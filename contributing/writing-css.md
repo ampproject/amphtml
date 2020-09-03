@@ -27,7 +27,6 @@ Specificity is the means by which browsers decide which CSS property values are 
 relevant to an element and, therefore, will be applied. Specificity is based on the matching rules
 which are composed of different sorts of CSS selectors.
 
-
 A selector is something which can identify/select an element or a group of elements and apply a
 list of properties to all the selected elements.
 
@@ -43,6 +42,7 @@ html > body div#pagewrap ul#summer-drinks > li.favorite
 #summer-drinks::before
 #summer-drinks::after
 ```
+
 A selector can contain a class, id, pseudo elements, psuedo classes , :not(), and a combination
 of any of these and many more. For a comprehensive list of all CSS selectors, see https://developer.mozilla.org/en-US/docs/Web/CSS/Reference#Selectors.
 
@@ -62,14 +62,14 @@ To compute specificity, use this online calculator: https://specificity.keegan.s
 ### Creating a new Selector
 
 1. Keep the specificity as low as possible; the Selector properties should be easily
-    overridable (using maybe a single id or class-name, without having to repeat a complex
-    selector).
+   overridable (using maybe a single id or class-name, without having to repeat a complex
+   selector).
 2. Try to write selectors by using tag names and attributes; class names that get added after
-    build GET FOUC. [FOUC (Flash Of Unstyled Content)](#fouc) is a really bad UX. Use caution
-    and best effort to STAY AWAY from using elements/classes that are a result of
-    BUILDing in the CSS.
-    * A good example would be amp-selector.
-    * A bad example would be amp-accordion (See the [Case Studies](#case-studies) below).
+   build GET FOUC. [FOUC (Flash Of Unstyled Content)](#fouc) is a really bad UX. Use caution
+   and best effort to STAY AWAY from using elements/classes that are a result of
+   BUILDing in the CSS.
+   - A good example would be amp-selector.
+   - A bad example would be amp-accordion (See the [Case Studies](#case-studies) below).
 3. Keep the Selector as simple as possible and ensure it's readable.
 
 ### Modifying an existing Selector
@@ -77,23 +77,23 @@ To compute specificity, use this online calculator: https://specificity.keegan.s
 This is a bit more tricky than creating a new selector (with completely new properties).
 
 AMP is a versioned library that a lot of websites use. You might ask yourself, "But I am only changing CSS, how can
-this break AMP?".  Well, you can! All it takes to break backwards compatibility is replacing a selector with another
+this break AMP?". Well, you can! All it takes to break backwards compatibility is replacing a selector with another
 selector that has higher specificity.
 
 1. Do not change the specificity of a selector, if possible.
 2. If a new property (like font-size: 12px;) is being added, it is okay to add a new selector.
 3. If an existing property is being shifted around between existing selectors, make sure the
-    properties always move from higher specificity to lower specificity.
+   properties always move from higher specificity to lower specificity.
 4. DO NOT move properties to a selector with high specificity at any cost! This is a
-    **BREAKING change**.
+   **BREAKING change**.
 5. Remember there are 2 types of properties:
-    * Overridable
-    * Non-overridable: The ones suffixed with `!important`
-      * These properties can be shifted around easily. However, BE CAUTIOUS
-          when you suffix an existing property with `!important` because this is ALWAYS
-          going to BREAK backwards compatibility (but could fix issues).
-       * Always add `!important` during the first pass, and plan for it during design or
-          early implementation phases.
+   - Overridable
+   - Non-overridable: The ones suffixed with `!important`
+     - These properties can be shifted around easily. However, BE CAUTIOUS
+       when you suffix an existing property with `!important` because this is ALWAYS
+       going to BREAK backwards compatibility (but could fix issues).
+     - Always add `!important` during the first pass, and plan for it during design or
+       early implementation phases.
 
 ### FOUC
 
@@ -117,7 +117,7 @@ element itself. It's totally fine to change padding during build, but a huge no-
 2. It's mostly OK to move properties/selectors from HIGHER TO LOWER specificity.
 3. DON’T move properties/selectors from LOWER TO HIGHER specificity.
 4. Avoid FOUC by writing CSS on tags and attributes and not depending on BUILD
-    outcomes.
+   outcomes.
 
 ## Case Studies
 
@@ -129,9 +129,10 @@ The following CSS is an example of a bad selector:
 
 ```css
 amp-selector​:not​([​disabled​]) [​option​][​selected​]​:not​([​disabled​]) {
-​outline​: ​solid​ ​ 1 ​px​ ​rgba​(​ 0 ​,​ 0 ​,​ 0 ​,​0.7​);
+  ​outline​: ​solid​ ​ 1 ​px​ ​rgba​(​ 0 ​, ​ 0 ​, ​ 0 ​, ​0.7​);
 }
 ```
+
 Why is it bad?
 
 1. It's a super high specificity selector, that is, it's very hard to override using a single class name or id.
@@ -146,13 +147,14 @@ Here is how we changed this CSS to make it better:
 
 ```css
 amp-selector​ [​option​][​selected​] {
-​outline​: ​solid​ ​ 1 ​px​ ​rgba​(​ 0 ​,​ 0 ​,​ 0 ​,​0.7​);
+  ​outline​: ​solid​ ​ 1 ​px​ ​rgba​(​ 0 ​, ​ 0 ​, ​ 0 ​, ​0.7​);
 }
 amp-selector​ [​selected​][​disabled​],
 amp-selector​[​disabled​] [​selected​] {
-​outline​: ​none​;
+  ​outline​: ​none​;
 }
 ```
+
 Fixing PR: https://github.com/ampproject/amphtml/commit/e12deb125bc0bed16d33481e0c
 
 ### AMP Accordion CSS changes broke specificity
@@ -173,19 +175,17 @@ Fixing PR: https://github.com/ampproject/amphtml/commit/e12deb125bc0bed16d33481e
 + ​border​: ​solid​ ​ 1 ​px​ ​#dfdfdf​;
 +}
 ```
-* Breaking change: https://github.com/ampproject/amphtml/commit/f2a361651b4b4d1d484c6cd9502c895695545d
-* GH Issue : https://github.com/ampproject/amphtml/issues/10224
-* Partial Rollback: https://github.com/ampproject/amphtml/pull/10225
+
+- Breaking change: https://github.com/ampproject/amphtml/commit/f2a361651b4b4d1d484c6cd9502c895695545d
+- GH Issue : https://github.com/ampproject/amphtml/issues/10224
+- Partial Rollback: https://github.com/ampproject/amphtml/pull/10225
 
 The lesson learnt here is that even though the breaking CSS was a good change (it fixed the FOUC
 due to the class introduced at BUILD), it moved properties from a selector with LOWER
 specificity to HIGHER specificity, which breaks backward compatibility.
-
 
 ## Reading material
 
 - https://csswizardry.com/2014/07/hacks-for-dealing-with-specificity/
 - https://csswizardry.com/2012/05/keep-your-css-selectors-short/
 - https://philipwalton.com/articles/do-we-actually-need-specificity-in-css/
-
-

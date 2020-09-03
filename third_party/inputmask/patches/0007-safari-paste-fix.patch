@@ -1,0 +1,16 @@
+diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
+index 412be8d43..79cb5cc0a 100644
+--- a/third_party/inputmask/inputmask.js
++++ b/third_party/inputmask/inputmask.js
+@@ -1794,7 +1794,10 @@ export function factory($, window, document, undefined) {
+                     }
+                 }
+                 checkVal(input, false, false, pasteValue.toString().split(""));
+-                writeBuffer(input, getBuffer(), seekNext(getLastValidPosition()), e, undoValue !== getBuffer().join(""));
++                // Use settimeout to make Safari paste work
++                setTimeout(() => {
++                    writeBuffer(input, getBuffer(), seekNext(getLastValidPosition()), e, undoValue !== getBuffer().join(""));
++                }, 0);
+                 return e.preventDefault();
+             },
+             inputFallBackEvent: function(e) {

@@ -19,8 +19,8 @@ tags: {  # amp-ooyala-player
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-ooyala-player"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }

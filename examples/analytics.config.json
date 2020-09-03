@@ -1,9 +1,10 @@
 {
   "requests": {
-    "event": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?remote-test&title=${title}&r=${random}"
+    "event": "/analytics/remote-${type}?&title=${title}&r=${random}"
   },
   "vars": {
-    "title": "Example Request"
+    "title": "Example Request",
+    "type": "pageview"
   },
   "triggers": {
     "remotePageview": {
@@ -11,6 +12,5 @@
       "request": "event"
     }
   },
-  "transport" : {"beacon": false, "xhrpost": false}
+  "transport": {"beacon": true, "xhrpost": false}
 }
-

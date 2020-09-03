@@ -19,7 +19,7 @@
  * Loading indicator.
  * Hide when `i-amphtml-subs-loading` class is not set.
  */
-html:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
+body:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
   display: none !important;
 }
 
@@ -28,7 +28,7 @@ html:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
  * Content section.
  * Hide when not known or denied.
  */
-html:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
+body:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
   display: none !important;
 }
 
@@ -37,7 +37,7 @@ html:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
  * Content-not-granted section.
  * Hide when not known or granted.
  */
-html:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"] {
+body:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"] {
   display: none !important;
 }
 
@@ -46,8 +46,8 @@ html:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"]
  * Actions sections.
  * Hide when not known or delegated.
  */
-html.i-amphtml-subs-grant-unk [subscriptions-section="actions"],
-html.i-amphtml-subs-delegated [subscriptions-section="actions"] {
+body.i-amphtml-subs-grant-unk [subscriptions-section="actions"],
+body.i-amphtml-subs-delegated [subscriptions-section="actions"] {
   display: none !important;
 }
 
@@ -57,25 +57,15 @@ html.i-amphtml-subs-delegated [subscriptions-section="actions"] {
  */
 
 /** Hide actions until state is known. */
-html.i-amphtml-subs-grant-unk [subscriptions-action] {
+body.i-amphtml-subs-grant-unk [subscriptions-action] {
   display: none !important;
 }
 
-/** Action: login. Only show when logged out. */
-html:not(.i-amphtml-subs-loggedin-no) [subscriptions-action="login"] {
+[subscriptions-actions]:not(.i-amphtml-subs-display),
+[subscriptions-section="actions"]:not(.i-amphtml-subs-display),
+[subscriptions-action]:not(.i-amphtml-subs-display) {
   display: none !important;
 }
-
-/** Action: logout. Only show when logged in. */
-html:not(.i-amphtml-subs-loggedin-yes) [subscriptions-action="logout"] {
-  display: none !important;
-}
-
-/** Action: subscribe. Only show when not a subscriber. */
-html:not(.i-amphtml-subs-subscriber-no) [subscriptions-action="subscribe"] {
-  display: none !important;
-}
-
 
 /** Dialog. */
 amp-subscriptions-dialog {
@@ -85,7 +75,7 @@ amp-subscriptions-dialog {
   left: 0 !important;
   margin-left: 0 !important;
   width: 100% !important;
-  z-index: 2147483641;  /* Behind lightbox if available. */
+  z-index: 2147483641 !important;  /* Paywall is behind iframes from swg.js */
   max-height: 90vh;
   box-sizing: border-box;
   opacity: 1;
@@ -111,6 +101,38 @@ amp-subscriptions-dialog {
   border: none;
   border-radius: 12px 0 0 0;
   cursor: pointer;
+}
+
+body:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
+  display: none;
+}
+
+.i-amphtml-subs-progress {
+  height: 2px;
+  background-color: #ccc;
+  position: relative;
+  margin: 8px;
+  overflow: hidden;
+}
+
+.i-amphtml-subs-progress:after {
+  content: '';
+  background-color: #2196F3;
+  height: 2px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20%;
+  animation: i-amphtml-subs-loading-progress 1500ms ease-in-out infinite;
+}
+
+@keyframes i-amphtml-subs-loading-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(500%);
+  }
 }
 
 /**

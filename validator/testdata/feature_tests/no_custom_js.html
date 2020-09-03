@@ -15,7 +15,7 @@
 -->
 <!--
   Test Description:
-  Custom Javascript (other than whitelisted script locations) is rejected.
+  Custom Javascript (other than allowlisted script locations) is rejected.
 -->
 <!doctype html>
 <html ⚡>
@@ -28,5 +28,7 @@
    <script async src="https://example.com/v0-not-allowed.js"></script>
    <script async custom-element="amp-foo" src="https://example.com/v0/not-allowed.js"></script>
  </head>
- <body>Hello World!</body>
+ <body>
+  <script>alert('Hello World!')</script>
+ </body>
 </html>

@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {setIsMediaComponent} from '../../../src/video-interface';
+import {userAssert} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {string} */
+    this.serviceUrl_ = '';
 
     /** @private {string} */
     this.partnerId_ = '';
@@ -37,11 +41,14 @@ class AmpKaltura extends AMP.BaseElement {
   }
 
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://cdnapisec.kaltura.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      `https://${encodeURIComponent(this.serviceUrl_)}${opt_onLayout}`
+    );
   }
 
   /** @override */
@@ -51,38 +58,63 @@ class AmpKaltura extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.partnerId_ = user().assert(
-        this.element.getAttribute('data-partner'),
-        'The data-partner attribute is required for <amp-kaltura-player> %s',
-        this.element);
+    this.partnerId_ = userAssert(
+      this.element.getAttribute('data-partner'),
+      'The data-partner attribute is required for <amp-kaltura-player> %s',
+      this.element
+    );
+
+    setIsMediaComponent(this.element);
 
     this.entryId_ = this.element.getAttribute('data-entryid') || 'default';
+
+    this.serviceUrl_ =
+      this.element.getAttribute('data-service-url') || 'cdnapisec.kaltura.com';
   }
 
   /** @override */
   layoutCallback() {
-    const uiconfId = this.element.getAttribute('data-uiconf') ||
-        this.element.getAttribute('data-uiconf-id') || 'default';
+    const uiconfId =
+      this.element.getAttribute('data-uiconf') ||
+      this.element.getAttribute('data-uiconf-id') ||
+      'default';
     const iframe = this.element.ownerDocument.createElement('iframe');
-    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(this.partnerId_)}/sp/${encodeURIComponent(this.partnerId_)}00/embedIframeJs/uiconf_id/${encodeURIComponent(uiconfId)}/partner_id/${encodeURIComponent(this.partnerId_)}?iframeembed=true&playerId=kaltura_player_amp&entry_id=${encodeURIComponent(this.entryId_)}`;
+    let src = `https://${encodeURIComponent(
+      this.serviceUrl_
+    )}/p/${encodeURIComponent(this.partnerId_)}/sp/${encodeURIComponent(
+      this.partnerId_
+    )}00/embedIframeJs/uiconf_id/${encodeURIComponent(
+      uiconfId
+    )}/partner_id/${encodeURIComponent(
+      this.partnerId_
+    )}?iframeembed=true&playerId=kaltura_player_amp&entry_id=${encodeURIComponent(
+      this.entryId_
+    )}`;
     const params = getDataParamsFromAttributes(
-        this.element, key => `flashvars[${key}]`);
+      this.element,
+      (key) => `flashvars[${key}]`
+    );
     src = addParamsToUrl(src, params);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     return this.loadPromise(iframe);
   }
 
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
+    this.propagateAttributes(['aria-label'], placeholder);
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(this.partnerId_)}/thumbnail/entry_id/${encodeURIComponent(this.entryId_)}`;
+    let src = `https://${encodeURIComponent(
+      this.serviceUrl_
+    )}/p/${encodeURIComponent(
+      this.partnerId_
+    )}/thumbnail/entry_id/${encodeURIComponent(this.entryId_)}`;
     if (width) {
       src += `/width/${width}`;
     }
@@ -93,21 +125,33 @@ class AmpKaltura extends AMP.BaseElement {
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
     return placeholder;
   }
 
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
-        'method': 'pause' ,
-        'value': '' ,
-      })) , '*');
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        JSON.stringify(
+          dict({
+            'method': 'pause',
+            'value': '',
+          })
+        ),
+        '*'
+      );
     }
   }
 }
 
-
-AMP.extension('amp-kaltura-player', '0.1', AMP => {
+AMP.extension('amp-kaltura-player', '0.1', (AMP) => {
   AMP.registerElement('amp-kaltura-player', AmpKaltura);
 });

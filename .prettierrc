@@ -1,0 +1,30 @@
+{
+  "bracketSpacing": false,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "quoteProps": "preserve",
+  "overrides": [
+    {
+      "files": "OWNERS",
+      "options": {"parser": "json5"}
+    },
+    {
+      "files": "*.md",
+      "options": {"parser": "markdown"}
+    },
+    {
+      "files": [".prettierrc", ".renovaterc.json", "*.json"],
+      "options": {"parser": "json"}
+    },
+    {
+      "files": [
+        ".codecov.yml",
+        ".github/workflows/continuous-integration-workflow.yml",
+        ".lando.yml",
+        ".lgtm.yml",
+        ".travis.yml"
+      ],
+      "options": {"parser": "yaml"}
+    }
+  ]
+}

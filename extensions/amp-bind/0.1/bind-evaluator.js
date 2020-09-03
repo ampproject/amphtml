@@ -17,32 +17,18 @@
 import {BindExpression} from './bind-expression';
 import {BindMacro} from './bind-macro';
 import {BindValidator} from './bind-validator';
-import {filterSplice} from '../../../src/utils/array';
-
-/**
- * @typedef {{
- *   tagName: string,
- *   property: string,
- *   expressionString: string,
- * }}
- */
-export let BindingDef;
-
-/**
- * Error-like object that can be passed through web worker boundary.
- * @typedef {{
- *   message: string,
- *   stack: string,
- * }}
- */
-let EvaluatorErrorDef;
+import {remove} from '../../../src/utils/array';
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
-  constructor() {
-    /** @const @private {!Array<BindingDef>} */
+  /**
+   * Creates an instance of BindEvaluator.
+   * @param {boolean} allowUrlProperties
+   */
+  constructor(allowUrlProperties) {
+    /** @const @private {!Array<!BindBindingDef>} */
     this.bindings_ = [];
 
     /**
@@ -52,7 +38,7 @@ export class BindEvaluator {
     this.macros_ = Object.create(null);
 
     /** @const @private {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
+    this.validator_ = new BindValidator(allowUrlProperties);
 
     /** @const @private {!Object<string, !BindExpression>} */
     this.expressions_ = Object.create(null);
@@ -61,13 +47,13 @@ export class BindEvaluator {
   /**
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
-   * @param {!Array<BindingDef>} bindings
-   * @return {!Object<string, EvaluatorErrorDef>},
+   * @param {!Array<!BindBindingDef>} bindings
+   * @return {!Object<string, !BindEvaluatorErrorDef>},
    */
   addBindings(bindings) {
     const errors = Object.create(null);
     // Create BindExpression objects from expression strings.
-    bindings.forEach(binding => {
+    bindings.forEach((binding) => {
       const parsed = this.parse_(binding.expressionString);
       if (parsed.error) {
         errors[binding.expressionString] = parsed.error;
@@ -85,24 +71,26 @@ export class BindEvaluator {
   removeBindingsWithExpressionStrings(expressionStrings) {
     const expressionsToRemove = Object.create(null);
 
-    expressionStrings.forEach(expressionString => {
+    expressionStrings.forEach((expressionString) => {
       delete this.expressions_[expressionString];
       expressionsToRemove[expressionString] = true;
     });
 
-    filterSplice(this.bindings_, binding =>
-      !expressionsToRemove[binding.expressionString]);
+    remove(
+      this.bindings_,
+      (binding) => !!expressionsToRemove[binding.expressionString]
+    );
   }
 
   /**
    * Parses and stores the given macros and returns map of macro `id` to
    * parse errors.
-   * @param {!Array<./amp-bind-macro.AmpBindMacroDef>} macros
-   * @return {!Object<string, EvaluatorErrorDef>}
+   * @param {!Array<!BindMacroDef>} macros
+   * @return {!Object<string, !BindEvaluatorErrorDef>}
    */
   addMacros(macros) {
     const errors = [];
-    // Create BindMacro objects from AmpBindMacroDef.
+    // Create BindMacro objects from BindMacroDef.
     macros.forEach((macro, index) => {
       // Only allow a macro to reference macros defined before it to prevent
       // cycles and recursion.
@@ -121,29 +109,29 @@ export class BindEvaluator {
   /**
    * Evaluates all expressions with the given `scope` data returns two maps:
    * expression strings to results and expression strings to errors.
-   * @param {!Object} scope
-   * @return {{
-   *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *   errors: !Object<string, !EvaluatorErrorDef>,
-   * }}
+   * @param {!JsonObject} scope
+   * @return {!BindEvaluateBindingsResultDef}
    */
   evaluateBindings(scope) {
-    /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
+    /** @type {!Object<string, BindExpressionResultDef>} */
     const cache = Object.create(null);
-    /** @type {!Object<string, !EvaluatorErrorDef>} */
+    /** @type {!Object<string, !BindEvaluatorErrorDef>} */
     const errors = Object.create(null);
 
+    this.setGlobals_(scope);
+
     // First, evaluate all of the expression strings in the bindings.
-    this.bindings_.forEach(binding => {
-      const expressionString = binding.expressionString;
+    this.bindings_.forEach((binding) => {
+      const {expressionString} = binding;
       // Skip if we've already evaluated this expression string.
       if (cache[expressionString] !== undefined || errors[expressionString]) {
         return;
       }
       const expression = this.expressions_[expressionString];
       if (!expression) {
-        const error =
-            new Error(`Expression "${expressionString}"" is not cached.`);
+        const error = new Error(
+          `Expression "${expressionString}"" is not cached.`
+        );
         errors[expressionString] = {message: error.message, stack: error.stack};
         return;
       }
@@ -156,10 +144,14 @@ export class BindEvaluator {
     });
 
     // Then, validate each binding and delete invalid expression results.
-    this.bindings_.forEach(binding => {
+    this.bindings_.forEach((binding) => {
       const {tagName, property, expressionString} = binding;
       const result = cache[expressionString];
       if (result === undefined) {
+        return;
+      }
+      // Don't validate non-primitive expression results e.g. arrays, objects.
+      if (result !== null && typeof result === 'object') {
         return;
       }
       // IMPORTANT: We need to validate expression results on each binding
@@ -170,8 +162,9 @@ export class BindEvaluator {
         // TODO(choumx): If this expression string is used in another
         // tagName/property which is valid, we ought to allow it.
         delete cache[expressionString];
-        const error =
-            new Error(`"${result}" is not a valid result for [${property}].`);
+        const error = new Error(
+          `"${result}" is not a valid result for [${property}].`
+        );
         errors[expressionString] = {message: error.message, stack: error.stack};
       }
     });
@@ -182,17 +175,15 @@ export class BindEvaluator {
   /**
    * Evaluates and returns a single expression string.
    * @param {string} expressionString
-   * @param {!Object} scope
-   * @return {{
-   *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: ?EvaluatorErrorDef,
-   * }}
+   * @param {!JsonObject} scope
+   * @return {!BindEvaluateExpressionResultDef}
    */
   evaluateExpression(expressionString, scope) {
     const parsed = this.parse_(expressionString);
     if (!parsed.expression) {
       return {result: null, error: parsed.error};
     }
+    this.setGlobals_(scope);
     const evaluated = this.evaluate_(parsed.expression, scope);
     if (!evaluated.result) {
       return {result: null, error: evaluated.error};
@@ -201,12 +192,19 @@ export class BindEvaluator {
   }
 
   /**
+   * Sets global references in scope if they're not already set or overriden.
+   * @param {!JsonObject} scope
+   */
+  setGlobals_(scope) {
+    if (!('global' in scope)) {
+      scope['global'] = scope;
+    }
+  }
+
+  /**
    * Parses a single expression string, caches and returns it.
    * @param {string} expressionString
-   * @return {{
-   *   expression: BindExpression,
-   *   error: ?EvaluatorErrorDef,
-   * }}
+   * @return {{expression: ?BindExpression, error: ?BindEvaluatorErrorDef}}
    * @private
    */
   parse_(expressionString) {
@@ -226,11 +224,8 @@ export class BindEvaluator {
   /**
    * Evaluate a single expression with the given scope.
    * @param {!BindExpression} expression
-   * @param {!Object} scope
-   * @return {{
-   *   result: ./bind-expression.BindExpressionResultDef,
-   *   error: ?EvaluatorErrorDef,
-   * }}
+   * @param {!JsonObject} scope
+   * @return {{result: ?BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
    * @private
    */
   evaluate_(expression, scope) {
@@ -246,7 +241,8 @@ export class BindEvaluator {
 
   /**
    * Return parsed bindings for testing.
-   * @visibleForTesting {!Array<BindingDef>}
+   * @return {!Array<!BindBindingDef>}
+   * @visibleForTesting
    */
   bindingsForTesting() {
     return this.bindings_;
@@ -263,7 +259,8 @@ export class BindEvaluator {
 
   /**
    * Returns the expression result string for a binding to `property`.
-   * @param {./bind-expression.BindExpressionResultDef} result
+   * @param {string} property
+   * @param {BindExpressionResultDef} result
    * @return {?string}
    * @private
    */

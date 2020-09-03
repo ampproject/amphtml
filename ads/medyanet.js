@@ -21,12 +21,12 @@ import {validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function medyanet(global, data) {
-  validateData(data, ['slot']);
+  validateData(data, ['slot', 'domain']);
 
   global.adunit = data.slot;
   global.size = '[' + data.width + ',' + data.height + ']';
+  global.domain = data.domain;
 
   medyanetAds(global, data);
 }
@@ -46,13 +46,13 @@ function medyanetAds(global, data) {
   f.setAttribute('allowfullscreen', 'true');
   f.setAttribute('scrolling', 'no');
   setStyles(f, {
-    border: '0 none transparent' ,
-    position: 'relative' ,
+    border: '0 none transparent',
+    position: 'relative',
   });
-  f.onload = function() {
+  f.onload = function () {
     window.context.renderStart();
   };
-  f.src = `https://app.medyanetads.com/amp/medyanetads.html?bidderData=fanatik.com.tr&adunit=${global.adunit}&size=${global.size}`;
+  f.src = `https://app.medyanetads.com/amp/medyanetads.html?bidderData=${global.domain}&adunit=${global.adunit}&size=${global.size}`;
   const url = window.top.location.search.substring(1);
   if (url && url.indexOf('hb=true') !== -1) {
     f.src = f.src + '&hb=true';

@@ -33,7 +33,9 @@
     width="640"
     height="360"
     layout="responsive"
-    poster="images/kitten-playing.png">
+    poster="images/kitten-playing.png"
+    object-fit="cover"
+    object-position="left center">
     <source src="videos/kitten-playing.webm"
       type="video/webm" />
     <source src="videos/kitten-playing.mp4"
@@ -46,5 +48,26 @@
   <!-- Invalid: Incorrect attribute value for autoplay -->
   <amp-video autoplay=true layout=fill width=300 height=500
     loop="1" preload="metadata" controls="controls"></amp-video>
+
+  <!-- Valid: Correct attribute value for rotate-to-fullscreen -->
+  <amp-video rotate-to-fullscreen layout=fill width=300 height=500
+    loop preload="metadata" controls></amp-video>
+
+  <!-- Valid: Media Session Attributes -->
+  <amp-video layout=fill width=300 height=500 
+    title="Hello" artist="World" artwork="example.jpg" poster="example.jpg"
+    ></amp-video>
+
+  <!-- Valid: Most attributes are bindable -->
+  <amp-video layout=fill width=300 height=500 
+    [title]="Hello" [artist]="World" [artwork]="example.jpg" [poster]="example.jpg"
+    ></amp-video>
+
+  <!-- Invalid: `dock` without `amp-video-docking` extension. -->
+  <amp-video dock layout=fill width=300 height=500 controls></amp-video>
+
+  <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
+  <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
+    loop preload="metadata" controls></amp-video>
 </body>
 </html>

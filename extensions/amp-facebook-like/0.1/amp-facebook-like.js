@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-
+import {Services} from '../../../src/services';
 import {dashToUnderline} from '../../../src/string';
+import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 
 class AmpFacebookLike extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -31,9 +33,12 @@ class AmpFacebookLike extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private @const {string} */
-    this.dataLocale_ = element.hasAttribute('data-locale') ?
-      element.getAttribute('data-locale') :
-      dashToUnderline(window.navigator.language);
+    this.dataLocale_ = element.hasAttribute('data-locale')
+      ? element.getAttribute('data-locale')
+      : dashToUnderline(window.navigator.language);
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /** @override */
@@ -49,11 +54,15 @@ class AmpFacebookLike extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://facebook.com', opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), 'https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.preload(
-        'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js', 'script');
-    preloadBootstrap(this.win, this.preconnect);
+    preconnect.preload(
+      this.getAmpDoc(),
+      'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
+      'script'
+    );
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -66,14 +75,49 @@ class AmpFacebookLike extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(iframe, 'embed-size', data => {
-      this.attemptChangeHeight(data['height']).catch(() => {
-        /* ignore failures */
-      });
-    }, /* opt_is3P */true);
+    listenFor(
+      iframe,
+      'embed-size',
+      (data) => {
+        this.attemptChangeHeight(data['height']).catch(() => {
+          /* ignore failures */
+        });
+      },
+      /* opt_is3P */ true
+    );
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.handleFacebookMessages_.bind(this)
+    );
+    this.toggleLoading(true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  handleFacebookMessages_(event) {
+    if (this.iframe_ && event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    const eventData = getData(event);
+    if (!eventData) {
+      return;
+    }
+
+    const parsedEventData = isObject(eventData)
+      ? eventData
+      : tryParseJson(eventData);
+    if (!parsedEventData) {
+      return;
+    }
+    if (eventData['action'] == 'ready') {
+      this.toggleLoading(false);
+    }
   }
 
   /** @override */
@@ -82,11 +126,13 @@ class AmpFacebookLike extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
     return true;
   }
 }
 
-
-AMP.extension('amp-facebook-like', '0.1', AMP => {
+AMP.extension('amp-facebook-like', '0.1', (AMP) => {
   AMP.registerElement('amp-facebook-like', AmpFacebookLike);
 });

@@ -1,0 +1,22 @@
+{
+  "templates": [
+    {
+      "id": "spooky",
+      "dates": [
+        "2018-02-10",
+        "2017-11-03",
+        "2017-11-05",
+        "2017-11-06",
+        "FREQ=WEEKLY;DTSTART=20190101T150000Z;COUNT=30;WKST=MO;BYDAY=FR,SU"
+      ]
+    },
+    {
+      "id": "default"
+    }
+  ],
+  "highlighted": ["2019-01-29"],
+  "blocked": ["2019-01-21"],
+  "date": "2019-01-25",
+  "startDate": "2018-05-07",
+  "endDate": "2018-05-10"
+}

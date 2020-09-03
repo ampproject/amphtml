@@ -20,14 +20,19 @@
  * smaller than the given minimal interval.
  *
  * @param {!Window} win
- * @param {function(...*)} callback
+ * @param {function(...T):R} callback
  * @param {number} minInterval the minimum time interval in millisecond
- * @returns {function(...*)}
+ * @return {function(...T)}
+ * @template T
+ * @template R
  */
 export function throttle(win, callback, minInterval) {
   let locker = 0;
   let nextCallArgs = null;
 
+  /**
+   * @param {!Object} args
+   */
   function fire(args) {
     nextCallArgs = null;
     // Lock the fire for minInterval milliseconds
@@ -36,6 +41,9 @@ export function throttle(win, callback, minInterval) {
     callback.apply(null, args);
   }
 
+  /**
+   * Waiter function
+   */
   function waiter() {
     locker = 0;
     // If during the period there're invocations queued up, fire once.
@@ -44,7 +52,7 @@ export function throttle(win, callback, minInterval) {
     }
   }
 
-  return function(...args) {
+  return function (...args) {
     if (locker) {
       nextCallArgs = args;
     } else {
@@ -59,20 +67,28 @@ export function throttle(win, callback, minInterval) {
  * invoked.
  *
  * @param {!Window} win
- * @param {function(...*)} callback
+ * @param {function(...T):R} callback
  * @param {number} minInterval the minimum time interval in millisecond
- * @returns {function(...*)}
+ * @return {function(...T)}
+ * @template T
+ * @template R
  */
 export function debounce(win, callback, minInterval) {
   let locker = 0;
   let timestamp = 0;
   let nextCallArgs = null;
 
+  /**
+   * @param {?Array} args
+   */
   function fire(args) {
     nextCallArgs = null;
     callback.apply(null, args);
   }
 
+  /**
+   * Wait function for debounce
+   */
   function waiter() {
     locker = 0;
     const remaining = minInterval - (win.Date.now() - timestamp);
@@ -83,7 +99,7 @@ export function debounce(win, callback, minInterval) {
     }
   }
 
-  return function(...args) {
+  return function (...args) {
     timestamp = win.Date.now();
     nextCallArgs = args;
     if (!locker) {

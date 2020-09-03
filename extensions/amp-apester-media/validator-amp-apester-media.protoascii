@@ -19,9 +19,9 @@ tags: {  # amp-apester-media
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-apester-media"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,12 +31,12 @@ tags: {  # <amp-apester-media>
   tag_name: "AMP-APESTER-MEDIA"
   requires_extension: "amp-apester-media"
   attrs: {
-    name: "data-apester-media-id"
+    name: "data-apester-channel-token"
     mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"
     value_regex: "[0-9a-zA-Z]+"
   }
   attrs: {
-    name: "data-apester-channel-token"
+    name: "data-apester-media-id"
     mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"
     value_regex: "[0-9a-zA-Z]+"
   }
@@ -49,5 +49,5 @@ tags: {  # <amp-apester-media>
       supported_layouts: NODISPLAY
       supported_layouts: RESPONSIVE
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-apester-media"
+  spec_url: "https://amp.dev/documentation/components/amp-apester-media/"
 }

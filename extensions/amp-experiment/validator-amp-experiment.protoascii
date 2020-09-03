@@ -20,9 +20,10 @@ tags: {  # amp-experiment
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-experiment"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -32,25 +33,27 @@ tags: {  # amp-experiment (json)
   tag_name: "SCRIPT"
   spec_name: "amp-experiment extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"
-  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    max_bytes: 15000
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment/#configuration"
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment/"
 }
 tags: {  # <amp-experiment>
   html_format: AMP
   tag_name: "AMP-EXPERIMENT"
   requires_extension: "amp-experiment"
   unique: true
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment/"
 }

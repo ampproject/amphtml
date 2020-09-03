@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-
-import {AdTracker, getExistingAds} from '../ad-tracker';
+import * as Utils from '../utils';
+import {
+  AdTracker,
+  getAdConstraintsFromConfigObj,
+  getExistingAds,
+} from '../ad-tracker';
 import {Services} from '../../../../src/services';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
-
-describes.realWin('ad-tracker', {amp: true}, env => {
+describes.realWin('ad-tracker', {amp: true}, (env) => {
   let win, doc;
-  let resources;
   let container;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
 
-    resources = Services.resourcesForDoc(doc);
-    sandbox.stub(resources, 'getElementLayoutBox').callsFake(element => {
+    env.sandbox.stub(Utils, 'getElementLayoutBox').callsFake((element) => {
       return Promise.resolve(element.layoutBox);
     });
 
@@ -50,9 +51,9 @@ describes.realWin('ad-tracker', {amp: true}, env => {
   }
 
   function checkMinSpacing(adTracker, tooNearPos, okPos) {
-    return adTracker.isTooNearAnAd(tooNearPos).then(tooNear => {
+    return adTracker.isTooNearAnAd(tooNearPos).then((tooNear) => {
       expect(tooNear).to.equal(true);
-      return adTracker.isTooNearAnAd(okPos).then(tooNear => {
+      return adTracker.isTooNearAnAd(okPos).then((tooNear) => {
         expect(tooNear).to.equal(false);
       });
     });
@@ -65,9 +66,10 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-    ], adConstraints);
+    const adTracker = new AdTracker(
+      [addAd(layoutRectLtwh(0, 0, 300, 50))],
+      adConstraints
+    );
     expect(adTracker.getAdCount()).to.equal(1);
 
     adTracker.addAd(addAd(layoutRectLtwh(0, 100, 300, 50)));
@@ -81,10 +83,11 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-    ], adConstraints);
-    return adTracker.isTooNearAnAd(149).then(tooNear => {
+    const adTracker = new AdTracker(
+      [addAd(layoutRectLtwh(0, 0, 300, 50))],
+      adConstraints
+    );
+    return adTracker.isTooNearAnAd(149).then((tooNear) => {
       expect(tooNear).to.equal(true);
     });
   });
@@ -96,10 +99,11 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 100, 300, 50)),
-    ], adConstraints);
-    return adTracker.isTooNearAnAd(1).then(tooNear => {
+    const adTracker = new AdTracker(
+      [addAd(layoutRectLtwh(0, 100, 300, 50))],
+      adConstraints
+    );
+    return adTracker.isTooNearAnAd(1).then((tooNear) => {
       expect(tooNear).to.equal(true);
     });
   });
@@ -111,10 +115,11 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-    ], adConstraints);
-    return adTracker.isTooNearAnAd(25).then(tooNear => {
+    const adTracker = new AdTracker(
+      [addAd(layoutRectLtwh(0, 0, 300, 50))],
+      adConstraints
+    );
+    return adTracker.isTooNearAnAd(25).then((tooNear) => {
       expect(tooNear).to.equal(true);
     });
   });
@@ -126,11 +131,14 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-      addAd(layoutRectLtwh(0, 250, 300, 50)),
-    ], adConstraints);
-    return adTracker.isTooNearAnAd(150).then(tooNear => {
+    const adTracker = new AdTracker(
+      [
+        addAd(layoutRectLtwh(0, 0, 300, 50)),
+        addAd(layoutRectLtwh(0, 250, 300, 50)),
+      ],
+      adConstraints
+    );
+    return adTracker.isTooNearAnAd(150).then((tooNear) => {
       expect(tooNear).to.equal(false);
     });
   });
@@ -142,24 +150,24 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-    ], adConstraints);
+    const adTracker = new AdTracker(
+      [addAd(layoutRectLtwh(0, 0, 300, 50))],
+      adConstraints
+    );
     return checkMinSpacing(adTracker, 549, 550);
   });
 
   it('should use a subsequent ad spacing when an existing ad present', () => {
     const adConstraints = {
       initialMinSpacing: 500,
-      subsequentMinSpacing: [
-        {adCount: 1, spacing: 600},
-      ],
+      subsequentMinSpacing: [{adCount: 1, spacing: 600}],
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-    ], adConstraints);
+    const adTracker = new AdTracker(
+      [addAd(layoutRectLtwh(0, 0, 300, 50))],
+      adConstraints
+    );
     return checkMinSpacing(adTracker, 649, 650);
   });
 
@@ -173,10 +181,13 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-    ], adConstraints);
+    const adTracker = new AdTracker(
+      [
+        addAd(layoutRectLtwh(0, 0, 300, 50)),
+        addAd(layoutRectLtwh(0, 0, 300, 50)),
+      ],
+      adConstraints
+    );
     return checkMinSpacing(adTracker, 749, 750);
   });
 
@@ -191,9 +202,10 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-    ], adConstraints);
+    const adTracker = new AdTracker(
+      [addAd(layoutRectLtwh(0, 0, 300, 50))],
+      adConstraints
+    );
     return checkMinSpacing(adTracker, 649, 650).then(() => {
       adTracker.addAd(addAd(layoutRectLtwh(0, 0, 300, 50)));
       return checkMinSpacing(adTracker, 649, 650).then(() => {
@@ -213,18 +225,18 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       maxAdCount: 10,
     };
 
-    const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-    ], adConstraints);
+    const adTracker = new AdTracker(
+      [addAd(layoutRectLtwh(0, 0, 300, 50))],
+      adConstraints
+    );
     adTracker.addAd(addAd(layoutRectLtwh(0, 100, 300, 50)));
-    return adTracker.isTooNearAnAd(150).then(tooNear => {
+    return adTracker.isTooNearAnAd(150).then((tooNear) => {
       expect(tooNear).to.equal(true);
     });
   });
 });
 
-
-describes.realWin('getExistingAds', {amp: true}, env => {
+describes.realWin('getExistingAds', {amp: true}, (env) => {
   let win;
   let doc;
   let ampdoc;
@@ -251,5 +263,219 @@ describes.realWin('getExistingAds', {amp: true}, env => {
     expect(ads[0]).to.equal(ad1);
     expect(ads[1]).to.equal(ad2);
     expect(ads[2]).to.equal(ad3);
+  });
+});
+
+describes.realWin('getAdConstraintsFromConfigObj', {amp: true}, (env) => {
+  let ampdoc;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+  });
+
+  it('should get from pixel values', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '170px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.deep.equal({
+      initialMinSpacing: 150,
+      subsequentMinSpacing: [
+        {
+          adCount: 2,
+          spacing: 160,
+        },
+        {
+          adCount: 4,
+          spacing: 170,
+        },
+      ],
+      maxAdCount: 8,
+    });
+  });
+
+  it('should get from viewport values', () => {
+    const viewportMock = env.sandbox.mock(Services.viewportForDoc(ampdoc));
+    viewportMock.expects('getHeight').returns(500).atLeast(1);
+
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '0.4vp',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '0.5vp',
+          },
+          {
+            adCount: 4,
+            spacing: '1.5vp',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.deep.equal({
+      initialMinSpacing: 200,
+      subsequentMinSpacing: [
+        {
+          adCount: 2,
+          spacing: 250,
+        },
+        {
+          adCount: 4,
+          spacing: 750,
+        },
+      ],
+      maxAdCount: 8,
+    });
+  });
+
+  it('should handle no subsequentMinSpacing', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.deep.equal({
+      initialMinSpacing: 150,
+      subsequentMinSpacing: [],
+      maxAdCount: 8,
+    });
+  });
+
+  it('should return null when initialMinSpacing unparsable', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150em',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '170px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when initialMinSpacing negative', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '-1px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '170px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when subsequentMinSpacing unparsable', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '170em',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when subsequentMinSpacing negative', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            adCount: 4,
+            spacing: '-1px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when no adCount', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+          {
+            spacing: '170px',
+          },
+        ],
+        maxAdCount: 8,
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
+  });
+
+  it('should return null when no maxAdCount', () => {
+    const configObj = {
+      adConstraints: {
+        initialMinSpacing: '150px',
+        subsequentMinSpacing: [
+          {
+            adCount: 2,
+            spacing: '160px',
+          },
+        ],
+      },
+    };
+
+    expect(getAdConstraintsFromConfigObj(ampdoc, configObj)).to.be.null;
   });
 });

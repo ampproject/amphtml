@@ -2,7 +2,7 @@
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use baseInstance file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -29,7 +29,6 @@ const TAG = 'POSITION_OBSERVER';
 /** @const @private */
 const SCROLL_TIMEOUT = 500;
 
-
 export class PositionObserver {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
@@ -47,7 +46,7 @@ export class PositionObserver {
     /** @private {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
 
-    /** @private {!../viewport/viewport-impl.Viewport} */
+    /** @private {!../viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private {Array<function()>} */
@@ -63,19 +62,28 @@ export class PositionObserver {
     this.callbackStarted_ = false;
 
     /** @private {function()} */
-    this.boundStopScroll_ = debounce(this.win_, () => {
-      this.inScroll_ = false;
-    }, SCROLL_TIMEOUT);
+    this.boundStopScroll_ = debounce(
+      this.win_,
+      () => {
+        this.inScroll_ = false;
+      },
+      SCROLL_TIMEOUT
+    );
   }
 
   /**
    * @param {!Element} element
    * @param {!PositionObserverFidelity} fidelity
    * @param {function(?./position-observer-worker.PositionInViewportEntryDef)} handler
+   * @return {!UnlistenDef}
    */
   observe(element, fidelity, handler) {
-    const worker =
-        new PositionObserverWorker(this.ampdoc_, element, fidelity, handler);
+    const worker = new PositionObserverWorker(
+      this.ampdoc_,
+      element,
+      fidelity,
+      handler
+    );
 
     this.workers_.push(worker);
 
@@ -84,6 +92,15 @@ export class PositionObserver {
     }
 
     worker.update();
+
+    return () => {
+      for (let i = 0; i < this.workers_.length; i++) {
+        if (this.workers_[i] == worker) {
+          this.removeWorker_(i);
+          return;
+        }
+      }
+    };
   }
 
   /**
@@ -92,14 +109,22 @@ export class PositionObserver {
   unobserve(element) {
     for (let i = 0; i < this.workers_.length; i++) {
       if (this.workers_[i].element == element) {
-        this.workers_.splice(i, 1);
-        if (this.workers_.length == 0) {
-          this.stopCallback_();
-        }
+        this.removeWorker_(i);
         return;
       }
     }
     dev().error(TAG, 'cannot unobserve unobserved element');
+  }
+
+  /**
+   * @param {number} index
+   * @private
+   */
+  removeWorker_(index) {
+    this.workers_.splice(index, 1);
+    if (this.workers_.length == 0) {
+      this.stopCallback_();
+    }
   }
 
   /**
@@ -109,12 +134,16 @@ export class PositionObserver {
   startCallback_() {
     this.callbackStarted_ = true;
     // listen to viewport scroll event to help pass determine if need to
-    this.unlisteners_.push(this.viewport_.onScroll(() => {
-      this.onScrollHandler_();
-    }));
-    this.unlisteners_.push(this.viewport_.onResize(() => {
-      this.onResizeHandler_();
-    }));
+    this.unlisteners_.push(
+      this.viewport_.onScroll(() => {
+        this.onScrollHandler_();
+      })
+    );
+    this.unlisteners_.push(
+      this.viewport_.onResize(() => {
+        this.onResizeHandler_();
+      })
+    );
   }
 
   /**
@@ -133,7 +162,7 @@ export class PositionObserver {
    * This should always be called in vsync.
    * @param {boolean=} opt_force
    * @visibleForTesting
-  */
+   */
   updateAllEntries(opt_force) {
     for (let i = 0; i < this.workers_.length; i++) {
       const worker = this.workers_[i];
@@ -188,7 +217,5 @@ export class PositionObserver {
  * @param {!../ampdoc-impl.AmpDoc} ampdoc
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
-    return new PositionObserver(ampdoc);
-  });
+  registerServiceBuilderForDoc(ampdoc, 'position-observer', PositionObserver);
 }

@@ -11,8 +11,9 @@
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
     <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
     <style amp-custom>
         input.user-invalid {
             background-color: #dc4e41;
@@ -181,6 +182,17 @@
     </script>
 </amp-analytics>
 
+<h4>Form with textarea</h4>
+<form method="post" action-xhr="/form/echo-json/post" target="_blank">
+  <textarea name="textarea-ctrl-submit">Press Ctrl+Enter to submit this text</textarea><br>
+  <input name="submit-button" type="submit" value="Submit" />
+  <div submit-success>
+    <template type="amp-mustache">
+      Success! {{textarea-ctrl-submit}}
+    </template>
+  </div>
+</form>
+
 <h4>Search (GET non-xhr same origin)</h4>
 <form method="get" action="/form/search-html/get" target="_blank">
     <fieldset>
@@ -188,7 +200,7 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 </form>
 
@@ -201,20 +213,42 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 </form>
 
+<h4>Search (GET non-xhr same origin) Using AMP Bind and Amp Action (on="tap:....")</h4>
+<amp-state id="ampBindStateGetNonXhrSameOrigin">
+  <script type="application/json">
+    "Not Changed"
+  </script>
+</amp-state>
+<form id="amp-bind-form-get-non-xhr-same-origin" method="get" action="/form/search-html/get" target="_blank">
+  <fieldset>
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+    <label>
+      <span>Search for</span>
+      <input type="search" name="term" required>
+    </label>
+    <input hidden type="text" name="ampBind" [value]="ampBindStateGetNonXhrSameOrigin">
+  </fieldset>
+
+  <button type="button" on="tap:AMP.setState({ ampBindStateGetNonXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetNonXhrSameOrigin' }), amp-bind-form-get-non-xhr-same-origin.submit">
+    Submit AMP Bind Search
+  </button>
+</form>
+
 <h4>Search (GET xhr same origin)</h4>
-<form method="get" action="/form/search-html/get" action-xhr="/form/search-json/get" target="_blank">
+<form method="get" id="xhr-get" action="/form/search-html/get" action-xhr="/form/search-json/get" target="_blank">
     <fieldset>
         <label>
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
-    </fieldset>
+        <input name="submit-button" type="submit" value="Search">
 
+    </fieldset>
     <div submit-success>
         <template type="amp-mustache">
             <h1>Here are the results for the search:</h1>
@@ -227,8 +261,8 @@
 
 <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
 <form method="get"
-      action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
-      action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      action="https://httpbin.org/response-headers"
+      action-xhr="https://httpbin.org/response-headers"
       target="_blank">
     <fieldset>
         <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
@@ -237,7 +271,7 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 
     <div submit-success>
@@ -245,6 +279,35 @@
             <h1>You searched for: {{term}}</h1>
         </template>
     </div>
+</form>
+
+<h4>Search (GET xhr same origin) Using AMP Bind and Amp Action (on="tap:....")</h4>
+<amp-state id="ampBindStateGetXhrSameOrigin">
+  <script type="application/json">
+    "Not Changed"
+  </script>
+</amp-state>
+<form id="amp-bind-form-get-xhr-same-origin" method="get" id="xhr-get" action="/form/search-html/get" action-xhr="/form/search-json/get" target="_blank">
+  <fieldset>
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+    <label>
+      <span>Search for</span>
+      <input type="search" name="term" required>
+    </label>
+    <input hidden type="text" name="additionalFields" [value]="ampBindStateGetXhrSameOrigin">
+  </fieldset>
+
+  <button type="button" on="tap:AMP.setState({ ampBindStateGetXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetXhrSameOrigin' }), amp-bind-form-get-xhr-same-origin.submit">
+    Submit AMP Bind Search
+  </button>
+
+  <div submit-success>
+    <template type="amp-mustache">
+      <h1>You searched for: {{term}}</h1>
+      <p>The submitted amp bind state was: {{additionalFields}}</p>
+    </template>
+  </div>
 </form>
 
 <h4>Subscribe to our weekly Newsletter (POST xhr same origin)</h4>
@@ -262,7 +325,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email1" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
     <div submitting>
       <template type="amp-mustache">
@@ -295,7 +358,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email2" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 
     <div submit-success>
@@ -326,7 +389,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email3" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 
     <div class="form-message invalid-message">
@@ -379,7 +442,7 @@
             <span>Subscribe</span>
             <input type="email" name="email" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -405,7 +468,7 @@
             <span visible-when-invalid="valueMissing" validation-for="email4"></span>
             <span visible-when-invalid="typeMismatch" validation-for="email4"></span>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -429,7 +492,7 @@
             <span visible-when-invalid="valueMissing" validation-for="email5"></span>
             <span visible-when-invalid="typeMismatch" validation-for="email5"></span>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -463,7 +526,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email51" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -487,7 +550,7 @@
             <span visible-when-invalid="valueMissing" validation-for="email6"></span>
             <span visible-when-invalid="typeMismatch" validation-for="email6"></span>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -511,7 +574,7 @@
             <span visible-when-invalid="valueMissing" validation-for="email7"></span>
             <span visible-when-invalid="typeMismatch" validation-for="email7"></span>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 </form>
 
@@ -586,10 +649,10 @@
             <span>Your email</span>
             <input type="email" name="email" id="email8" required>
         </label>
-        <input type="submit" value="Subscribe - Input">
-        <input type="submit" value="Subscribe 2 - Input">
-        <button type="submit">Subscribe with a Button</button>
-        <button type="submit">Subscribe with a Button 2</button>
+        <input name="submit-button" type="submit" value="Subscribe - Input">
+        <input name="submit-button" type="submit" value="Subscribe 2 - Input">
+        <button name="submit-button" type="submit" value="Subscribe with a Button">Subscribe with a Button</button>
+        <button name="submit-button" type="submit" value="Subscribe with a Button 2">Subscribe with a Button 2</button>
     </fieldset>
 
     <div submit-success>
@@ -616,7 +679,7 @@
         <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="3" selected></amp-img>
         <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="4"></amp-img>
     </amp-selector>
-    <input type="Submit">
+    <input name="submit-button" type="submit" value="Submit">
 </form>
 
 
@@ -630,7 +693,7 @@
             <span>Send us a message</span>
             <input type="text" name="message" id="message1" required>
         </label>
-        <input type="submit" value="Send">
+        <input name="submit-button" type="submit" value="Send">
     </fieldset>
 </form>
 
@@ -649,7 +712,7 @@
             <span>Your email</span>
             <input type="email" name="email" id="email9" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input name="submit-button" type="submit" value="Subscribe">
     </fieldset>
 
     <div class="form-message invalid-message">
@@ -677,6 +740,7 @@
 <h4>Asynchronous verification example</h4>
 
 <form
+  on="verify-error:mistake.show;verifying:mistake.hide"
   method="post"
   action-xhr="/form/verify-search-json/post"
   verify-xhr="/form/verify-search-json/post"
@@ -703,11 +767,15 @@
             <span>City</span>
             <input type="text" name="city" required>
         </label>
+        <label>
+            <span>Not sent to verify</span>
+            <input type="text" name="do-not-verify" no-verify>
+        </label>
         <p>Throw an error?</p>
         <label>Yes: <input type="radio" name="error" value="true" required></label>
         <label>No: <input type="radio" name="error" value="false" required checked></label>
         <div class="spinner"></div>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
     <div submit-success>
         <template type="amp-mustache">
@@ -715,6 +783,16 @@
             <ul>
                 {{#results}}<li>{{title}}</li>{{/results}}
             </ul>
+        </template>
+    </div>
+    <div verify-error>
+        <template type="amp-mustache">
+            {{#verifyErrors}}
+                <p>{{message}}</p>
+            {{/verifyErrors}}
+            {{^verifyErrors}}
+                <p>Something went wrong. Try again later?</p>
+            {{/verifyErrors}}
         </template>
     </div>
     <div submit-error>
@@ -728,6 +806,8 @@
         </template>
     </div>
 </form>
+<span id="mistake" hidden>You made a mistake</span>
+
 
 <h4>Debounced search</h4>
 <form
@@ -741,7 +821,7 @@
             <span>Search for</span>
             <input type="search" on="input-debounced:debounced-search.submit" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 
     <div submit-success>
@@ -764,8 +844,8 @@
 </template>
 
 <form method="get"
-      action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
-      action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      action="https://httpbin.org/response-headers"
+      action-xhr="https://httpbin.org/response-headers"
       target="_blank">
     <fieldset>
         <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
@@ -774,8 +854,19 @@
             <span>Search for</span>
             <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Search">
+        <input name="submit-button" type="submit" value="Search">
     </fieldset>
 
     <div submit-success template="submit_success_template"></div>
+</form>
+
+<h4>File upload</h4>
+<form method="post" action-xhr="/form/json/upload" enctype="multipart/form-data" target="_blank">
+    <label>
+        <p>Upload a file:</p>
+        <input type="file" name="myFile" accept="text/plain">
+    </label>
+    <div><input name="submit-button" type="submit" value="Submit"></div>
+    <div submit-success><template type="amp-mustache">Way to go 🎉 {{message}}</template></div>
+    <div submit-error>Way to fail</div>
 </form>

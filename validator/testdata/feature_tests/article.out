@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,121 +22,121 @@ FAIL
 |    <link rel="canonical" href="https://medium.com/p/cb7f223fad86" >
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|  
+|
 |    <style amp-custom>
 |      body {
 |        margin: 0;
 |        font-family: 'Georgia', Serif;
 |      }
-|  
+|
 |      .brand-logo {
 |        font-family: 'Open Sans';
 |      }
-|  
+|
 |      .ad-container {
 |        display: flex;
 |        justify-content: center;
 |      }
-|  
+|
 |      .content-container p {
 |        line-height: 24px;
 |      }
-|  
+|
 |      header,
 |      .article-body {
 |        padding: 15px;
 |      }
-|  
+|
 |      /* In the shadow-doc mode, the parent shell already has header and nav. */
 |      .amp-shadow header {
 |        display: none;
 |      }
-|  
+|
 |      .lightbox {
 |        background: #222;
 |      }
-|  
+|
 |      .full-bleed {
 |        margin: 0 -15px;
 |      }
-|  
+|
 |      .lightbox-content {
 |        position: absolute;
 |        top: 0;
 |        left: 0;
 |        right: 0;
 |        bottom: 0;
-|  
+|
 |        display: flex;
 |        flex-direction: column;
 |        flex-wrap: nowrap;
 |        justify-content: center;
 |        align-items: center;
 |      }
-|  
+|
 |      .lightbox-content p {
 |        color: #fff;
 |        padding: 15px;
 |      }
-|  
+|
 |      .lightbox amp-img {
 |        width: 100%;
 |      }
-|  
+|
 |      figure {
 |        margin: 0;
 |      }
-|  
+|
 |      figcaption {
 |        color: #6f757a;
 |        padding: 15px 0;
 |        font-size: .9em;
 |      }
-|  
+|
 |      .author {
 |        display: flex;
 |        align-items: center;
-|  
+|
 |        background: #f4f4f4;
 |        padding: 0 15px;
-|  
+|
 |        font-size: .8em;
-|  
+|
 |        border: solid #dcdcdc;
 |        border-width: 1px 0;
 |      }
-|  
+|
 |      .header-time {
 |        color: #a8a3ae;
 |        font-family: 'Roboto';
 |        font-size: 12px;
 |      }
-|  
+|
 |      .author p {
 |        margin: 5px;
 |      }
-|  
+|
 |      .byline {
 |        font-family: 'Roboto';
 |        display: inline-block;
 |      }
-|  
+|
 |      .byline p {
 |        line-height: normal;
 |      }
-|  
+|
 |      .byline .brand {
 |        color: #6f757a;
 |      }
-|  
+|
 |      .standfirst {
 |        color: #6f757a;
 |      }
-|  
+|
 |      .mailto {
 |        text-decoration: none;
 |      }
-|  
+|
 |      #author-avatar {
 |        margin: 10px;
 |        border: 5px solid #fff;
@@ -144,12 +144,12 @@ FAIL
 |        height: 50px;
 |        border-radius: 50%;
 |      }
-|  
+|
 |      h1 {
 |        margin: 5px 0;
 |        font-weight: normal;
 |      }
-|  
+|
 |      footer {
 |        display: flex;
 |        align-items: center;
@@ -158,48 +158,48 @@ FAIL
 |        background: #f4f4f4;
 |        margin-bottom: 20px;
 |      }
-|  
+|
 |      hr {
 |        margin: 0;
 |      }
-|  
+|
 |      amp-app-banner {
 |        padding: 10px;
 |      }
-|  
+|
 |      amp-app-banner .content {
 |        display: flex;
 |        align-items: center;
 |        justify-content: center;
 |      }
-|  
+|
 |      amp-img {
 |        background-color: #f4f4f4;
 |      }
-|  
+|
 |      .slot-fallback {
 |        padding: 16px;
 |        background: yellow;
 |      }
-|  
+|
 |      amp-app-banner amp-img {
 |        background-color: transparent;
 |        margin-right: 15px
 |      }
-|  
+|
 |      amp-app-banner .description {
 |        margin-right: 20px;
 |      }
-|  
+|
 |      amp-app-banner h5 {
 |        margin: 0;
 |      }
-|  
+|
 |      amp-app-banner p {
 |        font-size: 10px;
 |        margin: 3px 0;
 |      }
-|  
+|
 |      amp-app-banner .actions button {
 |        padding: 5px;
 |        width: 70px;
@@ -207,26 +207,26 @@ FAIL
 |        font-size: 8px;
 |        background: #fff;
 |      }
-|  
+|
 |      amp-app-banner .actions {
 |        text-align: right;
 |        font-size: 14px;
 |      }
-|  
+|
 |      amp-sidebar {
 |        width: 150px;
 |      }
-|  
+|
 |      nav li {
 |        list-style: none;
 |        margin-bottom: 10px;
 |      }
-|  
+|
 |      nav li a {
 |        text-decoration: none;
 |        color: #666666;
 |      }
-|  
+|
 |    </style>
 |    <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
 |    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
@@ -271,7 +271,7 @@ FAIL
 |        </div>
 |      </div>
 |    </amp-app-banner>
-|  
+|
 |    <header>
 |      <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
 |        ☰
@@ -280,19 +280,19 @@ FAIL
 |        PublisherLogo
 |      </span>
 |    </header>
-|  
+|
 |    <!--
 |    Slots spec is not implemented yet by any browser. Will use an older version via `<content>` tag.
 |    <slot name="slot1"></slot>
 |    -->
 |    <content>
 >>   ^~~~~~~~~
-feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HTML]
+feature_tests/article.html:287:2 The tag 'content' is disallowed.
 |      <div class="slot-fallback">
 |        This is a slot fallback.
 |      </div>
 |    </content>
-|  
+|
 |    <main role="main">
 |      <article>
 |        <figure>
@@ -306,10 +306,10 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |              height="216" tabindex="0">
 |          </amp-img>
 |        </figure>
-|  
+|
 |        <amp-lightbox id="headline-img-lightbox" class="lightbox"
 |            layout="nodisplay">
-|  
+|
 |          <div class="lightbox-content">
 |            <amp-img id="floating-headline-img"
 |                src="img/hero@1x.jpg"
@@ -323,7 +323,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |            </p>
 |          </div>
 |        </amp-lightbox>
-|  
+|
 |        <div class="content-container">
 |          <ul>
 |            <li><a href="#section1">Section 1</a></li>
@@ -337,7 +337,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |              Fusce pretium tempor justo, vitae consequat dolor maximus eget.
 |            </p>
 |          </header>
-|  
+|
 |          <div class="author">
 |            <amp-img src="img/sample.jpg" id="author-avatar" placeholder
 |                height="50" width="50">
@@ -371,7 +371,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |              Mauris sem est, accumsan sed tincidunt ut, sagittis vel arcu.
 |              Nullam in libero nisi.
 |            </p>
-|  
+|
 |            <div class="ad-container">
 |              <amp-ad width=300 height=250
 |                  type="a9"
@@ -380,7 +380,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |                  data-aax_src="302">
 |              </amp-ad>
 |            </div>
-|  
+|
 |            <p>
 |              Sed pharetra semper fringilla. Nulla fringilla, neque eget
 |              varius suscipit, mi turpis congue odio, quis dignissim nisi
@@ -397,7 +397,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |              ac molestie nulla porttitor ac. Donec porta risus ut enim
 |              pellentesque, id placerat elit ornare.
 |            </p>
-|  
+|
 |            <figure>
 |              <amp-video
 |                autoplay
@@ -411,7 +411,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |                Fusce pretium tempor justo, vitae consequat dolor maximus eget.
 |              </figcaption>
 |            </figure>
-|  
+|
 |            <p>
 |              Sed pharetra semper fringilla. Nulla fringilla, neque eget
 |              varius suscipit, mi turpis congue odio, quis dignissim nisi
@@ -428,7 +428,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |              ac molestie nulla porttitor ac. Donec porta risus ut enim
 |              pellentesque, id placerat elit ornare.
 |            </p>
-|  
+|
 |            <p id="section1">
 |              Curabitur convallis, urna quis pulvinar feugiat, purus diam
 |              posuere turpis, sit amet tincidunt purus justo et mi. Donec
@@ -444,7 +444,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |              Integer suscipit iaculis elit nec mollis. Vestibulum eget arcu
 |              nec lectus finibus rutrum vel sed orci.
 |            </p>
-|  
+|
 |            <figure>
 |              <amp-img class="full-bleed" placeholder
 |                  src="img/sea@1x.jpg"
@@ -458,7 +458,7 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |              </figcaption>
 |            </figure>
 |            <hr>
-|  
+|
 |            <p>
 |              Cum sociis natoque penatibus et magnis dis parturient montes,
 |              nascetur ridiculus mus. Nulla et viverra turpis. Fusce
@@ -471,14 +471,14 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |              Ut elementum velit fermentum felis volutpat sodales in non libero.
 |              Aliquam erat volutpat.
 |            </p>
-|  
+|
 |            <div class="ad-container">
 |              <amp-ad width=300 height=200
 |                  type="adsense"
 |                  data-ad-client="ca-pub-9350112648257122">
 |              </amp-ad>
 |            </div>
-|  
+|
 |            <p id="section2">
 |              Morbi at velit vitae eros congue congue venenatis non dui.
 |              Sed lacus sem, feugiat sed elementum sed, maximus sed lacus.
@@ -493,11 +493,11 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |        </div>
 |      </article>
 |    </main>
-|  
+|
 |    <footer>
 |      <div class="brand-logo">PublisherLogo</div>
 |    </footer>
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/article.html:498:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-video) [DEPRECATION]
+feature_tests/article.html:498:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video/)

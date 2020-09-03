@@ -171,22 +171,18 @@
       this.url = url;
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
-      this.viewportType_ = 'natural';
       this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.prerenderSize_ = 1;
       this.csi_ = 1;
-
-      this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
       this.container = document.getElementById(containerId);
       this.iframe = document.createElement('iframe');
       this.iframe.setAttribute('id', 'AMP_DOC_' + this.id);
-      // TODO(dvoytenko): Set to the final value when crbug/577330 is fixed:
-      // this.iframe.setAttribute('sandbox',
-      //     'allow-popups allow-scripts allow-forms allow-pointer-lock' +
-      //     ' allow-popups-to-escape-sandbox allow-same-origin');
+      this.iframe.setAttribute('sandbox',
+          'allow-popups allow-scripts allow-forms allow-pointer-lock' +
+          ' allow-popups-to-escape-sandbox allow-same-origin');
+      this.iframe.setAttribute('scrolling', 'yes');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
       this.visibilityToggle_.addEventListener('click', function() {
@@ -195,13 +191,6 @@
           this.toggleVisibility(this.visibilityState_ != 'visible', true);
         }
       }.bind(this));
-      this.viewer.classList.add(this.viewportType_);
-
-      if (this.viewportType_ == 'natural' && !this.isIos_) {
-        this.iframe.setAttribute('scrolling', 'yes');
-      } else {
-        this.iframe.setAttribute('scrolling', 'no');
-      }
 
       window.addEventListener('resize', this.onResize_.bind(this));
       window.addEventListener('popstate', this.onPopState_.bind(this));
@@ -213,15 +202,13 @@
 
       var params = {
         history: 1,
-        viewportType: this.viewportType_,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
-        prerenderSize: this.prerenderSize_,
-        origin: parseUrl(window.location.href).origin,
+        origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a,swipe,handshakepoll'
+        cap: 'foo,a2a,swipe,handshakepoll,iframeScroll'
       };
       log('Params:' + JSON.stringify(params));
 
@@ -229,7 +216,7 @@
       if (window.location.hash && window.location.hash.length > 1) {
         inputUrl += '&' + window.location.hash.substring(1);
       }
-      var parsedUrl = parseUrl(inputUrl);
+      var parsedUrl = parseUrlDeprecated(inputUrl);
       var url = parsedUrl.href;
       this.frameOrigin_ = parsedUrl.origin;
       log('AMP URL = ', url);
@@ -253,7 +240,6 @@
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.ampViewerHost_.sendRequest('visibilitychange', {
         state: this.visibilityState_,
-        prerenderSize: this.prerenderSize
       }, true);
       if (updateToggle) {
         this.updateVisibilityToggle_();
@@ -442,7 +428,7 @@
     }
 
 
-    function parseUrl(urlString) {
+    function parseUrlDeprecated(urlString) {
       var a = document.createElement('a');
       a.href = urlString;
       return {

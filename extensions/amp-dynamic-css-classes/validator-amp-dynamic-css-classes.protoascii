@@ -19,8 +19,8 @@ tags: {  # amp-dynamic-css-classes
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-dynamic-css-classes"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     deprecated_allow_duplicates: true
     requires_usage: NONE
   }

@@ -19,9 +19,9 @@ tags: {  # amp-user-notification
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-user-notification"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -39,7 +39,7 @@ tags: {  # <amp-user-notification>
   attrs: {
     name: "data-dismiss-href"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
       allow_empty: false
     }
@@ -47,7 +47,7 @@ tags: {  # <amp-user-notification>
   attrs: {
     name: "data-show-if-href"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
       allow_empty: false
     }

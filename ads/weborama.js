@@ -72,7 +72,9 @@ export function weboramaDisplay(global, data) {
     publisherclick: data.wbo_publisherclick,
     // clicktrackers: data.wbo_clicktrackers,
     // imptrackers: data.wbo_imptrackers,
-    // zindex: data.wbo_zindex, // This is actually quite useless for now, since we are launced in a non-friendly iframe.
+    // This is actually quite useless for now, since we are launced in a
+    // non-friendly iframe.
+    // zindex: data.wbo_zindex,
     disable_unload_event: data.wbo_disable_unload_event,
     donottrack: data.wbo_donottrack,
     script_variant: data.wbo_script_variant,
@@ -81,5 +83,8 @@ export function weboramaDisplay(global, data) {
     weak_encoding: data.wbo_weak_encoding,
   };
 
-  writeScript(global, 'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js');
+  writeScript(
+    global,
+    'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js'
+  );
 }

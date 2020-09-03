@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
     <script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js"></script>
+    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <style amp-custom>
     .spacer {
         height: 100vh;
@@ -23,6 +25,33 @@
     </style>
 </head>
 <body>
+    <amp-analytics>
+        <script type="application/json">
+        {
+            "requests": {
+                "fakeStart": "https://fake.com/start",
+                "fakeEnd": "https://fake.com/end"
+            },
+            "triggers": {
+                "ad-start": {
+                    "on": "video-ad-start",
+                    "selector": "#preroll",
+                    "request": "fakeStart"
+                },
+                "ad-end": {
+                    "on": "video-ad-end",
+                    "selector": "#preroll",
+                    "request": "fakeEnd"
+                }
+            },
+            "transport": {
+                "beacon": false,
+                "xhrpost": false,
+                "image": true
+              }
+        }
+        </script>
+    </amp-analytics>
     <h2>Pre-roll</h2>
     <div class="player-wrapper">
         <amp-ima-video id="preroll"
@@ -166,5 +195,22 @@
     <button on="tap:adsenseskippable.mute">Mute</button>
     <button on="tap:adsenseskippable.unmute">Unmute</button>
     <button on="tap:adsenseskippable.fullscreen">Fullscreen</button>
+
+    <h2>In Carousel</h2>
+    <amp-carousel layout="responsive" width="640" height="360" type="slides">
+        <amp-ima-video id="adsense"
+            width="640" height="360" layout="responsive"
+            data-tag="https://afimplex.appspot.com/nonskippable"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+        <div>Slide 2</div>
+        <amp-ima-video id="adsense"
+            width="640" height="360" layout="responsive"
+            data-tag="https://afimplex.appspot.com/nonskippable"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </amp-carousel>
 </body>
 </html>

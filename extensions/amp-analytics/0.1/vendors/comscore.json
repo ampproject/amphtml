@@ -1,0 +1,21 @@
+{
+  "vars": {
+    "c2": "1000001"
+  },
+  "requests": {
+    "host": "https://sb.scorecardresearch.com",
+    "base": "${host}/p?",
+    "pageview": "${base}c1=2&c2=${c2}&cs_ucfr=$IF($EQUALS(${consentState}, sufficient), 1)$IF($EQUALS(${consentState}, insufficient), 0)$IF($EQUALS(${consentState}, ), )&cs_amp_consent=${consentState}&cs_pv=${pageViewId}&c12=${clientId(comScore)}&rn=${random}&c8=${title}&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

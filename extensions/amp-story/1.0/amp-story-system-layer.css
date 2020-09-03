@@ -1,0 +1,410 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import './amp-story-share.css';
+
+
+.i-amphtml-story-system-layer {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent) !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 56px !important; /* 6px progress bar + 48px icons + 2px margin */
+  opacity: 1 !important;
+  z-index: 100000 !important;
+  box-sizing: border-box !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  pointer-events: none !important;
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
+  opacity: 0.3 !important;
+  z-index: 1 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+.i-amphtml-story-hidden.i-amphtml-story-system-layer {
+  opacity: 0 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+.i-amphtml-story-hidden.i-amphtml-story-system-layer * {
+  pointer-events: none !important;
+}
+
+.i-amphtml-story-desktop-panels.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
+  opacity: 0 !important;
+}
+
+.i-amphtml-story-system-layer-buttons {
+  margin-top: 8px; /* 6px progress bar + 2px margin */
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end !important;
+}
+
+.i-amphtml-story-button {
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  height: 48px !important;
+  width: 48px !important;
+  cursor: pointer !important;
+  border-radius: 50% !important;
+  border-width: 0 !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  pointer-events: auto !important;
+
+  /* for svg backgrounds: */
+  background: center center no-repeat !important;
+}
+
+.i-amphtml-story-button:active {
+  /* TODO(alanorozco): do we want material ripple effect? */
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.i-amphtml-story-system-layer .i-amphtml-story-button {
+  float: left !important;
+}
+
+.i-amphtml-story-progress-bar {
+  border: 0 !important;
+  display: flex !important;
+  height: 2px !important;
+  left: 0 !important;
+  margin: 4px 0 0 !important;
+  padding: 0 2px !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  visibility: visible !important;
+  z-index: 100001 !important;
+}
+
+[ad-showing] .i-amphtml-story-progress-bar {
+  visibility: hidden !important;
+}
+
+[ad-showing] .i-amphtml-story-share-control {
+  display: none !important;
+}
+
+[ad-showing]:not([i-amphtml-current-page-has-audio])
+.i-amphtml-story-mute-audio-control,
+[ad-showing]:not([i-amphtml-current-page-has-audio])
+.i-amphtml-story-unmute-audio-control {
+  visibility: hidden !important;
+}
+
+.i-amphtml-story-page-progress-bar {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-radius: 1px !important;
+  height: 100% !important;
+  list-style-type: none !important;
+  margin: 0 2px !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+.i-amphtml-story-page-progress-value {
+  /* Do not remove `translateZ(0)` as it prevents an iOS repaint issue. */
+  background: rgba(255, 255, 255, 1) !important;
+  height: 100% !important;
+  width: 100% !important;
+  transform: translateZ(0) scaleX(0) !important; /* 0-width by default */
+  transform-origin: left !important;
+}
+
+[dir=rtl] .i-amphtml-story-page-progress-value {
+  transform-origin: right !important;
+}
+
+.i-amphtml-first-page-active[info] .i-amphtml-message-container {
+  /* 48px for info button, add width to padding for additional story buttons. */
+  padding-right: 48px !important;
+}
+
+.i-amphtml-first-page-active[info][dir=rtl] .i-amphtml-message-container {
+  /* 48px for info button, add width to padding for additional story buttons. */
+  padding-right: auto !important;
+  padding-left: 48px !important;
+}
+
+.i-amphtml-message-container {
+  display: flex !important;
+  align-items: center !important;
+  width: max-content !important;
+  transition-property: opacity, transform !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 48px !important;
+  height: 100% !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+}
+
+[dir=rtl] .i-amphtml-message-container {
+  right: auto !important;
+  left: 48px !important;
+}
+
+[i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container {
+  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), visibility 0.2s, transform 0.0s 0.2s !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(10px) !important;
+}
+
+[i-amphtml-story-has-new-page="noshow"] .i-amphtml-story-has-new-page-notification-container {
+  transition: opacity 1.5s, visibility 1.5s !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.i-amphtml-last-page-active[i-amphtml-story-has-new-page="show"] .i-amphtml-story-has-new-page-notification-container {
+  transition: opacity 1.5s, visibility 1.5s !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+[dir=rtl][i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container {
+  transform: translateX(-10px) !important;
+}
+
+[i-amphtml-story-messagedisplay="show"] .i-amphtml-message-container {
+  transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), visibility 0.2s, transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(0px) !important;
+}
+
+.i-amphtml-story-mute-text,
+.i-amphtml-story-unmute-sound-text,
+.i-amphtml-story-unmute-no-sound-text {
+  width: max-content !important;
+  color: #fff !important;
+}
+
+.i-amphtml-story-sound-display {
+  display: inline-block !important;
+  height: 46px !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-no-audio-ui .i-amphtml-story-sound-display {
+  display: none !important;
+}
+
+.i-amphtml-story-mute-audio-control,
+.i-amphtml-story-unmute-audio-control,
+.i-amphtml-paused-display,
+.i-amphtml-story-pause-control,
+.i-amphtml-story-play-control,
+.i-amphtml-story-mute-text,
+.i-amphtml-story-unmute-sound-text,
+.i-amphtml-story-unmute-no-sound-text,
+.i-amphtml-story-sidebar-control {
+  display: none !important;
+}
+
+[i-amphtml-story-has-sidebar] .i-amphtml-story-sidebar-control {
+  display: block !important;
+}
+
+.i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-mute-audio-control,
+.i-amphtml-story-has-audio[muted] .i-amphtml-story-unmute-audio-control {
+  display: block !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-paused-display, .i-amphtml-story-desktop-fullbleed .i-amphtml-paused-display {
+  display: block !important;
+}
+
+.i-amphtml-paused-display button[disabled] {
+  opacity: 0.3 !important;
+  cursor: initial !important;
+}
+
+.i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
+.i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
+  display: block !important;
+}
+
+.i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
+[i-amphtml-current-page-has-audio].i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-sound-text,
+:not([i-amphtml-current-page-has-audio]).i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-no-sound-text {
+  display: block !important;
+}
+
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-system-layer-buttons {
+  visibility: hidden !important;
+}
+
+.i-amphtml-story-unmute-audio-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-mute-audio-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-pause-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-play-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M8 5v14l11-7z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-sidebar-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-share-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>') !important;
+}
+
+[ios] .i-amphtml-story-share-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/></svg>') !important;
+  /** Visual hack to make the icon looks aligned. */
+  background-position-y: calc(50% - 2px) !important;
+}
+
+.i-amphtml-story-info-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z"/></svg>') !important;
+  display: none !important;
+}
+
+.i-amphtml-story-has-new-page-notification-container {
+  display: flex !important;
+  position: absolute !important;
+  justify-content: center !important;
+  z-index: 100002 !important; /* On top of the progress bar. */
+  top: 32px !important;
+  right: 0 !important;
+  left: 0 !important;
+  opacity: 0 !important;
+}
+
+.i-amphtml-story-has-new-page-text-wrapper {
+  background-color: rgba(32, 33, 37, 0.8) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 4px 10px 4px 0 !important;
+  border-radius: 5px !important;
+}
+
+[dir=rtl] .i-amphtml-story-has-new-page-text-wrapper {
+  padding-right: 0 !important;
+  padding-left: 10px !important;
+}
+
+.i-amphtml-story-has-new-page-text {
+  color: #fff !important;
+  font-size: 16px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  font-weight: 700 !important;
+}
+
+.i-amphtml-story-has-new-page-circle-icon {
+  background: rgba(3, 255, 160, 1) !important;
+  border-radius: 50% !important;
+  height: 6px !important;
+  width: 6px !important;
+  position: relative !important;
+  box-shadow: 0 0 0 2px rgba(3, 255, 160, 0.5) !important;
+  margin: 0px 10px !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-has-new-page-notification-container {
+  top: 0 !important;
+}
+
+.i-amphtml-embedded.i-amphtml-first-page-active .i-amphtml-story-info-control {
+  display: block !important;
+}
+
+.i-amphtml-story-no-sharing .i-amphtml-story-share-control,
+.i-amphtml-story-no-sharing .i-amphtml-story-info-control {
+  display: none !important;
+}
+
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer {
+  background: transparent !important;
+  top: auto !important;
+  bottom: 0 !important;
+  height: 96px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: row-reverse !important;
+}
+
+.i-amphtml-animate-progress li {
+  transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-progress-bar-overflow.i-amphtml-story-progress-bar {
+  width: calc(100% - 4px) !important;
+  margin: 4px 2px 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-progress-bar {
+  position: relative !important;
+  height: 3px !important;
+  width: calc(100vw / 3) !important;
+  margin: 0 24px !important;
+}
+
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
+  height: 3px !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {
+  border-radius: 100px !important;
+}
+
+.i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+  border-radius: 0px !important;
+  list-style: none !important;
+  margin: 0 2px !important;
+  width: 2px !important;
+  position: absolute !important;
+  transform-origin: left !important;
+}
+
+[dir=rtl].i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+  transform-origin: right !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar,
+.i-amphtml-story-desktop-fullbleed .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+  width: 3px !important;
+}
+
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+}

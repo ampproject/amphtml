@@ -1,0 +1,182 @@
+<!doctype html>
+<html amp4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Scrollbound Animation Ad</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <!-- ## Summary-->
+  <!--
+  Sample AMPHTML ad using [amp-position-observer]({{g.doc('/content/amp-dev/documentation/components/reference/amp-position-observer.md', locale=doc.locale).url.path}}), and [amp-animation]({{g.doc('/content/amp-dev/documentation/components/reference/amp-animation.md', locale=doc.locale).url.path}}) to create an interactive ad.
+  -->
+  <!-- ## Styling -->
+  <!--
+  This is an advanced example that requires some styling to make it look and function properly. The styling designed here is responsive and will work with various ad sizes.
+  -->
+  <style amp-custom>
+    /* Main element that contains the creative. */
+    .root-container {
+      background: #000;
+      color: #fff;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      overflow: hidden;
+      width: 340px;
+      height: 240px;
+      position: relative;
+      margin: 0 auto;
+      display: block;
+    }
+    /* Position the footer absolutely, at the bottom of the container. */
+    .footer {
+      background: #000;
+      font-size: 12px;
+      padding: 8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      color: #fff;
+      z-index: 2;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+    .footer-logo {
+      border-right: 1px solid #fff;
+      padding: 0 8px 0 0;
+      margin: 0 8px 0 0;
+    }
+    .logo-img {
+      display: block;
+    }
+    .stretch {
+      flex: 1;
+    }
+    .button {
+      text-transform: uppercase;
+      padding: 8px;
+      color: #fff;
+      display: inline-block;
+      background-color: #2979ff;
+      text-decoration: none;
+    }
+    .button:active {
+      background-color: #92bbff;
+    }
+    /* Basic cards styling */
+    .cards-container {
+      position: absolute;
+      z-index: 1;
+      left: 0;
+      right: 0;
+    }
+    .card {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+    /* Change position of the expand button for the middle card */
+    .card-gauges .expand-button {
+      left: 90px;
+      top: 50px;
+    }
+    .learn-more a:active {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+<!-- ## Animations -->
+<!--
+The animations are implemented using [amp-animation]({{g.doc('/content/amp-dev/documentation/components/reference/amp-animation.md', locale=doc.locale).url.path}}) which is an AMP component that uses [Web Animations API](https://www.w3.org/TR/web-animations/) to support both __time__ and __scroll__ based animations.
+-->
+<amp-animation id="adAnim" layout="nodisplay">
+  <script type="application/json">
+    {
+      "duration": "1s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#cardsContainer",
+          "keyframes": [
+            { "transform": "translateY(0)" },
+            { "transform": "translateY(-384px)"}
+          ]
+        }
+      ]
+    }
+  </script>
+</amp-animation>
+<!--
+**Slide cards opposite to scroll direction**:
+The ad initially shows the top-most card. As the document scrolls, the other two cards are revealed.
+
+To achieve that, we define 4 keyframes. Between 0% and 10% of viewport, the first card is displayed. Between 10% and 90%, the cards container will vertically translate to -384 pixels, which is the negative of double as each card's height. When reaching this point, the third card will be fully displayed. Between 90% and 100%, the same position is kept.
+-->
+
+<!-- ## Scrollbound Animations -->
+<!--
+The scrollbound animations are implemented using [amp-position-observer]({{g.doc('/content/amp-dev/documentation/components/reference/amp-position-observer.md', locale=doc.locale).url.path}}) which is an AMP component that
+Monitors the position of an element within the viewport as a user scrolls, and dispatches enter, exit and scroll events that can be used with other components
+-->
+<amp-position-observer
+    intersection-ratios="1"
+    viewport-margins="10vh"
+    on="scroll:adAnim.seekTo(percent=event.percent)"
+    layout="nodisplay">
+</amp-position-observer>
+
+<!-- ## Banner markup -->
+<div class="root-container">
+  <div class="footer">
+    <div class="footer-logo">
+      <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-logo.png"
+          width="72"
+          height="32"
+          layout="fixed"
+          alt="Howdy"
+          class="logo-img"></amp-img>
+    </div>
+    <div class="stretch">The All-New WX-S R5</div>
+    <a href="https://amp.dev/documentation/examples/" target="_blank" class="button">
+      Learn more
+    </a>
+  </div>
+
+  <!-- ## Cards -->
+  <div class="cards-container" id="cardsContainer">
+    <div class="card card-seats">
+      <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-seats.jpg"
+          width="340"
+          height="192"
+          layout="responsive"
+          alt="Ergonomic Leather Seats"
+          class="a-carousel-img"></amp-img>
+    </div>
+    <div class="card card-gauges">
+      <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-gauges.jpg"
+          width="340"
+          height="192"
+          layout="responsive"
+          alt="Sport Gauge Cluster"
+          class="a-carousel-img"></amp-img>
+    </div>
+    <div class="card card-engine">
+      <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-engine.jpg"
+          width="340"
+          height="192"
+          layout="responsive"
+          alt="Tuned Engine"
+          class="a-carousel-img"></amp-img>
+    </div>
+  </div>
+</div>
+<div style="height: 200vh"></div>
+</body>
+</html>

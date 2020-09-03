@@ -15,16 +15,15 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
+import {dev, devAssert} from './log';
 import {map} from './utils/object.js';
 import {startsWith} from './string';
-
 
 /** @type {Object<string, string>} */
 let propertyNameCache;
 
 /** @const {!Array<string>} */
 const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
-
 
 /**
  * @export
@@ -36,7 +35,7 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
- * Checks the style if a prefixed version of a property exists and returns
+  Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
  * @param {!Object} style
@@ -65,7 +64,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * @return {string}
  */
 export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
-  if (startsWith(camelCase, '--')) {
+  if (isVar(camelCase)) {
     // CSS vars are returned as is.
     return camelCase;
   }
@@ -90,7 +89,6 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
   return propertyName;
 }
 
-
 /**
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
@@ -98,30 +96,42 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
  * @param {!Object<string, *>} styles
  */
 export function setImportantStyles(element, styles) {
+  const {style} = element;
   for (const k in styles) {
-    element.style.setProperty(
-        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+    style.setProperty(
+      getVendorJsPropertyName(style, k),
+      styles[k].toString(),
+      'important'
+    );
   }
 }
 
-
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {Element} element
+ * @param {?Element} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
  * @param {boolean=} opt_bypassCache
  */
 export function setStyle(element, property, value, opt_units, opt_bypassCache) {
-  const propertyName = getVendorJsPropertyName(element.style, property,
-      opt_bypassCache);
-  if (propertyName) {
-    element.style[propertyName] =
-      /** @type {string} */ (opt_units ? value + opt_units : value);
+  const propertyName = getVendorJsPropertyName(
+    element.style,
+    property,
+    opt_bypassCache
+  );
+  if (!propertyName) {
+    return;
+  }
+  const styleValue = /** @type {string} */ (opt_units
+    ? value + opt_units
+    : value);
+  if (isVar(propertyName)) {
+    element.style.setProperty(propertyName, styleValue);
+  } else {
+    element.style[propertyName] = styleValue;
   }
 }
-
 
 /**
  * Returns the value of the CSS style of the specified element.
@@ -131,14 +141,19 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
  * @return {*}
  */
 export function getStyle(element, property, opt_bypassCache) {
-  const propertyName = getVendorJsPropertyName(element.style, property,
-      opt_bypassCache);
+  const propertyName = getVendorJsPropertyName(
+    element.style,
+    property,
+    opt_bypassCache
+  );
   if (!propertyName) {
     return undefined;
   }
+  if (isVar(propertyName)) {
+    return element.style.getPropertyValue(propertyName);
+  }
   return element.style[propertyName];
 }
-
 
 /**
  * Sets the CSS styles of the specified element. The styles
@@ -152,6 +167,69 @@ export function setStyles(element, styles) {
   }
 }
 
+/**
+ * Asserts that the style is not the `display` style.
+ * This is the only possible way to pass a dynamic style to setStyle.
+ *
+ * If you wish to set `display`, use the `toggle` helper instead. This is so
+ * changes to display can trigger necessary updates. See #17475.
+ *
+ * @param {string} style
+ * @return {string}
+ */
+export function assertNotDisplay(style) {
+  if (style === 'display') {
+    dev().error(
+      'STYLE',
+      '`display` style detected. You must use toggle instead.'
+    );
+  }
+  return style;
+}
+
+/**
+ * Asserts that the styles does not contain the `display` style.
+ * This is the only possible way to pass a dynamic styles object to setStyles
+ * and setImportantStyles.
+ *
+ * If you wish to set `display`, use the `toggle` helper instead. This is so
+ * changes to display can trigger necessary updates. See #17475.
+ *
+ * @param {!Object<string, *>} styles
+ * @return {!Object<string, *>}
+ */
+export function assertDoesNotContainDisplay(styles) {
+  if ('display' in styles) {
+    dev().error(
+      'STYLE',
+      '`display` style detected in styles. You must use toggle instead.'
+    );
+  }
+  return styles;
+}
+
+/**
+ * Sets the initial display style of an element. This is a last resort. If you
+ * can set the initial display using CSS, YOU MUST.
+ * DO NOT USE THIS TO ARBITRARILY SET THE DISPLAY STYLE AFTER INITIAL SETUP.
+ *
+ * @param {!Element} el
+ * @param {string} value
+ */
+export function setInitialDisplay(el, value) {
+  const {style} = el;
+  devAssert(
+    value !== '' && value !== 'none',
+    'Initial display value must not be "none". Use toggle instead.'
+  );
+  devAssert(
+    !style['display'],
+    'setInitialDisplay MUST NOT be used for ' +
+      'resetting the display style. If you are looking for display:none ' +
+      'toggling, use toggle instead.'
+  );
+  style['display'] = value;
+}
 
 /**
  * Shows or hides the specified element.
@@ -160,11 +238,14 @@ export function setStyles(element, styles) {
  */
 export function toggle(element, opt_display) {
   if (opt_display === undefined) {
-    opt_display = getStyle(element, 'display') == 'none';
+    opt_display = element.hasAttribute('hidden');
   }
-  setStyle(element, 'display', opt_display ? '' : 'none');
+  if (opt_display) {
+    element.removeAttribute('hidden');
+  } else {
+    element.setAttribute('hidden', '');
+  }
 }
-
 
 /**
  * Returns a pixel value.
@@ -172,9 +253,17 @@ export function toggle(element, opt_display) {
  * @return {string}
  */
 export function px(value) {
-  return value + 'px';
+  return `${value}px`;
 }
 
+/**
+ * Returns a degree value.
+ * @param {number} value
+ * @return {string}
+ */
+export function deg(value) {
+  return `${value}deg`;
+}
 
 /**
  * Returns a "translateX" for CSS "transform" property.
@@ -187,7 +276,6 @@ export function translateX(value) {
   }
   return `translateX(${px(value)})`;
 }
-
 
 /**
  * Returns a "translateX" for CSS "transform" property.
@@ -208,7 +296,6 @@ export function translate(x, opt_y) {
   return `translate(${x}, ${opt_y})`;
 }
 
-
 /**
  * Returns a "scale" for CSS "transform" property.
  * @param {number|string} value
@@ -216,6 +303,18 @@ export function translate(x, opt_y) {
  */
 export function scale(value) {
   return `scale(${value})`;
+}
+
+/**
+ * Returns a "rotate" for CSS "transform" property.
+ * @param {number|string} value
+ * @return {string}
+ */
+export function rotate(value) {
+  if (typeof value == 'number') {
+    value = deg(value);
+  }
+  return `rotate(${value})`;
 }
 
 /**
@@ -227,7 +326,9 @@ export function scale(value) {
  */
 export function removeAlphaFromColor(rgbaColor) {
   return rgbaColor.replace(
-      /\(([^,]+),([^,]+),([^,)]+),[^)]+\)/g, '($1,$2,$3, 1)');
+    /\(([^,]+),([^,]+),([^,)]+),[^)]+\)/g,
+    '($1,$2,$3, 1)'
+  );
 }
 
 /**
@@ -239,10 +340,9 @@ export function removeAlphaFromColor(rgbaColor) {
  * @return {!Object<string, string>}
  */
 export function computedStyle(win, el) {
-  const style = /** @type {?CSSStyleDeclaration} */(win.getComputedStyle(el));
-  return /** @type {!Object<string, string>} */(style) || map();
+  const style = /** @type {?CSSStyleDeclaration} */ (win.getComputedStyle(el));
+  return /** @type {!Object<string, string>} */ (style) || map();
 }
-
 
 /**
  * Resets styles that were set dynamically (i.e. inline)
@@ -250,9 +350,30 @@ export function computedStyle(win, el) {
  * @param {!Array<string>} properties
  */
 export function resetStyles(element, properties) {
-  const styleObj = {};
-  properties.forEach(prop => {
-    styleObj[prop] = null;
-  });
-  setStyles(element, styleObj);
+  for (let i = 0; i < properties.length; i++) {
+    setStyle(element, properties[i], null);
+  }
+}
+
+/**
+ * Propagates the object-fit/position element attributes as styles.
+ * @param {!Element} fromEl ie: amp-img
+ * @param {!Element} toEl ie: the img within amp-img
+ */
+export function propagateObjectFitStyles(fromEl, toEl) {
+  if (fromEl.hasAttribute('object-fit')) {
+    setStyle(toEl, 'object-fit', fromEl.getAttribute('object-fit'));
+  }
+
+  if (fromEl.hasAttribute('object-position')) {
+    setStyle(toEl, 'object-position', fromEl.getAttribute('object-position'));
+  }
+}
+
+/**
+ * @param {string} property
+ * @return {boolean}
+ */
+function isVar(property) {
+  return startsWith(property, '--');
 }

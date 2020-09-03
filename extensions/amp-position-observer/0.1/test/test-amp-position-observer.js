@@ -24,7 +24,7 @@ import {RelativePositions, layoutRectLtwh} from '../../../../src/layout-rect';
  * - moves the container in the viewport and tests enter, exit, progress values,
  *   with various ratio and margin configurations
  */
-describes.sandboxed('amp-position-observer', {}, () => {
+describes.sandboxed('amp-position-observer', {}, (env) => {
   let impl;
   let enterSpy;
   let exitSpy;
@@ -34,7 +34,7 @@ describes.sandboxed('amp-position-observer', {}, () => {
   const ABOVE_VP = -1000;
   const INSIDE_VP = 500;
 
-  function init(ratios = '0', margins = '0') {
+  function init(ratios = '0', margins = '0', runOnce = false) {
     const elem = {
       getAttribute(attr) {
         if (attr == 'intersection-ratios') {
@@ -50,16 +50,17 @@ describes.sandboxed('amp-position-observer', {}, () => {
     };
 
     impl = new AmpVisibilityObserver(elem);
+    impl.runOnce_ = runOnce;
     impl.parseAttributes_();
-    enterSpy = sandbox.stub(impl, 'triggerEnter_');
-    exitSpy = sandbox.stub(impl, 'triggerExit_');
-    scrollSpy = sandbox.stub(impl, 'triggerScroll_');
+    enterSpy = env.sandbox.stub(impl, 'triggerEnter_');
+    exitSpy = env.sandbox.stub(impl, 'triggerExit_');
+    scrollSpy = env.sandbox.stub(impl, 'triggerScroll_');
   }
 
   function resetSpies() {
-    enterSpy.reset();
-    exitSpy.reset();
-    scrollSpy.reset();
+    enterSpy.resetHistory();
+    exitSpy.resetHistory();
+    scrollSpy.resetHistory();
   }
 
   function setPosition(top) {
@@ -324,6 +325,61 @@ describes.sandboxed('amp-position-observer', {}, () => {
         expect(impl.scrollProgress_).to.be.equal(0);
         expect(exitSpy).to.be.called;
       });
+    });
+
+    describe('attribute `once` specified', () => {
+      it(
+        'should not trigger functions is `once` is specified - ' +
+          'scroll from bottom to top',
+        () => {
+          init('0', '0', true);
+          expect(enterSpy).not.to.be.called;
+          setPosition(INSIDE_VP);
+          expect(enterSpy).to.be.calledOnce;
+          expect(scrollSpy).to.be.calledOnce;
+
+          resetSpies();
+          setPosition(ABOVE_VP);
+          expect(exitSpy).to.be.calledOnce;
+          expect(scrollSpy).to.be.calledOnce;
+
+          resetSpies();
+          setPosition(INSIDE_VP);
+          expect(scrollSpy).not.to.be.called;
+          expect(enterSpy).not.to.be.called;
+          expect(exitSpy).not.to.be.called;
+        }
+      );
+
+      it(
+        'should not trigger functions is `once` is specified - ' +
+          'scroll from top to bottom',
+        () => {
+          init('0', '0', true);
+          expect(enterSpy).not.to.be.called;
+
+          resetSpies();
+          setPosition(ABOVE_VP);
+          expect(scrollSpy).not.to.be.called;
+          expect(enterSpy).not.to.be.called;
+          expect(exitSpy).not.to.be.called;
+
+          resetSpies();
+          setPosition(INSIDE_VP);
+          expect(scrollSpy).to.be.calledOnce;
+
+          resetSpies();
+          setPosition(BELOW_VP);
+          expect(exitSpy).to.be.calledOnce;
+          expect(scrollSpy).to.be.calledOnce;
+
+          resetSpies();
+          setPosition(INSIDE_VP);
+          expect(scrollSpy).not.to.be.called;
+          expect(enterSpy).not.to.be.called;
+          expect(exitSpy).not.to.be.called;
+        }
+      );
     });
   });
 
@@ -1056,6 +1112,3 @@ describes.sandboxed('amp-position-observer', {}, () => {
     });
   });
 });
-
-
-

@@ -21,9 +21,9 @@ tags: {  # amp-analytics
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-analytics"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -33,38 +33,38 @@ tags: {  # amp-analytics (json)
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
+  descriptive_name: "amp-analytics extension .json script"
   requires_extension: "amp-analytics"
   mandatory_parent: "AMP-ANALYTICS"
-  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
+  spec_url: "https://amp.dev/documentation/components/amp-analytics/"
 }
 tags: {  # <amp-analytics>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-ANALYTICS"
   requires_extension: "amp-analytics"
-  attrs: { name: "type" }
   attrs: {
     name: "config"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
+  attrs: { name: "type" }
+  spec_url: "https://amp.dev/documentation/components/amp-analytics/"
 }
-

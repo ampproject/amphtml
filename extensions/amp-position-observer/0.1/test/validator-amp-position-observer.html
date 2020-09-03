@@ -31,13 +31,17 @@
   <!-- Valid -->
   <amp-position-observer layout="nodisplay"></amp-position-observer>
   <amp-position-observer layout="nodisplay" on="enter:foo;exit:bar;scroll:baz(percent=event.percent)"></amp-position-observer>
+  <amp-position-observer layout="nodisplay" on="enter:foo;exit:bar;scroll:baz(percent=event.percent)" once></amp-position-observer>
   <amp-position-observer target="#id" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer target="#id" layout="nodisplay" once></amp-position-observer>
   <amp-position-observer intersection-ratios="0" layout="nodisplay"></amp-position-observer>
   <amp-position-observer intersection-ratios="1" layout="nodisplay"></amp-position-observer>
   <amp-position-observer intersection-ratios="0.5" layout="nodisplay"></amp-position-observer>
   <amp-position-observer intersection-ratios="0.5 0" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.5 0" layout="nodisplay" once></amp-position-observer>
   <amp-position-observer intersection-ratios="1 0.5" layout="nodisplay"></amp-position-observer>
   <amp-position-observer viewport-margins="100" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100" layout="nodisplay" once></amp-position-observer>
   <amp-position-observer viewport-margins="100 200" layout="nodisplay"></amp-position-observer>
   <amp-position-observer viewport-margins="100vh" layout="nodisplay"></amp-position-observer>
   <amp-position-observer viewport-margins="100px" layout="nodisplay"></amp-position-observer>
@@ -45,6 +49,7 @@
   <amp-position-observer viewport-margins="100px 200vh" layout="nodisplay"></amp-position-observer>
   <amp-position-observer viewport-margins="100vh 200px" layout="nodisplay"></amp-position-observer>
   <amp-position-observer viewport-margins="100 200vh" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100 200vh" layout="nodisplay" once></amp-position-observer>
   <!-- Invalid: missing required layout value -->
   <amp-position-observer></amp-position-observer>
   <!-- Invalid: interesection-ratios not valid entries -->

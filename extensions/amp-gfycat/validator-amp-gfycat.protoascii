@@ -19,9 +19,9 @@ tags: {  # amp-gfycat
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-gfycat"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -39,7 +39,7 @@ tags: {  # <amp-gfycat>
     value: ""
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-gfycat"
+  spec_url: "https://amp.dev/documentation/components/amp-gfycat/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

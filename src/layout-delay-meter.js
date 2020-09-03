@@ -15,11 +15,11 @@
  */
 
 import {Services} from './services';
-import {dev} from './log';
+import {TickLabel} from './enums';
 
 const LABEL_MAP = {
-  0: 'cld',
-  2: 'adld',
+  0: TickLabel.CONTENT_LAYOUT_DELAY,
+  2: TickLabel.ADS_LAYOUT_DELAY,
 };
 
 /**
@@ -27,7 +27,6 @@ const LABEL_MAP = {
  * "start to layout" of an element.
  */
 export class LayoutDelayMeter {
-
   /**
    * @param {!Window} win
    * @param {number} priority
@@ -43,10 +42,13 @@ export class LayoutDelayMeter {
     this.firstLayoutTime_ = null;
     /** @private {boolean} */
     this.done_ = false;
-    /** @private {?string} */
+    /** @private {?TickLabel} */
     this.label_ = LABEL_MAP[priority];
   }
 
+  /**
+   *
+   */
   enterViewport() {
     if (!this.label_ || this.firstInViewportTime_) {
       return;
@@ -55,6 +57,9 @@ export class LayoutDelayMeter {
     this.tryMeasureDelay_();
   }
 
+  /**
+   * starts layout
+   */
   startLayout() {
     if (!this.label_ || this.firstLayoutTime_) {
       return;
@@ -63,6 +68,9 @@ export class LayoutDelayMeter {
     this.tryMeasureDelay_();
   }
 
+  /**
+   * Tries to measure delay
+   */
   tryMeasureDelay_() {
     if (!this.performance_ || !this.performance_.isPerformanceTrackingOn()) {
       return;
@@ -76,8 +84,12 @@ export class LayoutDelayMeter {
       return;
     }
     const delay = this.win_.Math.max(
-        this.firstLayoutTime_ - this.firstInViewportTime_, 0);
-    this.performance_.tickDelta(dev().assertString(this.label_), delay);
+      this.firstLayoutTime_ - this.firstInViewportTime_,
+      0
+    );
+    if (this.label_) {
+      this.performance_.tickDelta(this.label_, delay);
+    }
     this.performance_.throttledFlush();
     this.done_ = true;
   }

@@ -1,0 +1,388 @@
+<!--
+  ## Introduction
+
+  With [`amp-video`](https://amp.dev/documentation/components/amp-video)
+  you can have rich user interface features, such as docking (minimize-to-corner).
+
+  You can simply enable this feature on your `<amp-video>` by using the `dock`
+  attribute. This example goes further by specifying a "docking slot" (a DOM
+  element that represents the area where the video should be minimized) and
+  layout synchronization using [events and
+  actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events),
+  and the `amp-animation` extension.
+
+  You can see the sample in action [here](preview).
+-->
+<!-- -->
+<!doctype html>
+<html amp lang="en">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Include the [`amp-video`](https://amp.dev/documentation/components/amp-video) extension. -->
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <!-- Include the [`amp-video-docking`](https://amp.dev/documentation/components/amp-video-docking) extension. -->
+  <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+  <!-- Include the [`amp-animation`](https://amp.dev/documentation/components/amp-animation)
+  extension to animate the `<aside>` element on `dock` and `undock`.  -->
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <title>My Article</title>
+  <link rel="canonical" href="http://example.ampproject.org/article-metadata.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <!-- ## Include styling -->
+  <style amp-custom>
+    body {
+      margin: 0;
+      background: white;
+      font-family: sans-serif;
+      line-height: 20px;
+      font-size: 14px;
+    }
+
+    header {
+      background: rgba(255, 240, 250, 1);
+      color: rgba(255, 50, 100, 1);
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 1;
+      line-height: 40px;
+      font-size: 18px;
+      z-index: 2;
+      display: flex;
+      padding: 0 40px
+    }
+
+    h1 {
+      padding: 20px;
+      background: rgba(255, 50, 100, 1);
+      color: #fff;
+      margin: 0;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    main {
+      margin: 0 auto;
+      padding: 120px 0 0 0;
+      width: 100vw;
+      font-size: 16px;
+      line-height: 24px;
+    }
+
+    .content {
+      width: calc(70vw - 40px);
+      padding: 0 40px 40px;
+      box-sizing: border-box;
+    }
+
+    aside {
+      right: 40px;
+      margin-left: 70vw;
+      position: fixed;
+      top: 120px;
+
+      /*
+      Define a viewport-based width for the aside. The docking slot will expand
+      to fill its width.
+      */
+      width: 30vw;
+    }
+
+    .more-content {
+      padding: 20px 20px 0;
+      background: #f8f8f8;
+
+      /*
+      Offset vertical axis by the negative height of the docking slot.
+      Since the docking slot is 30vw wide, its height is 16.85vw based on a 16:9
+      aspect ratio
+      */
+      transform: translateY(-16.85vw);
+    }
+
+    .more-content ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .more-content li {
+      display: block;
+      margin: 0 -20px;
+    }
+
+    .more-content li a {
+      display: flex;
+      border-top: 1px solid #eee;
+      text-decoration: none;
+      color: rgba(255, 50, 100, 1);
+      align-items: center;
+    }
+    .more-content li a > span {
+      padding: 16px 20px;
+      flex: 1;
+    }
+
+    .docked-placeholder {
+      opacity: 0;
+      position: absolute;
+      background: #f8f8f8;
+    }
+
+    .docked-indicator-icon {
+      fill: #888;
+      width: 48px;
+      height: 48px;
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+    }
+
+    h2 {
+      font-weight: normal;
+      margin: 0;
+      font-size: 36px;
+      padding: 60px 0 20px;
+      line-height: 40px;
+    }
+
+    h3 {
+      margin: 0;
+      padding-bottom: 20px;
+    }
+
+    .spacer {
+      height: 80vh;
+      overflow: hidden;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    /* This is only needed for the preview to work on AMP by Example. You don't
+    need to include these set of properties. */
+    #abe-preview > div {
+      width: 100vw;
+      max-width: 100vw;
+    }
+
+    /* Ditto. */
+    .abe-experiment-warning {
+      max-width: calc(70vw - 60px);
+    }
+
+    @media (max-width: 600px), (max-height: 480px) {
+      /* Hide on smaller devices to fallback to standard docking. */
+      #dock-slot {
+        display: none;
+      }
+
+      /* Reset fixed items. */
+      aside,
+      header {
+        position: static;
+      }
+
+      aside {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .more-content {
+        transform: none;
+      }
+
+      .content {
+        width: 100vw;
+      }
+
+      main {
+        padding-top: 20px;
+      }
+    }
+
+    a[name=video] {
+      height: 120px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ## Define animation -->
+  <!-- To slide down the content below the docking slot, the vertical offset is
+  changed into a `40px` positive offset to create padding below the slot.
+  To slide it up, we'll simply reverse this animation. -->
+  <amp-animation layout="nodisplay" id="slideSidebarDown">
+    <script type="application/json">
+      {
+        "selector": ".more-content",
+        "duration": "0.5s",
+        "fill": "both",
+        "easing": "ease",
+        "keyframes": [
+          {"transform": "translateY(-16.85vw)"},
+          {"transform": "translateY(40px)"}
+        ]
+      }
+    </script>
+  </amp-animation>
+  <header>
+    <h1>
+      fresh.io
+    </h1>
+  </header>
+  <main>
+    <div class="content">
+      <div style="height: 80vh"></div>
+      <a name="video"></a>
+      <!-- ## Include your video -->
+      <!-- In your [`<amp-video>`](https://amp.dev/documentation/components/amp-video)
+      tag, you should include the `dock` attribute. This attribute specifies that
+      the video should be minimized to corner on scroll. By setting a value on
+      the attribute, we're specifying which docking slot we're using via a CSS
+      selector. -->
+      <amp-video
+          src="https://cdn.glitch.com/17d445b5-0a12-4d3f-8731-136b26c3661d%2FPexels%20Videos%202857.mp4?1541526433834"
+          poster="https://cdn.glitch.com/17d445b5-0a12-4d3f-8731-136b26c3661d%2FScreen%20Shot%202018-11-06%20at%209.48.17%20AM.png?1541526513440"
+          width="720"
+          height="405"
+          layout="responsive"
+          loop
+          controls dock="#dock-slot">
+      </amp-video>
+      <h2>Grilled Eggplant</h2>
+      <p>
+        <strong>Docking triggers on user interaction, so click on video to activate. ☝</strong>
+      </p>
+      <h3>
+        Ingredients
+      </h3>
+      <ul>
+        <li>1 large eggplant</li>
+        <li>⅓ cup butter or ⅓ cup margarine, melted</li>
+        <li>½ teaspoon garlic salt</li>
+        <li>½ teaspoon italian seasoning</li>
+        <li>½ teaspoon salt</li>
+        <li>¼ teaspoon pepper</li>
+      </ul>
+      <h3>
+        Directions
+      </h3>
+      <ol>
+        <li>Peel the eggplant, and then cut into 3/4-inch slices.</li>
+        <li>Combine butter, garlic salt, and Italian seasonings; stir well.</li>
+        <li>Brush eggplant slices with butter mixture, and sprinkle with salt and pepper.</li>
+        <li>Place eggplant on grill; grill over medium heat 10 minutes or until tender, turning and basting occasionally.</li>
+      </ol>
+      <amp-video
+        src="https://cdn.glitch.com/17d445b5-0a12-4d3f-8731-136b26c3661d%2FBacking%20Cookies.mp4?1544223694077"
+        poster="https://cdn.glitch.com/17d445b5-0a12-4d3f-8731-136b26c3661d%2Fchocolatechip.png?1544224047256"
+        width="720"
+        height="405"
+        layout="responsive"
+        loop
+        controls dock="#dock-slot">
+      </amp-video>
+      <h2>Chocolate chip cookies</h2>
+      <p>
+        <strong>Docking triggers on user interaction, so click on video to activate. ☝</strong>
+      </p>
+      <h3>
+        Ingredients
+      </h3>
+      <ul>
+        <li>½ cup unsalted butter, melted</li>
+        <li>⅓ cup granulated sugar</li>
+        <li>½ cup light brown sugar, packed</li>
+        <li>1 large egg</li>
+        <li>1 teaspoon vanilla extract</li>
+        <li>½ teaspoon baking soda</li>
+        <li>½ teaspoon salt</li>
+        <li>1 ½ cups all-purpose flour</li>
+        <li>1 ½ cups chocolate chips</li>
+      </ul>
+
+      <h3>
+        Directions
+      </h3>
+      <ol>
+        <li>Place melted butter in the bowl of a stand mixer fitted with the paddle attachment.
+          Add granulated and brown sugars and mix on low speed until the mixture is smooth.
+          Mix in egg and vanilla extract and mix on medium speed until combined.</li>
+        <li>Mix in baking soda and salt, then slowly mix in flour and mix just until the batter is smooth.
+           Slowly mix in chocolate chips.</li>
+        <li>Line a cookie sheet with parchment paper. Scoop 2 tablespoon balls of dough onto the cookie
+          sheet. Cover with plastic wrap and chill for at least 2 hours.</li>
+        <li>Preheat oven to 350°F. Line a second cookie sheet with parchment paper.</li>
+        <li>Remove the chilled cookie dough balls from the refrigerator and place them on the cookie sheets. Bake
+          for 11 to 15 minutes, or until the edges are a light golden and the tops are no longer glossy.</li>
+      </ol>
+      <div style="height: 100vh"></div>
+    </div>
+    <aside>
+      <!-- ## Include the docking slot. -->
+      <!-- Set width and height to `16:9`. Since its layout is
+      `responsive`, the slot will expand to fill the aside's width while
+      preserving aspect ratio.
+
+      You should also set the `on` attribute to specify the actions that get executed on docking events.
+      In this case, we'll start the `slideDown` animation on `dock` and run it in reverse on `undock`.
+
+      Note that we're seeting the action on the slot element. If we were to set
+      it in the video itself, it would be triggered for `minimize-to-corner` rather
+      than `minimize-to-slot`.-->
+      <amp-layout
+          layout="responsive"
+          width="16"
+          height="9"
+          id="dock-slot"
+          on="dock: slideSidebarDown.start;
+              undock: slideSidebarDown.start, slideSidebarDown.reverse;">
+      </amp-layout>
+      <!-- ## Define the content under the slot -->
+      <!-- This container is negatively offset on the vertical axis to cover
+      the docking slot. Our `slideSidebarDown` animation will take care of translating
+      this content to make room for the docking slot. -->
+      <div class="more-content">
+        <h3>More Content</h3>
+        <ul>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/g/100/100" width="80" height="80"></amp-img>
+              <span>Was it an alien or something?! Click here to find out!</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/80/80" width="80" height="80"></amp-img>
+              <span>Baby ducks see water for the first time - Can you BELIEVE what they do?</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/g/120/120" width="80" height="80"></amp-img>
+              <span>Grocery stores HATE him: save up to 90% with this one weird trick.</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/140/140" width="80" height="80"></amp-img>
+              <span>When you read these 99 shocking food facts, you'll never want to eat again.</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <amp-img src="https://placekitten.com/g/180/180" width="80" height="80"></amp-img>
+              <span>Scientists say giant asteroid could hit Earth next week, causing mass devastation.</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+</body>
+</html>

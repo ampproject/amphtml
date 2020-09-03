@@ -1,0 +1,18 @@
+URL: https://github.com/RobinHerbots/Inputmask/tree/4.0.4
+License: MIT
+License File: https://github.com/RobinHerbots/Inputmask/blob/4.0.4/LICENSE.txt
+
+Description:
+Copy of inputmask library and dependency library from release 4.0.4
+https://github.com/RobinHerbots/Inputmask/tree/4.0.4
+
+Local Modifications:
+- Patch 0000: Replace the universal module definition with a factory wrapper.
+- Patch 0001: Reference Element from the global object dependency-injected into
+  the factory. This fixes behavior across iframe boundaries, like in tests.
+- Patch 0002: Changed initial unmask behavior when value patching is disabled.
+- Patch 0003: In `trigger` implementation, only use CustomEvent for custom
+  events, and use native Events for code-initiated user events like "click".
+- Patch 0004: Check for showMaskOnHover in the mouseenter handler.
+- Patch 0005: Remove extraneous whitespace.
+- Patch 0006: Add support for the "?" mask character as a wildcard character.

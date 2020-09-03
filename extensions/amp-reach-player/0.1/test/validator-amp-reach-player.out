@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ FAIL
 |         missing value results in an error. -->
 |    <amp-reach-player
 >>   ^~~~~~~~~
-amp-reach-player/0.1/test/validator-amp-reach-player.html:38:2 The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'. (see https://www.ampproject.org/docs/reference/components/amp-reach-player) [AMP_TAG_PROBLEM]
+amp-reach-player/0.1/test/validator-amp-reach-player.html:38:2 The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'. (see https://amp.dev/documentation/components/amp-reach-player)
 |        layout="responsive" width="480" height="270">
 |    </amp-reach-player>
 |  </body>

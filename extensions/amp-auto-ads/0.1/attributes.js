@@ -25,23 +25,36 @@ const TAG = 'amp-auto-ads';
 /**
  * @const {!Object<string, boolean>}
  */
-const NON_DATA_ATTRIBUTE_WHITELIST = {
+const NON_DATA_ATTRIBUTE_ALLOWLIST = {
   'type': true,
+  'rtc-config': true,
+};
+
+/**
+ * Indicates attributes from config object for different ad formats.
+ * @enum {string}
+ */
+export const Attributes = {
+  // Attributes from config object which should be added on any ads.
+  BASE_ATTRIBUTES: 'attributes',
+  // Attributes from config object which should be added on anchor ads.
+  STICKY_AD_ATTRIBUTES: 'stickyAdAttributes',
 };
 
 /**
  * @param {!JsonObject} configObj
+ * @param {!Attributes} attributes
  * @return {!JsonObject<string, string>}
  */
-export function getAttributesFromConfigObj(configObj) {
-  if (!configObj['attributes']) {
+export function getAttributesFromConfigObj(configObj, attributes) {
+  if (!configObj[attributes]) {
     return dict();
   }
-  if (!isObject(configObj['attributes']) || isArray(configObj['attributes'])) {
-    user().warn(TAG, 'attributes property not an object');
+  if (!isObject(configObj[attributes]) || isArray(configObj[attributes])) {
+    user().warn(TAG, attributes + ' property not an object');
     return dict();
   }
-  return parseAttributes(configObj['attributes']);
+  return parseAttributes(configObj[attributes]);
 }
 
 /**
@@ -51,13 +64,16 @@ export function getAttributesFromConfigObj(configObj) {
 function parseAttributes(attributeObject) {
   const attributes = dict();
   for (const key in attributeObject) {
-    if (!NON_DATA_ATTRIBUTE_WHITELIST[key] && !startsWith(key, 'data-')) {
+    if (!NON_DATA_ATTRIBUTE_ALLOWLIST[key] && !startsWith(key, 'data-')) {
       user().warn(TAG, 'Attribute not whitlisted: ' + key);
       continue;
     }
-    const valueType = (typeof attributeObject[key]);
-    if (valueType != 'number' && valueType != 'string' &&
-        valueType != 'boolean') {
+    const valueType = typeof attributeObject[key];
+    if (
+      valueType != 'number' &&
+      valueType != 'string' &&
+      valueType != 'boolean'
+    ) {
       user().warn(TAG, 'Attribute type not supported: ' + valueType);
       continue;
     }

@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,22 +32,22 @@ FAIL
 |  <body>
 |    <!-- Valid: simplest possible example -->
 |    <amp-social-share type="twitter"></amp-social-share>
-|  
+|
 |    <!-- Valid: a simple example with params -->
 |    <amp-social-share type="linkedin" width="60" height="44"
 |                      data-param-text="Hello world"
 |                      data-param-url="https://example.com/">
 |    </amp-social-share>
-|  
-|    <!-- Valid: A share endpoint that's a URL with whitelisted app protocol -->
+|
+|    <!-- Valid: A share endpoint that's a URL with allowlisted app protocol -->
 |    <amp-social-share type="whatsapp"
 |                      layout="container"
 |                      data-share-endpoint="whatsapp://send"
 |                      data-param-text="Check this out: TITLE - CANONICAL_URL">
 |      Share on Whatsapp
 |    </amp-social-share>
-|  
-|    <!-- Valid: A share endpoint that's a URL with the whitelisted https protocol
+|
+|    <!-- Valid: A share endpoint that's a URL with the allowlisted https protocol
 |      -->
 |    <amp-social-share type="vote-this-up"
 |                      layout="container"
@@ -55,7 +55,7 @@ FAIL
 |                      data-param-text="Check this out: TITLE - CANONICAL_URL">
 |      Share on Whatsapp
 |    </amp-social-share>
-|  
+|
 |    <!-- Valid: A share endpoint that's within an amp-sidebar -->
 |    <amp-sidebar layout="nodisplay">
 |    <amp-social-share type="vote-this-up"
@@ -65,7 +65,7 @@ FAIL
 |      Share on Whatsapp
 |    </amp-social-share>
 |    </amp-sidebar>
-|  
+|
 |    <!-- Valid: unknown type, no endpoint given
 |         Note: It would be good to consider this invalid, but given the choices
 |         around required / optional parameters for this tag, we don't have a
@@ -75,21 +75,21 @@ FAIL
 |                      data-param-text="Hello world"
 |                      data-param-url="https://example.com/">
 |    </amp-social-share>
-|  
-|    <!-- Invalid: Endpoint given with a protocol that doesn't fit the whitelist -->
+|
+|    <!-- Invalid: Endpoint given with a protocol that doesn't fit the allowlist -->
 |    <amp-social-share type="vote-this-up"
 >>   ^~~~~~~~~
-amp-social-share/0.1/test/validator-amp-social-share.html:79:2 Invalid URL protocol 'votethisup:' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://www.ampproject.org/docs/reference/components/amp-social-share) [AMP_TAG_PROBLEM]
+amp-social-share/0.1/test/validator-amp-social-share.html:79:2 Invalid URL protocol 'votethisup:' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://amp.dev/documentation/components/amp-social-share)
 |                      layout="container"
 |                      data-share-endpoint="votethisup://vote"
 |                      data-param-text="Check this out: TITLE - CANONICAL_URL">
 |      Share on Whatsapp
 |    </amp-social-share>
-|  
-|    <!-- Invalid: Endpoint given with a protocol that doesn't fit the whitelist -->
+|
+|    <!-- Invalid: Endpoint given with a protocol that doesn't fit the allowlist -->
 |    <amp-social-share type="uhm-no-hahaha"
 >>   ^~~~~~~~~
-amp-social-share/0.1/test/validator-amp-social-share.html:87:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://www.ampproject.org/docs/reference/components/amp-social-share) [AMP_TAG_PROBLEM]
+amp-social-share/0.1/test/validator-amp-social-share.html:87:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://amp.dev/documentation/components/amp-social-share)
 |                      layout="container"
 |                      data-share-endpoint="j a v a s c r i p t : alert('oh hi')"
 |                      data-param-text="Check this out: TITLE - CANONICAL_URL">

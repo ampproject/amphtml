@@ -1,3 +1,11 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Embeds the Facebook comments plugin.
+---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,66 +22,59 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-facebook-comments"></a> `amp-facebook-comments`
+# amp-facebook-comments
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Embeds the Facebook comments plugin.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-facebook-comments" src="https://cdn.ampproject.org/v0/amp-facebook-comments-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
+## Usage
 
-[TOC]
-
-## Overview
-
-You can use the `amp-facebook-comments` component to embed the [Facebook comments plugin](https://developers.facebook.com/docs/plugins/comments).
-
-**Example**
+Use the `amp-facebook-comments` component to embed the [Facebook comments plugin](https://developers.facebook.com/docs/plugins/comments).
 
 ```html
-<amp-facebook-comments width=486 height=657
-    layout="responsive"
-    data-numposts="5"
-    data-href="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html">
+<amp-facebook-comments
+  width="486"
+  height="657"
+  layout="responsive"
+  data-numposts="5"
+  data-href="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html"
+>
 </amp-facebook-comments>
 ```
+
 ## Attributes
 
-##### data-href (required)
+### `data-href`
 
-The URL of the comments page. For example, `http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html`.
+The URL of the comments page. For example,
+`http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html`.
 
-##### data-locale (optional)
+### `data-locale` (optional)
 
-By default, the locale is set to user's system language; however, you can specify a locale as well.
+By default, the locale is set to user's system language; however, you can
+specify a locale as well.
 
-For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
+For details on strings accepted here please visit the
+[Facebook API Localization page](https://developers.facebook.com/docs/internationalization).
 
-##### data-numposts (optional)
+### `data-numposts` (optional)
 
-The number of comments to show.  For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
+The number of comments to show. Currently Facebook SDK limits this to max 100.
+For details, see the
+[Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-##### data-order-by (optional)
+### `data-order-by` (optional)
 
-The order to use when displaying comments. For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
+The order to use when displaying comments. For details, see the
+[Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-##### data-colorscheme (optional)
+### `data-colorscheme` (optional)
 
-The color scheme. For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
+The color scheme. For details, see the
+[Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-##### common attributes
+### Common attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 
-See [amp-facebook-comments rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-comments/validator-amp-facebook-comments.protoascii) in the AMP validator specification.
+See [amp-facebook-comments rules](validator-amp-facebook-comments.protoascii) in the AMP validator specification.

@@ -28,22 +28,31 @@
 
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
+// TODO(aghassemi,#7822): Videos may not be playable on an iOS simulator.
+describe
+  .configure()
+  .skipIos()
+  .run('amp-video', () => {
+    runVideoPlayerIntegrationTests((fixture) => {
+      const video = fixture.doc.createElement('amp-video');
+      video.setAttribute('src', '/examples/av/ForBiggerJoyrides.mp4');
+      return video;
+    });
+  });
 
-//TODO(aghassemi,#7822): We have to skip iOS for video tests since videos
-// can't play SauceLab's iOS simulator. We need real devices instead.
-
-
-describe.configure().skipIos().run('amp-video', () => {
-  runVideoPlayerIntegrationTests(fixture => {
-    const video = fixture.doc.createElement('amp-video');
-    video.setAttribute('src', '/examples/av/ForBiggerJoyrides.mp4');
+// TODO(alanorozco): unskip
+describe.skip('amp-video-iframe', () => {
+  runVideoPlayerIntegrationTests((fixture) => {
+    const video = fixture.doc.createElement('amp-video-iframe');
+    video.setAttribute('src', '/examples/amp-video-iframe/frame.html');
+    video.setAttribute('poster', 'https://placekitten.com/800/450');
     return video;
   });
 });
 
 //TODO(aghassemi, #9379): unskip
 describe.skip('amp-youtube', () => {
-  runVideoPlayerIntegrationTests(fixture => {
+  runVideoPlayerIntegrationTests((fixture) => {
     const video = fixture.doc.createElement('amp-youtube');
     video.setAttribute('data-videoid', 'O0QDEXZhow4');
     return video;
@@ -52,7 +61,7 @@ describe.skip('amp-youtube', () => {
 
 //TODO(aghassemi, #9379): unskip
 describe.skip('amp-dailymotion', () => {
-  runVideoPlayerIntegrationTests(fixture => {
+  runVideoPlayerIntegrationTests((fixture) => {
     const video = fixture.doc.createElement('amp-dailymotion');
     video.setAttribute('data-videoid', 'x3rdtfy');
     return video;
@@ -60,7 +69,7 @@ describe.skip('amp-dailymotion', () => {
 });
 
 describe.configure().skip('amp-3q-player', () => {
-  runVideoPlayerIntegrationTests(fixture => {
+  runVideoPlayerIntegrationTests((fixture) => {
     const video = fixture.doc.createElement('amp-3q-player');
     video.setAttribute('data-id', 'c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
     return video;
@@ -69,7 +78,7 @@ describe.configure().skip('amp-3q-player', () => {
 
 //TODO(aghassemi,#8264): Unskip when integration is fixed.
 describe.skip('amp-nexxtv-player', () => {
-  runVideoPlayerIntegrationTests(fixture => {
+  runVideoPlayerIntegrationTests((fixture) => {
     const video = fixture.doc.createElement('amp-nexxtv-player');
     video.setAttribute('data-mediaid', 'PTPFEC4U184674');
     video.setAttribute('data-client', '583');
@@ -79,25 +88,47 @@ describe.skip('amp-nexxtv-player', () => {
 
 //TODO(aghassemi, #9379): unskip
 describe.skip('amp-ima-video', () => {
-  runVideoPlayerIntegrationTests(fixture => {
+  runVideoPlayerIntegrationTests((fixture) => {
     const video = fixture.doc.createElement('amp-ima-video');
     video.setAttribute('width', 640);
     video.setAttribute('height', 360);
     video.setAttribute('data-width', '640');
     video.setAttribute('data-height', '360');
     video.setAttribute('data-src', '/examples/av/ForBiggerJoyrides.mp4');
-    video.setAttribute('data-tag', 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=');
+    video.setAttribute(
+      'data-tag',
+      'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator='
+    );
     video.setAttribute('data-poster', '/examples/img/ima-poster.png');
     return video;
   }, 'amp-ima-video');
 });
 
-describe.configure().skipIos().run('amp-brid-player', () => {
-  runVideoPlayerIntegrationTests(fixture => {
+//TODO(cvializ, #14833): unskip after brid player is fixed
+describe.skip('amp-brid-player', () => {
+  runVideoPlayerIntegrationTests((fixture) => {
     const video = fixture.doc.createElement('amp-brid-player');
     video.setAttribute('data-partner', '264');
     video.setAttribute('data-player', '4144');
     video.setAttribute('data-video', '13663');
+    return video;
+  });
+});
+
+describe.skip('amp-brightcove', () => {
+  runVideoPlayerIntegrationTests((fixture) => {
+    const video = fixture.doc.createElement('amp-brightcove');
+    video.setAttribute('data-account-id', '1290862519001');
+    video.setAttribute('data-player-id', 'SyIOV8yWM');
+    video.setAttribute('data-video-id', 'amp-test-video');
+    return video;
+  });
+});
+
+describe.skip('amp-delight-player', () => {
+  runVideoPlayerIntegrationTests((fixture) => {
+    const video = fixture.doc.createElement('amp-delight-player');
+    video.setAttribute('data-content-id', '-LLoCCZqWi18O73b6M0w');
     return video;
   });
 });

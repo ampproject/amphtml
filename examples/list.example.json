@@ -1,20 +1,25 @@
 {
- "items": [
-   {
-     "title": "amp-carousel",
-     "url": "/components/amp-carousel/"
-   },
-   {
-     "title": "amp-img",
-     "url": "/components/amp-img/"
-   },
-   {
-     "title": "amp-ad",
-     "url": "/components/amp-ad/"
-   },
-   {
-     "title": "amp-accordion",
-     "url": "/components/amp-accordion/"
-   }
- ]
+  "items": [
+    {
+      "title": "amp-carousel",
+      "url": "/components/amp-carousel/",
+      "image": "img/ampicon.png"
+    },
+    {
+      "title": "amp-img",
+      "url": "/components/amp-img/",
+      "image": "img/clock.jpg"
+    },
+    {
+      "title": "amp-ad",
+      "url": "/components/amp-ad/",
+      "image": "img/sea@1x.jpg"
+    },
+    {
+      "title": "amp-accordion",
+      "url": "/components/amp-accordion/",
+      "image": "img/ampicon.png"
+    }
+  ],
+  "next": "./list.example.json"
 }

@@ -18,7 +18,7 @@
       font-size: 12px;
     }
 
-    #copyright {
+    .notice {
       color: lightgray;
       font-size: 10px;
     }
@@ -27,7 +27,7 @@
       width: 100px;
     }
 
-    #switch-holder {
+    #switch-wrapper {
       display: flex;
       align-items: center;
     }
@@ -63,7 +63,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #0389ff;
+      background-color: #005af0;
       -webkit-transition: .4s;
       transition: .4s;
       border-radius: 20px;
@@ -83,11 +83,11 @@
     }
 
     input[type="checkbox"]:checked + #switch {
-      background-color: #2196F3;
+      background-color: #005af0;
     }
 
     input[type="checkbox"]:focus + #switch {
-      box-shadow: 0 0 1px #2196F3;
+      box-shadow: 0 0 1px #005af0;
     }
 
     input:checked + #switch:before {
@@ -95,29 +95,58 @@
       -ms-transform: translateX(18px);
       transform: translateX(18px);
     }
+
+    #base-url-holder, #switch-holder, .notice, .desc {
+      display: flex;
+      flex-direction: column;
+      margin-top: 24px;
+    }
+
+    #base-url {
+      border-radius: 4px;
+      padding: 8px;
+      border: 1px solid #d0d0d0;
+      color: #333;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .section-header {
+      margin-bottom: 16px;
+      text-align: left;
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
     </style>
     <script src="popup.js"></script>
   </head>
   <body>
-    <img id = "logo" src="logo.svg" /><br><br>
-    <p>Switch between using a local distribution of AMP HTML or the online
+    <img id="logo" src="logo.svg" />
+    <p class="desc">Switch between using a local distribution of AMP HTML or the online
     distribution hosted at https://cdn.ampproject.org/</p>
-    <br>
-    <div id = "switch-holder">
-      <span id = "left">
-        Online CDN
-      </span>
-      <label id="switch-container">
-        <input type="checkbox">
-        <div id="switch"></div>
-      </label>
-      <span id = "right">
-        Local AMP
-       </span>
+    <div id="switch-holder">
+      <label class="section-header" for="enabled">Local AMP Serving</label>
+      <div id="switch-wrapper">
+        <span id="left">
+          Online CDN
+        </span>
+        <div id="switch-container">
+          <input type="checkbox" id="enabled">
+          <label id="switch" for="enabled"></label>
+        </div>
+        <span id="right">
+          Local AMP
+        </span>
+      </div>
     </div>
-    <br><br>
-    <span id="copyright">
-      &copy; Copyright 2017 The AMP HTML Authors.<br> All Rights Reserved.
+    <div id="base-url-holder">
+      <label for="base-url" class="section-header">Base URL</label>
+      <input id="base-url" type="url">
+    </div>
+    <span class="notice">
+      &copy; Copyright 2017 The AMP HTML Authors. All Rights Reserved.
     </span>
   </body>
 </html>

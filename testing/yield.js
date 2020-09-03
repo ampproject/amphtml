@@ -22,25 +22,28 @@
  */
 export function installYieldIt(realIt) {
   it = enableYield.bind(null, realIt); // eslint-disable-line no-native-reassign, no-undef
-  it./*OK*/only = enableYield.bind(null, realIt.only);
+  it./*OK*/ only = enableYield.bind(null, realIt.only);
   it.skip = realIt.skip;
 }
 
 /**
  * A convenient method so you can flush the event queue by doing
  * `yield macroTask()` in your test.
- * @returns {Promise}
+ * @return {Promise}
  */
 export function macroTask() {
   return new Promise(setTimeout);
 }
 
 function enableYield(fn, message, runnable) {
-  if (!runnable || !runnable.constructor
-      || runnable.constructor.name !== 'GeneratorFunction') {
+  if (
+    !runnable ||
+    !runnable.constructor ||
+    runnable.constructor.name !== 'GeneratorFunction'
+  ) {
     return fn(message, runnable);
   }
-  return fn(message, done => {
+  return fn(message, (done) => {
     const iterator = runnable();
     function step(method, result) {
       let state;

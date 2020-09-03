@@ -13,68 +13,76 @@
       font-size: 16px;
       line-height: 20px;
     }
-    .meta {
-      overflow: auto;
-    }
-    .time, .location {
-      float: left;
-    }
-    .content {
-      margin-bottom: 4em;
+    .scroll {
+      height: 40px;
+      overflow: scroll;
+      border: 1px solid black;
     }
   </style>
-  <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js"></script>
+  <script>	
+  (self.AMP = self.AMP || []).push(function(AMP) {	
+    AMP.toggleExperiment('amp-timeago-bento', true);	
+  });	
+  </script>
+  <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-1.0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <h1>My article title</h1>
-  <div class="meta">
-    <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</amp-timeago>
-    <span class="location">London, UK</span>
+  <amp-state id="myState">
+    <script type="application/json">
+      {
+        "datetime": "2018-04-11T00:37:33.809Z",
+        "title": "Saturday 11 April 2018 00.37"
+      }
+    </script>
+  </amp-state>
+  <h1>Basic example</h1>
+  <div class="scroll">
+    <p>Scroll up and down for updated times</p>
+    <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2020-01-28T20:52:41+00:00" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
   </div>
-  <div class="content">
-    <p>Nunc sed turpis. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Curabitur nisi. Nullam accumsan lorem in dui.</p>
-    <p>Phasellus blandit leo ut odio. Vivamus euismod mauris. Praesent adipiscing. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus.</p>
-  </div>
+  <h1>amp-bind example</h1>
+  <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" [datetime]="myState.datetime" [title]="myState.title" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
+  <button on="tap:AMP.setState({myState: {datetime: '2020-09-01T00:00:00.000Z', title: 'Saturday 1 September 2018 00.00'}})">Set to 1st September 2020</button>
   <h1>Locale examples</h1>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="be">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="bg">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="ca">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="da">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="de">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="el">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="enShort">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="es">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="eu">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="fi">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="fr">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="he">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="hu">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="inBG">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="inHI">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="inID">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="it">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="ja">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="ko">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="ml">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="nbNO">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="nl">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="nnNO">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="pl">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="ptBR">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="ro">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="ru">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="sv">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="ta">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="th">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="tr">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="uk">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="vi">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="zhCN">Saturday 11 April 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="zhTW">Saturday 11 April 2017 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="be">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="bg">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="ca">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="da">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="de">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="el">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="enShort">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="es">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="eu">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="fi">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="fr">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="he">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="hu">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="inBG">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="inHI">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="inID">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="it">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="ja">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="ko">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="ml">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="nbNO">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="nl">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="nnNO">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="pl">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="ptBR">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="ro">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="ru">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="sv">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="ta">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="th">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="tr">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="uk">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="vi">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="zhCN">Saturday 11 April 2018 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="zhTW">Saturday 11 April 2018 00.37</amp-timeago>
   <h1>Cutoff example (100 days)</h1>
-  <amp-timeago layout="fixed" width="320" height="20" datetime="2017-03-13T00:37:33.809Z" locale="en" cutoff="8640000">Monday 13 March 2017 00.37</amp-timeago>
-  <amp-timeago layout="fixed" width="320" height="20" datetime="2017-06-21T00:37:33.809Z" locale="en" cutoff="8640000">Wednesday 21 June 2017 00.37</amp-timeago>
+  <amp-timeago layout="fixed" width="320" height="20" datetime="2018-04-11T00:37:33.809Z" locale="en" cutoff="8640000">Saturday 11 April 2018 00.37</amp-timeago>
 </body>
 </html>

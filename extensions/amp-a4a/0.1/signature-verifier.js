@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {isArray} from '../../../src/types';
 
 /** @visibleForTesting */
@@ -29,7 +29,6 @@ export const AMP_SIGNATURE_HEADER = 'AMP-Fast-Fetch-Signature';
  * @enum {number}
  */
 export const VerificationStatus = {
-
   /** The ad was successfully verified as AMP. */
   OK: 0,
 
@@ -58,7 +57,6 @@ export const VerificationStatus = {
    * i.e. is not SSL.
    */
   CRYPTO_UNAVAILABLE: 4,
-
 };
 
 /**
@@ -75,7 +73,6 @@ export const VerificationStatus = {
  * introduced as an experiment.
  */
 export class SignatureVerifier {
-
   /**
    * @param {!Window} win
    * @param {!Object<string, string>} signingServerURLs a map from the name of
@@ -132,10 +129,12 @@ export class SignatureVerifier {
      * the performance system will be used; otherwise Date.now() will be
      * returned.
      *
-     * @private @const {function(): number}
+     * @protected @const {function(): number}
      */
-    this.getNow_ = (win.performance && win.performance.now) ?
-      win.performance.now.bind(win.performance) : Date.now;
+    this.getNow_ =
+      win.performance && win.performance.now
+        ? win.performance.now.bind(win.performance)
+        : Date.now;
   }
 
   /**
@@ -165,13 +164,10 @@ export class SignatureVerifier {
    *
    * @param {!ArrayBuffer} creative
    * @param {!Headers} headers
-   * @param {function(string, !Object)} lifecycleCallback called for each AMP
-   *     lifecycle event triggered during verification
    * @return {!Promise<!VerificationStatus>}
    */
-  verify(creative, headers, lifecycleCallback) {
-    const signatureFormat =
-        /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
+  verify(creative, headers) {
+    const signatureFormat = /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
     if (!headers.has(AMP_SIGNATURE_HEADER)) {
       return Promise.resolve(VerificationStatus.UNVERIFIED);
     }
@@ -180,12 +176,17 @@ export class SignatureVerifier {
     if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
       user().error(
-          'AMP-A4A', `Invalid signature header: ${headerValue.split(':')[0]}`);
+        'AMP-A4A',
+        `Invalid signature header: ${headerValue.split(':')[0]}`
+      );
       return Promise.resolve(VerificationStatus.ERROR_SIGNATURE_MISMATCH);
     }
     return this.verifyCreativeAndSignature(
-        match[1], match[2], base64DecodeToBytes(match[3]), creative,
-        lifecycleCallback);
+      match[1],
+      match[2],
+      base64DecodeToBytes(match[3]),
+      creative
+    );
   }
 
   /**
@@ -206,22 +207,26 @@ export class SignatureVerifier {
    * @param {string} keypairId
    * @param {!Uint8Array} signature
    * @param {!ArrayBuffer} creative
-   * @param {function(string, !Object)} lifecycleCallback called for each AMP
-   *     lifecycle event triggered during verification
    * @return {!Promise<!VerificationStatus>}
    * @visibleForTesting
    */
   verifyCreativeAndSignature(
-    signingServiceName, keypairId, signature, creative, lifecycleCallback) {
+    signingServiceName,
+    keypairId,
+    signature,
+    creative
+  ) {
     if (!this.signers_) {
       // Web Cryptography isn't available.
       return Promise.resolve(VerificationStatus.CRYPTO_UNAVAILABLE);
     }
     const signer = this.signers_[signingServiceName];
-    dev().assert(
-        signer, 'Keyset for service %s not loaded before verification',
-        signingServiceName);
-    return signer.promise.then(success => {
+    devAssert(
+      signer,
+      'Keyset for service %s not loaded before verification',
+      signingServiceName
+    );
+    return signer.promise.then((success) => {
       if (!success) {
         // The public keyset couldn't be fetched and imported. Probably a
         // network connectivity failure.
@@ -231,58 +236,52 @@ export class SignatureVerifier {
       if (keyPromise === undefined) {
         // We don't have this key, but maybe the cache is stale; try
         // cachebusting.
-        signer.promise =
-            this.fetchAndAddKeys_(signer.keys, signingServiceName, keypairId)
-                .then(success => {
-                  if (signer.keys[keypairId] === undefined) {
-                    // We still don't have this key; make sure we never try
-                    // again.
-                    signer.keys[keypairId] = null;
-                  }
-                  return success;
-                });
+        signer.promise = this.fetchAndAddKeys_(
+          signer.keys,
+          signingServiceName,
+          keypairId
+        ).then((success) => {
+          if (signer.keys[keypairId] === undefined) {
+            // We still don't have this key; make sure we never try
+            // again.
+            signer.keys[keypairId] = null;
+          }
+          return success;
+        });
         // This "recursive" call can recurse at most once.
         return this.verifyCreativeAndSignature(
-            signingServiceName, keypairId, signature, creative,
-            lifecycleCallback);
+          signingServiceName,
+          keypairId,
+          signature,
+          creative
+        );
       } else if (keyPromise === null) {
         // We don't have this key and we already tried cachebusting.
         return VerificationStatus.ERROR_KEY_NOT_FOUND;
       } else {
-        return keyPromise.then(key => {
+        return keyPromise.then((key) => {
           if (!key) {
             // This particular public key couldn't be imported. Probably the
             // signing service's fault.
             return VerificationStatus.UNVERIFIED;
           }
           const crypto = Services.cryptoFor(this.win_);
-          const startTime = this.getNow_();
           return crypto.verifyPkcs(key, signature, creative).then(
-              result => {
-                const endTime = this.getNow_();
-                if (result) {
-                  lifecycleCallback('signatureVerifySuccess', {
-                    'met.delta.AD_SLOT_ID': endTime - startTime,
-                    'signingServiceName.AD_SLOT_ID': signingServiceName,
-                  });
-                  return VerificationStatus.OK;
-                } else {
-                  // TODO(@taymonbeal, #11090): figure out whether an additional
-                  // CSI ping is needed here
-                  return VerificationStatus.ERROR_SIGNATURE_MISMATCH;
-                }
-              },
-              err => {
-                // Web Cryptography rejected the verification attempt. This
-                // hopefully won't happen in the wild, but browsers can be weird
-                // about this, so we need to guard against the possibility.
-                // Phone home to the AMP Project so that we can understand why
-                // this occurred.
-                const message = err && err.message;
-                dev().error(
-                    'AMP-A4A', `Failed to verify signature: ${message}`);
-                return VerificationStatus.UNVERIFIED;
-              });
+            (result) =>
+              result
+                ? VerificationStatus.OK
+                : VerificationStatus.ERROR_SIGNATURE_MISMATCH,
+            (err) => {
+              // Web Cryptography rejected the verification attempt. This
+              // hopefully won't happen in the wild, but browsers can be weird
+              // about this, so we need to guard against the possibility.
+              // Phone home to the AMP Project so that we can understand why
+              // this occurred.
+              const message = err && err.message;
+              dev().error('AMP-A4A', `Failed to verify signature: ${message}`);
+              return VerificationStatus.UNVERIFIED;
+            }
+          );
         });
       }
     });
@@ -311,88 +310,97 @@ export class SignatureVerifier {
     }
     // TODO(@taymonbeal, #11088): consider a timeout on this fetch
     return Services.xhrFor(this.win_)
-        .fetchJson(url, {
-          mode: 'cors',
-          method: 'GET',
-          // This should be cached across publisher domains, so don't append
-          // __amp_source_origin to the URL.
-          ampCors: false,
-          credentials: 'omit',
-        }).then(
-            response => {
-              // These are assertions on signing service behavior required by
-              // the spec. However, nothing terrible happens if they aren't met
-              // and there's no meaningful error recovery to be done if they
-              // fail, so we don't need to do them at runtime in production.
-              // They're included in dev mode as a debugging aid.
-              dev().assert(
-                  response.status === 200,
-                  'Fast Fetch keyset spec requires status code 200');
-              dev().assert(
-                  response.headers.get('Content-Type') ==
-                      'application/jwk-set+json',
-                  'Fast Fetch keyset spec requires Content-Type: ' +
-                      'application/jwk-set+json');
-              return response.json().then(
-                  jwkSet => {
-                    // This is supposed to be a JSON Web Key Set, as defined in
-                    // Section 5 of RFC 7517. However, the signing service could
-                    // misbehave and send an arbitrary JSON value, so we have to
-                    // type-check at runtime.
-                    if (!jwkSet || !isArray(jwkSet['keys'])) {
-                      signingServiceError(
-                          signingServiceName,
-                          `Key set (${JSON.stringify(jwkSet)}) has no "keys"`);
-                      return false;
-                    }
-                    jwkSet['keys'].forEach(jwk => {
-                      if (!jwk || typeof jwk['kid'] != 'string') {
-                        signingServiceError(
-                            signingServiceName,
-                            `Key (${JSON.stringify(jwk)}) has no "kid"`);
-                      } else if (keys[jwk['kid']] === undefined) {
-                        // We haven't seen this keypair ID before.
-                        keys[jwk['kid']] =
-                            Services.cryptoFor(this.win_).importPkcsKey(jwk)
-                                .catch(err => {
-                                  // Web Cryptography rejected the key
-                                  // import attempt. Either the signing
-                                  // service sent a malformed key or the
-                                  // browser is doing something weird.
-                                  const jwkData = JSON.stringify(jwk);
-                                  const message = err && err.message;
-                                  signingServiceError(
-                                      signingServiceName,
-                                      `Failed to import key (${
-                                        jwkData
-                                      }): ${message}`);
-                                  return null;
-                                });
-                      }
-                    });
-                    return true;
-                  },
-                  err => {
-                    // The signing service didn't send valid JSON.
-                    signingServiceError(
-                        signingServiceName,
-                        `Failed to parse JSON: ${err && err.response}`);
-                    return false;
-                  });
-            },
-            err => {
-              // Some kind of error occurred during the XHR. This could be a lot
-              // of things (and we have no type information), but if there's no
-              // `response` it's probably a network connectivity failure, so we
-              // ignore it. Unfortunately, we can't distinguish this from a CORS
-              // problem.
-              if (err && err.response) {
-                // This probably indicates a non-2xx HTTP status code.
+      .fetchJson(url, {
+        mode: 'cors',
+        method: 'GET',
+        // This should be cached across publisher domains, so don't append
+        // __amp_source_origin to the URL.
+        ampCors: false,
+        credentials: 'omit',
+      })
+      .then(
+        (response) => {
+          // These are assertions on signing service behavior required by
+          // the spec. However, nothing terrible happens if they aren't met
+          // and there's no meaningful error recovery to be done if they
+          // fail, so we don't need to do them at runtime in production.
+          // They're included in dev mode as a debugging aid.
+          devAssert(
+            response.status === 200,
+            'Fast Fetch keyset spec requires status code 200'
+          );
+          devAssert(
+            response.headers.get('Content-Type') == 'application/jwk-set+json',
+            'Fast Fetch keyset spec requires Content-Type: ' +
+              'application/jwk-set+json'
+          );
+          return response.json().then(
+            (jsonResponse) => {
+              const jwkSet = /** @type {!JsonObject} */ (jsonResponse);
+              // This is supposed to be a JSON Web Key Set, as defined in
+              // Section 5 of RFC 7517. However, the signing service could
+              // misbehave and send an arbitrary JSON value, so we have to
+              // type-check at runtime.
+              if (!jwkSet || !isArray(jwkSet['keys'])) {
                 signingServiceError(
-                    signingServiceName, `Status code ${err.response.status}`);
+                  signingServiceName,
+                  `Key set (${JSON.stringify(jwkSet)}) has no "keys"`
+                );
+                return false;
               }
+              /** @type {!Array} */ (jwkSet['keys']).forEach((jwk) => {
+                if (!jwk || typeof jwk['kid'] != 'string') {
+                  signingServiceError(
+                    signingServiceName,
+                    `Key (${JSON.stringify(jwk)}) has no "kid"`
+                  );
+                } else if (keys[jwk['kid']] === undefined) {
+                  // We haven't seen this keypair ID before.
+                  keys[jwk['kid']] = Services.cryptoFor(this.win_)
+                    .importPkcsKey(jwk)
+                    .catch((err) => {
+                      // Web Cryptography rejected the key
+                      // import attempt. Either the signing
+                      // service sent a malformed key or the
+                      // browser is doing something weird.
+                      const jwkData = JSON.stringify(jwk);
+                      const message = err && err.message;
+                      signingServiceError(
+                        signingServiceName,
+                        `Failed to import key (${jwkData}): ${message}`
+                      );
+                      return null;
+                    });
+                }
+              });
+              return true;
+            },
+            (err) => {
+              // The signing service didn't send valid JSON.
+              signingServiceError(
+                signingServiceName,
+                `Failed to parse JSON: ${err && err.response}`
+              );
               return false;
-            });
+            }
+          );
+        },
+        (err) => {
+          // Some kind of error occurred during the XHR. This could be a lot
+          // of things (and we have no type information), but if there's no
+          // `response` it's probably a network connectivity failure, so we
+          // ignore it. Unfortunately, we can't distinguish this from a CORS
+          // problem.
+          if (err && err.response) {
+            // This probably indicates a non-2xx HTTP status code.
+            signingServiceError(
+              signingServiceName,
+              `Status code ${err.response.status}`
+            );
+          }
+          return false;
+        }
+      );
   }
 }
 
@@ -407,5 +415,7 @@ export class SignatureVerifier {
  */
 function signingServiceError(signingServiceName, message) {
   dev().error(
-      'AMP-A4A', `Signing service error for ${signingServiceName}: ${message}`);
+    'AMP-A4A',
+    `Signing service error for ${signingServiceName}: ${message}`
+  );
 }

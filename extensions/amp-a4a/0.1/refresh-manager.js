@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -42,29 +42,28 @@ const TAG = 'AMP-AD';
  * Retrieves the publisher-specified refresh interval, if one were set. This
  * function first checks for appropriate slot attributes and then for
  * metadata tags, preferring whichever it finds first.
- * @param {!Element} element
- * @param {!Window} win
+ * @param {!AmpElement} element
+ * @param {!Window} unusedWin
  * @return {?number}
  * @visibleForTesting
  */
-export function getPublisherSpecifiedRefreshInterval(element, win) {
+export function getPublisherSpecifiedRefreshInterval(element, unusedWin) {
   const refreshInterval = element.getAttribute(DATA_ATTR_NAME);
   if (refreshInterval) {
     return checkAndSanitizeRefreshInterval(refreshInterval);
   }
-  let metaTag;
-  const metaTagContent = ((metaTag = win.document
-      .getElementsByName(METATAG_NAME))
-      && metaTag[0]
-      && metaTag[0].getAttribute('content'));
+  const metaTagContent = element.getAmpDoc().getMetaByName(METATAG_NAME);
   if (!metaTagContent) {
     return null;
   }
   const networkIntervalPairs = metaTagContent.split(',');
   for (let i = 0; i < networkIntervalPairs.length; i++) {
     const pair = networkIntervalPairs[i].split('=');
-    user().assert(pair.length == 2, 'refresh metadata config must be of ' +
-        'the form `network_type=refresh_interval`');
+    userAssert(
+      pair.length == 2,
+      'refresh metadata config must be of ' +
+        'the form `network_type=refresh_interval`'
+    );
     if (pair[0].toLowerCase() == element.getAttribute('type').toLowerCase()) {
       return checkAndSanitizeRefreshInterval(pair[1]);
     }
@@ -82,11 +81,12 @@ export function getPublisherSpecifiedRefreshInterval(element, win) {
  */
 function checkAndSanitizeRefreshInterval(refreshInterval) {
   const refreshIntervalNum = Number(refreshInterval);
-  if (isNaN(refreshIntervalNum) ||
-      refreshIntervalNum < MIN_REFRESH_INTERVAL) {
-    user().warn(TAG,
-        'invalid refresh interval, must be a number no less than ' +
-        `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
+  if (isNaN(refreshIntervalNum) || refreshIntervalNum < MIN_REFRESH_INTERVAL) {
+    user().warn(
+      TAG,
+      'invalid refresh interval, must be a number no less than ' +
+        `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`
+    );
     return null;
   }
   return refreshIntervalNum * 1000;
@@ -131,7 +131,7 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @const {!Object<string, (!IntersectionObserver|!IntersectionObserverPolyfill)>}
+ * @const {!Object<string, (!IntersectionObserver)>}
  */
 const observers = {};
 
@@ -160,27 +160,30 @@ let refreshManagerIdCounter = 0;
  * @return {?RefreshManager}
  */
 export function getRefreshManager(a4a, opt_predicate) {
-  const refreshInterval =
-      getPublisherSpecifiedRefreshInterval(a4a.element, a4a.win);
+  const refreshInterval = getPublisherSpecifiedRefreshInterval(
+    a4a.element,
+    a4a.win
+  );
   if (!refreshInterval || (opt_predicate && !opt_predicate())) {
     return null;
   }
-  return new RefreshManager(a4a, {
-    visiblePercentageMin: 50,
-    continuousTimeMin: 1,
-  }, refreshInterval);
+  return new RefreshManager(
+    a4a,
+    dict({
+      'visiblePercentageMin': 50,
+      'continuousTimeMin': 1,
+    }),
+    refreshInterval
+  );
 }
 
-
 export class RefreshManager {
-
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
-   * @param {!RefreshConfig} config
+   * @param {!JsonObject} config
    * @param {number} refreshInterval
    */
   constructor(a4a, config, refreshInterval) {
-
     /** @private {string} */
     this.state_ = RefreshLifecycleState.INITIAL;
 
@@ -193,19 +196,19 @@ export class RefreshManager {
     /** @const @private {!Element} */
     this.element_ = a4a.element;
 
-    /** @const @private {string} */
+    /** @const @protected {string} */
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
     this.refreshInterval_ = refreshInterval;
 
-    /** @const @private {!RefreshConfig} */
+    /** @const @private {!JsonObject} */
     this.config_ = this.convertAndSanitizeConfiguration_(config);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @private {?(number|string)} */
+    /** @protected {?(number|string)} */
     this.refreshTimeoutId_ = null;
 
     /** @private {?(number|string)} */
@@ -221,15 +224,17 @@ export class RefreshManager {
    * Returns an IntersectionObserver configured to the given threshold, creating
    * one if one does not yet exist.
    *
-   * @param {(string|number)} threshold
-   * @return {(!IntersectionObserver|!IntersectionObserverPolyfill)}
+   * @param {number} threshold
+   * @return {!IntersectionObserver}
    */
   getIntersectionObserverWithThreshold_(threshold) {
-    threshold = String(threshold);
-    return observers[threshold] ||
-        (observers[threshold] = 'IntersectionObserver' in this.win_
-          ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-          : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
+    const thresholdString = String(threshold);
+    return (
+      observers[thresholdString] ||
+      (observers[
+        thresholdString
+      ] = new this.win_.IntersectionObserver(this.ioCallback_, {threshold}))
+    );
   }
 
   /**
@@ -240,9 +245,9 @@ export class RefreshManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   ioCallback_(entries) {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
-      dev().assert(refreshManagerId);
+      devAssert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
       if (entry.target != refreshManager.element_) {
         return;
@@ -255,21 +260,27 @@ export class RefreshManager {
           // threshold. If this timer runs out without interruption, then all
           // viewability conditions have been met, and we can begin the refresh
           // timer.
-          if (entry.intersectionRatio >=
-              refreshManager.config_.visiblePercentageMin) {
+          if (
+            entry.intersectionRatio >=
+            refreshManager.config_['visiblePercentageMin']
+          ) {
             refreshManager.state_ = RefreshLifecycleState.VIEW_PENDING;
             refreshManager.visibilityTimeoutId_ = refreshManager.timer_.delay(
-                () => {
-                  refreshManager.state_ = RefreshLifecycleState.REFRESH_PENDING;
-                  refreshManager.startRefreshTimer_();
-                }, refreshManager.config_.continuousTimeMin);
+              () => {
+                refreshManager.state_ = RefreshLifecycleState.REFRESH_PENDING;
+                refreshManager.startRefreshTimer_();
+              },
+              refreshManager.config_['continuousTimeMin']
+            );
           }
           break;
         case RefreshLifecycleState.VIEW_PENDING:
           // If the element goes off screen before the minimum on screen time
           // duration elapses, place it back into INITIAL state.
-          if (entry.intersectionRatio <
-              refreshManager.config_.visiblePercentageMin) {
+          if (
+            entry.intersectionRatio <
+            refreshManager.config_['visiblePercentageMin']
+          ) {
             refreshManager.timer_.cancel(refreshManager.visibilityTimeoutId_);
             refreshManager.visibilityTimeoutId_ = null;
             refreshManager.state_ = RefreshLifecycleState.INITIAL;
@@ -290,13 +301,13 @@ export class RefreshManager {
     switch (this.state_) {
       case RefreshLifecycleState.INITIAL:
         this.getIntersectionObserverWithThreshold_(
-            this.config_.visiblePercentageMin).observe(this.element_);
+          this.config_['visiblePercentageMin']
+        ).observe(this.element_);
         break;
       case RefreshLifecycleState.REFRESH_PENDING:
       case RefreshLifecycleState.VIEW_PENDING:
       default:
         break;
-
     }
   }
 
@@ -307,11 +318,10 @@ export class RefreshManager {
    *    refresh timer elapses successfully.
    */
   startRefreshTimer_() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
         this.state_ = RefreshLifecycleState.INITIAL;
-        this.getIntersectionObserverWithThreshold_(
-            this.config_.visiblePercentageMin).unobserve(this.element_);
+        this.unobserve();
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
       }, /** @type {number} */ (this.refreshInterval_));
@@ -321,17 +331,27 @@ export class RefreshManager {
   /**
    * Converts config to appropriate units, modifying the argument in place. This
    * also ensures that visiblePercentageMin is in the range of [0, 100].
-   * @param {!RefreshConfig} config
-   * @return {!RefreshConfig}
+   * @param {!JsonObject} config
+   * @return {!JsonObject}
    */
   convertAndSanitizeConfiguration_(config) {
-    dev().assert(config['visiblePercentageMin'] >= 0 &&
+    devAssert(
+      config['visiblePercentageMin'] >= 0 &&
         config['visiblePercentageMin'] <= 100,
-    'visiblePercentageMin for refresh must be in the range [0, 100]');
+      'visiblePercentageMin for refresh must be in the range [0, 100]'
+    );
     // Convert seconds to milliseconds.
     config['continuousTimeMin'] *= 1000;
     config['visiblePercentageMin'] /= 100;
     return config;
   }
-}
 
+  /**
+   * Stops the intersection observer from observing the element.
+   */
+  unobserve() {
+    this.getIntersectionObserverWithThreshold_(
+      this.config_['visiblePercentageMin']
+    ).unobserve(this.element_);
+  }
+}

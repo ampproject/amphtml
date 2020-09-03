@@ -20,8 +20,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
-import {user} from '../../../src/log';
-
+import {userAssert} from '../../../src/log';
 
 /**
  * Construct ad network type-specific tag and script name.  Note that this
@@ -29,7 +28,7 @@ import {user} from '../../../src/log';
  * will be handled by the extension loader.
  *
  * @param {string} type
- * @return !string
+ * @return {string}
  * @private
  */
 function networkImplementationTag(type) {
@@ -37,7 +36,6 @@ function networkImplementationTag(type) {
 }
 
 export class AmpAd extends AMP.BaseElement {
-
   /** @override */
   isLayoutSupported(unusedLayout) {
     // TODO(jridgewell, #5980, #8218): ensure that unupgraded calls are not
@@ -52,15 +50,17 @@ export class AmpAd extends AMP.BaseElement {
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
     const consent = consentId
-      ? Services.userNotificationManagerForDoc(this.element)
-          .then(service => service.get(consentId))
+      ? Services.userNotificationManagerForDoc(this.element).then((service) =>
+          service.get(consentId)
+        )
       : Promise.resolve();
-
+    const type = this.element.getAttribute('type');
     return consent.then(() => {
-      const type = this.element.getAttribute('type');
       const isCustom = type === 'custom';
-      user().assert(isCustom || hasOwn(adConfig, type)
-          || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
+      userAssert(
+        isCustom || hasOwn(adConfig, type) || hasOwn(a4aRegistry, type),
+        `Unknown ad type "${type}"`
+      );
 
       // Check for the custom ad type (no ad network, self-service)
       if (isCustom) {
@@ -69,41 +69,55 @@ export class AmpAd extends AMP.BaseElement {
 
       this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
       const slotId = this.win.ampAdSlotIdCounter++;
-      this.element.setAttribute('data-amp-slot-index', slotId);
 
-      const useRemoteHtml = (
-        !(adConfig[type] || {}).remoteHTMLDisabled &&
-            this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
-      // TODO(tdrl): Check amp-ad registry to see if they have this already.
-      // TODO(a4a-cam): Shorten this predicate.
-      if (!a4aRegistry[type] ||
-          // Note that predicate execution may have side effects.
-          !a4aRegistry[type](this.win, this.element, useRemoteHtml)) {
-        // Either this ad network doesn't support Fast Fetch, its Fast Fetch
-        // implementation has explicitly opted not to handle this tag, or this
-        // page uses remote.html which is inherently incompatible with Fast
-        // Fetch. Fall back to Delayed Fetch.
-        return new AmpAd3PImpl(this.element);
-      }
+      return new Promise((resolve) => {
+        this.getVsync().mutate(() => {
+          this.element.setAttribute('data-amp-slot-index', slotId);
 
-      const extensionTagName = networkImplementationTag(type);
-      this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-      return Services.extensionsFor(this.win).loadElementClass(extensionTagName)
-          .then(ctor => new ctor(this.element))
-          .catch(error => {
-          // Work around presubmit restrictions.
-            const TAG = this.element.tagName;
-            // Report error and fallback to 3p
-            this.user().error(
-                TAG, 'Unable to load ad implementation for type ',
-                type, ', falling back to 3p, error: ', error);
-            return new AmpAd3PImpl(this.element);
-          });
+          const useRemoteHtml =
+            !(adConfig[type] || {})['remoteHTMLDisabled'] &&
+            this.element.getAmpDoc().getMetaByName('amp-3p-iframe-src');
+          // TODO(tdrl): Check amp-ad registry to see if they have this already.
+          // TODO(a4a-cam): Shorten this predicate.
+          if (
+            !a4aRegistry[type] ||
+            // Note that predicate execution may have side effects.
+            !a4aRegistry[type](this.win, this.element, useRemoteHtml)
+          ) {
+            // Either this ad network doesn't support Fast Fetch, its Fast
+            // Fetch implementation has explicitly opted not to handle this
+            // tag, or this page uses remote.html which is inherently
+            // incompatible with Fast Fetch. Fall back to Delayed Fetch.
+            return resolve(new AmpAd3PImpl(this.element));
+          }
+
+          const extensionTagName = networkImplementationTag(type);
+          this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
+          resolve(
+            Services.extensionsFor(this.win)
+              .loadElementClass(extensionTagName)
+              .then((ctor) => new ctor(this.element))
+              .catch((error) => {
+                // Work around presubmit restrictions.
+                const TAG = this.element.tagName;
+                // Report error and fallback to 3p
+                this.user().error(
+                  TAG,
+                  'Unable to load ad implementation for type ',
+                  type,
+                  ', falling back to 3p, error: ',
+                  error
+                );
+                return new AmpAd3PImpl(this.element);
+              })
+          );
+        });
+      });
     });
   }
 }
 
-AMP.extension('amp-ad', '0.1', AMP => {
+AMP.extension('amp-ad', '0.1', (AMP) => {
   AMP.registerElement('amp-ad', AmpAd, CSS);
   AMP.registerElement('amp-embed', AmpAd);
 });

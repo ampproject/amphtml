@@ -15,65 +15,44 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
-import {ParallaxProvider} from './providers/parallax';
-import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {
+  FxBindings,
+  FxObservesSignal,
+  FxType, // eslint-disable-line no-unused-vars
+  getFxTypes,
+} from './fx-type';
+import {devAssert, rethrowAsync} from '../../../src/log';
+import {
+  installPositionBoundFx,
+  installScrollToggledFx,
+} from './providers/fx-provider';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
-import {map} from '../../../src/utils/object';
 
 const TAG = 'amp-fx-collection';
 
 /**
- * Enum for list of supported visual effects.
- * @enum {string}
- */
-const FxType = {
-  PARALLAX: 'parallax',
-};
-
-/**
- * Map of fx type to fx provider class.
- * @type {Object<FxType, function(new:FxProviderInterface, !../../../src/service/ampdoc-impl.AmpDoc)>}
- */
-const fxProviders = map({
-  [FxType.PARALLAX]: ParallaxProvider,
-});
-
-/**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
  * the specified effects on them.
+ * @visibleForTesting
  */
-class AmpFxCollection {
-
+export class AmpFxCollection {
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
-
-    /** @private @const {!Document|!ShadowRoot} */
-    this.root_ = ampdoc.getRootNode();
 
     /** @private @const {!Array<!Element>} */
     this.seen_ = [];
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
-
-    /** @private @const {!Object<FxType, FxProviderInterface>} */
-    this.fxProviderInstances_ = map();
-
-    Promise.all([
-      ampdoc.whenReady(),
-      this.viewer_.whenFirstVisible(),
-    ]).then(() => {
+    Promise.all([ampdoc.whenReady(), ampdoc.whenFirstVisible()]).then(() => {
+      const root = this.ampdoc_.getRootNode();
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
-      listen(this.root_, AmpEvents.DOM_UPDATE, this.scan_.bind(this));
+      listen(root, AmpEvents.DOM_UPDATE, () => this.scan_());
     });
   }
 
@@ -82,16 +61,15 @@ class AmpFxCollection {
    * fx provider.
    */
   scan_() {
-    const fxElements = this.root_.querySelectorAll('[amp-fx]');
-    iterateCursor(fxElements, fxElement => {
-      if (this.seen_.includes(fxElement)) {
+    const elements = this.ampdoc_.getRootNode().querySelectorAll('[amp-fx]');
+    iterateCursor(elements, (element) => {
+      if (this.seen_.includes(element)) {
         return;
       }
 
       // Don't break for all components if only a subset are misconfigured.
       try {
-        this.register_(fxElement);
-        this.seen_.push(fxElement);
+        this.register_(element);
       } catch (e) {
         rethrowAsync(e);
       }
@@ -100,80 +78,35 @@ class AmpFxCollection {
 
   /**
    * Registers an fx-enabled element with its requested fx providers.
-   * @param {!Element} fxElement
+   * @param {!Element} element
    */
-  register_(fxElement) {
-    dev().assert(fxElement.hasAttribute('amp-fx'));
-    dev().assert(!this.seen_.includes(fxElement));
-    dev().assert(this.viewer_.isVisible());
+  register_(element) {
+    devAssert(element.hasAttribute('amp-fx'));
+    devAssert(!this.seen_.includes(element));
+    devAssert(this.ampdoc_.isVisible());
 
-    const fxTypes = this.getFxTypes_(fxElement);
-
-    fxTypes.forEach(fxType => {
-      const fxProvider = this.getFxProvider_(fxType);
-      fxProvider.installOn(fxElement);
+    getFxTypes(element).forEach((type) => {
+      this.install_(element, type);
     });
+
+    this.seen_.push(element);
   }
 
   /**
-   * Returns the array of fx types this component has specified as a
-   * space-separated list in the value of `amp-fx` attribute.
-   * e.g. `amp-fx="parallax fade-in"
-   *
-   * @param {!Element} fxElement
-   * @returns {!Array<!FxType>}
+   * @param {!Element} element
+   * @param {!FxType} type
+   * @private
    */
-  getFxTypes_(fxElement) {
-    dev().assert(fxElement.hasAttribute('amp-fx'));
-    const fxTypes = fxElement.getAttribute('amp-fx')
-        .trim()
-        .toLowerCase()
-        .split(/\s+/);
-
-    user().assert(fxTypes.length, 'No value provided for `amp-fx` attribute');
-
-    // Validate that we support the requested fx types.
-    fxTypes.forEach(fxType => {
-      user().assertEnumValue(FxType, fxType, 'amp-fx');
-    });
-
-    return fxTypes;
-  }
-
-  /**
-   * Given an fx type, instantiates the appropriate provider if needed and
-   * returns it.
-   * @param {FxType} fxType
-   */
-  getFxProvider_(fxType) {
-    dev().assert(fxProviders[fxType],
-        `No provider for ${fxType} found, did you forget to register it?`);
-
-    if (!this.fxProviderInstances_[fxType]) {
-      this.fxProviderInstances_[fxType] = new fxProviders[fxType](this.ampdoc_);
+  install_(element, type) {
+    const {observes} = devAssert(FxBindings[type]);
+    if (observes == FxObservesSignal.SCROLL_TOGGLE) {
+      installScrollToggledFx(this.ampdoc_, element, type);
+      return;
     }
-    return this.fxProviderInstances_[fxType];
+    installPositionBoundFx(this.ampdoc_, element, type);
   }
 }
 
-/**
- * Defines the expected interface all FxProviders need to implement.
- * @interface
- */
-export class FxProviderInterface {
-
-  /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpDoc
-   */
-  constructor(unusedAmpDoc) {}
-
-  /**
-   *
-   * @param {!Element} unusedElement
-   */
-  installOn(unusedElement) {}
-}
-
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc(TAG, AmpFxCollection);
 });

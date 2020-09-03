@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "gulp-performance",
+  "version": "0.1.0",
+  "description": "Dev dependencies used by `gulp performance`",
+  "devDependencies": {
+    "chai": "4.2.0",
+    "mocha": "8.1.2",
+    "puppeteer": "5.2.1"
+  }
+}

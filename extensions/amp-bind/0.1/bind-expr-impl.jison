@@ -7,8 +7,8 @@
 "false"                   return 'FALSE'
 [0-9]+("."[0-9]+)?\b      return 'NUMBER'
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
-\'[^\']*\'                return 'STRING'
-\"[^\"]*\"                return 'STRING'
+\'([^\'\\]|\\.)*\'        return 'STRING'
+\"([^\"\\]|\\.)*\"        return 'STRING'
 '=>'                      return '=>'
 "+"                       return '+'
 "-"                       return '-'
@@ -177,7 +177,17 @@ invocation:
       %}
   | expr '.' NAME '(' arrow_function ')'
       %{
-        $$ = new AstNode(AstNodeType.INVOCATION, [$expr, $arrow_function], $NAME);
+        {
+          const array = new AstNode(AstNodeType.ARRAY, [$arrow_function]);
+          $$ = new AstNode(AstNodeType.INVOCATION, [$expr, array], $NAME);
+        }
+      %}
+  | expr '.' NAME '(' arrow_function ',' expr ')'
+      %{
+        {
+          const array = new AstNode(AstNodeType.ARRAY, [$arrow_function, $expr2]);
+          $$ = new AstNode(AstNodeType.INVOCATION, [$expr1, array], $NAME);
+        }
       %}
   ;
 
@@ -253,9 +263,9 @@ variable:
 
 literal:
     primitive
-      ${
+      %{
         $$ = $1;
-      }
+      %}
   | object_literal
       %{
         $$ = $1;
@@ -269,8 +279,16 @@ literal:
 primitive:
     STRING
       %{
-        const string = yytext.substr(1, yyleng - 2);
-        $$ = new AstNode(AstNodeType.LITERAL, null, string);
+        const raw = yytext.substr(1, yyleng - 2);
+        // Since we accept escaped quotation marks, unescape them here.
+        // Note: We can't use $1 directly because of https://github.com/zaach/jison/issues/380.
+        const unescaped = raw.replace(/\\('|")/g, "$" + "1");
+
+        // Use JSON.parse() to process special chars e.g. '\n'.
+        // JSON doesn't recognize single-quotes, so use double-quote in
+        // leading/trailing chars and escape double-quote in the string.
+        const parsed = tryParseJson(`"${unescaped.replace(/"/g, '\\"')}"`);
+        this.$ = new AstNode(AstNodeType.LITERAL, null, parsed || unescaped);
       %}
   | NUMBER
       %{

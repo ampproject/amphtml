@@ -19,9 +19,9 @@ tags: {  # amp-vimeo
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-vimeo"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -30,6 +30,10 @@ tags: {  # <amp-vimeo>
   html_format: AMP
   tag_name: "AMP-VIMEO"
   requires_extension: "amp-vimeo"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
   attrs: {
     name: "data-videoid"
     mandatory: true

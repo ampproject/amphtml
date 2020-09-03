@@ -20,9 +20,9 @@ tags: {  # amp-anim
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-anim"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -33,8 +33,8 @@ tags: {  # amp-anim
   spec_name: "amp-anim extension .js script (AMP4EMAIL)"
   extension_spec: {
     name: "amp-anim"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -45,10 +45,11 @@ tags: {  # <amp-anim>
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "controls" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
+  spec_url: "https://amp.dev/documentation/components/amp-anim/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -59,6 +60,8 @@ tags: {  # <amp-anim>
     supported_layouts: RESPONSIVE
   }
 }
+# See the restrictions on mandatory-src-amp4email, as well as the removal of
+# `object-fit` and `object-position`.
 tags: {  # <amp-anim>
   html_format: AMP4EMAIL
   tag_name: "AMP-ANIM"
@@ -66,10 +69,9 @@ tags: {  # <amp-anim>
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
+  spec_url: "https://amp.dev/documentation/components/amp-anim/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

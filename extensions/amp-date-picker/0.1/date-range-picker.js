@@ -14,190 +14,92 @@
  * limitations under the License.
  */
 
-import {map,omit} from '../../../src/utils/object';
+import {DayPickerPhrases} from './defaultPhrases';
+import {dict} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
-
+import {wrap as withMaximumNights} from './wrappers/maximum-nights';
 
 /**
  * Create a DateRangePicker React component
- * @return {function(new:React.Component, !Object)} A date range picker component class
+ * @return {typeof React.Component} A date range picker component class
  */
 function createDateRangePickerBase() {
-  const React = requireExternal('react');
-  const moment = requireExternal('moment');
-  const {
-    ANCHOR_LEFT,
-    HORIZONTAL_ORIENTATION,
-  } = requireExternal('react-dates/constants');
-  const {
-    DateRangePicker: DatePicker,
-    DateRangePickerPhrases,
-  } = requireExternal('react-dates');
+  const constants = /** @type {JsonObject} */ (requireExternal(
+    'react-dates/constants'
+  ));
+  const DAY_SIZE = constants['DAY_SIZE'];
+  const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
+  const DayPickerRangeController = /** @type {typeof  React.Component} */ (requireExternal(
+    'react-dates'
+  )['DayPickerRangeController']);
 
-  React.options.syncComponentUpdates = false;
+  const defaultProps = dict({
+    'startDate': null, // TODO: use null
+    'endDate': null, // TODO: use null
+    'onDatesChange': function () {},
 
-  const defaultProps = map({
-    // example props for the demo
-    autoFocus: false,
-    autoFocusEndDate: false,
-    initialStartDate: null,
-    initialEndDate: null,
+    'focusedInput': null,
+    'onFocusChange': function () {},
+    'onClose': function () {},
 
-    // input related props
-    startDateId: 'start-date',
-    startDatePlaceholderText: 'Start Date',
-    endDateId: 'end-date',
-    endDatePlaceholderText: 'End Date',
-    disabled: false,
-    required: false,
-    screenReaderInputMessage: '',
-    showClearDates: false,
-    showDefaultInputIcon: false,
-    customInputIcon: null,
-    customArrowIcon: null,
-    customCloseIcon: null,
+    'keepOpenOnDateSelect': false,
+    'minimumNights': 1,
+    'isOutsideRange': function () {},
+    'isDayBlocked': function () {},
+    'isDayHighlighted': function () {},
 
-    // calendar presentation and interaction related props
-    renderMonth: null,
-    orientation: HORIZONTAL_ORIENTATION,
-    anchorDirection: ANCHOR_LEFT,
-    horizontalMargin: 0,
-    withPortal: false,
-    withFullScreenPortal: false,
-    initialVisibleMonth: null,
-    numberOfMonths: 2,
-    keepOpenOnDateSelect: false,
-    reopenPickerOnClearDates: false,
-    isRTL: false,
+    // DayPicker props
+    'renderMonth': null,
+    'enableOutsideDays': false,
+    'numberOfMonths': 1,
+    'orientation': HORIZONTAL_ORIENTATION,
+    'withPortal': false,
+    'hideKeyboardShortcutsPanel': false,
+    'initialVisibleMonth': null,
+    'daySize': DAY_SIZE,
 
-    // navigation related props
-    navPrev: null,
-    navNext: null,
-    onPrevMonthClick() {},
-    onNextMonthClick() {},
+    'navPrev': null,
+    'navNext': null,
 
-    // day presentation and interaction related props
-    renderDay: null,
-    minimumNights: 1,
-    enableOutsideDays: false,
-    isDayBlocked: () => false,
-    isOutsideRange: () => false,
-    isDayHighlighted: () => false,
+    'onPrevMonthClick': function () {},
+    'onNextMonthClick': function () {},
+    'onOutsideClick': function () {},
 
-    // internationalization
-    displayFormat: () => moment.localeData().longDateFormat('L'),
-    monthFormat: 'MMMM YYYY',
+    'renderDay': null,
+    'renderCalendarInfo': null,
+    'firstDayOfWeek': null,
+    'verticalHeight': null,
+    'noBorder': false,
+    'transitionDuration': undefined,
 
-    // TODO(cvializ): make these configurable for i18n
-    phrases: Object.assign({}, DateRangePickerPhrases, {
-      chooseAvailableStartDate: ({date}) => `Choose ${date} as the first date.`,
-      chooseAvailableEndDate: ({date}) => `Choose ${date} as the last date.`,
-      dateIsUnavailable: ({date}) => `The date ${date} is unavailable.`,
-      dateIsSelected: ({date}) => `The date ${date} is selected.`,
-    }),
-    registerAction: null,
+    // accessibility
+    'onBlur': function () {},
+    'isFocused': false,
+    'showKeyboardShortcuts': false,
+
+    // i18n
+    'monthFormat': 'MMMM YYYY',
+    'weekDayFormat': 'd',
+    'phrases': DayPickerPhrases,
+
+    'isRTL': false,
   });
 
-  class DateRangePickerBase extends React.Component {
-    /**
-     * @param {!Object} props
-     */
-    constructor(props) {
-      super(props);
+  const WrappedDayPickerRangeController = withDatePickerCommon(
+    withMaximumNights(DayPickerRangeController)
+  );
+  WrappedDayPickerRangeController['defaultProps'] = defaultProps;
 
-      let focusedInput = null;
-      if (props.autoFocus) {
-        focusedInput = 'startDate';//this.props.startDateId;
-      } else if (props.autoFocusEndDate) {
-        focusedInput = 'endDate';//this.props.endDateId;
-      }
-
-      this.state = {
-        focusedInput,
-        startDate: props.initialStartDate && moment(props.initialStartDate),
-        endDate: props.initialEndDate && moment(props.initialEndDate),
-      };
-
-      this.onDatesChange = this.onDatesChange.bind(this);
-      this.onFocusChange = this.onFocusChange.bind(this);
-
-      if (this.props.registerAction) {
-        this.props.registerAction('setDates', invocation => {
-          const {startDate, endDate} = invocation.args;
-          const state = {};
-          if (startDate) {
-            state.startDate = moment(startDate);
-          }
-          if (endDate) {
-            state.endDate = moment(endDate);
-          }
-
-          // TODO(cvializ): check if valid date, blocked, outside range, etc
-          this.setState(state);
-        });
-        this.props.registerAction('clear', () => {
-          this.setState({startDate: null, endDate: null});
-        });
-      }
-    }
-
-    /**
-     * @param {!Object} details
-     */
-    onDatesChange({startDate, endDate}) {
-      const {onDatesChange} = this.props;
-
-      this.setState({startDate, endDate});
-
-      if (onDatesChange) {
-        onDatesChange({startDate, endDate});
-      }
-    }
-
-    /**
-     * @param {?string} focusedInput
-     */
-    onFocusChange(focusedInput) {
-      if (this.props.emitUpdate) {
-        this.props.emitUpdate();
-      }
-      this.setState({focusedInput});
-    }
-
-    /** @override */
-    render() {
-      const {focusedInput, startDate, endDate} = this.state;
-
-      const props = omit(this.props, [
-        'autoFocus',
-        'autoFocusEndDate',
-        'initialStartDate',
-        'initialEndDate',
-        'onDatesChange',
-      ]);
-
-      return React.createElement(DatePicker, Object.assign({}, props, {
-        onDatesChange: this.onDatesChange,
-        onFocusChange: this.onFocusChange,
-        focusedInput,
-        startDate,
-        endDate,
-      }));
-    }
-  }
-
-  DateRangePickerBase.defaultProps = defaultProps;
-
-  return withDatePickerCommon(DateRangePickerBase);
+  return WrappedDayPickerRangeController;
 }
 
-/** @private {?function(new:React.Component, !Object)} */
+/** @private {?typeof React.Component} */
 let DateRangePicker_ = null;
 
 /**
  * Creates a date range picker, injecting its dependencies.
- * @return {function(new:React.Component, !Object)} A date range picker component class
+ * @return {typeof React.Component} A date range picker component class
  */
 export function createDateRangePicker() {
   if (!DateRangePicker_) {

@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
+import {internalRuntimeVersion} from './internal-version';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   filter: (string|undefined),
  *   minified: boolean,
  *   lite: boolean,
  *   test: boolean,
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
+ *   runtime: (null|string|undefined),
+ *   a4aId: (null|string|undefined),
+ *   esm: (boolean|undefined)
  * }}
  */
 export let ModeDef;
-
-/** @type {string} */
-const version = '$internalRuntimeVersion$';
 
 /**
  * `rtvVersion` is the prefixed version we serve off of the cdn.
@@ -48,10 +48,10 @@ let rtvVersion = '';
  */
 export function getMode(opt_win) {
   const win = opt_win || self;
-  if (win.AMP_MODE) {
-    return win.AMP_MODE;
+  if (win.__AMP_MODE) {
+    return win.__AMP_MODE;
   }
-  return win.AMP_MODE = getMode_(win);
+  return (win.__AMP_MODE = getMode_(win));
 }
 
 /**
@@ -60,6 +60,9 @@ export function getMode(opt_win) {
  * @return {!ModeDef}
  */
 function getMode_(win) {
+  // TODO(erwinmombay): simplify the logic here
+  const AMP_CONFIG = self.AMP_CONFIG || {};
+
   // Magic constants that are replaced by closure compiler.
   // IS_MINIFIED is always replaced with true when closure compiler is used
   // while IS_DEV is only replaced when `gulp dist` is called without the
@@ -67,18 +70,19 @@ function getMode_(win) {
   const IS_DEV = true;
   const IS_MINIFIED = false;
 
-  const localDevEnabled = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
-  const runningTests = IS_DEV && !!(win.AMP_TEST || win.__karma__);
-  const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
+  const runningTests =
+    IS_DEV && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
+  const isLocalDev = IS_DEV && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString_(
-      // location.originalHash is set by the viewer when it removes the fragment
-      // from the URL.
-      win.location.originalHash || win.location.hash);
+    // location.originalHash is set by the viewer when it removes the fragment
+    // from the URL.
+    win.location.originalHash || win.location.hash
+  );
 
   const searchQuery = parseQueryString_(win.location.search);
 
   if (!rtvVersion) {
-    rtvVersion = getRtvVersion(win, isLocalDev);
+    rtvVersion = getRtvVersion(win);
   }
 
   // The `minified`, `test` and `localDev` properties are replaced
@@ -87,19 +91,26 @@ function getMode_(win) {
   // paths for localhost/testing/development are eliminated.
   return {
     localDev: isLocalDev,
-    // Triggers validation
-    development: !!(hashQuery['development'] == '1' || win.AMP_DEV_MODE),
+    // Triggers validation or enable pub level logging. Validation can be
+    // bypassed via #validate=0.
+    // Note that AMP_DEV_MODE flag is used for testing purposes.
+    // Use Array.indexOf instead of Array.includes because of #24219
+    development: !!(
+      ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].indexOf(
+        hashQuery['development']
+      ) >= 0 || win.AMP_DEV_MODE
+    ),
     examiner: hashQuery['development'] == '2',
-    // Allows filtering validation errors by error category. For the
-    // available categories, see ErrorCategory in validator/validator.proto.
-    filter: hashQuery['filter'],
+    esm: IS_ESM,
+    // amp-geo override
+    geoOverride: hashQuery['amp-geo'],
     minified: IS_MINIFIED,
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
     log: hashQuery['log'],
-    version,
+    version: internalRuntimeVersion(),
     rtvVersion,
   };
 }
@@ -109,39 +120,29 @@ function getMode_(win) {
  * denoting canary/prod/experiment (unless `isLocalDev` is true).
  *
  * @param {!Window} win
- * @param {boolean} isLocalDev
  * @return {string}
  */
-function getRtvVersion(win, isLocalDev) {
-  // If it's local dev then we won't actually have a full version so
-  // just use the version.
-  if (isLocalDev) {
-    return version;
-  }
-
+function getRtvVersion(win) {
   if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
     return win.AMP_CONFIG.v;
   }
 
-  // Currently `$internalRuntimeVersion$` and thus `mode.version` contain only
+  // Currently `internalRuntimeVersion` and thus `mode.version` contain only
   // major version. The full version however must also carry the minor version.
   // We will default to production default `01` minor version for now.
-  // TODO(erwinmombay): decide whether $internalRuntimeVersion$ should contain
+  // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
   // minor version.
-  return `01${version}`;
+  return `01${internalRuntimeVersion()}`;
 }
-
 
 /**
  * @param {!Window} win
- * @param {boolean} isLocalDev
  * @return {string}
  * @visibleForTesting
  */
-export function getRtvVersionForTesting(win, isLocalDev) {
-  return getRtvVersion(win, isLocalDev);
+export function getRtvVersionForTesting(win) {
+  return getRtvVersion(win);
 }
-
 
 /** @visibleForTesting */
 export function resetRtvVersionForTesting() {

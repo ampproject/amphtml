@@ -20,8 +20,8 @@ tags: {  # amp-fx-collection
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-fx-collection"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     # amp-fx-parallax has no associated tag which indicates usage of the
     # extension.
     requires_usage: NONE

@@ -14,20 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Admanmedia 
+# Admanmedia
 
-Please visit our web (http://www.admanmedia.com) for more details
+Please visit [www.admanmedia.com](http://www.admanmedia.com) for more details.
+
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="admanmedia"
-    data-id="8e916419">
-</amp-ad>
+<amp-ad width="300" height="250" type="admanmedia" data-id="8e916419"> </amp-ad>
 ```
 
 ## Configuration
 
-__Required:__
+For details on the configuration semantics, see [Admanmedia documentation](http://www.admanmedia.com).
 
-- `data-id` - Adunit unique id
+### Required parameters
+
+- `data-id` - Ad unit unique id

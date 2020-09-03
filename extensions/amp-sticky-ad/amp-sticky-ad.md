@@ -1,3 +1,11 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+teaser:
+  text: Provides a way to display and stick ad content at the bottom of the page.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,30 +22,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-sticky-ad"></a> `amp-sticky-ad`
+# amp-sticky-ad
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides a way to fix an ad to the bottom of a page. The sticky-ad serves as a container, with the ad as its child.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-sticky-ad/">Annotated code example for amp-sticky-ad</a></td>
-  </tr>
-</table>
+## Usage
 
-[TOC]
-
-## Behavior
+Provides a way to display and stick ad content at the bottom of the page.
 
 - There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child: `<amp-ad>`. **Note**: Make sure you include any required scripts for the `<amp-ad>` component.
 - The sticky ad appears at the bottom of a page.
@@ -53,19 +42,22 @@ limitations under the License.
 - If no ad is filled, the sticky ad container will collapse and will no longer be visible.
 
 Example:
+
 ```html
 <amp-sticky-ad layout="nodisplay">
-  <amp-ad width="320"
-      height="50"
-      type="doubleclick"
-      data-slot="/35096353/amptesting/formats/sticky">
+  <amp-ad
+    width="320"
+    height="50"
+    type="doubleclick"
+    data-slot="/35096353/amptesting/formats/sticky"
+  >
   </amp-ad>
 </amp-sticky-ad>
 ```
 
 ## Attributes
 
-##### layout (required)
+### layout (required)
 
 Must be set to `nodisplay`.
 

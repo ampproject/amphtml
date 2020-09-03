@@ -15,19 +15,21 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   function callQuerySelector(node) {
     const {callee} = node;
 
     // If it's not a querySelector(All) call, I don't care about it.
     const {property} = callee;
-    if (property.type !== 'Identifier' ||
-        !property.name.startsWith('querySelector')) {
+    if (
+      property.type !== 'Identifier' ||
+      !property.name.startsWith('querySelector')
+    ) {
       return;
     }
 
     if (property.leadingComments) {
-      const ok = property.leadingComments.some(comment => {
+      const ok = property.leadingComments.some((comment) => {
         return comment.value === 'OK';
       });
       if (ok) {
@@ -57,11 +59,15 @@ module.exports = function(context) {
       return;
     }
 
-    context.report(node, 'querySelector is not scoped to the element, but ' +
+    context.report({
+      node,
+      message:
+        'querySelector is not scoped to the element, but ' +
         'globally and filtered to just the elements inside the element. ' +
         'This leads to obscure bugs if you attempt to match a descendant ' +
         'of a descendant (ie querySelector("div div")). Instead, use the ' +
-        'scopedQuerySelector in src/dom.js');
+        'scopedQuerySelector in src/dom.js',
+    });
   }
 
   function callScopedQuerySelector(node) {
@@ -70,8 +76,8 @@ module.exports = function(context) {
       return;
     }
 
-    if (callee.trailingComments) {
-      const ok = callee.trailingComments.some(comment => {
+    if (node.leadingComments) {
+      const ok = node.leadingComments.some((comment) => {
         return comment.value === 'OK';
       });
       if (ok) {
@@ -85,8 +91,12 @@ module.exports = function(context) {
       return;
     }
 
-    context.report(node, 'using scopedQuerySelector here is actually ' +
-        "unnecessary, since you don't use child selector semantics.");
+    context.report({
+      node,
+      message:
+        'using scopedQuerySelector here is actually ' +
+        "unnecessary, since you don't use child selector semantics.",
+    });
   }
 
   function getSelector(node, argIndex) {
@@ -94,15 +104,14 @@ module.exports = function(context) {
     let selector;
 
     if (!arg) {
-      context.report(node, 'no argument to query selector');
+      context.report({node, message: 'no argument to query selector'});
       selector = 'dynamic value';
     } else if (arg.type === 'Literal') {
       selector = arg.value;
     } else if (arg.type === 'TemplateLiteral') {
-
       // Ensure all template variables are properly escaped.
       let accumulator = '';
-      const quasis = arg.quasis.map(v => v.value.raw);
+      const quasis = arg.quasis.map((v) => v.value.raw);
       for (let i = 0; i < arg.expressions.length; i++) {
         const expression = arg.expressions[i];
         accumulator += quasis[i];
@@ -111,40 +120,53 @@ module.exports = function(context) {
           const {callee} = expression;
           if (callee.type === 'Identifier') {
             const inNthChild = /:nth-(last-)?(child|of-type|col)\([^)]*$/.test(
-                accumulator);
+              accumulator
+            );
 
             if (callee.name === 'escapeCssSelectorIdent') {
               if (inNthChild) {
-                context.report(expression, 'escapeCssSelectorIdent may not ' +
+                context.report({
+                  node: expression,
+                  message:
+                    'escapeCssSelectorIdent may not ' +
                     'be used inside an :nth-X psuedo-class. Please use ' +
-                    'escapeCssSelectorNth instead.');
+                    'escapeCssSelectorNth instead.',
+                });
               }
               continue;
             } else if (callee.name === 'escapeCssSelectorNth') {
               if (!inNthChild) {
-                context.report(expression, 'escapeCssSelectorNth may only be ' +
+                context.report({
+                  node: expression,
+                  message:
+                    'escapeCssSelectorNth may only be ' +
                     'used inside an :nth-X psuedo-class. Please use ' +
-                    'escapeCssSelectorIdent instead.');
+                    'escapeCssSelectorIdent instead.',
+                });
               }
               continue;
             }
           }
         }
 
-        context.report(expression, 'Each selector value must be escaped by ' +
-            'escapeCssSelectorIdent in src/dom.js');
+        context.report({
+          node: expression,
+          message:
+            'Each selector value must be escaped by ' +
+            'escapeCssSelectorIdent in src/css.js',
+        });
       }
 
       selector = quasis.join('');
     } else {
       if (arg.type === 'BinaryExpression') {
-        context.report(arg, 'Use a template literal string');
+        context.report({node: arg, message: 'Use a template literal string'});
       }
       selector = 'dynamic value';
     }
 
     // strip out things that can't affect children selection
-    selector = selector.replace(/\(.*\)|\[.*\]/, function(match) {
+    selector = selector.replace(/\(.*\)|\[.*\]/, function (match) {
       return match[0] + match[match.length - 1];
     });
 

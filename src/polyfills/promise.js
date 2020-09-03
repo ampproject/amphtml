@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-
-import * as Promise from 'promise-pjs/promise';
+import Promise from 'promise-pjs';
 
 /**
  * Sets the Promise polyfill if it does not exist.
  * @param {!Window} win
+ * @suppress {checkTypes}
  */
 export function install(win) {
   if (!win.Promise) {

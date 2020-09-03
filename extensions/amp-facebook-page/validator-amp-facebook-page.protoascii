@@ -19,8 +19,8 @@ tags: {  # amp-facebook-page
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-facebook-page"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -33,8 +33,8 @@ tags: {  # <amp-facebook-page>
     name: "data-href"
     mandatory: true
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
       allow_relative: false
     }
   }

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
-import {Layout} from './layout';
+import {ActionTrust, DEFAULT_ACTION} from './action-constants';
+import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
-import {dev, user} from './log';
-import {getData, listen} from './event-helper';
+import {devAssert, user, userAssert} from './log';
+import {getData, listen, loadPromise} from './event-helper';
+import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {isExperimentOn} from './experiments';
-import {loadPromise} from './event-helper';
-import {preconnectForElement} from './preconnect';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -108,6 +106,9 @@ import {preconnectForElement} from './preconnect';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
+ * When the dimensions of an element has changed, the 'onMeasureChanged'
+ * callback is called.
+ *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -119,23 +120,21 @@ export class BaseElement {
     /** @public @const {!Element} */
     this.element = element;
     /*
-    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.extern.js, this is so closure compiler doesn't reuse the
-    same symbol it would use in the core compilation unit for the private
-    property in the extensions compilation unit's private properties.
-     */
+    build-system/externs/amp.multipass.extern.js. This is so closure compiler
+    doesn't reuse the same symbol it would use in the core compilation unit for
+    the private property in the extensions compilation unit's private
+    properties.
+    */
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {number} */
-    this.layoutWidth_ = -1;
 
     /** @package {boolean} */
     this.inViewport_ = false;
@@ -152,21 +151,8 @@ export class BaseElement {
      * }>} */
     this.actionMap_ = null;
 
-    /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectForElement(this.element);
-
-    /** @public {?Object} For use by sub classes */
-    this.config = null;
-
-    /**
-     * The time at which this element was scheduled for layout relative to the
-     * epoch. This value will be set to 0 until the this element has been
-     * scheduled.
-     * Note that this value may change over time if the element is enqueued,
-     * then dequeued and re-enqueued by the scheduler.
-     * @public {number}
-     */
-    this.layoutScheduleTime = 0;
+    /** @private {?string} */
+    this.defaultActionAlias_ = null;
   }
 
   /**
@@ -178,13 +164,25 @@ export class BaseElement {
   }
 
   /**
-  * This is the priority of loading elements (layoutCallback).
-  * The lower the number, the higher the priority.
-  * The default priority for base elements is 0.
-  * @return {number}
-  */
-  getPriority() {
-    return 0;
+   * The element's default action alias.
+   * @return {?string}
+   */
+  getDefaultActionAlias() {
+    return this.defaultActionAlias_;
+  }
+
+  /**
+   * This is the priority of loading elements (layoutCallback). Used only to
+   * determine layout timing and preloading priority. Does not affect build time,
+   * etc.
+   *
+   * The lower the number, the higher the priority.
+   *
+   * The default priority for base elements is LayoutPriority.CONTENT.
+   * @return {number}
+   */
+  getLayoutPriority() {
+    return LayoutPriority.CONTENT;
   }
 
   /**
@@ -195,11 +193,13 @@ export class BaseElement {
    * available. It's a restricted API and special review is required to
    * allow individual extensions to request priority upgrade.
    *
-   * @param {number} newPriority
+   * @param {number} newLayoutPriority
    * @restricted
    */
-  updatePriority(newPriority) {
-    this.element.getResources().updatePriority(this.element, newPriority);
+  updateLayoutPriority(newLayoutPriority) {
+    this.element
+      .getResources()
+      .updateLayoutPriority(this.element, newLayoutPriority);
   }
 
   /** @return {!Layout} */
@@ -228,7 +228,8 @@ export class BaseElement {
 
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
-   * @public @return {!Window}
+   * @public
+   * @return {!Window}
    */
   getWin() {
     return this.win;
@@ -243,20 +244,28 @@ export class BaseElement {
     return this.element.getAmpDoc();
   }
 
-  /** @public @return {!./service/vsync-impl.Vsync} */
+  /**
+   * @public
+   * @return {!./service/vsync-impl.Vsync}
+   */
   getVsync() {
     return Services.vsyncFor(this.win);
   }
 
   /**
-   * Returns the layout width for this element. A `-1` value indicates that the
-   * layout is not yet known. A `0` value indicates that the element is not
-   * visible.
-   * @return {number}
-   * @public
+   * Returns the consent policy id that this element should wait for before
+   * buildCallback.
+   * A `null` value indicates to not be blocked by consent.
+   * Subclasses may override.
+   * @return {?string}
    */
-  getLayoutWidth() {
-    return this.layoutWidth_;
+  getConsentPolicy() {
+    let policyId = null;
+    if (this.element.hasAttribute('data-block-on-consent')) {
+      policyId =
+        this.element.getAttribute('data-block-on-consent') || 'default';
+    }
+    return policyId;
   }
 
   /**
@@ -360,20 +369,12 @@ export class BaseElement {
   }
 
   /**
-   * Sets this element as the owner of the specified element. By setting itself
-   * as an owner, the element declares that it will manage the lifecycle of
-   * the owned element itself. This element, as an owner, will have to call
-   * {@link scheduleLayout}, {@link schedulePreload}, {@link updateInViewport}
-   * and similar methods.
-   * @param {!Element} element
-   */
-  setAsOwner(element) {
-    this.element.getResources().setOwner(element, this.element);
-  }
-
-  /**
    * Subclasses can override this method to opt-in into being called to
    * prerender when document itself is not yet visible (pre-render mode).
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during prerender mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
    * @return {boolean}
    */
   prerenderAllowed() {
@@ -381,13 +382,37 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to indicate that it is has
+   * render-blocking service.
+   *
+   * The return value of this function is used to determine if the element
+   * built _and_ laid out will be prioritized.
+   * @return {boolean}
+   */
+  isBuildRenderBlocking() {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
-   * @returns {?Element}
+   * @return {?Element}
    */
   createPlaceholderCallback() {
     return null;
+  }
+
+  /**
+   * Subclasses can override this method to provide a svg logo that will be
+   * displayed as the loader.
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
+   */
+  createLoaderLogoCallback() {
+    return {};
   }
 
   /**
@@ -400,7 +425,8 @@ export class BaseElement {
    * @return {boolean|number}
    */
   renderOutsideViewport() {
-    return 3;
+    // Inabox allow layout independent of viewport location.
+    return getMode(this.win).runtime == 'inabox' || 3;
   }
 
   /**
@@ -458,24 +484,21 @@ export class BaseElement {
    * viewport. Intended to be implemented by actual components.
    * @param {boolean} unusedInViewport
    */
-  viewportCallback(unusedInViewport) {
-  }
+  viewportCallback(unusedInViewport) {}
 
   /**
    * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
    */
-  pauseCallback() {
-  }
+  pauseCallback() {}
 
   /**
    * Requests the element to resume its activity when the document returns from
    * an inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content may be resumed.
    */
-  resumeCallback() {
-  }
+  resumeCallback() {}
 
   /**
    * Requests the element to unload any expensive resources when the element
@@ -517,22 +540,6 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the element that its activation is requested based on some
-   * user event. Intended to be implemented by actual components.
-   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
-   */
-  activate(unusedInvocation) {
-  }
-
-  /**
-   * Minimum event trust required for activate().
-   * @return {ActionTrust}
-   */
-  activationTrust() {
-    return ActionTrust.HIGH;
-  }
-
-  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
    * and 'error' events.
    * @param {T} element
@@ -557,14 +564,35 @@ export class BaseElement {
    * The handler is only invoked by events with trust equal to or greater than
    * `minTrust`. Otherwise, a user error is logged.
    *
-   * @param {string} method
+   * @param {string} alias
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.initActionMap_();
-    this.actionMap_[method] = {handler, minTrust};
+    this.actionMap_[alias] = {handler, minTrust};
+  }
+
+  /**
+   * Registers the default action for this component.
+   * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {string=} alias
+   * @param {ActionTrust=} minTrust
+   * @public
+   */
+  registerDefaultAction(
+    handler,
+    alias = DEFAULT_ACTION,
+    minTrust = ActionTrust.DEFAULT
+  ) {
+    devAssert(
+      !this.defaultActionAlias_,
+      'Default action "%s" already registered.',
+      this.defaultActionAlias_
+    );
+    this.registerAction(alias, handler, minTrust);
+    this.defaultActionAlias_ = alias;
   }
 
   /**
@@ -572,42 +600,26 @@ export class BaseElement {
    * been previously registered using {@link registerAction}, otherwise an
    * error is thrown.
    * @param {!./service/action-impl.ActionInvocation} invocation The invocation data.
-   * @param {boolean} unusedDeferred Whether the invocation has had to wait any time
+   * @param {boolean=} unusedDeferred Whether the invocation has had to wait any time
    *   for the element to be resolved, upgraded and built.
    * @final
    * @package
+   * @return {*} TODO(#23582): Specify return type
    */
   executeAction(invocation, unusedDeferred) {
-    if (invocation.method == 'activate') {
-      if (invocation.satisfiesTrust(this.activationTrust())) {
-        return this.activate(invocation);
-      }
-    } else {
-      this.initActionMap_();
-      const holder = this.actionMap_[invocation.method];
-      user().assert(holder, `Method not found: ${invocation.method} in %s`,
-          this);
-      const {handler, minTrust} = holder;
-      if (invocation.satisfiesTrust(minTrust)) {
-        return handler(invocation);
-      }
+    let {method} = invocation;
+    // If the default action has an alias, the handler will be stored under it.
+    if (method === DEFAULT_ACTION) {
+      method = this.defaultActionAlias_ || method;
     }
-  }
-
-  /**
-   * Returns the maximum DPR available on this device.
-   * @return {number}
-   */
-  getMaxDpr() {
-    return this.element.getResources().getMaxDpr();
-  }
-
-  /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    return this.element.getResources().getDpr();
+    this.initActionMap_();
+    const holder = this.actionMap_[method];
+    const {tagName} = this.element;
+    userAssert(holder, `Method not found: ${method} in ${tagName}`);
+    const {handler, minTrust} = holder;
+    if (invocation.satisfiesTrust(minTrust)) {
+      return handler(invocation);
+    }
   }
 
   /**
@@ -624,10 +636,32 @@ export class BaseElement {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      if (this.element.hasAttribute(attr)) {
-        element.setAttribute(attr, this.element.getAttribute(attr));
+      const val = this.element.getAttribute(attr);
+      if (null !== val) {
+        element.setAttribute(attr, val);
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
+      }
+    }
+  }
+
+  /**
+   * Utility method to propagate all data attributes from this element
+   * to the target element. (For use with arbitrary data attributes.)
+   * Removes any data attributes that are missing on this element from
+   * the target element.
+   * @param {!Element} targetElement
+   */
+  propagateDataset(targetElement) {
+    for (const key in targetElement.dataset) {
+      if (!(key in this.element.dataset)) {
+        delete targetElement.dataset[key];
+      }
+    }
+
+    for (const key in this.element.dataset) {
+      if (targetElement.dataset[key] !== this.element.dataset[key]) {
+        targetElement.dataset[key] = this.element.dataset[key];
       }
     }
   }
@@ -641,21 +675,13 @@ export class BaseElement {
    * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
-      listen(element, eventType, event => {
+    const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
+      listen(element, eventType, (event) => {
         this.element.dispatchCustomEvent(eventType, getData(event) || {});
-      }));
+      })
+    );
 
-    return () => unlisteners.forEach(unlisten => unlisten());
-  }
-
-  /**
-   * Must be executed in the mutate context. Removes `display:none` from the
-   * element set via `layout=nodisplay`.
-   * @param {boolean} displayOn
-   */
-  toggleLayoutDisplay(displayOn) {
-    this.element.toggleLayoutDisplay(displayOn);
+    return () => unlisteners.forEach((unlisten) => unlisten());
   }
 
   /**
@@ -693,6 +719,25 @@ export class BaseElement {
    */
   toggleFallback(state) {
     this.element.toggleFallback(state);
+  }
+
+  /**
+   * Hides or shows the loading indicator.
+   * @param {boolean} state
+   * @public @final
+   */
+  toggleLoading(state) {
+    this.element.toggleLoading(state);
+  }
+
+  /**
+   * Returns whether the loading indicator is reused again after the first
+   * render.
+   * @return {boolean}
+   * @public
+   */
+  isLoadingReused() {
+    return false;
   }
 
   /**
@@ -754,7 +799,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   getViewport() {
     return Services.viewportForDoc(this.getAmpDoc());
@@ -770,62 +815,22 @@ export class BaseElement {
   }
 
   /**
-   * Schedule the layout request for the children element or elements
-   * specified. Resource manager will perform the actual layout based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
+   * Collapses the element, setting it to `display: none`, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
    */
-  scheduleLayout(elements) {
-    this.element.getResources().scheduleLayout(this.element, elements);
+  collapse() {
+    Services.mutatorForDoc(this.getAmpDoc()).collapseElement(this.element);
   }
 
   /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
+   * Return a promise that request the runtime to collapse one element
+   * @return {!Promise}
    */
-  schedulePause(elements) {
-    this.element.getResources().schedulePause(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleResume(elements) {
-    this.element.getResources().scheduleResume(this.element, elements);
-  }
-
-  /**
-   * Schedule the preload request for the children element or elements
-   * specified. Resource manager will perform the actual preload based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  schedulePreload(elements) {
-    this.element.getResources().schedulePreload(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleUnlayout(elements) {
-    this.element.getResources()./*OK*/scheduleUnlayout(this.element, elements);
-  }
-
-  /**
-   * Update inViewport state of the specified children element or elements.
-   * Resource manager will perform the actual changes to the inViewport state
-   * based on the state of these elements and their parent subtree.
-   * @param {!Element|!Array<!Element>} elements
-   * @param {boolean} inLocalViewport
-   * @public
-   */
-  updateInViewport(elements, inLocalViewport) {
-    this.element.getResources().updateInViewport(
-        this.element, elements, inLocalViewport);
+  attemptCollapse() {
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptCollapse(
+      this.element
+    );
   }
 
   /**
@@ -835,34 +840,19 @@ export class BaseElement {
    * @param {number} newHeight
    * @public
    */
-  changeHeight(newHeight) {
-    this.element.getResources()./*OK*/changeSize(
-        this.element, newHeight, /* newWidth */ undefined);
+  forceChangeHeight(newHeight) {
+    Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
-
-  /**
-   * Collapses the element, setting it to `display: none`, and notifies its
-   * owner (if there is one) through {@link collapsedCallback} that the element
-   * is no longer visible.
-   */
-  collapse() {
-    this.element.getResources().collapseElement(this.element);
-  }
-
-  /**
-   * Return a promise that request the runtime to collapse one element
-   * @return {!Promise}
-   */
-  attemptCollapse() {
-    return this.element.getResources().attemptCollapse(this.element);
-  }
-
 
   /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * as soon as possible. However, unlike in {@link forceChangeHeight}, the runtime
    * may refuse to make a change in which case it will show the element's
    * overflow element if provided, which is supposed to provide the reader with
    * the necessary user action. (The overflow element is shown only if the
@@ -873,56 +863,105 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return this.element.getResources().attemptChangeSize(
-        this.element, newHeight, /* newWidth */ undefined);
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
-  * Return a promise that requests the runtime to update
-  * the size of this element to the specified value.
-  * The runtime will schedule this request and attempt to process it
-  * as soon as possible. However, unlike in {@link changeSize}, the runtime
-  * may refuse to make a change in which case it will show the element's
-  * overflow element if provided, which is supposed to provide the reader with
-  * the necessary user action. (The overflow element is shown only if the
-  * requested height is greater than 0.)
-  * The promise is resolved if the height is successfully updated.
-  * @param {number|undefined} newHeight
-  * @param {number|undefined} newWidth
-  * @return {!Promise}
-  * @public
-  */
-  attemptChangeSize(newHeight, newWidth) {
-    return this.element.getResources().attemptChangeSize(
-        this.element, newHeight, newWidth);
-  }
-
-  /**
-  * Runs the specified mutation on the element and ensures that measures
-  * and layouts performed for the affected elements.
-  *
-  * This method should be called whenever a significant mutations are done
-  * on the DOM that could affect layout of elements inside this subtree or
-  * its siblings. The top-most affected element should be specified as the
-  * first argument to this method and all the mutation work should be done
-  * in the mutator callback which is called in the "mutation" vsync phase.
-  *
-  * @param {function()} mutator
-  * @param {Element=} opt_element
-  * @return {!Promise}
-  */
-  mutateElement(mutator, opt_element) {
-    return this.element.getResources().mutateElement(
-        opt_element || this.element, mutator);
-  }
-
-  /**
-   * Schedules callback to be complete within the next batch. This call is
-   * intended for heavy DOM mutations that typically cause re-layouts.
-   * @param {!Function} callback
+   * Return a promise that requests the runtime to update
+   * the size of this element to the specified value.
+   * The runtime will schedule this request and attempt to process it
+   * as soon as possible. However, unlike in {@link changeSize}, the runtime
+   * may refuse to make a change in which case it will show the element's
+   * overflow element if provided, which is supposed to provide the reader with
+   * the necessary user action. (The overflow element is shown only if the
+   * requested height is greater than 0.)
+   * The promise is resolved if the height is successfully updated.
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
+   * @param {?Event=} opt_event
+   * @return {!Promise}
+   * @public
    */
-  deferMutate(callback) {
-    this.element.getResources().deferMutate(this.element, callback);
+  attemptChangeSize(newHeight, newWidth, opt_event) {
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
+      this.element,
+      newHeight,
+      newWidth,
+      /* newMargin */ undefined,
+      opt_event
+    );
+  }
+
+  /**
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
+   */
+  measureElement(measurer) {
+    return Services.mutatorForDoc(this.getAmpDoc()).measureElement(measurer);
+  }
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts are performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {function()} mutator
+   * @param {Element=} opt_element
+   * @return {!Promise}
+   */
+  mutateElement(mutator, opt_element) {
+    return this.measureMutateElement(null, mutator, opt_element);
+  }
+
+  /**
+   * Runs the specified measure, then runs the mutation on the element and
+   * ensures that remeasures and layouts are performed for the affected
+   * elements.
+   *
+   * This method should be called whenever a measure and significant mutations
+   * are done on the DOM that could affect layout of elements inside this
+   * subtree or its siblings. The top-most affected element should be specified
+   * as the first argument to this method and all the mutation work should be
+   * done in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @param {Element=} opt_element
+   * @return {!Promise}
+   */
+  measureMutateElement(measurer, mutator, opt_element) {
+    return Services.mutatorForDoc(this.getAmpDoc()).measureMutateElement(
+      opt_element || this.element,
+      measurer,
+      mutator
+    );
+  }
+
+  /**
+   * Runs the specified mutation on the element. Will not cause remeasurements.
+   * Only use this function when the mutations will not affect any resource sizes.
+   *
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(mutator) {
+    return Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+      this.element,
+      mutator,
+      /* skipRemeasure */ true
+    );
   }
 
   /**
@@ -940,7 +979,7 @@ export class BaseElement {
    * is no longer visible.
    */
   expand() {
-    this.element.getResources().expandElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
   }
 
   /**
@@ -954,8 +993,9 @@ export class BaseElement {
 
   /**
    * Called when one or more attributes are mutated.
-   * @note Must be called inside a mutate context.
-   * @note Boolean attributes have a value of `true` and `false` when
+   * Note:
+   * - Must be called inside a mutate context.
+   * - Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
    * @param {
    *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
@@ -974,20 +1014,17 @@ export class BaseElement {
    */
   onLayoutMeasure() {}
 
-  user() {
-    return user(this.element);
-  }
+  /**
+   * Called only when the measurements of an amp-element changes. This
+   * would not trigger for every measurement invalidation caused by a mutation.
+   * @public
+   */
+  onMeasureChanged() {}
 
   /**
-   * Declares a child element (or ourselves) as a Layer
-   * @param {!Element=} opt_element
+   * @return {./log.Log}
    */
-  declareLayer(opt_element) {
-    dev().assert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
-        ' to declare layer.');
-    if (opt_element) {
-      dev().assert(this.element.contains(opt_element));
-    }
-    return this.element.getLayers().declareLayer(opt_element || this.element);
+  user() {
+    return user(this.element);
   }
 }

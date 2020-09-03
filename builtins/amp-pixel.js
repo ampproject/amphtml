@@ -16,20 +16,16 @@
 
 import {BaseElement} from '../src/base-element';
 import {Services} from '../src/services';
-import {createElementWithAttributes} from '../src/dom';
-import {dev, user} from '../src/log';
-import {dict} from '../src/utils/object';
+import {createPixel} from '../src/pixel';
+import {dev, userAssert} from '../src/log';
 import {registerElement} from '../src/service/custom-element-registry';
-import {toWin} from '../src/types';
 
 const TAG = 'amp-pixel';
-
 
 /**
  * A simple analytics instrument. Fires as an impression signal.
  */
 export class AmpPixel extends BaseElement {
-
   /** @override */
   constructor(element) {
     super(element);
@@ -55,22 +51,26 @@ export class AmpPixel extends BaseElement {
       // Safari doesn't support referrerPolicy yet. We're using an
       // iframe based trick to remove referrer, which apparently can
       // only do "no-referrer".
-      user().assert(this.referrerPolicy_ == 'no-referrer',
-          `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
-          + ' Only "no-referrer" is supported');
+      userAssert(
+        this.referrerPolicy_ == 'no-referrer',
+        `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".` +
+          ' Only "no-referrer" is supported'
+      );
     }
-    if (this.element.hasAttribute('i-amphtml-ssr') &&
-        this.element.querySelector('img')) {
+    if (
+      this.element.hasAttribute('i-amphtml-ssr') &&
+      this.element.querySelector('img')
+    ) {
       dev().info(TAG, 'inabox img already present');
       return;
     }
     // Trigger, but only when visible.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    viewer.whenFirstVisible().then(this.trigger_.bind(this));
+    this.getAmpDoc().whenFirstVisible().then(this.trigger_.bind(this));
   }
 
   /**
    * Triggers the signal.
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   trigger_() {
@@ -81,21 +81,24 @@ export class AmpPixel extends BaseElement {
     }
     // Delay(1) provides a rudimentary "idle" signal.
     // TODO(dvoytenko): use an improved idle signal when available.
-    this.triggerPromise_ = Services.timerFor(this.win).promise(1).then(() => {
-      const src = this.element.getAttribute('src');
-      if (!src) {
-        return;
-      }
-      return Services.urlReplacementsForDoc(this.element)
+    this.triggerPromise_ = Services.timerFor(this.win)
+      .promise(1)
+      .then(() => {
+        const src = this.element.getAttribute('src');
+        if (!src) {
+          return;
+        }
+        return Services.urlReplacementsForDoc(this.element)
           .expandUrlAsync(this.assertSource_(src))
-          .then(src => {
-            const pixel = this.referrerPolicy_
-              ? createNoReferrerPixel(this.element, src)
-              : createImagePixel(this.win, src);
+          .then((src) => {
+            if (!this.win) {
+              return;
+            }
+            const pixel = createPixel(this.win, src, this.referrerPolicy_);
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });
-    });
+      });
   }
 
   /**
@@ -104,59 +107,14 @@ export class AmpPixel extends BaseElement {
    * @private
    */
   assertSource_(src) {
-    user().assert(
-        /^(https\:\/\/|\/\/)/i.test(src),
-        'The <amp-pixel> src attribute must start with ' +
-        '"https://" or "//". Invalid value: ' + src);
+    userAssert(
+      /^(https\:\/\/|\/\/)/i.test(src),
+      'The <amp-pixel> src attribute must start with ' +
+        '"https://" or "//". Invalid value: ' +
+        src
+    );
     return /** @type {string} */ (src);
   }
-}
-
-/**
- * @param {!Element} parentElement
- * @param {string} src
- * @returns {!Element}
- */
-function createNoReferrerPixel(parentElement, src) {
-  if (isReferrerPolicySupported()) {
-    return createImagePixel(toWin(parentElement.ownerDocument.defaultView), src,
-        true);
-  } else {
-    // if "referrerPolicy" is not supported, use iframe wrapper
-    // to scrub the referrer.
-    const iframe = createElementWithAttributes(
-        /** @type {!Document} */ (parentElement.ownerDocument), 'iframe', dict({
-          'src': 'about:blank',
-        }));
-    parentElement.appendChild(iframe);
-    createImagePixel(iframe.contentWindow, src);
-    return iframe;
-  }
-}
-
-/**
- * @param {!Window} win
- * @param {string} src
- * @param {boolean=} noReferrer
- * @returns {!Image}
- */
-function createImagePixel(win, src, noReferrer) {
-  const image = new win.Image();
-  if (noReferrer) {
-    image.referrerPolicy = 'no-referrer';
-  }
-  image.src = src;
-  return image;
-}
-
-/**
- * Check if element attribute "referrerPolicy" is supported by the browser.
- * At this moment (4/14/2017), Safari does not support it yet.
- *
- * @returns {boolean}
- */
-export function isReferrerPolicySupported() {
-  return 'referrerPolicy' in Image.prototype;
 }
 
 /**

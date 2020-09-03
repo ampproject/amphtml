@@ -15,16 +15,19 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    CallExpression: function(node) {
+    CallExpression: function (node) {
       if (node.callee.name === 'dict') {
         if (node.arguments[0]) {
           const arg1 = node.arguments[0];
           if (arg1.type !== 'ObjectExpression') {
-            context.report(node,
-                'calls to `dict` must have an Object Literal Expression as ' +
-                'the first argument');
+            context.report({
+              node,
+              message:
+                'calls to `dict` must have an Object Literal ' +
+                'Expression as the first argument',
+            });
             return;
           }
           checkNode(arg1, context);
@@ -36,16 +39,21 @@ module.exports = function(context) {
 
 function checkNode(node, context) {
   if (node.type === 'ObjectExpression') {
-    node.properties.forEach(function(prop) {
-      if (!prop.key.raw) {
-        context.report(node, 'Found: ' + prop.key.name + '. The keys ' +
-            'of the Object Literal Expression passed into `dict` must ' +
-            'have string keys.');
+    node.properties.forEach(function (prop) {
+      if (!prop.key.raw && !prop.computed) {
+        context.report({
+          node: prop,
+          message:
+            'Found: ' +
+            prop.key.name +
+            '. The keys of the Object ' +
+            'Literal Expression passed into `dict` must have string keys.',
+        });
       }
       checkNode(prop.value, context);
     });
   } else if (node.type === 'ArrayExpression') {
-    node.elements.forEach(function(elem) {
+    node.elements.forEach(function (elem) {
       checkNode(elem, context);
     });
   }

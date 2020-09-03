@@ -40,7 +40,8 @@ export function appnexus(global, data) {
   }
 
   /**
-   * Construct the TTJ URL. Note params should be properly encoded first (use encodeURIComponent);
+   * Construct the TTJ URL.
+   * Note params should be properly encoded first (use encodeURIComponent);
    * @param  {!Array<string>} args query string params to add to the base URL.
    * @return {string}      Formated TTJ URL.
    */
@@ -55,16 +56,26 @@ export function appnexus(global, data) {
   }
 
   appnexusAst(global, data);
-
 }
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
   let apntag;
-  if (context.isMaster) { // in case we are in the master iframe, we load AST
+  if (context.isMaster) {
+    // in case we are in the master iframe, we load AST
     context.master.apntag = context.master.apntag || {};
     context.master.apntag.anq = context.master.apntag.anq || [];
     apntag = context.master.apntag;
+
+    context.master.adUnitTargetIds = context.master.adUnitTargetIds || [];
+
+    context.master.adUnitTargetIds = data.adUnits.map(
+      (adUnit) => adUnit.targetId
+    );
 
     apntag.anq.push(() => {
       if (data.pageOpts) {
@@ -75,10 +86,9 @@ function appnexusAst(global, data) {
         });
       }
 
-      data.adUnits.forEach(adUnit => {
+      /** @type {!Array} */ (data.adUnits).forEach((adUnit) => {
         apntag.defineTag(adUnit);
       });
-
     });
     loadScript(global, APPNEXUS_AST_URL, () => {
       apntag.anq.push(() => {
@@ -103,19 +113,47 @@ function appnexusAst(global, data) {
 
   if (!apntag) {
     apntag = context.master.apntag;
-
     //preserve a global reference
+    /** @type {{showTag: function(string, Object)}} global.apntag */
     global.apntag = context.master.apntag;
   }
 
-  apntag.anq.push(() => {
-    apntag.onEvent('adAvailable', data.target, adObj => {
-      global.context.renderStart({width: adObj.width, height: adObj.height});
-      apntag.showTag(data.target, global.window);
+  if (!context.isMaster && data.adUnits) {
+    const newAddUnits = data.adUnits.filter((adUnit) => {
+      return context.master.adUnitTargetIds.indexOf(adUnit.targetId) === -1;
     });
+    if (newAddUnits.length) {
+      apntag.anq.push(() => {
+        /** @type {!Array} */ (newAddUnits).forEach((adUnit) => {
+          apntag.defineTag(adUnit);
+          context.master.adUnitTargetIds.push(adUnit.targetId);
+        });
+        apntag.loadTags();
+      });
+    }
+  }
 
-    apntag.onEvent('adNoBid', data.target, () => {
-      context.noContentAvailable();
-    });
+  // check for ad responses received for a slot but before listeners are
+  // registered, for example when an above-the-fold ad is scrolled into view
+  apntag.anq.push(() => {
+    if (typeof apntag.checkAdAvailable === 'function') {
+      const getAd = apntag.checkAdAvailable(data.target);
+      getAd({resolve: isAdAvailable, reject: context.noContentAvailable});
+    }
   });
+
+  apntag.anq.push(() => {
+    apntag.onEvent('adAvailable', data.target, isAdAvailable);
+    apntag.onEvent('adNoBid', data.target, context.noContentAvailable);
+  });
+
+  /**
+   * resolve getAd with an available ad object
+   *
+   * @param {{targetId: string}} adObj
+   */
+  function isAdAvailable(adObj) {
+    global.context.renderStart({width: adObj.width, height: adObj.height});
+    global.apntag.showTag(adObj.targetId, global.window);
+  }
 }

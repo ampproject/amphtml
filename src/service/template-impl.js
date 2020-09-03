@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
-import {dev, user} from '../log';
+import {Deferred} from '../utils/promise';
+import {Services} from '../services';
+import {dev, userAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';
-
+import {rootNodeFor, scopedQuerySelector} from '../dom';
 
 /**
  * @fileoverview
@@ -25,9 +26,8 @@ import {getService, registerServiceBuilder} from '../service';
  * {@link https://docs.google.com/document/d/1q-5MPQHnOHLF_uL7lQsGZdzuBgrPTkCy2PdRP-YCbOw/edit#}
  */
 
-
 /**
- * @typedef {function(new:BaseTemplate, !Element, !Window)}
+ * @typedef {typeof BaseTemplate}
  */
 let TemplateClassDef;
 
@@ -37,12 +37,10 @@ const PROP_ = '__AMP_IMPL_';
 /** @private @const {string} */
 const PROP_PROMISE_ = '__AMP_WAIT_';
 
-
 /**
  * The interface that is implemented by all templates.
  */
 export class BaseTemplate {
-
   /**
    * @param {!Element} element
    * @param {!Window} win
@@ -53,6 +51,9 @@ export class BaseTemplate {
 
     /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView || win;
+
+    /** @private @const */
+    this.viewer_ = Services.viewerForDoc(this.element);
 
     this.compileCallback();
   }
@@ -66,6 +67,16 @@ export class BaseTemplate {
   }
 
   /**
+   * Bypasses template rendering and directly sets HTML. Should only be used
+   * for server-side rendering case. To be implemented by subclasses.
+   * @param {string} unusedData
+   * @return {!Element|!Array<Element>}
+   */
+  setHtml(unusedData) {
+    throw new Error('Not implemented');
+  }
+
+  /**
    * To be implemented by subclasses.
    * @param {!JsonObject|string} unusedData
    * @return {!Element}
@@ -75,40 +86,74 @@ export class BaseTemplate {
   }
 
   /**
-   * Helps the template implementation to unwrap the root element. The root
-   * element can be unwrapped only when it contains a single element or a
-   * single element surrounded by empty text nodes.
+   * Iterate through the child nodes of the given root, applying the
+   * given callback to non-empty text nodes and elements.
    * @param {!Element} root
-   * @return {!Element}
-   * @protected @final
+   * @param {function((!Element|string))} callback
    */
-  unwrap(root) {
-    let singleElement = null;
+  visitChildren_(root, callback) {
     for (let n = root.firstChild; n != null; n = n.nextSibling) {
       if (n.nodeType == /* TEXT */ 3) {
-        if (n.textContent.trim()) {
-          // Non-empty text node - can't unwrap.
-          singleElement = null;
-          break;
+        const text = n.textContent.trim();
+        if (text) {
+          callback(text);
         }
       } else if (n.nodeType == /* COMMENT */ 8) {
         // Ignore comments.
       } else if (n.nodeType == /* ELEMENT */ 1) {
-        if (!singleElement) {
-          singleElement = dev().assertElement(n);
-        } else {
-          // This is not the first element - can't unwrap.
-          singleElement = null;
-          break;
-        }
-      } else {
-        singleElement = null;
+        callback(dev().assertElement(n));
       }
     }
-    return singleElement || root;
+  }
+
+  /**
+   * Unwraps the root element. If root has a single element child,
+   * returns the child. Otherwise, returns root.
+   * @param {!Element} root
+   * @return {!Element}
+   * @protected @final
+   */
+  tryUnwrap(root) {
+    let onlyChild;
+    this.visitChildren_(root, (c) => {
+      if (onlyChild === undefined && c.nodeType) {
+        onlyChild = c;
+      } else {
+        onlyChild = null;
+      }
+    });
+    return onlyChild || root;
+  }
+
+  /**
+   * Unwraps the root element and returns any children in an array.
+   * Text node children are normalized inside a <div>.
+   * @param {!Element} root
+   * @return {!Array<!Element>}
+   * @protected @final
+   */
+  unwrapChildren(root) {
+    const children = [];
+    this.visitChildren_(root, (c) => {
+      if (typeof c == 'string') {
+        const element = this.win.document.createElement('div');
+        element.textContent = c;
+        children.push(element);
+      } else {
+        children.push(c);
+      }
+    });
+    return children;
+  }
+
+  /**
+   * @protected @final
+   * @return {boolean}
+   */
+  viewerCanRenderTemplates() {
+    return this.viewer_.hasCapability('viewerRenderTemplate');
   }
 }
-
 
 /**
  */
@@ -130,9 +175,18 @@ export class Templates {
      * @private @const {!Object<string, function(!TemplateClassDef)>}
      */
     this.templateClassResolvers_ = {};
+  }
 
-    /** @type {!Object<string, boolean>|undefined} */
-    this.declaredTemplates_ = undefined;
+  /**
+   * Inserts the specified template element.
+   * @param {!Element} templateElement
+   * @param {string} html
+   * @return {!Promise<(!Element|!Array<!Element>)>}
+   */
+  setHtmlForTemplate(templateElement, html) {
+    return this.getImplementation_(templateElement).then((impl) => {
+      return this.setHtml_(impl, html);
+    });
   }
 
   /**
@@ -142,7 +196,7 @@ export class Templates {
    * @return {!Promise<!Element>}
    */
   renderTemplate(templateElement, data) {
-    return this.getImplementation_(templateElement).then(impl => {
+    return this.getImplementation_(templateElement).then((impl) => {
       return this.render_(impl, data);
     });
   }
@@ -158,8 +212,8 @@ export class Templates {
     if (array.length == 0) {
       return Promise.resolve([]);
     }
-    return this.getImplementation_(templateElement).then(impl => {
-      return array.map(item => {
+    return this.getImplementation_(templateElement).then((impl) => {
+      return array.map((item) => {
         return this.render_(impl, item);
       });
     });
@@ -177,8 +231,26 @@ export class Templates {
    */
   findAndRenderTemplate(parent, data, opt_querySelector) {
     return this.renderTemplate(
-        this.findTemplate_(parent, opt_querySelector),
-        data);
+      this.findTemplate(parent, opt_querySelector),
+      data
+    );
+  }
+
+  /**
+   * Discovers the already rendered template for the specified parent and
+   * inserts it in the DOM. The template can be specified either via "template"
+   * attribute  or as a child "template" element. When specified via "template"
+   * attribute, the value indicates the ID of the template element.
+   * @param {!Element} parent
+   * @param {string} html
+   * @param {string=} opt_querySelector
+   * @return {!Promise<(!Element|!Array<!Element>)>}
+   */
+  findAndSetHtmlForTemplate(parent, html, opt_querySelector) {
+    return this.setHtmlForTemplate(
+      this.findTemplate(parent, opt_querySelector),
+      html
+    );
   }
 
   /**
@@ -194,8 +266,9 @@ export class Templates {
    */
   findAndRenderTemplateArray(parent, array, opt_querySelector) {
     return this.renderTemplateArray(
-        this.findTemplate_(parent, opt_querySelector),
-        array);
+      this.findTemplate(parent, opt_querySelector),
+      array
+    );
   }
 
   /**
@@ -205,7 +278,7 @@ export class Templates {
    * @return {boolean}
    */
   hasTemplate(parent, opt_querySelector) {
-    return !!this.maybeFindTemplate_(parent, opt_querySelector);
+    return !!this.maybeFindTemplate(parent, opt_querySelector);
   }
 
   /**
@@ -214,13 +287,18 @@ export class Templates {
    * @param {!Element} parent
    * @param {string=} opt_querySelector
    * @return {!Element}
-   * @private
    */
-  findTemplate_(parent, opt_querySelector) {
-    const templateElement = this.maybeFindTemplate_(parent, opt_querySelector);
-    user().assert(templateElement, 'Template not found for %s', parent);
-    user().assert(templateElement.tagName == 'TEMPLATE',
-        'Template element must be a "template" tag %s', templateElement);
+  findTemplate(parent, opt_querySelector) {
+    const templateElement = this.maybeFindTemplate(parent, opt_querySelector);
+    userAssert(templateElement, 'Template not found for %s', parent);
+    const templateTagName = templateElement.tagName;
+    userAssert(
+      templateTagName == 'TEMPLATE' ||
+        (templateTagName == 'SCRIPT' &&
+          templateElement.getAttribute('type') === 'text/plain'),
+      'Template must be defined in a <template> or ' +
+        '<script type="text/plain"> tag'
+    );
     return templateElement;
   }
 
@@ -228,20 +306,20 @@ export class Templates {
    * Find a specified template inside the parent. Returns null if not present.
    * The template can be specified either via "template" attribute or as a
    * child "template" element. When specified via "template" attribute,
-   * the value indicates the ID of the template element.
+   * the value indicates the ID of the template element. The template
+   * can be defined either via the <template> or <script> tag.
    * @param {!Element} parent
    * @param {string=} opt_querySelector
    * @return {?Element}
-   * @private
    */
-  maybeFindTemplate_(parent, opt_querySelector) {
+  maybeFindTemplate(parent, opt_querySelector) {
     const templateId = parent.getAttribute('template');
     if (templateId) {
       return rootNodeFor(parent).getElementById(templateId);
     } else if (opt_querySelector) {
       return scopedQuerySelector(parent, opt_querySelector);
     } else {
-      return childElementByTag(parent, 'template');
+      return parent.querySelector('template, script[type="text/plain"]');
     }
   }
 
@@ -259,26 +337,34 @@ export class Templates {
       return Promise.resolve(impl);
     }
 
-    const type = user().assert(element.getAttribute('type'),
-        'Type must be specified: %s', element);
+    let type = '';
+    const {tagName} = element;
+    if (tagName == 'TEMPLATE') {
+      type = element.getAttribute('type');
+    } else if (tagName == 'SCRIPT') {
+      type = element.getAttribute('template');
+    }
+    userAssert(type, 'Type must be specified: %s', element);
 
     let promise = element[PROP_PROMISE_];
     if (promise) {
       return promise;
     }
 
-    promise = this.waitForTemplateClass_(element, type).then(templateClass => {
-      const impl = element[PROP_] = new templateClass(element, this.win_);
-      delete element[PROP_PROMISE_];
-      return impl;
-    });
+    promise = this.waitForTemplateClass_(element, type).then(
+      (templateClass) => {
+        const impl = (element[PROP_] = new templateClass(element, this.win_));
+        delete element[PROP_PROMISE_];
+        return impl;
+      }
+    );
     element[PROP_PROMISE_] = promise;
     return promise;
   }
 
   /**
-   * Returns the promise that will eventually yield the template class. This will
-   * wait until the actual template script has been downloaded and parsed.
+   * Returns the promise that will eventually yield the template class. This
+   * will wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
    * @return {!Promise<!TemplateClassDef>}
@@ -289,12 +375,11 @@ export class Templates {
       return this.templateClassMap_[type];
     }
 
-    let aResolve;
-    const promise = new Promise((resolve, unusedReject) => {
-      aResolve = resolve;
-    });
+    const deferred = new Deferred();
+    const {promise, resolve} = deferred;
+
     this.templateClassMap_[type] = promise;
-    this.templateClassResolvers_[type] = aResolve;
+    this.templateClassResolvers_[type] = resolve;
     return promise;
   }
 
@@ -304,13 +389,14 @@ export class Templates {
    * @param {string} type
    * @param {!TemplateClassDef} templateClass
    * @private
+   * @restricted
    */
   registerTemplate_(type, templateClass) {
     if (!this.templateClassMap_[type]) {
       this.templateClassMap_[type] = Promise.resolve(templateClass);
     } else {
       const resolver = this.templateClassResolvers_[type];
-      user().assert(resolver, 'Duplicate template type: %s', type);
+      userAssert(resolver, 'Duplicate template type: %s', type);
       delete this.templateClassResolvers_[type];
       resolver(templateClass);
     }
@@ -319,13 +405,23 @@ export class Templates {
   /**
    * @param {!BaseTemplate} impl
    * @param {!JsonObject} data
+   * @return {!Element}
    * @private
    */
   render_(impl, data) {
     return impl.render(data);
   }
-}
 
+  /**
+   * @param {!BaseTemplate} impl
+   * @param {string} html
+   * @return {!Element|!Array<!Element>}
+   * @private
+   */
+  setHtml_(impl, html) {
+    return impl.setHtml(html);
+  }
+}
 
 /**
  * @param {!Window} win
@@ -340,7 +436,7 @@ export function installTemplatesService(win) {
  * @param {!Window} win
  * @param {string} type
  * @param {!TemplateClassDef} templateClass
- * @package
+ * @return {undefined}
  */
 export function registerExtendedTemplate(win, type, templateClass) {
   const templatesService = getService(win, 'templates');

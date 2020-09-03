@@ -15,12 +15,13 @@
 #
 tags: {
   html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-selector"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -31,14 +32,15 @@ tags: {
   spec_name: "SCRIPT[custom-element=amp-selector] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-selector"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   html_format: AMP
+  html_format: AMP4ADS
   html_format: AMP4EMAIL
   tag_name: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SELECTOR"
@@ -50,7 +52,9 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   attrs: { name: "form" }
   attrs: {
     name: "keyboard-select-mode"
-    value_regex_casei: "focus|none|select"
+    value_casei: "focus"
+    value_casei: "none"
+    value_casei: "select"
   }
   attrs: {
     name: "multiple"
@@ -66,7 +70,7 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
     tag_spec_name: "AMP-SELECTOR child"
   }
   attr_lists: "extended-amp-global"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   amp_layout {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -89,16 +93,27 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
 # always match, we want to prefer 'option' when both of them match.
 tags: {
   html_format: AMP
+  html_format: AMP4ADS
   html_format: AMP4EMAIL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
-  attrs: { name: "option" mandatory: true }
-  attrs: { name: "disabled" value: "" }
-  attrs: { name: "selected" value: "" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: {
+    name: "option"
+    mandatory: true
+  }
+  attrs: {
+    name: "selected"
+    value: ""
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-selector/"
 }
 tags: {
   html_format: AMP
+  html_format: AMP4ADS
   html_format: AMP4EMAIL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"

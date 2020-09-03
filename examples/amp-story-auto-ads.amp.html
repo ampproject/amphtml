@@ -5,7 +5,9 @@
   <title>amp-story</title>
   <link rel="canonical" href="animations-presets.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <style amp-custom>
@@ -34,9 +36,64 @@
     .circle {
       border-radius: 80px;
     }
+    .fill-img img {
+      object-fit: cover;
+    }
     </style>
 </head>
 <body>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "transport": {
+          "beacon": false,
+          "xhrpost": false,
+          "image": true
+        },
+        "requests": {
+          "endpoint": "https://www.example.com",
+          "base": "${endpoint}?id=${adId}zx=${timestamp}"
+        },
+        "triggers": {
+          "storyAdRequest": {
+            "on": "story-ad-request",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "request"}
+          },
+          "storyAdLoad": {
+            "on": "story-ad-load",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "load"}
+          },
+          "storyAdInsert": {
+            "on": "story-ad-insert",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "insert"}
+          },
+          "storyAdView": {
+            "on": "story-ad-view",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "view"}
+          },
+          "storyAdClick": {
+            "on": "story-ad-click",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "click"}
+          },
+          "storyAdExit": {
+            "on": "story-ad-exit",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "exit"}
+          },
+          "storyAdDestroy": {
+            "on": "story-ad-discard",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "discard"}
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
   <amp-story standalone>
     <amp-story-auto-ads>
       <script type="application/json">
@@ -49,17 +106,7 @@
       </script>
 
       <template type="amp-mustache" id="template-1">
-        <h2>Template ad 1</h2>
-        <amp-img layout='fixed' height="300" width="300" src="{{imgSrc}}"></amp-img>
-        <amp-pixel src="{{impressionUrl}}"></amp-pixel>
-      </template>
-
-      <!-- TODO(ccordry) make a example server that returns different payloads
-      and can take advantage of multiple templates. -->
-      <template type="amp-mustache" id="template-2">
-        <div class="creative-line-1">{{creativeLine1}}</div>
-        <div class="creative-line-2">{{creativeLine2}}</div>
-        <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+        <amp-img class="fill-img" layout="fill" src="{{imgSrc}}"></amp-img>
       </template>
     </amp-story-auto-ads>
 
@@ -100,7 +147,7 @@
       </amp-story-grid-layer>
     </amp-story-page>
 
-    <amp-story-page id="fly-in-top-page">
+    <amp-story-page id="fly-in-top-page" next-page-no-ad>
       <amp-story-grid-layer template="vertical">
         <h1>fly-in-top</h1>
         <div class="square"
@@ -109,7 +156,7 @@
       </amp-story-grid-layer>
     </amp-story-page>
 
-    <amp-story-page id="fly-in-bottom-page">
+    <amp-story-page id="fly-in-bottom-page" next-page-no-ad>
       <amp-story-grid-layer template="vertical">
         <h1>fly-in-bottom</h1>
         <div class="square"

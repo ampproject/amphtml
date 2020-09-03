@@ -20,8 +20,8 @@ tags: {  # amp-position-observer
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-position-observer"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -35,6 +35,10 @@ tags: {  # <amp-position-observer>
     # Regex ^([0]*?\.\d*$|1$|0$)|([0]*?\.\d*|1|0)\s{1}([0]*?\.\d*$|1$|0$)
     # Values such as: "0", "0.1" , "1", "0 1", "0 0.5", "0.5 1", "1 1", etc...
     value_regex: "^([0]*?\\.\\d*$|1$|0$)|([0]*?\\.\\d*|1|0)\\s{1}([0]*?\\.\\d*$|1$|0$)"
+  }
+  attrs: {
+    name: "once"
+    value: ""
   }
   attrs: { name: "target" }
   attrs: {

@@ -24,11 +24,15 @@ export function dable(global, data) {
   // check required props
   validateData(data, ['widgetId']);
 
-  (global.dable = global.dable || function() {
-    (global.dable.q = global.dable.q || []).push(arguments);
-  });
-  global.dable('setService', data['serviceName'] ||
-      global.window.context.location.hostname);
+  global.dable =
+    global.dable ||
+    function () {
+      (global.dable.q = global.dable.q || []).push(arguments);
+    };
+  global.dable(
+    'setService',
+    data['serviceName'] || global.window.context.location.hostname
+  );
   global.dable('setURL', global.window.context.sourceUrl);
   global.dable('setRef', global.window.context.referrer);
 
@@ -42,13 +46,16 @@ export function dable(global, data) {
   }
 
   const itemId = data['itemId'] || '';
+  const opts = {};
 
   if (itemId) {
     global.dable('sendLog', 'view', {id: itemId});
+  } else {
+    opts.ignoreItems = true;
   }
 
   // call render widget
-  global.dable('renderWidget', slot.id, itemId, function(hasAd) {
+  global.dable('renderWidget', slot.id, itemId, opts, function (hasAd) {
     if (hasAd) {
       global.context.renderStart();
     } else {

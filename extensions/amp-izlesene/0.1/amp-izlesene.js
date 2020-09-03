@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpIzlesene extends AMP.BaseElement {
+  /**
+   *Creates an instance of AmpIzlesene.
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
     /** @private {?string}  */
@@ -37,9 +42,16 @@ class AmpIzlesene extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.getVideoIframeSrc_());
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.getVideoIframeSrc_()
+    );
     // Host that Izlesene uses to serve poster frames needed by player.
-    this.preconnect.url('https://i1.imgiz.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://i1.imgiz.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -49,10 +61,13 @@ class AmpIzlesene extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-izlesene> %s',
-        this.element);
+    setIsMediaComponent(this.element);
+
+    this.videoid_ = userAssert(
+      this.element.getAttribute('data-videoid'),
+      'The data-videoid attribute is required for <amp-izlesene> %s',
+      this.element
+    );
   }
 
   /** @return {string} */
@@ -61,8 +76,11 @@ class AmpIzlesene extends AMP.BaseElement {
       return this.videoIframeSrc_;
     }
 
-    dev().assert(this.videoid_);
-    let src = 'https://www.izlesene.com/embedplayer/' + encodeURIComponent(this.videoid_ || '') + '/?';
+    devAssert(this.videoid_);
+    let src =
+      'https://www.izlesene.com/embedplayer/' +
+      encodeURIComponent(this.videoid_ || '') +
+      '/?';
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
@@ -71,7 +89,7 @@ class AmpIzlesene extends AMP.BaseElement {
     }
 
     src = addParamsToUrl(src, params);
-    return this.videoIframeSrc_ = src;
+    return (this.videoIframeSrc_ = src);
   }
 
   /** @override */
@@ -92,14 +110,16 @@ class AmpIzlesene extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(dict({
-        'command': 'pause',
-      }), '*');
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        dict({
+          'command': 'pause',
+        }),
+        '*'
+      );
     }
   }
 }
 
-
-AMP.extension('amp-izlesene', '0.1', AMP => {
+AMP.extension('amp-izlesene', '0.1', (AMP) => {
   AMP.registerElement('amp-izlesene', AmpIzlesene);
 });

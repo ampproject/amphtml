@@ -17,8 +17,9 @@
 import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
+import {tryResolve} from '../../../src/utils/promise';
 
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 // Popup options
 const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,
@@ -27,44 +28,50 @@ const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,
 
 /**
  * Pinterest Follow Button
- * @attr data-href:  the url of the user's profile to follow
- * @attr data-label: the text to display (user's full name)
+ * data-href:  the url of the user's profile to follow
+ * data-label: the text to display (user's full name)
  */
 export class FollowButton {
-
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    user().assert(rootElement.getAttribute('data-href'),
-        'The data-href attribute is required for follow buttons');
-    user().assert(rootElement.getAttribute('data-label'),
-        'The data-label attribute is required for follow buttons');
+    userAssert(
+      rootElement.getAttribute('data-href'),
+      'The data-href attribute is required for follow buttons'
+    );
+    userAssert(
+      rootElement.getAttribute('data-label'),
+      'The data-label attribute is required for follow buttons'
+    );
     this.element = rootElement;
     this.label = rootElement.getAttribute('data-label');
-    this.href = assertHttpsUrl(rootElement.getAttribute('data-href'),
-        rootElement);
+    this.href = assertHttpsUrl(
+      rootElement.getAttribute('data-href'),
+      rootElement
+    );
   }
 
   /**
    * Override the default href click handling to log and open popup
-   * @param {Event} event: the HTML event object
+   * @param {Event} event
    */
   handleClick(event) {
     event.preventDefault();
-    openWindowDialog(window, this.href, 'pin' + Date.now(),
-        POP_FOLLOW);
+    openWindowDialog(window, this.href, 'pin' + Date.now(), POP_FOLLOW);
     Util.log(`&type=button_follow&href=${this.href}`);
   }
 
   /**
    * Render the follow button
-   * @returns {Element}
+   * @return {Element}
    */
   renderTemplate() {
-    const followButton = Util.make(this.element.ownerDocument, {'a': {
-      class: '-amp-pinterest-follow-button',
-      href: this.href,
-      textContent: this.label,
-    }});
+    const followButton = Util.make(this.element.ownerDocument, {
+      'a': {
+        class: '-amp-pinterest-follow-button',
+        href: this.href,
+        textContent: this.label,
+      },
+    });
     followButton.appendChild(Util.make(this.element.ownerDocument, {'i': {}}));
     followButton.onclick = this.handleClick.bind(this);
     return followButton;
@@ -72,7 +79,7 @@ export class FollowButton {
 
   /**
    * Prepare the render data, create the node and add handlers
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   render() {
     // Add trailing slash?
@@ -81,6 +88,6 @@ export class FollowButton {
     }
     this.href += `pins/follow/?guid=${Util.guid}`;
 
-    return Promise.resolve(this.renderTemplate());
+    return tryResolve(() => this.renderTemplate());
   }
 }

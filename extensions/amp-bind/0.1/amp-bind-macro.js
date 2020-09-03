@@ -14,16 +14,7 @@
  * limitations under the License.
  */
 
-/**
- * Data representation of an <amp-bind-macro> that can cross the web worker
- * boundary (structured cloneable).
- * @typedef {{
- *   id: string,
- *   argumentNames: Array<string>,
- *   expressionString: string
- * }}
- */
-export let AmpBindMacroDef;
+import {LayoutPriority} from '../../../src/layout';
 
 /**
  * The <amp-bind-macro> element is used to define an expression macro that can
@@ -31,9 +22,9 @@ export let AmpBindMacroDef;
  */
 export class AmpBindMacro extends AMP.BaseElement {
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Loads after other content.
-    return 1;
+    return LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -55,10 +46,11 @@ export class AmpBindMacro extends AMP.BaseElement {
   /**
    * @return {string} Returns a string to identify this tag. May not be unique
    *     if the element name is not unique.
-   * @private
+   * @protected
    */
   getName_() {
-    return '<amp-bind-macro> ' +
-        (this.element.getAttribute('id') || '<unknown id>');
+    return (
+      '<amp-bind-macro> ' + (this.element.getAttribute('id') || '<unknown id>')
+    );
   }
 }

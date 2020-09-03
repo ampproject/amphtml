@@ -37,11 +37,10 @@ export let MockResponseTiming;
 export let MockResponse;
 
 /**
- * A stub for `window.fetch`, facilitating hermetic testing of code that uses it.
- * The window is stubbed when this class's constructor is called.
+ * A stub for `window.fetch`, facilitating hermetic testing of code that uses
+ * it. The window is stubbed when this class's constructor is called.
  */
 export class FetchMock {
-
   /** @param {!Window} win */
   constructor(win) {
     /** @private {!Window} */
@@ -106,7 +105,7 @@ export class FetchMock {
    * @private
    */
   fetch_(input, init) {
-    const url = new Request(input, init).url;
+    const {url} = new Request(input, init);
     const route = this.routes_[url];
     if (!route) {
       throw new Error('no route defined for ' + url);
@@ -116,16 +115,18 @@ export class FetchMock {
     }
     route.called = true;
     return Promise.resolve(
-        typeof route.response == 'function' ?
-          route.response() : route.response)
-        .then(data => {
-          if (data === null || typeof data == 'string') {
-            return new Response(data);
-          } else {
-            const {body, status, headers} = data;
-            return new Response(body, {status, headers});
-          }
-        });
+      typeof route.response == 'function' ? route.response() : route.response
+    ).then((data) => {
+      if (data === null || typeof data == 'string') {
+        return new Response(data);
+      } else {
+        const {body, status, headers} = data;
+        return new Response(
+          body,
+          /** @type {!ResponseInit} */ ({status, headers})
+        );
+      }
+    });
   }
 }
 

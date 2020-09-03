@@ -1,0 +1,61 @@
+{
+  "bookendVersion": "v1.0",
+  "shareProviders": [
+    "email",
+    "facebook",
+    "twitter",
+    "pinterest",
+    "whatsapp",
+    "gplus"
+  ],
+  "components": [
+    {
+      "type": "heading",
+      "text": "Other Examples"
+    },
+    {
+      "type": "small",
+      "title": "Small article card",
+      "url": "http://example.com/1.html",
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+    },
+    {
+      "type": "landscape",
+      "title": "Landscape article card",
+      "url": "http://example.com/2.html",
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+    },
+    {
+      "type": "portrait",
+      "title": "Portrait article card",
+      "url": "http://example.com/3.html",
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+    },
+    {
+      "type": "cta-link",
+      "links": [
+        {
+          "text": "Link One",
+          "url": "http://example.com/4.html"
+        },
+        {
+          "text": "Link Two",
+          "url": "http://example.com/4.html"
+        },
+        {
+          "text": "Link Three",
+          "url": "http://example.com/4.html"
+        }
+      ]
+    },
+    {
+      "type": "textbox",
+      "text": [
+        "Food by Enrique McPizza",
+        "Choreography by Gabriel Filly",
+        "Script by Alan Ecma S.",
+        "Direction by Jon Tarantino"
+      ]
+    }
+  ]
+}

@@ -20,6 +20,11 @@ const adbladeFields = ['width', 'height', 'cid'];
 const adbladeHostname = 'web.adblade.com';
 const industrybrainsHostname = 'web.industrybrains.com';
 
+/**
+ * @param {string} hostname
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 function addAdiantUnit(hostname, global, data) {
   validateData(data, adbladeFields, []);
 
@@ -35,8 +40,8 @@ function addAdiantUnit(hostname, global, data) {
   global.document.getElementById('c').appendChild(ins);
 
   ins.parentNode.addEventListener(
-      'eventAdbladeRenderStart',
-      global.context.renderStart()
+    'eventAdbladeRenderStart',
+    global.context.renderStart()
   );
 
   // run our JavaScript code to display the ad unit

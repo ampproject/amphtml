@@ -1,13 +1,11 @@
 {
   "name": "Local AMP",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "manifest_version": 2,
   "description": "Run prod AMP pages with the local AMP runtime.",
   "homepage_url": "https://www.ampproject.org",
   "background": {
-    "scripts": [
-      "background.js"
-    ],
+    "scripts": ["background.js"],
     "persistent": true
   },
   "icons": {
@@ -24,9 +22,5 @@
     "default_title": "AMP Local Proxy",
     "default_popup": "popup.html"
   },
-  "permissions": [
-    "webRequest",
-    "webRequestBlocking",
-    "*://*/*"
-  ]
+  "permissions": ["webRequest", "webRequestBlocking", "*://*/*"]
 }

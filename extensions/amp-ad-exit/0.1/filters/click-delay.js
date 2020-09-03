@@ -15,38 +15,71 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {user} from '../../../../src/log';
+import {dev, userAssert} from '../../../../src/log';
+
+/** @type {string} */
+const TAG = 'amp-ad-exit';
 
 export class ClickDelayFilter extends Filter {
   /**
    * @param {string} name The user-defined name of the filter.
    * @param {!../config.ClickDelayConfig} spec
+   * @param {!Window} win
    */
-  constructor(name, spec) {
-    super(name);
-    user().assert(isValidClickDelaySpec(spec), 'Invalid ClickDelay spec');
+  constructor(name, spec, win) {
+    super(name, spec.type);
+    userAssert(
+      spec.type == FilterType.CLICK_DELAY &&
+        typeof spec.delay == 'number' &&
+        spec.delay > 0,
+      'Invalid ClickDelay spec'
+    );
 
-    this.delay_ = spec.delay;
+    /**
+     * @const {!../config.ClickDelayConfig}
+     * @visibleForTesting
+     */
+    this.spec = spec;
 
-    /** @private {number} */
-    this.inViewportTime_ = Date.now();
+    /**
+     * @type {number}
+     * @visibleForTesting
+     */
+    this.intervalStart = Date.now();
+
+    if (spec.startTimingEvent) {
+      if (!win['performance'] || !win['performance']['timing']) {
+        dev().warn(
+          TAG,
+          'Browser does not support performance timing, ' +
+            'falling back to now'
+        );
+      } else if (
+        win['performance']['timing'][spec.startTimingEvent] == undefined
+      ) {
+        dev().warn(
+          TAG,
+          `Invalid performance timing event type ${spec.startTimingEvent}` +
+            ', falling back to now'
+        );
+      } else {
+        this.intervalStart =
+          win['performance']['timing'][spec.startTimingEvent];
+      }
+    }
   }
 
   /** @override */
   filter() {
-    return (Date.now() - this.inViewportTime_) >= this.delay_;
+    return Date.now() - this.intervalStart >= this.spec.delay;
   }
 }
 
 /**
- * @param {!../config.FilterConfig} spec
- * @return {boolean} Whether the config defines a ClickDelay filter.
+ * @param {number} delay
+ * @param {string=} startTimingEvent
+ * @return {!../config.ClickDelayConfig}
  */
-function isValidClickDelaySpec(spec) {
-  return spec.type == FilterType.CLICK_DELAY && typeof spec.delay == 'number' &&
-      spec.delay > 0;
-}
-
-export function makeClickDelaySpec(delay) {
-  return {type: FilterType.CLICK_DELAY, delay};
+export function makeClickDelaySpec(delay, startTimingEvent = undefined) {
+  return {type: FilterType.CLICK_DELAY, delay, startTimingEvent};
 }

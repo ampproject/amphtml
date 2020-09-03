@@ -14,33 +14,46 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
+/** @fileoverview */
+
 import {install as installArrayIncludes} from './polyfills/array-includes';
-import {
-  install as installDOMTokenListToggle,
-} from './polyfills/domtokenlist-toggle';
+import {install as installCustomElements} from './polyfills/custom-elements';
+import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
+import {install as installFetch} from './polyfills/fetch';
+import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
+import {install as installIntersectionObserver} from './polyfills/intersection-observer';
+import {install as installMapSet} from './polyfills/map-set';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
+import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
-// Importing the document-register-element module has the side effect
-// of installing the custom elements polyfill if necessary.
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+import {install as installSetAdd} from './polyfills/set-add';
+import {install as installWeakMapSet} from './polyfills/weakmap-set';
 
-/**
-  Only install in closure binary and not in babel/browserify binary, since in
-  the closure binary we strip out the `document-register-element` install side
-  effect so we can tree shake the dependency correctly and we have to make
-  sure to not `install` it during dev since the `install` is done as a side
-  effect in importing the module.
-*/
-if (!getMode().localDev) {
-  installCustomElements(self, 'auto');
+if (!IS_ESM) {
+  installFetch(self);
+  installMathSign(self);
+  installObjectAssign(self);
+  installObjectValues(self);
+  installPromise(self);
+  installArrayIncludes(self);
+  installMapSet(self);
+  installWeakMapSet(self);
+  installSetAdd(self);
 }
-installDOMTokenListToggle(self);
-installMathSign(self);
-installObjectAssign(self);
-installPromise(self);
-installDocContains(self);
-installArrayIncludes(self);
+
+// Polyfills that depend on DOM availability
+if (self.document) {
+  if (!IS_ESM) {
+    installDOMTokenList(self);
+    installDocContains(self);
+    installGetBoundingClientRect(self);
+  }
+  // The anonymous class parameter allows us to detect native classes vs
+  // transpiled classes.
+  if (!IS_SXG) {
+    installCustomElements(self, class {});
+    installIntersectionObserver(self);
+  }
+}

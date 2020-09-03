@@ -19,9 +19,9 @@ tags: {  # amp-pinterest
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-pinterest"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -33,14 +33,14 @@ tags: {  # <amp-pinterest>
   html_format: AMP
   tag_name: "AMP-PINTEREST"
   requires_extension: "amp-pinterest"
+  attrs: { name: "alt" }
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-do"
     mandatory: true
   }
-  attrs: { name: "alt" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-pinterest"
+  spec_url: "https://amp.dev/documentation/components/amp-pinterest/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

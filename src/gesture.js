@@ -16,13 +16,12 @@
 
 import {Observable} from './observable';
 import {Pass} from './pass';
-import {dev} from './log';
+import {devAssert} from './log';
 import {findIndex} from './utils/array';
+import {supportsPassiveEventListener} from './event-helper-listen';
 import {toWin} from './types';
 
-
 const PROP_ = '__AMP_Gestures';
-
 
 /**
  * A gesture object contains the type and data of the gesture such as
@@ -45,13 +44,12 @@ export class Gesture {
     this.type = type;
     /** @const {DATA} */
     this.data = data;
-    /** @const {time} */
+    /** @const {number} */
     this.time = time;
     /** @const {?Event} */
     this.event = event;
   }
 }
-
 
 /**
  * Gestures object manages all gestures on a particular element. It listens
@@ -61,18 +59,26 @@ export class Gesture {
  * between competing recognizers to decide which gesture should go forward.
  */
 export class Gestures {
-
   /**
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
    * @param {boolean=} opt_shouldNotPreventDefault
+   * @param {boolean=} opt_shouldStopPropagation
    * @return {!Gestures}
    */
-  static get(element, opt_shouldNotPreventDefault = false) {
+  static get(
+    element,
+    opt_shouldNotPreventDefault = false,
+    opt_shouldStopPropagation = false
+  ) {
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(element, opt_shouldNotPreventDefault);
+      res = new Gestures(
+        element,
+        opt_shouldNotPreventDefault,
+        opt_shouldStopPropagation
+      );
       element[PROP_] = res;
     }
     return res;
@@ -80,8 +86,10 @@ export class Gestures {
 
   /**
    * @param {!Element} element
+   * @param {boolean} shouldNotPreventDefault
+   * @param {boolean} shouldStopPropagation
    */
-  constructor(element, shouldNotPreventDefault) {
+  constructor(element, shouldNotPreventDefault, shouldStopPropagation) {
     /** @private {!Element} */
     this.element_ = element;
 
@@ -103,6 +111,9 @@ export class Gestures {
     /** @private {boolean} */
     this.shouldNotPreventDefault_ = shouldNotPreventDefault;
 
+    /** @private {boolean} */
+    this.shouldStopPropagation_ = shouldStopPropagation;
+
     /**
      * This variable indicates that the eventing has stopped on this
      * event cycle.
@@ -111,8 +122,10 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(toWin(element.ownerDocument.defaultView),
-        this.doPass_.bind(this));
+    this.pass_ = new Pass(
+      toWin(element.ownerDocument.defaultView),
+      this.doPass_.bind(this)
+    );
 
     /** @private {!Observable} */
     this.pointerDownObservable_ = new Observable();
@@ -132,9 +145,19 @@ export class Gestures {
     /** @private @const {function(!Event)} */
     this.boundOnTouchCancel_ = this.onTouchCancel_.bind(this);
 
-    this.element_.addEventListener('touchstart', this.boundOnTouchStart_);
+    const win = element.ownerDocument.defaultView;
+    const passiveSupported = supportsPassiveEventListener(toWin(win));
+    this.element_.addEventListener(
+      'touchstart',
+      this.boundOnTouchStart_,
+      passiveSupported ? {passive: true} : false
+    );
     this.element_.addEventListener('touchend', this.boundOnTouchEnd_);
-    this.element_.addEventListener('touchmove', this.boundOnTouchMove_);
+    this.element_.addEventListener(
+      'touchmove',
+      this.boundOnTouchMove_,
+      passiveSupported ? {passive: true} : false
+    );
     this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_);
 
     /** @private {boolean} */
@@ -158,8 +181,8 @@ export class Gestures {
    * gesture handler registered in this method the recognizer is installed
    * and from that point on it participates in the event processing.
    *
-   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
-   * @param {function(!Gesture<DATA>)} handler
+   * @param {function(new:GestureRecognizer, !Gestures)} recognizerConstr
+   * @param {function(!Gesture)} handler
    * @return {!UnlistenDef}
    * @template DATA
    */
@@ -180,7 +203,7 @@ export class Gestures {
    * true if anything was done. Returns false if there were no handlers
    * registered on the given gesture recognizer in first place.
    *
-   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @param {function(new:GestureRecognizer, !Gestures)} recognizerConstr
    * @return {boolean}
    */
   removeGesture(recognizerConstr) {
@@ -188,7 +211,7 @@ export class Gestures {
     const overserver = this.overservers_[type];
     if (overserver) {
       overserver.removeAll();
-      const index = findIndex(this.recognizers_, e => e.getType() == type);
+      const index = findIndex(this.recognizers_, (e) => e.getType() == type);
       if (index < 0) {
         return false;
       }
@@ -295,8 +318,14 @@ export class Gestures {
         this.stopTracking_(i);
         continue;
       }
+
       this.recognizers_[i].onTouchEnd(event);
-      if (!this.pending_[i] || this.pending_[i] < now) {
+
+      const isReady = !this.pending_[i];
+      const isExpired = this.pending_[i] < now;
+      const isEventing = this.eventing_ == this.recognizers_[i];
+
+      if (!isEventing && (isReady || isExpired)) {
         this.stopTracking_(i);
       }
     }
@@ -324,6 +353,8 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {number} offset
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalReady_(recognizer, offset) {
     // Somebody got here first.
@@ -352,6 +383,8 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {number} timeLeft
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalPending_(recognizer, timeLeft) {
     // Somebody got here first.
@@ -373,6 +406,8 @@ export class Gestures {
    * emitting gestures.
    * @param {!GestureRecognizer} recognizer
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalEnd_(recognizer) {
     if (this.eventing_ == recognizer) {
@@ -388,14 +423,20 @@ export class Gestures {
    * @param {*} data
    * @param {?Event} event
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalEmit_(recognizer, data, event) {
-    dev().assert(this.eventing_ == recognizer,
-        'Recognizer is not currently allowed: %s', recognizer.getType());
+    devAssert(
+      this.eventing_ == recognizer,
+      'Recognizer is not currently allowed: %s',
+      recognizer.getType()
+    );
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
-      overserver.fire(new Gesture(recognizer.getType(), data, Date.now(),
-          event));
+      overserver.fire(
+        new Gesture(recognizer.getType(), data, Date.now(), event)
+      );
     }
   }
 
@@ -409,8 +450,7 @@ export class Gestures {
     if (!cancelEvent) {
       const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
-        if (this.ready_[i] ||
-                this.pending_[i] && this.pending_[i] >= now) {
+        if (this.ready_[i] || (this.pending_[i] && this.pending_[i] >= now)) {
           cancelEvent = true;
           break;
         }
@@ -421,6 +461,8 @@ export class Gestures {
       if (!this.shouldNotPreventDefault_) {
         event.preventDefault();
       }
+    } else if (this.shouldStopPropagation_) {
+      event.stopPropagation();
     }
     if (this.passAfterEvent_) {
       this.passAfterEvent_ = false;
@@ -525,7 +567,6 @@ export class Gestures {
   }
 }
 
-
 /**
  * The gesture recognizer receives the pointer events from Gestures instance.
  * Based on these events, it can "recognize" the gesture it's responsible for,
@@ -554,7 +595,6 @@ export class Gestures {
  * @template DATA
  */
 export class GestureRecognizer {
-
   /**
    * @param {string} type
    * @param {!Gestures} manager
@@ -627,15 +667,13 @@ export class GestureRecognizer {
    * state. It will be in this state until it calls {@link signalEnd} or
    * the {@link acceptCancel} is called by the Gestures instance.
    */
-  acceptStart() {
-  }
+  acceptStart() {}
 
   /**
    * The Gestures instance calls this method to reset the recognizer. At this
    * point the recognizer is in the initial waiting state.
    */
-  acceptCancel() {
-  }
+  acceptCancel() {}
 
   /**
    * The Gestures instance calls this method for each "touchstart" event. If
@@ -666,6 +704,5 @@ export class GestureRecognizer {
    * next touch series.
    * @param {!Event} unusedEvent
    */
-  onTouchEnd(unusedEvent) {
-  }
+  onTouchEnd(unusedEvent) {}
 }

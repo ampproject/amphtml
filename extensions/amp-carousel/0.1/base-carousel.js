@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {isAmp4Email} from '../../../src/format';
+import {toggleAttribute} from '../../../src/dom';
 
 /**
  * @abstract
  */
 export class BaseCarousel extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -38,8 +39,11 @@ export class BaseCarousel extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const input = Services.inputFor(this.win);
-    this.showControls_ = input.isMouseDetected() ||
-        this.element.hasAttribute('controls');
+    const doc = /** @type {!Document} */ (this.element.ownerDocument);
+    this.showControls_ =
+      isAmp4Email(doc) ||
+      input.isMouseDetected() ||
+      this.element.hasAttribute('controls');
 
     if (this.showControls_) {
       this.element.classList.add('i-amphtml-carousel-has-controls');
@@ -60,61 +64,60 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /**
    * Handles element specific viewport based events.
-   * @param {boolean} unusedInViewport.
+   * @param {boolean} unusedInViewport
    * @protected
    */
   onViewportCallback(unusedInViewport) {}
 
-
-  buildButtons() {
-    this.prevButton_ = this.element.ownerDocument.createElement('div');
-    this.prevButton_.classList.add('amp-carousel-button');
-    this.prevButton_.classList.add('amp-carousel-button-prev');
-    this.prevButton_.setAttribute('role', 'button');
-    if (this.element.hasAttribute('data-previous-button-aria-label')) {
-      this.prevButton_.setAttribute('aria-label',
-          this.element.getAttribute('data-previous-button-aria-label'));
-    } else {
-      this.prevButton_.setAttribute('aria-label',
-          'Previous item in carousel');
-    }
-    this.prevButton_.setAttribute('tabindex', 0);
-    this.prevButton_.onkeydown = event => {
-      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
+  /**
+   * Builds a carousel button for next/prev.
+   * @param {string} className
+   * @param {function()} onInteraction
+   * @return {?Element}
+   */
+  buildButton(className, onInteraction) {
+    const button = this.element.ownerDocument.createElement('div');
+    button.tabIndex = 0;
+    button.classList.add('amp-carousel-button');
+    button.classList.add(className);
+    button.setAttribute('role', this.buttonsAriaRole());
+    button.onkeydown = (event) => {
+      if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
-          this.interactionPrev();
+          onInteraction();
         }
       }
     };
-    this.prevButton_.onclick = () => {
+    button.onclick = onInteraction;
+
+    return button;
+  }
+
+  /**
+   * The ARIA role for the controls. Either `button` or `presentation` based
+   * on usage.
+   * @return {string}
+   * @protected
+   */
+  buttonsAriaRole() {
+    // Subclasses may override.
+    return 'button';
+  }
+
+  /**
+   * Builds the next and previous buttons.
+   */
+  buildButtons() {
+    this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
       this.interactionPrev();
-    };
+    });
     this.element.appendChild(this.prevButton_);
 
-    this.nextButton_ = this.element.ownerDocument.createElement('div');
-    this.nextButton_.classList.add('amp-carousel-button');
-    this.nextButton_.classList.add('amp-carousel-button-next');
-    this.nextButton_.setAttribute('role', 'button');
-    if (this.element.hasAttribute('data-next-button-aria-label')) {
-      this.nextButton_.setAttribute('aria-label',
-          this.element.getAttribute('data-next-button-aria-label'));
-    } else {
-      this.nextButton_.setAttribute('aria-label',
-          'Next item in carousel');
-    }
-    this.nextButton_.setAttribute('tabindex', 0);
-    this.nextButton_.onkeydown = event => {
-      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
-        if (!event.defaultPrevented) {
-          event.preventDefault();
-          this.interactionNext();
-        }
-      }
-    };
-    this.nextButton_.onclick = () => {
+    this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
-    };
+    });
+    this.updateButtonTitles();
     this.element.appendChild(this.nextButton_);
   }
 
@@ -183,17 +186,49 @@ export class BaseCarousel extends AMP.BaseElement {
     }
     this.getVsync().mutate(() => {
       const className = 'i-amphtml-carousel-button-start-hint';
+      const hideAttribute = 'i-amphtml-carousel-hide-buttons';
       this.element.classList.add(className);
       Services.timerFor(this.win).delay(() => {
-        this.deferMutate(() => {
+        this.mutateElement(() => {
           this.element.classList.remove(className);
-          this.prevButton_.classList.toggle(
-              'i-amphtml-screen-reader', !this.showControls_);
-          this.nextButton_.classList.toggle(
-              'i-amphtml-screen-reader', !this.showControls_);
+          toggleAttribute(this.element, hideAttribute, !this.showControls_);
         });
       }, 4000);
     });
+  }
+
+  /**
+   * Updates the titles for the next/previous buttons. This should be called
+   * by subclasses if they want to update the button labels. The
+   * `getNextButtonTitle` and `getPrevButtonTitle` should be overwritten to
+   * provide the title values.
+   * @protected
+   */
+  updateButtonTitles() {
+    this.nextButton_.title = this.getNextButtonTitle();
+    this.prevButton_.title = this.getPrevButtonTitle();
+  }
+
+  /**
+   * @return {string} The title to use for the next button.
+   * @protected
+   */
+  getNextButtonTitle() {
+    return (
+      this.element.getAttribute('data-next-button-aria-label') ||
+      'Next item in carousel'
+    );
+  }
+
+  /**
+   * @return {string} The title to use for the pevious button.
+   * @protected
+   */
+  getPrevButtonTitle() {
+    return (
+      this.element.getAttribute('data-prev-button-aria-label') ||
+      'Previous item in carousel'
+    );
   }
 
   /** @override */

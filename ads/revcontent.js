@@ -14,21 +14,33 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function revcontent(global, data) {
-  const endpoint = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
-  const required = [
-    'id',
-    'width',
-    'height',
-    'wrapper',
-  ];
+  let endpoint =
+    'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+
+  if (typeof data.revcontent !== 'undefined') {
+    if (typeof data.env === 'undefined') {
+      endpoint = 'https://assets.revcontent.com/master/delivery.js';
+    } else if (data.env == 'dev') {
+      endpoint = 'https://performante.revcontent.dev/delivery.js';
+    } else {
+      endpoint = 'https://assets.revcontent.com/' + data.env + '/delivery.js';
+    }
+  }
+
+  const required = ['id', 'height'];
   const optional = [
+    'wrapper',
+    'subIds',
+    'revcontent',
+    'env',
+    'loadscript',
     'api',
     'key',
     'ssl',
@@ -47,9 +59,18 @@ export function revcontent(global, data) {
     'sizer',
     'debug',
     'ampcreative',
+    'gdpr',
+    'gdprConsent',
+    'usPrivacy',
   ];
+
+  data.endpoint = data.endpoint ? data.endpoint : 'trends.revcontent.com';
 
   validateData(data, required, optional);
   global.data = data;
-  writeScript(window, endpoint);
+  if (data.loadscript) {
+    loadScript(window, endpoint);
+  } else {
+    writeScript(window, endpoint);
+  }
 }

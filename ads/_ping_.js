@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../src/log';
+import {dev, devAssert, userAssert} from '../src/log';
 import {validateData} from '../3p/3p';
 
 /**
@@ -28,8 +28,8 @@ export function _ping_(global, data) {
   // for testing only. see #10628
   global.networkIntegrationDataParamForTesting = data;
 
-  validateData(data, []);
-  user().assert(!data['error'], 'Fake user error!');
+  validateData(data, ['url'], ['valid', 'adHeight', 'adWidth', 'enableIo']);
+  userAssert(!data['error'], 'Fake user error!');
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 
@@ -42,8 +42,11 @@ export function _ping_(global, data) {
   });
 
   if (data.ad_container) {
-    dev().assert(
-        global.context.container == data.ad_container, 'wrong container');
+    devAssert(global.context.container == data.ad_container, 'wrong container');
+  }
+  if (data.valid == 'false') {
+    // Immediately send no-content for visual diff test
+    global.context.noContentAvailable();
   }
   if (data.valid && data.valid == 'true') {
     const img = document.createElement('img');
@@ -68,18 +71,32 @@ export function _ping_(global, data) {
       global.context.renderStart();
     }
     if (data.enableIo) {
-      global.context.observeIntersection(function(changes) {
-        changes.forEach(function(c) {
-          dev().info('AMP-AD', 'Intersection: (WxH)' +
-              `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+      global.context.observeIntersection(function (changes) {
+        /** @type {!Array} */ (changes).forEach(function (c) {
+          dev().info(
+            'AMP-AD',
+            'Intersection: (WxH)' +
+              `${c.intersectionRect.width}x${c.intersectionRect.height}`
+          );
         });
         // store changes to global.lastIO for testing purpose
         global.ping.lastIO = changes[changes.length - 1];
       });
     }
-    global.context.getHtml('a', ['href'], function(html) {
+    global.context.getHtml('a', ['href'], function (html) {
       dev().info('GET-HTML', html);
     });
+    global.context.getConsentState(function (consentState) {
+      dev().info('GET-CONSENT-STATE', consentState);
+    });
+    if (global.context.consentSharedData) {
+      const TAG = 'consentSharedData';
+      dev().info(TAG, global.context.consentSharedData);
+    }
+    if (global.context.initialConsentValue) {
+      const TAG = 'consentStringValue';
+      dev().info(TAG, global.context.initialConsentValue);
+    }
   } else {
     global.setTimeout(() => {
       global.context.noContentAvailable();

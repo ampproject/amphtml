@@ -14,72 +14,32 @@
  * limitations under the License.
  */
 
-import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
+import {LocalSubscriptionIframePlatform} from './local-subscription-platform-iframe';
+import {LocalSubscriptionRemotePlatform} from './local-subscription-platform-remote';
 
 /**
- * This implements the methods to interact with various subscription platforms.
- *
- * @implements {./subscription-platform.SubscriptionPlatform}
+ * Local subscription platform factory method.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!JsonObject} platformConfig
+ * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+ * @return {!./subscription-platform.SubscriptionPlatform}
  */
-export class LocalSubscriptionPlatform {
-
-  /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JsonObject} serviceConfig
-   * @param {!PageConfig} pageConfig
-   */
-  constructor(ampdoc, serviceConfig, pageConfig) {
-    /** @const */
-    this.ampdoc_ = ampdoc;
-
-    /** @const @private {!JsonObject} */
-    this.serviceConfig_ = serviceConfig;
-
-    /** @const @private {!PageConfig} */
-    this.pageConfig_ = pageConfig;
-
-    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = Services.xhrFor(this.ampdoc_.win);
-
-    /** @private @const {string} */
-    this.authorizationUrl_ = assertHttpsUrl(
-        user().assert(
-            this.serviceConfig_['authorizationUrl'],
-            'Service config does not have authorization Url'
-        ),
-        'Authorization Url'
+export function localSubscriptionPlatformFactory(
+  ampdoc,
+  platformConfig,
+  serviceAdapter
+) {
+  /* Return the correxct platform based on the config */
+  if (platformConfig['type'] === 'iframe') {
+    return new LocalSubscriptionIframePlatform(
+      ampdoc,
+      platformConfig,
+      serviceAdapter
     );
   }
-
-  /** @override */
-  getEntitlements() {
-    const currentProductId = user().assertString(
-        this.pageConfig_.getProductId(), 'Current Product ID is null');
-
-    return this.xhr_
-        .fetchJson(this.authorizationUrl_, {
-          credentials: 'include',
-        })
-        .then(res => res.json())
-        .then(resJson => {
-          return new Entitlements(
-              this.serviceConfig_['serviceId'] || 'local',
-              JSON.stringify(resJson),
-              Entitlement.parseListFromJson(resJson),
-              currentProductId
-          );
-        });
-  }
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @VisibleForTesting
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
+  return new LocalSubscriptionRemotePlatform(
+    ampdoc,
+    platformConfig,
+    serviceAdapter
+  );
 }

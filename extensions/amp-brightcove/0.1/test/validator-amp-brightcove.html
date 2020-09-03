@@ -30,20 +30,21 @@
 <body>
   <!-- Valid: Example of a valid amp-brightcove. -->
   <amp-brightcove
-      data-account="906043040001"
-      data-video-id="1401169490001"
-      data-player-id="180a5658-8be8-4f33-8eba-d562ab41b40c"
+      autoplay
+      data-account="1290862519001"
+      data-video-id="ref:amp-docs-sample"
+      data-player-id="SyIOV8yWM"
       layout="responsive" width="480" height="270">
   </amp-brightcove>
   <!-- Valid: data-video-id, data-player-id are optional;
        leaving them out results in the default config. -->
   <amp-brightcove
-      data-account="906043040001"
+      data-account="1290862519001"
       layout="responsive" width="480" height="270">
   </amp-brightcove>
   <!-- Valid: most "data-*" attributes are bindable. -->
   <amp-brightcove
-      data-account="906043040001"
+      data-account="1290862519001"
       layout="responsive" width="480" height="270"
       [data-account]="foo.bar" [data-embed]="foo.bar" [data-player]="foo.bar"
       [data-player-id]="foo.bar" [data-playlist-id]="foo.bar"
@@ -52,6 +53,14 @@
   <!-- Invalid: data-account is mandatory;
        leaving them out results in an error. -->
   <amp-brightcove
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
+  <!-- Invalid: `dock` without `amp-video-docking` extension. -->
+  <amp-brightcove
+      dock
+      data-account="1290862519001"
+      data-video-id="ref:amp-docs-sample"
+      data-player-id="SyIOV8yWM"
       layout="responsive" width="480" height="270">
   </amp-brightcove>
 </body>

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceFor} from './variables';
+import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {findIndex} from '../../../src/utils/array';
 import {isObject} from '../../../src/types';
-import {parseUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
@@ -41,9 +40,9 @@ let IndividualResourceSpecDef;
 /**
  * A parsed resource spec for a specific host or sets of hosts (as defined by
  * the hostPattern).
- * @typedef{{
+ * @typedef {{
  *   hostPattern: !RegExp,
- *   resouces: !Array<{
+ *   resources: !Array<{
  *     name: string,
  *     pathPattern: !RegExp,
  *     queryPattern: !RegExp,
@@ -53,6 +52,14 @@ let IndividualResourceSpecDef;
 let ResourceSpecForHostDef;
 
 /**
+ * The default maximum buffer size for resource timing entries. After the limit
+ * has been reached, the browser will stop recording resource timing entries.
+ * This number is chosen by the spec: https://w3c.github.io/resource-timing.
+ * @const {number}
+ */
+const RESOURCE_TIMING_BUFFER_SIZE = 150;
+
+/**
  * Yields the thread before running the function to avoid causing jank. (i.e. a
  * task that takes over 16ms.)
  * @param {function(): OUT} fn
@@ -60,7 +67,7 @@ let ResourceSpecForHostDef;
  * @template OUT
  */
 function yieldThread(fn) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => resolve(fn()));
   });
 }
@@ -75,17 +82,32 @@ function validateResourceTimingSpec(spec) {
     user().warn('ANALYTICS', 'resourceTimingSpec missing "resources" field');
     return false;
   }
-  if (!spec['encoding'] || !spec['encoding']['entry'] ||
-      !spec['encoding']['delim']) {
+  if (
+    !spec['encoding'] ||
+    !spec['encoding']['entry'] ||
+    !spec['encoding']['delim']
+  ) {
     user().warn(
-        'ANALYTICS',
-        'resourceTimingSpec is missing or has incomplete encoding options');
+      'ANALYTICS',
+      'resourceTimingSpec is missing or has incomplete encoding options'
+    );
     return false;
   }
   if (spec['encoding']['base'] < 2 || spec['encoding']['base'] > 36) {
     user().warn(
-        'ANALYTICS',
-        'resource timing variables only supports bases between 2 and 36');
+      'ANALYTICS',
+      'resource timing variables only supports bases between 2 and 36'
+    );
+    return false;
+  }
+  if (
+    spec['responseAfter'] != null &&
+    typeof spec['responseAfter'] != 'number'
+  ) {
+    user().warn(
+      'ANALYTICS',
+      'resourceTimingSpec["responseAfter"] must be a number'
+    );
     return false;
   }
   return true;
@@ -97,11 +119,9 @@ function validateResourceTimingSpec(spec) {
  * @return {!Array<!PerformanceResourceTiming>}
  */
 function getResourceTimingEntries(win) {
-  if (!win.performance || !win.performance.getEntriesByType) {
-    return [];
-  }
-  return /** @type {!Array<!PerformanceResourceTiming>} */ (
-    win.performance.getEntriesByType('resource'));
+  return /** @type {!Array<!PerformanceResourceTiming>} */ (win.performance.getEntriesByType(
+    'resource'
+  ));
 }
 
 /**
@@ -142,16 +162,17 @@ function entryToExpansionOptions(entry, name, format) {
  * @return {?string} The name of the entry, or null if no matching name exists.
  */
 function nameForEntry(entry, resourcesByHost) {
-  const url = parseUrl(entry.name);
+  const url = entry.name;
   for (let i = 0; i < resourcesByHost.length; ++i) {
     const {hostPattern, resources} = resourcesByHost[i];
     if (!hostPattern.test(url.host)) {
       continue;
     }
     const index = findIndex(
-        resources,
-        res => res.pathPattern.test(url.pathname) &&
-            res.queryPattern.test(url.search));
+      resources,
+      (res) =>
+        res.pathPattern.test(url.pathname) && res.queryPattern.test(url.search)
+    );
     if (index != -1) {
       return resources[index].name;
     }
@@ -208,7 +229,7 @@ function filterEntries(entries, resourceDefs) {
   // definitions to have the same host.
   const byHost = groupSpecsByHost(resourceDefs);
   const results = [];
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     const name = nameForEntry(entry, byHost);
     if (name) {
       results.push({entry, name});
@@ -222,40 +243,83 @@ function filterEntries(entries, resourceDefs) {
  * single string.
  * @param {!Array<!PerformanceResourceTiming>} entries
  * @param {!JsonObject} resourceTimingSpec
- * @param {!Window} win
+ * @param {!Element} element amp-analytics element.
  * @return {!Promise<string>}
  */
-function serialize(entries, resourceTimingSpec, win) {
+function serialize(entries, resourceTimingSpec, element) {
   const resources = resourceTimingSpec['resources'];
   const encoding = resourceTimingSpec['encoding'];
 
-  const variableService = variableServiceFor(win);
+  const variableService = variableServiceForDoc(element);
   const format = (val, relativeTo = 0) =>
     Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
-  const promises =
-      filterEntries(entries, resources)
-          .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
-          .map(
-              expansion =>
-                variableService.expandTemplate(encoding['entry'], expansion));
-  return Promise.all(promises).then(vars => vars.join(encoding['delim']));
+  const promises = filterEntries(entries, resources)
+    .map((resourceTimingEntry) => {
+      const {entry, name} = resourceTimingEntry;
+      return entryToExpansionOptions(entry, name, format);
+    })
+    .map((expansion) =>
+      variableService.expandTemplate(encoding['entry'], expansion, element)
+    );
+  return Promise.all(promises).then((vars) => vars.join(encoding['delim']));
 }
 
 /**
  * Serializes resource timing entries according to the resource timing spec.
+ * @param {!Element} element amp-analytics element.
  * @param {!JsonObject} resourceTimingSpec
- * @param {!Window} win
  * @return {!Promise<string>}
  */
-export function serializeResourceTiming(resourceTimingSpec, win) {
-  if (!validateResourceTimingSpec(resourceTimingSpec)) {
+function serializeResourceTiming(element, resourceTimingSpec) {
+  const {win} = element.getAmpDoc();
+  // Check that the performance timing API exists before and that the spec is
+  // valid before proceeding. If not, we simply return an empty string.
+  if (
+    resourceTimingSpec['done'] ||
+    !win.performance ||
+    !win.performance.now ||
+    !win.performance.getEntriesByType ||
+    !validateResourceTimingSpec(resourceTimingSpec)
+  ) {
+    resourceTimingSpec['done'] = true;
     return Promise.resolve('');
   }
-  const entries = getResourceTimingEntries(win);
+  let entries = getResourceTimingEntries(win);
+  if (entries.length >= RESOURCE_TIMING_BUFFER_SIZE) {
+    // We've exceeded the maximum buffer size so no additional metrics will be
+    // reported for this resourceTimingSpec.
+    resourceTimingSpec['done'] = true;
+  }
+
+  const responseAfter = resourceTimingSpec['responseAfter'] || 0;
+  // Update responseAfter for next time to avoid reporting the same resource
+  // multiple times.
+  resourceTimingSpec['responseAfter'] = Math.max(
+    responseAfter,
+    win.performance.now()
+  );
+
+  // Filter resources that are too early.
+  entries = entries.filter((e) => e.startTime + e.duration >= responseAfter);
   if (!entries.length) {
     return Promise.resolve('');
   }
   // Yield the thread in case iterating over all resources takes a long time.
-  return yieldThread(() => serialize(entries, resourceTimingSpec, win));
+  return yieldThread(() => serialize(entries, resourceTimingSpec, element));
+}
+
+/**
+ * @param {!Element} element amp-analytics element.
+ * @param {!JsonObject|undefined} spec resource timing spec.
+ * @param {number} startTime start timestamp.
+ * @return {!Promise<string>}
+ */
+export function getResourceTiming(element, spec, startTime) {
+  // Only allow collecting timing within 1s
+  if (spec && Date.now() < startTime + 60 * 1000) {
+    return serializeResourceTiming(element, spec);
+  } else {
+    return Promise.resolve('');
+  }
 }

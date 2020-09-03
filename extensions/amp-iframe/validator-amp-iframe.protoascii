@@ -19,9 +19,9 @@ tags: {  # amp-iframe
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-iframe"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -45,7 +45,8 @@ tags: {  # <amp-iframe>
   }
   attrs: {
     name: "frameborder"
-    value_regex: "0|1"
+    value: "0"
+    value: "1"
   }
   attrs: { name: "referrerpolicy" }
   attrs: {
@@ -55,17 +56,23 @@ tags: {  # <amp-iframe>
   attrs: { name: "sandbox" }
   attrs: {
     name: "scrolling"
-    value_regex: "auto|yes|no"
+    value: "auto"
+    value: "no"
+    value: "yes"
+  }
+  attrs: {
+    name: "tabindex"
+    value_regex: "-?\\d+"
   }
   attrs: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "srcdoc"

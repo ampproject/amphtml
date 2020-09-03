@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
+import {ActionTrust} from './action-constants';
 import {
   SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,
@@ -22,15 +22,26 @@ import {
   isProxyOrigin,
 } from './url';
 import {Services} from './services';
-import {dev, user} from './log';
+import {dev, user, userAssert} from './log';
+import {isExtensionScriptInNode} from './element-service';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise}
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
-  ampdoc.getRootNode().addEventListener('submit', onDocumentFormSubmit_, true);
+  // Register global submit event listener only if the amp-form
+  // extension is used. Allowing the usage of native forms, otherwise.
+  return isExtensionScriptInNode(ampdoc, 'amp-form').then(
+    (ampFormInstalled) => {
+      if (ampFormInstalled) {
+        ampdoc
+          .getRootNode()
+          .addEventListener('submit', onDocumentFormSubmit_, true);
+      }
+    }
+  );
 }
-
 
 /**
  * Intercept any submit on the current document and prevent invalid submits from
@@ -67,9 +78,12 @@ export function onDocumentFormSubmit_(e) {
 
   const inputs = form.elements;
   for (let i = 0; i < inputs.length; i++) {
-    user().assert(!inputs[i].name ||
-        inputs[i].name != SOURCE_ORIGIN_PARAM,
-    'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+    userAssert(
+      !inputs[i].name || inputs[i].name != SOURCE_ORIGIN_PARAM,
+      'Illegal input name, %s found: %s',
+      SOURCE_ORIGIN_PARAM,
+      inputs[i]
+    );
   }
 
   const action = form.getAttribute('action');
@@ -78,42 +92,58 @@ export function onDocumentFormSubmit_(e) {
 
   if (actionXhr) {
     assertHttpsUrl(actionXhr, form, 'action-xhr');
-    user().assert(!isProxyOrigin(actionXhr),
-        'form action-xhr should not be on AMP CDN: %s', form);
+    userAssert(
+      !isProxyOrigin(actionXhr),
+      'form action-xhr should not be on AMP CDN: %s',
+      form
+    );
     checkCorsUrl(actionXhr);
   }
   if (action) {
     assertHttpsUrl(action, form, 'action');
-    user().assert(!isProxyOrigin(action),
-        'form action should not be on AMP CDN: %s', form);
+    userAssert(
+      !isProxyOrigin(action),
+      'form action should not be on AMP CDN: %s',
+      form
+    );
     checkCorsUrl(action);
   }
 
   if (method == 'GET') {
-    user().assert(actionXhr || action,
-        'form action-xhr or action attribute is required for method=GET: %s',
-        form);
+    userAssert(
+      actionXhr || action,
+      'form action-xhr or action attribute is required for method=GET: %s',
+      form
+    );
   } else if (method == 'POST') {
     if (action) {
       const TAG = 'form';
-      user().error(TAG,
-          'action attribute is invalid for method=POST: %s', form);
+      user().error(
+        TAG,
+        'action attribute is invalid for method=POST: %s',
+        form
+      );
     }
 
     if (!actionXhr) {
       e.preventDefault();
-      user().assert(false,
-          'Only XHR based (via action-xhr attribute) submissions are support ' +
+      userAssert(
+        false,
+        'Only XHR based (via action-xhr attribute) submissions are support ' +
           'for POST requests. %s',
-          form);
+        form
+      );
     }
   }
 
   const target = form.getAttribute('target');
   if (target) {
-    user().assert(target == '_blank' || target == '_top',
-        'form target=%s is invalid can only be _blank or _top: %s',
-        target, form);
+    userAssert(
+      target == '_blank' || target == '_top',
+      'form target=%s is invalid can only be _blank or _top: %s',
+      target,
+      form
+    );
   } else {
     form.setAttribute('target', '_top');
   }
@@ -132,7 +162,13 @@ export function onDocumentFormSubmit_(e) {
 
     const actions = Services.actionServiceForDoc(form);
     actions.execute(
-        form, 'submit', /*args*/ null, /*source*/ form, /*caller*/ form, e,
-        ActionTrust.HIGH);
+      form,
+      'submit',
+      /*args*/ null,
+      /*source*/ form,
+      /*caller*/ form,
+      e,
+      ActionTrust.HIGH
+    );
   }
 }

@@ -13,31 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Observable} from '../src/observable';
 import {
+  CONSTANTS,
   deserializeMessage,
   listen,
   serializeMessage,
 } from '../src/3p-frame-messaging';
+import {Observable} from '../src/observable';
 import {dev} from '../src/log';
+import {dict, map} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
-import {map} from '../src/utils/object';
 
 export class IframeMessagingClient {
-
   /**
-   *  @param {!Window} win A window object.
+   * @param {!Window} win A window object.
+   * @param {Window=} hostWindow The host window to send messages to. If not set
+   * then we'll broadcast our messages to all parent windows and choose the
+   * first one with a valid response to be the host window.
    */
-  constructor(win) {
+  constructor(win, hostWindow) {
     /** @private {!Window} */
     this.win_ = win;
     /** @private {?string} */
     this.rtvVersion_ = getMode().rtvVersion || null;
-    /** @private {!Window} */
-    this.hostWindow_ = win.parent;
+    /** @private {?Window} */
+    this.hostWindow_ = hostWindow || null;
     /** @private {?string} */
     this.sentinel_ = null;
+    /** @type {number} */
+    this.nextMessageId_ = 1;
     /**
      * Map messageType keys to observables to be fired when messages of that
      * type are received.
@@ -48,12 +53,35 @@ export class IframeMessagingClient {
   }
 
   /**
-   * Make an event listening request to the host window.
+   * Retrieves data from host.
+   *
+   * @param {string} requestType
+   * @param {?Object} payload
+   * @param {function(*)} callback
+   */
+  getData(requestType, payload, callback) {
+    const responseType = requestType + CONSTANTS.responseTypeSuffix;
+    const messageId = this.nextMessageId_++;
+    const unlisten = this.registerCallback(responseType, (result) => {
+      if (result[CONSTANTS.messageIdFieldName] === messageId) {
+        unlisten();
+        callback(result[CONSTANTS.contentFieldName]);
+      }
+    });
+    const data = dict();
+    data[CONSTANTS.payloadFieldName] = payload;
+    data[CONSTANTS.messageIdFieldName] = messageId;
+    this.sendMessage(requestType, data);
+  }
+
+  /**
+   * Make an event listening request.
    *
    * @param {string} requestType The type of the request message.
    * @param {string} responseType The type of the response message.
-   * @param {function(Object)} callback The callback function to call
+   * @param {function(JsonObject)} callback The callback function to call
    *   when a message with type responseType is received.
+   * @return {function()}
    */
   makeRequest(requestType, responseType, callback) {
     const unlisten = this.registerCallback(responseType, callback);
@@ -62,16 +90,17 @@ export class IframeMessagingClient {
   }
 
   /**
-   * Make a one time event listening request to the host window.
-   * Will unlisten after response is received
+   * Make a one time event listening request.
+   * Will unlisten after response is received.
    *
    * @param {string} requestType The type of the request message.
    * @param {string} responseType The type of the response message.
    * @param {function(Object)} callback The callback function to call
    *   when a message with type responseType is received.
+   * @return {*} TODO(#23582): Specify return type
    */
   requestOnce(requestType, responseType, callback) {
-    const unlisten = this.registerCallback(responseType, event => {
+    const unlisten = this.registerCallback(responseType, (event) => {
       unlisten();
       callback(event);
     });
@@ -81,12 +110,10 @@ export class IframeMessagingClient {
 
   /**
    * Register callback function for message with type messageType.
-   *   As it stands right now, only one callback can exist at a time.
-   *   All future calls will overwrite any previously registered
-   *   callbacks.
    * @param {string} messageType The type of the message.
    * @param {function(?JsonObject)} callback The callback function to call
    *   when a message with type messageType is received.
+   * @return {function()}
    */
   registerCallback(messageType, callback) {
     // NOTE : no validation done here. any callback can be register
@@ -96,16 +123,62 @@ export class IframeMessagingClient {
   }
 
   /**
-   *  Send a postMessage to Host Window
-   *  @param {string} type The type of message to send.
-   *  @param {JsonObject=} opt_payload The payload of message to send.
+   * Send a postMessage to Host Window, or all parent windows if host window is
+   * not set.
+   * @param {string} type The type of message to send.
+   * @param {JsonObject=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
-    this.hostWindow_.postMessage/*OK*/(
-        serializeMessage(
-            type, dev().assertString(this.sentinel_),
-            opt_payload, this.rtvVersion_),
-        '*');
+    const msg = serializeMessage(
+      type,
+      dev().assertString(this.sentinel_),
+      opt_payload,
+      this.rtvVersion_
+    );
+
+    if (!this.hostWindow_) {
+      for (
+        let j = 0, hostWin = this.win_;
+        j < 10 && hostWin != this.win_.top;
+        j++
+      ) {
+        hostWin = hostWin.parent;
+        this.sendMessageInternal_(hostWin, msg);
+        j++;
+      }
+    } else {
+      this.sendMessageInternal_(this.hostWindow_, msg);
+    }
+  }
+
+  /**
+   * @param {!Window} win
+   * @param {string} msg
+   * private
+   */
+  sendMessageInternal_(win, msg) {
+    // opt in the userActivation feature
+    // see https://github.com/dtapuska/useractivation
+    if (this.isMessageOptionsSupported_(win)) {
+      this.postMessageWithUserActivation_(win, msg);
+    } else {
+      win./*OK*/ postMessage(msg, '*');
+    }
+  }
+
+  /**
+   * @param {!Window} win
+   * @param {string} msg
+   * @suppress {checkTypes} // Can be removed after closure compiler update their externs.
+   */
+  postMessageWithUserActivation_(win, msg) {
+    win./*OK*/ postMessage(
+      msg,
+      dict({
+        'targetOrigin': '*',
+        'includeUserActivation': true,
+      })
+    );
   }
 
   /**
@@ -118,26 +191,29 @@ export class IframeMessagingClient {
    * @private
    */
   setupEventListener_() {
-    listen(this.win_, 'message', event => {
-      // Does it look a message from AMP?
-      if (event.source != this.hostWindow_) {
+    listen(this.win_, 'message', (event) => {
+      // If we have set a host window, strictly check that it's from it.
+      if (this.hostWindow_ && event.source != this.hostWindow_) {
         return;
       }
 
+      // Does it look like a message from AMP?
       const message = deserializeMessage(getData(event));
       if (!message || message['sentinel'] != this.sentinel_) {
         return;
       }
 
+      // At this point the message is valid; serialize necessary information and
+      // set its source as the host window if we don't have it set (aka in
+      // broadcast mode).
+      message['origin'] = event.origin;
+
+      if (!this.hostWindow_) {
+        this.hostWindow_ = event.source;
+      }
+
       this.fireObservable_(message['type'], message);
     });
-  }
-
-  /**
-   * @param {!Window} win
-   */
-  setHostWindow(win) {
-    this.hostWindow_ = win;
   }
 
   /**
@@ -166,5 +242,14 @@ export class IframeMessagingClient {
     if (messageType in this.observableFor_) {
       this.observableFor_[messageType].fire(message);
     }
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {boolean}
+   */
+  isMessageOptionsSupported_(win) {
+    // Learned from https://github.com/dtapuska/useractivation
+    return win.postMessage.length == 1;
   }
 }

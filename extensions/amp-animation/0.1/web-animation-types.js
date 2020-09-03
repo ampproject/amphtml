@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+// WARNING
+// WARNING
+// WARNING
+// WARNING
+// File must be synced with amp.extens.js
+
+/**
+ * A struct for parameters for `Element.animate` call.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
+ *
+ * @typedef {{
+ *   target: !Element,
+ *   keyframes: !WebKeyframesDef,
+ *   vars: ?Object<string, *>,
+ *   timing: !WebAnimationTimingDef,
+ * }}
+ */
+export let InternalWebAnimationRequestDef;
 
 /**
  * @typedef {
@@ -24,7 +42,6 @@
  * }
  */
 export let WebAnimationDef;
-
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -37,7 +54,6 @@ export let WebAnimationDef;
  */
 export let WebMultiAnimationDef;
 
-
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
@@ -48,7 +64,6 @@ export let WebMultiAnimationDef;
  * }}
  */
 export let WebSwitchAnimationDef;
-
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -61,7 +76,6 @@ export let WebSwitchAnimationDef;
  */
 export let WebCompAnimationDef;
 
-
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
@@ -73,12 +87,10 @@ export let WebCompAnimationDef;
  */
 export let WebKeyframeAnimationDef;
 
-
 /**
  * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
  */
 export let WebKeyframesDef;
-
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties
@@ -97,7 +109,6 @@ export let WebKeyframesDef;
  */
 export let WebAnimationTimingDef;
 
-
 /**
  * Indicates an extension to a type that allows specifying vars. Vars are
  * specified as properties with the name in the format of `--varName`.
@@ -106,7 +117,6 @@ export let WebAnimationTimingDef;
  * @typedef {Object}
  */
 export let WebAnimationVarsDef;
-
 
 /**
  * Defines media parameters for an animation.
@@ -119,7 +129,6 @@ export let WebAnimationVarsDef;
  */
 export let WebAnimationConditionalDef;
 
-
 /**
  * @typedef {{
  *   target: (!Element|undefined),
@@ -128,7 +137,6 @@ export let WebAnimationConditionalDef;
  * }}
  */
 export let WebAnimationSelectorDef;
-
 
 /**
  * @mixes WebAnimationTimingDef
@@ -141,6 +149,23 @@ export let WebAnimationSelectorDef;
  */
 export let WebAnimationSubtargetDef;
 
+/**
+ * @typedef {{
+ *   scope: (!Element|undefined),
+ *   scaleByScope: (boolean|undefined),
+ * }}
+ *
+ * - scope delimits selectors.
+ * - scaleByScope determines that CSS resolution should treat the scope
+ *   element as a virtual viewport, so that:
+ *   1. vw/vh units are relative to the scope's size
+ *   2. element's x() and y() coords are relative to the scope's top-left corner
+ *   3. element's size and position (width()/height()/x()/y()) are inversely
+ *      relative to the scope's transformed scale, e.g. if the scope is scaled
+ *      to 90%, the element's dimensions will be returned as if it was unscaled
+ *      to 100%.
+ */
+export let WebAnimationBuilderOptionsDef;
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/Animation/playState
@@ -154,7 +179,6 @@ export const WebAnimationPlayState = {
   FINISHED: 'finished',
 };
 
-
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/direction
  * @enum {string}
@@ -165,7 +189,6 @@ export const WebAnimationTimingDirection = {
   ALTERNATE: 'alternate',
   ALTERNATE_REVERSE: 'alternate-reverse',
 };
-
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/fill
@@ -179,21 +202,22 @@ export const WebAnimationTimingFill = {
   AUTO: 'auto',
 };
 
-
 /** @const {!Object<string, boolean>} */
-const WHITELISTED_RPOPS = {
+const ALLOWLISTED_PROPS = {
   'opacity': true,
   'transform': true,
+  'transform-origin': true,
   'visibility': true,
   'offset-distance': true,
   'offsetDistance': true,
+  'clip-path': true,
+  'clipPath': true,
 };
-
 
 /**
  * @param {string} prop
  * @return {boolean}
  */
-export function isWhitelistedProp(prop) {
-  return WHITELISTED_RPOPS[prop] || false;
+export function isAllowlistedProp(prop) {
+  return ALLOWLISTED_PROPS[prop] || false;
 }

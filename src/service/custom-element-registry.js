@@ -16,42 +16,44 @@
 
 import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
-import {declareExtension} from './ampdoc-impl';
+import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
-import {user} from '../log';
-
+import {userAssert} from '../log';
 
 /**
  * @param {!Window} win
- * @return {!Object<string, function(new:../base-element.BaseElement, !Element)>}
+ * @return {!Object<string, typeof ../base-element.BaseElement>}
  */
 function getExtendedElements(win) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
+  if (!win.__AMP_EXTENDED_ELEMENTS) {
+    win.__AMP_EXTENDED_ELEMENTS = {};
   }
-  return win.ampExtendedElements;
+  return win.__AMP_EXTENDED_ELEMENTS;
 }
-
 
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
  * @param {string} name
- * @param {function(new:../base-element.BaseElement, !Element)} toClass
+ * @param {typeof ../base-element.BaseElement} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
   const knownElements = getExtendedElements(win);
   if (!knownElements[name]) {
-    registerElement(win, name, /** @type {!Function} */ (toClass));
+    registerElement(win, name, toClass);
     return;
   }
   if (knownElements[name] == toClass) {
     // Already registered this instance.
     return;
   }
-  user().assert(knownElements[name] == ElementStub,
-      '%s is already registered. The script tag for ' +
-      '%s is likely included twice in the page.', name, name);
+  userAssert(
+    knownElements[name] == ElementStub,
+    '%s is already registered. The script tag for ' +
+      '%s is likely included twice in the page.',
+    name,
+    name
+  );
   knownElements[name] = toClass;
   for (let i = 0; i < stubbedElements.length; i++) {
     const stub = stubbedElements[i];
@@ -63,31 +65,32 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
-    const element = stub.element;
-    if (element.tagName.toLowerCase() == name &&
-            element.ownerDocument.defaultView == win) {
-      tryUpgradeElementNoInline(element, toClass);
+    const {element} = stub;
+    if (
+      element.tagName.toLowerCase() == name &&
+      element.ownerDocument.defaultView == win
+    ) {
+      tryUpgradeElement_(element, toClass);
       // Remove element from array.
       stubbedElements.splice(i--, 1);
     }
   }
 }
 
-
 /**
  * This method should not be inlined to prevent TryCatch deoptimization.
- * NoInline keyword at the end of function name also prevents Closure compiler
- * from inlining the function.
+ * @param {Element} element
+ * @param {typeof ../base-element.BaseElement} toClass
  * @private
+ * @noinline
  */
-function tryUpgradeElementNoInline(element, toClass) {
+function tryUpgradeElement_(element, toClass) {
   try {
     element.upgrade(toClass);
   } catch (e) {
     reportError(e, element);
   }
 }
-
 
 /**
  * Stub extended elements missing an implementation. It can be called multiple
@@ -96,14 +99,12 @@ function tryUpgradeElementNoInline(element, toClass) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function stubElementsForDoc(ampdoc) {
-  const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
-  for (let i = 0; i < list.length; i++) {
-    const name = list[i].getAttribute('custom-element');
-    declareExtension(ampdoc, name);
+  const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
+  extensions.forEach((name) => {
+    ampdoc.declareExtension(name);
     stubElementIfNotKnown(ampdoc.win, name);
-  }
+  });
 }
-
 
 /**
  * Stub element if not yet known.
@@ -116,7 +117,6 @@ export function stubElementIfNotKnown(win, name) {
     registerElement(win, name, ElementStub);
   }
 }
-
 
 /**
  * Copies the specified element to child window (friendly iframe). This way
@@ -131,28 +131,18 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
   registerElement(childWin, name, toClass || ElementStub);
 }
 
-
 /**
  * Registers a new custom element with its implementation class.
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:../base-element.BaseElement, !Element)} implementationClass
+ * @param {typeof ../base-element.BaseElement} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win, name);
-
-  const supportsCustomElementsV1 = 'customElements' in win;
-  if (supportsCustomElementsV1) {
-    win['customElements'].define(name, klass);
-  } else {
-    win.document.registerElement(name, {
-      prototype: klass.prototype,
-    });
-  }
+  const klass = createCustomElementClass(win);
+  win['customElements'].define(name, klass);
 }
-
 
 /**
  * In order to provide better error messages we only allow to retrieve
@@ -169,7 +159,6 @@ export function markElementScheduledForTesting(win, elementName) {
   }
 }
 
-
 /**
  * Resets our scheduled elements.
  * @param {!Window} win
@@ -177,11 +166,10 @@ export function markElementScheduledForTesting(win, elementName) {
  * @visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
-  if (win.ampExtendedElements) {
-    delete win.ampExtendedElements[elementName];
+  if (win.__AMP_EXTENDED_ELEMENTS) {
+    delete win.__AMP_EXTENDED_ELEMENTS[elementName];
   }
 }
-
 
 /**
  * Returns a currently registered element class.
@@ -191,6 +179,6 @@ export function resetScheduledElementForTesting(win, elementName) {
  * @visibleForTesting
  */
 export function getElementClassForTesting(win, elementName) {
-  const knownElements = win.ampExtendedElements;
-  return knownElements && knownElements[elementName] || null;
+  const knownElements = win.__AMP_EXTENDED_ELEMENTS;
+  return (knownElements && knownElements[elementName]) || null;
 }

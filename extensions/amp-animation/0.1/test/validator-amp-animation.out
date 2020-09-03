@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,7 @@ FAIL
 |      }
 |      </script>
 |    </amp-animation>
-|  
+|
 |    <span>
 |      <amp-animation layout="nodisplay">
 |        <script type="application/json">
@@ -51,11 +51,11 @@ FAIL
 |        </script>
 |      </amp-animation>
 |    </span>
-|  
+|
 |    <!-- Invalid: trigger value is not visibility -->
 |    <amp-animation layout="nodisplay" trigger="display">
 >>   ^~~~~~~~~
-amp-animation/0.1/test/validator-amp-animation.html:55:2 The attribute 'trigger' in tag 'amp-animation' is set to the invalid value 'display'. (see https://www.ampproject.org/docs/reference/components/amp-animation) [AMP_TAG_PROBLEM]
+amp-animation/0.1/test/validator-amp-animation.html:55:2 The attribute 'trigger' in tag 'amp-animation' is set to the invalid value 'display'. (see https://amp.dev/documentation/components/amp-animation)
 |      <script type="application/json">
 |      {
 |        "target": "target1",
@@ -64,11 +64,11 @@ amp-animation/0.1/test/validator-amp-animation.html:55:2 The attribute 'trigger'
 |      }
 |      </script>
 |    </amp-animation>
-|  
+|
 |    <!-- Invalid: no child json tag -->
 |    <amp-animation layout="nodisplay">
 >>   ^~~~~~~~~
-amp-animation/0.1/test/validator-amp-animation.html:66:2 Tag 'amp-animation' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-animation) [AMP_TAG_PROBLEM]
+amp-animation/0.1/test/validator-amp-animation.html:66:2 Tag 'amp-animation' must have 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-animation)
 |    </amp-animation>
 |  </body>
 |  </html>

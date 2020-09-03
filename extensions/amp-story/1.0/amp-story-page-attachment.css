@@ -1,0 +1,229 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** Remote attachment styles. */
+
+.i-amphtml-story-page-attachment-remote {
+  height: 48px !important;
+  bottom: 0 !important;
+  top: auto !important;
+}
+
+.i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-container {
+  height: 100% !important;
+  border-radius: 8px 8px 0 0 !important;
+  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.12) !important;
+}
+
+.i-amphtml-story-page-attachment-remote-content {
+  display: flex !important;
+  padding: 0 24px !important;
+  align-items: center !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 15px !important;
+  justify-content: space-between !important;
+  line-height: 48px !important;
+  text-decoration: none !important;
+}
+
+.i-amphtml-story-page-attachment-remote-title {
+  max-width: calc(100% - 30px /* 24px icon + 6px margin */) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-remote-title {
+  color: #9AA0A6 !important;
+}
+
+.i-amphtml-story-page-attachment-remote-icon {
+  display: block !important;
+  height: 24px !important;
+  width: 24px !important;
+  padding: 0px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#9AA0A6"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>') !important;
+}
+
+/** amp-story-page open attachment message. */
+
+@keyframes open-attachment-fly-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes open-attachment-icon {
+  0% {
+    transform: translateY(14px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes open-attachment-icon-explode {
+  0% {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@keyframes open-attachment-icon-color {
+  0% {
+    background: #fff;
+  }
+  to {
+    background: rgba(0, 0, 0, 0.87);
+    text-shadow: none;
+  }
+}
+
+@keyframes open-attachment-bar-left {
+  0% {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-30deg);
+  }
+}
+
+@keyframes open-attachment-bar-right {
+  0% {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(30deg);
+  }
+}
+
+/**
+ * Hiding the element and only showing it on the active page so the animation
+ * triggers every time the page becomes active.
+ */
+amp-story-page .i-amphtml-story-page-open-attachment {
+  display: none !important;
+}
+
+amp-story-page[active] .i-amphtml-story-page-open-attachment {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  animation: open-attachment-fly-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment > * {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-icon {
+  display: block !important;
+  height: 32px !important;
+  width: 32px !important;
+  cursor: pointer !important;
+  animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: #FFF !important;
+  border-radius: 100% !important;
+  z-index: -1 !important;
+  animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-bar-left,
+amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
+  position: absolute !important;
+  display: block !important;
+  height: 3px !important;
+  width: 12px !important;
+  border-radius: 3px !important;
+  top: 14px !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-bar-left {
+  left: 6px !important;
+  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
+             open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
+  right: 6px !important;
+  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
+             open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-label {
+  position: relative !important;
+  padding: 12px 32px 20px 32px !important;
+  height: 16px !important;
+  max-width: calc(100% - 64px) !important;
+  color: #FFF !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.3px;
+  line-height: 16px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  white-space: nowrap !important;
+}
+
+/** Remote attachment opening animation */
+
+.i-amphtml-story-page-attachment-expand {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: #FFF !important;
+  z-index: 100000 !important; /** System layer + 1 */
+  animation: i-amphtml-open-3p-attachment 120ms cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+}
+
+@keyframes i-amphtml-open-3p-attachment {
+ 0% {
+  transform: scaleX(0);
+  opacity: 0.3;
+ }
+ 100% {
+  transform: scaleX(1);
+  opacity: 1;
+ }
+}

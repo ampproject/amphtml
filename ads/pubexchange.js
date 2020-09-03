@@ -21,7 +21,6 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function pubexchange(global, data) {
-
   // ensure we have valid widgetIds value
   validateData(data, ['publication', 'moduleId', 'moduleNum'], ['test']);
 

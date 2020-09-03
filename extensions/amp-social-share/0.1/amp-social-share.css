@@ -38,12 +38,12 @@ amp-social-share {
 
 /* Facebook Styling */
 .amp-social-share-facebook {
-  background-color: #3b5998;
+  background-color: #32529f;
 }
 
 /* Pinterest Styling */
 .amp-social-share-pinterest {
-  background-color: #bd081c;
+  background-color: #e60023;
 }
 
 /* LinkedIn Styling */
@@ -69,6 +69,11 @@ amp-social-share {
 /* Whatsapp Styling */
 .amp-social-share-whatsapp {
   background-color: #25d366;
+}
+
+/* line Styling */
+.amp-social-share-line {
+  background-color: #52b448;
 }
 
 /* SMS Styling */

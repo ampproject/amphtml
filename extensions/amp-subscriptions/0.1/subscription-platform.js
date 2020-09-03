@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-
-
 /**
  * This interface is intended to be implemented by Subscription platforms to
  * provide method of getting entitlements.
@@ -25,28 +21,85 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
  * @interface
  */
 export class SubscriptionPlatform {
+  /**
+   * Returns the service Id.
+   * @return {string}
+   */
+  getServiceId() {}
 
   /**
    * Requests entitlement for a subscription platform.
-   * @return {!Promise<!Entitlements>}
+   * @return {!Promise<?./entitlement.Entitlement>}
    */
-  getEntitlements() {
-  }
-}
+  getEntitlements() {}
 
+  /**
+   * Activates the subscription platform and hands over the control for
+   * rendering.
+   * @param {!./entitlement.Entitlement} unusedEntitlement
+   * @param {?./entitlement.Entitlement} unusedGrantEntitlement
+   */
+  activate(unusedEntitlement, unusedGrantEntitlement) {}
 
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
-}
+  /**
+   * Reset the platform and renderer.
+   * This should clear dialogs and toasts originating
+   * from the platform.
+   */
+  reset() {}
 
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
+  /**
+   * True if this platform can fetch entitlement safely in pre-render
+   * without leaking information to the publisher or a 3rd party
+   * @return {boolean}
+   */
+  isPrerenderSafe() {}
+
+  /**
+   * Returns if pingback is enabled for this platform.
+   * @return {boolean}
+   */
+  isPingbackEnabled() {}
+
+  /**
+   * True if pingback returns all entitlments
+   * @return {boolean}
+   */
+  pingbackReturnsAllEntitlements() {}
+
+  /**
+   * Performs the pingback to the subscription platform.
+   * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} unusedEntitlement
+   * @return {!Promise|undefined}
+   */
+  pingback(unusedEntitlement) {}
+
+  /**
+   * Tells if the platform supports a score factor
+   * @param {string} unusedFactor
+   * @return {number}
+   */
+  getSupportedScoreFactor(unusedFactor) {}
+
+  /**
+   * Executes action for the local platform.
+   * @param {string} unusedAction
+   * @param {?string} unusedSourceId
+   * @return {!Promise<boolean>}
+   */
+  executeAction(unusedAction, unusedSourceId) {}
+
+  /**
+   * Returns the base score configured for the platform.
+   * @return {number}
+   */
+  getBaseScore() {}
+
+  /**
+   * Decorate the DomNode according to your platform
+   * @param {!Element} unusedElement
+   * @param {string} unusedAction
+   * @param {?JsonObject} unusedOptions
+   */
+  decorateUI(unusedElement, unusedAction, unusedOptions) {}
 }

@@ -26,7 +26,7 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 </head>
 <body>
   <!-- Valid form -->
@@ -44,8 +44,31 @@
       </label>
       <input type="submit" value="Subscribe">
     </fieldset>
+    <div submitting><template type="amp-mustache">Submitting</template></div>
     <div submit-success><template type="amp-mustache">Success</template></div>
     <div submit-error>Error</div>
+    <div verify-error>Error</div>
+  </form>
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <fieldset>
+      <label>
+        <span>Your name</span>
+        <input id="name" type="text" name="name" required>
+        <span visible-when-invalid="valueMissing" validation-for="name"></span>
+      </label>
+      <label>
+        <span>Your email</span>
+        <input type="email" name="email" required>
+      </label>
+      <input type="button" name="button">
+      <input type="submit" value="Subscribe">
+    </fieldset>
+    <div>
+      <div submit-success><template type="amp-mustache">Success</template></div>
+      <div submit-error>Error</div>
+      <div verify-error><template type="amp-mustache">Verify failed</template></div>
+    </div>
   </form>
   <!-- More valid tags (datalist and optgroup) -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
@@ -108,11 +131,17 @@
     <option value="1">English</option>
   </select>
   <textarea name="comment"></textarea>
-  <!-- Invalid: input can not be type="button|file|image|password". -->
+  <!-- Invalid: input can not be type="image". -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-    <input type="button" name="button">
-    <input type="file" name="file">
     <input type="image" name="image">
+  </form>
+  <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input type="password" name="password">
+    <input type="file" name="file" accept="text/plain">
+  </form>
+  <!-- Invalid: password requires post and action-xhr -->
+  <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="password" name="password">
   </form>
   <!-- Invalid: if validation-for is set on an element, then -->
@@ -141,17 +170,45 @@
   </template>
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
+    <div submitting template="submitting_template"></div>
     <div submit-success template="submit_success_template"></div>
     <div submit-error>
       <template type="amp-mustache">Error in inlined template</template>
     </div>
+    <div verify-error template="verify_error_template"></div>
   </form>
   <!-- Invalid: inlined and referenced template for the same div -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
-    <div submit-success template="submit_success_template">
-      <template type="amp-mustache">Success in inlined inlined</template>
+    <div submitting template="submitting_template">
+      <template type="amp-mustache">Submitting in inlined template</template>
     </div>
+    <div submit-success template="submit_success_template">
+      <template type="amp-mustache">Success in inlined template</template>
+    </div>
+    <div submit-error template="submit_error_template">
+      <template type="amp-mustache">Error in inlined template</template>
+    </div>
+    <div verify-error template="verify_error_template">
+      <template type="amp-mustache">Verify in inlined template</template>
+    </div>
+  </form>
+  <!-- Valid: form with verify-xhr and input with no-verify-->
+  <form method="post" action-xhr="https://example.com/subscribe" verify-xhr="https://example.com/verify" target="_blank">
+    <input name="do-not-verify" no-verify>
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: mask attr without the amp-inputmask extension -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input mask="L0L_0L0" type="tel">
+  </form>
+  <!-- Valid: textarea within form -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <textarea name="comment"></textarea>
+  </form>
+  <!-- Valid: textarea with autoexpand attribute -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <textarea name="comment" autoexpand></textarea>
   </form>
 </body>
 </html>

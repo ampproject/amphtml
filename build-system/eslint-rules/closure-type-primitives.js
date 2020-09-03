@@ -32,19 +32,18 @@ let EslintNodeDef;
  */
 let ClosureCommentDef;
 
-module.exports = function(context) {
+module.exports = function (context) {
   const sourceCode = context.getSourceCode();
 
   return {
     meta: {
       fixable: 'code',
     },
-    Program: function() {
-      const comments =
-          /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
+    Program: function () {
+      const comments = /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
       comments
-          .map(node => parseClosureComments(context, node))
-          .forEach(comment => checkClosureComments(context, comment));
+        .map((node) => parseClosureComments(context, node))
+        .forEach((comment) => checkClosureComments(context, comment));
     },
   };
 };
@@ -92,12 +91,12 @@ function checkClosureComments(context, closureComment) {
   }
 
   const {parsed, node} = closureComment;
-  traverse(parsed).forEach(astNode => {
+  traverse(parsed).forEach((astNode) => {
     if (!astNode) {
       return;
     }
 
-    const name = astNode.name;
+    const {name} = astNode;
     if (astNode.type === 'NameExpression' && isPrimitiveWrapperName(name)) {
       reportPrimitiveWrapper(context, node, name);
     }
@@ -108,15 +107,11 @@ function checkClosureComments(context, closureComment) {
 }
 
 /** @enum {string} */
-const PRIMITIVE_WRAPPER_NAMES = [
-  'Boolean',
-  'Number',
-  'String',
-  'Symbol',
-];
+const PRIMITIVE_WRAPPER_NAMES = ['Boolean', 'Number', 'String', 'Symbol'];
 
 /**
- * Disallowed primitives wrappers, from go/es6-style#disallowed-features-wrapper-objects
+ * Disallowed primitives wrappers, from
+ * go/es6-style#disallowed-features-wrapper-objects
  * @param {string} name
  * @return {boolean}
  */
@@ -178,12 +173,7 @@ function checkNonNullableNodes(context, node, astNode) {
  * so we don't add them to this list.
  * @enum {string}
  */
-const NON_NULLABLE_PRIMITIVE_NAMES = [
-  'boolean',
-  'number',
-  'string',
-  'symbol',
-];
+const NON_NULLABLE_PRIMITIVE_NAMES = ['boolean', 'number', 'string', 'symbol'];
 
 /**
  * True if the given name matches a primitive type
@@ -219,4 +209,3 @@ function reportNonNullablePrimitive(context, node, name) {
     },
   });
 }
-

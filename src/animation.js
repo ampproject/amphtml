@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {Services} from './services';
 import {dev} from './log';
 import {getCurve} from './curve';
 
 const TAG_ = 'Animation';
 
-const NOOP_CALLBACK = function() {};
+const NOOP_CALLBACK = function () {};
 
 /**
  * The animation class allows construction of arbitrary animation processes.
@@ -30,7 +31,6 @@ const NOOP_CALLBACK = function() {};
  * achieve the desired effect.
  */
 export class Animation {
-
   /**
    * Creates and starts animation with a single segment. Returns AnimationPlayer
    * object that can be used to monitor or control animation.
@@ -38,15 +38,15 @@ export class Animation {
    * @param {!Node} contextNode The context node.
    * @param {!TransitionDef<?>} transition Transition to animate.
    * @param {./time.timeDef} duration Duration in milliseconds.
-   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for animation.
-   *   Default is the linear animation.
+   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for
+   *   animation. Default is the linear animation.
    * @return {!AnimationPlayer}
    */
   static animate(contextNode, transition, duration, opt_curve) {
     return new Animation(contextNode)
-        .setCurve(opt_curve)
-        .add(0, transition, 1)
-        .start(duration);
+      .setCurve(opt_curve)
+      .add(0, transition, 1)
+      .start(duration);
   }
 
   /**
@@ -84,9 +84,9 @@ export class Animation {
   }
 
   /**
-   * Adds a segment to the animation. Each segment starts at offset (delay)
-   * and runs for a portion of the overall animation (duration). Note that
-   * both delay and duration and normtimeDef types which accept values from 0 to 1.
+   * Adds a segment to the animation. Each segment starts at offset (delay) and
+   * runs for a portion of the overall animation (duration). Note that both
+   * delay and duration and normtimeDef types which accept values from 0 to 1.
    * Optionally, the time is pushed through a curve. If curve is not specified,
    * the default animation curve will be used. The specified transition is
    * animated over the specified duration from 0 to 1.
@@ -115,13 +115,16 @@ export class Animation {
    * @return {!AnimationPlayer}
    */
   start(duration) {
-    const player = new AnimationPlayer(this.vsync_, this.contextNode_,
-        this.segments_, this.curve_, duration);
-    player.start_();
+    const player = new AnimationPlayer(
+      this.vsync_,
+      this.contextNode_,
+      this.segments_,
+      this.curve_,
+      duration
+    );
     return player;
   }
 }
-
 
 /**
  * AnimationPlayer allows tracking and monitoring of the running animation.
@@ -133,7 +136,6 @@ export class Animation {
  * implements {IThenable}
  */
 class AnimationPlayer {
-
   /**
    * @param {!./service/vsync-impl.Vsync} vsync
    * @param {!Node} contextNode
@@ -142,7 +144,6 @@ class AnimationPlayer {
    * @param {./time.timeDef} duration
    */
   constructor(vsync, contextNode, segments, defaultCurve, duration) {
-
     /** @private @const {!./service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
@@ -167,36 +168,42 @@ class AnimationPlayer {
     this.duration_ = duration;
 
     /** @private {./time.timeDef} */
-    this.startTime_ = 0;
+    this.startTime_ = Date.now();
 
     /** @private {./time.normtimeDef} */
-    this.normLinearTime_ = 0;
+    // this.normLinearTime_ = 0;
 
     /** @private {./time.normtimeDef} */
-    this.normTime_ = 0;
+    // this.normTime_ = 0;
 
     /** @private {boolean} */
-    this.running_ = false;
+    this.running_ = true;
 
     /** @private {!Object<string, *>} */
     this.state_ = {};
 
-    /** @const {function()} */
-    this.resolve_;
+    const deferred = new Deferred();
 
-    /** @const {function()} */
-    this.reject_;
+    /** @const @private */
+    this.promise_ = deferred.promise;
 
-    /** @private {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    /** @const @private */
+    this.resolve_ = deferred.resolve;
+
+    /** @const @private */
+    this.reject_ = deferred.reject;
 
     /** @const */
     this.task_ = this.vsync_.createAnimTask(this.contextNode_, {
       mutate: this.stepMutate_.bind(this),
     });
+
+    if (this.vsync_.canAnimate(this.contextNode_)) {
+      this.task_(this.state_);
+    } else {
+      dev().warn(TAG_, 'cannot animate');
+      this.complete_(/* success */ false, /* dir */ 0);
+    }
   }
 
   /**
@@ -238,20 +245,6 @@ class AnimationPlayer {
   }
 
   /**
-   * @private
-   */
-  start_() {
-    this.startTime_ = Date.now();
-    this.running_ = true;
-    if (this.vsync_.canAnimate(this.contextNode_)) {
-      this.task_(this.state_);
-    } else {
-      dev().warn(TAG_, 'cannot animate');
-      this.complete_(/* success */ false, /* dir */ 0);
-    }
-  }
-
-  /**
    * @param {boolean} success
    * @param {number} dir
    * @private
@@ -265,7 +258,7 @@ class AnimationPlayer {
       // Sort in the completion order.
       if (this.segments_.length > 1) {
         this.segments_.sort((s1, s2) => {
-          return (s1.delay + s1.duration) - (s2.delay + s2.duration);
+          return s1.delay + s1.duration - (s2.delay + s2.duration);
         });
       }
       try {
@@ -301,8 +294,10 @@ class AnimationPlayer {
       return;
     }
     const currentTime = Date.now();
-    const normLinearTime = Math.min((currentTime - this.startTime_) /
-        this.duration_, 1);
+    const normLinearTime = Math.min(
+      (currentTime - this.startTime_) / this.duration_,
+      1
+    );
 
     // Start segments due to be started
     for (let i = 0; i < this.segments_.length; i++) {
@@ -342,8 +337,10 @@ class AnimationPlayer {
     let normLinearTime;
     let normTime;
     if (segment.duration > 0) {
-      normLinearTime = Math.min((totalLinearTime - segment.delay) /
-          segment.duration, 1);
+      normLinearTime = Math.min(
+        (totalLinearTime - segment.delay) / segment.duration,
+        1
+      );
       normTime = normLinearTime;
       if (segment.curve && normTime != 1) {
         try {
@@ -371,7 +368,6 @@ class AnimationPlayer {
   }
 }
 
-
 /**
  * @typedef {{
  *   delay: ./time.normtimeDef,
@@ -381,7 +377,6 @@ class AnimationPlayer {
  * }}
  */
 let SegmentDef;
-
 
 /**
  * @typedef {{

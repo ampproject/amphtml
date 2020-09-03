@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ FAIL
 |        data-bcid="50d595ec0364e95588c77bd2"
 |        layout="responsive" width="480" height="270">
 |    </amp-o2-player>
-|  
+|
 |    <!-- Valid: data-vid is optional -->
 |    <amp-o2-player
 |        data-pid="573d9bf1e4b02a3388f42c36"
@@ -44,21 +44,21 @@ FAIL
 |        data-macros="m.playertype=HTML5"
 |        layout="responsive" width="480" height="270">
 |    </amp-o2-player>
-|  
+|
 |    <!-- Invalid: bcid is needed;
 |         leaving it out results in an error. -->
 |    <amp-o2-player
 >>   ^~~~~~~~~
-amp-o2-player/0.1/test/validator-amp-o2-player.html:49:2 The mandatory attribute 'data-bcid' is missing in tag 'amp-o2-player'. (see https://www.ampproject.org/docs/reference/components/amp-o2-player) [AMP_TAG_PROBLEM]
+amp-o2-player/0.1/test/validator-amp-o2-player.html:49:2 The mandatory attribute 'data-bcid' is missing in tag 'amp-o2-player'. (see https://amp.dev/documentation/components/amp-o2-player)
 |        data-pid="573d9bf1e4b02a3388f42c36"
 |        layout="responsive" width="480" height="270">
 |    </amp-o2-player>
-|  
+|
 |    <!-- Invalid: pid is needed;
 |           leaving it out results in an error. -->
 |    <amp-o2-player
 >>   ^~~~~~~~~
-amp-o2-player/0.1/test/validator-amp-o2-player.html:56:2 The mandatory attribute 'data-pid' is missing in tag 'amp-o2-player'. (see https://www.ampproject.org/docs/reference/components/amp-o2-player) [AMP_TAG_PROBLEM]
+amp-o2-player/0.1/test/validator-amp-o2-player.html:56:2 The mandatory attribute 'data-pid' is missing in tag 'amp-o2-player'. (see https://amp.dev/documentation/components/amp-o2-player)
 |        data-bcid="50d595ec0364e95588c77bd2"
 |        layout="responsive" width="480" height="270">
 |    </amp-o2-player>

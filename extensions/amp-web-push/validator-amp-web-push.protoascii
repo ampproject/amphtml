@@ -19,8 +19,8 @@ tags: {  # amp-web-push
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-web-push"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -32,20 +32,20 @@ tags: {  # <amp-web-push>
     name: "helper-iframe-url"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
   }
   attrs: {
     name: "id"
     mandatory: true
-    value_regex: "amp-web-push"
+    value: "amp-web-push"
   }
   attrs: {
     name: "permission-dialog-url"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
   }
@@ -53,12 +53,18 @@ tags: {  # <amp-web-push>
     name: "service-worker-url"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
   }
+  attrs: {
+    name: "service-worker-scope"
+    value_url: {
+      protocol: "https"
+    }
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-web-push"
+  spec_url: "https://amp.dev/documentation/components/amp-web-push/"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
@@ -70,10 +76,12 @@ tags: {  # <amp-web-push-widget>
   attrs: {
     name: "visibility"
     mandatory: true
-    value_regex: "(blocked|subscribed|unsubscribed)"
+    value: "blocked"
+    value: "subscribed"
+    value: "unsubscribed"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-web-push"
+  spec_url: "https://amp.dev/documentation/components/amp-web-push/"
   amp_layout: {
     supported_layouts: FIXED
   }

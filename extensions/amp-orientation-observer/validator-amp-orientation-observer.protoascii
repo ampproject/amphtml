@@ -1,0 +1,57 @@
+#
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-orientation-observer
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-orientation-observer"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-orientation-observer>
+  html_format: AMP
+  tag_name: "AMP-ORIENTATION-OBSERVER"
+  requires_extension: "amp-orientation-observer"
+  attr_lists: "extended-amp-global"
+  attrs: {
+    name: "alpha-range"
+    # Regex: (\d+)\s{1}(\d+)
+    # Values such as: "100 100", "0 100", etc..
+    value_regex: "(\\d+)\\s{1}(\\d+)"
+  }
+  attrs: {
+    name: "beta-range"
+    # Regex: (\d+)\s{1}(\d+)
+    # Values such as: "100 100", "0 100", etc..
+    value_regex: "(\\d+)\\s{1}(\\d+)"
+  }
+  attrs: {
+    name: "gamma-range"
+    # Regex: (\d+)\s{1}(\d+)
+    # Values such as: "100 100", "0 100", etc..
+    value_regex: "(\\d+)\\s{1}(\\d+)"
+  }
+  attrs: {
+    name: "smoothing"
+    value_regex: "[0-9]+|"
+  }
+  amp_layout {
+    supported_layouts: NODISPLAY
+  }
+}

@@ -20,19 +20,42 @@ import {startsWith} from './string';
 const excludedTags = ['script', 'style'];
 
 /** @type {!Array<string>} */
-const allowedAmpTags = ['amp-accordion', 'amp-app-banner', 'amp-carousel',
-  'amp-fit-text', 'amp-form', 'amp-selector', 'amp-sidebar'];
+const allowedAmpTags = [
+  'amp-accordion',
+  'amp-app-banner',
+  'amp-carousel',
+  'amp-fit-text',
+  'amp-form',
+  'amp-selector',
+  'amp-sidebar',
+];
 
 /** @type {!Array<string>} */
-const allowedAttributes = ['action', 'alt', 'class', 'disabled', 'height',
-  'href', 'id', 'name', 'placeholder', 'readonly', 'src', 'tabindex',
-  'title', 'type', 'value', 'width'];
+const allowedAttributes = [
+  'action',
+  'alt',
+  'class',
+  'disabled',
+  'height',
+  'href',
+  'id',
+  'name',
+  'placeholder',
+  'readonly',
+  'src',
+  'tabindex',
+  'title',
+  'type',
+  'value',
+  'width',
+];
 
 /**
  * Returns content of HTML node
  * @param {!Window} win
  * @param {string} selector - CSS selector of the node to take content from
- * @param {!Array<string>} attrs - tag attributes to be left in the stringified HTML
+ * @param {!Array<string>} attrs - tag attributes to be left in the stringified
+ * HTML
  * @return {string}
  */
 export function getHtml(win, selector, attrs) {
@@ -53,7 +76,7 @@ export function getHtml(win, selector, attrs) {
  */
 function appendToResult(node, attrs, result) {
   const stack = [node];
-  const allowedAttrs = attrs.filter(attr => {
+  const allowedAttrs = attrs.filter((attr) => {
     return allowedAttributes.includes(attr);
   });
 
@@ -75,7 +98,6 @@ function appendToResult(node, attrs, result) {
   }
 }
 
-
 /**
  *
  * @param {!Element} node
@@ -91,7 +113,6 @@ function isApplicableNode(node) {
   }
 }
 
-
 /**
  *
  * @param {!Element} node
@@ -101,7 +122,7 @@ function isApplicableNode(node) {
 function appendOpenTag(node, attrs, result) {
   result.push(`<${node.tagName.toLowerCase()}`);
 
-  attrs.forEach(function(attr) {
+  attrs.forEach(function (attr) {
     if (node.hasAttribute(attr)) {
       result.push(` ${attr}="${node.getAttribute(attr)}"`);
     }

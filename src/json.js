@@ -19,18 +19,17 @@
  * {@link http://json.org/}.
  */
 
+import {childElementsByTag, isJsonScriptTag} from './dom';
 import {isObject} from './types';
-
 
 // NOTE Type are changed to {*} because of
 // https://github.com/google/closure-compiler/issues/1999
 
 /**
  * JSON scalar. It's either string, number or boolean.
- * @typedef {*} should be string|number|boolean
+ * @typedef {*} should be string|number|boolean|null
  */
 let JSONScalarDef;
-
 
 /**
  * JSON object. It's a map with string keys and JSON values.
@@ -38,13 +37,11 @@ let JSONScalarDef;
  */
 let JSONObjectDef;
 
-
 /**
  * JSON array. It's an array with JSON values.
  * @typedef {*} should be !Array<?JSONValueDef>
  */
 let JSONArrayDef;
-
 
 /**
  * JSON value. It's either a scalar, an object or an array.
@@ -89,10 +86,11 @@ export function getValueForExpr(obj, expr) {
   let value = obj;
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
-    if (part &&
-        value &&
-        value[part] !== undefined &&
-        hasOwnProperty(value, part)
+    if (
+      part &&
+      value &&
+      value[part] !== undefined &&
+      hasOwnProperty(value, part)
     ) {
       value = value[part];
       continue;
@@ -111,7 +109,7 @@ export function getValueForExpr(obj, expr) {
  * @return {?JsonObject} May be extend to parse arrays.
  */
 export function parseJson(json) {
-  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**
@@ -121,7 +119,7 @@ export function parseJson(json) {
  * @param {*} json JSON string to parse
  * @param {function(!Error)=} opt_onFailed Optional function that will be called
  *     with the error if parsing fails.
- * @return {?JsonObject|undefined} May be extend to parse arrays.
+ * @return {?JsonObject} May be extend to parse arrays.
  */
 export function tryParseJson(json, opt_onFailed) {
   try {
@@ -130,63 +128,86 @@ export function tryParseJson(json, opt_onFailed) {
     if (opt_onFailed) {
       opt_onFailed(e);
     }
-    return undefined;
+    return null;
   }
 }
 
 /**
- * Recursively checks strict equality of items in nested arrays and objects.
+ * Helper method to get the json config from an element <script> tag
+ * @param {!Element} element
+ * @return {?JsonObject}
+ * @throws {!Error} If element does not have exactly one <script> child
+ * with type="application/json", or if the <script> contents are not valid JSON.
+ */
+export function getChildJsonConfig(element) {
+  const scripts = childElementsByTag(element, 'script');
+  const n = scripts.length;
+  if (n !== 1) {
+    throw new Error(`Found ${scripts.length} <script> children. Expected 1.`);
+  }
+  const script = scripts[0];
+  if (!isJsonScriptTag(script)) {
+    throw new Error('<script> child must have type="application/json"');
+  }
+  try {
+    return parseJson(script.textContent);
+  } catch (unusedError) {
+    throw new Error('Failed to parse <script> contents. Is it valid JSON?');
+  }
+}
+
+/**
+ * Deeply checks strict equality of items in nested arrays and objects.
  *
  * @param {JSONValueDef} a
  * @param {JSONValueDef} b
- * @param {number} depth The maximum recursion depth. Must be finite.
+ * @param {number} depth The maximum depth. Must be finite.
  * @return {boolean}
  * @throws {Error} If depth argument is not finite.
  */
-export function recursiveEquals(a, b, depth = 3) {
-  if (!isFinite(depth)) {
-    throw new Error('depth arg must be finite: ' + depth);
+export function deepEquals(a, b, depth = 5) {
+  if (!isFinite(depth) || depth < 0) {
+    throw new Error('Invalid depth: ' + depth);
   }
   if (a === b) {
     return true;
   }
-  // Only check shallow equality for depth < 1.
-  if (depth < 1) {
-    return false;
-  }
-  if (typeof a !== typeof b) {
-    return false;
-  }
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (let i = 0; i < a.length; i++) {
-      if (!recursiveEquals(a[i], b[i], depth - 1)) {
+  /** @type {!Array<{a: JSONValueDef, b: JSONValueDef, depth: number}>} */
+  const queue = [{a, b, depth}];
+  while (queue.length > 0) {
+    const {a, b, depth} = queue.shift();
+    // Only check deep equality if depth > 0.
+    if (depth > 0) {
+      if (typeof a !== typeof b) {
         return false;
+      } else if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) {
+          return false;
+        }
+        for (let i = 0; i < a.length; i++) {
+          queue.push({a: a[i], b: b[i], depth: depth - 1});
+        }
+        continue;
+      } else if (a && b && typeof a === 'object' && typeof b === 'object') {
+        const keysA = Object.keys(/** @type {!Object} */ (a));
+        const keysB = Object.keys(/** @type {!Object} */ (b));
+        if (keysA.length !== keysB.length) {
+          return false;
+        }
+        for (let i = 0; i < keysA.length; i++) {
+          const k = keysA[i];
+          queue.push({a: a[k], b: b[k], depth: depth - 1});
+        }
+        continue;
       }
     }
-    return true;
-  }
-  if (a && b && typeof a === 'object' && typeof b === 'object') {
-    const keysA = Object.keys(/** @type {!Object} */ (a));
-    const keysB = Object.keys(/** @type {!Object} */ (b));
-    if (keysA.length !== keysB.length) {
+    // If we get here, then depth == 0 or (a, b) are primitives.
+    if (a !== b) {
       return false;
     }
-    for (let i = 0; i < keysA.length; i++) {
-      const keyA = keysA[i];
-      const valueA = a[keyA];
-      const valueB = b[keyA];
-      if (!recursiveEquals(valueA, valueB, depth - 1)) {
-        return false;
-      }
-    }
-    return true;
   }
-  return false;
+  return true;
 }
-
 
 /**
  * @param {*} obj
@@ -198,5 +219,44 @@ function hasOwnProperty(obj, key) {
     return false;
   }
   return Object.prototype.hasOwnProperty.call(
-      /** @type {!Object} */ (obj), key);
+    /** @type {!Object} */ (obj),
+    key
+  );
+}
+
+/**
+ * This helper function handles configurations specified in a JSON format.
+ *
+ * It allows the configuration is to be written in plain JS (which has better
+ * dev ergonomics like comments and trailing commas), and allows the
+ * configuration to be transformed into an efficient JSON-parsed representation
+ * in the dist build. See https://v8.dev/blog/cost-of-javascript-2019#json
+ *
+ * @param {!Object} obj
+ * @return {!JsonObject}
+ */
+export function jsonConfiguration(obj) {
+  return /** @type {!JsonObject} */ (obj);
+}
+
+/**
+ * This converts an Object into a suitable type to be used in `includeJsonLiteral`.
+ * This doesn't actually do any conversion, it only changes the closure type.
+ *
+ * @param {!Object|!Array|string|number|boolean|null} value
+ * @return {!InternalJsonLiteralTypeDef}
+ */
+export function jsonLiteral(value) {
+  return /** @type {!InternalJsonLiteralTypeDef} */ (value);
+}
+
+/**
+ * Allows inclusion of a variable (that's wrapped in a jsonLiteral
+ * call) to be included inside a jsonConfiguration.
+ *
+ * @param {!InternalJsonLiteralTypeDef} value
+ * @return {*}
+ */
+export function includeJsonLiteral(value) {
+  return value;
 }

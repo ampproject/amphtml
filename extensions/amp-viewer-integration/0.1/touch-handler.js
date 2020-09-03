@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 
-
 import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
-
 
 /**
  * The list of touch event properites to copy.
  * @const {!Array<string>}
  */
 const EVENT_PROPERTIES = [
-  'altKey', 'charCode', 'ctrlKey', 'detail', 'eventPhase', 'keyCode',
-  'layerX', 'layerY', 'metaKey', 'pageX', 'pageY', 'returnValue',
-  'shiftKey', 'timeStamp', 'type', 'which',
+  'altKey',
+  'charCode',
+  'ctrlKey',
+  'detail',
+  'eventPhase',
+  'key',
+  'layerX',
+  'layerY',
+  'metaKey',
+  'pageX',
+  'pageY',
+  'returnValue',
+  'shiftKey',
+  'timeStamp',
+  'type',
+  'which',
 ];
 
 /**
@@ -34,8 +45,16 @@ const EVENT_PROPERTIES = [
  * @const {!Array<string>}
  */
 const TOUCH_PROPERTIES = [
-  'clientX', 'clientY', 'force', 'identifier', 'pageX', 'pageY', 'radiusX',
-  'radiusY', 'screenX', 'screenY',
+  'clientX',
+  'clientY',
+  'force',
+  'identifier',
+  'pageX',
+  'pageY',
+  'radiusX',
+  'radiusY',
+  'screenX',
+  'screenY',
 ];
 
 /**
@@ -44,10 +63,9 @@ const TOUCH_PROPERTIES = [
 const SCROLL_LOCK = 'scrollLock';
 
 /**
- * @fileoverview Forward touch events from the AMP doc to the viewer.
+ * Forward touch events from the AMP doc to the viewer.
  */
 export class TouchHandler {
-
   /**
    * @param {!Window} win
    * @param {!./messaging/messaging.Messaging} messaging
@@ -71,6 +89,9 @@ export class TouchHandler {
     this.listenForTouchEvents_();
   }
 
+  /**
+   * @private
+   */
   listenForTouchEvents_() {
     const handleEvent = this.handleEvent_.bind(this);
     const doc = this.win.document;
@@ -82,13 +103,17 @@ export class TouchHandler {
       passive: !this.scrollLocked_,
     };
     this.unlistenHandlers_.push(
-        listen(doc, 'touchstart', handleEvent, options),
-        listen(doc, 'touchend', handleEvent, options),
-        listen(doc, 'touchmove', handleEvent, options));
+      listen(doc, 'touchstart', handleEvent, options),
+      listen(doc, 'touchend', handleEvent, options),
+      listen(doc, 'touchmove', handleEvent, options)
+    );
   }
 
+  /**
+   * @private
+   */
   unlisten_() {
-    this.unlistenHandlers_.forEach(unlisten => unlisten());
+    this.unlistenHandlers_.forEach((unlisten) => unlisten());
     this.unlistenHandlers_.length = 0;
   }
 
@@ -117,11 +142,10 @@ export class TouchHandler {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);
     }
-    if (this.scrollLocked_) {
+    if (this.scrollLocked_ && e.cancelable) {
       e.preventDefault();
     }
   }
-
 
   /**
    * Makes a partial copy of the event.
@@ -130,8 +154,7 @@ export class TouchHandler {
    * @private
    */
   copyTouchEvent_(e) {
-    const copiedEvent =
-        this.copyProperties_(e, EVENT_PROPERTIES);
+    const copiedEvent = this.copyProperties_(e, EVENT_PROPERTIES);
     if (e.touches) {
       copiedEvent['touches'] = this.copyTouches_(e.touches);
     }
@@ -140,7 +163,6 @@ export class TouchHandler {
     }
     return copiedEvent;
   }
-
 
   /**
    * Copies an array of touches.

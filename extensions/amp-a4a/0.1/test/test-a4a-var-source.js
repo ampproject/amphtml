@@ -16,24 +16,21 @@
 
 import {A4AVariableSource} from '../a4a-variable-source';
 import {createIframePromise} from '../../../../testing/iframe';
-import {installDocumentInfoServiceForDoc} from
-  '../../../../src/service/document-info-impl';
-
+import {installDocumentInfoServiceForDoc} from '../../../../src/service/document-info-impl';
 
 describe('A4AVariableSource', () => {
-
   let varSource;
 
-  beforeEach(() => {
-    return createIframePromise().then(iframe => {
-      iframe.doc.title = 'Pixel Test';
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('href', 'https://pinterest.com:8080/pin1');
-      link.setAttribute('rel', 'canonical');
-      iframe.doc.head.appendChild(link);
-      installDocumentInfoServiceForDoc(iframe.ampdoc);
-      varSource = new A4AVariableSource(iframe.ampdoc, iframe.win);
-    });
+  beforeEach(async () => {
+    const iframe = await createIframePromise();
+    iframe.doc.title = 'Pixel Test';
+    const link = iframe.doc.createElement('link');
+    link.setAttribute('href', 'https://pinterest.com:8080/pin1');
+    link.setAttribute('rel', 'canonical');
+    iframe.doc.head.appendChild(link);
+    iframe.win.__AMP_SERVICES.documentInfo = null;
+    installDocumentInfoServiceForDoc(iframe.ampdoc);
+    varSource = new A4AVariableSource(iframe.ampdoc, iframe.win);
   });
 
   function expandAsync(varName, opt_params) {
@@ -49,23 +46,33 @@ describe('A4AVariableSource', () => {
   });
 
   it('should replace CANONICAL_URL', () => {
-    expect(expandSync('CANONICAL_URL'))
-        .to.equal('https://pinterest.com:8080/pin1');
-  });
-
-  it('should replace AD_NAV_TIMING', () => {
-    expect(expandSync('AD_NAV_TIMING', ['navigationStart'])).to.match(/\d+/);
-    return expandAsync('AD_NAV_TIMING', ['navigationStart']).then(val =>
-      expect(val).to.match(/\d+/)
+    expect(expandSync('CANONICAL_URL')).to.equal(
+      'https://pinterest.com:8080/pin1'
     );
   });
 
-  it('should replace AD_NAV_TYPE', () => {
-    expect(expandSync('AD_NAV_TYPE')).to.match(/\d/);
+  it('should replace NAV_TIMING', async () => {
+    expect(expandSync('NAV_TIMING', ['navigationStart'])).to.match(/\d+/);
+    const val = await expandAsync('NAV_TIMING', ['navigationStart']);
+    return expect(val).to.match(/\d+/);
   });
 
-  it('should replace AD_NAV_REDIRECT_COUNT', () => {
-    expect(expandSync('AD_NAV_REDIRECT_COUNT')).to.match(/\d/);
+  it('should replace NAV_TYPE', () => {
+    expect(expandSync('NAV_TYPE')).to.match(/\d/);
+  });
+
+  it('should replace NAV_REDIRECT_COUNT', () => {
+    expect(expandSync('NAV_REDIRECT_COUNT')).to.match(/\d/);
+  });
+
+  it('should replace HTML_ATTR', () => {
+    expect(expandSync('HTML_ATTR', ['div', 'id'])).to.equal(
+      '[{"id":"parent"}]'
+    );
+  });
+
+  it('should replace CLIENT_ID with null', () => {
+    return expect(expandSync('CLIENT_ID', ['a'])).to.be.null;
   });
 
   function undefinedVariable(varName) {
@@ -75,9 +82,6 @@ describe('A4AVariableSource', () => {
   }
 
   // Performance timing info.
-  undefinedVariable('NAV_TIMING');
-  undefinedVariable('NAV_TYPE');
-  undefinedVariable('NAV_REDIRECT_COUNT');
   undefinedVariable('PAGE_LOAD_TIME');
   undefinedVariable('DOMAIN_LOOKUP_TIME');
   undefinedVariable('TCP_CONNECT_TIME');
@@ -90,4 +94,9 @@ describe('A4AVariableSource', () => {
   // Access data.
   undefinedVariable('ACCESS_READER_ID');
   undefinedVariable('AUTHDATA');
+
+  // amp-bind state.
+  // AMP_STATE() is not scoped to the FIE so this cannot be safely removed
+  // without refactoring the implementation in url-replacements-impl.js.
+  undefinedVariable('AMP_STATE');
 });

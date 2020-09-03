@@ -17,10 +17,9 @@ import {getData, listen} from './../../../src/event-helper';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -31,20 +30,24 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     /** @private {?number} */
     this.itemHeight_ = 400; //default
 
-    /** @private {?number} */
-    this.riddleId_ = null;
-
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
+    /** @private {string} */
+    this.riddleId_ = '';
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
 
+  /**
+   * Handles message.
+   *
+   * @param {!Event} event
+   */
   handleMessage_(event) {
-    if (!this.iframe_ ||
-        event.origin != 'https://www.riddle.com' ||
-        event.source != this.iframe_.contentWindow) {
+    if (
+      !this.iframe_ ||
+      event.origin != 'https://www.riddle.com' ||
+      event.source != this.iframe_.contentWindow
+    ) {
       return;
     }
 
@@ -54,8 +57,7 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
       return;
     }
 
-    if (data['riddleId'] != undefined
-      && data['riddleId'] == this.riddleId_) {
+    if (data['riddleId'] != undefined && data['riddleId'] == this.riddleId_) {
       this.riddleHeightChanged_(data['riddleHeight']);
     }
   }
@@ -67,15 +69,16 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.riddleId_ = user().assert(
-        this.element.getAttribute('data-riddle-id'),
-        'The data-riddle-id attribute is required for <amp-riddle-quiz> %s',
-        this.element);
+    this.riddleId_ = userAssert(
+      this.element.getAttribute('data-riddle-id'),
+      'The data-riddle-id attribute is required for <amp-riddle-quiz> %s',
+      this.element
+    );
     // listen for resize events coming from riddles
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleMessage_.bind(this)
+      this.win,
+      'message',
+      this.handleMessage_.bind(this)
     );
 
     const iframe = this.element.ownerDocument.createElement('iframe');
@@ -84,7 +87,8 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = 'https://www.riddle.com/a/iframe/' + encodeURIComponent(this.riddleId_);
+    iframe.src =
+      'https://www.riddle.com/a/iframe/' + encodeURIComponent(this.riddleId_);
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -116,10 +120,12 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
 
     this.itemHeight_ = height; //Save new height
 
-    this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
+    this.attemptChangeHeight(this.itemHeight_).catch(() => {
+      /* die */
+    });
   }
 }
 
-AMP.extension('amp-riddle-quiz', '0.1', AMP => {
+AMP.extension('amp-riddle-quiz', '0.1', (AMP) => {
   AMP.registerElement('amp-riddle-quiz', AmpRiddleQuiz, false);
 });

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {GOOGLE_ACTIVEVIEW_ERROR_TAG} from './requests';
 import {Observable} from '../../../src/observable';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 /**
  * This class implements visibility calculations based on the
@@ -24,51 +27,69 @@ import {dev} from '../../../src/log';
  */
 export class VisibilityModel {
   /**
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {function():number} calcVisibility
+   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcLayoutBoxTemp
+   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcBoundingClientRectTemp
+   * @param {?../../../src/service/viewport/viewport-impl.ViewportImpl} viewportTemp
    */
-  constructor(spec, calcVisibility) {
+  constructor(
+    spec,
+    calcVisibility,
+    calcLayoutBoxTemp = null,
+    calcBoundingClientRectTemp = null,
+    viewportTemp = null
+  ) {
     /** @const @private */
     this.calcVisibility_ = calcVisibility;
 
+    // TODO(#29618): Remove after ampim investigation
+    this.calcLayoutBoxTemp_ = calcLayoutBoxTemp;
+
+    this.calcBoundingClientRectTemp_ = calcBoundingClientRectTemp;
+
+    this.viewportTemp_ = viewportTemp;
+
+    this.errorInfoTemp_ = dict({});
+
     /**
      * Spec parameters.
-     * @private {{
-     *   visiblePercentageMin: number,
-     *   visiblePercentageMax: number,
-     *   totalTimeMin: number,
-     *   totalTimeMax: number,
-     *   continuousTimeMin: number,
-     *   continuousTimeMax: number,
-     * }}
+     * @private {!JsonObject}
      */
-    this.spec_ = {
-      visiblePercentageMin: Number(spec['visiblePercentageMin']) / 100 || 0,
-      visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100 || 1,
-      totalTimeMin: Number(spec['totalTimeMin']) || 0,
-      totalTimeMax: Number(spec['totalTimeMax']) || Infinity,
-      continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
-      continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
-    };
+    this.spec_ = dict({
+      'visiblePercentageMin': Number(spec['visiblePercentageMin']) / 100 || 0,
+      'visiblePercentageMax': Number(spec['visiblePercentageMax']) / 100 || 1,
+      'totalTimeMin': Number(spec['totalTimeMin']) || 0,
+      'totalTimeMax': Number(spec['totalTimeMax']) || Infinity,
+      'continuousTimeMin': Number(spec['continuousTimeMin']) || 0,
+      'continuousTimeMax': Number(spec['continuousTimeMax']) || Infinity,
+    });
     // Above, if visiblePercentageMax was not specified, assume 100%.
     // Here, do allow 0% to be the value if that is what was specified.
     if (String(spec['visiblePercentageMax']).trim() === '0') {
-      this.spec_.visiblePercentageMax = 0;
+      this.spec_['visiblePercentageMax'] = 0;
     }
+
+    /**
+     * Accumulate visibility counters but do not fire the trigger until the
+     * ready promise resolves.
+     * @private @const {boolean}
+     */
+    this.ignoreVisibilityForReport_ = spec['reportWhen'] !== undefined;
 
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
 
-    /** @private {?function()} */
-    this.eventResolver_ = null;
-
     /** @private {?Observable} */
     this.onTriggerObservable_ = new Observable();
 
+    const deferred = new Deferred();
+
     /** @private */
-    this.eventPromise_ = new Promise(resolve => {
-      this.eventResolver_ = resolve;
-    });
+    this.eventPromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.eventResolver_ = deferred.resolve;
 
     this.eventPromise_.then(() => {
       this.onTriggerObservable_.fire();
@@ -79,6 +100,9 @@ export class VisibilityModel {
 
     /** @const @private {time} */
     this.createdTime_ = Date.now();
+
+    // TODO(warrengm): Consider refactoring so that the ready defaults are
+    // false.
 
     /** @private {boolean} */
     this.ready_ = true;
@@ -131,6 +155,15 @@ export class VisibilityModel {
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
 
+    /** @private {number} Scroll position at ini-load time */
+    this.initialScrollDepth_ = 0;
+
+    /**
+     * @private {boolean} Whether scroll position at ini-load time has
+     * been set
+     */
+    this.initialScrollDepthAlreadySet_ = false;
+
     /** @private {boolean} */
     this.waitToReset_ = false;
 
@@ -147,11 +180,14 @@ export class VisibilityModel {
    * @private
    */
   reset_() {
-    dev().assert(!this.eventResolver_,
-        'Attempt to refresh visible event before previous one resolve');
-    this.eventPromise_ = new Promise(resolve => {
-      this.eventResolver_ = resolve;
-    });
+    devAssert(
+      !this.eventResolver_,
+      'Attempt to refresh visible event before previous one resolve'
+    );
+    const deferred = new Deferred();
+    this.eventPromise_ = deferred.promise;
+    this.eventResolver_ = deferred.resolve;
+
     this.eventPromise_.then(() => {
       this.onTriggerObservable_.fire();
     });
@@ -190,7 +226,7 @@ export class VisibilityModel {
       clearTimeout(this.scheduleRepeatId_);
       this.scheduleRepeatId_ = null;
     }
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
@@ -264,25 +300,39 @@ export class VisibilityModel {
   /**
    * Returns the calculated state of visibility.
    * @param {time} startTime
-   * @return {!Object<string, string|number>}
+   * @return {!JsonObject}
    */
   getState(startTime) {
-    return {
+    return dict({
       // Observed times, relative to the `startTime`.
-      firstSeenTime: timeBase(this.firstSeenTime_, startTime),
-      lastSeenTime: timeBase(this.lastSeenTime_, startTime),
-      lastVisibleTime: timeBase(this.lastVisibleTime_, startTime),
-      firstVisibleTime: timeBase(this.firstVisibleTime_, startTime),
+      'firstSeenTime': timeBase(this.firstSeenTime_, startTime),
+      'lastSeenTime': timeBase(this.lastSeenTime_, startTime),
+      'lastVisibleTime': timeBase(this.lastVisibleTime_, startTime),
+      'firstVisibleTime': timeBase(this.firstVisibleTime_, startTime),
 
       // Durations.
-      maxContinuousVisibleTime: this.maxContinuousVisibleTime_,
-      totalVisibleTime: this.totalVisibleTime_,
+      'maxContinuousVisibleTime': this.maxContinuousVisibleTime_,
+      'totalVisibleTime': this.totalVisibleTime_,
 
       // Visibility percents.
-      loadTimeVisibility: this.loadTimeVisibility_ * 100 || 0,
-      minVisiblePercentage: this.minVisiblePercentage_ * 100,
-      maxVisiblePercentage: this.maxVisiblePercentage_ * 100,
-    };
+      'loadTimeVisibility': this.loadTimeVisibility_ * 100 || 0,
+      'minVisiblePercentage': this.minVisiblePercentage_ * 100,
+      'maxVisiblePercentage': this.maxVisiblePercentage_ * 100,
+    });
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * Return object
+   * {
+   *   'layoutBoxAtMaxRatio': AMP calculated layout box at max intersect ratio
+   *   'boundingClientRectAtMaxRatio': InOb calculated clientRect at max intersect ratio
+   *   'viewportSizeAtMaxRatio': viewport size at max intersect ratio
+   * }
+   * @return {!JsonObject}
+   */
+  getErrorInfoTemp() {
+    return this.errorInfoTemp_;
   }
 
   /**
@@ -301,7 +351,11 @@ export class VisibilityModel {
     if (!this.eventResolver_) {
       return;
     }
-    const conditionsMet = this.updateCounters_(visibility);
+
+    // When ignoreVisibilityForReport_ is true, we update counters but fire the
+    // event when the report ready promise is resolved.
+    const conditionsMet =
+      this.updateCounters_(visibility) || this.ignoreVisibilityForReport_;
     if (conditionsMet) {
       if (this.scheduledUpdateTimeoutId_) {
         clearTimeout(this.scheduledUpdateTimeoutId_);
@@ -347,20 +401,25 @@ export class VisibilityModel {
    * @return {boolean}
    */
   isVisibilityMatch_(visibility) {
-    dev().assert(visibility >= 0 && visibility <= 1,
-        'invalid visibility value: %s', visibility);
+    devAssert(
+      visibility >= 0 && visibility <= 1,
+      'invalid visibility value: %s',
+      visibility
+    );
     // Special case: If visiblePercentageMin is 100%, then it doesn't make
     // sense to do the usual (min, max] since that would never be true.
-    if (this.spec_.visiblePercentageMin == 1) {
+    if (this.spec_['visiblePercentageMin'] == 1) {
       return visibility == 1;
     }
     // Special case: If visiblePercentageMax is 0%, then we
     // want to ping when the creative becomes not visible.
-    if (this.spec_.visiblePercentageMax == 0) {
+    if (this.spec_['visiblePercentageMax'] == 0) {
       return visibility == 0;
     }
-    return visibility > this.spec_.visiblePercentageMin &&
-        visibility <= this.spec_.visiblePercentageMax;
+    return (
+      visibility > this.spec_['visiblePercentageMin'] &&
+      visibility <= this.spec_['visiblePercentageMax']
+    );
   }
 
   /**
@@ -369,8 +428,11 @@ export class VisibilityModel {
    * @private
    */
   updateCounters_(visibility) {
-    dev().assert(visibility >= 0 && visibility <= 1,
-        'invalid visibility value: %s', visibility);
+    devAssert(
+      visibility >= 0 && visibility <= 1,
+      'invalid visibility value: %s',
+      visibility
+    );
     const now = Date.now();
 
     if (visibility > 0) {
@@ -378,14 +440,15 @@ export class VisibilityModel {
       this.lastSeenTime_ = now;
       // Consider it as load time visibility if this happens within 300ms of
       // page load.
-      if (!this.loadTimeVisibility_ && (now - this.createdTime_) < 300) {
+      if (!this.loadTimeVisibility_ && now - this.createdTime_ < 300) {
         this.loadTimeVisibility_ = visibility;
       }
     }
 
     const prevMatchesVisibility = this.matchesVisibility_;
-    const timeSinceLastUpdate =
-        this.lastVisibleUpdateTime_ ? now - this.lastVisibleUpdateTime_ : 0;
+    const timeSinceLastUpdate = this.lastVisibleUpdateTime_
+      ? now - this.lastVisibleUpdateTime_
+      : 0;
     this.matchesVisibility_ = this.isVisibilityMatch_(visibility);
     if (this.matchesVisibility_) {
       this.everMatchedVisibility_ = true;
@@ -393,28 +456,57 @@ export class VisibilityModel {
         // Keep counting.
         this.totalVisibleTime_ += timeSinceLastUpdate;
         this.continuousTime_ += timeSinceLastUpdate;
-        this.maxContinuousVisibleTime_ =
-            Math.max(this.maxContinuousVisibleTime_, this.continuousTime_);
+        this.maxContinuousVisibleTime_ = Math.max(
+          this.maxContinuousVisibleTime_,
+          this.continuousTime_
+        );
       } else {
         // The resource came into view: start counting.
-        dev().assert(!this.lastVisibleUpdateTime_);
+        devAssert(!this.lastVisibleUpdateTime_);
         this.firstVisibleTime_ = this.firstVisibleTime_ || now;
       }
       this.lastVisibleUpdateTime_ = now;
       this.minVisiblePercentage_ =
-          this.minVisiblePercentage_ > 0 ?
-            Math.min(this.minVisiblePercentage_, visibility) :
-            visibility;
-      this.maxVisiblePercentage_ =
-          Math.max(this.maxVisiblePercentage_, visibility);
+        this.minVisiblePercentage_ > 0
+          ? Math.min(this.minVisiblePercentage_, visibility)
+          : visibility;
+
+      // TODO(#29618): Remove after ampim investigation
+      if (visibility > this.maxVisiblePercentage_) {
+        try {
+          if (this.calcLayoutBoxTemp_) {
+            this.errorInfoTemp_[
+              'layoutBoxAtMaxRatio'
+            ] = this.calcLayoutBoxTemp_();
+          }
+          if (this.calcBoundingClientRectTemp_) {
+            this.errorInfoTemp_[
+              'boundingClientRectAtMaxRatio'
+            ] = this.calcBoundingClientRectTemp_();
+          }
+          if (this.viewportTemp_) {
+            this.errorInfoTemp_[
+              'viewportSizeAtMaxRatio'
+            ] = this.viewportTemp_.getSize();
+          }
+        } catch (e) {
+          dev().error(GOOGLE_ACTIVEVIEW_ERROR_TAG, e);
+        }
+      }
+
+      this.maxVisiblePercentage_ = Math.max(
+        this.maxVisiblePercentage_,
+        visibility
+      );
       this.lastVisibleTime_ = now;
     } else if (prevMatchesVisibility) {
       // The resource went out of view. Do final calculations and reset state.
-      dev().assert(this.lastVisibleUpdateTime_ > 0);
+      devAssert(this.lastVisibleUpdateTime_ > 0);
 
       this.maxContinuousVisibleTime_ = Math.max(
-          this.maxContinuousVisibleTime_,
-          this.continuousTime_ + timeSinceLastUpdate);
+        this.maxContinuousVisibleTime_,
+        this.continuousTime_ + timeSinceLastUpdate
+      );
 
       // Reset for next visibility event.
       this.lastVisibleUpdateTime_ = 0;
@@ -423,11 +515,34 @@ export class VisibilityModel {
       this.lastVisibleTime_ = now;
     }
 
-    return this.everMatchedVisibility_ &&
-        (this.totalVisibleTime_ >= this.spec_.totalTimeMin) &&
-        (this.totalVisibleTime_ <= this.spec_.totalTimeMax) &&
-        (this.maxContinuousVisibleTime_ >= this.spec_.continuousTimeMin) &&
-        (this.maxContinuousVisibleTime_ <= this.spec_.continuousTimeMax);
+    return (
+      this.everMatchedVisibility_ &&
+      this.totalVisibleTime_ >= this.spec_['totalTimeMin'] &&
+      this.totalVisibleTime_ <= this.spec_['totalTimeMax'] &&
+      this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin'] &&
+      this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']
+    );
+  }
+
+  /**
+   * Set the amount that the user had scrolled down the page at the time of
+   * page loading.
+   * @param {number} depth
+   */
+  maybeSetInitialScrollDepth(depth) {
+    if (!this.initialScrollDepthAlreadySet_) {
+      this.initialScrollDepth_ = depth;
+      this.initialScrollDepthAlreadySet_ = true;
+    }
+  }
+
+  /**
+   * Gets the amount that the user had scrolled down the page, at the time of
+   * ini-load.
+   * @return {number} depth
+   */
+  getInitialScrollDepth() {
+    return this.initialScrollDepth_;
   }
 
   /**
@@ -438,17 +553,21 @@ export class VisibilityModel {
    */
   computeTimeToWait_() {
     const waitForContinuousTime = Math.max(
-        this.spec_.continuousTimeMin - this.continuousTime_, 0);
+      this.spec_['continuousTimeMin'] - this.continuousTime_,
+      0
+    );
     const waitForTotalTime = Math.max(
-        this.spec_.totalTimeMin - this.totalVisibleTime_, 0);
+      this.spec_['totalTimeMin'] - this.totalVisibleTime_,
+      0
+    );
     const maxWaitTime = Math.max(waitForContinuousTime, waitForTotalTime);
     return Math.min(
-        maxWaitTime,
-        waitForContinuousTime || Infinity,
-        waitForTotalTime || Infinity);
+      maxWaitTime,
+      waitForContinuousTime || Infinity,
+      waitForTotalTime || Infinity
+    );
   }
 }
-
 
 /**
  * Calculates the specified time based on the given `baseTime`.

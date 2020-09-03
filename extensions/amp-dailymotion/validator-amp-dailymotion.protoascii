@@ -18,9 +18,9 @@ tags: {  # amp-dailymotion
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-dailymotion"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -32,19 +32,23 @@ tags: {  # <amp-dailymotion>
   attrs: { name: "autoplay" }
   attrs: {
     name: "data-endscreen-enable"
-    value_regex: "true|false"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "data-info"
-    value_regex: "true|false"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "data-mute"
-    value_regex: "true|false"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "data-sharing-enable"
-    value_regex: "true|false"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "data-start"
@@ -56,15 +60,20 @@ tags: {  # <amp-dailymotion>
   }
   attrs: {
     name: "data-ui-logo"
-    value_regex: "true|false"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "data-videoid"
     mandatory: true
     value_regex_casei: "[a-z0-9]+"
   }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-dailymotion"
+  spec_url: "https://amp.dev/documentation/components/amp-dailymotion/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -14,65 +14,64 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {
-  adoptServiceForEmbed,
-  adoptServiceForEmbedIfEmbeddable,
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-  setParentWindow,
-} from '../service';
-import {calculateExtensionScriptUrl} from './extension-location';
+  calculateExtensionScriptUrl,
+  parseExtensionUrl,
+} from './extension-location';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
-import {cssText} from '../../build/css';
-import {declareExtension} from './ampdoc-impl';
-import {dev, rethrowAsync} from '../log';
+import {dev, devAssert, rethrowAsync, user} from '../log';
 import {getMode} from '../mode';
-import {
-  install as installDOMTokenListToggle,
-} from '../polyfills/domtokenlist-toggle';
-import {install as installDocContains} from '../polyfills/document-contains';
-import {installImg} from '../../builtins/amp-img';
-import {installLayout} from '../../builtins/amp-layout';
-import {installPixel} from '../../builtins/amp-pixel';
-import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {installStylesForDoc} from '../style-installer';
 import {map} from '../utils/object';
-import {toWin} from '../types';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
+import {startsWith} from '../string';
 
+export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
-const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
 
 /**
- * The structure that contains the declaration of a custom element.
+ * Default milliseconds to wait for all extensions to load before erroring.
+ * (8 seconds is the same as the CSS boilerplate timoeout)
+ * @const
+ */
+const LOAD_TIMEOUT = 16000;
+
+/**
+ * Contains data for the declaration of a custom element.
  *
  * @typedef {{
  *   implementationClass:
- *       function(new:../base-element.BaseElement, !Element),
+ *       typeof ../base-element.BaseElement,
  *   css: (?string|undefined),
  * }}
  */
 let ExtensionElementDef;
 
+/**
+ * Contains data for the declaration of an extension service.
+ *
+ * @typedef {{serviceName: string, serviceClass: function(new:Object, !./ampdoc-impl.AmpDoc)}}
+ */
+let ExtensionServiceDef;
 
 /**
  * The structure that contains the resources declared by an extension.
  *
  * @typedef {{
  *   elements: !Object<string, !ExtensionElementDef>,
- *   services: !Array<string>,
+ *   services: !Object<string, !ExtensionServiceDef>,
  * }}
  */
 let ExtensionDef;
-
 
 /**
  * Internal structure that maintains the state of an extension through loading.
@@ -92,8 +91,20 @@ let ExtensionDef;
  */
 let ExtensionHolderDef;
 
+/**
+ * @param {string} extensionId
+ * @return {boolean}
+ */
 export function isTemplateExtension(extensionId) {
   return CUSTOM_TEMPLATES.indexOf(extensionId) >= 0;
+}
+
+/**
+ * @param {string} extensionId
+ * @return {boolean}
+ */
+function isIntermediateExtension(extensionId) {
+  return startsWith(extensionId, '_');
 }
 
 /**
@@ -106,82 +117,10 @@ export function installExtensionsService(window) {
 }
 
 /**
- * Register and process the specified extension. The factory is called
- * immediately, which in turn is expected to register elements, templates,
- * services and document factories.
- * @param {!Extensions} extensions
- * @param {string} extensionId
- * @param {function(!Object)} factory
- * @param {!Object} arg
- * @restricted
- */
-export function registerExtension(extensions, extensionId, factory, arg) {
-  extensions.registerExtension_(extensionId, factory, arg);
-}
-
-
-/**
- * Apply all registered factories to the specified ampdoc.
- * @param {!Extensions} extensions
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Array<string>} extensionIds
- * @return {!Promise}
- * @restricted
- */
-export function installExtensionsInDoc(extensions, ampdoc, extensionIds) {
-  return extensions.installExtensionsInDoc_(ampdoc, extensionIds);
-}
-
-
-/**
- * Add an element to the extension currently being registered. This is a
- * restricted method and it's allowed to be called only during the overall
- * extension registration.
- * @param {!Extensions} extensions
- * @param {string} name
- * @param {function(new:../base-element.BaseElement, !Element)}
- *     implementationClass
- * @param {?string|undefined} css
- * @restricted
- */
-export function addElementToExtension(
-  extensions, name, implementationClass, css) {
-  extensions.addElement_(name, implementationClass, css);
-}
-
-/**
- * Add a service to the extension currently being registered. This is a
- * restricted method and it's allowed to be called only during the overall
- * extension registration.
- * @param {!Extensions} extensions
- * @param {string} name
- * @param {function(new:Object, !./ampdoc-impl.AmpDoc)} implementationClass
- * @restricted
- */
-export function addServiceToExtension(extensions, name, implementationClass) {
-  extensions.addService_(name, implementationClass);
-}
-
-/**
- * Add a ampdoc factory to the extension currently being registered. This is a
- * restricted method and it's allowed to be called only during the overall
- * extension registration.
- * @param {!Extensions} extensions
- * @param {function(!./ampdoc-impl.AmpDoc)} factory
- * @param {string=} opt_forName
- * @restricted
- */
-export function addDocFactoryToExtension(extensions, factory, opt_forName) {
-  extensions.addDocFactory_(factory, opt_forName);
-}
-
-
-/**
  * The services that manages extensions in the runtime.
  * @visibleForTesting
  */
 export class Extensions {
-
   /**
    * @param {!Window} win
    */
@@ -200,20 +139,21 @@ export class Extensions {
   }
 
   /**
-   * Registers a new extension. This method is called by the extension's script
-   * itself when it's loaded using the regular `AMP.push()` callback.
+   * Register and process the specified extension. The factory is called
+   * immediately, which in turn is expected to register elements, templates,
+   * services and document factories. This method is called by the extension's
+   * script itself when it's loaded using the regular `AMP.push()` callback.
    * @param {string} extensionId
-   * @param {function(!Object)} factory
+   * @param {function(!Object, !Object)} factory
    * @param {!Object} arg
-   * @private
    * @restricted
    */
-  registerExtension_(extensionId, factory, arg) {
+  registerExtension(extensionId, factory, arg) {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
-      factory(arg);
-      if (getMode().localDev || getMode().test) {
+      factory(arg, arg['_']);
+      if (getMode(this.win).localDev || getMode(this.win).test) {
         if (Object.freeze) {
           const m = holder.extension;
           m.elements = Object.freeze(m.elements);
@@ -238,12 +178,19 @@ export class Extensions {
   /**
    * Waits for the previously included extension to complete
    * loading/registration.
+   * @param {!Window} win
    * @param {string} extensionId
-   * @return {!Promise<!ExtensionDef>}
+   * @param {number=} opt_timeout
+   * @return {!Promise<?ExtensionDef>}
    */
-  waitForExtension(extensionId) {
-    return this.waitFor_(this.getExtensionHolder_(
-        extensionId, /* auto */ false));
+  waitForExtension(win, extensionId, opt_timeout) {
+    return /** @type {!Promise<?ExtensionDef>} */ (Services.timerFor(
+      win
+    ).timeoutPromise(
+      opt_timeout || LOAD_TIMEOUT,
+      this.waitFor_(this.getExtensionHolder_(extensionId, /* auto */ false)),
+      `Render timeout waiting for extension ${extensionId} to be load.`
+    ));
   }
 
   /**
@@ -258,8 +205,11 @@ export class Extensions {
       extensionId = 'amp-ad';
     }
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
-    this.insertExtensionScriptIfNeeded_(extensionId, holder,
-        opt_extensionVersion);
+    this.insertExtensionScriptIfNeeded_(
+      extensionId,
+      holder,
+      opt_extensionVersion
+    );
     return this.waitFor_(holder);
   }
 
@@ -281,27 +231,74 @@ export class Extensions {
       return extLoaders[extensionId];
     }
     stubElementIfNotKnown(ampdoc.win, extensionId);
-    return extLoaders[extensionId] = this.preloadExtension(
-        extensionId, opt_extensionVersion)
-        .then(() => this.installExtensionInDoc_(ampdoc, extensionId));
+    return (extLoaders[extensionId] = this.preloadExtension(
+      extensionId,
+      opt_extensionVersion
+    ).then(() => this.installExtensionInDoc(ampdoc, extensionId)));
   }
 
   /**
    * Reloads the new version of the extension.
    * @param {string} extensionId
-   * @param {!Element} oldScriptElement
-   * @return {!Promise<!ExtensionDef>}
+   * @return {?Promise<!ExtensionDef>}
    */
-  reloadExtension(extensionId, oldScriptElement) {
-    // "Disconnect" the old script element and extension record.
+  reloadExtension(extensionId) {
+    // Ignore inserted script elements to prevent recursion.
+    const els = this.getExtensionScripts_(
+      extensionId,
+      /* includeInserted */ false
+    );
+    if (!els.length) {
+      const TAG = 'reloadExtension';
+      user().error(
+        TAG,
+        'Extension script for "%s" is missing or was already reloaded.',
+        extensionId
+      );
+      return null;
+    }
+    // The previously awaited extension loader must not have finished or
+    // failed.
     const holder = this.extensions_[extensionId];
     if (holder) {
-      dev().assert(!holder.loaded && !holder.error);
-      delete this.extensions_[extensionId];
+      devAssert(!holder.loaded && !holder.error);
+      holder.scriptPresent = false;
     }
-    oldScriptElement.removeAttribute('custom-element');
-    oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
-    return this.preloadExtension(extensionId);
+    els.forEach((el) =>
+      el.setAttribute('i-amphtml-loaded-new-version', extensionId)
+    );
+    const urlParts = parseExtensionUrl(els[0].src);
+    return this.preloadExtension(extensionId, urlParts.extensionVersion);
+  }
+
+  /**
+   * Returns the extension <script> element and attribute for the given
+   * extension ID, if it exists. Otherwise, returns null.
+   * @param {string} extensionId
+   * @param {boolean=} includeInserted If true, includes script elements that
+   *   are inserted by the runtime dynamically. Default is true.
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getExtensionScripts_(extensionId, includeInserted = true) {
+    // Always ignore <script> elements that have a mismatched RTV.
+    const modifier =
+      ':not([i-amphtml-loaded-new-version])' +
+      (includeInserted ? '' : ':not([i-amphtml-inserted])');
+    // We have to match against "src" because a few extensions, such as
+    // "amp-viewer-integration", do not have "custom-element" attribute.
+    const matches = this.win.document.head./*OK*/ querySelectorAll(
+      `script[src*="/${extensionId}-"]` + modifier
+    );
+    const filtered = [];
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      const urlParts = parseExtensionUrl(match.src);
+      if (urlParts.extensionId === extensionId) {
+        filtered.push(match);
+      }
+    }
+    return filtered;
   }
 
   /**
@@ -309,28 +306,32 @@ export class Extensions {
    * class when the extension has been loaded. If necessary, adds the extension
    * script to the page.
    * @param {string} elementName
-   * @return {!Promise<function(new:../base-element.BaseElement, !Element)>}
+   * @return {!Promise<typeof ../base-element.BaseElement>}
    */
   loadElementClass(elementName) {
-    return this.preloadExtension(elementName).then(extension => {
-      const element = dev().assert(extension.elements[elementName],
-          'Element not found: %s', elementName);
+    return this.preloadExtension(elementName).then((extension) => {
+      const element = devAssert(
+        extension.elements[elementName],
+        'Element not found: %s',
+        elementName
+      );
       return element.implementationClass;
     });
   }
 
   /**
-   * Registers the element implementation with the current extension.
+   * Add an element to the extension currently being registered. This is a
+   * restricted method and it's allowed to be called only during the overall
+   * extension registration.
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
-   * @private
    * @restricted
    */
-  addElement_(name, implementationClass, css) {
+  addElement(name, implementationClass, css) {
     const holder = this.getCurrentExtensionHolder_(name);
     holder.extension.elements[name] = {implementationClass, css};
-    this.addDocFactory_(ampdoc => {
+    this.addDocFactory((ampdoc) => {
       this.installElement_(ampdoc, name, implementationClass, css);
     });
   }
@@ -339,15 +340,21 @@ export class Extensions {
    * Installs the specified element implementation in the ampdoc.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
    * @private
    */
   installElement_(ampdoc, name, implementationClass, css) {
     if (css) {
-      installStylesForDoc(ampdoc, css, () => {
-        this.registerElementInWindow_(ampdoc.win, name, implementationClass);
-      }, /* isRuntimeCss */ false, name);
+      installStylesForDoc(
+        ampdoc,
+        css,
+        () => {
+          this.registerElementInWindow_(ampdoc.win, name, implementationClass);
+        },
+        /* isRuntimeCss */ false,
+        name
+      );
     } else {
       this.registerElementInWindow_(ampdoc.win, name, implementationClass);
     }
@@ -356,7 +363,7 @@ export class Extensions {
   /**
    * @param {!Window} win
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @private
    */
   registerElementInWindow_(win, name, implementationClass) {
@@ -367,40 +374,48 @@ export class Extensions {
   }
 
   /**
-   * Adds `name` to the list of services registered by the current extension.
+   * Add a service to the extension currently being registered. This is a
+   * restricted method and it's allowed to be called only during the overall
+   * extension registration.
    * @param {string} name
    * @param {function(new:Object, !./ampdoc-impl.AmpDoc)} implementationClass
-   * @private
    */
-  addService_(name, implementationClass) {
+  addService(name, implementationClass) {
     const holder = this.getCurrentExtensionHolder_();
-    holder.extension.services.push(name);
-    this.addDocFactory_(ampdoc => {
+    holder.extension.services.push(
+      /** @type {!ExtensionServiceDef} */ ({
+        serviceName: name,
+        serviceClass: implementationClass,
+      })
+    );
+    this.addDocFactory((ampdoc) => {
       registerServiceBuilderForDoc(
-          ampdoc,
-          name,
-          implementationClass,
-          /* instantiate */ true);
+        ampdoc,
+        name,
+        implementationClass,
+        /* instantiate */ true
+      );
     });
   }
 
   /**
-   * Registers an ampdoc factory.
+   * Add a ampdoc factory to the extension currently being registered. This is a
+   * restricted method and it's allowed to be called only during the overall
+   * extension registration.
    * @param {function(!./ampdoc-impl.AmpDoc)} factory
    * @param {string=} opt_forName
-   * @private
    * @restricted
    */
-  addDocFactory_(factory, opt_forName) {
+  addDocFactory(factory, opt_forName) {
     const holder = this.getCurrentExtensionHolder_(opt_forName);
     holder.docFactories.push(factory);
 
-    // If a single-doc mode, or is shadow-doc mode and has AmpDocShell,
-    // run factory right away if it's included by the doc.
-    if (this.currentExtensionId_ && (this.ampdocService_.isSingleDoc() ||
-        this.ampdocService_.hasAmpDocShell())) {
+    // If a single-doc mode, run factory right away if it's included by the doc.
+    if (this.currentExtensionId_ && this.ampdocService_.isSingleDoc()) {
       const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
+      // Note that this won't trigger for FIE extensions that are not present
+      // in the parent doc.
       if (ampdoc.declaresExtension(extensionId) || holder.auto) {
         factory(ampdoc);
       }
@@ -408,20 +423,43 @@ export class Extensions {
   }
 
   /**
+   * Preinstalls built-ins and legacy elements in the emebedded ampdoc.
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Array<string>} extensionIds
+   * @restricted
+   */
+  preinstallEmbed(ampdoc, extensionIds) {
+    const topWin = this.win;
+    const childWin = ampdoc.win;
+
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
+
+    // Stub extensions.
+    extensionIds.forEach((extensionId) => {
+      // This will extend automatic upgrade of custom elements from top
+      // window to the child window.
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
+        stubElementIfNotKnown(childWin, extensionId);
+      }
+    });
+  }
+
+  /**
    * Installs all ampdoc factories previously registered with
-   * `addDocFactory_`.
+   * `addDocFactory`.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Array<string>} extensionIds
    * @return {!Promise}
-   * @private
    * @restricted
    */
-  installExtensionsInDoc_(ampdoc, extensionIds) {
-    const promises = [];
-    extensionIds.forEach(extensionId => {
-      promises.push(this.installExtensionInDoc_(ampdoc, extensionId));
-    });
-    return Promise.all(promises);
+  installExtensionsInDoc(ampdoc, extensionIds) {
+    return Promise.all(
+      extensionIds.map((extensionId) =>
+        this.installExtensionInDoc(ampdoc, extensionId)
+      )
+    );
   }
 
   /**
@@ -429,13 +467,12 @@ export class Extensions {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} extensionId
    * @return {!Promise}
-   * @private
    */
-  installExtensionInDoc_(ampdoc, extensionId) {
+  installExtensionInDoc(ampdoc, extensionId) {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     return this.waitFor_(holder).then(() => {
-      declareExtension(ampdoc, extensionId);
-      holder.docFactories.forEach(factory => {
+      ampdoc.declareExtension(extensionId);
+      holder.docFactories.forEach((factory) => {
         try {
           factory(ampdoc);
         } catch (e) {
@@ -443,93 +480,6 @@ export class Extensions {
         }
       });
     });
-  }
-
-  /**
-   * Install extensions in the child window (friendly iframe). The pre-install
-   * callback, if specified, is executed after polyfills have been configured
-   * but before the first extension is installed.
-   * @param {!Window} childWin
-   * @param {!Array<string>} extensionIds
-   * @param {function(!Window)=} opt_preinstallCallback
-   * @return {!Promise}
-   * @restricted
-   */
-  installExtensionsInChildWindow(childWin, extensionIds,
-    opt_preinstallCallback) {
-    const topWin = this.win;
-    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
-    setParentWindow(childWin, parentWin);
-
-    // Install necessary polyfills.
-    installPolyfillsInChildWindow(childWin);
-
-    // Install runtime styles.
-    installStylesLegacy(childWin.document, cssText, /* callback */ null,
-        /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
-
-    // Run pre-install callback.
-    if (opt_preinstallCallback) {
-      opt_preinstallCallback(childWin);
-    }
-
-    // Adopt embeddable services.
-    adoptStandardServicesForEmbed(childWin);
-
-    // Install built-ins and legacy elements.
-    copyBuiltinElementsToChildWindow(topWin, childWin);
-    stubLegacyElements(childWin);
-
-    const promises = [];
-    extensionIds.forEach(extensionId => {
-      // This will extend automatic upgrade of custom elements from top
-      // window to the child window.
-      if (!LEGACY_ELEMENTS.includes(extensionId)) {
-        stubElementIfNotKnown(childWin, extensionId);
-      }
-
-      // Install CSS.
-      const promise = this.preloadExtension(extensionId).then(extension => {
-        // Adopt embeddable extension services.
-        extension.services.forEach(service => {
-          adoptServiceForEmbedIfEmbeddable(childWin, service);
-        });
-
-        // Adopt the custom elements.
-        let elementPromises = null;
-        for (const elementName in extension.elements) {
-          const elementDef = extension.elements[elementName];
-          const elementPromise = new Promise(resolve => {
-            if (elementDef.css) {
-              installStylesLegacy(
-                  childWin.document,
-                  elementDef.css,
-                  /* completeCallback */ resolve,
-                  /* isRuntime */ false,
-                  extensionId);
-            } else {
-              resolve();
-            }
-          }).then(() => {
-            upgradeOrRegisterElement(
-                childWin,
-                elementName,
-                elementDef.implementationClass);
-          });
-          if (elementPromises) {
-            elementPromises.push(elementPromise);
-          } else {
-            elementPromises = [elementPromise];
-          }
-        }
-        if (elementPromises) {
-          return Promise.all(elementPromises).then(() => extension);
-        }
-        return extension;
-      });
-      promises.push(promise);
-    });
-    return Promise.all(promises);
   }
 
   /**
@@ -569,12 +519,13 @@ export class Extensions {
    * @private
    */
   getCurrentExtensionHolder_(opt_forName) {
-    if (!this.currentExtensionId_ && !getMode().test) {
+    if (!this.currentExtensionId_ && !getMode(this.win).test) {
       dev().error(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
-        this.currentExtensionId_ || UNKNOWN_EXTENSION,
-        /* auto */ true);
+      this.currentExtensionId_ || UNKNOWN_EXTENSION,
+      /* auto */ true
+    );
   }
 
   /**
@@ -591,10 +542,10 @@ export class Extensions {
       } else if (holder.error) {
         holder.promise = Promise.reject(holder.error);
       } else {
-        holder.promise = new Promise((resolve, reject) => {
-          holder.resolve = resolve;
-          holder.reject = reject;
-        });
+        const deferred = new Deferred();
+        holder.promise = deferred.promise;
+        holder.resolve = deferred.resolve;
+        holder.reject = deferred.reject;
       }
     }
     return holder.promise;
@@ -609,8 +560,10 @@ export class Extensions {
    */
   insertExtensionScriptIfNeeded_(extensionId, holder, opt_extensionVersion) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
-      const scriptElement =
-          this.createExtensionScript_(extensionId, opt_extensionVersion);
+      const scriptElement = this.createExtensionScript_(
+        extensionId,
+        opt_extensionVersion
+      );
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
     }
@@ -628,9 +581,8 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const scriptInHead = this.win.document.head./*OK*/querySelector(
-          `[custom-element="${extensionId}"]`);
-      holder.scriptPresent = !!scriptInHead;
+      const scriptsInHead = this.getExtensionScripts_(extensionId);
+      holder.scriptPresent = scriptsInHead.length > 0;
     }
     return !holder.scriptPresent;
   }
@@ -645,33 +597,60 @@ export class Extensions {
   createExtensionScript_(extensionId, opt_extensionVersion) {
     const scriptElement = this.win.document.createElement('script');
     scriptElement.async = true;
-    scriptElement.setAttribute(
-        isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
-        extensionId);
+    if (isIntermediateExtension(extensionId)) {
+      opt_extensionVersion = '';
+    } else {
+      scriptElement.setAttribute(
+        this.attributeForExtension_(extensionId),
+        extensionId
+      );
+    }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
+
+    // Propagate nonce to all generated script tags.
+    const currentScript = this.win.document.head.querySelector('script[nonce]');
+    if (currentScript) {
+      scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
+    }
+
+    // Allow error information to be collected
+    // https://github.com/ampproject/amphtml/issues/7353
+    scriptElement.setAttribute('crossorigin', 'anonymous');
     let loc = this.win.location;
-    if (getMode().test && this.win.testLocation) {
+    if (getMode(this.win).test && this.win.testLocation) {
       loc = this.win.testLocation;
     }
-    const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        opt_extensionVersion, getMode().localDev);
+    const scriptSrc = calculateExtensionScriptUrl(
+      loc,
+      extensionId,
+      opt_extensionVersion,
+      getMode(this.win).localDev
+    );
     scriptElement.src = scriptSrc;
     return scriptElement;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @return {string}
+   * @private
+   */
+  attributeForExtension_(extensionId) {
+    return isTemplateExtension(extensionId)
+      ? 'custom-template'
+      : 'custom-element';
   }
 }
 
 /**
- * Install builtins.
  * @param {!Window} win
- * @restricted
  */
-export function installBuiltinElements(win) {
-  installImg(win);
-  installPixel(win);
-  installLayout(win);
+export function stubLegacyElements(win) {
+  LEGACY_ELEMENTS.forEach((name) => {
+    stubElementIfNotKnown(win, name);
+  });
 }
-
 
 /**
  * Copy builtins to a child window.
@@ -682,42 +661,6 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
   copyElementToChildWindow(parentWin, childWin, 'amp-img');
   copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
 }
-
-
-/**
- * @param {!Window} win
- */
-export function stubLegacyElements(win) {
-  LEGACY_ELEMENTS.forEach(name => {
-    stubElementIfNotKnown(win, name);
-  });
-}
-
-
-/**
- * Install polyfills in the child window (friendly iframe).
- * @param {!Window} childWin
- */
-function installPolyfillsInChildWindow(childWin) {
-  installDocContains(childWin);
-  installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, 'auto');
-}
-
-
-/**
- * Adopt predefined core services for the child window (friendly iframe).
- * @param {!Window} childWin
- */
-function adoptStandardServicesForEmbed(childWin) {
-  // The order of service adoptations is important.
-  // TODO(dvoytenko): Refactor service registration if this set becomes
-  // to pass the "embeddable" flag if this set becomes too unwieldy.
-  adoptServiceForEmbed(childWin, 'action');
-  adoptServiceForEmbed(childWin, 'standard-actions');
-  adoptServiceForEmbed(childWin, 'navigation');
-}
-
 
 /**
  * @return {!Object}

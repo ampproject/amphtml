@@ -51,10 +51,18 @@
 <amp-facebook width=552 height=310
     layout="responsive"
     data-embed-as="video"
-    data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+    data-href="https://www.facebook.com/zuck/videos/10102509264909801/"
+    data-allowfullscreen="true">
 </amp-facebook>
 
 <h2>Comments</h2>
+<amp-facebook-comments width=552 height=310
+    layout="responsive"
+    data-numposts="5"
+    data-order-by="time"
+    data-href="https://developers.facebook.com/docs/plugins/comments">
+</amp-facebook-comments>
+
 <amp-facebook-comments width=552 height=310
     layout="responsive"
     data-numposts="5"
@@ -113,6 +121,20 @@
     data-show-facepile="true"
     data-href="https://www.facebook.com/itsdougthepug">
 </amp-facebook-page>
+
+<h2>Embedded comment</h2>
+<amp-facebook width=552 height=500
+    layout="responsive"
+    data-embed-as="comment"
+    data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185">
+</amp-facebook>
+
+<amp-facebook width=552 height=200
+    layout="fixed"
+    data-embed-as="comment"
+    data-include-comment-parent="true"
+    data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=717538375088203">
+</amp-facebook>
 
 </body>
 </html>

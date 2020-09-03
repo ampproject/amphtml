@@ -19,8 +19,7 @@ import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {once} from '../src/utils/function.js';
 import {parseJson} from '../src/json';
-import {parseUrl} from '../src/url';
-
+import {parseUrlDeprecated} from '../src/url';
 
 /**
  * @typedef {{
@@ -46,14 +45,12 @@ import {parseUrl} from '../src/url';
  */
 export let ContextStateDef;
 
-
 /** @const {!JsonObject} */
 const FALLBACK = dict({
   'attributes': dict({
     '_context': dict(),
   }),
 });
-
 
 /**
  * Gets metadata encoded in iframe name attribute.
@@ -68,13 +65,11 @@ const allMetadata = once(() => {
     return parseJson(iframeName);
   } catch (err) {
     if (!getMode().test) {
-      dev().info(
-          'INTEGRATION', 'Could not parse context from:', iframeName);
+      dev().info('INTEGRATION', 'Could not parse context from:', iframeName);
     }
     return FALLBACK;
   }
 });
-
 
 /**
  * @return {{mode: !Object, experimentToggles: !Object}}
@@ -87,7 +82,6 @@ export function getAmpConfig() {
     experimentToggles: metadata['attributes']['_context'].experimentToggles,
   };
 }
-
 
 /**
  * @return {!JsonObject}
@@ -103,7 +97,6 @@ const getAttributeDataImpl_ = once(() => {
   return data;
 });
 
-
 /**
  * @return {!JsonObject}
  */
@@ -112,14 +105,13 @@ export function getAttributeData() {
   return getAttributeDataImpl_();
 }
 
-
 /**
  * @return {!Location}
  */
 const getLocationImpl_ = once(() => {
-  return parseUrl(allMetadata()['attributes']['_context']['location']['href']);
+  const href = allMetadata()['attributes']['_context']['location']['href'];
+  return parseUrlDeprecated(href);
 });
-
 
 /**
  * @return {!Location}
@@ -128,7 +120,6 @@ export function getLocation() {
   // using indirect invocation to prevent no-export-side-effect issue
   return getLocationImpl_();
 }
-
 
 /**
  * @return {!ContextStateDef}
@@ -156,7 +147,6 @@ export function getContextState() {
     tagName: rawContext['tagName'],
   };
 }
-
 
 /**
  * @return {string}

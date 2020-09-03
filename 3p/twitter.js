@@ -17,8 +17,8 @@
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
 import {loadScript} from './3p';
-import {parseUrl} from '../src/url';
 import {setStyles} from '../src/style';
+import {startsWith} from '../src/string';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -59,64 +59,100 @@ export function twitter(global, data) {
     justifyContent: 'center',
   });
   global.document.getElementById('c').appendChild(tweet);
-  getTwttr(global, function(twttr) {
+  getTwttr(global, function (twttr) {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
 
-    let twitterWidgetSandbox;
-    twttr.events.bind('resize', event => {
-      // To be safe, make sure the resize event was triggered for the widget we created below.
-      if (twitterWidgetSandbox === event.target) {
-        resize(twitterWidgetSandbox);
-      }
-    });
-
-    const tweetId = cleanupTweetId_(data.tweetid);
-    twttr.widgets.createTweet(tweetId, tweet, data)./*OK*/then(el => {
-      if (el) {
-        // Not a deleted tweet
-        twitterWidgetSandbox = el;
-        resize(twitterWidgetSandbox);
-      } else {
-        global.context.noContentAvailable();
-      }
-    });
+    if (data.tweetid) {
+      twttr.widgets
+        .createTweet(cleanupTweetId_(data.tweetid), tweet, data)
+        ./*OK*/ then((el) => tweetCreated(twttr, el));
+    } else if (data.momentid) {
+      twttr.widgets
+        .createMoment(data.momentid, tweet, data)
+        ./*OK*/ then((el) => tweetCreated(twttr, el));
+    } else if (data.timelineSourceType) {
+      // Extract properties starting with 'timeline'.
+      const timelineData = Object.keys(data)
+        .filter((prop) => startsWith(prop, 'timeline'))
+        .reduce((newData, prop) => {
+          newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
+          return newData;
+        }, {});
+      twttr.widgets
+        .createTimeline(timelineData, tweet, data)
+        ./*OK*/ then((el) => tweetCreated(twttr, el));
+    }
   });
 
+  /**
+   * Handles a tweet or moment being created, resizing as necessary.
+   * @param {!Object} twttr
+   * @param {?Element} el
+   */
+  function tweetCreated(twttr, el) {
+    if (!el) {
+      global.context.noContentAvailable();
+      return;
+    }
+
+    resize(/** @type {!Element} */ (el));
+    twttr.events.bind('resize', (event) => {
+      // To be safe, make sure the resize event was triggered for the widget we
+      // created below.
+      if (el === event.target) {
+        resize(/** @type {!Element} */ (el));
+      }
+    });
+  }
+
+  /**
+   * @param {!Element} container
+   */
   function resize(container) {
-    const height = container./*OK*/offsetHeight;
+    const height = container./*OK*/ offsetHeight;
     // 0 height is always wrong and we should get another resize request
     // later.
     if (height == 0) {
       return;
     }
     context.updateDimensions(
-        container./*OK*/offsetWidth,
-        height + /* margins */ 20);
+      container./*OK*/ offsetWidth,
+      height + /* margins */ 20
+    );
+  }
+
+  /**
+   * @param {string} input
+   * @param {string} prefix
+   * @return {*} TODO(#23582): Specify return type
+   */
+  function stripPrefixCamelCase(input, prefix) {
+    const stripped = input.replace(new RegExp('^' + prefix), '');
+    return stripped.charAt(0).toLowerCase() + stripped.substr(1);
   }
 }
 
 /**
+ * @param {string} tweetid
  * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
  */
 export function cleanupTweetId_(tweetid) {
   // 1)
   // Handle malformed ids such as
   // https://twitter.com/abc123/status/585110598171631616
   tweetid = tweetid.toLowerCase();
-  if (tweetid.indexOf('https://twitter.com/') >= 0) {
-    const url = parseUrl(tweetid);
-    // pathname = /abc123/status/585110598171631616
-    const paths = url.pathname.split('/');
-    if (paths[2] == 'status' && paths[3]) {
-      return paths[3];
-    }
+  let match = tweetid.match(/https:\/\/twitter.com\/[^\/]+\/status\/(\d+)/);
+  if (match) {
+    return match[1];
   }
+
   // 2)
   // Handle malformed ids such as
   // 585110598171631616?ref_src
-  const match = tweetid.match(/^(\d+)\?ref.*/);
+  match = tweetid.match(/^(\d+)\?ref.*/);
   if (match) {
     return match[1];
   }

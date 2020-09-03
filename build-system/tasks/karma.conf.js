@@ -15,6 +15,62 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
+const browserifyPersistFs = require('browserify-persist-fs');
+const crypto = require('crypto');
+const fs = require('fs');
+const globby = require('globby');
+
+const {isGithubActionsBuild} = require('../common/github-actions');
+const {isTravisBuild} = require('../common/travis');
+
+const TEST_SERVER_PORT = 8081;
+
+const COMMON_CHROME_FLAGS = [
+  // Dramatically speeds up iframe creation time.
+  '--disable-extensions',
+  // Allows simulating user actions (e.g unmute) which otherwise will be denied.
+  '--autoplay-policy=no-user-gesture-required',
+];
+
+if (argv.debug) {
+  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
+}
+
+// Used by persistent browserify caching to further salt hashes with our
+// environment state. Eg, when updating a babel-plugin, the environment hash
+// must change somehow so that the cache busts and the file is retransformed.
+const createHash = (input) =>
+  crypto.createHash('sha1').update(input).digest('hex');
+
+const persistentCache = browserifyPersistFs(
+  '.karma-cache',
+  {
+    deps: createHash(fs.readFileSync('./yarn.lock')),
+    build: globby
+      .sync([
+        'build-system/**/*.js',
+        '!build-system/eslint-rules',
+        '!**/test/**',
+      ])
+      .map((f) => {
+        return createHash(fs.readFileSync(f));
+      }),
+  },
+  () => {
+    process.stdout.write('.');
+  }
+);
+
+persistentCache.gc(
+  {
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+  () => {
+    // swallow errors
+  }
+);
+
 /**
  * @param {!Object} config
  */
@@ -25,27 +81,42 @@ module.exports = {
     'mocha',
     'sinon-chai',
     'chai',
+    'source-map-support',
   ],
 
   preprocessors: {
-    'test/fixtures/*.html': ['html2js'],
-    'src/**/*.js': ['browserify'],
-    'test/**/*.js': ['browserify'],
-    'ads/**/test/test-*.js': ['browserify'],
-    'extensions/**/test/**/*.js': ['browserify'],
-    'testing/**/*.js': ['browserify'],
+    // `test-bin` is the output directory of the postHTML transformation.
+    './test-bin/test/fixtures/*.html': ['html2js'],
+    './test/**/*.js': ['browserify'],
+    './ads/**/test/test-*.js': ['browserify'],
+    './extensions/**/test/**/*.js': ['browserify'],
+    './testing/**/*.js': ['browserify'],
   },
+
+  html2JsPreprocessor: {
+    // Strip the test-bin/ prefix for the transformer destination so that the
+    // change is transparent for users of the path.
+    stripPrefix: 'test-bin/',
+  },
+
+  hostname: 'localhost',
 
   browserify: {
     watch: true,
     debug: true,
-    transform: [
-      ['babelify'],
-    ],
-    bundleDelay: 900,
+    fast: true,
+    basedir: __dirname + '/../../',
+    transform: [['babelify', {caller: {name: 'test'}, global: true}]],
+    // Prevent "cannot find module" errors on Travis. See #14166.
+    bundleDelay: isTravisBuild() ? 5000 : 1200,
+
+    persistentCache,
   },
 
-  reporters: ['super-dots', 'karmaSimpleReporter'],
+  reporters: [
+    isGithubActionsBuild() ? 'dots' : 'super-dots',
+    'karmaSimpleReporter',
+  ],
 
   superDotsReporter: {
     nbDotsPerLine: 100000,
@@ -66,7 +137,7 @@ module.exports = {
     suppressSkipped: true,
     suppressFailed: false,
     suppressErrorSummary: true,
-    maxLogLines: 10,
+    maxLogLines: 20,
   },
 
   mochaReporter: {
@@ -103,138 +174,85 @@ module.exports = {
 
   autoWatch: true,
 
-  browsers: [
-    process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
-  ],
-
-  // Number of sauce tests to start in parallel
-  concurrency: 6,
-
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
-      flags: ['--no-sandbox', '--disable-extensions'],
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     Chrome_no_extensions: {
       base: 'Chrome',
-      // Dramatically speeds up iframe creation time.
-      flags: ['--disable-extensions'],
+      flags: COMMON_CHROME_FLAGS,
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      flags: ['--disable-extensions'],
+      flags: [
+        // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+        '--no-sandbox',
+        '--remote-debugging-port=9222',
+        // https://github.com/karma-runner/karma-chrome-launcher/issues/175
+        "--proxy-server='direct://'",
+        '--proxy-bypass-list=*',
+      ].concat(COMMON_CHROME_FLAGS),
     },
-    // SauceLabs configurations.
-    // New configurations can be created here:
-    // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_android: {
-      base: 'SauceLabs',
-      browserName: 'android',
-      version: 'latest',
-    },
-    SL_Chrome_latest: {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      version: 'latest',
-    },
-    SL_Chrome_45: {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      version: '45',
-    },
-    SL_iOS_latest: {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: 'latest',
-    },
-    SL_iOS_10_0: {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '10.0',
-    },
-    SL_iOS_9_1: {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '9.1',
-    },
-    SL_Firefox_latest: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      version: 'latest',
-    },
-    SL_Safari_latest: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 'latest',
-    },
-    SL_Safari_10: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 10,
-    },
-    SL_Safari_9: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 9,
-    },
-    SL_Edge_latest: {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
-      version: 'latest',
-    },
-    SL_IE_11: {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      version: 11,
-    },
-  },
-
-  sauceLabs: {
-    testName: 'AMP HTML on Sauce',
-    tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
-    startConnect: false,
   },
 
   client: {
     mocha: {
       reporter: 'html',
-      // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000,
+      // Longer timeout on Travis; fail quickly during local runs.
+      timeout: isTravisBuild() ? 10000 : 2000,
+      // Run tests up to 3 times before failing them on Travis / GH Actions.
+      retries: isGithubActionsBuild() || isTravisBuild() ? 2 : 0,
     },
     captureConsole: false,
+    verboseLogging: false,
+    testServerPort: TEST_SERVER_PORT,
   },
 
   singleRun: true,
-  browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
-  browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
+  failOnEmptyTestSuite: false,
+
+  // Give a disconnected browser 2 minutes to reconnect with Karma.
+  // This allows a browser to retry 2 times per `browserDisconnectTolerance`
+  // on Travis before stalling out after 10 minutes.
+  browserDisconnectTimeout: 2 * 60 * 1000,
+
+  // If there's no message from the browser, make Karma wait 2 minutes
+  // until it disconnects.
+  browserNoActivityTimeout: 2 * 60 * 1000,
+
+  // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
+  browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
   beforeMiddleware: ['custom'],
   plugins: [
+    '@chiragrupani/karma-chromium-edge-launcher',
     'karma-browserify',
     'karma-chai',
     'karma-chrome-launcher',
-    'karma-coverage',
-    'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
     'karma-ie-launcher',
+    'karma-structured-json-reporter',
     'karma-mocha',
     'karma-mocha-reporter',
-    'karma-safari-launcher',
-    'karma-sauce-launcher',
+    'karma-safarinative-launcher',
     'karma-simple-reporter',
     'karma-sinon-chai',
+    'karma-source-map-support',
     'karma-super-dots-reporter',
     {
-      'middleware:custom': ['factory', function() {
-        return require(require.resolve('../app.js'));
-      }],
+      'middleware:custom': [
+        'factory',
+        function () {
+          return require(require.resolve('../server/app.js'));
+        },
+      ],
     },
   ],
 };

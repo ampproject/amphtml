@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {dev, user} from '../../../src/log';
+import {
+  createFrameFor,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -24,19 +33,15 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {startsWith} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
+
+const TAG = 'amp-wistia-player';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpWistiaPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -59,7 +64,11 @@ class AmpWistiaPlayer extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // video player and video metadata
-    this.preconnect.url('https://fast.wistia.net', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://fast.wistia.net',
+      onLayout
+    );
   }
 
   /** @override */
@@ -69,9 +78,9 @@ class AmpWistiaPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -79,36 +88,40 @@ class AmpWistiaPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const mediaId = user().assert(
-        this.element.getAttribute('data-media-hashed-id'),
-        'The data-media-hashed-id attribute is required ' +
-            'for <amp-wistia-player> %s',
-        this.element);
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('title',
-        this.element.getAttribute('title') || 'Wistia Video Player');
-    iframe.setAttribute('frameborder', '0');
+    const {element} = this;
+    const mediaId = userAssert(
+      element.getAttribute('data-media-hashed-id'),
+      'The data-media-hashed-id attribute is required ' +
+        'for <amp-wistia-player> %s',
+      element
+    );
+
+    const iframe = createFrameFor(
+      this,
+      `https://fast.wistia.net/embed/iframe/${encodeURIComponent(mediaId)}`
+    );
+
+    iframe.setAttribute(
+      'title',
+      element.getAttribute('title') || 'Wistia Video Player'
+    );
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('allowtransparency', '');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = 'https://fast.wistia.net/embed/iframe/' + encodeURIComponent(
-        mediaId);
-    this.applyFillContent(iframe);
+
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleWistiaMessages_.bind(this)
+      this.win,
+      'message',
+      this.handleWistiaMessage_.bind(this)
     );
-
-    this.element.appendChild(this.iframe_);
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell Wistia Player we want to receive messages
       this.listenToFrame_();
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      element.dispatchCustomEvent(VideoEvents.LOAD);
     });
+
     this.playerReadyResolver_(loaded);
     return loaded;
   }
@@ -124,10 +137,9 @@ class AmpWistiaPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
-
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true;
   }
 
@@ -143,53 +155,54 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  handleWistiaMessages_(event) {
-    if (event.origin !== 'https://fast.wistia.net' ||
-      event.source != this.iframe_.contentWindow) {
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  handleWistiaMessage_(event) {
+    if (!originMatches(event, this.iframe_, 'https://fast.wistia.net')) {
       return;
     }
 
-    if (!getData(event) || !(isObject(getData(event))
-        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
-      return; // Doesn't look like JSON.
+    const eventData = getData(event);
+    if (!isJsonOrObj(eventData)) {
+      return;
     }
-    /** @const {?JsonObject} */
-    const data = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : tryParseJson(getData(event)));
 
-    if (data === undefined) {
+    const data = objOrParseJson(eventData);
+    if (data == null) {
       return; // We only process valid JSON.
     }
 
-    if (data['method'] == '_trigger') {
-      const playerEvent = (data['args'] ? data['args'][0] : undefined);
-      if (playerEvent === 'statechange') {
-        const state = (data['args'] ? data['args'][1] : undefined);
-        if (state === 'playing') {
-          this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-        } else if (state === 'paused') {
-          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-        } else if (state === 'ended') {
-          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-          this.element.dispatchCustomEvent(VideoEvents.ENDED);
-        }
-      } else if (playerEvent == 'mutechange') {
-        const isMuted = (data['args'] ? data['args'][1] : undefined);
-        if (isMuted === true) {
-          this.element.dispatchCustomEvent(VideoEvents.MUTED);
-        } else if (isMuted === false) {
-          this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-        }
-      }
+    const {element} = this;
+
+    if (data['method'] != '_trigger') {
+      return;
+    }
+
+    const playerEvent = data['args'] ? data['args'][0] : undefined;
+
+    if (playerEvent === 'statechange') {
+      const state = data['args'] ? data['args'][1] : undefined;
+      redispatch(element, state, {
+        'playing': VideoEvents.PLAYING,
+        'paused': VideoEvents.PAUSE,
+        'ended': [VideoEvents.PAUSE, VideoEvents.ENDED],
+      });
+      return;
+    }
+
+    if (playerEvent == 'mutechange') {
+      const isMuted = data['args'] ? data['args'][1] : undefined;
+      element.dispatchCustomEvent(mutedOrUnmutedEvent(isMuted));
+      return;
     }
   }
 
   /**
-  * Sends 'listening' message to the Wistia iframe to listen for events.
-  * @private
-  */
+   * Sends 'listening' message to the Wistia iframe to listen for events.
+   * @private
+   */
   listenToFrame_() {
     this.sendCommand_('amp-listening');
   }
@@ -202,7 +215,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/postMessage(command, '*');
+        this.iframe_.contentWindow./*OK*/ postMessage(command, '*');
       }
     });
   }
@@ -288,6 +301,13 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  preimplementsAutoFullscreen() {
+    // This player's iframe internally implements a feature that accomplishes
+    // essentially the same as AMP's `rotate-to-fullscreen`.
+    return true;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
@@ -304,9 +324,13 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-
-AMP.extension('amp-wistia-player', '0.1', AMP => {
-  AMP.registerElement('amp-wistia-player', AmpWistiaPlayer);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpWistiaPlayer);
 });

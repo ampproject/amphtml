@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust'; // eslint-disable-line no-unused-vars
+import {dev} from './log';
+import {whenUpgradedToCustomElement} from './dom';
+
+export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 
 /**
  * VideoInterface defines a common video API which any AMP component that plays
@@ -31,7 +34,6 @@ import {ActionTrust} from './action-trust'; // eslint-disable-line no-unused-var
  * @interface
  */
 export class VideoInterface {
-
   /**
    * Whether the component supports video playback in the current platform.
    * If false, component will be not treated as a video component.
@@ -49,25 +51,32 @@ export class VideoInterface {
   isInteractive() {}
 
   /**
-   * Current playback time in seconds at time of trigger
+   * Current playback time in seconds at time of trigger.
+   *
+   * This is used for analytics metadata.
+   *
    * @return {number}
    */
   getCurrentTime() {}
 
   /**
    * Total duration of the video in seconds
+   *
+   * This is used for analytics metadata.
+   *
    * @return {number}
    */
   getDuration() {}
 
   /**
    * Get a 2d array of start and stop times that the user has watched.
+   * This is used for analytics metadata.
    * @return {!Array<Array<number>>}
    */
   getPlayedRanges() {}
 
   /**
-   * Plays the video..
+   * Plays the video.
    *
    * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
    * triggered by the autoplay functionality. Video players can use this hint
@@ -82,11 +91,15 @@ export class VideoInterface {
 
   /**
    * Mutes the video.
+   * Implementation is required for autoplay and mute/unmute controls on docked
+   * video.
    */
   mute() {}
 
   /**
    * Unmutes the video.
+   * Implementation is required for autoplay and mute/unmute controls on docked
+   * video.
    */
   unmute() {}
 
@@ -94,6 +107,8 @@ export class VideoInterface {
    * Makes the video UI controls visible.
    *
    * AMP will not call this method if `controls` attribute is not set.
+   *
+   * Implementation is required for docked video.
    */
   showControls() {}
 
@@ -101,44 +116,45 @@ export class VideoInterface {
    * Hides the video UI controls.
    *
    * AMP will not call this method if `controls` attribute is not set.
+   *
+   * Implementation is required for docked video.
    */
   hideControls() {}
 
   /**
    * Returns video's meta data (artwork, title, artist, album, etc.) for use
    * with the Media Session API
-   * artwork (Array): URL to the poster image (preferably a 512x512 PNG)
-   * title (string): Name of the video
-   * artist (string): Name of the video's author/artist
-   * album (string): Name of the video's album if it exists
    * @return {!./mediasession-helper.MetadataDef|undefined} metadata
+   *   - artwork (Array): URL to the poster image (preferably a 512x512 PNG)
+   *   - title (string): Name of the video
+   *   - artist (string): Name of the video's author/artist
+   *   - album (string): Name of the video's album if it exists
    */
   getMetadata() {}
 
   /**
-   * If this returns true then it will be assumed that the player implements
-   * the MediaSession API internally so that the video manager does not override
-   * it. If not, the video manager will use the metadata variable as well as
-   * inferred meta-data to update the video's Media Session notification.
+   * If returning true, it's assumed that the embedded video document internally
+   * implements a feature to enter fullscreen on device rotation, so that the
+   * VideoManager does not override it.
+   *
+   * Otherwise, the feature is implemented automatically when using the
+   * `rotate-to-fullscreen` attribute.
+   *
+   * @return {boolean}
+   */
+  preimplementsAutoFullscreen() {}
+
+  /**
+   * If returning true, it's assumed that the embedded video document internally
+   * implements the MediaSession API internally so that the VideoManager won't
+   * replace it.
+   *
+   * Otherwise provided and inferred metadata are used to update the video's
+   * Media Session.
    *
    * @return {boolean}
    */
   preimplementsMediaSessionAPI() {}
-
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @return {!AmpElement}
-   */
-  get element() {}
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @return {boolean}
-   */
-  isInViewport() {}
 
   /**
    * Enables fullscreen on the internal video element
@@ -157,22 +173,17 @@ export class VideoInterface {
   fullscreenExit() {}
 
   /**
-   * Returns whether the video is currently in fullscreen mode or not
+   * Returns whether the video is currently in fullscreen mode or not.
    * @return {boolean}
    */
   isFullscreen() {}
 
   /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @param {string} unusedMethod
-   * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
-   * @param {ActionTrust} unusedMinTrust
-   * @public
+   * Seeks the video to a specified time.
+   * @param {number} unusedTimeSeconds
    */
-  registerAction(unusedMethod, unusedHandler, unusedMinTrust) {}
+  seekTo(unusedTimeSeconds) {}
 }
-
 
 /**
  * Attributes
@@ -180,7 +191,7 @@ export class VideoInterface {
  * Components implementing the VideoInterface are expected to support
  * the following attributes.
  *
- * @constant {!Object<string, string>}
+ * @const {!Object<string, string>}
  */
 export const VideoAttributes = {
   /**
@@ -189,7 +200,7 @@ export const VideoAttributes = {
    * Whether the developer has configured autoplay on the component.
    * This is normally done by setting `autoplay` attribute on the component.
    *
-   * AMP runtime manages autoplay behaviour itself using methods such as `play`,
+   * AMP runtime manages autoplay behavior itself using methods such as `play`,
    * `pause`, `showControls`, `hideControls`, `mute`, etc.. therefore components
    * should not propagate the autoplay attribute to the underlying player
    * implementation.
@@ -212,7 +223,7 @@ export const VideoAttributes = {
    */
   DOCK: 'dock',
   /**
-   * fullscreen-on-landscape
+   * rotate-to-fullscreen
    *
    * If enabled, this automatically expands the currently visible video and
    * playing to fullscreen when the user changes the device's orientation to
@@ -223,9 +234,14 @@ export const VideoAttributes = {
    * http://caniuse.com/#feat=screen-orientation
    * and http://caniuse.com/#feat=fullscreen
    */
-  FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
+  ROTATE_TO_FULLSCREEN: 'rotate-to-fullscreen',
+  /**
+   * noaudio
+   *
+   * If set and autoplay, the equalizer icon will not be displayed.
+   */
+  NO_AUDIO: 'noaudio',
 };
-
 
 /**
  * Events
@@ -233,7 +249,7 @@ export const VideoAttributes = {
  * Components implementing the VideoInterface are expected to dispatch
  * the following DOM events.
  *
- * @constant {!Object<string, string>}
+ * @const {!Object<string, string>}
  */
 export const VideoEvents = {
   /**
@@ -255,6 +271,27 @@ export const VideoEvents = {
    * @event load
    */
   LOAD: 'load',
+
+  /**
+   * loadedmetadata
+   *
+   * Fired when the video's metadata becomes available (e.g. duration).
+   *
+   * @event loadedmetadata
+   */
+  LOADEDMETADATA: 'loadedmetadata',
+
+  /**
+   * play
+   *
+   * Fired when the video plays (either because of autoplay or the play method).
+   *
+   * Note: Because this event was not originally present in this interface, we
+   * cannot rely on all all implementations to emit it.
+   *
+   * @event play
+   */
+  PLAY: 'play',
 
   /**
    * playing
@@ -346,8 +383,19 @@ export const VideoEvents = {
    * @event ad_end
    */
   AD_END: 'ad_end',
+
+  /**
+   * A 3p video player can send signals for analytics whose meaning doesn't
+   * fit for other events. In this case, a `tick` event is sent with additional
+   * information in its data property.
+   *
+   * @event amp:video:tick
+   */
+  CUSTOM_TICK: 'amp:video:tick',
 };
 
+/** @typedef {string} */
+export let PlayingStateDef;
 
 /**
  * Playing States
@@ -355,7 +403,7 @@ export const VideoEvents = {
  * Internal playing states used to distinguish between video playing on user's
  * command and videos playing automatically
  *
- * @constant {!Object<string, string>}
+ * @const {!Object<string, PlayingStateDef>}
  */
 export const PlayingStates = {
   /**
@@ -386,7 +434,6 @@ export const PlayingStates = {
    */
   PAUSED: 'paused',
 };
-
 
 /** @enum {string} */
 export const VideoAnalyticsEvents = {
@@ -444,21 +491,107 @@ export const VideoAnalyticsEvents = {
    * @event video-session-visible
    */
   SECONDS_PLAYED: 'video-seconds-played',
+
+  /**
+   * video-hosted-custom
+   *
+   * Indicates that a custom event incoming from a 3p frame is to be logged.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  CUSTOM: 'video-hosted-custom',
+
+  /**
+   * video-percentage-played
+   *
+   * Indicates that a percentage interval has been played.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  PERCENTAGE_PLAYED: 'video-percentage-played',
+
+  /**
+   * video-ad-start
+   *
+   * Indicates that an ad begins to play.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ad-start
+   */
+  AD_START: 'video-ad-start',
+
+  /**
+   * video-ad-end
+   *
+   * Indicates that an ad ended.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ad-end
+   */
+  AD_END: 'video-ad-end',
 };
 
+/**
+ * This key can't predictably collide with custom var names as defined in
+ * analytics user configuration.
+ * @type {string}
+ */
+export const videoAnalyticsCustomEventTypeKey = '__amp:eventType';
 
 /**
- * @typedef {{
- *   autoplay: boolean,
- *   currentTime: number,
- *   duration: number,
- *   height: number,
- *   id: string,
- *   playedRangesJson: string,
- *   playedTotal: number,
- *   muted: boolean,
- *   state: string,
- *   width: number
- * }}
+ * Helper union type to be used internally, so that the compiler treats
+ * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
+ *
+ * WARNING: Don't use to `register` at the Service level. Registering should
+ * only allow `VideoInterface` as a guarding measure.
+ *
+ * @typedef {!VideoInterface|!./base-element.BaseElement}
  */
-export let VideoAnalyticsDetailsDef;
+export let VideoOrBaseElementDef;
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isDockable(element) {
+  return element.hasAttribute(VideoAttributes.DOCK);
+}
+
+/** @enum {string} */
+export const VideoServiceSignals = {
+  USER_INTERACTED: 'user-interacted',
+  PLAYBACK_DELEGATED: 'playback-delegated',
+};
+
+/** @param {!AmpElement|!VideoOrBaseElementDef} video */
+export function delegateAutoplay(video) {
+  whenUpgradedToCustomElement(dev().assertElement(video)).then((el) => {
+    el.signals().signal(VideoServiceSignals.PLAYBACK_DELEGATED);
+  });
+}
+
+/** @param {!AmpElement|!VideoOrBaseElementDef} video */
+export function userInteractedWith(video) {
+  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+}
+
+/**
+ * Classname that media components should annotate themselves with.
+ * This applies to all video and audio playback components, regardless of
+ * whether they implement a common interface or not.
+ *
+ * TODO(go.amp.dev/issue/26984): This isn't exclusive to video, but there's no
+ * better place to put this now due to OWNERShip. Move.
+ */
+export const MEDIA_COMPONENT_CLASSNAME = 'i-amphtml-media-component';
+
+/**
+ * Annotates media component element with a common classname.
+ * This applies to all video and audio playback components, regardless of
+ * whether they implement a common interface or not.
+ * @param {!Element} element
+ *
+ * TODO(go.amp.dev/issue/26984): This isn't exclusive to video, but there's no
+ * better place to put this now due to OWNERShip. Move.
+ */
+export function setIsMediaComponent(element) {
+  element.classList.add(MEDIA_COMPONENT_CLASSNAME);
+}

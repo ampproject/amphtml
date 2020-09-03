@@ -15,10 +15,39 @@
   <amp-ad width="300" height="400"
       id="i-amphtml-demo-id"
       type="fake"
-      src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json">
+      src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
     <div placeholder>Loading...</div>
     <div fallback>Could not display the fake ad :(</div>
   </amp-ad>
   <br/>
+
+  <h2>Fake Ad Network [srcdoc]:</h2>
+  <amp-ad width="300" height="400"
+      id="i-amphtml-demo-id-2"
+      type="fake"
+      a4a-conversion="true"
+      srcdoc='
+        <!doctype html>
+        <html ⚡4ads>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,minimum-scale=1">
+          <style amp4ads-boilerplate>body{visibility:hidden}</style>
+          <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+        </head>
+        <body>
+          <p>Hello, fake ad with srcdoc.<p>
+          <amp-img
+            layout="fixed"
+            height="250"
+            width="300"
+            src="https://placekitten.com/300/250"
+          ></amp-img>
+        </body>
+        </html>
+      '>
+    <div placeholder>Loading...</div>
+    <div fallback>Could not display the fake ad :(</div>
+  </amp-ad>
 </body>
 </html>

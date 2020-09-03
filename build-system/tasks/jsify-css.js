@@ -15,7 +15,6 @@
  */
 'use strict';
 
-
 const autoprefixer = require('autoprefixer');
 const colors = require('ansi-colors');
 const cssnano = require('cssnano');
@@ -26,7 +25,7 @@ const postcssImport = require('postcss-import');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 const cssprefixer = autoprefixer({
-  browsers: [
+  overrideBrowserslist: [
     'last 5 ChromeAndroid versions',
     'last 5 iOS versions',
     'last 3 FirefoxAndroid versions',
@@ -42,7 +41,8 @@ const cssNanoDefaultOptions = {
   convertValues: false,
   discardUnused: false,
   cssDeclarationSorter: false,
-  // `mergeIdents` this is only unsafe if you rely on those animation names in JavaScript.
+  // `mergeIdents` this is only unsafe if you rely on those animation names in
+  // JavaScript.
   mergeIdents: true,
   reduceIdents: false,
   reduceInitial: false,
@@ -60,12 +60,15 @@ const cssNanoDefaultOptions = {
  * @return {!Promise<string>} that resolves with the css content after
  *    processing
  */
-const transformCss = exports.transformCss = function(filename, opt_cssnano) {
+function transformCss(filename, opt_cssnano) {
   opt_cssnano = opt_cssnano || Object.create(null);
   // See http://cssnano.co/optimisations/ for full list.
   // We try and turn off any optimization that is marked unsafe.
-  const cssnanoOptions = Object.assign(Object.create(null),
-      cssNanoDefaultOptions, opt_cssnano);
+  const cssnanoOptions = Object.assign(
+    Object.create(null),
+    cssNanoDefaultOptions,
+    opt_cssnano
+  );
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
 
   const css = fs.readFileSync(filename, 'utf8');
@@ -73,7 +76,7 @@ const transformCss = exports.transformCss = function(filename, opt_cssnano) {
   return postcss(transformers).process(css.toString(), {
     'from': filename,
   });
-};
+}
 
 /**
  * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
@@ -84,12 +87,17 @@ const transformCss = exports.transformCss = function(filename, opt_cssnano) {
  * @return {!Promise<string>} that resolves with the css content after
  *    processing
  */
-exports.jsifyCssAsync = function(filename) {
-  return transformCss(filename).then(function(result) {
-    result.warnings().forEach(function(warn) {
+function jsifyCssAsync(filename) {
+  return transformCss(filename).then(function (result) {
+    result.warnings().forEach(function (warn) {
       log(colors.red(warn.toString()));
     });
-    const css = result.css;
+    const {css} = result;
     return css + '\n/*# sourceURL=/' + filename + '*/';
   });
+}
+
+module.exports = {
+  jsifyCssAsync,
+  transformCss,
 };

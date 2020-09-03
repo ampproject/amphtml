@@ -14,214 +14,222 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
-import {
-  clearSupportsAutoplayCacheForTesting,
-  installVideoManagerForDoc,
-  supportsAutoplay,
-} from '../../src/service/video-manager-impl';
+import {VideoUtils} from '../../src/utils/video';
+import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {listenOncePromise} from '../../src/event-helper';
-import {
-  runVideoPlayerIntegrationTests,
-} from './test-video-players-helper';
+import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 import {toArray} from '../../src/types';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
 // See #11588.
-describe.configure().skip('Fake Video Player' +
-    'Integration Tests', () => {
+describe.configure().skip('Fake Video PlayerIntegration Tests', () => {
   // We run the video player integration tests on a fake video player as part
   // of functional testing. Same tests run on real video players such as
   // `amp-video` and `amp-youtube` as part of integration testing.
-  runVideoPlayerIntegrationTests(fixture => {
+  runVideoPlayerIntegrationTests((fixture) => {
     fixture.win.AMP.push({
       n: 'amp-test-fake-videoplayer',
-      f: function(AMP) {
-        AMP.registerElement('amp-test-fake-videoplayer',
-            createFakeVideoPlayerClass(fixture.win));
+      f: function (AMP) {
+        AMP.registerElement(
+          'amp-test-fake-videoplayer',
+          createFakeVideoPlayerClass(fixture.win)
+        );
       },
     });
     return fixture.doc.createElement('amp-test-fake-videoplayer');
   });
 });
 
-describe.configure().ifNewChrome().run('VideoManager', function() {
-  describes.fakeWin('VideoManager', {
-    amp: {
-      ampdoc: 'single',
-    },
-  }, env => {
-    let sandbox;
-    let videoManager;
-    let klass;
-    let video;
-    let impl;
+describe
+  .configure()
+  .ifChrome()
+  .run('VideoManager', function () {
+    describes.fakeWin(
+      'VideoManager',
+      {
+        amp: {
+          ampdoc: 'single',
+        },
+      },
+      (env) => {
+        let videoManager;
+        let klass;
+        let video;
+        let impl;
 
-    it('should receive i-amphtml-video-interface class when registered', () => {
-      const expectedClass = 'i-amphtml-video-interface';
-      expect(toArray(video.classList)).to.not.contain(expectedClass);
-      videoManager.register(impl);
-      expect(toArray(video.classList)).to.contain(expectedClass);
-    });
-
-    it('should register common actions', () => {
-      const spy = sandbox.spy(impl, 'registerAction');
-      videoManager.register(impl);
-
-      expect(spy).to.have.been.calledWith('play');
-      expect(spy).to.have.been.calledWith('pause');
-      expect(spy).to.have.been.calledWith('mute');
-      expect(spy).to.have.been.calledWith('unmute');
-    });
-
-    it('should be paused if autoplay is not set', () => {
-
-      videoManager.register(impl);
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.isVisible_ = false;
-
-      const curState = videoManager.getPlayingState(impl);
-      expect(curState).to.equal(PlayingStates.PAUSED);
-    });
-
-
-    it('autoplay - should be PLAYING_MANUAL if user interacted', () => {
-
-      video.setAttribute('autoplay', '');
-
-      videoManager.register(impl);
-
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.userInteractedWithAutoPlay_ = true;
-      entry.isVisible_ = true;
-      entry.loaded_ = true;
-
-      impl.play();
-      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-        const curState = videoManager.getPlayingState(impl);
-        expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
-      });
-    });
-
-
-    it('autoplay - should be PLAYING_AUTO if user did not interact', () => {
-
-      video.setAttribute('autoplay', '');
-      videoManager.register(impl);
-
-      const visibilityStub = sandbox.stub(
-          Services.viewerForDoc(env.ampdoc), 'isVisible');
-      visibilityStub.onFirstCall().returns(true);
-
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.isVisible_ = true;
-      entry.loaded_ = true;
-      entry.videoVisibilityChanged_();
-
-      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-        const curState = videoManager.getPlayingState(impl);
-        expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
-
-      });
-
-    });
-
-    // TODO(aghassemi): Investigate failure. #10974.
-    it.skip('autoplay - autoplay not supported should behave' +
-        'like manual play', () => {
-
-      video.setAttribute('autoplay', '');
-      videoManager.register(impl);
-
-      const visibilityStub = sandbox.stub(
-          Services.viewerForDoc(env.ampdoc), 'isVisible');
-      visibilityStub.onFirstCall().returns(true);
-
-      const entry = videoManager.getEntryForVideo_(impl);
-
-      const supportsAutoplayStub =
-          sandbox.stub(entry, 'boundSupportsAutoplay_');
-      supportsAutoplayStub.returns(Promise.reject());
-
-      entry.isVisible_ = true;
-      entry.loaded_ = true;
-
-      entry.videoVisibilityChanged_();
-
-      return new Promise(function(resolve, reject) {
-        listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-          reject();
+        it('should receive i-amphtml-video-interface class when registered', () => {
+          const expectedClass = 'i-amphtml-video-interface';
+          expect(toArray(video.classList)).to.not.contain(expectedClass);
+          videoManager.register(impl);
+          expect(toArray(video.classList)).to.contain(expectedClass);
         });
-        setTimeout(function() {
+
+        it('should register common actions', () => {
+          const spy = env.sandbox.spy(impl, 'registerAction');
+          videoManager.register(impl);
+
+          expect(spy).to.have.been.calledWith('play');
+          expect(spy).to.have.been.calledWith('pause');
+          expect(spy).to.have.been.calledWith('mute');
+          expect(spy).to.have.been.calledWith('unmute');
+        });
+
+        it('should be paused if autoplay is not set', () => {
+          videoManager.register(impl);
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = false;
+
           const curState = videoManager.getPlayingState(impl);
           expect(curState).to.equal(PlayingStates.PAUSED);
-          resolve('Video did not autoplay as expected');
-        }, 1000);
-      });
-    });
+        });
 
-    it('autoplay - should be PAUSED if pause after playing', () => {
-
-      video.setAttribute('autoplay', '');
-
-      videoManager.register(impl);
-
-      impl.play();
-
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.userInteractedWithAutoPlay_ = true;
-      entry.isVisible_ = false;
-
-      impl.pause();
-      return listenOncePromise(video, VideoEvents.PAUSE).then(() => {
-        const curState = videoManager.getPlayingState(impl);
-        expect(curState).to.equal(PlayingStates.PAUSED);
-      });
-    });
-
-    it('autoplay - initially there should be no user interaction', () => {
-
-      video.setAttribute('autoplay', '');
-
-      videoManager.register(impl);
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.isVisible_ = false;
-
-      const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
-      expect(userInteracted).to.be.false;
-    });
-
-
-    it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
-
-      video.setAttribute('autoplay', '');
-
-      videoManager.register(impl);
-
-      const visibilityStub = sandbox.stub(
-          Services.viewerForDoc(env.ampdoc), 'isVisible');
-      visibilityStub.onFirstCall().returns(true);
-
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.isVisible_ = true;
-      entry.loaded_ = true;
-      entry.videoVisibilityChanged_();
-
-      entry.isVisible_ = false;
-      entry.videoVisibilityChanged_();
-      const curState = videoManager.getPlayingState(impl);
-      expect(curState).to.equal(PlayingStates.PAUSED);
-    });
-
-
-    it(`no autoplay - should be paused if the
-        user pressed pause after playing`, () => {
+        it('autoplay - should be PLAYING_MANUAL if user interacted', () => {
+          video.setAttribute('autoplay', '');
 
           videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
+
+          const entry = videoManager.getEntry_(impl);
+          env.sandbox.stub(entry, 'userInteracted').returns(true);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+
+          impl.play();
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            const curState = videoManager.getPlayingState(impl);
+            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+          });
+        });
+
+        it('autoplay - should be PLAYING_AUTO if user did not interact', () => {
+          video.setAttribute('autoplay', '');
+          videoManager.register(impl);
+
+          const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
+          visibilityStub.onFirstCall().returns(true);
+
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+          entry.videoVisibilityChanged_();
+
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            const curState = videoManager.getPlayingState(impl);
+            expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
+          });
+        });
+
+        // TODO(aghassemi): Investigate failure. #10974.
+        it.skip(
+          'autoplay - autoplay not supported should behave' +
+            'like manual play',
+          () => {
+            video.setAttribute('autoplay', '');
+            videoManager.register(impl);
+
+            const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
+            visibilityStub.onFirstCall().returns(true);
+
+            const entry = videoManager.getEntry_(impl);
+
+            const supportsAutoplayStub = env.sandbox.stub(
+              entry,
+              'supportsAutoplay_'
+            );
+
+            supportsAutoplayStub.returns(Promise.reject());
+
+            entry.isVisible_ = true;
+            entry.loaded_ = true;
+
+            entry.videoVisibilityChanged_();
+
+            return new Promise(function (resolve, reject) {
+              listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+                reject();
+              });
+              setTimeout(function () {
+                const curState = videoManager.getPlayingState(impl);
+                expect(curState).to.equal(PlayingStates.PAUSED);
+                resolve('Video did not autoplay as expected');
+              }, 1000);
+            });
+          }
+        );
+
+        it('autoplay - should be PAUSED if pause after playing', () => {
+          video.setAttribute('autoplay', '');
+
+          videoManager.register(impl);
+
+          impl.play();
+
+          const entry = videoManager.getEntry_(impl);
+          env.sandbox.stub(entry, 'userInteracted').returns(true);
+          entry.isVisible_ = false;
+
+          impl.pause();
+          return listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+            const curState = videoManager.getPlayingState(impl);
+            expect(curState).to.equal(PlayingStates.PAUSED);
+          });
+        });
+
+        it('autoplay - initially there should be no user interaction', () => {
+          video.setAttribute('autoplay', '');
+
+          videoManager.register(impl);
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = false;
+
+          expect(videoManager.userInteracted(impl)).to.be.false;
+        });
+
+        it('autoplay - there should be user interaction if the ad was unmuted', () => {
+          video.setAttribute('autoplay', '');
+
+          videoManager.register(impl);
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+          entry.videoVisibilityChanged_();
+
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            expect(videoManager.userInteracted(impl)).to.be.false;
+
+            listenOncePromise(video, VideoEvents.UNMUTED).then(() => {
+              expect(videoManager.userInteracted(impl)).to.be.true;
+            });
+
+            video.dispatchCustomEvent(VideoEvents.AD_START);
+            video.dispatchCustomEvent(VideoEvents.UNMUTED);
+          });
+        });
+
+        it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
+          video.setAttribute('autoplay', '');
+
+          videoManager.register(impl);
+
+          const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
+          visibilityStub.onFirstCall().returns(true);
+
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+          entry.videoVisibilityChanged_();
+
+          entry.isVisible_ = false;
+          entry.videoVisibilityChanged_();
+          const curState = videoManager.getPlayingState(impl);
+          expect(curState).to.equal(PlayingStates.PAUSED);
+        });
+
+        it('no autoplay - should pause if user presses pause after playing', () => {
+          videoManager.register(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = false;
 
           impl.play();
@@ -234,11 +242,9 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
           });
         });
 
-    it(`no autoplay - should be playing manual
-        whenever video is playing`, () => {
-
+        it('no autoplay - should be playing manual whenever playing', () => {
           videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = false;
 
           impl.play();
@@ -248,166 +254,149 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
           });
         });
 
+        beforeEach(() => {
+          klass = createFakeVideoPlayerClass(env.win);
+          video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+          env.win.document.body.appendChild(video);
+          impl = video.implementation_;
+          installVideoManagerForDoc(env.ampdoc);
+          videoManager = Services.videoManagerForDoc(env.ampdoc);
+        });
+      }
+    );
+  });
+
+describe
+  .configure()
+  .ifChrome()
+  .run('Autoplay support', () => {
+    const supportsAutoplay = VideoUtils.isAutoplaySupported; // for line length
+    let win;
+    let video;
+    let isLite;
+    let createElementSpy;
+    let setAttributeSpy;
+    let playStub;
+
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-      klass = createFakeVideoPlayerClass(env.win);
-      video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-      impl = video.implementation_;
-      installVideoManagerForDoc(env.ampdoc);
-      videoManager = Services.videoManagerForDoc(env.ampdoc);
+      video = {
+        setAttribute() {},
+        style: {
+          position: null,
+          top: null,
+          width: null,
+          height: null,
+          opacity: null,
+        },
+        muted: null,
+        playsinline: null,
+        webkitPlaysinline: null,
+        paused: false,
+        play() {},
+      };
+
+      const doc = {
+        createElement() {
+          return video;
+        },
+      };
+
+      win = {
+        document: doc,
+      };
+
+      isLite = false;
+
+      createElementSpy = window.sandbox.spy(doc, 'createElement');
+      setAttributeSpy = window.sandbox.spy(video, 'setAttribute');
+      playStub = window.sandbox.stub(video, 'play');
+
+      VideoUtils.resetIsAutoplaySupported();
     });
 
     afterEach(() => {
-      sandbox.restore();
+      VideoUtils.resetIsAutoplaySupported();
     });
 
-  });
-});
+    it('should create an invisible test video element', () => {
+      return supportsAutoplay(win, isLite).then(() => {
+        expect(video.style.position).to.equal('fixed');
+        expect(video.style.top).to.equal('0');
+        expect(video.style.width).to.equal('0');
+        expect(video.style.height).to.equal('0');
+        expect(video.style.opacity).to.equal('0');
 
-describe.configure().ifNewChrome().run('Supports Autoplay', () => {
-  let sandbox;
+        expect(setAttributeSpy).to.have.been.calledWith('muted', '');
+        expect(setAttributeSpy).to.have.been.calledWith('playsinline', '');
+        expect(setAttributeSpy).to.have.been.calledWith(
+          'webkit-playsinline',
+          ''
+        );
+        expect(setAttributeSpy).to.have.been.calledWith('height', '0');
+        expect(setAttributeSpy).to.have.been.calledWith('width', '0');
 
-  let win;
-  let video;
+        expect(video.muted).to.be.true;
+        expect(video.playsinline).to.be.true;
+        expect(video.webkitPlaysinline).to.be.true;
 
-  let isLite;
+        expect(createElementSpy.called).to.be.true;
+      });
+    });
 
-  let createElementSpy;
-  let setAttributeSpy;
-  let playStub;
+    it('should return false if `paused` is true after `play()` call', () => {
+      video.paused = true;
+      return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
+        expect(supportsAutoplay).to.be.false;
+        expect(playStub.called).to.be.true;
+        expect(createElementSpy.called).to.be.true;
+      });
+    });
 
-  it('should create an invisible test video element', () => {
-    return supportsAutoplay(win, isLite).then(() => {
-      expect(video.style.position).to.equal('fixed');
-      expect(video.style.top).to.equal('0');
-      expect(video.style.width).to.equal('0');
-      expect(video.style.height).to.equal('0');
-      expect(video.style.opacity).to.equal('0');
+    it('should return true if `paused` is false after `play()` call', () => {
+      video.paused = false;
+      return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
+        expect(supportsAutoplay).to.be.true;
+        expect(playStub.called).to.be.true;
+        expect(createElementSpy.called).to.be.true;
+      });
+    });
 
-      expect(setAttributeSpy).to.have.been.calledWith('muted', '');
-      expect(setAttributeSpy).to.have.been.calledWith('playsinline', '');
-      expect(setAttributeSpy).to.have.been.calledWith('webkit-playsinline', '');
-      expect(setAttributeSpy).to.have.been.calledWith('height', '0');
-      expect(setAttributeSpy).to.have.been.calledWith('width', '0');
+    it('should suppress errors if detection play call throws', () => {
+      playStub.throws();
+      video.paused = true;
+      return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
+        expect(supportsAutoplay).to.be.false;
+        expect(playStub.called).to.be.true;
+        expect(createElementSpy.called).to.be.true;
+      });
+    });
 
-      expect(video.muted).to.be.true;
-      expect(video.playsinline).to.be.true;
-      expect(video.webkitPlaysinline).to.be.true;
+    it('should suppress errors if detection play call rejects a promise', () => {
+      const p = Promise.reject(
+        'play() can only be initiated by a user gesture.'
+      );
+      playStub.returns(p);
+      video.paused = true;
+      return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
+        expect(supportsAutoplay).to.be.false;
+        expect(playStub.called).to.be.true;
+        expect(createElementSpy.called).to.be.true;
+      });
+    });
 
-      expect(createElementSpy.called).to.be.true;
+    it('should be false when in amp-lite mode', () => {
+      isLite = true;
+      return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
+        expect(supportsAutoplay).to.be.false;
+      });
     });
   });
-
-  it('should return false if `paused` is true after `play()` call', () => {
-    video.paused = true;
-    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
-      expect(supportsAutoplay).to.be.false;
-      expect(playStub.called).to.be.true;
-      expect(createElementSpy.called).to.be.true;
-    });
-  });
-
-  it('should return true if `paused` is false after `play()` call', () => {
-    video.paused = false;
-    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
-      expect(supportsAutoplay).to.be.true;
-      expect(playStub.called).to.be.true;
-      expect(createElementSpy.called).to.be.true;
-    });
-  });
-
-  it('should suppress errors if detection play call throws', () => {
-    playStub.throws();
-    video.paused = true;
-    expect(supportsAutoplay(win, isLite)).not.to.throw;
-    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
-      expect(supportsAutoplay).to.be.false;
-      expect(playStub.called).to.be.true;
-      expect(createElementSpy.called).to.be.true;
-    });
-  });
-
-  it('should suppress errors if detection play call rejects a promise', () => {
-    const p = Promise.reject('play() can only be initiated by a user gesture.');
-    const promiseCatchSpy = sandbox.spy(p, 'catch');
-    playStub.returns(p);
-    video.paused = true;
-    expect(supportsAutoplay(win, isLite)).not.to.throw;
-    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
-      expect(promiseCatchSpy.called).to.be.true;
-      expect(supportsAutoplay).to.be.false;
-      expect(playStub.called).to.be.true;
-      expect(createElementSpy.called).to.be.true;
-    });
-  });
-
-  it('should be false when in amp-lite mode', () => {
-    isLite = true;
-    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
-      expect(supportsAutoplay).to.be.false;
-    });
-  });
-
-  it('should cache the result', () => {
-    const firstResultRef = supportsAutoplay(win, isLite);
-    const secondResultRef = supportsAutoplay(win, isLite);
-    expect(firstResultRef).to.equal(secondResultRef);
-
-    clearSupportsAutoplayCacheForTesting();
-
-    const thirdResultRef = supportsAutoplay(win, isLite);
-    expect(thirdResultRef).to.not.equal(firstResultRef);
-    expect(thirdResultRef).to.not.equal(secondResultRef);
-  });
-
-  beforeEach(() => {
-    clearSupportsAutoplayCacheForTesting();
-    sandbox = sinon.sandbox.create();
-
-    video = {
-      setAttribute() {},
-      style: {
-        position: null,
-        top: null,
-        width: null,
-        height: null,
-        opacity: null,
-      },
-      muted: null,
-      playsinline: null,
-      webkitPlaysinline: null,
-      paused: false,
-      play() {},
-    };
-
-    const doc = {
-      createElement() {
-        return video;
-      },
-    };
-
-    win = {
-      document: doc,
-    };
-
-    isLite = false;
-
-    createElementSpy = sandbox.spy(doc, 'createElement');
-    setAttributeSpy = sandbox.spy(video, 'setAttribute');
-    playStub = sandbox.stub(video, 'play');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-});
 
 function createFakeVideoPlayerClass(win) {
   /**
    * @implements {../../src/video-interface.VideoInterface}
    */
   return class FakeVideoPlayer extends win.AMP.BaseElement {
-
     /** @param {!AmpElement} element */
     constructor(element) {
       super(element);
@@ -435,7 +424,7 @@ function createFakeVideoPlayerClass(win) {
 
     /** @override */
     buildCallback() {
-      const ampdoc = Services.ampdocServiceFor(this.win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
       installVideoManagerForDoc(ampdoc);
       Services.videoManagerForDoc(this.win.document).register(this);
     }
@@ -515,32 +504,27 @@ function createFakeVideoPlayerClass(win) {
     /**
      * @override
      */
-    showControls() {
-    }
+    showControls() {}
 
     /**
      * @override
      */
-    hideControls() {
-    }
+    hideControls() {}
 
     /**
      * @override
      */
-    fullscreenEnter() {
-    }
+    fullscreenEnter() {}
 
     /**
      * @override
      */
-    fullscreenExit() {
-    }
+    fullscreenExit() {}
 
     /**
      * @override
      */
-    isFullscreen() {
-    }
+    isFullscreen() {}
 
     /** @override */
     getCurrentTime() {

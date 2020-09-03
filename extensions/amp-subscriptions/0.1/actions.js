@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {ActionStatus} from './analytics';
+import {assertHttpsUrl, parseQueryString} from '../../../src/url';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
-import {parseQueryString} from '../../../src/url';
 
-/** @const */
 const TAG = 'amp-subscriptions';
-
+const LOCAL = 'local';
 
 /**
  */
 export class Actions {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!./url-builder.UrlBuilder} urlBuilder
@@ -68,11 +66,13 @@ export class Actions {
     }
     const promises = [];
     for (const k in this.actionsConfig_) {
-      promises.push(this.urlBuilder_.buildUrl(
-          this.actionsConfig_[k], /* useAuthData */ true)
-          .then(url => {
+      promises.push(
+        this.urlBuilder_
+          .buildUrl(this.actionsConfig_[k], /* useAuthData */ true)
+          .then((url) => {
             this.builtActionUrlMap_[k] = url;
-          }));
+          })
+      );
     }
     return Promise.all(promises).then(() => {
       return this.builtActionUrlMap_;
@@ -84,55 +84,63 @@ export class Actions {
    * @return {!Promise<string>}
    */
   execute(action) {
-    user().assert(this.actionsConfig_[action],
-        'Action URL is not configured: %s', action);
+    userAssert(
+      this.actionsConfig_[action],
+      'Action URL is not configured: %s',
+      action
+    );
     // URL should always be available at this time.
-    const url = user().assert(this.builtActionUrlMap_[action],
-        'Action URL is not ready: %s', action);
-    return this.execute_(url, 'action-' + action);
+    const url = userAssert(
+      this.builtActionUrlMap_[action],
+      'Action URL is not ready: %s',
+      action
+    );
+    return this.execute_(url, action);
   }
 
   /**
    * @param {string} url
-   * @param {string} eventLabel
-   * @return {!Promise<string>}
+   * @param {string} action
+   * @return {!Promise}
    * @private
    */
-  execute_(url, eventLabel) {
+  execute_(url, action) {
     const now = Date.now();
 
     // If action is pending, block a new one from starting for 1 second. After
     // 1 second, however, the new action request will be allowed to proceed,
     // given that we cannot always determine fully if the previous attempt is
     // "stuck".
-    if (this.actionPromise_ && (now - this.actionStartTime_ < 1000)) {
+    if (this.actionPromise_ && now - this.actionStartTime_ < 1000) {
       return this.actionPromise_;
     }
 
-    dev().fine(TAG, 'Start action: ', url, eventLabel);
+    dev().fine(TAG, 'Start action: ', url, action);
 
-    this.analytics_.event(eventLabel + '-started');
+    this.analytics_.actionEvent(LOCAL, action, ActionStatus.STARTED);
     const dialogPromise = this.openPopup_(url);
-    const actionPromise = dialogPromise.then(result => {
-      dev().fine(TAG, 'Action completed: ', eventLabel, result);
-      this.actionPromise_ = null;
-      const query = parseQueryString(result);
-      const s = query['success'];
-      const success = (s == 'true' || s == 'yes' || s == '1');
-      if (success) {
-        this.analytics_.event(eventLabel + '-success');
-      } else {
-        this.analytics_.event(eventLabel + '-rejected');
-      }
-      return (success || !s);
-    }).catch(reason => {
-      dev().fine(TAG, 'Action failed: ', eventLabel, reason);
-      this.analytics_.event(eventLabel + '-failed');
-      if (this.actionPromise_ == actionPromise) {
+    const actionPromise = dialogPromise
+      .then((result) => {
+        dev().fine(TAG, 'Action completed: ', action, result);
         this.actionPromise_ = null;
-      }
-      throw reason;
-    });
+        const query = parseQueryString(result);
+        const s = query['success'];
+        const success = s == 'true' || s == 'yes' || s == '1';
+        if (success) {
+          this.analytics_.actionEvent(LOCAL, action, ActionStatus.SUCCESS);
+        } else {
+          this.analytics_.actionEvent(LOCAL, action, ActionStatus.REJECTED);
+        }
+        return success || !s;
+      })
+      .catch((reason) => {
+        dev().fine(TAG, 'Action failed: ', action, reason);
+        this.analytics_.actionEvent(LOCAL, action, ActionStatus.FAILED);
+        if (this.actionPromise_ == actionPromise) {
+          this.actionPromise_ = null;
+        }
+        throw reason;
+      });
     this.actionPromise_ = actionPromise;
     this.actionStartTime_ = now;
     return this.actionPromise_;

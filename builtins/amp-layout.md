@@ -1,3 +1,14 @@
+---
+$category: layout
+formats:
+  - websites
+  - email
+  - ads
+  - stories
+teaser:
+  text: A generic, multi-purpose container element that brings AMP's powerful layouts to any element.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,26 +25,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-layout"></a> `amp-layout`
+# amp-layout <a name="amp-layout"></a>
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A generic, multi-purpose container element that brings AMP's powerful <a href="https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute">layouts </a> to any element.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-</table>
+## Usage
 
-## Overview
+The `amp-layout` component allows you to apply aspect-ratio based responsive
+layouts to any element. The `amp-layout` component works similarly to the
+[`layout`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute)
+attribute on existing AMP components, but supports any HTML markup as children.
+Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed,
+etc.).
 
-The `amp-layout` component allows you to apply aspect-ratio based responsive layouts to any element. The `amp-layout` component works similarly to the [layout](https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute) attribute on existing AMP components, but supports any HTML markup as children. Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed, etc.).
-
-**Example**
-
-This example uses `amp-layout` to create a responsive container around a circle drawn with inline SVG.
+The example below uses `amp-layout` to create a responsive container around a circle
+drawn with inline SVG.
 
 ```html
 <amp-layout layout="responsive" width="1" height="1">
@@ -43,9 +47,12 @@ This example uses `amp-layout` to create a responsive container around a circle 
   </svg>
 </amp-layout>
 ```
+
 ## Attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+### Common attributes
+
+The `amp-layout` component includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 

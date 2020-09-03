@@ -15,50 +15,31 @@
  */
 
 import {
-  checkCorsUrl,
-  getSourceUrl,
-  isProxyOrigin,
-  parseUrl,
-  resolveRelativeUrl,
-} from './url';
-import {dict, map} from './utils/object';
+  ALLOWLISTED_ATTRS,
+  ALLOWLISTED_ATTRS_BY_TAGS,
+  ALLOWLISTED_TARGETS,
+  BIND_PREFIX,
+  DENYLISTED_TAGS,
+  EMAIL_ALLOWLISTED_AMP_TAGS,
+  TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
+  isValidAttr,
+} from './purifier/sanitation';
+import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
-import {parseSrcset} from './srcset';
+import {isAmp4Email} from './format';
+import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
-import {urls} from './config';
 import {user} from './log';
 
 /** @private @const {string} */
 const TAG = 'sanitizer';
 
-/** @private @const {string} */
-const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
-
 /**
+ * Allowlist of supported self-closing tags for Caja. These are used for
+ * correct parsing on Caja and are not necessary for DOMPurify which uses
+ * the browser's HTML parser.
  * @const {!Object<string, boolean>}
- * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
-const BLACKLISTED_TAGS = dict({
-  'applet': true,
-  'audio': true,
-  'base': true,
-  'embed': true,
-  'frame': true,
-  'frameset': true,
-  'iframe': true,
-  'img': true,
-  'link': true,
-  'meta': true,
-  'object': true,
-  'script': true,
-  'style': true,
-  // TODO(dvoytenko, #1156): SVG is blacklisted temporarily. There's no
-  // intention to keep this block for any longer than we have to.
-  'svg': true,
-  'video': true,
-});
-
-/** @const {!Object<string, boolean>} */
 const SELF_CLOSING_TAGS = dict({
   'br': true,
   'col': true,
@@ -78,96 +59,12 @@ const SELF_CLOSING_TAGS = dict({
   'param': true,
 });
 
-/** @const {!Array<string>} */
-const WHITELISTED_FORMAT_TAGS = [
-  'b',
-  'br',
-  'code',
-  'del',
-  'em',
-  'i',
-  'ins',
-  'mark',
-  'q',
-  's',
-  'small',
-  'strong',
-  'sub',
-  'sup',
-  'time',
-  'u',
-];
-
-/** @const {!Array<string>} */
-const WHITELISTED_ATTRS = [
-  'fallback',
-  'href',
-  'on',
-  'placeholder',
-  'option',
-  'submit-success',
-  'submit-error',
-  /* Attributes added for amp-bind */
-  // TODO(kmh287): Add more whitelisted attributes for bind?
-  'text',
-];
-
-/** @const {!Object<string, !Array<string>>} */
-const WHITELISTED_ATTRS_BY_TAGS = dict({
-  'a': [
-    'rel',
-  ],
-  'div': [
-    'template',
-  ],
-  'form': [
-    'action-xhr',
-    'custom-validation-reporting',
-    'target',
-  ],
-  'template': [
-    'type',
-  ],
-});
-
-/** @const {!RegExp} */
-const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
-
-/** @const {!Array<string>} */
-const WHITELISTED_TARGETS = ['_top', '_blank'];
-
-/** @const {!Array<string>} */
-const BLACKLISTED_ATTR_VALUES = [
-  /*eslint no-script-url: 0*/ 'javascript:',
-  /*eslint no-script-url: 0*/ 'vbscript:',
-  /*eslint no-script-url: 0*/ 'data:',
-  /*eslint no-script-url: 0*/ '<script',
-  /*eslint no-script-url: 0*/ '</script',
-];
-
-/** @const {!Object<string, !Object<string, !RegExp>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
-  'input': {
-    'type': /(?:image|file|password|button)/i,
-  },
-});
-
-/** @const {!Array<string>} */
-const BLACKLISTED_FIELDS_ATTR = [
-  'form',
-  'formaction',
-  'formmethod',
-  'formtarget',
-  'formnovalidate',
-  'formenctype',
-];
-
-/** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
-  'input': BLACKLISTED_FIELDS_ATTR,
-  'textarea': BLACKLISTED_FIELDS_ATTR,
-  'select': BLACKLISTED_FIELDS_ATTR,
-});
+/**
+ * Regex to allow data-*, aria-* and role attributes.
+ * Only needed in Caja. Internally supported by DOMPurify.
+ * @const {!RegExp}
+ */
+const ALLOWLISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /**
  * Sanitizes the provided HTML.
@@ -177,58 +74,87 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
  * cases, such as <SCRIPT>, <STYLE>, <IFRAME>.
  *
  * @param {string} html
+ * @param {!Document} doc
  * @return {string}
  */
-export function sanitizeHtml(html) {
-  const tagPolicy = htmlSanitizer.makeTagPolicy();
+export function sanitizeHtml(html, doc) {
+  const tagPolicy = htmlSanitizer.makeTagPolicy((parsed) =>
+    parsed.getScheme() === 'https' ? parsed : null
+  );
   const output = [];
   let ignore = 0;
 
-  function emit(content) {
+  const emit = (content) => {
     if (ignore == 0) {
       output.push(content);
     }
-  }
+  };
+
+  // No Caja support for <script> or <svg>.
+  const cajaDenylistedTags = {
+    'script': true,
+    'svg': true,
+    ...DENYLISTED_TAGS,
+  };
 
   const parser = htmlSanitizer.makeSaxParser({
-    'startTag': function(tagName, attribs) {
+    'startTag': function (tagName, attribs) {
       if (ignore > 0) {
         if (!SELF_CLOSING_TAGS[tagName]) {
           ignore++;
         }
         return;
       }
-      const isBinding = map();
-      // Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
-      // brackets before custom validation and readding them afterwards.
+      const isAmpElement = startsWith(tagName, 'amp-');
+      // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
+      // brackets before custom validation and restoring them afterwards.
+      const bindingAttribs = [];
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
-        if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
-          isBinding[i] = true;
+        if (!attr) {
+          continue;
+        }
+        const classicBinding = attr[0] == '[' && attr[attr.length - 1] == ']';
+        const alternativeBinding = startsWith(attr, BIND_PREFIX);
+        if (classicBinding) {
           attribs[i] = attr.slice(1, -1);
         }
+        if (classicBinding || alternativeBinding) {
+          bindingAttribs.push(i);
+        }
       }
-      if (BLACKLISTED_TAGS[tagName]) {
+
+      if (cajaDenylistedTags[tagName]) {
         ignore++;
-      } else if (!startsWith(tagName, 'amp-')) {
+      } else if (isAmpElement) {
+        // Enforce AMP4EMAIL tag allowlist at runtime.
+        if (isAmp4Email(doc) && !EMAIL_ALLOWLISTED_AMP_TAGS[tagName]) {
+          ignore++;
+        }
+      } else {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = tagPolicy(tagName, attribs);
+        const scrubbed = /** @type {!JsonObject} */ (tagPolicy(
+          tagName,
+          attribs
+        ));
         if (!scrubbed) {
           ignore++;
         } else {
-          attribs = scrubbed.attribs;
+          attribs = scrubbed['attribs'];
           // Restore some of the attributes that AMP is directly responsible
-          // for, such as "on"
+          // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
-            const attrib = attribs[i];
-            if (WHITELISTED_ATTRS.includes(attrib)) {
+            const attrName = attribs[i];
+            if (ALLOWLISTED_ATTRS.includes(attrName)) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+            } else if (attrName.search(ALLOWLISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
-                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrib)) {
+            } else if (
+              ALLOWLISTED_ATTRS_BY_TAGS[tagName] &&
+              ALLOWLISTED_ATTRS_BY_TAGS[tagName].includes(attrName)
+            ) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -251,14 +177,13 @@ export function sanitizeHtml(html) {
           let origTarget = index != -1 ? savedAttribs[index] : null;
           if (origTarget != null) {
             origTarget = origTarget.toLowerCase();
-            if (WHITELISTED_TARGETS.indexOf(origTarget) != -1) {
+            if (ALLOWLISTED_TARGETS.indexOf(origTarget) != -1) {
               attribs[index] = origTarget;
             } else {
               attribs[index] = '_top';
             }
           } else if (hasHref) {
-            attribs.push('target');
-            attribs.push('_top');
+            attribs.push('target', '_top');
           }
         }
       }
@@ -268,27 +193,37 @@ export function sanitizeHtml(html) {
         }
         return;
       }
+      // Filter out bindings with empty attribute values.
+      const hasBindings = bindingAttribs.some((i) => !!attribs[i + 1]);
+      if (hasBindings) {
+        // Set a custom attribute to identify elements with bindings.
+        // This is an optimization that avoids the need for a DOM scan later.
+        attribs.push('i-amphtml-binding', '');
+      }
       emit('<');
       emit(tagName);
       for (let i = 0; i < attribs.length; i += 2) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
-        if (!isValidAttr(tagName, attrName, attrValue)) {
-          user().error(TAG, `Removing "${attrName}" attribute with invalid `
-              + `value in <${tagName} ${attrName}="${attrValue}">.`);
+        if (!isValidAttr(tagName, attrName, attrValue, doc, false)) {
+          user().error(
+            TAG,
+            `Removing "${attrName}" attribute with invalid ` +
+              `value in <${tagName} ${attrName}="${attrValue}">.`
+          );
           continue;
         }
         emit(' ');
-        if (isBinding[i]) {
-          emit('[' + attrName + ']');
+        if (bindingAttribs.includes(i) && !startsWith(attrName, BIND_PREFIX)) {
+          emit(`[${attrName}]`);
         } else {
           emit(attrName);
         }
         emit('="');
         if (attrValue) {
           // Rewrite attribute values unless this attribute is a binding.
-          // Bindings contain expressions not scalars and shouldn't be modified.
-          const rewrite = (isBinding[i])
+          // Bindings contain expressions and shouldn't be rewritten.
+          const rewrite = bindingAttribs.includes(i)
             ? attrValue
             : rewriteAttributeValue(tagName, attrName, attrValue);
           emit(htmlSanitizer.escapeAttrib(rewrite));
@@ -297,7 +232,7 @@ export function sanitizeHtml(html) {
       }
       emit('>');
     },
-    'endTag': function(tagName) {
+    'endTag': function (tagName) {
       if (ignore > 0) {
         ignore--;
         return;
@@ -315,220 +250,41 @@ export function sanitizeHtml(html) {
 }
 
 /**
- * Sanitizes the provided formatting HTML. Only the most basic inline tags are
- * allowed, such as <b>, <i>, etc.
+ * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
+ *
+ * WARNING: This method should not be used elsewhere as we do not strip out
+ * the style attribute in this method for the inline-style experiment.
+ * We do so in sanitizeHtml which occurs after this initial sanitizing.
  *
  * @param {string} html
  * @return {string}
  */
-export function sanitizeFormattingHtml(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html,
-      function(tagName, attribs) {
-        if (tagName == 'template') {
-          for (let i = 0; i < attribs.length; i += 2) {
-            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
-              return {
-                tagName,
-                attribs: ['type', 'amp-mustache'],
-              };
-            }
-          }
-        }
-        if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
-          return null;
-        }
+export function sanitizeTagsForTripleMustache(html) {
+  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
+}
+
+/**
+ * Tag policy for handling what is valid html in templates.
+ * @param {string} tagName
+ * @param {!Array<string>} attribs
+ * @return {?{tagName: string, attribs: !Array<string>}}
+ */
+function tripleMustacheTagPolicy(tagName, attribs) {
+  if (tagName == 'template') {
+    for (let i = 0; i < attribs.length; i += 2) {
+      if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
         return {
           tagName,
-          attribs: [],
+          attribs: ['type', 'amp-mustache'],
         };
       }
-  );
-}
-
-/**
- * Whether the attribute/value are valid.
- * @param {string} tagName
- * @param {string} attrName
- * @param {string} attrValue
- * @return {boolean}
- */
-export function isValidAttr(tagName, attrName, attrValue) {
-  // "on*" attributes are not allowed.
-  if (startsWith(attrName, 'on') && attrName != 'on') {
-    return false;
-  }
-
-  // Inline styles are not allowed.
-  if (attrName == 'style') {
-    return false;
-  }
-
-  // See validator-main.protoascii
-  // https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
-  if (attrName == 'class' &&
-      attrValue &&
-      /(^|\W)i-amphtml-/i.test(attrValue)) {
-    return false;
-  }
-
-  // No attributes with "javascript" or other blacklisted substrings in them.
-  if (attrValue) {
-    const attrValueNorm = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
-    for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
-      if (attrValueNorm.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
-        return false;
-      }
     }
   }
-
-  // Remove blacklisted attributes from specific tags e.g. input[formaction].
-  const attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
-  if (attrNameBlacklist && attrNameBlacklist.indexOf(attrName) != -1) {
-    return false;
+  if (!TRIPLE_MUSTACHE_ALLOWLISTED_TAGS.includes(tagName)) {
+    return null;
   }
-
-  // Remove blacklisted values for specific attributes for specific tags
-  // e.g. input[type=image].
-  const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-  if (attrBlacklist) {
-    const blacklistedValuesRegex = attrBlacklist[attrName];
-    if (blacklistedValuesRegex &&
-        attrValue.search(blacklistedValuesRegex) != -1) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
- * The same as rewriteAttributeValue() but actually updates the element and
- * modifies other related attribute(s) for special cases, i.e. `target` for <a>.
- * @param {!Element} element
- * @param {string} attrName
- * @param {string} attrValue
- * @param {!Location=} opt_location
- * @return {string}
- */
-export function rewriteAttributesForElement(
-  element, attrName, attrValue, opt_location)
-{
-  const tag = element.tagName.toLowerCase();
-  const attr = attrName.toLowerCase();
-  const rewrittenValue = rewriteAttributeValue(tag, attr, attrValue);
-  // When served from proxy (CDN), changing an <a> tag from a hash link to a
-  // non-hash link requires updating `target` attribute per cache modification
-  // rules. @see amp-cache-modifications.md#url-rewrites
-  const isProxy = isProxyOrigin(opt_location || self.location);
-  if (isProxy && tag === 'a' && attr === 'href') {
-    const oldValue = element.getAttribute(attr);
-    const newValueIsHash = rewrittenValue[0] === '#';
-    const oldValueIsHash = oldValue && oldValue[0] === '#';
-
-    if (newValueIsHash && !oldValueIsHash) {
-      // Save the original value of `target` so it can be restored (if needed).
-      if (!element[ORIGINAL_TARGET_VALUE]) {
-        element[ORIGINAL_TARGET_VALUE] = element.getAttribute('target');
-      }
-      element.removeAttribute('target');
-    } else if (oldValueIsHash && !newValueIsHash) {
-      // Restore the original value of `target` or default to `_top`.
-      element.setAttribute('target', element[ORIGINAL_TARGET_VALUE] || '_top');
-    }
-  }
-  element.setAttribute(attr, rewrittenValue);
-  return rewrittenValue;
-}
-
-/**
- * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
- * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
- * @see resolveUrlAttr for rewriting rules.
- * @param {string} tagName
- * @param {string} attrName
- * @param {string} attrValue
- * @return {string}
- * @private Visible for testing.
- */
-export function rewriteAttributeValue(tagName, attrName, attrValue) {
-  const tag = tagName.toLowerCase();
-  const attr = attrName.toLowerCase();
-  if (attr == 'src' || attr == 'href' || attr == 'srcset') {
-    return resolveUrlAttr(tag, attr, attrValue, self.location);
-  }
-  return attrValue;
-}
-
-/**
- * Rewrites the URL attribute values. URLs are rewritten as following:
- * - If URL is absolute, it is not rewritten
- * - If URL is relative, it's rewritten as absolute against the source origin
- * - If resulting URL is a `http:` URL and it's for image, the URL is rewritten
- *   again to be served with AMP Cache (cdn.ampproject.org).
- *
- * @param {string} tagName
- * @param {string} attrName
- * @param {string} attrValue
- * @param {!Location} windowLocation
- * @return {string}
- * @private Visible for testing.
- */
-export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
-  checkCorsUrl(attrValue);
-  const isProxyHost = isProxyOrigin(windowLocation);
-  const baseUrl = parseUrl(getSourceUrl(windowLocation));
-
-  if (attrName == 'href' && !startsWith(attrValue, '#')) {
-    return resolveRelativeUrl(attrValue, baseUrl);
-  }
-
-  if (attrName == 'src') {
-    if (tagName == 'amp-img') {
-      return resolveImageUrlAttr(attrValue, baseUrl, isProxyHost);
-    }
-    return resolveRelativeUrl(attrValue, baseUrl);
-  }
-
-  if (attrName == 'srcset') {
-    let srcset;
-    try {
-      srcset = parseSrcset(attrValue);
-    } catch (e) {
-      // Do not fail the whole template just because one srcset is broken.
-      // An AMP element will pick it up and report properly.
-      user().error(TAG, 'Failed to parse srcset: ', e);
-      return attrValue;
-    }
-    const sources = srcset.getSources();
-    for (let i = 0; i < sources.length; i++) {
-      sources[i].url = resolveImageUrlAttr(
-          sources[i].url, baseUrl, isProxyHost);
-    }
-    return srcset.stringify();
-  }
-
-  return attrValue;
-}
-
-/**
- * Non-HTTPs image URLs are rewritten via proxy.
- * @param {string} attrValue
- * @param {!Location} baseUrl
- * @param {boolean} isProxyHost
- * @return {string}
- */
-function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
-  const src = parseUrl(resolveRelativeUrl(attrValue, baseUrl));
-
-  // URLs such as `data:` or proxy URLs are returned as is. Unsafe protocols
-  // do not arrive here - already stripped by the sanitizer.
-  if (src.protocol == 'data:' || isProxyOrigin(src) || !isProxyHost) {
-    return src.href;
-  }
-
-  // Rewrite as a proxy URL.
-  return `${urls.cdn}/i/` +
-      (src.protocol == 'https:' ? 's/' : '') +
-      encodeURIComponent(src.host) +
-      src.pathname + (src.search || '') + (src.hash || '');
+  return {
+    tagName,
+    attribs,
+  };
 }

@@ -1,3 +1,11 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Brid.tv player.
+---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,80 +22,99 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-brid-player"></a> `amp-brid-player`
+# amp-brid-player
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-brid-player" src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-brid-player/"> Annotated code example for amp-brid-player</a></td>
-  </tr>
-</table>
-
-[TOC]
-
-## Example
+An `amp-brid-player` displays the Brid Player used in [Brid.tv](https://www.brid.tv/) Video Platform.
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
-Examples:
-
 ```html
 <amp-brid-player
-    data-partner="264"
-    data-player="4144"
-    data-video="13663"
-    layout="responsive"
-    width="480" height="270">
+  data-partner="264"
+  data-player="4144"
+  data-video="13663"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-brid-player>
 ```
 
-## Attributes
-
-##### autoplay
+### `autoplay`
 
 If this attribute is present, and the browser supports autoplay:
 
-* the video is automatically muted before autoplay starts
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+- the video is automatically muted before autoplay starts
+- when the video is scrolled out of view, the video is paused
+- when the video is scrolled into view, the video resumes playback
+- when the user taps the video, the video is unmuted
+- if the user has interacted with the video (e.g., mutes/unmutes,
+  pauses/resumes, etc.), and the video is scrolled in or out of view, the
+  state of the video remains as how the user left it. For example, if the user
+  pauses the video, then scrolls the video out of view and returns to the
+  video, the video is still paused.
 
-##### data-partner
+### `data-partner`
 
-The Brid.tv partner id.
+The Brid.tv partner ID.
 
-##### data-player
+### `data-player`
 
-The Brid.tv player id. Specific to every partner.
+The Brid.tv player ID. Specific to every partner.
 
-##### data-video
+### `data-video`
 
-The Brid.tv video ID.
+The Brid.tv video ID. Embed code must either have `video`, `playlist` or
+`outstream` attribute.
 
-##### data-playlist
+### `data-playlist`
 
-The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.
+The Brid.tv playlist ID or custom string value for dynamic playlists. Embed code
+must either have `video`, `playlist` or `outstream` attribute.
 
-##### data-outstream
+### `data-outstream`
 
-The Brid.tv outstream unit ID.
+The Brid.tv outstream unit ID. Embed code must either have `video`, `playlist`
+or `outstream` attribute.
 
-##### common attributes
+### `data-dynamic`
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+Parameter used to specify type of dynamic playlist, e.g. latest, channel, tag.
+
+### `dock`
+
+**Requires `amp-video-docking` extension.** If this attribute is present and the
+video is playing manually, the video will be "minimized" and fixed to a corner
+or an element when the user scrolls out of the video component's visual area.
+
+For more details, see [documentation on the docking extension itself](https://amp.dev/documentation/components/amp-video-docking).
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
+
+## Actions
+
+### `play`
+
+Plays the video.
+
+### `pause`
+
+Pauses the video.
+
+### `mute`
+
+Mutes the video.
+
+### `unmute`
+
+Unmutes the video.
+
+### `fullscreencenter`
+
+Takes the video to fullscreen.
 
 ## Validation
 

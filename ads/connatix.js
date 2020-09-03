@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../src/utils/object.js';
 import {tryParseJson} from '../src/json.js';
 import {validateData} from '../3p/3p';
 
@@ -22,7 +23,6 @@ import {validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function connatix(global, data) {
-
   validateData(data, ['connatix']);
 
   // Because 3p's loadScript does not allow for data attributes,
@@ -31,14 +31,18 @@ export function connatix(global, data) {
   const cnxData = Object.assign(Object(tryParseJson(data['connatix'])));
   global.cnxAmpAd = true;
   for (const key in cnxData) {
-    if (cnxData.hasOwnProperty(key)) {
+    if (hasOwn(cnxData, key)) {
       script.setAttribute(key, cnxData[key]);
     }
   }
 
-  window.addEventListener('connatix_no_content', function() {
-    window.context.noContentAvailable();
-  }, false);
+  window.addEventListener(
+    'connatix_no_content',
+    function () {
+      window.context.noContentAvailable();
+    },
+    false
+  );
 
   script.onload = () => {
     global.context.renderStart();

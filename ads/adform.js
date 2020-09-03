@@ -33,14 +33,15 @@ const hosts = {
 export function adform(global, data) {
   validateData(data, [['src', 'bn', 'mid']]);
   global.Adform = {ampData: data};
-  const src = data.src;
-  const bn = data.bn;
-  const mid = data.mid;
+  const {src, bn, mid} = data;
   let url;
 
   // Custom ad url using "data-src" attribute
   if (src) {
-    validateSrcPrefix(Object.keys(hosts).map(type => hosts[type]), src);
+    validateSrcPrefix(
+      Object.keys(hosts).map((type) => hosts[type]),
+      src
+    );
     url = src;
   }
   // Ad tag using "data-bn" attribute

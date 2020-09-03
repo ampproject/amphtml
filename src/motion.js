@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {Services} from './services';
 
 /** @const {function()} */
-const NOOP_CALLBACK_ = function() {};
+const NOOP_CALLBACK_ = function () {};
 
 /** @const {number} */
 const MIN_VELOCITY_ = 0.02;
@@ -34,7 +35,6 @@ const EXP_FRAME_CONST_ = Math.round(-FRAME_CONST_ / Math.log(0.95));
  * @const {number}
  */
 const VELOCITY_DEPR_FACTOR_ = FRAME_CONST_ * 2;
-
 
 /**
  * Calculates velocity for an object traveling the distance deltaV in the
@@ -63,7 +63,6 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
   return speed * depr + prevVelocity * (1 - depr);
 }
 
-
 /**
  * Returns a motion process that will yield when the velocity has run down to
  * zerp. For each iteration, the velocity is depreciated and the coordinates
@@ -79,12 +78,25 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * @param {!./service/vsync-impl.Vsync=} opt_vsync Mostly for testing only.
  * @return {!Motion}
  */
-export function continueMotion(contextNode, startX, startY, veloX, veloY,
-  callback, opt_vsync) {
-  return new Motion(contextNode, startX, startY, veloX, veloY,
-      callback, opt_vsync).start_();
+export function continueMotion(
+  contextNode,
+  startX,
+  startY,
+  veloX,
+  veloY,
+  callback,
+  opt_vsync
+) {
+  return new Motion(
+    contextNode,
+    startX,
+    startY,
+    veloX,
+    veloY,
+    callback,
+    opt_vsync
+  ).start();
 }
-
 
 /**
  * Motion process that allows tracking and monitoring of the running motion.
@@ -133,33 +145,28 @@ export class Motion {
     /** @private {number} */
     this.velocityY_ = 0;
 
-    /** @private {time} */
-    this.startTime_ = Date.now();
-
-    /** @private {time} */
-    this.lastTime_ = this.startTime_;
-
-    /** @private {!Function} */
-    this.resolve_;
-
-    /** @private {!Function} */
-    this.reject_;
+    const deferred = new Deferred();
 
     /** @private {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    this.promise_ = deferred.promise;
+
+    /** @private {!Function} */
+    this.resolve_ = deferred.resolve;
+
+    /** @private {!Function} */
+    this.reject_ = deferred.reject;
 
     /** @private {boolean} */
     this.continuing_ = false;
   }
 
-  /** @private */
-  start_() {
+  /** */
+  start() {
     this.continuing_ = true;
-    if (Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
-            Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_) {
+    if (
+      Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
+      Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_
+    ) {
       this.fireMove_();
       this.completeContinue_(true);
     } else {
@@ -209,8 +216,9 @@ export class Motion {
     this.velocityY_ = this.maxVelocityY_;
     const boundStep = this.stepContinue_.bind(this);
     const boundComplete = this.completeContinue_.bind(this, true);
-    return this.vsync_.runAnimMutateSeries(this.contextNode_, boundStep, 5000)
-        .then(boundComplete, boundComplete);
+    return this.vsync_
+      .runAnimMutateSeries(this.contextNode_, boundStep, 5000)
+      .then(boundComplete, boundComplete);
   }
 
   /**
@@ -225,7 +233,6 @@ export class Motion {
       return false;
     }
 
-    this.lastTime_ = Date.now();
     this.lastX_ += timeSincePrev * this.velocityX_;
     this.lastY_ += timeSincePrev * this.velocityY_;
     if (!this.fireMove_()) {
@@ -235,8 +242,10 @@ export class Motion {
     const decel = Math.exp(-timeSinceStart / EXP_FRAME_CONST_);
     this.velocityX_ = this.maxVelocityX_ * decel;
     this.velocityY_ = this.maxVelocityY_ * decel;
-    return (Math.abs(this.velocityX_) > MIN_VELOCITY_ ||
-        Math.abs(this.velocityY_) > MIN_VELOCITY_);
+    return (
+      Math.abs(this.velocityX_) > MIN_VELOCITY_ ||
+      Math.abs(this.velocityY_) > MIN_VELOCITY_
+    );
   }
 
   /**
@@ -248,7 +257,6 @@ export class Motion {
       return;
     }
     this.continuing_ = false;
-    this.lastTime_ = Date.now();
     this.fireMove_();
     if (success) {
       this.resolve_();

@@ -19,9 +19,9 @@ tags: {  # amp-brightcove
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-brightcove"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,18 +31,27 @@ tags: {  # <amp-brightcove>
   tag_name: "AMP-BRIGHTCOVE"
   requires_extension: "amp-brightcove"
   attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
     name: "data-account"
     mandatory: true
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
   }
   # <amp-bind>
   attrs: { name: "[data-account]" }
   attrs: { name: "[data-embed]" }
-  attrs: { name: "[data-player]" }
   attrs: { name: "[data-player-id]" }
+  attrs: { name: "[data-player]" }
   attrs: { name: "[data-playlist-id]" }
   attrs: { name: "[data-video-id]" }
+  attrs: { name: "[data-referrer]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brightcove"
+  spec_url: "https://amp.dev/documentation/components/amp-brightcove/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

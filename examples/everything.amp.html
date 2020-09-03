@@ -36,7 +36,7 @@
       opacity: 0.7;
       position: fixed;
       z-index: 1000;
-      top: 100px;
+      top: 0px;
       right: 10px;
       width: 40px;
       height: 40px;
@@ -116,6 +116,7 @@
   </style>
   <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-addthis" src="https://cdn.ampproject.org/v0/amp-addthis-0.1.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
@@ -159,6 +160,20 @@
     <a class="goto" href="#footer">Footer</a>
   </p>
 
+  <p>
+    <div style="width:400px; height:300px; overflow-x: scroll !important;">
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width=400 height=300 layout=intrinsic style="float: left"></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=intrinsic style="float: left"></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" width=400 height=300 layout=intrinsic style="float: left"></amp-img>
+      <amp-anim
+          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
+          width="400" height="300" style="float: left">
+        <amp-img placeholder
+            src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no-k"
+            width="400" height="300" style="float: left"></amp-img>
+      </amp-anim>
+    </div>
+  </p>
   <p>
     <amp-carousel width=400 height=300 layout=responsive type=slides>
       <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>
@@ -307,11 +322,21 @@
   <p>
     Lorem ipsum dolor sit amet.
   </p>
-  <amp-ad width=300 height=250
-      type="a9"
-      data-aax_size="300x250"
-      data-aax_pubname="abc123"
-      data-aax_src="302">
+  <amp-ad width="400" height="300"
+      type = "a9"
+      data-amzn_assoc_placement = "adunit0"
+      data-amzn_assoc_search_bar = "true"
+      data-amzn_assoc_tracking_id = "deepak2015-20"
+      data-amzn_assoc_search_bar_position = "bottom"
+      data-amzn_assoc_ad_mode = "search"
+      data-amzn_assoc_ad_type = "smart"
+      data-amzn_assoc_marketplace = "amazon"
+      data-amzn_assoc_region = "US"
+      data-amzn_assoc_title = "Shop Related Products"
+      data-amzn_assoc_default_search_phrase = "apple watches"
+      data-amzn_assoc_default_category = "All"
+      data-amzn_assoc_linkid = "b01186f9b305e15fc51214bb45187875"
+      data-regionurl = "https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US">
   </amp-ad>
   <p>
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
@@ -396,7 +421,16 @@
     height="320"
     layout="responsive">
   </amp-instagram>
-
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+  <h2>AddThis</h2>
+  <amp-addthis
+    width="320"
+    height="192"
+    data-pub-id="ra-59c2c366435ef478"
+    data-widget-id="0fyg">
+  </amp-addthis>
   <h2 id="amp-iframe">IFrame</h2>
   <amp-iframe width=300 height=300
       sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
