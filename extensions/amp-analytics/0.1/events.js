@@ -1489,7 +1489,7 @@ export class VisibilityTracker extends EventTracker {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
       const readyPromiseWaitForSpec =
-        waitForSpec || (selector ? 'ini-load' : null);
+        waitForSpec || (selector ? 'ini-load' : 'none');
       return visibilityManager.listenRoot(
         visibilitySpec,
         this.getReadyPromise(readyPromiseWaitForSpec),
@@ -1634,20 +1634,6 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
-   * Sets the default waitForSpec based upon if the element
-   * passed in is an AMP element or not.
-   * @param {string|undefined} waitForSpec
-   * @param {!Element} element
-   * @return {string}
-   */
-  setDefaultWaitForElement_(waitForSpec, element) {
-    if (!waitForSpec) {
-      waitForSpec = isAmpElement(element) ? 'ini-load' : 'none';
-    }
-    return waitForSpec;
-  }
-
-  /**
    * @param {string|undefined} waitForSpec
    * @param {Element=} opt_element
    * @return {?Promise}
@@ -1655,19 +1641,25 @@ export class VisibilityTracker extends EventTracker {
    */
   getReadyPromise(waitForSpec, opt_element) {
     if (opt_element) {
-      waitForSpec = this.setDefaultWaitForElement_(waitForSpec, opt_element);
+      if (!isAmpElement(opt_element)) {
+        userAssert(
+          !waitForSpec || waitForSpec == 'none',
+          'waitFor for non-AMP elements must be none or null. Found %s',
+          waitForSpec
+        );
+      } else {
+        waitForSpec = waitForSpec || 'ini-load';
+      }
     }
 
-    if (!waitForSpec) {
+    if (!waitForSpec || waitForSpec == 'none') {
       // Default case, waitFor selector is not defined, wait for nothing
       return null;
     }
 
     const trackerAllowlist = getTrackerTypesForParentType('visible');
-    const isAllowedWaitFor = opt_element ? isAmpElement(opt_element) : true;
     userAssert(
-      waitForSpec == 'none' ||
-        (trackerAllowlist[waitForSpec] !== undefined && isAllowedWaitFor),
+      trackerAllowlist[waitForSpec] !== undefined,
       'waitFor value %s not supported',
       waitForSpec
     );

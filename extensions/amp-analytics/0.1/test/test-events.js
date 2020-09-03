@@ -2247,32 +2247,46 @@ describes.realWin('Events', {amp: 1}, (env) => {
       });
 
       describe('non AMP elements', () => {
-        it('with non AMP element and waitFor NONE', () => {
+        it.only('with non AMP element and waitFor NONE or null', () => {
           const element = win.document.createElement('p');
           expect(tracker.getReadyPromise('none', element)).to.be.null;
+          expect(tracker.getReadyPromise(null, element)).to.be.null;
+          expect(tracker.getReadyPromise(undefined, element)).to.be.null;
         });
 
-        it('error with non AMP element and waitFor not NONE', () => {
+        it('error with non AMP element and waitFor not NONE or null', () => {
           const element = win.document.createElement('p');
           expect(() => tracker.getReadyPromise('ini-load', element)).to.throw(
-            /waitFor value ini-load not supported​​​/
-          );
-        });
-      });
-
-      describe('default waitFor with element', () => {
-        it('should set default waitFor for non AMP element', () => {
-          const element = win.document.createElement('p');
-          expect(tracker.setDefaultWaitForElement_(null, element)).to.equal(
-            'none'
+            /waitFor for non-AMP elements must be none or null. Found ini-load/
           );
         });
 
-        it('should set default waitFor for AMP element', () => {
+        it('should set default waitFor for AMP element', async () => {
           const element = win.document.createElement('amp-list');
-          expect(tracker.setDefaultWaitForElement_(null, element)).to.equal(
-            'ini-load'
+          tracker.waitForTrackers_['render-start'] = root.getTracker(
+            'render-start',
+            SignalTracker
           );
+          const signalTrackerMock = env.sandbox.mock(
+            tracker.waitForTrackers_['render-start']
+          );
+          const iniLoadTrackerMock = env.sandbox.mock(
+            tracker.waitForTrackers_['ini-load']
+          );
+
+          await tracker.getReadyPromise(null, element);
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', element)
+            .returns(Promise.resolve())
+            .once();
+
+          await tracker.getReadyPromise('render-start', element);
+          signalTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('render-start')
+            .returns(Promise.resolve())
+            .once();
         });
       });
     });
