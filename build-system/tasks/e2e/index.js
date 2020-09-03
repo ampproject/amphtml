@@ -38,8 +38,26 @@ const {watch} = require('gulp');
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
-async function launchWebServer_() {
-  await startServer(
+// Set up the e2e testing environment.
+async function setUpTesting_() {
+  // install e2e-specific modules
+  installPackages(__dirname);
+
+  require('@babel/register')({caller: {name: 'test'}});
+  const {describes} = require('./helper');
+  describes.configure({
+    browsers: argv.browsers,
+    engine: argv.engine,
+    headless: argv.headless,
+  });
+
+  // build runtime
+  if (!argv.nobuild) {
+    await buildRuntime();
+  }
+
+  // start up web server
+  return startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.debug},
     {compiled: argv.compiled}
@@ -73,24 +91,7 @@ function addMochaFile(mocha, file) {
 }
 
 async function e2e() {
-  // install e2e-specific modules
-  installPackages(__dirname);
-
-  require('@babel/register')({caller: {name: 'test'}});
-  const {describes} = require('./helper');
-  describes.configure({
-    browsers: argv.browsers,
-    engine: argv.engine,
-    headless: argv.headless,
-  });
-
-  // build runtime
-  if (!argv.nobuild) {
-    await buildRuntime();
-  }
-
-  // start up web server
-  await launchWebServer_();
+  await setUpTesting_();
 
   // set up promise to return to gulp.task()
   let resolve;
