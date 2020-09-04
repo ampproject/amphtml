@@ -240,36 +240,37 @@ export function getIframeProps(
     })
   );
 
-  let returnObj = {
+  let returnProps = {
     src: baseUrl,
     ampLocation: parseUrlDeprecated(baseUrl),
     name: name
   };
   
   if (attributes['width']) {
-    returnObj.width = attributes['width'];
+    returnProps.width = attributes['width'];
   }
   if (attributes['height']) {
-    returnObj.height = attributes['height'];
+    returnProps.height = attributes['height'];
   }
   if (attributes['title']) {
-    returnObj.title = attributes['title'];
+    returnProps.title = attributes['title'];
   }
   
-  returnObj.scrolling = 'no';
-  returnObj.onload = function () {
+  returnProps.scrolling = 'no';
+  returnProps.onload = function () {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
 
-  returnObj.allow = "sync-xhr 'none';";
+  returnProps.allow = "sync-xhr 'none';";
   const excludeFromSandbox = ['facebook'];
   if (!excludeFromSandbox.includes(opt_type)) {
-    applySandbox(returnObj);
+    applySandbox(returnProps);
   }
 
-  returnObj["data-amp-3p-sentinel"] = attributes['_context']['sentinel'];
-  return returnObj;
+  returnProps["data-amp-3p-sentinel"] = attributes['_context']['sentinel'];
+  console.log("returnProps", returnProps);
+  return returnProps;
 }
 
 /**
