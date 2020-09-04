@@ -61,6 +61,10 @@
     <img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height='100' width='300' xmlns='http://www.w3.org/2000/svg' version='1.1'/>">
     </i-amphtml-sizer>
   </amp-img>
+  <!-- Invalid i-amphtml-sizer > img  does not specify class -->
+  <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9Ijc1IiB3aWR0aD0iNzUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIi8+"></i-amphtml-sizer>
+  </amp-img>
   <!-- Valid -->
   <amp-social-share class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout=fixed style=width:60px;height:44px; type=test></amp-social-share>
   <!-- Invalid i-amphtml-layout attribute value does not match layout value -->

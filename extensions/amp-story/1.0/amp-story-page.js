@@ -108,6 +108,7 @@ export const Selectors = {
   // work with this current implementation.
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
+  ALL_STORY_360: 'amp-story-360',
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
 
@@ -122,7 +123,7 @@ const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
 ).join(',');
 
 /** @private @const {number} */
-const RESIZE_TIMEOUT_MS = 350;
+const RESIZE_TIMEOUT_MS = 1000;
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
@@ -301,6 +302,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
+    /** @private {!Deferred} */
+    this.backgroundAudioDeferred_ = new Deferred();
+
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
      * optimizations that make the document less useful at crawl time, e.g.
@@ -311,6 +315,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /** @private {?Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}*/
+    this.story360componentsCache_ = null;
   }
 
   /**
@@ -491,9 +498,20 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.pauseAllMedia_(true /** rewindToBeginning */);
     }
 
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.muteAllMedia();
+    }
+
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
     }
+
+    this.story360components_.forEach((componentPromise) => {
+      componentPromise.then((component) => {
+        component.pause();
+        component.rewind();
+      });
+    });
   }
 
   /**
@@ -511,10 +529,14 @@ export class AmpStoryPage extends AMP.BaseElement {
               this.advancement_.start();
             }
           });
-        this.startMeasuringAllVideoPerformance_();
-        this.preloadAllMedia_()
-          .then(() => this.startListeningToVideoEvents_())
-          .then(() => this.playAllMedia_());
+        this.preloadAllMedia_().then(() => {
+          this.startMeasuringAllVideoPerformance_();
+          this.startListeningToVideoEvents_();
+          this.playAllMedia_();
+          if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+            this.unmuteAllMedia();
+          }
+        });
       });
       this.prefersReducedMotion_()
         ? this.maybeFinishAnimations_()
@@ -523,6 +545,13 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
+      this.story360components_.forEach((componentPromise) => {
+        componentPromise.then((component) => {
+          if (component.canAnimate) {
+            component.play();
+          }
+        });
+      });
     }
 
     this.reportDevModeErrors_();
@@ -534,14 +563,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     const loop =
       this.element.getAttribute('id') !==
       this.element.getAttribute('auto-advance-after');
-    const audioEl = upgradeBackgroundAudio(this.element, loop);
-    if (audioEl) {
-      this.mediaPoolPromise_.then((mediaPool) =>
-        this.registerMedia_(mediaPool, dev().assertElement(audioEl)).then(() =>
-          mediaPool.preload(dev().assertElement(audioEl))
-        )
-      );
-    }
+    upgradeBackgroundAudio(this.element, loop);
+    this.backgroundAudioDeferred_.resolve();
+
     this.muteAllMedia();
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
@@ -652,8 +676,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     const mediaPromises = mediaSet.map((mediaEl) => {
       return new Promise((resolve) => {
         switch (mediaEl.tagName.toLowerCase()) {
-          case 'amp-img':
           case 'amp-anim':
+          case 'amp-img':
+          case 'amp-story-360':
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
               .then(resolve, resolve);
@@ -696,8 +721,13 @@ export class AmpStoryPage extends AMP.BaseElement {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-audio':
           case 'amp-video':
+            const signal =
+              mediaEl.getAttribute('layout') === Layout.NODISPLAY
+                ? CommonSignals.BUILT
+                : CommonSignals.LOAD_END;
+
             whenUpgradedToCustomElement(mediaEl)
-              .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
+              .then((el) => el.signals().whenSignal(signal))
               .then(resolve, resolve);
             break;
           case 'audio': // Already laid out as built from background-audio attr.
@@ -707,6 +737,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         }
       });
     });
+
+    if (this.element.hasAttribute('background-audio')) {
+      mediaPromises.push(this.backgroundAudioDeferred_.promise);
+    }
+
     return Promise.all(mediaPromises);
   }
 
@@ -1076,7 +1111,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       // happen after a user intent, and the media element was not "blessed".
       // On unmute, make sure this audio element is playing, at the expected
       // currentTime.
-      if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+      if (
+        mediaEl.tagName === 'AUDIO' &&
+        mediaEl.paused &&
+        this.playAudioElementFromTimestamp_
+      ) {
         const currentTime =
           (Date.now() - this.playAudioElementFromTimestamp_) / 1000;
         if (mediaEl.hasAttribute('loop') || currentTime < mediaEl.duration) {
@@ -1811,5 +1850,22 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAutoAdvance() {
     return this.advancement_.isAutoAdvance();
+  }
+
+  /**
+   * @private
+   * @return {!Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}
+   */
+  get story360components_() {
+    if (!this.story360componentsCache_) {
+      this.story360componentsCache_ = toArray(
+        scopedQuerySelectorAll(this.element, Selectors.ALL_STORY_360)
+      ).map((element) =>
+        whenUpgradedToCustomElement(element).then((customEl) =>
+          customEl.getImpl()
+        )
+      );
+    }
+    return this.story360componentsCache_;
   }
 }

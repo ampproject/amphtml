@@ -20,11 +20,10 @@ import {useState} from '../../../src/preact';
 /**
  * Renders the children prop, waiting for it to resolve if it is a promise.
  *
- * @param {!JsonObject} props
+ * @param {!DateDisplayDef.AsyncRenderProps} props
  * @return {PreactDef.Renderable}
  */
-export function AsyncRender(props) {
-  const children = props['children'];
+export function AsyncRender({children}) {
   const [state, set] = useState(children);
   useResourcesNotify();
 

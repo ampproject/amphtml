@@ -37,7 +37,11 @@ import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {WindowInterface} from '../../../src/window-interface';
-import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  parseQueryString,
+  parseUrlDeprecated,
+} from '../../../src/url';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -116,6 +120,9 @@ export class GoogleSubscriptionsPlatform {
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
+
+    /** @private @const {boolean} */
+    this.isDev_ = getMode().development || getMode().localDev;
 
     /**
      * @private @const
@@ -262,15 +269,36 @@ export class GoogleSubscriptionsPlatform {
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = platformConfig;
 
+    /** @private viewer */
+    this.viewerPromise_ = Services.viewerForDoc(ampdoc);
+
     /** @private {boolean} */
     this.isGoogleViewer_ = false;
-    this.resolveGoogleViewer_(Services.viewerForDoc(ampdoc));
+    this.resolveGoogleViewer_(this.viewerPromise_);
 
     /** @private {boolean} */
     this.isReadyToPay_ = false;
 
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
+
+    /** @private @const {boolean} */
+    this.enableMetering_ = !!this.serviceConfig_['enableMetering'];
+
+    /** @private @const {boolean} */
+    this.enableLAA_ = !!this.serviceConfig_['enableLAA'];
+
+    // Allow a publisher to turn off the entitlments check, needed
+    // in the case where LAA is in use but no other Google service is configured
+    // defaults true for backward compatibility
+    /** @private @const {boolean} */
+    this.enableEntitlements_ =
+      this.serviceConfig_['enableEntitlements'] === false ? false : true;
+
+    userAssert(
+      !(this.enableLAA_ && this.enableMetering_),
+      'enableLAA and enableMetering are mutually exclusive.'
+    );
 
     /** @private @const {string} */
     this.skuMapUrl_ = this.serviceConfig_['skuMapUrl'] || null;
@@ -399,7 +427,7 @@ export class GoogleSubscriptionsPlatform {
    */
   maybeFetchRealTimeConfig() {
     let timeout = SERVICE_TIMEOUT;
-    if (getMode().development || getMode().localDev) {
+    if (this.isDev_) {
       timeout = SERVICE_TIMEOUT * 2;
     }
 
@@ -468,6 +496,56 @@ export class GoogleSubscriptionsPlatform {
     );
   }
 
+  /**
+   * get LAA params - in it's own method so we can stub it for test.
+   * @return {Object<string>}
+   * @private
+   */
+  getLAAParams_() {
+    return parseQueryString(this.ampdoc_.win.location.search);
+  }
+
+  /**
+   * Checks enableLAA flag and LAA header params and if present
+   * and unexpired generates an LAA entitlement.
+   * @return {!Promise<?Entitlement>}
+   * @private
+   */
+  maybeGetLAAEntitlement_() {
+    if (this.enableLAA_) {
+      return this.viewerPromise_.getReferrerUrl().then((referrer) => {
+        const parsedQuery = this.getLAAParams_();
+        const parsedReferrer = parseUrlDeprecated(referrer);
+        if (
+          // Note we don't use the more generic this.isDev_ flag because that can be triggered
+          // by a hash value which would allow non gooogle hostnames to construct LAA urls.
+          ((parsedReferrer.protocol === 'https' &&
+            GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) ||
+            getMode(this.ampdoc_.win).localDev) &&
+          parsedQuery[`gaa_at`] == 'laa' &&
+          parsedQuery[`gaa_n`] &&
+          parsedQuery[`gaa_sig`] &&
+          parsedQuery[`gaa_ts`] &&
+          parseInt(parsedQuery[`gaa_ts`], 16) > Date.now() / 1000
+        ) {
+          // All the criteria are met to return an LAA entitlement
+          return Promise.resolve(
+            new Entitlement({
+              source: 'google:laa',
+              raw: '',
+              service: PLATFORM_ID,
+              granted: true,
+              grantReason: GrantReason.LAA,
+              dataObject: {},
+              decryptedDocumentKey: null,
+            })
+          );
+        }
+      });
+    }
+    return Promise.resolve(null);
+  }
+
   /** @override */
   isPrerenderSafe() {
     /**
@@ -485,9 +563,25 @@ export class GoogleSubscriptionsPlatform {
     const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
       'google.com'
     );
-    return this.runtime_
-      .getEntitlements(encryptedDocumentKey)
-      .then((swgEntitlements) => {
+    userAssert(
+      !(this.enableLAA_ && encryptedDocumentKey),
+      `enableLAA cannot be used when the document is encrypted`
+    );
+
+    return this.maybeGetLAAEntitlement_().then((laaEntitlement) => {
+      if (laaEntitlement) {
+        return laaEntitlement;
+      }
+      if (!this.enableEntitlements_) {
+        return null;
+      }
+      let params = {};
+      if (encryptedDocumentKey) {
+        params = {
+          encryption: {encryptedDocumentKey},
+        };
+      }
+      return this.runtime_.getEntitlements(params).then((swgEntitlements) => {
         // Get and store the isReadyToPay signal which is independent of
         // any entitlments existing.
         if (swgEntitlements.isReadyToPay) {
@@ -524,6 +618,7 @@ export class GoogleSubscriptionsPlatform {
           decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
         });
       });
+    });
   }
 
   /** @override */
@@ -773,6 +868,23 @@ export class AmpFetcher {
   /** @override */
   fetch(input, opt_init) {
     return this.xhr_.fetch(input, opt_init); //needed to kepp closure happy
+  }
+
+  /** @override */
+  sendPost(url, message) {
+    const init = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      credentials: 'include',
+      body:
+        'f.req=' +
+        JSON.stringify(/** @type {JsonObject} */ (message.toArray(false))),
+    };
+    return this.fetch(url, init).then(
+      (response) => (response && response.json()) || {}
+    );
   }
 
   /**

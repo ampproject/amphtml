@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Ad Up Technology
+# AdUp Technology
 
-Please visit [www.adup-tech.com](http://www.adup-tech.com) for more information
-on how to get required ad tag or placement keys.
+Please visit [www.adup-tech.com](http://www.adup-tech.com) for more information and sign up as publisher to create your placement.
 
 ## Examples
 
@@ -97,16 +96,25 @@ Uses available space but respecting aspect ratio by given `width` and `height` (
 
 ## Configuration
 
-### Required parameters
+| Attribute           | Optional | Description                                                                                   |
+| ------------------- | :------: | --------------------------------------------------------------------------------------------- |
+| `data-placementkey` |          | The unique placement key                                                                      |
+| `data-mincpc`       |    X     | The mininum price per click in €                                                              |
+| `data-query`        |    X     | Additional query keywords separated by semicolon                                              |
+| `data-pageurl`      |    X     | The page url (if different from current url)                                                  |
+| `data-gdpr`         |    X     | `1` = GDPR applies / `0` = GDPR does not apply / omit = unknown wether GDPR applies (default) |
+| `data-gdpr_consent` |    X     | The base64url-encoded IAB consent string                                                      |
+| `data-adtest`       |    X     | `1` = testing mode enabled / `0` = testing mode disabled (default)                            |
 
-- `data-placementkey`
+## User Consent Integration
 
-### Optional parameters
+If avaiable, the following consent data will always be send to our adserver:
 
-- `data-query`
-- `data-mincpc`
-- `data-adtest`
+- `window.context.consentSharedData.consentString` as IAB consent string
 
-## Design/Layout
+Otherwise following (optional) tag attributes will be send to our adserver:
 
-Please visit [www.adup-tech.com](http://www.adup-tech.com) and sign up as publisher to create your own placement.
+- `data-gdpr` as "GDPR applies" state
+- `data-gdpr_consent` as IAB consent string
+
+If none of above values are given, we try to fetch users consent data via TCF API (if avaiable).

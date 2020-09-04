@@ -16,10 +16,65 @@
  */
 
 amp-story-360 canvas {
+  position: absolute; /* fixes Safari bug */
  	width: 100% !important;
  	height: 100% !important;
 }
 
 amp-story-360 amp-img {
   opacity: 0 !important;
+}
+
+.i-amphtml-story-360-activate-button {
+  position: absolute !important;
+  bottom: 8px !important;
+  right: 8px !important;
+  background: rgba(0, 0, 0, .8) !important;
+  color: white !important;
+  outline: none !important;
+  border: none !important;
+  padding: 6px !important;
+  padding-left: 10px !important;
+  border-radius: 18px !important;
+  font-size: 12px !important;
+  font-family: 'Roboto', sans-serif !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-360-activate-button-icon {
+  box-sizing: border-box !important;
+  margin-left: 5px !important;
+  font-size: 6px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border: 1px solid white !important;
+  border-radius: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 700 !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-360-activate-button-icon-svg {
+  position: absolute !important;
+  width: calc(100% + 2px) !important;
+  height: calc(100% + 2px) !important;
+  left: -1px !important;
+  top: -1px !important;
+}
+
+[active] .i-amphtml-story-360-activate-button-icon-svg {
+  animation: rotate 1s 1s !important;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-activate-button {
+  display: none !important;
 }

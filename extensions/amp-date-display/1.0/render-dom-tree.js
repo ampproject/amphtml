@@ -23,11 +23,10 @@ import {useResourcesNotify} from '../../../src/preact/utils';
 /**
  * Clears the host element and appends the DOM tree into it.
  *
- * @param {!JsonObject} props
- * @return {null}
+ * @param {!DateDisplayDef.RenderDomTreeProps} props
+ * @return {?PreactDef.Renderable}
  */
-export function RenderDomTree(props) {
-  const {'dom': dom, 'host': host} = props;
+export function RenderDomTree({dom, host}) {
   useResourcesNotify();
 
   removeChildren(dev().assertElement(host));

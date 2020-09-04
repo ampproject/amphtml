@@ -16,7 +16,7 @@
 
 import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
 import {ActionTrust} from '../../../src/action-constants';
-import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
+import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
@@ -96,7 +96,7 @@ export class AmpIframe extends AMP.BaseElement {
     /** @private {boolean} */
     this.isResizable_ = false;
 
-    /** @private {?IntersectionObserverHostApi} */
+    /** @private {?IntersectionObserver3pHost} */
     this.intersectionObserverHostApi_ = null;
 
     /** @private {string} */
@@ -321,13 +321,6 @@ export class AmpIframe extends AMP.BaseElement {
     this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ =
       this.isAdLike_ && !isAdPositionAllowed(element, this.win);
-
-    // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This can be done by
-    // IntersectionObserverHostApi onlayoutMeasure function.
-    if (this.intersectionObserverHostApi_) {
-      this.intersectionObserverHostApi_.fire();
-    }
   }
 
   /**
@@ -446,7 +439,7 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.src = this.iframeSrc;
 
     if (!this.isTrackingFrame_) {
-      this.intersectionObserverHostApi_ = new IntersectionObserverHostApi(
+      this.intersectionObserverHostApi_ = new IntersectionObserver3pHost(
         this,
         iframe
       );
@@ -594,13 +587,6 @@ export class AmpIframe extends AMP.BaseElement {
       }
     }
     return true;
-  }
-
-  /** @override  */
-  viewportCallback(inViewport) {
-    if (this.intersectionObserverHostApi_) {
-      this.intersectionObserverHostApi_.onViewportCallback(inViewport);
-    }
   }
 
   /** @override  */

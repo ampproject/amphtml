@@ -21,7 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
-import {EXPERIMENT_INFO_LIST as AMPDOC_FIE_EXPERIMENT_INFO_LIST} from '../../../src/ampdoc-fie';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -99,14 +98,13 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -146,37 +144,6 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
-};
-
-/** @const {string} */
-const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
-
-/**
- * Branches of the random subdomain for SafeFrame experiment.
- * @const @enum{string}
- * @visibleForTesting
- */
-export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
-  CONTROL: '21065817',
-  EXPERIMENT: '21065818',
-};
-
-/**
- * @const @enum {string}
- * @visibleForTesting
- * TODO(#28555): Clean up experiment
- */
-export const EXPAND_JSON_TARGETING_EXP = {
-  ID: 'expand-json-targeting',
-  CONTROL: '21066261',
-  EXPERIMENT: '21066262',
-};
-
-/** @const @enum {string} */
-const ROUND_LOCATION_PARAMS_EXP = {
-  ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21066728',
-  EXPERIMENT: '21066729',
 };
 
 /**
@@ -463,22 +430,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       {
-        experimentId: RANDOM_SUBDOMAIN_SAFEFRAME_EXP,
-        isTrafficEligible: () => true,
-        branches: [
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
-        ],
-      },
-      {
-        experimentId: EXPAND_JSON_TARGETING_EXP.ID,
-        isTrafficEligible: () => true,
-        branches: [
-          EXPAND_JSON_TARGETING_EXP.CONTROL,
-          EXPAND_JSON_TARGETING_EXP.EXPERIMENT,
-        ],
-      },
-      {
         experimentId: RENDER_ON_IDLE_FIX_EXP.id,
         isTrafficEligible: () => true,
         branches: [
@@ -499,19 +450,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
-      {
-        experimentId: ROUND_LOCATION_PARAMS_EXP.ID,
-        isTrafficEligible: () => true,
-        branches: [
-          ROUND_LOCATION_PARAMS_EXP.CONTROL,
-          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT,
-        ],
-      },
-    ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
+    ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
+    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
+    if (moduleNomoduleExpId) {
+      this.experimentIds.push(moduleNomoduleExpId);
+    }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
     }
@@ -697,10 +644,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
-      ...googleBlockParameters(
-        this,
-        this.experimentIds.includes(ROUND_LOCATION_PARAMS_EXP.EXPERIMENT)
-      ),
+      ...googleBlockParameters(this),
     };
   }
 
@@ -783,10 +727,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
 
     // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
-    const isJsonTargetingExpOn =
-      isExperimentOn(this.win, 'expand-json-targeting') &&
-      getExperimentBranch(this.win, EXPAND_JSON_TARGETING_EXP.ID) ===
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT;
+    const isJsonTargetingExpOn = isExperimentOn(
+      this.win,
+      'expand-json-targeting'
+    );
 
     const targetingExpansionPromise = isJsonTargetingExpOn
       ? timerService
@@ -814,7 +758,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
         ),
-        this.experimentIds.includes(ROUND_LOCATION_PARAMS_EXP.EXPERIMENT),
         this.experimentIds
       ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
     });
@@ -1240,11 +1183,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getSafeframePath() {
-    const randomSubdomainExperimentBranch =
-      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
-    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
-      return super.getSafeframePath();
-    }
     safeFrameRandomSubdomain =
       safeFrameRandomSubdomain || this.getRandomString_();
 
@@ -1753,7 +1691,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         headersObj,
                         done,
                         sraRequestAdUrlResolvers,
-                        sraUrl
+                        sraUrl,
+                        this.isInNoSigningExp()
                       );
                     }
                   );
@@ -2031,15 +1970,7 @@ function constructSRARequest_(a4a, instances) {
   return Promise.all(
     instances.map((instance) => instance.getAdUrlDeferred.promise)
   )
-    .then(() =>
-      googlePageParameters(
-        a4a,
-        startTime,
-        instances[0].experimentIds.includes(
-          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT
-        )
-      )
-    )
+    .then(() => googlePageParameters(a4a, startTime))
     .then((googPageLevelParameters) => {
       const blockParameters = constructSRABlockParameters(instances);
       return truncAndTimeUrl(

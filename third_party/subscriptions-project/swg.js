@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.110 */
+/** Version: 0.1.22.120 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -73,6 +73,9 @@ const AnalyticsEvent = {
   ACTION_SWG_BUTTON_SELECT_OFFER_CLICK: 1018,
   ACTION_SWG_BUTTON_SHOW_CONTRIBUTIONS_CLICK: 1019,
   ACTION_SWG_BUTTON_SELECT_CONTRIBUTION_CLICK: 1020,
+  ACTION_USER_CONSENT_DEFERRED_ACCOUNT: 1021,
+  ACTION_USER_DENY_DEFERRED_ACCOUNT: 1022,
+  ACTION_DEFERRED_ACCOUNT_REDIRECT: 1023,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -124,12 +127,12 @@ class AccountCreationRequest {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.complete_, // field 1 - complete
+        this.complete_, // field 1 - complete
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -194,13 +197,13 @@ class AlreadySubscribedResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.subscriberOrMember_, // field 1 - subscriber_or_member
-      this.linkRequested_, // field 2 - link_requested
+        this.subscriberOrMember_, // field 1 - subscriber_or_member
+        this.linkRequested_, // field 2 - link_requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -418,22 +421,22 @@ class AnalyticsContext {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.embedderOrigin_, // field 1 - embedder_origin
-      this.transactionId_, // field 2 - transaction_id
-      this.referringOrigin_, // field 3 - referring_origin
-      this.utmSource_, // field 4 - utm_source
-      this.utmCampaign_, // field 5 - utm_campaign
-      this.utmMedium_, // field 6 - utm_medium
-      this.sku_, // field 7 - sku
-      this.readyToPay_, // field 8 - ready_to_pay
-      this.label_, // field 9 - label
-      this.clientVersion_, // field 10 - client_version
-      this.url_, // field 11 - url
+        this.embedderOrigin_, // field 1 - embedder_origin
+        this.transactionId_, // field 2 - transaction_id
+        this.referringOrigin_, // field 3 - referring_origin
+        this.utmSource_, // field 4 - utm_source
+        this.utmCampaign_, // field 5 - utm_campaign
+        this.utmMedium_, // field 6 - utm_medium
+        this.sku_, // field 7 - sku
+        this.readyToPay_, // field 8 - ready_to_pay
+        this.label_, // field 9 - label
+        this.clientVersion_, // field 10 - client_version
+        this.url_, // field 11 - url
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -498,13 +501,13 @@ class AnalyticsEventMeta {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.eventOriginator_, // field 1 - event_originator
-      this.isFromUserAction_, // field 2 - is_from_user_action
+        this.eventOriginator_, // field 1 - event_originator
+        this.isFromUserAction_, // field 2 - is_from_user_action
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -612,15 +615,15 @@ class AnalyticsRequest {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
-      this.event_, // field 2 - event
-      this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
-      this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
+        this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
+        this.event_, // field 2 - event
+        this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
+        this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -634,6 +637,154 @@ class AnalyticsRequest {
    */
   label() {
     return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EntitlementJwt {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.jwt_ = data[base] == null ? null : data[base];
+
+    /** @private {?string} */
+    this.source_ = data[1 + base] == null ? null : data[1 + base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getJwt() {
+    return this.jwt_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setJwt(value) {
+    this.jwt_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSource() {
+    return this.source_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSource(value) {
+    this.source_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.jwt_, // field 1 - jwt
+        this.source_, // field 2 - source
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EntitlementJwt';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EntitlementsRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?EntitlementJwt} */
+    this.usedEntitlement_ =
+      data[base] == null || data[base] == undefined
+        ? null
+        : new EntitlementJwt(data[base], includesLabel);
+
+    /** @private {?Timestamp} */
+    this.clientEventTime_ =
+      data[1 + base] == null || data[1 + base] == undefined
+        ? null
+        : new Timestamp(data[1 + base], includesLabel);
+  }
+
+  /**
+   * @return {?EntitlementJwt}
+   */
+  getUsedEntitlement() {
+    return this.usedEntitlement_;
+  }
+
+  /**
+   * @param {!EntitlementJwt} value
+   */
+  setUsedEntitlement(value) {
+    this.usedEntitlement_ = value;
+  }
+
+  /**
+   * @return {?Timestamp}
+   */
+  getClientEventTime() {
+    return this.clientEventTime_;
+  }
+
+  /**
+   * @param {!Timestamp} value
+   */
+  setClientEventTime(value) {
+    this.clientEventTime_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) : [], // field 1 - used_entitlement
+        this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) : [], // field 2 - client_event_time
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EntitlementsRequest';
   }
 }
 
@@ -668,12 +819,12 @@ class EntitlementsResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.jwt_, // field 1 - jwt
+        this.jwt_, // field 1 - jwt
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -789,16 +940,16 @@ class EventParams {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.smartboxMessage_, // field 1 - smartbox_message
-      this.gpayTransactionId_, // field 2 - gpay_transaction_id
-      this.hadLogged_, // field 3 - had_logged
-      this.sku_, // field 4 - sku
-      this.oldTransactionId_, // field 5 - old_transaction_id
+        this.smartboxMessage_, // field 1 - smartbox_message
+        this.gpayTransactionId_, // field 2 - gpay_transaction_id
+        this.hadLogged_, // field 3 - had_logged
+        this.sku_, // field 4 - sku
+        this.oldTransactionId_, // field 5 - old_transaction_id
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -863,13 +1014,13 @@ class FinishedLoggingResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.complete_, // field 1 - complete
-      this.error_, // field 2 - error
+        this.complete_, // field 1 - complete
+        this.error_, // field 2 - error
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -934,13 +1085,13 @@ class LinkSaveTokenRequest {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.authCode_, // field 1 - auth_code
-      this.token_, // field 2 - token
+        this.authCode_, // field 1 - auth_code
+        this.token_, // field 2 - token
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -988,12 +1139,12 @@ class LinkingInfoResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.requested_, // field 1 - requested
+        this.requested_, // field 1 - requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1109,16 +1260,16 @@ class SkuSelectedResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.sku_, // field 1 - sku
-      this.oldSku_, // field 2 - old_sku
-      this.oneTime_, // field 3 - one_time
-      this.playOffer_, // field 4 - play_offer
-      this.oldPlayOffer_, // field 5 - old_play_offer
+        this.sku_, // field 1 - sku
+        this.oldSku_, // field 2 - old_sku
+        this.oneTime_, // field 3 - one_time
+        this.playOffer_, // field 4 - play_offer
+        this.oldPlayOffer_, // field 5 - old_play_offer
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1166,12 +1317,12 @@ class SmartBoxMessage {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.isClicked_, // field 1 - is_clicked
+        this.isClicked_, // field 1 - is_clicked
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1219,12 +1370,12 @@ class SubscribeResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.subscribe_, // field 1 - subscribe
+        this.subscribe_, // field 1 - subscribe
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1238,6 +1389,77 @@ class SubscribeResponse {
    */
   label() {
     return 'SubscribeResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class Timestamp {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?number} */
+    this.seconds_ = data[base] == null ? null : data[base];
+
+    /** @private {?number} */
+    this.nanos_ = data[1 + base] == null ? null : data[1 + base];
+  }
+
+  /**
+   * @return {?number}
+   */
+  getSeconds() {
+    return this.seconds_;
+  }
+
+  /**
+   * @param {number} value
+   */
+  setSeconds(value) {
+    this.seconds_ = value;
+  }
+
+  /**
+   * @return {?number}
+   */
+  getNanos() {
+    return this.nanos_;
+  }
+
+  /**
+   * @param {number} value
+   */
+  setNanos(value) {
+    this.nanos_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.seconds_, // field 1 - seconds
+        this.nanos_, // field 2 - nanos
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'Timestamp';
   }
 }
 
@@ -1272,12 +1494,12 @@ class ViewSubscriptionsResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.native_, // field 1 - native
+        this.native_, // field 1 - native
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1300,6 +1522,8 @@ const PROTO_MAP = {
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
+  'EntitlementJwt': EntitlementJwt,
+  'EntitlementsRequest': EntitlementsRequest,
   'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
   'FinishedLoggingResponse': FinishedLoggingResponse,
@@ -1308,6 +1532,7 @@ const PROTO_MAP = {
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse,
+  'Timestamp': Timestamp,
   'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
 };
 
@@ -1389,7 +1614,7 @@ class ClientEventManagerApi {
    * invoked unless the event is filtered.
    * @param {!function(!ClientEvent)} listener
    */
-  registerEventListener(listener) { }
+  registerEventListener(listener) {}
 
   /**
    * Register a filterer for events if you need to potentially prevent the
@@ -1398,7 +1623,7 @@ class ClientEventManagerApi {
    * event.
    * @param {!function(!ClientEvent):FilterResult} filterer
    */
-  registerEventFilterer(filterer) { }
+  registerEventFilterer(filterer) {}
 
   /**
    * Call this function to log an event.  It will immediately throw an error if
@@ -1407,7 +1632,7 @@ class ClientEventManagerApi {
    * listener asynchronously.
    * @param {!ClientEvent} event
    */
-  logEvent(event) { }
+  logEvent(event) {}
 }
 
 /**
@@ -1672,6 +1897,30 @@ function map(initial) {
 }
 
 /**
+ * Implements `Array.find()` method that's not yet available in all browsers.
+ *
+ * @param {?Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {?T}
+ * @template T
+ */
+function findInArray(array, predicate) {
+  if (!array) {
+    return null;
+  }
+  const len = array.length || 0;
+  if (len > 0) {
+    for (let i = 0; i < len; i++) {
+      const other = array[i];
+      if (predicate(other, i, array)) {
+        return other;
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1717,6 +1966,96 @@ function getRandomInts(numInts, maxVal) {
   }
 
   return arr;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Character mapping from base64url to base64.
+ * @const {!Object<string, string>}
+ */
+const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
+
+/**
+ * Converts a string which holds 8-bit code points, such as the result of atob,
+ * into a Uint8Array with the corresponding bytes.
+ * If you have a string of characters, you probably want to be using utf8Encode.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function stringToBytes(str) {
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    log_2(charCode <= 255, 'Characters must be in range [0,255]');
+    bytes[i] = charCode;
+  }
+  return bytes;
+}
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function bytesToString(bytes) {
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
+}
+
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function utf8DecodeSync(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  const asciiString = bytesToString(new Uint8Array(bytes));
+  return decodeURIComponent(escape(asciiString));
+}
+
+/**
+ * Turn a string into UTF-8 bytes.
+ * @param {string} string
+ * @return {!Uint8Array}
+ */
+function utf8EncodeSync(string) {
+  if (typeof TextEncoder !== 'undefined') {
+    return new TextEncoder('utf-8').encode(string);
+  }
+  return stringToBytes(unescape(encodeURIComponent(string)));
+}
+
+/**
+ * Converts a string which is in base64url encoding into a Uint8Array
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function base64UrlDecodeToBytes(str) {
+  const encoded = atob(str.replace(/[-_.]/g, (ch) => base64UrlDecodeSubs[ch]));
+  return stringToBytes(encoded);
 }
 
 /**
@@ -1801,6 +2140,42 @@ function getUuid() {
 
 function getSwgTransactionId() {
   return getUuid() + '.swg';
+}
+
+/**
+ * Returns a string whose length matches the length of format.
+ * @param {string} str
+ * @param {string} format
+ * @return {string}
+ */
+function padString(str, format) {
+  return (format + str).slice(-format.length);
+}
+
+const PADDING = '00000000';
+function toHex(buffer) {
+  const hexCodes = [];
+  const view = new DataView(buffer);
+  for (let i = 0; i < view.byteLength; i += 4) {
+    // toString(16) will give the hex representation of the number without padding
+    const stringValue = view.getUint32(i).toString(16);
+    hexCodes.push(padString(stringValue, PADDING));
+  }
+  return hexCodes.join('');
+}
+
+/**
+ * Returns a hexadecimal 128 character string that is the
+ * SHA-512 hash of the passed string.
+ * @param {string} stringToHash
+ * @return {!Promise<string>}
+ */
+function hash(stringToHash) {
+  const crypto = self.crypto || self.msCrypto;
+  const subtle = crypto.subtle;
+  return subtle
+    .digest('SHA-512', utf8EncodeSync(stringToHash))
+    .then((digest) => toHex(digest));
 }
 
 /**
@@ -4340,96 +4715,6 @@ class ActivityIframeView extends View {
  */
 
 /**
- * Character mapping from base64url to base64.
- * @const {!Object<string, string>}
- */
-const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
-
-/**
- * Converts a string which holds 8-bit code points, such as the result of atob,
- * into a Uint8Array with the corresponding bytes.
- * If you have a string of characters, you probably want to be using utf8Encode.
- * @param {string} str
- * @return {!Uint8Array}
- */
-function stringToBytes(str) {
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    const charCode = str.charCodeAt(i);
-    log_2(charCode <= 255, 'Characters must be in range [0,255]');
-    bytes[i] = charCode;
-  }
-  return bytes;
-}
-
-/**
- * Converts a 8-bit bytes array into a string
- * @param {!Uint8Array} bytes
- * @return {string}
- */
-function bytesToString(bytes) {
-  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
-  // stack overflow. #10495, https://jsperf.com/bytesToString-2
-  const array = new Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) {
-    array[i] = String.fromCharCode(bytes[i]);
-  }
-  return array.join('');
-}
-
-/**
- * Interpret a byte array as a UTF-8 string.
- * @param {!Uint8Array} bytes
- * @return {string}
- */
-function utf8DecodeSync(bytes) {
-  if (typeof TextDecoder !== 'undefined') {
-    return new TextDecoder('utf-8').decode(bytes);
-  }
-  const asciiString = bytesToString(new Uint8Array(bytes));
-  return decodeURIComponent(escape(asciiString));
-}
-
-/**
- * Turn a string into UTF-8 bytes.
- * @param {string} string
- * @return {!Uint8Array}
- */
-function utf8EncodeSync(string) {
-  if (typeof TextEncoder !== 'undefined') {
-    return new TextEncoder('utf-8').encode(string);
-  }
-  return stringToBytes(unescape(encodeURIComponent(string)));
-}
-
-/**
- * Converts a string which is in base64url encoding into a Uint8Array
- * containing the decoded value.
- * @param {string} str
- * @return {!Uint8Array}
- */
-function base64UrlDecodeToBytes(str) {
-  const encoded = atob(str.replace(/[-_.]/g, (ch) => base64UrlDecodeSubs[ch]));
-  return stringToBytes(encoded);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This module declares JSON types as defined in the
  * {@link http://json.org/}.
  */
@@ -4556,6 +4841,9 @@ class JwtHelper {
  * limitations under the License.
  */
 
+/** Source for Google-provided metering entitlements. */
+const GOOGLE_METERING_SOURCE = 'google:metering';
+
 /**
  * The holder of the entitlements for a service.
  */
@@ -4566,6 +4854,7 @@ class Entitlements {
    * @param {!Array<!Entitlement>} entitlements
    * @param {?string} currentProduct
    * @param {function(!Entitlements)} ackHandler
+   * @param {function(!Entitlements, ?Function=)} consumeHandler
    * @param {?boolean|undefined} isReadyToPay
    * @param {?string|undefined} decryptedDocumentKey
    */
@@ -4575,6 +4864,7 @@ class Entitlements {
     entitlements,
     currentProduct,
     ackHandler,
+    consumeHandler,
     isReadyToPay,
     decryptedDocumentKey
   ) {
@@ -4593,6 +4883,8 @@ class Entitlements {
     this.product_ = currentProduct;
     /** @private @const {function(!Entitlements)} */
     this.ackHandler_ = ackHandler;
+    /** @private @const {function(!Entitlements, ?Function=)} */
+    this.consumeHandler_ = consumeHandler;
   }
 
   /**
@@ -4602,9 +4894,10 @@ class Entitlements {
     return new Entitlements(
       this.service,
       this.raw,
-      this.entitlements.map(ent => ent.clone()),
+      this.entitlements.map((ent) => ent.clone()),
       this.product_,
       this.ackHandler_,
+      this.consumeHandler_,
       this.isReadyToPay,
       this.decryptedDocumentKey
     );
@@ -4616,9 +4909,34 @@ class Entitlements {
   json() {
     return {
       'service': this.service,
-      'entitlements': this.entitlements.map(item => item.json()),
+      'entitlements': this.entitlements.map((item) => item.json()),
       'isReadyToPay': this.isReadyToPay,
     };
+  }
+
+  /**
+   * Returns true if the current article is unlocked by a
+   * cacheable entitlement. Metering entitlements aren't cacheable,
+   * because each metering entitlement is meant to be used for one article.
+   * Subscription entitlements are cacheable, because subscription entitlements
+   * are meant to be used across multiple articles on a publication.
+   * @return {boolean}
+   */
+  enablesThisWithCacheableEntitlements() {
+    const entitlement = this.getEntitlementForThis();
+    return !!entitlement && entitlement.source !== GOOGLE_METERING_SOURCE;
+  }
+
+  /**
+   * Returns true if the current article is unlocked by a
+   * Google metering entitlement. These entitlements come
+   * from Google News Intiative's licensing program to support news.
+   * https://www.blog.google/outreach-initiatives/google-news-initiative/licensing-program-support-news-industry-/
+   * @return {boolean}
+   */
+  enablesThisWithGoogleMetering() {
+    const entitlement = this.getEntitlementForThis();
+    return !!entitlement && entitlement.source === GOOGLE_METERING_SOURCE;
   }
 
   /**
@@ -4672,22 +4990,42 @@ class Entitlements {
   /**
    * Returns the first matching entitlement for the specified product,
    * optionally also matching the specified source.
+   *
+   * Returns non-metering entitlements if possible, to avoid consuming
+   * metered reads unnecessarily.
+   *
    * @param {?string} product
    * @param {string=} source
    * @return {?Entitlement}
    */
   getEntitlementFor(product, source) {
-    if (product && this.entitlements.length > 0) {
-      for (let i = 0; i < this.entitlements.length; i++) {
-        if (
-          this.entitlements[i].enables(product) &&
-          (!source || source == this.entitlements[i].source)
-        ) {
-          return this.entitlements[i];
-        }
-      }
+    if (!product) {
+      return null;
     }
-    return null;
+
+    // Prefer subscription entitlements over metering entitlements.
+    // Metering entitlements are a limited resource. When a metering entitlement
+    // unlocks an article, that depletes the user's remaining "free reads".
+    // Subscription entitlements are *not* depleted when they unlock articles.
+    // They are essentially unlimited if the subscription remains valid.
+    // For this reason, subscription entitlements are preferred.
+    const entitlementsThatUnlockArticle = this.entitlements.filter(
+      (entitlement) =>
+        entitlement.enables(product) &&
+        (!source || source === entitlement.source)
+    );
+
+    const subscriptionEntitlement = findInArray(
+      entitlementsThatUnlockArticle,
+      (entitlement) => entitlement.source !== GOOGLE_METERING_SOURCE
+    );
+
+    const meteringEntitlement = findInArray(
+      entitlementsThatUnlockArticle,
+      (entitlement) => entitlement.source === GOOGLE_METERING_SOURCE
+    );
+
+    return subscriptionEntitlement || meteringEntitlement || null;
   }
 
   /**
@@ -4716,6 +5054,17 @@ class Entitlements {
    */
   ack() {
     this.ackHandler_(this);
+  }
+
+  /**
+   * A 3p site should call this method to consume a Google metering entitlement.
+   * When a metering entitlement is consumed, SwG shows the user a metering dialog.
+   * When the user closes the dialog, SwG depletes one of the user's remaining
+   * "free reads".
+   * @param {?Function=} onCloseDialog Called after the user closes the dialog.
+   */
+  consume(onCloseDialog) {
+    this.consumeHandler_(this, onCloseDialog);
   }
 }
 
@@ -4803,7 +5152,7 @@ class Entitlement {
     const jsonList = Array.isArray(json)
       ? /** @type {!Array<Object>} */ (json)
       : [json];
-    return jsonList.map(json => Entitlement.parseFromJson(json));
+    return jsonList.map((json) => Entitlement.parseFromJson(json));
   }
 
   /**
@@ -4814,12 +5163,10 @@ class Entitlement {
     if (this.source !== 'google') {
       return null;
     }
-    const sku = (
-        /** @type {?string} */ (getPropertyFromJsonString(
-            this.subscriptionToken,
-            'productId'
-        ) || null)
-    );
+    const sku = /** @type {?string} */ (getPropertyFromJsonString(
+      this.subscriptionToken,
+      'productId'
+    ) || null);
     if (!sku) {
       log_4('Unable to retrieve SKU from SwG subscription token');
     }
@@ -4843,11 +5190,9 @@ class Entitlement {
  * limitations under the License.
  */
 
-
 /**
  */
 class UserData {
-
   /**
    * @param {string} idToken
    * @param {!Object} data
@@ -5050,11 +5395,9 @@ class PurchaseData {
  * limitations under the License.
  */
 
-
 /**
  */
 class DeferredAccountCreationResponse {
-
   /**
    * @param {!Entitlements} entitlements
    * @param {!UserData} userData
@@ -5080,10 +5423,11 @@ class DeferredAccountCreationResponse {
    */
   clone() {
     return new DeferredAccountCreationResponse(
-        this.entitlements,
-        this.userData,
-        this.purchaseDataList,
-        this.completeHandler_);
+      this.entitlements,
+      this.userData,
+      this.purchaseDataList,
+      this.completeHandler_
+    );
   }
 
   /**
@@ -5093,7 +5437,7 @@ class DeferredAccountCreationResponse {
     return {
       'entitlements': this.entitlements.json(),
       'userData': this.userData.json(),
-      'purchaseDataList': this.purchaseDataList.map(pd => pd.json()),
+      'purchaseDataList': this.purchaseDataList.map((pd) => pd.json()),
       // TODO(dvoytenko): deprecate.
       'purchaseData': this.purchaseData.json(),
     };
@@ -5368,6 +5712,7 @@ const SubscriptionFlows = {
   LINK_ACCOUNT: 'linkAccount',
   SHOW_LOGIN_PROMPT: 'showLoginPrompt',
   SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
+  SHOW_METER_TOAST: 'showMeterToast',
 };
 
 /**
@@ -5576,6 +5921,15 @@ function serializeProtoMessageForUrl(message) {
 }
 
 /**
+ * @param {!../model/doc.Doc} doc
+ * @return {string}
+ */
+function getCanonicalUrl(doc) {
+  const node = doc.getRootNode().querySelector("link[rel='canonical']");
+  return (node && node.href) || '';
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -5660,7 +6014,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.110',
+    '_client': 'SwG 0.1.22.120',
   });
 }
 
@@ -6779,7 +7133,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.110',
+        '_client': 'SwG 0.1.22.120',
         'supportsEventManager': true,
       },
       args || {}
@@ -7628,7 +7982,8 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.110');
+    context.setClientVersion('SwG 0.1.22.120');
+    context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -7642,13 +7997,6 @@ class AnalyticsService {
     }
     if (source) {
       context.setUtmSource(source);
-    }
-
-    const urlNode = this.doc_
-      .getRootNode()
-      .querySelector("link[rel='canonical']");
-    if (urlNode && urlNode.href) {
-      context.setUrl(urlNode.href);
     }
   }
 
@@ -10043,6 +10391,28 @@ class DialogManager {
  * limitations under the License.
  */
 
+/** @enum {number}  */
+const MeterClientTypes = {
+  /** Meter client type for content licensed by Google. */
+  LICENSED_BY_GOOGLE: 1,
+};
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /** @const {!Object<string, string|number>} */
 const toastImportantStyles = {
   'height': 0,
@@ -10198,6 +10568,33 @@ class Toast {
 }
 
 /**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {!number} millis
+ * @return {!Timestamp}
+ */
+function toTimestamp(millis) {
+  return new Timestamp(
+    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
+    false
+  );
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10293,20 +10690,29 @@ class EntitlementsManager {
   }
 
   /**
-   * @return {string}
-   * @private
-   */
-  getQueryString_() {
-    return this.win_.location.search;
-  }
-
-  /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    */
-  getEntitlements(encryptedDocumentKey) {
+  getEntitlements(params) {
+    // Remain backwards compatible by accepting
+    // `encryptedDocumentKey` string as a first param.
+    if (typeof params === 'string') {
+      // TODO: Delete the fallback if nobody needs it. Use a log to verify.
+      if (Date.now() > 1600289016959) {
+        // TODO: Remove the conditional check for this warning
+        // after the AMP extension is updated to pass an object.
+        log_4(
+          `[swg.js:getEntitlements]: If present, the first param of getEntitlements() should be an object of type GetEntitlementsParamsExternalDef.`
+        );
+      }
+
+      params = {
+        encryption: {encryptedDocumentKey: /**@type {string} */ (params)},
+      };
+    }
+
     if (!this.responsePromise_) {
-      this.responsePromise_ = this.getEntitlementsFlow_(encryptedDocumentKey);
+      this.responsePromise_ = this.getEntitlementsFlow_(params);
     }
     return this.responsePromise_.then((response) => {
       if (response.isReadyToPay != null) {
@@ -10335,25 +10741,49 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
-   * @return {!Promise<!Entitlements>}
-   * @private
+   * Sends a pingback that marks a metering entitlement as used.
+   * @param {!Entitlements} entitlements
    */
-  getEntitlementsFlow_(encryptedDocumentKey) {
-    return this.fetchEntitlementsWithCaching_(encryptedDocumentKey).then(
-      (entitlements) => {
-        this.onEntitlementsFetched_(entitlements);
-        return entitlements;
-      }
-    );
+  sendPingback_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
+      return;
+    }
+
+    const jwt = new EntitlementJwt();
+    jwt.setSource(entitlement.source);
+    jwt.setJwt(entitlement.subscriptionToken);
+
+    const message = new EntitlementsRequest();
+    message.setUsedEntitlement(jwt);
+    message.setClientEventTime(toTimestamp(Date.now()));
+
+    const url =
+      '/publication/' +
+      encodeURIComponent(this.publicationId_) +
+      '/entitlements';
+
+    this.fetcher_.sendPost(serviceUrl(url), message);
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetchEntitlementsWithCaching_(encryptedDocumentKey) {
+  getEntitlementsFlow_(params) {
+    return this.fetchEntitlementsWithCaching_(params).then((entitlements) => {
+      this.onEntitlementsFetched_(entitlements);
+      return entitlements;
+    });
+  }
+
+  /**
+   * @param {!GetEntitlementsParamsExternalDef=} params
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetchEntitlementsWithCaching_(params) {
     return Promise.all([
       this.storage_.get(ENTS_STORAGE_KEY),
       this.storage_.get(IS_READY_TO_PAY_STORAGE_KEY),
@@ -10361,7 +10791,8 @@ class EntitlementsManager {
       const raw = cachedValues[0];
       const irtp = cachedValues[1];
       // Try cache first.
-      if (raw && !encryptedDocumentKey) {
+      const needsDecryption = !!(params && params.encryption);
+      if (raw && !needsDecryption) {
         const cached = this.getValidJwtEntitlements_(
           raw,
           /* requireNonExpired */ true,
@@ -10374,9 +10805,9 @@ class EntitlementsManager {
         }
       }
       // If cache didn't match, perform fetch.
-      return this.fetchEntitlements_(encryptedDocumentKey).then((ents) => {
-        // If entitlements match the product, store them in cache.
-        if (ents && ents.enablesThis() && ents.raw) {
+      return this.fetchEntitlements_(params).then((ents) => {
+        // If the product is enabled by cacheable entitlements, store them in cache.
+        if (ents && ents.enablesThisWithCacheableEntitlements() && ents.raw) {
           this.storage_.set(ENTS_STORAGE_KEY, ents.raw);
         }
         return ents;
@@ -10385,17 +10816,17 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetchEntitlements_(encryptedDocumentKey) {
+  fetchEntitlements_(params) {
     // TODO(dvoytenko): Replace retries with consistent fetch.
     let positiveRetries = this.positiveRetries_;
     this.positiveRetries_ = 0;
     const attempt = () => {
       positiveRetries--;
-      return this.fetch_(encryptedDocumentKey).then((entitlements) => {
+      return this.fetch_(params).then((entitlements) => {
         if (entitlements.enablesThis() || positiveRetries <= 0) {
           return entitlements;
         }
@@ -10526,6 +10957,7 @@ class EntitlementsManager {
       Entitlement.parseListFromJson(json),
       this.pageConfig_.getProductId(),
       this.ack_.bind(this),
+      this.consume_.bind(this),
       isReadyToPay,
       decryptedDocumentKey
     );
@@ -10549,47 +10981,39 @@ class EntitlementsManager {
       .callbacks()
       .triggerEntitlementsResponse(Promise.resolve(entitlements));
 
-    // Show a toast if needed.
-    this.maybeShowToast_(entitlements);
-  }
-
-  /**
-   * @param {!Entitlements} entitlements
-   * @return {!Promise}
-   * @private
-   */
-  maybeShowToast_(entitlements) {
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
-      return Promise.resolve();
+      return;
     }
-    // Check if storage bit is set. It's only set by the `Entitlements.ack`
-    // method.
-    return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
-      if (value == '1') {
-        // Already shown;
-        return;
-      }
-      if (entitlement) {
-        this.showToast_(entitlement);
-      }
-    });
+
+    this.maybeShowToast_(entitlement);
   }
 
   /**
    * @param {!Entitlement} entitlement
+   * @return {!Promise}
    * @private
    */
-  showToast_(entitlement) {
-    const source = entitlement.source || 'google';
-    return new Toast(
-      this.deps_,
-      feUrl('/toastiframe'),
-      feArgs({
-        'publicationId': this.publicationId_,
-        'source': source,
-      })
-    ).open();
+  maybeShowToast_(entitlement) {
+    // Check if storage bit is set. It's only set by the `Entitlements.ack`
+    // method.
+    return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
+      const toastWasShown = value === '1';
+      if (toastWasShown) {
+        return;
+      }
+
+      // Show toast.
+      const source = entitlement.source || 'google';
+      return new Toast(
+        this.deps_,
+        feUrl('/toastiframe'),
+        feArgs({
+          'publicationId': this.publicationId_,
+          'source': source,
+        })
+      ).open();
+    });
   }
 
   /**
@@ -10603,21 +11027,116 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!Entitlements} entitlements
+   * @param {?Function=} onCloseDialog Called after the user closes the dialog.
+   * @private
+   */
+  consume_(entitlements, onCloseDialog) {
+    if (entitlements.enablesThisWithGoogleMetering()) {
+      const activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.deps_.activities(),
+        feUrl('/metertoastiframe'),
+        feArgs({
+          'productId': this.deps_.pageConfig().getProductId(),
+          'publicationId': this.deps_.pageConfig().getPublicationId(),
+          'productType': ProductType.UI_CONTRIBUTION,
+          'list': 'default',
+          'skus': null,
+          'isClosable': true,
+        }),
+        /* shouldFadeBody */ true
+      );
+      activityIframeView_.onCancel(() => {
+        if (onCloseDialog) {
+          onCloseDialog();
+        }
+        this.sendPingback_(entitlements);
+      });
+      return this.deps_.dialogManager().openView(activityIframeView_);
+    }
+  }
+
+  /**
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetch_(encryptedDocumentKey) {
-    let url =
-      '/publication/' +
-      encodeURIComponent(this.publicationId_) +
-      '/entitlements';
-    if (encryptedDocumentKey) {
-      url += '?crypt=' + encodeURIComponent(encryptedDocumentKey);
-    }
-    return this.fetcher_
-      .fetchCredentialedJson(serviceUrl(url))
-      .then((json) => this.parseEntitlements(json));
+  fetch_(params) {
+    return hash(getCanonicalUrl(this.deps_.doc()))
+      .then((hashedCanonicalUrl) => {
+        const urlParams = [];
+
+        // Add encryption param.
+        if (params && params.encryption) {
+          urlParams.push(
+            'crypt=' +
+              encodeURIComponent(params.encryption.encryptedDocumentKey)
+          );
+        }
+
+        // Add metering params.
+        const productId = this.pageConfig_.getProductId();
+        if (productId && params && params.metering && params.metering.state) {
+          /** @type {!GetEntitlementsParamsInternalDef} */
+          const encodableParams = {
+            metering: {
+              clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
+              owner: productId,
+              resource: {
+                hashedCanonicalUrl,
+              },
+              state: {
+                id: params.metering.state.id,
+                attributes: [],
+              },
+            },
+          };
+
+          // Add attributes.
+          const standardAttributes = params.metering.state.standardAttributes;
+          if (standardAttributes) {
+            Object.keys(standardAttributes).forEach((key) => {
+              encodableParams.metering.state.attributes.push({
+                name: 'standard_' + key,
+                timestamp: standardAttributes[key].timestamp,
+              });
+            });
+          }
+          const customAttributes = params.metering.state.customAttributes;
+          if (customAttributes) {
+            Object.keys(customAttributes).forEach((key) => {
+              encodableParams.metering.state.attributes.push({
+                name: 'custom_' + key,
+                timestamp: customAttributes[key].timestamp,
+              });
+            });
+          }
+
+          // Encode params.
+          const encodedParams = btoa(JSON.stringify(encodableParams));
+          urlParams.push('encodedParams=' + encodedParams);
+        }
+
+        // Build URL.
+        let url =
+          '/publication/' +
+          encodeURIComponent(this.publicationId_) +
+          '/entitlements';
+        if (urlParams.length > 0) {
+          url += '?' + urlParams.join('&');
+        }
+        return serviceUrl(url);
+      })
+      .then((url) => this.fetcher_.fetchCredentialedJson(url))
+      .then((json) => {
+        if (json.errorMessages && json.errorMessages.length > 0) {
+          json.errorMessages.forEach((errorMessage) => {
+            log_4('SwG Entitlements: ' + errorMessage);
+          });
+        }
+        return this.parseEntitlements(json);
+      });
   }
 }
 
@@ -11043,6 +11562,14 @@ class Fetcher {
    * @param {!string|!Object} unusedData
    */
   sendBeacon(unusedUrl, unusedData) {}
+
+  /**
+   * POST data to a URL endpoint, get a Promise for a response
+   * @param {!string} unusedUrl
+   * @param {!string|!Object} unusedMessage
+   * @return {!Promise<!../utils/xhr.FetchResponse>}
+   */
+  sendPost(unusedUrl, unusedMessage) {}
 }
 
 /**
@@ -11067,6 +11594,20 @@ class XhrFetcher {
     return this.fetch(url, init).then((response) => response.json());
   }
 
+  sendPost(url, message) {
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      credentials: 'include',
+      body: 'f.req=' + serializeProtoMessageForUrl(message),
+    });
+    return this.fetch(url, init).then(
+      (response) => (response && response.json()) || {}
+    );
+  }
+
   /** @override */
   fetch(url, init) {
     return this.xhr_.fetch(url, init);
@@ -11074,22 +11615,17 @@ class XhrFetcher {
 
   /** @override */
   sendBeacon(url, data) {
-    const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
-    const body = 'f.req=' + serializeProtoMessageForUrl(data);
     if (navigator.sendBeacon) {
-      const blob = new Blob([body], {type: contentType});
+      const headers = {type: 'application/x-www-form-urlencoded;charset=UTF-8'};
+      const blob = new Blob(
+        ['f.req=' + serializeProtoMessageForUrl(data)],
+        headers
+      );
       navigator.sendBeacon(url, blob);
       return;
     }
-
     // Only newer browsers support beacon.  Fallback to standard XHR POST.
-    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-      method: 'POST',
-      headers: {'Content-Type': contentType},
-      credentials: 'include',
-      body,
-    });
-    this.fetch(url, init);
+    this.sendPost(url, data);
   }
 }
 
@@ -13109,9 +13645,6 @@ class PayFrameHelper {
   }
 }
 
-// Start loading pay frame early
-PayFrameHelper.load();
-
 /**
  * @license
  * Copyright 2018 Google Inc. All Rights Reserved.
@@ -14579,6 +15112,9 @@ class PaymentsAsyncClient {
     this.webActivityDelegate_.onResult(this.onResult_.bind(this));
     this.delegate_.onResult(this.onResult_.bind(this));
 
+    // Load PayFrameHelper upon client construction.
+    PayFrameHelper.load();
+
     // If web delegate is used anyway then this is overridden in the web
     // activity delegate when load payment data is called.
     if (chromeSupportsPaymentHandler()) {
@@ -15118,22 +15654,8 @@ class PayClient {
     /** @private {?PaymentsAsyncClient} */
     this.client_ = null;
 
-    if (!isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD)) {
-      this.client_ = this.createClient_(
-        /** @type {!PaymentOptions} */
-        ({
-          environment: 'PRODUCTION',
-          'i': {
-            'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-          },
-        }),
-        this.analytics_.getTransactionId(),
-        this.handleResponse_.bind(this)
-      );
-    } else {
-      /** @private @const {!Preconnect} */
-      this.preconnect_ = new Preconnect(this.win_.document);
-    }
+    /** @private @const {!Preconnect} */
+    this.preconnect_ = new Preconnect(this.win_.document);
 
     // Prepare new verifier pair.
     this.redirectVerifierHelper_.prepare();
@@ -15187,10 +15709,7 @@ class PayClient {
   start(paymentRequest, options = {}) {
     this.request_ = paymentRequest;
 
-    if (
-      isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD) &&
-      !this.client_
-    ) {
+    if (!this.client_) {
       this.preconnect(this.preconnect_);
       this.client_ = this.createClient_(
         /** @type {!PaymentOptions} */
@@ -16160,9 +16679,6 @@ class ConfiguredRuntime {
     preconnect.preconnect('https://www.google.com/');
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
-    if (!isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD)) {
-      this.payClient_.preconnect(preconnect);
-    }
 
     injectStyleSheet(this.doc_, CSS$1);
 
@@ -16318,9 +16834,9 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  getEntitlements(encryptedDocumentKey) {
+  getEntitlements(params) {
     return this.entitlementsManager_
-      .getEntitlements(encryptedDocumentKey)
+      .getEntitlements(params)
       .then((entitlements) => {
         // Auto update internal things tracking the user's current SKU.
         if (entitlements) {
@@ -16559,11 +17075,19 @@ class ConfiguredRuntime {
     return Promise.resolve(this.propensityModule_);
   }
 
-  /** @override
+  /**
+   * This one exists as an internal helper so SwG logging doesn't require a promise.
    * @return {!ClientEventManager}
    */
   eventManager() {
     return this.eventManager_;
+  }
+
+  /**
+   * This one exists as a public API so publishers can subscribe to SwG events.
+   * @override */
+  getEventManager() {
+    return Promise.resolve(this.eventManager_);
   }
 
   /** @override */

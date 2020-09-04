@@ -792,7 +792,12 @@ describes.sandboxed('StandardActions', {}, (env) => {
       const goBackStub = env.sandbox.stub(history, 'goBack');
       invocation.method = 'goBack';
       standardActions.handleAmpTarget_(invocation);
-      expect(goBackStub).to.be.calledOnce;
+      expect(goBackStub).to.be.calledWithExactly(false);
+      goBackStub.resetHistory();
+
+      invocation.args = {navigate: true};
+      standardActions.handleAmpTarget_(invocation);
+      expect(goBackStub).to.be.calledWith(true);
     });
 
     it('should implement optoutOfCid', function* () {

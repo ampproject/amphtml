@@ -137,6 +137,7 @@ function compile(
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
     'build-system/externs/preact.extern.js',
+    'build-system/externs/weakref.extern.js',
   ];
   const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
@@ -159,10 +160,10 @@ function compile(
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
     entryModuleFilenames.forEach(function (filename) {
-      if (!filename.includes('extensions/')) {
+      if (!pathModule.normalize(filename).startsWith('extensions')) {
         return;
       }
-      const path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
+      const path = pathModule.join(pathModule.dirname(filename), '**', '*.js');
       srcs.push(path);
     });
     if (options.extraGlobs) {
@@ -183,13 +184,16 @@ function compile(
       const polyfills = fs.readdirSync('src/polyfills');
       const polyfillsShadowList = polyfills.filter((p) => {
         // custom-elements polyfill must be included.
-        return p !== 'custom-elements.js';
+        // install intersection-observer to esm build as iOS safari 11.1 to
+        // 12.1 do not have InObs.
+        return !['custom-elements.js', 'intersection-observer.js'].includes(p);
       });
       srcs.push(
         '!build/fake-module/src/polyfills.js',
         '!build/fake-module/src/polyfills/**/*.js',
         '!build/fake-polyfills/src/polyfills.js',
         'src/polyfills/custom-elements.js',
+        'src/polyfills/intersection-observer.js',
         'build/fake-polyfills/**/*.js'
       );
       polyfillsShadowList.forEach((polyfillFile) => {
@@ -236,30 +240,16 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
-    // Normally setting this server-side experiment flag would be handled by
-    // the release process automatically. Since this experiment is actually on the
-    // build system instead of runtime, we never run it through babel and therefore
-    // must compute it here.
-    const isStrict = argv.define_experiment_constant === 'STRICT_COMPILATION';
-    const isEsm = argv.esm;
-    let language;
-    if (isEsm) {
-      // Do not transpile down to ES5 if running with `--esm`, since we do
-      // limited transpilation in Babel.
-      language = 'NO_TRANSPILE';
-    } else if (isStrict) {
-      language = 'ECMASCRIPT5_STRICT';
-    } else {
-      language = 'ECMASCRIPT5';
-    }
-
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
       language_in: 'ECMASCRIPT_2020',
-      language_out: language,
+      // Do not transpile down to ES5 if running with `--esm`, since we do
+      // limited transpilation in Babel.
+      language_out:
+        argv.esm || argv.sxg ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
