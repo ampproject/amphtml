@@ -398,6 +398,7 @@ requirement: {
   whitelist: 'ads/zen.js'
   whitelist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
   whitelist: 'src/json.js' # Where parseJson itself is implemented.
+  whitelist_regexp: '.*\\.jss\\.js'
 }
 
 requirement: {

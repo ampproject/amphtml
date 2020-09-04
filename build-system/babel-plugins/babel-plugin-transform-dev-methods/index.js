@@ -41,9 +41,8 @@ function defaultCalleeToPropertiesMap() {
 }
 
 // This Babel Plugin removes
-// 1. `dev().info(...)`
-// 2. `dev().fine(...)`
-// 3. `user().fine(...)`
+// - `dev().(info|fine|warn)(...)`
+// - `user().(info|fine|warn)(...)`
 // CallExpressions for production ESM builds.
 module.exports = function () {
   let calleeToPropertiesMap = defaultCalleeToPropertiesMap();
