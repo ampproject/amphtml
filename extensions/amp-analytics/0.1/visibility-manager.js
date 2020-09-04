@@ -903,7 +903,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     intersectionRect,
     boundingClientRect
   ) {
-    intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
     if (boundingClientRect.width < 1 || boundingClientRect.height < 1) {
@@ -911,6 +910,8 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       // Use < 1 because the width/height can
       // be a double value on high resolution screen
       intersectionRatio = 0;
+    } else {
+      intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     }
     if (trackedElement) {
       trackedElement.intersectionRatio = intersectionRatio;
