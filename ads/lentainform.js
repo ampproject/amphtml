@@ -21,11 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function lentainform(global, data) {
-  validateData(
-    data,
-    ['publisher', 'widget', 'container'],
-    ['url', 'options']
-  );
+  validateData(data, ['publisher', 'widget', 'container'], ['url', 'options']);
 
   const scriptRoot = document.createElement('div');
   scriptRoot.id = data.container;
