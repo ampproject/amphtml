@@ -15,15 +15,16 @@
  */
 
 import * as Preact from '../../../src/preact';
-import * as styles from './pagination.css';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {useContext} from '../../../src/preact';
+import {useStyles} from './pagination.jss';
 
 /**
  * @param {!InlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
 export function Pagination({inset, ...rest}) {
+  const classes = useStyles();
   const {slideCount, currentSlide, setCurrentSlide} = useContext(
     CarouselContext
   );
@@ -31,26 +32,44 @@ export function Pagination({inset, ...rest}) {
   const indicator = (
     <div
       aria-hidden="true"
-      class="i-amphtml-carousel-pagination-container"
+      class={`${classes.container} ${inset ? classes.inset : ''}`}
       style={{
-        ...styles.paginationContainer,
-        ...(inset ? styles.insetPaginationContainer : {}),
+        // TODO: where does this belong?
         height: 20,
       }}
     >
-      <Comp
-        currentSlide={currentSlide}
-        inset={inset}
-        goTo={(i) => setCurrentSlide(i)}
-        slideCount={slideCount}
-      />
+      <div
+        class={`${Comp == Dots ? classes.dots : classes.numbers} ${
+          inset ? classes.inset : ''
+        }`}
+      >
+        {inset && (
+          <>
+            <div
+              class={`${classes.insetBaseStyle} ${classes.insetFrosting}`}
+            ></div>
+            <div
+              class={`${classes.insetBaseStyle} ${classes.insetBackdrop}`}
+            ></div>
+            <div
+              class={`${classes.insetBaseStyle} ${classes.insetBackground}`}
+            ></div>
+          </>
+        )}
+        <Comp
+          currentSlide={currentSlide}
+          inset={inset}
+          goTo={(i) => setCurrentSlide(i)}
+          slideCount={slideCount}
+        />
+      </div>
     </div>
   );
   return inset ? (
     indicator
   ) : (
     // Respect user provided dimensions with a default height of 20px.
-    <div style={{height: '20px'}} {...rest}>
+    <div style={{height: 20}} {...rest}>
       {indicator}
     </div>
   );
@@ -61,48 +80,27 @@ export function Pagination({inset, ...rest}) {
  * @return {PreactDef.Renderable}
  */
 function Dots({currentSlide, goTo, inset, slideCount}) {
+  const classes = useStyles();
   const dotList = [];
   for (let i = 0; i < slideCount; i++) {
     dotList.push(
       <div
         key={i}
-        class="i-amphtml-carousel-pagination-dot-container"
-        style={styles.paginationDotContainer}
+        class={`${classes.dotWrapper} ${inset ? classes.inset : ''}`}
       >
-        <div
-          class="i-amphtml-carousel-pagination-dot"
-          style={{
-            ...styles.paginationDot,
-            ...(inset ? styles.insetPaginationDot : {}),
-          }}
-        >
+        <div class={`${classes.dot} ${inset ? classes.inset : ''}`}>
           <div
             role="button"
             aria-selected={String(i === currentSlide)}
             onClick={() => goTo(i)}
-            class="i-amphtml-carousel-pagination-dot-progress"
-            style={{
-              ...styles.paginationDotProgress,
-              ...(inset ? styles.insetPaginationDotProgress : {}),
-              opacity: i === currentSlide ? 1 : 0,
-            }}
+            class={`${classes.dotProgress} ${inset ? classes.inset : ''}`}
+            style={{opacity: i === currentSlide ? 1 : 0}}
           ></div>
         </div>
       </div>
     );
   }
-  return (
-    <div
-      class="i-amphtml-carousel-pagination-dots"
-      style={{
-        ...styles.paginationDots,
-        ...(inset ? styles.insetPaginationDots : {}),
-      }}
-    >
-      {inset && insetBaseStyles}
-      {dotList}
-    </div>
-  );
+  return <>{dotList}</>;
 }
 
 /**
@@ -110,34 +108,12 @@ function Dots({currentSlide, goTo, inset, slideCount}) {
  * @return {PreactDef.Renderable}
  */
 function Numbers({currentSlide, inset, slideCount}) {
+  const classes = useStyles();
   return (
-    <div
-      style={{
-        ...styles.paginationNumbers,
-        color: inset ? '#fff' : 'currentColor',
-      }}
-    >
-      {inset && insetBaseStyles}
-      <div style={{zIndex: 1}}>
-        <span class="i-amphtml-carousel-pagination-index">
-          {currentSlide + 1}
-        </span>
-        <span> / </span>
-        <span class="i-amphtml-carousel-pagination-total">{slideCount}</span>
-      </div>
+    <div class={`${classes.numbersWrapper} ${inset ? classes.inset : ''}`}>
+      <span>{currentSlide + 1}</span>
+      <span> / </span>
+      <span>{slideCount}</span>
     </div>
   );
 }
-
-const insetBaseStyles = (
-  <>
-    <div style={{...styles.insetPaginationBaseStyle, ...styles.frosting}}></div>
-    <div style={{...styles.insetPaginationBaseStyle, ...styles.backdrop}}></div>
-    <div
-      style={{
-        ...styles.insetPaginationBaseStyle,
-        ...styles.insetPaginationBackground,
-      }}
-    ></div>
-  </>
-);
