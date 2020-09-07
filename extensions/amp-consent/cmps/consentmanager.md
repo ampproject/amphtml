@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# DIDOMI
+# ConsentManager
 
 Collect and enforce user consent with the ConsentManager CMP. Login to your ConsentManager.net account in order to create a CMP.
 
