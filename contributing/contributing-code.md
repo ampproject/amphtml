@@ -149,6 +149,8 @@ It is acceptable for one person to fulfill these requirements, e.g. if an Owner 
 
 We now have a bot that will automatically assign Owners to a PR once it is created, and it is likely at least one of these Owners will also be a Reviewer.
 
+Depending on the files/folders involved, Owners include one or more [AMP Working Groups](https://amp.dev/community/working-groups/access-subscriptions/), such as the groups for  [Security & Privacy](https://amp.dev/community/working-groups/security-privacy/) and [User Interface & Accessibility](https://amp.dev/community/working-groups/ui-and-a11y/).
+
 Once the PR has been approved, anyone with commit rights to the repository may merge the PR, including its author.
 
 These guidelines are specific to the amphtml repository. Other ampproject repos may follow the same guidelines or use different guidelines as documented in their CONTRIBUTING.md files.
