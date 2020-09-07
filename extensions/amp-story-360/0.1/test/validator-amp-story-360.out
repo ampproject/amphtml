@@ -40,7 +40,7 @@ PASS
 |          poster-portrait-src="example.com/poster.jpg">
 |      <amp-story-page id="cover">
 |        <amp-story-grid-layer template="fill">
-|          <amp-story-360 layout="fill" heading-start="95" pitch-start="-10" zoom-start="4" heading-end="-45" pitch-end="-20" zoom-end="1" duration="30s">
+|          <amp-story-360 layout="fill" heading-start="95" pitch-start="-10" zoom-start="4" heading-end="-45" pitch-end="-20" zoom-end="1" duration="30s" tilt-pitch="45" tilt-yaw="45">
 |            <amp-img src="img/panorama1.jpg" width="7168" height="3584"></amp-img>
 |          </amp-story-360>
 |       </amp-story-grid-layer>
