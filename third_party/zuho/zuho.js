@@ -15,20 +15,23 @@ const SHADERS = {
     uniform sampler2D uTex;
     varying vec2      vPos;
 
-    bool unproject(vec2, out vec3);
+    uniform vec4 uQuaternion;
+    vec3 reorient(inout vec3 v){
+      vec4 q = uQuaternion; 
+      v = v + 2.0 * cross(cross(v, q.xyz) + q.w * v, q.xyz);
+      return v;
+    }
 
     vec4 sample(float dx, float dy) {
-      vec2 p = vPos + uPxSize * vec2(dx, dy);
-      vec3 q;
-      if(unproject(p, q)) {
-        vec3 dir = normalize(uRot * q);
-        float u = (-0.5 / pi) * atan(dir[1], dir[0]) + 0.5;
-        float v = (1.0 / pi) * acos(dir[2]);
-        return texture2D(uTex, vec2(u, v));
-      }
-      else {
-        return vec4(0.0);
-      }
+    vec3 q = vec3( vPos + uPxSize * vec2(dx, dy), -1.0 );
+    vec3 dir = normalize(uRot * q);
+
+      // reorient the 3D vector
+      reorient(dir);
+
+      float u = (-0.5 / pi) * atan( dir[1], dir[0] ) + 0.5;
+      float v = (1.0 / pi) * acos( dir[2] );
+      return texture2D( uTex, vec2( u, v ) );
     }
   `,
   fragSourceFast: `
@@ -77,23 +80,14 @@ const SHADERS = {
   `,
 };
 
-const MAPPING = {
-  azPerspective: `
-    bool unproject(vec2 p, out vec3 q) {
-      q = vec3(p, -1.0);
-      return true;
-    }
-  `,
-};
-
 export class Matrix {
   static mul(n, x, y) {
     console.assert(x.length == n * n && y.length == n * n);
     const z = new Float32Array(n * n);
-    for(let i = 0; i < n; ++i) {
-      for(let j = 0; j < n; ++j) {
+    for (let i = 0; i < n; ++i) {
+      for (let j = 0; j < n; ++j) {
         let sum = 0.0;
-        for(let k = 0; k < n; ++k) {
+        for (let k = 0; k < n; ++k) {
           sum += x[i * n + k] * y[k * n + j];
         }
         z[i * n + j] = sum;
@@ -105,7 +99,7 @@ export class Matrix {
   static identity(n) {
     const z = new Float32Array(n * n);
     z.fill(0.0);
-    for(let i = 0; i < n; ++i) {
+    for (let i = 0; i < n; ++i) {
       z[i * n + i] = 1.0;
     }
     return z;
@@ -124,24 +118,96 @@ export class Matrix {
   }
 };
 
+class Quaternion {
+  constructor(x = 0, y = 0, z = 0, w = 1) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+  }
+
+  get values() {
+    return [this.x, this.y, this.z, this.w];
+  }
+
+  set(x = 0, y = 0, z = 0, w = 1) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+    return this;
+  }
+
+  copy(q) {
+    this.x = q.x;
+    this.y = q.y;
+    this.z = q.z;
+    this.w = q.w;
+    return this;
+  }
+
+  static inverse(q) {
+    q.x *= -1;
+    q.y *= -1;
+    q.z *= -1;
+    return q;
+  }
+
+  static multiply(a, b) {
+    return new Quaternion(
+        a.x * b.w + a.w * b.x + a.y * b.z - a.z * b.y,
+        a.y * b.w + a.w * b.y + a.z * b.x - a.x * b.z,
+        a.z * b.w + a.w * b.z + a.x * b.y - a.y * b.x,
+        a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z);
+  }
+
+  static setFromAxisAngle(q, axis, angle) {
+    const halfAngle = angle / 2;
+    const s = Math.sin(halfAngle);
+    q.x = axis[0] * s;
+    q.y = axis[1] * s;
+    q.z = axis[2] * s;
+    q.w = Math.cos(halfAngle);
+    return q;
+  }
+
+  // computes a quaternion that compensates the yaw/tilt of the panoramas
+  static orient(yaw, tilt_yaw, tilt_pitch) {
+    let q = new Quaternion();
+    let t = new Quaternion();
+    let i = new Quaternion();
+    this.setFromAxisAngle(t, [0, 1, 0], tilt_yaw);
+    q.copy(t);
+    i = this.inverse(i.copy(t));
+    this.setFromAxisAngle(t, [0, 0, 1], tilt_pitch);
+    q = this.multiply(this.multiply(q, t), i);
+    this.setFromAxisAngle(t, [0, 1, 0], yaw);
+    q = this.multiply(q, t);
+    q.set(-q.x, -q.z, -q.y, q.w);
+    return q;
+  }
+}
+
 export class Renderer {
   constructor(canvas) {
     const params = {
-        alpha: true,
-        depth: false,
-        stencil: false,
-        antialias: false,
-        premultipliedAlpha: true,
+      alpha: true,
+      depth: false,
+      stencil: false,
+      antialias: false,
+      premultipliedAlpha: true,
     };
-    const gl = this.gl =
-      	canvas.getContext("webgl", params) ||
-      	canvas.getContext("experimental-webgl", params);
+    const gl = this.gl = canvas.getContext('webgl', params) ||
+        canvas.getContext('experimental-webgl', params);
 
     this.canvas = canvas;
     this.resize();
 
     this.rotation = null;
     this.scale = 1;
+
+    this.quaternion = null;
+    this.setAngles(); // Initializes the quaterinon with neutral values.
 
     this.vertShader = gl.createShader(gl.VERTEX_SHADER);
     this.fragShaderFast = gl.createShader(gl.FRAGMENT_SHADER);
@@ -153,13 +219,13 @@ export class Renderer {
     gl.attachShader(this.progFast, this.fragShaderFast);
     gl.attachShader(this.progSlow, this.vertShader);
     gl.attachShader(this.progSlow, this.fragShaderSlow);
-    this.setMapping(MAPPING.azPerspective);
+    this.setMapping();
     this.setCamera(Matrix.identity(3), 1.0);
 
     this.vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
-    const vertices = new Float32Array(
-    		[-1.0, -1.0, +1.0, -1.0, -1.0, +1.0, +1.0, +1.0]);
+    const vertices =
+        new Float32Array([-1.0, -1.0, +1.0, -1.0, -1.0, +1.0, +1.0, +1.0]);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
     this.tex = gl.createTexture();
@@ -180,11 +246,19 @@ export class Renderer {
     gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
-  setMapping(code) {
-    this.compile_(this.fragShaderFast, SHADERS.fragSourceCommon 
-    		+ SHADERS.fragSourceFast + code);
-    this.compile_(this.fragShaderSlow, SHADERS.fragSourceCommon 
-    		+ SHADERS.fragSourceSlow + code);
+  setAngles(yaw = 0, tilt_yaw = 0, tilt_pitch = 0) {
+    const RAD = Math.PI / 180;
+    this.quaternion =
+        Quaternion.orient(yaw * RAD, tilt_yaw * RAD, tilt_pitch * RAD);
+  }
+
+  setMapping(code = '') {
+    this.compile_(
+        this.fragShaderFast,
+        SHADERS.fragSourceCommon + SHADERS.fragSourceFast + code);
+    this.compile_(
+        this.fragShaderSlow,
+        SHADERS.fragSourceCommon + SHADERS.fragSourceSlow + code);
     this.link_(this.progFast);
     this.link_(this.progSlow);
   }
@@ -196,7 +270,7 @@ export class Renderer {
 
   resize() {
     const rect = this.canvas.getBoundingClientRect();
-    this.canvas.width  = rect.width  * devicePixelRatio;
+    this.canvas.width = rect.width * devicePixelRatio;
     this.canvas.height = rect.height * devicePixelRatio;
     this.gl.viewport(0.0, 0.0, this.canvas.width, this.canvas.height);
   }
@@ -208,14 +282,18 @@ export class Renderer {
 
     const prog = fast ? this.progFast : this.progSlow;
     gl.useProgram(prog);
-    const f = this.scale / Math.sqrt(gl.drawingBufferWidth * 
-        gl.drawingBufferHeight);
+    const f =
+        this.scale / Math.sqrt(gl.drawingBufferWidth * gl.drawingBufferHeight);
     const sx = f * gl.drawingBufferWidth;
     const sy = f * gl.drawingBufferHeight;
-    gl.uniformMatrix3fv(gl.getUniformLocation(prog, "uRot"), false, 
-    		this.rotation);
-    gl.uniform2f(gl.getUniformLocation(prog, "uScale"), sx, sy);
-    gl.uniform1f(gl.getUniformLocation(prog, "uPxSize"), 2.0 * f);
+    gl.uniformMatrix3fv(
+        gl.getUniformLocation(prog, 'uRot'), false, this.rotation);
+    gl.uniform2f(gl.getUniformLocation(prog, 'uScale'), sx, sy);
+    gl.uniform1f(gl.getUniformLocation(prog, 'uPxSize'), 2.0 * f);
+
+    // passes the value of the computed quaternion to the shader
+    gl.uniform4fv(
+        gl.getUniformLocation(prog, 'uQuaternion'), this.quaternion.values);
 
     gl.enableVertexAttribArray(0);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
@@ -223,7 +301,7 @@ export class Renderer {
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.tex);
-    gl.uniform1i(gl.getUniformLocation(prog, "uTex"), 0);
+    gl.uniform1i(gl.getUniformLocation(prog, 'uTex'), 0);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -238,7 +316,7 @@ export class Renderer {
     gl.shaderSource(shader, src);
     gl.compileShader(shader);
     const log = gl.getShaderInfoLog(shader);
-    if(log.length > 0) {
+    if (log.length > 0) {
       console.log(log);
     }
   }
@@ -248,7 +326,7 @@ export class Renderer {
     const gl = this.gl;
     gl.linkProgram(prog);
     const log = gl.getProgramInfoLog(prog);
-    if(log.length > 0) {
+    if (log.length > 0) {
       console.log(log);
     }
   }
