@@ -217,15 +217,6 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     );
 
-    // Unblock rendering on first `CanRender` response. And keep the context
-    // in-sync.
-    subscribe(this.element, [CanRender, CanPlay], (canRender, canPlay) => {
-      this.context_.renderable = canRender;
-      this.context_.playable = canPlay;
-      this.mounted_ = true;
-      this.scheduleRender_();
-    });
-
     // Subscribe to dependent contexts.
     const useContexts = Ctor['useContexts'];
     if (useContexts.length != 0) {
@@ -237,7 +228,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     this.renderDeferred_ = new Deferred();
     this.scheduleRender_();
-    return this.renderDeferred_.promise;
+    return this.renderDeferred_.promise.then(() => {
+      console.log('PreactBaseElement: buildCallback resolved');
+    });
   }
 
   /** @override */
@@ -257,7 +250,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     // If not, wait for `onLoad` callback.
     this.loadDeferred_ = new Deferred();
-    return this.loadDeferred_.promise;
+    return this.loadDeferred_.promise.then(() => {
+      console.log('PreactBaseElement: layoutCallback resolved');
+    });
   }
 
   /** @override */
@@ -365,6 +360,7 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @private */
   onLoad_() {
+    console.log('PreactBaseElement: onLoad_');
     if (this.loadDeferred_) {
       this.loadDeferred_.resolve();
       this.loadDeferred_ = null;
@@ -561,6 +557,13 @@ export class PreactBaseElement extends AMP.BaseElement {
 PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
+
+/**
+ * Whether the component implements a loading protocol.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['loadable'] = false;
 
 /**
  * @protected {!Array<!ContextProp>}

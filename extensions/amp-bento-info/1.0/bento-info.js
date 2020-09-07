@@ -16,18 +16,31 @@
 import * as Preact from '../../../src/preact';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
-import {useAmpContext} from '../../../src/preact/context';
+import {useAmpContext, useLoad} from '../../../src/preact/context';
 import {useMemo, useState} from '../../../src/preact';
 
 /**
  * @return {PreactDef.Renderable}
  */
-export function BentoInfo({}) {
+export function BentoInfo({...rest}) {
   const context = useAmpContext();
+  const {load, onLoad, onLoadError} = useLoad(rest);
+
+  const src = 'http://localhost:8000/examples/img/sea@1x.jpg';
+
   return (
     <div>
-      <div>renderable: {String(context.renderable)}</div>
-      <div>playable: {String(context.playable)}</div>
+      <div>context.renderable: {String(context.renderable)}</div>
+      <div>context.playable: {String(context.playable)}</div>
+      <div>context.loading: {String(context.loading)}</div>
+      <div>props.loading: {String(rest['loading'])}</div>
+      <div>command.load: {String(load)}</div>
+      <img
+        src={load ? src : null}
+        onLoad={onLoad}
+        onError={onLoadError}
+        style={{width: 40, height: 40}}
+        />
     </div>
   );
 }

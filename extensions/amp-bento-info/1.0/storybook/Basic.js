@@ -14,32 +14,19 @@
  * limitations under the License.
  */
 
-import {BentoInfo} from './bento-info';
-import {Layout} from '../../../src/layout';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import * as Preact from '../../../../src/preact';
+import {BentoInfo} from '../bento-info';
+import {WithAmpContext} from '../../../../src/preact/context';
+import {Shim} from './shim';
+import {boolean, select, withKnobs} from '@storybook/addon-knobs';
+import {withA11y} from '@storybook/addon-a11y';
 
-/** @const {string} */
-export const TAG = 'amp-bento-info';
+export default {
+  title: 'BentoInfo',
+  component: BentoInfo,
+  decorators: [withA11y, withKnobs],
+};
 
-export class AmpBentoInfo extends PreactBaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    return true;
-  }
-}
-
-/** @override */
-AmpBentoInfo['Component'] = BentoInfo;
-
-/** @override */
-AmpBentoInfo['loadable'] = true;
-
-/** @override */
-AmpBentoInfo['props'] = {};
-
-/** @override */
-AmpBentoInfo['children'] = {};
-
-AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpBentoInfo);
-});
+export const _default = () => {
+  return <Shim />
+};
