@@ -49,6 +49,9 @@ AmpInlineGalleryPagination['props'] = {
 AmpInlineGalleryPagination['children'] = {};
 
 /** @override */
+AmpInlineGalleryPagination['layoutSizeDefined'] = true;
+
+/** @override */
 // eslint-disable-next-line
 AmpInlineGalleryPagination['shadowCss'] = useStyles().CSS;
 
