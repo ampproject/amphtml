@@ -68,8 +68,6 @@ describes.endtoend(
         '[role=listitem]:nth-child(15)'
       );
       await expect(fifteenthItem).to.be.ok;
-      const items = await getListItems(controller);
-      await expect(items.length).equal(15);
     });
   }
 );
