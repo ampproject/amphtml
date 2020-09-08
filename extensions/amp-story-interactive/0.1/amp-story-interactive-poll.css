@@ -88,7 +88,10 @@
   word-wrap: break-word !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  max-height: 2.6em !important;
 }
 
 .i-amphtml-story-interactive-poll-two-lines .i-amphtml-story-interactive-option-text {
