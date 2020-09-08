@@ -254,20 +254,24 @@ export class PaginationButtons {
       }
     );
 
-    this.storeService_.subscribe(StateProperty.PAGE_IDS, () => {
-      // Since onCurrentPageIndexUpdate_ uses this.hasBookend, and the bookend
-      // isn't initialized until after the story is laid out, we wait for the
-      // story to be laid out before calling this function.
-      this.ampStory_.element
-        .signals()
-        .whenSignal(CommonSignals.LOAD_END)
-        .then(() => {
-          const currentPageIndex = Number(
-            this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
-          );
-          this.onCurrentPageIndexUpdate_(currentPageIndex);
-        });
-    });
+    this.storeService_.subscribe(
+      StateProperty.PAGE_IDS,
+      () => {
+        // Since onCurrentPageIndexUpdate_ uses this.hasBookend, and the bookend
+        // isn't initialized until after the story is laid out, we wait for the
+        // story to be laid out before calling this function.
+        this.ampStory_.element
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            const currentPageIndex = Number(
+              this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+            );
+            this.onCurrentPageIndexUpdate_(currentPageIndex);
+          });
+      },
+      true /** callToInitialize */
+    );
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
@@ -304,6 +308,7 @@ export class PaginationButtons {
    * @private
    */
   onCurrentPageIndexUpdate_(pageIndex) {
+    console.log(pageIndex, totalPages, 'test');
     const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
     const bookendActive = this.storeService_.get(StateProperty.BOOKEND_STATE);
 
