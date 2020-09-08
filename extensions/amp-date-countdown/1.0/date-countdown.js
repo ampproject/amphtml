@@ -79,19 +79,19 @@ export function DateCountdown({
       ),
     [endDate, timeleftMs, timestampMs, timestampSeconds, offsetSeconds]
   );
-  const [timeLeft, setTimeLeft] = useState(epoch - Date.now());
+  const [timeleft, setTimeleft] = useState(epoch - Date.now());
   const localeStrings = useMemo(() => getLocaleWord(locale), [locale]);
   const rootRef = useRef(null);
 
   useEffect(() => {
-    if (!playable) {
+    if (!playable || !rootRef.current) {
       return;
     }
     const win = rootRef.current.ownerDocument.defaultView;
     const interval = win.setInterval(() => {
-      const newTimeLeft = epoch - Date.now() + DELAY;
-      setTimeLeft(newTimeLeft);
-      if (whenEnded === DEFAULT_WHEN_ENDED && newTimeLeft < 1000) {
+      const newTimeleft = epoch - Date.now() + DELAY;
+      setTimeleft(newTimeleft);
+      if (whenEnded === DEFAULT_WHEN_ENDED && newTimeleft < 1000) {
         win.clearInterval(interval);
       }
     }, DELAY);
@@ -99,7 +99,7 @@ export function DateCountdown({
   }, [playable, epoch, whenEnded]);
 
   const data = {
-    ...getYDHMSFromMs(timeLeft, biggestUnit),
+    ...getYDHMSFromMs(timeleft, biggestUnit),
     ...localeStrings,
   };
   return (
