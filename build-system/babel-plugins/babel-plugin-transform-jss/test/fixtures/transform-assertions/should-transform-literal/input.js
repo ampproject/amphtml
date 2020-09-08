@@ -16,4 +16,4 @@
 
 import {createUseStyles} from 'react-jss';
 
-export const useStyles = createUseStyles({button: {fontSize: 12}});
+export const useStyles = createUseStyles({floatLeft: {float: 'left'}});

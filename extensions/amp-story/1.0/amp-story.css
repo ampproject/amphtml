@@ -871,12 +871,12 @@ amp-story .amp-video-eq,
 
 .i-amphtml-story-interactive-component {
   align-self: center;
-  width: auto;
   height: auto !important;
   pointer-events: none !important;
-  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
-  min-width: 224px !important;
-  max-width: 400px !important;
+  min-width: 14em !important; /* 14em = 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  max-width: 25em !important;
+  font-size: calc(var(--story-page-vmin) * 3); /* override with ems for pixel perfect layout */
+  width: 100%;
   /* Properties overrideable by user */
   --interactive-accent-color: #005AF0;
   --interactive-prompt-background: var(--interactive-accent-color);
@@ -891,18 +891,19 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-theme-shading: rgba(85, 89, 94, 0.2) !important;
   --i-amphtml-interactive-theme-shading-base: rgb(222, 222, 225) !important;
   --i-amphtml-interactive-theme-shading-flash: rgba(85, 89, 94, 0.5) !important;
-  --i-amphtml-interactive-chip-radius: 32px !important;
+  --i-amphtml-interactive-chip-radius: 2em !important;
   --i-amphtml-interactive-chip-shadow: 0px 0px 0px transparent !important;
   --i-amphtml-interactive-chip-shadow-inset: inset 0px 0px 0px transparent !important;
   --i-amphtml-interactive-answer-choice-border: var(--interactive-accent-color) !important;
   --i-amphtml-interactive-answer-choice-background: white !important;
-  --i-amphtml-interactive-prompt-text-size: 22px !important;
-  --i-amphtml-interactive-prompt-line-height: 28px !important;
+  --i-amphtml-interactive-prompt-text-size: 1.375em !important;
+  --i-amphtml-interactive-prompt-line-height: 1.3em !important;
   --i-amphtml-interactive-strong-text-color: black !important;
   --i-amphtml-interactive-animation-time: .3s !important;
   --i-amphtml-interactive-ease-out-curve: cubic-bezier(.3, 0, 0, 1) !important;
   --i-amphtml-interactive-animation-delay: 0s !important;
   --i-amphtml-interactive-component-shadow: 0px 4px 12px rgba(60, 64, 67, 0.08), 0px 2px 4px rgba(60, 64, 67, 0.12);
+  --i-amphtml-interactive-prompt-clamp: 4 !important;
   --i-amphtml-interactive-results-prompt-margin: 20px !important;
 }
 
@@ -938,13 +939,16 @@ amp-story .amp-video-eq,
 }
 
 .i-amphtml-story-interactive-component[prompt-size="large"] {
-  --i-amphtml-interactive-prompt-text-size: 28px !important;
-  --i-amphtml-interactive-prompt-line-height: 36px !important;
+  --i-amphtml-interactive-prompt-text-size: 1.75em !important;
+  --i-amphtml-interactive-prompt-clamp: 3 !important;
 }
 
 .i-amphtml-story-interactive-component[prompt-size="small"] {
-  --i-amphtml-interactive-prompt-text-size: 18px !important;
-  --i-amphtml-interactive-prompt-line-height: 24px !important;
+  --i-amphtml-interactive-prompt-text-size: 1.125em !important;
+}
+
+amp-story-interactive-binary-poll.i-amphtml-story-interactive-component, amp-story-interactive-results.i-amphtml-story-interactive-component {
+  max-width: 18em !important;
 }
 
 amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[theme="dark"] {

@@ -1,5 +1,3 @@
-var _classes = JSON.parse("{\"floatLeft\":\"float-left-a6c6677\",\"CSS\":\".float-left-a6c6677 {\\n  float: left;\\n}\"}");
-
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,4 +13,14 @@ var _classes = JSON.parse("{\"floatLeft\":\"float-left-a6c6677\",\"CSS\":\".floa
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const useStyles = () => _classes;
+
+import {CarouselContext} from './carousel-context';
+import {contextProp} from '../../../src/context';
+
+const CarouselContextProp = contextProp('base-carousel:1.0:context', {
+  type: CarouselContext,
+  recursive: true,
+  defaultValue: null,
+});
+
+export {CarouselContextProp};

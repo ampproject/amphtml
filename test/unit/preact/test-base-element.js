@@ -18,8 +18,8 @@ import * as Preact from '../../../src/preact/index';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
 import {htmlFor} from '../../../src/static-template';
-import {poll} from '../../../testing/iframe';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
+import {waitFor} from '../../../testing/test-helper';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   let win, doc, html;
@@ -45,17 +45,6 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     Impl['Component'] = component;
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
   });
-
-  function waitFor(callback, errorMessage) {
-    return poll(
-      errorMessage,
-      () => {
-        return callback();
-      },
-      undefined /** opt_onError */,
-      200 /** opt_timeout */
-    );
-  }
 
   function waitForMutation(element, callback) {
     return new Promise((resolve) => {

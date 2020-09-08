@@ -20,11 +20,11 @@ import {
   createElementWithAttributes,
   waitForChildPromise,
 } from '../../../../src/dom';
-import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
-import {whenCalled} from '../../../../testing/test-helper';
+import {useStyles} from '../base-carousel.jss';
+import {waitFor, whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-base-carousel',
@@ -38,14 +38,23 @@ describes.realWin(
     let win;
     let element;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const styles = useStyles();
+
     async function getSlidesFromShadow() {
       await whenCalled(env.sandbox.spy(element, 'attachShadow'));
       const shadow = element.shadowRoot;
       await waitForChildPromise(shadow, (shadow) => {
         return shadow.querySelectorAll('[class*=hideScrollbar]');
       });
-      const slots = await shadow.querySelectorAll(
-        '[class*=hideScrollbar] slot'
+      await waitFor(
+        () =>
+          shadow.querySelectorAll(`[class*=${styles.hideScrollbar}] slot`)
+            .length > 0,
+        'slots rendered'
+      );
+      const slots = shadow.querySelectorAll(
+        `[class*=${styles.hideScrollbar}] slot`
       );
       return toArray(slots).reduce(
         (acc, slot) => acc.concat(slot.assignedElements()),
@@ -76,17 +85,6 @@ describes.realWin(
 
       slides.forEach((slide) => element.appendChild(slide));
       return slides;
-    }
-
-    function waitFor(callback, errorMessage) {
-      return poll(
-        errorMessage,
-        () => {
-          return callback();
-        },
-        undefined /** opt_onError */,
-        200 /** opt_timeout */
-      );
     }
 
     beforeEach(() => {
@@ -167,7 +165,9 @@ describes.realWin(
         win.document.body.appendChild(element);
         await getSlidesFromShadow();
 
-        scroller = element.shadowRoot.querySelector('[class*=scrollContainer]');
+        scroller = element.shadowRoot.querySelector(
+          `[class*=${styles.scrollContainer}]`
+        );
       });
 
       function invocation(method, args = {}) {
