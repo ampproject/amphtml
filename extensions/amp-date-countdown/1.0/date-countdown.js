@@ -70,7 +70,7 @@ export function DateCountdown({
   ...rest
 }) {
   useResourcesNotify();
-  const {'playable': playable} = useAmpContext();
+  const {playable} = useAmpContext();
   const epoch = useMemo(
     () =>
       new Date(
