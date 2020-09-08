@@ -5707,6 +5707,14 @@ class Validator {
     if (result_.status() == ValidationResult::UNKNOWN)
       result_.set_status(ValidationResult::PASS);
 
+    // b/168027048: Temporary workaround for rare parsing issue resulting in
+    // negative column numbers. Remove this loop after the issue is resolved.
+    for (auto it = result_.mutable_errors()->begin();
+         it != result_.mutable_errors()->end(); ++it) {
+      ValidationError& error = *it;
+      if (error.col() < 0) error.set_col(0);
+    }
+
     // As some errors can be inserted out of order, sort errors at the
     // end based on their line/col numbers.
     std::sort(result_.mutable_errors()->begin(),
