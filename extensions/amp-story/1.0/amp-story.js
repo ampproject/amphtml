@@ -455,7 +455,9 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
-    this.buildPaginationButtons_();
+    // Build pagination buttons if they can be displayed.
+    this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS) &&
+      new PaginationButtons(this);
   }
 
   /**
@@ -922,17 +924,6 @@ export class AmpStory extends AMP.BaseElement {
     } catch (e) {
       dev().warn(TAG, 'Failed to lock screen orientation:', e.message);
     }
-  }
-
-  /** @private */
-  buildPaginationButtons_() {
-    this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS) &&
-      new PaginationButtons(this);
-  }
-
-  /** @visibleForTesting */
-  buildPaginationButtonsForTesting() {
-    this.buildPaginationButtons_();
   }
 
   /** @override */
