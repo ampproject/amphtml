@@ -83,6 +83,7 @@ const BUTTON = {
  * @param {!Element} hoverEl
  * @param {!Element} targetEl
  * @param {string} className
+ * @return {?Array<function(!Event)>}
  */
 function setClassOnHover(hoverEl, targetEl, className) {
   const enterListener = () => targetEl.classList.add(className);

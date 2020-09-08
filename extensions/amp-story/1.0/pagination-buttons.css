@@ -35,7 +35,7 @@
   height: calc(100vh - 150px) !important;
   margin: auto 0 !important;
   background: none !important;
-  /* border: none !important; */
+  border: none !important;
   /* Hiding the outline since this button is intended to be used with
     mobile screen readers such as TalkBack which add focus lines. */
   outline: none !important;
