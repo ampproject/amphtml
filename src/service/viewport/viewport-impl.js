@@ -15,7 +15,6 @@
  */
 
 import {Animation} from '../../animation';
-import {tryResolve} from '../../utils/promise';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
@@ -30,7 +29,6 @@ import {
   isIframed,
 } from '../../dom';
 import {computedStyle, setStyle} from '../../style';
-import {debounce} from '../../utils/rate-limit';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
@@ -46,6 +44,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
+import {tryResolve} from '../../utils/promise';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK_ = {
@@ -441,8 +440,9 @@ export class ViewportImpl {
       return new Promise((resolve, opt_reject) => {
         element./* OK */ scrollIntoView({
           block: SCROLL_POS_TO_BLOCK_[pos],
-          behavior: 'smooth',});
-          setTimeout(resolve, SCROLL_DELAY_);
+          behavior: 'smooth',
+        });
+        setTimeout(resolve, SCROLL_DELAY_);
       });
     } else {
       devAssert(
