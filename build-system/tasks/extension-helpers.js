@@ -17,9 +17,7 @@
 const colors = require('ansi-colors');
 const debounce = require('debounce');
 const fs = require('fs-extra');
-const globby = require('globby');
 const log = require('fancy-log');
-const pathmod = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
   extensionAliasBundles,
@@ -563,54 +561,100 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   }
 
   if (name === 'amp-script') {
-    const workerDomDir = 'node_modules/@ampproject/worker-dom';
-    const newDirExists = fs.existsSync(`${workerDomDir}/dist/amp-production`);
-    const targetDir = 'dist/v0';
+    copyWorkerDomResources(version);
+  }
+}
 
-    log('Copying required @ampproject/worker-dom files.');
+async function copyWorkerDomResources(version) {
+  const workerDomDir = 'node_modules/@ampproject/worker-dom';
+  const newDirExists = fs.existsSync(`${workerDomDir}/dist/amp-production`);
+  const targetDir = 'dist/v0';
 
-    if (newDirExists) {
-      const dir = `${workerDomDir}/dist`;
-      const workerFilesToDeploy = await globby(
-        `${dir}/amp-production/worker/*`,
-        `${dir}/amp-debug/worker/*`
-      );
-      for (const filepath of workerFilesToDeploy) {
-        const maxFile = /amp-debug/.test(filepath);
-        const basename = pathmod.basename(filepath);
-        // Modify the current name to be either amp-script-worker or
-        // amp-script-worker-nodom.
-        const newBasename = basename
-          .replace(/^worker/, 'amp-script-worker')
-          .replace(/\.nodom/, '-nodom');
-        const nameParts = newBasename.split('.');
-        // Modify the basename part to have the version and the max.
-        nameParts[0] = nameParts[0] + `-${version}${maxFile ? '.max' : ''}`;
-        const newFilename = nameParts.join('.');
-        await fs.copy(filepath, `${targetDir}/${newFilename}`);
-      }
-      // TODO(#30142, erwinm): remove else block once
-      // https://github.com/ampproject/worker-dom/pull/929 is the new version
-      // installed by AMP.
-    } else {
-      const dir = `${workerDomDir}/dist/amp/worker/`;
-      const file = `${targetDir}/amp-script-worker-${version}`;
-      // The "js" output is minified and transpiled to ES5.
-      await fs.copy(`${dir}/worker.js`, `${file}.js`);
-      await fs.copy(`${dir}/worker.js.map`, `${file}.js.map`);
-      // Copy the current worker code as the "mjs" file as well.
-      // This is a temporary fix.
-      await fs.copy(`${dir}/worker.js`, `${file}.mjs`);
-      await fs.copy(`${dir}/worker.js.map`, `${file}.mjs.map`);
+  log(
+    green('Copying @ampproject/worker-dom resources:'),
+    cyan('worker.js, worker.nodom.js')
+  );
 
-      const noDomFile = `${targetDir}/amp-script-worker-nodom-${version}`;
-      // Same as above but for the nodom worker variant.
-      await fs.copy(`${dir}/worker.nodom.js`, `${noDomFile}.js`);
-      await fs.copy(`${dir}/worker.nodom.js.map`, `${noDomFile}.js.map`);
-      // Copy the current worker nodom code as the "mjs" file as well.
-      await fs.copy(`${dir}/worker.nodom.js`, `${noDomFile}.mjs`);
-      await fs.copy(`${dir}/worker.nodom.js.map`, `${noDomFile}.mjs.map`);
+  if (newDirExists) {
+    const dir = `${workerDomDir}/dist`;
+    const workerFilesToDeploy = new Map([
+      ['amp-production/worker/worker.js', `amp-script-worker-${version}.js`],
+      [
+        'amp-production/worker/worker.nodom.js',
+        `amp-script-worker-nodom-${version}.js`,
+      ],
+      ['amp-production/worker/worker.mjs', `amp-script-worker-${version}.mjs`],
+      [
+        'amp-production/worker/worker.nodom.mjs',
+        `amp-script-worker-nodom-${version}.mjs`,
+      ],
+      [
+        'amp-production/worker/worker.js.map',
+        `amp-script-worker-${version}.js.map`,
+      ],
+      [
+        'amp-production/worker/worker.nodom.js.map',
+        `amp-script-worker-nodom-${version}.js.map`,
+      ],
+      [
+        'amp-production/worker/worker.mjs.map',
+        `amp-script-worker-${version}.mjs.map`,
+      ],
+      [
+        'amp-production/worker/worker.nodom.mjs.map',
+        `amp-script-worker-nodom-${version}.mjs.map`,
+      ],
+      ['amp-debug/worker/worker.js', `amp-script-worker-${version}.max.js`],
+      [
+        'amp-debug/worker/worker.nodom.js',
+        `amp-script-worker-nodom-${version}.max.js`,
+      ],
+      ['amp-debug/worker/worker.mjs', `amp-script-worker-${version}.max.mjs`],
+      [
+        'amp-debug/worker/worker.nodom.mjs',
+        `amp-script-worker-nodom-${version}.max.mjs`,
+      ],
+      [
+        'amp-debug/worker/worker.js.map',
+        `amp-script-worker-${version}.max.js.map`,
+      ],
+      [
+        'amp-debug/worker/worker.nodom.js.map',
+        `amp-script-worker-nodom-${version}.max.js.map`,
+      ],
+      [
+        'amp-debug/worker/worker.mjs.map',
+        `amp-script-worker-${version}.max.mjs.map`,
+      ],
+      [
+        'amp-debug/worker/worker.nodom.mjs.map',
+        `amp-script-worker-nodom-${version}.max.mjs.map`,
+      ],
+    ]);
+    for (const [src, dest] of workerFilesToDeploy) {
+      await fs.copy(`${dir}/${src}`, `${targetDir}/${dest}`);
     }
+    // TODO(#30142, erwinm): remove else block once
+    // https://github.com/ampproject/worker-dom/pull/929 is the new version
+    // installed by AMP.
+  } else {
+    const dir = `${workerDomDir}/dist/amp/worker/`;
+    const file = `${targetDir}/amp-script-worker-${version}`;
+    // The "js" output is minified and transpiled to ES5.
+    await fs.copy(`${dir}/worker.js`, `${file}.js`);
+    await fs.copy(`${dir}/worker.js.map`, `${file}.js.map`);
+    // Copy the current worker code as the "mjs" file as well.
+    // This is a temporary fix.
+    await fs.copy(`${dir}/worker.js`, `${file}.mjs`);
+    await fs.copy(`${dir}/worker.js.map`, `${file}.mjs.map`);
+
+    const noDomFile = `${targetDir}/amp-script-worker-nodom-${version}`;
+    // Same as above but for the nodom worker variant.
+    await fs.copy(`${dir}/worker.nodom.js`, `${noDomFile}.js`);
+    await fs.copy(`${dir}/worker.nodom.js.map`, `${noDomFile}.js.map`);
+    // Copy the current worker nodom code as the "mjs" file as well.
+    await fs.copy(`${dir}/worker.nodom.js`, `${noDomFile}.mjs`);
+    await fs.copy(`${dir}/worker.nodom.js.map`, `${noDomFile}.mjs.map`);
   }
 }
 
