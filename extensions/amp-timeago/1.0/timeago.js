@@ -15,13 +15,25 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import {Wrapper} from '../../../src/preact/component';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';
+
+/** @const {!Object<string, *>} */
+const DEFAULT_DATETIME_OPTIONS = {
+  'year': 'numeric',
+  'month': 'short',
+  'day': 'numeric',
+  'hour': 'numeric',
+  'minute': 'numeric',
+};
+
+/** @const {!Object<string, *>} */
+const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
 
 /**
  * @param {!TimeagoProps} props
@@ -31,43 +43,35 @@ export function Timeago({
   datetime,
   locale = DEFAULT_LOCALE,
   cutoff,
-  cutoffText,
-  containSize = false,
+  placeholder,
   ...rest
 }) {
-  const [timestamp, setTimestamp] = useState('');
+  const [timestamp, setTimestamp] = useState(placeholder || '');
   const ref = useRef(null);
 
   useEffect(() => {
     const node = ref.current;
+    if (!node) {
+      return undefined;
+    }
     const observer = new IntersectionObserver((entries) => {
       const last = entries[entries.length - 1];
       if (last.isIntersecting) {
         setTimestamp(
-          getFuzzyTimestampValue(datetime, locale, cutoff, cutoffText)
+          getFuzzyTimestampValue(datetime, locale, cutoff, placeholder)
         );
       }
     });
-    if (node) {
-      observer.observe(node);
-    }
+    observer.observe(node);
     return () => observer.disconnect();
-  }, [datetime, locale, cutoff, cutoffText]);
+  }, [datetime, locale, cutoff, placeholder]);
 
   useResourcesNotify();
 
   return (
-    <ContainWrapper
-      {...rest}
-      as="time"
-      size={containSize}
-      layout={true}
-      paint={true}
-      contentRef={ref}
-      datetime={datetime}
-    >
+    <Wrapper {...rest} as="time" ref={ref} datetime={datetime}>
       {timestamp}
-    </ContainWrapper>
+    </Wrapper>
   );
 }
 
@@ -75,10 +79,10 @@ export function Timeago({
  * @param {string} datetime
  * @param {string} locale
  * @param {number|undefined} cutoff
- * @param {string|undefined} cutoffText
+ * @param {string|undefined} placeholder
  * @return {string}
  */
-function getFuzzyTimestampValue(datetime, locale, cutoff, cutoffText) {
+function getFuzzyTimestampValue(datetime, locale, cutoff, placeholder) {
   if (!cutoff) {
     return timeago(datetime, locale);
   }
@@ -86,7 +90,20 @@ function getFuzzyTimestampValue(datetime, locale, cutoff, cutoffText) {
   const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
   if (secondsAgo > cutoff) {
-    return cutoffText || '';
+    return placeholder ? placeholder : getDefaultPlaceholder(elDate, locale);
   }
   return timeago(datetime, locale);
+}
+
+/**
+ * @param {Date} date
+ * @param {string} locale
+ * @return {string}
+ */
+function getDefaultPlaceholder(date, locale) {
+  if (date.toLocaleDateString() == new Date().toLocaleDateString()) {
+    // Same date: time is enough.
+    return date.toLocaleTimeString(locale, DEFAULT_TIME_OPTIONS);
+  }
+  return date.toLocaleString(locale, DEFAULT_DATETIME_OPTIONS);
 }
