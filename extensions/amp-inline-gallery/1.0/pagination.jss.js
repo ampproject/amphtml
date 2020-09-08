@@ -26,6 +26,7 @@ const container = {
    */
   fontFamily: 'sans-serif',
   lineHeight: 1,
+  height: '20px', // Default height. Can be overriden by user style.
   display: 'flex',
   flexDirection: 'column',
   '&$inset': {

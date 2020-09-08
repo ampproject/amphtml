@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
+import {Wrapper} from '../../../src/preact/component';
 import {useContext} from '../../../src/preact';
 import {useStyles} from './pagination.jss';
 
@@ -29,14 +30,11 @@ export function Pagination({inset, ...rest}) {
     CarouselContext
   );
   const Comp = slideCount <= 8 ? Dots : Numbers;
-  const indicator = (
-    <div
+  return (
+    <Wrapper
       aria-hidden="true"
-      class={`${classes.container} ${inset ? classes.inset : ''}`}
-      style={{
-        // TODO: where does this belong?
-        height: 20,
-      }}
+      wrapperClassName={`${classes.container} ${inset ? classes.inset : ''}`}
+      {...rest}
     >
       <div
         class={`${Comp == Dots ? classes.dots : classes.numbers} ${
@@ -63,15 +61,7 @@ export function Pagination({inset, ...rest}) {
           slideCount={slideCount}
         />
       </div>
-    </div>
-  );
-  return inset ? (
-    indicator
-  ) : (
-    // Respect user provided dimensions with a default height of 20px.
-    <div style={{height: 20}} {...rest}>
-      {indicator}
-    </div>
+    </Wrapper>
   );
 }
 
