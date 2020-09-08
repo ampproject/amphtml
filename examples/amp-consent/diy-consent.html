@@ -255,13 +255,37 @@ function showConfirmation() {
   document.querySelector('#confirmation-wrapper').style = 'display: block';
 }
 
+function getConsentString() {
+  // Check if served from a viewer
+  if (window.location.ancestorOrigins.length == 2) {
+    // Return full consent string
+    return 'full-accept-string';
+  }
+  // Otherwise return abbriviated version
+  return 'accept-string';
+}
+
+function getAdditionalConsentString() {
+  // Check if served from a viewer
+  if (window.location.ancestorOrigins.length == 2) {
+    // Return full consent string
+    return 'full-additional-consent-string';
+  }
+  // Otherwise return abbriviated version
+  return 'additional-consent-string';
+}
+
 const consentObjects = [
   {
     querySelector: '#a',
     type: 'consent-response',
     action: 'accept',
-    info: 'accept-str',
-    consentMetadata: {'consentStringType': 2, 'additionalConsent': '1~1.35.41.101', 'gdprApplies': true},
+    info: getConsentString(),
+    consentMetadata: {
+      'consentStringType': 2, 
+      'additionalConsent': getAdditionalConsentString(), 
+      'gdprApplies': true
+    },
     timeout: 1000,
     onclick: () => {
       showConfirmation();

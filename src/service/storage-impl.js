@@ -53,6 +53,9 @@ export class Storage {
     /** @private @const {!StorageBindingDef} */
     this.binding_ = binding;
 
+    /** @private @const {boolean} */
+    this.isViewerStorage_ = binding instanceof ViewerStorageBinding;
+
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.ampdoc.win.location);
 
@@ -113,6 +116,14 @@ export class Storage {
    */
   remove(name) {
     return this.saveStore_((store) => store.remove(name));
+  }
+
+  /**
+   * Returns if this.binding is an instance of ViewerStorageBinding
+   * @return {boolean}
+   */
+  isViewerStorage() {
+    return this.isViewerStorage_;
   }
 
   /**
