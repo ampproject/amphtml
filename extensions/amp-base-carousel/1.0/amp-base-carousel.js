@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
+import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -28,18 +29,25 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
+/** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   init() {
     const {element} = this;
-    let advance = () => {};
-    this.registerAction('prev', () => advance(-1), ActionTrust.LOW);
-    this.registerAction('next', () => advance(1), ActionTrust.LOW);
+    this.registerApiAction('prev', (api) => api.advance(-1), ActionTrust.LOW);
+    this.registerApiAction('next', (api) => api.advance(1), ActionTrust.LOW);
+    this.registerApiAction(
+      'goToSlide',
+      (api, invocation) => {
+        const {args} = invocation;
+        api.goToSlide(args['index'] || -1);
+      },
+      ActionTrust.LOW
+    );
     return dict({
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },
-      'setAdvance': (a) => (advance = a),
     });
   }
 
@@ -86,6 +94,9 @@ AmpBaseCarousel['props'] = {
 /** @override */
 // eslint-disable-next-line
 AmpBaseCarousel['shadowCss'] = useStyles().CSS;
+
+/** @override */
+AmpBaseCarousel['useContexts'] = [CarouselContextProp];
 
 /**
  * Triggers a 'slideChange' event with one data param:

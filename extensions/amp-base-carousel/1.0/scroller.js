@@ -151,9 +151,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
   );
 }
 
-const Scroller = forwardRef((props, ref) =>
-  ScrollerWithRef(/** @type {BaseCarouselDef.ScrollerProps} */ (props), ref)
-);
+const Scroller = forwardRef(ScrollerWithRef);
 Scroller.displayName = 'Scroller'; // Make findable for tests.
 export {Scroller};
 

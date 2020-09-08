@@ -660,6 +660,20 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-inline-gallery',
+    version: '1.0',
+    latestVersion: '0.1',
+    options: {
+      hasCss: false,
+      cssBinaries: [
+        'amp-inline-gallery',
+        'amp-inline-gallery-pagination',
+        'amp-inline-gallery-thumbnails',
+      ],
+    },
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-inputmask',
     version: '0.1',
     latestVersion: '0.1',
@@ -937,8 +951,8 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story-interactive',
-    version: '1.0',
-    latestVersion: '1.0',
+    version: '0.1',
+    latestVersion: '0.1',
     options: {
       hasCss: true,
       cssBinaries: [

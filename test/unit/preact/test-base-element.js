@@ -18,8 +18,8 @@ import * as Preact from '../../../src/preact/index';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
 import {htmlFor} from '../../../src/static-template';
-import {poll} from '../../../testing/iframe';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
+import {waitFor} from '../../../testing/test-helper';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   let win, doc, html;
@@ -37,22 +37,14 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     };
     component = env.sandbox.stub().callsFake((props) => {
       lastProps = props;
-      return Preact.createElement('div', {id: 'component'});
+      return Preact.createElement('div', {
+        id: 'component',
+        'data-name': props.name,
+      });
     });
     Impl['Component'] = component;
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
   });
-
-  function waitFor(callback, errorMessage) {
-    return poll(
-      errorMessage,
-      () => {
-        return callback();
-      },
-      undefined /** opt_onError */,
-      200 /** opt_timeout */
-    );
-  }
 
   function waitForMutation(element, callback) {
     return new Promise((resolve) => {
@@ -72,6 +64,101 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       return new Promise((resolve) => setTimeout(resolve, 32));
     });
   }
+
+  describe('shadow container rendering', () => {
+    let element;
+
+    beforeEach(() => {
+      Impl['children'] = {};
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100">
+          <div id="child1"></div>
+        </amp-preact>
+      `;
+    });
+
+    it('should render from scratch', async () => {
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(component).to.be.calledOnce;
+      const container = element.shadowRoot.querySelector(':scope > c');
+      expect(container).to.be.ok;
+      expect(container.style.display).to.equal('contents');
+      expect(container.querySelector(':scope > #component')).to.be.ok;
+      expect(
+        element.shadowRoot.querySelectorAll('slot[name="i-amphtml-svc"]')
+      ).to.have.lengthOf(1);
+    });
+
+    describe('SSR', () => {
+      let shadowRoot, container;
+      let componentEl, serviceSlotEl, styleEl;
+
+      beforeEach(async () => {
+        shadowRoot = element.attachShadow({mode: 'open'});
+        container = html`<c></c>`;
+        componentEl = html`<div id="component"></div>`;
+        container.appendChild(componentEl);
+        shadowRoot.appendChild(container);
+
+        serviceSlotEl = html`<slot name="i-amphtml-svc"></slot>`;
+        shadowRoot.appendChild(serviceSlotEl);
+
+        styleEl = html`<style></style>`;
+        shadowRoot.appendChild(styleEl);
+
+        doc.body.appendChild(element);
+        await element.build();
+        await waitFor(() => component.callCount > 0, 'component hydrated');
+      });
+
+      it('should hydrate SSR shadow root', () => {
+        expect(component).to.be.calledOnce;
+        expect(element.shadowRoot.querySelector(':scope > c')).to.equal(
+          container
+        );
+        expect(
+          element.shadowRoot.querySelector(':scope > c > #component')
+        ).to.equal(componentEl);
+        expect(
+          element.shadowRoot.querySelectorAll('slot[name="i-amphtml-svc"]')
+        ).to.have.lengthOf(1);
+        expect(
+          element.shadowRoot.querySelector(
+            ':scope > slot[name="i-amphtml-svc"]'
+          )
+        ).to.equal(serviceSlotEl);
+        expect(element.shadowRoot.querySelector(':scope > style')).to.equal(
+          styleEl
+        );
+      });
+
+      it('should rerender after SSR hydration', async () => {
+        // Only rendering updates attributes.
+        element.implementation_.mutateProps({name: 'A'});
+        await waitFor(() => component.callCount > 1, 'component rendered');
+        expect(component).to.be.calledTwice;
+        expect(componentEl.getAttribute('data-name')).to.equal('A');
+
+        // No changes.
+        expect(element.shadowRoot.querySelector(':scope > c')).to.equal(
+          container
+        );
+        expect(
+          element.shadowRoot.querySelector(':scope > c > #component')
+        ).to.equal(componentEl);
+        expect(
+          element.shadowRoot.querySelector(
+            ':scope > slot[name="i-amphtml-svc"]'
+          )
+        ).to.equal(serviceSlotEl);
+        expect(element.shadowRoot.querySelector(':scope > style')).to.equal(
+          styleEl
+        );
+      });
+    });
+  });
 
   describe('no children mapping', () => {
     let element;

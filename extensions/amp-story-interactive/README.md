@@ -61,7 +61,7 @@ Also add the following import to your AMP documents:
 <script
   async
   custom-element="amp-story-interactive"
-  src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"
+  src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"
 ></script>
 ```
 
@@ -259,6 +259,37 @@ Meanwhile, please use:
 
 The endpoint will return the JSON on a GET request, useful for testing. The public endpoint will be released before the public launch, and with it, this mock endpoint will be deprecated.
 
+## Sizing
+
+The component follows the container model. The size can be changed by overriding the element's font-size, which by default will be set to `3*var(--story-page-vmin)`. The component has an inherited `min-width: 14ems` and `max-width: 25ems`, unless it's a binary-poll or results, in which case it will have `max-width:18em`. This makes it occupy 75% of the width on portrait stories by default. The height will depend on the font-size and number of lines on the prompt. The width can be overridden as well, but it has to adhere to the min and max width.
+
+Overriding the font-size in ems will make the component behave consistent with aspect-ratios.
+
+The demos section contains updated CSS to reflect all the mesurements in ems.
+
+## Creating pixel-perfect layouts with interactive components
+
+While the component by default adapts to the screen size with the variable font-size, it doesn't stay perfectly consistent across screen sizes. It's possible to use the aspect-ratio layer in order to create layouts that will scale perfectly with different screen sizes, by using the `em` units on the component.
+
+<table>
+<tr>
+  <td>
+    <code>
+
+    ```
+    <amp-story-grid-layer template="fill" aspect-ratio="400:600">
+      <amp-story-interactive-quiz
+        style="font-size:0.2em">
+      </amp-story-interactive-quiz>
+    </amp-story-grid-layer>
+    ```
+
+  </code>
+  </td>
+
+  <td><img src="https://user-images.githubusercontent.com/22420856/92150262-26ab1600-eded-11ea-9b16-0e482c2f7d58.png" width="300"></td></tr>
+</table>
+
 ## Demos
 
 With these components we wanted to help users create more entertaining and immersive experiences, and to facilitate that, we have created demos with good use cases of the components. Feel free to ~~steal~~ implement any ideas from these demos into your own stories (or check the source code).
@@ -290,7 +321,7 @@ Codepen with HTML and CSS of a quiz, and a simple panel that could show how the 
 <br><br>
 Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
 <br><br>
-<a href="https://codepen.io/mszylkowski/pen/pogGxbz">https://codepen.io/mszylkowski/pen/pogGxbz</a>
+<a href="https://codepen.io/mszylkowski/pen/qBZXmQj">https://codepen.io/mszylkowski/pen/qBZXmQj</a>
 </td>
 <td>
 <img src="https://user-images.githubusercontent.com/22420856/88303287-dd878280-ccd4-11ea-8238-1dcedf4c5bee.png">
@@ -305,7 +336,31 @@ Codepen with HTML and CSS of a poll, and a simple panel that could show how the 
 <br><br>
 Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
 <br><br>
-<a href="https://codepen.io/mszylkowski/pen/GRoeorr">https://codepen.io/mszylkowski/pen/GRoeorr</a>
+<a href="https://codepen.io/mszylkowski/pen/abNWzdb">https://codepen.io/mszylkowski/pen/abNWzdb</a>
+</td>
+</tr>
+<tr>
+<td>
+Codepen with HTML and CSS of a results component, and a simple panel that could show how the component could look like on a creation tool. This component is highly customizable, so we included a list of custom styles that can be implemented with the given CSS. The Codepen also can reflect the layout of results with/without an image on the category, and with/without score (for quizzes and polls results).
+<br><br>
+Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
+<br><br>
+<a href="https://codepen.io/mszylkowski/pen/abNWzdb">https://codepen.io/mszylkowski/pen/abNWzdb</a>
+</td>
+<td>
+<img src="https://user-images.githubusercontent.com/22420856/92153654-9f60a100-edf2-11ea-86ec-fe8bcd816879.png">
+</td>
+</tr>
+<tr>
+<td>
+<img src="https://user-images.githubusercontent.com/22420856/92153451-4c86e980-edf2-11ea-9327-1b5136e7e63c.png">
+</td>
+<td>
+Codepen with HTML and CSS of a binary poll, and a simple panel that could show how the component could look like on a creation tool. Useful to experiment how the component looks on different states, as well as imagine how to integrate it with creation tools. On answered state, the component reflects the option sizing that adapts to the content of the options.
+<br><br>
+Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
+<br><br>
+<a href="https://codepen.io/mszylkowski/pen/oNxogoV">https://codepen.io/mszylkowski/pen/oNxogoV</a>
 </td>
 </tr>
 </table>
