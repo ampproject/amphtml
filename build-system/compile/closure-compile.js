@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const closureCompiler = require('@kristoferbaxter/google-closure-compiler');
+const closureCompiler = require('@ampproject/google-closure-compiler');
 const log = require('fancy-log');
 const path = require('path');
 const pumpify = require('pumpify');

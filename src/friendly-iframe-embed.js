@@ -63,6 +63,7 @@ import {whenContentIniLoad} from './ini-load';
  *   html: ?string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
+ *   skipHtmlMerge: (boolean|undefined),
  * }}
  */
 export let FriendlyIframeSpec;
@@ -141,9 +142,7 @@ export function installFriendlyIframeEmbed(
     );
   }
 
-  const isInUnsignedExp = !spec.html;
-  const html = isInUnsignedExp ? spec.html : mergeHtml(spec);
-
+  const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
   iframe.onload = () => {
     // Chrome does not reflect the iframe readystate.
@@ -159,9 +158,7 @@ export function installFriendlyIframeEmbed(
   };
   let loadedPromise;
   if (isSrcdocSupported()) {
-    if (!isInUnsignedExp) {
-      iframe.srcdoc = html;
-    }
+    iframe.srcdoc = html;
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
     registerViolationListener();
@@ -170,10 +167,8 @@ export function installFriendlyIframeEmbed(
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
     registerViolationListener();
-    if (!isInUnsignedExp) {
-      childDoc.open();
-      childDoc.write(devAssert(html));
-    }
+    childDoc.open();
+    childDoc.write(devAssert(html));
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
     loadedPromise = loadPromise(iframe.contentWindow);
@@ -759,12 +754,16 @@ export function installExtensionsInEmbed(
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  installDocContains(childWin);
-  installDOMTokenList(childWin);
+  if (!IS_ESM) {
+    installDocContains(childWin);
+    installDOMTokenList(childWin);
+  }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  installCustomElements(childWin, class {});
-  installIntersectionObserver(parentWin, childWin);
+  if (!IS_SXG) {
+    installCustomElements(childWin, class {});
+    installIntersectionObserver(parentWin, childWin);
+  }
 }
 
 /**
