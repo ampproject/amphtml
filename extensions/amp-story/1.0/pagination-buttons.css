@@ -58,11 +58,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-container {
-  position: absolute !important;
   pointer-events: none !important;
-  max-width: 100vw !important;
-  max-height: 100vh !important;
-  transform: none !important;
 }
 
 /* Navigation buttons */
@@ -72,7 +68,6 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
 
 [desktop] .i-amphtml-story-button-move {
   display: flex !important;
-  /* pointer-events: all !important; */
   position: fixed!important;
   top: 0!important;
   bottom: 0!important;
