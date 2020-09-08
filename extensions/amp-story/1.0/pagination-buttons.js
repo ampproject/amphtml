@@ -70,10 +70,7 @@ const ForwardButtonStates = {
 /** @private @const {!./simple-template.ElementDef} */
 const BUTTON = {
   tag: 'div',
-  attrs: dict(
-    {'class': 'i-amphtml-story-button-container'},
-    {'role': 'button'}
-  ),
+  attrs: dict({'class': 'i-amphtml-story-button-container', 'role': 'button'}),
   children: [
     {
       tag: 'button',
@@ -114,7 +111,8 @@ class PaginationButton {
     this.element = renderAsElement(doc, BUTTON);
 
     this.element.classList.add(initialState.className);
-    this.element.setAttribute('aria-label', initialState.label);
+    initialState.label &&
+      this.element.setAttribute('aria-label', initialState.label);
 
     this.element.addEventListener('click', (e) => this.onClick_(e));
 
@@ -132,7 +130,10 @@ class PaginationButton {
     }
     this.element.classList.remove(this.state_.className);
     this.element.classList.add(state.className);
-    this.element.setAttribute('aria-label', state.label);
+    state.label
+      ? this.element.setAttribute('aria-label', state.label)
+      : this.element.removeAttribute('aria-label');
+
     this.state_ = state;
   }
 
