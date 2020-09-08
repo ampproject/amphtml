@@ -982,7 +982,7 @@ export class AmpStory extends AMP.BaseElement {
           HistoryState.BOOKEND_ACTIVE
         );
         if (bookendInHistory) {
-          return this.hasBookend_().then((hasBookend) => {
+          return this.hasBookend().then((hasBookend) => {
             if (hasBookend) {
               return this.showBookend_();
             }
@@ -1329,7 +1329,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.hasBookend_().then((hasBookend) => {
+    this.hasBookend().then((hasBookend) => {
       if (hasBookend) {
         this.showBookend_();
       }
@@ -2373,9 +2373,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @return {!Promise<boolean>}
-   * @private
    */
-  hasBookend_() {
+  hasBookend() {
     if (!this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)) {
       return Promise.resolve(false);
     }

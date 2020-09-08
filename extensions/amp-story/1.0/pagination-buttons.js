@@ -255,7 +255,7 @@ export class PaginationButtons {
     );
 
     this.storeService_.subscribe(StateProperty.PAGE_IDS, () => {
-      // Since onCurrentPageIndexUpdate_ uses this.hasBookend_, and the bookend
+      // Since onCurrentPageIndexUpdate_ uses this.hasBookend, and the bookend
       // isn't initialized until after the story is laid out, we wait for the
       // story to be laid out before calling this function.
       this.ampStory_.element
@@ -324,7 +324,7 @@ export class PaginationButtons {
     }
 
     if (pageIndex === totalPages - 1) {
-      this.ampStory_.hasBookend_().then((hasBookend) => {
+      this.ampStory_.hasBookend().then((hasBookend) => {
         if (!hasBookend) {
           this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
         }
