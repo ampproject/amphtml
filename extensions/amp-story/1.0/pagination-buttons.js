@@ -69,8 +69,11 @@ const ForwardButtonStates = {
 
 /** @private @const {!./simple-template.ElementDef} */
 const BUTTON = {
-  tag: 'button',
-  attrs: dict({'class': 'i-amphtml-story-button-container'}),
+  tag: 'div',
+  attrs: dict(
+    {'class': 'i-amphtml-story-button-container'},
+    {'role': 'button'}
+  ),
   children: [
     {
       tag: 'button',
