@@ -748,7 +748,11 @@ export class AmpA4A extends AMP.BaseElement {
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
           {consentState, consentString, gdprApplies},
-          this.tryExecuteRealTimeConfig_(consentState, consentString)
+          this.tryExecuteRealTimeConfig_(
+            consentState,
+            consentString,
+            consentMetadata
+          )
         ));
       })
       // This block returns the (possibly empty) response to the XHR request.
@@ -2209,15 +2213,17 @@ export class AmpA4A extends AMP.BaseElement {
    * the rtc-config attribute on the amp-ad element, warn.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
+   * @param {?Object} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState, consentString) {
+  tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
     if (!!AMP.RealTimeConfigManager) {
       try {
         return new AMP.RealTimeConfigManager(this).maybeExecuteRealTimeConfig(
           this.getCustomRealTimeConfigMacros_(),
           consentState,
-          consentString
+          consentString,
+          consentMetadata
         );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
