@@ -134,9 +134,7 @@ const insetBackdrop = {
   opacity: 0.5,
 };
 
-// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
-// eslint-disable-next-line local/no-export-side-effect
-export const useStyles = createUseStyles({
+const JSS = {
   inset,
   container,
   dots,
@@ -149,4 +147,8 @@ export const useStyles = createUseStyles({
   insetBackground,
   insetFrosting,
   insetBackdrop,
-});
+};
+
+// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
+// eslint-disable-next-line local/no-export-side-effect
+export const useStyles = createUseStyles(JSS);
