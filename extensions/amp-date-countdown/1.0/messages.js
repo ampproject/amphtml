@@ -17,7 +17,7 @@
 /**
  * Get locale strings or undefined.
  * @param {string} locale
- * @return {DateCountdownLocaleDef|undefined}
+ * @return {!Array<string>|undefined}
  */
 export function getLocaleStrings(locale) {
   return LOCALE_WORD[locale];
@@ -25,12 +25,7 @@ export function getLocaleStrings(locale) {
 
 /**
  * Strings representing years, minutes, etc. in various locales
- * @typedef {Array<string>}
- */
-let DateCountdownLocaleDef;
-
-/**
- * @type {Object<string, DateCountdownLocaleDef>}
+ * @type {Object<string, !Array<string>>}
  */
 const LOCALE_WORD = {
   'de': ['Jahren', 'Monaten', 'Tagen', 'Stunden', 'Minuten', 'Sekunden'],

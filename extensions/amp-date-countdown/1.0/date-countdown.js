@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {getLocaleStrings} from './date-countdown-config';
+import {getLocaleStrings} from './messages';
 import {useAmpContext} from '../../../src/preact/context';
 import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
@@ -169,7 +169,7 @@ function getLocaleWord(locale) {
  * days, hours, minutes, etc. and returns formatted strings in an object.
  * @param {number} ms
  * @param {string} biggestUnit
- * @return {Object}
+ * @return {JsonObject}
  */
 function getYDHMSFromMs(ms, biggestUnit) {
   //Math.trunc is used instead of Math.floor to support negative past date
