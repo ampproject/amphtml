@@ -23,7 +23,6 @@
   height: calc(100vh - 150px) !important;
   margin: auto 0 !important;
   background: none !important;
-  border: 1px solid red !important;
   transition: 150ms opacity linear, 150ms visibility linear !important;
   outline: none !important;
   z-index: 100002 !important;
@@ -39,7 +38,6 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
 .i-amphtml-story-button-container.next-container > .i-amphtml-story-button-move {
   left: auto !important;
   right: 0 !important;
-  border: 1px solid green !important;
 }
 
 [dir=rtl] .next-container,
