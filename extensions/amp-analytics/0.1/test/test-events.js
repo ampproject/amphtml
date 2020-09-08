@@ -2247,7 +2247,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       });
 
       describe('non AMP elements', () => {
-        it.only('with non AMP element and waitFor NONE or null', () => {
+        it('with non AMP element and waitFor NONE or null', () => {
           const element = win.document.createElement('p');
           expect(tracker.getReadyPromise('none', element)).to.be.null;
           expect(tracker.getReadyPromise(null, element)).to.be.null;
