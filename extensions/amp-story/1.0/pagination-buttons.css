@@ -82,7 +82,7 @@
   display: none !important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-button-move {
+[desktop] .i-amphtml-story-button-move {
   display: flex !important;
   pointer-events: all !important;
   position: fixed!important;
