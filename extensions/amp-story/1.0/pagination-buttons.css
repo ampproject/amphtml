@@ -170,6 +170,11 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
   opacity: 1!important;
 }
 
+.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-replay >    
+    .i-amphtml-story-button-move {
+  opacity: 1 !important;
+}
+
 /* On back button mouseover */
 .i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
     .i-amphtml-story-button-move,
