@@ -240,19 +240,31 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isOnActivePage_ = false;
+
+    /** @private {number} */
+    this.sceneHeading_ = 0;
+
+    /** @private {number} */
+    this.scenePitch_ = 0;
+
+    /** @private {number} */
+    this.sceneRoll_ = 0;
   }
 
   /** @override */
   buildCallback() {
     const attr = (name) => this.element.getAttribute(name);
+    const attrAsFloat = (name, fallbackValue = 0) => {
+      return parseFloat(attr(name) || fallbackValue);
+    }
 
     if (attr('duration')) {
       this.duration_ = timeStrToMillis(attr('duration')) || 0;
     }
 
-    const startHeading = parseFloat(attr('heading-start') || 0);
-    const startPitch = parseFloat(attr('pitch-start') || 0);
-    const startZoom = parseFloat(attr('zoom-start') || 1);
+    const startHeading = attrAsFloat('heading-start');
+    const startPitch = attrAsFloat('pitch-start');
+    const startZoom = attrAsFloat('zoom-start', 1);
     this.orientations_.push(
       CameraOrientation.fromDegrees(startHeading, startPitch, startZoom)
     );
@@ -262,12 +274,22 @@ export class AmpStory360 extends AMP.BaseElement {
       attr('pitch-end') !== undefined ||
       attr('zoom-end') !== undefined
     ) {
-      const endHeading = parseFloat(attr('heading-end') || startHeading);
-      const endPitch = parseFloat(attr('pitch-end') || startPitch);
-      const endZoom = parseFloat(attr('zoom-end') || startZoom);
+      const endHeading = attrAsFloat('heading-end', startHeading);
+      const endPitch = attrAsFloat('pitch-end', startPitch);
+      const endZoom = attrAsFloat('zoom-end', startZoom);
       this.orientations_.push(
         CameraOrientation.fromDegrees(endHeading, endPitch, endZoom)
       );
+    }
+
+    if (
+      attr('scene-heading') !== undefined ||
+      attr('scene-pitch') !== undefined ||
+      attr('scene-roll') !== undefined
+    ) {
+      this.sceneHeading_ = attrAsFloat('scene-heading');
+      this.scenePitch_ = attrAsFloat('scene-pitch');
+      this.sceneRoll_ = attrAsFloat('scene-roll');
     }
 
     const container = this.element.ownerDocument.createElement('div');
@@ -528,6 +550,8 @@ export class AmpStory360 extends AMP.BaseElement {
           const img = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
+          this.renderer_.setImageOrientation(
+              this.sceneHeading_, this.scenePitch_, this.sceneRoll_);
           this.renderer_.setImage(img);
           this.renderer_.resize();
           if (this.orientations_.length < 1) {

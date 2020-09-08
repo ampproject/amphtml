@@ -15,23 +15,15 @@ const SHADERS = {
     uniform sampler2D uTex;
     varying vec2      vPos;
 
-    uniform vec4 uQuaternion;
-    vec3 reorient(inout vec3 v){
-      vec4 q = uQuaternion; 
-      v = v + 2.0 * cross(cross(v, q.xyz) + q.w * v, q.xyz);
-      return v;
-    }
+    vec4 sample( float dx, float dy ) {
 
-    vec4 sample(float dx, float dy) {
-    vec3 q = vec3( vPos + uPxSize * vec2(dx, dy), -1.0 );
-    vec3 dir = normalize(uRot * q);
+      vec3 q = vec3(vPos + uPxSize * vec2(dx, dy), -1.0);
+      vec3 dir = normalize(uRot * q);
 
-      // reorient the 3D vector
-      reorient(dir);
+      float u = (-0.5 / pi) * atan(dir[1], dir[0]) + 0.5;
+      float v = (1.0 / pi) * acos(dir[2]);
+      return texture2D(uTex, vec2(u, v));
 
-      float u = (-0.5 / pi) * atan( dir[1], dir[0] ) + 0.5;
-      float v = (1.0 / pi) * acos( dir[2] );
-      return texture2D( uTex, vec2( u, v ) );
     }
   `,
   fragSourceFast: `
@@ -48,22 +40,22 @@ const SHADERS = {
     void main() {
       // (2, 3) halton vector sequences.
       vec4 acc = (1.0 / 16.0) * (
-        (((sampleSq( 1.0 /  2.0 - 0.5,  1.0 /  3.0 - 0.5) +
-           sampleSq( 1.0 /  4.0 - 0.5,  2.0 /  3.0 - 0.5)) +
-          (sampleSq( 3.0 /  4.0 - 0.5,  1.0 /  9.0 - 0.5) +
-           sampleSq( 1.0 /  8.0 - 0.5,  4.0 /  9.0 - 0.5))) +
-         ((sampleSq( 5.0 /  8.0 - 0.5,  7.0 /  9.0 - 0.5) +
-           sampleSq( 3.0 /  8.0 - 0.5,  2.0 /  9.0 - 0.5)) +
-          (sampleSq( 7.0 /  8.0 - 0.5,  5.0 /  9.0 - 0.5) +
-           sampleSq( 1.0 / 16.0 - 0.5,  8.0 /  9.0 - 0.5)))) +
-        (((sampleSq( 9.0 / 16.0 - 0.5,  1.0 / 27.0 - 0.5) +
-           sampleSq( 5.0 / 16.0 - 0.5, 10.0 / 27.0 - 0.5)) +
+        (((sampleSq(1.0 / 2.0 - 0.5,  1.0 / 3.0 - 0.5) +
+           sampleSq(1.0 / 4.0 - 0.5,  2.0 / 3.0 - 0.5)) +
+          (sampleSq(3.0 / 4.0 - 0.5,  1.0 / 9.0 - 0.5) +
+           sampleSq(1.0 / 8.0 - 0.5,  4.0 / 9.0 - 0.5))) +
+         ((sampleSq(5.0 / 8.0 - 0.5,  7.0 / 9.0 - 0.5) +
+           sampleSq(3.0 / 8.0 - 0.5,  2.0 / 9.0 - 0.5)) +
+          (sampleSq(7.0 / 8.0 - 0.5,  5.0 / 9.0 - 0.5) +
+           sampleSq(1.0 / 16.0 - 0.5,  8.0 / 9.0 - 0.5)))) +
+        (((sampleSq(9.0 / 16.0 - 0.5,  1.0 / 27.0 - 0.5) +
+           sampleSq(5.0 / 16.0 - 0.5, 10.0 / 27.0 - 0.5)) +
           (sampleSq(13.0 / 16.0 - 0.5, 19.0 / 27.0 - 0.5) +
-           sampleSq( 3.0 / 16.0 - 0.5,  4.0 / 27.0 - 0.5))) +
+           sampleSq(3.0 / 16.0 - 0.5,  4.0 / 27.0 - 0.5))) +
          ((sampleSq(11.0 / 16.0 - 0.5, 13.0 / 27.0 - 0.5) +
-           sampleSq( 7.0 / 16.0 - 0.5, 22.0 / 27.0 - 0.5)) +
+           sampleSq(7.0 / 16.0 - 0.5, 22.0 / 27.0 - 0.5)) +
           (sampleSq(15.0 / 16.0 - 0.5,  7.0 / 27.0 - 0.5) +
-           sampleSq( 1.0 / 32.0 - 0.5, 16.0 / 27.0 - 0.5))))
+           sampleSq(1.0 / 32.0 - 0.5, 16.0 / 27.0 - 0.5))))
      );
       gl_FragColor = vec4(sqrt(acc.xyz), acc.w);
     }
@@ -205,9 +197,7 @@ export class Renderer {
 
     this.rotation = null;
     this.scale = 1;
-
-    this.quaternion = null;
-    this.setAngles(); // Initializes the quaterinon with neutral values.
+    this.orientation = null;
 
     this.vertShader = gl.createShader(gl.VERTEX_SHADER);
     this.fragShaderFast = gl.createShader(gl.FRAGMENT_SHADER);
@@ -246,10 +236,10 @@ export class Renderer {
     gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
-  setAngles(yaw = 0, tilt_yaw = 0, tilt_pitch = 0) {
+  setImageOrientation(heading = 0, pitch = 0, roll = 0) {
     const RAD = Math.PI / 180;
-    this.quaternion =
-        Quaternion.orient(yaw * RAD, tilt_yaw * RAD, tilt_pitch * RAD);
+    this.orientation =
+        this.euler_(RAD * heading, RAD * pitch, RAD * roll);
   }
 
   setMapping(code = '') {
@@ -291,9 +281,12 @@ export class Renderer {
     gl.uniform2f(gl.getUniformLocation(prog, 'uScale'), sx, sy);
     gl.uniform1f(gl.getUniformLocation(prog, 'uPxSize'), 2.0 * f);
 
-    // passes the value of the computed quaternion to the shader
-    gl.uniform4fv(
-        gl.getUniformLocation(prog, 'uQuaternion'), this.quaternion.values);
+    if (!this.orientation) {
+      this.orientation = Matrix.identity(3);
+    }
+    gl.uniformMatrix3fv(
+        gl.getUniformLocation(prog, 'uRot'), false,
+        Matrix.mul(3, this.rotation, this.orientation));
 
     gl.enableVertexAttribArray(0);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
@@ -329,5 +322,29 @@ export class Renderer {
     if (log.length > 0) {
       console.log(log);
     }
+  }
+
+  /** @private */
+  euler_(heading, pitch, roll) {
+    const te = Matrix.identity(3);
+    const x = -roll, y = -pitch, z = heading;
+
+    const a = Math.cos(x), b = Math.sin(x);
+    const c = Math.cos(y), d = Math.sin(y);
+    const e = Math.cos(z), f = Math.sin(z);
+
+    const ae = a * e, af = a * f, be = b * e, bf = b * f;
+
+    te[0] = c * e;
+    te[3] = -c * f;
+    te[6] = d;
+    te[1] = af + be * d;
+    te[4] = ae - bf * d;
+    te[7] = -b * c;
+    te[2] = bf - ae * d;
+    te[5] = be + af * d;
+    te[8] = a * c;
+
+    return te;
   }
 }

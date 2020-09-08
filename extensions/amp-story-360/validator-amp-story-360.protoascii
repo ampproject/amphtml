@@ -59,11 +59,15 @@ tags: {  # <amp-story-360>
     value_regex: "\\d+\\.?\\d*"
   }
   attrs: {
-    name: "tilt-pitch"
+    name: "scene-heading"
     value_regex: "-?\\d+\\.?\\d*"
   }
   attrs: {
-    name: "tilt-yaw"
+    name: "scene-pitch"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "scene-roll"
     value_regex: "-?\\d+\\.?\\d*"
   }
   child_tags: {
