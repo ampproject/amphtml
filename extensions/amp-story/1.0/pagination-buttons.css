@@ -15,36 +15,30 @@
  */
 
 .i-amphtml-story-button-container {
+  cursor: pointer;
   position: absolute !important;
   z-index: 100002 !important;
-  top: 0 !important;
-  bottom: 0 !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-button-container {
-  width: 100vw !important;
-  height: 100vh !important;
-  cursor: pointer;
-}
-
-/* Focusable my mobile screen readers */
-.i-amphtml-story-button-container {
   width: 30px !important;
   top: 0 !important;
   bottom: 0 !important;
   height: calc(100vh - 150px) !important;
   margin: auto 0 !important;
   background: none !important;
-  border: none !important;
-  /* Hiding the outline on small screens since this button is intended to be 
-     used with mobile screen readers such as TalkBack which add focus lines. */
-  outline: none !important;
-  pointer-events: none !important;
+  border: 1px solid red !important;
   transition: 150ms opacity linear, 150ms visibility linear !important;
+  outline: none !important;
+}
+
+/* Hiding the outline on small screens since this button is intended to be 
+used with mobile screen readers such as TalkBack which add focus lines. */
+amp-story:not([desktop]) .i-amphtml-story-button-container {
+  pointer-events: none !important;
+  /* border: none !important; */
 }
 
 .next-container {
   right: 0 !important;
+  border: 1px solid green !important;
 }
 
 [dir=rtl] .next-container {
@@ -57,7 +51,7 @@
   right: 0 !important;
 }
 
-/** This is needed to overwrite position of replay and read more button at the end of the the story. */
+/* This is needed to overwrite position of replay and read more button at the end of the the story. */
 [dir=rtl] .i-amphtml-story-button-container.next-container > .i-amphtml-story-button-move {
   right: auto !important;
   left: 0 !important;
@@ -65,13 +59,7 @@
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-container {
   position: absolute !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  z-index: 100002 !important;
   pointer-events: none !important;
-  display: block !important;
   max-width: 100vw !important;
   max-height: 100vh !important;
   transform: none !important;
@@ -84,7 +72,7 @@
 
 [desktop] .i-amphtml-story-button-move {
   display: flex !important;
-  pointer-events: all !important;
+  /* pointer-events: all !important; */
   position: fixed!important;
   top: 0!important;
   bottom: 0!important;
@@ -101,6 +89,7 @@
   opacity: .5!important;
   transition: 150ms opacity linear, 350ms transform linear!important;
   cursor: pointer!important;
+  pointer-events: all!important;
   z-index: 100002!important;
 }
 
@@ -139,6 +128,10 @@
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-fwd-next > .i-amphtml-story-button-move,
 .i-amphtml-story-desktop-fullbleed[dir=rtl] .prev-container > .i-amphtml-story-button-move {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M11.76 8.24L27.51 24 11.76 39.76 16 44l20-20L16 4z"/><path fill="none" d="M0 0h48v48H0z"/></svg>') !important;
+}
+
+.i-amphtml-story-fwd-replay {
+  pointer-events: none !important;
 }
 
 .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
