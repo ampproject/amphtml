@@ -265,7 +265,7 @@ The component follows the container model. The size can be changed by overriding
 
 The demos section contains updated CSS to reflect all the mesurements in ems.
 
-### Creating pixel-perfect layouts with interactive components using aspect-ratio
+### Creating pixel-perfect layouts with interactive components using amp-story-grid-layer with aspect-ratio
 
 While the component by default adapts to the screen size with the variable font-size, it doesn't stay perfectly consistent across screen sizes. It's possible to use the aspect-ratio layer in order to create layouts that will scale perfectly with different screen sizes, by setting the `font-size` in ems on the component.
 
