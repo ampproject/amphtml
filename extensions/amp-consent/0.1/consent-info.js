@@ -78,6 +78,7 @@ export let ConsentInfoDef;
  * @typedef {{
  *  consentStringType: (CONSENT_STRING_TYPE|undefined),
  *  additionalConsent: (string|undefined),
+ *  gdprApplies: (boolean|undefined),
  * }}
  */
 export let ConsentMetadataDef;
