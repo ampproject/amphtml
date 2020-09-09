@@ -73,10 +73,8 @@ export function DateCountdown({
   const {playable} = useAmpContext();
   const epoch = useMemo(
     () =>
-      new Date(
-        getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
-          offsetSeconds * DELAY
-      ),
+      getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
+      offsetSeconds * MILLISECONDS_IN_SECOND,
     [endDate, timeleftMs, timestampMs, timestampSeconds, offsetSeconds]
   );
   const [timeleft, setTimeleft] = useState(epoch - Date.now());
