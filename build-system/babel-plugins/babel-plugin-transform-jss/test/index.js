@@ -21,18 +21,43 @@ const runner = require('@babel/helper-plugin-test-runner').default;
 runner(__dirname);
 
 // eslint-disable-next-line no-undef
-test('throws when duplicate classname is found', () => {
-  const fileContents = `
+const fileContents = `
 import {createUseStyles} from 'react-jss';
-export const useStyles = createUseStyles({button: {fontSize: 12}});
-    `;
-  const filename = 'test.jss.js';
-  const plugins = [path.join(__dirname, '..')];
-  const caller = {name: 'babel-jest'};
+export const useStyles = createUseStyles({button: {fontSize: 12}});`;
 
-  // Transforming the same file twice should yield the same classnames, resulting in an error
-  babel.transformSync(fileContents, {filename, plugins, caller});
-  expect(() =>
-    babel.transformSync(fileContents, {filename, plugins, caller})
-  ).toThrow(/Classnames must be unique across all files/);
+const plugins = [path.join(__dirname, '..')];
+const caller = {name: 'babel-jest'};
+
+// eslint-disable-next-line no-undef
+test('transforming the same file contents twice should throw if there is a hash collision with filename', () => {
+  let filename;
+  expect(() => {
+    stubCreateHash(() => {
+      filename = 'test1.jss.js';
+      babel.transformSync(fileContents, {filename, plugins, caller});
+      filename = 'test2.jss.js';
+      babel.transformSync(fileContents, {filename, plugins, caller});
+    });
+  }).toThrow(/Classnames must be unique across all files/);
 });
+
+// eslint-disable-next-line no-undef
+test('transforming same exact file twice is fine (e.g. watch mode)', () => {
+  const filename = 'test.jss.js';
+  babel.transformSync(fileContents, {filename, plugins, caller});
+  babel.transformSync(fileContents, {filename, plugins, caller});
+});
+
+function stubCreateHash(fn) {
+  const hash = require('../create-hash');
+  const originalCreateHash = hash.createHash;
+  hash.createHash = () => 'abcedf';
+
+  try {
+    fn();
+    hash.createHash = originalCreateHash;
+  } catch (err) {
+    hash.createHash = originalCreateHash;
+    throw err;
+  }
+}
