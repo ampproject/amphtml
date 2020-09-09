@@ -182,22 +182,27 @@ const strings = {
     string: 'Play video',
     description: 'Label for a button to play the video visible on the page.',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_A]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_RESULTS_SCORE]: {
+    string: 'SCORE:',
+    description:
+      'Label for the results component preceding the score in percentages, should have `:` at the end',
+  },
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A]: {
     string: 'A',
     description:
       'Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_B]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B]: {
     string: 'B',
     description:
       'Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_C]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C]: {
     string: 'C',
     description:
       'Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_D]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D]: {
     string: 'D',
     description:
       'Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)',

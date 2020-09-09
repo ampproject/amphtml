@@ -95,7 +95,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     const localizationService = Services.localizationForDoc(this.element);
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
       return localizationService.getLocalizedString(
-        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
+        LocalizedStringId[`AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_${choice}`]
       );
     });
     const optionContainer = this.rootEl_.querySelector(
