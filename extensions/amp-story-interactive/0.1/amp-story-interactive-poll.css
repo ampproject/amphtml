@@ -84,9 +84,18 @@
   z-index: 1 !important;
   transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
   transform-origin: left !important;
-  white-space: nowrap !important;
+  line-height: 1.3em !important;
+  word-wrap: break-word !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  max-height: 2.6em !important;
+}
+
+.i-amphtml-story-interactive-poll-two-lines .i-amphtml-story-interactive-option-text {
+  font-size: 1.125em !important;
 }
 
 .i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-text{
