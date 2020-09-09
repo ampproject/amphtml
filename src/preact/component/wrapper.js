@@ -21,7 +21,7 @@ import {forwardRef} from '../compat';
  * The wrapper component provides the canonical wrapper for components whose
  * size depends on the children. This is often the opposite of the
  * `ContainWrapper`.
- * @param {!WrapperCompomemtProps} props
+ * @param {!WrapperComponentProps} props
  * @param {{current: ?Element}} ref
  * @return {PreactDef.Renderable}
  */

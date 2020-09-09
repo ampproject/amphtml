@@ -30,7 +30,7 @@ export default {
 export const _default = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const paginationHeight = number('top indicator height', 40);
+  const paginationHeight = number('top indicator height', 20);
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
   const slideCount = number('slide count', 5, {min: 0, max: 99});

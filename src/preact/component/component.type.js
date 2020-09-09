@@ -24,7 +24,7 @@
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-var WrapperCompomemtProps;
+var WrapperComponentProps;
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/contain
