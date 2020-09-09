@@ -94,8 +94,12 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     // Localize the answer choice options
     const localizationService = Services.localizationForDoc(this.element);
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
-      return localizationService.getLocalizedString(
-        LocalizedStringId[`AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_${choice}`]
+      return (
+        localizationService.getLocalizedString(
+          LocalizedStringId[
+            `AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_${choice}`
+          ]
+        ) | choice
       );
     });
     const optionContainer = this.rootEl_.querySelector(
