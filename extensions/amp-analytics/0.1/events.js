@@ -25,7 +25,7 @@ import {
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -1446,7 +1446,6 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
-    let readyPromiseWaitForSpec;
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
     if (reportWhenSpec) {
@@ -1489,7 +1488,8 @@ export class VisibilityTracker extends EventTracker {
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      readyPromiseWaitForSpec = waitForSpec || (selector ? 'ini-load' : null);
+      const readyPromiseWaitForSpec =
+        waitForSpec || (selector ? 'ini-load' : 'none');
       return visibilityManager.listenRoot(
         visibilitySpec,
         this.getReadyPromise(readyPromiseWaitForSpec),
@@ -1503,19 +1503,14 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    // An AMP-element. Wait for DOM to be fully parsed to avoid
+    // An element. Wait for DOM to be fully parsed to avoid
     // false missed searches.
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
-    readyPromiseWaitForSpec = waitForSpec || 'ini-load';
     this.assertUniqueSelectors_(selector);
     const unlistenPromise = this.root
-      .getAmpElements(
-        context.parentElement || context,
-        selector,
-        selectionMethod
-      )
+      .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {
         const unlistenCallbacks = [];
         for (let i = 0; i < elements.length; i++) {
@@ -1523,7 +1518,7 @@ export class VisibilityTracker extends EventTracker {
             visibilityManager.listenElement(
               elements[i],
               visibilitySpec,
-              this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
+              this.getReadyPromise(waitForSpec, elements[i]),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(this, eventType, listener, elements[i])
             )
@@ -1645,14 +1640,26 @@ export class VisibilityTracker extends EventTracker {
    * @visibleForTesting
    */
   getReadyPromise(waitForSpec, opt_element) {
-    if (!waitForSpec) {
+    if (opt_element) {
+      if (!isAmpElement(opt_element)) {
+        userAssert(
+          !waitForSpec || waitForSpec == 'none',
+          'waitFor for non-AMP elements must be none or null. Found %s',
+          waitForSpec
+        );
+      } else {
+        waitForSpec = waitForSpec || 'ini-load';
+      }
+    }
+
+    if (!waitForSpec || waitForSpec == 'none') {
       // Default case, waitFor selector is not defined, wait for nothing
       return null;
     }
 
     const trackerAllowlist = getTrackerTypesForParentType('visible');
     userAssert(
-      waitForSpec == 'none' || trackerAllowlist[waitForSpec] !== undefined,
+      trackerAllowlist[waitForSpec] !== undefined,
       'waitFor value %s not supported',
       waitForSpec
     );
