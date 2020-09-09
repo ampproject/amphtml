@@ -15,15 +15,12 @@ const SHADERS = {
     uniform sampler2D uTex;
     varying vec2      vPos;
 
-    vec4 sample( float dx, float dy ) {
-
+    vec4 sample(float dx, float dy) {
       vec3 q = vec3(vPos + uPxSize * vec2(dx, dy), -1.0);
       vec3 dir = normalize(uRot * q);
-
       float u = (-0.5 / pi) * atan(dir[1], dir[0]) + 0.5;
       float v = (1.0 / pi) * acos(dir[2]);
       return texture2D(uTex, vec2(u, v));
-
     }
   `,
   fragSourceFast: `
