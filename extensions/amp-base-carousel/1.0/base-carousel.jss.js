@@ -41,7 +41,7 @@ const horizontalScroll = {
   overflowX: 'auto',
   overflowY: 'hidden',
   // Hide scrollbar.
-  '&.$hideScrollbar': {
+  '&$hideScrollbar': {
     paddingBottom: '20px',
   },
 };
