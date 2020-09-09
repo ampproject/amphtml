@@ -199,14 +199,14 @@ function getYDHMSFromMs(ms, biggestUnit) {
         );
 
   return {
-    d,
-    dd: padStart(d),
-    h,
-    hh: padStart(h),
-    m,
-    mm: padStart(m),
-    s,
-    ss: padStart(s),
+    'd': d,
+    'dd': padStart(d),
+    'h': h,
+    'hh': padStart(h),
+    'm': m,
+    'mm': padStart(m),
+    's': s,
+    'ss': padStart(s),
   };
 }
 
