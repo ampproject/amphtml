@@ -454,10 +454,6 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
-
-    // Build pagination buttons if they can be displayed.
-    this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS) &&
-      new PaginationButtons(this);
   }
 
   /**
@@ -1021,6 +1017,10 @@ export class AmpStory extends AMP.BaseElement {
         return firstPageEl.whenBuilt();
       });
     }
+
+    // Build pagination buttons if they can be displayed.
+    this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS) &&
+      new PaginationButtons(this);
 
     // Will resolve when all pages are built.
     return storyLayoutPromise;
