@@ -41,7 +41,8 @@ module.exports = function (babel, options = {}) {
         // Relative will return "foo" instead of "./foo". And if it returned
         // a "../foo", making it "./../foo" doesn't hurt.
         const source =
-          './' + filepath.relative(filepath.dirname(filename), importFrom);
+          './' +
+          toPosix(filepath.relative(filepath.dirname(filename), importFrom));
         const resolvedPromise = addNamed(path, 'resolvedPromise', source, {
           importedType: 'es6',
         });
@@ -50,3 +51,9 @@ module.exports = function (babel, options = {}) {
     },
   };
 };
+
+// Even though we are using the path module, JS Modules should never have
+// their paths specified in Windows format.
+function toPosix(filepath) {
+  return filepath.replace(/\\\\/g, '/').replace(/\\/g, '/');
+}

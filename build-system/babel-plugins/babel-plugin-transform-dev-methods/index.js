@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {resolve, dirname} = require('path');
+const {resolve, dirname, relative, join} = require('path');
 
 // Returns a new Map<string, {detected: boolean, removeable: Array<string>}
 // key is a valid callee name to potentially remove.
@@ -65,12 +65,12 @@ module.exports = function () {
         }
         specifiers.forEach((specifier) => {
           if (specifier.imported) {
-            const filepath = resolve(
-              dirname(state.file.opts.filename),
-              source.value
+            const filepath = relative(
+              join(__dirname, '../../../'),
+              resolve(dirname(state.file.opts.filename), source.value)
             );
 
-            if (filepath.endsWith('/amphtml/src/log')) {
+            if (filepath.endsWith('src/log') || filepath.endsWith('src\\log')) {
               const propertyMapped = calleeToPropertiesMap.get(
                 specifier.imported.name
               );

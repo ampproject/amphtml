@@ -68,7 +68,10 @@ function transformRedefineInline({types: t}) {
       ImportDeclaration(path, {opts}) {
         const {source} = path.node;
         if (source.value.startsWith('.')) {
-          source.value = join(opts.from, source.value).replace(/^[^.]/, './$&');
+          source.value = toPosix(join(opts.from, source.value)).replace(
+            /^[^.]/,
+            './$&'
+          );
         }
       },
       MemberExpression(path, {opts}) {
@@ -221,3 +224,9 @@ module.exports = function ({types: t}) {
     },
   };
 };
+
+// Even though we are using the path module, JS Modules should never have
+// their paths specified in Windows format.
+function toPosix(filepath) {
+  return filepath.replace(/\\\\/g, '/').replace(/\\/g, '/');
+}

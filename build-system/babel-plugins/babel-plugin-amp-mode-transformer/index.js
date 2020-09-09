@@ -19,7 +19,7 @@
  * and getMode().localDev to true.
  * @param {Object} babelTypes
  */
-const {resolve, dirname} = require('path');
+const {resolve, dirname, join, relative} = require('path');
 
 let shouldResolveDevelopmentMode = true;
 
@@ -41,11 +41,14 @@ module.exports = function ({types: t}) {
         }
         specifiers.forEach((specifier) => {
           if (specifier.imported && specifier.imported.name === 'getMode') {
-            const filepath = resolve(
-              dirname(state.file.opts.filename),
-              source.value
+            const filepath = relative(
+              join(__dirname, '../../../'),
+              resolve(dirname(state.file.opts.filename), source.value)
             );
-            if (filepath.endsWith('/amphtml/src/mode')) {
+            if (
+              filepath.endsWith('src/mode') ||
+              filepath.endsWith('src\\mode')
+            ) {
               getModeFound = true;
             }
           }
