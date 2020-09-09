@@ -996,6 +996,7 @@ describes.repeated(
               return list.layoutCallback().catch(() => {});
             });
           });
+
           describe('Using amp-script: protocol', () => {
             let ampScriptEl;
             beforeEach(() => {
