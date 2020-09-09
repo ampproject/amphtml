@@ -17,6 +17,16 @@
 /** @externs */
 
 /**
+ * @typedef {{
+ *   as: (string|!Function|undefined),
+ *   wrapperClassName: (?string|undefined),
+ *   wrapperStyle: (?Object|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+var WrapperComponentProps;
+
+/**
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/contain
  *
  * @typedef {{
@@ -24,10 +34,12 @@
  *   size: (boolean|undefined),
  *   layout: (boolean|undefined),
  *   paint: (boolean|undefined),
+ *   wrapperClassName: (?string|undefined),
  *   wrapperStyle: (?Object|undefined),
  *   contentRef: ({current: ?}|function(!Element)|undefined),
+ *   contentClassName: (?string|undefined),
  *   contentStyle: (?Object|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-var ContainWrapperProps;
+var ContainWrapperComponentProps;

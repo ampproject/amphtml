@@ -15,3 +15,4 @@
  */
 
 export {ContainWrapper} from './contain';
+export {Wrapper} from './wrapper';
