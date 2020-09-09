@@ -933,6 +933,48 @@ describes.realWin(
         expect(iframe.getAttribute('src')).to.contain(newSrc);
       });
 
+      it('sends a consent-data message to the iframe', function* () {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin',
+          width: 100,
+          height: 100,
+        });
+
+        const impl = ampIframe.implementation_;
+        impl.getConsentString_ = () => Promise.resolve({consentString: true});
+        impl.getConsentMetadata_ = () =>
+          Promise.resolve({consentMetadata: true});
+        impl.getConsentPolicyState_ = () =>
+          Promise.resolve({
+            consentPolicyState: true,
+          });
+
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const iframe = ampIframe.querySelector('iframe');
+
+        return new Promise((resolve, unusedReject) => {
+          impl.sendConsentDataToIframe_ = (source, origin, message) => {
+            resolve(message);
+          };
+          iframe.contentWindow.postMessage(
+            {
+              sentinel: 'amp',
+              type: 'requestSendConsentState',
+            },
+            '*'
+          );
+        }).then((message) => {
+          expect(message).to.deep.equal({
+            sentinel: 'amp',
+            type: 'consent-data',
+            consentString: {consentString: true},
+            consentMetadata: {consentMetadata: true},
+            consentPolicyState: {consentPolicyState: true},
+          });
+        });
+      });
+
       it('should propagate `title` when container attribute is mutated', function* () {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
