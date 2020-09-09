@@ -18,12 +18,14 @@ import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
+import {childElementByTag, createElementWithAttributes, matches} from '../dom';
+import {createRef, hydrate, render} from './index';
 import {devAssert} from '../log';
-import {hasOwn} from '../utils/object';
+import {dict, hasOwn} from '../utils/object';
+import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
-import {matches} from '../dom';
-import {render} from './index';
 import {startsWith} from '../string';
+import {subscribe} from '../context';
 
 /**
  * @typedef {{
@@ -55,6 +57,12 @@ const PASSTHROUGH_MUTATION_INIT = {
   characterData: true,
 };
 
+/** @const {!JsonObject<string, string>} */
+const SHADOW_CONTAINER_ATTRS = dict({'style': 'display: contents'});
+
+/** @const {!JsonObject<string, string>} */
+const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
+
 /**
  * The same as `applyFillContent`, but inside the shadow.
  * @const {!Object}
@@ -72,6 +80,8 @@ const SIZE_DEFINED_STYLE = {
  * subclass on purpose, you're not meant to do work in the subclass! There will
  * be very few exceptions, which is why we allow options to configure the
  * class.
+ *
+ * @template API_TYPE
  */
 export class PreactBaseElement extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -84,12 +94,18 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {boolean} */
     this.scheduledRender_ = false;
 
-    /** @private {!Object} */
+    /** @private {!AmpContextDef.ContextType} */
     this.context_ = {
       renderable: false,
       playable: false,
       notify: () => this.mutateElement(() => {}),
     };
+
+    /** @private {{current: ?API_TYPE}} */
+    this.ref_ = createRef();
+
+    /** @private {?Array} */
+    this.contextValues_ = null;
 
     this.boundRerender_ = () => {
       this.scheduledRender_ = false;
@@ -133,6 +149,14 @@ export class PreactBaseElement extends AMP.BaseElement {
     });
 
     this.defaultProps_ = this.init() || null;
+
+    const useContexts = Ctor['useContexts'];
+    if (useContexts.length != 0) {
+      subscribe(this.element, useContexts, (...contexts) => {
+        this.contextValues_ = contexts;
+        this.scheduleRender_();
+      });
+    }
 
     this.scheduleRender_();
 
@@ -189,6 +213,28 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
+   * @return {!API_TYPE}
+   * @protected
+   */
+  api() {
+    return devAssert(this.ref_.current);
+  }
+
+  /**
+   * @param {string} alias
+   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
+   * @param {../action-constants.ActionTrust} minTrust
+   * @protected
+   */
+  registerApiAction(alias, handler, minTrust) {
+    this.registerAction(
+      alias,
+      (invocation) => handler(this.api(), invocation),
+      minTrust
+    );
+  }
+
+  /**
    * @param {!Array<!MutationRecord>} records
    * @private
    */
@@ -212,7 +258,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   unmount_() {
     this.mounted_ = false;
     if (this.container_) {
-      render(<></>, this.container_);
+      render(null, this.container_);
     }
   }
 
@@ -226,7 +272,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     const Ctor = this.constructor;
 
+    let toHydrate = false;
     if (!this.container_) {
+      const doc = this.win.document;
       if (
         Ctor['children'] ||
         Ctor['passthrough'] ||
@@ -238,20 +286,43 @@ export class PreactBaseElement extends AMP.BaseElement {
             'when configured with "children", "passthrough", or ' +
             '"passthroughNonEmpty" properties.'
         );
-        const shadowRoot = this.element.attachShadow({mode: 'open'});
-        this.container_ = shadowRoot;
+        // Check if there's a pre-constructed shadow DOM.
+        let {shadowRoot} = this.element;
+        let container = shadowRoot && childElementByTag(shadowRoot, 'c');
+        if (container) {
+          toHydrate = true;
+        } else {
+          // Create new shadow root.
+          shadowRoot = this.element.attachShadow({mode: 'open'});
 
-        const shadowCss = Ctor['shadowCss'];
-        if (shadowCss) {
-          installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
+          // The pre-constructed shadow root is required to have the stylesheet
+          // inline. Thus, only the new shadow roots share the stylesheets.
+          const shadowCss = Ctor['shadowCss'];
+          if (shadowCss) {
+            installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
+          }
+
+          // Create container.
+          // The pre-constructed shadow root is required to have this container.
+          container = createElementWithAttributes(
+            doc,
+            'c',
+            SHADOW_CONTAINER_ATTRS
+          );
+          shadowRoot.appendChild(container);
+
+          // Create a slot for internal service elements i.e. "i-amphtml-sizer".
+          // The pre-constructed shadow root is required to have this slot.
+          const serviceSlot = createElementWithAttributes(
+            doc,
+            'slot',
+            SERVICE_SLOT_ATTRS
+          );
+          shadowRoot.appendChild(serviceSlot);
         }
-
-        // Create a slot for internal service elements i.e. "i-amphtml-sizer"
-        const serviceSlot = this.win.document.createElement('slot');
-        serviceSlot.setAttribute('name', 'i-amphtml-svc');
-        this.container_.appendChild(serviceSlot);
+        this.container_ = container;
       } else {
-        const container = this.win.document.createElement('i-amphtml-c');
+        const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
         this.applyFillContent(container);
         if (!Ctor['detached']) {
@@ -260,18 +331,47 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     }
 
-    const props = collectProps(Ctor, this.element, this.defaultProps_);
+    // Exit early if contexts are not ready. Optional contexts will yield
+    // right away, even when `null`. The required contexts will block the
+    // `contextValues` until available.
+    const useContexts = Ctor['useContexts'];
+    const contextValues = this.contextValues_;
+    const isReady =
+      toHydrate || useContexts.length == 0 || contextValues != null;
+    if (!isReady) {
+      return;
+    }
+
+    // Process attributes and children.
+    const props = collectProps(
+      Ctor,
+      this.element,
+      this.ref_,
+      this.defaultProps_
+    );
 
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
-    const v = (
-      <WithAmpContext {...this.context_}>
-        {Preact.createElement(Ctor['Component'], props)}
-      </WithAmpContext>
-    );
+    let comp = Preact.createElement(Ctor['Component'], props);
 
-    render(v, this.container_);
+    // Add contexts.
+    for (let i = 0; i < useContexts.length; i++) {
+      const Context = useContexts[i].type;
+      const value = contextValues[i];
+      if (value) {
+        comp = <Context.Provider value={value}>{comp}</Context.Provider>;
+      }
+    }
+
+    // Add AmpContext with renderable/playable proeprties.
+    const v = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
+
+    if (toHydrate) {
+      hydrate(v, this.container_);
+    } else {
+      render(v, this.container_);
+    }
 
     const deferred = this.scheduledRenderDeferred_;
     if (deferred) {
@@ -304,6 +404,11 @@ export class PreactBaseElement extends AMP.BaseElement {
 PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
+
+/**
+ * @protected {!Array<!ContextProp>}
+ */
+PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
 
 /**
  * An override to specify that the component requires `layoutSizeDefined`.
@@ -371,11 +476,12 @@ PreactBaseElement['children'] = null;
 /**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
+ * @param {{current: ?}} ref
  * @param {!JsonObject|null|undefined} defaultProps
  * @return {!JsonObject}
  */
-function collectProps(Ctor, element, defaultProps) {
-  const props = /** @type {!JsonObject} */ ({...defaultProps});
+function collectProps(Ctor, element, ref, defaultProps) {
+  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
 
   const {
     'className': className,

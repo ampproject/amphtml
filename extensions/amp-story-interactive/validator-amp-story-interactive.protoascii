@@ -19,7 +19,7 @@ tags: {  # amp-story-interactive
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-story-interactive"
-    version: "1.0"
+    version: "0.1"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
@@ -29,24 +29,30 @@ tags: {  # <amp-story-interactive-quiz>
   tag_name: "AMP-STORY-INTERACTIVE-QUIZ"
   requires_extension: "amp-story-interactive"
   mandatory_ancestor: "AMP-STORY-GRID-LAYER"
-  attr_lists: 'interactive-options-text-attrs'
-  attr_lists: 'interactive-options-confetti-attrs'
-  attr_lists: 'interactive-shared-configs-attrs'
+  attr_lists: "interactive-options-text-attrs"
+  attr_lists: "interactive-options-confetti-attrs"
+  attr_lists: "interactive-shared-configs-attrs"
   attrs: {
-    name: 'option-1-correct'
+    name: "option-1-correct"
     mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
   }
   attrs: {
-    name: 'option-2-correct'
+    name: "option-2-correct"
     mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
   }
   attrs: {
-    name: 'option-3-correct'
+    name: "option-3-correct"
     mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+    trigger: {
+      also_requires_attr: "option-3-text"
+    }
   }
   attrs: {
-    name: 'option-4-correct'
+    name: "option-4-correct"
     mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+    trigger: {
+      also_requires_attr: "option-4-text"
+    }
   }
 }
 tags: {  # <amp-story-interactive-poll>
@@ -54,30 +60,30 @@ tags: {  # <amp-story-interactive-poll>
   tag_name: "AMP-STORY-INTERACTIVE-POLL"
   requires_extension: "amp-story-interactive"
   mandatory_ancestor: "AMP-STORY-GRID-LAYER"
-  attr_lists: 'interactive-options-text-attrs'
-  attr_lists: 'interactive-options-confetti-attrs'
-  attr_lists: 'interactive-options-results-category-attrs'
-  attr_lists: 'interactive-shared-configs-attrs'
+  attr_lists: "interactive-options-text-attrs"
+  attr_lists: "interactive-options-confetti-attrs"
+  attr_lists: "interactive-options-results-category-attrs"
+  attr_lists: "interactive-shared-configs-attrs"
 }
 tags: {  # <amp-story-interactive-binary-poll>
   html_format: AMP
   tag_name: "AMP-STORY-INTERACTIVE-BINARY-POLL"
   requires_extension: "amp-story-interactive"
   mandatory_ancestor: "AMP-STORY-GRID-LAYER"
-  attr_lists: 'interactive-shared-configs-attrs'
+  attr_lists: "interactive-shared-configs-attrs"
   attrs: {
-    name: 'option-1-text'
+    name: "option-1-text"
     mandatory: true
   }
   attrs: {
-    name: 'option-2-text'
+    name: "option-2-text"
     mandatory: true
   }
   attrs: {
-    name: 'option-1-confetti'
+    name: "option-1-confetti"
   }
   attrs: {
-    name: 'option-2-confetti'
+    name: "option-2-confetti"
   }
 }
 tags: {  # <amp-story-interactive-results>
@@ -86,133 +92,192 @@ tags: {  # <amp-story-interactive-results>
   requires_extension: "amp-story-interactive"
   mandatory_ancestor: "AMP-STORY-GRID-LAYER"
   attrs: {
-    name: 'option-1-results-category'
+    name: "option-1-results-category"
     mandatory: true
   }
   attrs: {
-    name: 'option-2-results-category'
+    name: "option-2-results-category"
     mandatory: true
   }
   attrs: {
-    name: 'option-3-results-category'
+    name: "option-3-results-category"
   }
   attrs: {
-    name: 'option-4-results-category'
+    name: "option-4-results-category"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+    }
   }
   attrs: {
-    name: 'option-1-image'
+    name: "option-1-image"
   }
   attrs: {
-    name: 'option-2-image'
+    name: "option-2-image"
   }
   attrs: {
-    name: 'option-3-image'
+    name: "option-3-image"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+    }
   }
   attrs: {
-    name: 'option-4-image'
+    name: "option-4-image"
+    trigger: {
+      also_requires_attr: "option-4-results-category"
+    }
   }
   attrs: {
-    name: 'option-1-text'
+    name: "option-1-text"
   }
   attrs: {
-    name: 'option-2-text'
+    name: "option-2-text"
   }
   attrs: {
-    name: 'option-3-text'
+    name: "option-3-text"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+    }
   }
   attrs: {
-    name: 'option-4-text'
+    name: "option-4-text"
+    trigger: {
+      also_requires_attr: "option-4-results-category"
+    }
   }
   attrs: {
-    name: 'prompt-text'
+    name: "option-1-results-threshold"
+    value_regex: "\d+[.\d+]?"
   }
   attrs: {
-    name: 'theme'
-    value: 'light'
-    value: 'dark'
+    name: "option-2-results-threshold"
+    value_regex: "\d+[.\d+]?"
+  }
+  attrs: {
+    name: "option-3-results-threshold"
+    value_regex: "\d+[.\d+]?"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+    }
+  }
+  attrs: {
+    name: "option-4-results-threshold"
+    value_regex: "\d+[.\d+]?"
+    trigger: {
+      also_requires_attr: "option-4-results-category"
+    }
+  }
+  attrs: {
+    name: "prompt-text"
+  }
+  attrs: {
+    name: "theme"
+    value: "light"
+    value: "dark"
+  }
+  attrs: {
+    name: "chip-style"
+    value: "flat"
+    value: "transparent"
   }
 }
 
 attr_lists: {
-  name: 'interactive-shared-configs-attrs'
+  name: "interactive-shared-configs-attrs"
   attrs: {
-    name: 'id'
+    name: "id"
     mandatory: true
   }
   attrs: {
-    name: 'prompt-text'
+    name: "prompt-text"
   }
   attrs: {
-    name: 'endpoint'
+    name: "endpoint"
     mandatory: true
     value_url: {
-      protocol: 'https'
+      protocol: "https"
       allow_relative: false
       allow_empty: false
     }
   }
   attrs: {
-    name: 'theme'
-    value: 'light'
-    value: 'dark'
+    name: "theme"
+    value: "light"
+    value: "dark"
   }
   attrs: {
-    name: 'chip-style'
-    value: 'shadow'
-    value: 'flat'
-    value: 'transparent'
+    name: "chip-style"
+    value: "shadow"
+    value: "flat"
+    value: "transparent"
   }
   attrs: {
-    name: 'prompt-size'
-    value: 'small'
-    value: 'medium'
-    value: 'large'
+    name: "prompt-size"
+    value: "small"
+    value: "medium"
+    value: "large"
   }
 }
 attr_lists: {
-  name: 'interactive-options-text-attrs'
+  name: "interactive-options-text-attrs"
   attrs: {
-    name: 'option-1-text'
+    name: "option-1-text"
     mandatory: true
   }
   attrs: {
-    name: 'option-2-text'
+    name: "option-2-text"
     mandatory: true
   }
   attrs: {
-    name: 'option-3-text'
+    name: "option-3-text"
   }
   attrs: {
-    name: 'option-4-text'
-  }
-}
-attr_lists: {
-  name: 'interactive-options-confetti-attrs'
-  attrs: {
-    name: 'option-1-confetti'
-  }
-  attrs: {
-    name: 'option-2-confetti'
-  }
-  attrs: {
-    name: 'option-3-confetti'
-  }
-  attrs: {
-    name: 'option-4-confetti'
+    name: "option-4-text"
+    trigger: {
+      also_requires_attr: "option-3-text"
+    }
   }
 }
 attr_lists: {
-  name: 'interactive-options-results-category-attrs'
+  name: "interactive-options-confetti-attrs"
   attrs: {
-    name: 'option-1-results-category'
+    name: "option-1-confetti"
   }
   attrs: {
-    name: 'option-2-results-category'
+    name: "option-2-confetti"
   }
   attrs: {
-    name: 'option-3-results-category'
+    name: "option-3-confetti"
   }
   attrs: {
-    name: 'option-4-results-category'
+    name: "option-4-confetti"
+  }
+}
+attr_lists: {
+  name: "interactive-options-results-category-attrs"
+  attrs: {
+    name: "option-1-results-category"
+    trigger: {
+      also_requires_attr: "option-2-results-category"
+    }
+  }
+  attrs: {
+    name: "option-2-results-category"
+    trigger: {
+      also_requires_attr: "option-1-results-category"
+    }
+  }
+  attrs: {
+    name: "option-3-results-category"
+    trigger: {
+      also_requires_attr: "option-2-results-category"
+      also_requires_attr: "option-3-text"
+    }
+  }
+  attrs: {
+    name: "option-4-results-category"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+      also_requires_attr: "option-4-text"
+    }
   }
 }

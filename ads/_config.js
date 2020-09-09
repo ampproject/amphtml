@@ -651,6 +651,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'luckyads': {
+    renderStartImplemented: true,
+  },
+
   'macaw': {
     renderStartImplemented: true,
   },
@@ -839,6 +843,11 @@ const adConfig = jsonConfiguration({
   'pixels': {
     prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
     clientIdCookieName: '__AF',
+    renderStartImplemented: true,
+  },
+
+  'playstream': {
+    prefetch: 'https://app.playstream.media/js/amp.js',
     renderStartImplemented: true,
   },
 

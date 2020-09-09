@@ -23,6 +23,11 @@ import {
  * @const {!LocalizedStringBundleDef}
  */
 const strings = {
+  [LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT]: {
+    string: 'Activate',
+    description:
+      'Label for the activate button to ask for device orientation permission',
+  },
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL]: {
     string: 'Mute story',
     description:
@@ -100,7 +105,7 @@ const strings = {
       'Label for a link to documentation on how AMP links are handled.',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS]: {
-    string: 'Tip 2/2',
+    string: 'Tip 2 of 2',
     description:
       'Label for a hint indicating progress on a multistep onboarding user education tutorial.',
   },
@@ -115,7 +120,7 @@ const strings = {
       'Label for a button dismissing or advancing to the next step of an onboarding user education tutorial.',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS]: {
-    string: 'Tip 1/2',
+    string: 'Tip 1 of 2',
     description:
       'Label for a hint indicating progress on a multistep onboarding user education tutorial.',
   },

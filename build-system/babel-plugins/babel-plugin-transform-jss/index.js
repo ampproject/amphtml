@@ -36,24 +36,45 @@
  * ```
  */
 
+const hash = require('./create-hash');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
+const {relative, join} = require('path');
 
 module.exports = function ({types: t, template}) {
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
 
-  function compileJss(JSS) {
-    const jss = create();
-    jss.setup(preset());
+  const seen = new Map();
+  function compileJss(JSS, filename) {
+    const relativeFilepath = relative(join(__dirname, '../../..'), filename);
+    const filehash = hash.createHash(relativeFilepath);
+    const jss = create({
+      ...preset(),
+      createGenerateId: () => {
+        return (rule) => {
+          const dashCaseKey = rule.key.replace(
+            /([A-Z])/g,
+            (c) => `-${c.toLowerCase()}`
+          );
+          const className = `${dashCaseKey}-${filehash}`;
+          if (seen.has(className) && seen.get(className) !== filename) {
+            throw new Error(
+              `Classnames must be unique across all files. Found a duplicate: ${className}`
+            );
+          }
+          seen.set(className, filename);
+          return className;
+        };
+      },
+    });
     return jss.createStyleSheet(JSS);
   }
 
   return {
     visitor: {
       CallExpression(path, state) {
-        // TODO: Can I skip the whole file if not jss?
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
           return;
@@ -70,7 +91,7 @@ module.exports = function ({types: t, template}) {
             `First argument to createUseStyles must be statically evaluatable.`
           );
         }
-        const sheet = compileJss(JSS);
+        const sheet = compileJss(JSS, filename);
         if ('CSS' in sheet.classes) {
           throw path.buildCodeFrameError(
             'Cannot have class named CSS in your JSS object.'
