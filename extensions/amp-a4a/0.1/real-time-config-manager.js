@@ -107,7 +107,7 @@ export class RealTimeConfigManager {
     /** @private {?string} */
     this.consentString_ = null;
 
-    /** @private {?Object} */
+    /** @private {?Object<string, string|number|boolean|undefined>} */
     this.consentMetadata_ = null;
   }
 
@@ -169,7 +169,7 @@ export class RealTimeConfigManager {
    *   substitutions available to use.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
-   * @param {?Object} consentMetadata
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    * @visibleForTesting
    */
@@ -286,8 +286,11 @@ export class RealTimeConfigManager {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
     macros['CONSENT_STATE'] = () => this.consentState_;
     macros['CONSENT_STRING'] = () => this.consentString_;
-    macros['CONSENT_METADATA'] = (key) =>
-      this.consentMetadata_ ? this.consentMetadata_[key] : null;
+    macros['CONSENT_METADATA'] = /** @type {!../../../src/service/variable-source.AsyncResolverDef} */ ((key) => {
+      userAssert(typeof key == 'string', "bad");
+      // user().assertString(key);
+      return this.consentMetadata_ ? this.consentMetadata_[key] : null;
+    });
     return macros;
   }
 

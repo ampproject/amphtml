@@ -751,7 +751,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.tryExecuteRealTimeConfig_(
             consentState,
             consentString,
-            consentMetadata
+            /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
           )
         ));
       })
@@ -2213,7 +2213,7 @@ export class AmpA4A extends AMP.BaseElement {
    * the rtc-config attribute on the amp-ad element, warn.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
-   * @param {?Object} consentMetadata
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {

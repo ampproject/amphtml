@@ -164,7 +164,10 @@
             "on": "visible",
             "request": "endpoint",
             "extraUrlParams": {
-              "consentState": "CONSENT_STATE"
+              "consentState": "CONSENT_STATE",
+              "gdprApplies": "CONSENT_METADATA(gdprApplies)",
+              "additionalConsent": "CONSENT_METADATA(additionalConsent)",
+              "consentStringType": "CONSENT_METADATA(consentStringType)"
             }
           }
         },
@@ -189,8 +192,10 @@
   <amp-consent id='ABC' layout='nodisplay'>
     <script type="application/json">{
       "consentInstanceId": "consent-clinet",
-      "consentRequired": false,
+      "consentRequired": true,
+      "checkConsentHref": "/check-consent?consentRequired=true&consentStateValue=rejected&consentMetadata={'gdprApplies':true,'additionalConsent':'abc123','consentStringType':1}&consentString=full-consent-string",
       "postPromptUI": "postPromptUI",
+      "promptUI": "ui1",
       "geoOverride": {
         "eu": {
           "consentRequired": true,
@@ -198,17 +203,17 @@
         },
         "na": {
           "consentRequired": "remote",
-          "checkConsentHref": "/check-consent?consentRequired=true&consentStateValue=rejected",
+          "checkConsentHref": "/check-consent?consentRequired=true&consentStateValue=rejected&consentMetadata={'gdprApplies':true,'additionalConsent':'abc123','consentStringType':1}&consentString=full-consent-string",
           "promptUI": "ui1"
         },
         "expireCache1": {
           "consentRequired": "remote",
-          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=rejected",
+          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=rejected&consentMetadata={'gdprApplies':false,'additionalConsent':'xyz','consentStringType':2}&consentString=full-consent-string",
           "promptUI": "ui1"
         },
         "expireCache2": {
           "consentRequired": "remote",
-          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=accepted",
+          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=accepted&consentMetadata={'gdprApplies':false,'additionalConsent':'xyz','consentStringType':2}&consentString=full-consent-string",
           "promptUI": "ui1"
         }
       }

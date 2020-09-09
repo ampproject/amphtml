@@ -2536,6 +2536,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
             a4a,
             consentString,
             consentMetadata,
+            consentStringType,
+            additionalConsent,
             gdprApplies;
           beforeEach(async () => {
             fixture = await createIframePromise();
@@ -2549,7 +2551,13 @@ describes.realWin('no signing', {amp: true}, (env) => {
             a4a = new MockA4AImpl(a4aElement);
             consentString = 'test-consent-string';
             gdprApplies = true;
-            consentMetadata = {gdprApplies};
+            additionalConsent = 'abc123';
+            consentStringType = 1;
+            consentMetadata = {
+              gdprApplies,
+              consentStringType,
+              additionalConsent,
+            };
             return fixture;
           });
 
@@ -2594,7 +2602,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
             expect(
               tryExecuteRealTimeConfigSpy.withArgs(
                 CONSENT_POLICY_STATE.SUFFICIENT,
-                consentString
+                consentString,
+                consentMetadata
               )
             ).calledOnce;
           });
@@ -2647,7 +2656,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
             expect(
               tryExecuteRealTimeConfigSpy.withArgs(
                 CONSENT_POLICY_STATE.SUFFICIENT,
-                consentString
+                consentString,
+                consentMetadata
               )
             ).calledOnce;
           });
@@ -2694,6 +2704,7 @@ describes.realWin('no signing', {amp: true}, (env) => {
             expect(
               tryExecuteRealTimeConfigSpy.withArgs(
                 CONSENT_POLICY_STATE.UNKNOWN,
+                null,
                 null
               )
             ).calledOnce;

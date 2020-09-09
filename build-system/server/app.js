@@ -821,6 +821,8 @@ app.post('/check-consent', (req, res) => {
   res.json({
     'consentRequired': req.query.consentRequired === 'true',
     'consentStateValue': req.query.consentStateValue,
+    'consentMetadata': JSON.parse(req.query.consentMetadata.replace(/'/g, '"')),
+    'consentString': req.query.consentString,
     'expireCache': req.query.expireCache === 'true',
   });
 });

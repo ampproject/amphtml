@@ -273,7 +273,7 @@ export class VariableService {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
-      'CONSENT_METADATA': (key) => 
+      'CONSENT_METADATA': (key) =>
         getConsentMetadataValue(element, dev().assertString(key)),
     };
     const perfMacros = isInFie(element)
@@ -528,7 +528,7 @@ function getConsentStateStr(element) {
 }
 
 /**
- * Get the associated value from the resolved consent metadata object 
+ * Get the associated value from the resolved consent metadata object
  * @param {!Element} element
  * @param {string} key
  * @return {!Promise<?Object>}
