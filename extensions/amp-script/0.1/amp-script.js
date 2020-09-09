@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
+import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
