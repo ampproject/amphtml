@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '../';
+import {forwardRef} from '../compat';
 
 const CONTAIN = [
   null, // 0: none
@@ -34,44 +35,55 @@ const SIZE_CONTENT_STYLE = {
 };
 
 /**
- * The wrapper component that implements different "contain" parameters.
+ * The wrapper component that implements different "contain" parameters. This
+ * most often indicates that the element's size doesn't depend on its children
+ * (e.g. `contain:size`), but there might be other variances as well.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/contain
  *
  * Contain parameters:
  * - size: the element's size does not depend on its content.
  * - layout: nothing outside the element may affect its internal layout and
- *   vice versa.
+ * vice versa.
  * - paint: the element's content doesn't display outside the element's bounds.
- *
- * @param {!ContainWrapperProps} props
+ * @param {!ContainWrapperComponentProps} props
+ * @param {{current: ?Element}} ref
  * @return {PreactDef.Renderable}
  */
-export function ContainWrapper({
-  as: Comp = 'div',
-  size = false,
-  layout = false,
-  paint = false,
-  style,
-  wrapperStyle,
-  contentRef,
-  contentStyle,
-  children,
-  ...rest
-}) {
+function ContainWrapperWithRef(
+  {
+    as: Comp = 'div',
+    size = false,
+    layout = false,
+    paint = false,
+    wrapperClassName,
+    wrapperStyle,
+    contentRef,
+    contentClassName,
+    contentStyle,
+    children,
+    'className': className,
+    'style': style,
+    ...rest
+  },
+  ref
+) {
   // The formula: `size << 2 | layout << 1 | paint`.
   const containIndex = (size ? 4 : 0) + (layout ? 2 : 0) + (paint ? 1 : 0);
   return (
     <Comp
+      {...rest}
+      ref={ref}
+      className={`${className || ''} ${wrapperClassName || ''}`}
       style={{
         ...style,
         ...wrapperStyle,
         contain: CONTAIN[containIndex],
       }}
-      {...rest}
     >
       <div
         ref={contentRef}
+        className={contentClassName}
         style={{
           ...(size && SIZE_CONTENT_STYLE),
           'overflow': paint ? 'hidden' : 'visible',
@@ -83,3 +95,7 @@ export function ContainWrapper({
     </Comp>
   );
 }
+
+const ContainWrapper = forwardRef(ContainWrapperWithRef);
+
+export {ContainWrapper};
