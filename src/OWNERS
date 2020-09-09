@@ -26,5 +26,12 @@
       pattern: 'friendly-iframe-embed.js',
       owners: [{name: 'ampproject/wg-ads-reviewers'}],
     },
+    {
+      pattern: '{3p-frame, 3p-frame-*}.js',
+      owners: [
+        {name: 'ampproject/wg-ads-reviewers'},
+        {name: 'ampproject/wg-ui-and-a11y'},
+      ],
+    },
   ],
 }
