@@ -427,6 +427,7 @@ export class AmpStoryPlayer {
       story.getAttribute('data-poster-portrait-src')
     );
     iframeEl.classList.add('story-player-iframe');
+    iframeEl.setAttribute('allow', 'autoplay');
     this.iframes_.push(iframeEl);
 
     applySandbox(iframeEl);
