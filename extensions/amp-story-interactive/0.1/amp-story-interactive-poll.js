@@ -19,8 +19,10 @@ import {
   InteractiveType,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
+import {computedStyle, setStyle} from '../../../src/style';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
-import {setStyle} from '../../../src/style';
+import {toArray} from '../../../src/types';
 
 /**
  * Generates the template for the poll.
@@ -79,6 +81,13 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
     return this.rootEl_;
   }
 
+  /** @override */
+  layoutCallback() {
+    return this.adaptFontSize_(dev().assertElement(this.rootEl_)).then(() =>
+      super.layoutCallback()
+    );
+  }
+
   /**
    * Finds the prompt and options content
    * and adds it to the quiz element.
@@ -133,5 +142,44 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
       ).textContent = `${percentage}`;
       setStyle(currOption, '--option-percentage', percentages[index] + '%');
     });
+  }
+
+  /**
+   * This method changes the font-size to best display the options, measured only once on create.
+   *
+   * If two lines appear, it will add the class 'i-amphtml-story-interactive-poll-two-lines'
+   * It measures the number of lines on all options and generates the best size.
+   * - font-size: 22px (1.375em) - All options are one line
+   * - font-size: 18px (1.125em) - Any option is two lines if displayed at 22px.
+   *
+   * @private
+   * @param {!Element} root
+   * @return {!Promise}
+   */
+  adaptFontSize_(root) {
+    let hasTwoLines = false;
+    const allOptionTexts = toArray(
+      root.querySelectorAll('.i-amphtml-story-interactive-option-text')
+    );
+    return this.measureMutateElement(
+      () => {
+        hasTwoLines = allOptionTexts.some((e) => {
+          const lines = Math.round(
+            e./*OK*/ clientHeight /
+              parseFloat(
+                computedStyle(this.win, e)['line-height'].replace('px', '')
+              )
+          );
+          return lines >= 2;
+        });
+      },
+      () => {
+        this.rootEl_.classList.toggle(
+          'i-amphtml-story-interactive-poll-two-lines',
+          hasTwoLines
+        );
+      },
+      root
+    );
   }
 }
