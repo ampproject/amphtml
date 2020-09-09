@@ -163,16 +163,14 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
     );
     return this.measureMutateElement(
       () => {
-        allOptionTexts.forEach((e) => {
+        hasTwoLines = allOptionTexts.some((e) => {
           const lines = Math.round(
             e./*OK*/ clientHeight /
               parseFloat(
                 computedStyle(this.win, e)['line-height'].replace('px', '')
               )
           );
-          if (lines >= 2) {
-            hasTwoLines = true;
-          }
+          return lines >= 2;
         });
       },
       () => {
