@@ -36,7 +36,7 @@
  * ```
  */
 
-const crypto = require('crypto');
+const hash = require('./create-hash');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
 const {relative, join} = require('path');
@@ -46,14 +46,10 @@ module.exports = function ({types: t, template}) {
     return filename.endsWith('.jss.js');
   }
 
-  const seen = new Set();
+  const seen = new Map();
   function compileJss(JSS, filename) {
     const relativeFilepath = relative(join(__dirname, '../../..'), filename);
-    const filehash = crypto
-      .createHash('sha256')
-      .update(relativeFilepath)
-      .digest('hex')
-      .slice(0, 7);
+    const filehash = hash.createHash(relativeFilepath);
     const jss = create({
       ...preset(),
       createGenerateId: () => {
@@ -63,12 +59,12 @@ module.exports = function ({types: t, template}) {
             (c) => `-${c.toLowerCase()}`
           );
           const className = `${dashCaseKey}-${filehash}`;
-          if (seen.has(className)) {
+          if (seen.has(className) && seen.get(className) !== filename) {
             throw new Error(
               `Classnames must be unique across all files. Found a duplicate: ${className}`
             );
           }
-          seen.add(className);
+          seen.set(className, filename);
           return className;
         };
       },
@@ -79,7 +75,6 @@ module.exports = function ({types: t, template}) {
   return {
     visitor: {
       CallExpression(path, state) {
-        // TODO: Can I skip the whole file if not jss?
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
           return;
