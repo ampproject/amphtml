@@ -57,7 +57,7 @@ const strings = {
     string: 'More about AMP results',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS]: {
-    string: 'Tip 2/2',
+    string: 'Tip 2 of 2',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS]: {
     string: 'Swipe to go to the next story',
@@ -66,7 +66,7 @@ const strings = {
     string: 'Got it',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS]: {
-    string: 'Tip 1/2',
+    string: 'Tip 1 of 2',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE]: {
     string: 'Tip',
