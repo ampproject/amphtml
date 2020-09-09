@@ -185,7 +185,7 @@ const strings = {
   [LocalizedStringId.AMP_STORY_INTERACTIVE_RESULTS_SCORE]: {
     string: 'SCORE:',
     description:
-      'Label for the results component preceding the score in percentages, should have `:` at the end',
+      'Label for the results component preceding the score in percentages',
   },
   [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A]: {
     string: 'A',
