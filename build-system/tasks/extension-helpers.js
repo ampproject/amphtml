@@ -565,10 +565,16 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   }
 }
 
+/**
+ * Copies the required resources from @ampproject/worker-dom and renames
+ * them accordingly.
+ *
+ * @param {string} version
+ */
 async function copyWorkerDomResources(version) {
+  const startTime = Date.now();
   const workerDomDir = 'node_modules/@ampproject/worker-dom';
   const targetDir = 'dist/v0';
-
   log(
     green('Copying @ampproject/worker-dom resources:'),
     cyan('worker.js, worker.nodom.js')
@@ -632,6 +638,11 @@ async function copyWorkerDomResources(version) {
   for (const [src, dest] of workerFilesToDeploy) {
     await fs.copy(`${dir}/${src}`, `${targetDir}/${dest}`);
   }
+  endBuildStep(
+    'Copied @ampproject/worker-dom resources',
+    'worker.js, worker.nodom.js',
+    startTime
+  );
 }
 
 module.exports = {
