@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {dirname, relative, join} = require('path');
+const {dirname, relative, join, posix} = require('path');
+const {join: posixJoin} = require('path').posix;
 const {transformFileSync} = require('@babel/core');
 
 /**
@@ -68,7 +69,7 @@ function transformRedefineInline({types: t}) {
       ImportDeclaration(path, {opts}) {
         const {source} = path.node;
         if (source.value.startsWith('.')) {
-          source.value = toPosix(join(opts.from, source.value)).replace(
+          source.value = posixJoin(opts.from, source.value).replace(
             /^[^.]/,
             './$&'
           );
@@ -224,9 +225,3 @@ module.exports = function ({types: t}) {
     },
   };
 };
-
-// Even though we are using the path module, JS Modules should never have
-// their paths specified in Windows format.
-function toPosix(filepath) {
-  return filepath.replace(/\\\\/g, '/').replace(/\\/g, '/');
-}

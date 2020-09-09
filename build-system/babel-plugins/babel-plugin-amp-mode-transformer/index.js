@@ -19,7 +19,7 @@
  * and getMode().localDev to true.
  * @param {Object} babelTypes
  */
-const {resolve, dirname, join, relative} = require('path');
+const {resolve, dirname, join, relative} = require('path').posix;
 
 let shouldResolveDevelopmentMode = true;
 
@@ -45,10 +45,7 @@ module.exports = function ({types: t}) {
               join(__dirname, '../../../'),
               resolve(dirname(state.file.opts.filename), source.value)
             );
-            if (
-              filepath.endsWith('src/mode') ||
-              filepath.endsWith('src\\mode')
-            ) {
+            if (filepath.endsWith('src/mode')) {
               getModeFound = true;
             }
           }

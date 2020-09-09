@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const filepath = require('path');
+const pathmodule = require('path');
 const {addNamed} = require('@babel/helper-module-imports');
 
 module.exports = function (babel, options = {}) {
@@ -42,7 +42,7 @@ module.exports = function (babel, options = {}) {
         // a "../foo", making it "./../foo" doesn't hurt.
         const source =
           './' +
-          toPosix(filepath.relative(filepath.dirname(filename), importFrom));
+          toPosix(pathmodule.relative(pathmodule.dirname(filename), importFrom));
         const resolvedPromise = addNamed(path, 'resolvedPromise', source, {
           importedType: 'es6',
         });
@@ -54,6 +54,6 @@ module.exports = function (babel, options = {}) {
 
 // Even though we are using the path module, JS Modules should never have
 // their paths specified in Windows format.
-function toPosix(filepath) {
-  return filepath.replace(/\\\\/g, '/').replace(/\\/g, '/');
+function toPosix(path) {
+  return path.replace(/\\\\/g, '/').replace(/\\/g, '/');
 }

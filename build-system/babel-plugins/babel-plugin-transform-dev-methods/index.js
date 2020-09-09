@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {resolve, dirname, relative, join} = require('path');
+const {resolve, dirname, relative, join} = require('path').posix;
 
 // Returns a new Map<string, {detected: boolean, removeable: Array<string>}
 // key is a valid callee name to potentially remove.
@@ -70,7 +70,7 @@ module.exports = function () {
               resolve(dirname(state.file.opts.filename), source.value)
             );
 
-            if (filepath.endsWith('src/log') || filepath.endsWith('src\\log')) {
+            if (filepath.endsWith('src/log')) {
               const propertyMapped = calleeToPropertiesMap.get(
                 specifier.imported.name
               );
