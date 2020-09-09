@@ -99,7 +99,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
           LocalizedStringId[
             `AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_${choice}`
           ]
-        ) | choice
+        ) || choice
       );
     });
     const optionContainer = this.rootEl_.querySelector(
