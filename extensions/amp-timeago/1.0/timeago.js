@@ -79,8 +79,8 @@ export function Timeago({
  * @param {string} datetime
  * @param {string} locale
  * @param {number|undefined} cutoff
- * @param {string|undefined} placeholder
- * @return {string}
+ * @param {string|!PreactDef.VNode|null|undefined} placeholder
+ * @return {string|!PreactDef.VNode}
  */
 function getFuzzyTimestampValue(datetime, locale, cutoff, placeholder) {
   if (!cutoff) {
