@@ -44,7 +44,8 @@ CMP_CONFIG['appconsent'] = {
 
 CMP_CONFIG['ConsentManager'] = {
   'consentInstanceId': 'ConsentManager',
-  'checkConsentHref': 'https://consentmanager.mgr.consensu.org/delivery/ampcheck.php',
+  'checkConsentHref': 
+    'https://consentmanager.mgr.consensu.org/delivery/ampcheck.php',
   'promptUISrc': 'https://consentmanager.mgr.consensu.org/delivery/ampui.php',
 };
 
