@@ -139,8 +139,6 @@ describe('amp-ad 3P', () => {
         expect(context.addContextToIframe).to.be.a('function');
         expect(context.getHtml).to.be.a('function');
         expect(context.noContentAvailable).to.be.a('function');
-        expect(context.onResizeDenied).to.be.a('function');
-        expect(context.onResizeSuccess).to.be.a('function');
         expect(context.renderStart).to.be.a('function');
         expect(context.reportRenderedEntityIdentifier).to.be.a('function');
         expect(context.requestResize).to.be.a('function');
@@ -162,11 +160,9 @@ describe('amp-ad 3P', () => {
       .then(() => {
         expect(iframe.offsetHeight).to.equal(250);
         expect(iframe.offsetWidth).to.equal(300);
-        expect(iframe.contentWindow.ping.resizeSuccess).to.be.undefined;
-        iframe.contentWindow.context.requestResize(200, 50);
-        return poll('wait for embed-size to be received', () => {
-          return !!fixture.messages.getFirstMessageEventOfType('embed-size');
-        });
+        return iframe.contentWindow.context
+          .requestResize(200, 50)
+          .catch(() => {});
       })
       .then(() => {
         // The userActivation feature is known to be available on Chrome 74+
@@ -177,15 +173,6 @@ describe('amp-ad 3P', () => {
           expect(event.userActivation).to.be.ok;
           expect(event.userActivation.isActive).to.be.a('boolean');
         }
-
-        return poll(
-          'wait for attemptChangeSize',
-          () => {
-            return iframe.contentWindow.ping.resizeSuccess != undefined;
-          },
-          null,
-          5000
-        );
       })
       .then(async function () {
         lastIO = null;
