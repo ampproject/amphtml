@@ -23,7 +23,7 @@ import {
 } from '../../../../src/dom';
 
 describes.realWin(
-  'amp-date-display',
+  'amp-date-display 1.0',
   {
     amp: {
       runtimeOn: true,
@@ -83,6 +83,7 @@ describes.realWin(
     });
 
     afterEach(() => {
+      clock.runAll();
       clock.uninstall();
     });
 
