@@ -96,6 +96,7 @@
           <!-- This should be in alphabetical order. _ping_ should be the first -->
           <option>_ping_</option>
           <option>appconsent</option>
+          <option>ConsentManager</option>
           <option>didomi</option>
           <option>iubenda</option>
           <option>sirdata</option>
@@ -155,6 +156,22 @@
         <div id="postPromptUI">
           Post Prompt UI
           <button on="tap:ABC.prompt(consent=appconsent)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End appconsent example -->
+
+
+      <!-- ConsentManager example -->
+      <amp-consent id="ConsentManager" layout="nodisplay" type="ConsentManager">
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": { "id": "1" }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=ConsentManager)" role="button">Manage</button>
         </div>
       </amp-consent>
       <!-- End appconsent example -->
