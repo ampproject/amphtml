@@ -1019,8 +1019,9 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     // Build pagination buttons if they can be displayed.
-    this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS) &&
+    if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
       new PaginationButtons(this);
+    }
 
     // Will resolve when all pages are built.
     return storyLayoutPromise;
