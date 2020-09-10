@@ -19,8 +19,9 @@ import {SocialShare} from '../social-share';
 import {dict} from '../../../../src/utils/object';
 import {mount} from 'enzyme';
 
-describes.sandboxed('SocialShare preact component v1.0', {}, () => {
-  it('errors when the required "type" attribute is not provided', () => {
+describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
+  // TODO(#30043): unskip once #30043 is merged (Preact bug fix).
+  it.skip('errors when the required "type" attribute is not provided', () => {
     const jsx = <SocialShare />;
 
     expect(() => {
@@ -28,7 +29,8 @@ describes.sandboxed('SocialShare preact component v1.0', {}, () => {
     }).to.throw('The type attribute is required.');
   });
 
-  it(
+  // TODO(#30043): unskip once #30043 is merged (Preact bug fix).
+  it.skip(
     'errors when the required endpoint is not provided when not using' +
       ' a pre-configured type',
     () => {
