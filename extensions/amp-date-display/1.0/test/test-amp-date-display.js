@@ -83,6 +83,7 @@ describes.realWin(
     });
 
     afterEach(() => {
+      clock.runAll();
       clock.uninstall();
     });
 

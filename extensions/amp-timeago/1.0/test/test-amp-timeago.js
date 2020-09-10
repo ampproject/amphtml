@@ -64,8 +64,7 @@ describes.realWin(
       toggleExperiment(win, 'amp-timeago-bento', false);
     });
 
-    // TODO (#29246): De-flake and un-skip this test.
-    it.skip('should render display 2 days ago when built', async () => {
+    it('should render display 2 days ago when built', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
@@ -75,8 +74,7 @@ describes.realWin(
       expect(time).to.equal('2 days ago');
     });
 
-    // TODO (#29246): De-flake and un-skip this test.
-    it.skip('should display original date when older than cutoff', async () => {
+    it('should display original date when older than cutoff', async () => {
       const date = new Date('2017-01-01');
       element.setAttribute('datetime', date.toISOString());
       element.textContent = 'Sunday 1 January 2017';
@@ -86,8 +84,7 @@ describes.realWin(
       expect(time).to.equal('Sunday 1 January 2017');
     });
 
-    // TODO (#29246): De-flake and un-skip this test.
-    it.skip('should update after mutation of datetime attribute', async () => {
+    it('should update after mutation of datetime attribute', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
