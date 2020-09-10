@@ -485,10 +485,10 @@ export class Resource {
     const oldBox = this.layoutBox_;
     if (usePremeasuredRect) {
       this.computeMeasurements_(devAssert(this.premeasuredRect_));
-      this.premeasuredRect_ = null;
     } else {
       this.computeMeasurements_();
     }
+    this.premeasuredRect_ = null;
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
