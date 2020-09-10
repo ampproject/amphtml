@@ -14,5 +14,19 @@
  * limitations under the License.
  */
 
-export {ContainWrapper} from './contain';
-export {Wrapper} from './wrapper';
+const crypto = require('crypto');
+
+// This is in its own file in order to make it easy to stub in tests.
+module.exports = {
+  createHash: (filepath) =>
+    crypto
+      .createHash('sha256')
+      .update(toPosix(filepath))
+      .digest('hex')
+      .slice(0, 7),
+};
+
+// To support Windows, use posix separators for all filepath hashes.
+function toPosix(filepath) {
+  return filepath.replace(/\\\\?/g, '/');
+}
