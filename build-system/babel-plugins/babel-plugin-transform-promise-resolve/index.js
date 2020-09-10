@@ -55,5 +55,5 @@ module.exports = function (babel, options = {}) {
 // Even though we are using the path module, JS Modules should never have
 // their paths specified in Windows format.
 function toPosix(path) {
-  return path.replace(/\\\\/g, '/').replace(/\\/g, '/');
+  return path.replace(/\\\\?/g, '/');
 }

@@ -28,5 +28,5 @@ module.exports = {
 
 // To support Windows, use posix separators for all filepath hashes.
 function toPosix(filepath) {
-  return filepath.replace(/\\\\/g, '/').replace(/\\/g, '/');
+  return filepath.replace(/\\\\?/g, '/');
 }
