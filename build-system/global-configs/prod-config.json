@@ -36,6 +36,5 @@
   "version-locking": 1,
   "amp-ad-no-center-css": 0,
   "analytics-chunks": 1,
-  "sticky-ad-padding-bottom": 1,
-  "render-on-idle-fix": 1
+  "sticky-ad-padding-bottom": 1
 }
