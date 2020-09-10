@@ -45,9 +45,9 @@ export function kargo(global, data) {
     'kargo-load',
     function (done) {
       // load AdTag in Master window
-      loadScript(window, kargoScriptUrl, () => {
+      loadScript(global, kargoScriptUrl, () => {
         let success = false;
-        if (window.Kargo != null && window.Kargo.loaded) {
+        if (global.Kargo != null && global.Kargo.loaded) {
           success = true;
         }
 
