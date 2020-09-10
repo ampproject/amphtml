@@ -508,11 +508,15 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    // Handles TalkBack click.
-    if (event.clientX === 0 && event.clientY === 0) {
+    const openLinkInNewWindow = () => {
       target.setAttribute('target', '_blank');
       target.setAttribute('role', 'link');
       return false;
+    };
+
+    // Handles TalkBack clicks. They always come from 0 0.
+    if (event.clientX === 0 && event.clientY === 0) {
+      openLinkInNewWindow();
     }
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
@@ -524,9 +528,7 @@ export class ManualAdvancement extends AdvancementConfig {
       target.getAttribute('show-tooltip') === 'auto' &&
       this.isInScreenBottom_(target, pageRect)
     ) {
-      target.setAttribute('target', '_blank');
-      target.setAttribute('role', 'link');
-      return false;
+      openLinkInNewWindow();
     }
 
     return !!closest(
