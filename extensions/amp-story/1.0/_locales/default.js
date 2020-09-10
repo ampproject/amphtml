@@ -80,16 +80,19 @@ const strings = {
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
     string: 'Updated',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_A]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_RESULTS_SCORE]: {
+    string: 'SCORE:',
+  },
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A]: {
     string: 'A',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_B]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B]: {
     string: 'B',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_C]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C]: {
     string: 'C',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_D]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D]: {
     string: 'D',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
