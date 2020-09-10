@@ -16,11 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {SocialShare} from '../social-share';
-import {object, select, text, withKnobs} from '@storybook/addon-knobs';
+import {color, object, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
-  title: 'Social Share',
+  title: 'SocialShare',
   component: SocialShare,
   decorators: [withA11y, withKnobs],
 };
@@ -37,10 +37,8 @@ export const _default = () => {
     'line',
     'sms',
     'system',
-    'custom endpoint',
+    'custom',
     undefined,
-    '',
-    'random',
   ];
   const type = select('type', knobConfigurations, knobConfigurations[0]);
   const endpoint = text('customEndpoint', undefined);
@@ -48,22 +46,21 @@ export const _default = () => {
   const target = text('target', undefined);
   const width = text('width', undefined);
   const height = text('height', undefined);
+  const foregroundColor = color('color', undefined);
+  const background = color('background', undefined);
+  const children = text('children', undefined);
 
   return (
-    <div>
-      <p>
-        Click the button below to share this page using the configured provider.
-        Update the provider using storybook knobs. Choose Provider Type: 'custom
-        endpoint' to specify your own share endpoint.
-      </p>
-      <SocialShare
-        type={type}
-        endpoint={endpoint}
-        params={additionalParams}
-        target={target}
-        width={width}
-        height={height}
-      />
-    </div>
+    <SocialShare
+      type={type}
+      endpoint={endpoint}
+      params={additionalParams}
+      target={target}
+      width={width}
+      height={height}
+      color={foregroundColor}
+      background={background}
+      children={children}
+    />
   );
 };

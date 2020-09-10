@@ -21,7 +21,7 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
-storiesOf('amp-social-share v1', module)
+storiesOf('amp-social-share-0_1', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
@@ -68,6 +68,7 @@ storiesOf('amp-social-share v1', module)
       'sms',
       'system',
       'custom',
+      undefined,
     ];
     const type = select('type', typeConfigurations, typeConfigurations[0]);
     const customEndpoint = text('data-share-endpoint', undefined);
@@ -76,6 +77,8 @@ storiesOf('amp-social-share v1', module)
     const paramAttribution = text('data-param-attribution', undefined);
     const paramMedia = text('data-param-media', undefined);
     const appId = text('data-param-app_id', '254325784911610');
+    const width = text('width', undefined);
+    const height = text('height', undefined);
     return (
       <amp-social-share
         type={type}
@@ -85,6 +88,8 @@ storiesOf('amp-social-share v1', module)
         data-param-attribution={paramAttribution}
         data-param-media={paramMedia}
         data-param-app_id={appId}
+        width={width}
+        height={height}
       ></amp-social-share>
     );
   });
