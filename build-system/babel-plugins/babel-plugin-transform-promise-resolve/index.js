@@ -42,7 +42,9 @@ module.exports = function (babel, options = {}) {
         // a "../foo", making it "./../foo" doesn't hurt.
         const source =
           './' +
-          toPosix(pathmodule.relative(pathmodule.dirname(filename), importFrom));
+          toPosix(
+            pathmodule.relative(pathmodule.dirname(filename), importFrom)
+          );
         const resolvedPromise = addNamed(path, 'resolvedPromise', source, {
           importedType: 'es6',
         });

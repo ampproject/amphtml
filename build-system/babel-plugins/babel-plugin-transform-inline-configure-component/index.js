@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {dirname, relative, join, posix} = require('path');
+const {dirname, relative, join} = require('path');
 const {join: posixJoin} = require('path').posix;
 const {transformFileSync} = require('@babel/core');
 
