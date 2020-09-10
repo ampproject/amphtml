@@ -117,6 +117,7 @@ export class AnalyticsGroup {
       chunk(this.analyticsElement_, task, priority);
     }
     this.triggerCount_++;
+    console.log('[ANALITYCS-GROUP] triggered', this.triggerCount_);
     return deferred.promise;
   }
 }

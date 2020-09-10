@@ -420,6 +420,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Promise}
    */
   addTrigger_(config) {
+    console.log('added trigger to', config);
     if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
@@ -601,6 +602,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
+    console.log(event);
     const requests = isArray(trigger['request'])
       ? trigger['request']
       : [trigger['request']];
@@ -640,6 +642,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     this.checkTriggerEnabled_(trigger, event).then((enabled) => {
+      console.log('[ANALYTICS] checkTriggerEnabled', enabled, 'for', event);
       const isConnected =
         this.element.ownerDocument && this.element.ownerDocument.defaultView;
       if (!enabled || !isConnected) {

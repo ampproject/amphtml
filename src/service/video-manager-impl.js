@@ -516,8 +516,8 @@ class VideoEntry {
       this.video.pause();
     };
 
-    listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
-      this.videoLoaded()
+    listenOncePromise(video.element, VideoEvents.LOAD).then(
+      () => console.log(video.element.id, 'loaded') && this.videoLoaded()
     );
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
@@ -1626,6 +1626,7 @@ function analyticsEvent(entry, eventType, opt_vars) {
   const {video} = entry;
 
   entry.getAnalyticsDetails().then((details) => {
+    console.log('Event', video.element.id, eventType, details);
     if (opt_vars) {
       Object.assign(details, opt_vars);
     }
