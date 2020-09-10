@@ -15,46 +15,42 @@
  */
 
 import '../../../amp-mustache/0.2/amp-mustache';
-import * as lolex from 'lolex';
 import {parseDateAttrs} from '../amp-date-display';
-import {
-  waitForChildPromise,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {waitFor} from '../../../../testing/test-helper.js';
+import {whenUpgradedToCustomElement} from '../../../../src/dom';
 
 describes.realWin(
   'amp-date-display 1.0',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-mustache:0.2', 'amp-date-display:1.0'],
     },
   },
   (env) => {
     let win;
-    let element;
-    let clock;
+    let element, template;
+
+    async function waitRendered() {
+      await whenUpgradedToCustomElement(element);
+      await element.build();
+      await waitFor(() => {
+        // The rendered container inserts a <time> element.
+        const time = element.querySelector('time');
+        return time && time.textContent;
+      }, 'time rendered');
+      return element.querySelector('time');
+    }
 
     async function getRenderedData() {
-      await whenUpgradedToCustomElement(element);
-      await element.whenBuilt();
-      await waitForChildPromise(element, () => {
-        // The rendered container inserts a div element.
-        return element.querySelector('div');
-      });
-
-      return JSON.parse(element.textContent);
+      const time = await waitRendered();
+      return JSON.parse(time.textContent);
     }
 
     beforeEach(() => {
       win = env.win;
-      clock = lolex.install({
-        target: window,
-        now: new Date('2018-01-01T08:00:00Z'),
-      });
 
       element = win.document.createElement('amp-date-display');
-      const template = win.document.createElement('template');
+      template = win.document.createElement('template');
       template.setAttribute('type', 'amp-mustache');
       template.content.textContent = JSON.stringify({
         year: '{{year}}',
@@ -80,11 +76,6 @@ describes.realWin(
       });
       element.appendChild(template);
       element.setAttribute('layout', 'nodisplay');
-    });
-
-    afterEach(() => {
-      clock.runAll();
-      clock.uninstall();
     });
 
     it('renders mustache template into element', async () => {
@@ -144,6 +135,16 @@ describes.realWin(
       expect(data.second).to.equal('6');
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
+    });
+
+    it('renders default template into element', async () => {
+      element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+      element.setAttribute('display-in', 'UTC');
+      element.removeChild(template);
+      win.document.body.appendChild(element);
+
+      const time = await waitRendered();
+      expect(time.textContent).to.contain('2001');
     });
 
     it('does not rerender', async () => {

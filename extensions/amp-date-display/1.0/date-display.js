@@ -15,10 +15,37 @@
  */
 
 import {getDate} from '../../../src/utils/date';
+import * as Preact from '../../../src/preact';
+import {Wrapper, useRenderer} from '../../../src/preact/component';
+import {useMemo} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /** @const {string} */
+const DEFAULT_DISPLAY_IN = 'local';
+
+/** @const {string} */
 const DEFAULT_LOCALE = 'en';
+
+/** @const {!Object<string, *>} */
+const DEFAULT_DATETIME_OPTIONS = {
+  'year': 'numeric',
+  'month': 'short',
+  'day': 'numeric',
+  'hour': 'numeric',
+  'minute': 'numeric',
+};
+
+/** @const {!Object<string, *>} */
+const DEFAULT_DATETIME_OPTIONS_UTC = {
+  ...DEFAULT_DATETIME_OPTIONS,
+  timeZone: 'UTC',
+};
+
+/**
+ * @param {!JsonObject} data
+ * @return {string}
+ */
+const DEFAULT_RENDER = (data) => /** @type {string} */ (data['localeString']);
 
 /** @typedef {{
   year: number,
@@ -32,6 +59,7 @@ const DEFAULT_LOCALE = 'en';
   minute: number,
   second: number,
   iso: string,
+  localeString: string,
 }} */
 let VariablesV2Def;
 
@@ -63,22 +91,53 @@ let EnhancedVariablesV2Def;
  * @param {!DateDisplayDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function DateDisplay(props) {
-  const {datetime, render, children} = props;
+export function DateDisplay({
+  datetime,
+  displayIn,
+  locale,
+  render = DEFAULT_RENDER,
+  ...rest
+}) {
   const date = new Date(getDate(datetime));
-  const data = /** @type {!JsonObject} */ (getDataForTemplate(date, props));
+
+  // TODO(#29293): Move defaults to the props destructuring in the args once
+  // the typing is fixed.
+  const data = useMemo(
+    () =>
+      getDataForTemplate(
+        date,
+        displayIn || DEFAULT_DISPLAY_IN,
+        locale || DEFAULT_LOCALE
+      ),
+    [date, displayIn, locale]
+  );
+
+  const rendered = useRenderer(render, data);
+  const isHtml =
+    rendered && typeof rendered == 'object' && '__html' in rendered;
+
   useResourcesNotify();
 
-  return render(data, children);
+  return (
+    <Wrapper
+      {...rest}
+      as="time"
+      datetime={data['iso']}
+      dangerouslySetInnerHTML={isHtml ? rendered : null}
+    >
+      {isHtml ? null : rendered}
+    </Wrapper>
+  );
 }
 
 /**
- * @param {!Date} date
- * @param {!DateDisplayDef.Props} props
- * @return {?EnhancedVariablesV2Def}
+ * @param {number|undefined} epoch
+ * @param {string} displayIn
+ * @param {string} locale
+ * @return {!EnhancedVariablesV2Def}
  */
-function getDataForTemplate(date, props) {
-  const {displayIn = '', locale = DEFAULT_LOCALE} = props;
+function getDataForTemplate(epoch, displayIn, locale) {
+  const date = new Date(epoch);
 
   const basicData =
     displayIn.toLowerCase() === 'utc'
@@ -144,6 +203,7 @@ function getVariablesInLocal(date, locale) {
     'minute': date.getMinutes(),
     'second': date.getSeconds(),
     'iso': date.toISOString(),
+    'localeString': date.toLocaleString(locale, DEFAULT_DATETIME_OPTIONS),
   };
 }
 
@@ -177,5 +237,6 @@ function getVariablesInUTC(date, locale) {
     'minute': date.getUTCMinutes(),
     'second': date.getUTCSeconds(),
     'iso': date.toISOString(),
+    'localeString': date.toLocaleString(locale, DEFAULT_DATETIME_OPTIONS_UTC),
   };
 }

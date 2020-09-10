@@ -24,23 +24,7 @@ var DateDisplayDef = {};
  *   datetime: (!Date|number|string),
  *   displayIn: (string|undefined),
  *   locale: (string|undefined),
- *   render: (function(!JsonObject, (?PreactDef.Renderable|undefined)):PreactDef.Renderable),
- *   children: (?PreactDef.Renderable|undefined),
+ *   render: (?RendererFunctionType|undefined),
  * }}
  */
 DateDisplayDef.Props;
-
-/**
- * @typedef {{
- *   children: (?PreactDef.Renderable|undefined),
- * }}
- */
-DateDisplayDef.AsyncRenderProps;
-
-/**
- * @typedef {{
- *   dom: !Element,
- *   host: !Element,
- * }}
- */
-DateDisplayDef.RenderDomTreeProps;
