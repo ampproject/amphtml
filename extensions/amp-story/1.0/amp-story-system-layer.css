@@ -406,5 +406,5 @@
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
   position: fixed !important;
   top: 0 !important;
-  right: 0 !important;
+  width: 100vw !important;
 }
