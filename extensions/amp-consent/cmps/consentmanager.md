@@ -25,23 +25,26 @@ Collect and enforce user consent with the ConsentManager CMP. Login to your Cons
   <script type="application/json">
     {
       "postPromptUI": "postPromptUI",
-      "clientConfig": {"id": "your CMP ID",
-                       "params":"optional configuration parameters"}
+      "clientConfig": {
+        "id": "your CMP ID",
+        "params": "optional configuration parameters"
+      }
     }
   </script>
   <div id="postPromptUI">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=ConsentManager)" role="button">Manage</button>
+    <button on="tap:consent.prompt(consent=ConsentManager)" role="button">
+      Manage
+    </button>
   </div>
 </amp-consent>
 ```
 
 ## Configuration
 
-
-| Attribute |  Type  | Mandatory | Description                                             |
-| --------- | :----: | :-------: | ------------------------------------------------------- |
+| Attribute |  Type  | Mandatory | Description                                                                    |
+| --------- | :----: | :-------: | ------------------------------------------------------------------------------ |
 | id        | String |    yes    | Your ConsentManager CMP ID. Can be found in your account under Menu > Get Code |
-| params    | String |    no     | Additional parameters that can be used in order to configure the CMP layout |
+| params    | String |    no     | Additional parameters that can be used in order to configure the CMP layout    |
 
 Visit the [ConsentManager Website](https://www.consentmanager.net/) and our [Documentation](https://help.consentmanager.net/books/cmp/page/using-the-cmp-with-amp-websites) for more information.
