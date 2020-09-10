@@ -50,7 +50,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
 }
 
-/* Navigation buttons */
+/* Navigation buttons. These are only displayed on desktop. */
 .i-amphtml-story-button-move {
   display: none !important;
 }
