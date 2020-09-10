@@ -488,6 +488,7 @@ export class Resource {
       this.premeasuredRect_ = null;
     } else {
       this.computeMeasurements_();
+      this.premeasuredRect_ = null;
     }
     const newBox = this.layoutBox_;
 
