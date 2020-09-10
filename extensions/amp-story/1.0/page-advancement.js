@@ -511,12 +511,12 @@ export class ManualAdvancement extends AdvancementConfig {
     const openLinkInNewWindow = () => {
       target.setAttribute('target', '_blank');
       target.setAttribute('role', 'link');
-      return false;
     };
 
     // Handles TalkBack clicks. They always come from 0 0.
     if (event.clientX === 0 && event.clientY === 0) {
       openLinkInNewWindow();
+      return false;
     }
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
@@ -529,6 +529,7 @@ export class ManualAdvancement extends AdvancementConfig {
       this.isInScreenBottom_(target, pageRect)
     ) {
       openLinkInNewWindow();
+      return false;
     }
 
     return !!closest(
