@@ -19,7 +19,7 @@ import {waitForChildPromise} from '../../../../src/dom';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.realWin(
-  'amp-timeago',
+  'amp-timeago 1.0',
   {
     amp: {
       runtimeOn: true,

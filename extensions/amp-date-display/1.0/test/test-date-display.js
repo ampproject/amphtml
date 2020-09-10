@@ -20,6 +20,7 @@ import {mount} from 'enzyme';
 
 describes.sandboxed('date-display preact component', {}, (env) => {
   let sandbox;
+  let clock;
 
   function render(data) {
     return JSON.stringify(
@@ -36,7 +37,11 @@ describes.sandboxed('date-display preact component', {}, (env) => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    sandbox.useFakeTimers(new Date('2018-01-01T08:00:00Z'));
+    clock = sandbox.useFakeTimers(new Date('2018-01-01T08:00:00Z'));
+  });
+
+  afterEach(() => {
+    clock.runAll();
   });
 
   // Unfortunately, we cannot test the most interesting case of UTC datetime
