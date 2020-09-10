@@ -620,6 +620,15 @@ class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    
+    // If managed by pool, then once reset occurs we need to
+    // wait for the new video is loaded, then dispatch LOAD
+    // analytics event.
+    if (this.isManagedByPool_()) {
+      this.loadPromise(this.video_).then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
+    }
   }
 
   /** @override */
