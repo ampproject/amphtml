@@ -207,8 +207,7 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   andbeyond: {
-     url:
-      'https://prebid.andbeyond.media/amp.php?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    url: 'https://prebid.andbeyond.media/amp.php?tag_id=TAG_ID',
     macros: ['TAG_ID'],
     disableKeyAppend: true,
   },
