@@ -508,6 +508,13 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
+    // Handles TalkBack click.
+    if (event.clientX === 0 && event.clientY === 0) {
+      target.setAttribute('target', '_blank');
+      target.setAttribute('role', 'link');
+      return false;
+    }
+
     if (this.isInScreenSideEdge_(event, pageRect)) {
       event.preventDefault();
       return false;
