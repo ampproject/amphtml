@@ -576,15 +576,22 @@ class AmpVideo extends AMP.BaseElement {
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
     video.addEventListener('error', (e) => this.handleMediaError_(e));
+    const videoEvents = [
+      VideoEvents.ENDED,
+      VideoEvents.LOADEDMETADATA,
+      VideoEvents.PAUSE,
+      VideoEvents.PLAYING,
+      VideoEvents.PLAY,
+    ];
+
+    // If managed by pool, then once reset occurs we must 
+    // send the LOAD event here as opposed to in layoutCallback.
+    if (this.isManagedByPool_()) {
+      videoEvents.push(VideoEvents.LOAD);
+    }
 
     const forwardEventsUnlisten = this.forwardEvents(
-      [
-        VideoEvents.ENDED,
-        VideoEvents.LOADEDMETADATA,
-        VideoEvents.PAUSE,
-        VideoEvents.PLAYING,
-        VideoEvents.PLAY,
-      ],
+      videoEvents,
       video
     );
 
