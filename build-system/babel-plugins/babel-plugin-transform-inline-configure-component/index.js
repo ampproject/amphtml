@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const {dirname, relative, join} = require('path');
+const {join: posixJoin} = require('path').posix;
 const {transformFileSync} = require('@babel/core');
 
 /**
@@ -68,7 +69,10 @@ function transformRedefineInline({types: t}) {
       ImportDeclaration(path, {opts}) {
         const {source} = path.node;
         if (source.value.startsWith('.')) {
-          source.value = join(opts.from, source.value).replace(/^[^.]/, './$&');
+          source.value = posixJoin(opts.from, source.value).replace(
+            /^[^.]/,
+            './$&'
+          );
         }
       },
       MemberExpression(path, {opts}) {
