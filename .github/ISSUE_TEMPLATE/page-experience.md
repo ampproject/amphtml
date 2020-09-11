@@ -38,7 +38,7 @@ Notes
 
 Suspected components in use: 
 <!--
-List components on the page that may be cuasing these issues
+List components being used on the page
 -->
 
 <!--
