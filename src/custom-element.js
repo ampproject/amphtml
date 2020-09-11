@@ -166,9 +166,6 @@ function createBaseCustomElementClass(win) {
       this.isFirstLayoutCompleted_ = false;
 
       /** @private {boolean} */
-      this.isInViewport_ = false;
-
-      /** @private {boolean} */
       this.paused_ = false;
 
       /** @private {string|null|undefined} */
@@ -498,7 +495,7 @@ function createBaseCustomElementClass(win) {
           this.classList.remove('i-amphtml-notbuilt');
           this.classList.remove('amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
-          if (this.isInViewport_) {
+          if (this.isInViewport()) {
             this.updateInViewport_(true);
           }
           if (this.actionQueue_) {
@@ -1203,7 +1200,7 @@ function createBaseCustomElementClass(win) {
      * @final @package
      */
     isInViewport() {
-      return this.isInViewport_;
+      return this.getResource_().isInViewport;
     }
 
     /**
@@ -1217,15 +1214,11 @@ function createBaseCustomElementClass(win) {
      */
     viewportCallback(inViewport) {
       assertNotTemplate(this);
-      if (inViewport == this.isInViewport_) {
-        return;
-      }
       // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
       // elements in dead iframes.
       if (!this.ownerDocument || !this.ownerDocument.defaultView) {
         return;
       }
-      this.isInViewport_ = inViewport;
       if (this.layoutCount_ == 0) {
         if (!inViewport) {
           this.toggleLoading(false);
@@ -1238,7 +1231,7 @@ function createBaseCustomElementClass(win) {
             // once investigation is complete. It appears that we get a lot of
             // errors here once the iframe is destroyed due to timer.
             if (
-              this.isInViewport_ &&
+              this.isInViewport() &&
               this.ownerDocument &&
               this.ownerDocument.defaultView &&
               this.layoutCount_ === 0 // Ensures that layoutCallback hasn't completed in this 100ms window.

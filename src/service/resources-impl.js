@@ -331,12 +331,14 @@ export class ResourcesImpl {
     this.intersectionObserverCallbackFired_ = true;
 
     entries.forEach((entry) => {
-      const {boundingClientRect, target} = entry;
+      const {boundingClientRect, target, isIntersecting} = entry;
 
       const r = Resource.forElement(target);
       // Strangely, JSC is missing x/y from typedefs of boundingClientRect
       // despite it being a DOMRectReadOnly (ClientRect) by spec.
       r.premeasure(/** @type {!ClientRect} */ (boundingClientRect));
+
+      r.setInViewport(isIntersecting); // TODO: needs to be visibleRect instead of loadRect (1.25x vs. 3x height.).
     });
 
     this.schedulePass();
@@ -1339,23 +1341,7 @@ export class ResourcesImpl {
         expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
-    // Phase 3: Trigger "viewport enter/exit" events.
-    for (let i = 0; i < this.resources_.length; i++) {
-      const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
-        continue;
-      }
-      // Note that when the document is not visible, neither are any of its
-      // elements to reduce CPU cycles.
-      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-      // layers. This is currently a short-term fix to the problem that
-      // the fixed elements get incorrect top coord.
-      const shouldBeInViewport =
-        this.visible_ && r.isDisplayed() && r.overlaps(visibleRect);
-      r.setInViewport(shouldBeInViewport);
-    }
-
-    // Phase 4: Schedule elements for layout within a reasonable distance from
+    // Phase 3: Schedule elements for layout within a reasonable distance from
     // current viewport.
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -1390,7 +1376,7 @@ export class ResourcesImpl {
     }
 
     if (this.visible_ && this.isIdle_(now)) {
-      // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
+      // Phase 4: Idle Render Outside Viewport layout: layout up to 4 items
       // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
       for (
@@ -1410,7 +1396,7 @@ export class ResourcesImpl {
           idleScheduledCount++;
         }
       }
-      // Phase 6: Idle layout: layout more if we are otherwise not doing much.
+      // Phase 5: Idle layout: layout more if we are otherwise not doing much.
       // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
       for (
         let i = 0;

@@ -226,6 +226,9 @@ export class Resource {
      * @private {?ClientRect}
      */
     this.premeasuredRect_ = null;
+
+    /** @private {boolean} */
+    this.isInViewport_ = false;
   }
 
   /**
@@ -1008,11 +1011,10 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    const isInViewport = this.element.isInViewport();
-    if (isInViewport) {
+    if (this.isInViewport_) {
       this.resolveDeferredsWhenWithinViewports_();
     }
-    return isInViewport;
+    return this.isInViewport_;
   }
 
   /**
@@ -1020,7 +1022,10 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    this.element.viewportCallback(inViewport);
+    this.isInViewport_ = inViewport;
+    if (this.element.isBuilt() && ! this.hasOwner()) {
+      this.element.viewportCallback(inViewport); 
+    }
   }
 
   /**
