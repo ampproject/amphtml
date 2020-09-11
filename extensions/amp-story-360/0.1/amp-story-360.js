@@ -553,7 +553,8 @@ export class AmpStory360 extends AMP.BaseElement {
           this.renderer_.setImageOrientation(
             this.sceneHeading_,
             this.scenePitch_,
-            this.sceneRoll_);
+            this.sceneRoll_
+          );
           this.renderer_.setImage(img);
           this.renderer_.resize();
           if (this.orientations_.length < 1) {
