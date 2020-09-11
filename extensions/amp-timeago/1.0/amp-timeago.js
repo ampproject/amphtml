@@ -16,7 +16,6 @@
 
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Timeago} from './timeago';
-import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
@@ -26,11 +25,6 @@ const TAG = 'amp-timeago';
 
 class AmpTimeago extends PreactBaseElement {
   /** @override */
-  init() {
-    return dict({'cutoffText': this.element.textContent});
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'amp-timeago-bento'),
@@ -38,13 +32,18 @@ class AmpTimeago extends PreactBaseElement {
     );
     return isLayoutSizeDefined(layout);
   }
+
+  /** @override */
+  updatePropsForRendering(props) {
+    props['placeholder'] = props['children'];
+  }
 }
 
 /** @override */
 AmpTimeago['Component'] = Timeago;
 
 /** @override */
-AmpTimeago['passthrough'] = true;
+AmpTimeago['passthroughNonEmpty'] = true;
 
 /** @override */
 AmpTimeago['layoutSizeDefined'] = true;
