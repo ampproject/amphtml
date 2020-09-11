@@ -40,7 +40,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
 }
 
 .next-container,
-.i-amphtml-story-button-container.next-container   > .i-amphtml-story-button-move {
+.i-amphtml-story-button-container.next-container > .i-amphtml-story-button-move {
   left: auto !important;
   right: 0 !important;
 }
