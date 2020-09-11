@@ -34,14 +34,13 @@
   z-index: 100002 !important;
 }
 
-/* Hiding pointer events on mobile since this button is intended to be 
-used with mobile screen readers such as TalkBack which add focus lines. */
+/* Hide pointer events on mobile so only visible to screenreaders like TalkBack */
 amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
 }
 
 .next-container,
-.i-amphtml-story-button-container.next-container > .i-amphtml-story-button-move {
+.i-amphtml-story-button-container.next-container   > .i-amphtml-story-button-move {
   left: auto !important;
   right: 0 !important;
 }
