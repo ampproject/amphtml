@@ -41,4 +41,3 @@ All parameters are mandatory, only `data-pubref` is optional.
 - `data-publisherid` (String, non-empty)
 - `data-placementid` (String, non-empty)
 - `data-pubref` (String)
-
