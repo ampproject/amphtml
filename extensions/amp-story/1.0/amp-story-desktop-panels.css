@@ -142,8 +142,8 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 .i-amphtml-story-desktop-panels .i-amphtml-story-button-container {
-  height: calc(75vh * .9) !important;
-  width: calc(3/5 * 75vh * .9) !important;
-  min-width: calc(320px * .9)!important;
-  min-height: calc(533px * .9)!important;
+  height: calc(75vh * var(--i-amphtml-story-inactive-page-scale-factor)) !important;
+  width: calc(3/5 * 75vh * var(--i-amphtml-story-inactive-page-scale-factor)) !important;
+  min-width: calc(320px * var(--i-amphtml-story-inactive-page-scale-factor))!important;
+  min-height: calc(533px * var(--i-amphtml-story-inactive-page-scale-factor))!important;
 }
