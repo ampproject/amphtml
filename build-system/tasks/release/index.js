@@ -35,7 +35,7 @@ const BASE_FLAVOR_CONFIG = {
   rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
   // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
   command:
-    'gulp dist --noconfig --esm && gulp dist --noconfig && gulp dist --sxg',
+    'gulp dist --noconfig --esm && gulp dist --sxg && gulp dist --noconfig',
   environment: 'AMP',
 };
 
