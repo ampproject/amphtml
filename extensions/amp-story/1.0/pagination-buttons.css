@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/* 
+ * In desktop panel mode i-amphtml-story-button-container acts as a sentinel 
+ * and covers the previous and next pages.
+ * In mobile it is focusable for screen readers and the buttons are hidden. 
+ * In desktop full bleed it is not focusable since the buttons are visible.
+ */
 .i-amphtml-story-button-container {
   cursor: pointer !important;
   position: absolute !important;
@@ -28,7 +34,7 @@
   z-index: 100002 !important;
 }
 
-/* Hiding the outline on small screens since this button is intended to be 
+/* Hiding pointer events on mobile since this button is intended to be 
 used with mobile screen readers such as TalkBack which add focus lines. */
 amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
