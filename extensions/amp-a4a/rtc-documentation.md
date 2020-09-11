@@ -123,6 +123,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 
 #### Currently Supported Vendors
 
+- Andbeyond 
 - AppNexus
 - APS
 - Automatad
