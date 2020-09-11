@@ -437,12 +437,12 @@ export class ViewportImpl {
   /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
     if (IS_SXG) {
-      return new Promise((resolve, _) => {
+      return new Promise((resolve, opt_) => {
         element./* OK */ scrollIntoView({
           block: SCROLL_POS_TO_BLOCK[pos],
           behavior: 'smooth',
         });
-        setTimeout(resolve, SCROLL_DELAY_);
+        setTimeout(resolve, SMOOTH_SCROLL_DELAY_);
       });
     } else {
       devAssert(
