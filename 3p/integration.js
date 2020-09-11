@@ -340,6 +340,7 @@ const AMP_EMBED_ALLOWED = {
   svknative: true,
   taboola: true,
   temedya: true,
+  vlyby: true,
   whopainfeed: true,
   yahoofedads: true,
   yahoonativeads: true,
