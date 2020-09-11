@@ -19,16 +19,17 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad
-  width="400"
-  height="225"
+<amp-embed
+  width="300"
+  height="250"
   type="vlyby"
-  heights="(min-width:1907px) 56%, (min-width:1100px) 64%, (min-width:780px) 75%, (min-width:480px) 105%, 200%"
-  data-publisherid="00uh4p9ch0xd1vgYs0h7"
-  data-placementid="Default"
-  data-pubref="bunte.de"
+  layout="responsive"
+  heights="250px"
+  data-publisherid="f363eb2b75459b34592cc4"
+  data-placementid="default"
+  data-pubref="test.amp.com"
 >
-</amp-ad>
+</amp-embed>
 ```
 
 ## Configuration
