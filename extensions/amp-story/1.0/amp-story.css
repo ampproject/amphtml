@@ -964,10 +964,6 @@ amp-story-interactive-results[chip-style="transparent"] {
   --i-amphtml-interactive-options-chip-background-color: transparent !important;
   --interactive-prompt-background: transparent;
   --i-amphtml-interactive-component-shadow: none !important;
-}
-
-amp-story-interactive-results[chip-style="transparent"] {
-  --interactive-prompt-background: transparent;
   --interactive-prompt-text-color: black;
   --i-amphtml-interactive-results-prompt-margin: 0px !important;
 }
