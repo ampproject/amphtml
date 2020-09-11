@@ -20,27 +20,38 @@ import {dict} from '../../../../src/utils/object';
 import {mount} from 'enzyme';
 
 describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
-  // TODO(#30043): unskip once #30043 is merged (Preact bug fix).
-  it.skip('errors when the required "type" attribute is not provided', () => {
-    const jsx = <SocialShare />;
+  const originalWarn = console.warn;
 
-    expect(() => {
-      mount(jsx);
-    }).to.throw('The type attribute is required.');
+  afterEach(() => (console.warn = originalWarn));
+
+  it('warns when the required "type" attribute is not provided', () => {
+    const consoleOutput = [];
+    const mockedWarn = (output) => consoleOutput.push(output);
+    console.warn = mockedWarn;
+
+    const jsx = <SocialShare />;
+    mount(jsx);
+
+    expect(consoleOutput.length).to.equal(1);
+    expect(consoleOutput[0]).to.equal(
+      'The type attribute is required. SocialShare'
+    );
   });
 
-  // TODO(#30043): unskip once #30043 is merged (Preact bug fix).
-  it.skip(
-    'errors when the required endpoint is not provided when not using' +
+  it(
+    'warns when the required endpoint is not provided when not using' +
       ' a pre-configured type',
     () => {
-      const props = dict({'type': 'not-configured-type'});
-      const jsx = <SocialShare {...props} />;
+      const consoleOutput = [];
+      const mockedWarn = (output) => consoleOutput.push(output);
+      console.warn = mockedWarn;
 
-      expect(() => {
-        mount(jsx);
-      }).to.throw(
-        'An endpoint is required if not using a pre-configured type.'
+      const jsx = <SocialShare {...dict({'type': 'not-configured-type'})} />;
+      mount(jsx);
+
+      expect(consoleOutput.length).to.equal(1);
+      expect(consoleOutput[0]).to.equal(
+        'An endpoint is required if not using a pre-configured type. SocialShare'
       );
     }
   );

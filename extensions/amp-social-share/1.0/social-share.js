@@ -54,6 +54,7 @@ export function SocialShare({
     checkedWidth,
     checkedHeight,
     checkedTarget,
+    errorState,
   } = checkProps(type, endpoint, target, width, height, params);
 
   const size = dict({
@@ -61,24 +62,26 @@ export function SocialShare({
     'height': checkedHeight,
   });
 
-  return (
-    <div
-      {...rest}
-      role="button"
-      tabindex={tabIndex}
-      onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
-      onClick={() => handleActivation(finalEndpoint, checkedTarget)}
-      style={{...size, ...style}}
-    >
-      {processChildren(
-        /** @type {string} */ (type),
-        children,
-        color,
-        background,
-        size
-      )}
-    </div>
-  );
+  if (!errorState) {
+    return (
+      <div
+        {...rest}
+        role="button"
+        tabindex={tabIndex}
+        onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
+        onClick={() => handleActivation(finalEndpoint, checkedTarget)}
+        style={{...size, ...style}}
+      >
+        {processChildren(
+          /** @type {string} */ (type),
+          children,
+          color,
+          background,
+          size
+        )}
+      </div>
+    );
+  }
 }
 
 /**
@@ -125,12 +128,29 @@ function processChildren(type, children, color, background, size) {
  *   checkedWidth: (number|string),
  *   checkedHeight: (number|string),
  *   checkedTarget: string,
+ *   errorState: boolean,
  * }}
  */
 function checkProps(type, endpoint, target, width, height, params) {
+  // Defaults
+  const checkedWidth = width || DEFAULT_WIDTH;
+  const checkedHeight = height || DEFAULT_HEIGHT;
+  const checkedTarget = target || DEFAULT_TARGET;
+
+  let finalEndpoint = '';
+  let errorState = false;
+
   // Verify type is provided
   if (type === undefined) {
-    throw new Error(`The type attribute is required. ${NAME}`);
+    displayWarning(`The type attribute is required. ${NAME}`);
+    errorState = true;
+    return {
+      finalEndpoint,
+      checkedWidth,
+      checkedHeight,
+      checkedTarget,
+      errorState,
+    };
   }
 
   // User must provide endpoint if they choose a type that is not
@@ -138,9 +158,17 @@ function checkProps(type, endpoint, target, width, height, params) {
   const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
   let baseEndpoint = endpoint || typeConfig.shareEndpoint;
   if (baseEndpoint === undefined) {
-    throw new Error(
+    displayWarning(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
     );
+    errorState = true;
+    return {
+      finalEndpoint,
+      checkedWidth,
+      checkedHeight,
+      checkedTarget,
+      errorState,
+    };
   }
 
   // Special case when type is 'email'
@@ -149,28 +177,24 @@ function checkProps(type, endpoint, target, width, height, params) {
   }
 
   // Add params to baseEndpoint
-  const finalEndpoint = addParamsToUrl(
+  finalEndpoint = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),
     /** @type {!JsonObject} */ (params)
   );
-
-  // Defaults
-  const checkedWidth = width || DEFAULT_WIDTH;
-  const checkedHeight = height || DEFAULT_HEIGHT;
-  const checkedTarget = target || DEFAULT_TARGET;
 
   return {
     finalEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
+    errorState,
   };
 }
 
 /**
  * @param {?string} message
  */
-function throwWarning(message) {
+function displayWarning(message) {
   console /*OK*/
     .warn(message);
 }
@@ -189,10 +213,10 @@ function handleActivation(finalEndpoint, target) {
         /** @type {string} */ (getQueryString(finalEndpoint))
       );
       window.navigator.share(data).catch((e) => {
-        throwWarning(`${e.message}. ${NAME}`);
+        displayWarning(`${e.message}. ${NAME}`);
       });
     } else {
-      throwWarning(
+      displayWarning(
         `Could not complete system share.  Navigator unavailable. ${NAME}`
       );
     }
