@@ -76,10 +76,12 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   transform: perspective(1px) scale(var(--i-amphtml-story-inactive-page-scale-factor)) translateX(calc(-3 * var(--i-amphtml-story-page-50vw, 50%) - 64px)) translateY(0%) !important;
 }
 
-.i-amphtml-story-desktop-panels .prev-container {
+.i-amphtml-story-desktop-panels .prev-container,
+[dir=rtl] .i-amphtml-story-desktop-panels .next-container {
   left: calc(50% - var(--i-amphtml-story-page-50vw, 50%) * var(--i-amphtml-story-inactive-page-scale-factor) * 3 - 64px) !important;
 }
 
+.i-amphtml-story-desktop-panels .next-container,
 [dir=rtl] .i-amphtml-story-desktop-panels .prev-container {
   left: calc(var(--i-amphtml-story-page-50vw, 50%) * var(--i-amphtml-story-inactive-page-scale-factor) + 50% + 64px) !important;
 }
@@ -90,23 +92,13 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   transform: perspective(1px) scale(var(--i-amphtml-story-inactive-page-scale-factor)) translate(calc(var(--i-amphtml-story-page-50vw, 50%) + 64px), 0%) !important;
 }
 
-.i-amphtml-story-desktop-panels .next-container {
-  left: calc(var(--i-amphtml-story-page-50vw, 50%) * var(--i-amphtml-story-inactive-page-scale-factor) + 50% + 64px) !important;
-}
-
-[dir=rtl] .i-amphtml-story-desktop-panels .next-container {
-  left: calc(50% - var(--i-amphtml-story-page-50vw, 50%) * var(--i-amphtml-story-inactive-page-scale-factor) * 3 - 64px) !important;
-}
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"] {
   transform: perspective(1px) scale(var(--i-amphtml-story-inactive-page-scale-factor)) translate(calc(3 * var(--i-amphtml-story-page-50vw, 50%) + 128px), 0%) !important;
 }
 
-.i-amphtml-story-prev-hover > amp-story-page[i-amphtml-desktop-position="-1"] {
-  opacity: 0.3 !important;
-}
-
-.i-amphtml-story-next-hover > amp-story-page[i-amphtml-desktop-position="0"] + amp-story-page {
+.i-amphtml-story-prev-hover > amp-story-page[i-amphtml-desktop-position="-1"],
+.i-amphtml-story-next-hover > amp-story-page[i-amphtml-desktop-position="1"] {
   opacity: 0.3 !important;
 }
 
