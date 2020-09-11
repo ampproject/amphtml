@@ -23,8 +23,7 @@
  *   datetime: string,
  *   locale: string,
  *   cutoff: (number|undefined),
- *   cutoffText: (string|undefined),
- *   containSize: (boolean|undefined),
+ *   placeholder: (string|!PreactDef.VNode|null|undefined),
  * }}
  */
 var TimeagoProps;
