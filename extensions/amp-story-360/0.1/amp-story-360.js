@@ -256,7 +256,7 @@ export class AmpStory360 extends AMP.BaseElement {
     const attr = (name) => this.element.getAttribute(name);
     const attrAsFloat = (name, fallbackValue = 0) => {
       return parseFloat(attr(name) || fallbackValue);
-    }
+    };
 
     if (attr('duration')) {
       this.duration_ = timeStrToMillis(attr('duration')) || 0;
@@ -551,7 +551,9 @@ export class AmpStory360 extends AMP.BaseElement {
             dev().assertElement(this.element.querySelector('img'))
           );
           this.renderer_.setImageOrientation(
-              this.sceneHeading_, this.scenePitch_, this.sceneRoll_);
+              this.sceneHeading_,
+              this.scenePitch_,
+              this.sceneRoll_);
           this.renderer_.setImage(img);
           this.renderer_.resize();
           if (this.orientations_.length < 1) {
