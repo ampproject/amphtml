@@ -6,7 +6,6 @@
   ],
   "allow-url-opt-in": ["pump-early-frame"],
   "canary": 1,
-  "a4a-no-signing": 1,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 0.05,
   "amp-access-iframe": 1,
