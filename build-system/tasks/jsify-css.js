@@ -53,14 +53,15 @@ const cssNanoDefaultOptions = {
 };
 
 /**
- * Css transformations to target file using postcss.
+ * Transform a css string using postcss.
 
- * @param {string} filename css file
+ * @param {string} cssStr the css text to transform
  * @param {!Object=} opt_cssnano cssnano options
+ * @param {!Object=} opt_filename the filename of the file being transformed. Used for sourcemaps generation.
  * @return {!Promise<string>} that resolves with the css content after
  *    processing
  */
-function transformCss(filename, opt_cssnano) {
+function transformCss(cssStr, opt_cssnano, opt_filename) {
   opt_cssnano = opt_cssnano || Object.create(null);
   // See http://cssnano.co/optimisations/ for full list.
   // We try and turn off any optimization that is marked unsafe.
@@ -70,12 +71,31 @@ function transformCss(filename, opt_cssnano) {
     opt_cssnano
   );
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
-
-  const css = fs.readFileSync(filename, 'utf8');
   const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
-  return postcss(transformers).process(css.toString(), {
-    'from': filename,
-  });
+  return postcss(transformers).process(
+    cssStr,
+    opt_filename
+      ? {
+          'from': opt_filename,
+        }
+      : undefined
+  );
+}
+
+/**
+ * Transform a css file using postcss.
+
+ * @param {string} filename css file
+ * @param {!Object=} opt_cssnano cssnano options
+ * @return {!Promise<string>} that resolves with the css content after
+ *    processing
+ */
+function transformCssFile(filename, opt_cssnano) {
+  return transformCss(
+    fs.readFileSync(filename, {encoding: 'utf8'}),
+    opt_cssnano,
+    filename
+  );
 }
 
 /**
@@ -100,4 +120,5 @@ function jsifyCssAsync(filename) {
 module.exports = {
   jsifyCssAsync,
   transformCss,
+  transformCssFile,
 };
