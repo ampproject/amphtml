@@ -47,12 +47,12 @@ import {numeric} from '../../transition';
 import {tryResolve} from '../../utils/promise';
 
 const TAG_ = 'Viewport';
-const SCROLL_POS_TO_BLOCK_ = {
+const SCROLL_POS_TO_BLOCK = {
   'top': 'start',
   'center': 'center',
   'bottom': 'end',
 };
-const SCROLL_DELAY_ = 300;
+const SMOOTH_SCROLL_DELAY_ = 300;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -437,9 +437,9 @@ export class ViewportImpl {
   /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
     if (IS_SXG) {
-      return new Promise((resolve, opt_reject) => {
+      return new Promise((resolve, _) => {
         element./* OK */ scrollIntoView({
-          block: SCROLL_POS_TO_BLOCK_[pos],
+          block: SCROLL_POS_TO_BLOCK[pos],
           behavior: 'smooth',
         });
         setTimeout(resolve, SCROLL_DELAY_);
