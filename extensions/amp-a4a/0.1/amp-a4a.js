@@ -861,7 +861,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isInNoSigningExp() {
     // eslint-disable-next-line no-undef
-    return NO_SIGNING_RTV;
+    return !!NO_SIGNING_RTV;
   }
 
   /**
