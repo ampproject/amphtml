@@ -33,10 +33,7 @@ Run `gulp get-zindex` to generate this file.
 | .i-amphtml-story-opacity-mask                                                                           | 100003     | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-story-has-new-page-notification-container                                                    | 100002     | extensions/amp-story/1.0/amp-story-system-layer.css                  |
 | amp-story[standalone] .i-amphtml-story-developer-log                                                    | 100002     | extensions/amp-story/1.0/amp-story.css                               |
-| .i-amphtml-story-button-move                                                                            | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-container                                    | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-desktop-panels .i-amphtml-story-button-container                                       | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-page-sentinel                                                                          | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
+| .i-amphtml-story-button-container                                                                       | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
 | .i-amphtml-ad-overlay-container                                                                         | 100001     | extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-ad-badge.css    |
 | .i-amphtml-story-bookend                                                                                | 100001     | extensions/amp-story/1.0/amp-story-bookend.css                       |
 | .i-amphtml-story-info-dialog                                                                            | 100001     | extensions/amp-story/1.0/amp-story-info-dialog.css                   |
