@@ -38,10 +38,8 @@ export function vlyby(global, data) {
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (changes) {
     /** @type {!Array} */ (changes).forEach(function (c) {
-      if (c.intersectionRect.height) {
-        if (window._vlybyAmpStart && window._vlybyAmpStart === 'function') {
-            _vlybyAmpStart();
-        }
+      if(global._vlyby_amp) {
+        global._vlyby_amp.rects= c;
       }
     });
   });
@@ -55,17 +53,15 @@ export function vlyby(global, data) {
   
   function createScript(global, id) {
     const s = global.document.createElement('script');
-    const referrer = global._vlyby_amp.data.pubref || global.context.referrer;
+    const referrer = global._vlyby_amp.data.pubref || global.context.canonicalUrl;
     const url = global.context.canonicalUrl;
     s.setAttribute('type', 'text/javascript');
     s.setAttribute('async', 'true');
-    s.setAttribute('src', '//cdn.vlyby.com/qad/qad-outer2.js');
+    s.setAttribute('src', '//amp.vlyby.com/qad/qad-outer2.js');
     s.setAttribute('data-PubId', global._vlyby_amp.data.publisherid);
     s.setAttribute('data-PlacementId', global._vlyby_amp.data.placementid);
     s.setAttribute('data-DivId', id);
     s.setAttribute('data-PubRef', referrer);
-    //s.setAttribute('data-ManualStart', 'true');
-    //s.setAttribute('data-ManualStartFuncName', '_vlybyAmpStart');
     global.document.getElementById('c').appendChild(s);
   }
   function createContainer(global, id) {
