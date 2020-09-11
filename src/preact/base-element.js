@@ -15,6 +15,7 @@
  */
 
 import * as Preact from './index';
+import {BaseElement} from './bento-ce';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
@@ -83,7 +84,7 @@ const SIZE_DEFINED_STYLE = {
  *
  * @template API_TYPE
  */
-export class PreactBaseElement extends AMP.BaseElement {
+export class PreactBaseElement extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

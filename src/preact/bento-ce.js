@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< Updated upstream
 let CE = typeof AMP !== 'undefined' && AMP.BaseElement;
 
 if (!CE) {
@@ -22,6 +23,29 @@ if (!CE) {
     constructor() {
       /** @const {!Element} */
       this.element = this;
+=======
+/**
+ * @constructor @struct
+ * @extends {BaseElement$$module$src$base_element}
+ */
+let BaseElement;
+
+const AmpBaseElement = typeof AMP !== 'undefined' && AMP.BaseElement;
+
+if (AmpBaseElement) {
+  BaseElement = AmpBaseElement;
+} else {
+  class CustomElement extends HTMLElement {
+    /** */
+    constructor() {
+      super();
+
+      /** @const {!Element} */
+      this.element = this;
+
+      /** @const {!Window} */
+      this.win = this.ownerDocument.defaultView;
+>>>>>>> Stashed changes
     }
 
     /** */
@@ -36,7 +60,34 @@ if (!CE) {
     mutateElement(cb) {
       Promise.resolve().then(cb);
     }
+<<<<<<< Updated upstream
   };
 }
 
 export {CE};
+=======
+
+    /**
+     * @param {string} alias
+     * @param {function(!./service/action-impl.ActionInvocation)} handler
+     * @param {*} unusedMinTrust
+     * @public
+     */
+    registerAction(alias, handler, unusedMinTrust) {
+      this.element.addEventListener(alias, (e) => {
+        //TODO
+        handler(e);
+      });
+    }
+
+    /**
+     * Unneeded in the Custom Element implementation.
+     */
+    isLayoutSupported() {}
+  }
+
+  BaseElement = /** @type {!BaseElement$$module$src$base_element} */ (CustomElement);
+}
+
+export {BaseElement};
+>>>>>>> Stashed changes
