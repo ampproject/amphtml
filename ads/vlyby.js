@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/* eslint-disable require-jsdoc */
 import {validateData} from '../3p/3p';
 
 /**
@@ -28,33 +28,31 @@ export function vlyby(global, data) {
     data,
   };
 
-  validateData(
-    data,
-    global._vlyby_amp.mandatory_data
-  );
+  validateData(data, global._vlyby_amp.mandatory_data);
 
   const rand = Math.round(Math.random() * 100000000);
 
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (changes) {
     /** @type {!Array} */ (changes).forEach(function (c) {
-      if(global._vlyby_amp) {
-        global._vlyby_amp.rects= c;
+      if (global._vlyby_amp) {
+        global._vlyby_amp.rects = c;
       }
     });
   });
 
   //create Container
-  const containerId = 'qad'+rand;
+  const containerId = 'qad' + rand;
   createContainer(global, containerId);
-  
+
   //create Script
   createScript(global, containerId);
-  
+
   function createScript(global, id) {
     const s = global.document.createElement('script');
-    const referrer = global._vlyby_amp.data.pubref || global.context.canonicalUrl;
-    const url = global.context.canonicalUrl;
+    const referrer =
+      global._vlyby_amp.data.pubref || global.context.canonicalUrl;
+
     s.setAttribute('type', 'text/javascript');
     s.setAttribute('async', 'true');
     s.setAttribute('src', '//amp.vlyby.com/qad/qad-outer2.js');
