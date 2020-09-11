@@ -75,15 +75,15 @@ storiesOf('amp-social-share-1_0', module)
       undefined,
     ];
     const type = select('type', typeConfigurations, typeConfigurations[0]);
-    const customEndpoint = text('data-share-endpoint', undefined);
-    const paramUrl = text('data-param-url', undefined);
-    const paramText = text('data-param-text', undefined);
-    const paramAttribution = text('data-param-attribution', undefined);
-    const paramMedia = text('data-param-media', undefined);
+    const customEndpoint = text('data-share-endpoint', null);
+    const paramUrl = text('data-param-url', null);
+    const paramText = text('data-param-text', null);
+    const paramAttribution = text('data-param-attribution', null);
+    const paramMedia = text('data-param-media', null);
     const appId = text('data-param-app_id', '254325784911610');
-    const layout = text('layout', undefined);
-    const width = text('width', undefined);
-    const height = text('height', undefined);
+    const layout = text('layout', null);
+    const width = text('width', null);
+    const height = text('height', null);
     return (
       <amp-social-share
         type={type}

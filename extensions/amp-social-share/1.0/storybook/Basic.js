@@ -41,14 +41,14 @@ export const _default = () => {
     undefined,
   ];
   const type = select('type', knobConfigurations, knobConfigurations[0]);
-  const endpoint = text('customEndpoint', undefined);
+  const endpoint = text('customEndpoint', null);
   const additionalParams = object('additionalParams', {'subject': 'test'});
-  const target = text('target', undefined);
-  const width = text('width', undefined);
-  const height = text('height', undefined);
-  const foregroundColor = color('color', undefined);
-  const background = color('background', undefined);
-  const children = text('children', undefined);
+  const target = text('target', null);
+  const width = text('width', null);
+  const height = text('height', null);
+  const foregroundColor = color('color');
+  const background = color('background');
+  const children = text('children', null);
 
   return (
     <SocialShare
