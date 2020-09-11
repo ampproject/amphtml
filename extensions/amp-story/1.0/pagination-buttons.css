@@ -147,7 +147,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
 
 /* Do not display when hidden. */
 .i-amphtml-story-button-hidden {
-  visibility: hidden;
+  visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
