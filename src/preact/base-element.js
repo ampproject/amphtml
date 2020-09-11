@@ -349,6 +349,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       this.ref_,
       this.defaultProps_
     );
+    this.updatePropsForRendering(props);
 
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
@@ -379,6 +380,12 @@ export class PreactBaseElement extends AMP.BaseElement {
       this.scheduledRenderDeferred_ = null;
     }
   }
+
+  /**
+   * @param {!JsonObject} unusedProps
+   * @protected
+   */
+  updatePropsForRendering(unusedProps) {}
 
   /**
    * @protected
