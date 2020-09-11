@@ -36,7 +36,7 @@ This page is failing for the following reason:
 Notes
 ---
 
-Suspected components in use: 
+Components in use: 
 <!--
 List components being used on the page
 -->
