@@ -37,10 +37,7 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   box-shadow: none !important;
 }
 
-[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element {
-  transform: perspective(1px) scale(var(--i-amphtml-story-inactive-page-scale-factor)) translateX(calc(-350% - 192px)) translateY(0%) !important;
-}
-
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element,
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-visited] {
   transform: perspective(1px) scale(var(--i-amphtml-story-inactive-page-scale-factor)) translateX(calc(-350% - 192px)) translateY(0%) !important;
 }
@@ -136,6 +133,6 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 .i-amphtml-story-desktop-panels .i-amphtml-story-button-container {
   height: calc(75vh * var(--i-amphtml-story-inactive-page-scale-factor)) !important;
   width: calc(3/5 * 75vh * var(--i-amphtml-story-inactive-page-scale-factor)) !important;
-  min-width: calc(320px * var(--i-amphtml-story-inactive-page-scale-factor))!important;
-  min-height: calc(533px * var(--i-amphtml-story-inactive-page-scale-factor))!important;
+  min-width: calc(320px * var(--i-amphtml-story-inactive-page-scale-factor)) !important;
+  min-height: calc(533px * var(--i-amphtml-story-inactive-page-scale-factor)) !important;
 }
