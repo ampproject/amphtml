@@ -19,10 +19,10 @@ To use RTC, you must meet the following requirements:
 
 ### Supported Vendors
 
-- Andbeyond
 - AppNexus
 - APS
 - Automatad
+- Andbeyond
 - Browsi
 - Criteo
 - FLUX
