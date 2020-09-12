@@ -178,7 +178,7 @@ export class AmpMustache extends BaseTemplate {
    */
   unwrapChildren(root) {
     const children = [];
-    visitChildren_(root, (c) => {
+    this.visitChildren_(root, (c) => {
       if (typeof c == 'string') {
         const element = this.win.document.createElement('div');
         element.textContent = c;
@@ -199,7 +199,7 @@ export class AmpMustache extends BaseTemplate {
    */
   tryUnwrap(root) {
     let onlyChild;
-    visitChildren_(root, (c) => {
+    this.visitChildren_(root, (c) => {
       if (onlyChild === undefined && c.nodeType) {
         onlyChild = c;
       } else {
