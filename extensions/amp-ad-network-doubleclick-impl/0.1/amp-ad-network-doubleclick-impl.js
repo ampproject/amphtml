@@ -32,7 +32,6 @@ import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
-  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -426,14 +425,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         experimentId: ZINDEX_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
-      },
-      {
-        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_PADDING_BOTTOM_EXP.control,
-          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
-        ],
       },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);

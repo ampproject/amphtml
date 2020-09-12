@@ -27,7 +27,6 @@ import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
   SANDBOX_HEADER,
-  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
@@ -220,16 +219,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @visibleForTesting
    */
   divertExperiments() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_PADDING_BOTTOM_EXP.control,
-          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
-        ],
-      },
-    ]);
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
       experimentInfoList

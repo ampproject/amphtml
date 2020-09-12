@@ -285,11 +285,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
   },
   {
-    id: 'sticky-ad-padding-bottom',
-    name: 'Add a bottom padding for edgeless iPhones',
-    spec: 'https://github.com/ampproject/amphtml/issues/22251',
-  },
-  {
     id: 'expand-json-targeting',
     name: 'Allow CLIENT_ID in doubleclick json targeting feature',
     spec: 'https://github.com/ampproject/amphtml/issues/25190',
