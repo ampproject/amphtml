@@ -355,6 +355,7 @@ describes.realWin('BaseTemplate', {amp: true}, (env) => {
     }).to.throw(/Not implemented/);
   });
 
+  /*
   describe('tryUnwrap()', () => {
     it('should unwrap single element', () => {
       const root = doc.createElement('div');
@@ -447,4 +448,5 @@ describes.realWin('BaseTemplate', {amp: true}, (env) => {
       expect(result[1]).to.equal(children[1]);
     });
   });
+  */
 });

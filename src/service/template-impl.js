@@ -86,67 +86,6 @@ export class BaseTemplate {
   }
 
   /**
-   * Iterate through the child nodes of the given root, applying the
-   * given callback to non-empty text nodes and elements.
-   * @param {!Element} root
-   * @param {function((!Element|string))} callback
-   */
-  visitChildren_(root, callback) {
-    for (let n = root.firstChild; n != null; n = n.nextSibling) {
-      if (n.nodeType == /* TEXT */ 3) {
-        const text = n.textContent.trim();
-        if (text) {
-          callback(text);
-        }
-      } else if (n.nodeType == /* COMMENT */ 8) {
-        // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
-        callback(dev().assertElement(n));
-      }
-    }
-  }
-
-  /**
-   * Unwraps the root element. If root has a single element child,
-   * returns the child. Otherwise, returns root.
-   * @param {!Element} root
-   * @return {!Element}
-   * @protected @final
-   */
-  tryUnwrap(root) {
-    let onlyChild;
-    this.visitChildren_(root, (c) => {
-      if (onlyChild === undefined && c.nodeType) {
-        onlyChild = c;
-      } else {
-        onlyChild = null;
-      }
-    });
-    return onlyChild || root;
-  }
-
-  /**
-   * Unwraps the root element and returns any children in an array.
-   * Text node children are normalized inside a <div>.
-   * @param {!Element} root
-   * @return {!Array<!Element>}
-   * @protected @final
-   */
-  unwrapChildren(root) {
-    const children = [];
-    this.visitChildren_(root, (c) => {
-      if (typeof c == 'string') {
-        const element = this.win.document.createElement('div');
-        element.textContent = c;
-        children.push(element);
-      } else {
-        children.push(c);
-      }
-    });
-    return children;
-  }
-
-  /**
    * @protected @final
    * @return {boolean}
    */

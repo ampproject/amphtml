@@ -22,6 +22,7 @@
     "intersection-observer": "0.11.0",
     "jss": "10.3.0",
     "jss-preset-default": "10.4.0",
+    "madge": "^3.9.2",
     "moment": "2.24.0",
     "preact": "10.2.1",
     "promise-pjs": "1.1.4",
