@@ -48,7 +48,7 @@ export function vlyby(global, data) {
 
   //create Container
   const containerId = 'qad' + rand;
-  createContainer(global, containerId);
+  createContainer(containerId);
 
   //create Script
   createScript(containerId);
