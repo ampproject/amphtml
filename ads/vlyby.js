@@ -51,13 +51,13 @@ export function vlyby(global, data) {
   function createScript(global, id) {
     const s = global.document.createElement('script');
     const referrer =
-      global._vlyby_amp.data.pubref || global.context.canonicalUrl;
+      global._vlyby_amp.data['pubref'] || global.context.canonicalUrl;
 
     s.setAttribute('type', 'text/javascript');
     s.setAttribute('async', 'true');
     s.setAttribute('src', '//amp.vlyby.com/qad/qad-outer2.js');
-    s.setAttribute('data-PubId', global._vlyby_amp.data.publisherid);
-    s.setAttribute('data-PlacementId', global._vlyby_amp.data.placementid);
+    s.setAttribute('data-PubId', global._vlyby_amp.data['publisherid']);
+    s.setAttribute('data-PlacementId', global._vlyby_amp.data['placementid']);
     s.setAttribute('data-DivId', id);
     s.setAttribute('data-PubRef', referrer);
     global.document.getElementById('c').appendChild(s);
