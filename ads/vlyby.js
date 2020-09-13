@@ -48,12 +48,12 @@ export function vlyby(global, data) {
 
   //create Container
   const containerId = 'qad' + rand;
-  createContainer(containerId);
+  createContainer(global, containerId);
 
   //create Script
-  createScript(containerId);
+  createScript(global, containerId);
 
-  function createScript(id) {
+  function createScript(global, id) {
     const s = global.document.createElement('script');
     const referrer = data['pubref'] || global.context.canonicalUrl;
 
@@ -66,7 +66,7 @@ export function vlyby(global, data) {
     s.setAttribute('data-PubRef', referrer);
     global.document.getElementById('c').appendChild(s);
   }
-  function createContainer(id) {
+  function createContainer(global, id) {
     const d = global.document.createElement('div');
     d.id = id;
     global.document.getElementById('c').appendChild(d);
