@@ -51,9 +51,9 @@ export function vlyby(global, data) {
   createContainer(global, containerId);
 
   //create Script
-  createScript(global, containerId);
+  createScript(containerId);
 
-  function createScript(global, id) {
+  function createScript(id) {
     const s = global.document.createElement('script');
     const referrer = data['pubref'] || global.context.canonicalUrl;
 
