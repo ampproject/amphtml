@@ -66,7 +66,7 @@ export function vlyby(global, data) {
     s.setAttribute('data-PubRef', referrer);
     global.document.getElementById('c').appendChild(s);
   }
-  function createContainer(global, id) {
+  function createContainer(id) {
     const d = global.document.createElement('div');
     d.id = id;
     global.document.getElementById('c').appendChild(d);
