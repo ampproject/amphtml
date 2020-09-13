@@ -23,9 +23,14 @@ import {validateData} from '../3p/3p';
 export function vlyby(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   global._vlyby_amp = {
-    allowed_data: ['pubref', 'publisherid', 'placementid'],
+    allowed_data: ['publisherid', 'placementid', 'pubref'],
     mandatory_data: ['publisherid', 'placementid'],
-    data,
+    data: {
+      pubref: '',
+      publisherid: '',
+      placementid: '',
+      ...data,
+    },
   };
 
   validateData(data, global._vlyby_amp.mandatory_data);
