@@ -702,19 +702,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return this.mergeRtcResponses_(results);
     });
 
-    // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
-    const isJsonTargetingExpOn = isExperimentOn(
-      this.win,
-      'expand-json-targeting'
-    );
-
-    const targetingExpansionPromise = isJsonTargetingExpOn
-      ? timerService
-          .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
-          .catch(() => {
-            dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
-          })
-      : Promise.resolve();
+    const targetingExpansionPromise = timerService
+      .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
+      .catch(() => {
+        dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
+      });
 
     Promise.all([
       rtcParamsPromise,
