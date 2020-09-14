@@ -35,7 +35,9 @@ import {Keys} from '../../../src/utils/key-codes';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
+  checkCorsUrl,
   isProxyOrigin,
+  assertHttpsUrl,
   parseQueryString,
   serializeQueryString,
 } from '../../../src/url';
@@ -1685,7 +1687,156 @@ export class AmpFormService {
   }
 }
 
+/**
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise}
+ */
+function installGlobalSubmitListenerForDoc(ampdoc) {
+  if (this.docSubmitInstalled_) {
+    return;
+  } else {
+    this.docSubmitInstalled_ = true;
+    ampdoc
+      .getRootNode()
+      .addEventListener('submit', onDocumentFormSubmit_, true);
+  }
+}
+
+/**
+ * Intercept any submit on the current document and prevent invalid submits from
+ * going through.
+ *
+ * @param {!Event} e
+ */
+export function onDocumentFormSubmit_(e) {
+  if (e.defaultPrevented) {
+    return;
+  }
+
+  const form = dev().assertElement(e.target);
+  if (!form || form.tagName != 'FORM') {
+    return;
+  }
+
+  // amp-form extension will add novalidate to all forms to manually trigger
+  // validation. In that case `novalidate` doesn't have the same meaning.
+  const isAmpFormMarked = form.classList.contains('i-amphtml-form');
+  let shouldValidate;
+  if (isAmpFormMarked) {
+    shouldValidate = !form.hasAttribute('amp-novalidate');
+  } else {
+    shouldValidate = !form.hasAttribute('novalidate');
+  }
+
+  // Safari does not trigger validation check on submission, hence we
+  // trigger it manually. In other browsers this would never execute since
+  // the submit event wouldn't be fired if the form is invalid.
+  if (shouldValidate && form.checkValidity && !form.checkValidity()) {
+    e.preventDefault();
+  }
+
+  const inputs = form.elements;
+  for (let i = 0; i < inputs.length; i++) {
+    userAssert(
+      !inputs[i].name || inputs[i].name != SOURCE_ORIGIN_PARAM,
+      'Illegal input name, %s found: %s',
+      SOURCE_ORIGIN_PARAM,
+      inputs[i]
+    );
+  }
+
+  const action = form.getAttribute('action');
+  const actionXhr = form.getAttribute('action-xhr');
+  const method = (form.getAttribute('method') || 'GET').toUpperCase();
+
+  if (actionXhr) {
+    assertHttpsUrl(actionXhr, form, 'action-xhr');
+    userAssert(
+      !isProxyOrigin(actionXhr),
+      'form action-xhr should not be on AMP CDN: %s',
+      form
+    );
+    checkCorsUrl(actionXhr);
+  }
+  if (action) {
+    assertHttpsUrl(action, form, 'action');
+    userAssert(
+      !isProxyOrigin(action),
+      'form action should not be on AMP CDN: %s',
+      form
+    );
+    checkCorsUrl(action);
+  }
+
+  if (method == 'GET') {
+    userAssert(
+      actionXhr || action,
+      'form action-xhr or action attribute is required for method=GET: %s',
+      form
+    );
+  } else if (method == 'POST') {
+    if (action) {
+      const TAG = 'form';
+      user().error(
+        TAG,
+        'action attribute is invalid for method=POST: %s',
+        form
+      );
+    }
+
+    if (!actionXhr) {
+      e.preventDefault();
+      userAssert(
+        false,
+        'Only XHR based (via action-xhr attribute) submissions are support ' +
+          'for POST requests. %s',
+        form
+      );
+    }
+  }
+
+  const target = form.getAttribute('target');
+  if (target) {
+    userAssert(
+      target == '_blank' || target == '_top',
+      'form target=%s is invalid can only be _blank or _top: %s',
+      target,
+      form
+    );
+  } else {
+    form.setAttribute('target', '_top');
+  }
+
+  // For xhr submissions relay the submission event through action service to
+  // allow us to wait for amp-form (and possibly its dependencies) to execute
+  // the actual submission. For non-XHR GET we let the submission go through
+  // to allow _blank target to work.
+  if (actionXhr) {
+    e.preventDefault();
+
+    // It's important to stop propagation of the submission to avoid double
+    // handling of the event in cases were we are delegating to action service
+    // to deliver the submission event.
+    e.stopImmediatePropagation();
+
+    const actions = Services.actionServiceForDoc(form);
+    actions.execute(
+      form,
+      'submit',
+      /*args*/ null,
+      /*source*/ form,
+      /*caller*/ form,
+      e,
+      ActionTrust.HIGH
+    );
+  }
+}
+
 AMP.extension(TAG, '0.1', (AMP) => {
+  const {ampdoc} = AMP;
   AMP.registerServiceForDoc('form-submit-service', FormSubmitService);
   AMP.registerServiceForDoc(TAG, AmpFormService);
+  ampdoc.whenReady().then(() => {
+    installGlobalSubmitListenerForDoc(ampdoc);
+  });
 });
