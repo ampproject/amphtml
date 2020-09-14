@@ -215,7 +215,7 @@ export const presets = {
     ],
   },
   'drop': {
-    duration: 100,
+    duration: 1600,
     easing: `linear`,
     keyframes(dimensions) {
       const maxBounceHeight = Math.max(
