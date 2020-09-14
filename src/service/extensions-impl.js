@@ -607,6 +607,9 @@ export class Extensions {
     }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
+    if (getMode().esm) {
+      scriptElement.setAttribute('type', 'module');
+    }
 
     // Propagate nonce to all generated script tags.
     const currentScript = this.win.document.head.querySelector('script[nonce]');
