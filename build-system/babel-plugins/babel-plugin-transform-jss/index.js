@@ -143,5 +143,10 @@ function transformCssSync(cssText) {
     encoding: 'utf-8',
     stdio: 'pipe',
   });
+  if (spawnedProcess.status !== 0) {
+    throw new Error(
+      `Transforming CSS returned status code: ${spawnedProcess.status}. stderr: "${spawnedProcess.stderr}".`
+    );
+  }
   return spawnedProcess.stdout;
 }
