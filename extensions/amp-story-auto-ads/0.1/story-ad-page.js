@@ -39,10 +39,11 @@ import {
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getA4AVarsMetaTags, getAmpCtaMetaTags, getFrameDoc} from './utils';
+import {getFrameDoc, getStoryAdMetaTags} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
+import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -55,6 +56,12 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @const {string} */
 const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-ad-fullbleed';
+
+/** @const {string} */
+const CTA_META_PREFIX = 'amp-cta-';
+
+/** @const {string} */
+const A4A_VARS_META_PREFIX = 'amp4ads-vars-';
 
 /** @enum {string} */
 const PageAttributes = {
@@ -424,17 +431,16 @@ export class StoryAdPage {
    * @private
    */
   extractA4AVars_() {
-    const a4aVarsTags = getA4AVarsMetaTags(this.adDoc_);
+    const a4aVarsTags = getStoryAdMetaTags(this.adDoc_);
     iterateCursor(a4aVarsTags, (tag) => {
-      const name = tag.name.split('amp4ads-vars-')[1];
-      const {content} = tag;
-      this.a4aVars_[name] = content;
-    });
-    const ampCtaTags = getAmpCtaMetaTags(this.adDoc_);
-    iterateCursor(ampCtaTags, (tag) => {
-      const name = tag.name.split('amp-')[1];
-      const {content} = tag;
-      this.a4aVars_[name] = content;
+      const {name, content} = tag;
+      if (startsWith(name, CTA_META_PREFIX)) {
+        const key = name.split('amp-')[1];
+        this.a4aVars_[key] = content;
+      } else if (startsWith(name, A4A_VARS_META_PREFIX)) {
+        const key = name.split(A4A_VARS_META_PREFIX)[1];
+        this.a4aVars_[key] = content;
+      }
     });
   }
 
