@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,8 +127,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     });
 
     ['title', 'aria-label'].forEach((prop) => {
-      it(`should use ${prop} prop as fallback`, async () => {
-        const title = `Title through ${prop}`;
+      it(`should use ${prop} prop as fallback for title`, async () => {
+        const title = `Title through ${prop} prop`;
 
         metadata = omit(metadata, ['title']);
 

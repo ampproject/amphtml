@@ -30,7 +30,7 @@ import {
 } from '../../../src/mediasession-helper';
 import {
   useCallback,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -42,26 +42,26 @@ import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
  * @param {!VideoWrapperProps} props
  * @return {!JsonObject}
  */
-function getMetadata(player, props) {
-  const metadata =
-    (player && player.getMetadata && player.getMetadata()) ||
+const getMetadata = (player, props) =>
+  /** @type {!JsonObject} */ Object.assign(
     dict({
-      'title': props.title || '',
+      'title': props.title || props['aria-label'] || document.title,
       'artist': props.artist || '',
       'album': props.album || '',
-      'artwork': [{'src': props.artwork || props.poster || ''}],
-    });
-
-  metadata.title = metadata.title || props['aria-label'] || document.title;
-
-  metadata.artwork =
-    metadata.artwork ||
-    parseSchemaImage(document) ||
-    parseOgImage(document) ||
-    parseFavicon(document);
-
-  return metadata;
-}
+      'artwork': [
+        {
+          'src':
+            props.artwork ||
+            props.poster ||
+            parseSchemaImage(document) ||
+            parseOgImage(document) ||
+            parseFavicon(document) ||
+            '',
+        },
+      ],
+    }),
+    player && player.getMetadata ? player.getMetadata() : Object.create(null)
+  );
 
 /**
  * @param {!VideoWrapperProps} props
@@ -81,8 +81,8 @@ export function VideoWrapper({
   useResourcesNotify();
 
   const [muted, setMuted] = useState(autoplay);
-  const [metadata, setMetadata] = useState(null);
   const [playing, setPlaying] = useState(false);
+  const [metadata, setMetadata] = useState(null);
   const [userInteracted, setUserInteracted] = useState(false);
 
   const wrapperRef = useRef(null);
@@ -104,13 +104,8 @@ export function VideoWrapper({
     });
   }, [readyDeferred]);
 
-  useEffect(() => {
-    if (mediasession && metadata && playing) {
-      // TODO(alanorozco): Improve MediaSession support:
-      // - playbackState
-      // - setPositionState
-      // - prev/next
-      // - clearing
+  useLayoutEffect(() => {
+    if (mediasession && playing && metadata) {
       setMediaSession(window, metadata, play, pause);
     }
   }, [mediasession, playing, metadata, play, pause]);
