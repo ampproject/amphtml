@@ -46,9 +46,18 @@ export function getUniqueId(win) {
  * @param {Document} doc
  * @return {!IArrayLike}
  */
-export function getA4AMetaTags(doc) {
+export function getA4AVarsMetaTags(doc) {
   const selector = 'meta[name^=amp4ads-vars-]';
   return doc.querySelectorAll(selector);
+}
+
+/**
+ * Finds all story ad meta tags starting with `amp-cta-`.
+ * @param {Document} doc
+ * @return {!IArrayLike}
+ */
+export function getAmpCtaMetaTags(doc) {
+  return doc.querySelectorAll('meta[name^=amp-cta-]');
 }
 
 /**

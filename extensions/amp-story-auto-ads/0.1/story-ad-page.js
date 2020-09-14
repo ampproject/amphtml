@@ -39,7 +39,7 @@ import {
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getA4AMetaTags, getFrameDoc} from './utils';
+import {getA4AVarsMetaTags, getAmpCtaMetaTags, getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
@@ -419,13 +419,20 @@ export class StoryAdPage {
   }
 
   /**
-   * Find all `amp4ads-vars-` prefixed meta tags and store them in single obj.
+   * Find all `amp4ads-vars-` & `amp-cta-` prefixed meta tags and store them
+   * in single obj.
    * @private
    */
   extractA4AVars_() {
-    const tags = getA4AMetaTags(this.adDoc_);
-    iterateCursor(tags, (tag) => {
+    const a4aVarsTags = getA4AVarsMetaTags(this.adDoc_);
+    iterateCursor(a4aVarsTags, (tag) => {
       const name = tag.name.split('amp4ads-vars-')[1];
+      const {content} = tag;
+      this.a4aVars_[name] = content;
+    });
+    const ampCtaTags = getAmpCtaMetaTags(this.adDoc_);
+    iterateCursor(ampCtaTags, (tag) => {
+      const name = tag.name.split('amp-')[1];
       const {content} = tag;
       this.a4aVars_[name] = content;
     });
