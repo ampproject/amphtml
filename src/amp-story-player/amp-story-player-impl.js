@@ -602,7 +602,7 @@ export class AmpStoryPlayer {
     // TODO(enriqe): sanitize URLs for matching.
     const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
 
-    // TODO(Enriqe): replace for add() once implemented.
+    // TODO(#28987): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
@@ -616,26 +616,34 @@ export class AmpStoryPlayer {
       this.stories_.length - 1
     );
 
-    // Place current story index first to prioritize loading over adjacent ones.
-    adjacentStoriesIdx.splice(adjacentStoriesIdx.indexOf(storyIdx), 1);
-    adjacentStoriesIdx.unshift(storyIdx);
-
     adjacentStoriesIdx.forEach((idx) => {
       const story = this.stories_[idx];
-      let iframe = story[IFRAME_IDX];
+      let iframeIdx = story[IFRAME_IDX];
 
-      if (iframe === undefined) {
-        this.allocateIframeForStory_(idx, idx < this.currentIdx_);
-        iframe = story[IFRAME_IDX];
+      if (iframeIdx === undefined) {
+        const visibilityState =
+          idx === storyIdx
+            ? VisibilityState.VISIBLE
+            : VisibilityState.PRERENDER;
+        this.allocateIframeForStory_(
+          idx,
+          storyIdx < this.currentIdx_ /** reverse */,
+          visibilityState
+        );
+        iframeIdx = story[IFRAME_IDX];
       }
 
+      let iframePosition;
       if (idx === storyIdx) {
-        this.updateCurrentIframe_(story);
+        iframePosition = IframePosition.CURRENT;
+        this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
+        tryFocus(this.iframes_[iframeIdx]);
       } else {
-        const position =
+        iframePosition =
           idx > storyIdx ? IframePosition.NEXT : IframePosition.PREVIOUS;
-        this.updateIframePosition_(iframe, position);
       }
+
+      this.updateIframePosition_(iframeIdx, iframePosition);
     });
 
     this.currentIdx_ = storyIdx;
@@ -838,9 +846,14 @@ export class AmpStoryPlayer {
    * navigating and allocates it to a story that the user is close to seeing.
    * @param {number} nextStoryIdx
    * @param {boolean} reverse
+   * @param {VisibilityState=} visibilityState
    * @private
    */
-  allocateIframeForStory_(nextStoryIdx, reverse = false) {
+  allocateIframeForStory_(
+    nextStoryIdx,
+    reverse = false,
+    visibilityState = VisibilityState.PRERENDER
+  ) {
     const detachedStoryIdx = reverse
       ? this.iframePool_.rotateLast(nextStoryIdx)
       : this.iframePool_.rotateFirst(nextStoryIdx);
@@ -857,7 +870,7 @@ export class AmpStoryPlayer {
     detachedStory[IFRAME_IDX] = undefined;
 
     const nextIframe = this.iframes_[nextStory[IFRAME_IDX]];
-    this.layoutIframe_(nextStory, nextIframe, VisibilityState.PRERENDER);
+    this.layoutIframe_(nextStory, nextIframe, visibilityState);
     this.updateIframePosition_(
       nextStory[IFRAME_IDX],
       reverse ? IframePosition.PREVIOUS : IframePosition.NEXT
