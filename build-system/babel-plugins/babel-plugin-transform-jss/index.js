@@ -137,7 +137,7 @@ function transformCssSync(cssText) {
 
   // TODO: migrate to the helpers in build-system exec.js
   // after adding args support.
-  const spawnedProcess = spawnSync(`node`, [`-e`, programText], {
+  const spawnedProcess = spawnSync('node', ['-e', programText], {
     cwd: __dirname,
     env: process.env,
     encoding: 'utf-8',
