@@ -20,7 +20,7 @@
 
 /**
  * @typedef {{
- *   datetime: string,
+ *   datetime: (?Date|number|undefined),
  *   locale: string,
  *   cutoff: (number|undefined),
  *   placeholder: (string|!PreactDef.VNode|null|undefined),

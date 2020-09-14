@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../amp-timeago';
+import {parseDateAttrs} from '../amp-timeago';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper.js';
 
@@ -80,6 +80,16 @@ describes.realWin(
       expect(time).to.equal('2 days ago');
     });
 
+    it('should render display 2 days ago using "timestamp-ms"', async () => {
+      const date = new Date();
+      date.setDate(date.getDate() - 2);
+      element.setAttribute('timestamp-ms', date.getTime());
+      element.textContent = date.toString();
+      win.document.body.appendChild(element);
+      const time = await getTimeFromShadow();
+      expect(time).to.equal('2 days ago');
+    });
+
     it('should display original date when older than cutoff', async () => {
       const date = new Date('2017-01-01');
       element.setAttribute('datetime', date.toISOString());
@@ -106,3 +116,50 @@ describes.realWin(
     });
   }
 );
+
+describe('amp-timeago 1.0: parseDateAttrs', () => {
+  const DATE = new Date(1514793600000);
+  const DATE_STRING = DATE.toISOString();
+
+  let element;
+
+  beforeEach(() => {
+    element = document.createElement('amp-timeago');
+  });
+
+  it('should throw when no date is specified', () => {
+    expect(() => parseDateAttrs(element)).to.throw(/Invalid date/);
+  });
+
+  it('should throw when invalid date is specified', () => {
+    element.setAttribute('datetime', 'invalid');
+    expect(() => parseDateAttrs(element)).to.throw(/Invalid date/);
+  });
+
+  it('should parse the "datetime" attribute', () => {
+    element.setAttribute('datetime', DATE_STRING);
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
+
+    // With offset.
+    element.setAttribute('offset-seconds', '1');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+
+  it('should parse the "timestamp-ms" attribute', () => {
+    element.setAttribute('timestamp-ms', DATE.getTime());
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
+
+    // With offset.
+    element.setAttribute('offset-seconds', '1');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+
+  it('should parse the "timestamp-seconds" attribute', () => {
+    element.setAttribute('timestamp-seconds', DATE.getTime() / 1000);
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
+
+    // With offset.
+    element.setAttribute('offset-seconds', '1');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+});

@@ -23,6 +23,7 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {parseDate} from '../../../src/utils/date';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -86,13 +87,32 @@ AmpDateDisplay['passthrough'] = true;
 
 /** @override */
 AmpDateDisplay['props'] = {
+  'datetime': {
+    attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
+    parseAttrs: parseDateAttrs,
+  },
   'displayIn': {attr: 'display-in'},
-  'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
   'locale': {attr: 'locale'},
-  'datetime': {attr: 'datetime'},
-  'timestampMs': {attr: 'timestamp-ms', type: 'number'},
-  'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
 };
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ * @visibleForTesting
+ */
+export function parseDateAttrs(element) {
+  const datetimeStr = element.getAttribute('datetime');
+  const datetime = parseDate(datetimeStr);
+  const timestampMs = Number(element.getAttribute('timestamp-ms'));
+  const timestampSeconds =
+    Number(element.getAttribute('timestamp-seconds')) * 1000;
+  const offsetSeconds = Number(element.getAttribute('offset-seconds')) * 1000;
+
+  const epoch = datetime || timestampMs || timestampSeconds;
+  userAssert(epoch, 'Invalid date: %s', datetimeStr);
+
+  return epoch + offsetSeconds;
+}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpDateDisplay);

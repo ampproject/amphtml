@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
+import {getDate} from '../../../src/utils/date';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';
-
-/** @const {number} */
-const DEFAULT_OFFSET_SECONDS = 0;
 
 /** @typedef {{
   year: number,
@@ -66,27 +64,25 @@ let EnhancedVariablesV2Def;
  * @return {PreactDef.Renderable}
  */
 export function DateDisplay(props) {
-  const {render, children} = props;
-  const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
+  const {datetime, render, children} = props;
+  const date = getDate(datetime);
+  const data = /** @type {!JsonObject} */ (getDataForTemplate(date, props));
   useResourcesNotify();
 
-  return render(data, children);
+  return data ? render(data, children) : null;
 }
 
 /**
+ * @param {?Date} date
  * @param {!DateDisplayDef.Props} props
- * @return {!EnhancedVariablesV2Def}
+ * @return {?EnhancedVariablesV2Def}
  */
-function getDataForTemplate(props) {
-  const {
-    displayIn = '',
-    locale = DEFAULT_LOCALE,
-    offsetSeconds = DEFAULT_OFFSET_SECONDS,
-  } = props;
+function getDataForTemplate(date, props) {
+  if (!date) {
+    return null;
+  }
 
-  const epoch = getEpoch(props);
-  const offset = offsetSeconds * 1000;
-  const date = new Date(epoch + offset);
+  const {displayIn = '', locale = DEFAULT_LOCALE} = props;
 
   const basicData =
     displayIn.toLowerCase() === 'utc'
@@ -94,34 +90,6 @@ function getDataForTemplate(props) {
       : getVariablesInLocal(date, locale);
 
   return enhanceBasicVariables(basicData);
-}
-
-/**
- * @param {!DateDisplayDef.Props} props
- * @return {number|undefined}
- */
-function getEpoch({datetime = '', timestampMs = 0, timestampSeconds = 0}) {
-  let epoch;
-  if (datetime.toLowerCase() === 'now') {
-    epoch = Date.now();
-  } else if (datetime) {
-    epoch = Date.parse(datetime);
-    if (isNaN(epoch)) {
-      console /*OK*/
-        .error(`Invalid date: ${datetime}`);
-    }
-  } else if (timestampMs) {
-    epoch = timestampMs;
-  } else if (timestampSeconds) {
-    epoch = timestampSeconds * 1000;
-  }
-
-  if (epoch === undefined) {
-    console /*OK*/
-      .error('One of datetime, timestamp-ms, or timestamp-seconds is required');
-  }
-
-  return epoch;
 }
 
 /**
