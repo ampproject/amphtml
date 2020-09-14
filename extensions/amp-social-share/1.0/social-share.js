@@ -57,31 +57,34 @@ export function SocialShare({
     errorState,
   } = checkProps(type, endpoint, target, width, height, params);
 
+  // Early exit if checkProps did not pass
+  if (errorState) {
+    return null;
+  }
+
   const size = dict({
     'width': checkedWidth,
     'height': checkedHeight,
   });
 
-  if (!errorState) {
-    return (
-      <div
-        {...rest}
-        role="button"
-        tabindex={tabIndex}
-        onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
-        onClick={() => handleActivation(finalEndpoint, checkedTarget)}
-        style={{...size, ...style}}
-      >
-        {processChildren(
-          /** @type {string} */ (type),
-          children,
-          color,
-          background,
-          size
-        )}
-      </div>
-    );
-  }
+  return (
+    <div
+      {...rest}
+      role="button"
+      tabindex={tabIndex}
+      onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
+      onClick={() => handleActivation(finalEndpoint, checkedTarget)}
+      style={{...size, ...style}}
+    >
+      {processChildren(
+        /** @type {string} */ (type),
+        children,
+        color,
+        background,
+        size
+      )}
+    </div>
+  );
 }
 
 /**
@@ -132,42 +135,32 @@ function processChildren(type, children, color, background, size) {
  * }}
  */
 function checkProps(type, endpoint, target, width, height, params) {
-  // Defaults
-  const checkedWidth = width || DEFAULT_WIDTH;
-  const checkedHeight = height || DEFAULT_HEIGHT;
-  const checkedTarget = target || DEFAULT_TARGET;
-
-  let finalEndpoint = '';
-  let errorState = false;
-
-  // Verify type is provided
+  // Verify type is provided, early exit if not provided
   if (type === undefined) {
     displayWarning(`The type attribute is required. ${NAME}`);
-    errorState = true;
     return {
-      finalEndpoint,
-      checkedWidth,
-      checkedHeight,
-      checkedTarget,
-      errorState,
+      finalEndpoint: '',
+      checkedWidth: '',
+      checkedHeight: '',
+      checkedTarget: '',
+      errorState: true,
     };
   }
 
   // User must provide endpoint if they choose a type that is not
-  // pre-configured
+  // pre-configured, early exit if not provided
   const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
   let baseEndpoint = endpoint || typeConfig.shareEndpoint;
   if (baseEndpoint === undefined) {
     displayWarning(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
     );
-    errorState = true;
     return {
-      finalEndpoint,
-      checkedWidth,
-      checkedHeight,
-      checkedTarget,
-      errorState,
+      finalEndpoint: '',
+      checkedWidth: '',
+      checkedHeight: '',
+      checkedTarget: '',
+      errorState: true,
     };
   }
 
@@ -177,17 +170,22 @@ function checkProps(type, endpoint, target, width, height, params) {
   }
 
   // Add params to baseEndpoint
-  finalEndpoint = addParamsToUrl(
+  const finalEndpoint = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),
     /** @type {!JsonObject} */ (params)
   );
+
+  // Defaults
+  const checkedWidth = width || DEFAULT_WIDTH;
+  const checkedHeight = height || DEFAULT_HEIGHT;
+  const checkedTarget = target || DEFAULT_TARGET;
 
   return {
     finalEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
-    errorState,
+    errorState: false,
   };
 }
 
