@@ -16,4 +16,6 @@
 
 import {createUseStyles} from 'react-jss';
 
-export const useStyles = createUseStyles({floatLeft: {float: 'left'}});
+export const useStyles = createUseStyles({
+  floatLeft: {float: 'left', border: 'black solid 1px'},
+});

@@ -131,9 +131,12 @@ module.exports = function ({types: t, template}) {
 // Abuses spawnSync to let us run an async function sync.
 function transformCssSync(cssText) {
   const programText = `
-  const {transformCss} = require('../../../build-system/tasks/jsify-css');
-  transformCss(\`${cssText}\`).then((css) => console.log(css.toString()));
+    const {transformCss} = require('../../../build-system/tasks/jsify-css');
+    transformCss(\`${cssText}\`).then((css) => console.log(css.toString()));
   `;
+
+  // TODO: migrate to the helpers in build-system exec.js
+  // after adding args support.
   const spawnedProcess = spawnSync(`node`, [`-e`, programText], {
     cwd: __dirname,
     env: process.env,

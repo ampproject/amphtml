@@ -1,4 +1,4 @@
-var _classes = JSON.parse("{\"floatLeft\":\"float-left-a6c6677\",\"CSS\":\".float-left-a6c6677 {\\n  float: left;\\n}\"}");
+var _classes = JSON.parse("{\"floatLeft\":\"float-left-a6c6677\",\"CSS\":\".float-left-a6c6677{float:left;border:1px solid #000}\\n\"}");
 
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
