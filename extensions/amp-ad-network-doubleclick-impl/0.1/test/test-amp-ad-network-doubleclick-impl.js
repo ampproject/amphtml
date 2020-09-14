@@ -807,7 +807,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
       element.setAttribute(
         'json',
         `{
@@ -823,7 +822,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting inside array', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
       element.setAttribute(
         'json',
         `{
