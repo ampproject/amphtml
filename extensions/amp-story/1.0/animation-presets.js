@@ -225,7 +225,7 @@ export const presets = {
       return [
         {
           offset: 0.0,
-          transform: `translateY(${px(0)})`,
+          transform: `translateY(${px(-maxBounceHeight * 1)})`,
           easing: 'cubic-bezier(.5, 0, 1, 1)',
         },
         {
