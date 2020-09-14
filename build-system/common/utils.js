@@ -92,8 +92,10 @@ function logFiles(files) {
  * @return {Array<string>}
  */
 function getFilesFromArgv() {
+  // globby does not support Windows paths.
+  const toPosix = str => str.replace(/\\\\?/g, '/');
   return argv.files
-    ? globby.sync(argv.files.split(',').map((s) => s.trim()))
+    ? globby.sync(argv.files.split(',').map((s) => s.trim()).map(toPosix))
     : [];
 }
 
