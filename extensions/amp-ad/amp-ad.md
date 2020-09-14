@@ -498,6 +498,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [Strossle](../../ads/strossle.md)
 - [Taboola](../../ads/taboola.md)
 - [TE Medya](../../ads/temedya.md)
+- [vlyby](../../ads/vlyby.md)
 - [Whopa InFeed](../../ads/whopainfeed.md)
 - [Yahoo Native-Display Ads Federation](../../ads/yahoofedads.md)
 - [Yahoo Native Ads](../../ads/yahoonativeads.md)
