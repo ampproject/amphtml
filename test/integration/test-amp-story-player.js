@@ -76,10 +76,10 @@ config.run('amp-story-player', () => {
             return !!iframeDoc.querySelector('#page2[active]');
           },
           undefined,
-          13000
+          10000
         );
 
-        expect(iframeDoc.querySelector('#page2[active]')).to.exist;
+        return expect(iframeDoc.querySelector('#page2[active]')).to.exist;
       });
     }
   );
