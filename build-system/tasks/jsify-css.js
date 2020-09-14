@@ -72,14 +72,9 @@ function transformCss(cssStr, opt_cssnano, opt_filename) {
   );
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
   const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
-  return postcss(transformers).process(
-    cssStr,
-    opt_filename
-      ? {
-          'from': opt_filename,
-        }
-      : undefined
-  );
+  return postcss(transformers).process(cssStr, {
+    'from': opt_filename,
+  });
 }
 
 /**
@@ -108,7 +103,7 @@ function transformCssFile(filename, opt_cssnano) {
  *    processing
  */
 function jsifyCssAsync(filename) {
-  return transformCss(filename).then(function (result) {
+  return transformCssFile(filename).then(function (result) {
     result.warnings().forEach(function (warn) {
       log(colors.red(warn.toString()));
     });
