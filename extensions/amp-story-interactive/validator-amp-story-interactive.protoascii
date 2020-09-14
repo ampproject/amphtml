@@ -146,22 +146,22 @@ tags: {  # <amp-story-interactive-results>
   }
   attrs: {
     name: "option-1-results-threshold"
-    value_regex: "\d+[.\d+]?"
+    value_regex: "\\d+[.\\d+]?"
   }
   attrs: {
     name: "option-2-results-threshold"
-    value_regex: "\d+[.\d+]?"
+    value_regex: "\\d+[.\\d+]?"
   }
   attrs: {
     name: "option-3-results-threshold"
-    value_regex: "\d+[.\d+]?"
+    value_regex: "\\d+[.\\d+]?"
     trigger: {
       also_requires_attr: "option-3-results-category"
     }
   }
   attrs: {
     name: "option-4-results-threshold"
-    value_regex: "\d+[.\d+]?"
+    value_regex: "\\d+[.\\d+]?"
     trigger: {
       also_requires_attr: "option-4-results-category"
     }
