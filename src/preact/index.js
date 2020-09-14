@@ -18,7 +18,7 @@ import * as hooks from /*OK*/ 'preact/hooks';
 import * as preact from /*OK*/ 'preact';
 
 // Defines the type interfaces for the approved Preact APIs.
-// TODO: hydrate, isValidElement, Component
+// TODO: isValidElement, Component
 
 /**
  * @param {!PreactDef.FunctionalComponent|string} unusedType
@@ -41,11 +41,20 @@ export function cloneElement(unusedElement, unusedProps, unusedChildren) {
 }
 
 /**
+ * @param {?PreactDef.VNode} vnode
+ * @param {Node} container
+ * @param {?Node=} opt_replaceNode
+ */
+export function render(vnode, container, opt_replaceNode) {
+  preact.render(vnode, container, opt_replaceNode);
+}
+
+/**
  * @param {!PreactDef.VNode} vnode
  * @param {Node} container
  */
-export function render(vnode, container) {
-  preact.render(vnode, container, undefined);
+export function hydrate(vnode, container) {
+  preact.hydrate(vnode, container);
 }
 
 /**
@@ -130,13 +139,24 @@ export function useMemo(cb, opt_deps) {
 }
 
 /**
- * @param {function(...*):T|undefined} cb
+ * @param {T} cb
  * @param {!Array<*>=} opt_deps
- * @return {function(...*):T|undefined}
+ * @return {T}
  * @template T
  */
 export function useCallback(cb, opt_deps) {
   return hooks.useCallback(cb, opt_deps);
+}
+
+/**
+ * @param {{current: (T|null)}} ref
+ * @param {function():T} create
+ * @param {!Array<*>=} opt_deps
+ * @return {undefined}
+ * @template T
+ */
+export function useImperativeHandle(ref, create, opt_deps) {
+  return hooks.useImperativeHandle(ref, create, opt_deps);
 }
 
 /**

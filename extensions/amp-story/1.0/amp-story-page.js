@@ -123,7 +123,7 @@ const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
 ).join(',');
 
 /** @private @const {number} */
-const RESIZE_TIMEOUT_MS = 350;
+const RESIZE_TIMEOUT_MS = 1000;
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
@@ -301,6 +301,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
+
+    /** @private {!Deferred} */
+    this.backgroundAudioDeferred_ = new Deferred();
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
@@ -526,15 +529,14 @@ export class AmpStoryPage extends AMP.BaseElement {
               this.advancement_.start();
             }
           });
-        this.startMeasuringAllVideoPerformance_();
-        this.preloadAllMedia_()
-          .then(() => this.startListeningToVideoEvents_())
-          .then(() => {
-            this.playAllMedia_();
-            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-              this.unmuteAllMedia();
-            }
-          });
+        this.preloadAllMedia_().then(() => {
+          this.startMeasuringAllVideoPerformance_();
+          this.startListeningToVideoEvents_();
+          this.playAllMedia_();
+          if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+            this.unmuteAllMedia();
+          }
+        });
       });
       this.prefersReducedMotion_()
         ? this.maybeFinishAnimations_()
@@ -561,14 +563,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     const loop =
       this.element.getAttribute('id') !==
       this.element.getAttribute('auto-advance-after');
-    const audioEl = upgradeBackgroundAudio(this.element, loop);
-    if (audioEl) {
-      this.mediaPoolPromise_.then((mediaPool) =>
-        this.registerMedia_(mediaPool, dev().assertElement(audioEl)).then(() =>
-          mediaPool.preload(dev().assertElement(audioEl))
-        )
-      );
-    }
+    upgradeBackgroundAudio(this.element, loop);
+    this.backgroundAudioDeferred_.resolve();
+
     this.muteAllMedia();
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
@@ -740,6 +737,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         }
       });
     });
+
+    if (this.element.hasAttribute('background-audio')) {
+      mediaPromises.push(this.backgroundAudioDeferred_.promise);
+    }
+
     return Promise.all(mediaPromises);
   }
 
@@ -1109,7 +1111,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       // happen after a user intent, and the media element was not "blessed".
       // On unmute, make sure this audio element is playing, at the expected
       // currentTime.
-      if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+      if (
+        mediaEl.tagName === 'AUDIO' &&
+        mediaEl.paused &&
+        this.playAudioElementFromTimestamp_
+      ) {
         const currentTime =
           (Date.now() - this.playAudioElementFromTimestamp_) / 1000;
         if (mediaEl.hasAttribute('loop') || currentTime < mediaEl.duration) {

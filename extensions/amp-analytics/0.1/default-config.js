@@ -46,6 +46,7 @@ const defaultConfig = jsonConfiguration({
     'documentReferrer': 'DOCUMENT_REFERRER',
     'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
     'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
+    'experimentBranches': 'EXPERIMENT_BRANCHES',
     'externalReferrer': 'EXTERNAL_REFERRER',
     'firstContentfulPaint': 'FIRST_CONTENTFUL_PAINT',
     'firstInputDelay': 'FIRST_INPUT_DELAY',

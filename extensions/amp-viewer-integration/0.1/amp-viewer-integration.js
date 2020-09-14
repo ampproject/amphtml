@@ -90,10 +90,8 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
-    if (MOVE_FIXED_LAYER) {
-      const viewport = Services.viewportForDoc(ampdoc);
-      viewport.createFixedLayer(FixedLayer);
-    }
+    const viewport = Services.viewportForDoc(ampdoc);
+    viewport.createFixedLayer(FixedLayer);
 
     if (this.isWebView_ || this.isHandShakePoll_) {
       const source = isIframed(this.win) ? this.win.parent : null;

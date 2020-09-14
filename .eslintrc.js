@@ -59,6 +59,7 @@ module.exports = {
   'globals': {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
+    'IS_SXG': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',
@@ -151,6 +152,7 @@ module.exports = {
     'local/no-module-exports': 2,
     'local/no-rest': 2,
     'local/no-spread': 2,
+    'local/no-static-this': 2,
     'local/no-style-display': 2,
     'local/no-style-property-setting': 2,
     'local/no-swallow-return-from-allow-console-error': 2,

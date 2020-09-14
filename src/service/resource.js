@@ -485,10 +485,10 @@ export class Resource {
     const oldBox = this.layoutBox_;
     if (usePremeasuredRect) {
       this.computeMeasurements_(devAssert(this.premeasuredRect_));
-      this.premeasuredRect_ = null;
     } else {
       this.computeMeasurements_();
     }
+    this.premeasuredRect_ = null;
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -626,6 +626,10 @@ export class Resource {
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
+   * The returned layoutBox is:
+   * - relative to the top of the document for non fixed element,
+   * - relative to the top of the document at current scroll position
+   *   for fixed element.
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
@@ -683,17 +687,18 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed(usePremeasuredRect = false) {
+    const isConnected =
+      this.element.ownerDocument && this.element.ownerDocument.defaultView;
+    if (!isConnected) {
+      return false;
+    }
     devAssert(!usePremeasuredRect || this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
       ? devAssert(this.premeasuredRect_)
       : this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
-    return (
-      (isFluid || hasNonZeroSize) &&
-      !!this.element.ownerDocument &&
-      !!this.element.ownerDocument.defaultView
-    );
+    return isFluid || hasNonZeroSize;
   }
 
   /**

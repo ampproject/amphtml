@@ -126,9 +126,11 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - AppNexus
 - APS
 - Automatad
+- Andbeyond
 - Browsi
 - Criteo
 - FLUX
+- Freestar
 - Galaxie Media
 - IndexExchange
 - Kargo

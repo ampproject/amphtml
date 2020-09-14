@@ -87,6 +87,21 @@ export function whenCalled(spy, opt_callCount = 1) {
   );
 }
 
+/**
+ * Resolves a promise when the callback returns a truthy value.
+ * @param {function():?} callback
+ * @param {string} errorMessage
+ * @return {!Promise}
+ */
+export function waitFor(callback, errorMessage) {
+  return poll(
+    errorMessage,
+    callback,
+    undefined /* opt_onError */,
+    200 /* opt_timeout */
+  );
+}
+
 const noneValues = {
   'animation-name': ['none', 'initial'],
   'animation-duration': ['0s', 'initial'],
@@ -183,14 +198,14 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
+    return RequestBank.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
       res.json()
     );
   }
 
   static tearDown() {
     const url = `${REQUEST_URL}/teardown/`;
-    return this.fetch_(url, 'tearDown');
+    return RequestBank.fetch_(url, 'tearDown');
   }
 
   static fetch_(url, action, timeout = 10000) {

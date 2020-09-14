@@ -209,12 +209,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'hidden-mutation-observer',
-    name: "Enables FixedLayer's hidden-attribute mutation observer",
-    spec: 'https://github.com/ampproject/amphtml/issues/17475',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
@@ -262,14 +256,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
   },
   {
-    id: 'layoutbox-invalidate-on-scroll',
-    name:
-      'Invalidate the cached layoutboxes of elements nested in a scroller ' +
-      'after that scroller scrolls.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24929',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -297,11 +283,6 @@ export const EXPERIMENTS = [
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
-  },
-  {
-    id: 'sticky-ad-padding-bottom',
-    name: 'Add a bottom padding for edgeless iPhones',
-    spec: 'https://github.com/ampproject/amphtml/issues/22251',
   },
   {
     id: 'expand-json-targeting',

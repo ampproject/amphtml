@@ -480,6 +480,13 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'firstimpression': {
+    prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',
+    preconnect: 'https://cdn.firstimpression.io',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'flite': {},
 
   'fluct': {
@@ -509,6 +516,10 @@ const adConfig = jsonConfiguration({
 
   'giraff': {
     renderStartImplemented: true,
+  },
+
+  'glomex': {
+    prefetch: 'https://player.glomex.com/integration/1/amp-embed.js',
   },
 
   'gmossp': {
@@ -637,6 +648,14 @@ const adConfig = jsonConfiguration({
       'https://scene-front.lokaplatform.com',
       'https://loka-materials.akamaized.net',
     ],
+    renderStartImplemented: true,
+  },
+
+  'luckyads': {
+    renderStartImplemented: true,
+  },
+
+  'macaw': {
     renderStartImplemented: true,
   },
 
@@ -824,6 +843,11 @@ const adConfig = jsonConfiguration({
   'pixels': {
     prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
     clientIdCookieName: '__AF',
+    renderStartImplemented: true,
+  },
+
+  'playstream': {
+    prefetch: 'https://app.playstream.media/js/amp.js',
     renderStartImplemented: true,
   },
 
@@ -1058,7 +1082,6 @@ const adConfig = jsonConfiguration({
   },
 
   'springAds': {
-    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
     preconnect: ['https://ib.adnxs.com'],
     renderStartImplemented: true,
   },
@@ -1176,6 +1199,10 @@ const adConfig = jsonConfiguration({
 
   'viralize': {
     renderStartImplemented: true,
+  },
+
+  'vlyby': {
+    prefetch: 'https://amp.vlyby.com/qad/qad-outer2.js',
   },
 
   'vmfive': {

@@ -607,11 +607,19 @@ export class AmpConsent extends AMP.BaseElement {
         return ampdoc.whenFirstVisible().then(() => {
           return expandConsentEndpointUrl(this.element, resolvedHref).then(
             (expandedHref) => {
-              return xhrService
-                .fetchJson(expandedHref, init)
-                .then((res) =>
-                  xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
-                );
+              return xhrService.fetchJson(expandedHref, init).then((res) => {
+                try {
+                  return xhrService.xssiJson(
+                    res,
+                    this.consentConfig_['xssiPrefix']
+                  );
+                } catch (e) {
+                  userAssert(
+                    false,
+                    'Could not parse the `checkConsentHref` response.'
+                  );
+                }
+              });
             }
           );
         });

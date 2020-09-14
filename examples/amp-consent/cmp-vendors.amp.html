@@ -96,7 +96,9 @@
           <!-- This should be in alphabetical order. _ping_ should be the first -->
           <option>_ping_</option>
           <option>appconsent</option>
+          <option>ConsentManager</option>
           <option>didomi</option>
+          <option>iubenda</option>
           <option>sirdata</option>
           <option>Marfeel</option>
           <option>Ogury</option>
@@ -158,6 +160,22 @@
       </amp-consent>
       <!-- End appconsent example -->
 
+
+      <!-- ConsentManager example -->
+      <amp-consent id="ConsentManager" layout="nodisplay" type="ConsentManager">
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": { "id": "1" }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=ConsentManager)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End appconsent example -->
+
       <!-- didomi example -->
       <amp-consent id='didomi' layout='nodisplay' type='didomi'>
           <script type="application/json">
@@ -185,6 +203,21 @@
           </div>
         </amp-consent>
         <!-- End didomi example -->
+
+      <!-- iubenda example -->
+      <amp-consent id="iubenda" layout="nodisplay" type="iubenda">
+        <script type="application/json">
+          {
+            "promptUISrc": "https://cdn.iubenda.com/cs/test/cs-for-amp.html",
+            "postPromptUI": "iubendaPostPromptUI"
+          }
+        </script>
+        <div id="iubendaPostPromptUI">
+          Post Prompt UI
+          <button on="tap:iubenda.prompt(consent=iubenda)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End iubenda example -->
 
       <!-- sirdata example -->
       <amp-consent id="consent" layout="nodisplay" type="sirdata">

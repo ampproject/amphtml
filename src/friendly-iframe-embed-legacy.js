@@ -30,7 +30,6 @@ import {
   installServiceInEmbedIfEmbeddable,
   setParentWindow,
 } from './service';
-import {getMode} from './mode';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
@@ -277,17 +276,14 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  installDocContains(childWin);
-  installDOMTokenList(childWin);
+  if (!IS_ESM) {
+    installDocContains(childWin);
+    installDOMTokenList(childWin);
+  }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  installCustomElements(childWin, class {});
-  if (
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL ||
-    getMode().localDev ||
-    getMode().test
-  ) {
+  if (!IS_SXG) {
+    installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
   }
 }

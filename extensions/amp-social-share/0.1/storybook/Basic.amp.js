@@ -18,10 +18,10 @@ import * as Preact from '../../../../src/preact';
 import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
-storiesOf('amp-social-share v1', module)
+storiesOf('amp-social-share-0_1', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
@@ -68,14 +68,17 @@ storiesOf('amp-social-share v1', module)
       'sms',
       'system',
       'custom',
+      undefined,
     ];
     const type = select('type', typeConfigurations, typeConfigurations[0]);
-    const customEndpoint = text('data-share-endpoint', undefined);
-    const paramUrl = text('data-param-url', undefined);
-    const paramText = text('data-param-text', undefined);
-    const paramAttribution = text('data-param-attribution', undefined);
-    const paramMedia = text('data-param-media', undefined);
+    const customEndpoint = text('data-share-endpoint', null);
+    const paramUrl = text('data-param-url', null);
+    const paramText = text('data-param-text', null);
+    const paramAttribution = text('data-param-attribution', null);
+    const paramMedia = text('data-param-media', null);
     const appId = text('data-param-app_id', '254325784911610');
+    const width = text('width', null);
+    const height = text('height', null);
     return (
       <amp-social-share
         type={type}
@@ -85,6 +88,8 @@ storiesOf('amp-social-share v1', module)
         data-param-attribution={paramAttribution}
         data-param-media={paramMedia}
         data-param-app_id={appId}
+        width={width}
+        height={height}
       ></amp-social-share>
     );
   });

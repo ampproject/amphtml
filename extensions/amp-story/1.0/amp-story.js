@@ -50,10 +50,6 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
-import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
-import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
-import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
@@ -76,6 +72,7 @@ import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
+import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElement,
   childElementByTag,
@@ -312,9 +309,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?HTMLMediaElement} */
     this.backgroundAudioEl_ = null;
 
-    /** @private {?./pagination-buttons.PaginationButtons} */
-    this.paginationButtons_ = null;
-
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win, this.element);
 
@@ -343,10 +337,10 @@ export class AmpStory extends AMP.BaseElement {
 
     /**
      * Store the current paused state, to make sure the story does not play on
-     * resume if it was previously paused.
-     * @private {boolean}
+     * resume if it was previously paused. null when nothing to restore.
+     * @private {?boolean}
      */
-    this.pausedStateToRestore_ = false;
+    this.pausedStateToRestore_ = null;
 
     /** @private {?Element} */
     this.sidebar_ = null;
@@ -417,7 +411,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
     this.initializePageIds_();
-    this.initializeInteractiveComponents_();
     this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
@@ -469,12 +462,21 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   pause_() {
-    this.pausedStateToRestore_ = !!this.storeService_.get(
-      StateProperty.PAUSED_STATE
-    );
+    // Preserve if previously set. This method can be called several times when
+    // setting the visibilitystate to paused and then inactive.
+    if (this.pausedStateToRestore_ === null) {
+      this.pausedStateToRestore_ = !!this.storeService_.get(
+        StateProperty.PAUSED_STATE
+      );
+    }
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
       this.pauseBackgroundAudio_();
+    }
+    // If viewer has navigated to the next document, reset the active page.
+    if (this.getAmpDoc().getVisibilityState() === VisibilityState.INACTIVE) {
+      this.activePage_.setState(PageState.NOT_ACTIVE);
+      this.activePage_.element.setAttribute('active', '');
     }
   }
 
@@ -488,6 +490,7 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
+    this.pausedStateToRestore_ = null;
     if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
       this.playBackgroundAudio_();
     }
@@ -566,33 +569,6 @@ export class AmpStory extends AMP.BaseElement {
       pageIds[i] = newId;
     }
     this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
-  }
-
-  /**
-   * Initializes interactives by deduplicating their IDs and calling initializeState().
-   * @private
-   */
-  initializeInteractiveComponents_() {
-    const interactiveEls = this.element.querySelectorAll(
-      'amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-quiz'
-    );
-    const interactiveIds = toArray(interactiveEls).map(
-      (el) => el.id || 'interactive-id'
-    );
-    const idsMap = map();
-    for (let i = 0; i < interactiveIds.length; i++) {
-      if (idsMap[interactiveIds[i]] === undefined) {
-        idsMap[interactiveIds[i]] = 0;
-        continue;
-      }
-      user().error(TAG, `Duplicate interactive ID ${interactiveIds[i]}`);
-      const newId = `${interactiveIds[i]}__${++idsMap[interactiveIds[i]]}`;
-      interactiveEls[i].id = newId;
-      interactiveIds[i] = newId;
-      whenUpgradedToCustomElement(interactiveEls[i]).then((el) => {
-        el.getImpl().then((e) => e.initializeState());
-      });
-    }
   }
 
   /**
@@ -946,28 +922,6 @@ export class AmpStory extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  buildPaginationButtons_() {
-    if (
-      this.paginationButtons_ ||
-      !this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)
-    ) {
-      return;
-    }
-
-    // TODO(#19768): Avoid passing a private function here.
-    this.paginationButtons_ = PaginationButtons.create(this, () =>
-      this.hasBookend_()
-    );
-
-    this.paginationButtons_.attach(this.element);
-  }
-
-  /** @visibleForTesting */
-  buildPaginationButtonsForTesting() {
-    this.buildPaginationButtons_();
-  }
-
   /** @override */
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
@@ -1015,7 +969,7 @@ export class AmpStory extends AMP.BaseElement {
           HistoryState.BOOKEND_ACTIVE
         );
         if (bookendInHistory) {
-          return this.hasBookend_().then((hasBookend) => {
+          return this.hasBookend().then((hasBookend) => {
             if (hasBookend) {
               return this.showBookend_();
             }
@@ -1062,6 +1016,11 @@ export class AmpStory extends AMP.BaseElement {
       return whenUpgradedToCustomElement(firstPageEl).then(() => {
         return firstPageEl.whenBuilt();
       });
+    }
+
+    // Build pagination buttons if they can be displayed.
+    if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
+      new PaginationButtons(this);
     }
 
     // Will resolve when all pages are built.
@@ -1170,6 +1129,8 @@ export class AmpStory extends AMP.BaseElement {
       /* payload */ undefined,
       {bubbles: true}
     );
+    this.viewerMessagingHandler_ &&
+      this.viewerMessagingHandler_.send('storyContentLoaded', dict({}));
     this.signals().signal(CommonSignals.INI_LOAD);
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
@@ -1360,7 +1321,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.hasBookend_().then((hasBookend) => {
+    this.hasBookend().then((hasBookend) => {
       if (hasBookend) {
         this.showBookend_();
       }
@@ -1808,6 +1769,7 @@ export class AmpStory extends AMP.BaseElement {
           Action.TOGGLE_PAUSED,
           this.pausedStateToRestore_
         );
+        this.pausedStateToRestore_ = null;
         this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
       }
     });
@@ -1851,7 +1813,6 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_PANELS:
         this.setDesktopPositionAttributes_(this.activePage_);
-        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-panels');
@@ -1859,7 +1820,6 @@ export class AmpStory extends AMP.BaseElement {
         });
         break;
       case UIType.DESKTOP_FULLBLEED:
-        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
@@ -2105,6 +2065,7 @@ export class AmpStory extends AMP.BaseElement {
             Action.TOGGLE_PAUSED,
             this.pausedStateToRestore_
           );
+          this.pausedStateToRestore_ = null;
           this.mutateElement(() => {
             this.unsupportedBrowserLayer_.removeLayer();
           });
@@ -2404,9 +2365,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @return {!Promise<boolean>}
-   * @private
    */
-  hasBookend_() {
+  hasBookend() {
     if (!this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)) {
       return Promise.resolve(false);
     }
@@ -2845,15 +2805,5 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerElement(
-    'amp-story-interactive-binary-poll',
-    AmpStoryInteractiveBinaryPoll
-  );
-  AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
-  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
-  AMP.registerElement(
-    'amp-story-interactive-results',
-    AmpStoryInteractiveResults
-  );
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

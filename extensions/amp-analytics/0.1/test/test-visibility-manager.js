@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {AnalyticsEventType} from '../events';
 import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
-import {
-  IntersectionObserverPolyfill,
-  nativeIntersectionObserverSupported,
-} from '../../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../../src/services';
 import {
   VisibilityManagerForDoc,
@@ -207,6 +202,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target: otherTarget,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(root.getRootVisibility()).to.equal(0);
@@ -217,11 +213,13 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target: otherTarget,
         intersectionRatio: 0.5,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
       {
         target: win.document.documentElement,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(root.getRootVisibility()).to.equal(0.3);
@@ -232,6 +230,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target: win.document.documentElement,
         intersectionRatio: 0,
         intersectionRect: layoutRectLtwh(0, 0, 0, 0),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(root.getRootVisibility()).to.equal(0);
@@ -385,72 +384,6 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     expect(inOb.elements).to.not.contain(otherTarget);
   });
 
-  it('should polyfill and dispose intersection observer', () => {
-    delete win.IntersectionObserver;
-
-    const startScrollCount = viewport.scrollObservable_.getHandlerCount();
-    const startChangeCount = viewport.changeObservable_.getHandlerCount();
-
-    // Check observer is correctly set.
-    const inOb = root.getIntersectionObserver_();
-    expect(inOb).to.be.instanceOf(IntersectionObserverPolyfill);
-    expect(viewport.scrollObservable_.getHandlerCount()).to.equal(
-      startScrollCount + 1
-    );
-    expect(viewport.changeObservable_.getHandlerCount()).to.equal(
-      startChangeCount + 1
-    );
-
-    root.dispose();
-    expect(viewport.scrollObservable_.getHandlerCount()).to.equal(
-      startScrollCount
-    );
-    expect(viewport.changeObservable_.getHandlerCount()).to.equal(
-      startChangeCount
-    );
-  });
-
-  it('should support polyfill on non-amp root element', () => {
-    delete win.IntersectionObserver;
-    const inOb = root.getIntersectionObserver_();
-
-    const rootElement = win.document.documentElement;
-    root.listenElement(rootElement, {}, null, null, eventResolver);
-    expect(root.models_).to.have.length(1);
-    const model = root.models_[0];
-    expect(inOb.observeEntries_).to.have.length(1);
-
-    // AMP API is polyfilled.
-    expect(rootElement.getLayoutBox).to.be.a('function');
-    expect(rootElement.getOwner()).to.be.null;
-
-    // Starts as invisible.
-    expect(model.getVisibility_()).to.equal(0);
-
-    // Trigger tick.
-    env.sandbox.stub(viewport, 'getRect').callsFake(() => {
-      return layoutRectLtwh(0, 0, 100, 100);
-    });
-    env.sandbox.stub(viewport, 'getLayoutRect').callsFake((element) => {
-      if (element == rootElement) {
-        return layoutRectLtwh(0, 50, 100, 100);
-      }
-      return null;
-    });
-    expect(rootElement.getLayoutBox()).to.contain({
-      left: 0,
-      top: 50,
-      width: 100,
-      height: 100,
-    });
-    viewport.scrollObservable_.fire({type: AnalyticsEventType.SCROLL});
-    expect(model.getVisibility_()).to.equal(0.5);
-
-    return eventPromise.then(() => {
-      expect(inOb.observeEntries_).to.have.length(0);
-    });
-  });
-
   it('should listen on root', () => {
     clock.tick(1);
     const disposed = env.sandbox.spy();
@@ -596,6 +529,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(0.3);
@@ -640,6 +574,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(0.3);
@@ -650,6 +585,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: -0.01,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(0);
@@ -659,6 +595,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: -1000,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(0);
@@ -669,6 +606,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 1.01,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(1);
@@ -678,9 +616,53 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 1000,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(1);
+  });
+
+  it('should protect from zero size element', () => {
+    const target = win.document.createElement('div');
+    root.listenElement(target, {}, null, null, eventResolver);
+    expect(root.models_).to.have.length(1);
+    const model = root.models_[0];
+
+    const inOb = root.getIntersectionObserver_();
+    expect(model.getVisibility_()).to.equal(0);
+
+    // Valid element size
+    inOb.callback([
+      {
+        target,
+        intersectionRatio: 1,
+        intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 10, 10),
+      },
+    ]);
+    expect(model.getVisibility_()).to.equal(1);
+
+    // zero element size.
+    inOb.callback([
+      {
+        target,
+        intersectionRatio: 1,
+        intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 0, 10),
+      },
+    ]);
+    expect(model.getVisibility_()).to.equal(0);
+
+    // zero element size, high resolution screen.
+    inOb.callback([
+      {
+        target,
+        intersectionRatio: 0.8,
+        intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 10, 0.452),
+      },
+    ]);
+    expect(model.getVisibility_()).to.equal(0);
   });
 
   it('should listen on a element with different specs', () => {
@@ -708,6 +690,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model1.getVisibility_()).to.equal(0.3);
@@ -783,6 +766,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
 
@@ -966,6 +950,7 @@ describes.realWin(
           target: embed.host,
           intersectionRatio: 0.5,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0.5);
@@ -978,6 +963,7 @@ describes.realWin(
           target: otherTarget,
           intersectionRatio: 0.45,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0.5);
@@ -1004,6 +990,7 @@ describes.realWin(
           target: embed.host,
           intersectionRatio: 0,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0);
@@ -1016,6 +1003,7 @@ describes.realWin(
           target: otherTarget,
           intersectionRatio: 0.55,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0);
@@ -1028,6 +1016,7 @@ describes.realWin(
           target: embed.host,
           intersectionRatio: 0.7,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0.7);
@@ -1070,14 +1059,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, (env) => {
         unobserve: unobserveSpy,
       };
     };
-    if (nativeIntersectionObserverSupported(ampdoc.win)) {
-      env.sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
-    } else {
-      win.IntersectionObserver = inob;
-      win.IntersectionObserverEntry = function () {};
-      win.IntersectionObserverEntry.prototype.intersectionRatio = 0;
-      expect(nativeIntersectionObserverSupported(ampdoc.win)).to.be.true;
-    }
+    env.sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
 
     readyPromise = new Promise((resolve) => {
       readyResolver = resolve;

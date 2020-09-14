@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {isSrcdocSupported} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
 const fontProviderAllowList = [
@@ -39,13 +38,14 @@ const sandboxVals = [
   'allow-top-navigation',
 ];
 
-const createSecureDocSkeleton = (sanitizedHeadElements) =>
+export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
   `<!DOCTYPE html>
   <html ⚡4ads lang="en">
   <head>
+    <base href="${escapeHtml(url)}">
     <meta charset="UTF-8">
     <meta http-equiv=Content-Security-Policy content="
-      img-src *;
+      img-src * data:;
       media-src *;
       font-src *;
       connect-src *;
@@ -57,21 +57,19 @@ const createSecureDocSkeleton = (sanitizedHeadElements) =>
     ">
     ${sanitizedHeadElements}
   </head>
-  <body></body>
+  <body>${body}</body>
   </html>`;
 
 /**
  * Create iframe with predefined CSP and sandbox attributes for security.
  * @param {!Document} document
- * @param {!Element} head
  * @param {string} title
  * @param {string} height
  * @param {string} width
  * @return {!HTMLIFrameElement}
- *
  */
-export function createSecureFrame(document, head, title, height, width) {
-  const iframe = /** @type {HTMLIFrameElement} */ (createElementWithAttributes(
+export function createSecureFrame(document, title, height, width) {
+  const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
     document,
     'iframe',
     dict({
@@ -87,17 +85,5 @@ export function createSecureFrame(document, head, title, height, width) {
       'sandbox': sandboxVals.join(' '),
     })
   ));
-
-  const secureDoc = createSecureDocSkeleton(head./*OK*/ innerHTML);
-  // TODO(ccordry): add violation reporting here or in fie.
-  if (isSrcdocSupported()) {
-    iframe.srcdoc = secureDoc;
-  } else {
-    iframe.src = 'about:blank';
-    const childDoc = iframe.contentWindow.document;
-    childDoc.open();
-    childDoc.write(secureDoc);
-    childDoc.close();
-  }
   return iframe;
 }

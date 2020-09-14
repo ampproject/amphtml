@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 import {AmpEvents} from '../src/amp-events';
+import {Deferred} from '../src/utils/promise';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev, devAssert} from '../src/log';
-import {dict} from '../src/utils/object';
+import {dict, map} from '../src/utils/object';
 import {isObject} from '../src/types';
 import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
@@ -107,6 +108,12 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.tagName = null;
 
+    /** @type {!Object<number, Deferred>} */
+    this.resizeIdToDeferred_ = map();
+
+    /** @type {number} */
+    this.nextResizeRequestId_ = 0;
+
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
@@ -114,6 +121,7 @@ export class AbstractAmpContext {
     this.client_.setSentinel(devAssert(this.sentinel));
 
     this.listenForPageVisibility_();
+    this.listenToResizeResponse_();
   }
 
   /**
@@ -210,16 +218,43 @@ export class AbstractAmpContext {
    *  @param {number} width The new width for the ad we are requesting.
    *  @param {number} height The new height for the ad we are requesting.
    *  @param {boolean=} hasOverflow Whether the ad handles its own overflow ele
+   *  @return {Promise} Signify the success/failure of the request.
    */
   requestResize(width, height, hasOverflow) {
+    const requestId = this.nextResizeRequestId_++;
     this.client_.sendMessage(
       MessageType.EMBED_SIZE,
       dict({
+        'id': requestId,
         'width': width,
         'height': height,
         'hasOverflow': hasOverflow,
       })
     );
+    const deferred = new Deferred();
+    this.resizeIdToDeferred_[requestId] = deferred;
+    return deferred.promise;
+  }
+
+  /**
+   *  Set up listeners to handle responses from request size.
+   */
+  listenToResizeResponse_() {
+    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, (data) => {
+      const id = data['id'];
+      if (id !== undefined) {
+        this.resizeIdToDeferred_[id].resolve();
+        delete this.resizeIdToDeferred_[id];
+      }
+    });
+
+    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, (data) => {
+      const id = data['id'];
+      if (id !== undefined) {
+        this.resizeIdToDeferred_[id].reject('Resizing is denied');
+        delete this.resizeIdToDeferred_[id];
+      }
+    });
   }
 
   /**
@@ -262,6 +297,13 @@ export class AbstractAmpContext {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
     this.sendDeprecationNotice_('onResizeDenied');
+  }
+
+  /**
+   *  Make the ad interactive.
+   */
+  signalInteractive() {
+    this.client_.sendMessage(MessageType.SIGNAL_INTERACTIVE);
   }
 
   /**

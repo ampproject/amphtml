@@ -20,16 +20,13 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {EXPERIMENT_INFO_LIST as AMPDOC_FIE_EXPERIMENT_INFO_LIST} from '../../../src/ampdoc-fie';
 import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A, NO_SIGNING_EXP} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
-  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
-  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
@@ -47,7 +44,6 @@ import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
   addExperimentIdToElement,
-  isInExperiment,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {computedStyle, setStyles} from '../../../src/style';
@@ -68,13 +64,6 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-adsense-impl';
-
-/** @const @enum {string} */
-const ROUND_LOCATION_PARAMS_EXP = {
-  ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21066726',
-  EXPERIMENT: '21066727',
-};
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -187,23 +176,35 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
       );
 
-    return ResponsiveState.maybeUpgradeToResponsive(
-      this.element,
-      this.getAdClientId_()
-    ).then((state) => {
-      if (state != null) {
-        this.responsiveState_ = state;
-      }
-      if (
-        this.responsiveState_ != null &&
-        !this.responsiveState_.isContainerWidthState()
-      ) {
-        return this.responsiveState_.attemptToMatchResponsiveHeight();
-      }
-      // This should happen last, as some diversion criteria rely on some of the
-      // preceding logic (specifically responsive logic).
-      this.divertExperiments();
-    });
+    // Convert the full-width tag to container width for desktop users.
+    if (
+      this.element.hasAttribute('data-auto-format') &&
+      !ResponsiveState.isLayoutViewportNarrow(this.element)
+    ) {
+      return ResponsiveState.convertToContainerWidth(this.element).then(
+        (state) => {
+          if (state != null) {
+            this.responsiveState_ = state;
+          }
+          this.divertExperiments();
+        }
+      );
+    } else {
+      return ResponsiveState.maybeUpgradeToResponsive(
+        this.element,
+        this.getAdClientId_()
+      ).then((state) => {
+        if (state != null) {
+          this.responsiveState_ = state;
+        }
+        if (this.responsiveState_ != null) {
+          return this.responsiveState_.attemptToMatchResponsiveHeight();
+        }
+        // This should happen last, as some diversion criteria rely on some of the
+        // preceding logic (specifically responsive logic).
+        this.divertExperiments();
+      });
+    }
   }
 
   /** @override */
@@ -218,37 +219,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @visibleForTesting
    */
   divertExperiments() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          RENDER_ON_IDLE_FIX_EXP.control,
-          RENDER_ON_IDLE_FIX_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: NO_SIGNING_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
-      },
-      {
-        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_PADDING_BOTTOM_EXP.control,
-          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: ROUND_LOCATION_PARAMS_EXP.ID,
-        isTrafficEligible: () => true,
-        branches: [
-          ROUND_LOCATION_PARAMS_EXP.CONTROL,
-          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT,
-        ],
-      },
-    ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
       experimentInfoList
@@ -412,7 +383,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           'pucrd': identity.pucrd || null,
           ...parameters,
         },
-        isInExperiment(this.element, ROUND_LOCATION_PARAMS_EXP.EXPERIMENT),
         experimentIds
       );
     });

@@ -33,7 +33,7 @@ describe('amp-ad 3P', () => {
     });
   });
 
-  it('create an iframe with APIs', function () {
+  it('create an iframe with APIs', async function () {
     this.timeout(20000);
     let iframe;
     let lastIO = null;
@@ -139,8 +139,6 @@ describe('amp-ad 3P', () => {
         expect(context.addContextToIframe).to.be.a('function');
         expect(context.getHtml).to.be.a('function');
         expect(context.noContentAvailable).to.be.a('function');
-        expect(context.onResizeDenied).to.be.a('function');
-        expect(context.onResizeSuccess).to.be.a('function');
         expect(context.renderStart).to.be.a('function');
         expect(context.reportRenderedEntityIdentifier).to.be.a('function');
         expect(context.requestResize).to.be.a('function');
@@ -162,11 +160,9 @@ describe('amp-ad 3P', () => {
       .then(() => {
         expect(iframe.offsetHeight).to.equal(250);
         expect(iframe.offsetWidth).to.equal(300);
-        expect(iframe.contentWindow.ping.resizeSuccess).to.be.undefined;
-        iframe.contentWindow.context.requestResize(200, 50);
-        return poll('wait for embed-size to be received', () => {
-          return !!fixture.messages.getFirstMessageEventOfType('embed-size');
-        });
+        return iframe.contentWindow.context
+          .requestResize(200, 50)
+          .catch(() => {});
       })
       .then(() => {
         // The userActivation feature is known to be available on Chrome 74+
@@ -177,26 +173,79 @@ describe('amp-ad 3P', () => {
           expect(event.userActivation).to.be.ok;
           expect(event.userActivation.isActive).to.be.a('boolean');
         }
-
-        return poll(
-          'wait for attemptChangeSize',
-          () => {
-            return iframe.contentWindow.ping.resizeSuccess != undefined;
-          },
-          null,
-          5000
-        );
       })
-      .then(() => {
+      .then(async function () {
         lastIO = null;
+        // Ad is fully visible
         iframe.contentWindow.context.observeIntersection((changes) => {
           lastIO = changes[changes.length - 1];
         });
-        fixture.win.scrollTo(0, 1000);
-        fixture.win.document.body.dispatchEvent(new Event('scroll'));
-        return poll('wait for new IO entry', () => {
-          return lastIO != null;
+        await poll('wait for initial IO entry', () => {
+          return (
+            lastIO != null &&
+            lastIO.boundingClientRect.top == 1000 &&
+            lastIO.intersectionRatio == 1
+          );
         });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad is still fully visible. observeIntersection fire when
+        // ads is fully visible with position change
+        fixture.win.scrollTo(0, 1000);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await poll('wait for new IO entry when ad is fully visible', () => {
+          return (
+            lastIO != null &&
+            lastIO.boundingClientRect.top == (platform.isIos() ? 1 : 0) &&
+            lastIO.intersectionRatio == 1
+          );
+        });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad is partially visible (around 50%)
+        fixture.win.scrollTo(0, 1125);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await poll(
+          'wait for new IO entry when intersectionRatio changes',
+          () => {
+            return (
+              lastIO != null &&
+              lastIO.intersectionRatio > 0 &&
+              lastIO.intersectionRatio < 1
+            );
+          }
+        );
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad first becomes invisible
+        fixture.win.scrollTo(0, 1251);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await poll('wait for new IO entry when ad exit viewport', () => {
+          return lastIO != null && lastIO.intersectionRatio == 0;
+        });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Scroll when ad is invisible
+        fixture.win.scrollTo(0, 1451);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        expect(lastIO).to.be.null;
       })
       .then(
         () =>

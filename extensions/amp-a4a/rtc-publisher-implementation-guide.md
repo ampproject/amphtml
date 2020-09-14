@@ -22,9 +22,11 @@ To use RTC, you must meet the following requirements:
 - AppNexus
 - APS
 - Automatad
+- Andbeyond
 - Browsi
 - Criteo
 - FLUX
+- [Freestar](https://freestar.com)
 - IndexExchange
 - Kargo
 - Lotame

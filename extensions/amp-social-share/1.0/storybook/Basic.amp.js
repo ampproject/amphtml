@@ -17,18 +17,19 @@
 import * as Preact from '../../../../src/preact';
 import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
-import {toggleExperiment} from '../../../../src/experiments';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
-storiesOf('amp-social-share v2', module)
+storiesOf('amp-social-share-1_0', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-social-share', version: 0.2}]})
+  .addParameters({
+    extensions: [{name: 'amp-social-share', version: '1.0'}],
+    experiments: ['amp-social-share-bento'],
+  })
   .add('default', () => {
-    toggleExperiment(window, 'amp-social-share-v2', true);
     /*
      * Knob and Component Details -
      * amp-social-share allows the user to set various parameters to configure
@@ -71,14 +72,18 @@ storiesOf('amp-social-share v2', module)
       'sms',
       'system',
       'custom',
+      undefined,
     ];
     const type = select('type', typeConfigurations, typeConfigurations[0]);
-    const customEndpoint = text('data-share-endpoint', undefined);
-    const paramUrl = text('data-param-url', undefined);
-    const paramText = text('data-param-text', undefined);
-    const paramAttribution = text('data-param-attribution', undefined);
-    const paramMedia = text('data-param-media', undefined);
+    const customEndpoint = text('data-share-endpoint', null);
+    const paramUrl = text('data-param-url', null);
+    const paramText = text('data-param-text', null);
+    const paramAttribution = text('data-param-attribution', null);
+    const paramMedia = text('data-param-media', null);
     const appId = text('data-param-app_id', '254325784911610');
+    const layout = text('layout', null);
+    const width = text('width', null);
+    const height = text('height', null);
     return (
       <amp-social-share
         type={type}
@@ -88,43 +93,9 @@ storiesOf('amp-social-share v2', module)
         data-param-attribution={paramAttribution}
         data-param-media={paramMedia}
         data-param-app_id={appId}
-      ></amp-social-share>
-    );
-  })
-  .add('responsive', () => {
-    toggleExperiment(window, 'amp-social-share-v2', true);
-    const typeConfigurations = [
-      'email',
-      'facebook',
-      'linkedin',
-      'pinterest',
-      'tumblr',
-      'twitter',
-      'whatsapp',
-      'line',
-      'sms',
-      'system',
-      'custom',
-    ];
-    const type = select('type', typeConfigurations, typeConfigurations[0]);
-    const customEndpoint = text('data-share-endpoint', undefined);
-    const paramUrl = text('data-param-url', undefined);
-    const paramText = text('data-param-text', undefined);
-    const paramAttribution = text('data-param-attribution', undefined);
-    const paramMedia = text('data-param-media', undefined);
-    const appId = text('data-param-app_id', '254325784911610');
-    return (
-      <amp-social-share
-        type={type}
-        data-share-endpoint={customEndpoint}
-        data-param-text={paramText}
-        data-param-url={paramUrl}
-        data-param-attribution={paramAttribution}
-        data-param-media={paramMedia}
-        data-param-app_id={appId}
-        layout="responsive"
-        width="100"
-        height="100"
+        layout={layout}
+        width={width}
+        height={height}
       ></amp-social-share>
     );
   });

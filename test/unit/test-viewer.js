@@ -660,6 +660,18 @@ describes.sandboxed('Viewer', {}, (env) => {
     it('should become visible on mousedown', eventTest.bind(null, 'mousedown'));
 
     it('should become visible on keydown', eventTest.bind(null, 'keydown'));
+
+    it('should not become visible when not a single doc', () => {
+      env.sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
+      ampdoc.overrideVisibilityState('prerender');
+
+      viewer = new ViewerImpl(ampdoc);
+
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
+      expect(events.touchstart).to.be.undefined;
+      expect(events.keydown).to.be.undefined;
+      expect(events.mousedown).to.be.undefined;
+    });
   });
 
   describe('Messaging not embedded', () => {
@@ -1779,6 +1791,90 @@ describes.sandboxed('Viewer', {}, (env) => {
       });
       clock.tick(1010);
       return result;
+    });
+  });
+
+  describe('onMessage', () => {
+    it('should fire observer on event', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.onMessage('event', onMessageSpy);
+      viewer.receiveMessage('event', {foo: 'bar'});
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should not fire observer on other events', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.onMessage('event', onMessageSpy);
+      viewer.receiveMessage('otherevent', {foo: 'bar'});
+      expect(onMessageSpy).to.not.have.been.called;
+    });
+
+    it('should fire observer with queued messages on handler registration', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should empty queued messages after first handler registration', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessage('event', onMessageSpy);
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should cap the max number of queued messages', () => {
+      const onMessageSpy = env.sandbox.spy();
+      for (let i = 0; i < 55; i++) {
+        viewer.receiveMessage('event', {foo: 'bar'});
+      }
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.callCount(50);
+    });
+  });
+
+  describe('onMessageRespond', () => {
+    it('should call responder on event', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.receiveMessage('event', {foo: 'bar'});
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should not call responder on other events', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.receiveMessage('otherevent', {foo: 'bar'});
+      expect(onMessageRespondStub).to.not.have.been.called;
+    });
+
+    it('should call responder with queued messages on responder registration', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should empty queued messages after first responder registration', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should return responder response when enqueing message on responder registration', async () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves('response');
+      const promise = viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(await promise).to.equal('response');
     });
   });
 });

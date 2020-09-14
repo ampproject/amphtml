@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
+import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {
   AmpScript,
   AmpScriptService,
@@ -56,8 +56,10 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
-    // Make @ampproject/worker-dom dependency a no-op for these unit tests.
-    env.sandbox.stub(WorkerDOM, 'upgrade').resolves();
+    // Make @ampproject/worker-dom dependency essentially a noop for these tests.
+    env.sandbox
+      .stub(WorkerDOM, 'upgrade')
+      .callsFake((unused, scriptsPromise) => scriptsPromise);
   });
 
   function stubFetch(url, headers, text, responseUrl) {
@@ -82,6 +84,33 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
 
     expectAsyncConsoleError(/Same-origin "src" requires/);
     return script.layoutCallback().should.be.rejected;
+  });
+
+  it('should support nodom variant', async () => {
+    element.setAttribute('nodom', '');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/javascript; charset=UTF-8'}, // Valid content-type.
+      'alert(1)'
+    );
+
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
+      .rejects();
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-nodom-0.1.js/))
+      .resolves({text: () => Promise.resolve('/* noop */')});
+    registerServiceBuilderForDoc(
+      env.win.document,
+      'amp-script',
+      AmpScriptService
+    );
+
+    await script.buildCallback();
+    await script.layoutCallback();
+    resetServiceForTesting(env.win, 'amp-script');
   });
 
   it('should work with "text/javascript" content-type for same-origin src', () => {

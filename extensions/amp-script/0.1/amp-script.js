@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
+import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
@@ -109,6 +109,15 @@ export class AmpScript extends AMP.BaseElement {
      * @private {boolean}
      */
     this.development_ = false;
+
+    /**
+     * If true, signals that the `nodom` variant of worker-dom should be used.
+     * The worker js will have a much smaller bundle size, but no access to dom
+     * functions.
+     *
+     * @private {boolean}
+     */
+    this.nodom_ = false;
   }
 
   /** @override */
@@ -118,6 +127,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.nodom_ = this.element.hasAttribute('nodom');
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
       this.element.ownerDocument.documentElement.hasAttribute(
@@ -128,6 +138,18 @@ export class AmpScript extends AMP.BaseElement {
       user().warn(
         TAG,
         'JavaScript size and script hash requirements are disabled in development mode.',
+        this.element
+      );
+    }
+
+    if (
+      this.nodom_ &&
+      (this.element.hasAttribute('width') ||
+        this.element.hasAttribute('height'))
+    ) {
+      user().warn(
+        TAG,
+        'Cannot set width or height of a nodom <amp-script>',
         this.element
       );
     }
@@ -266,22 +288,24 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    WorkerDOM.upgrade(
+    return WorkerDOM.upgrade(
       container || this.element,
       workerAndAuthorScripts,
       config
     ).then((workerDom) => {
       this.workerDom_ = workerDom;
       this.initialize_.resolve();
-      this.workerDom_.onerror = (errorEvent) => {
-        errorEvent.preventDefault();
-        user().error(
-          TAG,
-          `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
-        );
-      };
+      // workerDom will be null if it failed to init.
+      if (this.workerDom_) {
+        this.workerDom_.onerror = (errorEvent) => {
+          errorEvent.preventDefault();
+          user().error(
+            TAG,
+            `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
+          );
+        };
+      }
     });
-    return workerAndAuthorScripts;
   }
 
   /**
@@ -297,7 +321,7 @@ export class AmpScript extends AMP.BaseElement {
     const useLocal = getMode().localDev || getMode().test;
     const workerUrl = calculateExtensionScriptUrl(
       location,
-      'amp-script-worker',
+      this.nodom_ ? 'amp-script-worker-nodom' : 'amp-script-worker',
       '0.1',
       useLocal
     );
@@ -548,8 +572,8 @@ export class AmpScriptService {
         // extraction is ready.
         throw user().createError(
           TAG,
-          `Script hash not found. ${debugId} must have "sha384-${hash}" in meta[name="amp-script-src"].` +
-            ' See https://amp.dev/documentation/components/amp-script/#security-features.'
+          `Script hash not found or incorrect for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">. ` +
+            'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
       }
     });

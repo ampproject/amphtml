@@ -17,7 +17,7 @@
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
-import {IntersectionObserverHostForAd} from './intersection-observer-host';
+import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
@@ -66,8 +66,8 @@ export class AmpAdXOriginIframeHandler {
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserverHostForAd} */
-    this.intersectionObserverHost_ = null;
+    /** @private {?LegacyAdIntersectionObserverHost} */
+    this.legacyIntersectionObserverApiHost_ = null;
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
@@ -103,11 +103,11 @@ export class AmpAdXOriginIframeHandler {
     this.baseInstance_.applyFillContent(this.iframe);
     const timer = Services.timerFor(this.baseInstance_.win);
 
-    // Init IntersectionObserver service.
-    this.intersectionObserverHost_ = new IntersectionObserverHostForAd(
+    // Init the legacy observeInterection API service.
+    // (Behave like position observer)
+    this.legacyIntersectionObserverApiHost_ = new LegacyAdIntersectionObserverHost(
       this.baseInstance_,
-      this.iframe,
-      true
+      this.iframe
     );
 
     this.embedStateApi_ = new SubscriptionApi(
@@ -170,6 +170,7 @@ export class AmpAdXOriginIframeHandler {
             this.element_.warnOnMissingOverflow = false;
           }
           this.handleResize_(
+            data['id'],
             data['height'],
             data['width'],
             source,
@@ -181,6 +182,21 @@ export class AmpAdXOriginIframeHandler {
         true
       )
     );
+
+    if (this.element_.hasAttribute('sticky')) {
+      setStyle(iframe, 'pointer-events', 'none');
+      this.unlisteners_.push(
+        listenFor(
+          this.iframe,
+          'signal-interactive',
+          () => {
+            setStyle(iframe, 'pointer-events', 'auto');
+          },
+          true,
+          true
+        )
+      );
+    }
 
     this.unlisteners_.push(
       this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
@@ -363,6 +379,7 @@ export class AmpAdXOriginIframeHandler {
   renderStartMsgHandler_(info) {
     const data = getData(info);
     this.handleResize_(
+      undefined,
       data['height'],
       data['width'],
       info['source'],
@@ -417,9 +434,9 @@ export class AmpAdXOriginIframeHandler {
       this.inaboxPositionApi_.destroy();
       this.inaboxPositionApi_ = null;
     }
-    if (this.intersectionObserverHost_) {
-      this.intersectionObserverHost_.destroy();
-      this.intersectionObserverHost_ = null;
+    if (this.legacyIntersectionObserverApiHost_) {
+      this.legacyIntersectionObserverApiHost_.destroy();
+      this.legacyIntersectionObserverApiHost_ = null;
     }
   }
 
@@ -427,6 +444,7 @@ export class AmpAdXOriginIframeHandler {
    * Updates the element's dimensions to accommodate the iframe's
    * requested dimensions. Notifies the window that request the resize
    * of success or failure.
+   * @param {number|undefined} id
    * @param {number|string|undefined} height
    * @param {number|string|undefined} width
    * @param {!Window} source
@@ -434,7 +452,7 @@ export class AmpAdXOriginIframeHandler {
    * @param {!MessageEvent} event
    * @private
    */
-  handleResize_(height, width, source, origin, event) {
+  handleResize_(id, height, width, source, origin, event) {
     this.baseInstance_.getVsync().mutate(() => {
       if (!this.iframe) {
         // iframe can be cleanup before vsync.
@@ -448,6 +466,7 @@ export class AmpAdXOriginIframeHandler {
           (info) => {
             this.sendEmbedSizeResponse_(
               info.success,
+              id,
               info.newWidth,
               info.newHeight,
               source,
@@ -462,6 +481,7 @@ export class AmpAdXOriginIframeHandler {
   /**
    * Sends a response to the window which requested a resize.
    * @param {boolean} success
+   * @param {number|undefined} id
    * @param {number} requestedWidth
    * @param {number} requestedHeight
    * @param {!Window} source
@@ -470,6 +490,7 @@ export class AmpAdXOriginIframeHandler {
    */
   sendEmbedSizeResponse_(
     success,
+    id,
     requestedWidth,
     requestedHeight,
     source,
@@ -484,6 +505,7 @@ export class AmpAdXOriginIframeHandler {
       [{win: source, origin}],
       success ? 'embed-size-changed' : 'embed-size-denied',
       dict({
+        'id': id,
         'requestedWidth': requestedWidth,
         'requestedHeight': requestedHeight,
       }),
@@ -579,9 +601,6 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverHost_) {
-      this.intersectionObserverHost_.onViewportCallback(inViewport);
-    }
     this.sendEmbedInfo_(inViewport);
   }
 
@@ -591,8 +610,8 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.intersectionObserverHost_) {
-      this.intersectionObserverHost_.fire();
+    if (this.legacyIntersectionObserverApiHost_) {
+      this.legacyIntersectionObserverApiHost_.fire();
     }
   }
 
