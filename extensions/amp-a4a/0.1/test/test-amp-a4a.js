@@ -2536,8 +2536,6 @@ describes.realWin('no signing', {amp: true}, (env) => {
             a4a,
             consentString,
             consentMetadata,
-            consentStringType,
-            additionalConsent,
             gdprApplies;
           beforeEach(async () => {
             fixture = await createIframePromise();
@@ -2551,12 +2549,10 @@ describes.realWin('no signing', {amp: true}, (env) => {
             a4a = new MockA4AImpl(a4aElement);
             consentString = 'test-consent-string';
             gdprApplies = true;
-            additionalConsent = 'abc123';
-            consentStringType = 1;
             consentMetadata = {
               gdprApplies,
-              consentStringType,
-              additionalConsent,
+              'consentStringType': 1,
+              'additionalConsent': 'abc123',
             };
             return fixture;
           });

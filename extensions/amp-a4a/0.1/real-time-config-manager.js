@@ -286,9 +286,12 @@ export class RealTimeConfigManager {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
     macros['CONSENT_STATE'] = () => this.consentState_;
     macros['CONSENT_STRING'] = () => this.consentString_;
-    macros['CONSENT_METADATA'] = /** @type {!../../../src/service/variable-source.AsyncResolverDef} */ ((key) => {
-      userAssert(typeof key == 'string', "bad");
-      // user().assertString(key);
+    macros[
+      'CONSENT_METADATA'
+    ] = /** @type {!../../../src/service/variable-source.AsyncResolverDef} */ ((
+      key
+    ) => {
+      userAssert(key, 'CONSENT_METADATA macro must contian a key');
       return this.consentMetadata_ ? this.consentMetadata_[key] : null;
     });
     return macros;

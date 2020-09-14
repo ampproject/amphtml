@@ -444,6 +444,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       );
     });
 
+    it('replaces CONSENT_METADATA', () => {
+      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        Promise.resolve({
+          getConsentMetadataInfo: () => {
+            return {
+              'gdprApplies': true,
+              'additionalConsent': 'abc123',
+              'consentStringType': 1,
+            };
+          },
+        })
+      );
+
+      return check(
+        'CONSENT_METADATA(gdprApplies)&CONSENT_METADATA(additionalConsent)&CONSENT_METADATA(consentStringType)',
+        'true&abc123&1'
+      );
+    });
+
     it('"COOKIE" resolves cookie value', async () => {
       doc.cookie = 'test=123';
       await check('COOKIE(test)', '123');

@@ -274,7 +274,10 @@ export class VariableService {
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
       'CONSENT_METADATA': (key) =>
-        getConsentMetadataValue(element, dev().assertString(key)),
+        getConsentMetadataValue(
+          element,
+          userAssert(key, 'CONSENT_METADATA macro must contain a key')
+        ),
     };
     const perfMacros = isInFie(element)
       ? {}
