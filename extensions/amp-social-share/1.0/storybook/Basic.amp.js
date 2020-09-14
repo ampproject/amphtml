@@ -21,7 +21,7 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
-storiesOf('amp-social-share 1_0', module)
+storiesOf('amp-social-share-1_0', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
@@ -72,14 +72,18 @@ storiesOf('amp-social-share 1_0', module)
       'sms',
       'system',
       'custom',
+      undefined,
     ];
     const type = select('type', typeConfigurations, typeConfigurations[0]);
-    const customEndpoint = text('data-share-endpoint', undefined);
-    const paramUrl = text('data-param-url', undefined);
-    const paramText = text('data-param-text', undefined);
-    const paramAttribution = text('data-param-attribution', undefined);
-    const paramMedia = text('data-param-media', undefined);
+    const customEndpoint = text('data-share-endpoint', null);
+    const paramUrl = text('data-param-url', null);
+    const paramText = text('data-param-text', null);
+    const paramAttribution = text('data-param-attribution', null);
+    const paramMedia = text('data-param-media', null);
     const appId = text('data-param-app_id', '254325784911610');
+    const layout = text('layout', null);
+    const width = text('width', null);
+    const height = text('height', null);
     return (
       <amp-social-share
         type={type}
@@ -89,42 +93,9 @@ storiesOf('amp-social-share 1_0', module)
         data-param-attribution={paramAttribution}
         data-param-media={paramMedia}
         data-param-app_id={appId}
-      ></amp-social-share>
-    );
-  })
-  .add('responsive', () => {
-    const typeConfigurations = [
-      'email',
-      'facebook',
-      'linkedin',
-      'pinterest',
-      'tumblr',
-      'twitter',
-      'whatsapp',
-      'line',
-      'sms',
-      'system',
-      'custom',
-    ];
-    const type = select('type', typeConfigurations, typeConfigurations[0]);
-    const customEndpoint = text('data-share-endpoint', undefined);
-    const paramUrl = text('data-param-url', undefined);
-    const paramText = text('data-param-text', undefined);
-    const paramAttribution = text('data-param-attribution', undefined);
-    const paramMedia = text('data-param-media', undefined);
-    const appId = text('data-param-app_id', '254325784911610');
-    return (
-      <amp-social-share
-        type={type}
-        data-share-endpoint={customEndpoint}
-        data-param-text={paramText}
-        data-param-url={paramUrl}
-        data-param-attribution={paramAttribution}
-        data-param-media={paramMedia}
-        data-param-app_id={appId}
-        layout="responsive"
-        width="100"
-        height="100"
+        layout={layout}
+        width={width}
+        height={height}
       ></amp-social-share>
     );
   });
