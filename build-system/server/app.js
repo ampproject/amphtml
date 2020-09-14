@@ -818,13 +818,18 @@ app.post('/get-consent-no-prompt/', (req, res) => {
 
 app.post('/check-consent', (req, res) => {
   cors.assertCors(req, res, ['POST']);
-  res.json({
+  const response = {
     'consentRequired': req.query.consentRequired === 'true',
     'consentStateValue': req.query.consentStateValue,
-    'consentMetadata': JSON.parse(req.query.consentMetadata.replace(/'/g, '"')),
     'consentString': req.query.consentString,
     'expireCache': req.query.expireCache === 'true',
-  });
+  };
+  if (req.query.consentMetadata) {
+    response['consentMetadata'] = JSON.parse(
+      req.query.consentMetadata.replace(/'/g, '"')
+    );
+  }
+  res.json(response);
 });
 
 // Proxy with local JS.

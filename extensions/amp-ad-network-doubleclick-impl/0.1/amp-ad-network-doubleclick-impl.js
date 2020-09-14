@@ -25,16 +25,13 @@ import {
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
-  NO_SIGNING_EXP,
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
-  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
-  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -428,27 +425,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         experimentId: ZINDEX_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
-      },
-      {
-        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          RENDER_ON_IDLE_FIX_EXP.control,
-          RENDER_ON_IDLE_FIX_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: NO_SIGNING_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
-      },
-      {
-        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_PADDING_BOTTOM_EXP.control,
-          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
-        ],
       },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);

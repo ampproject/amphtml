@@ -656,10 +656,6 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   white-space: nowrap !important;
 }
 
-.i-amphtml-story-button-container {
-  display: none !important;
-}
-
 /* Default loading spinner */
 
 amp-story .amp-video-eq,
@@ -968,10 +964,6 @@ amp-story-interactive-results[chip-style="transparent"] {
   --i-amphtml-interactive-options-chip-background-color: transparent !important;
   --interactive-prompt-background: transparent;
   --i-amphtml-interactive-component-shadow: none !important;
-}
-
-amp-story-interactive-results[chip-style="transparent"] {
-  --interactive-prompt-background: transparent;
   --interactive-prompt-text-color: black;
   --i-amphtml-interactive-results-prompt-margin: 0px !important;
 }
@@ -982,31 +974,4 @@ amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
 
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
   --i-amphtml-interactive-animation-delay: 350ms !important;
-}
-
-.i-amphtml-story-screen-reader-back-button {
-  width: 10px !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-  z-index: 1 !important;
-  height: calc(100vh - 150px) !important;
-  margin: auto 0 !important;
-  background: none !important;
-  border: none !important;
-  /* Hiding the outline since this button is intended to be used with
-     mobile screen readers such as TalkBack which add focus lines. */
-  outline: none !important;
-  pointer-events: none !important;
-}
-
-[dir=rtl] .i-amphtml-story-screen-reader-back-button {
-  right: 0 !important;
-  left: auto !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-screen-reader-back-button,
-.i-amphtml-story-screen-reader-back-button-hidden {
-  display: none !important;
 }

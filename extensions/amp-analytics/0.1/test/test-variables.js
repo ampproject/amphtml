@@ -458,8 +458,8 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       );
 
       return check(
-        'CONSENT_METADATA(gdprApplies)&CONSENT_METADATA(additionalConsent)&CONSENT_METADATA(consentStringType)',
-        'true&abc123&1'
+        'CONSENT_METADATA(gdprApplies)&CONSENT_METADATA(additionalConsent)&CONSENT_METADATA(consentStringType)&CONSENT_METADATA(invalid_key)',
+        'true&abc123&1&'
       );
     });
 

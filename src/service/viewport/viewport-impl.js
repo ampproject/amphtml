@@ -47,6 +47,12 @@ import {numeric} from '../../transition';
 import {tryResolve} from '../../utils/promise';
 
 const TAG_ = 'Viewport';
+const SCROLL_POS_TO_BLOCK = {
+  'top': 'start',
+  'center': 'center',
+  'bottom': 'end',
+};
+const SMOOTH_SCROLL_DELAY_ = 300;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -403,9 +409,14 @@ export class ViewportImpl {
 
   /** @override */
   scrollIntoView(element) {
-    return this.getScrollingContainerFor_(element).then((parent) =>
-      this.scrollIntoViewInternal_(element, parent)
-    );
+    if (IS_SXG) {
+      element./* OK */ scrollIntoView();
+      return Promise.resolve();
+    } else {
+      return this.getScrollingContainerFor_(element).then((parent) =>
+        this.scrollIntoViewInternal_(element, parent)
+      );
+    }
   }
 
   /**
@@ -425,20 +436,30 @@ export class ViewportImpl {
 
   /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
-    devAssert(
-      !opt_curve || opt_duration !== undefined,
-      "Curve without duration doesn't make sense."
-    );
+    if (IS_SXG) {
+      return new Promise((resolve, opt_) => {
+        element./* OK */ scrollIntoView({
+          block: SCROLL_POS_TO_BLOCK[pos],
+          behavior: 'smooth',
+        });
+        setTimeout(resolve, SMOOTH_SCROLL_DELAY_);
+      });
+    } else {
+      devAssert(
+        !opt_curve || opt_duration !== undefined,
+        "Curve without duration doesn't make sense."
+      );
 
-    return this.getScrollingContainerFor_(element).then((parent) =>
-      this.animateScrollWithinParent(
-        element,
-        parent,
-        dev().assertString(pos),
-        opt_duration,
-        opt_curve
-      )
-    );
+      return this.getScrollingContainerFor_(element).then((parent) =>
+        this.animateScrollWithinParent(
+          element,
+          parent,
+          dev().assertString(pos),
+          opt_duration,
+          opt_curve
+        )
+      );
+    }
   }
 
   /** @override */
@@ -875,14 +896,22 @@ export class ViewportImpl {
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
 
-    const animPromise = this.animateFixedElements_(duration, curve, transient);
-    if (paddingTop < this.lastPaddingTop_) {
-      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-      return;
+    if (this.fixedLayer_) {
+      const animPromise = this.fixedLayer_.animateFixedElements(
+        this.paddingTop_,
+        this.lastPaddingTop_,
+        duration,
+        curve,
+        transient
+      );
+      if (paddingTop < this.lastPaddingTop_) {
+        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      } else {
+        animPromise.then(() => {
+          this.binding_.showViewerHeader(transient, paddingTop);
+        });
+      }
     }
-    animPromise.then(() => {
-      this.binding_.showViewerHeader(transient, paddingTop);
-    });
   }
 
   /**
@@ -895,33 +924,6 @@ export class ViewportImpl {
     } else {
       this.resetScroll();
     }
-  }
-
-  /**
-   * @param {number} duration
-   * @param {string} curve
-   * @param {boolean} transient
-   * @return {!Promise}
-   * @private
-   */
-  animateFixedElements_(duration, curve, transient) {
-    this.fixedLayer_.updatePaddingTop(this.paddingTop_, transient);
-    if (duration <= 0) {
-      return Promise.resolve();
-    }
-    // Add transit effect on position fixed element
-    const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
-    return Animation.animate(
-      this.ampdoc.getRootNode(),
-      (time) => {
-        const p = tr(time);
-        this.fixedLayer_.transformMutate(`translateY(${p}px)`);
-      },
-      duration,
-      curve
-    ).thenAlways(() => {
-      this.fixedLayer_.transformMutate(null);
-    });
   }
 
   /**
