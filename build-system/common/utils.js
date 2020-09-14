@@ -92,7 +92,8 @@ function logFiles(files) {
  * @return {Array<string>}
  */
 function getFilesFromArgv() {
-  // globby does not support Windows paths.
+  // TODO: https://github.com/ampproject/amphtml/issues/30223
+  // Switch from globby to a lib that supports Windows.
   const toPosix = str => str.replace(/\\\\?/g, '/');
   return argv.files
     ? globby.sync(argv.files.split(',').map((s) => s.trim()).map(toPosix))
