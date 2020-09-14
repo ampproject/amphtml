@@ -35,9 +35,9 @@ import {Keys} from '../../../src/utils/key-codes';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
+  assertHttpsUrl,
   checkCorsUrl,
   isProxyOrigin,
-  assertHttpsUrl,
   parseQueryString,
   serializeQueryString,
 } from '../../../src/url';
@@ -1692,14 +1692,9 @@ export class AmpFormService {
  * @return {!Promise}
  */
 function installGlobalSubmitListenerForDoc(ampdoc) {
-  if (this.docSubmitInstalled_) {
-    return;
-  } else {
-    this.docSubmitInstalled_ = true;
-    ampdoc
-      .getRootNode()
-      .addEventListener('submit', onDocumentFormSubmit_, true);
-  }
+  return ampdoc
+    .getRootNode()
+    .addEventListener('submit', onDocumentFormSubmit_, true);
 }
 
 /**
