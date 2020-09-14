@@ -166,13 +166,3 @@ export function useImperativeHandle(ref, create, opt_deps) {
 export function toChildArray(unusedChildren) {
   return preact.toChildArray.apply(undefined, arguments);
 }
-
-/**
- * @param {{current: (T|undefined)}} ref
- * @param {!Function} init
- * @param {!Array<*>=} opt_deps
- * @template T
- */
-export function useImperativeHandle(ref, init, opt_deps) {
-  hooks.useImperativeHandle(ref, init, opt_deps);
-}
