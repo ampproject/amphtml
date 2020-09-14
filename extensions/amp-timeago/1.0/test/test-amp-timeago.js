@@ -117,7 +117,7 @@ describes.realWin(
   }
 );
 
-describe('amp-timeago 1.0: parseDateAttrs', () => {
+describes.sandboxed('amp-timeago 1.0: parseDateAttrs', {}, () => {
   const DATE = new Date(1514793600000);
   const DATE_STRING = DATE.toISOString();
 
