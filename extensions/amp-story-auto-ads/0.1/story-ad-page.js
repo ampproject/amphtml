@@ -431,8 +431,8 @@ export class StoryAdPage {
    * @private
    */
   extractA4AVars_() {
-    const a4aVarsTags = getStoryAdMetaTags(this.adDoc_);
-    iterateCursor(a4aVarsTags, (tag) => {
+    const storyMetaTags = getStoryAdMetaTags(this.adDoc_);
+    iterateCursor(storyMetaTags, (tag) => {
       const {name, content} = tag;
       if (startsWith(name, CTA_META_PREFIX)) {
         const key = name.split('amp-')[1];

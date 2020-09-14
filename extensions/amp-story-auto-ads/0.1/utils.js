@@ -52,15 +52,6 @@ export function getStoryAdMetaTags(doc) {
 }
 
 /**
- * Finds all story ad meta tags starting with `amp-cta-`.
- * @param {Document} doc
- * @return {!IArrayLike}
- */
-export function getAmpCtaMetaTags(doc) {
-  return doc.querySelectorAll('meta[name^=amp-cta-]');
-}
-
-/**
  * Returns document from given iframe, or null if non FIE.
  * @param {HTMLIFrameElement} iframe
  * @return {!Document}
