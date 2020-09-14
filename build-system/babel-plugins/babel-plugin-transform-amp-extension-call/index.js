@@ -29,9 +29,7 @@ module.exports = function (babel) {
           const func = node.arguments[node.arguments.length - 1];
 
           const IIFE = t.expressionStatement(
-            t.callExpression(func, [
-              t.memberExpression(t.identifier('self'), t.identifier('AMP')),
-            ])
+            t.callExpression(func, [t.identifier('AMP')])
           );
           path.replaceWith(IIFE);
         }

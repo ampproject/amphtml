@@ -393,6 +393,7 @@ exports.extensionBundles = [
     name: 'amp-base-carousel',
     version: '1.0',
     latestVersion: '0.1',
+    options: {wrapper: wrappers.bento},
     type: TYPES.MISC,
   },
   {
@@ -491,8 +492,15 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-date-display',
-    version: ['0.1', '1.0'],
+    version: '0.1',
     latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-date-display',
+    version: '1.0',
+    latestVersion: '0.1',
+    options: {wrapper: wrappers.bento},
     type: TYPES.MISC,
   },
   {
@@ -554,6 +562,7 @@ exports.extensionBundles = [
     name: 'amp-fit-text',
     version: '1.0',
     latestVersion: '0.1',
+    options: {wrapper: wrappers.bento},
     type: TYPES.MISC,
   },
   {
@@ -670,6 +679,7 @@ exports.extensionBundles = [
         'amp-inline-gallery-pagination',
         'amp-inline-gallery-thumbnails',
       ],
+      wrapper: wrappers.bento,
     },
     type: TYPES.MISC,
   },
@@ -980,9 +990,16 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-selector',
-    version: ['0.1', '1.0'],
+    version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-selector',
+    version: '1.0',
+    latestVersion: '0.1',
+    options: {hasCss: true, wrapper: wrappers.bento},
     type: TYPES.MISC,
   },
   {
@@ -1074,12 +1091,19 @@ exports.extensionBundles = [
     name: 'amp-social-share',
     version: '1.0',
     latestVersion: '0.1',
-    options: {hasCss: true},
+    options: {hasCss: true, wrapper: wrappers.bento},
     type: TYPES.MISC,
   },
   {
     name: 'amp-timeago',
-    version: ['0.1', '1.0'],
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {wrappers: wrappers.bento},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-timeago',
+    version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MISC,
   },

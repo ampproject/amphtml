@@ -78,6 +78,7 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   loadPriority: ?string,
  *   cssBinaries: ?Array<string>,
  *   extraGlobs: ?Array<string>,
+ *   wrapper: ?string,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -538,7 +539,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       // See https://github.com/ampproject/amphtml/issues/3977
       wrapper: options.noWrapper
         ? ''
-        : wrappers.extension(name, options.loadPriority),
+        : (options.wrapper || wrappers.extension)(name, options.loadPriority),
     })
   );
 

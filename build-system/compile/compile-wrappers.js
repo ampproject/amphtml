@@ -30,14 +30,28 @@ exports.mainBinary =
 
 exports.extension = function (
   name,
-  loadPriority,
-  intermediateDeps,
+  opt_loadPriority,
+  opt_intermediateDeps,
   opt_splitMarker
 ) {
   opt_splitMarker = opt_splitMarker || '';
 
+  return `(self.AMP=self.AMP||[]).push(${extensionPayload(
+    name,
+    opt_loadPriority,
+    opt_intermediateDeps,
+    opt_splitMarker
+  )});`;
+};
+
+function extensionPayload(
+  name,
+  loadPriority = '',
+  intermediateDeps = [],
+  splitMarker = ''
+) {
   let deps = '';
-  if (intermediateDeps && intermediateDeps.length) {
+  if (intermediateDeps.length) {
     deps = 'i:';
     function quote(s) {
       return `"${s}"`;
@@ -57,9 +71,20 @@ exports.extension = function (
     priority = 'p:"high",';
   }
   return (
-    `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-    `v:"${VERSION}",f:(function(AMP,_){${opt_splitMarker}\n` +
-    '<%= contents %>\n})});'
+    `{n:"${name}",${priority}${deps}` +
+    `v:"${VERSION}",f:(function(AMP,_){${splitMarker}\n` +
+    `<%= contents %>\n})}`
+  );
+}
+
+exports.bento = function (name) {
+  const payload = extensionPayload(name);
+
+  return (
+    `(function(p){self.AMP?self.AMP.push(p):` +
+    `document.head.querySelector('script[src$=v0.js],script[src$=v0.mjs]')?self.AMP=[p]:` +
+    `p.f({registerElement:function(n,b,c){customElements.define(n,c)}})` +
+    `})(${payload});`
   );
 };
 

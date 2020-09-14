@@ -14,45 +14,32 @@
  * limitations under the License.
  */
 
-<<<<<<< Updated upstream
-let CE = typeof AMP !== 'undefined' && AMP.BaseElement;
+import {toWin} from '../types';
 
-if (!CE) {
-  CE = class CustomElement extends HTMLElement {
-    /** */
-    constructor() {
-      /** @const {!Element} */
-      this.element = this;
-=======
-/**
- * @constructor @struct
- * @extends {BaseElement$$module$src$base_element}
- */
+/** @type {typeof AMP.BaseElement} */
 let BaseElement;
 
-const AmpBaseElement = typeof AMP !== 'undefined' && AMP.BaseElement;
-
-if (AmpBaseElement) {
-  BaseElement = AmpBaseElement;
+if (typeof AMP !== 'undefined' && AMP.BaseElement) {
+  BaseElement = AMP.BaseElement;
 } else {
-  class CustomElement extends HTMLElement {
-    /** */
-    constructor() {
-      super();
-
+  class CeBaseElement {
+    /**
+     * @param {!Element} element
+     */
+    constructor(element) {
       /** @const {!Element} */
-      this.element = this;
+      this.element = element;
 
       /** @const {!Window} */
-      this.win = this.ownerDocument.defaultView;
->>>>>>> Stashed changes
+      this.win = toWin(element.ownerDocument.defaultView);
     }
 
-    /** */
+    /**
     connectedCallback() {
       this.buildCallback();
       this.layoutCallback();
     }
+    */
 
     /**
      * @param {function():undefined} cb
@@ -60,25 +47,21 @@ if (AmpBaseElement) {
     mutateElement(cb) {
       Promise.resolve().then(cb);
     }
-<<<<<<< Updated upstream
-  };
-}
-
-export {CE};
-=======
 
     /**
      * @param {string} alias
-     * @param {function(!./service/action-impl.ActionInvocation)} handler
+     * @param {function(!../service/action-impl.ActionInvocation)} handler
      * @param {*} unusedMinTrust
      * @public
      */
-    registerAction(alias, handler, unusedMinTrust) {
-      this.element.addEventListener(alias, (e) => {
-        //TODO
-        handler(e);
-      });
-    }
+    // registerAction(alias, handler, unusedMinTrust) {
+    //   this.element.addEventListener(alias, (e) => {
+    //     //TODO
+    //     handler(/** @type {!../service/action-impl.ActionInvocation} */ ({
+    //       node: this.element,
+    //     }));
+    //   });
+    // }
 
     /**
      * Unneeded in the Custom Element implementation.
@@ -86,8 +69,7 @@ export {CE};
     isLayoutSupported() {}
   }
 
-  BaseElement = /** @type {!BaseElement$$module$src$base_element} */ (CustomElement);
+  BaseElement = /** @type {typeof AMP.BaseElement} */ (CeBaseElement);
 }
 
 export {BaseElement};
->>>>>>> Stashed changes
