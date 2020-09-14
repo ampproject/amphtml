@@ -221,7 +221,7 @@ function appendToCompiledFile(srcFilename, destFilePath) {
 }
 
 function getMinifiedName(name) {
-  if (argv.sxg && !names.endsWith('.sxg.js')){
+  if (argv.sxg && !name.endsWith('.sxg.js')) {
     return name.replace(/\.js$/, '.sxg.js');
   }
   if (argv.esm) {
