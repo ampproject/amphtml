@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {DateCountdown} from '../date-countdown';
-import {number, select, withKnobs} from '@storybook/addon-knobs';
+import {date, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -56,11 +56,7 @@ export const _default = () => {
     'SECONDS',
   ];
 
-  //to do: update me!
-  const endDate = number('endDate', null);
-  const timeleftMs = number('timeleftMs', 5000);
-  const timestampMs = number('timestampMs', null);
-  const timestampSeconds = number('timestampSeconds', null);
+  const endDate = date('endDate', new Date());
   const offsetSeconds = number('offsetSeconds', null);
   const locale = select(
     'locale',
@@ -81,10 +77,7 @@ export const _default = () => {
   return (
     <div>
       <DateCountdown
-        endDate={endDate}
-        timeleftMs={timeleftMs}
-        timestampMs={timestampMs}
-        timestampSeconds={timestampSeconds}
+        endDate={new Date(endDate).toISOString()}
         offsetSeconds={offsetSeconds}
         locale={locale}
         whenEnded={whenEnded}
