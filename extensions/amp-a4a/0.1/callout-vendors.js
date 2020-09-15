@@ -211,6 +211,11 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['TAG_ID'],
     disableKeyAppend: true,
   },
+  adpushup: {
+    url: 'https://amp.adpushup.com/prebidserver/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&curl=CANONICAL_URL&gdpr_consent=CONSENT_STRING&adc=ADCID&purl=HREF',
+    macros: ['TAG_ID', 'CONSENT_STRING'],
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests
