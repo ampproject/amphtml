@@ -261,7 +261,7 @@ const forbiddenTerms = {
     allowlist: [
       'src/runtime.js',
       'src/service/core-services.js',
-      'src/service/template-impl.js',
+      'src/template-impl.js',
     ],
   },
   'installUrlReplacementsServiceForDoc': {

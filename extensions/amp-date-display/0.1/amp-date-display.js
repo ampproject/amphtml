@@ -95,7 +95,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = '';
 
-    /** @private @const {!../../../src/service/template-impl.Templates} */
+    /** @private @const {!../../../src/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
     /** @private {?Element} */

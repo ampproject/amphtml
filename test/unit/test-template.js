@@ -18,7 +18,7 @@ import {
   BaseTemplate,
   installTemplatesService,
   registerExtendedTemplate,
-} from '../../src/service/template-impl';
+} from '../../src/template-impl';
 import {Services} from '../../src/services';
 import {getServiceForDoc, resetServiceForTesting} from '../../src/service';
 

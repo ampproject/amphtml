@@ -73,7 +73,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!../../../src/service/template-impl.Templates} */
+    /** @const {!../../../src/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
     /** @const {function(!Element)} */

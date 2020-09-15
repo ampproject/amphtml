@@ -38,7 +38,7 @@ export class LocalSubscriptionPlatformRenderer {
     /** @private @const {!./dialog.Dialog} */
     this.dialog_ = dialog;
 
-    /** @private @const {!../../../src/service/template-impl.Templates} */
+    /** @private @const {!../../../src/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
 
     /** @private @const {!./service-adapter.ServiceAdapter} */
