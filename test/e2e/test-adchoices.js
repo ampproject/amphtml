@@ -30,7 +30,7 @@ describes.endtoend(
     it('interactions', async () => {
       const infoDiv = await controller.findElement('#spv1');
       await expect(controller.getElementCssValue(infoDiv, 'top')).to.be.equal(
-        '-250px'
+        'FAILED TEST' //'-250px'
       );
 
       const infoBtn = await controller.findElement('#cbb');
