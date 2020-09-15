@@ -25,12 +25,12 @@ import {useMountEffect} from '../../../src/preact/utils';
  * @param {!InstagramProps} props
  * @return {PreactDef.Renderable}
  */
-export function Instagram({shortcode, captioned, width, layout, style}) {
+export function Instagram({shortcode, captioned, width, layout, style, alt}) {
   captioned = captioned ? 'captioned/' : '';
   const iframeRef = Preact.useRef(null);
   const [heightStyle, setHeightStyle] = Preact.useState(null);
   const [opacityStyle, setOpacityStyle] = Preact.useState(0);
-  const widthStyle = (layout == 'responsive' ? '100%' : px(String(width)));
+  const widthStyle = layout == 'responsive' ? '100%' : px(String(width));
 
   useMountEffect(() => {
     function handleMessage(event) {
@@ -66,6 +66,7 @@ export function Instagram({shortcode, captioned, width, layout, style}) {
     scrolling: 'no',
     frameborder: 0,
     allowtransparency: 'true',
+    title: alt,
     style: Object.assign(
       {
         overflow: 'auto',

@@ -22,7 +22,8 @@
  *   captioned: (boolean|undefined),
  *   width: number, 
  *   layout: (string|undefined),
- *   style: (Object|undefined)
+ *   style: (Object|undefined),
+ *   alt: (string|undefined)
  * }}
  */
 var InstagramProps;
