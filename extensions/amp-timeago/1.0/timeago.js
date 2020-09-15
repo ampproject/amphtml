@@ -50,17 +50,19 @@ export function Timeago({
   const [timestamp, setTimestamp] = useState(placeholder || '');
   const ref = useRef(null);
 
-  const date = new Date(getDate(datetime));
+  const date = getDate(datetime);
 
   useEffect(() => {
     const node = ref.current;
-    if (!node || !date) {
+    if (!node) {
       return undefined;
     }
     const observer = new IntersectionObserver((entries) => {
       const last = entries[entries.length - 1];
       if (last.isIntersecting) {
-        setTimestamp(getFuzzyTimestampValue(date, locale, cutoff, placeholder));
+        setTimestamp(
+          getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
+        );
       }
     });
     observer.observe(node);
@@ -74,7 +76,7 @@ export function Timeago({
       {...rest}
       as="time"
       ref={ref}
-      datetime={date && date.toISOString()}
+      datetime={new Date(date).toISOString()}
     >
       {timestamp}
     </Wrapper>
@@ -82,22 +84,22 @@ export function Timeago({
 }
 
 /**
- * @param {?Date} datetime
+ * @param {!Date} date
  * @param {string} locale
  * @param {number|undefined} cutoff
  * @param {string|!PreactDef.VNode|null|undefined} placeholder
  * @return {string|!PreactDef.VNode}
  */
-function getFuzzyTimestampValue(datetime, locale, cutoff, placeholder) {
+function getFuzzyTimestampValue(date, locale, cutoff, placeholder) {
   if (!cutoff) {
-    return timeago(datetime, locale);
+    return timeago(date, locale);
   }
-  const secondsAgo = Math.floor((Date.now() - datetime.getTime()) / 1000);
+  const secondsAgo = Math.floor((Date.now() - date.getTime()) / 1000);
 
   if (secondsAgo > cutoff) {
-    return placeholder ? placeholder : getDefaultPlaceholder(datetime, locale);
+    return placeholder ? placeholder : getDefaultPlaceholder(date, locale);
   }
-  return timeago(datetime, locale);
+  return timeago(date, locale);
 }
 
 /**
