@@ -54,11 +54,11 @@ export function SocialShare({
     checkedWidth,
     checkedHeight,
     checkedTarget,
-    errorState,
+    renderNull,
   } = checkProps(type, endpoint, target, width, height, params);
 
   // Early exit if checkProps did not pass
-  if (errorState) {
+  if (renderNull) {
     return null;
   }
 
@@ -131,7 +131,7 @@ function processChildren(type, children, color, background, size) {
  *   checkedWidth: (number|string),
  *   checkedHeight: (number|string),
  *   checkedTarget: string,
- *   errorState: boolean,
+ *   renderNull: boolean,
  * }}
  */
 function checkProps(type, endpoint, target, width, height, params) {
@@ -143,7 +143,7 @@ function checkProps(type, endpoint, target, width, height, params) {
       checkedWidth: '',
       checkedHeight: '',
       checkedTarget: '',
-      errorState: true,
+      renderNull: true,
     };
   }
 
@@ -160,7 +160,7 @@ function checkProps(type, endpoint, target, width, height, params) {
       checkedWidth: '',
       checkedHeight: '',
       checkedTarget: '',
-      errorState: true,
+      renderNull: true,
     };
   }
 
@@ -185,7 +185,7 @@ function checkProps(type, endpoint, target, width, height, params) {
     checkedWidth,
     checkedHeight,
     checkedTarget,
-    errorState: false,
+    renderNull: false,
   };
 }
 

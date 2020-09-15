@@ -30,8 +30,9 @@ describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
     console.warn = mockedWarn;
 
     const jsx = <SocialShare />;
-    mount(jsx);
+    const wrapper = mount(jsx);
 
+    expect(wrapper.exists('div')).to.equal(false);
     expect(consoleOutput.length).to.equal(1);
     expect(consoleOutput[0]).to.equal(
       'The type attribute is required. SocialShare'
@@ -47,8 +48,9 @@ describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
       console.warn = mockedWarn;
 
       const jsx = <SocialShare {...dict({'type': 'not-configured-type'})} />;
-      mount(jsx);
+      const wrapper = mount(jsx);
 
+      expect(wrapper.exists('div')).to.equal(false);
       expect(consoleOutput.length).to.equal(1);
       expect(consoleOutput[0]).to.equal(
         'An endpoint is required if not using a pre-configured type. SocialShare'
