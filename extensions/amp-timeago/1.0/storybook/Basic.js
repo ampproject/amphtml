@@ -38,7 +38,7 @@ export const _default = () => {
   const locale = select('Locale', allLocales, userLocale);
   return (
     <Timeago
-      datetime={new Date(dateTime).toISOString()}
+      datetime={dateTime}
       locale={locale}
       cutoff={cutoff}
       placeholder={placeholder}

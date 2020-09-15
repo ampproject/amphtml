@@ -41,7 +41,7 @@ function WrapperWithRef(
     <Comp
       {...rest}
       ref={ref}
-      className={`${className || ''} ${wrapperClassName || ''}`}
+      className={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
       style={{...style, ...wrapperStyle}}
     >
       {children}
