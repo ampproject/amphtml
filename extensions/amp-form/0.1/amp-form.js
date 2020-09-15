@@ -1688,11 +1688,10 @@ export class AmpFormService {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.Ampdoc} ampdoc
- * @return {!Promise}
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
 function installGlobalSubmitListenerForDoc(ampdoc) {
-  return ampdoc
+  ampdoc
     .getRootNode()
     .addEventListener('submit', onDocumentFormSubmit_, true);
 }
