@@ -15,10 +15,9 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {Services} from '../services';
-import {dev, userAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
+import {userAssert} from '../log';
 
 /**
  * @fileoverview
@@ -27,7 +26,7 @@ import {rootNodeFor, scopedQuerySelector} from '../dom';
  */
 
 /**
- * @typedef {typeof BaseTemplate}
+ * @typedef {typeof ../base-template.BaseTemplate}
  */
 let TemplateClassDef;
 
@@ -36,63 +35,6 @@ const PROP_ = '__AMP_IMPL_';
 
 /** @private @const {string} */
 const PROP_PROMISE_ = '__AMP_WAIT_';
-
-/**
- * The interface that is implemented by all templates.
- */
-export class BaseTemplate {
-  /**
-   * @param {!Element} element
-   * @param {!Window} win
-   */
-  constructor(element, win) {
-    /** @public @const */
-    this.element = element;
-
-    /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView || win;
-
-    /** @private @const */
-    this.viewer_ = Services.viewerForDoc(this.element);
-
-    this.compileCallback();
-  }
-
-  /**
-   * Override in subclass if the element needs to compile the template.
-   * @protected
-   */
-  compileCallback() {
-    // Subclasses may override.
-  }
-
-  /**
-   * Bypasses template rendering and directly sets HTML. Should only be used
-   * for server-side rendering case. To be implemented by subclasses.
-   * @param {string} unusedData
-   * @return {!Element|!Array<Element>}
-   */
-  setHtml(unusedData) {
-    throw new Error('Not implemented');
-  }
-
-  /**
-   * To be implemented by subclasses.
-   * @param {!JsonObject|string} unusedData
-   * @return {!Element}
-   */
-  render(unusedData) {
-    throw new Error('Not implemented');
-  }
-
-  /**
-   * @protected @final
-   * @return {boolean}
-   */
-  viewerCanRenderTemplates() {
-    return this.viewer_.hasCapability('viewerRenderTemplate');
-  }
-}
 
 /**
  */
@@ -266,11 +208,11 @@ export class Templates {
    * Returns the promise that will eventually yield the template implementation
    * for the specified template element.
    * @param {!Element} element
-   * @return {!Promise<!BaseTemplate>}
+   * @return {!Promise<!../base-template.BaseTemplate>}
    * @private
    */
   getImplementation_(element) {
-    /** @const {!BaseTemplate} */
+    /** @const {!../base-template.BaseTemplate} */
     const impl = element[PROP_];
     if (impl) {
       return Promise.resolve(impl);
@@ -342,7 +284,7 @@ export class Templates {
   }
 
   /**
-   * @param {!BaseTemplate} impl
+   * @param {!../base-template.BaseTemplate} impl
    * @param {!JsonObject} data
    * @return {!Element}
    * @private
@@ -352,7 +294,7 @@ export class Templates {
   }
 
   /**
-   * @param {!BaseTemplate} impl
+   * @param {!../base-template.BaseTemplate} impl
    * @param {string} html
    * @return {!Element|!Array<!Element>}
    * @private
