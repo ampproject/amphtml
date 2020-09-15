@@ -16,7 +16,7 @@
 'use strict';
 
 // Disables use of the `this` value when we suspect that it is using the
-// implict global `this`. `this` is only valid inside class
+// implicit global `this`. `this` is only valid inside class
 // methods/constructors, and nested arrow functions.
 //
 // We special case calls to `fn.bind`, `fn.call`, and `fn.apply`, since they
@@ -98,10 +98,7 @@ module.exports = {
             case 'Program':
               return context.report({
                 node,
-                message: 'invalid this',
-                fix(fixer) {
-                  return fixer.replaceText(node, 'undefined');
-                },
+                message: '`this` looks to be using the implicit global `this` value on accident.',
               });
           }
         }

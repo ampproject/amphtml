@@ -80,6 +80,7 @@ module.exports = {
       'pragma': 'Preact',
     },
   },
+  'reportUnusedDisableDirectives': true,
   'rules': {
     'chai-expect/missing-assertion': 2,
     'chai-expect/no-inner-compare': 2,
