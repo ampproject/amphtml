@@ -34,23 +34,20 @@ export function parseDate(s) {
 }
 
 /**
- * @param {?Date|number|undefined} date
- * @return {?number}
+ * @param {!Date|number|string|T} value
+ * @return {number|T}
+ * @template T
  */
-export function getEpoch(date) {
-  if (!date) {
+export function getDate(value) {
+  if (!value) {
     return null;
   }
-  return typeof date == 'number' ? date : date.getTime();
-}
-
-/**
- * @param {?Date|number|undefined} date
- * @return {?Date}
- */
-export function getDate(date) {
-  if (!date) {
-    return null;
+  if (typeof value == 'number') {
+    return value;
   }
-  return typeof date == 'number' ? new Date(date) : date;
+  if (typeof value == 'string') {
+    return parseDate(value);
+  }
+  // Must be a `Date` object.
+  return value.getTime();
 }

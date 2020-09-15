@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getDate, getEpoch, parseDate} from '../../../src/utils/date';
+import {getDate, parseDate} from '../../../src/utils/date';
 
 describes.sandboxed('utils/date', {}, (env) => {
   describe('parseDate', () => {
@@ -42,7 +42,7 @@ describes.sandboxed('utils/date', {}, (env) => {
     });
   });
 
-  describe('getDate and getEpoch', () => {
+  describe('getDate', () => {
     let date;
 
     beforeEach(() => {
@@ -50,24 +50,25 @@ describes.sandboxed('utils/date', {}, (env) => {
     });
 
     it('should return null for null input', () => {
-      expect(getEpoch(null)).to.be.null;
       expect(getDate(null)).to.be.null;
-      expect(getEpoch(0)).to.be.null;
       expect(getDate(0)).to.be.null;
+      expect(getDate('')).to.be.null;
+      expect(getDate(undefined)).to.be.null;
+      expect(getDate(NaN)).to.be.null;
     });
 
-    it('should return the epoch value', () => {
-      expect(getEpoch(date)).to.equal(date.getTime());
-      expect(getEpoch(date.getTime())).to.equal(date.getTime());
+    it('should return the value from Date and number types', () => {
+      expect(getDate(date)).to.equal(date.getTime());
+      expect(getDate(date.getTime())).to.equal(date.getTime());
     });
 
-    it('should return the exact date instance value', () => {
-      expect(getDate(date)).to.equal(date);
+    it('should parse a string value', () => {
+      expect(getDate(date.toISOString())).to.equal(date.getTime());
     });
 
-    it('should create a new date', () => {
-      expect(getDate(date.getTime()).getTime()).to.equal(date.getTime());
-      expect(getDate(date.getTime())).to.not.equal(date);
+    it('should parse a "now" keywrod', () => {
+      env.sandbox.useFakeTimers(date);
+      expect(getDate('now')).to.be.equal(date.getTime());
     });
   });
 });

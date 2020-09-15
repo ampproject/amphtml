@@ -22,9 +22,9 @@ import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createRef, hydrate, render} from './index';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
+import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
-import {parseDate} from '../utils/date';
 import {startsWith} from '../string';
 import {subscribe} from '../context';
 
@@ -32,7 +32,7 @@ import {subscribe} from '../context';
  * The following combinations are allowed.
  * - `attr` and (optionally) `type` can be specified when an attribute maps to
  *   a component prop 1:1.
- * - `attrs` and `readFromAttrs` can be specified when multiple attributes map
+ * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
  *
  * @typedef {{
@@ -521,14 +521,15 @@ function collectProps(Ctor, element, ref, defaultProps) {
 
   // Props.
   for (const name in propDefs) {
-    const def = propDefs[name];
+    const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
     let value;
     if (def.attr) {
       value =
         def.type == 'boolean'
           ? element.hasAttribute(def.attr)
           : element.getAttribute(def.attr);
-    } else if (def.attrs) {
+    } else if (def.parseAttrs) {
+      devAssert(def.attrs);
       value = def.parseAttrs(element);
     }
     if (value == null) {
@@ -540,7 +541,7 @@ function collectProps(Ctor, element, ref, defaultProps) {
         def.type == 'number'
           ? parseFloat(value)
           : def.type == 'date'
-          ? parseDate(value)
+          ? getDate(value)
           : def.type == 'Element'
           ? // TBD: what's the best way for element referencing compat between
             // React and AMP? Currently modeled as a Ref.
@@ -666,10 +667,10 @@ function shouldMutationBeRerendered(Ctor, m) {
     // Check if the attribute is mapped to one of the properties.
     const props = Ctor['props'];
     for (const name in props) {
-      const def = props[name];
+      const def = /** @type {!AmpElementPropDef} */ (props[name]);
       if (
-        (def.attr && m.attributeName == def.attr) ||
-        (def.attrs && def.attrs.indexOf(m.attributeName) != -1)
+        m.attributeName == def.attr ||
+        (def.attrs && def.attrs.includes(devAssert(m.attributeName)))
       ) {
         return true;
       }

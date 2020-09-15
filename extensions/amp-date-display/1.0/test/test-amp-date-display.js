@@ -164,7 +164,7 @@ describes.realWin(
   }
 );
 
-describes.sandboxed('amp-date-display 1.0: parseDateAttrs', {}, () => {
+describes.sandboxed('amp-date-display 1.0: parseDateAttrs', {}, (env) => {
   const DATE = new Date(1514793600000);
   const DATE_STRING = DATE.toISOString();
 
@@ -175,7 +175,7 @@ describes.sandboxed('amp-date-display 1.0: parseDateAttrs', {}, () => {
   });
 
   it('should throw when no date is specified', () => {
-    expect(() => parseDateAttrs(element)).to.throw(/Invalid date/);
+    expect(() => parseDateAttrs(element)).to.throw(/required/);
   });
 
   it('should throw when invalid date is specified', () => {
@@ -192,6 +192,16 @@ describes.sandboxed('amp-date-display 1.0: parseDateAttrs', {}, () => {
     expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
   });
 
+  it('should accept "datetime=now"', () => {
+    env.sandbox.useFakeTimers(DATE);
+    element.setAttribute('datetime', 'now');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
+
+    // With offset.
+    element.setAttribute('offset-seconds', '1');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+
   it('should parse the "timestamp-ms" attribute', () => {
     element.setAttribute('timestamp-ms', DATE.getTime());
     expect(parseDateAttrs(element)).to.equal(DATE.getTime());
@@ -201,6 +211,11 @@ describes.sandboxed('amp-date-display 1.0: parseDateAttrs', {}, () => {
     expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
   });
 
+  it('should throw when invalid "timestamp-ms" is specified', () => {
+    element.setAttribute('timestamp-ms', 'invalid');
+    expect(() => parseDateAttrs(element)).to.throw(/required/);
+  });
+
   it('should parse the "timestamp-seconds" attribute', () => {
     element.setAttribute('timestamp-seconds', DATE.getTime() / 1000);
     expect(parseDateAttrs(element)).to.equal(DATE.getTime());
@@ -208,5 +223,10 @@ describes.sandboxed('amp-date-display 1.0: parseDateAttrs', {}, () => {
     // With offset.
     element.setAttribute('offset-seconds', '1');
     expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+
+  it('should throw when invalid "timestamp-seconds" is specified', () => {
+    element.setAttribute('timestamp-seconds', 'invalid');
+    expect(() => parseDateAttrs(element)).to.throw(/required/);
   });
 });

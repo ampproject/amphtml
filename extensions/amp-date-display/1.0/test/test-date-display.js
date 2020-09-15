@@ -95,6 +95,22 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.month).to.equal('2');
   });
 
+  it('accepts string type', () => {
+    const props = {
+      render,
+      datetime: '2001-02-03T04:05:06.007Z',
+      displayIn: 'UTC',
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+    const data = JSON.parse(wrapper.text());
+
+    expect(data.year).to.equal('2001');
+    expect(data.yearTwoDigit).to.equal('01');
+    expect(data.month).to.equal('2');
+  });
+
   it('provides all variables in local and English (default)', () => {
     const props = {
       render,

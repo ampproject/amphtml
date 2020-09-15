@@ -67,17 +67,34 @@ AmpTimeago['props'] = {
 export function parseDateAttrs(element) {
   // TODO(#29246): Is this a coincidence that timeago would have the same format
   // as date-display? E.g. the format for date-countdown is somewhat different.
-  const datetimeStr = element.getAttribute('datetime');
-  const datetime = parseDate(datetimeStr);
-  const timestampMs = Number(element.getAttribute('timestamp-ms'));
-  const timestampSeconds =
-    Number(element.getAttribute('timestamp-seconds')) * 1000;
-  const offsetSeconds = Number(element.getAttribute('offset-seconds')) * 1000;
+  const epoch = userAssert(
+    parseEpoch(element),
+    'One of datetime, timestamp-ms, or timestamp-seconds is required'
+  );
 
-  const epoch = datetime || timestampMs || timestampSeconds;
-  userAssert(epoch, 'Invalid date: %s', datetimeStr);
-
+  const offsetSeconds =
+    (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
   return epoch + offsetSeconds;
+}
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ */
+function parseEpoch(element) {
+  const datetime = element.getAttribute('datetime');
+  if (datetime) {
+    return userAssert(parseDate(datetime), 'Invalid date: %s', datetime);
+  }
+  const timestampMs = element.getAttribute('timestamp-ms');
+  if (timestampMs) {
+    return Number(timestampMs);
+  }
+  const timestampSeconds = element.getAttribute('timestamp-seconds');
+  if (timestampSeconds) {
+    return Number(timestampSeconds) * 1000;
+  }
+  return null;
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {

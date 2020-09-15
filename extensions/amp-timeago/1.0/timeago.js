@@ -50,7 +50,7 @@ export function Timeago({
   const [timestamp, setTimestamp] = useState(placeholder || '');
   const ref = useRef(null);
 
-  const date = getDate(datetime);
+  const date = new Date(getDate(datetime));
 
   useEffect(() => {
     const node = ref.current;

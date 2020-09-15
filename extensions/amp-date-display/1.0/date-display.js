@@ -65,7 +65,7 @@ let EnhancedVariablesV2Def;
  */
 export function DateDisplay(props) {
   const {datetime, render, children} = props;
-  const date = getDate(datetime);
+  const date = new Date(getDate(datetime));
   const data = /** @type {!JsonObject} */ (getDataForTemplate(date, props));
   useResourcesNotify();
 
@@ -73,15 +73,11 @@ export function DateDisplay(props) {
 }
 
 /**
- * @param {?Date} date
+ * @param {!Date} date
  * @param {!DateDisplayDef.Props} props
  * @return {?EnhancedVariablesV2Def}
  */
 function getDataForTemplate(date, props) {
-  if (!date) {
-    return null;
-  }
-
   const {displayIn = '', locale = DEFAULT_LOCALE} = props;
 
   const basicData =

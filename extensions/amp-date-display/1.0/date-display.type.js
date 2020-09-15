@@ -21,11 +21,11 @@ var DateDisplayDef = {};
 
 /**
  * @typedef {{
- *   children: (?PreactDef.Renderable|undefined),
- *   datetime: (?Date|number|undefined),
+ *   datetime: (!Date|number|string),
  *   displayIn: (string|undefined),
  *   locale: (string|undefined),
  *   render: (function(!JsonObject, (?PreactDef.Renderable|undefined)):PreactDef.Renderable),
+ *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
 DateDisplayDef.Props;
