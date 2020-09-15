@@ -31,4 +31,6 @@ export function remixd(global, data) {
       '" id="remixd-audio-player-script"><' +
       '/script>'
   );
+
+  window.context.renderStart();
 }
