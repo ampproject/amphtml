@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {dev} from '../log';
+import {Services} from './services';
+import {dev} from './log';
 
 /**
  * The interface that is implemented by all templates.
