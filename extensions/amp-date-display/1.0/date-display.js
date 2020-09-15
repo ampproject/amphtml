@@ -69,7 +69,7 @@ export function DateDisplay(props) {
   const data = /** @type {!JsonObject} */ (getDataForTemplate(date, props));
   useResourcesNotify();
 
-  return data ? render(data, children) : null;
+  return render(data, children);
 }
 
 /**
