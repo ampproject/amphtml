@@ -98,7 +98,8 @@ module.exports = {
             case 'Program':
               return context.report({
                 node,
-                message: '`this` looks to be using the implicit global `this` value on accident.',
+                message:
+                  '`this` looks to be using the implicit global `this` value on accident.',
               });
           }
         }
