@@ -23,7 +23,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
-import {setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 
 /**
  * Generates the template for the quiz.
@@ -66,7 +66,12 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     super(element, InteractiveType.QUIZ);
 
     /** @private {!Array<string>} */
-    this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
+    this.answerChoiceOptions_ = [
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
+    ];
   }
 
   /** @override */
@@ -94,9 +99,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     // Localize the answer choice options
     const localizationService = Services.localizationForDoc(this.element);
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
-      return localizationService.getLocalizedString(
-        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
-      );
+      return localizationService.getLocalizedString(choice);
     });
     const optionContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-quiz-option-container'
@@ -145,14 +148,6 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
   }
 
   /**
-   * Get the quiz element
-   * @return {Element}
-   */
-  getQuizElement() {
-    return this.rootEl_;
-  }
-
-  /**
    * @override
    */
   updateOptionPercentages_(optionsData) {
@@ -161,20 +156,12 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     }
 
     const percentages = this.preprocessPercentages_(optionsData);
-
     percentages.forEach((percentage, index) => {
-      // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-      this.getOptionElements()[index].querySelector(
+      const option = this.getOptionElements()[index];
+      option.querySelector(
         '.i-amphtml-story-interactive-quiz-percentage-text'
       ).textContent = `${percentage}%`;
-    });
-
-    // TODO(mszylkowski): split each variable to be applied to the corresponding option.
-    setStyles(dev().assertElement(this.rootEl_), {
-      '--option-1-percentage': percentages[0] + '%',
-      '--option-2-percentage': percentages[1] + '%',
-      '--option-3-percentage': percentages[2] + '%',
-      '--option-4-percentage': percentages[3] + '%',
+      setStyle(option, '--option-percentage', percentage + '%');
     });
   }
 }
