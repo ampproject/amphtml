@@ -755,6 +755,10 @@ export class ViewerImpl {
     this.messagingOrigin_ = origin;
     this.messagingReadyResolver_(origin);
 
+    console./*OK*/ log(
+      'viewer: setMessageDeliverer: ',
+      this.messageQueue_.length
+    );
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
@@ -792,6 +796,11 @@ export class ViewerImpl {
    * @return {!Promise<(?JsonObject|string|undefined)>} the response promise
    */
   sendMessageInternal_(eventType, data, cancelUnsent, awaitResponse) {
+    console./*OK*/ log(
+      'viewer: sendMessageInternal: ',
+      eventType,
+      !!this.messageDeliverer_
+    );
     if (this.messageDeliverer_) {
       // Certain message deliverers return fake "Promise" instances called
       // "Thenables". Convert from these values into trusted Promise instances,
@@ -807,6 +816,9 @@ export class ViewerImpl {
     }
 
     if (!this.messagingReadyPromise_) {
+      console./*OK*/ log(
+        'viewer: sendMessageInternal: no messagingReadyPromise_'
+      );
       if (awaitResponse) {
         return Promise.reject(getChannelError());
       } else {
@@ -815,6 +827,7 @@ export class ViewerImpl {
     }
 
     if (!cancelUnsent) {
+      console./*OK*/ log('viewer: sendMessageInternal_: wait for connection');
       return this.messagingReadyPromise_.then(() => {
         return this.messageDeliverer_(eventType, data, awaitResponse);
       });
@@ -831,6 +844,7 @@ export class ViewerImpl {
       message.data = data;
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
+      console./*OK*/ log('viewer: sendMessageInternal_: queue up the message');
       const deferred = new Deferred();
       const {promise: responsePromise, resolve: responseResolver} = deferred;
 

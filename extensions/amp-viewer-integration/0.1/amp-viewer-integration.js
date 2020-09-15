@@ -150,6 +150,7 @@ export class AmpViewerIntegration {
           return;
         }
         // Viewer says: "I'm ready for you"
+        console./*OK*/ log('amp-viewer-integration: message: ', data.name);
         if (
           e.origin === origin &&
           e.source === source &&

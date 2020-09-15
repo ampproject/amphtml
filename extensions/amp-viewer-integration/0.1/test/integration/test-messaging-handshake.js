@@ -117,13 +117,22 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
         const ampDocUrl = `${iframeOrigin}${ampDocSrc}#${params}`;
         viewerIframe.setAttribute('src', ampDocUrl);
 
+        console./*OK*/ log(
+          'test: before initiateHandshakeWithDocument: ',
+          !!viewerIframe.contentWindow
+        );
         return Messaging.initiateHandshakeWithDocument(
           viewerIframe.contentWindow
         )
           .then((messaging) => {
+            console./*OK*/ log('test: got messaging');
             messaging.setDefaultHandler(() => Promise.resolve());
             return new Promise((resolve) =>
-              messaging.registerHandler('documentLoaded', resolve)
+              messaging.registerHandler('documentLoaded', (name) => {
+                // debugger;///QQQQQQ
+                console./*OK*/ log('test: got documentLoaded request: ', name);
+                resolve(name);
+              })
             );
           })
           .then((name) => {

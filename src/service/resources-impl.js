@@ -736,6 +736,7 @@ export class ResourcesImpl {
 
       // TODO(choumx, #26687): Update viewers to read data.viewport instead of
       // data.metaTags.viewport from 'documentLoaded' message.
+      console./*OK*/ log('resources: send documentLoaded');
       this.viewer_.sendMessage(
         'documentLoaded',
         dict({

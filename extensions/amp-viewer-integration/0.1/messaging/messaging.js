@@ -134,6 +134,7 @@ export class Messaging {
             return;
           }
           if (message.app === APP && message.name === CHANNEL_OPEN_MSG) {
+            console./*OK*/ log('messaging: channelOpen received: ', 'host');
             clearInterval(intervalRef);
             port.removeEventListener('message', listener);
             const messaging = new Messaging(
@@ -322,6 +323,11 @@ export class Messaging {
    * @return {!Promise<*>|undefined}
    */
   sendRequest(messageName, messageData, awaitResponse) {
+    console./*OK*/ log(
+      'messaging: sendRequest:',
+      this.win_ ? 'doc' : 'host',
+      messageName
+    );
     const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
@@ -409,6 +415,11 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
+    console./*OK*/ log(
+      'messaging: handleRequest_: ',
+      this.win_ ? 'doc' : 'host',
+      message.name
+    );
     let handler = this.messageHandlers_[message.name];
     if (!handler) {
       handler = this.defaultHandler_;
