@@ -49,13 +49,12 @@ export function yieldpro(global, data) {
     'yieldpro-request',
     (done) => {
       let success = false;
-      const masterWin = this;
-      if (!masterWin.showadAMPAdapter) {
-        masterWin.showadAMPAdapter = {
+      if (!global.showadAMPAdapter) {
+        global.showadAMPAdapter = {
           registerSlot: () => {},
         };
-        loadScript(this, scriptUrl, () => {
-          if (masterWin.showadAMPAdapter.inited) {
+        loadScript(global, scriptUrl, () => {
+          if (global.showadAMPAdapter.inited) {
             success = true;
           }
           done(success);
