@@ -1828,7 +1828,9 @@ AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   AMP.registerServiceForDoc('form-submit-service', FormSubmitService);
   AMP.registerServiceForDoc(TAG, AmpFormService);
-  ampdoc.whenReady().then(() => {
-    installGlobalSubmitListenerForDoc(ampdoc);
-  });
+  if (ampdoc) {
+    ampdoc.whenReady().then(() => {
+      installGlobalSubmitListenerForDoc(ampdoc);
+    });
+  }
 });
