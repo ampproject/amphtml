@@ -26,10 +26,9 @@ import {useMountEffect} from '../../../src/preact/utils';
  * @return {PreactDef.Renderable}
  */
 export function Instagram({shortcode, captioned, width, layout, style, alt}) {
-  captioned = captioned ? 'captioned/' : '';
   const iframeRef = Preact.useRef(null);
   const [heightStyle, setHeightStyle] = Preact.useState(null);
-  const [opacityStyle, setOpacityStyle] = Preact.useState(0);
+  const [opacity, setOpacity] = Preact.useState(0);
   const widthStyle = layout == 'responsive' ? '100%' : px(String(width));
 
   useMountEffect(() => {
@@ -44,8 +43,8 @@ export function Instagram({shortcode, captioned, width, layout, style, alt}) {
       const data = JSON.parse(getData(event));
 
       if (data['type'] == 'MEASURE') {
-        setHeightStyle(String(data['details']['height']) + 'px');
-        setOpacityStyle(1);
+        setHeightStyle({'height': px(data['details']['height'])});
+        setOpacity(1);
       }
     }
 
@@ -56,27 +55,32 @@ export function Instagram({shortcode, captioned, width, layout, style, alt}) {
     };
   });
 
-  const iframeProps = {
-    src:
-      'https://www.instagram.com/p/' +
-      encodeURIComponent(shortcode) +
-      '/embed/' +
-      captioned +
-      '?cr=1&v=12',
-    scrolling: 'no',
-    frameborder: 0,
-    allowtransparency: 'true',
-    title: alt,
-    style: Object.assign(
-      {
-        overflow: 'auto',
-        width: widthStyle,
-        height: heightStyle,
-        opacity: opacityStyle,
-      },
-      style
-    ),
-  };
-
-  return <iframe ref={iframeRef} {...iframeProps}></iframe>;
+  return (
+    <ContainWrapper
+      style={{...style, ...heightStyle, ...{'width': widthStyle}}}
+      layout
+      size
+      paint
+    >
+      <iframe
+        ref={iframeRef}
+        src={
+          'https://www.instagram.com/p/' +
+          encodeURIComponent(shortcode) +
+          '/embed/' +
+          (captioned ? 'captioned/' : '') +
+          '?cr=1&v=12'
+        }
+        scrolling="no"
+        frameborder="0"
+        allowtransparency
+        title={alt}
+        style={{
+          width: '100%',
+          height: '100%',
+          opacity,
+        }}
+      />
+    </ContainWrapper>
+  );
 }

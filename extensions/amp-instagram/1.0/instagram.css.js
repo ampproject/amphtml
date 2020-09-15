@@ -13,15 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/** @externs */
-
-/**
- * @typedef {{
- *   shortcode: string,
- *   captioned: (boolean|undefined),
- *   style: (Object|undefined),
- *   alt: (string|undefined)
- * }}
- */
-var InstagramProps;
+ 

@@ -16,24 +16,15 @@
 
 import {Instagram} from './instagram';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const {string} */
 const TAG = 'amp-instagram';
 
 class AmpInstagram extends PreactBaseElement {
   /** @override */
-  init() {
-    return dict({
-      'shortcode': this.element.getAttribute('shortcode'),
-      'width': this.element.getAttribute('width'),
-      'captioned': this.element.hasAttribute('captioned'),
-      'background': 'inherit',
-    });
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
-    return true;
+    return isLayoutSizeDefined(layout);
   }
 }
 
@@ -42,13 +33,10 @@ AmpInstagram['Component'] = Instagram;
 
 /** @override */
 AmpInstagram['props'] = {
-  'shortcode': {attr: 'shortcode'},
-  'captioned': {attr: 'captioned'},
-  'width': {attr: 'width'},
+  'shortcode': {attr: 'data-shortcode'},
+  'captioned': {attr: 'data-captioned'},
+  'alt': {attr: 'alt'},
 };
-
-/** @override */
-AmpInstagram['passthrough'] = true;
 
 /** @override */
 AmpInstagram['layoutSizeDefined'] = true;
