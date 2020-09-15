@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Instagram} from '../instagram';
-import {number, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -26,34 +26,20 @@ export default {
 };
 
 export const _default = () => {
-  const width = number('width', 400);
+  const width = number('width', 500);
   const height = number('height', 600);
+  const shortcode = text('shortcode', 'B8QaZW4AQY_');
+  const captioned = boolean('captioned');
+  const layout = text('layout', 'fixed');
+
   return (
     <Instagram
-      shortcode="B8QaZW4AQY_"
+      shortcode={shortcode}
       width={width}
       height={height}
-    ></Instagram>
-  );
-};
-
-export const withCaption = () => {
-  const width = number('width', 400);
-  const height = number('height', 600);
-  return (
-    <Instagram shortcode="B8QaZW4AQY_" captioned width={width}></Instagram>
-  );
-};
-
-export const responsive = () => {
-  const width = number('width', 400);
-  const height = number('height', 600);
-  return (
-    <Instagram
-      shortcode="B8QaZW4AQY_"
-      captioned
-      width={width}
-      layout="responsive"
+      captioned={captioned}
+      layout={layout}
+      alt="AMP Instagram Storybook Preact Example"
     ></Instagram>
   );
 };

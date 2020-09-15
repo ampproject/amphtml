@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {number, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
@@ -29,5 +29,19 @@ storiesOf('amp-instagram', module)
     extensions: [{name: 'amp-instagram', version: '1.0'}],
   })
   .add('Default', () => {
-    return <amp-instagram shortcode="B8QaZW4AQY_" width="300"></amp-instagram>;
+    const width = number('width', 500);
+    const height = number('height', 600);
+    const shortcode = text('shortcode', 'B8QaZW4AQY_');
+    const captioned = boolean('captioned');
+    const layout = text('layout', 'fixed');
+
+    return (
+      <amp-instagram
+        data-shortcode={shortcode}
+        data-captioned={captioned}
+        width={width}
+        height={height}
+        layout={layout}
+      ></amp-instagram>
+    );
   });
