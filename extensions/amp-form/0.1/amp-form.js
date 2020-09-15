@@ -1688,7 +1688,7 @@ export class AmpFormService {
 }
 
 /**
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-impl.Ampdoc} ampdoc
  * @return {!Promise}
  */
 function installGlobalSubmitListenerForDoc(ampdoc) {
