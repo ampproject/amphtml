@@ -85,9 +85,6 @@ void CaseTransformInternal(bool to_upper, std::string* s);
 // parameter. Returns false if next byte in the sequence is not a valid byte.
 bool ReadContinuationByte(uint8_t byte, uint8_t* out);
 
-// Checks the codepoints are in range of allowed utf-8 ranges.
-void CheckScalarValue(char32_t code_point);
-
 // Checks if the character is ASCII that is in range 1-127.
 inline bool IsOneByteASCIIChar(uint8_t c);
 
@@ -223,7 +220,11 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     if (code_point < 0x0800) {
       return std::nullopt;
     }
-    CheckScalarValue(code_point);
+    // Check if this is codepoint is low surrgates.
+    if (code_point >= 0xd800 && code_point <= 0xdfff) {
+      return std::nullopt;
+    }
+
     return code_point;
   }
 
@@ -830,12 +831,6 @@ bool ReadContinuationByte(uint8_t byte, uint8_t* out) {
 
   // Invalid continuation byte.
   return false;
-}
-
-void CheckScalarValue(char32_t code_point) {
-  CHECK((!(code_point >= 0xd800 && code_point <= 0xdfff)))
-        << "Lone surrogaate U+" + Strings::ToHexString(code_point) +
-           " is not a valid scalar value.";
 }
 
 inline bool IsOneByteASCIIChar(uint8_t c) {
