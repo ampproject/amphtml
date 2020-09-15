@@ -29,12 +29,11 @@ export const _default = () => {
   const width = number('width', 400);
   const height = number('height', 600);
   return (
-    <Instagram 
-      shortcode="B8QaZW4AQY_" 
+    <Instagram
+      shortcode="B8QaZW4AQY_"
       width={width}
       height={height}
-    >
-    </Instagram>
+    ></Instagram>
   );
 };
 
@@ -42,12 +41,7 @@ export const withCaption = () => {
   const width = number('width', 400);
   const height = number('height', 600);
   return (
-    <Instagram 
-      shortcode="B8QaZW4AQY_" 
-      captioned
-      width={width}
-    >
-    </Instagram>
+    <Instagram shortcode="B8QaZW4AQY_" captioned width={width}></Instagram>
   );
 };
 
@@ -55,12 +49,11 @@ export const responsive = () => {
   const width = number('width', 400);
   const height = number('height', 600);
   return (
-    <Instagram 
-      shortcode="B8QaZW4AQY_" 
+    <Instagram
+      shortcode="B8QaZW4AQY_"
       captioned
       width={width}
       layout="responsive"
-    >
-    </Instagram>
+    ></Instagram>
   );
 };

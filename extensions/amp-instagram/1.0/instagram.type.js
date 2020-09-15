@@ -20,7 +20,7 @@
  * @typedef {{
  *   shortcode: string,
  *   captioned: (boolean|undefined),
- *   width: number, 
+ *   width: number,
  *   layout: (string|undefined),
  *   style: (Object|undefined),
  *   alt: (string|undefined)
