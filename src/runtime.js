@@ -133,7 +133,7 @@ function adoptShared(global, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {typeof BaseTemplate} implementationClass
+   * @param {typeof ./base-template.BaseTemplate} implementationClass
    */
   global.AMP.registerTemplate = function (name, implementationClass) {
     registerExtendedTemplate(global, name, implementationClass);
