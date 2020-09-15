@@ -87,26 +87,6 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
           });
       });
 
-      it('should fail if messaging token is wrong', () => {
-        const params = serializeQueryString({
-          origin: getWinOrigin(window),
-          messagingToken: 'foo',
-        });
-        const ampDocUrl = `${iframeOrigin}${ampDocSrc}#${params}`;
-        viewerIframe.setAttribute('src', ampDocUrl);
-
-        return Messaging.waitForHandshakeFromDocument(
-          window,
-          viewerIframe.contentWindow,
-          iframeOrigin,
-          'bar'
-        ).then((messaging) => {
-          const handlerStub = window.sandbox.stub();
-          messaging.setDefaultHandler(handlerStub);
-          expect(handlerStub).to.not.have.been.called;
-        });
-      });
-
       it('should perform polling handshake', function () {
         this.timeout(10000);
 
@@ -129,6 +109,26 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
           .then((name) => {
             expect(name).to.equal('documentLoaded');
           });
+      });
+
+      it('should fail if messaging token is wrong', () => {
+        const params = serializeQueryString({
+          origin: getWinOrigin(window),
+          messagingToken: 'foo',
+        });
+        const ampDocUrl = `${iframeOrigin}${ampDocSrc}#${params}`;
+        viewerIframe.setAttribute('src', ampDocUrl);
+
+        return Messaging.waitForHandshakeFromDocument(
+          window,
+          viewerIframe.contentWindow,
+          iframeOrigin,
+          'bar'
+        ).then((messaging) => {
+          const handlerStub = window.sandbox.stub();
+          messaging.setDefaultHandler(handlerStub);
+          expect(handlerStub).to.not.have.been.called;
+        });
       });
     });
 });
