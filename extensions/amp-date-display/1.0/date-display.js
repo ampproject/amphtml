@@ -93,22 +93,14 @@ let EnhancedVariablesV2Def;
  */
 export function DateDisplay({
   datetime,
-  displayIn,
-  locale,
+  displayIn = DEFAULT_DISPLAY_IN,
+  locale = DEFAULT_LOCALE,
   render = DEFAULT_RENDER,
   ...rest
 }) {
-  const date = new Date(getDate(datetime));
-
-  // TODO(#29293): Move defaults to the props destructuring in the args once
-  // the typing is fixed.
+  const date = getDate(datetime);
   const data = useMemo(
-    () =>
-      getDataForTemplate(
-        date,
-        displayIn || DEFAULT_DISPLAY_IN,
-        locale || DEFAULT_LOCALE
-      ),
+    () => getDataForTemplate(new Date(date), displayIn, locale),
     [date, displayIn, locale]
   );
 
@@ -131,14 +123,12 @@ export function DateDisplay({
 }
 
 /**
- * @param {number|undefined} epoch
+ * @param {!Date} date
  * @param {string} displayIn
  * @param {string} locale
  * @return {!EnhancedVariablesV2Def}
  */
-function getDataForTemplate(epoch, displayIn, locale) {
-  const date = new Date(epoch);
-
+function getDataForTemplate(date, displayIn, locale) {
   const basicData =
     displayIn.toLowerCase() === 'utc'
       ? getVariablesInUTC(date, locale)

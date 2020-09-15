@@ -22,7 +22,6 @@ import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseDate} from '../../../src/utils/date';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
