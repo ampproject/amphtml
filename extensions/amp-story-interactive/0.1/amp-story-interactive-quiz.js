@@ -64,7 +64,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
   constructor(element) {
     super(element, InteractiveType.QUIZ);
 
-    /** @private {!Array<string>} */
+    /** @private {!Array<../../../src/localized-strings.LocalizedStringId>} */
     this.answerChoiceOptions_ = [
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
