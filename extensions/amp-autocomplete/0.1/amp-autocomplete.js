@@ -177,7 +177,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
      */
     this.initialAutocompleteAttr_ = null;
 
-    /** @const @private {!../../../src/template-impl.Templates} */
+    /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
     /**

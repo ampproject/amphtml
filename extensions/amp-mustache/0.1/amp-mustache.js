@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {BaseTemplate} from '../../../src/base-template';
 import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {
@@ -24,8 +25,6 @@ import {user} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
-
-const BaseTemplate = /** @type {typeof ../../../src/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.

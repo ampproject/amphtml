@@ -34,7 +34,6 @@ import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {Templates} from '../../../src/template-impl';
 
 /** @const */
 const TAG = 'amp-access';
@@ -91,8 +90,8 @@ export class AccessService {
     /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    /** @private @const {!../../../src/template-impl.Templates} */
-    this.templates_ = new Templates(ampdoc.win);
+    /** @private @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(ampdoc.win);
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(ampdoc);

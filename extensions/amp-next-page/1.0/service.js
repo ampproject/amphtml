@@ -88,7 +88,7 @@ export class NextPageService {
      */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
 
-    /** @private @const {!../../../src/template-impl.Templates} */
+    /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
 
     /** @private {?Element} */

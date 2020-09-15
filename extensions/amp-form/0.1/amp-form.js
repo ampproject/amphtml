@@ -148,7 +148,7 @@ export class AmpForm {
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
 
-    /** @const @private {!../../../src/template-impl.Templates} */
+    /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */

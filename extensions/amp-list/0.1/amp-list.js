@@ -122,7 +122,7 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Array} */
     this.renderedItems_ = null;
 
-    /** @const {!../../../src/template-impl.Templates} */
+    /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
     /**
