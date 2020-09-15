@@ -132,7 +132,7 @@ module.exports = function ({types: t, template}) {
 function transformCssSync(cssText) {
   const programText = `
     const {transformCss} = require('../../../build-system/tasks/jsify-css');
-    transformCss(\`${cssText}\`).then((css) => console.log(css.toString()));
+    transformCss(\`${cssText}\`).then((css) => console./* OK */log(css.toString()));
   `;
 
   // TODO: migrate to the helpers in build-system exec.js
