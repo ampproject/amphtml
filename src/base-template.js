@@ -19,6 +19,7 @@ import {dev} from './log';
 
 /**
  * The interface that is implemented by all templates.
+ * @abstract
  */
 export class BaseTemplate {
   /**
@@ -51,18 +52,18 @@ export class BaseTemplate {
    * for server-side rendering case. To be implemented by subclasses.
    * @param {string} unusedData
    * @return {!Element|!Array<Element>}
+   * @abstract
    */
   setHtml(unusedData) {
-    throw new Error('Not implemented');
   }
 
   /**
    * To be implemented by subclasses.
    * @param {!JsonObject|string} unusedData
    * @return {!Element}
+   * @abstract
    */
   render(unusedData) {
-    throw new Error('Not implemented');
   }
 
   /**
