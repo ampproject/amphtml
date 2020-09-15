@@ -46,7 +46,10 @@ const COV_DOWNLOAD_PATH = '/coverage/download';
 const COV_OUTPUT_DIR = './test/coverage-e2e';
 const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
 
-// Set up the e2e testing environment.
+/**
+ * Set up the e2e testing environment.
+ * @return {!Promise}
+ */
 async function setUpTesting_() {
   // install e2e-specific modules
   installPackages(__dirname);
@@ -72,6 +75,10 @@ async function setUpTesting_() {
   );
 }
 
+/**
+ * Creates a mocha test instance with configuration determined by CLI args.
+ * @return {!Mocha}
+ */
 function createMocha_() {
   let reporter;
   if (argv.testnames || argv.watch) {
@@ -92,7 +99,11 @@ function createMocha_() {
   });
 }
 
-// Refreshes require cache and adds file to a Mocha instance.
+/**
+ * Refreshes require cache and adds file to a Mocha instance.
+ * @param {!Mocha} mocha Mocha test instance.
+ * @param {string} file relative path to test file to add.
+ */
 function addMochaFile_(mocha, file) {
   delete require.cache[path.resolve(file)];
   mocha.addFile(file);
@@ -135,7 +146,10 @@ async function fetchCoverage_(outDir) {
   execOrDie(`unzip -o ${zipFilename} -d ${outDir}`);
 }
 
-// Runs e2e tests on all files under test.
+/**
+ * Runs e2e tests on all files under test.
+ * @return {!Promise}
+ */
 async function runTests_() {
   const mocha = createMocha_();
   const addFile = addMochaFile_.bind(null, mocha);
@@ -168,7 +182,10 @@ async function runTests_() {
   });
 }
 
-// Watches files a under test, running affected e2e tests on changes.
+/**
+ * Watches files a under test, running affected e2e tests on changes.
+ * @return {!Promise}
+ */
 async function runWatch_() {
   const filesToWatch = argv.files ? getFilesFromArgv() : config.e2eTestPaths;
 
@@ -185,6 +202,10 @@ async function runWatch_() {
   return new Promise();
 }
 
+/**
+ * Entry-point to run e2e tests.
+ * @return {!Promise}
+ */
 async function e2e() {
   await setUpTesting_();
   return argv.watch ? runWatch_() : runTests_();
