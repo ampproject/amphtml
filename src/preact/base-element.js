@@ -22,15 +22,24 @@ import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createRef, hydrate, render} from './index';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
+import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {startsWith} from '../string';
 import {subscribe} from '../context';
 
 /**
+ * The following combinations are allowed.
+ * - `attr` and (optionally) `type` can be specified when an attribute maps to
+ *   a component prop 1:1.
+ * - `attrs` and `parseAttrs` can be specified when multiple attributes map
+ *   to a single prop.
+ *
  * @typedef {{
- *   attr: string,
+ *   attr: (string|undefined),
  *   type: (string|undefined),
+ *   attrs: (!Array<string>|undefined),
+ *   parseAttrs: ((function(!Element):*)|undefined),
  *   default: *,
  * }}
  */
@@ -512,11 +521,17 @@ function collectProps(Ctor, element, ref, defaultProps) {
 
   // Props.
   for (const name in propDefs) {
-    const def = propDefs[name];
-    const value =
-      def.type == 'boolean'
-        ? element.hasAttribute(def.attr)
-        : element.getAttribute(def.attr);
+    const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
+    let value;
+    if (def.attr) {
+      value =
+        def.type == 'boolean'
+          ? element.hasAttribute(def.attr)
+          : element.getAttribute(def.attr);
+    } else if (def.parseAttrs) {
+      devAssert(def.attrs);
+      value = def.parseAttrs(element);
+    }
     if (value == null) {
       if (def.default !== undefined) {
         props[name] = def.default;
@@ -525,6 +540,8 @@ function collectProps(Ctor, element, ref, defaultProps) {
       const v =
         def.type == 'number'
           ? parseFloat(value)
+          : def.type == 'date'
+          ? getDate(value)
           : def.type == 'Element'
           ? // TBD: what's the best way for element referencing compat between
             // React and AMP? Currently modeled as a Ref.
@@ -650,8 +667,11 @@ function shouldMutationBeRerendered(Ctor, m) {
     // Check if the attribute is mapped to one of the properties.
     const props = Ctor['props'];
     for (const name in props) {
-      const def = props[name];
-      if (m.attributeName == def.attr) {
+      const def = /** @type {!AmpElementPropDef} */ (props[name]);
+      if (
+        m.attributeName == def.attr ||
+        (def.attrs && def.attrs.includes(devAssert(m.attributeName)))
+      ) {
         return true;
       }
     }

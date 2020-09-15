@@ -160,7 +160,10 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
   });
 
-  describe('no children mapping', () => {
+  describe('attribute mapping', () => {
+    const DATE_STRING = '2018-01-01T08:00:00Z';
+    const DATE = Date.parse(DATE_STRING);
+
     let element;
 
     beforeEach(async () => {
@@ -169,8 +172,14 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
         'propA': {attr: 'prop-a'},
         'minFontSize': {attr: 'min-font-size', type: 'number'},
+        'aDate': {attr: 'a-date', type: 'date'},
         'disabled': {attr: 'disabled', type: 'boolean'},
         'enabled': {attr: 'enabled', type: 'boolean'},
+        'combined': {
+          attrs: ['part-a', 'part-b'],
+          parseAttrs: (e) =>
+            `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
+        },
       };
       element = html`
         <amp-preact
@@ -181,9 +190,12 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           min-font-size="72"
           disabled
           unknown="1"
+          part-a="A"
+          part-b="B"
         >
         </amp-preact>
       `;
+      element.setAttribute('a-date', DATE_STRING);
       doc.body.appendChild(element);
       await element.build();
       await waitFor(() => component.callCount > 0, 'component rendered');
@@ -201,16 +213,20 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         valueWithDef: 'DEFAULT',
         propA: 'A',
         minFontSize: 72,
+        aDate: DATE,
         disabled: true,
         enabled: false,
+        combined: 'A+B',
       });
     });
 
     it('should mutate attributes', async () => {
       element.setAttribute('prop-a', 'B');
       element.setAttribute('min-font-size', '72.5');
+      element.setAttribute('a-date', '2018-01-01T08:00:01Z');
       element.setAttribute('enabled', '');
       element.removeAttribute('disabled');
+      element.setAttribute('part-b', 'C');
 
       await waitFor(() => component.callCount > 1, 'component re-rendered');
 
@@ -219,8 +235,10 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         valueWithDef: 'DEFAULT',
         propA: 'B',
         minFontSize: 72.5,
+        aDate: DATE + 1000,
         disabled: false,
         enabled: true,
+        combined: 'A+C',
       });
     });
 

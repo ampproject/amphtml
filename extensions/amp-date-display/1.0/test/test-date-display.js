@@ -50,7 +50,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
   it('provides all variables in UTC and English (default)', () => {
     const props = {
       render,
-      datetime: '2001-02-03T04:05:06.007Z',
+      datetime: Date.parse('2001-02-03T04:05:06.007Z'),
       displayIn: 'UTC',
     };
     const jsx = <DateDisplay {...props} />;
@@ -79,10 +79,42 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.dayPeriod).to.equal('am');
   });
 
+  it('accepts Date type', () => {
+    const props = {
+      render,
+      datetime: new Date('2001-02-03T04:05:06.007Z'),
+      displayIn: 'UTC',
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+    const data = JSON.parse(wrapper.text());
+
+    expect(data.year).to.equal('2001');
+    expect(data.yearTwoDigit).to.equal('01');
+    expect(data.month).to.equal('2');
+  });
+
+  it('accepts string type', () => {
+    const props = {
+      render,
+      datetime: '2001-02-03T04:05:06.007Z',
+      displayIn: 'UTC',
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+    const data = JSON.parse(wrapper.text());
+
+    expect(data.year).to.equal('2001');
+    expect(data.yearTwoDigit).to.equal('01');
+    expect(data.month).to.equal('2');
+  });
+
   it('provides all variables in local and English (default)', () => {
     const props = {
       render,
-      datetime: '2001-02-03T04:05:06.007',
+      datetime: Date.parse('2001-02-03T04:05:06.007'),
     };
     const jsx = <DateDisplay {...props} />;
 
@@ -110,136 +142,10 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.dayPeriod).to.equal('am');
   });
 
-  describe('correctly parses', () => {
-    it('now keyword', () => {
-      const props = {
-        render,
-        datetime: 'now',
-      };
-      const jsx = <DateDisplay {...props} />;
-
-      const wrapper = mount(jsx);
-      const data = JSON.parse(wrapper.text());
-      const dateFromParsed = new Date(data.iso);
-
-      // Because of the runtime there could be a several ms difference.
-      expect(dateFromParsed.getTime()).to.equal(Date.now());
-    });
-
-    it('day only ISO 8601 date', () => {
-      const props = {
-        render,
-        datetime: '2001-02-03',
-      };
-      const jsx = <DateDisplay {...props} />;
-
-      const wrapper = mount(jsx);
-      const data = JSON.parse(wrapper.text());
-
-      expect(data.iso).to.equal('2001-02-03T00:00:00.000Z');
-    });
-
-    it('full ISO 8601 date in UTC time zone', () => {
-      const props = {
-        render,
-        datetime: '2001-02-03T04:05:06.007Z',
-      };
-      const jsx = <DateDisplay {...props} />;
-
-      const wrapper = mount(jsx);
-      const data = JSON.parse(wrapper.text());
-
-      expect(data.iso).to.equal('2001-02-03T04:05:06.007Z');
-    });
-
-    it('full ISO 8601 date without time zone (interpreted as local)', () => {
-      const props = {
-        render,
-        datetime: '2001-02-03T04:05:06.007',
-      };
-      const jsx = <DateDisplay {...props} />;
-
-      const wrapper = mount(jsx);
-      const data = JSON.parse(wrapper.text());
-      const result =
-        `${data.year}-${data.monthTwoDigit}-${data.dayTwoDigit}` +
-        `T${data.hourTwoDigit}:${data.minuteTwoDigit}:${data.secondTwoDigit}`;
-
-      expect(result).to.equal('2001-02-03T04:05:06');
-    });
-
-    it('full ISO 8601 date in a custom time zone', () => {
-      const props = {
-        render,
-        datetime: '2001-02-03T04:05:06.007+08:00',
-      };
-      const jsx = <DateDisplay {...props} />;
-
-      const wrapper = mount(jsx);
-      const data = JSON.parse(wrapper.text());
-
-      expect(data.iso).to.equal('2001-02-02T20:05:06.007Z');
-    });
-
-    it('seconds since the UNIX epoch', () => {
-      const props = {
-        render,
-        timestampSeconds: 981173106,
-      };
-      const jsx = <DateDisplay {...props} />;
-
-      const wrapper = mount(jsx);
-      const data = JSON.parse(wrapper.text());
-
-      expect(data.iso).to.equal('2001-02-03T04:05:06.000Z');
-    });
-
-    it('miliseconds since the UNIX epoch', () => {
-      const props = {
-        render,
-        timestampMs: 981173106007,
-      };
-      const jsx = <DateDisplay {...props} />;
-
-      const wrapper = mount(jsx);
-      const data = JSON.parse(wrapper.text());
-
-      expect(data.iso).to.equal('2001-02-03T04:05:06.007Z');
-    });
-  });
-
-  it('adds offset seconds', () => {
-    const props = {
-      render,
-      datetime: '2001-02-03T04:05:06.007Z',
-      offsetSeconds: 1234567,
-    };
-    const jsx = <DateDisplay {...props} />;
-
-    const wrapper = mount(jsx);
-    const data = JSON.parse(wrapper.text());
-
-    expect(data.iso).to.equal('2001-02-17T11:01:13.007Z');
-  });
-
-  it('subtracts offset seconds', () => {
-    const props = {
-      render,
-      datetime: '2001-02-03T04:05:06.007Z',
-      offsetSeconds: -1234567,
-    };
-    const jsx = <DateDisplay {...props} />;
-
-    const wrapper = mount(jsx);
-    const data = JSON.parse(wrapper.text());
-
-    expect(data.iso).to.equal('2001-01-19T21:08:59.007Z');
-  });
-
   it('provides variables in Czech when "cs" locale is passed', () => {
     const props = {
       render,
-      datetime: '2001-02-03T04:05:06.007Z',
+      datetime: Date.parse('2001-02-03T04:05:06.007Z'),
       displayIn: 'UTC',
       locale: 'cs',
     };

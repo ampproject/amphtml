@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {Wrapper} from '../../../src/preact/component';
+import {getDate} from '../../../src/utils/date';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
@@ -49,6 +50,8 @@ export function Timeago({
   const [timestamp, setTimestamp] = useState(placeholder || '');
   const ref = useRef(null);
 
+  const date = getDate(datetime);
+
   useEffect(() => {
     const node = ref.current;
     if (!node) {
@@ -58,41 +61,45 @@ export function Timeago({
       const last = entries[entries.length - 1];
       if (last.isIntersecting) {
         setTimestamp(
-          getFuzzyTimestampValue(datetime, locale, cutoff, placeholder)
+          getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
         );
       }
     });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [datetime, locale, cutoff, placeholder]);
+  }, [date, locale, cutoff, placeholder]);
 
   useResourcesNotify();
 
   return (
-    <Wrapper {...rest} as="time" ref={ref} datetime={datetime}>
+    <Wrapper
+      {...rest}
+      as="time"
+      ref={ref}
+      datetime={new Date(date).toISOString()}
+    >
       {timestamp}
     </Wrapper>
   );
 }
 
 /**
- * @param {string} datetime
+ * @param {!Date} date
  * @param {string} locale
  * @param {number|undefined} cutoff
  * @param {string|!PreactDef.VNode|null|undefined} placeholder
  * @return {string|!PreactDef.VNode}
  */
-function getFuzzyTimestampValue(datetime, locale, cutoff, placeholder) {
+function getFuzzyTimestampValue(date, locale, cutoff, placeholder) {
   if (!cutoff) {
-    return timeago(datetime, locale);
+    return timeago(date, locale);
   }
-  const elDate = new Date(datetime);
-  const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
+  const secondsAgo = Math.floor((Date.now() - date.getTime()) / 1000);
 
   if (secondsAgo > cutoff) {
-    return placeholder ? placeholder : getDefaultPlaceholder(elDate, locale);
+    return placeholder ? placeholder : getDefaultPlaceholder(date, locale);
   }
-  return timeago(datetime, locale);
+  return timeago(date, locale);
 }
 
 /**
