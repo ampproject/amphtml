@@ -104,7 +104,7 @@ AmpDateDisplay['props'] = {
 AmpDateDisplay['layoutSizeDefined'] = true;
 
 /** @override */
-AmpDateDisplay['lightDomTag'] = 'time';
+AmpDateDisplay['lightDomTag'] = 'div';
 
 /** @override */
 AmpDateDisplay['usesTemplate'] = true;

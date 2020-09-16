@@ -596,19 +596,23 @@ function usesShadowDom(Ctor) {
  * @return {!JsonObject}
  */
 function collectProps(Ctor, element, ref, defaultProps) {
-  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
-  if (Ctor['lightDomTag']) {
-    props[RENDERED_PROP] = true;
-  }
-
   const {
+    'children': childrenDefs,
     'className': className,
     'layoutSizeDefined': layoutSizeDefined,
-    'props': propDefs,
+    'lightDomTag': lightDomTag,
     'passthrough': passthrough,
     'passthroughNonEmpty': passthroughNonEmpty,
-    'children': childrenDefs,
+    'props': propDefs,
   } = Ctor;
+
+  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
+
+  // Light DOM.
+  if (lightDomTag) {
+    props[RENDERED_PROP] = true;
+    props['as'] = lightDomTag;
+  }
 
   // Class.
   if (className) {

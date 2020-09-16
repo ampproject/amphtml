@@ -113,7 +113,7 @@ export function DateDisplay({
   return (
     <Wrapper
       {...rest}
-      as="time"
+      as="div"
       datetime={data['iso']}
       dangerouslySetInnerHTML={isHtml ? rendered : null}
     >
