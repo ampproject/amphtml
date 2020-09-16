@@ -266,4 +266,16 @@ describe('Srcset parseSrcset', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('should reject pixel values or other invalid dimensions', () => {
+    let result = parse_srcset.parseSrcset('image.png 500px');
+
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image.png 2 x');
+
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image.png 1kw');
+
+    expect(result.success).toBe(false);
+  });
 });
