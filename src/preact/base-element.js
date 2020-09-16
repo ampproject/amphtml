@@ -85,7 +85,7 @@ const SIZE_DEFINED_STYLE = {
  * @template API_TYPE
  */
 export class PreactBaseElement extends BaseElement {
-  /** @param {!AmpElement} element */
+  /** @param {!Element} element */
   constructor(element) {
     super(element);
 

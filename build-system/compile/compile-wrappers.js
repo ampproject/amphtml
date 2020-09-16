@@ -83,7 +83,9 @@ exports.bento = function (name) {
   return (
     `(function(p){self.AMP?self.AMP.push(p):` +
     `document.head.querySelector('script[src$=v0.js],script[src$=v0.mjs]')?self.AMP=[p]:` +
-    `p.f({registerElement:function(n,b,c){customElements.define(n,c)}})` +
+    'p.f({registerElement:function(n,b,s){' +
+    `if(s)document.head.appendChild(document.createElement('style')).textContent=s;` +
+    'customElements.define(n,b.CustomElement());}})' +
     `})(${payload});`
   );
 };

@@ -22,6 +22,22 @@ let BaseElement;
 if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
 } else {
+  class CustomElement extends HTMLElement {
+    /** */
+    constructor() {
+      super();
+
+      /** @const {!CeBaseElement} */
+      this.implementation = new CeBaseElement(this);
+    }
+
+    /** */
+    connectedCallback() {
+      this.implementation.buildCallback();
+      this.implementation.layoutCallback();
+    }
+  }
+
   class CeBaseElement {
     /**
      * @param {!Element} element
@@ -35,11 +51,12 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
     }
 
     /**
-    connectedCallback() {
-      this.buildCallback();
-      this.layoutCallback();
+     * @return {typeof HTMLElement}
+     * @export
+     */
+    static 'CustomElement'() {
+      return CustomElement;
     }
-    */
 
     /**
      * @param {function():undefined} cb
@@ -63,10 +80,20 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
     //   });
     // }
 
-    /**
-     * Unneeded in the Custom Element implementation.
-     */
+    /** */
     isLayoutSupported() {}
+
+    /** */
+    buildCallback() {}
+
+    /** */
+    layoutCallback() {}
+
+    /** */
+    // unlayoutCallback() {}
+
+    /** */
+    // mutatedAttributesCallback() {}
   }
 
   BaseElement = /** @type {typeof AMP.BaseElement} */ (CeBaseElement);

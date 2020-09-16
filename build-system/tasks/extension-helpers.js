@@ -68,7 +68,7 @@ const INABOX_EXTENSION_SET = [
  * Default extensions that should always be built. These are always or almost
  * always loaded by runtime.
  */
-const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
+const DEFAULT_EXTENSION_SET = [];
 
 /**
  * @typedef {{

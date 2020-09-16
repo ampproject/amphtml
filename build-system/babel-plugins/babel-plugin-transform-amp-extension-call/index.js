@@ -26,12 +26,13 @@ module.exports = function (babel) {
           t.isIdentifier(callee.object, {name: 'AMP'}) &&
           t.isIdentifier(callee.property, {name: 'extension'})
         ) {
-          const func = node.arguments[node.arguments.length - 1];
+          const {body} = node.arguments[node.arguments.length - 1];
 
-          const IIFE = t.expressionStatement(
-            t.callExpression(func, [t.identifier('AMP')])
-          );
-          path.replaceWith(IIFE);
+          if (t.isBlockStatement(body)) {
+            path.replaceWithMultiple(body.body);
+          } else {
+            path.replaceWith(body);
+          }
         }
       },
     },
