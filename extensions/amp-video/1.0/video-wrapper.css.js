@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// TODO(alanorozco): Share these across components, make them JSS.
+
 export const fillStretch = {
   'position': 'relative',
   'width': '100%',
