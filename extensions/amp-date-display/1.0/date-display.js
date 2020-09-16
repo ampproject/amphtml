@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getDate} from '../../../src/utils/date';
 import * as Preact from '../../../src/preact';
 import {Wrapper, useRenderer} from '../../../src/preact/component';
+import {getDate} from '../../../src/utils/date';
 import {useMemo} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 

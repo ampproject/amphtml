@@ -597,7 +597,9 @@ function usesShadowDom(Ctor) {
  */
 function collectProps(Ctor, element, ref, defaultProps) {
   const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
-  props[RENDERED_PROP] = true;
+  if (Ctor['lightDomTag']) {
+    props[RENDERED_PROP] = true;
+  }
 
   const {
     'className': className,
@@ -619,7 +621,8 @@ function collectProps(Ctor, element, ref, defaultProps) {
     if (usesShadowDom(Ctor)) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
-      props['className'] = `i-amphtml-fill-content ${className || ''}`.trim();
+      props['className'] =
+        `i-amphtml-fill-content ${className || ''}`.trim() || null;
     }
   }
 
