@@ -23,7 +23,7 @@ amp-story-360 canvas {
 
 amp-story-360 amp-img,
 amp-story-360 amp-video {
-  /* opacity: 0 !important; */
+  opacity: 0 !important;
 }
 
 .i-amphtml-story-360-activate-button {
