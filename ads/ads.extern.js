@@ -223,6 +223,8 @@ google.ima.Ad;
 google.ima.Ad.getSkipTimeOffset;
 google.ima.Ad.getAdPodInfo;
 google.ima.AdPodInfo;
+google.ima.AdPodInfo.getAdPosition;
+google.ima.AdPodInfo.getTotalAds;
 google.ima.AdDisplayContainer;
 google.ima.AdDisplayContainer.initialize;
 google.ima.ImaSdkSettings;
