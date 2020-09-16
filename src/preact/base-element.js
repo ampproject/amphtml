@@ -412,10 +412,10 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return (
-      (this.constructor['layoutSizeDefined'] && isLayoutSizeDefined(layout)) ||
-      super.isLayoutSupported(layout)
-    );
+    if (this.constructor['layoutSizeDefined']) {
+      return isLayoutSizeDefined(layout);
+    }
+    return super.isLayoutSupported(layout);
   }
 }
 
