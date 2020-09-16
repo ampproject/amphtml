@@ -17,6 +17,17 @@
         publisher="AMP Story"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
+        
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-story-360 layout="fill" heading-start="45" pitch-start="-20" heading-end="115" pitch-end="10" zoom-end="1.5" duration="3s" controls="gyroscope">
+            <amp-video autoplay layout="fill" loop>
+              <source src="img/360video.mp4" type="video/mp4" />
+            </amp-video>
+          </amp-story-360>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
       <amp-story-page id="page1">
         <amp-story-grid-layer template="fill">
           <amp-story-360 layout="fill" heading-start="45" pitch-start="-20" heading-end="115" pitch-end="10" zoom-end="1.5" duration="3s" controls="gyroscope">
@@ -26,6 +37,7 @@
           </amp-story-360>
         </amp-story-grid-layer>
       </amp-story-page>
+
       <amp-story-page id="page2">
         <amp-story-grid-layer template="fill">
           <amp-story-360 layout="fill" heading-end="-45" pitch-end="-20" heading-start="95" pitch-start="-10" zoom-start="4" duration="30s" controls="gyroscope">
