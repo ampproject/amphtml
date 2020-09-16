@@ -20,10 +20,6 @@
   --correct-color-shaded: #00600f !important;
   --incorrect-color: #f34e4e !important;
   --incorrect-color-shaded: #b71c1c !important;
-  --option-1-percentage: 0%;
-  --option-2-percentage: 0%;
-  --option-3-percentage: 0%;
-  --option-4-percentage: 0%;
 }
 
 .i-amphtml-story-interactive-quiz-option-container {
@@ -161,7 +157,7 @@
   ) !important;
 }
 
-/** TODO(jackbsteinberg): Use a more a11y-friendly approach than font-size: 0px; */
+/** TODO(jackbsteinberg): Use a more a11y-friendly approach than color: transparent */
 
 .i-amphtml-story-interactive-post-selection
   [correct]
@@ -201,43 +197,13 @@
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
-  .i-amphtml-story-interactive-quiz-option:nth-of-type(1)::before {
-  transform: translateX(var(--option-1-percentage)) !important;
-}
-
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
-  .i-amphtml-story-interactive-quiz-option:nth-of-type(2)::before {
-  transform: translateX(var(--option-2-percentage)) !important;
-}
-
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
-  .i-amphtml-story-interactive-quiz-option:nth-of-type(3)::before {
-  transform: translateX(var(--option-3-percentage)) !important;
-}
-
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
-  .i-amphtml-story-interactive-quiz-option:nth-of-type(4)::before {
-  transform: translateX(var(--option-4-percentage)) !important;
+  .i-amphtml-story-interactive-quiz-option::before {
+  transform: translateX(var(--option-percentage, 0%)) !important;
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data[dir='rtl']
-  .i-amphtml-story-interactive-quiz-option:nth-of-type(1)::before {
-  transform: translateX(calc(-1 * var(--option-1-percentage))) !important;
-}
-
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data[dir='rtl']
-  .i-amphtml-story-interactive-quiz-option:nth-of-type(2)::before {
-  transform: translateX(calc(-1 * var(--option-2-percentage))) !important;
-}
-
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data[dir='rtl']
-  .i-amphtml-story-interactive-quiz-option:nth-of-type(3)::before {
-  transform: translateX(calc(-1 * var(--option-3-percentage))) !important;
-}
-
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data[dir='rtl']
-  .i-amphtml-story-interactive-quiz-option:nth-of-type(4)::before {
-  transform: translateX(calc(-1 * var(--option-4-percentage))) !important;
+  .i-amphtml-story-interactive-quiz-option::before {
+  transform: translateX(calc(-1 * var(--option-percentage, 0%))) !important;
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
@@ -286,284 +252,36 @@
   color: var(--incorrect-color-shaded) !important;
 }
 
-/**
-* Proper bounce animation scale values calculated in a CodePen
-* using methodology from Medium post "Spring Animation in CSS"
-* by Thai Pangsakulyanont.
-*
-* https://codepen.io/jackbsteinberg/pen/ExaZpjZ
-* https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
-*/
 @keyframes answer-choice-bounce {
   0% {
     visibility: hidden;
     border: solid 2px var(--i-amphtml-interactive-answer-choice-background);
     transform: scale(0);
-  }
-  20% {
     visibility: hidden;
   }
   21% {
     visibility: visible;
-    transform: scale(0.01);
-  }
-  22% {
-    transform: scale(0.013);
-  }
-  23% {
-    transform: scale(0.051);
-  }
-  24% {
-    transform: scale(0.109);
-  }
-  25% {
-    transform: scale(0.183);
-  }
-  26% {
-    transform: scale(0.268);
-  }
-  27% {
-    transform: scale(0.361);
-  }
-  28% {
-    transform: scale(0.457);
-  }
-  29% {
-    transform: scale(0.555);
-  }
-  30% {
-    transform: scale(0.65);
-  }
-  31% {
-    transform: scale(0.742);
-  }
-  32% {
-    transform: scale(0.827);
-  }
-  33% {
-    transform: scale(0.905);
-  }
-  34% {
-    transform: scale(0.975);
-  }
-  35% {
-    transform: scale(1.035);
-  }
-  36% {
-    transform: scale(1.086);
-  }
-  37% {
-    transform: scale(1.127);
-  }
-  38% {
-    transform: scale(1.16);
-  }
-  39% {
-    transform: scale(1.183);
-  }
-  40% {
-    transform: scale(1.198);
-  }
-  41% {
-    transform: scale(1.206);
-  }
-  42% {
-    transform: scale(1.207);
+    transform: scale(.01);
+    animation-timing-function: cubic-bezier(.3, .5, .7, 1);
   }
   43% {
     transform: scale(1.203);
-  }
-  44% {
-    transform: scale(1.193);
-  }
-  45% {
-    transform: scale(1.18);
-  }
-  46% {
-    transform: scale(1.164);
-  }
-  47% {
-    transform: scale(1.146);
-  }
-  48% {
-    transform: scale(1.126);
-  }
-  49% {
-    transform: scale(1.106);
-  }
-  50% {
-    transform: scale(1.086);
-  }
-  51% {
-    transform: scale(1.066);
-  }
-  52% {
-    transform: scale(1.047);
-  }
-  53% {
-    transform: scale(1.03);
-  }
-  54% {
-    transform: scale(1.014);
-  }
-  55% {
-    transform: scale(1);
-  }
-  56% {
-    transform: scale(0.989);
-  }
-  57% {
-    transform: scale(0.979);
-  }
-  58% {
-    transform: scale(0.971);
-  }
-  59% {
-    transform: scale(0.964);
-  }
-  60% {
-    transform: scale(0.96);
-  }
-  61% {
-    transform: scale(0.958);
+    animation-timing-function: ease-in-out;
   }
   62% {
     transform: scale(0.956);
   }
-  63% {
-    transform: scale(0.957);
-  }
-  64% {
-    transform: scale(0.958);
-  }
-  65% {
-    transform: scale(0.96);
-  }
-  66% {
-    transform: scale(0.963);
-  }
-  67% {
-    transform: scale(0.967);
-  }
-  68% {
-    transform: scale(0.97);
-  }
-  69% {
-    transform: scale(0.975);
-  }
-  70% {
-    transform: scale(0.979);
-  }
-  71% {
-    transform: scale(0.983);
-  }
-  72% {
-    transform: scale(0.987);
-  }
-  73% {
-    transform: scale(0.991);
-  }
-  74% {
-    transform: scale(0.994);
-  }
-  75% {
-    transform: scale(0.997);
-  }
-  76% {
-    transform: scale(1);
-  }
-  77% {
-    transform: scale(1.002);
-  }
-  78% {
-    transform: scale(1.004);
-  }
-  79% {
-    transform: scale(1.006);
-  }
-  80% {
-    transform: scale(1.007);
-  }
-  81% {
-    transform: scale(1.008);
-  }
-  82% {
-    transform: scale(1.008);
-  }
   83% {
     transform: scale(1.008);
-  }
-  84% {
-    transform: scale(1.008);
-  }
-  85% {
-    transform: scale(1.008);
-  }
-  86% {
-    transform: scale(1.008);
-  }
-  87% {
-    transform: scale(1.007);
-  }
-  88% {
-    transform: scale(1.006);
-  }
-  89% {
-    transform: scale(1.005);
-  }
-  90% {
-    transform: scale(1.004);
-  }
-  91% {
-    transform: scale(1.004);
-  }
-  92% {
-    transform: scale(1.003);
-  }
-  93% {
-    transform: scale(1.002);
-  }
-  94% {
-    transform: scale(1.001);
-  }
-  95% {
-    transform: scale(1);
   }
   96% {
     transform: scale(1);
   }
-  97% {
-    transform: scale(0.999);
-  }
-  98% {
-    transform: scale(0.999);
-  }
   99% {
-    transform: scale(0.998);
+    transform: scale(.998);
   }
   100% {
-    border: solid 2px var(--i-amphtml-interactive-answer-choice-background);
     transform: scale(1);
-  }
-}
-
-@keyframes option-select-correct {
-  0% {
-    border-color: var(--correct-color);
-    background: var(--correct-color);
-    opacity: 0.2;
-    transform: scale(0.1);
-    color: var(--correct-color);
-  }
-  50% {
-    opacity: 1;
-    color: var(--correct-color);
-  }
-  100% {
-    border-color: var(--correct-color);
-    background: var(--correct-color);
-    transform: scale(1);
-    color: white;
   }
 }
 
