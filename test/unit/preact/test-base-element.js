@@ -164,8 +164,30 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       expect(lastProps).to.have.property('propA', 'B');
       expect(lastProps).to.not.have.property('unknown2');
     });
+  });
 
-    // QQQQ: template mutations
+  describe('usesTemplate', () => {
+    let element;
+
+    beforeEach(async () => {
+      Impl['usesTemplate'] = true;
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"> </amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should pick-up template attribute mutations', async () => {
+      element.setAttribute('template', 't1');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+    });
+
+    it('should pick-up template child mutations', async () => {
+      element.appendChild(document.createElement('template'));
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+    });
   });
 
   describe('shadow container rendering', () => {
