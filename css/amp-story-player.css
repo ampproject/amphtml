@@ -29,9 +29,14 @@ amp-story-player a:first-of-type {
   display: block;
 }
 
-amp-story-player a:not(:first-of-type), amp-story-player.i-amphtml-story-player-loaded a {
+amp-story-player a:not(:first-of-type) {
   visibility: hidden;
-  display: none;
+}
+
+amp-story-player.i-amphtml-story-player-loaded a:first-of-type {
+  visibility: hidden;
+  width: auto;
+  height: auto;
 }
 
 amp-story-player::after {
