@@ -16,3 +16,4 @@
 
 export {ContainWrapper} from './contain';
 export {Wrapper} from './wrapper';
+export {useRenderer} from './renderer';

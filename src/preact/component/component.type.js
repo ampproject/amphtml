@@ -43,3 +43,13 @@ var WrapperComponentProps;
  * }}
  */
 var ContainWrapperComponentProps;
+
+/**
+ * @typedef {!PreactDef.Renderable|!PreactDef.InnerHTML|null}
+ */
+var RendererFunctionResponseType;
+
+/**
+ * @typedef {function(!JsonObject):(?RendererFunctionResponseType|!Promise<?RendererFunctionResponseType>)}
+ */
+var RendererFunctionType;
