@@ -65,6 +65,14 @@ export class BaseTemplate {
   render(unusedData) {}
 
   /**
+   * To be implemented by subclasses.
+   * @param {!JsonObject|string} unusedData
+   * @return {string}
+   * @abstract
+   */
+  renderAsString(unusedData) {}
+
+  /**
    * Iterate through the child nodes of the given root, applying the
    * given callback to non-empty text nodes and elements.
    * @param {!Element} root
