@@ -73,7 +73,7 @@ const ViewportChangeState = {
  * intersect with the AMP component. The parent AMP component should notify the
  * manager as its own layout state changes so that the children can be updated
  * accordingly.
- * 
+ *
  * Note: For Safari 12, this does not schedule layout for slides until they
  * enter the viewport, since `rootMargin` on `IntersectionObserver` is not
  * properly handled.
@@ -87,7 +87,7 @@ const ViewportChangeState = {
  *     ampElement: this,
  *   });
  * }
- 
+
  * buildCallback() {
  *   // Call this each time the effective children you want to manage change.
  *   this.childLayoutManager.updateChildren(children);
@@ -125,9 +125,12 @@ export class ChildLayoutManager {
       intersectionElement,
       intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
       nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
-      viewportIntersectionThreshold = intersectionThreshold,
+      // This wierdness is needed due to the self-reference default.
+      viewportIntersectionThreshold = config.intersectionThreshold ??
+        DEFAULT_INTERSECTION_THRESHOLD,
       viewportIntersectionCallback = () => {},
     } = config;
+
     /** @private @const */
     this.ampElement_ = ampElement;
 
