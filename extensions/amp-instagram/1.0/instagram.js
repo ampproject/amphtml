@@ -17,21 +17,25 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {getData} from '../../../src/event-helper';
-import {px} from '../../../src/style';
 import {useMountEffect} from '../../../src/preact/utils';
+import {useState} from '../../../src/preact';
 
 /**
  * @param {!InstagramProps} props
  * @return {PreactDef.Renderable}
  */
-export function Instagram({shortcode, captioned, width, layout, style, alt}) {
+export function Instagram({shortcode, captioned, style, alt, resize}) {
   const iframeRef = Preact.useRef(null);
-  const [heightStyle, setHeightStyle] = Preact.useState(null);
-  const [opacity, setOpacity] = Preact.useState(0);
-  const widthStyle = layout == 'responsive' ? '100%' : px(String(width));
+  const [heightStyle, setHeightStyle] = useState(null);
+  const [opacity, setOpacity] = useState(0);
 
-  console.log("width", width);
+  /**
+   * Upon component mount, the Instagram post's height is received and applied.
+   */
   useMountEffect(() => {
+    /**
+     * @param {Event} event
+     */
     function handleMessage(event) {
       if (
         event.origin != 'https://www.instagram.com' ||
@@ -43,7 +47,11 @@ export function Instagram({shortcode, captioned, width, layout, style, alt}) {
       const data = JSON.parse(getData(event));
 
       if (data['type'] == 'MEASURE') {
-        setHeightStyle({'height': px(data['details']['height'])});
+        if (typeof resize === 'function') {
+          resize(data['details']['height']);
+        } else {
+          setHeightStyle({'height': data['details']['height']});
+        }
         setOpacity(1);
       }
     }
@@ -56,17 +64,12 @@ export function Instagram({shortcode, captioned, width, layout, style, alt}) {
   });
 
   return (
-    <ContainWrapper
-      style={{...style, ...heightStyle, ...{'width': widthStyle}}}
-      layout
-      size
-      paint
-    >
+    <ContainWrapper style={{...style, ...heightStyle}} layout size paint>
       <iframe
         ref={iframeRef}
         src={
           'https://www.instagram.com/p/' +
-          encodeURIComponent(shortcode) +
+          (encodeURIComponent(shortcode) || 'error') +
           '/embed/' +
           (captioned ? 'captioned/' : '') +
           '?cr=1&v=12'

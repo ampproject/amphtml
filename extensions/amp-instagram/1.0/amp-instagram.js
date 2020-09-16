@@ -23,6 +23,15 @@ const TAG = 'amp-instagram';
 
 class AmpInstagram extends PreactBaseElement {
   /** @override */
+  init() {
+    return {
+      resize: (height) => {
+        this.forceChangeHeight(height);
+      },
+    };
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }

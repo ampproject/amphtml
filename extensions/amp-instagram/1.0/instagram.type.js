@@ -22,6 +22,7 @@
  *   captioned: (boolean|undefined),
  *   style: (Object|undefined),
  *   alt: (string|undefined)
+ *   resize: (function|undefined)
  * }}
  */
 var InstagramProps;
