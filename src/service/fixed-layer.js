@@ -989,7 +989,7 @@ class TransferLayerDef {
 class TransferLayerBody {
   /**
    * @param {!Document} doc
-   * @param {!./vsync-impl.Vsync} vsync
+   * @param {!./vsync-impl.Vsync}  vsync
    */
   constructor(doc, vsync) {
     /** @private @const {!Document} */
