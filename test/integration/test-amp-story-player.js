@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BrowserController} from '../../testing/test-helper';
+import {BrowserController, waitFor} from '../../testing/test-helper';
 import {poll} from '../../testing/iframe';
 
 const config = describe.configure().skipEdge().skipSafari();
@@ -26,6 +26,10 @@ config.run('amp-story-player', () => {
     {
       body: `
       <script async src="/dist/amp-story-player.js"></script>
+      <script async src="/amp-story-player-v0.js"></script>
+      <link href="/build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+      <link href="/dist/v0/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+      <link href="/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
       <amp-story-player style="width: 360px; height: 600px;">
         <a href="/examples/amp-story/advance-after-background-audio.html"
           style="--story-player-poster: url('./img/overview.jpg');"
@@ -37,18 +41,19 @@ config.run('amp-story-player', () => {
       extensions,
     },
     (env) => {
-      let browser;
       let playerShadowDoc;
 
       beforeEach(async () => {
-        browser = new BrowserController(env.win);
-
         env.iframe.style.height = '732px';
         env.iframe.style.width = '412px';
 
-        await browser.waitForShadowRoot('amp-story-player', 25000);
-        playerShadowDoc = env.win.document.querySelector('amp-story-player')
-          .shadowRoot;
+        // Shadow DOM is not used in tests, use amp-story-player as container.
+        await waitFor(() =>
+          env.win.document.querySelector(
+            'amp-story-player.i-amphtml-story-player-loaded'
+          )
+        );
+        playerShadowDoc = env.win.document.querySelector('amp-story-player');
       });
 
       it('should auto advance story with audio after unmuting', async () => {
