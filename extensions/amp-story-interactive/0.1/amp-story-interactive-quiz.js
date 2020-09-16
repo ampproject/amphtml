@@ -64,13 +64,8 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
   constructor(element) {
     super(element, InteractiveType.QUIZ);
 
-    /** @private {!Array<../../../src/localized-strings.LocalizedStringId>} */
-    this.localizedAnswerChoices_ = [
-      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
-      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
-      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
-      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
-    ];
+    /** @private {!Array<string>} */
+    this.localizedAnswerChoices_ = [];
   }
 
   /** @override */
@@ -97,9 +92,12 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
 
     // Localize the answer choice options
     const localizationService = Services.localizationForDoc(this.element);
-    this.localizedAnswerChoices_ = this.localizedAnswerChoices_.map((choice) =>
-      localizationService.getLocalizedString(choice)
-    );
+    this.localizedAnswerChoices_ = [
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
+    ].map((choice) => localizationService.getLocalizedString(choice));
     const optionContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-quiz-option-container'
     );
