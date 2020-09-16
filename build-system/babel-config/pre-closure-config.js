@@ -72,7 +72,7 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
-    argv.esm || argv.sxg ? filterImportsPlugin : null,
+    //argv.esm || argv.sxg ? filterImportsPlugin : null,
     // TODO(erwinm, #28698): fix this in fixit week
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'

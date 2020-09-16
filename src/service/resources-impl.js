@@ -1367,7 +1367,6 @@ export class ResourcesImpl {
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        debugger;
         // TODO(dvoytenko): This extra build has to be merged with the
         // scheduleLayoutOrPreload method below.
         // Build all resources visible, measured, and in the viewport.
@@ -1392,7 +1391,6 @@ export class ResourcesImpl {
         // layers. This is currently a short-term fix to the problem that
         // the fixed elements get incorrect top coord.
         if (r.isDisplayed() && r.overlaps(loadRect)) {
-          debugger;
           this.scheduleLayoutOrPreload(r, /* layout */ true);
         }
       }
