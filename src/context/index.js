@@ -63,6 +63,17 @@ export function unassignSlot(node, slot) {
 }
 
 /**
+ * Sets (or unsets) the direct parent. If the parent is set, the node will no
+ * longer try to discover itself.
+ *
+ * @param {!Node} node
+ * @param {!Node|null} parent
+ */
+export function setParent(node, parent) {
+  ContextNode.get(node).setParent(parent);
+}
+
+/**
  * Sets the property's input value. This is analagous to a CSS specified
  * value. Several values for the same property can be set on a node - one
  * per each setter. A repeated call for the same setter overwrites a
