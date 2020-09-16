@@ -54,8 +54,7 @@ export class BaseTemplate {
    * @return {!Element|!Array<Element>}
    * @abstract
    */
-  setHtml(unusedData) {
-  }
+  setHtml(unusedData) {}
 
   /**
    * To be implemented by subclasses.
@@ -63,8 +62,7 @@ export class BaseTemplate {
    * @return {!Element}
    * @abstract
    */
-  render(unusedData) {
-  }
+  render(unusedData) {}
 
   /**
    * Iterate through the child nodes of the given root, applying the
