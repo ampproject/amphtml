@@ -25,6 +25,7 @@ import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
+import {isLayoutSizeDefined} from '../layout';
 import {startsWith} from '../string';
 import {subscribe} from '../context';
 
@@ -407,6 +408,14 @@ export class PreactBaseElement extends AMP.BaseElement {
       return opt_fallback;
     }
     return this.defaultProps_[prop];
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return (
+      (this.constructor['layoutSizeDefined'] && isLayoutSizeDefined(layout)) ||
+      super.isLayoutSupported(layout)
+    );
   }
 }
 
