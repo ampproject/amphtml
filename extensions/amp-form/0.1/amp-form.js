@@ -1825,12 +1825,7 @@ export function onDocumentFormSubmit_(e) {
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
-  const {ampdoc} = AMP;
   AMP.registerServiceForDoc('form-submit-service', FormSubmitService);
   AMP.registerServiceForDoc(TAG, AmpFormService);
-  if (ampdoc) {
-    ampdoc.whenReady().then(() => {
-      installGlobalSubmitListenerForDoc(ampdoc);
-    });
-  }
+  AMP.registerServiceForDoc('global-service-handler', installGlobalSubmitListenerForDoc);
 });
