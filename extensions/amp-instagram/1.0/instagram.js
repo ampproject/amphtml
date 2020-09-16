@@ -15,10 +15,9 @@
  */
 
 import * as Preact from '../../../src/preact';
-import * as styles from './instagram.css';
 import {ContainWrapper} from '../../../src/preact/component';
 import {getData} from '../../../src/event-helper';
-import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
+import {px} from '../../../src/style';
 import {useMountEffect} from '../../../src/preact/utils';
 
 /**
@@ -31,6 +30,7 @@ export function Instagram({shortcode, captioned, width, layout, style, alt}) {
   const [opacity, setOpacity] = Preact.useState(0);
   const widthStyle = layout == 'responsive' ? '100%' : px(String(width));
 
+  console.log("width", width);
   useMountEffect(() => {
     function handleMessage(event) {
       if (
