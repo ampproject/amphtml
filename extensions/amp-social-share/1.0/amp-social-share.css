@@ -28,14 +28,14 @@
 
 /* Facebook Styling */
 .amp-social-share-facebook {
-  color: #fff;
-  background-color: #1877f2;
+  color: #1877f2;
+  background-color: #fff;
 }
 
 /* Pinterest Styling */
 .amp-social-share-pinterest {
-  color: #fff;
-  background-color: #e60023;
+  color: #e60023;
+  background-color: #fff;
 }
 
 /* LinkedIn Styling */
@@ -65,7 +65,7 @@
 /* line Styling */
 .amp-social-share-line {
   color: #fff;
-  background-color: #25d366;
+  background-color: #00b900;
 }
 
 /* SMS Styling */

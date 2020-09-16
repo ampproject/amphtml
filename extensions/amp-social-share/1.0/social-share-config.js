@@ -68,8 +68,8 @@ const BUILTINS = {
     defaultParams: dict({
       'href': 'CANONICAL_URL',
     }),
-    defaultColor: 'ffffff',
-    defaultBackgroundColor: '1877f2',
+    defaultColor: '1877f2',
+    defaultBackgroundColor: 'ffffff',
   },
   'pinterest': {
     shareEndpoint: 'https://www.pinterest.com/pin/create/button/',
@@ -77,8 +77,8 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
       'description': 'TITLE',
     }),
-    defaultColor: 'ffffff',
-    defaultBackgroundColor: 'e60023',
+    defaultColor: 'e60023',
+    defaultBackgroundColor: 'ffffff',
   },
   'linkedin': {
     shareEndpoint: 'https://www.linkedin.com/shareArticle',
@@ -124,7 +124,7 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
     }),
     defaultColor: 'ffffff',
-    defaultBackgroundColor: '25d366',
+    defaultBackgroundColor: '00b900',
   },
   'sms': {
     shareEndpoint: 'sms:',

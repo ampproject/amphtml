@@ -1,4 +1,19 @@
-import * as Preact from '../../src/preact';
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import * as Preact from '../../../src/preact';
 
 /**
  * @param {!JsonObject} props
@@ -11,7 +26,7 @@ export function SocialShareIcon(props) {
         <svg {...props} viewBox="0 0 44 44">
           <path
             fill="currentColor"
-            d="M17.6 28.5V44H24.4V28.5H29.5L30.5 22.1H24.4V17.9C24.4 16.1 25.3 14.4 28 14.4H30.8V9.00001C30.8 9.00001 28.3 8.60001 25.9 8.60001C20.9 8.60001 17.6 11.7 17.6 17.2V22.1H12V28.5H17.6Z"
+            d="M44 22.134C44 9.90843 34.1516 0 22 0C9.84844 0 0 9.90843 0 22.134C0 33.1837 8.04375 42.34 18.5625 44V28.5321H12.9766V22.134H18.5625V17.2576C18.5625 11.7111 21.8453 8.6461 26.8727 8.6461C29.2789 8.6461 31.7969 9.0784 31.7969 9.0784V14.5254H29.0211C26.2883 14.5254 25.4375 16.2331 25.4375 17.9839V22.134H31.5391L30.5637 28.5321H25.4375V44C35.9562 42.34 44 33.1837 44 22.134Z"
           />
         </svg>
       );
