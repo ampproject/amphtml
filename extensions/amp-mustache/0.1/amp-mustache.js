@@ -120,16 +120,31 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   render(data) {
+    const html = this.render_(data);
+    return this.serializeHtml_(html);
+  }
+
+  /** @override */
+  renderAsString(data) {
+    const html = this.render_(data);
+    return sanitizeHtml(html, this.win.document);
+  }
+
+  /**
+   * @param {!JsonObject|string} data
+   * @return {string}
+   * @private
+   */
+  render_(data) {
     let mustacheData = data;
     if (typeof data === 'object') {
       mustacheData = {...data, ...this.nestedTemplates_};
     }
-    const html = mustache.render(
+    return mustache.render(
       this.template_,
       mustacheData,
       /* partials */ undefined
     );
-    return this.serializeHtml_(html);
   }
 
   /**
