@@ -18,14 +18,14 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {getData} from '../../../src/event-helper';
 import {useMountEffect} from '../../../src/preact/utils';
-import {useState} from '../../../src/preact';
+import {useRef, useState} from '../../../src/preact';
 
 /**
  * @param {!InstagramProps} props
  * @return {PreactDef.Renderable}
  */
 export function Instagram({shortcode, captioned, style, alt, resize}) {
-  const iframeRef = Preact.useRef(null);
+  const iframeRef = useRef(null);
   const [heightStyle, setHeightStyle] = useState(null);
   const [opacity, setOpacity] = useState(0);
 
