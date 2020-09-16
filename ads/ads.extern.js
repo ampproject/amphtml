@@ -221,6 +221,8 @@ var google;
 google.ima;
 google.ima.Ad;
 google.ima.Ad.getSkipTimeOffset;
+google.ima.Ad.getAdPodInfo;
+google.ima.AdPodInfo;
 google.ima.AdDisplayContainer;
 google.ima.AdDisplayContainer.initialize;
 google.ima.ImaSdkSettings;
