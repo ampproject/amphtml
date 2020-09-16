@@ -26,10 +26,7 @@ config.run('amp-story-player', () => {
     {
       body: `
       <script async src="/dist/amp-story-player.js"></script>
-      <script async src="/amp-story-player-v0.js"></script>
-      <link href="/build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
       <link href="/dist/v0/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
-      <link href="/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
       <amp-story-player style="width: 360px; height: 600px;">
         <a href="/examples/amp-story/advance-after-background-audio.html"
           style="--story-player-poster: url('./img/overview.jpg');"
