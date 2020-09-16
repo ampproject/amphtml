@@ -34,16 +34,16 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
       await element.build();
       await waitFor(() => {
-        // The rendered container inserts a <time> element.
-        const time = element.querySelector('time');
-        return time && time.textContent;
-      }, 'time rendered');
-      return element.querySelector('time');
+        // The rendered container inserts a <div> element.
+        const div = element.querySelector('div');
+        return div && div.textContent;
+      }, 'wrapper div rendered');
+      return element.querySelector('div');
     }
 
     async function getRenderedData() {
-      const time = await waitRendered();
-      return JSON.parse(time.textContent);
+      const wrapper = await waitRendered();
+      return JSON.parse(wrapper.textContent);
     }
 
     beforeEach(() => {
@@ -143,8 +143,8 @@ describes.realWin(
       element.removeChild(template);
       win.document.body.appendChild(element);
 
-      const time = await waitRendered();
-      expect(time.textContent).to.contain('2001');
+      const wrapper = await waitRendered();
+      expect(wrapper.textContent).to.contain('2001');
     });
 
     it('does not rerender', async () => {

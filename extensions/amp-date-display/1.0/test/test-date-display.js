@@ -55,6 +55,21 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
   // Unfortunately, we cannot test the most interesting case of UTC datetime
   // displayed in local, because the test would work in only one time zone.
 
+  it('should render as a div by default', () => {
+    const props = {
+      render,
+      datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+      displayIn: 'UTC',
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+
+    // This is actually fairly arbitrary that it should be a "div". But it's
+    // checked here to ensure that we can change it controllably when needed.
+    expect(wrapper.getDOMNode().tagName).to.equal('DIV');
+  });
+
   it('provides all variables in UTC and English (default)', () => {
     const props = {
       render,
