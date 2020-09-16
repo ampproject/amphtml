@@ -1854,3 +1854,57 @@ describes.sandboxed(
     });
   }
 );
+
+describes.sandboxed(
+  'FixedLayer bug due to calling browser native instead of AMP implementation',
+  {},
+  () => {
+    let win;
+    let ampdoc;
+    let viewer;
+    let vsyncApi;
+
+    beforeEach(() => {
+      win = new FakeWindow();
+      window.__AMP_MODE = {
+        localDev: true,
+        development: false,
+        minified: false,
+        test: false,
+        version: '$internalRuntimeVersion$',
+      };
+
+      const vsyncTasks = [];
+      vsyncApi = {
+        runPromise: (task) => {
+          vsyncTasks.push(task);
+          return Promise.resolve();
+        },
+        mutate: (mutator) => {
+          vsyncTasks.push({mutate: mutator});
+        },
+      };
+    });
+
+    it('should call Animation.animate in animateFixedElements', () => {
+      const animateSpy = window.sandbox.spy(Animation, 'animate');
+
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      fixedLayer.animateFixedElements(123, 456, 789, 'ease-in', false);
+      expect(animateSpy).to.be.calledOnce;
+    });
+  }
+);
