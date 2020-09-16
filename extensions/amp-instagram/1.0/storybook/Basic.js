@@ -30,15 +30,12 @@ export const _default = () => {
   const height = number('height', 600);
   const shortcode = text('shortcode', 'B8QaZW4AQY_');
   const captioned = boolean('captioned');
-  const layout = text('layout', 'fixed');
 
   return (
     <Instagram
       shortcode={shortcode}
-      width={width}
-      height={height}
+      style={{width, height}}
       captioned={captioned}
-      layout={layout}
       alt="AMP Instagram Storybook Preact Example"
     ></Instagram>
   );
