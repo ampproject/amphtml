@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {DateDisplay} from '../date-display';
-import {date, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+/** @externs */
 
-export default {
-  title: 'DateDisplay',
-  component: DateDisplay,
-  decorators: [withA11y, withKnobs],
-};
-
-export const _default = () => {
-  const dateTime = date('Date/time', new Date());
-  return (
-    <DateDisplay
-      datetime={dateTime}
-      render={(date) => <span>{`The ISO date is ${date.iso}`}</span>}
-    />
-  );
-};
+/**
+ * @typedef {{
+ *   endDate: (string|undefined),
+ *   timeleftMs: (number|undefined),
+ *   timestampMs: (number|undefined),
+ *   timestampSeconds: (number|undefined),
+ *   offsetSeconds: (number|undefined),
+ *   whenEnded: (string|undefined),
+ *   locale: (string|undefined),
+ *   biggestUnit: (string|undefined),
+ *   render: (function(!JsonObject, (?PreactDef.Renderable|undefined)):PreactDef.Renderable),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+var DateCountdownPropsDef;
