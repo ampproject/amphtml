@@ -25,11 +25,6 @@ import {userAssert} from '../log';
  * {@link https://docs.google.com/document/d/1q-5MPQHnOHLF_uL7lQsGZdzuBgrPTkCy2PdRP-YCbOw/edit#}
  */
 
-/**
- * @typedef {typeof ../base-template.BaseTemplate}
- */
-let TemplateClassDef;
-
 /** @private @const {string} */
 const PROP_ = '__AMP_IMPL_';
 
@@ -46,14 +41,14 @@ export class Templates {
 
     /**
      * A map from template type to template's class promise.
-     * @private @const {!Object<string, !Promise<!TemplateClassDef>>}
+     * @private @const {!Object<string, !Promise<typeof BaseTemplate>>}
      */
     this.templateClassMap_ = {};
 
     /**
      * A map from template type to template's class promise. This is a transient
      * storage. As soon as the template class loaded, the entry is removed.
-     * @private @const {!Object<string, function(!TemplateClassDef)>}
+     * @private @const {!Object<string, function(typeof BaseTemplate)>}
      */
     this.templateClassResolvers_ = {};
   }
@@ -234,7 +229,9 @@ export class Templates {
 
     promise = this.waitForTemplateClass_(element, type).then(
       (templateClass) => {
-        const impl = (element[PROP_] = new templateClass(element, this.win_));
+        // This is ugly workaround for https://github.com/google/closure-compiler/issues/2630.
+        const Constr = /** @type {function(new:Object, !Element, !Window)} */ (templateClass);
+        const impl = (element[PROP_] = new Constr(element, this.win_));
         delete element[PROP_PROMISE_];
         return impl;
       }
@@ -248,7 +245,7 @@ export class Templates {
    * will wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
-   * @return {!Promise<!TemplateClassDef>}
+   * @return {!Promise<typeof BaseTemplate>}
    * @private
    */
   waitForTemplateClass_(element, type) {
@@ -268,7 +265,7 @@ export class Templates {
    * Registers an extended template. This function should typically be called
    * through the registerTemplate method on the AMP runtime.
    * @param {string} type
-   * @param {!TemplateClassDef} templateClass
+   * @param {typeof BaseTemplate} templateClass
    * @private
    * @restricted
    */
@@ -316,7 +313,7 @@ export function installTemplatesService(win) {
  * through the registerTemplate method on the AMP runtime.
  * @param {!Window} win
  * @param {string} type
- * @param {!TemplateClassDef} templateClass
+ * @param {typeof BaseTemplate} templateClass
  * @return {undefined}
  */
 export function registerExtendedTemplate(win, type, templateClass) {

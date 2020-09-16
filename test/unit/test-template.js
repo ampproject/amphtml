@@ -349,12 +349,6 @@ describes.realWin('BaseTemplate', {amp: true}, (env) => {
     doc.body.appendChild(templateElement);
   });
 
-  it('should require render override', () => {
-    expect(() => {
-      new BaseTemplate(templateElement).render();
-    }).to.throw(/Not implemented/);
-  });
-
   describe('tryUnwrap()', () => {
     it('should unwrap single element', () => {
       const root = doc.createElement('div');
