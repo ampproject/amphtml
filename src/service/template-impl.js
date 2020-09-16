@@ -41,14 +41,14 @@ export class Templates {
 
     /**
      * A map from template type to template's class promise.
-     * @private @const {!Object<string, !Promise<typeof BaseTemplate>>}
+     * @private @const {!Object<string, !Promise<typeof ../base-template.BaseTemplate>>}
      */
     this.templateClassMap_ = {};
 
     /**
      * A map from template type to template's class promise. This is a transient
      * storage. As soon as the template class loaded, the entry is removed.
-     * @private @const {!Object<string, function(typeof BaseTemplate)>}
+     * @private @const {!Object<string, function(typeof ../base-template.BaseTemplate)>}
      */
     this.templateClassResolvers_ = {};
   }
@@ -245,7 +245,7 @@ export class Templates {
    * will wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
-   * @return {!Promise<typeof BaseTemplate>}
+   * @return {!Promise<typeof ../base-template.BaseTemplate>}
    * @private
    */
   waitForTemplateClass_(element, type) {
@@ -265,7 +265,7 @@ export class Templates {
    * Registers an extended template. This function should typically be called
    * through the registerTemplate method on the AMP runtime.
    * @param {string} type
-   * @param {typeof BaseTemplate} templateClass
+   * @param {typeof ../base-template.BaseTemplate} templateClass
    * @private
    * @restricted
    */
@@ -313,7 +313,7 @@ export function installTemplatesService(win) {
  * through the registerTemplate method on the AMP runtime.
  * @param {!Window} win
  * @param {string} type
- * @param {typeof BaseTemplate} templateClass
+ * @param {typeof ../base-template.BaseTemplate} templateClass
  * @return {undefined}
  */
 export function registerExtendedTemplate(win, type, templateClass) {
