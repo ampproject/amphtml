@@ -597,6 +597,23 @@ class AmpVideo extends AMP.BaseElement {
       this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
     });
 
+    // If managed by pool, let it handle the src changes and loading.
+    // Once the duration has changed, then we safely send the Load event.
+    if (this.isManagedByPool_()) {
+      const durationChangedEventUnlisten = listen(
+        video,
+        'durationchange',
+        (event) => {
+          const {target} = event;
+          if (isNaN(target.duration)) {
+            return;
+          }
+          this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        }
+      );
+      this.unlisteners_.push(durationChangedEventUnlisten);
+    }
+
     this.unlisteners_.push(forwardEventsUnlisten, mutedOrUnmutedEventUnlisten);
   }
 
@@ -620,15 +637,6 @@ class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
-    
-    // If managed by pool, then once reset occurs we need to
-    // wait for the new video is loaded, then dispatch LOAD
-    // analytics event.
-    if (this.isManagedByPool_()) {
-      this.loadPromise(this.video_).then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      });
-    }
   }
 
   /** @override */
