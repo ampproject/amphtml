@@ -116,12 +116,26 @@ export class AmpMustache extends BaseTemplate {
   /** @override */
   setHtml(html) {
     const wrapped = `<div>${html}</div>`;
-    const purified = this.purifyAndSetHtml_(wrapped);
+    const purified = this.tryUnwrap(this.purifyAndSetHtml_(wrapped));
     return this.unwrapChildren(purified);
   }
 
   /** @override */
   render(data) {
+    return this.tryUnwrap(this.render_(data));
+  }
+
+  /** @override */
+  renderAsString(data) {
+    return this.render_(data)./*OK*/ innerHTML;
+  }
+
+  /**
+   * @param {!JsonObject|string} data
+   * @return {!Element}
+   * @private
+   */
+  render_(data) {
     let mustacheData = data;
     // Also render any nested templates.
     if (typeof data === 'object') {
@@ -136,15 +150,13 @@ export class AmpMustache extends BaseTemplate {
   }
 
   /**
-   *
    * @param {string} html
    * @return {!Element}
    * @private
    */
   purifyAndSetHtml_(html) {
     const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
-    const div = body.firstElementChild;
-    return this.tryUnwrap(div);
+    return body.firstElementChild;
   }
 }
 

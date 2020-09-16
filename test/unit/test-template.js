@@ -44,8 +44,11 @@ describes.realWin('Template', {amp: true}, (env) => {
   class TemplateImpl extends BaseTemplate {
     render(data) {
       const elem = doc.createElement('div');
-      elem.textContent = 'abc' + data.value;
+      elem.textContent = `abc${data.value}`;
       return elem;
+    }
+    renderAsString(data) {
+      return `str(abc${data.value})`;
     }
   }
 
@@ -80,6 +83,20 @@ describes.realWin('Template', {amp: true}, (env) => {
     return templates.renderTemplate(templateElement, {value: 1}).then((res) => {
       expect(res.textContent).to.equal('abc1');
     });
+  });
+
+  it('should render as string', () => {
+    const templateElement = createTemplateElement();
+    registerExtendedTemplate(
+      win,
+      templateElement.getAttribute('type'),
+      TemplateImpl
+    );
+    return templates
+      .renderTemplateAsString(templateElement, {value: 1})
+      .then((res) => {
+        expect(res).to.equal('str(abc1)');
+      });
   });
 
   it('should render when detached', () => {
