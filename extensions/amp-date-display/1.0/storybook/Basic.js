@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {DateDisplay} from '../date-display';
-import {date, withKnobs} from '@storybook/addon-knobs';
+import {date, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -25,12 +25,38 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+const DISPLAY_IN_OPTIONS = ['utc', 'local'];
+const LOCALES = ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'];
+
 export const _default = () => {
   const dateTime = date('Date/time', new Date());
+  const displayIn = select(
+    'Display in',
+    DISPLAY_IN_OPTIONS,
+    DISPLAY_IN_OPTIONS[0]
+  );
+  const locale = select('Locale', LOCALES, LOCALES[0]);
   return (
     <DateDisplay
       datetime={dateTime}
-      render={(date) => <span>{`The ISO date is ${date.iso}`}</span>}
+      displayIn={displayIn}
+      locale={locale}
+      render={(date) => (
+        <div>{`ISO: ${date.iso}; locale: ${date.localeString}`}</div>
+      )}
     />
+  );
+};
+
+export const defaultRenderer = () => {
+  const displayIn = select(
+    'Display in',
+    DISPLAY_IN_OPTIONS,
+    DISPLAY_IN_OPTIONS[0]
+  );
+  const dateTime = date('Date/time', new Date());
+  const locale = select('Locale', LOCALES, LOCALES[0]);
+  return (
+    <DateDisplay datetime={dateTime} displayIn={displayIn} locale={locale} />
   );
 };

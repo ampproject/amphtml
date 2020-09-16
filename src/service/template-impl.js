@@ -26,19 +26,18 @@ import {rootNodeFor, scopedQuerySelector} from '../dom';
  * {@link https://docs.google.com/document/d/1q-5MPQHnOHLF_uL7lQsGZdzuBgrPTkCy2PdRP-YCbOw/edit#}
  */
 
-/**
- * @typedef {typeof BaseTemplate}
- */
-let TemplateClassDef;
-
 /** @private @const {string} */
 const PROP_ = '__AMP_IMPL_';
 
 /** @private @const {string} */
 const PROP_PROMISE_ = '__AMP_WAIT_';
 
+/** @private @const {function()} */
+const EMPTY_FUNC = () => {};
+
 /**
  * The interface that is implemented by all templates.
+ * @abstract
  */
 export class BaseTemplate {
   /**
@@ -71,19 +70,25 @@ export class BaseTemplate {
    * for server-side rendering case. To be implemented by subclasses.
    * @param {string} unusedData
    * @return {!Element|!Array<Element>}
+   * @abstract
    */
-  setHtml(unusedData) {
-    throw new Error('Not implemented');
-  }
+  setHtml(unusedData) {}
 
   /**
    * To be implemented by subclasses.
    * @param {!JsonObject|string} unusedData
    * @return {!Element}
+   * @abstract
    */
-  render(unusedData) {
-    throw new Error('Not implemented');
-  }
+  render(unusedData) {}
+
+  /**
+   * To be implemented by subclasses.
+   * @param {!JsonObject|string} unusedData
+   * @return {string}
+   * @abstract
+   */
+  renderAsString(unusedData) {}
 
   /**
    * Iterate through the child nodes of the given root, applying the
@@ -165,16 +170,25 @@ export class Templates {
 
     /**
      * A map from template type to template's class promise.
-     * @private @const {!Object<string, !Promise<!TemplateClassDef>>}
+     * @private @const {!Object<string, !Promise<typeof BaseTemplate>>}
      */
     this.templateClassMap_ = {};
 
     /**
      * A map from template type to template's class promise. This is a transient
      * storage. As soon as the template class loaded, the entry is removed.
-     * @private @const {!Object<string, function(!TemplateClassDef)>}
+     * @private @const {!Object<string, function(typeof BaseTemplate)>}
      */
     this.templateClassResolvers_ = {};
+  }
+
+  /**
+   * Waits for template to be fully initialized.
+   * @param {!Element} templateElement
+   * @return {!Promise}
+   */
+  whenReady(templateElement) {
+    return this.getImplementation_(templateElement).then(EMPTY_FUNC);
   }
 
   /**
@@ -198,6 +212,18 @@ export class Templates {
   renderTemplate(templateElement, data) {
     return this.getImplementation_(templateElement).then((impl) => {
       return this.render_(impl, data);
+    });
+  }
+
+  /**
+   * Renders the specified template element using the supplied data.
+   * @param {!Element} templateElement
+   * @param {!JsonObject} data
+   * @return {!Promise<!Element>}
+   */
+  renderTemplateAsString(templateElement, data) {
+    return this.getImplementation_(templateElement).then((impl) => {
+      return impl.renderAsString(data);
     });
   }
 
@@ -319,7 +345,7 @@ export class Templates {
     } else if (opt_querySelector) {
       return scopedQuerySelector(parent, opt_querySelector);
     } else {
-      return parent.querySelector('template, script[type="text/plain"]');
+      return parent.querySelector('template[type], script[type="text/plain"]');
     }
   }
 
@@ -353,7 +379,9 @@ export class Templates {
 
     promise = this.waitForTemplateClass_(element, type).then(
       (templateClass) => {
-        const impl = (element[PROP_] = new templateClass(element, this.win_));
+        // This is ugly workaround for https://github.com/google/closure-compiler/issues/2630.
+        const Constr = /** @type {function(new:Object, !Element, !Window)} */ (templateClass);
+        const impl = (element[PROP_] = new Constr(element, this.win_));
         delete element[PROP_PROMISE_];
         return impl;
       }
@@ -367,7 +395,7 @@ export class Templates {
    * will wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
-   * @return {!Promise<!TemplateClassDef>}
+   * @return {!Promise<typeof BaseTemplate>}
    * @private
    */
   waitForTemplateClass_(element, type) {
@@ -387,7 +415,7 @@ export class Templates {
    * Registers an extended template. This function should typically be called
    * through the registerTemplate method on the AMP runtime.
    * @param {string} type
-   * @param {!TemplateClassDef} templateClass
+   * @param {typeof BaseTemplate} templateClass
    * @private
    * @restricted
    */
@@ -435,7 +463,7 @@ export function installTemplatesService(win) {
  * through the registerTemplate method on the AMP runtime.
  * @param {!Window} win
  * @param {string} type
- * @param {!TemplateClassDef} templateClass
+ * @param {typeof BaseTemplate} templateClass
  * @return {undefined}
  */
 export function registerExtendedTemplate(win, type, templateClass) {

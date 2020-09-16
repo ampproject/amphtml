@@ -44,8 +44,31 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     clock.runAll();
   });
 
+  function syncPromise(response) {
+    return {
+      then(callback) {
+        callback(response);
+      },
+    };
+  }
+
   // Unfortunately, we cannot test the most interesting case of UTC datetime
   // displayed in local, because the test would work in only one time zone.
+
+  it('should render as a div by default', () => {
+    const props = {
+      render,
+      datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+      displayIn: 'UTC',
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+
+    // This is actually fairly arbitrary that it should be a "div". But it's
+    // checked here to ensure that we can change it controllably when needed.
+    expect(wrapper.getDOMNode().tagName).to.equal('DIV');
+  });
 
   it('provides all variables in UTC and English (default)', () => {
     const props = {
@@ -77,6 +100,31 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.second).to.equal('6');
     expect(data.secondTwoDigit).to.equal('06');
     expect(data.dayPeriod).to.equal('am');
+  });
+
+  it('should handle an async renderer', () => {
+    const props = {
+      render: (data) => syncPromise(render(data)),
+      datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+      displayIn: 'UTC',
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+    const data = JSON.parse(wrapper.text());
+    expect(data.year).to.equal('2001');
+    expect(data.yearTwoDigit).to.equal('01');
+  });
+
+  it('should use a default renderer in UTC', () => {
+    const props = {
+      datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+      displayIn: 'UTC',
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+    expect(wrapper.text()).to.equal('Feb 3, 2001, 4:05 AM');
   });
 
   it('accepts Date type', () => {
