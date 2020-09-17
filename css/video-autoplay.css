@@ -57,13 +57,13 @@ amp-story .amp-video-eq {
   width: 20px;
   z-index: 1;
 }
-.amp-video-eq .amp-video-eq-col {
+.amp-video-eq-col {
   flex: 1;
   height: 100%;
   margin-right: 1px;
   position: relative;
 }
-.amp-video-eq .amp-video-eq-col div {
+.amp-video-eq-col div {
   animation-name: amp-video-eq-animation;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
@@ -74,16 +74,16 @@ amp-story .amp-video-eq {
   width: 100%;
   will-change: transform;
 }
-.amp-video-eq .amp-video-eq-col div {
+.amp-video-eq-col div {
   animation-play-state: paused;
 }
-.amp-video-eq[unpausable] .amp-video-eq-col div {
+[unpausable] .amp-video-eq-col div {
   animation-name: none;
 }
-.amp-video-eq[unpausable].amp-video-eq-play .amp-video-eq-col div {
+[unpausable].amp-video-eq-play .amp-video-eq-col div {
   animation-name: amp-video-eq-animation;
 }
-.amp-video-eq.amp-video-eq-play .amp-video-eq-col div {
+.amp-video-eq-play .amp-video-eq-col div {
   animation-play-state: running;
 }
 .amp-video-eq-1-1 {

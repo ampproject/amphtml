@@ -21,6 +21,7 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../mediasession-helper';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
@@ -675,8 +676,8 @@ class VideoEntry {
       !video.preimplementsMediaSessionAPI() &&
       !element.classList.contains('i-amphtml-disable-mediasession')
     ) {
+      validateMediaMetadata(element, this.metadata_);
       setMediaSession(
-        element,
         this.ampdoc_.win,
         this.metadata_,
         this.boundMediasessionPlay_,
