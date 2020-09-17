@@ -117,8 +117,8 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       hostName + '/dist/video-iframe-integration.js'
     );
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
-      hostName + '/dist/v0/$1.max.js'
+      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).(m?)js/g,
+      hostName + '/dist/v0/$1.max.$2js'
     );
     if (inabox) {
       const filename = '/dist/amp-inabox.js';
