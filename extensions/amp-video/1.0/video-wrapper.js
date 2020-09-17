@@ -21,6 +21,7 @@ import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
 import {dict} from '../../../src/utils/object';
 import {fillContentOverlay, fillStretch} from './video-wrapper.css';
+import {forwardRef} from '../../../src/preact/compat';
 import {once} from '../../../src/utils/function';
 import {
   parseFavicon,
@@ -30,6 +31,7 @@ import {
 } from '../../../src/mediasession-helper';
 import {
   useCallback,
+  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -65,19 +67,23 @@ const getMetadata = (player, props) =>
 
 /**
  * @param {!VideoWrapperProps} props
+ * @param {?} ref
  * @return {PreactDef.Renderable}
  */
-export function VideoWrapper({
-  component: Component = 'video',
-  autoplay = false,
-  controls = false,
-  noaudio = false,
-  mediasession = true,
-  className,
-  style,
-  children,
-  ...rest
-}) {
+function VideoWrapperWithRef(
+  {
+    component: Component = 'video',
+    autoplay = false,
+    controls = false,
+    noaudio = false,
+    mediasession = true,
+    className,
+    style,
+    children,
+    ...rest
+  },
+  ref
+) {
   useResourcesNotify();
 
   const [muted, setMuted] = useState(autoplay);
@@ -104,6 +110,12 @@ export function VideoWrapper({
     });
   }, [readyDeferred]);
 
+  const requestFullscreen = useCallback(() => {
+    readyDeferred.promise.then(() => {
+      playerRef.current.requestFullscreen();
+    });
+  }, [readyDeferred]);
+
   useLayoutEffect(() => {
     if (mediasession && playing && metadata) {
       setMediaSession(window, metadata, play, pause);
@@ -113,6 +125,26 @@ export function VideoWrapper({
       // (Tricky because we don't want to clear a different active session.)
     };
   }, [mediasession, playing, metadata, play, pause]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      // Standard HTMLMediaElement/Element
+      play,
+      pause,
+      requestFullscreen,
+
+      // Non-standard
+      mute: () => setMuted(true),
+      unmute: () => {
+        if (userInteracted) {
+          setMuted(false);
+        }
+      },
+      userInteracted: () => setUserInteracted(true),
+    }),
+    [pause, play, requestFullscreen, userInteracted]
+  );
 
   return (
     <ContainWrapper
@@ -235,3 +267,7 @@ const AutoplayIconContent = once(() =>
     </div>
   ))
 );
+
+const VideoWrapper = forwardRef(VideoWrapperWithRef);
+VideoWrapper.displayName = 'VideoWrapper'; // Make findable for tests.
+export {VideoWrapper};
