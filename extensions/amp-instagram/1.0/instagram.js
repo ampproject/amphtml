@@ -24,9 +24,9 @@ import {useRef, useState} from '../../../src/preact';
  * @param {!InstagramProps} props
  * @return {PreactDef.Renderable}
  */
-export function Instagram({shortcode, captioned, style, alt, resize}) {
+export function Instagram({shortcode, captioned, style, title, resize}) {
   const iframeRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(null);
+  const [heightStyle, setHeightStyle] = useState(style['height'] || null);
   const [opacity, setOpacity] = useState(0);
 
   /**
@@ -50,7 +50,9 @@ export function Instagram({shortcode, captioned, style, alt, resize}) {
         if (typeof resize === 'function') {
           resize(data['details']['height']);
         } else {
-          setHeightStyle({'height': data['details']['height']});
+          setHeightStyle({
+            'height': Math.max(heightStyle, data['details']['height']),
+          });
         }
         setOpacity(1);
       }
@@ -77,7 +79,7 @@ export function Instagram({shortcode, captioned, style, alt, resize}) {
         scrolling="no"
         frameborder="0"
         allowtransparency
-        title={alt}
+        title={title}
         style={{
           width: '100%',
           height: '100%',
