@@ -896,11 +896,13 @@ export function onAdLoad(global) {
 
 /**
  * Called intermittently as the ad plays, allowing us to display ad counter.
- * @param {!Object} global
+ * @param {!Object} unusedEvent
  * @visibleForTesting
  */
-export function onAdProgress(global) {
-  const {adPosition, totalAds} = global.getAdData();
+export function onAdProgress(unusedEvent) {
+  const adPodInfo = currentAd.getAdPodInfo();
+  const adPosition = adPodInfo.getAdPosition();
+  const totalAds = adPodInfo.getTotalAds();
   const remainingTime = adsManager.getRemainingTime();
   const remainingMinutes = Math.floor(remainingTime / 60);
   let remainingSeconds = Math.floor(remainingTime % 60);
