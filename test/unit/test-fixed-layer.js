@@ -1831,27 +1831,6 @@ describes.sandboxed(
       const executed = fixedLayer.setup();
       expect(executed).to.be.true;
     });
-
-    it('should call Animation.animate in animateFixedElements', () => {
-      const animateSpy = window.sandbox.spy(Animation, 'animate');
-
-      ampdoc = new AmpDocSingle(win);
-      installPlatformService(win);
-      installTimerService(win);
-      installViewerServiceForDoc(ampdoc);
-      viewer = Services.viewerForDoc(ampdoc);
-      viewer.isEmbedded = () => true;
-
-      const fixedLayer = new FixedLayer(
-        ampdoc,
-        vsyncApi,
-        /* borderTop */ 0,
-        /* paddingTop */ 11,
-        /* transfer */ false
-      );
-      fixedLayer.animateFixedElements(123, 456, 789, 'ease-in', false);
-      expect(animateSpy).to.be.calledOnce;
-    });
   }
 );
 
