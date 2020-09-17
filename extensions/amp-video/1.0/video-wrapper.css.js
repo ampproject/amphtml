@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import {createUseStyles} from 'react-jss';
+// TODO(alanorozco): Share these across components, make them JSS.
 
-export const useStyles = createUseStyles({
-  floatLeft: {float: 'left', border: 'black solid 1px'},
-  fill: {
-    display: 'block',
-    position: 'relative',
-    flex: '1 1 auto',
-  },
-});
+export const fillStretch = {
+  'position': 'relative',
+  'width': '100%',
+  'height': '100%',
+};
+
+export const fillContentOverlay = {
+  'position': 'absolute',
+  'left': 0,
+  'right': 0,
+  'bottom': 0,
+  'top': 0,
+};
