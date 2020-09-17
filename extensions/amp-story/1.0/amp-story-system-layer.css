@@ -290,7 +290,6 @@
 [ios] .i-amphtml-story-share-control {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path fill="white" d="M15.6665 4.58329L14.3648 5.88496L12.9073 4.42746V14.6666H11.0923V4.42746L9.63484 5.88496L8.33317 4.58329L11.9998 0.916626L15.6665 4.58329ZM19.3332 9.16663V19.25C19.3332 20.2583 18.5082 21.0833 17.4998 21.0833H6.49984C5.48234 21.0833 4.6665 20.2583 4.6665 19.25V9.16663C4.6665 8.14913 5.48234 7.33329 6.49984 7.33329H9.24984V9.16663H6.49984V19.25H17.4998V9.16663H14.7498V7.33329H17.4998C18.5082 7.33329 19.3332 8.14913 19.3332 9.16663Z"/></svg>') !important;
   background-size: auto !important;
-
 }
 
 .i-amphtml-story-info-control {
