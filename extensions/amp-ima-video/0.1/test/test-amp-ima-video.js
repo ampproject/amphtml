@@ -192,7 +192,14 @@ describes.realWin(
         },
       ];
 
+      const adPodInfo = {};
+
+      imaVideoObj.onAdLoad({
+        getAd: () => ({getAdPodInfo: () => adPodInfo}),
+      });
+
       tests.forEach(({mock, label, expected}) => {
+        const {remainingTime, totalAds, adPosition} = mock;
         let defaults = videoDefaults;
         if (label) {
           defaults = Object.assign(defaults, {adLabel: label});
@@ -200,13 +207,11 @@ describes.realWin(
         imaVideoObj.imaVideo(win, defaults);
         const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
         const countdownDiv = controlsDiv.querySelector('#ima-countdown > div');
-        const adsManagerMock = getAdsManagerMock({
-          remainingTime: mock.remainingTime,
-        });
+        const adsManagerMock = getAdsManagerMock({remainingTime});
+        adPodInfo.getTotalAds = () => totalAds;
+        adPodInfo.getAdPosition = () => adPosition;
         imaVideoObj.setAdsManagerForTesting(adsManagerMock);
-        imaVideoObj.onAdProgress({
-          getAdData: () => mock,
-        });
+        imaVideoObj.onAdProgress({});
         expect(countdownDiv.textContent).to.eql(expected);
       });
     });
