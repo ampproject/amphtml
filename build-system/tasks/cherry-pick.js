@@ -41,11 +41,13 @@ function execOrThrow(cmd, msg) {
  * Determines the name of the cherry-pick branch.
  *
  * @param {string} version
+ * @param {number} numCommits
  * @return {string}
  */
-function cherryPickBranchName(version) {
+function cherryPickBranchName(version, numCommits) {
   const timestamp = version.slice(0, -3);
-  const suffix = String(Number(version.slice(-3)) + 1).padStart(3, '0');
+  const suffixNumber = Number(version.slice(-3)) + numCommits;
+  const suffix = String(suffixNumber).padStart(3, '0');
   return `amp-release-${timestamp}${suffix}`;
 }
 
@@ -120,7 +122,7 @@ async function cherryPick() {
     throw error;
   }
 
-  const branch = cherryPickBranchName(onto);
+  const branch = cherryPickBranchName(onto, commits.length);
   try {
     prepareBranch(onto, branch, remote);
     commits.forEach(performCherryPick);
