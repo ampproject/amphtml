@@ -52,6 +52,7 @@ let AmpElementPropDef;
  *   name: string,
  *   selector: string,
  *   single: (boolean|undefined),
+ *   clone: (boolean|undefined),
  *   props: (!JsonObject|undefined),
  * }}
  */
@@ -698,7 +699,7 @@ function collectProps(Ctor, element, ref, defaultProps) {
         continue;
       }
 
-      const {single, name, props: slotProps = {}} = def;
+      const {single, name, clone, props: slotProps = {}} = def;
 
       // TBD: assign keys, reuse slots, etc.
       if (single) {
@@ -711,18 +712,35 @@ function collectProps(Ctor, element, ref, defaultProps) {
         const list =
           name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
-          createSlot(
-            childElement,
-            childElement.getAttribute('slot') ||
-              `i-amphtml-${name}-${list.length}`,
-            slotProps
-          )
+          clone
+            ? shallowCloneVNode(childElement)
+            : createSlot(
+                childElement,
+                childElement.getAttribute('slot') ||
+                  `i-amphtml-${name}-${list.length}`,
+                slotProps
+              )
         );
       }
     }
   }
 
   return props;
+}
+
+/**
+ * Clones an Element into a VNode.
+ * @param {!Element} element
+ * @return {!PreactDef.Renderable}
+ */
+function shallowCloneVNode(element) {
+  const {attributes} = element;
+  const props = {key: element};
+  for (let i = 0; i < attributes.length; i++) {
+    const {name, value} = attributes[i];
+    props[name] = value;
+  }
+  return Preact.createElement(element.tagName, props);
 }
 
 /**

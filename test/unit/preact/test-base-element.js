@@ -386,6 +386,12 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           selector: '[special2]',
           single: true,
         },
+        'cloned': {
+          name: 'cloned',
+          selector: '[cloned]',
+          single: false,
+          clone: true,
+        },
         'children': {
           name: 'children',
           selector: '*',
@@ -397,6 +403,8 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           <div special1></div>
           <div id="child1"></div>
           <div id="child2"></div>
+          <div cloned id="cloned1"></div>
+          <div cloned id="cloned2"></div>
         </amp-preact>
       `;
       doc.body.appendChild(element);
@@ -530,6 +538,25 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       element.setAttribute('prop-a', 'B');
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
+    });
+
+    it('clones children (without descendant) as vnodes into prop', async () => {
+      expect(
+        component.withArgs(
+          env.sandbox.match({
+            cloned: [
+              env.sandbox.match({
+                type: 'DIV',
+                props: {cloned: '', id: 'cloned1'},
+              }),
+              env.sandbox.match({
+                type: 'DIV',
+                props: {cloned: '', id: 'cloned2'},
+              }),
+            ],
+          })
+        )
+      ).to.be.calledOnce;
     });
   });
 
