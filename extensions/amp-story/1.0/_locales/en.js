@@ -207,12 +207,6 @@ const strings = {
     description:
       'Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)',
   },
-  [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
-    string: 'Share story',
-    description:
-      'Label for the share button that pulls up a panel ' +
-      'of options for sharing the story',
-  },
   [LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL]: {
     string: 'Pause story',
     description: 'Label for the pause button on the system layer',
@@ -220,6 +214,12 @@ const strings = {
   [LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL]: {
     string: 'Play story',
     description: 'Label for the play button on the system layer',
+  },
+  [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
+    string: 'Share story',
+    description:
+      'Label for the share button that pulls up a panel ' +
+      'of options for sharing the story',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL]: {
     string: 'Share starting from this page',
