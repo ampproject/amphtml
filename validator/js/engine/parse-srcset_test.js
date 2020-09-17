@@ -286,10 +286,10 @@ describe('Srcset parseSrcset', () => {
     let result = parse_srcset.parseSrcset('image.png 500.0w');
 
     expect(result.success).toBe(false);
-    let result = parse_srcset.parseSrcset('image.png 1.5w');
+    result = parse_srcset.parseSrcset('image.png 1.5w');
 
     expect(result.success).toBe(false);
-    let result = parse_srcset.parseSrcset('image.png 0.1w');
+    result = parse_srcset.parseSrcset('image.png 0.1w');
 
     expect(result.success).toBe(false);
   });
