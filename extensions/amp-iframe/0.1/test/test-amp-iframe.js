@@ -693,6 +693,23 @@ describes.realWin(
         expect(attemptChangeSize).to.be.calledWith(217, 114);
       });
 
+      it('should hide overflow element after resize', async function () {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts',
+          width: 100,
+          height: 100,
+          resizable: '',
+        });
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = await ampIframe.getImpl();
+        const overflowElement = impl.getOverflowElement();
+        overflowElement.classList.toggle('amp-visible', true);
+        impl.updateSize_(217, '114' /* be tolerant to string number */);
+        await timer.promise(IFRAME_MESSAGE_TIMEOUT);
+        expect(overflowElement.classList.contains('amp-visible')).to.be.false;
+      });
+
       it('should resize amp-iframe when only height is provided', function* () {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
