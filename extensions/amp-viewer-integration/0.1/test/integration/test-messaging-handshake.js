@@ -88,8 +88,6 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
       });
 
       it('should perform polling handshake', function () {
-        this.timeout(2000);
-
         const params = serializeQueryString({
           origin: getWinOrigin(window),
           cap: 'handshakepoll',
