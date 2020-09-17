@@ -713,7 +713,7 @@ function collectProps(Ctor, element, ref, defaultProps) {
           name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
           clone
-            ? createVNode(childElement)
+            ? shallowCloneVNode(childElement)
             : createSlot(
                 childElement,
                 childElement.getAttribute('slot') ||
@@ -733,19 +733,14 @@ function collectProps(Ctor, element, ref, defaultProps) {
  * @param {!Element} element
  * @return {!PreactDef.Renderable}
  */
-function createVNode(element) {
+function shallowCloneVNode(element) {
   const {attributes} = element;
   const props = {key: element};
   for (let i = 0; i < attributes.length; i++) {
     const {name, value} = attributes[i];
     props[name] = value;
   }
-  const children = [];
-  for (let i = 0; i < element.children.length; i++) {
-    // TODO(alanorozco): Could these be text nodes?
-    children.push(createVNode(element.children[i]));
-  }
-  return <element.tagName {...props}>{children}</element.tagName>;
+  return Preact.createElement(element.tagName, props);
 }
 
 /**
