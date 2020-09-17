@@ -735,12 +735,13 @@ function collectProps(Ctor, element, ref, defaultProps) {
  */
 function shallowCloneVNode(element) {
   const {attributes} = element;
-  const props = {key: element};
-  for (let i = 0; i < attributes.length; i++) {
+  const props = {'key': element};
+  const {length} = attributes;
+  for (let i = 0; i < length; i++) {
     const {name, value} = attributes[i];
     props[name] = value;
   }
-  return Preact.createElement(element.tagName.toLowerCase(), props);
+  return Preact.createElement(element.localName, props);
 }
 
 /**
