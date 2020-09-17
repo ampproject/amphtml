@@ -17,25 +17,20 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {getData} from '../../../src/event-helper';
+import {parseJson} from '../../../src/json';
 import {useMountEffect} from '../../../src/preact/utils';
 import {useRef, useState} from '../../../src/preact';
 
 /**
- * @param {!InstagramProps} props
+ * @param {!InstagramPropsDef} props
  * @return {PreactDef.Renderable}
  */
 export function Instagram({shortcode, captioned, style, title, resize}) {
   const iframeRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(style['height'] || null);
+  const [heightStyle, setHeightStyle] = useState(style['height'] || 0);
   const [opacity, setOpacity] = useState(0);
 
-  /**
-   * Upon component mount, the Instagram post's height is received and applied.
-   */
   useMountEffect(() => {
-    /**
-     * @param {Event} event
-     */
     function handleMessage(event) {
       if (
         event.origin != 'https://www.instagram.com' ||
@@ -44,7 +39,7 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
         return;
       }
 
-      const data = JSON.parse(getData(event));
+      const data = parseJson(getData(event));
 
       if (data['type'] == 'MEASURE') {
         if (typeof resize === 'function') {

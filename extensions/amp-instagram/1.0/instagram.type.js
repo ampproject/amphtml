@@ -16,13 +16,12 @@
 
 /** @externs */
 
-/**
- * @typedef {{
+/* @typedef {{
  *   shortcode: string,
  *   captioned: (boolean|undefined),
  *   style: (Object|undefined),
- *   title: (string|undefined)
- *   resize: (function|undefined)
+ *   title: (string|undefined),
+ *   resize: (function(number):*|undefined),
  * }}
  */
-var InstagramProps;
+var InstagramPropsDef;
