@@ -740,7 +740,7 @@ function shallowCloneVNode(element) {
     const {name, value} = attributes[i];
     props[name] = value;
   }
-  return Preact.createElement(element.tagName, props);
+  return Preact.createElement(element.tagName.toLowerCase(), props);
 }
 
 /**
