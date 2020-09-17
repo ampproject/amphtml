@@ -107,7 +107,8 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
         });
       });
 
-      it('should perform polling handshake', function () {
+      // TODO(#30217): De-flake and un-skip.
+      it.skip('should perform polling handshake', function () {
         this.timeout(10000);
 
         const params = serializeQueryString({
