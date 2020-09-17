@@ -63,6 +63,7 @@ function getReplacePlugin() {
   const replacements = [
     createReplacement('IS_ESM', argv.esm || argv.sxg),
     createReplacement('IS_SXG', argv.sxg),
+    createReplacement('IS_FORTESTING', argv.fortesting),
   ];
 
   const experimentConstant = getExperimentConstant();

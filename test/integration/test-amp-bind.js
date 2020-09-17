@@ -52,14 +52,11 @@ describe
           browser = new BrowserController(env.win);
         });
 
-        it.only('[text]', function* () {
+        it('[text]', function* () {
           expect(text.textContent).to.equal('before_text');
           yield browser.wait(200);
           browser.click('#changeText');
-          yield poll('[text]', () => {
-            debugger;
-            return text.textContent === 'after_text'
-          });
+          yield poll('[text]', () => text.textContent === 'after_text');
         });
 
         it('[class]', function* () {
