@@ -209,11 +209,12 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL]: {
     string: 'Pause story',
-    description: 'Label for the pause button on the system layer',
+    description:
+      'Label for a button that pauses the media content on the story',
   },
   [LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL]: {
     string: 'Play story',
-    description: 'Label for the play button on the system layer',
+    description: 'Label for a button that plays the media content on the story',
   },
   [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
     string: 'Share story',
