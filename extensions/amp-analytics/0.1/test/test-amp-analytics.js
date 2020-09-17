@@ -1468,11 +1468,8 @@ describes.realWin(
     describe('Sandbox AMP Analytics Element', () => {
       beforeEach(() => {
         // Unfortunately need to fake sandbox analytics element's parent
-        // to an AMP element.
-        // Set the doc width/height to 1 to trigger visible event.
+        // to an AMP element
         doc.body.classList.add('i-amphtml-element');
-        doc.body.style.minWidth = '1px';
-        doc.body.style.minHeight = '1px';
       });
 
       afterEach(() => {
@@ -1754,10 +1751,6 @@ describes.realWin(
     describe('parentPostMessage', () => {
       let postMessageSpy;
 
-      beforeEach(() => {
-        doc.body.style.minWidth = '1px';
-        doc.body.style.minHeight = '1px';
-      });
       function waitForParentPostMessage(opt_max) {
         if (postMessageSpy.callCount) {
           return Promise.resolve();
