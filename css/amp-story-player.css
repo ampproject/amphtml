@@ -34,9 +34,7 @@ amp-story-player a:not(:first-of-type) {
 }
 
 amp-story-player.i-amphtml-story-player-loaded a:first-of-type {
-  visibility: hidden;
-  width: auto;
-  height: auto;
+  display: none;
 }
 
 amp-story-player::after {
