@@ -104,10 +104,17 @@ AmpVideo['props'] = {
 };
 
 /** @override */
-AmpVideo['passthrough'] = true;
+AmpVideo['layoutSizeDefined'] = true;
 
 /** @override */
-AmpVideo['layoutSizeDefined'] = true;
+AmpVideo['children'] = {
+  'sources': {
+    name: 'children',
+    selector: 'source',
+    single: false,
+    clone: true,
+  },
+};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpVideo);
