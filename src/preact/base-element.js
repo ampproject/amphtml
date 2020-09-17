@@ -15,22 +15,33 @@
  */
 
 import * as Preact from './index';
+import {AmpEvents} from '../amp-events';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {childElementByTag, createElementWithAttributes, matches} from '../dom';
+import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
+import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {startsWith} from '../string';
 import {subscribe} from '../context';
 
 /**
+ * The following combinations are allowed.
+ * - `attr` and (optionally) `type` can be specified when an attribute maps to
+ *   a component prop 1:1.
+ * - `attrs` and `parseAttrs` can be specified when multiple attributes map
+ *   to a single prop.
+ *
  * @typedef {{
- *   attr: string,
+ *   attr: (string|undefined),
  *   type: (string|undefined),
+ *   attrs: (!Array<string>|undefined),
+ *   parseAttrs: ((function(!Element):*)|undefined),
  *   default: *,
  * }}
  */
@@ -57,6 +68,11 @@ const PASSTHROUGH_MUTATION_INIT = {
   characterData: true,
 };
 
+/** @const {!MutationObserverInit} */
+const TEMPLATES_MUTATION_INIT = {
+  childList: true,
+};
+
 /** @const {!JsonObject<string, string>} */
 const SHADOW_CONTAINER_ATTRS = dict({'style': 'display: contents'});
 
@@ -72,6 +88,13 @@ const SIZE_DEFINED_STYLE = {
   'width': '100%',
   'height': '100%',
 };
+
+/**
+ * This is an internal property that marks light DOM nodes that were rendered
+ * by AMP/Preact bridge and thus must be ignored by the mutation observer to
+ * avoid mutate->rerender->mutate loops.
+ */
+const RENDERED_PROP = '__AMP_RENDERED';
 
 /**
  * Wraps a Preact Component in a BaseElement class.
@@ -112,6 +135,9 @@ export class PreactBaseElement extends AMP.BaseElement {
       this.rerender_();
     };
 
+    /** @private {boolean} */
+    this.hydrationPending_ = false;
+
     /** @private {!Deferred|null} */
     this.scheduledRenderDeferred_ = null;
 
@@ -142,13 +168,16 @@ export class PreactBaseElement extends AMP.BaseElement {
       Ctor['passthrough'] || Ctor['passthroughNonEmpty']
         ? PASSTHROUGH_MUTATION_INIT
         : null;
+    const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
     this.observer.observe(this.element, {
       attributes: true,
       ...childrenInit,
       ...passthroughInit,
+      ...templatesInit,
     });
 
     this.defaultProps_ = this.init() || null;
+    this.checkPropsPostMutations();
 
     const useContexts = Ctor['useContexts'];
     if (useContexts.length != 0) {
@@ -235,6 +264,33 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
+   * A callback called immediately or after mutations have been observed. The
+   * implementation can verify if any additional properties need to be mutated
+   * via `mutateProps()` API.
+   * @protected
+   */
+  checkPropsPostMutations() {}
+
+  /**
+   * A callback called to compute props before rendering is run. The properties
+   * computed here and ephemeral and thus should not be persisted via a
+   * `mutateProps()` method.
+   * @param {!JsonObject} unusedProps
+   * @protected
+   */
+  updatePropsForRendering(unusedProps) {}
+
+  /**
+   * A callback called to check whether the element is ready for rendering.
+   * @param {!JsonObject} unusedProps
+   * @return {boolean}
+   * @protected
+   */
+  isReady(unusedProps) {
+    return true;
+  }
+
+  /**
    * @param {!Array<!MutationRecord>} records
    * @private
    */
@@ -242,6 +298,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
     const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
     if (rerender) {
+      this.checkPropsPostMutations();
       this.scheduleRender_();
     }
   }
@@ -271,15 +328,12 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
 
     const Ctor = this.constructor;
+    const isShadow = usesShadowDom(Ctor);
+    const lightDomTag = isShadow ? null : Ctor['lightDomTag'];
 
-    let toHydrate = false;
     if (!this.container_) {
       const doc = this.win.document;
-      if (
-        Ctor['children'] ||
-        Ctor['passthrough'] ||
-        Ctor['passthroughNonEmpty']
-      ) {
+      if (isShadow) {
         devAssert(
           !Ctor['detached'],
           'The AMP element cannot be rendered in detached mode ' +
@@ -290,7 +344,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         let {shadowRoot} = this.element;
         let container = shadowRoot && childElementByTag(shadowRoot, 'c');
         if (container) {
-          toHydrate = true;
+          this.hydrationPending_ = true;
         } else {
           // Create new shadow root.
           shadowRoot = this.element.attachShadow({mode: 'open'});
@@ -321,6 +375,16 @@ export class PreactBaseElement extends AMP.BaseElement {
           shadowRoot.appendChild(serviceSlot);
         }
         this.container_ = container;
+      } else if (lightDomTag) {
+        this.container_ = this.element;
+        const replacement =
+          childElementByTag(this.container_, lightDomTag) ||
+          doc.createElement(lightDomTag);
+        replacement[RENDERED_PROP] = true;
+        if (Ctor['layoutSizeDefined']) {
+          replacement.classList.add('i-amphtml-fill-content');
+        }
+        this.container_.appendChild(replacement);
       } else {
         const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
@@ -336,9 +400,8 @@ export class PreactBaseElement extends AMP.BaseElement {
     // `contextValues` until available.
     const useContexts = Ctor['useContexts'];
     const contextValues = this.contextValues_;
-    const isReady =
-      toHydrate || useContexts.length == 0 || contextValues != null;
-    if (!isReady) {
+    const isContextReady = useContexts.length == 0 || contextValues != null;
+    if (!isContextReady) {
       return;
     }
 
@@ -350,6 +413,10 @@ export class PreactBaseElement extends AMP.BaseElement {
       this.defaultProps_
     );
     this.updatePropsForRendering(props);
+
+    if (!this.isReady(props)) {
+      return;
+    }
 
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
@@ -368,10 +435,28 @@ export class PreactBaseElement extends AMP.BaseElement {
     // Add AmpContext with renderable/playable proeprties.
     const v = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
 
-    if (toHydrate) {
+    if (this.hydrationPending_) {
+      this.hydrationPending_ = false;
       hydrate(v, this.container_);
     } else {
-      render(v, this.container_);
+      const replacement = lightDomTag
+        ? childElementByTag(this.container_, lightDomTag)
+        : null;
+      if (replacement) {
+        replacement[RENDERED_PROP] = true;
+      }
+      render(v, this.container_, replacement);
+    }
+
+    // Dispatch the DOM_UPDATE event when rendered in the light DOM.
+    if (!isShadow) {
+      this.mutateElement(() => {
+        this.element.dispatchEvent(
+          createCustomEvent(this.win, AmpEvents.DOM_UPDATE, /* detail */ null, {
+            bubbles: true,
+          })
+        );
+      });
     }
 
     const deferred = this.scheduledRenderDeferred_;
@@ -380,12 +465,6 @@ export class PreactBaseElement extends AMP.BaseElement {
       this.scheduledRenderDeferred_ = null;
     }
   }
-
-  /**
-   * @param {!JsonObject} unusedProps
-   * @protected
-   */
-  updatePropsForRendering(unusedProps) {}
 
   /**
    * @protected
@@ -427,6 +506,16 @@ PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
 PreactBaseElement['layoutSizeDefined'] = false;
 
 /**
+ * The tag name, e.g. "div", "span", time" that should be used as a replacement
+ * node for Preact rendering. This is the node that Preact will diff with
+ * with specified, instead of rendering a new node. Only applicable to light-DOM
+ * mapping styles.
+ *
+ * @protected {string}
+ */
+PreactBaseElement['lightDomTag'] = '';
+
+/**
  * An override to specify an exact className prop to Preact.
  *
  * @protected {string}
@@ -452,6 +541,13 @@ PreactBaseElement['passthrough'] = false;
  * @protected {boolean}
  */
 PreactBaseElement['passthroughNonEmpty'] = false;
+
+/**
+ * Whether this element uses "templates" system.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['usesTemplate'] = false;
 
 /**
  * The CSS for shadow stylesheets.
@@ -482,22 +578,41 @@ PreactBaseElement['children'] = null;
 
 /**
  * @param {typeof PreactBaseElement} Ctor
+ * @return {boolean}
+ */
+function usesShadowDom(Ctor) {
+  return !!(
+    Ctor['children'] ||
+    Ctor['passthrough'] ||
+    Ctor['passthroughNonEmpty']
+  );
+}
+
+/**
+ * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
  * @param {{current: ?}} ref
  * @param {!JsonObject|null|undefined} defaultProps
  * @return {!JsonObject}
  */
 function collectProps(Ctor, element, ref, defaultProps) {
-  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
-
   const {
+    'children': childrenDefs,
     'className': className,
     'layoutSizeDefined': layoutSizeDefined,
-    'props': propDefs,
+    'lightDomTag': lightDomTag,
     'passthrough': passthrough,
     'passthroughNonEmpty': passthroughNonEmpty,
-    'children': childrenDefs,
+    'props': propDefs,
   } = Ctor;
+
+  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
+
+  // Light DOM.
+  if (lightDomTag) {
+    props[RENDERED_PROP] = true;
+    props['as'] = lightDomTag;
+  }
 
   // Class.
   if (className) {
@@ -506,17 +621,28 @@ function collectProps(Ctor, element, ref, defaultProps) {
 
   // Common styles.
   if (layoutSizeDefined) {
-    props['style'] = SIZE_DEFINED_STYLE;
     props['containSize'] = true;
+    if (usesShadowDom(Ctor)) {
+      props['style'] = SIZE_DEFINED_STYLE;
+    } else {
+      props['className'] =
+        `i-amphtml-fill-content ${className || ''}`.trim() || null;
+    }
   }
 
   // Props.
   for (const name in propDefs) {
-    const def = propDefs[name];
-    const value =
-      def.type == 'boolean'
-        ? element.hasAttribute(def.attr)
-        : element.getAttribute(def.attr);
+    const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
+    let value;
+    if (def.attr) {
+      value =
+        def.type == 'boolean'
+          ? element.hasAttribute(def.attr)
+          : element.getAttribute(def.attr);
+    } else if (def.parseAttrs) {
+      devAssert(def.attrs);
+      value = def.parseAttrs(element);
+    }
     if (value == null) {
       if (def.default !== undefined) {
         props[name] = def.default;
@@ -525,6 +651,8 @@ function collectProps(Ctor, element, ref, defaultProps) {
       const v =
         def.type == 'number'
           ? parseFloat(value)
+          : def.type == 'date'
+          ? getDate(value)
           : def.type == 'Element'
           ? // TBD: what's the best way for element referencing compat between
             // React and AMP? Currently modeled as a Ref.
@@ -625,7 +753,8 @@ function shouldMutationForNodeListBeRerendered(nodeList) {
       // Ignore service elements, e.g. `<i-amphtml-svc>` or
       // `<x slot="i-amphtml-svc">`.
       if (
-        startsWith(node.tagName, 'I-AMPHTML') ||
+        node[RENDERED_PROP] ||
+        startsWith(node.tagName, 'I-') ||
         node.getAttribute('slot') == 'i-amphtml-svc'
       ) {
         continue;
@@ -647,11 +776,18 @@ function shouldMutationForNodeListBeRerendered(nodeList) {
 function shouldMutationBeRerendered(Ctor, m) {
   const {type} = m;
   if (type == 'attributes') {
+    // Check whether this is a templates attribute.
+    if (Ctor['usesTemplate'] && m.attributeName == 'template') {
+      return true;
+    }
     // Check if the attribute is mapped to one of the properties.
     const props = Ctor['props'];
     for (const name in props) {
-      const def = props[name];
-      if (m.attributeName == def.attr) {
+      const def = /** @type {!AmpElementPropDef} */ (props[name]);
+      if (
+        m.attributeName == def.attr ||
+        (def.attrs && def.attrs.includes(devAssert(m.attributeName)))
+      ) {
         return true;
       }
     }
