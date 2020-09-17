@@ -21,7 +21,7 @@
  *   shortcode: string,
  *   captioned: (boolean|undefined),
  *   style: (Object|undefined),
- *   alt: (string|undefined)
+ *   title: (string|undefined)
  *   resize: (function|undefined)
  * }}
  */
