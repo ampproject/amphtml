@@ -163,7 +163,7 @@ module.exports = {
     }
 
     function isPrivateName(node) {
-      return node.name.endsWith('_');
+      return (node.name || node.value).endsWith('_');
     }
 
     return {

@@ -166,6 +166,7 @@ async function compileAllJs(options) {
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
+    doBuildJs(jsBundles, 'custom-elements-polyfill.js', options),
     // doBuildJs(jsBundles, 'alp.max.js', options),
     // doBuildJs(jsBundles, 'examiner.max.js', options),
     // doBuildJs(jsBundles, 'ww.max.js', options),

@@ -41,6 +41,17 @@ exports.jsBundles = {
     destDir: './build/',
     minifiedDestDir: './build/',
   },
+  'custom-elements-polyfill.js': {
+    srcDir: 'src/polyfills/',
+    srcFilename: 'custom-elements-entrypoint.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      toName: 'custom-elements-polyfill.max.js',
+      includePolyfills: false,
+      minifiedName: 'custom-elements-polyfill.js',
+    },
+  },
   'alp.max.js': {
     srcDir: './ads/alp/',
     srcFilename: 'install-alp.js',
@@ -1098,13 +1109,13 @@ exports.extensionBundles = [
     name: 'amp-timeago',
     version: '0.1',
     latestVersion: '0.1',
-    options: {wrappers: wrappers.bento},
     type: TYPES.MISC,
   },
   {
     name: 'amp-timeago',
     version: '1.0',
     latestVersion: '0.1',
+    options: {wrapper: wrappers.bento},
     type: TYPES.MISC,
   },
   {

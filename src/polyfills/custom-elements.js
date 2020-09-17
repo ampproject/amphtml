@@ -107,7 +107,9 @@ function isPatched(win) {
  */
 function rethrowAsync(error) {
   setTimeout(() => {
-    self.__AMP_REPORT_ERROR(error);
+    if (self.__AMP_REPORT_ERROR) {
+      self.__AMP_REPORT_ERROR(error);
+    }
     throw error;
   });
 }

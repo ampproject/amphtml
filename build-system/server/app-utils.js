@@ -105,6 +105,10 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       hostName + '/dist/amp.js'
     );
     file = file.replace(
+      /https:\/\/cdn\.ampproject\.org\/custom-elements-polyfill\.js/g,
+      hostName + '/dist/custom-elements-polyfill.max.js'
+    );
+    file = file.replace(
       /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
       hostName + '/dist/amp-shadow.js'
     );
@@ -129,6 +133,10 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     file = file.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
       hostName + '/dist/v0.js'
+    );
+    file = file.replace(
+      /https:\/\/cdn\.ampproject\.org\/custom-elements-polyfill\.js/g,
+      hostName + '/dist/custom-elements-polyfill.js'
     );
     file = file.replace(
       /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,

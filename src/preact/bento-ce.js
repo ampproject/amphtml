@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {applyStaticLayout} from '../layout';
+import {initLogConstructor} from '../log';
 import {toWin} from '../types';
 
 /** @type {typeof AMP.BaseElement} */
@@ -22,22 +24,6 @@ let BaseElement;
 if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
 } else {
-  class CustomElement extends HTMLElement {
-    /** */
-    constructor() {
-      super();
-
-      /** @const {!CeBaseElement} */
-      this.implementation = new CeBaseElement(this);
-    }
-
-    /** */
-    connectedCallback() {
-      this.implementation.buildCallback();
-      this.implementation.layoutCallback();
-    }
-  }
-
   class CeBaseElement {
     /**
      * @param {!Element} element
@@ -51,11 +37,27 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
     }
 
     /**
+     * @param {typeof CeBaseElement} BaseElement
      * @return {typeof HTMLElement}
-     * @export
      */
-    static 'CustomElement'() {
-      return CustomElement;
+    static 'CustomElement'(BaseElement) {
+      initLogConstructor();
+      return class CustomElement extends HTMLElement {
+        /** */
+        constructor() {
+          super();
+
+          /** @const {!CeBaseElement} */
+          this.implementation = new BaseElement(this);
+        }
+
+        /** */
+        connectedCallback() {
+          applyStaticLayout(this);
+          this.implementation.buildCallback();
+          this.implementation.layoutCallback();
+        }
+      };
     }
 
     /**
