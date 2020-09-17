@@ -67,7 +67,7 @@ const getMetadata = (player, props) =>
 
 /**
  * @param {!VideoWrapperProps} props
- * @param {?} ref
+ * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function VideoWrapperWithRef(
