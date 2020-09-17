@@ -1855,9 +1855,8 @@ describes.sandboxed(
 
       const vsyncTasks = [];
       vsyncApi = {
-        runPromise: (task) => {
+        runPromise: async (task) => {
           vsyncTasks.push(task);
-          return Promise.resolve();
         },
         mutate: (mutator) => {
           vsyncTasks.push({mutate: mutator});
