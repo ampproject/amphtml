@@ -31,7 +31,6 @@ const COMMON_CHROME_FLAGS = [
   '--disable-extensions',
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
-  '--auto-open-devtools-for-tabs',
 ];
 
 if (argv.debug) {
