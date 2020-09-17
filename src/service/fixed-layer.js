@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Animation} from '../animation';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {

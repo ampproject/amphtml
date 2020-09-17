@@ -187,7 +187,7 @@ module.exports = {
     'no-lone-blocks': 2,
     'no-native-reassign': 2,
     'no-redeclare': 2,
-    'no-restricted-globals': [2, 'error', 'event'],
+    'no-restricted-globals': [2, 'error', 'event', 'Animation'],
     'no-script-url': 2,
     'no-self-compare': 2,
     'no-sequences': 2,
