@@ -57,11 +57,11 @@
   display: flex !important;
   flex-direction: row !important;
   justify-content: flex-end !important;
-  padding-top: 6px;
+  padding-top: 6px !important;
 }
 
 [desktop] .i-amphtml-story-system-layer-buttons {
-  padding: 8px 4px 0;
+  padding: 8px 4px 0 !important;
 }
 
 .i-amphtml-story-button {
@@ -78,7 +78,7 @@
 }
 
 [desktop] .i-amphtml-story-button {
-  margin: 0 4px;
+  margin: 0 4px !important;
   background-size: auto !important;
 }
 
