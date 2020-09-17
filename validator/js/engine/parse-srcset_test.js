@@ -246,6 +246,21 @@ describe('Srcset parseSrcset', () => {
     expect(result.success).toBe(false);
   });
 
+  it('should reject width or pixel density that are zero', () => {
+    let result = parse_srcset.parseSrcset('image.png 0x');
+
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image.png 1x, image2.png 0.0x');
+
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image.png 0w');
+
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image.png 1x, image2.png 000w');
+
+    expect(result.success).toBe(false);
+  });
+
   it('should reject empty srcsets', () => {
     let result = parse_srcset.parseSrcset('');
 
@@ -263,6 +278,18 @@ describe('Srcset parseSrcset', () => {
 
   it('should reject no comma between sources', () => {
     const result = parse_srcset.parseSrcset('image1 100w image2 50w');
+
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject decimal values for widths', () => {
+    let result = parse_srcset.parseSrcset('image.png 500.0w');
+
+    expect(result.success).toBe(false);
+    let result = parse_srcset.parseSrcset('image.png 1.5w');
+
+    expect(result.success).toBe(false);
+    let result = parse_srcset.parseSrcset('image.png 0.1w');
 
     expect(result.success).toBe(false);
   });
