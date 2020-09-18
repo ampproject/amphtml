@@ -58,6 +58,7 @@
   flex-direction: row !important;
   justify-content: flex-end !important;
   padding-top: 6px !important;
+  box-sizing: border-box !important;
 }
 
 [desktop] .i-amphtml-story-system-layer-buttons {
