@@ -15,8 +15,7 @@
  */
 
 import * as Preact from '../../src/preact';
-import {date, number, text, withKnobs} from '@storybook/addon-knobs';
-import {storiesOf} from '@storybook/preact';
+import {number, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -45,11 +44,7 @@ export const responsiveWidthBound = () => {
           }
         `}
       </style>
-      <amp-layout
-        layout="responsive"
-        width={width}
-        height={height}
-      >
+      <amp-layout layout="responsive" width={width} height={height}>
         <div className="content">
           {width}:{height}
         </div>
@@ -86,11 +81,7 @@ export const responsiveHeightBound = () => {
         `}
       </style>
       <div class="container">
-        <amp-layout
-          layout="responsive"
-          width={width}
-          height={height}
-        >
+        <amp-layout layout="responsive" width={width} height={height}>
           <div class="content">
             {width}:{height}
           </div>
