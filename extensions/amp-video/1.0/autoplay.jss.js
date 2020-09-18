@@ -36,7 +36,7 @@ const eqCol = {
   marginRight: '1px',
   position: 'relative',
   '& > div': {
-    animationName: '$amp-video-eq-animation',
+    animationName: '$eq-animation',
     animationTimingFunction: 'linear',
     animationIterationCount: 'infinite',
     animationDirection: 'alternate',
@@ -57,7 +57,7 @@ const JSS = {
   eq,
   eqCol,
   eqPlaying,
-  '@keyframes amp-video-eq-animation': {
+  '@keyframes eq-animation': {
     '0%': {transform: 'translateY(100%)'},
     '100%': {transform: 'translateY(0)'},
   },
