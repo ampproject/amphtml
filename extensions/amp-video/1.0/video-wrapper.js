@@ -27,6 +27,7 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
+import {useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
   useLayoutEffect,
@@ -35,7 +36,6 @@ import {
   useState,
 } from '../../../src/preact';
 import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
-import {useStyles} from './autoplay.jss';
 
 /**
  * @param {?{getMetadata: (function():?JsonObject|undefined)}} player
@@ -173,9 +173,7 @@ function Autoplay({
   play,
   pause,
 }) {
-  // TODO(alanorozco): We can't have multiple useStyles here,
-  // so maybe this component should be autoplay.js
-  const classes = useStyles();
+  const classes = useAutoplayStyles();
 
   useMountEffect(() => {
     const observer = new IntersectionObserver(
@@ -219,7 +217,7 @@ function Autoplay({
  * @return {!PreactDef.Renderable}
  */
 const AutoplayIconContent = once(() => {
-  const classes = useStyles();
+  const classes = useAutoplayStyles();
   return [1, 2, 3, 4].map((i) => (
     <div className={`${classes.eqCol} amp-video-eq-col`} key={i}>
       <div className={`amp-video-eq-filler ${classes[`eq-${i}-1`]}`}></div>
