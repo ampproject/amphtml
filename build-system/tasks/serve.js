@@ -208,4 +208,5 @@ serve.flags = {
   esm: '  Serve ESM JS (requires the use of --new_server)',
   cdn: '  Serve current prod JS',
   rtv: '  Serve JS from the RTV provided',
+  coverage: '  Serve instrumented code to collect coverage info',
 };
