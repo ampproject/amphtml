@@ -50,7 +50,7 @@ const eqCol = {
 };
 
 const eqPlaying = {
-  '& > .amp-video-eq-col > div': {animationPlayState: 'running'},
+  '& > div > div': {animationPlayState: 'running'},
 };
 
 const JSS = {
