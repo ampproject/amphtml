@@ -22,10 +22,14 @@ describes.sandboxed('Instagram preact component v1.0', {}, () => {
   it('Renders', () => {
     const props = {
       'shortcode': 'B8QaZW4AQY_',
-      'width': 500,
-      'height': 600,
+      'style': {'width': 500, 'height': 600},
     };
-    const wrapper = mount(<Instagram {...props} />);
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const wrapper = mount(<Instagram {...props} />, {attachTo: el});
     expect(wrapper.props().shortcode).to.equal('B8QaZW4AQY_');
+    expect(wrapper.find('iframe').prop('src')).to.equal(
+      'https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12'
+    );
   });
 });
