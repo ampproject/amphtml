@@ -713,7 +713,11 @@ function collectProps(Ctor, element, ref, defaultProps) {
           name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
           clone
+<<<<<<< HEAD
             ? shallowCloneVNode(childElement)
+=======
+            ? createShallowVNodeCopy(childElement)
+>>>>>>> 84d47a142ef6f671fd4ed17ef89f693d02fa33b6
             : createSlot(
                 childElement,
                 childElement.getAttribute('slot') ||
@@ -729,6 +733,7 @@ function collectProps(Ctor, element, ref, defaultProps) {
 }
 
 /**
+<<<<<<< HEAD
  * Clones an Element into a VNode.
  * @param {!Element} element
  * @return {!PreactDef.Renderable}
@@ -741,6 +746,27 @@ function shallowCloneVNode(element) {
     props[name] = value;
   }
   return Preact.createElement(element.tagName.toLowerCase(), props);
+=======
+ * Copies an Element into a VNode representation.
+ * (Interpretation into VNode is not recursive, so it excludes children.)
+ * @param {!Element} element
+ * @return {!PreactDef.Renderable}
+ */
+function createShallowVNodeCopy(element) {
+  const props = {
+    // Setting `key` to an object is fine in Preact, but not React.
+    'key': element,
+  };
+  // We need to read element.attributes and element.attributes.length only once,
+  // since reading a live NamedNodeMap repeatedly is expensive.
+  const {attributes, localName} = element;
+  const {length} = attributes;
+  for (let i = 0; i < length; i++) {
+    const {name, value} = attributes[i];
+    props[name] = value;
+  }
+  return Preact.createElement(localName, props);
+>>>>>>> 84d47a142ef6f671fd4ed17ef89f693d02fa33b6
 }
 
 /**
