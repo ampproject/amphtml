@@ -32,6 +32,7 @@ import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 
 /** @const {string} */
@@ -536,40 +537,92 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
-    userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
-    const owners = Services.ownersForDoc(this.element);
-    owners.setOwner(ampImgEl, this.element);
-    owners.scheduleLayout(this.element, ampImgEl);
-    return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => {
-        return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
-      })
-      .then(
-        () => {
-          this.renderer_ = new Renderer(this.canvas_);
-          const img = this.checkImageReSize_(
-            dev().assertElement(this.element.querySelector('img'))
+    const ampVideoEl = this.element.querySelector('amp-video');
+    userAssert(
+      ampImgEl || ampVideoEl,
+      'amp-story-360 must contain an amp-img or amp-video element.'
+    );
+    this.renderer_ = new Renderer(this.canvas_);
+
+    if (ampVideoEl) {
+      return whenUpgradedToCustomElement(ampVideoEl)
+        .then(() => {
+          return ampVideoEl.signals().whenSignal(CommonSignals.LOAD_END);
+        })
+        .then(() => {
+          console.log('testing', ampVideoEl);
+          listen(
+            ampVideoEl,
+            'playing',
+            () => {
+              const videoRenderLoop = () => {
+                // Getting video on each loop since the video elelmenet can change.
+                this.renderer_.setImage(
+                  dev().assertElement(ampVideoEl.querySelector('video'))
+                );
+                this.renderer_.render(true);
+                requestAnimationFrame(videoRenderLoop);
+              };
+              videoRenderLoop();
+              // this.mutateElement(() => videoRenderLoop());
+
+              this.renderer_.setImageOrientation(
+                this.sceneHeading_,
+                this.scenePitch_,
+                this.sceneRoll_
+              );
+              this.renderer_.resize();
+              if (this.orientations_.length < 1) {
+                return;
+              }
+              this.renderInitialPosition_();
+              this.isReady_ = true;
+              if (this.isPlaying_) {
+                this.animate_();
+              }
+            },
+            () => {
+              user().error(TAG, 'Failed to load the amp-video.');
+            }
           );
-          this.renderer_.setImageOrientation(
-            this.sceneHeading_,
-            this.scenePitch_,
-            this.sceneRoll_
-          );
-          this.renderer_.setImage(img);
-          this.renderer_.resize();
-          if (this.orientations_.length < 1) {
-            return;
+        });
+    }
+
+    if (ampImgEl) {
+      const owners = Services.ownersForDoc(this.element);
+      owners.setOwner(ampImgEl, this.element);
+      owners.scheduleLayout(this.element, ampImgEl);
+      return whenUpgradedToCustomElement(ampImgEl)
+        .then(() => {
+          return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
+        })
+        .then(
+          () => {
+            this.renderer_ = new Renderer(this.canvas_);
+            const img = this.checkImageReSize_(
+              dev().assertElement(this.element.querySelector('img'))
+            );
+            this.renderer_.setImageOrientation(
+              this.sceneHeading_,
+              this.scenePitch_,
+              this.sceneRoll_
+            );
+            this.renderer_.setImage(img);
+            this.renderer_.resize();
+            if (this.orientations_.length < 1) {
+              return;
+            }
+            this.renderInitialPosition_();
+            this.isReady_ = true;
+            if (this.isPlaying_) {
+              this.animate_();
+            }
+          },
+          () => {
+            user().error(TAG, 'Failed to load the amp-img.');
           }
-          this.renderInitialPosition_();
-          this.isReady_ = true;
-          if (this.isPlaying_) {
-            this.animate_();
-          }
-        },
-        () => {
-          user().error(TAG, 'Failed to load the amp-img.');
-        }
-      );
+        );
+    }
   }
 
   /** @private */
