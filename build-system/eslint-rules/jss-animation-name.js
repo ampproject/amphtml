@@ -51,7 +51,7 @@ module.exports = function (context) {
           message:
             `Use string literals for ${keyName} values.` +
             (isAnimation
-              ? '\n(Independent animation-* properties (e.g. animation-delay) are exempt from this rule, except for animation-name.)'
+              ? '\n(animation-* properties other than animation-name are exempt from this rule.)'
               : ''),
         });
         return;
