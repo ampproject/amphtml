@@ -33,8 +33,13 @@ describe
       fixture = await createFixtureIframe('test/fixtures/images.html', 500);
     });
 
+<<<<<<< HEAD
     it('should show the body in image test', async () => {
       await expectBodyToBecomeVisible(fixture.win, timeout);
+=======
+    it.only('should show the body in image test', () => {
+      return expectBodyToBecomeVisible(fixture.win, timeout);
+>>>>>>> 3911d0c00 (temp)
     });
 
     it('should be present', async () => {

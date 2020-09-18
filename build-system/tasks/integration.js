@@ -28,6 +28,8 @@ const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
 const {cyan, yellow} = require('ansi-colors');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
+const {buildNewServer} = require('../server/typescript-compile');
+let htmlTransform;
 
 const INTEGRATION_FIXTURES = [
   './test/fixtures/**/*.html',
