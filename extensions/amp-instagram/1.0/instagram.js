@@ -48,9 +48,7 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
         if (typeof resize === 'function') {
           resize(data['details']['height']);
         } else {
-          setHeightStyle({
-            'height': data['details']['height'],
-          });
+          setHeightStyle(data['details']['height']);
         }
         setOpacity(1);
       }
@@ -64,7 +62,7 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
   });
 
   return (
-    <ContainWrapper style={{...style, ...heightStyle}} layout size paint>
+    <ContainWrapper style={{...style, 'height': heightStyle}} layout size paint>
       <iframe
         ref={iframeRef}
         src={
