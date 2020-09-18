@@ -197,7 +197,11 @@ function Autoplay({
   return (
     <>
       {displayIcon && (
-        <div className={`${classes.eq} ${playing ? classes.eqPlaying : ''}`}>
+        <div
+          className={`amp-video-eq ${classes.eq} ${
+            playing ? classes.eqPlaying : ''
+          }`}
+        >
           <AutoplayIconContent />
         </div>
       )}
@@ -219,9 +223,9 @@ function Autoplay({
 const AutoplayIconContent = once(() => {
   const classes = useAutoplayStyles();
   return [1, 2, 3, 4].map((i) => (
-    <div className={`${classes.eqCol} amp-video-eq-col`} key={i}>
-      <div className={`amp-video-eq-filler ${classes[`eq-${i}-1`]}`}></div>
-      <div className={`amp-video-eq-filler ${classes[`eq-${i}-2`]}`}></div>
+    <div className={`${classes.eqCol}`} key={i}>
+      <div className={`f${i}-1`}></div>
+      <div className={`f${i}-2`}></div>
     </div>
   ));
 });
