@@ -84,7 +84,7 @@ const eqCol = {
 
 const eqPlaying = {
   // These are same as `eqCol`
-  '& > div::before, & > div::after': {animationPlayState: 'running'},
+  '& > div:before, & > div:after': {animationPlayState: 'running'},
 };
 
 const JSS = {
