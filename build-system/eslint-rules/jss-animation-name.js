@@ -45,7 +45,11 @@ module.exports = function (context) {
       if (typeof node.value.value !== 'string') {
         context.report({
           node: node.value,
-          message: `Use string literals for ${keyName} values.`,
+          message:
+            `Use string literals for ${keyName} values.` +
+            (keyName == 'animation'
+              ? '\n(Independent animation-* properties (e.g. animation-delay) are exempt from this rule, except for animation-name.)'
+              : ''),
         });
         return;
       }
