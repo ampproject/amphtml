@@ -121,6 +121,7 @@
     "gulp-watch": "5.0.1",
     "gzip-size": "5.1.1",
     "html-minifier": "4.0.0",
+    "istanbul-middleware": "0.2.2",
     "jest-dot-reporter": "1.0.12",
     "jest-silent-reporter": "0.2.1",
     "jison": "0.4.18",
