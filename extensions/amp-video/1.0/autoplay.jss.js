@@ -47,48 +47,48 @@ const eqCol = {
     willChange: 'transform',
     animationPlayState: 'paused',
   },
-  '& > .f1-1': {
-    animationDuration: '0.3s',
-    transform: 'translateY(60%)',
-  },
-  '& > .f1-2': {
-    animationDuration: '0.45s',
-    transform: 'translateY(60%)',
-  },
-  '& > .f2-1': {
-    animationDuration: '0.5s',
-    transform: 'translateY(30%)',
-  },
-  '& > .f2-2': {
-    animationDuration: '0.4s',
-    transform: 'translateY(30%)',
-  },
-  '& > .f3-1': {
-    animationDuration: '0.3s',
-    transform: 'translateY(70%)',
-  },
-  '& > .f3-2': {
-    animationDuration: '0.35s',
-    transform: 'translateY(70%)',
-  },
-  '& > .f4-1': {
-    animationDuration: '0.4s',
-    transform: 'translateY(50%)',
-  },
-  '& > .f4-2': {
-    animationDuration: '0.25s',
-    transform: 'translateY(50%)',
-  },
 };
 
 const eqPlaying = {
-  '& > div > div': {animationPlayState: 'running'},
+  '& > .amp-video-eq-col > div': {animationPlayState: 'running'},
 };
 
 const JSS = {
   eq,
   eqCol,
   eqPlaying,
+  'eq-1-1': {
+    animationDuration: '0.3s',
+    transform: 'translateY(60%)',
+  },
+  'eq-1-2': {
+    animationDuration: '0.45s',
+    transform: 'translateY(60%)',
+  },
+  'eq-2-1': {
+    animationDuration: '0.5s',
+    transform: 'translateY(30%)',
+  },
+  'eq-2-2': {
+    animationDuration: '0.4s',
+    transform: 'translateY(30%)',
+  },
+  'eq-3-1': {
+    animationDuration: '0.3s',
+    transform: 'translateY(70%)',
+  },
+  'eq-3-2': {
+    animationDuration: '0.35s',
+    transform: 'translateY(70%)',
+  },
+  'eq-4-1': {
+    animationDuration: '0.4s',
+    transform: 'translateY(50%)',
+  },
+  'eq-4-2': {
+    animationDuration: '0.25s',
+    transform: 'translateY(50%)',
+  },
   '@keyframes eq-animation': {
     '0%': {transform: 'translateY(100%)'},
     '100%': {transform: 'translateY(0)'},

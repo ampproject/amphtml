@@ -218,10 +218,21 @@ function Autoplay({
  */
 const AutoplayIconContent = once(() => {
   const classes = useAutoplayStyles();
+  // Mapping for DCE
+  const fillerClasses = {
+    '11': classes['eq-1-1'],
+    '12': classes['eq-1-2'],
+    '21': classes['eq-2-1'],
+    '22': classes['eq-2-2'],
+    '31': classes['eq-3-1'],
+    '32': classes['eq-3-2'],
+    '41': classes['eq-4-1'],
+    '42': classes['eq-4-2'],
+  };
   return [1, 2, 3, 4].map((i) => (
     <div className={`${classes.eqCol}`} key={i}>
-      <div className={`f${i}-1`}></div>
-      <div className={`f${i}-2`}></div>
+      <div className={fillerClasses[`${i}1`]}></div>
+      <div className={fillerClasses[`${i}2`]}></div>
     </div>
   ));
 });
