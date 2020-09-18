@@ -89,7 +89,7 @@ function VideoWrapperWithRef(
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying] = useState(false);
   const [metadata, setMetadata] = useState(null);
-  const [userInteracted, setUserInteracted] = useState(!autoplay);
+  const [hasUserInteracted, setHasUserInteracted] = useState(!autoplay);
 
   const wrapperRef = useRef(null);
   const playerRef = useRef(null);
@@ -116,6 +116,11 @@ function VideoWrapperWithRef(
     });
   }, [readyDeferred]);
 
+  const userInteracted = useCallback(() => {
+    setMuted(false);
+    setHasUserInteracted(true);
+  }, []);
+
   useLayoutEffect(() => {
     if (mediasession && playing && metadata) {
       setMediaSession(window, metadata, play, pause);
@@ -137,13 +142,13 @@ function VideoWrapperWithRef(
           requestFullscreen,
 
           // Non-standard
+          userInteracted,
           mute: () => setMuted(true),
           unmute: () => {
-            if (userInteracted) {
+            if (hasUserInteracted) {
               setMuted(false);
             }
           },
-          userInteracted: () => setUserInteracted(true),
         },
         {
           // Standard HTMLMediaElement/Element
@@ -155,13 +160,14 @@ function VideoWrapperWithRef(
         }
       ),
     [
+      play,
+      pause,
+      requestFullscreen,
+      userInteracted,
+      hasUserInteracted,
       autoplay,
       controls,
-      pause,
-      play,
-      requestFullscreen,
       rest.loop,
-      userInteracted,
     ]
   );
 
@@ -178,7 +184,7 @@ function VideoWrapperWithRef(
         {...rest}
         ref={playerRef}
         muted={muted}
-        controls={controls && (!autoplay || userInteracted)}
+        controls={controls && (!autoplay || hasUserInteracted)}
         onCanPlay={readyDeferred.resolve}
         onLoadedMetadata={() => {
           if (mediasession) {
@@ -193,7 +199,7 @@ function VideoWrapperWithRef(
       >
         {children}
       </Component>
-      {autoplay && !userInteracted && (
+      {autoplay && !hasUserInteracted && (
         <Autoplay
           playing={playing}
           displayIcon={!noaudio && muted}
@@ -201,10 +207,7 @@ function VideoWrapperWithRef(
           play={play}
           pause={pause}
           displayOverlay={controls}
-          onOverlayClick={() => {
-            setMuted(false);
-            setUserInteracted(true);
-          }}
+          onOverlayClick={userInteracted}
         />
       )}
     </ContainWrapper>
