@@ -37,6 +37,7 @@ module.exports = function (context) {
       if (!/\.jss.js$/.test(context.getFilename())) {
         return;
       }
+      // Could be {key: val} identifier or {'key': val} string
       const keyName = node.key.name || node.key.value;
       if (keyName !== 'animationName' && keyName !== 'animation') {
         return;
