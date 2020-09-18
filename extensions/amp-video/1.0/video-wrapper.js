@@ -197,11 +197,7 @@ function Autoplay({
   return (
     <>
       {displayIcon && (
-        <div
-          className={`amp-video-eq ${classes.eq} ${
-            playing ? classes.eqPlaying : ''
-          }`}
-        >
+        <div className={`${classes.eq} ${playing ? classes.eqPlaying : ''}`}>
           <AutoplayIconContent />
         </div>
       )}
