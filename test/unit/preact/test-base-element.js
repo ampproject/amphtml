@@ -546,12 +546,20 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           env.sandbox.match({
             cloned: [
               env.sandbox.match({
-                type: 'DIV',
-                props: {cloned: '', id: 'cloned1'},
+                type: 'div',
+                key: element.querySelector('#cloned1'),
+                props: {
+                  cloned: '',
+                  id: 'cloned1',
+                },
               }),
               env.sandbox.match({
-                type: 'DIV',
-                props: {cloned: '', id: 'cloned2'},
+                type: 'div',
+                key: element.querySelector('#cloned2'),
+                props: {
+                  cloned: '',
+                  id: 'cloned2',
+                },
               }),
             ],
           })

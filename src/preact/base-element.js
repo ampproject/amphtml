@@ -734,14 +734,14 @@ function collectProps(Ctor, element, ref, defaultProps) {
  * @return {!PreactDef.Renderable}
  */
 function shallowCloneVNode(element) {
-  const {attributes} = element;
+  // const {attributes} = element;
   const props = {
     // Setting `key` to an object is fine in Preact, but not React.
     'key': element,
   };
-  const {length} = attributes;
+  const {length} = element.attributes;
   for (let i = 0; i < length; i++) {
-    const {name, value} = attributes[i];
+    const {name, value} = element.attributes[i];
     props[name] = value;
   }
   return Preact.createElement(element.localName, props);
