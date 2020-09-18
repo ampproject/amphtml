@@ -39,7 +39,10 @@ module.exports = function (context) {
       }
       // Could be {key: val} identifier or {'key': val} string
       const keyName = node.key.name || node.key.value;
-      if (keyName !== 'animationName' && keyName !== 'animation') {
+      const isAnimation = keyName === 'animation';
+      const isAnimationName =
+        keyName === 'animationName' || keyName === 'animation-name';
+      if (!isAnimationName && !isAnimation) {
         return;
       }
       if (typeof node.value.value !== 'string') {
@@ -47,20 +50,20 @@ module.exports = function (context) {
           node: node.value,
           message:
             `Use string literals for ${keyName} values.` +
-            (keyName === 'animation'
+            (isAnimation
               ? '\n(Independent animation-* properties (e.g. animation-delay) are exempt from this rule, except for animation-name.)'
               : ''),
         });
         return;
       }
       if (
-        (keyName === 'animationName' && !/^\$/.test(node.value.value)) ||
-        (keyName === 'animation' && !/(^| )\$/.test(node.value.value))
+        (isAnimationName && !/^\$/.test(node.value.value)) ||
+        (isAnimation && !/(^| )\$/.test(node.value.value))
       ) {
         context.report({
           node: node.value,
           message: `The animation name in property ${keyName} should start with $${
-            keyName === 'animationName' ? ` (e.g. $${node.value.value})` : ''
+            isAnimationName ? ` (e.g. $${node.value.value})` : ''
           }.\nThis scopes it to a @keyframes rule present in this module.`,
         });
       }
