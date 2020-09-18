@@ -639,7 +639,10 @@ describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
     resetShouldUseAspectRatioCssForTesting();
   });
 
-  describe('aspect-ratio not supported', function () {
+  describe
+    .configure()
+    .enableIe()
+    .run('aspect-ratio not supported', function () {
     before(function () {
       if (CSS.supports('aspect-ratio: 1/1')) {
         this.skipTest();
@@ -672,7 +675,10 @@ describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
     });
   });
 
-  describe('aspect-ratio supported', function () {
+  describe
+    .configure()
+    .enableIe()
+    .run('aspect-ratio supported', function () {
     before(function () {
       if (!CSS.supports('aspect-ratio: 1/1')) {
         this.skipTest();
