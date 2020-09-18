@@ -55,7 +55,9 @@ module.exports = {
         ) {
           context.report({
             loc: node.value.loc,
-            message: `The animation name in property ${keyName} should start with $. This scopes it to a keyframes rule present in this module.`,
+            message:
+              `The animation name in property ${keyName} should start with $.\n` +
+              'This scopes it to a keyframes rule present in this module.',
             fix:
               keyName !== 'animationName'
                 ? undefined
