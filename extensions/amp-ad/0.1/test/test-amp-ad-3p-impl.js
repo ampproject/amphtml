@@ -279,44 +279,12 @@ describes.realWin(
       });
 
       describe('after layout', () => {
-        let xOriginIframeHandler;
-
-        beforeEach(() => {
-          return ad3p.layoutCallback().then(() => {
-            xOriginIframeHandler = ad3p.xOriginIframeHandler_;
-          });
+        beforeEach(async () => {
+          await ad3p.layoutCallback();
         });
 
-        it('should require unlayout if iframe is not pausable', () => {
-          env.sandbox
-            ./*OK*/ stub(xOriginIframeHandler, 'isPausable')
-            .returns(false);
+        it('should require unlayout', () => {
           expect(ad3p.unlayoutOnPause()).to.be.true;
-        });
-
-        it('should NOT require unlayout if iframe is pausable', () => {
-          window.sandbox
-            ./*OK*/ stub(xOriginIframeHandler, 'isPausable')
-            .returns(true);
-          expect(ad3p.unlayoutOnPause()).to.be.false;
-        });
-
-        it('should pause iframe', () => {
-          const stub = window.sandbox./*OK*/ stub(
-            xOriginIframeHandler,
-            'setPaused'
-          );
-          ad3p.pauseCallback();
-          expect(stub).to.be.calledOnce.calledWith(true);
-        });
-
-        it('should resume iframe', () => {
-          const stub = window.sandbox./*OK*/ stub(
-            xOriginIframeHandler,
-            'setPaused'
-          );
-          ad3p.resumeCallback();
-          expect(stub).to.be.calledOnce.calledWith(false);
         });
       });
     });

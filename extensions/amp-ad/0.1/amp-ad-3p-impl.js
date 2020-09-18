@@ -450,23 +450,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   unlayoutOnPause() {
-    return (
-      !this.xOriginIframeHandler_ || !this.xOriginIframeHandler_.isPausable()
-    );
-  }
-
-  /** @override  */
-  pauseCallback() {
-    if (this.xOriginIframeHandler_) {
-      this.xOriginIframeHandler_.setPaused(true);
-    }
-  }
-
-  /** @override  */
-  resumeCallback() {
-    if (this.xOriginIframeHandler_) {
-      this.xOriginIframeHandler_.setPaused(false);
-    }
+    return !this.xOriginIframeHandler_;
   }
 
   /** @override  */
