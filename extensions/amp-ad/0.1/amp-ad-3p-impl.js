@@ -450,7 +450,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   unlayoutOnPause() {
-    return !this.xOriginIframeHandler_;
+    return true;
   }
 
   /** @override  */
