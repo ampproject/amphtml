@@ -739,8 +739,8 @@ function createShallowVNodeCopy(element) {
     // Setting `key` to an object is fine in Preact, but not React.
     'key': element,
   };
-  // We need to read element.attributes and element.attributes.length once
-  // before the loop, since reading a live NamedNodeMap repeatedly is expensive.
+  // We need to read element.attributes and element.attributes.length only once,
+  // since reading a live NamedNodeMap repeatedly is expensive.
   const {attributes, localName} = element;
   const {length} = attributes;
   for (let i = 0; i < length; i++) {
