@@ -713,7 +713,7 @@ function collectProps(Ctor, element, ref, defaultProps) {
           name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
           clone
-            ? shallowCloneVNode(childElement)
+            ? createShallowVNodeCopy(childElement)
             : createSlot(
                 childElement,
                 childElement.getAttribute('slot') ||
@@ -729,11 +729,12 @@ function collectProps(Ctor, element, ref, defaultProps) {
 }
 
 /**
- * Clones an Element into a VNode.
+ * Copies an Element into a VNode representation.
+ * (Interpretation into VNode is not recursive, so it excludes children.)
  * @param {!Element} element
  * @return {!PreactDef.Renderable}
  */
-function shallowCloneVNode(element) {
+function createShallowVNodeCopy(element) {
   const props = {
     // Setting `key` to an object is fine in Preact, but not React.
     'key': element,
