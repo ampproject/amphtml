@@ -802,7 +802,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         intersectionRatio: 0,
         intersectionRect: null,
         isVisible: false,
-        boundingClientRectTemp: null, // TODO(#29618) Clean up
+        boundingClientRect: null,
         listeners: [],
       };
       this.trackedElements_[id] = trackedElement;
@@ -855,7 +855,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     }
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
-    return trackedElement && trackedElement.boundingClientRectTemp;
+    return trackedElement && trackedElement.boundingClientRect;
   }
 
   /**
@@ -955,7 +955,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       trackedElement.isVisible = isVisible;
       trackedElement.intersectionRatio = intersectionRatio;
       trackedElement.intersectionRect = intersectionRect;
-      trackedElement.boundingClientRectTemp = boundingClientRect;
+      trackedElement.boundingClientRect = boundingClientRect;
       for (let i = 0; i < trackedElement.listeners.length; i++) {
         trackedElement.listeners[i](
           trackedElement.isVisible ? intersectionRatio : 0
