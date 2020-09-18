@@ -54,7 +54,7 @@ module.exports = function (context) {
         (keyName === 'animation' && !/(^| )\$/.test(node.value.value))
       ) {
         context.report({
-          loc: node.value.loc,
+          node: node.value,
           message: `The animation name in property ${keyName} should start with $${
             keyName === 'animationName' ? ` (e.g. $${node.value.value})` : ''
           }.\nThis scopes it to a @keyframes rule present in this module.`,
