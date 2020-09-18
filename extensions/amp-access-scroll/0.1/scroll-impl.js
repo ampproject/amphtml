@@ -218,7 +218,7 @@ class ScrollContentBlocker {
     Services.xhrFor(this.ampdoc_.win)
       .fetchJson('https://block.scroll.com/check.json')
       .then(
-        () => false,
+        (response) => response.json().then((json) => json['dns'] === true),
         (e) => this.blockedByScrollApp_(e.message)
       )
       .then((blockedByScrollApp) => {
