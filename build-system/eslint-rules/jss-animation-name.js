@@ -29,46 +29,34 @@
  *   };
  * @return {!Object}
  */
-module.exports = {
-  meta: {fixable: 'code'},
-  create: function (context) {
-    return {
-      Property(node) {
-        if (!/\.jss.js$/.test(context.getFilename())) {
-          return;
-        }
-        const keyName = node.key.name || node.key.value;
-        if (keyName !== 'animationName' && keyName !== 'animation') {
-          return;
-        }
-        if (typeof node.value.value !== 'string') {
-          context.report({
-            loc: node.value.loc,
-            message: `Use string literals for ${node.key.name} values.`,
-          });
-          return;
-        }
-        if (
-          (keyName === 'animationName' && !/^\$/.test(node.value.value)) ||
-          (keyName === 'animation' && node.value.value.indexOf('$') < 0)
-        ) {
-          context.report({
-            loc: node.value.loc,
-            message:
-              `The animation name in property ${keyName} should start with $.\n` +
-              'This scopes it to a keyframes rule present in this module.',
-            fix:
-              keyName !== 'animationName'
-                ? undefined
-                : (fixer) => {
-                    return fixer.replaceText(
-                      node.value,
-                      `'$${node.value.value}'`
-                    );
-                  },
-          });
-        }
-      },
-    };
-  },
+module.exports = function (context) {
+  return {
+    Property(node) {
+      if (!/\.jss.js$/.test(context.getFilename())) {
+        return;
+      }
+      const keyName = node.key.name || node.key.value;
+      if (keyName !== 'animationName' && keyName !== 'animation') {
+        return;
+      }
+      if (typeof node.value.value !== 'string') {
+        context.report({
+          loc: node.value.loc,
+          message: `Use string literals for ${node.key.name} values.`,
+        });
+        return;
+      }
+      if (
+        (keyName === 'animationName' && !/^\$/.test(node.value.value)) ||
+        (keyName === 'animation' && node.value.value.indexOf('$') < 0)
+      ) {
+        context.report({
+          loc: node.value.loc,
+          message: `The animation name in property ${keyName} should start with $${
+            keyName === 'animationName' ? ` (e.g. $${node.value.value})` : ''
+          }.\nThis scopes it to a @keyframes rule present in this module.`,
+        });
+      }
+    },
+  };
 };
