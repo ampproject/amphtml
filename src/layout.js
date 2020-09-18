@@ -21,9 +21,11 @@
 
 import {dev, devAssert, userAssert} from './log';
 import {htmlFor} from './static-template';
-import {isFiniteNumber} from './types';
+import {isExperimentOn} from './experiments';
+import {isFiniteNumber, toWin} from './types';
 import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
+
 import {transparentPng} from './utils/img';
 
 /**
@@ -115,6 +117,12 @@ export const LOADING_ELEMENTS_ = {
  * @private @const {!RegExp}
  */
 const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
+
+/**
+ * Whether aspect-ratio CSS can be used to implement responsive layouts.
+ * @type {?boolean}
+ */
+let aspectRatioCssCache = null;
 
 /**
  * @param {string} s
@@ -509,14 +517,22 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
   } else if (layout == Layout.FIXED_HEIGHT) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
-    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-    sizer.setAttribute('slot', 'i-amphtml-svc');
-    setStyles(sizer, {
-      paddingTop:
-        (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
-    });
-    element.insertBefore(sizer, element.firstChild);
-    element.sizerElement = sizer;
+    if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
+      setStyle(
+        element,
+        'aspect-ratio',
+        `${getLengthNumeral(width)}/${getLengthNumeral(height)}`
+      );
+    } else {
+      const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+      sizer.setAttribute('slot', 'i-amphtml-svc');
+      setStyles(sizer, {
+        paddingTop:
+          (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
+      });
+      element.insertBefore(sizer, element.firstChild);
+      element.sizerElement = sizer;
+    }
   } else if (layout == Layout.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
     // trick Note a naked svg won't work becasue other thing expect the
@@ -565,4 +581,27 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // in the future.
   element.setAttribute('i-amphtml-layout', layout);
   return layout;
+}
+
+/**
+ * Whether aspect-ratio CSS can be used to implement responsive layouts.
+ *
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function shouldUseAspectRatioCss(win) {
+  if (aspectRatioCssCache == null) {
+    aspectRatioCssCache =
+      (isExperimentOn(win, 'layout-aspect-ratio-css') &&
+        win.CSS &&
+        win.CSS.supports &&
+        win.CSS.supports('aspect-ratio: 1/1')) ||
+      false;
+  }
+  return aspectRatioCssCache;
+}
+
+/** @visibleForTesting */
+export function resetShouldUseAspectRatioCssForTesting() {
+  aspectRatioCssCache = null;
 }
