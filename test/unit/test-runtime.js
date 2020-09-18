@@ -538,7 +538,6 @@ describes.fakeWin(
       self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
-      toggleExperiment(win, 'version-locking', true);
       function addExisting(index) {
         const s = document.createElement('script');
         const name = 'amp-test-element' + index;

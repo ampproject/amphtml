@@ -33,7 +33,6 @@
   "remove-task-timeout": 0,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
-  "version-locking": 1,
   "amp-ad-no-center-css": 0,
   "analytics-chunks": 1,
   "render-on-idle-fix": 1
