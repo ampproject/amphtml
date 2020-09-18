@@ -16,6 +16,7 @@
 
 import {Instagram} from './instagram';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const {string} */
@@ -24,11 +25,11 @@ const TAG = 'amp-instagram';
 class AmpInstagram extends PreactBaseElement {
   /** @override */
   init() {
-    return {
-      resize: (height) => {
+    return dict({
+      'resize': (height) => {
         this.forceChangeHeight(height);
       },
-    };
+    });
   }
 
   /** @override */

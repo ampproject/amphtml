@@ -27,10 +27,13 @@ import {useRef, useState} from '../../../src/preact';
  */
 export function Instagram({shortcode, captioned, style, title, resize}) {
   const iframeRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(style['height'] || 0);
+  const [heightStyle, setHeightStyle] = useState(null);
   const [opacity, setOpacity] = useState(0);
 
   useMountEffect(() => {
+    /**
+     * @param {Event} event
+     */
     function handleMessage(event) {
       if (
         event.origin != 'https://www.instagram.com' ||
@@ -46,7 +49,7 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
           resize(data['details']['height']);
         } else {
           setHeightStyle({
-            'height': Math.max(heightStyle, data['details']['height']),
+            'height': data['details']['height'],
           });
         }
         setOpacity(1);

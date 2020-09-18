@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-/** @externs */
+import * as Preact from '../../../../src/preact';
+import {Instagram} from '../instagram';
+import {dict} from '../../../../src/utils/object';
+import {mount} from 'enzyme';
 
-/** @typedef {{
- *   shortcode: string,
- *   captioned: (boolean|undefined),
- *   style: (Object|undefined),
- *   title: (string|undefined),
- *   resize: (function(number):*|undefined),
- * }}
- */
-var InstagramPropsDef;
+describes.sandboxed('Instagram preact component v1.0', {}, () => {
+  it('Renders', () => {
+    const props = dict({
+      'shortcode': 'B8QaZW4AQY_',
+      'width': 500,
+      'height': 600,
+    });
+    const wrapper = mount(<Instagram {...props} />);
+    expect(wrapper.props().shortcode).to.equal('B8QaZW4AQY_');
+  });
+});
