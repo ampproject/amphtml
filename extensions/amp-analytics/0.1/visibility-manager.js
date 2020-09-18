@@ -680,7 +680,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
      *   element: !Element,
      *   intersectionRatio: number,
      *   isVisible: boolean,
-     *   boundingClientRectTemp: ?../../../src/layout-rect.LayoutRectDef,
+     *   boundingClientRect: ?../../../src/layout-rect.LayoutRectDef,
      *   listeners: !Array<function(number)>
      * }>}
      */
@@ -906,7 +906,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         Number(intersection.width),
         Number(intersection.height)
       );
-      // TODO(#29618): Remove after ampim investigation
       let {boundingClientRect} = change;
       boundingClientRect =
         boundingClientRect &&
@@ -926,7 +925,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /**
-   * TODO(#29618): Clean up boundingClientRect after ampim investigation
    * @param {!Element} target
    * @param {number} intersectionRatio
    * @param {!../../../src/layout-rect.LayoutRectDef} intersectionRect
