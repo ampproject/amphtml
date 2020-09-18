@@ -27,7 +27,7 @@ import {useRef, useState} from '../../../src/preact';
  */
 export function Instagram({shortcode, captioned, style, title, resize}) {
   const iframeRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(null);
+  const [heightStyle, setHeightStyle] = useState(style['height']);
   const [opacity, setOpacity] = useState(0);
 
   useMountEffect(() => {
