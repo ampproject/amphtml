@@ -102,12 +102,12 @@ module.exports = function ({types: t, template}) {
         const id = path.scope.generateUidIdentifier('classes');
         path.scope.push({
           id,
-          init: template.expression.ast`JSON.parse(${t.stringLiteral(
+          init: template.expression.ast`${
             JSON.stringify({
               ...sheet.classes,
               'CSS': transformCssSync(sheet.toString()),
             })
-          )})`,
+          }`,
         });
 
         path.replaceWith(template.expression.ast`(() => ${id})`);
