@@ -44,7 +44,7 @@ module.exports = function (context) {
       }
       if (typeof node.value.value !== 'string') {
         context.report({
-          loc: node.value.loc,
+          node: node.value,
           message: `Use string literals for ${keyName} values.`,
         });
         return;
