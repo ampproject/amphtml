@@ -25,8 +25,7 @@
  *   };
  * Good:
  *   const JSS = {
- *     foo: {animationName: 'bar-local'},
- *     '@keyframes bar-local': {},
+ *     foo: {animationName: '$bar-local'},
  *   };
  * @return {!Object}
  */
