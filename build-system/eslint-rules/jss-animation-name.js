@@ -22,10 +22,12 @@
  * Bad:
  *   const JSS = {
  *     foo: {animationName: 'bar-global'},
+ *     foo: {animation: '0.5s bar-global infinite'},
  *   };
  * Good:
  *   const JSS = {
  *     foo: {animationName: '$bar-local'},
+ *     foo: {animation: '0.5s $bar-local infinite'},
  *   };
  * @return {!Object}
  */
