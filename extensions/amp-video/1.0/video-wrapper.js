@@ -222,14 +222,8 @@ const AutoplayIconContent = once(() => {
   const classes = useStyles();
   return [1, 2, 3, 4].map((i) => (
     <div className={`${classes.eqCol} amp-video-eq-col`} key={i}>
-      <div
-        style={{animationName: classes['amp-video-eq-animation']}}
-        className={`amp-video-eq-filler ${classes[`eq-${i}-1`]}`}
-      ></div>
-      <div
-        style={{animationName: classes['amp-video-eq-animation']}}
-        className={`amp-video-eq-filler ${classes[`eq-${i}-2`]}`}
-      ></div>
+      <div className={`amp-video-eq-filler ${classes[`eq-${i}-1`]}`}></div>
+      <div className={`amp-video-eq-filler ${classes[`eq-${i}-2`]}`}></div>
     </div>
   ));
 });
