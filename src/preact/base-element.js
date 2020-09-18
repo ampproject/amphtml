@@ -738,12 +738,13 @@ function shallowCloneVNode(element) {
     // Setting `key` to an object is fine in Preact, but not React.
     'key': element,
   };
-  const {length} = element.attributes;
+  const {attributes, localName} = element;
+  const {length} = attributes;
   for (let i = 0; i < length; i++) {
-    const {name, value} = element.attributes[i];
+    const {name, value} = attributes[i];
     props[name] = value;
   }
-  return Preact.createElement(element.localName, props);
+  return Preact.createElement(localName, props);
 }
 
 /**
