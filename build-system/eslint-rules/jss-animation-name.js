@@ -50,7 +50,7 @@ module.exports = function (context) {
       }
       if (
         (keyName === 'animationName' && !/^\$/.test(node.value.value)) ||
-        (keyName === 'animation' && node.value.value.indexOf('$') < 0)
+        (keyName === 'animation' && !/(^| )\$/.test(node.value.value))
       ) {
         context.report({
           loc: node.value.loc,
