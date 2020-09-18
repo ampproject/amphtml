@@ -16,43 +16,28 @@
 
 import {PostHTML} from 'posthtml';
 import {URL} from 'url';
-import {isValidScript, ScriptNode} from '../utilities/script';
-import {CDNURLToLocalDistURL} from '../utilities/cdn';
+import {isJsonScript, isValidScript, toExtension, ScriptNode} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
-import minimist from 'minimist';
-const argv = minimist(process.argv.slice(2));
 
 /**
  * @param head
  * @param script
- * @param compiled 
  */
-function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: boolean): void {
-  let modulePath;
-  if (argv.compiled || compiled) {
-    modulePath = CDNURLToLocalDistURL(
-      new URL(script.attrs.src || ''),
-      undefined,
-      '.mjs'
-    ).toString();
-    script.attrs.src = modulePath.replace('.mjs', '.js');
-  }
-  else {
-    const urlName = script.attrs.src.toString();
-    modulePath = urlName.replace('.js', '.mjs');
-  }
-
-  const insert: ScriptNode = {
-    ...script,
+function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode): void {
+  const modulePath = toExtension(new URL(nomoduleScript.attrs.src), '.mjs').toString();
+  const moduleScript : ScriptNode = {
+    ...nomoduleScript,
     attrs: {
-      ...script.attrs,
+      ...nomoduleScript.attrs,
       src: modulePath,
       type: 'module',
     },
   };
-  delete insert.attrs.nomodule;
+  delete moduleScript.attrs.nomodule;
 
-  (head.content || []).push(insert);
+  const content = head.content || [];
+  const nomoduleIdx = content.indexOf(nomoduleScript);
+  content.splice(nomoduleIdx + 1, 0, moduleScript);
 }
 
 /**
@@ -62,13 +47,17 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: b
 export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node): void {
     let head: PostHTML.Node | undefined = undefined;
-    let compiled: boolean = options.compiled || false;
     const scripts: Array<ScriptNode> = [];
     tree.walk(node => {
       if (node.tag === 'head') {
         head = node;
       }
-      if (!isValidScript(node)) {
+
+      if (isJsonScript(node)) {
+        return node;
+      }
+
+      if (!isValidScript(node, options.looseScriptSrcCheck)) {
         return node;
       }
 
@@ -84,7 +73,7 @@ export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void 
     }
 
     for (const script of scripts) {
-      appendModuleScript(head, script, compiled);
+      appendModuleScript(head, script);
     }
   }
 }
