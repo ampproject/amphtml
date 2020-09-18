@@ -45,10 +45,11 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
       const data = parseJson(getData(event));
 
       if (data['type'] == 'MEASURE') {
+        const height = data['details']['height'];
         if (typeof resize === 'function') {
-          resize(data['details']['height']);
+          resize(height);
         } else {
-          setHeightStyle(data['details']['height']);
+          setHeightStyle(height);
         }
         setOpacity(1);
       }
