@@ -66,7 +66,7 @@ const getMetadata = (player, props) =>
   );
 
 /**
- * @param {!VideoWrapperProps} props
+ * @param {!VideoDef.WrapperProps} props
  * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
  */
@@ -89,7 +89,7 @@ function VideoWrapperWithRef(
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying] = useState(false);
   const [metadata, setMetadata] = useState(null);
-  const [userInteracted, setUserInteracted] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(!autoplay);
 
   const wrapperRef = useRef(null);
   const playerRef = useRef(null);
@@ -128,22 +128,41 @@ function VideoWrapperWithRef(
 
   useImperativeHandle(
     ref,
-    () => ({
-      // Standard HTMLMediaElement/Element
-      play,
-      pause,
-      requestFullscreen,
+    () =>
+      Object.defineProperties(
+        {
+          // Standard HTMLMediaElement/Element
+          play,
+          pause,
+          requestFullscreen,
 
-      // Non-standard
-      mute: () => setMuted(true),
-      unmute: () => {
-        if (userInteracted) {
-          setMuted(false);
+          // Non-standard
+          mute: () => setMuted(true),
+          unmute: () => {
+            if (userInteracted) {
+              setMuted(false);
+            }
+          },
+          userInteracted: () => setUserInteracted(true),
+        },
+        {
+          // Standard HTMLMediaElement/Element
+          currentTime: {get: () => playerRef.current.currentTime},
+          duration: {get: () => playerRef.current.duration},
+          autoplay: {get: () => autoplay},
+          controls: {get: () => controls},
+          loop: {get: () => !!rest.loop},
         }
-      },
-      userInteracted: () => setUserInteracted(true),
-    }),
-    [pause, play, requestFullscreen, userInteracted]
+      ),
+    [
+      autoplay,
+      controls,
+      pause,
+      play,
+      requestFullscreen,
+      rest.loop,
+      userInteracted,
+    ]
   );
 
   return (
@@ -193,7 +212,7 @@ function VideoWrapperWithRef(
 }
 
 /**
- * @param {!VideoAutoplayProps} props
+ * @param {!VideoDef.AutoplayProps} props
  * @return {PreactDef.Renderable}
  */
 function Autoplay({

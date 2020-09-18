@@ -16,14 +16,34 @@
 
 /** @externs */
 
-/**
- * @typedef {function():PreactDef.Renderable|string}
- */
-var VideoPlayerDef;
+/** @const */
+var VideoDef = {};
 
 /**
  * @typedef {{
- *   component: (!VideoPlayerDef|undefined),
+ *   play: function():undefined,
+ *   pause: function():undefined,
+ *   requestFullscreen: function():undefined,
+ *   mute: function():undefined,
+ *   unmute: function():undefined,
+ *   userInteracted: function():undefined,
+ *   currentTime: (number|undefined),
+ *   duration: (number|undefined),
+ *   autoplay: boolean,
+ *   controls: boolean,
+ *   loop: boolean,
+ * }}
+ */
+VideoDef.Api;
+
+/**
+ * @typedef {function():PreactDef.Renderable|string}
+ */
+VideoDef.PlayerComponentDef;
+
+/**
+ * @typedef {{
+ *   component: (!VideoDef.PlayerComponentDef|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  *   autoplay: (boolean|undefined),
  *   controls: (boolean|undefined),
@@ -35,7 +55,7 @@ var VideoPlayerDef;
  *   artwork: (string|undefined),
  * }}
  */
-var VideoWrapperProps;
+VideoDef.WrapperProps;
 
 /**
  * @typedef {{
@@ -48,4 +68,4 @@ var VideoWrapperProps;
  *   pause: !Function,
  * }}
  */
-var VideoAutoplayProps;
+VideoDef.AutoplayProps;
