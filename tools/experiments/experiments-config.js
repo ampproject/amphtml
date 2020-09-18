@@ -294,4 +294,9 @@ export const EXPERIMENTS = [
     name: 'Move ads placement into layoutCallback',
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
+  {
+    id: 'layout-aspect-ratio-css',
+    name: 'Responsive layouts implemented via aspect-ratio CSS',
+    spec: 'https://github.com/ampproject/amphtml/issues/30291',
+  },
 ];
