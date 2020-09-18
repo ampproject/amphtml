@@ -31,6 +31,9 @@ const TAG = 'CHUNK';
  */
 let deactivated = /nochunking=1/.test(self.location.hash);
 let allowLongTasks = false;
+const supportsInputPending =
+  'scheduling' in self.navigator &&
+  'isInputPending' in self.navigator.scheduling;
 
 /**
  * @const {!Promise}
@@ -449,13 +452,16 @@ class Chunks {
    * @private
    */
   executeAsap_(idleDeadline) {
-    // If we've spent over 5 millseconds executing the
+    // If the user-agent supports isInputPending, use it to break to a macro task as necessary.
+    // Otherwise If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
     if (
       !allowLongTasks &&
       this.bodyIsVisible_ &&
-      this.durationOfLastExecution_ > 5
+      (supportsInputPending
+        ? self.navigator.scheduling.isInputPending()
+        : this.durationOfLastExecution_ > 5)
     ) {
       this.durationOfLastExecution_ = 0;
       this.requestMacroTask_();
