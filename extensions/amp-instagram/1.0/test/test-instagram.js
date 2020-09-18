@@ -16,16 +16,15 @@
 
 import * as Preact from '../../../../src/preact';
 import {Instagram} from '../instagram';
-import {dict} from '../../../../src/utils/object';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Instagram preact component v1.0', {}, () => {
   it('Renders', () => {
-    const props = dict({
+    const props = {
       'shortcode': 'B8QaZW4AQY_',
       'width': 500,
       'height': 600,
-    });
+    };
     const wrapper = mount(<Instagram {...props} />);
     expect(wrapper.props().shortcode).to.equal('B8QaZW4AQY_');
   });
