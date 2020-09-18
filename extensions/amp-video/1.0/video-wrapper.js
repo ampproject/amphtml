@@ -27,7 +27,7 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {useAutoplayStyles} from './autoplay.jss';
+import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
   useLayoutEffect,
