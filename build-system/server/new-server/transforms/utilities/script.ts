@@ -16,7 +16,7 @@
 
 import posthtml from 'posthtml';
 import {URL} from 'url';
-import {extname} from 'path';
+import {format, extname, parse} from 'path';
 import {VALID_CDN_ORIGIN} from './cdn';
 import {parse, format} from 'path';
 
@@ -25,6 +25,7 @@ export interface ScriptNode extends posthtml.Node {
   attrs: {
     [key: string]: string | undefined;
     src: string;
+    type?: string;
   };
 }
 
