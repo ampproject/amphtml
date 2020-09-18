@@ -299,6 +299,15 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
+    // Set up renderer
+    this.renderer_ = new Renderer(this.canvas_);
+    this.renderer_.setImageOrientation(
+      this.sceneHeading_,
+      this.scenePitch_,
+      this.sceneRoll_
+    );
+    this.renderer_.resize();
+
     // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
@@ -542,7 +551,6 @@ export class AmpStory360 extends AMP.BaseElement {
       ampImgEl || ampVideoEl,
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
-    this.renderer_ = new Renderer(this.canvas_);
 
     if (ampVideoEl) {
       return whenUpgradedToCustomElement(ampVideoEl)
@@ -550,28 +558,14 @@ export class AmpStory360 extends AMP.BaseElement {
           return ampVideoEl.signals().whenSignal(CommonSignals.LOAD_END);
         })
         .then(() => {
-          console.log('testing', ampVideoEl);
           listen(
             ampVideoEl,
             'playing',
             () => {
-              const videoRenderLoop = () => {
-                // Getting video on each loop since the video elelmenet can change.
-                this.renderer_.setImage(
-                  dev().assertElement(ampVideoEl.querySelector('video'))
-                );
-                this.renderer_.render(true);
-                requestAnimationFrame(videoRenderLoop);
-              };
-              videoRenderLoop();
-              // this.mutateElement(() => videoRenderLoop());
-
-              this.renderer_.setImageOrientation(
-                this.sceneHeading_,
-                this.scenePitch_,
-                this.sceneRoll_
+              this.renderer_.setImage(
+                dev().assertElement(this.element.querySelector('video'))
               );
-              this.renderer_.resize();
+
               if (this.orientations_.length < 1) {
                 return;
               }
@@ -598,17 +592,10 @@ export class AmpStory360 extends AMP.BaseElement {
         })
         .then(
           () => {
-            this.renderer_ = new Renderer(this.canvas_);
             const img = this.checkImageReSize_(
               dev().assertElement(this.element.querySelector('img'))
             );
-            this.renderer_.setImageOrientation(
-              this.sceneHeading_,
-              this.scenePitch_,
-              this.sceneRoll_
-            );
             this.renderer_.setImage(img);
-            this.renderer_.resize();
             if (this.orientations_.length < 1) {
               return;
             }
@@ -657,32 +644,51 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   animate_() {
+    const videoEl = this.element.querySelector('video');
+
     if (!this.animation_) {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
-    const loop = () => {
-      if (!this.isPlaying_ || !this.animation_ || this.gyroscopeControls_) {
+
+    const renderLoop = () => {
+      if (
+        !this.isPlaying_ ||
+        (!this.animation_ && !videoEl) ||
+        (this.gyroscopeControls_ && !videoEl)
+      ) {
         this.renderer_.render(false);
         return;
       }
+
       const nextOrientation = this.animation_.getNextOrientation();
-      if (nextOrientation) {
-        // mutateElement causes inaccurate animation speed here, so we use rAF.
-        this.win.requestAnimationFrame(() => {
+
+      // mutateElement causes inaccurate animation speed here, so we use rAF.
+      this.win.requestAnimationFrame(() => {
+        if (nextOrientation) {
           this.renderer_.setCamera(
             nextOrientation.rotation,
             nextOrientation.scale
           );
-          this.renderer_.render(true);
-          loop();
-        });
-      } else {
-        this.isPlaying_ = false;
-        this.renderer_.render(false);
-        return;
-      }
+        }
+
+        if (videoEl) {
+          this.renderer_.setImage(
+            dev().assertElement(this.element.querySelector('video'))
+          );
+        }
+
+        if (!nextOrientation && !videoEl) {
+          this.isPlaying_ = false;
+          this.renderer_.render(false);
+          return;
+        }
+
+        this.renderer_.render(true);
+        renderLoop();
+      });
     };
-    this.mutateElement(() => loop());
+
+    this.mutateElement(() => renderLoop());
   }
 
   /** @public */
