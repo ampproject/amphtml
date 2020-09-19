@@ -72,6 +72,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      */
     this.iframe_ = null;
 
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
+    this.viewport_ = null;
+
     /** @type {?Object} */
     this.config = null;
 
@@ -136,6 +139,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
+
+    /**
+     * Whether this is a sticky ad unit.
+     * @private {boolean}
+     */
+    this.isStickyAd_ = false;
   }
 
   /** @override */
@@ -184,7 +193,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.viewport_ = this.getViewport();
     this.type_ = this.element.getAttribute('type');
+    this.isStickyAd_ = this.element.hasAttribute('sticky');
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
     dev().info(TAG_3P_IMPL, `upgradeDelay ${this.type_}: ${upgradeDelayMs}`);
 
@@ -233,7 +244,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * Set sidekick ads
    */
   maybeSetStyleForSticky_() {
-    if (this.element.hasAttribute('sticky')) {
+    if (this.isStickyAd_) {
       setStyles(this.element, {
         position: 'fixed',
         bottom: '0',
@@ -361,7 +372,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return this.layoutPromise_;
     }
     userAssert(
-      !this.isInFixedContainer_ || this.element.hasAttribute('sticky'),
+      !this.isInFixedContainer_ || this.isStickyAd_,
       '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s unless it has sticky attribute',
       this.element
@@ -376,11 +387,22 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
 
+    // For sticky ad only: must wait for scrolling event before loading the ad
+    const scrollPromise = this.isStickyAd_
+      ? new Promise((resolve) => {
+          const unlisten = this.viewport_.onScroll(() => {
+            resolve();
+            unlisten();
+          });
+        })
+      : Promise.resolve(null);
+
     this.layoutPromise_ = Promise.all([
       getAdCid(this),
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
+      scrollPromise,
     ]).then((consents) => {
       // Use JsonObject to preserve field names so that ampContext can access
       // values with name
