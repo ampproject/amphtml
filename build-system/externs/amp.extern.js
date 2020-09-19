@@ -207,7 +207,6 @@ window.AMP.ampdoc;
 window.AMP.config;
 window.AMP.config.urls;
 window.AMP.BaseElement;
-window.AMP.BaseTemplate;
 window.AMP.registerElement;
 window.AMP.registerTemplate;
 window.AMP.registerServiceForDoc;
@@ -643,8 +642,6 @@ AMP.AmpAdUIHandler = class {
    */
   constructor(baseInstance) {}
 };
-
-AMP.BaseTemplate;
 
 AMP.RealTimeConfigManager;
 
