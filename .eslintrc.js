@@ -128,6 +128,7 @@ module.exports = {
     'local/html-template': 2,
     'local/is-experiment-on': 2,
     'local/json-configuration': 2,
+    'local/jss-animation-name': 2,
     'local/no-array-destructuring': 2,
     'local/no-arrow-on-register-functions': 2,
     'local/no-bigint': 2,
