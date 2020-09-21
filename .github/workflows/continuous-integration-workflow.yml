@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: CocoaPod init
+        run: pod init
       - name: CocoaPod Install
         run: pod install
 
