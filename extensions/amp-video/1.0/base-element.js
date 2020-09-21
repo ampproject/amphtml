@@ -23,18 +23,18 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 export class VideoBaseElement extends PreactBaseElement {
   /** @override */
   init() {
-    this.registerApiAction_(this, 'play', (api) => api.play());
-    this.registerApiAction_(this, 'pause', (api) => api.pause());
-    this.registerApiAction_(this, 'mute', (api) => api.mute());
-    this.registerApiAction_(this, 'unmute', (api) => api.unmute());
+    this.registerApiAction_('play', (api) => api.play());
+    this.registerApiAction_('pause', (api) => api.pause());
+    this.registerApiAction_('mute', (api) => api.mute());
+    this.registerApiAction_('unmute', (api) => api.unmute());
 
     // Ugly that this action has three names, but:
     // - requestFullscreen for consistency with Element.requestFullscreen
     // - fullscreenenter / fullscreen are for backwards compatibility
     const requestFullscreen = (api) => api.requestFullscreen();
-    this.registerApiAction_(this, 'requestFullscreen', requestFullscreen);
-    this.registerApiAction_(this, 'fullscreenenter', requestFullscreen);
-    this.registerApiAction_(this, 'fullscreen', requestFullscreen);
+    this.registerApiAction_('requestFullscreen', requestFullscreen);
+    this.registerApiAction_('fullscreenenter', requestFullscreen);
+    this.registerApiAction_('fullscreen', requestFullscreen);
 
     return dict({'component': this.constructor['PlayerComponent']});
   }
