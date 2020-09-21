@@ -225,12 +225,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'pausable-iframe',
-    name: 'Use iframe freezing instead of recreating iframes.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24110',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
-  },
-  {
     id: 'adsense-ad-size-optimization',
     name:
       'Per publisher server side settings for changing the ad size ' +
