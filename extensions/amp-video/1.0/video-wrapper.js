@@ -66,7 +66,7 @@ const getMetadata = (player, props) =>
   );
 
 /**
- * @param {!VideoDef.WrapperProps} props
+ * @param {!VideoWrapperDef.Props} props
  * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
  */
@@ -79,7 +79,8 @@ function VideoWrapperWithRef(
     mediasession = true,
     className,
     style,
-    children,
+    sources,
+    loop,
     ...rest
   },
   ref
@@ -98,23 +99,30 @@ function VideoWrapperWithRef(
   // <source>s change.
   const readyDeferred = useMemo(() => new Deferred(), []);
 
-  const play = useCallback(() => {
-    readyDeferred.promise.then(() => {
-      playerRef.current.play();
-    });
-  }, [readyDeferred]);
+  const play = useCallback(
+    () =>
+      readyDeferred.promise.then(() => {
+        const couldBePromise = playerRef.current.play();
+        if (couldBePromise && couldBePromise.catch) {
+          couldBePromise.catch(() => {
+            // Empty catch to prevent useless unhandled rejection logging.
+            // play() can fail for benign reasons like pausing.
+          });
+        }
+      }),
+    [readyDeferred]
+  );
 
-  const pause = useCallback(() => {
-    readyDeferred.promise.then(() => {
-      playerRef.current.pause();
-    });
-  }, [readyDeferred]);
+  const pause = useCallback(
+    () => readyDeferred.promise.then(() => playerRef.current.pause()),
+    [readyDeferred]
+  );
 
-  const requestFullscreen = useCallback(() => {
-    readyDeferred.promise.then(() => {
-      playerRef.current.requestFullscreen();
-    });
-  }, [readyDeferred]);
+  const requestFullscreen = useCallback(
+    () =>
+      readyDeferred.promise.then(() => playerRef.current.requestFullscreen()),
+    [readyDeferred]
+  );
 
   const userInteracted = useCallback(() => {
     setMuted(false);
@@ -133,32 +141,36 @@ function VideoWrapperWithRef(
 
   useImperativeHandle(
     ref,
-    () =>
-      Object.defineProperties(
-        {
-          // Standard HTMLMediaElement/Element
-          play,
-          pause,
-          requestFullscreen,
+    () => ({
+      // Standard HTMLMediaElement/Element
+      play,
+      pause,
+      requestFullscreen,
+      get currentTime() {
+        return playerRef.current.currentTime;
+      },
+      get duration() {
+        return playerRef.current.duration;
+      },
+      get autoplay() {
+        return autoplay;
+      },
+      get controls() {
+        return controls;
+      },
+      get loop() {
+        return !!loop;
+      },
 
-          // Non-standard
-          userInteracted,
-          mute: () => setMuted(true),
-          unmute: () => {
-            if (hasUserInteracted) {
-              setMuted(false);
-            }
-          },
-        },
-        {
-          // Standard HTMLMediaElement/Element
-          currentTime: {get: () => playerRef.current.currentTime},
-          duration: {get: () => playerRef.current.duration},
-          autoplay: {get: () => autoplay},
-          controls: {get: () => controls},
-          loop: {get: () => !!rest.loop},
+      // Non-standard
+      userInteracted,
+      mute: () => setMuted(true),
+      unmute: () => {
+        if (hasUserInteracted) {
+          setMuted(false);
         }
-      ),
+      },
+    }),
     [
       play,
       pause,
@@ -167,7 +179,7 @@ function VideoWrapperWithRef(
       hasUserInteracted,
       autoplay,
       controls,
-      rest.loop,
+      loop,
     ]
   );
 
@@ -184,6 +196,7 @@ function VideoWrapperWithRef(
         {...rest}
         ref={playerRef}
         muted={muted}
+        loop={loop}
         controls={controls && (!autoplay || hasUserInteracted)}
         onCanPlay={readyDeferred.resolve}
         onLoadedMetadata={() => {
@@ -197,7 +210,7 @@ function VideoWrapperWithRef(
         onPause={() => setPlaying(false)}
         style={fillStretch}
       >
-        {children}
+        {sources}
       </Component>
       {autoplay && !hasUserInteracted && (
         <Autoplay
@@ -215,7 +228,7 @@ function VideoWrapperWithRef(
 }
 
 /**
- * @param {!VideoDef.AutoplayProps} props
+ * @param {!VideoWrapperDef.AutoplayProps} props
  * @return {PreactDef.Renderable}
  */
 function Autoplay({

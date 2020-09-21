@@ -17,16 +17,16 @@
 /** @externs */
 
 /** @const */
-var VideoDef = {};
+var VideoWrapperDef = {};
 
 /**
  * @typedef {{
- *   play: function():undefined,
- *   pause: function():undefined,
- *   requestFullscreen: function():undefined,
- *   mute: function():undefined,
- *   unmute: function():undefined,
- *   userInteracted: function():undefined,
+ *   play: function():!Promise,
+ *   pause: function():!Promise,
+ *   requestFullscreen: function():!Promise,
+ *   mute: function(),
+ *   unmute: function(),
+ *   userInteracted: function(),
  *   currentTime: (number|undefined),
  *   duration: (number|undefined),
  *   autoplay: boolean,
@@ -34,17 +34,17 @@ var VideoDef = {};
  *   loop: boolean,
  * }}
  */
-VideoDef.Api;
+VideoWrapperDef.Api;
 
 /**
  * @typedef {function():PreactDef.Renderable|string}
  */
-VideoDef.PlayerComponentDef;
+VideoWrapperDef.PlayerComponent;
 
 /**
  * @typedef {{
- *   component: (!VideoDef.PlayerComponentDef|undefined),
- *   children: (?PreactDef.Renderable|undefined),
+ *   component: (!VideoWrapperDef.PlayerComponent|undefined),
+ *   sources: (?PreactDef.Renderable|undefined),
  *   autoplay: (boolean|undefined),
  *   controls: (boolean|undefined),
  *   noaudio: (boolean|undefined),
@@ -55,7 +55,7 @@ VideoDef.PlayerComponentDef;
  *   artwork: (string|undefined),
  * }}
  */
-VideoDef.WrapperProps;
+VideoWrapperDef.Props;
 
 /**
  * @typedef {{
@@ -68,4 +68,4 @@ VideoDef.WrapperProps;
  *   pause: !Function,
  * }}
  */
-VideoDef.AutoplayProps;
+VideoWrapperDef.AutoplayProps;
