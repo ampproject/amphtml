@@ -31,13 +31,14 @@ import {
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
-import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
+import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {?{getMetadata: (function():?JsonObject|undefined)}} player
@@ -159,7 +160,7 @@ function VideoWrapperWithRef(
         return controls;
       },
       get loop() {
-        return !!loop;
+        return loop;
       },
 
       // Non-standard
@@ -242,7 +243,7 @@ function Autoplay({
 }) {
   const classes = useAutoplayStyles();
 
-  useMountEffect(() => {
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[entries.length - 1].isIntersecting) {
@@ -259,7 +260,7 @@ function Autoplay({
     return () => {
       observer.disconnect();
     };
-  });
+  }, [pause, play, wrapperRef]);
 
   return (
     <>
@@ -287,3 +288,7 @@ const AutoplayIconContent = once(() => {
   const classes = useAutoplayStyles();
   return [1, 2, 3, 4].map((i) => <div className={classes.eqCol} key={i}></div>);
 });
+
+const VideoWrapper = forwardRef(VideoWrapperWithRef);
+VideoWrapper.displayName = 'VideoWrapper'; // Make findable for tests.
+export {VideoWrapper};

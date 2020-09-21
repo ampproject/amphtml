@@ -18,6 +18,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {VideoWrapper} from './video-wrapper';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {useStyles as useAutoplayStyles} from './autoplay.jss';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
 export class VideoBaseElement extends PreactBaseElement {
@@ -71,7 +72,7 @@ VideoBaseElement['Component'] = VideoWrapper;
 VideoBaseElement['layoutSizeDefined'] = true;
 
 /**
- * Defaults to 'video' on VideoWrapper.
+ * `component` prop on VideoWrapper (defaults to 'video').
  * @protected {string|PreactDef.FunctionalComponent|undefined}
  */
 VideoBaseElement['PlayerComponent'] = undefined;
@@ -108,3 +109,7 @@ VideoBaseElement['children'] = {
     clone: true,
   },
 };
+
+/** @override */
+// eslint-disable-next-line
+VideoBaseElement['shadowCss'] = useAutoplayStyles().CSS;

@@ -24,14 +24,15 @@ var VideoWrapperDef = {};
  *   play: function():!Promise,
  *   pause: function():!Promise,
  *   requestFullscreen: function():!Promise,
- *   mute: function(),
- *   unmute: function(),
- *   userInteracted: function(),
- *   currentTime: (number|undefined),
- *   duration: (number|undefined),
+ *   currentTime: number,
+ *   duration: number,
  *   autoplay: boolean,
  *   controls: boolean,
  *   loop: boolean,
+ *
+ *   mute: function(),
+ *   unmute: function(),
+ *   userInteracted: function(),
  * }}
  */
 VideoWrapperDef.Api;

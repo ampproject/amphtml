@@ -36,6 +36,7 @@ const eqCol = {
   marginRight: 1,
   position: 'relative',
   '&:before, &:after': {
+    content: '""',
     animation: '0s linear infinite alternate $eq-animation',
     backgroundColor: '#FAFAFA',
     height: '100%',
@@ -45,40 +46,20 @@ const eqCol = {
     animationPlayState: 'paused',
   },
   '&:nth-child(1)': {
-    '&:before, &:after': {
-      transform: 'translateY(60%)',
-      animationDuration: '0.3s',
-    },
-    '&:after': {
-      animationDuration: '0.45s',
-    },
+    '&:before': {animationDuration: '0.3s'},
+    '&:after': {animationDuration: '0.45s'},
   },
   '&:nth-child(2)': {
-    '&:before, &:after': {
-      transform: 'translateY(30%)',
-      animationDuration: '0.5s',
-    },
-    '&:after': {
-      animationDuration: '0.4s',
-    },
+    '&:before': {animationDuration: '0.5s'},
+    '&:after': {animationDuration: '0.4s'},
   },
   '&:nth-child(3)': {
-    '&:before, &:after': {
-      transform: 'translateY(70%)',
-      animationDuration: '0.3s',
-    },
-    '&:after': {
-      animationDuration: '0.35s',
-    },
+    '&:before': {animationDuration: '0.3s'},
+    '&:after': {animationDuration: '0.35s'},
   },
   '&:nth-child(4)': {
-    '&:before, &:after': {
-      transform: 'translateY(50%)',
-      animationDuration: '0.4s',
-    },
-    '&:after': {
-      animationDuration: '0.25s',
-    },
+    '&:before': {animationDuration: '0.4s'},
+    '&:after': {animationDuration: '0.25s'},
   },
 };
 
