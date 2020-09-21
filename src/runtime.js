@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
@@ -40,6 +39,7 @@ import {
 } from './service/extensions-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {registerExtendedTemplate} from './service/template-impl';
 import {reportErrorForWin} from './error';
 import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
 import {setStyle} from './style';
@@ -122,8 +122,6 @@ function adoptShared(global, callback) {
 
   global.AMP.BaseElement = BaseElement;
 
-  global.AMP.BaseTemplate = BaseTemplate;
-
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
@@ -135,7 +133,7 @@ function adoptShared(global, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {typeof BaseTemplate} implementationClass
+   * @param {typeof ./base-template.BaseTemplate} implementationClass
    */
   global.AMP.registerTemplate = function (name, implementationClass) {
     registerExtendedTemplate(global, name, implementationClass);
