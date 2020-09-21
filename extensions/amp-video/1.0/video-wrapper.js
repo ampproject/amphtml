@@ -18,7 +18,6 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Deferred} from '../../../src/utils/promise';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
 import {dict} from '../../../src/utils/object';
 import {fillContentOverlay, fillStretch} from './video-wrapper.css';
 import {once} from '../../../src/utils/function';
@@ -28,6 +27,7 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
+import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
   useLayoutEffect,
@@ -173,6 +173,8 @@ function Autoplay({
   play,
   pause,
 }) {
+  const classes = useAutoplayStyles();
+
   useMountEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -195,16 +197,7 @@ function Autoplay({
   return (
     <>
       {displayIcon && (
-        <div
-          className={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
-          // Legacy AMP (VideoManager) toggles this icon by a CSS selector.
-          // We need display: flex here to override VideoManager's default
-          // styling, since we're rendering this only when necessary, e.g.
-          // visible.
-          // TODO(alanorozco): We can simplify by also removing/adding element
-          // in legacy AMP (or if we no longer need the VideoManager).
-          style={{'display': 'flex'}}
-        >
+        <div className={`${classes.eq} ${playing ? classes.eqPlaying : ''}`}>
           <AutoplayIconContent />
         </div>
       )}
@@ -216,10 +209,6 @@ function Autoplay({
           onClick={onOverlayClick}
         ></div>
       )}
-
-      {/* TODO(wg-bento): Global styling.
-          https://github.com/ampproject/wg-bento/issues/7 */}
-      <style>{autoplayCss}</style>
     </>
   );
 }
@@ -227,11 +216,7 @@ function Autoplay({
 /**
  * @return {!PreactDef.Renderable}
  */
-const AutoplayIconContent = once(() =>
-  [1, 2, 3, 4].map((i) => (
-    <div className="amp-video-eq-col" key={i}>
-      <div className={`amp-video-eq-filler amp-video-eq-${i}-1`}></div>
-      <div className={`amp-video-eq-filler amp-video-eq-${i}-2`}></div>
-    </div>
-  ))
-);
+const AutoplayIconContent = once(() => {
+  const classes = useAutoplayStyles();
+  return [1, 2, 3, 4].map((i) => <div className={classes.eqCol} key={i}></div>);
+});

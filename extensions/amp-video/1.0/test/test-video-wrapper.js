@@ -20,6 +20,8 @@ import {forwardRef} from '../../../../src/preact/compat';
 import {mount} from 'enzyme';
 import {omit} from '../../../../src/utils/object';
 
+import {useStyles as useAutoplayStyles} from '../autoplay.jss';
+
 describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   let intersectionObserverObserved;
   let intersectionObserverCallback;
@@ -160,27 +162,29 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   });
 
   describe('Autoplay', () => {
+    const classes = useAutoplayStyles();
+
     it('should render icon', () => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-      expect(wrapper.exists('.amp-video-eq')).to.be.true;
+      expect(wrapper.exists(`.${classes.eq}`)).to.be.true;
     });
 
     it('should remove icon when clicking autoplay mask', () => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-      expect(wrapper.exists('.amp-video-eq')).to.be.true;
+      expect(wrapper.exists(`.${classes.eq}`)).to.be.true;
       wrapper.find('[role="button"]').simulate('click');
-      expect(wrapper.exists('.amp-video-eq')).to.be.false;
+      expect(wrapper.exists(`.${classes.eq}`)).to.be.false;
     });
 
     it('should not render icon when setting "noaudio"', () => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls noaudio autoplay />
       );
-      expect(wrapper.exists('.amp-video-eq')).to.be.false;
+      expect(wrapper.exists(`.${classes.eq}`)).to.be.false;
     });
 
     it('should not render mask without controls', () => {
