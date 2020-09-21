@@ -95,6 +95,12 @@ const strings = {
   [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D]: {
     string: 'D',
   },
+  [LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL]: {
+    string: 'Pause',
+  },
+  [LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL]: {
+    string: 'Play',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: ':(',
   },
