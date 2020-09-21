@@ -86,7 +86,7 @@ export class FirstImpressionIoConfig {
       queryParams['fi_reveal'] = fiReveal;
     }
     if (fiDemand) {
-      queryParams['fi_demand'] = fiReveal;
+      queryParams['fi_demand'] = fiDemand;
     }
     if (fiGeo) {
       queryParams['fi_geo'] = fiGeo;
