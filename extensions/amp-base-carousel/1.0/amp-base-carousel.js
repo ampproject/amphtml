@@ -92,7 +92,6 @@ AmpBaseCarousel['props'] = {
 };
 
 /** @override */
-// eslint-disable-next-line
 AmpBaseCarousel['shadowCss'] = CSS;
 
 /** @override */
