@@ -68,8 +68,8 @@ const BUILTINS = {
     defaultParams: dict({
       'href': 'CANONICAL_URL',
     }),
-    defaultColor: '1877f2',
-    defaultBackgroundColor: 'ffffff',
+    defaultColor: 'ffffff',
+    defaultBackgroundColor: '1877f2',
   },
   'pinterest': {
     shareEndpoint: 'https://www.pinterest.com/pin/create/button/',
