@@ -31,8 +31,9 @@
  * Out:
  * ```
  * const jss = { button: { fontSize: 12 }}
- * const _classes = {button: 'button-1', CSS: 'button-1 { font-size: 12 }'}
+ * const _classes = {button: 'button-1'}
  * export const useStyles = () => _classes;
+ * export const CSS = 'button-1 { font-size: 12px }'
  * ```
  */
 
@@ -99,18 +100,18 @@ module.exports = function ({types: t, template}) {
           );
         }
 
+        // Create the classes var.
         const id = path.scope.generateUidIdentifier('classes');
-        path.scope.push({
-          id,
-          init: template.expression.ast`${
-            JSON.stringify({
-              ...sheet.classes,
-              'CSS': transformCssSync(sheet.toString()),
-            })
-          }`,
-        });
+        const init = template.expression.ast`${JSON.stringify(sheet.classes)}`;
+        path.scope.push({ id, init });
+        path.scope.bindings[id.name].path.parentPath.addComment('leading', '* @enum {string}');
 
+        // Replace useStyles with a getter for the new `classes` var.
         path.replaceWith(template.expression.ast`(() => ${id})`);
+
+        // Export a variable named CSS with the compiled CSS.
+        const cssExport = template.ast`export const CSS = "${transformCssSync(sheet.toString())}"`;
+        path.findParent(p => p.type === 'ExportNamedDeclaration').insertAfter(cssExport);
       },
 
       // Remove the import for react-jss

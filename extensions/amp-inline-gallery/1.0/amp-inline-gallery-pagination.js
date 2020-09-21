@@ -19,7 +19,7 @@ import {Layout} from '../../../src/layout';
 import {Pagination} from './pagination';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {isExperimentOn} from '../../../src/experiments';
-import {useStyles} from './pagination.jss';
+import {CSS} from './pagination.jss';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -53,7 +53,7 @@ AmpInlineGalleryPagination['layoutSizeDefined'] = true;
 
 /** @override */
 // eslint-disable-next-line
-AmpInlineGalleryPagination['shadowCss'] = useStyles().CSS;
+AmpInlineGalleryPagination['shadowCss'] = CSS;
 
 /** @override */
 AmpInlineGalleryPagination['useContexts'] = [CarouselContextProp];
