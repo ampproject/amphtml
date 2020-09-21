@@ -19,7 +19,7 @@ import {Instagram} from '../instagram';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Instagram preact component v1.0', {}, () => {
-  it('Renders', () => {
+  it('Normal render', (done) => {
     const props = {
       'shortcode': 'B8QaZW4AQY_',
       'style': {'width': 500, 'height': 600},
@@ -31,5 +31,98 @@ describes.sandboxed('Instagram preact component v1.0', {}, () => {
     expect(wrapper.find('iframe').prop('src')).to.equal(
       'https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12'
     );
+    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
+    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
+    expect(wrapper.find('div')).to.have.lengthOf(2);
+    expect(wrapper.find('div.amp-instagram-container')).to.have.lengthOf(1);
+    expect(
+      wrapper.find('div.amp-instagram-container').prop('style').width
+    ).to.equal(500);
+    expect(
+      wrapper.find('div.amp-instagram-container').prop('style').height
+    ).to.equal(600);
+    wrapper.unmount();
+    done();
+  });
+
+  it('Normal render 2', (done) => {
+    const props = {
+      'shortcode': 'B8QaZW4AQY_',
+      'style': {'width': 500, 'height': 600},
+    };
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const wrapper = mount(<Instagram {...props} />, {attachTo: el});
+    expect(wrapper.props().shortcode).to.equal('B8QaZW4AQY_');
+    expect(wrapper.find('iframe').prop('src')).to.equal(
+      'https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12'
+    );
+    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
+    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
+    expect(wrapper.find('div')).to.have.lengthOf(2);
+    expect(wrapper.find('div.amp-instagram-container')).to.have.lengthOf(1);
+    expect(
+      wrapper.find('div.amp-instagram-container').prop('style').width
+    ).to.equal(500);
+    expect(
+      wrapper.find('div.amp-instagram-container').prop('style').height
+    ).to.equal(600);
+    wrapper.unmount();
+    done();
+  });
+
+  it('Render with caption', () => {
+    const props = {
+      'shortcode': 'B8QaZW4AQY_',
+      'captioned': true,
+      'style': {'width': 500, 'height': 705},
+    };
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const wrapper = mount(<Instagram {...props} />, {attachTo: el});
+    expect(wrapper.props().shortcode).to.equal('B8QaZW4AQY_');
+    expect(wrapper.find('iframe').prop('src')).to.equal(
+      'https://www.instagram.com/p/B8QaZW4AQY_/embed/captioned/?cr=1&v=12'
+    );
+    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
+    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
+    expect(wrapper.find('div')).to.have.lengthOf(2);
+    expect(wrapper.find('div.amp-instagram-container')).to.have.lengthOf(1);
+    expect(
+      wrapper.find('div.amp-instagram-container').prop('style').width
+    ).to.equal(500);
+    expect(
+      wrapper.find('div.amp-instagram-container').prop('style').height
+    ).to.equal(705);
+    wrapper.unmount();
+  });
+
+  it('Return error with no shortcode input', () => {
+    const props = {
+      'style': {'width': 500, 'height': 705},
+    };
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const wrapper = mount(<Instagram {...props} />, {attachTo: el});
+    expect(wrapper.find('iframe').prop('src')).to.equal(
+      'https://www.instagram.com/p/undefined/embed/?cr=1&v=12'
+    );
+    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
+    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
+    expect(wrapper.find('div')).to.have.lengthOf(2);
+    expect(wrapper.find('div.amp-instagram-container')).to.have.lengthOf(1);
+    expect(
+      wrapper.find('div.amp-instagram-container').prop('style').width
+    ).to.equal(500);
+    expect(
+      wrapper.find('div.amp-instagram-container').prop('style').height
+    ).to.equal(705);
+    wrapper.unmount();
+  });
+
+  it('Throw error with no width input', () => {
+    expect(() => {
+      mount(<Instagram />);
+    }).to.throw('The width attribute is required.');
   });
 });
