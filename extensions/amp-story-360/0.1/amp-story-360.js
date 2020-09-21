@@ -708,7 +708,9 @@ export class AmpStory360 extends AMP.BaseElement {
     // the animation (if applicable).
     if (this.isReady_) {
       this.win.requestAnimationFrame(() => {
-        this.renderInitialPosition_();
+        if (!this.gyroscopeControls_) {
+          this.renderInitialPosition_();
+        }
         if (this.isPlaying_) {
           this.animate_();
         }
