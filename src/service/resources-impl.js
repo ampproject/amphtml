@@ -237,19 +237,15 @@ export class ResourcesImpl {
     const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
       ? /** @type {*} */ (this.win.document)
       : null);
-    try {
-      this.intersectionObserver_ = new IntersectionObserver(
-        (e) => this.intersect(e),
-        // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
-        {root, rootMargin: '250% 31.25%'}
-      );
+    this.intersectionObserver_ = new IntersectionObserver(
+      (e) => this.intersect(e),
+      // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
+      {root, rootMargin: '250% 31.25%'}
+    );
 
-      // Wait for intersection callback instead of measuring all elements
-      // during the first pass.
-      this.relayoutAll_ = false;
-    } catch (e) {
-      dev().warn(TAG_, 'Falling back to classic Resources:', e);
-    }
+    // Wait for intersection callback instead of measuring all elements
+    // during the first pass.
+    this.relayoutAll_ = false;
 
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.

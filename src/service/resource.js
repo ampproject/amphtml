@@ -687,7 +687,7 @@ export class Resource {
     if (!isConnected) {
       return false;
     }
-    devAssert(this.intersect_);
+    devAssert(!usePremeasuredRect);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
       ? devAssert(this.premeasuredRect_)
