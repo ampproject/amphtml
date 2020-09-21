@@ -207,6 +207,15 @@ const strings = {
     description:
       'Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)',
   },
+  [LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL]: {
+    string: 'Pause story',
+    description:
+      'Label for a button that pauses the media content on the story',
+  },
+  [LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL]: {
+    string: 'Play story',
+    description: 'Label for a button that plays the media content on the story',
+  },
   [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
     string: 'Share story',
     description:
