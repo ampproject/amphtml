@@ -199,12 +199,14 @@ const TEMPLATE = {
               attrs: dict({
                 'class': PAUSE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL,
             },
             {
               tag: 'button',
               attrs: dict({
                 'class': PLAY_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL,
             },
           ],
         },
