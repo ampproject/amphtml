@@ -19,7 +19,6 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list-function-src.html',
-    experiments: ['protocol-adapters'],
     environments: ['single'],
   },
   async (env) => {
@@ -45,7 +44,6 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list-function-load-more.html',
-    experiments: ['protocol-adapters'],
     environments: ['single'],
   },
   async (env) => {
