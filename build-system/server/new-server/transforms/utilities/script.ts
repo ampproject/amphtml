@@ -18,7 +18,8 @@ import posthtml from 'posthtml';
 import {URL} from 'url';
 import {format, extname, parse} from 'path';
 import {VALID_CDN_ORIGIN} from './cdn';
-import {parse, format} from 'path';
+import log from 'fancy-log';
+import {cyan, yellow} from 'ansi-colors';
 
 export interface ScriptNode extends posthtml.Node {
   tag: 'script';
