@@ -75,12 +75,12 @@ function VideoWrapperWithRef(
     component: Component = 'video',
     autoplay = false,
     controls = false,
+    loop = false,
     noaudio = false,
     mediasession = true,
     className,
     style,
     sources,
-    loop,
     ...rest
   },
   ref
