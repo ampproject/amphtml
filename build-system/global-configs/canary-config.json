@@ -28,7 +28,6 @@
   "flexAdSlots": 0.05,
   "intersect-resources": 1,
   "ios-fixed-no-transfer": 1,
-  "protocol-adapters": 1,
   "pump-early-frame": 1,
   "remove-task-timeout": 0,
   "swg-gpay-api": 1,
