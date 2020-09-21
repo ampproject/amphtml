@@ -1662,7 +1662,7 @@ function createBaseCustomElementClass(win) {
         // in FIE
         (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
         // TODO(#22733): cleanup once the ampdoc-fie is fully launched.
-        (this.ampdoc_ && this.ampdoc_.getParent()) ||
+        (this.ampdoc_ && !!this.ampdoc_.getParent()) ||
         // in inabox
         getMode().runtime == 'inabox'
       );
