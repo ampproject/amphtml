@@ -49,18 +49,26 @@ export function SocialShare({
   ...rest
 }) {
   useResourcesNotify();
+  const checkPropsReturnValue = checkProps(
+    type,
+    endpoint,
+    target,
+    width,
+    height,
+    params
+  );
+
+  // Early exit if checkProps did not pass
+  if (!checkPropsReturnValue) {
+    return null;
+  }
+
   const {
     finalEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
-    renderNull,
-  } = checkProps(type, endpoint, target, width, height, params);
-
-  // Early exit if checkProps did not pass
-  if (renderNull) {
-    return null;
-  }
+  } = checkPropsReturnValue;
 
   const size = dict({
     'width': checkedWidth,
@@ -126,27 +134,14 @@ function processChildren(type, children, color, background, size) {
  * @param {number|string|undefined} width
  * @param {number|string|undefined} height
  * @param {JsonObject|Object|undefined} params
- * @return {{
+ * @return {null|{
  *   finalEndpoint: string,
  *   checkedWidth: (number|string),
  *   checkedHeight: (number|string),
  *   checkedTarget: string,
- *   renderNull: boolean,
  * }}
  */
 function checkProps(type, endpoint, target, width, height, params) {
-  // Verify type is provided, early exit if not provided
-  if (type === undefined) {
-    displayWarning(`The type attribute is required. ${NAME}`);
-    return {
-      finalEndpoint: '',
-      checkedWidth: '',
-      checkedHeight: '',
-      checkedTarget: '',
-      renderNull: true,
-    };
-  }
-
   // User must provide endpoint if they choose a type that is not
   // pre-configured, early exit if not provided
   const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
@@ -155,13 +150,7 @@ function checkProps(type, endpoint, target, width, height, params) {
     displayWarning(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
     );
-    return {
-      finalEndpoint: '',
-      checkedWidth: '',
-      checkedHeight: '',
-      checkedTarget: '',
-      renderNull: true,
-    };
+    return null;
   }
 
   // Special case when type is 'email'
@@ -185,7 +174,6 @@ function checkProps(type, endpoint, target, width, height, params) {
     checkedWidth,
     checkedHeight,
     checkedTarget,
-    renderNull: false,
   };
 }
 
