@@ -26,6 +26,9 @@ import {useRef, useState} from '../../../src/preact';
  * @return {PreactDef.Renderable}
  */
 export function Instagram({shortcode, captioned, style, title, resize}) {
+  if (style == undefined || style['width'] == undefined) {
+    throw new Error(`The width attribute is required.`);
+  }
   const iframeRef = useRef(null);
   const [heightStyle, setHeightStyle] = useState(style['height']);
   const [opacity, setOpacity] = useState(0);
@@ -63,7 +66,13 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
   });
 
   return (
-    <ContainWrapper style={{...style, 'height': heightStyle}} layout size paint>
+    <ContainWrapper
+      className="amp-instagram-container"
+      style={{...style, 'height': heightStyle}}
+      layout
+      size
+      paint
+    >
       <iframe
         ref={iframeRef}
         src={
