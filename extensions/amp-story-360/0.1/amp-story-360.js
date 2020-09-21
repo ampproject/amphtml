@@ -447,7 +447,7 @@ export class AmpStory360 extends AMP.BaseElement {
       rot
     );
     this.renderer_.setCamera(rot, 1);
-    this.renderer_.render(true);
+    !this.ampVideoEl_ && this.renderer_.render(true);
   }
 
   /**
@@ -546,26 +546,25 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
-    const ampVideoEl = this.element.querySelector('amp-video');
+    this.ampVideoEl_ = this.element.querySelector('amp-video');
     userAssert(
-      ampImgEl || ampVideoEl,
+      ampImgEl || this.ampVideoEl_,
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
 
-    if (ampVideoEl) {
-      return whenUpgradedToCustomElement(ampVideoEl)
+    if (this.ampVideoEl_) {
+      return whenUpgradedToCustomElement(this.ampVideoEl_)
         .then(() => {
-          return ampVideoEl.signals().whenSignal(CommonSignals.LOAD_END);
+          return this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END);
         })
         .then(() => {
           listen(
-            ampVideoEl,
+            this.ampVideoEl_,
             'playing',
             () => {
               this.renderer_.setImage(
-                dev().assertElement(this.element.querySelector('video'))
+                dev().assertElement(this.ampVideoEl_.querySelector('video'))
               );
-
               if (this.orientations_.length < 1) {
                 return;
               }
@@ -644,8 +643,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   animate_() {
-    const videoEl = this.element.querySelector('video');
-
     if (!this.animation_) {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
@@ -653,8 +650,8 @@ export class AmpStory360 extends AMP.BaseElement {
     const renderLoop = () => {
       if (
         !this.isPlaying_ ||
-        (!this.animation_ && !videoEl) ||
-        (this.gyroscopeControls_ && !videoEl)
+        (!this.animation_ && !this.ampVideoEl_) ||
+        (this.gyroscopeControls_ && !this.ampVideoEl_)
       ) {
         this.renderer_.render(false);
         return;
@@ -671,13 +668,13 @@ export class AmpStory360 extends AMP.BaseElement {
           );
         }
 
-        if (videoEl) {
+        if (this.ampVideoEl_) {
           this.renderer_.setImage(
-            dev().assertElement(this.element.querySelector('video'))
+            dev().assertElement(this.ampVideoEl_.querySelector('video'))
           );
         }
 
-        if (!nextOrientation && !videoEl) {
+        if (!nextOrientation && !this.ampVideoEl_) {
           this.isPlaying_ = false;
           this.renderer_.render(false);
           return;
