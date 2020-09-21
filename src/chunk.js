@@ -31,9 +31,6 @@ const TAG = 'CHUNK';
  */
 let deactivated = /nochunking=1/.test(self.location.hash);
 let allowLongTasks = false;
-const supportsInputPending =
-  'scheduling' in self.navigator &&
-  'isInputPending' in self.navigator.scheduling;
 
 /**
  * @const {!Promise}
@@ -311,6 +308,10 @@ class Chunks {
     this.boundExecute_ = this.execute_.bind(this);
     /** @private {number} */
     this.durationOfLastExecution_ = 0;
+    /** @private @const {boolean} */
+    this.supportsInputPending_ =
+      'scheduling' in this.win_.navigator &&
+      'isInputPending' in this.win_.navigator.scheduling;
 
     /**
      * Set to true if we scheduled a macro or micro task to execute the next
@@ -459,8 +460,8 @@ class Chunks {
     if (
       !allowLongTasks &&
       this.bodyIsVisible_ &&
-      (supportsInputPending
-        ? self.navigator.scheduling.isInputPending()
+      (this.supportsInputPending_
+        ? this.win_.navigator.scheduling.isInputPending()
         : this.durationOfLastExecution_ > 5)
     ) {
       this.durationOfLastExecution_ = 0;

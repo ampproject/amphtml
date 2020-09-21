@@ -482,6 +482,113 @@ describe('long tasks', () => {
   );
 });
 
+describe('isInputPending usage', () => {
+  describes.fakeWin(
+    'pending input breaks microtask loop to subsequent macrotask',
+    {
+      amp: false,
+    },
+    (env) => {
+      let subscriptions;
+      let progress;
+      let postMessageCalls;
+      let pendingInput;
+
+      function complete(str, simulatePendingInputAfter) {
+        return function (unusedIdleDeadline) {
+          if (simulatePendingInputAfter) {
+            pendingInput = true;
+          }
+          progress += str;
+        };
+      }
+
+      function runSubs() {
+        subscriptions['message']
+          .slice()
+          .forEach((method) => method({data: 'amp-macro-task'}));
+      }
+
+      beforeEach(() => {
+        postMessageCalls = 0;
+        pendingInput = false;
+        subscriptions = {};
+
+        env.win.navigator.scheduling = {
+          isInputPending: function () {
+            if (pendingInput) {
+              pendingInput = false;
+              return true;
+            }
+
+            return false;
+          },
+        };
+
+        installDocService(env.win, /* isSingleDoc */ true);
+
+        env.win.addEventListener = function (type, handler) {
+          if (subscriptions[type] && !subscriptions[type].includes(handler)) {
+            subscriptions[type].push(handler);
+          } else {
+            subscriptions[type] = [handler];
+          }
+        };
+
+        env.win.postMessage = function (key) {
+          expect(key).to.equal('amp-macro-task');
+          postMessageCalls++;
+          runSubs();
+        };
+
+        progress = '';
+        chunkInstanceForTesting(
+          env.win.document.documentElement
+        ).macroAfterLongTask_ = true;
+      });
+
+      it('should not run macro tasks with invisible bodys', (done) => {
+        startupChunk(env.win.document, complete('init', true));
+        startupChunk(env.win.document, complete('a', true));
+        startupChunk(env.win.document, complete('b', true));
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('initab');
+          done();
+        });
+      });
+
+      it('should execute chunks after pending input in a macro task', (done) => {
+        startupChunk(env.win.document, complete('1', true));
+        startupChunk(env.win.document, complete('2', false));
+        startupChunk(
+          env.win.document,
+          function () {
+            complete('3', false)();
+            expect(progress).to.equal('123');
+            expect(postMessageCalls).to.equal(0);
+          },
+          /* make body visible */ true
+        );
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('123');
+          complete('4', false)();
+        });
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('1234');
+        });
+        startupChunk(env.win.document, complete('5', true));
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(2);
+          expect(progress).to.equal('12345');
+          done();
+        });
+      });
+    }
+  );
+});
+
 describe('onIdle', () => {
   let win;
   let calls;
