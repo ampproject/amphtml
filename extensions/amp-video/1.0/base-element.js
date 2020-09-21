@@ -51,6 +51,9 @@ export class VideoBaseElement extends PreactBaseElement {
       alias,
       (api, invocation) => {
         if (invocation.trust >= ActionTrust.HIGH) {
+          // TODO(alanorozco): There may be a better solution that doesn't
+          // require this method which is not standard in HTMLMediaElement, like
+          // potentially toggling `autoplay` instead.
           api.userInteracted();
         }
         handler(api, invocation);
