@@ -643,7 +643,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   animate_() {
-    if (!this.animation_) {
+    if (!this.animation_ && !this.gyroscopeControls_) {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
 
@@ -657,7 +657,8 @@ export class AmpStory360 extends AMP.BaseElement {
         return;
       }
 
-      const nextOrientation = this.animation_.getNextOrientation();
+      const nextOrientation =
+        !this.gyroscopeControls_ && this.animation_.getNextOrientation();
 
       // mutateElement causes inaccurate animation speed here, so we use rAF.
       this.win.requestAnimationFrame(() => {
