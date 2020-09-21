@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-function test() {
-  const {a = 1, b: bb = 2} = param;
-  const [c = 3] = array;
+function test({a = 1}, b = a) {
   a;
-  bb;
-  c;
-}
-
-class Foo {
-  test() {
-    const {a = 1, b: bb = 2} = param;
-    const [c = 3] = array;
-    a;
-    bb;
-    c;
-  }
+  b;
 }

@@ -39,7 +39,7 @@
  * ```
  */
 
-module.exports = function ({types: t, template}) {
+module.exports = function ({types: t}) {
   return {
     visitor: {
       AssignmentPattern(path) {
@@ -53,13 +53,18 @@ module.exports = function ({types: t, template}) {
           );
         }
 
+        const root = path.find(
+          ({parentPath}) => parentPath.isStatement() || parentPath.isFunction()
+        );
+        if (!root.parentPath.isFunction()) {
+          // only transform param destructures
+          return;
+        }
+
         const {scope} = path;
         const {name} = left.node;
         const newName = scope.generateUid(name);
 
-        const root = path.find(
-          (p) => p.parentPath.isStatement() || p.parentPath.isFunction()
-        );
         const {referencePaths} = scope.getBinding(name);
         const ancestry = path.getAncestry().slice().reverse();
         for (const ref of referencePaths) {
@@ -67,11 +72,15 @@ module.exports = function ({types: t, template}) {
 
           const min = Math.min(ancestry.length, refAncestry.length);
           for (let i = 0; i < min; i++) {
-            if (ancestry[i] !== refAncestry[i]) {
+            const a = ancestry[i];
+            const r = refAncestry[i];
+            if (a.container !== r.container) {
               break;
             }
-            if (ancestry[i] === root) {
-              throw ref.buildCodeFrameError('self referencial destructure');
+            if (a === root) {
+              throw ref.buildCodeFrameError(
+                'default assignment of default assignment'
+              );
             }
           }
         }
@@ -80,17 +89,11 @@ module.exports = function ({types: t, template}) {
         scope.removeBinding(newName);
         left.node.name = name;
 
-        if (root.parentPath.isFunction()) {
-          scope.push({
-            id: t.identifier(newName),
-            init: t.identifier(name),
-            kind: 'let',
-          });
-        } else {
-          root.parentPath.insertAfter(template.statement.ast`
-            let ${newName} = ${name};
-          `);
-        }
+        scope.push({
+          id: t.identifier(newName),
+          init: t.identifier(name),
+          kind: 'let',
+        });
       },
     },
   };

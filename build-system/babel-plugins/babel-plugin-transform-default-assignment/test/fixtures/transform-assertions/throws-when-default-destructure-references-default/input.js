@@ -13,33 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function test() {
-  let _a = a,
-      _bb = bb,
-      _c = c;
-  const {
-    a = 1,
-    b: bb = 2
-  } = param;
-  const [c = 3] = array;
-  _a;
-  _bb;
-  _c;
-}
 
-class Foo {
-  test() {
-    let _a2 = a,
-        _bb2 = bb,
-        _c2 = c;
-    const {
-      a = 1,
-      b: bb = 2
-    } = param;
-    const [c = 3] = array;
-    _a2;
-    _bb2;
-    _c2;
-  }
-
+function test(a = 1, {b = a}) {
+  a;
+  b;
 }

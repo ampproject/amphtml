@@ -125,9 +125,7 @@ export class ChildLayoutManager {
       intersectionElement,
       intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
       nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
-      // This wierdness is needed due to the self-reference default.
-      viewportIntersectionThreshold = config.intersectionThreshold ??
-        DEFAULT_INTERSECTION_THRESHOLD,
+      viewportIntersectionThreshold = intersectionThreshold,
       viewportIntersectionCallback = () => {},
     } = config;
 

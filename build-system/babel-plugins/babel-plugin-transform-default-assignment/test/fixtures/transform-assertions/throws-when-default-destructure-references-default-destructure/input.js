@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-function test(options) {
-  const {
-    a = 1,
-    b = a, // This will be broken, but closure will catch it.
-  } = options;
+function test({a = 1}, {b = a}) {
   a;
   b;
 }
