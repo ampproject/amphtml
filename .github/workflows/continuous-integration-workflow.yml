@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [macos-latest],
+        platform: [macos-latest]
         #[ubuntu-latest, macos-latest, windows-latest]
         node-version: [12.x]
     runs-on: ${{ matrix.platform }}
