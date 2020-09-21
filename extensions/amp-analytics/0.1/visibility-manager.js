@@ -679,7 +679,8 @@ export class VisibilityManagerForDoc extends VisibilityManager {
      * @private {!Object<number, {
      *   element: !Element,
      *   intersectionRatio: number,
-     *   boundingClientRectTemp: ?../../../src/layout-rect.LayoutRectDef,
+     *   isVisible: boolean,
+     *   boundingClientRect: ?../../../src/layout-rect.LayoutRectDef,
      *   listeners: !Array<function(number)>
      * }>}
      */
@@ -701,6 +702,30 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       this.unsubscribe(
         this.observe(rootElement, this.setRootVisibility.bind(this))
       );
+      // Observe inabox window resize event.
+      const resizeListener = () => {
+        const id = getElementId(rootElement);
+        const trackedRoot = this.trackedElements_[id];
+        if (!trackedRoot) {
+          return;
+        }
+        if (
+          this.ampdoc.win./*OK*/ innerHeight < 1 ||
+          this.ampdoc.win./*OK*/ innerWidth < 1
+        ) {
+          trackedRoot.isVisible = false;
+        } else {
+          trackedRoot.isVisible = true;
+        }
+        this.setRootVisibility(
+          trackedRoot.isVisible ? trackedRoot.intersectionRatio : 0
+        );
+      };
+      this.ampdoc.win.addEventListener('resize', resizeListener);
+
+      this.unsubscribe(() => {
+        this.ampdoc.win.removeEventListener('resize', resizeListener);
+      });
     } else {
       // Main document: visibility is based on the ampdoc.
       this.setRootVisibility(this.ampdoc.isVisible() ? 1 : 0);
@@ -776,11 +801,15 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         element,
         intersectionRatio: 0,
         intersectionRect: null,
-        boundingClientRectTemp: null, // TODO(#29618) Clean up
+        isVisible: false,
+        boundingClientRect: null,
         listeners: [],
       };
       this.trackedElements_[id] = trackedElement;
-    } else if (trackedElement.intersectionRatio > 0) {
+    } else if (
+      trackedElement.intersectionRatio > 0 &&
+      trackedElement.isVisible
+    ) {
       // This has already been tracked and the `intersectionRatio` is fresh.
       listener(trackedElement.intersectionRatio);
     }
@@ -808,7 +837,12 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     }
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
-    return (trackedElement && trackedElement.intersectionRatio) || 0;
+    return (
+      (trackedElement &&
+        trackedElement.isVisible &&
+        trackedElement.intersectionRatio) ||
+      0
+    );
   }
 
   /**
@@ -821,7 +855,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     }
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
-    return trackedElement && trackedElement.boundingClientRectTemp;
+    return trackedElement && trackedElement.boundingClientRect;
   }
 
   /**
@@ -872,7 +906,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         Number(intersection.width),
         Number(intersection.height)
       );
-      // TODO(#29618): Remove after ampim investigation
       let {boundingClientRect} = change;
       boundingClientRect =
         boundingClientRect &&
@@ -892,7 +925,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /**
-   * TODO(#29618): Clean up boundingClientRect after ampim investigation
    * @param {!Element} target
    * @param {number} intersectionRatio
    * @param {!../../../src/layout-rect.LayoutRectDef} intersectionRect
@@ -908,12 +940,26 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
+
+    // This is different from the InOb v2 isVisible definition.
+    // isVisible here only checks for element size
+    let isVisible = true;
+
+    if (boundingClientRect.width < 1 || boundingClientRect.height < 1) {
+      // Set isVisible to false when the element is not visible.
+      // Use < 1 because the width/height can
+      // be a double value on high resolution screen
+      isVisible = false;
+    }
     if (trackedElement) {
+      trackedElement.isVisible = isVisible;
       trackedElement.intersectionRatio = intersectionRatio;
       trackedElement.intersectionRect = intersectionRect;
-      trackedElement.boundingClientRectTemp = boundingClientRect;
+      trackedElement.boundingClientRect = boundingClientRect;
       for (let i = 0; i < trackedElement.listeners.length; i++) {
-        trackedElement.listeners[i](intersectionRatio);
+        trackedElement.listeners[i](
+          trackedElement.isVisible ? intersectionRatio : 0
+        );
       }
     }
   }
