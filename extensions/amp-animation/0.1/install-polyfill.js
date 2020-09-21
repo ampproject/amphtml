@@ -32,10 +32,11 @@ export function installWebAnimationsIfNecessary(ampdoc) {
   polyfillPromiseMap.set(ampdoc, promise);
 
   const {win} = ampdoc;
-  if (Services.platformFor(win).isSafari()) {
+  const platform = Services.platformFor(win);
+  if (platform.isSafari() && platform.getMajorVersion() < 14) {
     /*
-      Force Web Animations polyfill on Safari.
-      Native Web Animations on WebKit do not respect easing for individual
+      Force Web Animations polyfill on Safari versions before 14.
+      Native Web Animations on WebKit did not respect easing for individual
       keyframes and break overall timing. See https://go.amp.dev/issue/27762 and
       https://bugs.webkit.org/show_bug.cgi?id=210526
       */
