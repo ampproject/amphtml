@@ -441,9 +441,7 @@ export class AmpStory360 extends AMP.BaseElement {
       rot
     );
     this.renderer_.setCamera(rot, 1);
-    if (this.mediaEl_.nodeName === 'AMP-IMG') {
-      this.renderer_.render(true);
-    }
+    !this.isVideo_ && this.renderer_.render(true);
   }
 
   /**
@@ -544,6 +542,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.mediaEl_ =
       this.element.querySelector('amp-img') ||
       this.element.querySelector('amp-video');
+    this.isVideo_ = this.mediaEl_.nodeName === 'AMP-VIDEO';
 
     userAssert(
       this.mediaEl_,
@@ -555,7 +554,7 @@ export class AmpStory360 extends AMP.BaseElement {
         return this.mediaEl_.signals().whenSignal(CommonSignals.LOAD_END);
       })
       .then(() => {
-        if (this.mediaEl_.nodeName === 'AMP-VIDEO') {
+        if (this.isVideo_) {
           return new Promise((resolve) => {
             listen(this.mediaEl_, 'playing', () => {
               this.renderer_.setImage(
@@ -564,7 +563,7 @@ export class AmpStory360 extends AMP.BaseElement {
               resolve();
             });
           });
-        } else if (this.mediaEl_.nodeName === 'AMP-IMG') {
+        } else {
           const owners = Services.ownersForDoc(this.element);
           owners.setOwner(this.mediaEl_, this.element);
           owners.scheduleLayout(this.element, this.mediaEl_);
@@ -636,13 +635,12 @@ export class AmpStory360 extends AMP.BaseElement {
     if (!this.animation_ && !this.gyroscopeControls_) {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
-    const isVideo = this.mediaEl_.nodeName === 'AMP-VIDEO';
 
     const renderLoop = () => {
       if (
         !this.isPlaying_ ||
-        (!this.animation_ && !isVideo) ||
-        (this.gyroscopeControls_ && !isVideo)
+        (!this.animation_ && !this.isVideo_) ||
+        (this.gyroscopeControls_ && !this.isVideo_)
       ) {
         this.renderer_.render(false);
         return;
@@ -660,13 +658,13 @@ export class AmpStory360 extends AMP.BaseElement {
           );
         }
 
-        if (isVideo) {
+        if (this.isVideo_) {
           this.renderer_.setImage(
             dev().assertElement(this.mediaEl_.querySelector('video'))
           );
         }
 
-        if (!nextOrientation && !isVideo) {
+        if (!nextOrientation && !this.isVideo_) {
           this.isPlaying_ = false;
           this.renderer_.render(false);
           return;
