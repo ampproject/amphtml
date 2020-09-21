@@ -843,9 +843,7 @@ function createBaseCustomElementClass(win) {
         // Resource.measure. With IntersectionObserver, observe() is the
         // equivalent which happens above in Resources.add(). Applying here
         // also avoids unnecessary reinvocation during reparenting.
-        if (this.getResources().isIntersectionExperimentOn()) {
-          this.applySizesAndMediaQuery();
-        }
+        this.applySizesAndMediaQuery();
       }
     }
 

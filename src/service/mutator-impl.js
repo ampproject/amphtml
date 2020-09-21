@@ -21,8 +21,7 @@ import {Services} from '../services';
 import {areMarginsChanged} from '../layout-rect';
 import {closest} from '../dom';
 import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
-import {isExperimentOn} from '../experiments';
+import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
 
 const FOUR_FRAME_DELAY_ = 70;
@@ -46,9 +45,6 @@ export class MutatorImpl {
     /** @private @const {!./resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
-    /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
-    this.viewport_ = Services.viewportForDoc(this.ampdoc);
-
     /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = Services./*OK*/ vsyncFor(this.win);
 
@@ -58,9 +54,6 @@ export class MutatorImpl {
     this.activeHistory_.onFocus((element) => {
       this.checkPendingChangeSize_(element);
     });
-
-    /** @private @const {boolean} */
-    this.intersect_ = this.resources_.isIntersectionExperimentOn();
   }
 
   /** @override */
@@ -135,27 +128,8 @@ export class MutatorImpl {
 
   /** @override */
   collapseElement(element) {
-    // With IntersectionObserver, no need to relayout or remeasure
-    // due to a single element collapse (similar to "relayout top").
-    if (!this.intersect_) {
-      const box = this.viewport_.getLayoutRect(element);
-      if (box.width != 0 && box.height != 0) {
-        if (isExperimentOn(this.win, 'dirty-collapse-element')) {
-          this.dirtyElement(element);
-        } else {
-          this.resources_.setRelayoutTop(box.top);
-        }
-      }
-    }
-
     const resource = Resource.forElement(element);
     resource.completeCollapse();
-
-    // Unlike completeExpand(), there's no requestMeasure() call here that
-    // requires another pass (with IntersectionObserver).
-    if (!this.intersect_) {
-      this.resources_.schedulePass(FOUR_FRAME_DELAY_);
-    }
   }
 
   /** @override */
@@ -209,24 +183,11 @@ export class MutatorImpl {
     mutator,
     skipRemeasure = false
   ) {
-    const calcRelayoutTop = () => {
-      const box = this.viewport_.getLayoutRect(element);
-      if (box.width != 0 && box.height != 0) {
-        return box.top;
-      }
-      return -1;
-    };
-    let relayoutTop = -1;
     // TODO(jridgewell): support state
     return this.vsync_.runPromise({
       measure: () => {
         if (measurer) {
           measurer();
-        }
-        // With IntersectionObserver, "relayout top" is no longer needed since
-        // relative positional changes won't affect correctness.
-        if (!this.intersect_ && !skipRemeasure) {
-          relayoutTop = calcRelayoutTop();
         }
       },
       mutate: () => {
@@ -250,51 +211,9 @@ export class MutatorImpl {
         this.resources_.schedulePass(FOUR_FRAME_DELAY_);
 
         // With IntersectionObserver, no need to set relayout top.
-        if (this.intersect_) {
-          this.resources_.maybeHeightChanged();
-          return;
-        }
-
-        if (relayoutTop != -1) {
-          this.resources_.setRelayoutTop(relayoutTop);
-        }
-        // Need to measure again in case the element has become visible or
-        // shifted.
-        this.vsync_.measure(() => {
-          const updatedRelayoutTop = calcRelayoutTop();
-          if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
-            this.resources_.setRelayoutTop(updatedRelayoutTop);
-            this.resources_.schedulePass(FOUR_FRAME_DELAY_);
-          }
-          this.resources_.maybeHeightChanged();
-        });
+        this.resources_.maybeHeightChanged();
       },
     });
-  }
-
-  /**
-   * Dirties the cached element measurements after a mutation occurs.
-   *
-   * TODO(jridgewell): This API needs to be audited. Common practice is
-   * to pass the amp-element in as the root even though we are only
-   * mutating children. If the amp-element is passed, we invalidate
-   * everything in the parent layer above it, where only invalidating the
-   * amp-element was necessary (only children were mutated, only
-   * amp-element's scroll box is affected).
-   *
-   * @param {!Element} element
-   */
-  dirtyElement(element) {
-    devAssert(!this.intersect_);
-    let relayoutAll = false;
-    const isAmpElement = element.classList.contains('i-amphtml-element');
-    if (isAmpElement) {
-      const r = Resource.forElement(element);
-      this.resources_.setRelayoutTop(r.getLayoutBox().top);
-    } else {
-      relayoutAll = true;
-    }
-    this.resources_.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
   }
 
   /**

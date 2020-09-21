@@ -179,12 +179,6 @@ export class ResourcesInterface {
   updateLayoutPriority(element, newLayoutPriority) {}
 
   /**
-   * https://github.com/ampproject/amphtml/issues/25428
-   * @return {boolean}
-   */
-  isIntersectionExperimentOn() {}
-
-  /**
    * Returns the percent of resources that were laid out after entering viewport.
    * @return {number}
    */

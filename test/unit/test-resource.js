@@ -28,11 +28,9 @@ describes.realWin('Resource', {amp: true}, (env) => {
   let elementMock;
   let resources;
   let resource;
-  let sandbox;
 
   beforeEach(() => {
     win = env.win;
-    sandbox = env.sandbox;
     doc = win.document;
 
     element = env.createAmpElement('amp-fake-element');
@@ -107,7 +105,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   describe('intersect-resources', () => {
     beforeEach(() => {
-      sandbox.stub(resources, 'isIntersectionExperimentOn').returns(true);
       resource = new Resource(1, element, resources);
     });
 

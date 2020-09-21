@@ -218,9 +218,6 @@ export class Resource {
     /** @private {?Function} */
     this.loadPromiseResolve_ = deferred.resolve;
 
-    /** @const @private {boolean} */
-    this.intersect_ = resources.isIntersectionExperimentOn();
-
     /**
      * A client rect that was "premeasured" by an IntersectionObserver.
      * @private {?ClientRect}
@@ -338,7 +335,7 @@ export class Resource {
         this.isBuilding_ = false;
         // With IntersectionObserver, measure can happen before build
         // so check if we're "ready for layout" (measured and built) here.
-        if (this.intersect_ && this.hasBeenMeasured()) {
+        if (this.hasBeenMeasured()) {
           this.state_ = ResourceState.READY_FOR_LAYOUT;
           this.element.onMeasure(/* sizeChanged */ true);
         } else {
@@ -442,7 +439,6 @@ export class Resource {
    * @param {!ClientRect} clientRect
    */
   premeasure(clientRect) {
-    devAssert(this.intersect_);
     this.premeasuredRect_ = clientRect;
   }
 
@@ -611,7 +607,6 @@ export class Resource {
    * @return {boolean}
    */
   hasBeenPremeasured() {
-    devAssert(this.intersect_);
     return !!this.premeasuredRect_;
   }
 
@@ -692,7 +687,7 @@ export class Resource {
     if (!isConnected) {
       return false;
     }
-    devAssert(!usePremeasuredRect || this.intersect_);
+    devAssert(this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
       ? devAssert(this.premeasuredRect_)
@@ -1041,9 +1036,7 @@ export class Resource {
       // measurement if/when the document becomes active again.
       // Therefore, its post-unlayout state must be READY_FOR_LAYOUT
       // (built and measured) to become eligible for relayout later.
-      this.state_ = this.intersect_
-        ? ResourceState.READY_FOR_LAYOUT
-        : ResourceState.NOT_LAID_OUT;
+      this.state_ = ResourceState.READY_FOR_LAYOUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;
     }

@@ -232,12 +232,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
   },
   {
-    id: 'intersect-resources',
-    name: 'Use IntersectionObserver for resource scheduling.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25428',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',

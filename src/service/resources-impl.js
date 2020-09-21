@@ -229,28 +229,26 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    if (isExperimentOn(this.win, 'intersect-resources')) {
-      const iframed = isIframed(this.win);
+    const iframed = isIframed(this.win);
 
-      // Classic IntersectionObserver doesn't support viewport tracking and
-      // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
-      // supports it via {root: document}, which throws on other browsers.
-      const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
-        ? /** @type {*} */ (this.win.document)
-        : null);
-      try {
-        this.intersectionObserver_ = new IntersectionObserver(
-          (e) => this.intersect(e),
-          // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
-          {root, rootMargin: '250% 31.25%'}
-        );
+    // Classic IntersectionObserver doesn't support viewport tracking and
+    // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
+    // supports it via {root: document}, which throws on other browsers.
+    const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
+      ? /** @type {*} */ (this.win.document)
+      : null);
+    try {
+      this.intersectionObserver_ = new IntersectionObserver(
+        (e) => this.intersect(e),
+        // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
+        {root, rootMargin: '250% 31.25%'}
+      );
 
-        // Wait for intersection callback instead of measuring all elements
-        // during the first pass.
-        this.relayoutAll_ = false;
-      } catch (e) {
-        dev().warn(TAG_, 'Falling back to classic Resources:', e);
-      }
+      // Wait for intersection callback instead of measuring all elements
+      // during the first pass.
+      this.relayoutAll_ = false;
+    } catch (e) {
+      dev().warn(TAG_, 'Falling back to classic Resources:', e);
     }
 
     // When user scrolling stops, run pass to check newly in-viewport elements.
@@ -304,11 +302,6 @@ export class ResourcesImpl {
         passive: true,
       });
     }
-  }
-
-  /** @override */
-  isIntersectionExperimentOn() {
-    return !!this.intersectionObserver_;
   }
 
   /**
@@ -444,12 +437,8 @@ export class ResourcesImpl {
     }
     this.resources_.push(resource);
 
-    if (this.intersectionObserver_) {
-      // The observer callback will schedule a pass to process this element.
-      this.intersectionObserver_.observe(element);
-    } else {
-      this.remeasurePass_.schedule(1000);
-    }
+    // The observer callback will schedule a pass to process this element.
+    this.intersectionObserver_.observe(element);
   }
 
   /**
@@ -619,10 +608,8 @@ export class ResourcesImpl {
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
     }
-    if (this.intersectionObserver_) {
-      // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
-      this.intersectionObserver_.unobserve(resource.element);
-    }
+    // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
+    this.intersectionObserver_.unobserve(resource.element);
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
   }
@@ -1194,125 +1181,59 @@ export class ResourcesImpl {
     // force re-layout.
     const {
       relayoutAll_: relayoutAll,
-      relayoutTop_: relayoutTop,
       elementsThatScrolled_: elementsThatScrolled,
     } = this;
     this.relayoutAll_ = false;
     this.relayoutTop_ = -1;
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
-    let relayoutCount = 0;
-    let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
-      if (this.intersectionObserver_) {
-        // With IntersectionObserver, we call applySizesAndMediaQuery() early
-        // in connectedCallback(), so we only need to re-apply on relayout.
-        // relayoutCount is also irrelevant and doesn't need an increment.
-        if (relayoutAll) {
-          r.applySizesAndMediaQuery();
-          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
-        }
-      } else if (
-        relayoutAll ||
-        !r.hasBeenMeasured() ||
-        // NOT_LAID_OUT is the state after build() but before measure().
-        r.getState() == ResourceState.NOT_LAID_OUT
-      ) {
-        // TODO(willchou): We sometimes call this needlessly/repeatedly.
-        // All elements outside of the loading rect are NOT_LAID_OUT!
+      // With IntersectionObserver, we call applySizesAndMediaQuery() early
+      // in connectedCallback(), so we only need to re-apply on relayout.
+      // relayoutCount is also irrelevant and doesn't need an increment.
+      if (relayoutAll) {
         r.applySizesAndMediaQuery();
         dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
-        relayoutCount++;
-      }
-      if (r.isMeasureRequested()) {
-        remeasureCount++;
       }
     }
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
     let toUnload;
-    if (this.intersectionObserver_) {
-      // The IntersectionObserver variant for phase 2 is just a simplification
-      // that ignores `relayoutTop` and `elementsThatScrolled`.
-      for (let i = 0; i < this.resources_.length; i++) {
-        const r = this.resources_[i];
-        const requested = r.isMeasureRequested();
-        if (r.hasOwner() && !requested) {
-          continue;
-        }
-        const premeasured = r.hasBeenPremeasured();
-        if (requested) {
-          dev().fine(TAG_, 'force remeasure:', r.debugid);
-        }
-        // Immediately measure (vs. waiting for async premeasure) for certain
-        // elements with sensitive time-to-measure.
-        const expediteFirstMeasure =
-          !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
-        const needsMeasure =
-          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
-        if (needsMeasure) {
-          const isDisplayed = this.measureResource_(
-            r,
-            /* usePremeasuredRect */ premeasured
-          );
-          if (!isDisplayed) {
-            devAssert(
-              r.getState() != ResourceState.NOT_BUILT,
-              'Should not unload unbuilt elements.'
-            );
-            if (!toUnload) {
-              toUnload = [];
-            }
-            toUnload.push(r);
-          }
-        }
+    for (let i = 0; i < this.resources_.length; i++) {
+      const r = this.resources_[i];
+      const requested = r.isMeasureRequested();
+      if (r.hasOwner() && !requested) {
+        continue;
       }
-    } else if (
-      relayoutCount > 0 ||
-      remeasureCount > 0 ||
-      relayoutAll ||
-      relayoutTop != -1 ||
-      elementsThatScrolled.length > 0
-    ) {
-      for (let i = 0; i < this.resources_.length; i++) {
-        const r = this.resources_[i];
-        if (r.hasOwner() && !r.isMeasureRequested()) {
-          // If element has owner, and measure is not requested, do nothing.
-          continue;
-        }
-        let needsMeasure =
-          relayoutAll ||
-          r.getState() == ResourceState.NOT_LAID_OUT ||
-          !r.hasBeenMeasured() ||
-          r.isMeasureRequested() ||
-          (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop);
-
-        if (!needsMeasure) {
-          for (let i = 0; i < elementsThatScrolled.length; i++) {
-            // TODO(jridgewell): Need to figure out how ShadowRoots and FIEs
-            // should behave in this model. If the ShadowRoot's host scrolls,
-            // do we need to invalidate inside the shadow or light tree? Or if
-            // the FIE's iframe parent scrolls, do we?
-            if (elementsThatScrolled[i].contains(r.element)) {
-              needsMeasure = true;
-              break;
-            }
+      const premeasured = r.hasBeenPremeasured();
+      if (requested) {
+        dev().fine(TAG_, 'force remeasure:', r.debugid);
+      }
+      // Immediately measure (vs. waiting for async premeasure) for certain
+      // elements with sensitive time-to-measure.
+      const expediteFirstMeasure =
+        !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
+      const needsMeasure =
+        premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
+      if (needsMeasure) {
+        const isDisplayed = this.measureResource_(
+          r,
+          /* usePremeasuredRect */ premeasured
+        );
+        if (!isDisplayed) {
+          devAssert(
+            r.getState() != ResourceState.NOT_BUILT,
+            'Should not unload unbuilt elements.'
+          );
+          if (!toUnload) {
+            toUnload = [];
           }
-        }
-
-        if (needsMeasure) {
-          const isDisplayed = this.measureResource_(r);
-          if (!isDisplayed) {
-            if (!toUnload) {
-              toUnload = [];
-            }
-            toUnload.push(r);
-          }
+          toUnload.push(r);
         }
       }
     }
@@ -1500,19 +1421,13 @@ export class ResourcesImpl {
         const {resource} = task;
 
         let stillDisplayed = true;
-        if (this.intersectionObserver_) {
-          // With IntersectionObserver, peek at the premeasured rect to see
-          // if the resource is still displayed (has a non-zero size).
-          // The premeasured rect is most analogous to an immediate measure.
-          if (resource.hasBeenPremeasured()) {
-            stillDisplayed = resource.isDisplayed(
-              /* usePremeasuredRect */ true
-            );
-          }
-        } else {
-          // Remeasure can only update isDisplayed(), not in-viewport state.
-          resource.measure();
+        // With IntersectionObserver, peek at the premeasured rect to see
+        // if the resource is still displayed (has a non-zero size).
+        // The premeasured rect is most analogous to an immediate measure.
+        if (resource.hasBeenPremeasured()) {
+          stillDisplayed = resource.isDisplayed(/* usePremeasuredRect */ true);
         }
+
         // Check if the element has exited the viewport or the page has changed
         // visibility since the layout was scheduled.
         if (
