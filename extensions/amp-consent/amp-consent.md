@@ -621,6 +621,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
 - Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
+- OneTrust: [Website](https://www.onetrust.com/) - [Documentation](./cmps/onetrust.md)
 - opencmp : [Documentation](./cmps/opencmp.md)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 - Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
