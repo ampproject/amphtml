@@ -48,8 +48,9 @@ async function main() {
       );
       break;
     case 'darwin':
-      timedExecOrDie('gulp unit --nobuild --safari');
-      timedExecOrDie('gulp integration --nobuild --compiled --safari');
+      // timedExecOrDie('gulp unit --nobuild --safari');
+      // timedExecOrDie('gulp integration --nobuild --compiled --safari');
+      timedExecOrDie('gulp integration --nobuild --compiled --safari --ios');
       break;
     case 'win32':
       timedExecOrDie('gulp unit --nobuild --headless --edge');
