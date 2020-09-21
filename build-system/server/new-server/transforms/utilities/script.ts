@@ -38,7 +38,8 @@ export function isValidScript(node: PostHTML.Node, looseScriptSrcCheck?: boolean
   }
 
   const attrs = node.attrs || {};
-  const src = new URL(attrs.src || '');
+  let src;
+  src = new URL(attrs.src || '');
   if (looseScriptSrcCheck) {
     return extname(src.pathname) === '.js';
   }
