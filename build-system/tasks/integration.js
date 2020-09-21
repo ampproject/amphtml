@@ -50,7 +50,8 @@ async function buildTransformedHtml() {
       cyan('test-bin/') + green('...')
     );
     for (const filePath of filePaths) {
-      await fs.copySync(filePath, `./test-bin/${filePath}`);
+      normalizedFilePath = pathModule.normalize(filePath);
+      await fs.copy(filePath, `./test-bin/${filePath}`);
     }
   } catch (e) {
     console./*OK*/ log(

@@ -37,7 +37,8 @@ function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode): vo
 
   const content = head.content || [];
   const nomoduleIdx = content.indexOf(nomoduleScript);
-  content.splice(nomoduleIdx + 1, 0, moduleScript);
+  // Add the module script after the nomodule script.
+  content.splice(nomoduleIdx + 1, 0, '\n', moduleScript);
 }
 
 /**
@@ -57,6 +58,7 @@ export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void 
         return node;
       }
 
+      console.log('node', JSON.stringify(node.attrs));
       if (!isValidScript(node, options.looseScriptSrcCheck)) {
         return node;
       }
