@@ -299,13 +299,7 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
-    // Set up renderer
     this.renderer_ = new Renderer(this.canvas_);
-    this.renderer_.setImageOrientation(
-      this.sceneHeading_,
-      this.scenePitch_,
-      this.sceneRoll_
-    );
     this.renderer_.resize();
 
     // Initialize all services before proceeding
@@ -569,6 +563,11 @@ export class AmpStory360 extends AMP.BaseElement {
                 return;
               }
               this.renderInitialPosition_();
+              this.renderer_.setImageOrientation(
+                this.sceneHeading_,
+                this.scenePitch_,
+                this.sceneRoll_
+              );
               this.isReady_ = true;
               if (this.isPlaying_) {
                 this.animate_();
@@ -599,6 +598,11 @@ export class AmpStory360 extends AMP.BaseElement {
               return;
             }
             this.renderInitialPosition_();
+            this.renderer_.setImageOrientation(
+              this.sceneHeading_,
+              this.scenePitch_,
+              this.sceneRoll_
+            );
             this.isReady_ = true;
             if (this.isPlaying_) {
               this.animate_();
