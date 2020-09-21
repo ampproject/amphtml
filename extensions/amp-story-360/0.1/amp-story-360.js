@@ -250,6 +250,12 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {number} */
     this.sceneRoll_ = 0;
+
+    /** @private {Element} */
+    this.mediaEl_ = null;
+
+    /** @private {boolean} */
+    this.isVideo_ = false;
   }
 
   /** @override */
@@ -556,7 +562,7 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(() => {
         if (this.isVideo_) {
           return new Promise((resolve) => {
-            listen(this.mediaEl_, 'playing', () => {
+            listen(dev().assertElement(this.mediaEl_), 'playing', () => {
               this.renderer_.setImage(
                 dev().assertElement(this.mediaEl_.querySelector('video'))
               );
@@ -565,8 +571,11 @@ export class AmpStory360 extends AMP.BaseElement {
           });
         } else {
           const owners = Services.ownersForDoc(this.element);
-          owners.setOwner(this.mediaEl_, this.element);
-          owners.scheduleLayout(this.element, this.mediaEl_);
+          owners.setOwner(dev().assertElement(this.mediaEl_), this.element);
+          owners.scheduleLayout(
+            this.element,
+            dev().assertElement(this.mediaEl_)
+          );
           this.renderer_.setImage(
             this.checkImageReSize_(
               dev().assertElement(this.element.querySelector('img'))
@@ -594,7 +603,7 @@ export class AmpStory360 extends AMP.BaseElement {
         () => {
           user().error(
             TAG,
-            `Failed to load the ${this.mediaEl.nodeName.toLowerCase()}.`
+            `Failed to load the ${this.mediaEl_.nodeName.toLowerCase()}.`
           );
         }
       );
