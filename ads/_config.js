@@ -349,6 +349,7 @@ const adConfig = jsonConfiguration({
 
   'broadstreetads': {
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
+    renderStartImplemented: true,
   },
 
   'byplay': {},
