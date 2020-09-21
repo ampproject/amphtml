@@ -441,7 +441,9 @@ export class AmpStory360 extends AMP.BaseElement {
       rot
     );
     this.renderer_.setCamera(rot, 1);
-    !this.ampVideoEl_ && this.renderer_.render(true);
+    if (this.mediaEl_.nodeName === 'AMP-IMG') {
+      this.renderer_.render(true);
+    }
   }
 
   /**
@@ -539,80 +541,64 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const ampImgEl = this.element.querySelector('amp-img');
-    this.ampVideoEl_ = this.element.querySelector('amp-video');
+    this.mediaEl_ =
+      this.element.querySelector('amp-img') ||
+      this.element.querySelector('amp-video');
+
     userAssert(
-      ampImgEl || this.ampVideoEl_,
+      this.mediaEl_,
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
 
-    if (this.ampVideoEl_) {
-      return whenUpgradedToCustomElement(this.ampVideoEl_)
-        .then(() => {
-          return this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END);
-        })
-        .then(() => {
-          listen(
-            this.ampVideoEl_,
-            'playing',
-            () => {
+    return whenUpgradedToCustomElement(this.mediaEl_)
+      .then(() => {
+        return this.mediaEl_.signals().whenSignal(CommonSignals.LOAD_END);
+      })
+      .then(() => {
+        if (this.mediaEl_.nodeName === 'AMP-VIDEO') {
+          return new Promise((resolve) => {
+            listen(this.mediaEl_, 'playing', () => {
               this.renderer_.setImage(
-                dev().assertElement(this.ampVideoEl_.querySelector('video'))
+                dev().assertElement(this.mediaEl_.querySelector('video'))
               );
-              if (this.orientations_.length < 1) {
-                return;
-              }
-              this.renderInitialPosition_();
-              this.renderer_.setImageOrientation(
-                this.sceneHeading_,
-                this.scenePitch_,
-                this.sceneRoll_
-              );
-              this.isReady_ = true;
-              if (this.isPlaying_) {
-                this.animate_();
-              }
-            },
-            () => {
-              user().error(TAG, 'Failed to load the amp-video.');
-            }
-          );
-        });
-    }
-
-    if (ampImgEl) {
-      const owners = Services.ownersForDoc(this.element);
-      owners.setOwner(ampImgEl, this.element);
-      owners.scheduleLayout(this.element, ampImgEl);
-      return whenUpgradedToCustomElement(ampImgEl)
-        .then(() => {
-          return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
-        })
-        .then(
-          () => {
-            const img = this.checkImageReSize_(
+              resolve();
+            });
+          });
+        } else if (this.mediaEl_.nodeName === 'AMP-IMG') {
+          const owners = Services.ownersForDoc(this.element);
+          owners.setOwner(this.mediaEl_, this.element);
+          owners.scheduleLayout(this.element, this.mediaEl_);
+          this.renderer_.setImage(
+            this.checkImageReSize_(
               dev().assertElement(this.element.querySelector('img'))
-            );
-            this.renderer_.setImage(img);
-            if (this.orientations_.length < 1) {
-              return;
-            }
-            this.renderInitialPosition_();
-            this.renderer_.setImageOrientation(
-              this.sceneHeading_,
-              this.scenePitch_,
-              this.sceneRoll_
-            );
-            this.isReady_ = true;
-            if (this.isPlaying_) {
-              this.animate_();
-            }
-          },
-          () => {
-            user().error(TAG, 'Failed to load the amp-img.');
+            )
+          );
+          return;
+        }
+      })
+      .then(
+        () => {
+          if (this.orientations_.length < 1) {
+            return;
           }
-        );
-    }
+          this.renderInitialPosition_();
+          this.renderer_.setImageOrientation(
+            this.sceneHeading_,
+            this.scenePitch_,
+            this.sceneRoll_
+          );
+          this.isReady_ = true;
+          if (this.isPlaying_) {
+            this.animate_();
+          }
+        },
+        () => {
+          user().error(
+            TAG,
+            `Failed to load the ${this.mediaEl.nodeName.toLowerCase()}.`
+          );
+        }
+      );
   }
 
   /** @private */
@@ -650,12 +636,13 @@ export class AmpStory360 extends AMP.BaseElement {
     if (!this.animation_ && !this.gyroscopeControls_) {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
+    const isVideo = this.mediaEl_.nodeName === 'AMP-VIDEO';
 
     const renderLoop = () => {
       if (
         !this.isPlaying_ ||
-        (!this.animation_ && !this.ampVideoEl_) ||
-        (this.gyroscopeControls_ && !this.ampVideoEl_)
+        (!this.animation_ && !isVideo) ||
+        (this.gyroscopeControls_ && !isVideo)
       ) {
         this.renderer_.render(false);
         return;
@@ -673,13 +660,13 @@ export class AmpStory360 extends AMP.BaseElement {
           );
         }
 
-        if (this.ampVideoEl_) {
+        if (isVideo) {
           this.renderer_.setImage(
-            dev().assertElement(this.ampVideoEl_.querySelector('video'))
+            dev().assertElement(this.mediaEl_.querySelector('video'))
           );
         }
 
-        if (!nextOrientation && !this.ampVideoEl_) {
+        if (!nextOrientation && !isVideo) {
           this.isPlaying_ = false;
           this.renderer_.render(false);
           return;
