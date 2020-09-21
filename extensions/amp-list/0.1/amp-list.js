@@ -484,10 +484,6 @@ export class AmpList extends AMP.BaseElement {
     return Promise.resolve()
       .then(() => {
         userAssert(
-          isExperimentOn(this.win, 'protocol-adapters'),
-          `Experiment 'protocol-adapters' is not turned on.`
-        );
-        userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
           '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
         );
