@@ -758,6 +758,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'myoffrz': {
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
