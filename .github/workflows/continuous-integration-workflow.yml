@@ -1,4 +1,5 @@
-name: Cross-Browser Tests
+# name: Cross-Browser Tests
+name: iOS CI Example
 on:
   push:
     branches:
@@ -9,30 +10,82 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12.x]
-    runs-on: ${{ matrix.platform }}
+
+    runs-on: macOS-latest
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Get yarn Cache Path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ matrix.platform }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ matrix.platform }}-yarn-
-      - name: Install Gulp CLI
-        run: yarn global add gulp-cli
-      - name: Install Dependencies
-        run: yarn
-      - name: Set Up Environment
-        if: ${{ matrix.platform == 'macos-latest' }}
-        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-      - name: Build and Test
-        run: node build-system/pr-check/cross-browser-tests.js
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: CocoaPod Install
+        run: pod install
+
+      #- name: Testing....display available Xcodes on the Server
+      #  run: ls /Applications | grep Xcode
+
+      - name: Force xcode 11
+        run: sudo xcode-select -switch /Applications/Xcode_11.1.app
+
+# - how to run build/test all in one line for starters
+#      - name: iPhone 11 Test
+#        run:  xcodebuild test -scheme affirm-me-test -workspace affirm-me.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.1'
+#      - name: iPad Air Test
+#        run:  xcodebuild test -scheme affirm-me-test -workspace affirm-me.xcworkspace -destination 'platform=iOS Simulator,name=iPad Air (3rd generation),OS=13.1'
+
+# Split build into build-only and test-only, is faster than the above method
+# (jfb) Possible upgrades are adding variables for scheme/workspace so there's not so much copy/paste
+# Run in this manner, there should not be any keychain / code signing issues
+
+      - name: iOS build setup
+        run: xcodebuild build-for-testing -scheme your-scheme-test -workspace your_project.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.1'
+
+      - name: testing ... iPhone 11
+        run: xcodebuild test-without-building -scheme your-scheme-test -workspace your_project.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.1'
+
+      # - name: testing ... iPhone 11 Pro Max
+      #   run: xcodebuild test-without-building -scheme your-scheme-test -workspace your_project.xcworkspace -destination 'platform=iOS Simulator,name=iPhone 11 Pro Max,OS=13.1'
+
+      # - name: testing ... iPad Air
+      #   run: xcodebuild test-without-building -scheme your-scheme-test -workspace your_project.xcworkspace -destination 'platform=iOS Simulator,name=iPad Air (3rd generation),OS=13.1'
+
+      # - name: testing ... iPad Pro 12.9
+      #   run: xcodebuild test-without-building -scheme your-scheme-test -workspace your_project.xcworkspace -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (3rd generation),OS=13.1'
+
+# Available simulators in Xcode 11.1
+#   { platform:iOS Simulator, id:D032379D-635D-4781-B596-623CB9CBF745, OS:13.1, name:iPad Air (3rd generation) }
+#   { platform:iOS Simulator, id:B55B52B5-6677-4771-9488-7916C5B17C59, OS:13.1, name:iPad Pro (9.7-inch) }
+#   { platform:iOS Simulator, id:6516ECC0-7CE5-4AA6-8F04-816506455380, OS:13.1, name:iPad Pro (11-inch) }
+#   { platform:iOS Simulator, id:287E0905-1417-4C70-987E-3F1B70544468, OS:13.1, name:iPad Pro (12.9-inch) (3rd generation) }
+#   { platform:iOS Simulator, id:6A7CFA76-FE25-4A9E-818E-4E1435415233, OS:13.1, name:iPhone 8 }
+#   { platform:iOS Simulator, id:4C38A616-8069-402C-8580-EFF323001A42, OS:13.1, name:iPhone 8 Plus }
+#   { platform:iOS Simulator, id:C45229CE-8038-4FE5-AA75-46E2080ED9C3, OS:13.1, name:iPhone 11 }
+#   { platform:iOS Simulator, id:6848AD49-7FE1-41CA-93AE-2F96474F6BB3, OS:13.1, name:iPhone 11 Pro }
+#   { platform:iOS Simulator, id:ED8673D7-F76C-4BCB-8FAE-01795C43FB39, OS:13.1, name:iPhone 11 Pro Max }
+
+  # build:
+  #   strategy:
+  #     matrix:
+  #       platform: [ubuntu-latest, macos-latest, windows-latest]
+  #       node-version: [12.x]
+  #   runs-on: ${{ matrix.platform }}
+  #   steps:
+  #     - name: Checkout Repo
+  #       uses: actions/checkout@v2
+  #     - name: Get yarn Cache Path
+  #       id: yarn-cache-dir-path
+  #       run: echo "::set-output name=dir::$(yarn cache dir)"
+  #     - name: Cache Dependencies
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+  #         key: ${{ matrix.platform }}-yarn-${{ hashFiles('**/yarn.lock') }}
+  #         restore-keys: |
+  #           ${{ matrix.platform }}-yarn-
+  #     - name: Install Gulp CLI
+  #       run: yarn global add gulp-cli
+  #     - name: Install Dependencies
+  #       run: yarn
+  #     - name: Set Up Environment
+  #       if: ${{ matrix.platform == 'macos-latest' }}
+  #       run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
+  #     - name: Build and Test
+  #       run: node build-system/pr-check/cross-browser-tests.js

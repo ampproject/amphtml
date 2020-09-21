@@ -94,6 +94,7 @@ integration.flags = {
   'grep': '  Runs tests that match the pattern',
   'headless': '  Run tests in a headless Chrome window',
   'ie': '  Runs tests on IE',
+  'ios': '  Runs tests on iOS emulator',
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
   'report': '  Write test result report to a local file',
