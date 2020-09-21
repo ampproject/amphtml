@@ -692,14 +692,26 @@ export function installExtensionsInEmbed(
     })
     .then(getDelayPromise)
     .then(() => {
-      // Install runtime styles.
-      installStylesForDoc(
-        ampdoc,
-        ampSharedCss,
-        /* callback */ null,
-        /* opt_isRuntimeCss */ true,
-        /* opt_ext */ 'amp-runtime'
-      );
+      if (IS_ESM) {
+        const css = parentWin.document.querySelector('style[amp-runtime]')
+          .textContent;
+        installStylesForDoc(
+          ampdoc,
+          css,
+          /* callback */ null,
+          /* opt_isRuntimeCss */ true,
+          /* opt_ext */ 'amp-runtime'
+        );
+      } else {
+        // Install runtime styles.
+        installStylesForDoc(
+          ampdoc,
+          ampSharedCss,
+          /* callback */ null,
+          /* opt_isRuntimeCss */ true,
+          /* opt_ext */ 'amp-runtime'
+        );
+      }
     })
     .then(getDelayPromise)
     .then(() => {
