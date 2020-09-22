@@ -544,8 +544,7 @@ export function getErrorReportData(
   if (IS_SXG) {
     runtime = 'sxg';
     data['sxg'] = '1';
-  }
-  else if (IS_ESM) {
+  } else if (IS_ESM) {
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {
