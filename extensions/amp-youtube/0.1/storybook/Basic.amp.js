@@ -15,48 +15,64 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {storiesOf} from '@storybook/preact';
 import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
-// eslint-disable-next-line
-storiesOf('Youtube', module)
-  .addDecorator(withKnobs)
-  .addDecorator(withA11y)
-  .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-youtube', version: 0.1}]})
-  .add('default', () => {
-    const videoId = text('Video ID', 'mGENRKrdoGY');
-    return (
-      <amp-youtube
-        data-videoid={videoId}
-        layout="fixed"
-        width="480"
-        height="270"
-      ></amp-youtube>
-    );
-  })
-  .add('responsive', () => {
-    const videoId = text('Video ID', 'mGENRKrdoGY');
-    return (
-      <amp-youtube
-        data-videoid={videoId}
-        layout="responsive"
-        width="480"
-        height="270"
-      ></amp-youtube>
-    );
-  })
-  .add('autoplay', () => {
-    const videoId = text('Video ID', 'mGENRKrdoGY');
-    return (
-      <amp-youtube
-        data-videoid={videoId}
-        layout="fixed"
-        width="480"
-        height="270"
-        autoplay
-      ></amp-youtube>
-    );
-  });
+export default {
+  title: 'Youtube',
+  decorators: [withKnobs, withA11y, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-youtube', version: 0.1}],
+  },
+};
+
+export const Default = () => {
+  const videoId = text('Video ID', 'mGENRKrdoGY');
+  return (
+    <amp-youtube
+      data-videoid={videoId}
+      layout="fixed"
+      width="480"
+      height="270"
+    ></amp-youtube>
+  );
+};
+
+Default.story = {
+  name: 'default',
+};
+
+export const Responsive = () => {
+  const videoId = text('Video ID', 'mGENRKrdoGY');
+  return (
+    <amp-youtube
+      data-videoid={videoId}
+      layout="responsive"
+      width="480"
+      height="270"
+    ></amp-youtube>
+  );
+};
+
+Responsive.story = {
+  name: 'responsive',
+};
+
+export const Autoplay = () => {
+  const videoId = text('Video ID', 'mGENRKrdoGY');
+  return (
+    <amp-youtube
+      data-videoid={videoId}
+      layout="fixed"
+      width="480"
+      height="270"
+      autoplay
+    ></amp-youtube>
+  );
+};
+
+Autoplay.story = {
+  name: 'autoplay',
+};
