@@ -893,6 +893,115 @@ describes.realWin('ContextNode', {}, (env) => {
     });
   });
 
+  describe('discover shadow DOM', () => {
+    let sibling1;
+    let sibling2;
+    let parent;
+
+    beforeEach(() => {
+      sibling1 = el('T-1-1-1');
+      sibling2 = el('T-1-1-2');
+      parent = el('T-1-1');
+    });
+
+    it('should rediscover slots when shadow root is added', async () => {
+      doc.body.appendChild(tree);
+      await waitForDiscover(parent, sibling1, sibling2);
+
+      const shadowRoot = parent.attachShadow({mode: 'open'});
+      ContextNode.get(shadowRoot).setParent(parent);
+
+      const slot1 = doc.createElement('slot');
+      slot1.name = 'slot1';
+      sibling1.setAttribute('slot', 'slot1');
+      shadowRoot.appendChild(slot1);
+      await waitForDiscover(shadowRoot, sibling1);
+
+      // sibling1's parent is shadow root because it matches the slot.
+      expectContext(sibling1, {parent: shadowRoot});
+      // sibling2's parent stays with "parent" because it's unslotted.
+      expectContext(sibling2, {parent});
+    });
+
+    describe('shadow DOM exists from the start', () => {
+      let shadowRoot;
+      let slot1, slot1Parent;
+
+      beforeEach(async () => {
+        shadowRoot = parent.attachShadow({mode: 'open'});
+        ContextNode.get(shadowRoot).setParent(parent);
+
+        slot1Parent = doc.createElement('div');
+        slot1Parent.id = 'slot1-parent';
+        shadowRoot.appendChild(slot1Parent);
+
+        slot1 = doc.createElement('slot');
+        slot1.id = slot1.name = 'slot1';
+        sibling1.setAttribute('slot', 'slot1');
+        slot1Parent.appendChild(slot1);
+
+        doc.body.appendChild(tree);
+        await waitForDiscover(parent, shadowRoot, sibling1, sibling2);
+      });
+
+      function awaitSlotChange() {
+        return new Promise((resolve) => {
+          shadowRoot.addEventListener('slotchange', resolve);
+        });
+      }
+
+      it('should assign shadow root as a parent via slot', () => {
+        // sibling1's parent is shadow root because it matches the slot.
+        expectContext(sibling1, {parent: shadowRoot});
+        // sibling2's parent stays with "parent" because it's unslotted.
+        expectContext(sibling2, {parent});
+      });
+
+      it('should reassign when slots change', async () => {
+        sibling1.removeAttribute('slot');
+        sibling2.setAttribute('slot', 'slot1');
+        await awaitSlotChange();
+        clock.runAll();
+
+        // sibling1's parent stays with "parent" because it's unslotted.
+        expectContext(sibling1, {parent});
+        // sibling2's parent is shadow root because it matches the slot.
+        expectContext(sibling2, {parent: shadowRoot});
+      });
+
+      it('should reassign when slots are removed', async () => {
+        slot1Parent.removeChild(slot1);
+        await waitForDiscover(sibling1);
+        // Returns to parent.
+        expectContext(sibling1, {parent});
+      });
+
+      it('should reassign to slot if it becomes a context node', async () => {
+        const sibling1Wait = waitForDiscover(sibling1);
+        await rediscover(slot1);
+        await sibling1Wait;
+        // slot belongs to the shadow root.
+        expectContext(slot1, {parent: shadowRoot});
+        // sibling1's parent is slot now.
+        expectContext(sibling1, {parent: slot1});
+        // Not changed: unslotted.
+        expectContext(sibling2, {parent});
+      });
+
+      it('should reassign to slot parent becomes a context node', async () => {
+        const sibling1Wait = waitForDiscover(sibling1);
+        await rediscover(slot1Parent);
+        await sibling1Wait;
+        // slot belongs to the shadow root.
+        expectContext(slot1Parent, {parent: shadowRoot});
+        // sibling1's parent is slot now.
+        expectContext(sibling1, {parent: slot1Parent});
+        // Not changed: unslotted.
+        expectContext(sibling2, {parent});
+      });
+    });
+  });
+
   describe('scanners', () => {
     const EXCLUDE_SELF = false;
 
