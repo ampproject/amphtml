@@ -26,7 +26,7 @@ class AmpInstagram extends PreactBaseElement {
   /** @override */
   init() {
     return dict({
-      'resize': (height) => {
+      'requestResize': (height) => {
         this.forceChangeHeight(height);
       },
     });
@@ -40,6 +40,9 @@ class AmpInstagram extends PreactBaseElement {
 
 /** @override */
 AmpInstagram['Component'] = Instagram;
+
+/** @override */
+AmpInstagram['children'] = {};
 
 /** @override */
 AmpInstagram['props'] = {
