@@ -55,7 +55,7 @@ export function Instagram({
         if (requestResize) {
           requestResize(height);
         } else {
-          setHeightStyle(height);
+          setHeightStyle({'height': height});
         }
         setOpacity(1);
       }
@@ -73,7 +73,7 @@ export function Instagram({
   return (
     <ContainWrapper
       {...rest}
-      style={{...style, 'height': heightStyle}}
+      style={{...style, ...heightStyle}}
       layout
       size
       paint

@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {Instagram} from '../instagram';
 import {mount} from 'enzyme';
 
-describes.sandboxed('Instagram preact component v1.0', {}, () => {
+describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
@@ -80,27 +80,19 @@ describes.sandboxed('Instagram preact component v1.0', {}, () => {
     wrapper.unmount();
   });
 
-  it('Resize prop is called', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
-    window.check = false;
-    function mock(opt_value) {
-      return true;
-    }
+  it('Resize prop is called', async () => {
     const wrapper = mount(
       <Instagram
-        {...{'style': {'width': 500, 'height': 705}, 'requestResize': mock}}
+        shortcode="B8QaZW4AQY_"
+        style={{'width': 500, 'height': 705}}
+        requestResize={env.sandbox.spy()}
       />,
-      {attachTo: el}
+      {attachTo: document.body}
     );
 
-    expect(wrapper.find('iframe').prop('src')).to.equal(
-      'https://www.instagram.com/p/error/embed/?cr=1&v=12'
+    await new Promise((resolve) =>
+      wrapper.find('iframe').instance().addEventListener('load', resolve)
     );
-    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
-    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
-    expect(wrapper.find('div')).to.have.lengthOf(2);
-    expect(window.check).to.be.true;
-    wrapper.unmount();
+    expect(wrapper.prop('requestResize')).to.have.been.calledOnce;
   });
 });
