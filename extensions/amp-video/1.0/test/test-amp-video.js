@@ -16,6 +16,7 @@
 
 import '../amp-video';
 import {htmlFor} from '../../../../src/static-template';
+import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitForChildPromise} from '../../../../src/dom';
 import {whenCalled} from '../../../../testing/test-helper.js';
@@ -57,9 +58,31 @@ describes.realWin(
       await waitForRender();
 
       const video = element.shadowRoot.querySelector('video');
-
       expect(video).to.not.be.null;
-      expect(video.tagName).to.equal('VIDEO');
+    });
+
+    it.only('passes attributes through to <video>', async () => {
+      element = html`
+        <amp-video
+          layout="responsive"
+          width="16"
+          height="9"
+          src="something.mp4"
+          poster="foo.png"
+          loop
+        ></amp-video>
+      `;
+
+      env.win.document.body.appendChild(element);
+
+      await waitForRender();
+
+      const video = element.shadowRoot.querySelector('video');
+      expect(video.getAttribute('src')).to.equal(element.getAttribute('src'));
+      expect(video.getAttribute('poster')).to.equal(
+        element.getAttribute('poster')
+      );
+      expect(video.getAttribute('loop')).to.equal(element.getAttribute('loop'));
     });
 
     it('clones <source> elements', async () => {
