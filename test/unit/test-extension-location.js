@@ -486,5 +486,14 @@ describes.sandboxed('SXG Extension Location', {}, () => {
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('latest');
     });
+
+    it('additional query params', () => {
+      window.__AMP_MODE = {sxg: 1};
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-latest.max.mjs?optin=beta&f=sxg'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('latest');
+    });
   });
 });

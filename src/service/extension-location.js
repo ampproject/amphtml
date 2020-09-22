@@ -125,17 +125,16 @@ export function parseExtensionUrl(scriptUrl) {
 
 /**
  * Based on mode, determine which file extension to use for the script URL.
- * @param {boolean=} isLocalDev
+ * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-function calculateFileExtension(isLocalDev) {
-  if (getMode().sxg && isLocalDev) {
+function calculateFileExtension(opt_isLocalDev) {
+  if (getMode().sxg && opt_isLocalDev) {
     return '.sxg.js';
   } else if (getMode().sxg || getMode().esm) {
     return '.mjs';
-  } else {
-    return '.js';
   }
+  return '.js';
 }
 
 /**
