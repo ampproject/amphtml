@@ -149,8 +149,6 @@ It is acceptable for one person to fulfill these requirements, e.g. if an Owner 
 
 We now have a bot that will automatically assign Owners to a PR once it is created, and it is likely at least one of these Owners will also be a Reviewer.
 
-Depending on the files/folders involved, Owners include one or more [AMP Working Groups](https://amp.dev/community/governance/#working-groups), such as the groups for [Security & Privacy](https://amp.dev/community/working-groups/security-privacy/) and [User Interface & Accessibility](https://amp.dev/community/working-groups/ui-and-a11y/).
-
 Once the PR has been approved, anyone with commit rights to the repository may merge the PR, including its author.
 
 These guidelines are specific to the amphtml repository. Other ampproject repos may follow the same guidelines or use different guidelines as documented in their CONTRIBUTING.md files.
@@ -180,6 +178,8 @@ These guidelines are specific to the amphtml repository. Other ampproject repos 
   - When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
   - Owners of an area may approve other Owners at or below their area of expertise following the normal PR process. To request becoming an Owner create a PR adding yourself to the appropriate OWNERS file and assign/cc a current Owner for that directory.
 - The list of Owners for a directory can be found in the [OWNERS](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3A"OWNERS"&s=indexed) file in the directory or a parent directory.
+
+Please note that some Owners may be relevant regardless of code location and therefore may include one or more [AMP Working Groups](https://amp.dev/community/governance/#working-groups), such as the groups for [Security & Privacy](https://amp.dev/community/working-groups/security-privacy/) and [User Interface & Accessibility](https://amp.dev/community/working-groups/ui-and-a11y/). 
 
 ## Cherry-picks
 
