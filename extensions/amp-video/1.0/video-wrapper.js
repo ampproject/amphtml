@@ -106,12 +106,8 @@ export function VideoWrapper({
 
   useLayoutEffect(() => {
     if (mediasession && playing && metadata) {
-      setMediaSession(window, metadata, play, pause);
+      return setMediaSession(window, metadata, play, pause);
     }
-    return () => {
-      // TODO(alanorozco): Clear media session.
-      // (Tricky because we don't want to clear a different active session.)
-    };
   }, [mediasession, playing, metadata, play, pause]);
 
   return (

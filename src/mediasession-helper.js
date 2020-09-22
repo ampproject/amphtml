@@ -36,12 +36,15 @@ export const EMPTY_METADATA = {
   'artwork': [{'src': ''}],
 };
 
+let lastMediaSession = 0;
+
 /**
  * Updates the Media Session API's metadata
  * @param {!Window} win
  * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
+ * @return {!UnlistenDef} clears it
  */
 export function setMediaSession(win, metadata, playHandler, pauseHandler) {
   const {navigator} = win;
@@ -56,7 +59,19 @@ export function setMediaSession(win, metadata, playHandler, pauseHandler) {
     navigator.mediaSession.setActionHandler('pause', pauseHandler);
 
     // TODO(@wassgha) Implement seek & next/previous
+
+    const currentMediaSession = ++lastMediaSession;
+    return () => {
+      if (currentMediaSession !== lastMediaSession) {
+        return;
+      }
+
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+    };
   }
+  return () => {};
 }
 
 /**

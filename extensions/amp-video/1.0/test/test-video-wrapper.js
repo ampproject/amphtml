@@ -29,13 +29,13 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   let play;
   let pause;
 
-  let metadata;
+  let defaultMetadata;
 
-  const TestPlayer = forwardRef(({}, ref) => {
+  const TestPlayer = forwardRef(({metadata}, ref) => {
     Preact.useImperativeHandle(ref, () => ({
       play,
       pause,
-      getMetadata: () => metadata,
+      getMetadata: () => ({...defaultMetadata, ...metadata}),
     }));
     return <></>;
   });
@@ -44,7 +44,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     pause = env.sandbox.spy();
     play = env.sandbox.spy();
 
-    metadata = {
+    defaultMetadata = {
       'title': 'Test player title',
       'artist': 'Test player artist',
       'album': 'Test player album',
@@ -113,7 +113,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       await wrapper.find(TestPlayer).invoke('onCanPlay')();
       await wrapper.find(TestPlayer).invoke('onPlaying')();
 
-      expect(navigator.mediaSession.metadata).to.eql(metadata);
+      expect(navigator.mediaSession.metadata).to.eql(defaultMetadata);
       expect(
         navigator.mediaSession.setActionHandler.withArgs(
           'play',
@@ -128,11 +128,102 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
+    it('should clear when unmounted', async () => {
+      const wrapper = mount(<VideoWrapper component={TestPlayer} />);
+
+      await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
+      await wrapper.find(TestPlayer).invoke('onPlaying')();
+
+      expect(navigator.mediaSession.metadata).to.eql(defaultMetadata);
+      expect(
+        navigator.mediaSession.setActionHandler.withArgs(
+          'play',
+          env.sandbox.match.typeOf('function')
+        )
+      ).to.have.been.calledOnce;
+      expect(
+        navigator.mediaSession.setActionHandler.withArgs(
+          'pause',
+          env.sandbox.match.typeOf('function')
+        )
+      ).to.have.been.calledOnce;
+
+      wrapper.unmount();
+
+      expect(navigator.mediaSession.metadata).to.eql(null);
+      expect(navigator.mediaSession.setActionHandler.withArgs('play', null)).to
+        .have.been.calledOnce;
+      expect(navigator.mediaSession.setActionHandler.withArgs('pause', null)).to
+        .have.been.calledOnce;
+    });
+
+    it('should not clear a different active session', async () => {
+      const children = [
+        <VideoWrapper component={TestPlayer} metadata={{title: '0'}} key={0} />,
+        <VideoWrapper component={TestPlayer} metadata={{title: '1'}} key={1} />,
+        <VideoWrapper component={TestPlayer} metadata={{title: '2'}} key={2} />,
+      ];
+
+      const wrapper = mount(<>{children}</>);
+
+      const players = wrapper.find(TestPlayer);
+
+      await players.at(0).invoke('onLoadedMetadata')();
+      await players.at(0).invoke('onCanPlay')();
+      await players.at(0).invoke('onPlaying')();
+
+      expect(navigator.mediaSession.metadata).to.include({title: '0'});
+      expect(
+        navigator.mediaSession.setActionHandler.withArgs(
+          'play',
+          env.sandbox.match.typeOf('function')
+        )
+      ).to.have.been.calledOnce;
+      expect(
+        navigator.mediaSession.setActionHandler.withArgs(
+          'pause',
+          env.sandbox.match.typeOf('function')
+        )
+      ).to.have.been.calledOnce;
+
+      await players.at(1).invoke('onLoadedMetadata')();
+      await players.at(1).invoke('onCanPlay')();
+      await players.at(1).invoke('onPlaying')();
+
+      expect(navigator.mediaSession.metadata).to.include({title: '1'});
+
+      children.splice(0, 1);
+      wrapper.setProps({children});
+
+      expect(navigator.mediaSession.metadata).to.include({title: '1'});
+
+      await players.at(2).invoke('onLoadedMetadata')();
+      await players.at(2).invoke('onCanPlay')();
+      await players.at(2).invoke('onPlaying')();
+
+      expect(navigator.mediaSession.metadata).to.include({title: '2'});
+
+      expect(navigator.mediaSession.setActionHandler.withArgs('play', null)).to
+        .not.have.been.called;
+      expect(navigator.mediaSession.setActionHandler.withArgs('pause', null)).to
+        .not.have.been.called;
+
+      children.splice(1, 1);
+      wrapper.setProps({children});
+
+      expect(navigator.mediaSession.metadata).to.be.null;
+      expect(navigator.mediaSession.setActionHandler.withArgs('play', null)).to
+        .have.been.calledOnce;
+      expect(navigator.mediaSession.setActionHandler.withArgs('pause', null)).to
+        .have.been.calledOnce;
+    });
+
     ['title', 'aria-label'].forEach((prop) => {
       it(`should use ${prop} prop as fallback for title`, async () => {
         const title = `Title through ${prop} prop`;
 
-        metadata = omit(metadata, ['title']);
+        defaultMetadata = omit(defaultMetadata, ['title']);
 
         const wrapper = mount(
           <VideoWrapper component={TestPlayer} {...{[prop]: title}} />
@@ -149,7 +240,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     it('should use document.title as fallback', async () => {
       document.title = 'Document title';
 
-      metadata = omit(metadata, ['title']);
+      defaultMetadata = omit(defaultMetadata, ['title']);
 
       const wrapper = mount(<VideoWrapper component={TestPlayer} />);
 
