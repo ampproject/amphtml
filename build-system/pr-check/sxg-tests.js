@@ -28,6 +28,7 @@ const {
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
   downloadSxgDistOutput,
+  uploadSxgDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -44,6 +45,7 @@ function main() {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting --sxg');
     timedExecOrDie('gulp integration --nobuild --compiled --headless');
+    uploadSxgDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -55,6 +57,7 @@ function main() {
       downloadSxgDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp integration --nobuild --compiled --headless');
+      uploadSxgDistOutput(FILENAME);
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,

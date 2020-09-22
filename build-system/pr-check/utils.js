@@ -345,6 +345,15 @@ function uploadEsmDistOutput(functionName) {
 }
 
 /**
+ * Zips and uploads the sxg dist output to a remote storage location
+ * @param {string} functionName
+ */
+function uploadSxgDistOutput(functionName) {
+  const sxgDistOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, SXG_DIST_OUTPUT_FILE, sxgDistOutputDirs);
+}
+
+/**
  * Replaces URLS in HTML files, zips and uploads dist output,
  * and signals to the AMP PR Deploy bot that the upload is complete.
  * @param {string} functionName
@@ -386,4 +395,5 @@ module.exports = {
   uploadBuildOutput,
   uploadDistOutput,
   uploadEsmDistOutput,
+  uploadSxgDistOutput,
 };
