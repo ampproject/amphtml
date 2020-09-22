@@ -37,3 +37,5 @@ jobs:
         run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
       - name: Build and Test
         run: node build-system/pr-check/cross-browser-tests.js
+        env:
+          DEBUG: 'iosctrl:*'
