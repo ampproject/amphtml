@@ -557,16 +557,12 @@ export class AmpStory360 extends AMP.BaseElement {
         return this.mediaEl_.signals().whenSignal(CommonSignals.LOAD_END);
       })
       .then(() => {
-        // this.renderer_ = new Renderer(this.canvas_);
         if (this.isVideo_) {
           return new Promise((resolve) => {
             listen(dev().assertElement(this.mediaEl_), 'playing', () => {
-              this.renderer_ = new Renderer(this.canvas_);
-              this.renderer_.resize();
-              this.renderer_.setImage(
+              resolve(
                 dev().assertElement(this.mediaEl_.querySelector('video'))
               );
-              resolve();
             });
           });
         } else {
@@ -576,18 +572,16 @@ export class AmpStory360 extends AMP.BaseElement {
             this.element,
             dev().assertElement(this.mediaEl_)
           );
-          this.renderer_ = new Renderer(this.canvas_);
-          this.renderer_.resize();
-          this.renderer_.setImage(
-            this.checkImageReSize_(
-              dev().assertElement(this.element.querySelector('img'))
-            )
+          return this.checkImageReSize_(
+            dev().assertElement(this.mediaEl_.querySelector('img'))
           );
-          return;
         }
       })
       .then(
-        () => {
+        (MediaEl) => {
+          this.renderer_ = new Renderer(this.canvas_);
+          this.renderer_.resize();
+          this.renderer_.setImage(MediaEl);
           if (this.orientations_.length < 1) {
             return;
           }
