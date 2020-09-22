@@ -19,7 +19,7 @@
  * https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading.
  *
  * Only `UNLOAD` is not defined by the "Lazy loading" spec at this time. It's
- * added here because it supersedes all other loading indstructions in AMP.
+ * added here because it supersedes all other loading instructions in AMP.
  *
  * @enum {string}
  */

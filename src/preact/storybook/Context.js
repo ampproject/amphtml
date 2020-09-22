@@ -40,7 +40,7 @@ export const _default = () => {
       playable={playable}
       loading={loading}
     >
-      <Composit />
+      <Composite />
     </WithAmpContext>
   );
 };
@@ -48,9 +48,9 @@ export const _default = () => {
 /**
  * @return {PreactDef.Renderable}
  */
-function Composit() {
+function Composite() {
   return (
-    <div class="composit">
+    <div class="composite">
       <Info title="Default" />
       <WithAmpContext renderable={false}>
         <Info title="Context: non-renderable" />

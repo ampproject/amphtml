@@ -104,7 +104,7 @@ export function useLoad(loadingProp) {
     // Explicit instruction to unload.
     loading == Loading.UNLOAD
       ? false
-      : // Explicit instrunction to load.
+      : // Explicit instruction to load.
       loading == Loading.EAGER
       ? true
       : // Auto: allowed to load.
@@ -112,8 +112,6 @@ export function useLoad(loadingProp) {
       ? true
       : // Lazy: can continue loading if already started, but do not start it.
         loadingRef.current || false;
-  if (loadingRef.current != load) {
-    loadingRef.current = load;
-  }
+  loadingRef.current = load;
   return load;
 }

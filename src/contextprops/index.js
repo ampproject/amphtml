@@ -21,7 +21,7 @@ import {contextProp} from '../context';
  * Defines whether a DOM subtree can be currently seen by the user. A subtree
  * can be not renderable due `display: none`, or `hidden` attribute, unslotted
  * in shadow DOM, or because a parent component knows for certain that this
- * subtree cannot be seen by the user without some active interraction.
+ * subtree cannot be seen by the user without some active interaction.
  *
  * Default is `true`.
  *
