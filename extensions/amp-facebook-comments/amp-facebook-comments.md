@@ -76,7 +76,6 @@ extended to AMP components.
 
 The color scheme. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.<br><br><em>Note: This is no longer supported by Facebook. For more details, follow our <a href="https://github.com/ampproject/amphtml/issues/29980">our tracking issue</a> and <a href="https://developers.facebook.com/support/bugs/1759174414250782/">Facebook's bug report</a>.</em>
 
-
 ## Validation
 
 See [amp-facebook-comments rules](validator-amp-facebook-comments.protoascii) in the AMP validator specification.
