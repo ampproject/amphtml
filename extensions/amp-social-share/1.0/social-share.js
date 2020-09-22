@@ -134,7 +134,7 @@ function processChildren(type, children, color, background, size) {
  * @param {number|string|undefined} width
  * @param {number|string|undefined} height
  * @param {JsonObject|Object|undefined} params
- * @return {null|{
+ * @return {?{
  *   finalEndpoint: string,
  *   checkedWidth: (number|string),
  *   checkedHeight: (number|string),
