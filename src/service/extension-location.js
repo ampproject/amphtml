@@ -63,7 +63,7 @@ export function calculateExtensionScriptUrl(
   opt_extensionVersion,
   opt_isLocalDev
 ) {
-  const fileExtension = '.js';
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
@@ -72,12 +72,7 @@ export function calculateExtensionScriptUrl(
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  let ret;
-  if (opt_isLocalDev) {
-    ret = `${base}/v0/${extensionId}${extensionVersion}${fileExtension}`;
-  }
-  ret = `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
-  return ret;
+  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
 }
 
 /**
@@ -95,15 +90,12 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
-  const fileExtension = '.js';
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (isLocalDev) {
     return `${base}/${entryPoint}${fileExtension}`;
   }
   if (opt_rtv) {
-    if (isLocalDev) {
-      return `${base}/${entryPoint}${fileExtension}`;
-    }
     return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`;
   }
   return `${base}/${entryPoint}${fileExtension}`;

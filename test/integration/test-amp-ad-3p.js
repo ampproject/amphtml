@@ -34,7 +34,7 @@ describe('amp-ad 3P', () => {
     });
   });
 
-  it.only('create an iframe with APIs', async function () {
+  it('create an iframe with APIs', async function () {
     this.timeout(20000);
     let iframe;
     let lastIO = null;

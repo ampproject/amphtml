@@ -226,10 +226,7 @@ function toEsmName(name) {
 }
 
 function maybeToEsmName(name) {
-  return name;
-  // If any process is "fortesting" write out the files as non mjs files
-  // since the current system relies too much on looking for "js" files.
-  //return argv.esm && !argv.fortesting ? toEsmName(name) : name;
+  return argv.esm ? toEsmName(name) : name;
 }
 
 /**

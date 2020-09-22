@@ -27,6 +27,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
+  downloadEsmDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -51,11 +52,9 @@ function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
+      downloadEsmDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --fortesting --esm');
-      timedExecOrDie(
-        'gulp integration --nobuild --compiled --headless --coverage'
-      );
+      timedExecOrDie('gulp integration --nobuild --compiled --headless');
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
