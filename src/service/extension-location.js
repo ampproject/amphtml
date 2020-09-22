@@ -101,7 +101,10 @@ export function calculateEntryPointScriptUrl(
       isLocalDev
     );
   }
-  return maybeAddQueryParams(`${base}/${entryPoint}${fileExtension}`, isLocalDev);
+  return maybeAddQueryParams(
+    `${base}/${entryPoint}${fileExtension}`,
+    isLocalDev
+  );
 }
 
 /**
@@ -122,9 +125,10 @@ export function parseExtensionUrl(scriptUrl) {
 
 /**
  * Based on mode, determine which file extension to use for the script URL.
- * @param {boolean=} isLocalDev 
+ * @param {boolean=} isLocalDev
+ * @return {string}
  */
-function calculateFileExtension(isLocalDev){
+function calculateFileExtension(isLocalDev) {
   if (getMode().sxg && isLocalDev) {
     return '.sxg.js';
   } else if (getMode().sxg || getMode().esm) {
