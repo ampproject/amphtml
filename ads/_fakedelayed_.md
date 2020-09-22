@@ -16,7 +16,7 @@ limitations under the License.
 
 # fake-delayed
 
-A fake ad type that is used for local development and teest.
+A fake ad type that is used for local development and testing.
 
 ## Example
 
