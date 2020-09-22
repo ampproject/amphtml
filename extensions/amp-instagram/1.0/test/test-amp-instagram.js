@@ -47,7 +47,7 @@ describes.realWin(
       const element = win.document.createElement('amp-instagram');
       element.setAttribute('data-shortcode', 'B8QaZW4AQY_');
       element.setAttribute('layout', 'responsive');
-      element.setAttribute('style', {'width': 500});
+      element.setAttribute('style', {'width': 500, 'height': 600});
       doc.body.appendChild(element);
       await waitForRender();
 
