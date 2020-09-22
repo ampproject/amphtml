@@ -142,6 +142,7 @@ import {eplanning} from '../ads/eplanning';
 import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
+import {fakeDelayed} from '../ads/_fakedelayed_';
 import {felmat} from '../ads/felmat';
 import {firstimpression} from '../ads/firstimpression';
 import {flite} from '../ads/flite';
@@ -367,6 +368,7 @@ init(window);
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
+  register('fake-delayed', fakeDelayed);
 }
 
 // Keep the list in alphabetic order
