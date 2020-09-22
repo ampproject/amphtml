@@ -24,21 +24,6 @@ describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
 
   afterEach(() => (console.warn = originalWarn));
 
-  it('warns when the required "type" attribute is not provided', () => {
-    const consoleOutput = [];
-    const mockedWarn = (output) => consoleOutput.push(output);
-    console.warn = mockedWarn;
-
-    const jsx = <SocialShare />;
-    const wrapper = mount(jsx);
-
-    expect(wrapper.exists('div')).to.equal(false);
-    expect(consoleOutput.length).to.equal(1);
-    expect(consoleOutput[0]).to.equal(
-      'The type attribute is required. SocialShare'
-    );
-  });
-
   it(
     'warns when the required endpoint is not provided when not using' +
       ' a pre-configured type',
