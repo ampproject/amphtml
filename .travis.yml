@@ -87,6 +87,10 @@ jobs:
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
+    - stage: test
+      name: 'SXG Integration Tests'
+      script:
+        - unbuffer node build-system/pr-check/sxg-tests.js
     - stage: experiment
       name: 'Experiment A Tests'
       script:
