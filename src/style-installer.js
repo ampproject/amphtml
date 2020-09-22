@@ -268,8 +268,10 @@ export function makeBodyVisible(doc) {
       const ampdoc = getAmpdoc(doc);
       ampdoc.signals().signal(CommonSignals.RENDER_START);
       if (services.length > 0) {
-        const resources = Services.resourcesForDoc(doc.documentElement);
-        resources./*OK*/ schedulePass(1, /* relayoutAll */ true);
+        if (!RUNTIME3) {
+          const resources = Services.resourcesForDoc(doc.documentElement);
+          resources./*OK*/ schedulePass(1, /* relayoutAll */ true);
+        }
       }
       try {
         const perf = Services.performanceFor(win);

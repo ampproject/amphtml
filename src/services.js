@@ -794,4 +794,26 @@ export class Services {
   static xhrFor(window) {
     return /** @type {!./service/xhr-impl.Xhr} */ (getService(window, 'xhr'));
   }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/custom-elements.CustomElements}
+   */
+  static customElements(elementOrAmpDoc) {
+    return /** @type {!./service/custom-elements.CustomElements} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'customElements'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/load-scheduler.LoadScheduler}
+   */
+  static loadScheduler(elementOrAmpDoc) {
+    return /** @type {!./service/load-scheduler.LoadScheduler} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'loadScheduler'
+    ));
+  }
 }

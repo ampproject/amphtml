@@ -291,6 +291,11 @@ export class BaseElement {
   }
 
   /**
+   * @param {boolean} isDisplayed
+   */
+  displayedCallback(isDisplayed) {}
+
+  /**
    * @return {boolean}
    */
   isInViewport() {

@@ -135,6 +135,15 @@ export class PreactBaseElement extends AMP.BaseElement {
       notify: () => this.mutateElement(() => {}),
     };
 
+    /** @private {?Node} */
+    this.container_ = null;
+
+    /** @private {boolean} */
+    this.scheduledRender_ = false;
+
+    /** @private {?Deferred} */
+    this.renderDeferred_ = null;
+
     /** @private {{current: ?API_TYPE}} */
     this.ref_ = createRef();
 
@@ -231,6 +240,13 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @override */
+  displayedCallback(isDisplayed) {
+    this.mounted_ = true;
+    this.context_.renderable = this.context_.playable = isDisplayed;
+    this.scheduleRender_();
+  }
+
+  /** @override */
   layoutCallback() {
     const Ctor = this.constructor;
     if (!Ctor['loadable']) {
@@ -275,6 +291,12 @@ export class PreactBaseElement extends AMP.BaseElement {
   mutateProps(props) {
     Object.assign(/** @type {!Object} */ (this.defaultProps_), props);
     this.scheduleRender_();
+  }
+
+  // QQQ: remove
+  /** @override */
+  mutateElement(callback) {
+    setTimeout(callback);
   }
 
   /**
@@ -355,6 +377,14 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
   }
 
+  /** @private */
+  onLoad_() {
+    if (this.loadDeferred_) {
+      this.loadDeferred_.resolve();
+      this.loadDeferred_ = null;
+    }
+  }
+
   /**
    * @param {*} opt_reason
    * @private
@@ -368,6 +398,12 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @private */
   rerender_() {
+    // QQQ: debug only
+    this.element.setAttribute(
+      'i-amphtml-context',
+      JSON.stringify(this.context_)
+    );
+
     // If the component unmounted before the scheduled render runs, exit
     // early.
     if (!this.mounted_) {
@@ -545,6 +581,13 @@ export class PreactBaseElement extends AMP.BaseElement {
 PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
+
+/**
+ * Whether the component implements a loading protocol.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['loadable'] = false;
 
 /**
  * @protected {!Array<!ContextProp>}

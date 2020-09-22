@@ -396,6 +396,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-bento-info',
+    version: '1.0',
+    latestVersion: '1.0',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-beopinion',
     version: '0.1',
     latestVersion: '0.1',

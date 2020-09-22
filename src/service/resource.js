@@ -88,6 +88,7 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
+    devAssert(!RUNTIME3);
     return /** @type {!Resource} */ (devAssert(
       Resource.forElementOptional(element),
       'Missing resource prop on %s',
@@ -100,6 +101,7 @@ export class Resource {
    * @return {Resource}
    */
   static forElementOptional(element) {
+    devAssert(!RUNTIME3);
     return /** @type {Resource} */ (element[RESOURCE_PROP_]);
   }
 
@@ -110,6 +112,7 @@ export class Resource {
    * @param {!AmpElement} owner
    */
   static setOwner(element, owner) {
+    devAssert(!RUNTIME3);
     devAssert(owner.contains(element), 'Owner must contain the element');
     if (Resource.forElementOptional(element)) {
       Resource.forElementOptional(element).updateOwner(owner);

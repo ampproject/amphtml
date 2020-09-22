@@ -222,7 +222,9 @@ export class Performance {
     const {documentElement} = this.win.document;
     this.ampdoc_ = Services.ampdoc(documentElement);
     this.viewer_ = Services.viewerForDoc(documentElement);
-    this.resources_ = Services.resourcesForDoc(documentElement);
+    if (!RUNTIME3) {
+      this.resources_ = Services.resourcesForDoc(documentElement);
+    }
 
     this.isPerformanceTrackingOn_ =
       this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
@@ -650,6 +652,9 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
+    if (RUNTIME3) {
+      return Promise.resolve();
+    }
     return this.resources_.whenFirstPass().then(() => {
       const {documentElement} = this.win.document;
       const size = Services.viewportForDoc(documentElement).getSize();

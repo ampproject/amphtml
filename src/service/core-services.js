@@ -19,6 +19,7 @@ import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
 import {installCryptoService} from './crypto-impl';
+import {installCustomElements} from './custom-elements';
 import {installDocumentInfoServiceForDoc} from './document-info-impl';
 import {installGlobalNavigationHandlerForDoc} from './navigation';
 import {installGlobalSubmitListenerForDoc} from '../document-submit';
@@ -27,6 +28,7 @@ import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
+import {installLoadScheduler} from './load-scheduler';
 import {installMutatorServiceForDoc} from './mutator-impl';
 import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
@@ -80,6 +82,11 @@ export function installRuntimeServices(global) {
 export function installAmpdocServices(ampdoc) {
   const isEmbedded = !!ampdoc.getParent();
 
+  if (RUNTIME3) {
+    installCustomElements(ampdoc);
+    installLoadScheduler(ampdoc);
+  }
+
   // When making changes to this method:
   // 1. Order is important!
   // 2. Consider to install same services to amp-inabox.js
@@ -101,15 +108,17 @@ export function installAmpdocServices(ampdoc) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
     : installHistoryServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'resources')
-    : installResourcesServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'owners')
-    : installOwnersServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
-    : installMutatorServiceForDoc(ampdoc);
+  if (!RUNTIME3) {
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'resources')
+      : installResourcesServiceForDoc(ampdoc);
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'owners')
+      : installOwnersServiceForDoc(ampdoc);
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
+      : installMutatorServiceForDoc(ampdoc);
+  }
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);

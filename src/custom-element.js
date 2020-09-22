@@ -271,6 +271,9 @@ function createBaseCustomElementClass(win) {
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
 
+      /** @private {boolean} */
+      this.isDisplayed_ = false;
+
       if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
         delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
@@ -380,7 +383,11 @@ function createBaseCustomElementClass(win) {
       this.implementation_.layout_ = this.layout_;
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
-      this.getResources().upgraded(this);
+      if (RUNTIME3) {
+        Services.customElements(this).readyToBuild(this);
+      } else {
+        this.getResources().upgraded(this);
+      }
       this.signals_.signal(CommonSignals.UPGRADED);
     }
 
@@ -448,6 +455,34 @@ function createBaseCustomElementClass(win) {
         'Cannot get default action alias of unupgraded element'
       );
       return this.implementation_.getDefaultActionAlias();
+    }
+
+    /**
+     * Called by the CustomElements service to indicate that element can now
+     * be displayed.
+     * @param {boolean} isDisplayed
+     * @package
+     */
+    displayedCallback(isDisplayed) {
+      devAssert(RUNTIME3);
+      if (isDisplayed != this.isDisplayed_) {
+        this.isDisplayed_ = isDisplayed;
+
+        if (isDisplayed) {
+          // Make sure the element is built.
+          this.build();
+          // Schedule the element.
+          if (this.readyState != 'complete') {
+            Services.loadScheduler(this).schedule(this);
+          }
+        } else {
+          // Schedule the element.
+          Services.loadScheduler(this).unschedule(this);
+          this.pauseCallback();
+        }
+
+        this.implementation_.displayedCallback(isDisplayed);
+      }
     }
 
     /** @return {boolean} */
@@ -801,11 +836,15 @@ function createBaseCustomElementClass(win) {
           );
         }
       }
-      if (!this.resources_) {
-        // Resources can now be initialized since the ampdoc is now available.
-        this.resources_ = Services.resourcesForDoc(this.ampdoc_);
+      if (RUNTIME3) {
+        Services.customElements(this).connected(this);
+      } else {
+        if (!this.resources_) {
+          // Resources can now be initialized since the ampdoc is now available.
+          this.resources_ = Services.resourcesForDoc(this.ampdoc_);
+        }
+        this.getResources().add(this);
       }
-      this.getResources().add(this);
 
       if (this.everAttached) {
         const reconstruct = this.reconstructWhenReparented();
@@ -813,8 +852,12 @@ function createBaseCustomElementClass(win) {
           this.reset_();
         }
         if (this.isUpgraded()) {
-          if (reconstruct) {
-            this.getResources().upgraded(this);
+          if (RUNTIME3) {
+            Services.customElements(this).readyToBuild(this);
+          } else {
+            if (reconstruct) {
+              this.getResources().upgraded(this);
+            }
           }
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
@@ -843,8 +886,12 @@ function createBaseCustomElementClass(win) {
         // Resource.measure. With IntersectionObserver, observe() is the
         // equivalent which happens above in Resources.add(). Applying here
         // also avoids unnecessary reinvocation during reparenting.
-        if (this.getResources().isIntersectionExperimentOn()) {
+        if (RUNTIME3) {
           this.applySizesAndMediaQuery();
+        } else {
+          if (this.getResources().isIntersectionExperimentOn()) {
+            this.applySizesAndMediaQuery();
+          }
         }
       }
     }
@@ -944,6 +991,8 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
+      Services.customElements(this).disconnected(this);
+
       // This path only comes from Resource#disconnect, which deletes the
       // Resource instance tied to this element. Therefore, it is no longer
       // an AMP Element. But, DOM queries for i-amphtml-element assume that
@@ -953,7 +1002,9 @@ function createBaseCustomElementClass(win) {
       }
 
       this.isConnected_ = false;
-      this.getResources().remove(this);
+      if (!RUNTIME3) {
+        this.getResources().remove(this);
+      }
       this.implementation_.detachedCallback();
     }
 
@@ -1133,6 +1184,28 @@ function createBaseCustomElementClass(win) {
      */
     getLayout() {
       return this.layout_;
+    }
+
+    /**
+     * Forces the element to load. This API can be called directly or via
+     * loader.
+     *
+     * @return {!Promise}
+     * @package @final
+     */
+    load() {
+      return this.build().then(() => {
+        if (this.readyState == 'complete') {
+          // QQQ: optimize.
+          return Promise.resolve();
+        }
+
+        // QQQQ: remove API and move the responsibility to the extensions.
+        this.layoutWidth_ = this.getBoundingClientRect().width;
+        this.implementation_.onLayoutMeasure();
+
+        return this.layoutCallback();
+      });
     }
 
     /**
@@ -1326,6 +1399,7 @@ function createBaseCustomElementClass(win) {
       if (!this.isBuilt()) {
         return false;
       }
+      this.displayedCallback(false);
       this.signals_.signal(CommonSignals.UNLOAD);
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
