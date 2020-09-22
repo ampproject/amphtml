@@ -1005,7 +1005,7 @@ describes.realWin('ContextNode', {}, (env) => {
     });
   });
 
-  describe.only('discover groups', () => {
+  describe('discover groups', () => {
     let sibling1;
     let sibling2;
     let cousin1;
