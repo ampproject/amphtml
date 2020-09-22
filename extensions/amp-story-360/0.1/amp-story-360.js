@@ -84,6 +84,24 @@ const buildActivateButtonTemplate = (element) => {
 };
 
 /**
+ * Generates the template for the feature discovery prompt.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildDiscoveryTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-360-discovery">
+      <div class="i-amphtml-story-360-discovery-animation"></div>
+      <span class="i-amphtml-story-360-text">
+        Move device to explore video
+      </span>
+    </div>
+  `;
+};
+
+/**
  * Internal helper class representing a camera orientation (POV) in polar
  * coordinates.
  */
@@ -356,6 +374,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   checkGyroscopePermissions_() {
+    this.renderActivateButton_();
     //  If browser doesn't support DeviceOrientationEvent.
     if (typeof this.win.DeviceOrientationEvent === 'undefined') {
       return;
@@ -491,12 +510,12 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   togglePermissionClass_(hidePermissionButton) {
-    this.mutateElement(() => {
-      this.element.classList.toggle(
-        'i-amphtml-story-360-hide-permissions-ui',
-        hidePermissionButton
-      );
-    });
+    // this.mutateElement(() => {
+    //   this.element.classList.toggle(
+    //     'i-amphtml-story-360-hide-permissions-ui',
+    //     hidePermissionButton
+    //   );
+    // });
   }
 
   /** @override */
@@ -535,6 +554,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const discoverTemplate = buildDiscoveryTemplate(this.element);
+    this.mutateElement(() => this.element.appendChild(discoverTemplate));
+
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
     const owners = Services.ownersForDoc(this.element);
