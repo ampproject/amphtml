@@ -42,6 +42,9 @@ const DIST_OUTPUT_FILE = isTravisBuild()
 const ESM_DIST_OUTPUT_FILE = isTravisBuild()
   ? `amp_esm_dist_${travisBuildNumber()}.zip`
   : '';
+const SXG_DIST_OUTPUT_FILE = isTravisBuild()
+  ? `amp_sxg_dist_${travisBuildNumber()}.zip`
+  : '';
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
@@ -308,6 +311,14 @@ function downloadEsmDistOutput(functionName) {
 }
 
 /**
+ * Downloads and unzips sxg dist output from storage
+ * @param {string} functionName
+ */
+function downloadSxgDistOutput(functionName) {
+  downloadOutput_(functionName, SXG_DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+}
+
+/**
  * Zips and uploads the build output to a remote storage location
  * @param {string} functionName
  */
@@ -363,6 +374,7 @@ module.exports = {
   downloadBuildOutput,
   downloadDistOutput,
   downloadEsmDistOutput,
+  downloadSxgDistOutput,
   printChangeSummary,
   processAndUploadDistOutput,
   startTimer,

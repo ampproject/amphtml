@@ -27,7 +27,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  downloadEsmDistOutput,
+  downloadSxgDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -52,7 +52,7 @@ function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      downloadEsmDistOutput(FILENAME);
+      downloadSxgDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp integration --nobuild --compiled --headless');
     } else {
