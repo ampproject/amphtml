@@ -138,7 +138,7 @@ export class ContextNode {
       return;
     }
     node[ASSIGNED_SLOT_PROP] = slot;
-    forEachContained(node, (cn) => cn.discover());
+    discoverContained(node);
   }
 
   /**
@@ -153,7 +153,7 @@ export class ContextNode {
       return;
     }
     node[ASSIGNED_SLOT_PROP] = undefined;
-    forEachContained(node, (cn) => cn.discover());
+    discoverContained(node);
   }
 
   /**
@@ -217,6 +217,22 @@ export class ContextNode {
       this.discover_.bind(this),
       setTimeout
     );
+
+    // Shadow root: track slot changes.
+    if (node.nodeType == FRAGMENT_NODE) {
+      node.addEventListener('slotchange', (e) => {
+        const slot = /** @type {!HTMLSlotElement} */ (e.target);
+        // Rediscover newly assigned nodes.
+        const assignedNodes = slot.assignedNodes();
+        assignedNodes.forEach(discoverContained);
+        // Rediscover unassigned nodes.
+        const closest = ContextNode.closest(slot);
+        const closestChildren = closest && closest.children;
+        if (closestChildren) {
+          closestChildren.forEach(discoverContextNode);
+        }
+      });
+    }
 
     this.discover();
   }
@@ -403,11 +419,7 @@ export class ContextNode {
         // fast operation.
         for (let i = 0; i < parentChildren.length; i++) {
           const child = parentChildren[i];
-          if (
-            child != this &&
-            child.isDiscoverable() &&
-            this.node.contains(child.node)
-          ) {
+          if (child != this && child.isDiscoverable()) {
             child.discover();
           }
         }
@@ -443,4 +455,18 @@ function forEachContained(node, callback, includeSelf = true) {
       }
     });
   }
+}
+
+/**
+ * @param {!Node} node
+ */
+function discoverContained(node) {
+  forEachContained(node, discoverContextNode);
+}
+
+/**
+ * @param {!ContextNode} cn
+ */
+function discoverContextNode(cn) {
+  cn.discover();
 }
