@@ -76,6 +76,7 @@ amp-story-360 amp-video {
   }
 }
 
+amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-activate-button,
 .i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-activate-button {
   display: none !important;
 }
