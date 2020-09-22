@@ -18,22 +18,25 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
-import {useMountEffect} from '../../../src/preact/utils';
-import {useRef, useState} from '../../../src/preact';
+import {useLayoutEffect, useRef, useState} from '../../../src/preact';
 
 /**
  * @param {!InstagramPropsDef} props
  * @return {PreactDef.Renderable}
  */
-export function Instagram({shortcode, captioned, style, title, resize}) {
-  if (style == undefined || style['width'] == undefined) {
-    throw new Error(`The width attribute is required.`);
-  }
+export function Instagram({
+  shortcode,
+  captioned,
+  style,
+  title,
+  requestResize,
+  ...rest
+}) {
   const iframeRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(style['height']);
+  const [heightStyle, setHeightStyle] = useState(null);
   const [opacity, setOpacity] = useState(0);
 
-  useMountEffect(() => {
+  useLayoutEffect(() => {
     /**
      * @param {Event} event
      */
@@ -49,8 +52,8 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
 
       if (data['type'] == 'MEASURE') {
         const height = data['details']['height'];
-        if (typeof resize === 'function') {
-          resize(height);
+        if (requestResize) {
+          requestResize(height);
         } else {
           setHeightStyle(height);
         }
@@ -58,16 +61,18 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
       }
     }
 
-    window.addEventListener('message', handleMessage);
+    const {defaultView} = iframeRef.current.ownerDocument;
+
+    defaultView.addEventListener('message', handleMessage);
 
     return () => {
-      window.removeEventListener('message', handleMessage);
+      defaultView.removeEventListener('message', handleMessage);
     };
-  });
+  }, [requestResize]);
 
   return (
     <ContainWrapper
-      className="amp-instagram-container"
+      {...rest}
       style={{...style, 'height': heightStyle}}
       layout
       size
@@ -77,7 +82,7 @@ export function Instagram({shortcode, captioned, style, title, resize}) {
         ref={iframeRef}
         src={
           'https://www.instagram.com/p/' +
-          (encodeURIComponent(shortcode) || 'error') +
+          encodeURIComponent(shortcode || 'error') +
           '/embed/' +
           (captioned ? 'captioned/' : '') +
           '?cr=1&v=12'
