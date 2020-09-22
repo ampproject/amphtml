@@ -309,10 +309,9 @@ class Chunks {
     /** @private {number} */
     this.durationOfLastExecution_ = 0;
     /** @private @const {boolean} */
-    this.supportsInputPending_ = !!(
-      this.win_.navigator.scheduling &&
-      this.win_.navigator.scheduling.isInputPending
-    );
+    this.supportsInputPending_ =
+      'scheduling' in this.win_.navigator &&
+      'isInputPending' in this.win_.navigator.scheduling;
 
     /**
      * Set to true if we scheduled a macro or micro task to execute the next
