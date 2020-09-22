@@ -97,3 +97,35 @@ export function setProp(node, prop, setter, value) {
 export function removeProp(node, prop, setter) {
   ContextNode.get(node).values.remove(prop, setter);
 }
+
+/**
+ * @param {!Node} node
+ * @param {string} name
+ * @param {function(!Node):boolean} match
+ * @param {number=} weight
+ */
+export function addGroup(node, name, match, weight = 0) {
+  ContextNode.get(node).addGroup(name, match, weight);
+}
+
+/**
+ * @param {!Node} node
+ * @param {string} groupName
+ * @param {!ContextProp<T>} prop
+ * @param {*} setter
+ * @param {T} value
+ * @template T
+ */
+export function setGroupProp(node, groupName, prop, setter, value) {
+  ContextNode.get(node).group(groupName).values.set(prop, setter, value);
+}
+
+/**
+ * @param {!Node} node
+ * @param {string} groupName
+ * @param {!ContextProp} prop
+ * @param {*} setter
+ */
+export function removeGroupProp(node, groupName, prop, setter) {
+  ContextNode.get(node).group(groupName).values.remove(prop, setter);
+}
