@@ -24,9 +24,10 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     document.body.appendChild(el);
     const wrapper = mount(
       <Instagram
-        {...{
-          'shortcode': 'B8QaZW4AQY_',
-          'style': {'width': 500, 'height': 600},
+        shortcode="B8QaZW4AQY_"
+        style={{
+          'width': 500,
+          'height': 600,
         }}
       />,
       {attachTo: el}
@@ -38,7 +39,6 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
     expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
     expect(wrapper.find('div')).to.have.lengthOf(2);
-    wrapper.unmount();
   });
 
   it('Render with caption', () => {
@@ -46,11 +46,9 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     document.body.appendChild(el);
     const wrapper = mount(
       <Instagram
-        {...{
-          'shortcode': 'B8QaZW4AQY_',
-          'captioned': true,
-          'style': {'width': 500, 'height': 705},
-        }}
+        shortcode="B8QaZW4AQY_"
+        captioned
+        style={{'width': 500, 'height': 705}}
       />,
       {attachTo: el}
     );
@@ -61,23 +59,20 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
     expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
     expect(wrapper.find('div')).to.have.lengthOf(2);
-    wrapper.unmount();
   });
 
   it('Return error with no shortcode input', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
-    const wrapper = mount(
-      <Instagram {...{'style': {'width': 500, 'height': 705}}} />,
-      {attachTo: el}
-    );
+    const wrapper = mount(<Instagram style={{'width': 500, 'height': 705}} />, {
+      attachTo: el,
+    });
     expect(wrapper.find('iframe').prop('src')).to.equal(
       'https://www.instagram.com/p/error/embed/?cr=1&v=12'
     );
     expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
     expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
     expect(wrapper.find('div')).to.have.lengthOf(2);
-    wrapper.unmount();
   });
 
   it('Resize prop is called', async () => {
@@ -94,5 +89,25 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
       wrapper.find('iframe').instance().addEventListener('load', resolve)
     );
     expect(wrapper.prop('requestResize')).to.have.been.calledOnce;
+  });
+
+  it("container's height is changed", async () => {
+    const initialHeight = 300;
+    document.body.addEventListener('message', console.log);
+    const wrapper = mount(
+      <Instagram
+        shortcode="B8QaZW4AQY_"
+        style={{'width': 500, 'height': initialHeight}}
+      />,
+      {attachTo: document.body}
+    );
+
+    await new Promise((resolve) =>
+      wrapper.find('iframe').instance().addEventListener('load', resolve)
+    );
+
+    expect(
+      wrapper.find('iframe').instance().parentElement.parentElement
+    ).to.not.equal(initialHeight);
   });
 });
