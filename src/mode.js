@@ -29,7 +29,8 @@ import {parseQueryString_} from './url-parse-query-string';
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   esm: (boolean|undefined)
+ *   esm: (boolean|undefined),
+ *   sxg: (boolean|undefined)
  * }}
  */
 export let ModeDef;
@@ -102,6 +103,7 @@ function getMode_(win) {
     ),
     examiner: hashQuery['development'] == '2',
     esm: IS_ESM,
+    sxg: IS_SXG,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: IS_MINIFIED,

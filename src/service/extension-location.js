@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {addParamToUrl} from '../url';
 import {getMode} from '../mode';
 import {urls} from '../config';
 
@@ -59,7 +60,14 @@ export function calculateExtensionScriptUrl(
   opt_extensionVersion,
   opt_isLocalDev
 ) {
-  const fileExtension = getMode().esm ? '.mjs' : '.js';
+  let fileExtension;
+  if (getMode().sxg && opt_isLocalDev) {
+    fileExtension = '.sxg.js';
+  } else if (getMode().sxg || getMode().esm) {
+    fileExtension = '.mjs';
+  } else {
+    fileExtension = '.js';
+  }
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
@@ -68,7 +76,10 @@ export function calculateExtensionScriptUrl(
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
+  return finalizeScriptUrl(
+    `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`,
+    opt_isLocalDev
+  );
 }
 
 /**
@@ -86,15 +97,25 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
-  const fileExtension = getMode().esm ? '.mjs' : '.js';
+  let fileExtension;
+  if (getMode().sxg && isLocalDev) {
+    fileExtension = '.sxg.js';
+  } else if (getMode().sxg || getMode().esm) {
+    fileExtension = '.mjs';
+  } else {
+    fileExtension = '.js';
+  }
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (isLocalDev) {
     return `${base}/${entryPoint}${fileExtension}`;
   }
   if (opt_rtv) {
-    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`;
+    return finalizeScriptUrl(
+      `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`,
+      isLocalDev
+    );
   }
-  return `${base}/${entryPoint}${fileExtension}`;
+  return finalizeScriptUrl(`${base}/${entryPoint}${fileExtension}`, isLocalDev);
 }
 
 /**
@@ -105,10 +126,23 @@ export function calculateEntryPointScriptUrl(
 export function parseExtensionUrl(scriptUrl) {
   // Note that the "(\.max)?" group only applies to local dev.
   const matches = scriptUrl.match(
-    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)?(\?.*)$/i
   );
   return {
     extensionId: matches ? matches[2] : undefined,
     extensionVersion: matches ? matches[3] : undefined,
   };
+}
+
+/**
+ * Add additional values to the script url depending on mode, such as query parameters.
+ * @param {string} scriptUrl
+ * @param {boolean=} opt_isLocalDev
+ * @return {string}
+ */
+function finalizeScriptUrl(scriptUrl, opt_isLocalDev) {
+  // If opt_isLocalDev is true, then .sxg.js is already appended and thus we don't need to add a query param.
+  return getMode().sxg && !opt_isLocalDev
+    ? addParamToUrl(scriptUrl, 'f', 'sxg')
+    : scriptUrl;
 }

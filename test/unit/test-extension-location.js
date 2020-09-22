@@ -329,3 +329,162 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
   });
 });
+
+describes.sandboxed('SXG Extension Location', {}, () => {
+  describe('get correct script source', () => {
+    beforeEach(() => {
+      // These functions must not rely on log for cases in SW.
+      resetLogConstructorForTesting();
+    });
+
+    afterEach(() => {
+      initLogConstructor();
+      window.__AMP_MODE = {};
+    });
+
+    it('with local mode', () => {
+      window.__AMP_MODE = {rtvVersion: '123', sxg: 1};
+      const script = calculateExtensionScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'amp-ad',
+        /*opt_extensionVersion*/ undefined,
+        /* isLocalDev */ true
+      );
+      expect(script).to.equal(
+        'http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.sxg.js'
+      );
+    });
+
+    it('with remote mode', () => {
+      window.__AMP_MODE = {rtvVersion: '123', sxg: 1};
+      const script = calculateExtensionScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'amp-ad',
+        /*opt_extensionVersion*/ undefined,
+        /* isLocalDev */ false
+      );
+      expect(script).to.equal(
+        'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.mjs?f=sxg'
+      );
+    });
+
+    it('should allow no versions', () => {
+      window.__AMP_MODE = {rtvVersion: '123', sxg: 1};
+      const script = calculateExtensionScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'no-version',
+        /* version is empty but defined */ '',
+        /* isLocalDev */ true
+      );
+      expect(script).to.equal(
+        'http://localhost:8000/dist/rtv/123/v0/no-version.sxg.js'
+      );
+    });
+  });
+
+  describe('get correct entry point source', () => {
+    beforeEach(() => {
+      // These functions must not rely on log for cases in SW.
+      resetLogConstructorForTesting();
+    });
+
+    afterEach(() => {
+      initLogConstructor();
+    });
+
+    it('with local mode', () => {
+      window.__AMP_MODE = {sxg: 1};
+      const script = calculateEntryPointScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'sw',
+        true
+      );
+      expect(script).to.equal('http://localhost:8000/dist/sw.sxg.js');
+    });
+
+    it('with remote mode', () => {
+      window.__AMP_MODE = {rtvVersion: '123', sxg: 1};
+      const script = calculateEntryPointScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'sw',
+        /* isLocalDev */ false
+      );
+      expect(script).to.equal('https://cdn.ampproject.org/sw.mjs?f=sxg');
+    });
+
+    it('with remote mode & rtv', () => {
+      window.__AMP_MODE = {rtvVersion: '123', sxg: 1};
+      const script = calculateEntryPointScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'ww',
+        /* isLocalDev */ false,
+        /* opt_rtv */ true
+      );
+      expect(script).to.equal(
+        'https://cdn.ampproject.org/rtv/123/ww.mjs?f=sxg'
+      );
+    });
+  });
+
+  describe('get correct URL parts', () => {
+    it('non-RTV urls', () => {
+      window.__AMP_MODE = {sxg: 1};
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-1.0.mjs?f=sxg'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('1.0');
+    });
+
+    it('RTV urls', () => {
+      window.__AMP_MODE = {sxg: 1};
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.mjs?f=sxg'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('0.1');
+    });
+
+    it('extensions with "latest" version', () => {
+      window.__AMP_MODE = {sxg: 1};
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-latest.mjs?f=sxg'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('latest');
+    });
+
+    it('extensions with .max suffix', () => {
+      window.__AMP_MODE = {sxg: 1};
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-latest.max.mjs?f=sxg'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('latest');
+    });
+  });
+});
