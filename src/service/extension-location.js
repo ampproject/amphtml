@@ -60,14 +60,7 @@ export function calculateExtensionScriptUrl(
   opt_extensionVersion,
   opt_isLocalDev
 ) {
-  let fileExtension;
-  if (getMode().sxg && opt_isLocalDev) {
-    fileExtension = '.sxg.js';
-  } else if (getMode().sxg || getMode().esm) {
-    fileExtension = '.mjs';
-  } else {
-    fileExtension = '.js';
-  }
+  const fileExtension = calculateFileExtension(opt_isLocalDev);
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
@@ -76,7 +69,7 @@ export function calculateExtensionScriptUrl(
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  return finalizeScriptUrl(
+  return maybeAddQueryParams(
     `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`,
     opt_isLocalDev
   );
@@ -97,25 +90,18 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
-  let fileExtension;
-  if (getMode().sxg && isLocalDev) {
-    fileExtension = '.sxg.js';
-  } else if (getMode().sxg || getMode().esm) {
-    fileExtension = '.mjs';
-  } else {
-    fileExtension = '.js';
-  }
+  const fileExtension = calculateFileExtension(isLocalDev);
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (isLocalDev) {
     return `${base}/${entryPoint}${fileExtension}`;
   }
   if (opt_rtv) {
-    return finalizeScriptUrl(
+    return maybeAddQueryParams(
       `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`,
       isLocalDev
     );
   }
-  return finalizeScriptUrl(`${base}/${entryPoint}${fileExtension}`, isLocalDev);
+  return maybeAddQueryParams(`${base}/${entryPoint}${fileExtension}`, isLocalDev);
 }
 
 /**
@@ -135,12 +121,26 @@ export function parseExtensionUrl(scriptUrl) {
 }
 
 /**
- * Add additional values to the script url depending on mode, such as query parameters.
+ * Based on mode, determine which file extension to use for the script URL.
+ * @param {boolean=} isLocalDev 
+ */
+function calculateFileExtension(isLocalDev){
+  if (getMode().sxg && isLocalDev) {
+    return '.sxg.js';
+  } else if (getMode().sxg || getMode().esm) {
+    return '.mjs';
+  } else {
+    return '.js';
+  }
+}
+
+/**
+ * Add additional values to the script URL depending on mode, such as query parameters.
  * @param {string} scriptUrl
  * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-function finalizeScriptUrl(scriptUrl, opt_isLocalDev) {
+function maybeAddQueryParams(scriptUrl, opt_isLocalDev) {
   // If opt_isLocalDev is true, then .sxg.js is already appended and thus we don't need to add a query param.
   return getMode().sxg && !opt_isLocalDev
     ? addParamToUrl(scriptUrl, 'f', 'sxg')
