@@ -305,9 +305,6 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
-    this.renderer_ = new Renderer(this.canvas_);
-    this.renderer_.resize();
-
     // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
@@ -560,9 +557,12 @@ export class AmpStory360 extends AMP.BaseElement {
         return this.mediaEl_.signals().whenSignal(CommonSignals.LOAD_END);
       })
       .then(() => {
+        // this.renderer_ = new Renderer(this.canvas_);
         if (this.isVideo_) {
           return new Promise((resolve) => {
             listen(dev().assertElement(this.mediaEl_), 'playing', () => {
+              this.renderer_ = new Renderer(this.canvas_);
+              this.renderer_.resize();
               this.renderer_.setImage(
                 dev().assertElement(this.mediaEl_.querySelector('video'))
               );
@@ -576,6 +576,8 @@ export class AmpStory360 extends AMP.BaseElement {
             this.element,
             dev().assertElement(this.mediaEl_)
           );
+          this.renderer_ = new Renderer(this.canvas_);
+          this.renderer_.resize();
           this.renderer_.setImage(
             this.checkImageReSize_(
               dev().assertElement(this.element.querySelector('img'))
