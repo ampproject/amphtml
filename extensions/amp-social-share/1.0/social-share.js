@@ -18,6 +18,7 @@ import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
 import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
+import {Wrapper} from '../../../src/preact/component';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getSocialConfig} from './social-share-config';
@@ -56,28 +57,26 @@ export function SocialShare({
     checkedTarget,
   } = checkProps(type, endpoint, target, width, height, params);
 
-  const size = dict({
-    'width': checkedWidth,
-    'height': checkedHeight,
-  });
-
   return (
-    <div
+    <Wrapper
       {...rest}
       role="button"
       tabindex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
-      style={{...size, ...style}}
+      wrapperStyle={{
+        width: checkedWidth,
+        height: checkedHeight,
+        ...style,
+      }}
     >
       {processChildren(
         /** @type {string} */ (type),
         children,
         color,
-        background,
-        size
+        background
       )}
-    </div>
+    </Wrapper>
   );
 }
 
@@ -89,10 +88,9 @@ export function SocialShare({
  * @param {?PreactDef.Renderable|undefined} children
  * @param {string|undefined} color
  * @param {string|undefined} background
- * @param {JsonObject} size
  * @return {PreactDef.Renderable}
  */
-function processChildren(type, children, color, background, size) {
+function processChildren(type, children, color, background) {
   if (children) {
     return children;
   } else {
@@ -104,7 +102,12 @@ function processChildren(type, children, color, background, size) {
     });
     return (
       <SocialShareIcon
-        style={{...iconStyle, ...baseStyle, ...size}}
+        style={{
+          ...iconStyle,
+          ...baseStyle,
+          width: '100%',
+          height: '100%',
+        }}
         type={type.toUpperCase()}
       />
     );
