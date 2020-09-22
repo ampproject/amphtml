@@ -15,8 +15,6 @@
  */
 
 import '../amp-instagram';
-import {waitForChildPromise} from '../../../../src/dom';
-import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.realWin(
   'amp-instagram',
@@ -28,15 +26,6 @@ describes.realWin(
   },
   (env) => {
     let win, doc;
-    let element;
-
-    const waitForRender = async () => {
-      await whenCalled(env.sandbox.spy(element, 'attachShadow'));
-      const shadow = element.shadowRoot;
-      await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelector('iframe');
-      });
-    };
 
     beforeEach(() => {
       win = env.win;
@@ -46,12 +35,19 @@ describes.realWin(
     it('renders', async () => {
       const element = win.document.createElement('amp-instagram');
       element.setAttribute('data-shortcode', 'B8QaZW4AQY_');
+      element.setAttribute('amp', true);
+      element.setAttribute('height', 500);
       element.setAttribute('layout', 'responsive');
       element.setAttribute('style', {'width': 500, 'height': 600});
       doc.body.appendChild(element);
-      await waitForRender();
+      await new Promise((resolve) =>
+        element
+          .querySelector('iframe')
+          .instance()
+          .addEventListener('load', resolve)
+      );
 
-      expect(element.shadowRoot.querySelector('iframe').prop('src')).to.equal(
+      expect(element.querySelector('iframe').prop('src')).to.equal(
         'https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12'
       );
     });
