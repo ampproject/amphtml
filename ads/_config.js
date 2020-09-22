@@ -476,6 +476,10 @@ const adConfig = jsonConfiguration({
 
   'fake': {},
 
+  'fake-delayed': {
+    renderStartImplemented: true,
+  },
+
   'felmat': {
     prefetch: 'https://t.felmat.net/js/fmamp.js',
     renderStartImplemented: true,
