@@ -25,8 +25,8 @@ export default {
   parameters: {extensions: [{name: 'amp-video', version: '1.0'}]},
 };
 
-const VideoTagPlayer = ({i}) => {
-  const group = `Player ${i + 1}`;
+const AmpVideoWithKnobs = ({i, ...rest}) => {
+  const group = i ? `Player ${i + 1}` : undefined;
 
   const width = text('width', '640px', group);
   const height = text('height', '360px', group);
@@ -66,7 +66,7 @@ const VideoTagPlayer = ({i}) => {
 
   return (
     <amp-video
-      component="video"
+      {...rest}
       ariaLabel={ariaLabel}
       autoplay={autoplay}
       controls={controls}
@@ -109,7 +109,7 @@ export const Default = () => {
 
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<VideoTagPlayer key={i} i={i} />);
+    players.push(<AmpVideoWithKnobs key={i} i={i} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -121,5 +121,31 @@ export const Default = () => {
       {players}
       {spaceBelow && <Spacer height={spacerHeight} />}
     </>
+  );
+};
+
+const ActionButton = ({children, ...props}) => (
+  <button style={{flex: 1, margin: '0 4px'}} {...props}>
+    {children}
+  </button>
+);
+
+export const Actions = () => {
+  return (
+    <div style="max-width: 800px">
+      <AmpVideoWithKnobs id="player" />
+      <div
+        style={{
+          margin: '12px 0',
+          display: 'flex',
+        }}
+      >
+        <ActionButton on="tap:player.play">Play</ActionButton>
+        <ActionButton on="tap:player.pause">Pause</ActionButton>
+        <ActionButton on="tap:player.mute">Mute</ActionButton>
+        <ActionButton on="tap:player.unmute">Unmute</ActionButton>
+        <ActionButton on="tap:player.fullscreen">Fullscreen</ActionButton>
+      </div>
+    </div>
   );
 };
