@@ -79,6 +79,12 @@ CMP_CONFIG['Ogury'] = {
   'promptUISrc': 'https://www.ogury.mgr.consensu.org/amp.html',
 };
 
+CMP_CONFIG['onetrust'] = {
+  'consentInstanceId': 'onetrust',
+  'checkConsentHref': 'https://cdn.cookielaw.org/amp/consent/check',
+  'promptUISrc': ' https://amp.onetrust.mgr.consensu.org/',
+};
+
 CMP_CONFIG['opencmp'] = {
   'consentInstanceId': 'opencmp',
   'checkConsentHref': 'https://amp.opencmp.net/consent/check',
