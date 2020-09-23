@@ -325,14 +325,15 @@ export class AmpStory360 extends AMP.BaseElement {
           this.resizeRenderer_()
         );
 
+        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
+          this.isOnActivePage_ = currPageId === this.getPageId_();
+          console.log(this.isOnActivePage_);
+        });
+
         storeService.subscribe(
           StateProperty.GYROSCOPE_PERMISSION_STATE,
           (permissionState) => this.onPermissionState_(permissionState)
         );
-
-        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
-          this.isOnActivePage_ = currPageId === this.getPageId_();
-        });
       }),
 
       Services.localizationServiceForOrNull(this.element).then(
@@ -403,8 +404,8 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Creates a listener,sets gyroscopeControls_ state and triggers a discovery animation.
-   * If listener is not called in 1000ms, remove listener and discovery animation then resume animation.
+   * Creates a listener,sets gyroscopeControls_ state and triggers a discovery graphic.
+   * If listener is not called in 1000ms, remove listener and discovery graphic then resume animation.
    * @private
    */
   enableGyroscope_() {
