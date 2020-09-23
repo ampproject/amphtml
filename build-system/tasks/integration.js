@@ -30,7 +30,7 @@ const {buildNewServer} = require('../server/typescript-compile');
 const pathModule = require('path');
 
 const INTEGRATION_FIXTURES = [
-  './test/fixtures/**/*.html',
+  './test/fixtures/images.html',
   '!./test/fixtures/e2e',
   '!./test/fixtures/served',
   '!./test/fixtures/performance',

@@ -28,6 +28,12 @@ export interface ScriptNode extends PostHTML.Node {
   };
 }
 
+const VALID_SCRIPT_EXTENSION = ['.js', '.mjs'];
+
+function isValidScriptExtension(url: URL): boolean {
+  return VALID_SCRIPT_EXTENSION.includes(extname(url.pathname));
+}
+
 /**
  * Determines if a Node is really a ScriptNode.
  * @param node
@@ -38,11 +44,11 @@ export function isValidScript(node: PostHTML.Node, allowLocal?: boolean): node i
   }
 
   const attrs = node.attrs || {};
-  const src = tryGetURL(attrs.src || '');
+  const url = tryGetURL(attrs.src || '');
   if (allowLocal) {
-    return extname(src.pathname) === '.js';
+    return isValidScriptExtension(url);
   }
-  return src.origin === VALID_CDN_ORIGIN && extname(src.pathname) === '.js';
+  return url.origin === VALID_CDN_ORIGIN && isValidScriptExtension(url);
 }
 
 export function isJsonScript(node: PostHTML.Node): boolean {
@@ -54,6 +60,10 @@ export function isJsonScript(node: PostHTML.Node): boolean {
   return type.toLowerCase() === 'application/json';
 }
 
+/**
+ * Transforms a url's extension type to the desired type.
+ * ex. v0.js -> v0.mjs
+ */
 export function toExtension(url: URL, extension: string): URL {
   const parsedPath = parse(url.pathname);
   parsedPath.base = parsedPath.base.replace(parsedPath.ext, extension);
@@ -62,6 +72,10 @@ export function toExtension(url: URL, extension: string): URL {
   return url;
 }
 
+/**
+ * This is a temporary measure to allow for a relaxed parsing of our
+ * fixture files src url's before they are all fixed accordingly.
+ */
 export function tryGetURL(src: string, port: number = 8000): URL {
   let url;
   try {

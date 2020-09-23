@@ -22,7 +22,7 @@ import {OptionSet} from '../utilities/option-set';
  * @param head
  * @param script
  */
-function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode): void {
+function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode, options: OptionSet): void {
   const modulePath = toExtension(tryGetURL(nomoduleScript.attrs.src), '.mjs').toString();
   const moduleScript : ScriptNode = {
     ...nomoduleScript,
@@ -36,8 +36,15 @@ function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode): vo
 
   const content = head.content || [];
   const nomoduleIdx = content.indexOf(nomoduleScript);
-  // Add the module script after the nomodule script.
-  content.splice(nomoduleIdx + 1, 0, '\n', moduleScript);
+  // If we are testing and in esm mode, outright replace the nomodule script
+  // with the module script. This is so that we testing the module script in
+  // isolation without a fallback.
+  if (options.fortesting && options.esm) {
+    content.splice(nomoduleIdx, 1, moduleScript);
+  } else {
+    // Add the module script after the nomodule script.
+    content.splice(nomoduleIdx + 1, 0, '\n', moduleScript);
+  }
 }
 
 /**
@@ -73,7 +80,7 @@ export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void 
     }
 
     for (const script of scripts) {
-      appendModuleScript(head, script);
+      appendModuleScript(head, script, options);
     }
   }
 }
