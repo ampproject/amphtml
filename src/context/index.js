@@ -63,6 +63,37 @@ export function unassignSlot(node, slot) {
 }
 
 /**
+ * Sets (or unsets) the direct parent. If the parent is set, the node will no
+ * longer try to discover itself.
+ *
+ * @param {!Node} node
+ * @param {!Node|null} parent
+ */
+export function setParent(node, parent) {
+  ContextNode.get(node).setParent(parent);
+}
+
+/**
+ * Designates (or undesignates) the node as a root node. If the node is
+ * designated as a root, it will no longer discover itself.
+ *
+ * @param {!Node} node
+ * @param {boolean} isRoot
+ */
+export function setIsRoot(node, isRoot) {
+  ContextNode.get(node).setIsRoot(isRoot);
+}
+
+/**
+ * Reruns discovery on the children of the specified node, if any.
+ *
+ * @param {!Node} node
+ */
+export function rediscoverChildren(node) {
+  ContextNode.rediscoverChildren(node);
+}
+
+/**
  * Sets the property's input value. This is analagous to a CSS specified
  * value. Several values for the same property can be set on a node - one
  * per each setter. A repeated call for the same setter overwrites a
