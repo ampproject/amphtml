@@ -25,12 +25,11 @@ export const VALID_CDN_ORIGIN = 'https://cdn.ampproject.org';
 export function CDNURLToLocalDistURL(
   url: URL,
   pathnames: [string | null, string | null] = [null, null],
-  extension: string = '.js',
-  port: number = 8000,
+  extension: string = '.js'
 ): URL {
   url.protocol = 'http';
   url.hostname = 'localhost';
-  url.port = String(port);
+  url.port = '8000';
 
   const [overwriteablePathname, newPathname] = pathnames;
   if (url.pathname === overwriteablePathname && newPathname !== null) {

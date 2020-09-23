@@ -20,25 +20,25 @@ import {isValidScript} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
 
-/**
- * For any script, with a valid path to AMP Project CDN, replace it with a local value.
- * @param script
- */
-function modifySrc(script: PostHTML.Node): PostHTML.Node {
+function sidegradeStories(script: PostHTML.Node): PostHTML.Node {
   if (!isValidScript(script)) {
     return script;
   }
 
-  const src = CDNURLToLocalDistURL(new URL(script.attrs.src || '')).toString();
+  const originalSrc = new URL(script.attrs.src || '');
+  const src = CDNURLToLocalDistURL(originalSrc, [
+    'amp-story-1.0.js',
+    'amp-story-1.0.max.js',
+  ]).toString();
   script.attrs.src = src;
   return script;
 }
 
 /**
- * Replace the src for every script tag to the local value.
+ * Replace the src for every stories script tag.
  */
 export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node) {
-    tree.match({tag: 'script'}, modifySrc);
+    tree.match({tag: 'script'}, sidegradeStories);
   }
 }
