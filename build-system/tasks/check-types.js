@@ -19,13 +19,13 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
+const {
+  displayLifecycleDebugging,
+} = require('../compile/debug-compilation-lifecycle');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {maybeUpdatePackages} = require('./update-packages');
-const {
-  displayLifecycleDebugging,
-} = require('../compile/debug-compilation-lifecycle');
 
 /**
  * Dedicated type check path.
