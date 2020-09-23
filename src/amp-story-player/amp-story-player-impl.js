@@ -386,17 +386,19 @@ export class AmpStoryPlayer {
 
   /** @private */
   initializeShadowRoot_() {
-    this.rootEl_ = this.doc_.createElement('main');
+    this.rootEl_ = this.doc_.createElement('div');
+    this.rootEl_.classList.add('i-amphtml-story-player-main-container');
 
-    const containerToUse = getMode().test
-      ? this.element_
-      : this.element_.attachShadow({mode: 'open'});
+    const containerToUse =
+      getMode().test || !this.element_.attachShadow
+        ? this.element_
+        : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
     styleEl.textContent = cssText;
     containerToUse.appendChild(styleEl);
-    containerToUse.appendChild(this.rootEl_);
+    containerToUse.insertBefore(this.rootEl_, containerToUse.firstElementChild);
   }
 
   /**
