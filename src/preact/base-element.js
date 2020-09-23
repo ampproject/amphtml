@@ -21,6 +21,7 @@ import {Deferred} from '../utils/promise';
 import {Loading} from '../loading';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
+import {addGroup, setGroupProp, setParent, subscribe} from '../context';
 import {cancellation} from '../error';
 import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createCustomEvent} from '../event-helper';
@@ -30,7 +31,6 @@ import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
-import {addGroup, setGroupProp, setParent, subscribe} from '../context';
 import {startsWith} from '../string';
 
 /**
@@ -102,7 +102,7 @@ const RENDERED_PROP = '__AMP_RENDERED';
 
 const UNSLOTTED_GROUP = 'unslotted';
 
-/** @const {function():boolean} */
+/** @return {boolean} */
 const MATCH_ANY = () => true;
 
 /**

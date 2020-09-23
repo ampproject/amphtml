@@ -17,7 +17,7 @@
 import * as Preact from './index';
 import {CanPlay, CanRender} from '../contextprops';
 import {dev} from '../log';
-import {removeProp, setProp} from '../context';
+import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useRef} from './index';
 
@@ -49,6 +49,7 @@ export function Slot(props) {
     return () => {
       removeProp(slot, CanRender, Slot);
       removeProp(slot, CanPlay, Slot);
+      rediscoverChildren(slot);
     };
   }, [context]);
 

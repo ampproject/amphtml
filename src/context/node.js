@@ -167,6 +167,20 @@ export class ContextNode {
     discoverContained(node);
   }
 
+
+  /**
+   * Reruns discovery on the children of the specified node, if any.
+   *
+   * @param {!Node} node
+   */
+  static rediscoverChildren(node) {
+    const contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
+    const children = contextNode && contextNode.children;
+    if (children) {
+      children.forEach(discoverContextNode);
+    }
+  }
+
   /**
    * Creates the context node and automatically starts the discovery process.
    *

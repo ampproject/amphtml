@@ -74,6 +74,15 @@ export function setParent(node, parent) {
 }
 
 /**
+ * Reruns discovery on the children of the specified node, if any.
+ *
+ * @param {!ContextNode} node
+ */
+export function rediscoverChildren(node) {
+  ContextNode.rediscoverChildren(node);
+}
+
+/**
  * Sets the property's input value. This is analagous to a CSS specified
  * value. Several values for the same property can be set on a node - one
  * per each setter. A repeated call for the same setter overwrites a
