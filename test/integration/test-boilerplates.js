@@ -43,21 +43,19 @@ describe('Old Opacity Boilerplate', () => {
 
 describe('New Visibility Boilerplate', () => {
   let fixture;
-  beforeEach(() => {
-    return createFixtureIframe(
+  beforeEach(async () => {
+    fixture = await createFixtureIframe(
       'test/fixtures/boilerplate-new-visibility.html',
       10000
-    ).then((f) => {
-      fixture = f;
-    });
+    );
   });
 
-  it('should show the body in boilerplate test', () => {
-    return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
-      expect(getStyle(fixture.win.document.body, 'visibility')).to.equal(
-        'visible'
-      );
-      expect(isAnimationNone(fixture.win.document.body)).to.be.true;
-    });
+  it('should show the body in boilerplate test', async () => {
+    await expectBodyToBecomeVisible(fixture.win, timeout);
+
+    expect(getStyle(fixture.win.document.body, 'visibility')).to.equal(
+      'visible'
+    );
+    expect(isAnimationNone(fixture.win.document.body)).to.be.true;
   });
 });

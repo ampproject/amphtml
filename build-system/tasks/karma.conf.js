@@ -170,7 +170,7 @@ module.exports = {
 
   // Can't import the Karma constant config.LOG_ERROR, so we hard code it here.
   // Hopefully it'll never change.
-  logLevel: 'ERROR',
+  logLevel: 'DEBUG',
 
   autoWatch: true,
 

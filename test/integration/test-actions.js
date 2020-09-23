@@ -21,10 +21,13 @@ describe('on="..."', () => {
   let fixture;
 
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/actions.html', 500).then((f) => {
+    const prom = createFixtureIframe('test/fixtures/actions.html', 500);
+    console.log(prom);
+    return prom.then((f) => {
       fixture = f;
 
       // Wait for one <amp-img> element to load.
+      console.log('awaitEvent');
       return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
     });
   });

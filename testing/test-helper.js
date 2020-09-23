@@ -103,6 +103,7 @@ export function waitFor(callback, errorMessage) {
 }
 
 const noneValues = {
+  'animation': ['none', 'initial'],
   'animation-name': ['none', 'initial'],
   'animation-duration': ['0s', 'initial'],
   'animation-timing-function': ['ease', 'initial'],
@@ -121,6 +122,7 @@ const noneValues = {
  * @return {boolean}
  */
 export function isAnimationNone(element) {
+  console.log(noneValues.map((p) => [p, getStyle(element, p)]));
   for (const property in noneValues) {
     const value = getStyle(element, property);
     const expectedValues = noneValues[property];
