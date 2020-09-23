@@ -33,9 +33,16 @@ function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
     return script;
   }
 
-  const src = CDNURLToLocalDistURL(new URL(script.attrs.src || '')).toString();
+  try {
+  const url = new URL(script.attrs.src || '');
+  const src = CDNURLToLocalDistURL(url, [null, null], '.js', options.port)
+      .toString();
   script.attrs.src = src;
-  return script;
+  } catch (e) {
+    console.error(`Could not convert src ${script.attrs.src}`);
+  } finally {
+    return script;
+  }
 }
 
 /**
