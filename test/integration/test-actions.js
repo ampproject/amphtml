@@ -22,12 +22,12 @@ describe('on="..."', () => {
 
   beforeEach(() => {
     const prom = createFixtureIframe('test/fixtures/actions.html', 500);
-    console.error(prom);
+    console.warn(prom);
     return prom.then((f) => {
       fixture = f;
 
       // Wait for one <amp-img> element to load.
-      console.error('awaitEvent');
+      console.warn('awaitEvent');
       return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
     });
   });
