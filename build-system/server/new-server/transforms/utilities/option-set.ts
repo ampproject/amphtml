@@ -20,10 +20,7 @@
  * options.json, then add the field to this interface.
  */
 export interface OptionSet {
-    compiled?: boolean;
-    // Allows to bypass `isValidScript` checks. This is needed as to allow
-    // localhost and absolute path urls as we convert all our html files
-    // to what a valid AMP HTML document should look like. This should be
-    // temporary.
-    looseScriptSrcCheck?: boolean,
+  compiled?: boolean;
+  esm?: boolean;
+  port?: number;
 }

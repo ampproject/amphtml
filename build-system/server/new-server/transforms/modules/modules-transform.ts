@@ -16,7 +16,7 @@
 
 import {PostHTML} from 'posthtml';
 import {URL} from 'url';
-import {isJsonScript, isValidScript, toExtension, ScriptNode} from '../utilities/script';
+import {isJsonScript, isValidScript, toExtension, ScriptNode, getURL} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
 
 /**

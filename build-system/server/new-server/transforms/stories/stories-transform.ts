@@ -20,7 +20,7 @@ import {isValidScript} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
 
-function sidegradeStories(script: PostHTML.Node): PostHTML.Node {
+function sidegradeStories(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
   if (!isValidScript(script)) {
     return script;
   }
@@ -29,7 +29,7 @@ function sidegradeStories(script: PostHTML.Node): PostHTML.Node {
   const src = CDNURLToLocalDistURL(originalSrc, [
     'amp-story-1.0.js',
     'amp-story-1.0.max.js',
-  ]).toString();
+  ], '.js', options.port).toString();
   script.attrs.src = src;
   return script;
 }
@@ -39,6 +39,8 @@ function sidegradeStories(script: PostHTML.Node): PostHTML.Node {
  */
 export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node) {
-    tree.match({tag: 'script'}, sidegradeStories);
+    tree.match({tag: 'script'}, (node) => {
+      return sidegradeStories(node, options);
+    });
   }
 }
