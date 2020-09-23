@@ -254,6 +254,12 @@ describe
           });
         });
 
+        it('should not register duplicate entries', () => {
+          videoManager.register(impl);
+          videoManager.register(impl);
+          expect(videoManager.entries_.length).to.equal(1);
+        });
+
         beforeEach(() => {
           klass = createFakeVideoPlayerClass(env.win);
           video = env.createAmpElement('amp-test-fake-videoplayer', klass);

@@ -187,13 +187,19 @@ export class VideoManager {
   register(video) {
     devAssert(video);
 
+    this.entries_ = this.entries_ || [];
+
+    // Don't register duplicate entries
+    if (this.entries_.some((entry) => entry.video === video)) {
+      return;
+    }
+
     this.registerCommonActions_(video);
 
     if (!video.supportsPlatform()) {
       return;
     }
 
-    this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.entries_.push(entry);
