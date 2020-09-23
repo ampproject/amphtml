@@ -456,7 +456,7 @@ class Chunks {
   executeAsap_(idleDeadline) {
     // If the user-agent supports isInputPending, use it to break to a macro task as necessary.
     // Otherwise If we've spent over 5 millseconds executing the
-    // last instruction yeild back to the main thread.
+    // last instruction yield back to the main thread.
     // 5 milliseconds is a magic number.
     if (
       !allowLongTasks &&
