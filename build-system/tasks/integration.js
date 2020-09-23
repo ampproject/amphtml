@@ -29,6 +29,13 @@ const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 const {buildNewServer} = require('../server/typescript-compile');
 const pathModule = require('path');
 
+const INTEGRATION_FIXTURES = [
+  './test/fixtures/**/*.html',
+  '!./test/fixtures/e2e',
+  '!./test/fixtures/served',
+  '!./test/fixtures/performance',
+]
+
 let htmlTransform;
 
 class Runner extends RuntimeTestRunner {
@@ -46,42 +53,30 @@ class Runner extends RuntimeTestRunner {
 }
 
 async function buildTransformedHtml() {
-  const filePaths = await globby('./test/fixtures/**/*.html');
+  const filePaths = await globby(INTEGRATION_FIXTURES);
     for (const filePath of filePaths) {
       const normalizedFilePath = pathModule.normalize(filePath);
-      if (argv.esm) {
-        await transformAndWriteToTestFolder(normalizedFilePath);
-      } else {
-        await copyToTestFolder(normalizedFilePath);
-      }
+      await transformAndWriteToTestFolder(normalizedFilePath);
     }
-}
-
-async function copyToTestFolder(filePath) {
-  log(
-    green('Copying integration test files to'),
-    cyan('test-bin/') + green('...')
-  );
-  await fs.copy(filePath, `./test-bin/${filePath}`);
 }
 
 async function transformAndWriteToTestFolder(filePath) {
   try {
-    const html = await transform(filePath);
-    await fs.write(`./test-bin/${filePath}`, html);
+    const html = await htmlTransform(filePath);
+    await fs.writeFile(`./test-bin/${filePath}`, html);
   } catch (e) {
     console./*OK*/ log(
-      `${normalizedFilePath} could not be transformed by the postHTML ` +
+      `${filePath} could not be transformed by the postHTML ` +
         `pipeline.\n${e.message}`
     );
+    await fs.copy(filePath, `./test-bin/${filePath}`);
   }
 }
 
 async function integration() {
-  if (argv.esm) {
-    buildNewServer();
-    htmlTransform = require('../server/new-server/transforms/dist/transform').transform;
-  }
+  buildNewServer();
+  htmlTransform = require('../server/new-server/transforms/dist/transform')
+      .transform;
   await buildTransformedHtml();
 
   maybePrintArgvMessages();
@@ -110,6 +105,7 @@ integration.flags = {
     '  Allow debug statements by auto opening devtools. NOTE: This only ' +
     'works in non headless mode.',
   'edge': '  Runs tests on Edge',
+  'esm': '  Runs against module/nomodule build',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',
