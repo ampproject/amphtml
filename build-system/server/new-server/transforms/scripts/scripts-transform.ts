@@ -29,7 +29,7 @@ function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
     return script;
   }
 
-  if (!isValidScript(script, options.looseScriptSrcCheck)) {
+  if (!isValidScript(script)) {
     return script;
   }
 
