@@ -428,11 +428,10 @@ export class AmpStoryPlayer {
    */
   buildIframe_(story) {
     const iframeEl = this.doc_.createElement('iframe');
-    setStyle(
-      iframeEl,
-      'backgroundImage',
-      `url(${story.getAttribute('data-poster-portrait-src')})`
-    );
+    const storyBackgroundImg = story.getAttribute('data-poster-portrait-src');
+    if (storyBackgroundImg) {
+      setStyle(iframeEl, 'backgroundImage', `url(${storyBackgroundImg})`);
+    }
     iframeEl.classList.add('story-player-iframe');
     iframeEl.setAttribute('allow', 'autoplay');
     this.iframes_.push(iframeEl);
