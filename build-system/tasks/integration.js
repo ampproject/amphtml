@@ -26,6 +26,7 @@ const {
 const {buildRuntime} = require('../common/utils');
 const {cyan, green} = require('ansi-colors');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
+const {transform} = require('../server/new-server/transforms/dist/transform');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -51,7 +52,11 @@ async function buildTransformedHtml() {
     );
     for (const filePath of filePaths) {
       normalizedFilePath = pathModule.normalize(filePath);
-      await fs.copy(filePath, `./test-bin/${filePath}`);
+      if (argv.esm) {
+        transformAndWriteToTestFolder(normalizedFilePath);
+      } else {
+        await copyToTestFolder(normalizedFilePath);
+      }
     }
   } catch (e) {
     console./*OK*/ log(
@@ -59,6 +64,15 @@ async function buildTransformedHtml() {
         `pipeline.\n${e.message}`
     );
   }
+}
+
+async function copyToTestFolder(filePath) {
+  await fs.copy(filePath, `./test-bin/${filePath}`);
+}
+
+async function transformAndWriteToTestFolder(filePath) {
+  const html = await transform(filePath);
+  await fs.write(`./test-bin/${filePath}`, html);
 }
 
 async function integration() {
