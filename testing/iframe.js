@@ -183,7 +183,7 @@ export function createFixtureIframe(
     iframe.onerror = function (event) {
       reject(event.error);
     };
-    console.log('initialIframeHeight');
+    console.error('initialIframeHeight');
     iframe.height = initialIframeHeight;
     iframe.width = 500;
     if ('srcdoc' in iframe) {

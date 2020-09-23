@@ -170,7 +170,7 @@ module.exports = {
 
   // Can't import the Karma constant config.LOG_ERROR, so we hard code it here.
   // Hopefully it'll never change.
-  logLevel: 'DEBUG',
+  logLevel: 'INFO',
 
   autoWatch: true,
 
@@ -206,7 +206,7 @@ module.exports = {
       retries: isGithubActionsBuild() || isTravisBuild() ? 2 : 0,
     },
     captureConsole: true,
-    verboseLogging: false,
+    verboseLogging: true,
     testServerPort: TEST_SERVER_PORT,
   },
 
