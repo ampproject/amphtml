@@ -19,24 +19,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
-const pathModule = require('path');
 const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
-const {cyan, red} = require('ansi-colors');
+const {cyan, green} = require('ansi-colors');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
-
-const INTEGRATION_FIXTURES = [
-  './test/fixtures/**/*.html',
-  '!./test/fixtures/e2e',
-  '!./test/fixtures/served',
-  '!./test/fixtures/performance',
-];
-
-let htmlTransform;
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -53,35 +42,25 @@ class Runner extends RuntimeTestRunner {
 }
 
 async function buildTransformedHtml() {
-  const filePaths = await globby(INTEGRATION_FIXTURES);
-  for (const filePath of filePaths) {
-    const normalizedFilePath = pathModule.normalize(filePath);
-    await transformAndWriteToTestFolder(normalizedFilePath);
-  }
-}
-
-async function transformAndWriteToTestFolder(filePath) {
+  const filePaths = await globby('./test/fixtures/**/*.html');
+  let normalizedFilePath;
   try {
-    const html = await htmlTransform(filePath);
-    await fs.writeFile(`./test-bin/${filePath}`, html);
-  } catch (e) {
     log(
-      red(
-        'ERROR:',
-        cyan(
-          `${filePath} could not be transformed by the postHTML ` +
-            `pipeline.\n${e.message}. \n Falling back to copying.`
-        )
-      )
+      green('Copying integration test files to'),
+      cyan('test-bin/') + green('...')
     );
-    await fs.copy(filePath, `./test-bin/${filePath}`);
+    for (const filePath of filePaths) {
+      await fs.copySync(filePath, `./test-bin/${filePath}`);
+    }
+  } catch (e) {
+    console./*OK*/ log(
+      `${normalizedFilePath} could not be transformed by the postHTML ` +
+        `pipeline.\n${e.message}`
+    );
   }
 }
 
 async function integration() {
-  buildNewServer();
-  htmlTransform = require('../server/new-server/transforms/dist/transform')
-    .transform;
   await buildTransformedHtml();
 
   maybePrintArgvMessages();
@@ -110,7 +89,6 @@ integration.flags = {
     '  Allow debug statements by auto opening devtools. NOTE: This only ' +
     'works in non headless mode.',
   'edge': '  Runs tests on Edge',
-  'esm': '  Runs against module/nomodule build',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',
