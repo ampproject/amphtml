@@ -267,12 +267,7 @@ export class Navigation {
    *   opener: (boolean|undefined),
    * }=} options
    */
-  navigateTo(
-    win,
-    url,
-    opt_requestedBy,
-    options = {}
-  ) {
+  navigateTo(win, url, opt_requestedBy, options = {}) {
     const {target = '_top', opener = false} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
