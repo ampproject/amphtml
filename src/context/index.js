@@ -76,7 +76,7 @@ export function setParent(node, parent) {
 /**
  * Reruns discovery on the children of the specified node, if any.
  *
- * @param {!ContextNode} node
+ * @param {!Node} node
  */
 export function rediscoverChildren(node) {
   ContextNode.rediscoverChildren(node);

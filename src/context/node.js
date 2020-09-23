@@ -167,7 +167,6 @@ export class ContextNode {
     discoverContained(node);
   }
 
-
   /**
    * Reruns discovery on the children of the specified node, if any.
    *
