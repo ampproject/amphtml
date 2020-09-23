@@ -18,6 +18,7 @@ import {ArrowNext, ArrowPrev} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
+import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   toChildArray,
@@ -95,7 +96,17 @@ function BaseCarouselWithRef(
           state management code.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < 2 ? child : <></>
+          Math.abs(index - currentSlide) < 2 ? (
+            <WithAmpContext
+              key={index}
+              renderable={index == currentSlide}
+              playable={index == currentSlide}
+            >
+              {child}
+            </WithAmpContext>
+          ) : (
+            <></>
+          )
         )}
       </Scroller>
       <ArrowPrev
