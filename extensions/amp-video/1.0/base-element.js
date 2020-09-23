@@ -36,8 +36,6 @@ export class VideoBaseElement extends PreactBaseElement {
     this.registerApiAction_('requestFullscreen', requestFullscreen);
     this.registerApiAction_('fullscreenenter', requestFullscreen);
     this.registerApiAction_('fullscreen', requestFullscreen);
-
-    return dict({'component': this.constructor['PlayerComponent']});
   }
 
   /**
@@ -74,11 +72,11 @@ VideoBaseElement['Component'] = VideoWrapper;
 /** @override */
 VideoBaseElement['layoutSizeDefined'] = true;
 
-/**
- * `component` prop on VideoWrapper (defaults to 'video').
- * @protected {string|PreactDef.FunctionalComponent|undefined}
- */
-VideoBaseElement['PlayerComponent'] = undefined;
+/** @override */
+VideoBaseElement['staticProps'] = dict({
+  // defaults to 'video'. Subclasses may set.
+  // 'component': undefined,
+});
 
 /** @override */
 VideoBaseElement['props'] = {

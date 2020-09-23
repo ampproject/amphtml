@@ -22,7 +22,7 @@ var VideoWrapperDef = {};
 /**
  * @typedef {{
  *   play: function():!Promise,
- *   pause: function():!Promise,
+ *   pause: function():void,
  *   requestFullscreen: function():!Promise,
  *   currentTime: number,
  *   duration: number,

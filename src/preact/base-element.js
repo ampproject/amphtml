@@ -143,7 +143,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.scheduledRenderDeferred_ = null;
 
     /** @private {!JsonObject|null|undefined} */
-    this.defaultProps_ = null;
+    this.defaultProps_ = this.constructor['staticProps'];
 
     /** @private {boolean} */
     this.mounted_ = true;
@@ -491,6 +491,12 @@ export class PreactBaseElement extends AMP.BaseElement {
 PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
+
+/**
+ * If default props are static, this can be used instead of init().
+ * @protected {!JsonObject|undefined}
+ */
+PreactBaseElement['staticProps'] = undefined;
 
 /**
  * @protected {!Array<!ContextProp>}

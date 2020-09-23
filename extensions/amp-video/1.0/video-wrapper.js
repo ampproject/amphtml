@@ -101,30 +101,24 @@ function VideoWrapperWithRef(
   // <source>s change.
   const readyDeferred = useMemo(() => new Deferred(), []);
 
-  const play = useCallback(
-    () =>
-      readyDeferred.promise.then(() => {
-        const couldBePromise = playerRef.current.play();
-        if (couldBePromise && couldBePromise.catch) {
-          couldBePromise.catch(() => {
-            // Empty catch to prevent useless unhandled rejection logging.
-            // play() can fail for benign reasons like pausing.
-          });
-        }
-      }),
-    [readyDeferred]
-  );
+  const play = useCallback(() => {
+    return readyDeferred.promise.then(() =>
+      Promise.resolve(playerRef.current.play()).catch(() => {
+        // Empty catch to prevent useless unhandled rejection logging.
+        // play() can fail for benign reasons like pausing.
+      })
+    );
+  }, [readyDeferred]);
 
-  const pause = useCallback(
-    () => readyDeferred.promise.then(() => playerRef.current.pause()),
-    [readyDeferred]
-  );
+  const pause = useCallback(() => {
+    readyDeferred.promise.then(() => playerRef.current.pause());
+  }, [readyDeferred]);
 
-  const requestFullscreen = useCallback(
-    () =>
-      readyDeferred.promise.then(() => playerRef.current.requestFullscreen()),
-    [readyDeferred]
-  );
+  const requestFullscreen = useCallback(() => {
+    return readyDeferred.promise.then(() =>
+      playerRef.current.requestFullscreen()
+    );
+  }, [readyDeferred]);
 
   const userInteracted = useCallback(() => {
     setMuted(false);
