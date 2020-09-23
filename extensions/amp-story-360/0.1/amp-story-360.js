@@ -33,9 +33,11 @@ import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
+import {ImgPlayer360} from './img-player-360';
+import {VideoPlayer360} from './video-player-360';
 
 /** @const {string} */
-const TAG = 'AMP_STORY_360';
+export const TAG = 'AMP_STORY_360';
 
 /**
  * Generates the template for the permission button.
@@ -131,7 +133,7 @@ class CameraOrientation {
  * from a set of 2 or more CameraOrientation target points and an animation
  * duration (approximate duration in ms based on 60FPS refresh rate).
  */
-class CameraAnimation {
+export class CameraAnimation {
   /**
    * @param {number} durationMs
    * @param {!Array<!CameraOrientation>} orientations
@@ -504,72 +506,21 @@ export class AmpStory360 extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /**
-   * Checks if the image is larger than the GPUs max texture size.
-   * Scales the image down if neededed.
-   * Returns the image element if image is within bounds.
-   * If image is out of bounds, returns a scaled canvas element.
-   * @param {!Element} imgEl
-   * @return {!Element}
-   * @private
-   */
-  checkImageReSize_(imgEl) {
-    const canvasForGL = document.createElement('canvas');
-    const gl = canvasForGL.getContext('webgl');
-    const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-
-    if (
-      imgEl.naturalWidth > MAX_TEXTURE_SIZE ||
-      imgEl.naturalHeight > MAX_TEXTURE_SIZE
-    ) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = Math.min(imgEl.naturalWidth, MAX_TEXTURE_SIZE);
-      canvas.height = Math.min(imgEl.naturalHeight, MAX_TEXTURE_SIZE);
-      ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-      return canvas;
-    } else {
-      return imgEl;
-    }
-  }
-
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
-    userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
-    const owners = Services.ownersForDoc(this.element);
-    owners.setOwner(ampImgEl, this.element);
-    owners.scheduleLayout(this.element, ampImgEl);
-    return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => {
-        return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
-      })
-      .then(
-        () => {
-          this.renderer_ = new Renderer(this.canvas_);
-          const img = this.checkImageReSize_(
-            dev().assertElement(this.element.querySelector('img'))
-          );
-          this.renderer_.setImageOrientation(
-            this.sceneHeading_,
-            this.scenePitch_,
-            this.sceneRoll_
-          );
-          this.renderer_.setImage(img);
-          this.renderer_.resize();
-          if (this.orientations_.length < 1) {
-            return;
-          }
-          this.renderInitialPosition_();
-          this.isReady_ = true;
-          if (this.isPlaying_) {
-            this.animate_();
-          }
-        },
-        () => {
-          user().error(TAG, 'Failed to load the amp-img.');
-        }
-      );
+    const ampVideoEl = this.element.querySelector('amp-video');
+    userAssert(
+      ampImgEl || ampVideoEl,
+      'amp-story-360 must contain an amp-img or amp-video element.'
+    );
+    if (ampImgEl) {
+      this.player_ = new ImgPlayer360(this, ampImgEl);
+    }
+    if (ampVideoEl) {
+      this.player_ = new VideoPlayer360(this, ampVideoEl);
+    }
+    return this.player_.initLayout_();
   }
 
   /** @private */
@@ -604,32 +555,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   animate_() {
-    if (!this.animation_) {
-      this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
-    }
-    const loop = () => {
-      if (!this.isPlaying_ || !this.animation_ || this.gyroscopeControls_) {
-        this.renderer_.render(false);
-        return;
-      }
-      const nextOrientation = this.animation_.getNextOrientation();
-      if (nextOrientation) {
-        // mutateElement causes inaccurate animation speed here, so we use rAF.
-        this.win.requestAnimationFrame(() => {
-          this.renderer_.setCamera(
-            nextOrientation.rotation,
-            nextOrientation.scale
-          );
-          this.renderer_.render(true);
-          loop();
-        });
-      } else {
-        this.isPlaying_ = false;
-        this.renderer_.render(false);
-        return;
-      }
-    };
-    this.mutateElement(() => loop());
+    this.player_.animate_();
   }
 
   /** @public */
