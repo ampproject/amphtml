@@ -76,7 +76,7 @@ function updateBrowsers(config) {
 
   if (argv.safari) {
     Object.assign(config, {
-      browsers: [argv.ios ? 'MobileSafari' : 'SafariNative'],
+      browsers: [argv.ios ? 'iOS' : 'SafariNative'],
     });
     return;
   }
