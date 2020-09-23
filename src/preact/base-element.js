@@ -135,15 +135,6 @@ export class PreactBaseElement extends AMP.BaseElement {
       notify: () => this.mutateElement(() => {}),
     };
 
-    /** @private {?Node} */
-    this.container_ = null;
-
-    /** @private {boolean} */
-    this.scheduledRender_ = false;
-
-    /** @private {?Deferred} */
-    this.renderDeferred_ = null;
-
     /** @private {{current: ?API_TYPE}} */
     this.ref_ = createRef();
 
@@ -377,14 +368,6 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  onLoad_() {
-    if (this.loadDeferred_) {
-      this.loadDeferred_.resolve();
-      this.loadDeferred_ = null;
-    }
-  }
-
   /**
    * @param {*} opt_reason
    * @private
@@ -581,13 +564,6 @@ export class PreactBaseElement extends AMP.BaseElement {
 PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
-
-/**
- * Whether the component implements a loading protocol.
- *
- * @protected {boolean}
- */
-PreactBaseElement['loadable'] = false;
 
 /**
  * @protected {!Array<!ContextProp>}

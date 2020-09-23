@@ -54,7 +54,6 @@ export function WithAmpContext({
   playable: playableProp = true,
   loading: loadingProp = 'auto',
   notify: notifyProp,
-  loading: loadingProp,
   children,
 }) {
   const parent = useAmpContext();
