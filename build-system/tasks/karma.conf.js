@@ -206,7 +206,7 @@ module.exports = {
       retries: isGithubActionsBuild() || isTravisBuild() ? 2 : 0,
     },
     captureConsole: true,
-    verboseLogging: true,
+    verboseLogging: false,
     testServerPort: TEST_SERVER_PORT,
   },
 
