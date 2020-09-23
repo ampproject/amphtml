@@ -18,6 +18,7 @@ import {PostHTML} from 'posthtml';
 import {isJsonScript, isValidScript, tryGetURL} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
+import {parse} from 'path';
 
 /**
  * For any script, with a valid path to AMP Project CDN, replace it with a local value.
@@ -28,12 +29,13 @@ function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
     return script;
   }
 
-  if (!isValidScript(script)) {
+  if (!isValidScript(script, options.looseScriptSrcCheck)) {
     return script;
   }
 
   const url = tryGetURL(script.attrs.src || '');
-  const src = CDNURLToLocalDistURL(url, [null, null], '.js', options.port)
+  const parsedPath = parse(url.pathname);
+  const src = CDNURLToLocalDistURL(url, [null, null], parsedPath.ext, options.port)
       .toString();
   script.attrs.src = src;
   return script;

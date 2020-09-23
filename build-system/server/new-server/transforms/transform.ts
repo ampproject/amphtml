@@ -22,24 +22,29 @@ import transformScriptPaths from './scripts/scripts-transform';
 import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
+const FORTESTING = argv._.includes('integration');
 // Use 9876 if running integration tests as this is the KARMA_SERVER_PORT
-const PORT = argv._.includes('integration') ? 9876 : 8000;
+const PORT = FORTESTING ? 9876 : 8000;
 const ESM = !!argv.esm;
 
 const transforms = [
   transformScriptPaths({
     esm: ESM,
-    port: PORT
+    port: PORT,
+    fortesting: FORTESTING,
   }),
-  transformCss()
 ];
 
 export async function transform(fileLocation: string): Promise<string> {
-  if (argv.esm) {
-    transforms.unshift(transformModules({
-      esm: ESM,
-      port: PORT
-    }));
+  if (ESM) {
+    transforms.unshift(
+      transformCss(),
+      transformModules({
+        esm: ESM,
+        port: PORT,
+        fortesting: FORTESTING,
+      }),
+    );
   }
 
   const source = await fsPromises.readFile(fileLocation, 'utf8');
