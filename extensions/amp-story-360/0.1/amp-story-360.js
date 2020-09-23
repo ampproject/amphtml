@@ -374,7 +374,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   checkGyroscopePermissions_() {
-    this.renderActivateButton_();
     //  If browser doesn't support DeviceOrientationEvent.
     if (typeof this.win.DeviceOrientationEvent === 'undefined') {
       return;
@@ -404,17 +403,21 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Creates a device orientation listener and sets gyroscopeControls_ state.
-   * If listener is not called in 1000ms, remove listener and resume animation.
-   * This happens on desktop browsers that support deviceorientation but aren't in motion.
+   * Creates a listener,sets gyroscopeControls_ state and triggers a discovery animation.
+   * If listener is not called in 1000ms, remove listener and discovery animation then resume animation.
    * @private
    */
   enableGyroscope_() {
     this.gyroscopeControls_ = true;
     this.togglePermissionClass_(true);
 
+    const discoverTemplate = buildDiscoveryTemplate(this.element);
+    this.mutateElement(() => this.element.appendChild(discoverTemplate));
+
+    // This can happen on desktop browsers that support deviceorientation but don't call it.
     const checkNoMotion = this.timer_.delay(() => {
       this.gyroscopeControls_ = false;
+      this.mutateElement(() => this.element.removeChild(discoverTemplate));
       if (this.isReady_ && this.isPlaying_) {
         this.animate_();
       }
@@ -510,12 +513,12 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   togglePermissionClass_(hidePermissionButton) {
-    // this.mutateElement(() => {
-    //   this.element.classList.toggle(
-    //     'i-amphtml-story-360-hide-permissions-ui',
-    //     hidePermissionButton
-    //   );
-    // });
+    this.mutateElement(() => {
+      this.element.classList.toggle(
+        'i-amphtml-story-360-hide-permissions-ui',
+        hidePermissionButton
+      );
+    });
   }
 
   /** @override */
@@ -554,9 +557,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const discoverTemplate = buildDiscoveryTemplate(this.element);
-    this.mutateElement(() => this.element.appendChild(discoverTemplate));
-
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
     const owners = Services.ownersForDoc(this.element);

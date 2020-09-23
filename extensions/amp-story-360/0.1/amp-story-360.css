@@ -81,6 +81,7 @@ amp-story-360 amp-img {
 }
 
 .i-amphtml-story-360-discovery {
+  pointer-events: none;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -89,11 +90,13 @@ amp-story-360 amp-img {
   perspective: 550px;
   z-index: 100000000;
   background: linear-gradient(0,rgba(0,0,0,1),transparent) !important;
-  animation: fadeInOut 5s forwards;
+  animation: fadeInOut 5s 1s forwards;
+  visibility: hidden;
 }
 
 @keyframes fadeInOut {
   0% {
+    visibility: visible;
     opacity: 0;
   }
   20% {
@@ -115,7 +118,7 @@ amp-story-360 amp-img {
   height: 100px;
   border: 1px solid white;
   border-radius: 10px;
-  animation: lookAround 4s;
+  animation: lookAround 4s 1s;
 }
 
 @keyframes lookAround {
