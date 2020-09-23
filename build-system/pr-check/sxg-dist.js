@@ -17,8 +17,8 @@
 
 /**
  * @fileoverview
- * This script builds the esm minified AMP runtime and runs the bundle size check.
- * This is run during the CI stage = build; job = module dist, bundle size.
+ * This script builds the sxg minified AMP runtime.
+ * This is run during the CI stage = build; job = sxg dist.
  */
 
 const colors = require('ansi-colors');
@@ -29,12 +29,13 @@ const {
   stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
   uploadSxgDistOutput,
+  downloadSxgDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {runYarnChecks} = require('./yarn-checks');
 
-const FILENAME = 'module-dist-bundle-size.js';
+const FILENAME = 'sxg-dist.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -46,9 +47,7 @@ function main() {
   }
 
   if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --sxg --fortesting');
-    uploadSxgDistOutput(FILENAME);
+    downloadSxgDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
