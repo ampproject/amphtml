@@ -16,16 +16,18 @@
 
 import * as dom from '../dom';
 import {AmpEvents} from '../amp-events';
+import {Loading} from '../loading';
 import {
   CanRender,
   LoadPendingState,
   LoadedState,
-  LoadingStrategy,
-  LoadingStrategyProp,
+  LoadingProp,
+} from '../contextprops';
+import {
   discover,
   setProp,
-  setPropOnPseudoNode,
-  setPseudoNode,
+  setGroupProp,
+  addGroup,
   subscribe,
 } from '../context';
 import {CommonSignals} from '../common-signals';
@@ -404,21 +406,18 @@ function createBaseCustomElementClass(win) {
       // Loading: schedule the component's loading when loading is enabled.
       subscribe(
         this,
-        [LoaderProp, LoadingStrategyProp],
-        (loader, loadingStrategy) => {
+        [LoaderProp, LoadingProp],
+        (loader, loading) => {
           const node = this;
-          console.log('amp-element: loadingStrategy: ',
+          console.log('amp-element: loading: ',
             node.nodeName.toLowerCase() + (node.id ? '#' + node.id : ''),
-            loadingStrategy);
-          switch (loadingStrategy) {
-            case LoadingStrategy.UNLOAD:
+            loading);
+          switch (loading) {
+            case Loading.UNLOAD:
               this.unlayoutCallback();
               return undefined;
-            case LoadingStrategy.PAUSE:
-              // QQQ: scheduleUnload.
-              return undefined;
             default:
-              return loader.scheduleLoad(this, loadingStrategy);
+              return loader.scheduleLoad(this, loading);
           }
         }
       );
@@ -815,7 +814,7 @@ function createBaseCustomElementClass(win) {
       }
 
       // Discover placeholders.
-      setPseudoNode(
+      addGroup(
         this,
         'placeholder',
         (node) => !!dom.closest(node, isPlaceholder, this)
@@ -1575,7 +1574,7 @@ function createBaseCustomElementClass(win) {
      */
     togglePlaceholder(show) {
       assertNotTemplate(this);
-      setPropOnPseudoNode(this, 'placeholder', CanRender, this, show);
+      setGroupProp(this, 'placeholder', CanRender, this, show);
       this.classList.toggle('i-amphtml-hide-placeholder', !show);
     }
 

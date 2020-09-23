@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  CanRender,
-  LoadingStrategy,
-  LoadingStrategyProp,
-  mountComponent,
-  useMountComponent,
-  useSetProp,
-} from '../context';
+import {Loading} from '../loading';
+import {CanRender, LoadingProp} from '../contextprops';
+import {mountComponent, useMountComponent, useSetProp} from '../context';
 import {DomReadyProvider, installThresholdLoader} from './loader';
 import {LoadingIndicatorService} from './loading-indicator';
 import {adoptServiceForEmbedDoc} from '../service';
@@ -94,8 +89,8 @@ function AmpDocSetter(root, ampdoc) {
     setProp(CanRender, ampdoc.isVisible());
     // QQQ: testing only.
     setProp(
-      LoadingStrategyProp,
-      ampdoc.isVisible() ? LoadingStrategy.AUTO : LoadingStrategy.UNLOAD
+      LoadingProp,
+      ampdoc.isVisible() ? Loading.AUTO : Loading.UNLOAD
     );
   };
   updateVisibility();

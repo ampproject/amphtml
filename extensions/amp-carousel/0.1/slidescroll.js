@@ -17,7 +17,8 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {CanRender, setProp} from '../../../src/context';
+import {CanRender} from '../../../src/contextprops';
+import {setProp} from '../../../src/context';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';

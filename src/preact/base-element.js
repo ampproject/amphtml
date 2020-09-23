@@ -217,7 +217,6 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     );
 
-    // Subscribe to dependent contexts.
     const useContexts = Ctor['useContexts'];
     if (useContexts.length != 0) {
       subscribe(this.element, useContexts, (...contexts) => {
@@ -557,13 +556,6 @@ export class PreactBaseElement extends AMP.BaseElement {
 PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
-
-/**
- * Whether the component implements a loading protocol.
- *
- * @protected {boolean}
- */
-PreactBaseElement['loadable'] = false;
 
 /**
  * @protected {!Array<!ContextProp>}

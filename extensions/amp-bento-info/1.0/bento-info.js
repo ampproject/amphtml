@@ -22,9 +22,9 @@ import {useMemo, useState} from '../../../src/preact';
 /**
  * @return {PreactDef.Renderable}
  */
-export function BentoInfo({...rest}) {
+export function BentoInfo({loading, onLoad, onLoadError, ...rest}) {
   const context = useAmpContext();
-  const {load, onLoad, onLoadError} = useLoad(rest);
+  const load = useLoad(loading);
 
   const src = 'http://localhost:8000/examples/img/sea@1x.jpg';
 

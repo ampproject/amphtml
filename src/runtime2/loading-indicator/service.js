@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {Loading} from '../../loading';
 import {
   CanPlay,
   LoadPendingState,
   LoadedState,
-  LoadingStrategy,
-  LoadingStrategyProp,
+  LoadingProp,
+} from '../../contextprops';
+import {
   observeInput,
   useDisposableMemo,
   useMountComponent,
@@ -50,15 +52,15 @@ export function LoadingIndicatorService(root) {
   });
 
   const LoadPendingTracker = withMetaData(
-    [CanPlay, LoadingStrategyProp, LoadPendingState, LoadedState],
-    (node, _, canPlay, loadingStrategy, loadPending, loaded) => {
+    [CanPlay, LoadingProp, LoadPendingState, LoadedState],
+    (node, _, canPlay, loading, loadPending, loaded) => {
       // console.log('LoadingIndicatorService: LoadPendingTracker: ',
       //   node.nodeName + '#' + node.id,
-      //   canPlay, loadingStrategy, loadPending, loaded);
+      //   canPlay, loading, loadPending, loaded);
       const indicatorsEnabled =
-        loadingStrategy == LoadingStrategy.AUTO ||
-        loadingStrategy == LoadingStrategy.LAZY ||
-        loadingStrategy == LoadingStrategy.EAGER;
+        loading == Loading.AUTO ||
+        loading == Loading.LAZY ||
+        loading == Loading.EAGER;
       if (indicatorsEnabled && canPlay && loadPending && !loaded) {
         io.observe(node);
         return () => {

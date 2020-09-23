@@ -16,6 +16,8 @@
 
 import {
   CanRender,
+} from '../../contextprops';
+import {
   contextProp,
   removeProp,
   setProp,
