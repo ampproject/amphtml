@@ -114,18 +114,23 @@ The amp-story-interactive-poll element provides a voting experience with 2-4 opt
 
 Can be paired up with amp-story-interactive-results to display different categories based on the answers to polls, but can be used independently as well. It is encouraged to add a prompt for extra context.
 
-[sourcecode:html]
+```html
 <amp-story-interactive-poll
-    id="favorite-country-poll"
-    theme="dark"
-    endpoint="https://endpoint.com/v1/interactives"
-    prompt-text="What is your favorite country?"
-    option-1-text="Spain" option-1-confetti="🇪🇸"
-    option-2-text="France" option-2-confetti="🇫🇷"
-    option-3-text="Germany" option-3-confetti="🇩🇪"
-    option-4-text="Uruguay" option-4-confetti="🇺🇾">
+  id="favorite-country-poll"
+  theme="dark"
+  endpoint="https://endpoint.com/v1/interactives"
+  prompt-text="What is your favorite country?"
+  option-1-text="Spain"
+  option-1-confetti="🇪🇸"
+  option-2-text="France"
+  option-2-confetti="🇫🇷"
+  option-3-text="Germany"
+  option-3-confetti="🇩🇪"
+  option-4-text="Uruguay"
+  option-4-confetti="🇺🇾"
+>
 </amp-story-interactive-poll>
-[/sourcecode]
+```
 
 ### amp-story-interactive-quiz
 
@@ -133,18 +138,23 @@ The amp-story-interactive-quiz element provides a guessing experience with 2-4 o
 
 Can be paired up with amp-story-interactive-results to display a score based on the correctness of the answers to quizzes, but can be used independently as well. It is encouraged to add a prompt for extra context.
 
-[sourcecode:html]
+```html
 <amp-story-interactive-quiz
-    id="first-soccer-cup-quiz"
-    chip-style="transparent"
-    endpoint="https://endpoint.com/v1/interactives"
-    prompt-text="Who won the first soccer world cup?"
-    option-1-text="Spain" option-1-confetti="🇪🇸"
-    option-2-text="France" option-2-confetti="🇫🇷"
-    option-3-text="Germany" option-3-confetti="🇩🇪"
-    option-4-text="Uruguay" option-4-confetti="🇺🇾">
+  id="first-soccer-cup-quiz"
+  chip-style="transparent"
+  endpoint="https://endpoint.com/v1/interactives"
+  prompt-text="Who won the first soccer world cup?"
+  option-1-text="Spain"
+  option-1-confetti="🇪🇸"
+  option-2-text="France"
+  option-2-confetti="🇫🇷"
+  option-3-text="Germany"
+  option-3-confetti="🇩🇪"
+  option-4-text="Uruguay"
+  option-4-confetti="🇺🇾"
+>
 </amp-story-interactive-quiz>
-[/sourcecode]
+```
 
 ### amp-story-interactive-results
 
@@ -152,19 +162,24 @@ The amp-story-interactive-results element provides an interface to display a cus
 Requires polls or quizzes in previous pages to feed into the state of the element, and the state will be calculated according to either the quizzes (if thresholds are specified) or the polls (if only categories are specified) that the user answered.
 Each category can specify an image, title and description that will be shown when the component selects that category for the user.
 
-[sourcecode:html]
+```html
 <amp-story-interactive-results
-    prompt-text="You should go to"
-    option-1-text="Spain" option-1-image="spain.png"
-    option-1-description="Check out their paella while you're there!"
-    option-2-text="France" option-2-image="france.png"
-    option-2-description="Check out their baguette while you're there!"
-    option-3-text="Germany" option-3-image="germany.png"
-    option-3-description="Check out their schnitzel while you're there!"
-    option-4-text="Uruguay" option-4-image="uruguay.png"
-    option-4-description="Check out their steak while you're there!">
+  prompt-text="You should go to"
+  option-1-text="Spain"
+  option-1-image="spain.png"
+  option-1-description="Check out their paella while you're there!"
+  option-2-text="France"
+  option-2-image="france.png"
+  option-2-description="Check out their baguette while you're there!"
+  option-3-text="Germany"
+  option-3-image="germany.png"
+  option-3-description="Check out their schnitzel while you're there!"
+  option-4-text="Uruguay"
+  option-4-image="uruguay.png"
+  option-4-description="Check out their steak while you're there!"
+>
 </amp-story-interactive-results>
-[/sourcecode]
+```
 
 ## Attributes
 
@@ -224,7 +239,7 @@ To fetch the data for an interactive component, the necessary fields are:
 
 Then, the requests and responses are:
 
-[sourcecode:js]
+```js
 // Getting the votes for an interactive.
 // If no client param, selected will always be false
 // (can be used to display the results on a dashboard).
@@ -239,16 +254,16 @@ Response: {
 {"index": 3, "selected": false, "count": 2}
 ]
 }
-[/sourcecode]
+```
 
-[sourcecode:js]
+```js
 // Posting the vote for an interactive. Client param is required.
 
 POST_URL = "{endpoint}/{interactiveId}:vote?type={interactiveType}&client={ampId}"
 POST_BODY = {'option_selected': 1}
 
 Response: No response necessary
-[/sourcecode]
+```
 
 Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others. Available free-to-use backends are:
 
@@ -287,17 +302,14 @@ While the component by default adapts to the screen size with the variable font-
 
 The width can be set either in ems or percentages of the parent width, and it will behave perfectly consistent (while keeping it between the min and max widths).
 
-[sourcecode:html]
+```html
 <amp-story-grid-layer template="fill" aspect-ratio="400:600">
-
   <div class="center-quiz">
-    <amp-story-interactive-quiz
-      style="font-size:0.2em"
-      ...>
+    <amp-story-interactive-quiz style="font-size:0.2em" ...>
     </amp-story-interactive-quiz>
   </div>
 </amp-story-grid-layer>
-[/sourcecode]
+```
 
 ### Adaptive font sizes for options
 
