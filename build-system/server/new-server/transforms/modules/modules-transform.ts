@@ -15,8 +15,7 @@
  */
 
 import {PostHTML} from 'posthtml';
-import {URL} from 'url';
-import {isJsonScript, isValidScript, toExtension, ScriptNode, getURL} from '../utilities/script';
+import {isJsonScript, isValidScript, toExtension, ScriptNode, tryGetURL} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
 
 /**
@@ -24,7 +23,7 @@ import {OptionSet} from '../utilities/option-set';
  * @param script
  */
 function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode): void {
-  const modulePath = toExtension(new URL(nomoduleScript.attrs.src), '.mjs').toString();
+  const modulePath = toExtension(tryGetURL(nomoduleScript.attrs.src), '.mjs').toString();
   const moduleScript : ScriptNode = {
     ...nomoduleScript,
     attrs: {
