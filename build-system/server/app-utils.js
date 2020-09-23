@@ -117,8 +117,8 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       hostName + '/dist/video-iframe-integration.js'
     );
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).(m?)js/g,
-      hostName + '/dist/v0/$1.max.$2js'
+      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
+      hostName + '/dist/v0/$1.max.js'
     );
     if (inabox) {
       const filename = '/dist/amp-inabox.js';
@@ -156,7 +156,7 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     );
 
     if (inabox) {
-      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
+      file = file.replace(/\/dist\/v0\.(m?)js/g, '/dist/amp4ads-v0.$1js');
     }
   } else if (isRtvMode(mode)) {
     hostName = `https://cdn.ampproject.org/rtv/${mode}/`;
