@@ -26,6 +26,10 @@ const {
 const {buildRuntime} = require('../common/utils');
 const {cyan, green} = require('ansi-colors');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
+const {buildNewServer} = require('../server/typescript-compile');
+const pathModule = require('path');
+
+let htmlTransform;
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -43,16 +47,28 @@ class Runner extends RuntimeTestRunner {
 
 async function buildTransformedHtml() {
   const filePaths = await globby('./test/fixtures/**/*.html');
-  let normalizedFilePath;
-  try {
-    log(
-      green('Copying integration test files to'),
-      cyan('test-bin/') + green('...')
-    );
     for (const filePath of filePaths) {
-      normalizedFilePath = pathModule.normalize(filePath);
-      await fs.copy(filePath, `./test-bin/${filePath}`);
+      const normalizedFilePath = pathModule.normalize(filePath);
+      if (argv.esm) {
+        await transformAndWriteToTestFolder(normalizedFilePath);
+      } else {
+        await copyToTestFolder(normalizedFilePath);
+      }
     }
+}
+
+async function copyToTestFolder(filePath) {
+  log(
+    green('Copying integration test files to'),
+    cyan('test-bin/') + green('...')
+  );
+  await fs.copy(filePath, `./test-bin/${filePath}`);
+}
+
+async function transformAndWriteToTestFolder(filePath) {
+  try {
+    const html = await transform(filePath);
+    await fs.write(`./test-bin/${filePath}`, html);
   } catch (e) {
     console./*OK*/ log(
       `${normalizedFilePath} could not be transformed by the postHTML ` +
@@ -62,6 +78,10 @@ async function buildTransformedHtml() {
 }
 
 async function integration() {
+  if (argv.esm) {
+    buildNewServer();
+    htmlTransform = require('../server/new-server/transforms/dist/transform').transform;
+  }
   await buildTransformedHtml();
 
   maybePrintArgvMessages();
