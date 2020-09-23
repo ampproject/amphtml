@@ -19,7 +19,6 @@
 /** @typedef {{
  *   shortcode: string,
  *   captioned: (boolean|undefined),
- *   style: (Object|undefined),
  *   title: (string|undefined),
  *   resize: (function(number):*|undefined),
  * }}
