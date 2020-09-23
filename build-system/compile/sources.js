@@ -30,7 +30,6 @@ const COMMON_GLOBS = [
   'third_party/inputmask/**/*.js',
   'third_party/mustache/**/*.js',
   'third_party/react-dates/bundle.js',
-  'third_party/optimized-svg-icons/social-share-svgs.js',
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
@@ -150,7 +149,6 @@ const CLOSURE_SRC_GLOBS = [
  */
 const THIRD_PARTY_TRANSFORM_GLOBS = [
   // JSX syntax should undergo usual transforms
-  'third_party/optimized-svg-icons/social-share-svgs.js',
 ];
 
 module.exports = {
