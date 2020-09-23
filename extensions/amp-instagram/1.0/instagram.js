@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
+import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {useLayoutEffect, useRef, useState} from '../../../src/preact';
@@ -33,7 +34,7 @@ export function Instagram({
   ...rest
 }) {
   const iframeRef = useRef(null);
-  const [height, setHeight] = useState(null);
+  const [heightStyle, setHeightStyle] = useState(dict());
   const [opacity, setOpacity] = useState(0);
 
   useLayoutEffect(() => {
@@ -55,7 +56,7 @@ export function Instagram({
         if (requestResize) {
           requestResize(height);
         } else {
-          setHeight(height);
+          setHeightStyle(dict({'height': height}));
         }
         setOpacity(1);
       }
@@ -71,7 +72,13 @@ export function Instagram({
   }, [requestResize]);
 
   return (
-    <ContainWrapper {...rest} style={{...style, ...height}} layout size paint>
+    <ContainWrapper
+      {...rest}
+      style={{...style, ...heightStyle}}
+      layout
+      size
+      paint
+    >
       <iframe
         ref={iframeRef}
         src={
