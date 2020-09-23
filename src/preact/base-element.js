@@ -30,7 +30,7 @@ import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
-import {setParent, subscribe} from '../context';
+import {addGroup, setGroupProp, setParent, subscribe} from '../context';
 import {startsWith} from '../string';
 
 /**
@@ -99,6 +99,11 @@ const SIZE_DEFINED_STYLE = {
  * avoid mutate->rerender->mutate loops.
  */
 const RENDERED_PROP = '__AMP_RENDERED';
+
+const UNSLOTTED_GROUP = 'unslotted';
+
+/** @const {function():boolean} */
+const MATCH_ANY = () => true;
 
 /**
  * Wraps a Preact Component in a BaseElement class.
@@ -420,10 +425,12 @@ export class PreactBaseElement extends AMP.BaseElement {
 
         // Connect shadow root to the element's context.
         setParent(shadowRoot, this.element);
-        // TODO(#30283): in Shadow DOM, only the children distributed in
+        // In Shadow DOM, only the children distributed in
         // slots are displayed. All other children are undisplayed. We need
         // to create a simple mechanism that would automatically compute
         // `CanRender = false` on undistributed children.
+        addGroup(this.element, UNSLOTTED_GROUP, MATCH_ANY, /* weight */ -1);
+        setGroupProp(this.element, UNSLOTTED_GROUP, CanRender, this, false);
       } else if (lightDomTag) {
         this.container_ = this.element;
         const replacement =

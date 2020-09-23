@@ -87,7 +87,16 @@ function BaseCarouselWithRef(
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
       >
-        {childrenArray}
+        {/*
+          TODO(#30283): TBD: this is an interesting concept. We could decide
+          to render only N slides at a time and for others just output an empty
+          placeholder. When a slide's slot is unrendered, the slide
+          automatically gets unslotted and gets CanRender=false w/o any extra
+          state management code.
+        */}
+        {childrenArray.map((child, index) =>
+          Math.abs(index - currentSlide) < 2 ? child : <></>
+        )}
       </Scroller>
       <ArrowPrev
         customArrow={arrowPrev}
