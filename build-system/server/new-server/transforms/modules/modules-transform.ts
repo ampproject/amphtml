@@ -57,7 +57,7 @@ export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void 
         return node;
       }
 
-      if (!isValidScript(node)) {
+      if (!isValidScript(node, options.looseScriptSrcCheck)) {
         return node;
       }
 
