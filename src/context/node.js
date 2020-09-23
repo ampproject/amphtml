@@ -372,7 +372,7 @@ export class ContextNode {
    * @return {?ContextNode}
    * @protected
    */
-  matchGroup(node) {
+  findGroup(node) {
     const {groups} = this;
     if (!groups) {
       return null;
@@ -458,7 +458,7 @@ export class ContextNode {
     }
     const closestNode = ContextNode.closest(this.node, /* includeSelf */ false);
     const parent =
-      (closestNode && closestNode.matchGroup(this.node)) || closestNode;
+      (closestNode && closestNode.findGroup(this.node)) || closestNode;
     this.updateTree_(parent, /* parentOverridden */ false);
   }
 
