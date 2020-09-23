@@ -327,7 +327,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
-          console.log(this.isOnActivePage_);
         });
 
         storeService.subscribe(
@@ -342,7 +341,6 @@ export class AmpStory360 extends AMP.BaseElement {
         }
       ),
     ]).then(() => {
-      attr('controls') === 'gyroscope' && this.checkGyroscopePermissions_();
       return Promise.resolve();
     });
   }
@@ -412,8 +410,10 @@ export class AmpStory360 extends AMP.BaseElement {
     this.gyroscopeControls_ = true;
     this.togglePermissionClass_(true);
 
-    const discoverTemplate = buildDiscoveryTemplate(this.element);
-    this.mutateElement(() => this.element.appendChild(discoverTemplate));
+    if (this.isOnActivePage_) {
+      const discoverTemplate = buildDiscoveryTemplate(this.element);
+      this.mutateElement(() => this.element.appendChild(discoverTemplate));
+    }
 
     // This can happen on desktop browsers that support deviceorientation but don't call it.
     const checkNoMotion = this.timer_.delay(() => {
@@ -558,6 +558,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.element.getAttribute('controls') === 'gyroscope' &&
+      this.checkGyroscopePermissions_();
+
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
     const owners = Services.ownersForDoc(this.element);

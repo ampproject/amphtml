@@ -97,6 +97,10 @@ amp-story-360 amp-img {
 @keyframes fadeInOut {
   0% {
     visibility: visible;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
   }
   95% {
     opacity: 1;
@@ -159,7 +163,6 @@ amp-story-360 amp-img {
   color: white;
 }
 
-amp-story-page:not([active]) .i-amphtml-story-360-discovery,
 amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery {
   display: none;
   animation-play-state: paused;
