@@ -44,7 +44,7 @@ let lastMediaSession = 0;
  * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
- * @return {!UnlistenDef} clears it
+ * @return {!UnlistenDef|undefined} Clears it, undefined when session not set.
  */
 export function setMediaSession(win, metadata, playHandler, pauseHandler) {
   const {navigator} = win;
@@ -71,7 +71,6 @@ export function setMediaSession(win, metadata, playHandler, pauseHandler) {
       navigator.mediaSession.setActionHandler('pause', null);
     };
   }
-  return () => {};
 }
 
 /**
