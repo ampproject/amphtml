@@ -61,20 +61,6 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     expect(wrapper.find('div')).to.have.lengthOf(2);
   });
 
-  it('Return error with no shortcode input', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
-    const wrapper = mount(<Instagram style={{'width': 500, 'height': 705}} />, {
-      attachTo: el,
-    });
-    expect(wrapper.find('iframe').prop('src')).to.equal(
-      'https://www.instagram.com/p/error/embed/?cr=1&v=12'
-    );
-    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
-    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
-    expect(wrapper.find('div')).to.have.lengthOf(2);
-  });
-
   it('Resize prop is called', async () => {
     const wrapper = mount(
       <Instagram

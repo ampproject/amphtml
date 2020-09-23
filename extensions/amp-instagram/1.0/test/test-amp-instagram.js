@@ -76,35 +76,6 @@ describes.realWin(
       );
     });
 
-    it('renders', async () => {
-      element = win.document.createElement('amp-instagram');
-      element.setAttribute('data-shortcode', 'B8QaZW4AQY_');
-      element.setAttribute('amp', true);
-      element.setAttribute('height', 500);
-      element.setAttribute('width', 500);
-      element.setAttribute('layout', 'responsive');
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      expect(
-        element.shadowRoot.querySelector('iframe').getAttribute('src')
-      ).to.equal('https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12');
-    });
-
-    it('Return error with no shortcode input', async () => {
-      element = win.document.createElement('amp-instagram');
-      element.setAttribute('amp', true);
-      element.setAttribute('height', 500);
-      element.setAttribute('width', 500);
-      element.setAttribute('layout', 'responsive');
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      expect(
-        element.shadowRoot.querySelector('iframe').getAttribute('src')
-      ).to.equal('https://www.instagram.com/p/error/embed/?cr=1&v=12');
-    });
-
     it("Container's height is changed", async () => {
       const initialHeight = 300;
       element = win.document.createElement('amp-instagram');

@@ -76,7 +76,7 @@ export function Instagram({
         ref={iframeRef}
         src={
           'https://www.instagram.com/p/' +
-          encodeURIComponent(shortcode || 'error') +
+          encodeURIComponent(shortcode) +
           '/embed/' +
           (captioned ? 'captioned/' : '') +
           '?cr=1&v=12'
