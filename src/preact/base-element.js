@@ -16,9 +16,13 @@
 
 import * as Preact from './index';
 import {AmpEvents} from '../amp-events';
+import {CanPlay, CanRender, LoadingProp} from '../contextprops';
 import {Deferred} from '../utils/promise';
+import {Loading} from '../loading';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
+import {addGroup, setGroupProp, setParent, subscribe} from '../context';
+import {cancellation} from '../error';
 import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
@@ -28,7 +32,6 @@ import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {startsWith} from '../string';
-import {subscribe} from '../context';
 
 /**
  * The following combinations are allowed.
@@ -97,6 +100,11 @@ const SIZE_DEFINED_STYLE = {
  */
 const RENDERED_PROP = '__AMP_RENDERED';
 
+const UNSLOTTED_GROUP = 'unslotted';
+
+/** @return {boolean} */
+const MATCH_ANY = () => true;
+
 /**
  * Wraps a Preact Component in a BaseElement class.
  *
@@ -112,16 +120,18 @@ export class PreactBaseElement extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Node} */
-    this.container_ = null;
-
-    /** @private {boolean} */
-    this.scheduledRender_ = false;
+    /** @private {!JsonObject} */
+    this.defaultProps_ = dict({
+      'loading': Loading.AUTO,
+      'onLoad': this.onLoad_.bind(this),
+      'onLoadError': this.onLoadError_.bind(this),
+    });
 
     /** @private {!AmpContextDef.ContextType} */
     this.context_ = {
       renderable: false,
       playable: false,
+      loading: Loading.LAZY,
       notify: () => this.mutateElement(() => {}),
     };
 
@@ -131,6 +141,16 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {?Array} */
     this.contextValues_ = null;
 
+    /** @private {?Node} */
+    this.container_ = null;
+
+    /** @private {boolean} */
+    this.scheduledRender_ = false;
+
+    /** @private {?Deferred} */
+    this.renderDeferred_ = null;
+
+    /** @private @const {function()} */
     this.boundRerender_ = () => {
       this.scheduledRender_ = false;
       this.rerender_();
@@ -139,14 +159,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {boolean} */
     this.hydrationPending_ = false;
 
-    /** @private {!Deferred|null} */
-    this.scheduledRenderDeferred_ = null;
-
-    /** @private {!JsonObject|null|undefined} */
-    this.defaultProps_ = null;
-
     /** @private {boolean} */
-    this.mounted_ = true;
+    this.mounted_ = false;
+
+    /** @private {?Deferred} */
+    this.loadDeferred_ = null;
 
     /** @protected {?MutationObserver} */
     this.observer = null;
@@ -177,8 +194,28 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...templatesInit,
     });
 
-    this.defaultProps_ = this.init() || null;
+    const initProps = this.init();
+    if (initProps) {
+      Object.assign(/** @type {!Object} */ (this.defaultProps_), initProps);
+    }
     this.checkPropsPostMutations();
+
+    // Unblock rendering on first `CanRender` response. And keep the context
+    // in-sync.
+    subscribe(
+      this.element,
+      [CanRender, CanPlay, LoadingProp],
+      (canRender, canPlay, loading) => {
+        this.context_.renderable = canRender;
+        this.context_.playable = canPlay;
+        // TODO(#30283): trust "loading" completely from the context once it's
+        // fully supported.
+        this.context_.loading =
+          loading == Loading.AUTO ? Loading.LAZY : loading;
+        this.mounted_ = true;
+        this.scheduleRender_();
+      }
+    );
 
     const useContexts = Ctor['useContexts'];
     if (useContexts.length != 0) {
@@ -188,39 +225,40 @@ export class PreactBaseElement extends AMP.BaseElement {
       });
     }
 
+    this.renderDeferred_ = new Deferred();
     this.scheduleRender_();
-
-    // context-changed is fired on each child element to notify it that the
-    // parent has changed the wrapping context. This is equivalent to
-    // updating the Context.Provider with new data and having it propagate.
-    this.element.addEventListener('i-amphtml-context-changed', (e) => {
-      e.stopPropagation();
-      this.scheduleRender_();
-    });
-
-    // unmounted is fired on each child element to notify it that the parent
-    // has removed the element from the DOM tree. This is equivalent to React
-    // recursively calling componentWillUnmount.
-    this.element.addEventListener('i-amphtml-unmounted', (e) => {
-      e.stopPropagation();
-      this.unmount_();
-    });
+    return this.renderDeferred_.promise;
   }
 
   /** @override */
   layoutCallback() {
-    const deferred =
-      this.scheduledRenderDeferred_ ||
-      (this.scheduledRenderDeferred_ = new Deferred());
-    this.context_.renderable = true;
-    this.context_.playable = true;
-    this.scheduleRender_();
-    return deferred.promise;
+    const Ctor = this.constructor;
+    if (!Ctor['loadable']) {
+      return super.layoutCallback();
+    }
+
+    this.mutateProps(dict({'loading': Loading.EAGER}));
+
+    // Check if the element has already been loaded.
+    const api = this.ref_.current;
+    if (api && api['complete']) {
+      return Promise.resolve();
+    }
+
+    // If not, wait for `onLoad` callback.
+    this.loadDeferred_ = new Deferred();
+    return this.loadDeferred_.promise;
   }
 
   /** @override */
   unlayoutCallback() {
-    return false;
+    const Ctor = this.constructor;
+    if (!Ctor['loadable']) {
+      return super.unlayoutCallback();
+    }
+    this.mutateProps(dict({'loading': Loading.UNLOAD}));
+    this.onLoadError_(cancellation());
+    return true;
   }
 
   /** @override */
@@ -235,10 +273,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @param {!JsonObject} props
    */
   mutateProps(props) {
-    this.defaultProps_ = /** @type {!JsonObject} */ ({
-      ...this.defaultProps_,
-      ...props,
-    });
+    Object.assign(/** @type {!Object} */ (this.defaultProps_), props);
     this.scheduleRender_();
   }
 
@@ -313,10 +348,21 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @private */
-  unmount_() {
-    this.mounted_ = false;
-    if (this.container_) {
-      render(null, this.container_);
+  onLoad_() {
+    if (this.loadDeferred_) {
+      this.loadDeferred_.resolve();
+      this.loadDeferred_ = null;
+    }
+  }
+
+  /**
+   * @param {*} opt_reason
+   * @private
+   */
+  onLoadError_(opt_reason) {
+    if (this.loadDeferred_) {
+      this.loadDeferred_.reject(opt_reason || new Error('load error'));
+      this.loadDeferred_ = null;
     }
   }
 
@@ -376,6 +422,15 @@ export class PreactBaseElement extends AMP.BaseElement {
           shadowRoot.appendChild(serviceSlot);
         }
         this.container_ = container;
+
+        // Connect shadow root to the element's context.
+        setParent(shadowRoot, this.element);
+        // In Shadow DOM, only the children distributed in
+        // slots are displayed. All other children are undisplayed. We need
+        // to create a simple mechanism that would automatically compute
+        // `CanRender = false` on undistributed children.
+        addGroup(this.element, UNSLOTTED_GROUP, MATCH_ANY, /* weight */ -1);
+        setGroupProp(this.element, UNSLOTTED_GROUP, CanRender, this, false);
       } else if (lightDomTag) {
         this.container_ = this.element;
         const replacement =
@@ -460,10 +515,9 @@ export class PreactBaseElement extends AMP.BaseElement {
       });
     }
 
-    const deferred = this.scheduledRenderDeferred_;
-    if (deferred) {
-      deferred.resolve();
-      this.scheduledRenderDeferred_ = null;
+    if (this.renderDeferred_) {
+      this.renderDeferred_.resolve();
+      this.renderDeferred_ = null;
     }
   }
 
@@ -496,6 +550,13 @@ PreactBaseElement['Component'] = function () {
  * @protected {!Array<!ContextProp>}
  */
 PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
+
+/**
+ * Whether the component implements a loading protocol.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['loadable'] = false;
 
 /**
  * An override to specify that the component requires `layoutSizeDefined`.

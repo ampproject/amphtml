@@ -114,7 +114,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
 
     it('should parse attributes on first render', async () => {
       expect(component).to.be.calledOnce;
-      expect(lastProps).to.deep.equal({
+      expect(lastProps).to.contain({
         valueWithDef: 'DEFAULT',
         propA: 'A',
         minFontSize: 72,
@@ -136,7 +136,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
 
       expect(component).to.be.calledTwice;
-      expect(lastProps).to.deep.equal({
+      expect(lastProps).to.contain({
         valueWithDef: 'DEFAULT',
         propA: 'B',
         minFontSize: 72.5,

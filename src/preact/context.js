@@ -15,7 +15,8 @@
  */
 
 import * as Preact from './index';
-import {createContext, useContext, useMemo} from './index';
+import {Loading, reducer as loadingReducer} from '../loading';
+import {createContext, useContext, useMemo, useRef} from './index';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -37,6 +38,7 @@ function getAmpContext() {
     (context = createContext({
       renderable: true,
       playable: true,
+      loading: Loading.AUTO,
     }))
   );
 }
@@ -48,23 +50,29 @@ function getAmpContext() {
  * @return {!PreactDef.VNode}
  */
 export function WithAmpContext({
-  renderable: renderableProp,
-  playable: playableProp,
+  renderable: renderableProp = true,
+  playable: playableProp = true,
+  loading: loadingProp = 'auto',
   notify: notifyProp,
   children,
 }) {
   const parent = useAmpContext();
   const renderable = renderableProp && parent.renderable;
-  const playable = playableProp && parent.playable;
+  const playable = renderable && playableProp && parent.playable;
+  const loading = loadingReducer(
+    renderable ? Loading.AUTO : Loading.LAZY,
+    loadingReducer(loadingProp, parent.loading)
+  );
   const notify = notifyProp || parent.notify;
   const current = useMemo(
     () =>
       /** @type {!AmpContextDef.ContextType} */ ({
         renderable,
         playable,
+        loading,
         notify,
       }),
-    [renderable, playable, notify]
+    [renderable, playable, loading, notify]
   );
   const AmpContext = getAmpContext();
   return <AmpContext.Provider children={children} value={current} />;
@@ -76,4 +84,34 @@ export function WithAmpContext({
 export function useAmpContext() {
   const AmpContext = getAmpContext();
   return useContext(AmpContext);
+}
+
+/**
+ * Whether the calling component should currently be in the loaded state.
+ *
+ * @param {!Loading|string} loadingProp
+ * @return {boolean}
+ */
+export function useLoad(loadingProp) {
+  const loadingRef = useRef(false);
+
+  const {loading: loadingContext, renderable} = useAmpContext();
+
+  const loading = loadingReducer(loadingProp, loadingContext);
+
+  // Compute whether the element should be loading at this time.
+  const load =
+    // Explicit instruction to unload.
+    loading == Loading.UNLOAD
+      ? false
+      : // Explicit instruction to load.
+      loading == Loading.EAGER
+      ? true
+      : // Auto: allowed to load.
+      loading == Loading.AUTO && renderable
+      ? true
+      : // Lazy: can continue loading if already started, but do not start it.
+        loadingRef.current || false;
+  loadingRef.current = load;
+  return load;
 }
