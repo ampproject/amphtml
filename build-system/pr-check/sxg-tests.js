@@ -54,7 +54,7 @@ function main() {
     ) {
       downloadSxgDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless');
+      timedExecOrDie('gulp integration --nobuild --compiled --headless --sxg');
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
