@@ -98,6 +98,7 @@ integration.flags = {
   'nohelp': '  Silence help messages that are printed prior to test run',
   'report': '  Write test result report to a local file',
   'safari': '  Runs tests on Safari',
+  'sxg': '  Runs tests on SXG build',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

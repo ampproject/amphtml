@@ -71,6 +71,10 @@ jobs:
       name: 'Module Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/module-dist-bundle-size.js
+    - stage: build
+      name: 'SXG Dist'
+      script:
+        - unbuffer node build-system/pr-check/sxg-dist.js
     - stage: test
       name: 'Visual Diff Tests'
       script:

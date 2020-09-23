@@ -17,8 +17,8 @@
 
 /**
  * @fileoverview
- * This script builds and tests the AMP runtime in sxg mode.
- * This is run during the CI stage = test; job = sxg tests.
+ * This script builds the esm minified AMP runtime and runs the bundle size check.
+ * This is run during the CI stage = build; job = module dist, bundle size.
  */
 
 const colors = require('ansi-colors');
@@ -26,41 +26,41 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
-  downloadSxgDistOutput,
+  uploadSxgDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
+const {runYarnChecks} = require('./yarn-checks');
 
-const FILENAME = 'sxg-tests.js';
+const FILENAME = 'module-dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
+  if (!runYarnChecks(FILENAME)) {
+    stopTimedJob(FILENAME, startTime);
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting --sxg');
-    timedExecOrDie('gulp integration --nobuild --compiled --headless --sxg');
+    timedExecOrDie('gulp dist --sxg --fortesting');
+    uploadSxgDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      downloadSxgDistOutput(FILENAME);
+    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless');
+      timedExecOrDie('gulp dist --sxg --fortesting');
+      uploadSxgDistOutput(FILENAME);
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('SXG Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
+        colors.cyan('SXG Dist'),
+        'because this commit does not affect the runtime or flag configs.'
       );
     }
   }
