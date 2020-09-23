@@ -21,6 +21,8 @@ import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {useLayoutEffect, useRef, useState} from '../../../src/preact';
 
+const NO_HEIGHT_STYLE = dict();
+
 /**
  * @param {!InstagramPropsDef} props
  * @return {PreactDef.Renderable}
@@ -28,13 +30,12 @@ import {useLayoutEffect, useRef, useState} from '../../../src/preact';
 export function Instagram({
   shortcode,
   captioned,
-  style,
   title,
   requestResize,
   ...rest
 }) {
   const iframeRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(dict());
+  const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
 
   useLayoutEffect(() => {
@@ -72,13 +73,7 @@ export function Instagram({
   }, [requestResize]);
 
   return (
-    <ContainWrapper
-      {...rest}
-      style={{...style, ...heightStyle}}
-      layout
-      size
-      paint
-    >
+    <ContainWrapper {...rest} wrapperStyle={heightStyle} layout size paint>
       <iframe
         ref={iframeRef}
         src={
@@ -88,6 +83,7 @@ export function Instagram({
           (captioned ? 'captioned/' : '') +
           '?cr=1&v=12'
         }
+        onLoad={() => setOpacity(1)}
         scrolling="no"
         frameborder="0"
         allowtransparency
