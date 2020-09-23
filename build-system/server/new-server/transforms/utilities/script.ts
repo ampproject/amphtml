@@ -38,7 +38,7 @@ export function isValidScript(node: PostHTML.Node): node is ScriptNode {
   }
 
   const attrs = node.attrs || {};
-  const src = new URL(attrs.src || '');
+  const src = tryGetURL(attrs.src || '');
   return src.origin === VALID_CDN_ORIGIN && extname(src.pathname) === '.js';
 }
 
@@ -57,4 +57,15 @@ export function toExtension(url: URL, extension: string): URL {
   parsedPath.ext = extension;
   url.pathname = format(parsedPath);
   return url;
+}
+
+export function tryGetURL(src: string, port: number = 8000): URL {
+  let url;
+  try {
+    url = new URL(src);
+  } catch (e) {
+    url = new URL(src, `http://localhost:${port}`);
+  } finally {
+    return url as URL;
+  }
 }
