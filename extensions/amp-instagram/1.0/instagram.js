@@ -33,7 +33,7 @@ export function Instagram({
   ...rest
 }) {
   const iframeRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(null);
+  const [height, setHeight] = useState(null);
   const [opacity, setOpacity] = useState(0);
 
   useLayoutEffect(() => {
@@ -55,7 +55,7 @@ export function Instagram({
         if (requestResize) {
           requestResize(height);
         } else {
-          setHeightStyle({'height': height});
+          setHeight(height);
         }
         setOpacity(1);
       }
@@ -71,13 +71,7 @@ export function Instagram({
   }, [requestResize]);
 
   return (
-    <ContainWrapper
-      {...rest}
-      style={{...style, ...heightStyle}}
-      layout
-      size
-      paint
-    >
+    <ContainWrapper {...rest} style={{...style, ...height}} layout size paint>
       <iframe
         ref={iframeRef}
         src={
