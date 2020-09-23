@@ -23,7 +23,11 @@ export interface OptionSet {
   compiled?: boolean;
   esm?: boolean;
   port?: number;
+<<<<<<< HEAD
   fortesting?: boolean;
+=======
+  fortesting?: boolean,
+>>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
   looseScriptSrcCheck?: boolean;
   useMaxNames?: boolean;
 }

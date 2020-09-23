@@ -22,9 +22,15 @@ import transformScriptPaths from './scripts/scripts-transform';
 import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
+<<<<<<< HEAD
 const FOR_TESTING = argv._.includes('integration');
 // Use 9876 if running integration tests as this is the KARMA_SERVER_PORT
 const PORT = FOR_TESTING ? 9876 : 8000;
+=======
+const FORTESTING = argv._.includes('integration');
+// Use 9876 if running integration tests as this is the KARMA_SERVER_PORT
+const PORT = FORTESTING ? 9876 : 8000;
+>>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
 const ESM = !!argv.esm;
 
 const defaultTransformConfig = {
@@ -35,14 +41,30 @@ const defaultTransformConfig = {
 };
 
 const transforms = [
+<<<<<<< HEAD
   transformScriptPaths(defaultTransformConfig),
+=======
+  transformScriptPaths({
+    esm: ESM,
+    port: PORT,
+    fortesting: FORTESTING,
+  }),
+>>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
 ];
 
 export async function transform(fileLocation: string): Promise<string> {
   if (ESM) {
     transforms.unshift(
       transformCss(),
+<<<<<<< HEAD
       transformModules(defaultTransformConfig),
+=======
+      transformModules({
+        esm: ESM,
+        port: PORT,
+        fortesting: FORTESTING,
+      }),
+>>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
     );
   }
 
