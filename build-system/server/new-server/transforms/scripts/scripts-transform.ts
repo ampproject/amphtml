@@ -15,8 +15,7 @@
  */
 
 import {PostHTML} from 'posthtml';
-import {URL} from 'url';
-import {isJsonScript, isValidScript} from '../utilities/script';
+import {isJsonScript, isValidScript, tryGetURL} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
 
@@ -33,16 +32,11 @@ function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
     return script;
   }
 
-  try {
-  const url = new URL(script.attrs.src || '');
+  const url = tryGetURL(script.attrs.src || '');
   const src = CDNURLToLocalDistURL(url, [null, null], '.js', options.port)
       .toString();
   script.attrs.src = src;
-  } catch (e) {
-    console.error(`Could not convert src ${script.attrs.src}`);
-  } finally {
-    return script;
-  }
+  return script;
 }
 
 /**

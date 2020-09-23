@@ -23,4 +23,5 @@ export interface OptionSet {
   compiled?: boolean;
   esm?: boolean;
   port?: number;
+  looseScriptSrcCheck?: boolean;
 }
