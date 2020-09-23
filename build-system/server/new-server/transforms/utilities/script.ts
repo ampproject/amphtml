@@ -38,14 +38,14 @@ function isValidScriptExtension(url: URL): boolean {
  * Determines if a Node is really a ScriptNode.
  * @param node
  */
-export function isValidScript(node: PostHTML.Node, allowLocal?: boolean): node is ScriptNode {
+export function isValidScript(node: PostHTML.Node, looseScriptSrcCheck?: boolean): node is ScriptNode {
   if (node.tag !== 'script') {
     return false;
   }
 
   const attrs = node.attrs || {};
   const url = tryGetURL(attrs.src || '');
-  if (allowLocal) {
+  if (looseScriptSrcCheck) {
     return isValidScriptExtension(url);
   }
   return url.origin === VALID_CDN_ORIGIN && isValidScriptExtension(url);
