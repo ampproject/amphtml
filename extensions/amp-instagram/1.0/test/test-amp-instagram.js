@@ -84,7 +84,6 @@ describes.realWin(
       element.setAttribute('height', initialHeight);
       element.setAttribute('width', 500);
       element.setAttribute('layout', 'responsive');
-      element.setAttribute('requestResize', env.sandbox.spy());
       doc.body.appendChild(element);
       await waitForRender();
 
