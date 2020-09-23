@@ -387,7 +387,7 @@ export class AmpStoryPlayer {
   /** @private */
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('div');
-    this.rootEl_.classList.add('amp-story-player-main-container');
+    this.rootEl_.classList.add('i-amphtml-story-player-main-container');
 
     const containerToUse =
       getMode().test || !this.element_.attachShadow
