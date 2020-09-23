@@ -18,6 +18,7 @@ import {PostHTML} from 'posthtml';
 import {URL} from 'url';
 import {extname} from 'path';
 import {VALID_CDN_ORIGIN} from './cdn';
+import {parse, format} from 'path';
 
 export interface ScriptNode extends PostHTML.Node {
   tag: 'script';
@@ -39,4 +40,21 @@ export function isValidScript(node: PostHTML.Node): node is ScriptNode {
   const attrs = node.attrs || {};
   const src = new URL(attrs.src || '');
   return src.origin === VALID_CDN_ORIGIN && extname(src.pathname) === '.js';
+}
+
+export function isJsonScript(node: PostHTML.Node): boolean {
+  if (node.tag !== 'script') {
+    return false;
+  }
+  const attrs = node.attrs || {};
+  const type = attrs.type || '';
+  return type.toLowerCase() === 'application/json';
+}
+
+export function toExtension(url: URL, extension: string): URL {
+  const parsedPath = parse(url.pathname);
+  parsedPath.base = parsedPath.base.replace(parsedPath.ext, extension);
+  parsedPath.ext = extension;
+  url.pathname = format(parsedPath);
+  return url;
 }
