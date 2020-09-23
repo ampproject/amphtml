@@ -91,7 +91,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     expect(wrapper.prop('requestResize')).to.have.been.calledOnce;
   });
 
-  it("container's height is changed", async () => {
+  it("Container's height is changed", async () => {
     const initialHeight = 300;
     document.body.addEventListener('message', console.log);
     const wrapper = mount(
