@@ -28,26 +28,26 @@
 
 /* Facebook Styling */
 .amp-social-share-facebook {
-  color: #fff;
-  background-color: #32529f;
+  color: #1877f2;
+  background-color: #fff;
 }
 
 /* Pinterest Styling */
 .amp-social-share-pinterest {
-  color: #fff;
-  background-color: #e60023;
+  color: #e60023;
+  background-color: #fff;
 }
 
 /* LinkedIn Styling */
 .amp-social-share-linkedin {
   color: #fff;
-  background-color: #0077b5;
+  background-color: #0a66c2;
 }
 
 /* Tumblr Styling */
 .amp-social-share-tumblr {
   color: #fff;
-  background-color: #3c5a77;
+  background-color: #001935;
 }
 
 /* Email Styling */
@@ -65,13 +65,13 @@
 /* line Styling */
 .amp-social-share-line {
   color: #fff;
-  background-color: #52b448;
+  background-color: #00b900;
 }
 
 /* SMS Styling */
 .amp-social-share-sms {
   color: #fff;
-  background-color: #ca2b63;
+  background-color: #000000;
 }
 
 /* "system" styling */
