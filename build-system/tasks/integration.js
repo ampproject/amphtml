@@ -19,22 +19,22 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
+const pathModule = require('path');
 const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {buildRuntime} = require('../common/utils');
-const {cyan, green} = require('ansi-colors');
-const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 const {buildNewServer} = require('../server/typescript-compile');
-const pathModule = require('path');
+const {buildRuntime} = require('../common/utils');
+const {cyan, red} = require('ansi-colors');
+const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
 const INTEGRATION_FIXTURES = [
   './test/fixtures/**/*.html',
   '!./test/fixtures/e2e',
   '!./test/fixtures/served',
   '!./test/fixtures/performance',
-]
+];
 
 let htmlTransform;
 
@@ -54,10 +54,10 @@ class Runner extends RuntimeTestRunner {
 
 async function buildTransformedHtml() {
   const filePaths = await globby(INTEGRATION_FIXTURES);
-    for (const filePath of filePaths) {
-      const normalizedFilePath = pathModule.normalize(filePath);
-      await transformAndWriteToTestFolder(normalizedFilePath);
-    }
+  for (const filePath of filePaths) {
+    const normalizedFilePath = pathModule.normalize(filePath);
+    await transformAndWriteToTestFolder(normalizedFilePath);
+  }
 }
 
 async function transformAndWriteToTestFolder(filePath) {
@@ -65,9 +65,14 @@ async function transformAndWriteToTestFolder(filePath) {
     const html = await htmlTransform(filePath);
     await fs.writeFile(`./test-bin/${filePath}`, html);
   } catch (e) {
-    console./*OK*/ log(
-      `${filePath} could not be transformed by the postHTML ` +
-        `pipeline.\n${e.message}`
+    log(
+      red(
+        'ERROR:',
+        cyan(
+          `${filePath} could not be transformed by the postHTML ` +
+            `pipeline.\n${e.message}. \n Falling back to copying.`
+        )
+      )
     );
     await fs.copy(filePath, `./test-bin/${filePath}`);
   }
@@ -76,7 +81,7 @@ async function transformAndWriteToTestFolder(filePath) {
 async function integration() {
   buildNewServer();
   htmlTransform = require('../server/new-server/transforms/dist/transform')
-      .transform;
+    .transform;
   await buildTransformedHtml();
 
   maybePrintArgvMessages();
