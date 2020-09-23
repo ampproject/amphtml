@@ -18,7 +18,7 @@
 
 /**
  * @typedef {{
- *   type: (string|undefined),
+ *   type: (string),
  *   endpoint: (string|undefined),
  *   params: (JsonObject|Object|undefined),
  *   target: (string|undefined),
