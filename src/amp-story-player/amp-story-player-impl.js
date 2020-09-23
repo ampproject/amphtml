@@ -431,7 +431,7 @@ export class AmpStoryPlayer {
     setStyle(
       iframeEl,
       'backgroundImage',
-      story.getAttribute('data-poster-portrait-src')
+      `url(${story.getAttribute('data-poster-portrait-src')})`
     );
     iframeEl.classList.add('story-player-iframe');
     iframeEl.setAttribute('allow', 'autoplay');

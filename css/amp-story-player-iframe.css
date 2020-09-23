@@ -31,6 +31,7 @@
   opacity: 0;
   transition: opacity 500ms ease;
   position: absolute;
+  background-size: cover;
 }
 
 main {
