@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as cookie from '../../src/cookies';
 import * as lolex from 'lolex';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
@@ -33,8 +34,8 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {macroTask} from '../../testing/yield';
+import {mockServiceForDoc, stubServiceForDoc} from '../../testing/test-helper';
 import {parseUrlDeprecated} from '../../src/url';
-import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -51,7 +52,7 @@ describes.sandboxed('cid', {}, (env) => {
   let whenFirstVisible;
   let trustedViewer;
   let shouldSendMessageTimeout;
-  let storageGetStub;
+  let storageMock;
   let seed;
 
   const hasConsent = Promise.resolve();
@@ -125,7 +126,11 @@ describes.sandboxed('cid', {}, (env) => {
       });
 
     installViewerServiceForDoc(ampdoc);
-    storageGetStub = stubServiceForDoc(env.sandbox, ampdoc, 'storage', 'get');
+    storageMock = mockServiceForDoc(env.sandbox, ampdoc, 'storage', [
+      'get',
+      'getTimestamp',
+    ]);
+
     viewer = Services.viewerForDoc(ampdoc);
     env.sandbox.stub(ampdoc, 'whenFirstVisible').callsFake(function () {
       return whenFirstVisible;
@@ -311,7 +316,7 @@ describes.sandboxed('cid', {}, (env) => {
       });
 
       it('should return empty if opted out', () => {
-        storageGetStub
+        storageMock.get
           .withArgs('amp-cid-optout')
           .returns(Promise.resolve(true));
 
@@ -787,9 +792,11 @@ describes.sandboxed('cid', {}, (env) => {
     });
 
   function compare(externalCidScope, compareValue) {
-    return cid.get({scope: externalCidScope}, hasConsent).then((c) => {
-      expect(c).to.equal(compareValue);
-    });
+    return cid
+      .get({scope: externalCidScope, backupToStorage: true}, hasConsent)
+      .then((c) => {
+        expect(c).to.equal(compareValue);
+      });
   }
 
   function removeMemoryCacheOfCid(opt_cid) {
@@ -812,6 +819,9 @@ describes.realWin('cid', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let clock;
+  let storageGetStub;
+  let storageSetStub;
+  let storageGetTimeStub;
   const hasConsent = Promise.resolve();
 
   beforeEach(() => {
@@ -823,6 +833,19 @@ describes.realWin('cid', {amp: true}, (env) => {
     });
     cid = cidServiceForDocForTesting(ampdoc);
     env.sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
+    storageSetStub = stubServiceForDoc(
+      env.sandbox,
+      ampdoc,
+      'storage',
+      'setNonBoolean'
+    );
+    storageGetStub = stubServiceForDoc(env.sandbox, ampdoc, 'storage', 'get');
+    storageGetTimeStub = stubServiceForDoc(
+      env.sandbox,
+      ampdoc,
+      'storage',
+      'getTimestamp'
+    );
   });
 
   afterEach(() => {
@@ -855,6 +878,125 @@ describes.realWin('cid', {amp: true}, (env) => {
       expect(fooCid).to.equal(fooCid2);
     }
   );
+
+  describe('CID backup', () => {
+    it('generate new CID and backup', async () => {
+      env.sandbox
+        .stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
+      setCookie(win, 'foo', '', 0);
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+          backupToStorage: true,
+        },
+        hasConsent
+      );
+      expect(fooCid).to.have.string('amp-');
+      expect(storageSetStub).to.be.calledWith('amp-cid-backup-foo', fooCid);
+    });
+
+    it('should find AMP generated CID in cookie and backup', async () => {
+      env.sandbox
+        .stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
+      const cidString = 'amp-abc123';
+      win.document.cookie = `foo=${cidString};`;
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+          backupToStorage: true,
+        },
+        hasConsent
+      );
+      expect(fooCid).to.equal(cidString);
+      expect(storageSetStub).to.be.calledWith('amp-cid-backup-foo', fooCid);
+
+      storageSetStub.resetHistory();
+      const nonAmpCidString = 'xyz987';
+      win.document.cookie = `bar=${nonAmpCidString};`;
+      expect(
+        await cid.get(
+          {
+            scope: 'bar',
+            createCookieIfNotPresent: true,
+            backupToStorage: true,
+          },
+          hasConsent
+        )
+      ).to.equal(nonAmpCidString);
+      expect(storageSetStub).to.not.be.called;
+    });
+
+    it('should use CID backup', async () => {
+      env.sandbox
+        .stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
+      setCookie(win, 'foo', '', 0);
+      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
+        win.document.cookie = `${name}=${value}`;
+      });
+      env.sandbox.stub(Date, 'now').returns(1);
+      const creationTime = 2;
+      const cidString = 'amp-abc123';
+      storageGetStub
+        .withArgs('amp-cid-backup-foo')
+        .returns(Promise.resolve(cidString));
+      storageGetTimeStub
+        .withArgs('amp-cid-backup-foo')
+        .returns(Promise.resolve(creationTime));
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+          backupToStorage: true,
+        },
+        hasConsent
+      );
+
+      expect(fooCid).to.equal(cidString);
+      expect(storageSetStub).to.be.calledWith('amp-cid-backup-foo', fooCid);
+      expect(getCookie(win, 'foo')).to.equal(cidString);
+    });
+
+    it('should not use expired CID backup', async () => {
+      env.sandbox
+        .stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
+      const setCookieSpy = env.sandbox.spy();
+      setCookie(win, 'foo', '', 0);
+      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
+        setCookieSpy(name, value);
+      });
+      const creationTime = 0;
+      const cidString = 'amp-abc123';
+      storageGetStub
+        .withArgs('amp-cid-backup-foo')
+        .returns(Promise.resolve(cidString));
+      storageGetTimeStub
+        .withArgs('amp-cid-backup-foo')
+        .returns(Promise.resolve(creationTime));
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+          backupToStorage: true,
+        },
+        hasConsent
+      );
+
+      expect(fooCid).to.not.equal(cidString);
+      expect(storageSetStub).to.not.be.calledWith(
+        'amp-cid-backup-foo',
+        cidString
+      );
+      expect(setCookieSpy).to.not.be.calledWith('foo', cidString);
+    });
+  });
 
   it('get method should return CID when in Viewer ', () => {
     env.sandbox
@@ -892,12 +1034,6 @@ describes.realWin('cid', {amp: true}, (env) => {
     ).returns(new Promise(() => {}));
     stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
       Promise.resolve(true)
-    );
-    const storageGetStub = stubServiceForDoc(
-      env.sandbox,
-      ampdoc,
-      'storage',
-      'get'
     );
     storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(false));
     env.sandbox.stub(url, 'isProxyOrigin').returns(true);
@@ -989,6 +1125,25 @@ describes.realWin('cid', {amp: true}, (env) => {
           .then((scopedCid) => {
             expect(scopedCid).to.be.null;
             expect(getCookie(win, '_ga')).to.be.null;
+          });
+      });
+
+      it('should not store CID in storage if opt-in', () => {
+        cid.apiKeyMap_ = {'AMP_ECID_GOOGLE': 'cid-api-key'};
+        const getScopedCidStub = env.sandbox.stub(cid.cidApi_, 'getScopedCid');
+        getScopedCidStub.returns(Promise.resolve('cid-from-api'));
+        return cid
+          .get(
+            {
+              scope: 'AMP_ECID_GOOGLE',
+              cookieName: '_ga',
+              createCookieIfNotPresent: true,
+              backupToStorage: true,
+            },
+            hasConsent
+          )
+          .then(() => {
+            expect(storageSetStub).to.not.be.called;
           });
       });
     });

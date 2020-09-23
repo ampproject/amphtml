@@ -83,6 +83,16 @@ export class Storage {
   }
 
   /**
+   * Returns the promise that yields the timestamp of the property for the specified
+   * key.
+   * @param {string} name
+   * @return {!Promise<number|undefined>}
+   */
+  getTimestamp(name) {
+    return this.getStore_().then((store) => store.getTimestamp(name));
+  }
+
+  /**
    * Saves the value (restricted to boolean value) of the specified property.
    * Returns the promise that's resolved when the operation completes.
    * @param {string} name
@@ -229,6 +239,16 @@ export class Store {
     // The structure is {key: {v: *, t: time}}
     const item = this.values_[name];
     return item ? item['v'] : undefined;
+  }
+
+  /**
+   * @param {string} name
+   * @return {number|undefined}
+   */
+  getTimestamp(name) {
+    // The structure is {key: {v: *, t: time}}
+    const item = this.values_[name];
+    return item ? item['t'] : undefined;
   }
 
   /**

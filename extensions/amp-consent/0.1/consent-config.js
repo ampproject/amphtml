@@ -342,7 +342,7 @@ export function expandConsentEndpointUrl(element, url) {
 export function getConsentCID(node) {
   return Services.cidForDoc(node).then((cid) => {
     return cid.get(
-      {scope: CID_SCOPE, createCookieIfNotPresent: true},
+      {scope: CID_SCOPE, createCookieIfNotPresent: true, backupToStorage: true},
       /** consent */ Promise.resolve()
     );
   });

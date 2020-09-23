@@ -264,6 +264,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         // Local service is default to "amp-access" scope.
         scope: 'amp-access',
         createCookieIfNotPresent: true,
+        backupToStorage: true,
       });
     });
 
@@ -272,6 +273,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       expect(cidGet).to.be.calledOnce.calledWith({
         scope: 'amp-access-service1',
         createCookieIfNotPresent: true,
+        backupToStorage: true,
       });
     });
 

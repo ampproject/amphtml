@@ -378,7 +378,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     if (!this.clientIdPromise_) {
       this.clientIdPromise_ = this.clientIdService_.then((data) => {
         return data.get(
-          {scope: 'amp-story', createCookieIfNotPresent: true},
+          {
+            scope: 'amp-story',
+            createCookieIfNotPresent: true,
+            backupToStorage: true,
+          },
           /* consent */ Promise.resolve()
         );
       });

@@ -167,7 +167,11 @@ export class AccessService {
       const consent = Promise.resolve();
       this.readerIdPromise_ = this.cid_.then((cid) => {
         return cid.get(
-          {scope: 'amp-access', createCookieIfNotPresent: true},
+          {
+            scope: 'amp-access',
+            createCookieIfNotPresent: true,
+            backupToStorage: true,
+          },
           consent
         );
       });

@@ -183,6 +183,7 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
       {
         scope: dev().assertString(opt_cidScope),
         createCookieIfNotPresent: true,
+        backupToStorage: true,
       },
       Promise.resolve()
     )
