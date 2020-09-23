@@ -58,8 +58,7 @@ export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void 
         return node;
       }
 
-      console.log('node', JSON.stringify(node.attrs));
-      if (!isValidScript(node, options.looseScriptSrcCheck)) {
+      if (!isValidScript(node)) {
         return node;
       }
 
