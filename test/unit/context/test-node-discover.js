@@ -134,10 +134,13 @@ describes.realWin('ContextNode', {}, (env) => {
     }
     if (spec.parent !== undefined) {
       const {parent} = contextNode;
-      expect((parent && parent.node) ?? null, 'parent').to.equal(spec.parent);
+      const parentNode = (parent && parent.node) ?? null;
+      const specNode =
+        ((spec.parent && spec.parent.node) || spec.parent) ?? null;
+      expect(parentNode, 'parent').to.equal(specNode);
     }
     if (spec.children !== undefined) {
-      const children = (contextNode.children || []).map((cn) => cn.node);
+      const children = (contextNode.children || []).map((cn) => cn.node || cn);
       children.sort(domOrderComparator);
       const specChildren = spec.children.slice(0);
       specChildren.sort(domOrderComparator);
@@ -999,6 +1002,84 @@ describes.realWin('ContextNode', {}, (env) => {
         // Not changed: unslotted.
         expectContext(sibling2, {parent});
       });
+    });
+  });
+
+  describe('discover groups', () => {
+    let sibling1;
+    let sibling2;
+    let cousin1;
+    let parent;
+    let grandparent;
+
+    beforeEach(async () => {
+      sibling1 = el('T-1-1-1');
+      sibling2 = el('T-1-1-2');
+      cousin1 = el('T-1-2-1');
+      parent = el('T-1-1');
+      grandparent = el('T-1');
+      await waitForDiscover(grandparent, parent, sibling1, sibling2, cousin1);
+    });
+
+    it('should rediscover children when a new group is added', async () => {
+      const group1 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling1,
+        0
+      );
+      await waitForDiscover(group1, sibling1);
+      clock.runAll();
+
+      expect(group1.node).to.equal(parent);
+      expectContext(group1, {parent, children: [sibling1]});
+
+      // sibling1 is reassigned to the group.
+      expectContext(sibling1, {parent: group1});
+
+      // sibling2 stays stays unchanged.
+      expectContext(sibling2, {parent});
+    });
+
+    it('should discover a new child', async () => {
+      const sibling3 = el('T-1-1-3');
+      const group1 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling3,
+        0
+      );
+      await waitForDiscover(group1);
+
+      // Discover the new node.
+      await rediscover(sibling3);
+      expectContext(sibling3, {parent: group1});
+    });
+
+    it('should handle weight', async () => {
+      const group1 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling1,
+        0
+      );
+      await waitForDiscover(group1, sibling1);
+      expectContext(sibling1, {parent: group1});
+
+      // A lower weight.
+      const group2 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling1,
+        -1
+      );
+      await waitForDiscover(group2, sibling1);
+      expectContext(sibling1, {parent: group1});
+
+      // A higher weight.
+      const group3 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling1,
+        1
+      );
+      await waitForDiscover(group3, sibling1);
+      expectContext(sibling1, {parent: group3});
     });
   });
 
