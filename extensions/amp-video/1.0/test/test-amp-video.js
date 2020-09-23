@@ -16,8 +16,6 @@
 
 import '../amp-video';
 import {htmlFor} from '../../../../src/static-template';
-import {toArray} from '../../../../src/types';
-import {toggleExperiment} from '../../../../src/experiments';
 import {waitForChildPromise} from '../../../../src/dom';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -31,7 +29,7 @@ describes.realWin(
     },
   },
   (env) => {
-    let win, doc, html;
+    let html;
     let element;
 
     const waitForRender = async () => {
@@ -61,7 +59,7 @@ describes.realWin(
       expect(video).to.not.be.null;
     });
 
-    it.only('passes attributes through to <video>', async () => {
+    it('passes attributes through to <video>', async () => {
       element = html`
         <amp-video
           layout="responsive"
