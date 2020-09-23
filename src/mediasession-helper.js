@@ -47,16 +47,16 @@ let lastMediaSession = 0;
  * @return {!UnlistenDef|undefined} Clears it, undefined when session not set.
  */
 export function setMediaSession(win, metadata, playHandler, pauseHandler) {
-  const {navigator} = win;
-  if ('mediaSession' in navigator && win.MediaMetadata) {
+  if ('mediaSession' in win.navigator && win.MediaMetadata) {
+    const {mediaSession} = win.navigator;
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)
-    navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
+    mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
 
-    navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
+    mediaSession.metadata = new win.MediaMetadata(metadata);
 
-    navigator.mediaSession.setActionHandler('play', playHandler);
-    navigator.mediaSession.setActionHandler('pause', pauseHandler);
+    mediaSession.setActionHandler('play', playHandler);
+    mediaSession.setActionHandler('pause', pauseHandler);
 
     // TODO(@wassgha) Implement seek & next/previous
 
@@ -65,10 +65,9 @@ export function setMediaSession(win, metadata, playHandler, pauseHandler) {
       if (currentMediaSession !== lastMediaSession) {
         return;
       }
-
-      navigator.mediaSession.metadata = null;
-      navigator.mediaSession.setActionHandler('play', null);
-      navigator.mediaSession.setActionHandler('pause', null);
+      mediaSession.metadata = null;
+      mediaSession.setActionHandler('play', null);
+      mediaSession.setActionHandler('pause', null);
     };
   }
 }
