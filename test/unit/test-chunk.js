@@ -414,7 +414,7 @@ describe('long tasks', () => {
         ).macroAfterLongTask_ = true;
       });
 
-      it('should not run macro tasks with invisible bodys', (done) => {
+      it('should not break out of microtask loop when body is invisible', (done) => {
         startupChunk(env.win.document, complete('init', true));
         startupChunk(env.win.document, complete('a', true));
         startupChunk(env.win.document, complete('b', true));
@@ -547,7 +547,7 @@ describe('isInputPending usage', () => {
         ).macroAfterLongTask_ = true;
       });
 
-      it('should not run macro tasks with invisible bodys', (done) => {
+      it('should not break out of microtask loop when body is invisible', (done) => {
         startupChunk(env.win.document, complete('init', true));
         startupChunk(env.win.document, complete('a', true));
         startupChunk(env.win.document, complete('b', true));
