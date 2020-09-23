@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
@@ -212,20 +211,17 @@ function renderSlides(
   classes
 ) {
   const {length} = children;
-  const slides = [];
 
-  children.forEach((child, index) => {
+  const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
-    slides.push(
-      <WithAmpContext
+    return (
+      <div
         key={key}
-        renderable={index == restingIndex}
-        playable={index == restingIndex}
+        data-slide={index}
+        class={`${classes.slideSizing} ${classes.slideElement}`}
       >
-        <div class={`${classes.slideSizing} ${classes.slideElement}`}>
-          {child}
-        </div>
-      </WithAmpContext>
+        {child}
+      </div>
     );
   });
 

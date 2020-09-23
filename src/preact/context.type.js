@@ -23,6 +23,7 @@ var AmpContextDef = {};
  * @typedef {{
  *   renderable: boolean,
  *   playable: boolean,
+ *   loading: string,
  *   notify: (function()|undefined),
  * }}
  */
@@ -32,6 +33,7 @@ AmpContextDef.ContextType;
  * @typedef {{
  *   renderable: boolean,
  *   playable: boolean,
+ *   loading: string,
  *   notify: (function()|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
