@@ -74,6 +74,17 @@ export function setParent(node, parent) {
 }
 
 /**
+ * Designates (or undesignates) the node as a root node. If the node is
+ * designated as a root, it will no longer discover itself.
+ *
+ * @param {!Node} node
+ * @param {boolean} isRoot
+ */
+export function setIsRoot(node, isRoot) {
+  ContextNode.get(node).setIsRoot(isRoot);
+}
+
+/**
  * Reruns discovery on the children of the specified node, if any.
  *
  * @param {!Node} node

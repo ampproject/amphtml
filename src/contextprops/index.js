@@ -63,7 +63,7 @@ const CanPlay = contextProp('CanPlay', {
  */
 const LoadingProp = contextProp('Loading', {
   defaultValue: Loading.AUTO,
-  recursive: (inputs) => inputs.reduce(loadingReducer),
+  recursive: true,
   deps: [CanRender],
   compute: (contextNode, inputs, parentValue, canRender) =>
     loadingReducer(

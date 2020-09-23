@@ -15,11 +15,11 @@
  */
 
 import * as Preact from './index';
-import {CanPlay, CanRender} from '../contextprops';
+import {CanPlay, CanRender, LoadingProp} from '../contextprops';
 import {dev} from '../log';
 import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
-import {useEffect, useRef} from './index';
+import {useEffect, useLayoutEffect, useRef} from './index';
 
 /**
  * @param {!Element} element
@@ -42,13 +42,20 @@ export function Slot(props) {
   const context = useAmpContext();
   const ref = useRef(/** @type {?Element} */ (null));
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const slot = dev().assertElement(ref.current);
     setProp(slot, CanRender, Slot, context.renderable);
     setProp(slot, CanPlay, Slot, context.playable);
+    setProp(
+      slot,
+      LoadingProp,
+      Slot,
+      /** @type {!../loading.Loading} */ (context.loading)
+    );
     return () => {
       removeProp(slot, CanRender, Slot);
       removeProp(slot, CanPlay, Slot);
+      removeProp(slot, LoadingProp, Slot);
       rediscoverChildren(slot);
     };
   }, [context]);
