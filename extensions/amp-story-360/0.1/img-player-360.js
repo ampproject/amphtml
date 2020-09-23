@@ -1,9 +1,9 @@
 import {Services} from '../../../src/services';
-import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 import {CommonSignals} from '../../../src/common-signals';
 import {TAG, CameraAnimation} from './amp-story-360';
-import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
+import {Renderer} from '../../../third_party/zuho/zuho';
 
 export class ImgPlayer360 {
   constructor(ampStory360, ampImgEl) {

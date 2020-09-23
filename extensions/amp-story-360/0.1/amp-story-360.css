@@ -21,7 +21,8 @@ amp-story-360 canvas {
  	height: 100% !important;
 }
 
-amp-story-360 amp-img {
+amp-story-360 amp-img,
+amp-story-360 amp-video {
   opacity: 0 !important;
 }
 

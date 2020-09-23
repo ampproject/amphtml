@@ -24,12 +24,11 @@ import {
   StateProperty,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
+import {Matrix} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
+import {closest} from '../../../src/dom';
+import {dev, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
