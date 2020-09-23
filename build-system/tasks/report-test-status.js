@@ -32,7 +32,7 @@ const IS_LOCAL_CHANGES = !!argv.local_changes;
 const IS_DIST = !!argv.compiled;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  ['integration', ['local', 'minified']],
+  ['integration', ['local', 'minified', 'sxg']],
   ['unit', ['local', 'local-changes']],
   ['e2e', ['local']],
 ]);
