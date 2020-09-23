@@ -919,6 +919,7 @@ app.get('/iframe-echo-message', (req, res) => {
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
 <<<<<<< HEAD
+<<<<<<< HEAD
 app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, res, next) => {
 =======
 app.use(['/dist/v0/amp-*.(js|mjs)', '/dist/amp*.(js|mjs)'], (req, res, next) => {
@@ -926,6 +927,15 @@ app.use(['/dist/v0/amp-*.(js|mjs)', '/dist/amp*.(js|mjs)'], (req, res, next) => 
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
+=======
+app.use(
+  ['/dist/v0/amp-*.(js|mjs)', '/dist/amp*.(js|mjs)'],
+  (req, res, next) => {
+    const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
+    setTimeout(next, sleep);
+  }
+);
+>>>>>>> 5b1ea8850 (lint fixes)
 
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
