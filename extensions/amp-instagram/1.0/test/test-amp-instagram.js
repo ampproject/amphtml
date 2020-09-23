@@ -105,22 +105,6 @@ describes.realWin(
       ).to.equal('https://www.instagram.com/p/error/embed/?cr=1&v=12');
     });
 
-    it('Resize prop is called', async () => {
-      element = win.document.createElement('amp-instagram');
-      element.setAttribute('data-shortcode', 'B8QaZW4AQY_');
-      element.setAttribute('amp', true);
-      element.setAttribute('height', 500);
-      element.setAttribute('width', 500);
-      element.setAttribute('layout', 'responsive');
-      element.setAttribute('requestResize', env.sandbox.spy());
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      expect(
-        element.shadowRoot.querySelector('iframe').getAttribute('requestResize')
-      ).to.have.been.calledOnce;
-    });
-
     it("Container's height is changed", async () => {
       const initialHeight = 300;
       element = win.document.createElement('amp-instagram');
