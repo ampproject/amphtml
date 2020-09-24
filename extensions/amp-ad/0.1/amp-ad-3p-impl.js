@@ -32,6 +32,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle, setStyles} from '../../../src/style';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
@@ -47,6 +48,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {listen} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {toWin} from '../../../src/types';
 
@@ -74,6 +76,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
+
+    /** @private {?../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = null;
 
     /** @type {?Object} */
     this.config = null;
@@ -112,6 +117,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      */
     this.unlistenViewportChanges_ = null;
 
+    /** @private {Array<Function>} */
+    this.unlisteners_ = [];
+
     /**
      * @private {IntersectionObserver}
      * @visibleForTesting
@@ -145,6 +153,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isStickyAd_ = false;
+
+    /**
+     * Whether the close button has been rendered for a sticky ad unit.
+     */
+    this.closeButtonRendered_ = false;
   }
 
   /** @override */
@@ -194,6 +207,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.viewport_ = this.getViewport();
+    this.vsync_ = this.getVsync();
     this.type_ = this.element.getAttribute('type');
     this.isStickyAd_ = this.element.hasAttribute('sticky');
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
@@ -250,6 +264,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         bottom: '0',
         right: '0',
       });
+
+      this.element.classList.add('i-amphtml-amp-ad-sticky-layout');
     }
   }
 
@@ -455,6 +471,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.unlisteners_.forEach((unlisten) => unlisten());
+    this.unlisteners_.length = 0;
+
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();
     if (this.xOriginIframeHandler_) {
@@ -472,6 +491,23 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return consentPolicyId
       ? getConsentPolicyState(this.element, consentPolicyId)
       : Promise.resolve(null);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isStickyAd() {
+    return this.isStickyAd_;
+  }
+
+  /**
+   * When a sticky ad is shown, the close button should be rendered at the same time.
+   */
+  onResizeSuccess() {
+    if (this.isStickyAd_ && !this.closeButtonRendered_) {
+      this.addCloseButton_();
+      this.closeButtonRendered_ = true;
+    }
   }
 
   /**
@@ -520,5 +556,33 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       MIN_FULL_WIDTH_HEIGHT,
       maxHeight
     );
+  }
+
+  /**
+   * The function that add a close button to sticky ad
+   */
+  addCloseButton_() {
+    const closeButton = createElementWithAttributes(
+      /** @type {!Document} */ (this.element.ownerDocument),
+      'button',
+      dict({
+        'aria-label':
+          this.element.getAttribute('data-close-button-aria-label') ||
+          'Close this ad',
+      })
+    );
+
+    this.unlisteners_.push(
+      listen(closeButton, 'click', () => {
+        this.vsync_.mutate(() => {
+          this.viewport_.removeFromFixedLayer(this.element);
+          removeElement(this.element);
+          this.viewport_.updatePaddingBottom(0);
+        });
+      })
+    );
+
+    closeButton.classList.add('amp-ad-close-button');
+    this.element.appendChild(closeButton);
   }
 }
