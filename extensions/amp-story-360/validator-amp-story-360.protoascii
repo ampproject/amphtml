@@ -58,6 +58,18 @@ tags: {  # <amp-story-360>
     name: "zoom-end"
     value_regex: "\\d+\\.?\\d*"
   }
+  attrs: {
+    name: "scene-heading"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "scene-pitch"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "scene-roll"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "AMP-IMG"

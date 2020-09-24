@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-import {useResourcesNotify} from '../../../src/preact/utils';
-import {useState} from '../../../src/preact';
+// TODO(alanorozco): Share these across components, make them JSS.
 
-/**
- * Renders the children prop, waiting for it to resolve if it is a promise.
- *
- * @param {!DateDisplayDef.AsyncRenderProps} props
- * @return {PreactDef.Renderable}
- */
-export function AsyncRender({children}) {
-  const [state, set] = useState(children);
-  useResourcesNotify();
+export const fillStretch = {
+  'position': 'relative',
+  'width': '100%',
+  'height': '100%',
+};
 
-  if (state && state.then) {
-    Promise.resolve(children).then(set);
-    return null;
-  }
-
-  return state;
-}
+export const fillContentOverlay = {
+  'position': 'absolute',
+  'left': 0,
+  'right': 0,
+  'bottom': 0,
+  'top': 0,
+};

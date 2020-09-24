@@ -575,11 +575,6 @@ async function copyWorkerDomResources(version) {
   const startTime = Date.now();
   const workerDomDir = 'node_modules/@ampproject/worker-dom';
   const targetDir = 'dist/v0';
-  log(
-    green('Copying @ampproject/worker-dom resources:'),
-    cyan('worker.js, worker.nodom.js')
-  );
-
   const dir = `${workerDomDir}/dist`;
   const workerFilesToDeploy = new Map([
     ['amp-production/worker/worker.js', `amp-script-worker-${version}.js`],
@@ -638,11 +633,7 @@ async function copyWorkerDomResources(version) {
   for (const [src, dest] of workerFilesToDeploy) {
     await fs.copy(`${dir}/${src}`, `${targetDir}/${dest}`);
   }
-  endBuildStep(
-    'Copied @ampproject/worker-dom resources',
-    'worker.js, worker.nodom.js',
-    startTime
-  );
+  endBuildStep('Copied', '@ampproject/worker-dom resources', startTime);
 }
 
 module.exports = {
