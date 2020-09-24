@@ -81,7 +81,7 @@ export function DateCountdown({
   );
 
   // How much time is left in our countdown
-  const [timeleft, setTimeleft] = useState(epoch - Date.now());
+  const setTimeleft = useState(epoch - Date.now())[1];
 
   // One time calculation of time labels in specified locale
   const localeStrings = useMemo(() => getLocaleWord(locale), [locale]);
