@@ -21,19 +21,23 @@ const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
 
-const MODE_PORTS = {
+const ENV_PORTS = {
   amp: 9001,
   preact: 9002,
 };
 
-function runStorybook(mode) {
+/**
+ * @param {string} env 'amp' or 'preact'
+ * @return {!ChildProcess}
+ */
+function runStorybook(env) {
   // install storybook-specific modules
   installPackages(__dirname);
 
-  const {ci, 'storybook_port': port = MODE_PORTS[mode]} = argv;
+  const {ci, 'storybook_port': port = ENV_PORTS[env]} = argv;
 
-  execScriptAsync(
-    `./node_modules/.bin/start-storybook --quiet -c ./${mode}-env -p ${port} ${
+  return execScriptAsync(
+    `./node_modules/.bin/start-storybook --quiet -c ./${env}-env -p ${port} ${
       ci ? '--ci' : ''
     }`,
     {
