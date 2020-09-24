@@ -143,7 +143,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.scheduledRenderDeferred_ = null;
 
     /** @private {!JsonObject|null|undefined} */
-    this.defaultProps_ = this.constructor['staticProps'];
+    this.defaultProps_ = null;
 
     /** @private {boolean} */
     this.mounted_ = true;
@@ -177,7 +177,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...templatesInit,
     });
 
-    this.defaultProps_ = this.init() || null;
+    this.defaultProps_ = {...Ctor['staticProps'], ...(this.init() || null)};
     this.checkPropsPostMutations();
 
     const useContexts = Ctor['useContexts'];

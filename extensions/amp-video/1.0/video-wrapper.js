@@ -79,7 +79,6 @@ function VideoWrapperWithRef(
     loop = false,
     noaudio = false,
     mediasession = true,
-    containsize,
     className,
     style,
     sources,
@@ -184,7 +183,6 @@ function VideoWrapperWithRef(
       contentRef={wrapperRef}
       className={className}
       style={style}
-      containsize={containsize}
       size
       layout
       paint
