@@ -518,7 +518,9 @@ export class Resource {
       this.initialLayoutBox_ = newBox;
     }
 
-    this.element.updateLayoutBox(newBox, sizeChanges);
+    if (this.element.isBuilt()) {
+      this.element.onMeasure(sizeChanges);
+    }
   }
 
   /**
@@ -576,7 +578,7 @@ export class Resource {
       0
     );
     this.isFixed_ = false;
-    this.element.updateLayoutBox(this.getLayoutBox());
+    this.element.onMeasure(false);
     const owner = this.getOwner();
     if (owner) {
       owner.collapsedCallback(this.element);

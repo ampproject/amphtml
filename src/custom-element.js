@@ -154,12 +154,6 @@ function createBaseCustomElementClass(win) {
       this.layout_ = Layout.NODISPLAY;
 
       /** @private {number} */
-      this.layoutWidth_ = -1;
-
-      /** @private {number} */
-      this.layoutHeight_ = -1;
-
-      /** @private {number} */
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
@@ -430,15 +424,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * TODO(wg-runtime, #25824): Make Resource.getLayoutBox() the source of truth.
-     * @return {number}
-     * @deprecated
-     */
-    getLayoutWidth() {
-      return this.layoutWidth_;
-    }
-
-    /**
      * Get the default action alias.
      * @return {?string}
      */
@@ -567,14 +552,13 @@ function createBaseCustomElementClass(win) {
      * Updates the layout box of the element.
      * Should only be called by Resources.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
-     * @param {boolean} sizeChanged
+     * 
+     * @deprecated
      */
-    updateLayoutBox(layoutBox, sizeChanged = false) {
-      this.layoutWidth_ = layoutBox.width;
-      this.layoutHeight_ = layoutBox.height;
-      if (this.isBuilt()) {
-        this.onMeasure(sizeChanged);
-      }
+    updateLayoutBox(layoutBox) {
+      const r = this.getResource_();
+      r.premeasure(layoutBox);
+      r.measure(/* usePremeasure */ true);
     }
 
     /**
@@ -1643,7 +1627,7 @@ function createBaseCustomElementClass(win) {
       if (
         this.loadingDisabled_ ||
         (laidOut && !this.implementation_.isLoadingReused()) ||
-        this.layoutWidth_ <= 0 || // Layout is not ready or invisible
+        this.getResource_().getLayoutBox().width <= 0 || // Layout is not ready or invisible
         !isLoadingAllowed(this) ||
         isInternalOrServiceNode(this) ||
         this.layout_ == Layout.NODISPLAY
@@ -1684,11 +1668,12 @@ function createBaseCustomElementClass(win) {
         const container = htmlFor(/** @type {!Document} */ (doc))`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
+        const {width, height} = this.getResource_().getLayoutBox();
         const loadingElement = createLoaderElement(
           this.getAmpDoc(),
           this,
-          this.layoutWidth_,
-          this.layoutHeight_,
+          width,
+          height,
           startTime
         );
 
