@@ -75,14 +75,11 @@ limitations under the License.
 
 The amp-story-interactive component provides a set of experiences, such as quizzes or polls, for users in [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories). Interactive experiences provided by amp-story-interactive can integrate into tools or editors and support analytics.
 
-<table>
-<tr><td style="border-right:none">Quiz</td><td>Poll</td><td>Results</td></tr>
-<tr>
-<td style="border-right:none"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/quiz-art.png" layout="responsive" width="3" height="5"></td>
-<td><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/animal-poll.png" layout="responsive" width="3" height="5"></td>
-<td><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/results-art.png" layout="responsive" width="3" height="5"></td>
-</tr>
-</table>
+<div layout="container" width="3" height="2">
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/animal-poll.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/results-art.png" layout="responsive" width="200" height="350"/></div>
+</div>
 
 ## Interactive experiences
 
@@ -93,6 +90,8 @@ The amp-story-interactive extension encompasses a set of interactive experiences
 The amp-story-interactive-binary-poll element provides a two option voting user interface. Users may select one of two valid options. When selected, the highlighted option fills the container and displays the total percentage of votes.
 
 Is well suited to be used without amp-story-interactive-results, and can optionally have a prompt.
+
+<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="responsive" width="3" height="2">
 
 ```html
 <amp-story-interactive-binary-poll
