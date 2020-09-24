@@ -102,7 +102,9 @@ module.exports = function ({template}) {
 
         // Create the classes var.
         const id = path.scope.generateUidIdentifier('classes');
-        const init = template.expression.ast`${JSON.stringify(sheet.classes)}`;
+        const init = template.expression.ast`{${Object.entries(sheet.classes)
+          .map(([k, v]) => `${k}:"${v}"`)
+          .join(',')}}`;
         path.scope.push({id, init});
         path.scope.bindings[id.name].path.parentPath.addComment(
           'leading',
