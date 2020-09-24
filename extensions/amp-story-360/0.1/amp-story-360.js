@@ -410,15 +410,18 @@ export class AmpStory360 extends AMP.BaseElement {
     this.gyroscopeControls_ = true;
     this.togglePermissionClass_(true);
 
+    let discoverTemplate;
     if (this.isOnActivePage_) {
-      const discoverTemplate = buildDiscoveryTemplate(this.element);
+      discoverTemplate = buildDiscoveryTemplate(this.element);
       this.mutateElement(() => this.element.appendChild(discoverTemplate));
     }
 
     // This can happen on desktop browsers that support deviceorientation but don't call it.
     const checkNoMotion = this.timer_.delay(() => {
       this.gyroscopeControls_ = false;
-      this.mutateElement(() => this.element.removeChild(discoverTemplate));
+      this.mutateElement(
+        () => discoverTemplate && this.element.removeChild(discoverTemplate)
+      );
       if (this.isReady_ && this.isPlaying_) {
         this.animate_();
       }
