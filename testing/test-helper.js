@@ -111,7 +111,7 @@ const noneValues = {
   'animation-iteration-count': ['1', 'initial'],
   'animation-direction': ['normal', 'initial'],
   'animation-fill-mode': ['none', 'initial'],
-  'animation-play-state': ['running', 'initial'],
+  'animation-play-state': ['running', 'initial', /* IE11 */ ''],
 };
 
 /**
