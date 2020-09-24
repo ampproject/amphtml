@@ -96,7 +96,7 @@ amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery 
   width: 100% !important;
   height: 50% !important;
   perspective: 550px !important;
-  background: linear-gradient(0,rgba(0,0,0,1),transparent) !important;
+  background: linear-gradient(transparent, black) !important;
   animation: fadeOut 1s 4s forwards !important;
 }
 
