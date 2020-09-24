@@ -130,7 +130,7 @@ ad network:
 ></amp-ad>
 ```
 
-To create an ad network implementation, you must perform the following:
+To create an ad network implementation, perform the following steps:
 
 1.  Create a new extension in the `extensions` directory of the AMP HTML Github
     [repository](https://github.com/ampproject/amphtml/tree/master/extensions)
