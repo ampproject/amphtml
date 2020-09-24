@@ -43,7 +43,7 @@ const {default: preset} = require('jss-preset-default');
 const {relative, join} = require('path');
 const {spawnSync} = require('child_process');
 
-module.exports = function ({types: t, template}) {
+module.exports = function ({template}) {
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
@@ -103,15 +103,22 @@ module.exports = function ({types: t, template}) {
         // Create the classes var.
         const id = path.scope.generateUidIdentifier('classes');
         const init = template.expression.ast`${JSON.stringify(sheet.classes)}`;
-        path.scope.push({ id, init });
-        path.scope.bindings[id.name].path.parentPath.addComment('leading', '* @enum {string}');
+        path.scope.push({id, init});
+        path.scope.bindings[id.name].path.parentPath.addComment(
+          'leading',
+          '* @enum {string}'
+        );
 
         // Replace useStyles with a getter for the new `classes` var.
         path.replaceWith(template.expression.ast`(() => ${id})`);
 
         // Export a variable named CSS with the compiled CSS.
-        const cssExport = template.ast`export const CSS = "${transformCssSync(sheet.toString())}"`;
-        path.findParent(p => p.type === 'ExportNamedDeclaration').insertAfter(cssExport);
+        const cssExport = template.ast`export const CSS = "${transformCssSync(
+          sheet.toString()
+        )}"`;
+        path
+          .findParent((p) => p.type === 'ExportNamedDeclaration')
+          .insertAfter(cssExport);
       },
 
       // Remove the import for react-jss

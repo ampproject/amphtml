@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {CSS} from './pagination.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {Layout} from '../../../src/layout';
 import {Pagination} from './pagination';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {isExperimentOn} from '../../../src/experiments';
-import {CSS} from './pagination.jss';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
