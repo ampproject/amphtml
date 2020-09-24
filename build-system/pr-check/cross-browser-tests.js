@@ -28,12 +28,10 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  timedExec: timedExecBase,
 } = require('./utils');
 
 const FILENAME = 'cross-browser-tests.js';
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExec = (cmd) => timedExecBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
