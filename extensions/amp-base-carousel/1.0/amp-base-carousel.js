@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
+import {CSS} from './base-carousel.jss';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -23,7 +24,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {useStyles} from './base-carousel.jss';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -92,8 +92,7 @@ AmpBaseCarousel['props'] = {
 };
 
 /** @override */
-// eslint-disable-next-line
-AmpBaseCarousel['shadowCss'] = useStyles().CSS;
+AmpBaseCarousel['shadowCss'] = CSS;
 
 /** @override */
 AmpBaseCarousel['useContexts'] = [CarouselContextProp];
