@@ -95,7 +95,7 @@ amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery 
   width: 100% !important;
   height: 50% !important;
   perspective: 550px !important;
-  background: linear-gradient(transparent, black) !important;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .8)) !important;
   animation: fadeOut 1s 4s forwards !important;
 }
 
@@ -122,7 +122,7 @@ amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery 
 .i-amphtml-story-360-discovery-animation:before {
   content: "" !important;
   position: absolute !important;
-  border-top: 1px solid #fff !important;
+  border-top: 1px solid white !important;
   width: 14px !important;
   top: 5px !important;
   left: calc(50% - 7px) !important;
