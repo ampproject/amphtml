@@ -911,13 +911,10 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(
-  ['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'],
-  (req, res, next) => {
-    const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
-    setTimeout(next, sleep);
-  }
-);
+app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, res, next) => {
+  const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
+  setTimeout(next, sleep);
+});
 
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
@@ -1225,7 +1222,7 @@ app.get(
     }
     const isJsMap = filePath.endsWith('.map');
     if (isJsMap) {
-      filePath = filePath.replace(/\.(m?js)\.map$/, '.$1js');
+      filePath = filePath.replace(/\.(m?js)\.map$/, '.$1');
     }
     filePath = replaceUrls(mode, filePath);
     req.url = filePath + (isJsMap ? '.map' : '');
@@ -1257,7 +1254,7 @@ app.get(
       return;
     }
     if (mode == 'default') {
-      req.url = req.url.replace(/\.(m?js)$/, '.max.$1js');
+      req.url = req.url.replace(/\.(m?js)$/, '.max.$1');
     }
     next();
   }
