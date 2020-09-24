@@ -166,6 +166,34 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
   });
 
+  describe('props with staticProps', () => {
+    let element;
+
+    const initProps = {x: 'x', tacos: true};
+
+    beforeEach(async () => {
+      Impl.prototype.init = () => initProps;
+      Impl['staticProps'] = {
+        a: 'a',
+        b: 123,
+      };
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"></amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('include staticProps', () => {
+      expect(lastProps).to.include(Impl['staticProps']);
+    });
+
+    it('include init() props', () => {
+      expect(lastProps).to.include(initProps);
+    });
+  });
+
   describe('usesTemplate', () => {
     let element;
 

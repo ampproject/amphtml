@@ -194,6 +194,11 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...templatesInit,
     });
 
+    const staticProps = Ctor['staticProps'];
+    if (staticProps) {
+      Object.assign(/** @type {!Object} */ (this.defaultProps_), staticProps);
+    }
+
     const initProps = this.init();
     if (initProps) {
       Object.assign(/** @type {!Object} */ (this.defaultProps_), initProps);
@@ -545,6 +550,12 @@ export class PreactBaseElement extends AMP.BaseElement {
 PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
+
+/**
+ * If default props are static, this can be used instead of init().
+ * @protected {!JsonObject|undefined}
+ */
+PreactBaseElement['staticProps'] = undefined;
 
 /**
  * @protected {!Array<!ContextProp>}
