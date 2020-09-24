@@ -23,7 +23,7 @@ export default {
   title: '0/amp-layout with aspect ratio CSS',
   decorators: [withA11y, withKnobs, withAmp],
   parameters: {
-    experiments: ['layout-aspect-ratio-css1'],
+    experiments: ['layout-aspect-ratio-css'],
   },
 };
 
@@ -82,6 +82,42 @@ export const responsiveHeightBound = () => {
       </style>
       <div class="container">
         <amp-layout layout="responsive" width={width} height={height}>
+          <div class="content">
+            {width}:{height}
+          </div>
+        </amp-layout>
+      </div>
+    </main>
+  );
+};
+
+export const intrinsic = () => {
+  const width = number('width', 800);
+  const height = number('height', 600);
+  const maxWidth = number('maxWidth', 400);
+  return (
+    <main>
+      <style jsx global>
+        {`
+          .container {
+            background: lightgray;
+            position: relative;
+            float: left;
+          }
+          .content {
+            background: cyan;
+            width: 100%;
+            height: 100%;
+          }
+        `}
+      </style>
+      <div class="container">
+        <amp-layout
+          layout="intrinsic"
+          width={width}
+          height={height}
+          style={{maxWidth}}
+        >
           <div class="content">
             {width}:{height}
           </div>

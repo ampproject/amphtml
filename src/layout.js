@@ -534,27 +534,35 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
       element.sizerElement = sizer;
     }
   } else if (layout == Layout.INTRINSIC) {
-    // Intrinsic uses an svg inside the sizer element rather than the padding
-    // trick Note a naked svg won't work becasue other thing expect the
-    // i-amphtml-sizer element
-    const sizer = htmlFor(element)`
-      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
-        <img alt="" role="presentation" aria-hidden="true"
-             class="i-amphtml-intrinsic-sizer" />
-      </i-amphtml-sizer>`;
-    const intrinsicSizer = sizer.firstElementChild;
-    intrinsicSizer.setAttribute(
-      'src',
-      !IS_ESM && fixIeIntrinsic && element.ownerDocument
-        ? transparentPng(
-            element.ownerDocument,
-            dev().assertNumber(getLengthNumeral(width)),
-            dev().assertNumber(getLengthNumeral(height))
-          )
-        : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
-    );
-    element.insertBefore(sizer, element.firstChild);
-    element.sizerElement = sizer;
+    if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
+      setStyles(element, {
+        aspectRatio: `${getLengthNumeral(width)}/${getLengthNumeral(height)}`,
+        contain: 'size',
+        containIntrinsicSize: `${width} ${height}`,
+      });
+    } else {
+      // Intrinsic uses an svg inside the sizer element rather than the padding
+      // trick Note a naked svg won't work becasue other thing expect the
+      // i-amphtml-sizer element
+      const sizer = htmlFor(element)`
+        <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
+          <img alt="" role="presentation" aria-hidden="true"
+               class="i-amphtml-intrinsic-sizer" />
+        </i-amphtml-sizer>`;
+      const intrinsicSizer = sizer.firstElementChild;
+      intrinsicSizer.setAttribute(
+        'src',
+        !IS_ESM && fixIeIntrinsic && element.ownerDocument
+          ? transparentPng(
+              element.ownerDocument,
+              dev().assertNumber(getLengthNumeral(width)),
+              dev().assertNumber(getLengthNumeral(height))
+            )
+          : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
+      );
+      element.insertBefore(sizer, element.firstChild);
+      element.sizerElement = sizer;
+    }
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
