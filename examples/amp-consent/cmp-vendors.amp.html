@@ -280,6 +280,25 @@
       </amp-consent>
       <!-- End Ogury example -->
 
+      <!-- OneTrust example -->
+      <amp-consent id='consent' layout='nodisplay' type='onetrust'>
+        <script type="application/json">
+        {
+          "postPromptUI": "onetrust-consent-prompt-ui",
+          "clientConfig": {
+            "CMP_id": "ac6c1ea9-9ac8-460e-a132-b328dea3f56f-test",
+            "Env": "App",
+            "Opt_Out": "C0004"
+          }
+        }
+        </script>
+        <div id="onetrust-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=onetrust)" role="button">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End OneTrust example -->
+
       <!-- opencmp example -->
       <amp-consent id='consent' layout='nodisplay' type='opencmp'>
         <script type="application/json">
