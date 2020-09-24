@@ -142,6 +142,7 @@ import {eplanning} from '../ads/eplanning';
 import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
+import {fakeDelayed} from '../ads/_fakedelayed_';
 import {felmat} from '../ads/felmat';
 import {firstimpression} from '../ads/firstimpression';
 import {flite} from '../ads/flite';
@@ -195,6 +196,7 @@ import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
 import {my6sense} from '../ads/my6sense';
+import {myoffrz} from '../ads/myoffrz';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
@@ -367,6 +369,7 @@ init(window);
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
+  register('fake-delayed', fakeDelayed);
 }
 
 // Keep the list in alphabetic order
@@ -514,6 +517,7 @@ register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mox', mox);
 register('my6sense', my6sense);
+register('myoffrz', myoffrz);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);

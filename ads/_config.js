@@ -476,6 +476,10 @@ const adConfig = jsonConfiguration({
 
   'fake': {},
 
+  'fake-delayed': {
+    renderStartImplemented: true,
+  },
+
   'felmat': {
     prefetch: 'https://t.felmat.net/js/fmamp.js',
     renderStartImplemented: true,
@@ -755,6 +759,10 @@ const adConfig = jsonConfiguration({
   },
 
   'my6sense': {
+    renderStartImplemented: true,
+  },
+
+  'myoffrz': {
     renderStartImplemented: true,
   },
 
