@@ -50,7 +50,6 @@ import {
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listen} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
-
 import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */
