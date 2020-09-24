@@ -55,8 +55,7 @@ export class IframePool {
   rotateFirst(nextStoryIdx) {
     const detachedStoryIdx = this.storyIdsWithIframe_.shift();
     this.storyIdsWithIframe_.push(nextStoryIdx);
-
-    this.iframePool_.push(this.iframePool_.shift());
+    this.storyIdsWithIframe_.sort();
 
     return detachedStoryIdx;
   }
@@ -71,28 +70,10 @@ export class IframePool {
    */
   rotateLast(nextStoryIdx) {
     const detachedStoryIdx = this.storyIdsWithIframe_.pop();
-    this.storyIdsWithIframe_.unshift(nextStoryIdx);
-
-    this.iframePool_.unshift(this.iframePool_.pop());
+    this.storyIdsWithIframe_.push(nextStoryIdx);
+    this.storyIdsWithIframe_.sort();
 
     return detachedStoryIdx;
-  }
-
-  /**
-   * Clears stored story indices.
-   * @return {!Array<number>}
-   */
-  evictStories() {
-    const evictedStories = this.storyIdsWithIframe_;
-    this.storyIdsWithIframe_ = [];
-    return evictedStories;
-  }
-
-  /**
-   * @return {!Array<number>}
-   */
-  getAvailableIframeIdx() {
-    return this.iframePool_;
   }
 
   /**
@@ -112,8 +93,11 @@ export class IframePool {
     // If index is at rightmost part of the array, adjacent iframes will all be
     // at the left.
     let cursor = storyIdx + 1 > maxIdx ? storyIdx - 2 : storyIdx - 1;
+
+    // Place current story index first to prioritize loading over adjacent ones.
+    adjacent.push(storyIdx);
     while (adjacent.length < this.iframePool_.length) {
-      if (cursor < 0) {
+      if (cursor < 0 || cursor === storyIdx) {
         ++cursor;
         continue;
       }
