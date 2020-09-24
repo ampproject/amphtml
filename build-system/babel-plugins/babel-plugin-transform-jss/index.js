@@ -117,7 +117,7 @@ module.exports = function ({template}) {
         // Export a variable named CSS with the compiled CSS.
         const cssExport = template.ast`export const CSS = "${transformCssSync(
           sheet.toString()
-        )}"`; 
+        )}"`;
         path
           .findParent((p) => p.type === 'ExportNamedDeclaration')
           .insertAfter(cssExport);
