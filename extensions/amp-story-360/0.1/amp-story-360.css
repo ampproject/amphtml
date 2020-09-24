@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+amp-story-360 {
+  font-family: 'Roboto', sans-serif !important;
+}
+
 amp-story-360 canvas {
   position: absolute; /* fixes Safari bug */
  	width: 100% !important;
@@ -37,7 +41,6 @@ amp-story-360 amp-img {
   padding-left: 10px !important;
   border-radius: 18px !important;
   font-size: 12px !important;
-  font-family: 'Roboto', sans-serif !important;
   display: flex !important;
   align-items: center !important;
   z-index: 100000 !important;
@@ -80,6 +83,11 @@ amp-story-360 amp-img {
   display: none !important;
 }
 
+amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery {
+  display: none !important;
+  animation-play-state: paused !important;
+}
+
 .i-amphtml-story-360-discovery {
   pointer-events: none !important;
   position: absolute !important;
@@ -89,19 +97,11 @@ amp-story-360 amp-img {
   height: 50% !important;
   perspective: 550px !important;
   background: linear-gradient(0,rgba(0,0,0,1),transparent) !important;
-  animation: fadeInOut 4.5s 1s forwards !important;
-  visibility: hidden;
+  animation: fadeOut 1s 4s forwards !important;
 }
 
-@keyframes fadeInOut {
+@keyframes fadeOut {
   0% {
-    visibility: visible;
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  95% {
     opacity: 1;
   }
   100% {
@@ -117,7 +117,7 @@ amp-story-360 amp-img {
   height: 100px !important;
   border: 1px solid white !important;
   border-radius: 10px !important;
-  animation: lookAround 4s 1s !important;
+  animation: lookAround 4s !important;
 }
 
 .i-amphtml-story-360-discovery-animation:before {
@@ -157,12 +157,6 @@ amp-story-360 amp-img {
   bottom: 50px !important;
   width: 100% !important;
   font-size: 21px !important;
-  font-family: 'Roboto', sans-serif !important;
   text-align: center !important;
   color: white !important;
-}
-
-amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery {
-  display: none !important;
-  animation-play-state: paused !important;
 }
