@@ -29,6 +29,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
+import {listenOncePromise} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -402,42 +403,32 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Creates a listener,sets gyroscopeControls_ state and triggers a discovery graphic.
-   * If listener is not called in 1000ms, remove listener and discovery graphic then resume animation.
+   * Listens for deviceorientation events.
+   *
+   * Some browsers support the 'deviceorientation' event but never call it.
+   * This waits for one call before adding a constant listener.
    * @private
    */
   enableGyroscope_() {
-    this.gyroscopeControls_ = true;
-    this.togglePermissionClass_(true);
-
-    let discoverTemplate;
-    if (this.isOnActivePage_) {
-      discoverTemplate = buildDiscoveryTemplate(this.element);
-      this.mutateElement(() => this.element.appendChild(discoverTemplate));
-    }
-
-    // This can happen on desktop browsers that support deviceorientation but don't call it.
-    const checkNoMotion = this.timer_.delay(() => {
-      this.gyroscopeControls_ = false;
-      this.mutateElement(
-        () => discoverTemplate && this.element.removeChild(discoverTemplate)
-      );
-      if (this.isReady_ && this.isPlaying_) {
-        this.animate_();
-      }
-    }, 1000);
-
-    let rafTimeout;
-
-    this.win.addEventListener('deviceorientation', (e) => {
-      if (this.isReady_ && this.isOnActivePage_) {
-        // Debounce onDeviceOrientation_ to rAF.
-        rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
-        rafTimeout = this.win.requestAnimationFrame(() =>
-          this.onDeviceOrientation_(e)
+    listenOncePromise(this.win, 'deviceorientation').then(() => {
+      this.gyroscopeControls_ = true;
+      this.togglePermissionClass_(true);
+      // Debounce onDeviceOrientation_ to rAF.
+      let rafTimeout;
+      this.win.addEventListener('deviceorientation', (e) => {
+        if (this.isReady_ && this.isOnActivePage_) {
+          rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
+          rafTimeout = this.win.requestAnimationFrame(() =>
+            this.onDeviceOrientation_(e)
+          );
+        }
+      });
+      // Display discovery animation.
+      if (this.isOnActivePage_) {
+        this.mutateElement(() =>
+          this.element.appendChild(buildDiscoveryTemplate(this.element))
         );
       }
-      this.timer_.cancel(checkNoMotion);
     });
   }
 
