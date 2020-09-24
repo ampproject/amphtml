@@ -34,12 +34,16 @@ function runStorybook(env) {
   // install storybook-specific modules
   installPackages(__dirname);
 
-  const {ci, 'storybook_port': port = ENV_PORTS[env]} = argv;
+  const {ci, 'storybook_port': storybookPort = ENV_PORTS[env]} = argv;
 
   return execScriptAsync(
-    `./node_modules/.bin/start-storybook --quiet -c ./${env}-env -p ${port} ${
-      ci ? '--ci' : ''
-    }`,
+    [
+      './node_modules/.bin/start-storybook',
+      '--quiet',
+      '-c ./${env}-env',
+      `-p ${storybookPort}`,
+      ci ? '--ci' : '',
+    ].join(' '),
     {
       'stdio': [null, process.stdout, process.stderr],
       cwd: __dirname,
