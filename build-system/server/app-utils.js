@@ -143,11 +143,11 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       hostName + '/dist/video-iframe-integration-v0.$1'
     );
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).(m?js)/g,
+      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?)\.(m?js)/g,
       hostName + '/dist/v0/$1.$2js'
     );
     file = file.replace(
-      /\/dist\/v0\/examples\/(.*)\.max.(m?js)/g,
+      /\/dist\/v0\/examples\/(.*)\.max\.(m?js)/g,
       '/dist/v0/examples/$1.$2'
     );
     file = file.replace(

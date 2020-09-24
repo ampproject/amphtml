@@ -1202,7 +1202,7 @@ app.get('/adzerk/*', (req, res) => {
  * Serve extension scripts and their source maps.
  */
 app.get(
-  ['/dist/rtv/*/v0/*.( m?js)', '/dist/rtv/*/v0/*.(m?js).map'],
+  ['/dist/rtv/*/v0/*.(m?js)', '/dist/rtv/*/v0/*.(m?js).map'],
   (req, res, next) => {
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
