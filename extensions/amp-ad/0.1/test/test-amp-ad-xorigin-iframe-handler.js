@@ -59,6 +59,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adImpl.lifecycleReporter = {
       addPingsForVisibility: (unusedElement) => {},
     };
+    adImpl.isStickyAd = () => false;
+    adImpl.onResizeSuccess = window.sandbox.spy();
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
@@ -364,6 +366,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
+          expect(adImpl.onResizeSuccess).to.be.called;
         });
     });
 
@@ -389,6 +392,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
+          expect(adImpl.onResizeSuccess).to.be.called;
         });
     });
 
