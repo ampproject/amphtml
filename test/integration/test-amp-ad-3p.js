@@ -125,11 +125,11 @@ describe('amp-ad 3P', () => {
           );
         }
         expect(context.startTime).to.be.a('number');
-        // Edge has different opinion about window.location in srcdoc iframe.
+        // Edge\IE has different opinion about window.location in srcdoc iframe.
         // Nevertheless this only happens in test. In real world AMP will not
         // in srcdoc iframe.
         expect(context.sourceUrl).to.equal(
-          platform.isEdge()
+          platform.isEdge() || platform.isIE()
             ? 'http://localhost:9876/context.html'
             : 'about:srcdoc'
         );
