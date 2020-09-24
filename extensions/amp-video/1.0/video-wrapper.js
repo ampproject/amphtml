@@ -134,6 +134,8 @@ function VideoWrapperWithRef(
     };
   }, [mediasession, playing, metadata, play, pause]);
 
+  // We'd like this to be as close as possible to the HTMLMediaElement
+  // interface, preferrably as an extension/superset.
   useImperativeHandle(
     ref,
     () => ({
