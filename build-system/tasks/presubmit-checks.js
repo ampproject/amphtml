@@ -126,6 +126,8 @@ const forbiddenTerms = {
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
       'build-system/pr-check/performance-tests.js',
+      'build-system/pr-check/sxg-dist.js',
+      'build-system/pr-check/sxg-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
