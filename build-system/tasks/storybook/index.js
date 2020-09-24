@@ -16,23 +16,29 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {exec} = require('../../common/exec');
+const log = require('fancy-log');
+const {createCtrlcHandler} = require('../../common/ctrlcHandler');
+const {createServer} = require('net');
+const {cyan, yellow} = require('ansi-colors');
+const {DEFAULT_PORT: AMP_BUILD_PORT} = require('../serve');
+const {defaultTask} = require('../default-task');
+const {execScriptAsync} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
 
-const DEFAULT_PORTS = {
-  'amp': 9001,
-  'preact': 9002,
+const MODE_PORTS = {
+  amp: 9001,
+  preact: 9002,
 };
 
 function runStorybook(mode) {
   // install storybook-specific modules
   installPackages(__dirname);
 
-  const port = argv.port || DEFAULT_PORTS[mode];
+  const {ci, 'storybook_port': port = MODE_PORTS[mode]} = argv;
 
-  exec(
+  execScriptAsync(
     `./node_modules/.bin/start-storybook --quiet -c ./${mode}-env -p ${port} ${
-      argv.ci ? '--ci' : ''
+      ci ? '--ci' : ''
     }`,
     {
       'stdio': [null, process.stdout, process.stderr],
@@ -43,11 +49,57 @@ function runStorybook(mode) {
 }
 
 /**
+ * @param {boolean} port
+ * @return {!Promise<boolean>}
+ */
+const isPortInUse = (port) =>
+  new Promise((resolve) => {
+    const server = createServer();
+    server.once('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        resolve(true);
+      }
+    });
+    server.once('listening', function () {
+      resolve(false);
+      server.close();
+    });
+    server.listen(port);
+  });
+
+/**
  * Simple wrapper around the storybook start script
  * for AMP components (HTML Environment)
  */
-function storybookAmp() {
+async function storybookAmp() {
+  await runAmpServer();
+  createCtrlcHandler('storybook-amp');
   runStorybook('amp' /* mode */);
+}
+
+async function runAmpServer() {
+  const {port = AMP_BUILD_PORT} = argv;
+
+  if (await isPortInUse(port)) {
+    const warningDelaySecs = 5;
+    log(
+      yellow(`WARNING: --port=${cyan(port)}`),
+      yellow('taken, make sure you either:')
+    );
+    log('A. serve localhost AMP binaries (gulp) in the background, or');
+    log('B. select CDN as Source on the Storybook AMP Panel');
+    log(
+      yellow('⤷ Continuing storybook-amp in'),
+      cyan(warningDelaySecs),
+      yellow('seconds...')
+    );
+    log(yellow('⤷ Press'), cyan('Ctrl + C'), yellow('to abort...'));
+    return new Promise((resolve) =>
+      setTimeout(() => resolve, warningDelaySecs * 1000)
+    );
+  }
+
+  await defaultTask();
 }
 
 /**
@@ -68,6 +120,7 @@ storybookAmp.description =
   'Isolated testing and development for AMPHTML components.';
 
 storybookPreact.flags = storybookAmp.flags = {
-  'port': '  Change the port that the storybook dashboard is served from',
+  'storybook_port':
+    '  Change the port that the storybook dashboard is served from',
   'ci': "  CI mode (skip interactive prompts, don't open browser)",
 };

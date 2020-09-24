@@ -41,6 +41,8 @@ const {watch} = require('gulp');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
+const DEFAULT_PORT = 8000;
+
 // Used for logging.
 let url = null;
 let quiet = !!argv.quiet;
@@ -101,7 +103,7 @@ async function startServer(
     name: 'AMP Dev Server',
     root: process.cwd(),
     host: argv.host || 'localhost',
-    port: argv.port || 8000,
+    port: argv.port || DEFAULT_PORT,
     https: argv.https,
     preferHttp1: true,
     silent: true,
@@ -191,6 +193,7 @@ module.exports = {
   doServe,
   startServer,
   stopServer,
+  DEFAULT_PORT,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
