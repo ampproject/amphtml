@@ -47,7 +47,9 @@ function main() {
   }
 
   if (!isTravisPullRequestBuild()) {
-    downloadSxgDistOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp dist --sxg --fortesting');
+    uploadSxgDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);

@@ -41,8 +41,8 @@ function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
+    downloadSxgDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting --sxg');
     timedExecOrDie('gulp integration --nobuild --compiled --headless --sxg');
   } else {
     printChangeSummary(FILENAME);
