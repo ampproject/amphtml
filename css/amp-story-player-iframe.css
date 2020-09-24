@@ -56,13 +56,11 @@
   transform: translate3d(-100%, 0, 0);
 }
 
-.amp-story-player-exit-control-button {
-  position: absolute;
+.amp-story-player-system-buttons-container button {
   height: 48px;
   width: 48px;
   background-repeat: no-repeat;
   background-position: 50%;
-  margin-top: 7px;
   background-size: 28px;
   border: 0px;
   background-color: transparent;
@@ -81,4 +79,33 @@
 
 .amp-story-player-hide-button {
   display: none;
+}
+
+.amp-story-player-system-buttons-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 44px;
+  display: flex;
+  flex-direction: row;
+}
+
+.amp-story-player-system-buttons-container-end-position {
+  justify-content: flex-end;
+}
+
+.amp-story-player-system-header {
+  top: 0;
+}
+
+.amp-story-player-system-header button {
+  margin-top: 7px;
+}
+
+.amp-story-player-system-footer {
+  bottom: 0;
+}
+
+.amp-story-player-system-footer button {
+  margin-bottom: 7px;
 }

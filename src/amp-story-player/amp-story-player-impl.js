@@ -30,16 +30,17 @@ import {
   serializeQueryString,
 } from '../url';
 import {applySandbox} from '../3p-frame';
+import {childElementsByTag, tryFocus} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
+import {getChildJsonConfig} from '../json';
 import {getMode} from '../../src/mode';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
-import {tryFocus} from '../dom';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -82,7 +83,10 @@ const BUTTON_TYPES = {
 
 /** @enum {string} */
 const BUTTON_CLASSES = {
-  BASE: 'amp-story-player-exit-control-button',
+  CONTAINER: 'amp-story-player-system-buttons-container',
+  END_POSITION: 'amp-story-player-system-buttons-container-end-position',
+  HEADER: 'amp-story-player-system-header',
+  FOOTER: 'amp-story-player-system-footer',
   HIDDEN: 'amp-story-player-hide-button',
   [BUTTON_TYPES.BACK]: 'amp-story-player-back-button',
   [BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
@@ -334,7 +338,7 @@ export class AmpStoryPlayer {
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
-    this.initializeButton_();
+    this.buildSystemUI_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -415,22 +419,66 @@ export class AmpStoryPlayer {
    * Helper to create a button.
    * @private
    */
-  initializeButton_() {
-    const option = this.element_.getAttribute('exit-control');
-    if (!Object.values(BUTTON_TYPES).includes(option)) {
+  buildSystemUI_() {
+    if (childElementsByTag(this.element_, 'script').length === 0) {
       return;
     }
 
-    const button = this.doc_.createElement('button');
-    this.rootEl_.appendChild(button);
+    // TODO: validate config structure. And 3 buttons max.
+    const config = getChildJsonConfig(this.element_);
 
-    button.classList.add(BUTTON_CLASSES[option]);
-    button.classList.add(BUTTON_CLASSES.BASE);
+    const {header} = config;
 
-    button.addEventListener('click', () => {
-      this.element_.dispatchEvent(
-        createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
-      );
+    this.buildButtonContainer_(header, BUTTON_CLASSES.HEADER);
+  }
+
+  /**
+   * @param {!Object} config
+   * @param {string} type
+   * @private
+   */
+  buildButtonContainer_(config, type) {
+    if (!config) {
+      console.log('no config', type);
+      return;
+    }
+
+    const containerEl = this.doc_.createElement('div');
+    this.rootEl_.appendChild(containerEl);
+
+    containerEl.classList.add(BUTTON_CLASSES.CONTAINER);
+    containerEl.classList.add(type);
+
+    const {position, buttons} = config;
+    console.log({type}, position);
+    if (position === 'end') {
+      containerEl.classList.add(BUTTON_CLASSES.END_POSITION);
+    }
+
+    this.buildButtons_(containerEl, buttons);
+  }
+
+  /**
+   * @param {!Element} container
+   * @param {!Array<!Object>} buttons
+   * @private
+   */
+  buildButtons_(container, buttons) {
+    buttons.forEach((button) => {
+      const buttonEl = this.doc_.createElement('button');
+      container.appendChild(buttonEl);
+
+      const {name, icon, event} = button;
+      const iconClass = icon ?? BUTTON_CLASSES[name];
+      const customEvent = event ?? BUTTON_EVENTS[name];
+
+      buttonEl.classList.add(iconClass);
+
+      buttonEl.addEventListener('click', () => {
+        this.element_.dispatchEvent(
+          createCustomEvent(this.win_, customEvent, dict({}))
+        );
+      });
     });
   }
 
