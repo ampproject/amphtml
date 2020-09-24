@@ -128,6 +128,36 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
+    it('should not clear on pause', async () => {
+      const wrapper = mount(<VideoWrapper component={TestPlayer} />);
+
+      await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
+      await wrapper.find(TestPlayer).invoke('onPlaying')();
+
+      expect(navigator.mediaSession.metadata).to.eql(defaultMetadata);
+      expect(
+        navigator.mediaSession.setActionHandler.withArgs(
+          'play',
+          env.sandbox.match.typeOf('function')
+        )
+      ).to.have.been.calledOnce;
+      expect(
+        navigator.mediaSession.setActionHandler.withArgs(
+          'pause',
+          env.sandbox.match.typeOf('function')
+        )
+      ).to.have.been.calledOnce;
+
+      await wrapper.find(TestPlayer).invoke('onPause')();
+
+      expect(navigator.mediaSession.metadata).to.eql(defaultMetadata);
+      expect(navigator.mediaSession.setActionHandler.withArgs('play', null)).to
+        .not.have.been.called;
+      expect(navigator.mediaSession.setActionHandler.withArgs('pause', null)).to
+        .not.have.been.called;
+    });
+
     it('should clear when unmounted', async () => {
       const wrapper = mount(<VideoWrapper component={TestPlayer} />);
 
