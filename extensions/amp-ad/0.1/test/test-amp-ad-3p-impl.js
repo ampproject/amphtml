@@ -278,6 +278,24 @@ describes.realWin(
         });
       });
 
+      describe('during layout', () => {
+        it('sticky ad: should not layout w/o scroll', () => {
+          ad3p.isStickyAd_ = true;
+          const layoutPromise = ad3p.layoutCallback();
+          return Promise.race([macroTask(), layoutPromise])
+            .then(() => {
+              expect(ad3p.xOriginIframeHandler_).to.be.null;
+            })
+            .then(() => {
+              ad3p.viewport_.scrollObservable_.fire();
+              return layoutPromise;
+            })
+            .then(() => {
+              expect(ad3p.xOriginIframeHandler_).to.not.be.null;
+            });
+        });
+      });
+
       describe('after layout', () => {
         beforeEach(async () => {
           await ad3p.layoutCallback();
