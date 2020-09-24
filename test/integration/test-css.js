@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../src/amp-events.js';
 import {createFixtureIframe} from '../../testing/iframe.js';
 
-describe('CSS', () => {
+describe.configure().run('CSS', () => {
   it('should include height of [overflow] child in size before build', async () => {
     const fixture = await createFixtureIframe(
       'test/fixtures/overflow.html',
