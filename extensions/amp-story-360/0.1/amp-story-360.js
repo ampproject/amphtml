@@ -45,8 +45,7 @@ const TAG = 'AMP_STORY_360';
  * @return {!Element}
  */
 const buildActivateButtonTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return htmlFor(element)`
     <button class="i-amphtml-story-360-activate-button" role="button">
       <span class="i-amphtml-story-360-activate-text"></span>
       <span class="i-amphtml-story-360-activate-button-icon"
@@ -81,24 +80,6 @@ const buildActivateButtonTemplate = (element) => {
         </svg>
       </span>
     </button>
-  `;
-};
-
-/**
- * Generates the template for the feature discovery prompt.
- *
- * @param {!Element} element
- * @return {!Element}
- */
-const buildDiscoveryTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <div class="i-amphtml-story-360-discovery">
-      <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-text">
-        Move device to explore video
-      </span>
-    </div>
   `;
 };
 
@@ -423,11 +404,17 @@ export class AmpStory360 extends AMP.BaseElement {
           );
         }
       });
-      // Display discovery animation.
+      // Discovery animation.
       if (this.isOnActivePage_) {
-        this.mutateElement(() =>
-          this.element.appendChild(buildDiscoveryTemplate(this.element))
-        );
+        const discoveryHTML = htmlFor(this.element)`
+        <div class="i-amphtml-story-360-discovery">
+          <div class="i-amphtml-story-360-discovery-animation"></div>
+          <span class="i-amphtml-story-360-text">
+            Move device to explore video
+          </span>
+        </div>
+      `;
+        this.mutateElement(() => this.element.appendChild(discoveryHTML));
       }
     });
   }
