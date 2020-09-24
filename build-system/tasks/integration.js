@@ -66,13 +66,12 @@ async function transformAndWriteToTestFolder(filePath) {
     await fs.writeFile(`./test-bin/${filePath}`, html);
   } catch (e) {
     log(
-      red(
-        'ERROR:',
-        cyan(
-          `${filePath} could not be transformed by the postHTML ` +
-            `pipeline.\n${e.message}. \n Falling back to copying.`
-        )
-      )
+      red('ERROR:'),
+      cyan(
+        `${filePath} could not be transformed by the postHTML ` +
+          'pipeline. Falling back to copying.'
+      ),
+      red(`Reason: ${e.message}`)
     );
     await fs.copy(filePath, `./test-bin/${filePath}`);
   }
