@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {Wrapper, useRenderer} from '../../../src/preact/component';
 import {getLocaleStrings} from './messages';
 import {useAmpContext} from '../../../src/preact/context';
 import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
@@ -66,20 +67,37 @@ export function DateCountdown({
   locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
   render,
-  children,
   ...rest
 }) {
   useResourcesNotify();
   const {playable} = useAmpContext();
+
+  // One time calculation of our final countdown target in epoch format
   const epoch = useMemo(
     () =>
       getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
       offsetSeconds * MILLISECONDS_IN_SECOND,
     [endDate, timeleftMs, timestampMs, timestampSeconds, offsetSeconds]
   );
+
+  // How much time is left in our countdown
   const [timeleft, setTimeleft] = useState(epoch - Date.now());
+
+  // One time calculation of time labels in specified locale
   const localeStrings = useMemo(() => getLocaleWord(locale), [locale]);
+
+  // Reference to DOM element to get access to correct window
   const rootRef = useRef(null);
+
+  // A reference to our 'data', 'data' is used to populate the template
+  // A reference is used so we can use the same object instance between
+  // successive re-renders
+  const dataRef = useRef(
+    getYDHMSFromMs(epoch - Date.now() + DELAY, biggestUnit)
+  );
+
+  // Put localeStrings into the data object
+  Object.assign(dataRef.current, localeStrings);
 
   useEffect(() => {
     if (!playable || !rootRef.current) {
@@ -88,22 +106,34 @@ export function DateCountdown({
     const win = rootRef.current.ownerDocument.defaultView;
     const interval = win.setInterval(() => {
       const newTimeleft = epoch - Date.now() + DELAY;
+
+      // Trigger a re-render
       setTimeleft(newTimeleft);
+
+      // Update dataRef to a new object to trigger re-calculation of 'rendered'
+      // (in the useRenderer function)
+      const data = getYDHMSFromMs(newTimeleft, biggestUnit);
+      dataRef.current = data;
+
       if (whenEnded === DEFAULT_WHEN_ENDED && newTimeleft < 1000) {
         win.clearInterval(interval);
       }
     }, DELAY);
     return () => win.clearInterval(interval);
-  }, [playable, epoch, whenEnded]);
+  }, [playable, epoch, whenEnded, biggestUnit]);
 
-  const data = {
-    ...getYDHMSFromMs(timeleft, biggestUnit),
-    ...localeStrings,
-  };
+  const rendered = useRenderer(render, dataRef.current);
+  const isHtml =
+    rendered && typeof rendered == 'object' && '__html' in rendered;
+
   return (
-    <div ref={rootRef} {...rest}>
-      {render(data, children)}
-    </div>
+    <Wrapper
+      {...rest}
+      ref={rootRef}
+      dangerouslySetInnerHTML={isHtml ? rendered : null}
+    >
+      {isHtml ? null : rendered}
+    </Wrapper>
   );
 }
 

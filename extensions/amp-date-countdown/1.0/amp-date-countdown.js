@@ -14,102 +14,27 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ActionTrust} from '../../../src/action-constants';
 import {DateCountdown} from './date-countdown';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
 
-/** @const {string} */
-const DEFAULT_LOCALE = 'en';
-
-/** @const {string} */
-const DEFAULT_WHEN_ENDED = 'stop';
-
-/** @const {string} */
-const DEFAULT_BIGGEST_UNIT = 'DAYS';
-
-/** @const {number} */
-const DEFAULT_OFFSET_SECONDS = 0;
-
-/** @const {number} */
-const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
-
-/** @const {number} */
-const MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
-
-/** @const {number} */
-const MILLISECONDS_IN_MINUTE = 60 * 1000;
-
-/** @const {number} */
-const MILLISECONDS_IN_SECOND = 1000;
-
-/** @const {Object} */
-//https://ctrlq.org/code/19899-google-translate-languages refer to google code
-const LOCALE_WORD = {
-  'de': ['Jahren', 'Monaten', 'Tagen', 'Stunden', 'Minuten', 'Sekunden'],
-  'en': ['Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds'],
-  'es': ['años', 'meses', 'días', 'horas', 'minutos', 'segundos'],
-  'fr': ['ans', 'mois', 'jours', 'heures', 'minutes', 'secondes'],
-  'id': ['tahun', 'bulan', 'hari', 'jam', 'menit', 'detik'],
-  'it': ['anni', 'mesi', 'giorni', 'ore', 'minuti', 'secondi'],
-  'ja': ['年', 'ヶ月', '日', '時間', '分', '秒'],
-  'ko': ['년', '달', '일', '시간', '분', '초'],
-  'nl': ['jaar', 'maanden', 'dagen', 'uur', 'minuten', 'seconden'],
-  'pt': ['anos', 'meses', 'dias', 'horas', 'minutos', 'segundos'],
-  'ru': ['год', 'месяц', 'день', 'час', 'минута', 'секунда'],
-  'th': ['ปี', 'เดือน', 'วัน', 'ชั่วโมง', 'นาที', 'วินาที'],
-  'tr': ['yıl', 'ay', 'gün', 'saat', 'dakika', 'saniye'],
-  'vi': ['năm', 'tháng', 'ngày', 'giờ', 'phút', 'giây'],
-  'zh-cn': ['年', '月', '天', '小时', '分钟', '秒'],
-  'zh-tw': ['年', '月', '天', '小時', '分鐘', '秒'],
-};
-
 class AmpDateCountdown extends PreactBaseElement {
-  /** @override */
-  init() {
-    const templates = Services.templatesFor(this.win);
-    let rendered = false;
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-    return dict({
-      /**
-       * @param {!JsonObject} data
-       * @param {*} children
-       * @return {*}
-       */
-      'render': (data, children) => {
-        // We only render once in AMP mode, but React mode may rerender
-        // serveral times.
-        if (rendered) {
-          return children;
-        }
-        rendered = true;
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
-        const host = this.element;
-        const domPromise = templates
-          .findAndRenderTemplate(host, data)
-          .then((rendered) => {
-            const container = document.createElement('div');
-            container.appendChild(rendered);
-
-            return <RenderDomTree dom={container} host={host} />;
-          });
-
-        return (
-          <>
-            {children}
-            <AsyncRender>{domPromise}</AsyncRender>
-          </>
-        );
-      },
-    });
+    /** @private {?Element} */
+    this.template_ = null;
   }
 
   /** @override */
@@ -120,22 +45,69 @@ class AmpDateCountdown extends PreactBaseElement {
     );
     return isLayoutSizeDefined(layout);
   }
+
+  /** @override */
+  checkPropsPostMutations() {
+    const templates =
+      this.templates_ || (this.templates_ = Services.templatesFor(this.win));
+    const template = templates.maybeFindTemplate(this.element);
+    if (template != this.template_) {
+      this.template_ = template;
+      if (template) {
+        // Only overwrite `render` when template is ready to minimize FOUC.
+        templates.whenReady(template).then(() => {
+          if (template != this.template_) {
+            // A new template has been set while the old one was initializing.
+            return;
+          }
+          this.mutateProps(
+            dict({
+              'render': (data) => {
+                return templates
+                  .renderTemplateAsString(dev().assertElement(template), data)
+                  .then((html) => dict({'__html': html}));
+              },
+            })
+          );
+        });
+      } else {
+        this.mutateProps(dict({'render': null}));
+      }
+    }
+  }
+
+  /** @override */
+  isReady(props) {
+    if (this.template_ && !('render' in props)) {
+      // The template is specified, but not available yet.
+      return false;
+    }
+    return true;
+  }
 }
 
 /** @override */
 AmpDateCountdown['Component'] = DateCountdown;
 
 /** @override */
-AmpDateCountdown['passthrough'] = true;
+AmpDateCountdown['layoutSizeDefined'] = true;
+
+/** @override */
+AmpDateCountdown['lightDomTag'] = 'div';
+
+/** @override */
+AmpDateCountdown['usesTemplate'] = true;
 
 /** @override */
 AmpDateCountdown['props'] = {
-  'displayIn': {attr: 'display-in'},
-  'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
-  'locale': {attr: 'locale'},
-  'datetime': {attr: 'datetime'},
+  'endDate': {attr: 'end-date', type: 'datetime'},
+  'timeleftMs': {attr: 'timeleft-ms', type: 'number'},
   'timestampMs': {attr: 'timestamp-ms', type: 'number'},
   'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
+  'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
+  'whenEnded': {attr: 'when-ended', type: 'string'},
+  'locale': {attr: 'locale', type: 'string'},
+  'biggestUnit': {attr: 'biggest-unit', type: 'string'},
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
