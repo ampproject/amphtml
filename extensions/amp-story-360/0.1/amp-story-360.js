@@ -232,9 +232,6 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win);
-
     /** @private {?string} */
     this.pageId_ = null;
 
@@ -307,14 +304,14 @@ export class AmpStory360 extends AMP.BaseElement {
           this.resizeRenderer_()
         );
 
-        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
-          this.isOnActivePage_ = currPageId === this.getPageId_();
-        });
-
         storeService.subscribe(
           StateProperty.GYROSCOPE_PERMISSION_STATE,
           (permissionState) => this.onPermissionState_(permissionState)
         );
+
+        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
+          this.isOnActivePage_ = currPageId === this.getPageId_();
+        });
       }),
 
       Services.localizationServiceForOrNull(this.element).then(
@@ -539,8 +536,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.element.getAttribute('controls') === 'gyroscope' &&
+    if (this.element.getAttribute('controls') === 'gyroscope') {
       this.checkGyroscopePermissions_();
+    }
 
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
