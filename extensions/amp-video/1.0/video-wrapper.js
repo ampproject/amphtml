@@ -30,6 +30,7 @@ import {
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -85,6 +86,8 @@ export function VideoWrapper({
   const [metadata, setMetadata] = useState(null);
   const [userInteracted, setUserInteracted] = useState(false);
 
+  const clearMediaSession = useRef(null);
+
   const wrapperRef = useRef(null);
   const playerRef = useRef(null);
 
@@ -106,9 +109,24 @@ export function VideoWrapper({
 
   useLayoutEffect(() => {
     if (mediasession && playing && metadata) {
-      return setMediaSession(window, metadata, play, pause);
+      clearMediaSession.current = setMediaSession(
+        window,
+        metadata,
+        play,
+        pause
+      );
     }
   }, [mediasession, playing, metadata, play, pause]);
+
+  useEffect(
+    // Clear only on unmount.
+    () => () => {
+      if (clearMediaSession.current) {
+        clearMediaSession.current();
+      }
+    },
+    []
+  );
 
   return (
     <ContainWrapper
