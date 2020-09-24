@@ -29,7 +29,6 @@ const {
   stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
   uploadSxgDistOutput,
-  downloadSxgDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
