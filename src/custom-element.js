@@ -551,14 +551,23 @@ function createBaseCustomElementClass(win) {
     /**
      * Updates the layout box of the element.
      * Should only be called by Resources.
-     * @param {!./layout-rect.LayoutRectDef} layoutBox
-     * 
-     * @deprecated
+     * @param {!ClientRect} layoutBox
+     *
+     * @deprecated -- only exists for test code.
+     * // TODO before merge: remove usages from all tests and delete
      */
     updateLayoutBox(layoutBox) {
       const r = this.getResource_();
       r.premeasure(layoutBox);
       r.measure(/* usePremeasure */ true);
+    }
+    /**
+     * TODO(wg-runtime, #25824): Make Resource.getLayoutBox() the source of truth.
+     * @return {number}
+     * @deprecated
+     */
+    getLayoutWidth() {
+      return this.getResource_().getLayoutBox().width;
     }
 
     /**
