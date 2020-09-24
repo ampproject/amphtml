@@ -908,15 +908,18 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
-  const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
-  setTimeout(next, sleep);
-});
+app.use(
+  ['/dist/v0/amp-*.(sxg.js|mjs|js)', '/dist/amp*.(sxg.js|mjs|js)'],
+  (req, res, next) => {
+    const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
+    setTimeout(next, sleep);
+  }
+);
 
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
  */
-app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
+app.get(['/dist/v0/amp-*.(sxg.js|mjs|js)'], (req, res, next) => {
   if (argv.no_caching_extensions) {
     res.header('Cache-Control', 'no-store');
   }
@@ -1199,7 +1202,7 @@ app.get('/adzerk/*', (req, res) => {
  * Serve extension scripts and their source maps.
  */
 app.get(
-  ['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
+  ['/dist/rtv/*/v0/*.(sxg.js|mjs|js)', '/dist/rtv/*/v0/*.(sxg.js|mjs|js).map'],
   (req, res, next) => {
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
@@ -1219,7 +1222,7 @@ app.get(
     }
     const isJsMap = filePath.endsWith('.map');
     if (isJsMap) {
-      filePath = filePath.replace(/\.js\.map$/, '.js');
+      filePath = filePath.replace(/\.(sxg\.js|mjs|js)\.map$/, '.$1');
     }
     filePath = replaceUrls(mode, filePath);
     req.url = filePath + (isJsMap ? '.map' : '');
@@ -1231,7 +1234,11 @@ app.get(
  * Serve entry point script url
  */
 app.get(
-  ['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
+  [
+    '/dist/sw.(sxg.js|mjs|js)',
+    '/dist/sw-kill.(sxg.js|mjs|js)',
+    '/dist/ww.(sxg.js|mjs|js)',
+  ],
   (req, res, next) => {
     // Special case for entry point script url. Use compiled for testing
     const mode = SERVE_MODE;
@@ -1251,18 +1258,21 @@ app.get(
       return;
     }
     if (mode == 'default') {
-      req.url = req.url.replace(/\.js$/, '.max.js');
+      req.url = req.url.replace(/\.(sxg\.js|mjs|js)$/, '.max.$1');
     }
     next();
   }
 );
 
-app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
-  req.url = req.url.replace(/dist/, 'dist.3p/current');
-  next();
-});
+app.get(
+  '/dist/iframe-transport-client-lib.(sxg.js|mjs|js)',
+  (req, res, next) => {
+    req.url = req.url.replace(/dist/, 'dist.3p/current');
+    next();
+  }
+);
 
-app.get('/dist/amp-inabox-host.js', (req, res, next) => {
+app.get('/dist/amp-inabox-host.(sxg.js|mjs|js)', (req, res, next) => {
   const mode = SERVE_MODE;
   if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
@@ -1273,7 +1283,7 @@ app.get('/dist/amp-inabox-host.js', (req, res, next) => {
 /*
  * Start Cache SW LOCALDEV section
  */
-app.get('/dist/sw(.max)?.js', (req, res, next) => {
+app.get('/dist/sw(.max)?.(sxg.js|mjs|js)', (req, res, next) => {
   const filePath = req.path;
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
@@ -1298,7 +1308,7 @@ app.get('/dist/sw(.max)?.js', (req, res, next) => {
     .catch(next);
 });
 
-app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
+app.get('/dist/rtv/9[89]*/*.(sxg.js|mjs|js)', (req, res, next) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.setHeader('Date', new Date().toUTCString());
   res.setHeader('Cache-Control', 'no-cache;max-age=31536000');
@@ -1370,7 +1380,7 @@ app.get('/dist/diversions', (req, res) => {
 /**
  * Web worker binary.
  */
-app.get('/dist/ww(.max)?.js', (req, res) => {
+app.get('/dist/ww(.max)?.(sxg.js|mjs|js)', (req, res) => {
   fs.promises.readFile(pc.cwd() + req.path).then((file) => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');

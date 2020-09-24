@@ -35,7 +35,7 @@ const fixturesExamplesPaths = [
 
 const builtRuntimePaths = [
   {
-    pattern: 'dist/**/*.js',
+    pattern: 'dist/**/*.{sxg.js,js,mjs}',
     included: false,
     nocache: false,
     watched: true,
@@ -47,7 +47,7 @@ const builtRuntimePaths = [
     watched: true,
   },
   {
-    pattern: 'dist.tools/**/*.js',
+    pattern: 'dist.tools/**/*.{sxg.js,js,mjs}',
     included: false,
     nocache: false,
     watched: true,
