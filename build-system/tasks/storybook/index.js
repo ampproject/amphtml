@@ -16,12 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {createServer} = require('net');
-const {cyan, yellow} = require('ansi-colors');
-const {DEFAULT_PORT: AMP_BUILD_PORT} = require('../serve');
-const {defaultTask} = require('../default-task');
+const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
 
@@ -49,57 +45,13 @@ function runStorybook(mode) {
 }
 
 /**
- * @param {boolean} port
- * @return {!Promise<boolean>}
- */
-const isPortInUse = (port) =>
-  new Promise((resolve) => {
-    const server = createServer();
-    server.once('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        resolve(true);
-      }
-    });
-    server.once('listening', function () {
-      resolve(false);
-      server.close();
-    });
-    server.listen(port);
-  });
-
-/**
  * Simple wrapper around the storybook start script
  * for AMP components (HTML Environment)
  */
 async function storybookAmp() {
-  await runAmpServer();
+  await runAmpDevBuildServer();
   createCtrlcHandler('storybook-amp');
   runStorybook('amp' /* mode */);
-}
-
-async function runAmpServer() {
-  const {port = AMP_BUILD_PORT} = argv;
-
-  if (await isPortInUse(port)) {
-    const warningDelaySecs = 5;
-    log(
-      yellow(`WARNING: --port=${cyan(port)}`),
-      yellow('taken, make sure you either:')
-    );
-    log('A. serve localhost AMP binaries (gulp) in the background, or');
-    log('B. select CDN as Source on the Storybook AMP Panel');
-    log(
-      yellow('⤷ Continuing storybook-amp in'),
-      cyan(warningDelaySecs),
-      yellow('seconds...')
-    );
-    log(yellow('⤷ Press'), cyan('Ctrl + C'), yellow('to abort...'));
-    return new Promise((resolve) =>
-      setTimeout(() => resolve, warningDelaySecs * 1000)
-    );
-  }
-
-  await defaultTask();
 }
 
 /**
