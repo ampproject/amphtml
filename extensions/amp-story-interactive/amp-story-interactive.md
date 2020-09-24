@@ -85,24 +85,25 @@ The amp-story-interactive component provides a set of experiences, such as quizz
 
 The amp-story-interactive extension encompasses a set of interactive experiences. Specify an interactive experience by defining one of the elements below. For best results, only use one element per amp-story-page.
 
+If you want to see all the components in action, check out the [example story](/documentation/examples/components/amp-story-interactive-poll/story#page=title-components)
+
 ### amp-story-interactive-binary-poll
 
 The amp-story-interactive-binary-poll element provides a two option voting user interface. Users may select one of two valid options. When selected, the highlighted option fills the container and displays the total percentage of votes.
 
 Is well suited to be used without amp-story-interactive-results, and can optionally have a prompt.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="responsive" width="3" height="2">
+<amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="intrinsic" width="400" height="230">
 
 ```html
 <amp-story-interactive-binary-poll
-  id="favorite-country-binary-poll"
-  theme="dark"
+  id="pizza-binary-poll"
   endpoint="https://endpoint.com/v1/interactives"
-  prompt-text="What is your favorite country?"
-  option-1-text="Spain"
-  option-1-confetti="🇪🇸"
-  option-2-text="France"
-  option-2-confetti="🇫🇷"
+  prompt-text="Like Pizza?"
+  option-1-text="Yes"
+  option-1-confetti="🍕"
+  option-2-text="No"
+  option-2-confetti="🤢"
 >
 </amp-story-interactive-binary-poll>
 ```
@@ -113,23 +114,20 @@ The amp-story-interactive-poll element provides a voting experience with 2-4 opt
 
 Can be paired up with amp-story-interactive-results to display different categories based on the answers to polls, but can be used independently as well. It is encouraged to add a prompt for extra context.
 
-```html
+<amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
+
+[sourcecode:html]
 <amp-story-interactive-poll
-  id="favorite-country-poll"
-  theme="dark"
-  endpoint="https://endpoint.com/v1/interactives"
-  prompt-text="What is your favorite country?"
-  option-1-text="Spain"
-  option-1-confetti="🇪🇸"
-  option-2-text="France"
-  option-2-confetti="🇫🇷"
-  option-3-text="Germany"
-  option-3-confetti="🇩🇪"
-  option-4-text="Uruguay"
-  option-4-confetti="🇺🇾"
->
+    id="season-poll"
+    theme="dark"
+    endpoint="https://endpoint.com/v1/interactives"
+    prompt-text="Pick a season"
+    option-1-text="Spring" option-1-confetti="🌼"
+    option-2-text="Summer" option-2-confetti="☀️"
+    option-3-text="Fall" option-3-confetti="🍁"
+    option-4-text="Winter" option-4-confetti="☃️">
 </amp-story-interactive-poll>
-```
+[/sourcecode]
 
 ### amp-story-interactive-quiz
 
@@ -137,23 +135,19 @@ The amp-story-interactive-quiz element provides a guessing experience with 2-4 o
 
 Can be paired up with amp-story-interactive-results to display a score based on the correctness of the answers to quizzes, but can be used independently as well. It is encouraged to add a prompt for extra context.
 
-```html
+<amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
+
+[sourcecode:html]
 <amp-story-interactive-quiz
-  id="first-soccer-cup-quiz"
-  chip-style="transparent"
-  endpoint="https://endpoint.com/v1/interactives"
-  prompt-text="Who won the first soccer world cup?"
-  option-1-text="Spain"
-  option-1-confetti="🇪🇸"
-  option-2-text="France"
-  option-2-confetti="🇫🇷"
-  option-3-text="Germany"
-  option-3-confetti="🇩🇪"
-  option-4-text="Uruguay"
-  option-4-confetti="🇺🇾"
->
+    id="arts-quiz"
+    endpoint="https://endpoint.com/v1/interactives"
+    prompt-text='Who was the artist that created the famous painting "The Last Supper"?'
+    option-1-text="Michelangelo"
+    option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
+    option-3-text="Rahael"
+    option-4-text="Sandro Boticelli">
 </amp-story-interactive-quiz>
-```
+[/sourcecode]
 
 ### amp-story-interactive-results
 
@@ -161,24 +155,18 @@ The amp-story-interactive-results element provides an interface to display a cus
 Requires polls or quizzes in previous pages to feed into the state of the element, and the state will be calculated according to either the quizzes (if thresholds are specified) or the polls (if only categories are specified) that the user answered.
 Each category can specify an image, title and description that will be shown when the component selects that category for the user.
 
-```html
+<amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
+
+[sourcecode:html]
 <amp-story-interactive-results
-  prompt-text="You should go to"
-  option-1-text="Spain"
-  option-1-image="spain.png"
-  option-1-description="Check out their paella while you're there!"
-  option-2-text="France"
-  option-2-image="france.png"
-  option-2-description="Check out their baguette while you're there!"
-  option-3-text="Germany"
-  option-3-image="germany.png"
-  option-3-description="Check out their schnitzel while you're there!"
-  option-4-text="Uruguay"
-  option-4-image="uruguay.png"
-  option-4-description="Check out their steak while you're there!"
->
+    theme="dark"
+    prompt-text="You are a"
+    option-1-text="Dog" option-1-image="dog.png"
+    option-1-description="You always have energy and love being with friends. Outdoors is your favorite place"
+    option-2-text="Cat" option-2-image="cat.png"
+    option-2-description="Cats are great animals for WFH">
 </amp-story-interactive-results>
-```
+[/sourcecode]
 
 ## Attributes
 
@@ -238,7 +226,7 @@ To fetch the data for an interactive component, the necessary fields are:
 
 Then, the requests and responses are:
 
-```js
+[sourcecode:js]
 // Getting the votes for an interactive.
 // If no client param, selected will always be false
 // (can be used to display the results on a dashboard).
@@ -253,16 +241,16 @@ Response: {
 {"index": 3, "selected": false, "count": 2}
 ]
 }
-```
+[/sourcecode]
 
-```js
+[sourcecode:js]
 // Posting the vote for an interactive. Client param is required.
 
 POST_URL = "{endpoint}/{interactiveId}:vote?type={interactiveType}&client={ampId}"
 POST_BODY = {'option_selected': 1}
 
 Response: No response necessary
-```
+[/sourcecode]
 
 Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others. Available free-to-use backends are:
 
@@ -273,6 +261,8 @@ Before setting up a backend, consider if the already existing backends satisfy y
 [/tip]
 
 ## Styling
+
+If you want to see all the theming options in action, check out the [example story](/documentation/examples/components/amp-story-interactive-poll/story#page=title-themes)
 
 ### CSS Variables
 
@@ -301,14 +291,17 @@ While the component by default adapts to the screen size with the variable font-
 
 The width can be set either in ems or percentages of the parent width, and it will behave perfectly consistent (while keeping it between the min and max widths).
 
-```html
+[sourcecode:html]
 <amp-story-grid-layer template="fill" aspect-ratio="400:600">
+
   <div class="center-quiz">
-    <amp-story-interactive-quiz style="font-size:0.2em" ...>
+    <amp-story-interactive-quiz
+      style="font-size:0.2em"
+      ...>
     </amp-story-interactive-quiz>
   </div>
 </amp-story-grid-layer>
-```
+[/sourcecode]
 
 ### Adaptive font sizes for options
 
