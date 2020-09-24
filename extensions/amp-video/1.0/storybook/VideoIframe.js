@@ -72,7 +72,7 @@ export const UsingVideoIframe = () => {
   const loop = boolean('loop', false);
   const poster = text(
     'poster',
-    'https://amp.dev/static/inline-examples/images/kitten-playing.png'
+    'https://amp.dev/static/samples/img/amp-video-iframe-sample-placeholder.jpg'
   );
 
   const artist = text('artist', '');
@@ -82,7 +82,7 @@ export const UsingVideoIframe = () => {
 
   const src = text(
     'src',
-    'http://localhost:8000/examples/amp-video-iframe/frame.html'
+    'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html'
   );
   return (
     <AmpVideoIframeLike
