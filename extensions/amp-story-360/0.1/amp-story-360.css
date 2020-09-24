@@ -97,7 +97,7 @@ amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery 
   perspective: 550px !important;
   background: linear-gradient(transparent, rgba(0, 0, 0, .8)) !important;
   animation: fadeOut 1s 4s forwards !important;
-  z-index: 100000;
+  z-index: 100000 !important;
 }
 
 @keyframes fadeOut {
