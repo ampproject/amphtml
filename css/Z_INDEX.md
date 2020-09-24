@@ -41,7 +41,11 @@ Run `gulp get-zindex` to generate this file.
 | .i-amphtml-story-focused-state-layer                                                                    | 100001     | extensions/amp-story/1.0/amp-story-tooltip.css                       |
 | .i-amphtml-story-page-attachment-expand                                                                 | 100000     | extensions/amp-story/1.0/amp-story-page-attachment.css               |
 | .i-amphtml-story-system-layer                                                                           | 100000     | extensions/amp-story/1.0/amp-story-system-layer.css                  |
+<<<<<<< HEAD
 | .i-amphtml-story-360-activate-button                                                                    | 100000     | extensions/amp-story-360.css                                         |
+=======
+| .i-amphtml-story-360-discovery                                                                          | 100000     | extensions/amp-story-360.css                                         |
+>>>>>>> 7f4a9ba89 (Set z-index.)
 | .i-amphtml-story-page-error                                                                             | 10000      | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-story-page-play-button                                                                       | 10000      | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-image-lightbox-trans                                                                         | 1001       | extensions/amp-image-lightbox/0.1/amp-image-lightbox.css             |
