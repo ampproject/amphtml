@@ -186,6 +186,7 @@ export function createFixtureIframe(
     }
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function (event) {
+      console.error(event.error);
       reject(event.error);
     };
     iframe.height = initialIframeHeight;
