@@ -21,10 +21,7 @@ describe('on="..."', () => {
   let fixture;
 
   beforeEach(async () => {
-    fixture = await createFixtureIframe(
-      'test/fixtures/boilerplate-new-visibility.html',
-      500
-    );
+    fixture = await createFixtureIframe('test/fixtures/actions.html', 500);
     // Wait for one <amp-img> element to load.
     console.warn('awaitEvent');
     await fixture.awaitEvent(AmpEvents.LOAD_END, 1);

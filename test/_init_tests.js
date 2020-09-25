@@ -285,7 +285,15 @@ function printWarning(...messages) {
     "        'expectAsyncConsoleError(<string or regex>[, <number of" +
     ' times the error message repeats>]);';
   originalConsoleError(errorMessage + "'\n" + helpMessage);
-  originalConsoleError(messages);
+  originalConsoleError(messages[0]);
+  if (messages[1]) {
+    originalConsoleError(messages[1].name);
+    originalConsoleError(messages[1].message);
+    originalConsoleError(messages[1].fileName);
+    originalConsoleError(messages[1].lineNumber);
+    originalConsoleError(messages[1].columnNumber);
+    originalConsoleError(messages[1].stack);
+  }
 }
 
 /**
