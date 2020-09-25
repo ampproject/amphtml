@@ -21,7 +21,7 @@ describe('on="..."', () => {
   let fixture;
 
   beforeEach(async () => {
-    fixture = await createFixtureIframe('test/fixtures/boilerplate-new-visibility.html', 5000);
+    fixture = await createFixtureIframe('test/fixtures/boilerplate-new-visibility.html', 500);
     // Wait for one <amp-img> element to load.
     console.warn('awaitEvent');
     // await fixture.awaitEvent(AmpEvents.LOAD_END, 1);
@@ -34,17 +34,17 @@ describe('on="..."', () => {
   }
 
   describe('"tap" event', () => {
-    // it('<non-AMP element>.toggleVisibility', async () => {
-    //   console.warn('startTest');
-    //   const span = fixture.doc.getElementById('spanToHide');
-    //   console.warn('afterSpan');
-    //   const button = fixture.doc.getElementById('hideBtn');
-    //   console.warn('afterButton');
+    it('<non-AMP element>.toggleVisibility', async () => {
+      console.warn('startTest');
+      const span = fixture.doc.getElementById('spanToHide');
+      console.warn('afterSpan');
+      const button = fixture.doc.getElementById('hideBtn');
+      console.warn('afterButton');
 
-    //   button.click();
-    //   console.warn('afterClick');
-    //   await poll('#spanToHide hidden', waitForDisplay(span, 'none'));
-    // });
+      button.click();
+      console.warn('afterClick');
+      await poll('#spanToHide hidden', waitForDisplay(span, 'none'));
+    });
 
     it('<AMP element>.toggleVisibility', async function () {
       console.warn('startTest')
