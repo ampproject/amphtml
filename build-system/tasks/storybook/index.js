@@ -45,7 +45,7 @@ function runStorybook(env) {
       ci ? '--ci' : '',
     ].join(' '),
     {
-      'stdio': [null, process.stdout, process.stderr],
+      stdio: [null, process.stdout, process.stderr],
       cwd: __dirname,
       env: process.env,
     }
