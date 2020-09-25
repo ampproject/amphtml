@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
+// import {AmpEvents} from '../../src/amp-events';
 import {createFixtureIframe, poll} from '../../testing/iframe.js';
 
 describe('on="..."', () => {
@@ -24,7 +24,7 @@ describe('on="..."', () => {
     fixture = await createFixtureIframe('test/fixtures/actions.html', 500);
     // Wait for one <amp-img> element to load.
     console.warn('awaitEvent');
-    await fixture.awaitEvent(AmpEvents.LOAD_END, 1);
+    // await fixture.awaitEvent(AmpEvents.LOAD_END, 1);
     console.warn('after awaitEvent');
   });
 
