@@ -59,14 +59,14 @@ function runStorybook(env) {
 async function storybookAmp() {
   await runAmpDevBuildServer();
   createCtrlcHandler('storybook-amp');
-  runStorybook('amp' /* mode */);
+  runStorybook('amp');
 }
 
 /**
  * Simple wrapper around the storybook start script.
  */
 function storybookPreact() {
-  runStorybook('preact' /* mode */);
+  runStorybook('preact');
 }
 
 module.exports = {
