@@ -144,11 +144,11 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     );
     file = file.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\/(.+?)\.(mjs|sxg.js|js)/g,
-      hostName + '/dist/v0/$1.$2js'
+      hostName + '/dist/v0/$1.$2'
     );
     file = file.replace(
       /\/dist\/v0\/examples\/(.*)\.max\.(mjs|sxg.js|js)/g,
-      '/dist/v0/examples/$1.$2js'
+      '/dist/v0/examples/$1.$2'
     );
     file = file.replace(
       /\/dist.3p\/current\/(.*)\.max.html/g,
