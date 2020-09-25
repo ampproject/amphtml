@@ -16,12 +16,10 @@
 
 /** @externs */
 
-// TODO(#29293): Make "locale" optional.
-
 /**
  * @typedef {{
  *   datetime: (!Date|number|string),
- *   locale: string,
+ *   locale: (string|undefined),
  *   cutoff: (number|undefined),
  *   placeholder: (string|!PreactDef.VNode|null|undefined),
  * }}
