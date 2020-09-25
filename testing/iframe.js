@@ -459,27 +459,51 @@ export function expectPostMessage(sourceWin, targetwin, msg) {
  * @template T
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
+  console.warn('return new Promise((resolve, reject) => {');
   return new Promise((resolve, reject) => {
+    console.warn('const start = Date.now();');
     const start = Date.now();
+    console.warn('const end = opt_timeout || 1600;');
     const end = opt_timeout || 1600;
+    console.warn('function poll() {');
     function poll() {
+      console.warn('const ret = condition();');
       const ret = condition();
+      console.warn('if (ret) {');
       if (ret) {
+        console.warn('clearInterval(interval);');
         clearInterval(interval);
+        console.warn('resolve(ret);');
         resolve(ret);
+        console.warn('} else {');
       } else {
+        console.warn('if (Date.now() - start > end) {');
         if (Date.now() - start > end) {
+          console.warn('clearInterval(interval);');
           clearInterval(interval);
+          console.warn('if (opt_onError) {');
           if (opt_onError) {
+            console.warn('reject(opt_onError());');
             reject(opt_onError());
+            console.warn('return;');
             return;
+            console.warn('}');
           }
+          console.warn(
+            "reject(new Error('Timeout waiting for ' + description));"
+          );
           reject(new Error('Timeout waiting for ' + description));
+          console.warn('}');
         }
+        console.warn('}');
       }
+      console.warn('}');
     }
+    console.warn('const interval = setInterval(poll, 8);');
     const interval = setInterval(poll, 8);
+    console.warn('poll();');
     poll();
+    console.warn('});');
   });
 }
 
