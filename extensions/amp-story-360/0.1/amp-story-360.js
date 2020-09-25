@@ -29,6 +29,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
+import {listenOncePromise} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -571,7 +572,26 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
-    userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
+    const ampVideoEl = this.element.querySelector('amp-video');
+    userAssert(
+      ampImgEl || ampVideoEl,
+      'amp-story-360 must contain an amp-img or amp-video element.'
+    );
+
+    if (ampImgEl) {
+      return this.setupAmpImgRenderer_(ampImgEl);
+    }
+    if (ampVideoEl) {
+      return this.setupAmpVideoRenderer_(ampVideoEl);
+    }
+  }
+
+  /**
+   * @param {Element} ampImgEl
+   * @return {!Promise<!Element>}
+   * @private
+   */
+  setupAmpImgRenderer_(ampImgEl) {
     const owners = Services.ownersForDoc(this.element);
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
@@ -603,6 +623,46 @@ export class AmpStory360 extends AMP.BaseElement {
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
+        }
+      );
+  }
+
+  /**
+   * @param {Element} ampVideoEl
+   * @return {!Promise<!Element>}
+   * @private
+   */
+  setupAmpVideoRenderer_(ampVideoEl) {
+    return whenUpgradedToCustomElement(ampVideoEl)
+      .then(() => {
+        return ampVideoEl.signals().whenSignal(CommonSignals.LOAD_END);
+      })
+      .then(() => {
+        return listenOncePromise(ampVideoEl, 'playing');
+      })
+      .then(
+        () => {
+          this.renderer_ = new Renderer(this.canvas_);
+          this.renderer_.setImageOrientation(
+            this.sceneHeading_,
+            this.scenePitch_,
+            this.sceneRoll_
+          );
+          this.renderer_.setImage(
+            dev().assertElement(ampVideoEl.querySelector('video'))
+          );
+          this.renderer_.resize();
+          if (this.orientations_.length < 1) {
+            return;
+          }
+          this.renderInitialPosition_();
+          this.isReady_ = true;
+          if (this.isPlaying_) {
+            this.animate_();
+          }
+        },
+        () => {
+          user().error(TAG, 'Failed to load the amp-video.');
         }
       );
   }
