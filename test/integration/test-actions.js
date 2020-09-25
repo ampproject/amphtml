@@ -21,10 +21,10 @@ describe('on="..."', () => {
   let fixture;
 
   beforeEach(async () => {
-    fixture = await createFixtureIframe('test/fixtures/actions.html', 500);
+    fixture = await createFixtureIframe('test/fixtures/boilerplate-new-visibility.html', 5000);
     // Wait for one <amp-img> element to load.
     console.warn('awaitEvent');
-    await fixture.awaitEvent(AmpEvents.LOAD_END, 1);
+    // await fixture.awaitEvent(AmpEvents.LOAD_END, 1);
     console.warn('after awaitEvent');
   });
 
@@ -34,60 +34,67 @@ describe('on="..."', () => {
   }
 
   describe('"tap" event', () => {
-    it('<non-AMP element>.toggleVisibility', async function () {
-      console.warn('startTest');
-      const span = fixture.doc.getElementById('spanToHide');
-      console.warn('afterSpan');
-      const button = fixture.doc.getElementById('hideBtn');
-      console.warn('afterButton');
+    // it('<non-AMP element>.toggleVisibility', async () => {
+    //   console.warn('startTest');
+    //   const span = fixture.doc.getElementById('spanToHide');
+    //   console.warn('afterSpan');
+    //   const button = fixture.doc.getElementById('hideBtn');
+    //   console.warn('afterButton');
 
-      button.click();
-      console.warn('afterClick');
-      await poll('#spanToHide hidden', waitForDisplay(span, 'none'));
-    });
+    //   button.click();
+    //   console.warn('afterClick');
+    //   await poll('#spanToHide hidden', waitForDisplay(span, 'none'));
+    // });
 
     it('<AMP element>.toggleVisibility', async function () {
+      console.warn('startTest')
       const img = fixture.doc.getElementById('imgToToggle');
       const button = fixture.doc.getElementById('toggleBtn');
+      console.warn('after getElementById')
+
 
       button.click();
+      console.warn('after click')
       await poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
+      console.warn('after poll')
 
       button.click();
+      console.warn('after click2')
       await poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
+      console.warn('after poll2')
     });
 
-    describe
-      .configure()
-      .skipIfPropertiesObfuscated()
-      .run('navigate', function () {
-        it('AMP.navigateTo(url=)', function* () {
-          const button = fixture.doc.getElementById('navigateBtn');
+  //   describe
+  //     .configure()
+  //     .skipIfPropertiesObfuscated()
+  //     .run('navigate', function () {
+  //       it('AMP.navigateTo(url=)', function* () {
+  //         const button = fixture.doc.getElementById('navigateBtn');
 
-          // This is brittle but I don't know how else to stub
-          // window navigation.
-          const navigationService = fixture.win.__AMP_SERVICES.navigation.obj;
-          const navigateTo = window.sandbox.stub(
-            navigationService,
-            'navigateTo'
-          );
+  //         // This is brittle but I don't know how else to stub
+  //         // window navigation.
+  //         const navigationService = fixture.win.__AMP_SERVICES.navigation.obj;
+  //         const navigateTo = window.sandbox.stub(
+  //           navigationService,
+  //           'navigateTo'
+  //         );
 
-          button.click();
-          yield poll('navigateTo() called with correct args', () => {
-            return navigateTo.calledWith(fixture.win, 'https://google.com');
-          });
-        });
-      });
+  //         button.click();
+  //         yield poll('navigateTo() called with correct args', () => {
+  //           return navigateTo.calledWith(fixture.win, 'https://google.com');
+  //         });
+  //       });
+  //     });
 
-    it('AMP.print()', function* () {
-      const button = fixture.doc.getElementById('printBtn');
+  //   it('AMP.print()', function* () {
+  //     const button = fixture.doc.getElementById('printBtn');
 
-      const print = window.sandbox.stub(fixture.win, 'print');
+  //     const print = window.sandbox.stub(fixture.win, 'print');
 
-      button.click();
-      yield poll('print() called once', () => {
-        return print.calledOnce;
-      });
-    });
-  });
+  //     button.click();
+  //     yield poll('print() called once', () => {
+  //       return print.calledOnce;
+  //     });
+  //   });
+  // });
 });
