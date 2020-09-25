@@ -156,7 +156,7 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     );
 
     if (inabox) {
-      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
+      file = file.replace(/\/dist\/v0\.(m?js)/g, '/dist/amp4ads-v0.$1');
     }
   } else if (isRtvMode(mode)) {
     hostName = `https://cdn.ampproject.org/rtv/${mode}/`;
