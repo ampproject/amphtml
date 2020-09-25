@@ -36,6 +36,7 @@ let nativeClientRect;
  * @return {!ClientRect|!LayoutRectDef}
  */
 function getBoundingClientRect() {
+  // eslint-disable-next-line local/no-invalid-this
   if (isConnectedNode(this)) {
     return nativeClientRect.call(this);
   }

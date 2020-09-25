@@ -80,6 +80,7 @@ module.exports = {
       'pragma': 'Preact',
     },
   },
+  'reportUnusedDisableDirectives': true,
   'rules': {
     'chai-expect/missing-assertion': 2,
     'chai-expect/no-inner-compare': 2,
@@ -146,6 +147,7 @@ module.exports = {
     'local/no-import': 2,
     'local/no-import-meta': 2,
     'local/no-import-rename': 2,
+    'local/no-invalid-this': 2,
     'local/no-is-amp-alt': 2,
     'local/no-log-array': 2,
     'local/no-mixed-interpolation': 2,
@@ -275,6 +277,7 @@ module.exports = {
         'local/no-function-async': 0,
         'local/no-function-generator': 0,
         'local/no-import-meta': 0,
+        'local/no-invalid-this': 0,
         'jsdoc/check-param-names': 0,
         'jsdoc/check-tag-names': 0,
         'jsdoc/check-types': 0,

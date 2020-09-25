@@ -199,7 +199,7 @@ export function getTrackerTypesForParentType(parentType) {
     ) {
       filtered[key] = TRACKER_TYPE[key].klass;
     }
-  }, this);
+  });
   return filtered;
 }
 
