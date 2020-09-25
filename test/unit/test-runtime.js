@@ -321,6 +321,7 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'HIGH';
         },
+        v: '$internalRuntimeVersion$',
       });
       expect(queueExtensions).to.have.length(2);
       expect(progress).to.equal('');
@@ -345,6 +346,7 @@ describes.fakeWin(
               expect(amp).to.equal(win.AMP);
               progress += 'A';
             },
+            v: '$internalRuntimeVersion$',
           });
           runChunksForTesting(win.document);
           return promise.then(() => {
@@ -365,6 +367,7 @@ describes.fakeWin(
           progress += 'C';
         },
         i: 'ext1',
+        v: '$internalRuntimeVersion$',
       });
       win.AMP.push({
         n: 'ext1',
@@ -373,6 +376,7 @@ describes.fakeWin(
           progress += 'A';
         },
         i: '_base_ext',
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -381,6 +385,7 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'B';
         },
+        v: '$internalRuntimeVersion$',
       });
 
       let script = win.document.querySelector('[data-script=_base_ext]');
@@ -418,6 +423,7 @@ describes.fakeWin(
           progress += 'A';
         },
         i: ['_base_ext1', '_base_ext2'],
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -427,6 +433,7 @@ describes.fakeWin(
           progress += 'B';
         },
         i: ['_base_ext1'],
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -435,6 +442,7 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'C';
         },
+        v: '$internalRuntimeVersion$',
       });
 
       let script1 = win.document.querySelector('[data-script=_base_ext1]');
@@ -538,7 +546,6 @@ describes.fakeWin(
       self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
-      toggleExperiment(win, 'version-locking', true);
       function addExisting(index) {
         const s = document.createElement('script');
         const name = 'amp-test-element' + index;
@@ -711,6 +718,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -753,6 +761,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -798,6 +807,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -827,6 +837,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', factory);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -877,6 +888,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -924,6 +936,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -974,6 +987,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -1078,6 +1092,7 @@ describes.realWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
 
         const script = win.document.createElement('script');
@@ -1503,6 +1518,7 @@ describes.realWin(
             f: (amp) => {
               amp.registerServiceForDoc('service1', Service1);
             },
+            v: '$internalRuntimeVersion$',
           });
 
           writer.write(
