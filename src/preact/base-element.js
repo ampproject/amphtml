@@ -195,14 +195,13 @@ export class PreactBaseElement extends AMP.BaseElement {
     });
 
     const staticProps = Ctor['staticProps'];
-    if (staticProps) {
-      Object.assign(/** @type {!Object} */ (this.defaultProps_), staticProps);
-    }
-
     const initProps = this.init();
-    if (initProps) {
-      Object.assign(/** @type {!Object} */ (this.defaultProps_), initProps);
-    }
+    Object.assign(
+      /** @type {!Object} */ (this.defaultProps_),
+      staticProps,
+      initProps
+    );
+
     this.checkPropsPostMutations();
 
     // Unblock rendering on first `CanRender` response. And keep the context
