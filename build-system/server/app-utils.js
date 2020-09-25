@@ -144,7 +144,7 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     );
     file = file.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\/(.+?)\.(m?js)/g,
-      hostName + '/dist/v0/$1.$2js'
+      hostName + '/dist/v0/$1.$2'
     );
     file = file.replace(
       /\/dist\/v0\/examples\/(.*)\.max\.(m?js)/g,
