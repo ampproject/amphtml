@@ -25,10 +25,11 @@ import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
 const transforms = [transformStories(), transformScriptPaths(), transformCss()];
+//const COMPILED = !!argv.compiled;
 
 export async function transform(fileLocation: string): Promise<string> {
   if (argv.sxg){
-    //transforms.unshift(transformSxg());
+    //transforms.unshift(transformSxg({compiled: COMPILED,}));
   }
   else if (argv.esm) {
     transforms.unshift(transformModules());
