@@ -185,6 +185,7 @@ export function createFixtureIframe(
       // Declare the test ready to run when the document was fully parsed.
       console.warn(186);
       window.afterLoad = function () {
+        console.warn(188);
         resolve({
           win,
           doc: win.document,

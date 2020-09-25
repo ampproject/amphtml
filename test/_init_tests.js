@@ -49,7 +49,7 @@ let testName;
 let expectedAsyncErrors;
 let rethrowAsyncSandbox;
 let consoleInfoLogWarnSandbox;
-const originalConsoleError = console /*OK*/.error;
+const originalConsoleError = console /*OK*/.trace;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
