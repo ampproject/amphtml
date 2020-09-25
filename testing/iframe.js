@@ -128,7 +128,7 @@ export function createFixtureIframe(
             resolve();
           } else {
             console.warn(130);
-            win.addEventListener(eventName, () => {
+            win.addEventListener(eventName, function () {
               console.warn(132);
               if (events[eventName] == count) {
                 console.warn(134);
@@ -141,9 +141,12 @@ export function createFixtureIframe(
       };
       // Record firing of custom events.
       for (const name in events) {
+        console.log(144);
         win.addEventListener(name, () => {
+          console.log(146);
           events[name]++;
         });
+        console.log(149);
       }
       win.onerror = function (message, file, line, col, error) {
         reject(
