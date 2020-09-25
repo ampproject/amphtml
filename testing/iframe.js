@@ -118,7 +118,7 @@ export function createFixtureIframe(
           if (events[eventName] >= count) {
             resolve();
           } else {
-            win.addEventListener(eventName, () => {
+            win.addEventListener(eventName, function () {
               if (events[eventName] == count) {
                 resolve();
               }
