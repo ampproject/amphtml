@@ -135,6 +135,7 @@ export function createFixtureIframe(
                 resolve();
               }
             });
+            console.warn(138);
           }
         });
       };
