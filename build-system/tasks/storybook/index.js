@@ -40,7 +40,7 @@ function runStorybook(env) {
     [
       './node_modules/.bin/start-storybook',
       '--quiet',
-      '-c ./${env}-env',
+      `-c ./${env}-env`,
       `-p ${storybookPort}`,
       ci ? '--ci' : '',
     ].join(' '),
