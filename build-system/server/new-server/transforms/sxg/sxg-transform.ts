@@ -18,8 +18,6 @@ import {PostHTML} from 'posthtml';
 import {URL} from 'url';
 import {isJsonScript, isValidScript} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
-import minimist from 'minimist';
-const argv = minimist(process.argv.slice(2));
 
 /**
  * Returns a function that will transform script node sources into their sxg counterparts.
