@@ -388,14 +388,23 @@ before(function () {
 
 beforeEach(function () {
   this.timeout(BEFORE_AFTER_TIMEOUT);
+  console.warn('this.timeout(BEFORE_AFTER_TIMEOUT);');
   beforeTest();
+  console.warn('beforeTest();');
   testName = this.currentTest.fullTitle();
+  console.warn('testName = this.currentTest.fullTitle();');
   window.sandbox = sinon.createSandbox();
+  console.warn('window.sandbox = sinon.createSandbox();');
   maybeStubConsoleInfoLogWarn();
+  console.warn('maybeStubConsoleInfoLogWarn();');
   preventAsyncErrorThrows();
+  console.warn('preventAsyncErrorThrows();');
   warnForConsoleError();
+  console.warn('warnForConsoleError();');
   initialGlobalState = Object.keys(global);
+  console.warn('initialGlobalState = Object.keys(global);');
   initialWindowState = Object.keys(window);
+  console.warn('initialWindowState = Object.keys(window);');
 });
 
 function beforeTest() {
