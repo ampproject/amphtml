@@ -29,15 +29,20 @@ describe('on="..."', () => {
   });
 
   function waitForDisplay(element, display) {
+    console.warn('waitForDisplay');
     return () => fixture.win.getComputedStyle(element)['display'] === display;
   }
 
   describe('"tap" event', () => {
     it('<non-AMP element>.toggleVisibility', function* () {
+      console.warn('startTest');
       const span = fixture.doc.getElementById('spanToHide');
+      console.warn('afterSpan');
       const button = fixture.doc.getElementById('hideBtn');
+      console.warn('afterButton');
 
       button.click();
+      console.warn('afterClick');
       yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
     });
 
