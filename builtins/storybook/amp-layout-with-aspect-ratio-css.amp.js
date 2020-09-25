@@ -23,7 +23,7 @@ export default {
   title: '0/amp-layout with aspect ratio CSS',
   decorators: [withA11y, withKnobs, withAmp],
   parameters: {
-    experiments: ['layout-aspect-ratio-css1'],
+    experiments: ['layout-aspect-ratio-css'],
   },
 };
 
