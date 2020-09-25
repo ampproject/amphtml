@@ -83,15 +83,16 @@ export function Instagram({
           (captioned ? 'captioned/' : '') +
           '?cr=1&v=12'
         }
-        onLoad={() => setOpacity(1)}
         scrolling="no"
         frameborder="0"
         allowtransparency
         title={title}
+        loading="lazy"
         style={{
           width: '100%',
           height: '100%',
           opacity,
+          contentVisibility: 'auto',
         }}
       />
     </ContainWrapper>

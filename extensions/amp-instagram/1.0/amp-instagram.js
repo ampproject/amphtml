@@ -45,6 +45,9 @@ AmpInstagram['Component'] = Instagram;
 AmpInstagram['children'] = {};
 
 /** @override */
+AmpInstagram['loadable'] = true;
+
+/** @override */
 AmpInstagram['props'] = {
   'shortcode': {attr: 'data-shortcode'},
   'captioned': {attr: 'data-captioned'},
