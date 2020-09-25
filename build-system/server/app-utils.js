@@ -127,28 +127,28 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     }
   } else if (mode == 'compiled') {
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
-      hostName + '/dist/v0.js'
+      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
+      hostName + '/dist/v0.$1'
     );
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
-      hostName + '/dist/shadow-v0.js'
+      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.(m?js)/g,
+      hostName + '/dist/shadow-v0.$1'
     );
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-      hostName + '/dist/amp4ads-v0.js'
+      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.(m?js)/g,
+      hostName + '/dist/amp4ads-v0.$1'
     );
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.js/g,
-      hostName + '/dist/video-iframe-integration-v0.js'
+      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.(m?js)/g,
+      hostName + '/dist/video-iframe-integration-v0.$1'
     );
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
-      hostName + '/dist/v0/$1.js'
+      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?)\.(m?js)/g,
+      hostName + '/dist/v0/$1.$2'
     );
     file = file.replace(
-      /\/dist\/v0\/examples\/(.*)\.max.js/g,
-      '/dist/v0/examples/$1.js'
+      /\/dist\/v0\/examples\/(.*)\.max\.(m?js)/g,
+      '/dist/v0/examples/$1.$2'
     );
     file = file.replace(
       /\/dist.3p\/current\/(.*)\.max.html/g,
@@ -156,7 +156,7 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     );
 
     if (inabox) {
-      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
+      file = file.replace(/\/dist\/v0\.(m?js)/g, '/dist/amp4ads-v0.$1');
     }
   } else if (isRtvMode(mode)) {
     hostName = `https://cdn.ampproject.org/rtv/${mode}/`;
@@ -164,14 +164,14 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
 
     if (inabox) {
       file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/rtv\/\d{15}\/v0\.js/g,
-        hostName + 'amp4ads-v0.js'
+        /https:\/\/cdn\.ampproject\.org\/rtv\/\d{15}\/v0\.(m?js)/g,
+        hostName + 'amp4ads-v0.$1'
       );
     }
   } else if (inabox) {
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
-      'https://cdn.ampproject.org/amp4ads-v0.js'
+      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
+      'https://cdn.ampproject.org/amp4ads-v0.$1'
     );
   }
   return file;
