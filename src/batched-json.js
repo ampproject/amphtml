@@ -46,16 +46,13 @@ export const UrlReplacementPolicy = {
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
-export function batchFetchJsonFor(
-  ampdoc,
-  element,
-  {
+export function batchFetchJsonFor(ampdoc, element, options = {}) {
+  const {
     expr = '.',
     urlReplacement = UrlReplacementPolicy.NONE,
     refresh = false,
     xssiPrefix = undefined,
-  } = {}
-) {
+  } = options;
   assertHttpsUrl(element.getAttribute('src'), element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, urlReplacement, refresh)
