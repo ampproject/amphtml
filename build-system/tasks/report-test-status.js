@@ -29,6 +29,7 @@ const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
 
 const IS_LOCAL_CHANGES = !!argv.local_changes;
+const IS_SXG = !!argv.sxg;
 const IS_DIST = !!argv.compiled;
 
 const TEST_TYPE_SUBTYPES = new Map([
@@ -58,6 +59,8 @@ function inferTestType() {
 
   if (IS_LOCAL_CHANGES) {
     return `${type}/local-changes`;
+  } else if (IS_SXG) {
+    return `${type}/sxg`;
   } else if (IS_DIST) {
     return `${type}/minified`;
   } else {
