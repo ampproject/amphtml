@@ -20,7 +20,8 @@
  *   shortcode: string,
  *   captioned: (boolean|undefined),
  *   title: (string|undefined),
- *   resize: (function(number):*|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   loadable: (string)
  * }}
  */
 var InstagramPropsDef;
