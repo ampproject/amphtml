@@ -31,9 +31,9 @@ AmpContextDef.ContextType;
 
 /**
  * @typedef {{
- *   renderable: boolean,
- *   playable: boolean,
- *   loading: string,
+ *   renderable: (boolean|undefined),
+ *   playable: (boolean|undefined),
+ *   loading: (string|undefined),
  *   notify: (function()|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
