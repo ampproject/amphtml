@@ -94,6 +94,7 @@ export function createFixtureIframe(
       throw new Error('Cannot find fixture: ' + fixture);
     }
     html = maybeSwitchToCompiledJs(html);
+    console.warn(97);
     window.ENABLE_LOG = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
@@ -107,6 +108,7 @@ export function createFixtureIframe(
       // the test iframe is about:srcdoc.
       // Unfortunately location object is not configurable, so we have to define
       // a new property.
+      console.warn(111);
       win.testLocation = new FakeLocation(window.location.href, win);
       win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
@@ -139,6 +141,7 @@ export function createFixtureIframe(
           }
         });
       };
+      console.warn(144);
       // Record firing of custom events.
       for (const name in events) {
         console.log(144);
@@ -149,6 +152,7 @@ export function createFixtureIframe(
         console.log(149);
       }
       win.onerror = function (message, file, line, col, error) {
+        console.warn(155);
         reject(
           new Error(
             'Error in frame: ' +
@@ -163,7 +167,9 @@ export function createFixtureIframe(
         );
       };
       const errors = [];
+      console.warn(170);
       win.console.error = function () {
+        console.warn(172);
         errors.push('Error: ' + [].slice.call(arguments).join(' '));
         console.error.apply(console, arguments);
       };
@@ -177,6 +183,7 @@ export function createFixtureIframe(
         reject(new Error('Timeout waiting for elements to start loading.'));
       }, window.ampTestRuntimeConfig.mochaTimeout || 2000);
       // Declare the test ready to run when the document was fully parsed.
+      console.warn(186);
       window.afterLoad = function () {
         resolve({
           win,
@@ -187,34 +194,45 @@ export function createFixtureIframe(
           messages,
         });
       };
+      console.warn(196);
     };
     // Add before and after load callbacks to the document.
     html = html.replace('>', '><script>parent.beforeLoad(window);</script>');
     html += '<script>parent.afterLoad(window);</script>';
+    console.warn(202);
     const iframe = document.createElement('iframe');
+    console.warn(204);
     if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
       iframe.setAttribute('scrolling', 'no');
     }
     iframe.name = 'test_' + fixture + iframeCount++;
+    console.warn(209);
     iframe.onerror = function (event) {
       console.error(200);
       console.error(event.error);
       console.error(event);
       reject(event.error);
     };
+    console.warn(216);
     iframe.height = initialIframeHeight;
     iframe.width = 500;
+    console.warn(219);
     if ('srcdoc' in iframe) {
       iframe.srcdoc = html;
+      console.warn(222);
       document.body.appendChild(iframe);
     } else {
       iframe.src = 'about:blank';
+      console.warn(226);
       document.body.appendChild(iframe);
+      console.warn(228);
       const idoc = iframe.contentWindow.document;
       idoc.open();
+      console.warn(231);
       idoc.write(html);
       idoc.close();
     }
+    console.warn(235);
   });
 }
 
