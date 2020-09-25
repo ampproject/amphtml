@@ -16,7 +16,7 @@
 
 import {PostHTML} from 'posthtml';
 import {URL} from 'url';
-import {isValidScript} from '../utilities/script';
+import {isJsonScript, isValidScript} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
 import minimist from 'minimist';
 const argv = minimist(process.argv.slice(2));
@@ -28,21 +28,22 @@ const argv = minimist(process.argv.slice(2));
 export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node) {
     tree.match({tag: 'script'}, (script) => {
-      if(!isValidScript(script)){
+      if (isJsonScript(script)) {
+        return script;
+      }
+      if (!isValidScript(script)) {
         return script;
       }
 
-      let url;
-      if(options.compiled || argv.compiled){
-        url = script.attrs.src.toString();
+      if (options.compiled) {
+        const url = script.attrs.src.toString();
         script.attrs.src = url.replace('.js', '.sxg.js');
       }
-      else{
-        url = new URL(script.attrs.src);
+      else {
+        const url = new URL(script.attrs.src);
         url.searchParams.append('f', 'sxg');
         script.attrs.src = url.toString();
       }
-      script.attrs.type = 'sxg';
       return script;
     });
   }
