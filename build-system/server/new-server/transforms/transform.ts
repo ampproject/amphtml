@@ -21,12 +21,16 @@ import transformModules from './modules/modules-transform';
 import transformScriptPaths from './scripts/scripts-transform';
 import transformStories from './stories/stories-transform';
 import transformCss from './css/css-transform';
+//import transformSxg from './sxg/sxg-transform';
 
 const argv = minimist(process.argv.slice(2));
 const transforms = [transformStories(), transformScriptPaths(), transformCss()];
 
 export async function transform(fileLocation: string): Promise<string> {
-  if (argv.esm) {
+  if (argv.sxg){
+    //transforms.unshift(transformSxg());
+  }
+  else if (argv.esm) {
     transforms.unshift(transformModules());
   }
 
