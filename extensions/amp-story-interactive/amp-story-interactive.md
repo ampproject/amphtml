@@ -28,50 +28,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
----
-
-\$title: amp-story-interactive
-teaser:
-text: >-
-A rich set of interactive experiences for stories, including quizzes, polls and results.
-toc: true
-version: '0.1'
-versions:
-
-- '0.1'
-  latest_version: '0.1'
-  formats:
-- stories
-  is_current: true
-  $path: /documentation/components/amp-story-interactive.html
-$localization:
-  path: '/{locale}/documentation/components/amp-story-interactive.html'
-  scripts:
-- > -
-      <script async custom-element="amp-story-interactive"
-      src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
-  author: mszylkowski
-  tags:
-- dynamic-content
-- social
-
----
-
-<!---
-Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
+[tip type="important"]Change image sources to ampproject/amphtml/master!!![/tip]
 
 The amp-story-interactive component provides a set of experiences, such as quizzes or polls, for users in [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories). Interactive experiences provided by amp-story-interactive can integrate into tools or editors and support analytics.
 
@@ -278,8 +235,8 @@ Some variables can be overridden through assigning a class to the component.
 
 ### Themes
 
-The `theme` attribute controls the chip color and text color of the component.
-The `chip-style` attribute controls the style details of the component.
+The `theme` attribute controls the chip color and text color of the component. Can be `light` (default) or `dark`.
+The `chip-style` attribute controls the style details of the component. Can be `flat` (default), `shadow` or `transparent`.
 
 ## Sizing
 
@@ -320,11 +277,29 @@ To add entering animations, [amp-story animations](https://amp.dev/documentation
 
 ## Analytics
 
-The component comes with support for [amp-analytics](https://amp.dev/documentation/components/amp-analytics/) events out of the box, and will report when an option is selected:
+The component comes with support for [amp-analytics](https://amp.dev/documentation/components/amp-analytics/) events out of the box with the event `story-interactive`, and will report when an option is selected:
 
 - `storyInteractiveId`: the element id
 - `storyInteractiveResponse`: the option selected
 - `storyInteractiveType`: the enum InteractiveType
+
+```html
+<amp-analytics id="my-analytics">
+  <script type="application/json">
+    {
+      "requests": {
+        "interactive": "https://example.com/interactive?id=${storyInteractiveId}&response=${storyInteractiveResponse}"
+      },
+      "triggers": {
+        "interactiveSelected": {
+          "on": "story-interactive",
+          "request": "interactive"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+```
 
 ## Validation
 
