@@ -19,14 +19,11 @@
 /** @const */
 var DateDisplayDef = {};
 
-// TODO(#29293): The `displayIn` and `locale` actually allow `|undefined` and
-// are defaulted in the component.
-
 /**
  * @typedef {{
  *   datetime: (!Date|number|string),
- *   displayIn: (string),
- *   locale: (string),
+ *   displayIn: (string|undefined),
+ *   locale: (string|undefined),
  *   render: (?RendererFunctionType|undefined),
  * }}
  */
