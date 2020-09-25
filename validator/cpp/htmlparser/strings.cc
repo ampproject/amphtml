@@ -93,7 +93,82 @@ inline bool IsOneByteASCIIChar(uint8_t c);
 // Returns false in case of error.
 bool ExtractChars(std::string_view str, std::vector<char32_t>* chars);
 
+// Converts 0xFF to 255, 0x8d to 141 etc. Better and exception safe than
+// std::stoi and others.
+bool OneByteHexCodeToInt(std::string_view hex_code, uint8_t* out);
+
 }  // namespace.
+
+std::optional<std::string> Strings::DecodePercentEncodedURL(
+    std::string_view uri) {
+  if (uri.empty()) return "";
+
+  std::stringbuf uri_decoded;
+  while (!uri.empty()) {
+    if (uri.front() != '%') {
+      uri_decoded.sputc(uri.front());
+      uri.remove_prefix(1);
+      continue;
+    }
+
+    uint8_t x1 = 0;
+    if (uri.size() < 3 ||
+        !OneByteHexCodeToInt(uri.substr(1, 2), &x1)) {
+      return std::nullopt;
+    }
+
+    // Consumed the first three percent encoded chars. eg. %a8.
+    uri.remove_prefix(3);
+
+    // Sequence byte without initial byte.
+    if ((x1 & 0xc0) == 0x80) return std::nullopt;
+
+    auto num_bytes = Strings::CodePointByteSequenceCount(x1);
+    uri_decoded.sputc(x1);
+    if (num_bytes == 1) continue;
+
+    // 2 bytes sequence.
+    if (num_bytes > 1) {
+      uint8_t x2 = 0;
+      if (uri.size() < 3 ||
+          uri.front() != '%' ||
+          !OneByteHexCodeToInt(uri.substr(1, 2), &x2) ||
+          (x2 & 0xc0) != 0x80) {
+        return std::nullopt;
+      }
+      uri.remove_prefix(3);
+      uri_decoded.sputc(x2);
+    }
+
+    // 3 byte sequence.
+    if (num_bytes > 2) {
+      uint8_t x3 = 0;
+      if (uri.size() < 3 ||
+          uri.front() != '%' ||
+          !OneByteHexCodeToInt(uri.substr(1, 2), &x3) ||
+          (x3 & 0xc0) != 0x80) {
+        return std::nullopt;
+      }
+      uri.remove_prefix(3);
+      uri_decoded.sputc(x3);
+    }
+
+    // 4 byte sequence.
+    if (num_bytes > 3) {
+      uint8_t x4 = 0;
+      if (uri.size() < 3 ||
+          uri.front() != '%' ||
+          !OneByteHexCodeToInt(uri.substr(1, 2), &x4) ||
+          (x4 & 0xc0) != 0x80) {
+        return std::nullopt;
+      }
+      uri.remove_prefix(3);
+      uri_decoded.sputc(x4);
+    }
+  }
+
+  return uri_decoded.str();
+}
 
 bool Strings::IsCharAlphabet(char c) {
   return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
@@ -863,6 +938,28 @@ bool ExtractChars(std::string_view str, std::vector<char32_t>* chars) {
       return false;
     }
   }
+  return true;
+}
+
+bool OneByteHexCodeToInt(std::string_view hex_code, uint8_t* out) {
+  // Will overflow.
+  if (hex_code.size() > 2) return false;
+  uint8_t x = 0;
+  while (!hex_code.empty()) {
+    auto h = hex_code.at(0);
+    hex_code.remove_prefix(1);
+    if (Strings::IsDigit(h)) {
+      x = (16 * x) | (h - '0');
+    } else if ('a' <= h && h <= 'f') {
+      x = 16 * x + h - 'a' + 10;
+    } else if ('A' <= h && h <= 'F') {
+      x = 16 * x + h - 'A' + 10;
+    } else {
+      // Invalid hex code eg. %2x or %m8
+      return false;
+    }
+  }
+  *out = x;
   return true;
 }
 
