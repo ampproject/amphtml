@@ -27,7 +27,8 @@ const argv = minimist(process.argv.slice(2));
  * @param script
  * @param compiled 
  */
-function appendSxgScript(head: PostHTML.Node, script: ScriptNode, compiled: boolean): void {
+function appendSxg(script: ScriptNode, compiled: boolean): PostHTML.Node {
+  /*
   if (argv.compiled || compiled) {
     let sxgPath = CDNURLToLocalDistURL(
       new URL(script.attrs.src || ''),
@@ -46,6 +47,11 @@ function appendSxgScript(head: PostHTML.Node, script: ScriptNode, compiled: bool
   }
 
   script.attrs.type = 'sxg';
+  */
+ if(argv.compiled || compiled){
+   script.attrs
+ }
+  return script;
 }
 
 /**
@@ -53,29 +59,9 @@ function appendSxgScript(head: PostHTML.Node, script: ScriptNode, compiled: bool
  * @param options
  */
 export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
-  return function(tree: PostHTML.Node): void {
-    let head: PostHTML.Node | undefined = undefined;
-    let compiled: boolean = options.compiled || false;
-    const scripts: Array<ScriptNode> = [];
-    tree.walk(node => {
-      if (node.tag === 'head') {
-        head = node;
-      }
-      if (!isValidScript(node)) {
-        return node;
-      }
-
-      scripts.push(node);
-      return node;
+  return function(tree: PostHTML.Node) {
+    tree.match({tag: 'script'}, (script) => {
+      script = 'l';
     });
-
-    if (head === undefined) {
-      console.log('Could not find a head element in the document');
-      return;
-    }
-
-    for (const script of scripts) {
-      appendSxgScript(head, script, compiled);
-    }
   }
 }
