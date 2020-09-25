@@ -102,7 +102,9 @@ module.exports = function ({template}) {
 
         // Create the classes var.
         const id = path.scope.generateUidIdentifier('classes');
-        const init = template.expression.ast`${JSON.stringify(sheet.classes)}`;
+        const init = template.expression.ast`${stringifyUnquotedProps(
+          sheet.classes
+        )}`;
         path.scope.push({id, init});
         path.scope.bindings[id.name].path.parentPath.addComment(
           'leading',
@@ -135,6 +137,21 @@ module.exports = function ({template}) {
     },
   };
 };
+
+/**
+ * An equivalent to JSON.stringify except the properties are unquoted.
+ * @param {Object} obj
+ * @return {string}
+ */
+function stringifyUnquotedProps(obj) {
+  return (
+    '{' +
+    Object.entries(obj)
+      .map(([k, v]) => `${k}:"${v}"`)
+      .join(',') +
+    '}'
+  );
+}
 
 // Abuses spawnSync to let us run an async function sync.
 function transformCssSync(cssText) {
