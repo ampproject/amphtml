@@ -75,6 +75,8 @@ describes.realWin(
       ins.setAttribute('alt', 'Testing');
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
+      } else {
+        ins.setAttribute('layout', 'fixed-height');
       }
       if (params && typeof params.displayItemInfo === 'boolean') {
         ins.setAttribute('data-item-info', params.displayItemInfo);

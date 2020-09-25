@@ -199,21 +199,19 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    return (this.iframePromise_ = this.loadPromise(iframe).then(
-      function () {
-        this.iframeLoaded_ = true;
-        this.attemptChangeHeight(dev().assertNumber(this.itemHeight_)).catch(
-          () => {
-            /* die */
-          }
-        );
+    return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
+      this.iframeLoaded_ = true;
+      this.attemptChangeHeight(dev().assertNumber(this.itemHeight_)).catch(
+        () => {
+          /* die */
+        }
+      );
 
-        const unlisten = this.getViewport().onChanged(
-          this.sendScrollDataToItem_.bind(this)
-        );
-        this.unlisteners_.push(unlisten);
-      }.bind(this)
-    ));
+      const unlisten = this.getViewport().onChanged(
+        this.sendScrollDataToItem_.bind(this)
+      );
+      this.unlisteners_.push(unlisten);
+    }));
   }
 
   /** @return {!Element} @private */

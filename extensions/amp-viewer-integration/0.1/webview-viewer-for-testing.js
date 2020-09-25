@@ -125,7 +125,7 @@ export class WebviewViewerForTesting {
         '*',
         [channel.port2]
       );
-      channel.port1.onmessage = function (e) {
+      channel.port1.onmessage = (e) => {
         if (this.isChannelOpen_(e)) {
           window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
           const data = JSON.parse(e.data);
@@ -133,7 +133,7 @@ export class WebviewViewerForTesting {
         } else {
           this.handleMessage_(e);
         }
-      }.bind(this);
+      };
     }
   }
 
