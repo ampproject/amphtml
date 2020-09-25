@@ -384,10 +384,11 @@ export class AmpStory360 extends AMP.BaseElement {
    * Listens for deviceorientation events.
    *
    * Some browsers support the 'deviceorientation' event but never call it.
-   * This waits for one call before adding a constant listener.
+   * This waits for one call before initiating a constant listener.
    * @private
    */
   enableGyroscope_() {
+    // Listen for one call before initiating.
     listenOncePromise(this.win, 'deviceorientation').then(() => {
       this.gyroscopeControls_ = true;
       this.togglePermissionClass_(true);
@@ -401,7 +402,7 @@ export class AmpStory360 extends AMP.BaseElement {
           );
         }
       });
-      // Discovery animation.
+      // Display discovery animation.
       if (this.isOnActivePage_) {
         const discoveryHTML = htmlFor(this.element)`
         <div class="i-amphtml-story-360-discovery">
