@@ -125,9 +125,9 @@ amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery 
   content: "" !important;
   position: absolute !important;
   border-top: 1px solid white !important;
-  width: 14px !important;
+  width: 10px !important;
   top: 5px !important;
-  left: calc(50% - 7px) !important;
+  left: calc(50% - 5px) !important;
 }
 
 @keyframes lookAround {
