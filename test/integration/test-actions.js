@@ -34,19 +34,19 @@ describe('on="..."', () => {
   }
 
   describe('"tap" event', () => {
-    it('<non-AMP element>.toggleVisibility', async () => {
-      console.warn('startTest');
-      const span = fixture.doc.getElementById('spanToHide');
-      console.warn('afterSpan');
-      const button = fixture.doc.getElementById('hideBtn');
-      console.warn('afterButton');
+    // it('<non-AMP element>.toggleVisibility', async () => {
+    //   console.warn('startTest');
+    //   const span = fixture.doc.getElementById('spanToHide');
+    //   console.warn('afterSpan');
+    //   const button = fixture.doc.getElementById('hideBtn');
+    //   console.warn('afterButton');
 
-      button.click();
-      console.warn('afterClick');
-      await poll('#spanToHide hidden', waitForDisplay(span, 'none'));
-    });
+    //   button.click();
+    //   console.warn('afterClick');
+    //   await poll('#spanToHide hidden', waitForDisplay(span, 'none'));
+    // });
 
-    it('<AMP element>.toggleVisibility', async function () {
+    it('<AMP element>.toggleVisibility', function* () {
       console.warn('startTest')
       const img = fixture.doc.getElementById('imgToToggle');
       const button = fixture.doc.getElementById('toggleBtn');
@@ -55,12 +55,12 @@ describe('on="..."', () => {
 
       button.click();
       console.warn('after click')
-      await poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
+      yield poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
       console.warn('after poll')
 
       button.click();
       console.warn('after click2')
-      await poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
+      yield poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
       console.warn('after poll2')
     });
 
