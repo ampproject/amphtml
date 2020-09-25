@@ -17,7 +17,7 @@
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
-import {getContextMetadata} from '../src/iframe-attributes';
+import {getContextMetadata, getPreactContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {setStyle} from './style';
@@ -60,6 +60,34 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
 }
 
 /**
+ * Produces the attributes for the ad template.
+ * @param {!Window} parentWindow
+ * @param {!AmpElement} element
+ * @param {string=} type
+ * @param {Object=} opt_context
+ * @return {!JsonObject} Contains
+ *     - type, width, height, src attributes of <amp-ad> tag. These have
+ *       precedence over the data- attributes.
+ *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
+ *     - A _context object for internal use.
+ */
+function getPreactFrameAttributes(parentWindow, element, passedProps, type, opt_context) {
+  const sentinel = generateSentinel(parentWindow);
+  let attributes = dict();
+  attributes = getPreactContextMetadata(parentWindow, element, sentinel, attributes, true);
+  for (const name in passedProps) {
+    // data-vars- is reserved for amp-analytics
+    // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+    if (!startsWith(name, 'vars')) {
+      attributes[name] = passedProps[name];
+    }
+  }
+  attributes['type'] = type;
+  attributes['_context'] = opt_context ? opt_context : attributes['_context'];
+  return attributes;
+}
+
+/**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!Window} parentWindow
@@ -67,47 +95,136 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {string=} opt_type
  * @param {Object=} opt_context
  * @param {!{
- *   disallowCustom,
- *   allowFullscreen,
- * }=} opt_options Options for the created iframe.
- * @return {!HTMLIFrameElement} The iframe.
- */
-export function getIframe(
+  *   disallowCustom,
+  *   allowFullscreen,
+  * }=} opt_options Options for the created iframe.
+  * @return {!HTMLIFrameElement} The iframe.
+  */
+ export function getIframe(
+   parentWindow,
+   parentElement,
+   opt_type,
+   opt_context,
+   {disallowCustom, allowFullscreen} = {}
+ ) {
+   // Check that the parentElement is already in DOM. This code uses a new and
+   // fast `isConnected` API and thus only used when it's available.
+   devAssert(
+     parentElement['isConnected'] === undefined ||
+       parentElement['isConnected'] === true,
+     'Parent element must be in DOM'
+   );
+   const attributes = getFrameAttributes(
+     parentWindow,
+     parentElement,
+     opt_type,
+     opt_context
+   );
+   const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
+     'iframe'
+   ));
+ 
+   if (!count[attributes['type']]) {
+     count[attributes['type']] = 0;
+   }
+   count[attributes['type']] += 1;
+ 
+   const ampdoc = parentElement.getAmpDoc();
+   const baseUrl = getBootstrapBaseUrl(
+     parentWindow,
+     ampdoc,
+     undefined,
+     disallowCustom
+   );
+   const host = parseUrlDeprecated(baseUrl).hostname;
+   // This name attribute may be overwritten if this frame is chosen to
+   // be the master frame. That is ok, as we will read the name off
+   // for our uses before that would occur.
+   // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
+   const name = JSON.stringify(
+     dict({
+       'host': host,
+       'type': attributes['type'],
+       // https://github.com/ampproject/amphtml/pull/2955
+       'count': count[attributes['type']],
+       'attributes': attributes,
+     })
+   );
+ 
+   iframe.src = baseUrl;
+   iframe.ampLocation = parseUrlDeprecated(baseUrl);
+   iframe.name = name;
+   // Add the check before assigning to prevent IE throw Invalid argument error
+   if (attributes['width']) {
+     iframe.width = attributes['width'];
+   }
+   if (attributes['height']) {
+     iframe.height = attributes['height'];
+   }
+   if (attributes['title']) {
+     iframe.title = attributes['title'];
+   }
+   if (allowFullscreen) {
+     iframe.setAttribute('allowfullscreen', 'true');
+   }
+   iframe.setAttribute('scrolling', 'no');
+   setStyle(iframe, 'border', 'none');
+   /** @this {!Element} */
+   iframe.onload = function () {
+     // Chrome does not reflect the iframe readystate.
+     this.readyState = 'complete';
+   };
+   // Block synchronous XHR in ad. These are very rare, but super bad for UX
+   // as they block the UI thread for the arbitrary amount of time until the
+   // request completes.
+   iframe.setAttribute('allow', "sync-xhr 'none';");
+   const excludeFromSandbox = ['facebook'];
+   if (!excludeFromSandbox.includes(opt_type)) {
+     applySandbox(iframe);
+   }
+   iframe.setAttribute(
+     'data-amp-3p-sentinel',
+     attributes['_context']['sentinel']
+   );
+   return iframe;
+ }
+
+/**
+ * Creates the iframe props for the embed. Applies correct size and passes the embed
+ * attributes to the frame via JSON inside the fragment.
+ * @param {!Window} parentWindow
+ * @param {!AmpElement} parentElement
+ * @param {!Object=} passedProps
+ * @param {string=} opt_type
+ * @param {Object=} opt_context
+ * @param {string=} opt_tagname
+  * @return {!HTMLIFrameElement} The iframe.
+  */
+export function getIframeProps(
   parentWindow,
   parentElement,
+  passedProps,
   opt_type,
   opt_context,
-  {disallowCustom, allowFullscreen} = {}
+  opt_tagname,
 ) {
-  // Check that the parentElement is already in DOM. This code uses a new and
-  // fast `isConnected` API and thus only used when it's available.
-  devAssert(
-    parentElement['isConnected'] === undefined ||
-      parentElement['isConnected'] === true,
-    'Parent element must be in DOM'
-  );
-  const attributes = getFrameAttributes(
+  let attributes = getPreactFrameAttributes(
     parentWindow,
     parentElement,
+    passedProps,
     opt_type,
     opt_context
   );
-  const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
-    'iframe'
-  ));
+
+  attributes._context.tagName = opt_tagname ? opt_tagname : attributes['_context']['tagName'];
 
   if (!count[attributes['type']]) {
     count[attributes['type']] = 0;
   }
   count[attributes['type']] += 1;
 
-  const ampdoc = parentElement.getAmpDoc();
-  const baseUrl = getBootstrapBaseUrl(
-    parentWindow,
-    ampdoc,
-    undefined,
-    disallowCustom
-  );
+  const baseUrl = getDevelopmentBootstrapBaseUrl(parentWindow, 'frame');
+
   const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
@@ -123,42 +240,37 @@ export function getIframe(
     })
   );
 
-  iframe.src = baseUrl;
-  iframe.ampLocation = parseUrlDeprecated(baseUrl);
-  iframe.name = name;
-  // Add the check before assigning to prevent IE throw Invalid argument error
+  let returnProps = {
+    src: baseUrl,
+    ampLocation: parseUrlDeprecated(baseUrl),
+    name: name
+  };
+  
   if (attributes['width']) {
-    iframe.width = attributes['width'];
+    returnProps.width = attributes['width'];
   }
   if (attributes['height']) {
-    iframe.height = attributes['height'];
+    returnProps.height = attributes['height'];
   }
   if (attributes['title']) {
-    iframe.title = attributes['title'];
+    returnProps.title = attributes['title'];
   }
-  if (allowFullscreen) {
-    iframe.setAttribute('allowfullscreen', 'true');
-  }
-  iframe.setAttribute('scrolling', 'no');
-  setStyle(iframe, 'border', 'none');
-  /** @this {!Element} */
-  iframe.onload = function () {
+  
+  returnProps.scrolling = 'no';
+  returnProps.onload = function () {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  // Block synchronous XHR in ad. These are very rare, but super bad for UX
-  // as they block the UI thread for the arbitrary amount of time until the
-  // request completes.
-  iframe.setAttribute('allow', "sync-xhr 'none';");
+
+  returnProps.allow = "sync-xhr 'none';";
   const excludeFromSandbox = ['facebook'];
   if (!excludeFromSandbox.includes(opt_type)) {
-    applySandbox(iframe);
+    applySandbox(returnProps);
   }
-  iframe.setAttribute(
-    'data-amp-3p-sentinel',
-    attributes['_context']['sentinel']
-  );
-  return iframe;
+
+  returnProps["data-amp-3p-sentinel"] = attributes['_context']['sentinel'];
+  console.log("returnProps", returnProps);
+  return returnProps;
 }
 
 /**
@@ -170,6 +282,7 @@ export function getIframe(
  * @param {!JsonObject} attributes The destination.
  * visibleForTesting
  */
+
 export function addDataAndJsonAttributes_(element, attributes) {
   const {dataset} = element;
   for (const name in dataset) {
@@ -179,6 +292,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
       attributes[name] = dataset[name];
     }
   }
+
   const json = element.getAttribute('json');
   if (json) {
     const obj = tryParseJson(json);
@@ -280,7 +394,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
   return (
     overrideBootstrapBaseUrl ||
-    getAdsLocalhost(parentWindow) +
+    getAdsLocalhost(parentWindow, true) +
       '/dist.3p/' +
       (getMode().minified
         ? `${internalRuntimeVersion()}/${srcFileBasename}`
@@ -291,12 +405,16 @@ export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
 
 /**
  * @param {!Window} win
+ * @param {?boolean} opt_preactmode
  * @return {string}
  */
-function getAdsLocalhost(win) {
+function getAdsLocalhost(win, opt_preactmode) {
   let adsUrl = urls.thirdParty; // local dev with a non-localhost server
   if (adsUrl == 'https://3p.ampproject.net') {
     adsUrl = 'http://ads.localhost'; // local dev with a localhost server
+  }
+  if (opt_preactmode) {
+    return adsUrl + ":" + "8000";
   }
   return adsUrl + ':' + (win.location.port || win.parent.location.port);
 }
