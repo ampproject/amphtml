@@ -40,6 +40,8 @@ function setServeMode(modeOptions) {
 
   if (modeOptions.compiled) {
     serveMode = 'compiled';
+  } else if (modeOptions.sxg) {
+    serveMode = 'sxg';
   } else if (modeOptions.esm) {
     serveMode = 'esm';
   } else if (modeOptions.cdn) {
@@ -63,6 +65,8 @@ function logServeMode() {
   const serveMode = getServeMode();
   if (serveMode == 'compiled') {
     log(green('Serving'), cyan('minified'), green('JS'));
+  } else if (serveMode == 'sxg') {
+    log(green('Serving'), cyan('SxG'), green('JS'));
   } else if (serveMode == 'esm') {
     log(green('Serving'), cyan('ESM'), green('JS'));
   } else if (serveMode == 'cdn') {
