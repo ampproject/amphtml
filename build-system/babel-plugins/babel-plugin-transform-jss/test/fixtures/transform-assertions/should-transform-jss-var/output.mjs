@@ -1,5 +1,5 @@
 /** @enum {string}*/
-var _classes = {"button":"button-21aa4a8"};
+var _classes = {button:"button-21aa4a8"};
 
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
