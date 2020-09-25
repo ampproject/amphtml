@@ -52,7 +52,7 @@ function exec(cmd, options) {
  *
  * @param {string} script
  * @param {?Object} options
- * @return {!Object}
+ * @return {!ChildProcess}
  */
 function execScriptAsync(script, options) {
   return childProcess.spawn(script, {shell: shellCmd, ...options});
