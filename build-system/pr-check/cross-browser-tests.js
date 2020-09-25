@@ -38,7 +38,7 @@ const timedExec = (cmd) => timedExecBase(cmd, FILENAME);
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting');
+  timedExecOrDie('gulp build --fortesting');
 
   switch (process.platform) {
     case 'linux':
@@ -55,7 +55,7 @@ async function main() {
       // timedExecOrDie('gulp unit --nobuild --headless --edge');
       // timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
       // TODO(rsimha): Fix all IE tests and make this task fail the build.
-      timedExec('gulp integration --nobuild --compiled --ie --verbose');
+      timedExec('gulp integration --nobuild --ie --verbose');
       break;
     default:
       log(
