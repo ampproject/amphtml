@@ -116,15 +116,22 @@ export function createFixtureIframe(
       // Function that returns a promise for when the given event fired at
       // least count times.
       const awaitEvent = (eventName, count) => {
+        console.warn(119);
         if (!(eventName in events)) {
           throw new Error('Unknown custom event ' + eventName);
         }
+        console.warn(123);
         return new Promise(function (resolve) {
+          console.warn(125);
           if (events[eventName] >= count) {
+            console.warn(127);
             resolve();
           } else {
+            console.warn(130);
             win.addEventListener(eventName, () => {
+              console.warn(132);
               if (events[eventName] == count) {
+                console.warn(134);
                 resolve();
               }
             });
