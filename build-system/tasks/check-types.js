@@ -19,6 +19,9 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
+const {
+  displayLifecycleDebugging,
+} = require('../compile/debug-compilation-lifecycle');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
@@ -64,6 +67,7 @@ async function checkTypes() {
   return compileCss()
     .then(() => {
       log('Checking types...');
+      displayLifecycleDebugging();
       return Promise.all([
         closureCompile(
           compileSrcs.concat(extensionSrcs),
@@ -124,4 +128,5 @@ module.exports = {
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
+  debug: '  Outputs the file contents during compilation lifecycles',
 };

@@ -66,10 +66,10 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {!AmpElement} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @param {!{
- *   disallowCustom,
- *   allowFullscreen,
- * }=} opt_options Options for the created iframe.
+ * @param {{
+ *   disallowCustom: (boolean|undefined),
+ *   allowFullscreen: (boolean|undefined),
+ * }=} options Options for the created iframe.
  * @return {!HTMLIFrameElement} The iframe.
  */
 export function getIframe(
@@ -77,8 +77,9 @@ export function getIframe(
   parentElement,
   opt_type,
   opt_context,
-  {disallowCustom, allowFullscreen} = {}
+  options = {}
 ) {
+  const {disallowCustom = false, allowFullscreen = false} = options;
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   devAssert(
