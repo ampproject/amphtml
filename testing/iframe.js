@@ -22,6 +22,7 @@ import {Services} from '../src/services';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
+import {dev} from '../src/log';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -65,6 +66,10 @@ export function createFixtureIframe(
   initialIframeHeight,
   opt_beforeLoad
 ) {
+  dev().assertNumber(
+    initialIframeHeight,
+    'Attempted to create fixture iframe with non-numeric height'
+  );
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
