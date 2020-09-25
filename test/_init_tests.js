@@ -49,7 +49,7 @@ let testName;
 let expectedAsyncErrors;
 let rethrowAsyncSandbox;
 let consoleInfoLogWarnSandbox;
-const originalConsoleError = console /*OK*/.trace;
+const originalConsoleError = console /*OK*/.error;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -285,6 +285,7 @@ function printWarning(...messages) {
     "        'expectAsyncConsoleError(<string or regex>[, <number of" +
     ' times the error message repeats>]);';
   originalConsoleError(errorMessage + "'\n" + helpMessage);
+  originalConsoleError(messages);
 }
 
 /**
