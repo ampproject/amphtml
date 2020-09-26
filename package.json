@@ -160,7 +160,7 @@
     "npm-exact-versions": "0.0.5",
     "opn": "5.5.0",
     "plugin-error": "1.0.1",
-    "postcss": "7.0.32",
+    "postcss": "8.1.0",
     "postcss-import": "12.0.1",
     "posthtml": "0.13.0",
     "prettier": "2.0.5",
