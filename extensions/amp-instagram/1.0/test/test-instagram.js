@@ -15,8 +15,9 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Instagram} from '../instagram';
+import {Instagram, handleMessage} from '../instagram';
 import {mount} from 'enzyme';
+import {useRef} from '../../../../src/preact';
 
 describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {
@@ -32,8 +33,10 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
       />,
       {attachTo: el}
     );
-    expect(wrapper.props().shortcode).to.equal('B8QaZW4AQY_');
-    expect(wrapper.find('iframe').prop('src')).to.equal(
+
+    const iframe = wrapper.find('iframe');
+
+    expect(iframe.prop('src')).to.equal(
       'https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12'
     );
     expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
@@ -52,7 +55,6 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
       />,
       {attachTo: el}
     );
-    expect(wrapper.props().shortcode).to.equal('B8QaZW4AQY_');
     expect(wrapper.find('iframe').prop('src')).to.equal(
       'https://www.instagram.com/p/B8QaZW4AQY_/embed/captioned/?cr=1&v=12'
     );
@@ -61,39 +63,68 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     expect(wrapper.find('div')).to.have.lengthOf(2);
   });
 
-  it('Resize prop is called', async () => {
-    const wrapper = mount(
+  it('Resize prop is called', () => {
+    mount(
       <Instagram
         shortcode="B8QaZW4AQY_"
-        style={{'width': 500, 'height': 705}}
+        style={{'width': 500, 'height': 600}}
         requestResize={env.sandbox.spy()}
       />,
       {attachTo: document.body}
     );
 
-    await new Promise((resolve) =>
-      wrapper.find('iframe').instance().addEventListener('load', resolve)
+    const requestResizeSpy = env.sandbox.spy();
+    const heightSpy = env.sandbox.spy();
+    const opacitySpy = env.sandbox.spy();
+
+    handleMessage(
+      createMockEvent(),
+      useRef({'contentWindow': 'source'}),
+      requestResizeSpy,
+      heightSpy,
+      opacitySpy
     );
-    expect(wrapper.prop('requestResize')).to.have.been.calledOnce;
+
+    expect(requestResizeSpy).to.have.been.calledOnce;
+    expect(heightSpy).to.have.not.been.called;
+    expect(opacitySpy).to.have.been.calledOnce;
   });
 
-  it("Container's height is changed", async () => {
-    const initialHeight = 300;
-    document.body.addEventListener('message', console.log);
-    const wrapper = mount(
+  it('Height is changed', () => {
+    mount(
       <Instagram
         shortcode="B8QaZW4AQY_"
-        style={{'width': 500, 'height': initialHeight}}
+        style={{'width': 500, 'height': 600}}
+        requestResize={env.sandbox.spy()}
       />,
       {attachTo: document.body}
     );
 
-    await new Promise((resolve) =>
-      wrapper.find('iframe').instance().addEventListener('load', resolve)
+    const heightSpy = env.sandbox.spy();
+    const opacitySpy = env.sandbox.spy();
+
+    handleMessage(
+      createMockEvent(),
+      useRef({'contentWindow': 'source'}),
+      null,
+      heightSpy,
+      opacitySpy
     );
 
-    expect(
-      wrapper.find('iframe').instance().parentElement.parentElement
-    ).to.not.equal(initialHeight);
+    expect(heightSpy).to.have.been.calledOnce;
+    expect(opacitySpy).to.have.been.calledOnce;
   });
 });
+
+function createMockEvent() {
+  const mockEvent = new CustomEvent('message');
+  mockEvent.origin = 'https://www.instagram.com';
+  mockEvent.source = 'source';
+  mockEvent.data = JSON.stringify({
+    'type': 'MEASURE',
+    'details': {
+      'height': 705,
+    },
+  });
+  return mockEvent;
+}

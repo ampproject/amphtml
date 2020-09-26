@@ -39,36 +39,20 @@ export function Instagram({
   const [opacity, setOpacity] = useState(0);
 
   useLayoutEffect(() => {
-    /**
-     * @param {Event} event
-     */
-    function handleMessage(event) {
-      if (
-        event.origin != 'https://www.instagram.com' ||
-        event.source != iframeRef.current.contentWindow
-      ) {
-        return;
-      }
-
-      const data = parseJson(getData(event));
-
-      if (data['type'] == 'MEASURE') {
-        const height = data['details']['height'];
-        if (requestResize) {
-          requestResize(height);
-        } else {
-          setHeightStyle(dict({'height': height}));
-        }
-        setOpacity(1);
-      }
-    }
-
+    const messageHandler = (event) =>
+      handleMessage(
+        event,
+        iframeRef,
+        requestResize,
+        setHeightStyle,
+        setOpacity
+      );
     const {defaultView} = iframeRef.current.ownerDocument;
 
-    defaultView.addEventListener('message', handleMessage);
+    defaultView.addEventListener('message', messageHandler);
 
     return () => {
-      defaultView.removeEventListener('message', handleMessage);
+      defaultView.removeEventListener('message', messageHandler);
     };
   }, [requestResize]);
 
@@ -97,4 +81,38 @@ export function Instagram({
       />
     </ContainWrapper>
   );
+}
+
+/**
+ * @param {Event} event
+ * @param {RefObject} iframeRef
+ * @param {function(number):*|undefined} requestResize
+ * @param {function(JSONObject|undefined)} setHeightStyle
+ * @param {function(number)} setOpacity
+ */
+export function handleMessage(
+  event,
+  iframeRef,
+  requestResize,
+  setHeightStyle,
+  setOpacity
+) {
+  if (
+    event.origin != 'https://www.instagram.com' ||
+    event.source != iframeRef.current.contentWindow
+  ) {
+    return;
+  }
+
+  const data = parseJson(getData(event));
+
+  if (data['type'] == 'MEASURE') {
+    const height = data['details']['height'];
+    if (requestResize) {
+      requestResize(height);
+    } else {
+      setHeightStyle(dict({'height': height}));
+    }
+    setOpacity(1);
+  }
 }
