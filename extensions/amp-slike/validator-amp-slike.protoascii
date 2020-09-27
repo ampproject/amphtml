@@ -21,6 +21,8 @@ tags: {  # amp-slike
     name: "amp-slike"
     version: "0.1"
     version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
@@ -31,12 +33,18 @@ tags: {  # <amp-slike>
    attrs: {
     name: "data-apikey"
     mandatory: true
+  }
+  attrs: {
     name: "data-videoid"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-slike"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: RESPONSIVE
   }
 }
