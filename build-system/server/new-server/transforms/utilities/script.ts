@@ -19,6 +19,8 @@ import {URL} from 'url';
 import {extname} from 'path';
 import {VALID_CDN_ORIGIN} from './cdn';
 import {parse, format} from 'path';
+import log from 'fancy-log';
+import {cyan, yellow} from 'ansi-colors';
 
 export interface ScriptNode extends PostHTML.Node {
   tag: 'script';
@@ -44,7 +46,7 @@ export function isValidScript(node: PostHTML.Node, looseScriptSrcCheck?: boolean
   }
 
   const attrs = node.attrs || {};
-  const url = tryGetURL(attrs.src || '');
+  const url = tryGetUrl(attrs.src || '');
   if (looseScriptSrcCheck) {
     return isValidScriptExtension(url);
   }
@@ -76,12 +78,15 @@ export function toExtension(url: URL, extension: string): URL {
  * This is a temporary measure to allow for a relaxed parsing of our
  * fixture files src url's before they are all fixed accordingly.
  */
-export function tryGetURL(src: string, port: number = 8000): URL {
+export function tryGetUrl(src: string, port: number = 8000): URL {
   let url;
   try {
     url = new URL(src);
   } catch (e) {
-    url = new URL(src, `http://localhost:${port}`);
+    const resource = `http://localhost:${port}`;
+    log(yellow('WARNING:'), cyan(`Resource name given "${src}" is implied ` +
+      `to be localhost. Using ${resource}.`));
+    url = new URL(src, resource);
   } finally {
     return url as URL;
   }

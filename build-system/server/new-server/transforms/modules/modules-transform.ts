@@ -15,7 +15,7 @@
  */
 
 import {PostHTML} from 'posthtml';
-import {isJsonScript, isValidScript, toExtension, ScriptNode, tryGetURL} from '../utilities/script';
+import {isJsonScript, isValidScript, toExtension, ScriptNode, tryGetUrl} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
 
 /**
@@ -23,7 +23,7 @@ import {OptionSet} from '../utilities/option-set';
  * @param script
  */
 function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode, options: OptionSet): void {
-  const modulePath = toExtension(tryGetURL(nomoduleScript.attrs.src), '.mjs').toString();
+  const modulePath = toExtension(tryGetUrl(nomoduleScript.attrs.src), '.mjs').toString();
   const moduleScript : ScriptNode = {
     ...nomoduleScript,
     attrs: {
@@ -60,6 +60,9 @@ export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void 
         head = node;
       }
 
+      // Make sure that isJsonScript is used before `isValidScript`. We bail out
+      // early if the ScriptNofe is of type="application/json" since it wouldn't
+      // have any src url to modify.
       if (isJsonScript(node)) {
         return node;
       }

@@ -15,7 +15,7 @@
  */
 
 import {PostHTML} from 'posthtml';
-import {isJsonScript, isValidScript, tryGetURL} from '../utilities/script';
+import {isJsonScript, isValidScript, tryGetUrl} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
 import {parse} from 'path';
@@ -25,6 +25,9 @@ import {parse} from 'path';
  * @param script
  */
 function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
+  // Make sure that isJsonScript is used before `isValidScript`. We bail out
+  // early if the ScriptNode is of type="application/json" since it wouldn't
+  // have any src url to modify.
   if (isJsonScript(script)) {
     return script;
   }
@@ -33,7 +36,7 @@ function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
     return script;
   }
 
-  const url = tryGetURL(script.attrs.src || '');
+  const url = tryGetUrl(script.attrs.src || '');
   const parsedPath = parse(url.pathname);
   const src = CDNURLToLocalDistURL(url, [null, null], parsedPath.ext, options.port)
       .toString();
