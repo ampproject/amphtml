@@ -23,6 +23,6 @@ export interface OptionSet {
   compiled?: boolean;
   esm?: boolean;
   port?: number;
-  fortesting?: boolean,
+  fortesting?: boolean;
   looseScriptSrcCheck?: boolean;
 }
