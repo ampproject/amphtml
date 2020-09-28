@@ -224,6 +224,8 @@ export const realWin = describeEnv((spec) => [
  *   hash: (string|undefined),
  *   amp: (boolean),
  *   timeout: (number),
+ *   ifIe: (boolean),
+ *   enableIe: (boolean),
  * }} spec
  * @param {function({
  *   win: !Window,
@@ -308,53 +310,41 @@ function describeEnv(factory) {
    * @param {function(string, function())} describeFunc
    */
   const templateFunc = function (name, spec, fn, describeFunc) {
-    const fixtures = [new SandboxFixture(spec)];
-    factory(spec).forEach((fixture) => {
-      if (fixture && fixture.isOn()) {
-        fixtures.push(fixture);
-      }
-    });
-    return describeFunc(name, function () {
+    const fixtures = [new SandboxFixture(spec)].concat(
+      factory(spec)
+        .filter(Boolean)
+        .filter((fixture) => fixture.isOn())
+    );
+
+    return describeFunc(name, () => {
       const env = Object.create(null);
 
-      beforeEach(() => {
-        let totalPromise = undefined;
-        // Set up all fixtures.
-        fixtures.forEach((fixture, unusedIndex) => {
-          if (totalPromise) {
-            totalPromise = totalPromise.then(() => fixture.setup(env));
-          } else {
-            const res = fixture.setup(env);
-            if (res && typeof res.then == 'function') {
-              totalPromise = res;
-            }
-          }
-        });
-        return totalPromise;
+      beforeEach(async () => {
+        for (let i = 0; i < fixtures.length; ++i) {
+          await fixtures[i].setup(env);
+        }
       });
 
-      afterEach(() => {
-        // Tear down all fixtures.
-        let teardown = Promise.resolve();
-        fixtures
-          .slice(0)
-          .reverse()
-          .forEach((fixture) => {
-            teardown = teardown.then(() => fixture.teardown(env));
-          });
+      afterEach(async () => {
+        // Tear down all fixtures in reverse order.
+        for (let i = fixtures.length - 1; i >= 0; --i) {
+          await fixtures[i].teardown(env);
+        }
 
-        return teardown.then(() => {
-          // Delete all other keys.
-          for (const key in env) {
-            delete env[key];
-          }
-        });
+        // Delete all other keys.
+        for (const key in env) {
+          delete env[key];
+        }
       });
 
       let d = describe.configure();
+      // Allow for specifying IE-only and IE-enabled test suites.
       if (spec.ifIe) {
         d = d.ifIe();
+      } else if (spec.enableIe) {
+        d = d.enableIe();
       }
+
       d.run(SUB, function () {
         if (spec.timeout) {
           this.timeout(spec.timeout);
