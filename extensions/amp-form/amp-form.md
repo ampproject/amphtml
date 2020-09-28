@@ -26,7 +26,7 @@ limitations under the License.
 
 # amp-form
 
-## Useage
+## Usage
 
 The `amp-form` extension allows you to create forms (`<form>`) to submit input fields in an AMP document. The `amp-form` extension also provides [polyfills](#polyfills) for some missing behaviors in browsers.
 
@@ -106,7 +106,7 @@ You can render success or error responses in your form by using [amp-mustache](.
 
 #### To render responses with templating:
 
-- Apply a response attribute to any descendent of the `<form>` element.
+- Apply a response attribute to any descendant of the `<form>` element.
 - Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
 - Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
 
@@ -520,12 +520,12 @@ Specifies a server endpoint to handle the form input. The value must be an `http
 - For `method=POST`: use the [`action-xhr`](#action-xhr) attribute.
 
 [tip type="note"]
-The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
+The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fall back to using `action` and `target` in cases where the `amp-form` extension fails to load.
 [/tip][/filter] <!-- formats="websites, ads" -->
 
 ### `action-xhr`
 
-Specifies a server endpoint to handle the form input and submit the form via XMLHttpRequest (XHR). An XHR request (sometimes called an AJAX request) is where the browser would make the request without a full load of the page or opening a new page. Browsers will send the request in the background using the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fallback to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
+Specifies a server endpoint to handle the form input and submit the form via XMLHttpRequest (XHR). An XHR request (sometimes called an AJAX request) is where the browser would make the request without a full load of the page or opening a new page. Browsers will send the request in the background using the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fall back to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
 
 {% call callout('Important', type='caution') %}
 Your XHR endpoint must implement the requirements for [CORS security](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
