@@ -84,6 +84,23 @@ const buildActivateButtonTemplate = (element) => {
 };
 
 /**
+ * Generates the template for the feature discovery animation.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildDiscoveryTemplate = (element) => {
+  return htmlFor(element)`
+    <div class="i-amphtml-story-360-discovery">
+      <div class="i-amphtml-story-360-discovery-animation"></div>
+      <span class="i-amphtml-story-360-text">
+        Move device to explore
+      </span>
+    </div>
+  `;
+};
+
+/**
  * Internal helper class representing a camera orientation (POV) in polar
  * coordinates.
  */
@@ -404,14 +421,7 @@ export class AmpStory360 extends AMP.BaseElement {
       });
       // Display discovery animation.
       if (this.isOnActivePage_) {
-        const discoveryHTML = htmlFor(this.element)`
-        <div class="i-amphtml-story-360-discovery">
-          <div class="i-amphtml-story-360-discovery-animation"></div>
-          <span class="i-amphtml-story-360-text">
-            Move device to explore video
-          </span>
-        </div>
-      `;
+        const discoveryHTML = buildDiscoveryTemplate(this.element);
         this.mutateElement(() => this.element.appendChild(discoveryHTML));
       }
     });
