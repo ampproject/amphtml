@@ -85,10 +85,11 @@ export function Instagram({
 
 /**
  * @param {Event} event
- * @param {RefObject} iframeRef
+ * @param {Object} iframeRef
  * @param {function(number):*|undefined} requestResize
- * @param {function(JSONObject|undefined)} setHeightStyle
+ * @param {function(Object)} setHeightStyle
  * @param {function(number)} setOpacity
+ * @return {undefined}
  */
 export function handleMessage(
   event,
@@ -106,7 +107,7 @@ export function handleMessage(
 
   const data = parseJson(getData(event));
 
-  if (data['type'] == 'MEASURE') {
+  if (data['type'] == 'MEASURE' && data['details']) {
     const height = data['details']['height'];
     if (requestResize) {
       requestResize(height);
