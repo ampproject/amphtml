@@ -573,6 +573,7 @@ export class AmpStory360 extends AMP.BaseElement {
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
     const ampVideoEl = this.element.querySelector('amp-video');
+    this.ampVideoEl_ = this.element.querySelector('amp-video');
     userAssert(
       ampImgEl || ampVideoEl,
       'amp-story-360 must contain an amp-img or amp-video element.'
@@ -703,6 +704,11 @@ export class AmpStory360 extends AMP.BaseElement {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
     const loop = () => {
+      if (this.ampVideoEl_) {
+        this.renderer_.setImage(
+          dev().assertElement(this.ampVideoEl_.querySelector('video'))
+        );
+      }
       if (!this.isPlaying_ || !this.animation_ || this.gyroscopeControls_) {
         this.renderer_.render(false);
         return;
