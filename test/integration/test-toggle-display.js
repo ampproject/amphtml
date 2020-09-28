@@ -24,13 +24,13 @@ describes.integration(
       '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',
   },
   (env) => {
-    let browser, win, doc;
+    let browser, doc;
     let img;
 
     beforeEach(async () => {
-      win = env.win;
+      const {win} = env;
       doc = win.document;
-      browser = new BrowserController(env.win);
+      browser = new BrowserController(win);
 
       await browser.waitForElementLayout('amp-img');
       img = doc.querySelector('amp-img');
@@ -43,21 +43,26 @@ describes.integration(
       expect(el).to.not.have.display('none');
     }
 
-    it('toggles regular display', () => {
-      expectToggleDisplay(img);
-    });
+    describe
+      .configure()
+      .enableIe()
+      .run('', () => {
+        it('toggles regular display', () => {
+          expectToggleDisplay(img);
+        });
 
-    it('toggles initial display style', () => {
-      setInitialDisplay(img, 'inline-block');
-      expectToggleDisplay(img);
-    });
+        it('toggles initial display style', () => {
+          setInitialDisplay(img, 'inline-block');
+          expectToggleDisplay(img);
+        });
 
-    it('toggles stylesheet display style', () => {
-      const style = doc.createElement('style');
-      style.innerText = 'amp-img { display: inline-block !important; }';
-      doc.head.appendChild(style);
+        it('toggles stylesheet display style', () => {
+          const style = doc.createElement('style');
+          style.innerText = 'amp-img { display: inline-block !important; }';
+          doc.head.appendChild(style);
 
-      expectToggleDisplay(img);
-    });
+          expectToggleDisplay(img);
+        });
+      });
   }
 );
