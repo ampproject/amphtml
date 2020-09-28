@@ -22,7 +22,7 @@ import transformScriptPaths from './scripts/scripts-transform';
 import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
-const FORTESTING = argv._.includes('integration');
+const FOR_TESTING = argv._.includes('integration');
 // Use 9876 if running integration tests as this is the KARMA_SERVER_PORT
 const PORT = FORTESTING ? 9876 : 8000;
 const ESM = !!argv.esm;
