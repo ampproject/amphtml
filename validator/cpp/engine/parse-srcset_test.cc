@@ -253,10 +253,39 @@ TEST(ParseSrcsetTest, NegativeWidthOrPixelDensityRejected) {
   EXPECT_FALSE(result.success);
 }
 
+TEST(ParseSrcsetTest, ZeroWidthOrPixelDensityRejected) {
+  SrcsetParsingResult result = ParseSourceSet("image.png 0x");
+  EXPECT_FALSE(result.success);
+  result = ParseSourceSet("image.png 1x, image2.png 0.0x");
+  EXPECT_FALSE(result.success);
+  result = ParseSourceSet("image.png 0w");
+  EXPECT_FALSE(result.success);
+  result = ParseSourceSet("image.png 1x, image2.png 000w");
+  EXPECT_FALSE(result.success);
+}
+
 TEST(ParseSrcsetTest, EmptySrcsetRejected) {
   SrcsetParsingResult result = ParseSourceSet("");
   EXPECT_FALSE(result.success);
   result = ParseSourceSet(" \n\t\f\r");
+  EXPECT_FALSE(result.success);
+}
+
+TEST(ParseSrcsetTest, DecimalWidthsRejected) {
+  SrcsetParsingResult result = ParseSourceSet("image.png 500.0w");
+  EXPECT_FALSE(result.success);
+  result = ParseSourceSet("image.png 1.5w");
+  EXPECT_FALSE(result.success);
+  result = ParseSourceSet("image.png 0.1w");
+  EXPECT_FALSE(result.success);
+}
+
+TEST(ParseSrcsetTest, InvalidPixelValuesOrDimensionsRejected) {
+  SrcsetParsingResult result = ParseSourceSet("image.png 500px");
+  EXPECT_FALSE(result.success);
+  result = ParseSourceSet("image.png 2 x");
+  EXPECT_FALSE(result.success);
+  result = ParseSourceSet("image.png 1kw");
   EXPECT_FALSE(result.success);
 }
 
