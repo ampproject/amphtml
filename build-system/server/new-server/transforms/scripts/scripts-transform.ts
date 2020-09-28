@@ -37,11 +37,15 @@ function modifySrc(script: posthtml.Node, options: OptionSet): posthtml.Node {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const url = tryGetUrl(script.attrs.src || '');
   const parsedPath = parse(url.pathname);
   const src = CDNURLToLocalDistURL(url, [null, null], parsedPath.ext, options.port, options.useMaxNames)
 =======
   const url = tryGetURL(script.attrs.src || '');
+=======
+  const url = tryGetUrl(script.attrs.src || '');
+>>>>>>> fa0f1e62c (apply recs)
   const parsedPath = parse(url.pathname);
   const src = CDNURLToLocalDistURL(url, [null, null], parsedPath.ext, options.port)
 >>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
