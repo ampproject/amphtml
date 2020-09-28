@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
- amp-story-360 {
-  font-family: 'Roboto', sans-serif !important;
-}
-
 amp-story-360 canvas {
   position: absolute; /* fixes Safari bug */
  	width: 100% !important;
@@ -30,6 +26,7 @@ amp-story-360 amp-img {
 }
 
 .i-amphtml-story-360-activate-button {
+  font-family: 'Roboto', sans-serif !important;
   position: absolute !important;
   bottom: 8px !important;
   right: 8px !important;
@@ -94,10 +91,10 @@ amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery 
   bottom: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  height: 50% !important;
+  height: 66% !important;
   perspective: 550px !important;
   perspective-origin: center calc(100% - 145px);
-  background: linear-gradient(transparent, rgba(0, 0, 0, .8)) !important;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .9)) !important;
   animation: fadeOut 1s 4s forwards ease-in-out !important;
   z-index: 100000 !important;
 }
@@ -155,6 +152,7 @@ amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery 
 }
 
 .i-amphtml-story-360-text {
+  font-family: 'Roboto', sans-serif !important;
   position: absolute !important;
   bottom: 40px !important;
   width: 100% !important;
