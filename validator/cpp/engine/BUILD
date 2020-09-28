@@ -322,7 +322,7 @@ cc_test(
         ":validator",
         ":validator_pb",
         "@com_google_absl//absl/strings",
-        "@htmlparser/css//:parse_css_cc_proto",
+        "@htmlparser//css:parse_css_cc_proto",
         "@validator//:validator_cc_proto",
     ],
 )

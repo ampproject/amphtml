@@ -63,7 +63,6 @@
 #include "url.h"
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
-#include "webutil/url/url.h"
 
 
 using absl::AsciiStrToLower;
@@ -88,35 +87,8 @@ using absl::StrCat;
 using absl::string_view;
 using absl::StrJoin;
 using absl::StrSplit;
-using amp::validator::AmpLayout;
-using amp::validator::AncestorMarker;
-using amp::validator::AtRuleSpec;
-using amp::validator::AttrList;
-using amp::validator::AttrSpec;
-using amp::validator::AttrTriggerSpec;
-using amp::validator::CdataSpec;
-using amp::validator::ChildTagSpec;
-using amp::validator::CssDeclaration;
-using amp::validator::CssSpec;
-using amp::validator::DeclarationList;
-using amp::validator::DescendantTagList;
-using amp::validator::DocCssSpec;
-using amp::validator::DocSpec;
-using amp::validator::ErrorSpecificity;
-using amp::validator::ExtensionSpec;
-using amp::validator::GetTypeIdentifier;
-using amp::validator::HtmlFormat;
-using amp::validator::MediaQuerySpec;
-using amp::validator::PropertySpec;
-using amp::validator::ReferencePoint;
-using amp::validator::SelectorSpec;
-using amp::validator::TagSpec;
-using amp::validator::TypeIdentifier;
-using amp::validator::UrlSpec;
-using amp::validator::ValidationError;
-using amp::validator::ValidationResult;
-using amp::validator::ValidatorRules;
 using amp::validator::parse_layout::CssLength;
+using htmlparser::URL;
 using htmlparser::css::BlockType;
 using htmlparser::css::CssParsingConfig;
 using google::protobuf::RepeatedPtrField;
@@ -2640,11 +2612,7 @@ void ValidateUrlAndProtocol(const ParsedUrlSpec& parsed_url_spec,
     return;
   }
 
-  // Build the url with this base so relative urls get a proper
-  // protocol and can be parsed correctly. We intentionally pick a
-  // hostname that will never be used.
-  URL base_url("https://whatever.ampproject.org/");
-  URL parsed_url(base_url, url);
+  htmlparser::URL parsed_url(url);
 
   if (!parsed_url.is_valid()) {
     adapter.InvalidUrl(context, url, tag_spec, result);
@@ -2657,15 +2625,14 @@ void ValidateUrlAndProtocol(const ParsedUrlSpec& parsed_url_spec,
   }
   // Check the URL to see if it does not have a valid protocol and
   // therefore is a relative URL given the previous checks above.
-  if (!spec->allow_relative() && htmlparser::URL::ProtocolStrict(url).empty()) {
+  if (!spec->allow_relative() && !parsed_url.has_protocol()) {
     adapter.DisallowedRelativeUrl(context, url, tag_spec, result);
     return;
   }
 }
 
 bool IsDataUrl(const std::string& url) {
-  URL base_url("https://whatever.ampproject.org/");
-  URL parsed_url(base_url, url);
+  URL parsed_url(url);
   if (!parsed_url.is_valid()) return false;
 
   return UrlProtocol(url, parsed_url) == "data";
