@@ -71,7 +71,7 @@
     "connect-header": "0.0.5",
     "cssnano": "4.1.10",
     "debounce": "1.2.0",
-    "del": "5.1.0",
+    "del": "6.0.0",
     "derequire": "2.1.1",
     "doctrine": "3.0.0",
     "envify": "4.1.0",
