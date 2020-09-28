@@ -44,26 +44,21 @@ describes.integration(
       expect(el).to.not.have.display('none');
     }
 
-    describe
-      .configure()
-      .enableIe()
-      .run('', () => {
-        it('toggles regular display', () => {
-          expectToggleDisplay(img);
-        });
+    it('toggles regular display', () => {
+      expectToggleDisplay(img);
+    });
 
-        it('toggles initial display style', () => {
-          setInitialDisplay(img, 'inline-block');
-          expectToggleDisplay(img);
-        });
+    it('toggles initial display style', () => {
+      setInitialDisplay(img, 'inline-block');
+      expectToggleDisplay(img);
+    });
 
-        it('toggles stylesheet display style', () => {
-          const style = doc.createElement('style');
-          style.innerText = 'amp-img { display: inline-block !important; }';
-          doc.head.appendChild(style);
+    it('toggles stylesheet display style', () => {
+      const style = doc.createElement('style');
+      style.innerText = 'amp-img { display: inline-block !important; }';
+      doc.head.appendChild(style);
 
-          expectToggleDisplay(img);
-        });
-      });
+      expectToggleDisplay(img);
+    });
   }
 );

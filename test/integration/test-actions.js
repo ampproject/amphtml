@@ -20,7 +20,6 @@ import {poll} from '../../testing/iframe.js';
 describes.integration(
   'on="..."',
   {
-    ifIe: true,
     body: `
   <span id="spanToHide">This text will be hidden by #hideBtn</span>
   <button id="hideBtn" on="tap:spanToHide.hide">Hide #spanToHide</button>
@@ -51,63 +50,56 @@ describes.integration(
       );
     }
 
-    describe
-      .configure()
-      .enableIe()
-      .run('"tap" event', () => {
-        it('<non-AMP element>.toggleVisibility', async () => {
-          doc.getElementById('hideBtn').click();
-          await waitForDisplayChange(
-            '#spanToHide hidden',
-            'spanToHide',
-            'none'
-          );
-        });
-
-        it('<AMP element>.toggleVisibility', async () => {
-          const toggleBtn = doc.getElementById('toggleBtn');
-
-          toggleBtn.click();
-          await waitForDisplayChange(
-            '#imgToToggle hidden',
-            'imgToToggle',
-            'none'
-          );
-
-          toggleBtn.click();
-          await waitForDisplayChange(
-            '#imgToToggle displayed',
-            'imgToToggle',
-            'inline-block'
-          );
-        });
-
-        describe
-          .configure()
-          .skipIfPropertiesObfuscated()
-          .run('navigate', function () {
-            it('AMP.navigateTo(url=)', async () => {
-              // This is brittle but I don't know how else to stub
-              // window navigation.
-              const navigationService = win.__AMP_SERVICES.navigation.obj;
-              const navigateTo = window.sandbox.stub(
-                navigationService,
-                'navigateTo'
-              );
-
-              doc.getElementById('navigateBtn').click();
-              await poll('navigateTo() called with correct args', () =>
-                navigateTo.calledWith(win, 'https://google.com')
-              );
-            });
-          });
-
-        it('AMP.print()', async () => {
-          const print = window.sandbox.stub(win, 'print');
-
-          doc.getElementById('printBtn').click();
-          await poll('print() called once', () => print.calledOnce);
-        });
+    describe('"tap" event', () => {
+      it('<non-AMP element>.toggleVisibility', async () => {
+        doc.getElementById('hideBtn').click();
+        await waitForDisplayChange('#spanToHide hidden', 'spanToHide', 'none');
       });
+
+      it('<AMP element>.toggleVisibility', async () => {
+        const toggleBtn = doc.getElementById('toggleBtn');
+
+        toggleBtn.click();
+        await waitForDisplayChange(
+          '#imgToToggle hidden',
+          'imgToToggle',
+          'none'
+        );
+
+        toggleBtn.click();
+        await waitForDisplayChange(
+          '#imgToToggle displayed',
+          'imgToToggle',
+          'inline-block'
+        );
+      });
+
+      describe
+        .configure()
+        .skipIfPropertiesObfuscated()
+        .run('navigate', function () {
+          it('AMP.navigateTo(url=)', async () => {
+            // This is brittle but I don't know how else to stub
+            // window navigation.
+            const navigationService = win.__AMP_SERVICES.navigation.obj;
+            const navigateTo = window.sandbox.stub(
+              navigationService,
+              'navigateTo'
+            );
+
+            doc.getElementById('navigateBtn').click();
+            await poll('navigateTo() called with correct args', () =>
+              navigateTo.calledWith(win, 'https://google.com')
+            );
+          });
+        });
+
+      it('AMP.print()', async () => {
+        const print = window.sandbox.stub(win, 'print');
+
+        doc.getElementById('printBtn').click();
+        await poll('print() called once', () => print.calledOnce);
+      });
+    });
   }
 );
