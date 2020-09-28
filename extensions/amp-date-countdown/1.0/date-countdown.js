@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {Wrapper, useRenderer} from '../../../src/preact/component';
+import {getDate} from '../../../src/utils/date';
 import {getLocaleStrings} from './messages';
 import {useAmpContext} from '../../../src/preact/context';
 import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
@@ -48,7 +49,6 @@ const TimeUnit = {
 };
 
 // Default prop values
-const DEFAULT_OFFSET_SECONDS = 0;
 const DEFAULT_LOCALE = 'en';
 const DEFAULT_WHEN_ENDED = 'stop';
 const DEFAULT_BIGGEST_UNIT = 'DAYS';
@@ -58,11 +58,7 @@ const DEFAULT_BIGGEST_UNIT = 'DAYS';
  * @return {PreactDef.Renderable}
  */
 export function DateCountdown({
-  endDate,
-  timeleftMs,
-  timestampMs,
-  timestampSeconds,
-  offsetSeconds = DEFAULT_OFFSET_SECONDS,
+  dateTime,
   whenEnded = DEFAULT_WHEN_ENDED,
   locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
@@ -72,13 +68,7 @@ export function DateCountdown({
   useResourcesNotify();
   const {playable} = useAmpContext();
 
-  // One time calculation of our final countdown target in epoch format
-  const epoch = useMemo(
-    () =>
-      getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
-      offsetSeconds * MILLISECONDS_IN_SECOND,
-    [endDate, timeleftMs, timestampMs, timestampSeconds, offsetSeconds]
-  );
+  const epoch = getDate(dateTime);
 
   // How much time is left in our countdown
   const setTimeleft = useState(epoch - Date.now())[1];
@@ -120,7 +110,7 @@ export function DateCountdown({
       }
     }, DELAY);
     return () => win.clearInterval(interval);
-  }, [playable, epoch, whenEnded, biggestUnit]);
+  }, [playable, epoch, whenEnded, biggestUnit, setTimeleft]);
 
   const rendered = useRenderer(render, dataRef.current);
   const isHtml =
@@ -135,37 +125,6 @@ export function DateCountdown({
       {isHtml ? null : rendered}
     </Wrapper>
   );
-}
-
-/**
- * Calculate the epoch time that this component should countdown to from
- * one of multiple input options.
- * @param {string|undefined} endDate
- * @param {number|undefined} timeleftMs
- * @param {number|undefined} timestampMs
- * @param {number|undefined} timestampSeconds
- * @return {number}
- */
-function getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) {
-  let epoch;
-
-  if (endDate) {
-    epoch = Date.parse(endDate);
-  } else if (timeleftMs) {
-    epoch = Date.now() + timeleftMs;
-  } else if (timestampMs) {
-    epoch = timestampMs;
-  } else if (timestampSeconds) {
-    epoch = timestampSeconds * 1000;
-  }
-
-  if (epoch === undefined) {
-    throw new Error(
-      `One of endDate, timeleftMs, timestampMs, timestampSeconds` +
-        `is required. ${NAME}`
-    );
-  }
-  return epoch;
 }
 
 /**

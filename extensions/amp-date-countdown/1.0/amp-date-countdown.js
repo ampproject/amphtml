@@ -21,9 +21,13 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {parseDate} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
+
+/** @const {number} */
+const MILLISECONDS_IN_SECOND = 1000;
 
 class AmpDateCountdown extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -100,15 +104,63 @@ AmpDateCountdown['usesTemplate'] = true;
 
 /** @override */
 AmpDateCountdown['props'] = {
-  'endDate': {attr: 'end-date', type: 'datetime'},
-  'timeleftMs': {attr: 'timeleft-ms', type: 'number'},
-  'timestampMs': {attr: 'timestamp-ms', type: 'number'},
-  'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
-  'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
+  'dateTime': {
+    attrs: [
+      'end-date',
+      'timeleft-ms',
+      'timestamp-ms',
+      'timestamp-seconds',
+      'offset-seconds',
+    ],
+    parseAttrs: parseDateAttrs,
+  },
+
   'whenEnded': {attr: 'when-ended', type: 'string'},
   'locale': {attr: 'locale', type: 'string'},
   'biggestUnit': {attr: 'biggest-unit', type: 'string'},
 };
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ * @visibleForTesting
+ */
+export function parseDateAttrs(element) {
+  const epoch = userAssert(
+    parseEpoch(element),
+    `One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds` +
+      `is required. ${TAG}`
+  );
+
+  const offsetMs =
+    (Number(element.getAttribute('offset-seconds')) || 0) *
+    MILLISECONDS_IN_SECOND;
+  return epoch + offsetMs;
+}
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ */
+function parseEpoch(element) {
+  const endDate = element.getAttribute('end-date');
+  if (endDate) {
+    return userAssert(parseDate(endDate), 'Invalid date: %s', endDate);
+  }
+  const timeleftMs = element.getAttribute('timeleft-ms');
+  if (timeleftMs) {
+    return Date.now() + Number(timeleftMs);
+  }
+  const timestampMs = element.getAttribute('timestamp-ms');
+  if (timestampMs) {
+    return Number(timestampMs);
+  }
+  const timestampSeconds = element.getAttribute('timestamp-seconds');
+  if (timestampSeconds) {
+    return Number(timestampSeconds) * 1000;
+  }
+  return null;
+}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpDateCountdown);
