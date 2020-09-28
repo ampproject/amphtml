@@ -704,31 +704,35 @@ export class AmpStory360 extends AMP.BaseElement {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
     const loop = () => {
-      if (this.ampVideoEl_) {
-        this.renderer_.setImage(
-          dev().assertElement(this.ampVideoEl_.querySelector('video'))
-        );
-      }
-      if (!this.isPlaying_ || !this.animation_ || this.gyroscopeControls_) {
+      if (!this.isPlaying_ || !this.animation_) {
         this.renderer_.render(false);
         return;
       }
       const nextOrientation = this.animation_.getNextOrientation();
-      if (nextOrientation) {
-        // mutateElement causes inaccurate animation speed here, so we use rAF.
-        this.win.requestAnimationFrame(() => {
+      // mutateElement causes inaccurate animation speed here, so we use rAF.
+      this.win.requestAnimationFrame(() => {
+        // Stop loop if no next orientation and not a video.
+        if (!nextOrientation && !this.ampVideoEl_) {
+          this.isPlaying_ = false;
+          this.renderer_.render(false);
+          return;
+        }
+        // Only apply next orientation if not in gyroscopepe mode.
+        if (nextOrientation && !this.gyroscopeControls_) {
           this.renderer_.setCamera(
             nextOrientation.rotation,
             nextOrientation.scale
           );
-          this.renderer_.render(true);
-          loop();
-        });
-      } else {
-        this.isPlaying_ = false;
-        this.renderer_.render(false);
-        return;
-      }
+        }
+        // If this is a video copy the texture on each frame.
+        if (this.ampVideoEl_) {
+          this.renderer_.setImage(
+            dev().assertElement(this.ampVideoEl_.querySelector('video'))
+          );
+        }
+        this.renderer_.render(true);
+        loop();
+      });
     };
     this.mutateElement(() => loop());
   }
