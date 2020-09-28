@@ -23,11 +23,15 @@ import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
 <<<<<<< HEAD
+<<<<<<< HEAD
 const FOR_TESTING = argv._.includes('integration');
 // Use 9876 if running integration tests as this is the KARMA_SERVER_PORT
 const PORT = FOR_TESTING ? 9876 : 8000;
 =======
 const FORTESTING = argv._.includes('integration');
+=======
+const FOR_TESTING = argv._.includes('integration');
+>>>>>>> c0ddae427 (Update build-system/server/new-server/transforms/transform.ts)
 // Use 9876 if running integration tests as this is the KARMA_SERVER_PORT
 const PORT = FORTESTING ? 9876 : 8000;
 >>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
