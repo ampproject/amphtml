@@ -20,6 +20,7 @@ import {poll} from '../../testing/iframe.js';
 describes.integration(
   'on="..."',
   {
+    ifIe: true,
     body: `
   <span id="spanToHide">This text will be hidden by #hideBtn</span>
   <button id="hideBtn" on="tap:spanToHide.hide">Hide #spanToHide</button>

@@ -20,6 +20,7 @@ import {setInitialDisplay, toggle} from '../../src/style';
 describes.integration(
   'toggle display helper',
   {
+    ifIe: true,
     body:
       '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',
   },
