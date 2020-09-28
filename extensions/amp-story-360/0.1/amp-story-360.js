@@ -266,6 +266,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {number} */
     this.sceneRoll_ = 0;
+
+    /** @private {?Element} */
+    this.ampVideoEl_ = null;
   }
 
   /** @override */
@@ -572,18 +575,18 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
-    const ampVideoEl = this.element.querySelector('amp-video');
+    // This reference is used to update the video into the renderer.
     this.ampVideoEl_ = this.element.querySelector('amp-video');
     userAssert(
-      ampImgEl || ampVideoEl,
+      ampImgEl || this.ampVideoEl_,
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
 
     if (ampImgEl) {
       return this.setupAmpImgRenderer_(ampImgEl);
     }
-    if (ampVideoEl) {
-      return this.setupAmpVideoRenderer_(ampVideoEl);
+    if (this.ampVideoEl_) {
+      return this.setupAmpVideoRenderer_();
     }
   }
 
@@ -629,17 +632,16 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * @param {Element} ampVideoEl
    * @return {!Promise<!Element>}
    * @private
    */
-  setupAmpVideoRenderer_(ampVideoEl) {
-    return whenUpgradedToCustomElement(ampVideoEl)
+  setupAmpVideoRenderer_() {
+    return whenUpgradedToCustomElement(this.ampVideoEl_)
       .then(() => {
-        return ampVideoEl.signals().whenSignal(CommonSignals.LOAD_END);
+        return this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END);
       })
       .then(() => {
-        return listenOncePromise(ampVideoEl, 'playing');
+        return listenOncePromise(this.ampVideoEl_, 'playing');
       })
       .then(
         () => {
@@ -650,7 +652,7 @@ export class AmpStory360 extends AMP.BaseElement {
             this.sceneRoll_
           );
           this.renderer_.setImage(
-            dev().assertElement(ampVideoEl.querySelector('video'))
+            dev().assertElement(this.ampVideoEl_.querySelector('video'))
           );
           this.renderer_.resize();
           if (this.orientations_.length < 1) {
