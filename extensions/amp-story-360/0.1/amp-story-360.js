@@ -426,6 +426,9 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   enableGyroscope_() {
+    if (this.element.getAttribute('controls') !== 'gyroscope') {
+      return;
+    }
     // Listen for one call before initiating.
     listenOncePromise(this.win, 'deviceorientation').then(() => {
       this.gyroscopeControls_ = true;
@@ -442,8 +445,9 @@ export class AmpStory360 extends AMP.BaseElement {
       });
       // Display discovery animation.
       if (this.isOnActivePage_) {
-        const discoveryHTML = buildDiscoveryTemplate(this.element);
-        this.mutateElement(() => this.element.appendChild(discoveryHTML));
+        const storyEl = this.win.document.querySelector('amp-story');
+        const discoveryHTML = buildDiscoveryTemplate(storyEl);
+        this.mutateElement(() => storyEl.appendChild(discoveryHTML));
       }
     });
   }
