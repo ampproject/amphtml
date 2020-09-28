@@ -719,14 +719,14 @@ export class AmpStory360 extends AMP.BaseElement {
           this.renderer_.render(false);
           return;
         }
-        // Only apply next orientation if not in gyroscopepe mode.
+        // Only apply next orientation if not in gyroscope mode.
         if (nextOrientation && !this.gyroscopeControls_) {
           this.renderer_.setCamera(
             nextOrientation.rotation,
             nextOrientation.scale
           );
         }
-        // If this is a video copy the texture on each frame.
+        // If video copy the texture on each frame.
         if (this.ampVideoEl_) {
           this.renderer_.setImage(
             dev().assertElement(this.ampVideoEl_.querySelector('video'))
