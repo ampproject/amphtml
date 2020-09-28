@@ -328,7 +328,7 @@ function describeEnv(factory) {
       afterEach(async () => {
         // Tear down all fixtures in reverse order.
         for (let i = fixtures.length - 1; i >= 0; --i) {
-          await fixtures[i].teardown(env);
+          fixtures[i].teardown(env);
         }
 
         // Delete all other keys.
@@ -483,23 +483,17 @@ class IntegrationFixture {
   }
 
   /** @override */
-  setup(env) {
+  async setup(env) {
     const body =
       typeof this.spec.body == 'function' ? this.spec.body() : this.spec.body;
     const css =
       typeof this.spec.css == 'function' ? this.spec.css() : this.spec.css;
-    const experiments =
-      this.spec.experiments == undefined
-        ? undefined
-        : this.spec.experiments.join(',');
-    const extensions =
-      this.spec.extensions == undefined
-        ? undefined
-        : this.spec.extensions.join(',');
+    const experiments = this.spec.experiments?.join(',');
+    const extensions = this.spec.extensions?.join(',');
     const ampDocType = this.spec.ampdoc || 'single';
     const style = this.spec.frameStyle;
 
-    let url =
+    const url =
       this.spec.amp === false
         ? '/amp4test/compose-html'
         : '/amp4test/compose-doc';
@@ -508,35 +502,39 @@ class IntegrationFixture {
       url = addParamsToUrl(url, this.spec.params);
     }
 
+    const docUrl =
+      addParamsToUrl(url, {
+        body,
+        css,
+        experiments,
+        extensions,
+      }) + `#${this.hash}`;
+
+    // If shadow mode, wrap doc in shadow viewer.
+    const src =
+      ampDocType == 'shadow'
+        ? addParamsToUrl('/amp4test/compose-shadow', {docUrl})
+        : docUrl;
+
+    env.iframe = createElementWithAttributes(document, 'iframe', {
+      src,
+      style,
+    });
+
     return new Promise((resolve, reject) => {
-      const docUrl =
-        addParamsToUrl(url, {body, css, experiments, extensions}) +
-        `#${this.hash}`;
-
-      let src = docUrl;
-      // If shadow mode, wrap doc in shadow viewer.
-      if (ampDocType == 'shadow') {
-        src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
-      }
-
-      env.iframe = createElementWithAttributes(document, 'iframe', {
-        src,
-        style,
-      });
-      env.iframe.onload = function () {
+      env.iframe.onload = () => {
         env.win = env.iframe.contentWindow;
         resolve();
       };
       env.iframe.onerror = reject;
+
       document.body.appendChild(env.iframe);
     });
   }
 
   /** @override */
   teardown(env) {
-    if (env.iframe.parentNode) {
-      env.iframe.parentNode.removeChild(env.iframe);
-    }
+    env.iframe.parentNode?.removeChild(env.iframe);
   }
 }
 
