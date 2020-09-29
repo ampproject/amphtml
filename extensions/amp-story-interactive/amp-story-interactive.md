@@ -135,7 +135,7 @@ Element ID that identifies the interactive component in the story, and is used t
 
 ### endpoint (required for binary-poll, poll, quiz)
 
-Complete URL of the backend, where votes for the interactive components are stored.
+Complete URL of backend. Stores interactive element votes.
 
 ### theme (optional)
 
@@ -148,7 +148,7 @@ Results and binary-poll elements don't support shadow.
 
 ### prompt-text (optional)
 
-Adds a prompt on top of the component in the case of a binary-poll, poll or quiz; useful for writing the question or add context to an element. Also used to write a prompt to the results component before the category title (highly encouraged).
+Adds a prompt to the top of the component. Use `prompt-text` to write the poll/quiz question, or as a prefix to the category in the `amp-story-interactive-result` element.
 
 ### prompt-size (optional for binary-poll, poll, quiz)
 
