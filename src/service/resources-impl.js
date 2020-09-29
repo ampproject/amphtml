@@ -1659,11 +1659,15 @@ export class ResourcesImpl {
   /**
    * @param {!./task-queue.TaskDef} task
    * @param {boolean} success
-   * @param {*=} opt_reason
+   * @param {!AbortSignal|*} data
    * @return {!Promise|undefined}
    * @private
    */
-  taskComplete_(task, success, opt_reason) {
+  taskComplete_(task, success, data) {
+    // If we succeeded, then data is an AbortSignal.
+    if (success && data.aborted) {
+      return;
+    }
     this.totalLayoutCount_++;
     if (task.resource.isInViewport() && this.firstVisibleTime_ >= 0) {
       this.slowLayoutCount_++;
@@ -1672,14 +1676,8 @@ export class ResourcesImpl {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev().info(
-        TAG_,
-        'task failed:',
-        task.id,
-        task.resource.debugid,
-        opt_reason
-      );
-      return Promise.reject(opt_reason);
+      dev().info(TAG_, 'task failed:', task.id, task.resource.debugid, data);
+      return Promise.reject(data);
     }
   }
 

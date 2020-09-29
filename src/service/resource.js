@@ -176,6 +176,13 @@ export class Resource {
     /** @private {number} */
     this.layoutCount_ = 0;
 
+    /**
+     * Used to signal that the current layoutCallback has been aborted by an
+     * unlayoutCallback.
+     * @private {?AbortController}
+     */
+    this.abortController_ = null;
+
     /** @private {*} */
     this.lastLayoutError_ = null;
 
@@ -932,30 +939,45 @@ export class Resource {
     dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.abortController_ = new AbortController();
+    const abortSignal = this.abortController_.signal;
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
+        if (abortSignal.aborted) {
+          // The chained layoutCount_ will log the expected race error.
+          return;
+        }
         try {
-          resolve(this.element.layoutCallback());
+          resolve(this.element.layoutCallback(abortSignal));
         } catch (e) {
           reject(e);
         }
       });
-    });
-
-    this.layoutPromise_ = promise.then(
-      () => this.layoutComplete_(true),
-      (reason) => this.layoutComplete_(false, reason)
+    }).then(
+      () => this.layoutComplete_(true, abortSignal),
+      (reason) => this.layoutComplete_(false, abortSignal, reason)
     );
-    return this.layoutPromise_;
+
+    return (this.layoutPromise_ = promise);
   }
 
   /**
    * @param {boolean} success
+   * @param {!AbortSignal} abortSignal
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
    */
-  layoutComplete_(success, opt_reason) {
+  layoutComplete_(success, abortSignal, opt_reason) {
+    if (abortSignal.aborted) {
+      // We hit a race condition, where `layoutCallback` -> `unlayoutCallback`
+      // was called in quick succession. Since the unlayout was called before
+      // the layout completed, we want to remain in the unlayout state.
+      const err = dev().createError('layoutComplete race');
+      err.associatedElement = this.element;
+      dev().expectedError(TAG, err);
+      return;
+    }
     if (this.loadPromiseResolve_) {
       this.loadPromiseResolve_();
       this.loadPromiseResolve_ = null;
@@ -968,6 +990,7 @@ export class Resource {
     this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
+      return Promise.resolve(abortSignal);
     } else {
       dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
       return Promise.reject(opt_reason);
@@ -1030,9 +1053,21 @@ export class Resource {
   unlayout() {
     if (
       this.state_ == ResourceState.NOT_BUILT ||
-      this.state_ == ResourceState.NOT_LAID_OUT
+      this.state_ == ResourceState.NOT_LAID_OUT ||
+      this.state_ == ResourceState.READY_FOR_LAYOUT
     ) {
       return;
+    }
+    if (this.abortController_) {
+      this.abortController_.abort();
+    } else {
+      const err = dev().createError(
+        'abortController_ not defined',
+        'current state: ',
+        this.state_
+      );
+      err.associatedElement = this.element;
+      dev().error(TAG, err);
     }
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
