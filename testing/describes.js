@@ -494,7 +494,7 @@ class IntegrationFixture {
     const ampDocType = this.spec.ampdoc || 'single';
     const style = this.spec.frameStyle;
 
-    const url =
+    let url =
       this.spec.amp === false
         ? '/amp4test/compose-html'
         : '/amp4test/compose-doc';
