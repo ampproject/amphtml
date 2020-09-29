@@ -15,6 +15,8 @@
  */
 
 import '../amp-brightcove';
+import * as consent from '../../../../src/consent';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {CommonSignals} from '../../../../src/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
 import {
@@ -133,6 +135,19 @@ describes.realWin(
             '/index.html?videoId=ref:amp-test-video&playsinline=true'
         );
 
+        const newSrc = new Promise((resolve) => {
+          const cb = () => {
+            resolve(iframe.src);
+            observer.disconnect();
+          };
+
+          const observer = new MutationObserver(cb);
+          observer.observe(iframe, {
+            attributes: true,
+            attributesFilter: ['src'],
+          });
+        });
+
         bc.setAttribute('data-account', '12345');
         bc.setAttribute('data-video-id', 'abcdef');
         bc.mutatedAttributesCallback({
@@ -140,7 +155,7 @@ describes.realWin(
           'data-video-id': 'abcdef',
         });
 
-        expect(iframe.src).to.equal(
+        return expect(newSrc).to.eventually.equal(
           'https://players.brightcove.net/' +
             '12345/default_default/index.html?videoId=abcdef&playsinline=true'
         );
@@ -269,6 +284,52 @@ describes.realWin(
             fakePostMessage(bc, {event: 'ended', muted: false, playing: false});
             return p;
           });
+      });
+    });
+
+    it('should propagate consent state to iframe', () => {
+      env.sandbox
+        .stub(consent, 'getConsentPolicyState')
+        .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
+      env.sandbox
+        .stub(consent, 'getConsentPolicySharedData')
+        .resolves({a: 1, b: 2});
+
+      return getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+        'data-block-on-consent': '_till_accepted',
+      }).then((bc) => {
+        const newSrc = new Promise((resolve) => {
+          const cb = (mutations) => {
+            mutations.forEach((m) => {
+              if (m.type === 'childList') {
+                m.addedNodes.forEach((n) => {
+                  if (n.tagName === 'IFRAME') {
+                    resolve(n.src);
+                    observer.disconnect();
+                  }
+                });
+              }
+            });
+          };
+
+          const observer = new MutationObserver(cb);
+          observer.observe(bc, {
+            childList: true,
+          });
+        });
+
+        return Promise.all([
+          expect(newSrc).to.eventually.contain(
+            `ampInitialConsentState=${CONSENT_POLICY_STATE.SUFFICIENT}`
+          ),
+          expect(newSrc).to.eventually.contain(
+            `ampConsentSharedData=${encodeURIComponent(
+              JSON.stringify({a: 1, b: 2})
+            )}`
+          ),
+        ]);
       });
     });
   }
