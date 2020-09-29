@@ -137,12 +137,12 @@ Complete URL of the backend, where votes for the interactive components are stor
 
 ### theme (optional)
 
-Controls the color of the chips and text. Can be light (default), dark.
+Controls the color of the chips and text. Can be `light` (default), `dark`.
 
 ### chip-style (optional for poll, quiz, results)
 
-Controls the style of the component. Can be flat (default), shadow, or transparent.
-Results components don't support shadow.
+Controls the style of the component. Can be `flat` (default), `shadow`, or `transparent`.
+Results and binary-poll elements don't support shadow.
 
 ### prompt-text (optional)
 
@@ -150,7 +150,7 @@ Adds a prompt on top of the component, useful for writing the question to a quiz
 
 ### prompt-size (optional for binary-poll, poll, quiz)
 
-Controls the font-size of the prompt text. Can be small, medium (default), large. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
+Controls the `font-size` of the prompt text. Can be `small`, `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
 
 ### option-{1/2/3/4}-text (required)
 
@@ -174,7 +174,7 @@ On the results component, it is used as a lower boundary for the category when l
 All selectable interactive components (not results) show the percentage of users that selected each option. This data is aggregated on a backend specified with the `endpoint` attribute.
 To fetch the data for an interactive component, the necessary fields are:
 
-- `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`<div id="interactiveId"></div>
+- <div id="interactiveId"></div>`interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
 - `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
 - `endpoint`: the attribute `element.getAttribute("endpoint")`
 - `ampId`: client ID that identifies the session, optional
