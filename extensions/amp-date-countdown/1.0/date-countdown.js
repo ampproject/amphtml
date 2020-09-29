@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {Wrapper, useRenderer} from '../../../src/preact/component';
+import {dict} from '../../../src/utils/object';
 import {getDate} from '../../../src/utils/date';
 import {getLocaleStrings} from './messages';
 import {useAmpContext} from '../../../src/preact/context';
@@ -74,7 +75,10 @@ export function DateCountdown({
   const setTimeleft = useState(epoch - Date.now())[1];
 
   // One time calculation of time labels in specified locale
-  const localeStrings = useMemo(() => getLocaleWord(locale), [locale]);
+  const localeStrings = useMemo(
+    () => getLocaleWord(/** @type {string} */ (locale)),
+    [locale]
+  );
 
   // Reference to DOM element to get access to correct window
   const rootRef = useRef(null);
@@ -83,11 +87,14 @@ export function DateCountdown({
   // A reference is used so we can use the same object instance between
   // successive re-renders
   const dataRef = useRef(
-    getYDHMSFromMs(epoch - Date.now() + DELAY, biggestUnit)
+    getYDHMSFromMs(
+      epoch - Date.now() + DELAY,
+      /** @type {string} */ (biggestUnit)
+    )
   );
 
   // Put localeStrings into the data object
-  Object.assign(dataRef.current, localeStrings);
+  Object.assign(/** @type {!Object} */ (dataRef.current), localeStrings);
 
   useEffect(() => {
     if (!playable || !rootRef.current) {
@@ -102,7 +109,10 @@ export function DateCountdown({
 
       // Update dataRef to a new object to trigger re-calculation of 'rendered'
       // (in the useRenderer function)
-      const data = getYDHMSFromMs(newTimeleft, biggestUnit);
+      const data = getYDHMSFromMs(
+        newTimeleft,
+        /** @type {string} */ (biggestUnit)
+      );
       dataRef.current = data;
 
       if (whenEnded === DEFAULT_WHEN_ENDED && newTimeleft < 1000) {
@@ -112,7 +122,10 @@ export function DateCountdown({
     return () => win.clearInterval(interval);
   }, [playable, epoch, whenEnded, biggestUnit, setTimeleft]);
 
-  const rendered = useRenderer(render, dataRef.current);
+  const rendered = useRenderer(
+    render,
+    /** @type {!JsonObject} */ (dataRef.current)
+  );
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
@@ -141,14 +154,14 @@ function getLocaleWord(locale) {
     locale = DEFAULT_LOCALE;
   }
   const localeWordList = getLocaleStrings(locale);
-  return {
+  return dict({
     'years': localeWordList[0],
     'months': localeWordList[1],
     'days': localeWordList[2],
     'hours': localeWordList[3],
     'minutes': localeWordList[4],
     'seconds': localeWordList[5],
-  };
+  });
 }
 
 /**
@@ -187,7 +200,7 @@ function getYDHMSFromMs(ms, biggestUnit) {
           Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND)
         );
 
-  return {
+  return dict({
     'd': d,
     'dd': padStart(d),
     'h': h,
@@ -196,7 +209,7 @@ function getYDHMSFromMs(ms, biggestUnit) {
     'mm': padStart(m),
     's': s,
     'ss': padStart(s),
-  };
+  });
 }
 
 /**
