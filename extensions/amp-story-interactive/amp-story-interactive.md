@@ -42,7 +42,9 @@ The amp-story-interactive component provides a set of experiences, such as quizz
 
 The amp-story-interactive component encompasses a set of interactive experiences. Specify an interactive experience by defining one of the elements below. For best results, only use one element per amp-story-page.
 
-If you want to see all the components in action, check out the [example story](https://amp.dev/documentation/examples/components/amp-story-interactive-poll/story#page=title-components)
+Most elements require a backend endpoint that will store aggregate data for each interactive, as well as persist the selected option for a user across sessions. Elements will fetch the percentage of votes for each option as well as the user selection (if any) from this endpoint, and display it with the options after the user has selected one.
+
+To see all the components in action, check out the [example story](https://amp.dev/documentation/examples/components/amp-story-interactive-poll/story#page=title-components).
 
 ### amp-story-interactive-binary-poll
 
@@ -146,33 +148,36 @@ Results and binary-poll elements don't support shadow.
 
 ### prompt-text (optional)
 
-Adds a prompt on top of the component, useful for writing the question to a quiz or poll. Also used to write a prompt to the results component before the category title (highly encouraged).
+Adds a prompt on top of the component in the case of a binary-poll, poll or quiz; useful for writing the question or add context to an element. Also used to write a prompt to the results component before the category title (highly encouraged).
 
 ### prompt-size (optional for binary-poll, poll, quiz)
 
-Controls the `font-size` of the prompt text. Can be `small`, `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
+Controls the `font-size` of the prompt text, so it only applies for elements that have prompts. Can be `small` (), `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
 
 ### option-{1/2/3/4}-text (required)
 
-String that represents the option. On a results component, it determines the description for the category associated (highly encouraged). Binary polls require 2 options, but polls, quizzes and results can have 2-4 options.
+String that represents a numbered option. Binary polls require 2 options. Polls and quizzes may include between 2 and 4 options.
+
+The `amp-story-interactive-result` element uses this string value as category description.
 
 ### option-{1/2/3/4}-confetti (optional for binary-poll, poll, quiz)
 
-Emoji that is used in a confetti burst animation when the option is selected. When specified on an option, the confetti burst will be activated. On quizzes, only the correct option should have a confetti.
+Emoji that bursts in an explosion animation when an option is selected. On quizzes, only the correct option should have a confetti.
 
 ### option-{1/2/3/4}-results-category (optional for poll, required for results)
 
-On the results component, it is used as the name of the category. On polls it links the options to the result with that name. The string has to match for the options to be linked.
-If the results component doesn't specify thresholds, the category strategy will be used: the category with more options selected in polls across the story will be shown.
+On the results component, this attribute represents the name of the category, shown in larger text after the `prompt-text` and before the category description. If the results element doesn't specify thresholds, the category strategy will be used: the category with more options selected in polls across the story will be shown.
+
+On polls it links the options to the result with that name as mentioned above. The string has to match perfectly for the options to be linked.
 
 ### option-{1/2/3/4}-results-threshold (optional for results)
 
-On the results component, it is used as a lower boundary for the category when linked to quizzes. The component will calculate the score as a percentage of questions answered correctly (between 0 and 100), and it will show the category that has the best lower threshold that matches the score. The best threshold is the highest one that is lower or equal to the score, or the lowest score if all thresholds are higher than the score. If a threshold is specified for any option, all other options also need a threshold.
+On the results element, it determines the lower boundary for the category when linked to quizzes. The component will calculate the score as a percentage of questions answered correctly (between 0 and 100), and it will show the category that has the best lower threshold that matches the score. The best threshold is the highest one that is lower or equal to the score, or the lowest score if all thresholds are higher than the score. If a threshold is present for any option, all other options also need a threshold.
 
 ## Aggregate data source
 
-All selectable interactive components (not results) show the percentage of users that selected each option. This data is aggregated on a backend specified with the `endpoint` attribute.
-To fetch the data for an interactive component, the necessary fields are:
+All selectable interactive elements (binary-poll, poll, quiz) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
+To fetch the data for an interactive element, the necessary fields are:
 
 - <div id="interactiveId"></div>`interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
 - `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
@@ -217,7 +222,7 @@ Before setting up a backend, consider if the already existing backends satisfy y
 
 ## Styling
 
-See the [example story](https://amp.dev/documentation/examples/components/amp-story-interactive-poll/story#page=title-themes) for a demonstration of available amp-story-interactive experiences.
+View all theming options in action in the [example story](/documentation/examples/components/amp-story-interactive-poll/story#page=title-themes).
 
 [tip type="read-on"]
 Check this [Codepen collection](https://codepen.io/collection/DEGRLE) to play with the components and styles.
@@ -225,30 +230,32 @@ Check this [Codepen collection](https://codepen.io/collection/DEGRLE) to play wi
 
 ### CSS Variables
 
-All interactive components support similar styling, which is controlled through CSS variables and attributes.
-CSS variables
-Some variables can be overridden through assigning a class to the component.
+Style all `amp-story-interactive` elements with CSS variables and attributes. Override default variables by assigning a class to the element.
 
 - `--interactive-accent-color`: The accent color of the component. If no prompt-background is specified, it will use that for the prompt background as well.
-- `--interactive-prompt-text-color`: Color of the top text. Only used on selectable components if a
+- `--interactive-prompt-text-color`: Color of the top text. Only used on selectable elements (binary-poll, poll, quiz) if a
   prompt is specified, or on results components if there are thresholds (which will color the score).
-- `--interactive-prompt-background`: Background of the top text. Only used on selectable components if a prompt is specified, or on results if there are thresholds but no image (which will color the score background). Can be a color (including transparent) or CSS gradient.
-- `--interactive-prompt-alignment`: Alignment of the prompt. Only used in selectable components (not results). Will default to center if the component has the transparent style or if it's a binary poll, otherwise it will default to initial.
+- `--interactive-prompt-background`: Background of the top text. Only used on selectable elements if a prompt is specified, or on results if there are thresholds but no image (which will color the score background). Can be a color (including transparent) or CSS gradient.
+- `--interactive-prompt-alignment`: Alignment of the prompt. Only used in selectable elements (binary-poll, poll, quiz). Will default to center if the component has the transparent style or if it's a binary poll, otherwise it will default to initial.
 
 ### Themes
 
 The `theme` attribute controls the chip color and text color of the component. Can be `light` (default) or `dark`.
 The `chip-style` attribute controls the style details of the component. Can be `flat` (default), `shadow` or `transparent`.
 
-## Sizing
+### Sizing
 
-The component follows the [container](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/layouts_demonstrated/#container) model. The size can be changed by overriding the element's font-size, which by default will be set to `3*var(--story-page-vmin)`. The component has a `min-width: 14em` and `max-width: 25em`, unless it's a binary-poll or results, in which case it will have `max-width:18em`. This makes it occupy 75% of the width on portrait stories by default, but the width can be overridden with a CSS rule to any value in between the min and max. The height will depend on the font-size and number of lines on the prompt, so it cannot be specified.
+All `amp-story-interactive` elements use the [container](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/layouts_demonstrated/#container) layout and have their `font-size` default to `3*var(--story-page-vmin)` so that elements take 75% of the width of portrait stories, scaling properly with the screen size.
 
-### Creating pixel-perfect layouts using amp-story-grid-layer[aspect-ratio]
+You may override the `font-size` on the element to any value in `rem`s, `em`s, or other units, and the element will scale accordingly. You may override the width to any value between the max and min widths (explained below) using CSS to update the element's aspect ratio.
 
-While the component by default adapts to the screen size with the variable font-size, it doesn't stay perfectly consistent across screen sizes. It's possible to use the aspect-ratio layer in order to create layouts that will scale perfectly with different screen sizes, by setting the font-size in ems on the component.
+The `amp-story-interactive-poll` and `amp-story-interactive-quiz` elements have a `min-width: 14em` and `max-width: 25em`. The `amp-story-interactive-binary-poll` and `amp-story-interactive-results` have a `min-width: 14em` and `max-width: 18em`.
 
-The width can be set either in ems or percentages of the parent width, and it will behave perfectly consistent (while keeping it between the min and max widths).
+#### Creating pixel-perfect layouts using amp-story-grid-layer[aspect-ratio]
+
+While the elements by default scale with the screen size with the adaptive font-size, layouts don't stay perfectly consistent across screen sizes. It's possible to use the aspect-ratio layer in order to create layouts that will scale perfectly with different screen sizes, by setting the font-size in `em`s on the component.
+
+The width can be set either in `em`s or percentages of the parent width, and it will behave perfectly consistent (while keeping it between the min and max widths).
 
 [sourcecode:html]
 <amp-story-grid-layer template="fill" aspect-ratio="400:600">
@@ -264,11 +271,11 @@ The width can be set either in ems or percentages of the parent width, and it wi
 
 ### Adaptive font sizes for options
 
-Polls and binary polls can adapt their font-sizes according to the content types. When they are created, depending on the number of lines that they have for the option text, they can increase or decrease the font size. The font-size will default to the largest possible that accommodates all the texts being measured. For instance, if one of the options requires a small font-size (because it has a lot of text) but the other options don't, the small font-size will be used for all the texts involved. Note that this only optimizes the content of the components to fit better, but they don't change the inherent size of the components.
+Polls and binary polls can adapt their font-sizes according to the content types. Depending on the number of lines that they have for the option text, they can increase or decrease the font size. The font-size will default to the largest possible that accommodates all the texts measured. For instance, if one of the options requires a small font-size (because it has a lot of text) but the other options don't, all the involved text elements will use a small font-size. Note that this only optimizes the content of the options to fit better, but they don't change the inherent size of the elements.
 
-Binary polls only on post-selection will show different font-sizes for the options. They will hold a large font-size if all the options are either emojis or have short texts (length <= 3). Medium font-size will be used if at least one of the options are longer than 3 characters but both can be displayed in one line; and small font-size will be used if at least one option has two lines.
+Binary polls only on post-selection will show different font-sizes for the options. They will hold a large font-size if all the options are either emojis or have short texts (length <= 3). The element will use medium font-size if at least one of the options are longer than 3 characters but both can be displayed in one line; and small font-size if at least one option has two lines.
 
-Polls will also adapt the font-size of the options depending on the content. If all the options fit in one line, they will use a large font-size. If any of the options require 2 lines, all the options will be reduced in size to accommodate the option text in the chip.
+Polls will also adapt the font-size of the options depending on the content. If all the options fit in one line, they will use a large font-size. If any of the options require 2 lines, all the options will reduce in size to accommodate the option text in the chip.
 
 For a live demo, check out the [binary-poll](https://codepen.io/mszylkowski/pen/oNxogoV) and [poll](https://codepen.io/mszylkowski/pen/ZEWaBoZ) Codepens, and change the option texts (be sure to select "Answered" on the binary-poll demo to see the size change).
 
