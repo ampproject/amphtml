@@ -69,7 +69,7 @@ const DEFAULT_RENDER = (data) =>
  * @return {PreactDef.Renderable}
  */
 export function DateCountdown({
-  dateTime,
+  datetime,
   whenEnded = DEFAULT_WHEN_ENDED,
   locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
@@ -79,10 +79,10 @@ export function DateCountdown({
   useResourcesNotify();
   const {playable} = useAmpContext();
 
-  const epoch = getDate(dateTime);
+  const epoch = getDate(datetime);
 
   // How much time is left in our countdown
-  const setTimeleft = useState(epoch - Date.now())[1];
+  const [, setTimeleft] = useState(epoch - Date.now());
 
   // One time calculation of time labels in specified locale
   const localeStrings = useMemo(
