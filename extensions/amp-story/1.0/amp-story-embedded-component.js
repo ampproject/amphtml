@@ -96,6 +96,7 @@ export const EXPANDABLE_COMPONENTS = {
   'amp-story-interactive-text': {
     selector: 'amp-story-interactive-text',
     skipTooltip: true,
+    delegateScaling: true,
   },
 };
 

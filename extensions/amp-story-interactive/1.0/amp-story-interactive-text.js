@@ -41,7 +41,7 @@ const buildPollTemplate = (element) => {
         <textarea
           class="i-amphtml-story-interactive-input"
           rows="1"
-          oninput='this.style.height="0px";this.style.height = (this.scrollHeight) + "px"'
+          oninput='this.style.height="0px";this.style.height = (this.scrollHeight + 2) + "px"'
         ></textarea>
         <div class="i-amphtml-story-interactive-text-response"></div>
         <div class="i-amphtml-story-interacive-text-send">
@@ -51,9 +51,7 @@ const buildPollTemplate = (element) => {
             fill="black"
             width="18px"
             height="18px"
-          >
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-          </svg>
+          ></svg>
         </div>
       </div>
     </div>
@@ -81,7 +79,8 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
     this.attachPrompt_(this.rootEl_);
     textArea.placeholder = this.element.getAttribute('placeholder-text');
     textArea.onkeydown = (e) => {
-      if (e.keyCode == 13) {
+      console.log(e.key);
+      if (e.key == 'Enter') {
         this.sendText_(textArea.value);
       }
     };
@@ -131,7 +130,6 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
 
   /**
    * Shows or hides the send button
-   * @param {string} inputText
    * @param {boolean} toggle
    * @private
    */

@@ -10,9 +10,10 @@
       body {
         font-family: 'Rubik', sans-serif;
       }
-      amp-story-interactive-text {
+      .text {
         justify-self: center;
         align-self: center;
+        font-size: calc(3 * var(--story-page-vmin));
       }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -40,6 +41,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-text
+              class="text"
               style="--interactive-accent-color: #233abc"
               theme="light"
               prompt-text="What did you think about the interactive components?"
@@ -60,6 +62,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-text
+              class="text"
               style="--interactive-accent-color: #fa357d"
               theme="dark"
               prompt-text="What did you think about the interactive components?"
@@ -80,6 +83,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-text
+              class="text"
               style="--interactive-accent-color: #fa357d"
               theme="light"
               chip-style="shadow"
@@ -101,6 +105,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-text
+              class="text"
               style="--interactive-accent-color: #fa357d"
               theme="dark"
               chip-style="shadow"
