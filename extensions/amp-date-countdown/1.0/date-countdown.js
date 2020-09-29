@@ -55,6 +55,16 @@ const DEFAULT_WHEN_ENDED = 'stop';
 const DEFAULT_BIGGEST_UNIT = 'DAYS';
 
 /**
+ * @param {!JsonObject} data
+ * @return {string}
+ */
+const DEFAULT_RENDER = (data) =>
+  /** @type {string} */ (`${data['days']} ${data['dd']}, ` +
+    `${data['hours']} ${data['hh']}, ` +
+    `${data['minutes']} ${data['mm']}, ` +
+    `${data['seconds']} ${data['ss']}, `);
+
+/**
  * @param {!DateCountdownPropsDef} props
  * @return {PreactDef.Renderable}
  */
@@ -63,7 +73,7 @@ export function DateCountdown({
   whenEnded = DEFAULT_WHEN_ENDED,
   locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
-  render,
+  render = DEFAULT_RENDER,
   ...rest
 }) {
   useResourcesNotify();
