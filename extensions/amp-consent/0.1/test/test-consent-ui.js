@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {
   CONSENT_ITEM_STATE,
   constructConsentInfo,
@@ -100,7 +101,9 @@ describes.realWin(
       });
     });
 
-    afterEach(() => env.sandbox.restore());
+    afterEach(() => {
+      env.sandbox.restore();
+    });
 
     const getReadyIframeCmpConsentUi = () => {
       const config = dict({
@@ -160,17 +163,36 @@ describes.realWin(
         expect(parent.classList.contains('amp-hidden')).to.be.true;
       });
 
-      it('append/remove iframe', function* () {
+      it('append/remove iframe', async () => {
         const config = dict({
           'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
+        const clock = lolex.install({target: win});
+
+        // Append iframe, and remove iframe after 1sec timeout
         expect(elementByTag(parent, 'iframe')).to.be.null;
         consentUI.show(false);
-        yield macroTask();
+        await macroTask();
         expect(elementByTag(parent, 'iframe')).to.not.be.null;
         consentUI.hide();
+        clock.tick(999);
+        expect(elementByTag(parent, 'iframe')).to.not.be.null;
+        clock.tick(1);
         expect(elementByTag(parent, 'iframe')).to.be.null;
+
+        // Not remove iframe if it got appended again
+        consentUI.show(false);
+        await macroTask();
+        consentUI.hide();
+        clock.tick(999);
+        expect(elementByTag(parent, 'iframe')).to.not.be.null;
+        consentUI.show(false);
+        await macroTask();
+        clock.tick(1);
+        expect(elementByTag(parent, 'iframe')).to.not.be.null;
+
+        clock.uninstall();
       });
 
       it('should not lock scrolling', () => {
@@ -348,7 +370,7 @@ describes.realWin(
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https://promptUISrc',
           });
-
+          const clock = lolex.install({target: win});
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
           await macroTask();
@@ -368,6 +390,8 @@ describes.realWin(
           expect(consentUI.srAlert_).to.be.undefined;
           expect(consentUI.srAlertShown_).to.be.true;
           // placeholder, div, div
+          expect(consentUI.baseInstance_.element.children.length).to.equal(4);
+          clock.tick(1000);
           expect(consentUI.baseInstance_.element.children.length).to.equal(3);
 
           consentUI.show(false);
@@ -376,6 +400,7 @@ describes.realWin(
           expect(consentUI.srAlertShown_).to.be.true;
           // iframe, placeholder, div, div
           expect(consentUI.baseInstance_.element.children.length).to.equal(4);
+          clock.uninstall();
         });
 
         it('should have configurable captions', async () => {
