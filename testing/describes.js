@@ -313,7 +313,7 @@ function describeEnv(factory) {
     const fixtures = [new SandboxFixture(spec)].concat(
       factory(spec)
         .filter(Boolean)
-        .filter((fixture) => fixture.isOn())
+        .filter(({isOn}) => isOn())
     );
 
     return describeFunc(name, () => {
@@ -328,7 +328,7 @@ function describeEnv(factory) {
       afterEach(async () => {
         // Tear down all fixtures in reverse order.
         for (let i = fixtures.length - 1; i >= 0; --i) {
-          fixtures[i].teardown(env);
+          await fixtures[i].teardown(env);
         }
 
         // Delete all other keys.
@@ -392,6 +392,7 @@ class FixtureInterface {
 
   /**
    * @param {!Object} env
+   * @return {!Promise|undefined}
    */
   teardown(unusedEnv) {}
 }
@@ -522,7 +523,7 @@ class IntegrationFixture {
     });
 
     return new Promise((resolve, reject) => {
-      env.iframe.onload = () => {
+      env.iframe.onload = function () {
         env.win = env.iframe.contentWindow;
         resolve();
       };
