@@ -1188,6 +1188,12 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-youtube',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-youtube',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,

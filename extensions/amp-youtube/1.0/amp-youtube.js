@@ -26,9 +26,13 @@ class AmpYoutube extends PreactBaseElement {}
 AmpYoutube['Component'] = Youtube;
 
 /** @override */
-AmpFitText['props'] = {
-  'minFontSize': {attr: 'min-font-size', type: 'number'},
-  'maxFontSize': {attr: 'max-font-size', type: 'number'},
+AmpYoutube['props'] = {
+  'autoplay': {attr: 'autoplay'},
+  'loop': {attr: 'loop'},
+  'videoid': {attr: 'data-videoid'},
+  'liveChannelid': {attr: 'data-liveChannelid'},
+  'dock': {attr: 'dock'},
+  'style': {attr: 'style'},
 };
 
 /** @override */

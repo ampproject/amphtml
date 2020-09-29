@@ -18,9 +18,16 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
-import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
-import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 import {addParamsToUrl} from '../../../src/url';
+
+/**
+ * @enum {number}
+ * @private
+ */
+const PlayerFlags = {
+  // Config to tell YouTube to hide annotations by default
+  HIDE_ANNOTATION: 3,
+};
 
 /**
  * @param {!YoutubeProps} props
@@ -31,9 +38,10 @@ export function Youtube({
   loop,
   videoid,
   liveChannelid,
-  params,
+  params = {},
   dock,
   credentials,
+  style,
   ...rest
 }) {
   const datasourceExists =
@@ -79,29 +87,42 @@ export function Youtube({
   src = addParamsToUrl(src, params);
 
   return (
-    <ContainWrapper size={true} layout={true} paint={true} {...rest}>
-      <VideoWrapper component={VideoIframe} autoplay={autoplay}></VideoWrapper>
+    <ContainWrapper
+      style={style}
+      size={true}
+      layout={true}
+      paint={true}
+      {...rest}
+    >
+      <VideoWrapper
+        component={VideoIframe}
+        autoplay={autoplay}
+        src={src}
+      ></VideoWrapper>
     </ContainWrapper>
   );
 }
 
 /**
+ * @param {string} credentials
+ * @param {string} videoid
+ * @param {string} liveChannelid
  * @return {string}
  * @private
  */
-getEmbedUrl(credentials, videoid, liveChannelid) {
+function getEmbedUrl(credentials, videoid, liveChannelid) {
   let urlSuffix = '';
   if (credentials === 'omit') {
     urlSuffix = '-nocookie';
   }
   const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
-    let descriptor = '';
-    if (this.videoid_) {
-      descriptor = `${encodeURIComponent(videoid || '')}?`;
-    } else {
-      descriptor =
-        'live_stream?channel=' +
-        `${encodeURIComponent(liveChannelid || '')}&`;
-    }
-    return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
+  let descriptor = '';
+  if (videoid) {
+    descriptor = `${encodeURIComponent(videoid || '')}?`;
+  } else {
+    descriptor = `live_stream?channel=${encodeURIComponent(
+      liveChannelid || ''
+    )}&`;
+  }
+  return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
 }
