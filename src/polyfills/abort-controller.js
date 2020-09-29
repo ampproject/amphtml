@@ -39,19 +39,19 @@ class AbortController {
   /** */
   constructor() {
     /** @const {!AbortSignal} */
-    this.abortSignal_ = new AbortSignal();
+    this.signal_ = new AbortSignal();
   }
 
   /** */
   abort() {
-    this.abortSignal_.isAborted_ = true;
+    this.signal_.isAborted_ = true;
   }
 
   /**
    * @return {!AbortSignal}
    */
   get signal() {
-    return this.abortSignal_;
+    return this.signal_;
   }
 }
 

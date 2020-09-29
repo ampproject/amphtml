@@ -940,23 +940,23 @@ export class Resource {
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
     this.abortController_ = new AbortController();
-    const abortSignal = this.abortController_.signal;
+    const signal = this.abortController_.signal;
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
-        if (abortSignal.aborted) {
+        if (signal.aborted) {
           // The chained layoutCount_ will log the expected race error.
           return;
         }
         try {
-          resolve(this.element.layoutCallback(abortSignal));
+          resolve(this.element.layoutCallback(signal));
         } catch (e) {
           reject(e);
         }
       });
     }).then(
-      () => this.layoutComplete_(true, abortSignal),
-      (reason) => this.layoutComplete_(false, abortSignal, reason)
+      () => this.layoutComplete_(true, signal),
+      (reason) => this.layoutComplete_(false, signal, reason)
     );
 
     return (this.layoutPromise_ = promise);
@@ -964,12 +964,12 @@ export class Resource {
 
   /**
    * @param {boolean} success
-   * @param {!AbortSignal} abortSignal
+   * @param {!AbortSignal} signal
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
    */
-  layoutComplete_(success, abortSignal, opt_reason) {
-    if (abortSignal.aborted) {
+  layoutComplete_(success, signal, opt_reason) {
+    if (signal.aborted) {
       // We hit a race condition, where `layoutCallback` -> `unlayoutCallback`
       // was called in quick succession. Since the unlayout was called before
       // the layout completed, we want to remain in the unlayout state.
@@ -990,7 +990,7 @@ export class Resource {
     this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
-      return Promise.resolve(abortSignal);
+      return Promise.resolve(signal);
     } else {
       dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
       return Promise.reject(opt_reason);

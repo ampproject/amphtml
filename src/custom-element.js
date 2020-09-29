@@ -1146,11 +1146,11 @@ function createBaseCustomElementClass(win) {
      *
      * Can only be called on a upgraded and built element.
      *
-     * @param {!AbortSignal} abortSignal
+     * @param {!AbortSignal} signal
      * @return {!Promise}
      * @package @final
      */
-    layoutCallback(abortSignal) {
+    layoutCallback(signal) {
       assertNotTemplate(this);
       devAssert(this.isBuilt(), 'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
@@ -1169,7 +1169,7 @@ function createBaseCustomElementClass(win) {
 
       return promise.then(
         () => {
-          if (abortSignal.aborted) {
+          if (signal.aborted) {
             return;
           }
           if (isLoadEvent) {
@@ -1187,7 +1187,7 @@ function createBaseCustomElementClass(win) {
           }
         },
         (reason) => {
-          if (abortSignal.aborted) {
+          if (signal.aborted) {
             return;
           }
           // add layoutCount_ by 1 despite load fails or not
