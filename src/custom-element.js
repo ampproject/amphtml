@@ -28,7 +28,12 @@ import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
+import {
+  blockedByConsentError,
+  cancellation,
+  isBlockedByConsent,
+  reportError,
+} from './error';
 import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
@@ -1153,6 +1158,10 @@ function createBaseCustomElementClass(win) {
     layoutCallback(signal) {
       assertNotTemplate(this);
       devAssert(this.isBuilt(), 'Must be built to receive viewport events');
+      if (signal.aborted) {
+        throw cancellation();
+      }
+
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = this.layoutCount_ == 0; // First layout is "load".
       this.signals_.reset(CommonSignals.UNLOAD);
@@ -1170,7 +1179,7 @@ function createBaseCustomElementClass(win) {
       return promise.then(
         () => {
           if (signal.aborted) {
-            return;
+            throw cancellation();
           }
           if (isLoadEvent) {
             this.signals_.signal(CommonSignals.LOAD_END);
@@ -1188,7 +1197,7 @@ function createBaseCustomElementClass(win) {
         },
         (reason) => {
           if (signal.aborted) {
-            return;
+            throw cancellation();
           }
           // add layoutCount_ by 1 despite load fails or not
           if (isLoadEvent) {

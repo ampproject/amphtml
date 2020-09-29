@@ -17,9 +17,9 @@
 import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
+import {cancellation, isBlockedByConsent, reportError} from '../error';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent, reportError} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -940,14 +940,10 @@ export class Resource {
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
     this.abortController_ = new AbortController();
-    const signal = this.abortController_.signal;
+    const {signal} = this.abortController_;
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
-        if (signal.aborted) {
-          // The chained layoutCount_ will log the expected race error.
-          return;
-        }
         try {
           resolve(this.element.layoutCallback(signal));
         } catch (e) {
@@ -976,7 +972,7 @@ export class Resource {
       const err = dev().createError('layoutComplete race');
       err.associatedElement = this.element;
       dev().expectedError(TAG, err);
-      return;
+      throw cancellation();
     }
     if (this.loadPromiseResolve_) {
       this.loadPromiseResolve_();
@@ -990,7 +986,6 @@ export class Resource {
     this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
-      return Promise.resolve(signal);
     } else {
       dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
       return Promise.reject(opt_reason);
