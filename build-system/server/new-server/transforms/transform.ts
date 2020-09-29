@@ -22,7 +22,6 @@ import transformScriptPaths from './scripts/scripts-transform';
 import transformStories from './stories/stories-transform';
 import transformCss from './css/css-transform';
 
-
 const argv = minimist(process.argv.slice(2));
 const transforms = [transformStories(), transformScriptPaths(), transformCss()];
 
