@@ -51,6 +51,8 @@ const BUTTON_ACTION_CAPTION = 'Focus Prompt';
 const CANCEL_OVERLAY = 'cancelFullOverlay';
 const REQUEST_OVERLAY = 'requestFullOverlay';
 
+const IFRAME_RUNNING_TIMEOUT = 1000;
+
 export const actionState = {
   error: 'error',
   success: 'success',
@@ -151,6 +153,9 @@ export class ConsentUI {
 
     /** @private {?Deferred} */
     this.iframeReady_ = null;
+
+    /** @private {boolean} */
+    this.removeIframe_ = false;
 
     /** @private {?JsonObject} */
     this.clientConfig_ = null;
@@ -540,6 +545,7 @@ export class ConsentUI {
     toggle(dev().assertElement(this.ui_), false);
 
     const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
+      this.removeIframe_ = false;
       this.ui_.src = expandedSrc;
       return this.getClientInfoPromise_().then((clientInfo) => {
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
@@ -618,7 +624,12 @@ export class ConsentUI {
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
     toggle(dev().assertElement(this.placeholder_), false);
-    removeElement(dev().assertElement(this.ui_));
+    this.removeIframe_ = true;
+    this.win_.setTimeout(() => {
+      if (this.removeIframe_) {
+        removeElement(dev().assertElement(this.ui_));
+      }
+    }, IFRAME_RUNNING_TIMEOUT);
   }
 
   /**
