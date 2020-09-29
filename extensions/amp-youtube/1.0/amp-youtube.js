@@ -14,28 +14,16 @@
  * limitations under the License.
  */
 
-import {FitText} from './fit-text';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+import {Youtube} from './youtube';
 
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-class AmpFitText extends PreactBaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'amp-fit-text-bento'),
-      'expected amp-fit-text-bento experiment to be enabled'
-    );
-    return isLayoutSizeDefined(layout);
-  }
-}
+class AmpYoutube extends PreactBaseElement {}
 
 /** @override */
-AmpFitText['Component'] = FitText;
+AmpYoutube['Component'] = Youtube;
 
 /** @override */
 AmpFitText['props'] = {
@@ -44,11 +32,11 @@ AmpFitText['props'] = {
 };
 
 /** @override */
-AmpFitText['passthrough'] = true;
+AmpYoutube['passthrough'] = true;
 
 /** @override */
-AmpFitText['layoutSizeDefined'] = true;
+AmpYoutube['layoutSizeDefined'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpFitText);
+  AMP.registerElement(TAG, AmpYoutube);
 });

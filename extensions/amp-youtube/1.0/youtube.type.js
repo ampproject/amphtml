@@ -18,9 +18,13 @@
 
 /**
  * @typedef {{
- *   minFontSize: (number|undefined),
- *   maxFontSize: (number|undefined),
- *   children: (?PreactDef.Renderable|undefined),
+ *   autoplay: boolean,
+ *   loop: boolean,
+ *   videoid: (string|undefined),
+ *   liveChannelid: (string|undefined),
+ *   params: Object,
+ *   dock: boolean,
+ *   credentials: (string|undefined)
  * }}
  */
 var YoutubeProps;

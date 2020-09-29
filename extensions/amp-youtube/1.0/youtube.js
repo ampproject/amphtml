@@ -20,12 +20,14 @@ import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
+import {addParamsToUrl} from '../../../src/url';
 
 /**
  * @param {!YoutubeProps} props
  * @return {PreactDef.Renderable}
  */
 export function Youtube({
+  autoplay,
   loop,
   videoid,
   liveChannelid,
@@ -43,9 +45,63 @@ export function Youtube({
     );
   }
 
+  let src = getEmbedUrl(credentials, videoid, liveChannelid);
+  if (!('playsinline' in params)) {
+    params['playsinline'] = '1';
+  }
+  if ('autoplay' in params) {
+    delete params['autoplay'];
+    autoplay = true;
+  }
+
+  if (autoplay) {
+    if (!('iv_load_policy' in params)) {
+      params['iv_load_policy'] = `${PlayerFlags.HIDE_ANNOTATION}`;
+    }
+
+    // Inline play must be set for autoplay regardless of original value.
+    params['playsinline'] = '1';
+  }
+
+  if ('loop' in params) {
+    loop = true;
+    delete params['loop'];
+  }
+
+  if (loop) {
+    if ('playlist' in params) {
+      params['loop'] = true;
+    } else if ('loop' in params) {
+      delete params['loop'];
+    }
+  }
+
+  src = addParamsToUrl(src, params);
+
   return (
     <ContainWrapper size={true} layout={true} paint={true} {...rest}>
       <VideoWrapper component={VideoIframe} autoplay={autoplay}></VideoWrapper>
     </ContainWrapper>
   );
+}
+
+/**
+ * @return {string}
+ * @private
+ */
+getEmbedUrl(credentials, videoid, liveChannelid) {
+  let urlSuffix = '';
+  if (credentials === 'omit') {
+    urlSuffix = '-nocookie';
+  }
+  const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
+    let descriptor = '';
+    if (this.videoid_) {
+      descriptor = `${encodeURIComponent(videoid || '')}?`;
+    } else {
+      descriptor =
+        'live_stream?channel=' +
+        `${encodeURIComponent(liveChannelid || '')}&`;
+    }
+    return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
 }
