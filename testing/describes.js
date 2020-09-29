@@ -313,7 +313,7 @@ function describeEnv(factory) {
     const fixtures = [new SandboxFixture(spec)].concat(
       factory(spec)
         .filter(Boolean)
-        .filter(({isOn}) => isOn())
+        .filter((fixture) => fixture.isOn())
     );
 
     return describeFunc(name, () => {
