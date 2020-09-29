@@ -26,22 +26,26 @@ import {OptionSet} from '../utilities/option-set';
 export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node) {
     tree.match({tag: 'script'}, (script) => {
+      // Make sure that isJsonScript is used before `isValidScript`. We bail out
+      // early if the ScriptNofe is of type="application/json" since it wouldn't
+      // have any src url to modify.
       if (isJsonScript(script)) {
         return script;
       }
+
       if (!isValidScript(script)) {
         return script;
       }
 
       if (options.compiled) {
-        const url = script.attrs.src.toString();
-        script.attrs.src = url.replace('.js', '.sxg.js');
-      }
-      else {
+        const src = script.attrs.src;
+        script.attrs.src = src.replace('.js', '.sxg.js');
+      } else {
         const url = new URL(script.attrs.src);
         url.searchParams.append('f', 'sxg');
         script.attrs.src = url.toString();
       }
+
       return script;
     });
   }
