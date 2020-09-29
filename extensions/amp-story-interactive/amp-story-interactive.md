@@ -245,15 +245,15 @@ The `chip-style` attribute controls the style details of the component. Can be `
 
 ### Sizing
 
-All `amp-story-interactive` elements use the [container](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/layouts_demonstrated/#container) layout and have their `font-size` default to `3*var(--story-page-vmin)` so that elements take 75% of the width of portrait stories, scaling properly with the screen size.
+All `amp-story-interactive` elements use the [container](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/layouts_demonstrated/#container) layout, so the width can be manipulated but the height is automatically computed. You may override the `font-size` on the element to any value in `rem`s, `em`s, or other units, and the element will scale accordingly. You may override the width to any value between the max and min widths (explained below) using CSS to update the element's aspect ratio.
 
-You may override the `font-size` on the element to any value in `rem`s, `em`s, or other units, and the element will scale accordingly. You may override the width to any value between the max and min widths (explained below) using CSS to update the element's aspect ratio.
+The default `font-size` is `3*var(--story-page-vmin)` so that elements take 75% of the width of portrait stories, independently of the screen size.
 
 The `amp-story-interactive-poll` and `amp-story-interactive-quiz` elements have a `min-width: 14em` and `max-width: 25em`. The `amp-story-interactive-binary-poll` and `amp-story-interactive-results` have a `min-width: 14em` and `max-width: 18em`.
 
-#### Creating pixel-perfect layouts using amp-story-grid-layer[aspect-ratio]
+#### Sizing within amp-story-grid-layer[aspect-ratio]
 
-While the elements by default scale with the screen size with the adaptive font-size, layouts don't stay perfectly consistent across screen sizes. It's possible to use the aspect-ratio layer in order to create layouts that will scale perfectly with different screen sizes, by setting the font-size in `em`s on the component.
+It's possible to use the [aspect-ratio](https://amp.dev/documentation/components/amp-story-grid-layer/#aspect-ratio-[optional]) layer in order to create layouts that will scale perfectly with different screen sizes, by setting the font-size in `em`s or `%` on the component. Users should not use pixels and they don't scale accordingly with different screen sizes.
 
 The width can be set either in `em`s or percentages of the parent width, and it will behave perfectly consistent (while keeping it between the min and max widths).
 
