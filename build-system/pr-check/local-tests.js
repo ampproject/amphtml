@@ -61,8 +61,8 @@ function main() {
         break;
       }
     }
-    timedExecOrDie('gulp test-report-upload');
 
+    timedExecOrDie('gulp test-report-upload');
     if (errorStatus) {
       process.exit(status);
     }
