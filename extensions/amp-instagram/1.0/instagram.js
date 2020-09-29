@@ -32,6 +32,7 @@ export function Instagram({
   captioned,
   title,
   requestResize,
+  loading = 'lazy',
   ...rest
 }) {
   const iframeRef = useRef(null);
@@ -42,7 +43,7 @@ export function Instagram({
     const messageHandler = (event) =>
       handleMessage(
         event,
-        iframeRef,
+        iframeRef.current,
         requestResize,
         setHeightStyle,
         setOpacity
@@ -71,7 +72,7 @@ export function Instagram({
         frameborder="0"
         allowtransparency
         title={title}
-        loading="lazy"
+        loading={loading}
         style={{
           width: '100%',
           height: '100%',
@@ -85,22 +86,23 @@ export function Instagram({
 
 /**
  * @param {Event} event
- * @param {Object} iframeRef
+ * @param {Object} iframe
  * @param {function(number):*|undefined} requestResize
  * @param {function(Object)} setHeightStyle
  * @param {function(number)} setOpacity
  * @return {undefined}
+ * @visibleForTesting
  */
 export function handleMessage(
   event,
-  iframeRef,
+  iframe,
   requestResize,
   setHeightStyle,
   setOpacity
 ) {
   if (
     event.origin != 'https://www.instagram.com' ||
-    event.source != iframeRef.current.contentWindow
+    event.source != iframe.contentWindow
   ) {
     return;
   }

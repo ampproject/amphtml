@@ -77,6 +77,8 @@ describes.realWin(
     });
 
     it("Container's height is changed", async () => {
+      // With no Instagram server connection, the height is set to 0/null.
+      // Either way, the height shouldn't equal initialHeight.
       const initialHeight = 300;
       element = win.document.createElement('amp-instagram');
       element.setAttribute('data-shortcode', 'B8QaZW4AQY_');
