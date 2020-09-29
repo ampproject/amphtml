@@ -38,17 +38,17 @@ The amp-story-interactive component provides a set of experiences, such as quizz
 <div style="width:32%;display:inline-block"><amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/results-art.png" layout="responsive" width="200" height="350"/></div>
 </div>
 
-## Interactive experiences
+## Usage
 
-The amp-story-interactive extension encompasses a set of interactive experiences. Specify an interactive experience by defining one of the elements below. For best results, only use one element per amp-story-page.
+The amp-story-interactive component encompasses a set of interactive experiences. Specify an interactive experience by defining one of the elements below. For best results, only use one element per amp-story-page.
 
-If you want to see all the components in action, check out the [example story](/documentation/examples/components/amp-story-interactive-poll/story#page=title-components)
+If you want to see all the components in action, check out the [example story](https://amp.dev/documentation/examples/components/amp-story-interactive-poll/story#page=title-components)
 
 ### amp-story-interactive-binary-poll
 
-The amp-story-interactive-binary-poll element provides a two option voting user interface. Users may select one of two valid options. When selected, the highlighted option fills the container and displays the total percentage of votes.
+The `amp-story-interactive-binary-poll` element provides a two option voting user interface. Users may select one of two valid options. When selected, the highlighted option fills the container and displays the total percentage of votes.
 
-Is well suited to be used without amp-story-interactive-results, and can optionally have a prompt.
+Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
 <amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="intrinsic" width="400" height="230">
 
@@ -67,9 +67,9 @@ Is well suited to be used without amp-story-interactive-results, and can optiona
 
 ### amp-story-interactive-poll
 
-The amp-story-interactive-poll element provides a voting experience with 2-4 options displayed vertically, where all options are valid. When selected, each option displays the total percentage of votes.
+The `amp-story-interactive-poll` element provides a voting experience with 2-4 options displayed vertically, where all options are valid. When selected, each option displays the total percentage of votes.
 
-Can be paired up with amp-story-interactive-results to display different categories based on the answers to polls, but can be used independently as well. It is encouraged to add a prompt for extra context.
+Display different categories based on user poll answers by pairing `amp-story-interactive-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
 
 <amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
 
@@ -88,9 +88,9 @@ Can be paired up with amp-story-interactive-results to display different categor
 
 ### amp-story-interactive-quiz
 
-The amp-story-interactive-quiz element provides a guessing experience with 2-4 options, one of which is correct. The option selected gets highlighted with green if correct, and red if not; and the percentages are displayed on the options according to the percentages of votes.
+The `amp-story-interactive-quiz` element provides a guessing experience with 2-4 options, one of which is correct. It displays the voting percentages after the user makes a selection. The user selection is green if correct and red if incorrect.
 
-Can be paired up with amp-story-interactive-results to display a score based on the correctness of the answers to quizzes, but can be used independently as well. It is encouraged to add a prompt for extra context.
+Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
 
 <amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
 
@@ -108,9 +108,7 @@ Can be paired up with amp-story-interactive-results to display a score based on 
 
 ### amp-story-interactive-results
 
-The amp-story-interactive-results element provides an interface to display a custom state depending on the options selected on the previous pages of a story.
-Requires polls or quizzes in previous pages to feed into the state of the element, and the state will be calculated according to either the quizzes (if thresholds are specified) or the polls (if only categories are specified) that the user answered.
-Each category can specify an image, title and description that will be shown when the component selects that category for the user.
+The `amp-story-interactive-result` element displays a customized state defined by the user's selection from previous polls or quizzes. This element requires use of a poll or quiz from previous pages to calculate an answer-based state. Each result state uses a category that may include an image, title and description to display to the user.
 
 <amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
 
@@ -127,11 +125,11 @@ Each category can specify an image, title and description that will be shown whe
 
 ## Attributes
 
-The components have a shared API language for customizing their options. This makes it easier to port the configuration steps across all the interactive components.
+The interactive experience elements from `amp-story-interactive` share an API language for customizing options.
 
 ### id (required for binary-poll, poll, quiz)
 
-Identifies the interactive component, and is used to compose the interactiveId that is sent to the backend. Should be unique for each component in the story.
+Element ID that identifies the interactive component in the story, and is used to compose the [`interactiveId`](#interactiveId) that is sent to the backend. Should be unique for each component in the story.
 
 ### endpoint (required for binary-poll, poll, quiz)
 
@@ -176,7 +174,7 @@ On the results component, it is used as a lower boundary for the category when l
 All selectable interactive components (not results) show the percentage of users that selected each option. This data is aggregated on a backend specified with the `endpoint` attribute.
 To fetch the data for an interactive component, the necessary fields are:
 
-- `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
+- `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`<div id="interactiveId"></div>
 - `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
 - `endpoint`: the attribute `element.getAttribute("endpoint")`
 - `ampId`: client ID that identifies the session, optional
@@ -219,7 +217,11 @@ Before setting up a backend, consider if the already existing backends satisfy y
 
 ## Styling
 
-If you want to see all the theming options in action, check out the [example story](/documentation/examples/components/amp-story-interactive-poll/story#page=title-themes)
+See the [example story](https://amp.dev/documentation/examples/components/amp-story-interactive-poll/story#page=title-themes) for a demonstration of available amp-story-interactive experiences.
+
+[tip type="read-on"]
+Check this [Codepen collection](https://codepen.io/collection/DEGRLE) to play with the components and styles.
+[/tip]
 
 ### CSS Variables
 
@@ -272,12 +274,12 @@ For a live demo, check out the [binary-poll](https://codepen.io/mszylkowski/pen/
 
 ## Animations
 
-The designs provide a subtle animation that enhances the interactivity aspect of the component, and are also animated when an option is selected to show the aggregate data.
-To add entering animations, [amp-story animations](https://amp.dev/documentation/components/amp-story/?format=stories#animation-attributes) can be added to all components.
+The designs provide a subtle animation on page-enter that enhances the interactivity aspect of the component. Transitioning animations also triggered when an option is selected to show the aggregate data.
+To add entering animations, [amp-story animations](https://amp.dev/documentation/components/amp-story/?format=stories#animation-attributes) `animate-in` attributes can be added to all elements.
 
 ## Analytics
 
-The component comes with support for [amp-analytics](https://amp.dev/documentation/components/amp-analytics/) events out of the box with the event `story-interactive`, and will report when an option is selected:
+The `amp-story-interactive` component elements support [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics/). Report a selected option by adding the `story-interactive` event to your configuration:
 
 - `storyInteractiveId`: the element id
 - `storyInteractiveResponse`: the option selected
@@ -304,7 +306,3 @@ The component comes with support for [amp-analytics](https://amp.dev/documentati
 ## Validation
 
 See validation rules in [amp-story-interactive validator](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story-interactive/validator-amp-story-interactive.protoascii).
-
-## References
-
-Check this [Codepen collection](https://codepen.io/collection/DEGRLE) to play with the components and styles.
