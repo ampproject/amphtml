@@ -94,8 +94,6 @@ describe('parse_url', () => {
     const url = new parse_url.URL(urlString);
     assertStrictEqual(true, url.hasProtocol);
     assertStrictEqual('whatsapp', url.protocol);
-    assertStrictEqual(
-        'i have no idea what this should contain', url.schemeSpecificPart);
   });
 
   it('parses basic login', () => {
