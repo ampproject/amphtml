@@ -31,6 +31,7 @@ import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
+import {isLayoutSizeDefined} from '../layout';
 import {startsWith} from '../string';
 
 /**
@@ -175,6 +176,15 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @return {!JsonObject|undefined}
    */
   init() {}
+
+  /** @override */
+  isLayoutSupported(layout) {
+    const Ctor = this.constructor;
+    if (Ctor['layoutSizeDefined']) {
+      return isLayoutSizeDefined(layout);
+    }
+    return super.isLayoutSupported(layout);
+  }
 
   /** @override */
   buildCallback() {
@@ -542,6 +552,13 @@ export class PreactBaseElement extends AMP.BaseElement {
 // Ideally, these would be Static Class Fields. But Closure can't even.
 
 /**
+ * An experiment required for this component.
+ *
+ * @protected {string}
+ */
+PreactBaseElement['experiment'] = '';
+
+/**
  * Override to provide the Component definition.
  *
  * @protected {!PreactDef.FunctionalComponent}
@@ -571,7 +588,8 @@ PreactBaseElement['loadable'] = false;
 /**
  * An override to specify that the component requires `layoutSizeDefined`.
  * This typically means that the element's `isLayoutSupported()` is
- * implemented via `isLayoutSizeDefined()`.
+ * implemented via `isLayoutSizeDefined()`, and this is how the default
+ * `isLayoutSupported()` is implemented when this flag is set.
  *
  * @protected {string}
  */
@@ -693,7 +711,6 @@ function collectProps(Ctor, element, ref, defaultProps) {
 
   // Common styles.
   if (layoutSizeDefined) {
-    props['containSize'] = true;
     if (usesShadowDom(Ctor)) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
