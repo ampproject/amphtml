@@ -40,3 +40,12 @@ export function isValidScript(node: PostHTML.Node): node is ScriptNode {
   const src = new URL(attrs.src || '');
   return src.origin === VALID_CDN_ORIGIN && extname(src.pathname) === '.js';
 }
+
+export function isJsonScript(node: PostHTML.Node): boolean {
+  if (node.tag !== 'script') {
+    return false;
+  }
+  const attrs = node.attrs || {};
+  const type = attrs.type || '';
+  return type.toLowerCase() === 'application/json';
+}
