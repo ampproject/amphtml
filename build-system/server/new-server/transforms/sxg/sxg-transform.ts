@@ -19,6 +19,30 @@ import {URL} from 'url';
 import {isJsonScript, isValidScript} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
 
+function sxgTransform(node: PostHTML.Node, options: OptionSet = {}): PostHTML.Node {
+  // Make sure that isJsonScript is used before `isValidScript`. We bail out
+  // early if the ScriptNode is of type="application/json" since it wouldn't
+  // have any src url to modify.
+  if (isJsonScript(node)) {
+    return node;
+  }
+
+  if (!isValidScript(node)) {
+    return node;
+  }
+
+  if (options.compiled) {
+    const src = node.attrs.src;
+    node.attrs.src = src.replace('.js', '.sxg.js');
+  } else {
+    const url = new URL(node.attrs.src);
+    url.searchParams.append('f', 'sxg');
+    node.attrs.src = url.toString();
+  }
+
+  return node;
+}
+
 /**
  * Returns a function that will transform script node sources into their sxg counterparts.
  * @param options
@@ -26,27 +50,7 @@ import {OptionSet} from '../utilities/option-set';
 export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node) {
     tree.match({tag: 'script'}, (script) => {
-      // Make sure that isJsonScript is used before `isValidScript`. We bail out
-      // early if the ScriptNofe is of type="application/json" since it wouldn't
-      // have any src url to modify.
-      if (isJsonScript(script)) {
-        return script;
-      }
-
-      if (!isValidScript(script)) {
-        return script;
-      }
-
-      if (options.compiled) {
-        const src = script.attrs.src;
-        script.attrs.src = src.replace('.js', '.sxg.js');
-      } else {
-        const url = new URL(script.attrs.src);
-        url.searchParams.append('f', 'sxg');
-        script.attrs.src = url.toString();
-      }
-
-      return script;
+      return sxgTransform(script, options);
     });
   }
 }
