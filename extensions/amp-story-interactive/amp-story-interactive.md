@@ -146,7 +146,7 @@ Results and binary-poll elements don't support shadow.
 
 ### prompt-text (optional)
 
-Adds a prompt on top of the component, useful for writing the question to a quiz or poll. Also used to write a prompt to the results component before the category title (highly encouraged).
+Adds a prompt to the top of the component. Use `prompt-text` to write the poll/quiz question and clarify results in the `amp-story-interactive-result` element. 
 
 ### prompt-size (optional for binary-poll, poll, quiz)
 
