@@ -20,8 +20,8 @@ const {red, cyan} = require('ansi-colors');
 
 /**
  * @fileoverview
- * This script kicks off the unit and integration tests on Linux and Mac OS.
- * This is run on Github Actions CI stage = Linux | Mac OS.
+ * This script kicks off the unit and integration tests on Linux, Mac OS, and
+ * Windows. This is run on Github Actions CI stage = Cross-Browser Tests.
  */
 
 const {
@@ -49,7 +49,11 @@ async function main() {
       timedExecOrDie('gulp unit --nobuild --safari');
       timedExecOrDie('gulp integration --nobuild --compiled --safari');
       break;
-    // TODO(rsimha, #28208): Build on Windows with native closure compiler.
+    case 'win32':
+      timedExecOrDie('gulp unit --nobuild --headless --edge');
+      timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
+      timedExecOrDie('gulp integration --nobuild --compiled --ie');
+      break;
     default:
       log(
         red('ERROR:'),

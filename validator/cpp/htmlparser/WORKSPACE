@@ -44,5 +44,5 @@ protobuf_deps()
 
 local_repository(
     name = "validator",
-    path = "../",
+    path = "../../",
 )

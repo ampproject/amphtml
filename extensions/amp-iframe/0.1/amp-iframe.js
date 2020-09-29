@@ -16,8 +16,9 @@
 
 import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
 import {ActionTrust} from '../../../src/action-constants';
-import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
+import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
@@ -25,12 +26,14 @@ import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {endsWith, startsWith} from '../../../src/string';
 import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
+import {
   isAdLike,
-  isPausable,
   listenFor,
   looksLikeTrackingIframe,
-  makePausable,
-  setPaused,
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
@@ -96,7 +99,7 @@ export class AmpIframe extends AMP.BaseElement {
     /** @private {boolean} */
     this.isResizable_ = false;
 
-    /** @private {?IntersectionObserverHostApi} */
+    /** @private {?IntersectionObserver3pHost} */
     this.intersectionObserverHostApi_ = null;
 
     /** @private {string} */
@@ -430,16 +433,10 @@ export class AmpIframe extends AMP.BaseElement {
 
     setSandbox(this.element, iframe, this.sandbox_);
 
-    // If "pausable-iframe" enabled, try to make the iframe pausable. It doesn't
-    // matter here whether this will succeed or not.
-    if (isExperimentOn(this.win, 'pausable-iframe')) {
-      makePausable(devAssert(this.iframe_));
-    }
-
     iframe.src = this.iframeSrc;
 
     if (!this.isTrackingFrame_) {
-      this.intersectionObserverHostApi_ = new IntersectionObserverHostApi(
+      this.intersectionObserverHostApi_ = new IntersectionObserver3pHost(
         this,
         iframe
       );
@@ -483,6 +480,10 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.isClickToPlay_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
+
+    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
+      this.sendConsentData_(source, origin);
+    });
 
     this.container_.appendChild(iframe);
 
@@ -531,35 +532,84 @@ export class AmpIframe extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  unlayoutOnPause() {
-    return !this.isPausable_();
-  }
+  /**
+   * Requests consent data from consent module
+   * and forwards information to iframe
+   * @param {Window} source
+   * @param {string} origin
+   * @private
+   */
+  sendConsentData_(source, origin) {
+    const consentPolicyId = super.getConsentPolicy() || 'default';
+    const consentStringPromise = this.getConsentString_(consentPolicyId);
+    const metadataPromise = this.getConsentMetadata_(consentPolicyId);
+    const consentPolicyStatePromise = this.getConsentPolicyState_(
+      consentPolicyId
+    );
 
-  /** @override  */
-  pauseCallback() {
-    if (this.isPausable_()) {
-      setPaused(devAssert(this.iframe_), true);
-    }
-  }
-
-  /** @override  */
-  resumeCallback() {
-    if (this.isPausable_()) {
-      setPaused(devAssert(this.iframe_), false);
-    }
+    Promise.all([
+      metadataPromise,
+      consentStringPromise,
+      consentPolicyStatePromise,
+    ]).then((consents) => {
+      this.sendConsentDataToIframe_(
+        source,
+        origin,
+        dict({
+          'sentinel': 'amp',
+          'type': MessageType.CONSENT_DATA,
+          'consentMetadata': consents[0],
+          'consentString': consents[1],
+          'consentPolicyState': consents[2],
+        })
+      );
+    });
   }
 
   /**
-   * @return {boolean}
+   * Send consent data to iframe
+   * @param {Window} source
+   * @param {string} origin
+   * @param {JsonObject} data
    * @private
    */
-  isPausable_() {
-    return (
-      isExperimentOn(this.win, 'pausable-iframe') &&
-      !!this.iframe_ &&
-      isPausable(this.iframe_)
-    );
+  sendConsentDataToIframe_(source, origin, data) {
+    source./*OK*/ postMessage(data, origin);
+  }
+
+  /**
+   * Get the consent string
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentString_(consentPolicyId = 'default') {
+    return getConsentPolicyInfo(this.element, consentPolicyId);
+  }
+
+  /**
+   * Get the consent metadata
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentMetadata_(consentPolicyId = 'default') {
+    return getConsentMetadata(this.element, consentPolicyId);
+  }
+
+  /**
+   * Get the consent policy state
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentPolicyState_(consentPolicyId = 'default') {
+    return getConsentPolicyState(this.element, consentPolicyId);
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
   }
 
   /**
@@ -716,6 +766,11 @@ export class AmpIframe extends AMP.BaseElement {
           if (newWidth !== undefined) {
             this.element.setAttribute('width', newWidth);
           }
+          this.element.overflowCallback(
+            /* overflown */ false,
+            newHeight,
+            newWidth
+          );
         },
         () => {}
       );

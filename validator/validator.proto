@@ -524,9 +524,11 @@ message HtmlFormat {
     AMP = 1;
     AMP4ADS = 2;
     AMP4EMAIL = 3;
-    ACTIONS = 5;       // Deprecated, do not use. Removal issue: b/162870645
     EXPERIMENTAL = 4;  // Currently unused
   }
+
+  // Deprecated fields, do not reuse.
+  // reserved 5;
 }
 
 // Tags that are not covered by at least one of these specs are disallowed.
@@ -849,7 +851,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 118
+  // NEXT AVAILABLE TAG: 119
   enum Code {
     UNKNOWN_CODE = 0;
     INVALID_DOCTYPE_HTML = 111;
@@ -884,6 +886,7 @@ message ValidationError {
     STYLESHEET_TOO_LONG = 50;
     STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
     INLINE_STYLE_TOO_LONG = 103;
+    INLINE_SCRIPT_TOO_LONG = 118;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_DENYLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;

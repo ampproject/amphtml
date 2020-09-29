@@ -15,28 +15,35 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import {withAmp} from 'storybook-addon-amp';
+import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 
-// eslint-disable-next-line
-storiesOf('amp-base-carousel', module)
-  .addDecorator(withKnobs)
-  .addDecorator(withA11y)
-  .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-base-carousel', version: '1.0'}]})
-  .add('default', () => {
-    return (
-      <amp-base-carousel width="440" height="225">
-        {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
-          <amp-layout width="440" height="225">
-            <svg viewBox="0 0 440 225">
-              <rect style={{fill: color}} width="440" height="225" />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-          </amp-layout>
-        ))}
-      </amp-base-carousel>
-    );
-  });
+export default {
+  title: 'amp-base-carousel',
+  decorators: [withKnobs, withA11y, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-base-carousel', version: '1.0'}],
+    experiments: ['amp-base-carousel-bento'],
+  },
+};
+
+export const Default = () => {
+  return (
+    <amp-base-carousel width="440" height="225">
+      {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
+        <amp-layout width="440" height="225">
+          <svg viewBox="0 0 440 225">
+            <rect style={{fill: color}} width="440" height="225" />
+            Sorry, your browser does not support inline SVG.
+          </svg>
+        </amp-layout>
+      ))}
+    </amp-base-carousel>
+  );
+};
+
+Default.story = {
+  name: 'default',
+};

@@ -216,52 +216,62 @@ export const presets = {
   },
   'drop': {
     duration: 1600,
+    easing: `linear`,
     keyframes(dimensions) {
       const maxBounceHeight = Math.max(
         160,
         dimensions.targetY + dimensions.targetHeight
       );
-
-      // addapted from https://easings.net/#easeOutBounce
       return [
         {
-          offset: 0,
-          transform: `translateY(${px((1 - 0) * -maxBounceHeight)})`,
+          offset: 0.0,
+          transform: `translateY(${px(Number(-maxBounceHeight))})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
         },
         {
-          offset: 0.35,
-          transform: `translateY(${px((1 - 0.9801) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
+          offset: 0.29,
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
         },
         {
           offset: 0.45,
-          transform: `translateY(${px((1 - 0.7502) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
+          transform: `translateY(${px(-maxBounceHeight * 0.2812)})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
         },
         {
-          offset: 0.75,
-          transform: `translateY(${px((1 - 0.9837) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
+          offset: 0.61,
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
         },
         {
-          offset: 0.82,
-          transform: `translateY(${px((1 - 0.9375) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
+          offset: 0.71,
+          transform: `translateY(${px(-maxBounceHeight * 0.0956)})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
+        },
+        {
+          offset: 0.8,
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
+        },
+        {
+          offset: 0.85,
+          transform: `translateY(${px(-maxBounceHeight * 0.0359)})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
         },
         {
           offset: 0.92,
-          transform: `translateY(${px((1 - 0.9934) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
         },
         {
           offset: 0.96,
-          transform: `translateY(${px((1 - 0.9846) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
+          transform: `translateY(${px(-maxBounceHeight * 0.0156)})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
         },
         {
           offset: 1,
           transform: `translateY(0)`,
-          easing: 'cubic-bezier(0, 0.3, 0.3, 1)',
+          easing: 'cubic-bezier(0, 0, .5, 1)',
         },
       ];
     },

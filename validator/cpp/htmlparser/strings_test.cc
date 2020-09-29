@@ -506,7 +506,152 @@ TEST(Utf8UtilTest, RoundTripsAndLengths) {
   EXPECT_EQ(12, amped.size());
   std::vector<char32_t> amped_codes =
       htmlparser::Strings::Utf8ToCodepoints(amped);
-  EXPECT_EQ(10, amped_codes.size());  // oh look there were multibyte chars.
+  EXPECT_EQ(10, amped_codes.size());
   EXPECT_EQ(amped,
             htmlparser::Strings::CodepointsToUtf8String(amped_codes));
+
+  // Checks multi-byte sequences where one of the byte is 0x80.
+  // 0x80 is a special value in multi bytes sequence. In a multi byte sequence
+  // only the last 6 bits are computed. The first two bits are always 0b10.
+  // So if any byte in sequence is null value, its encoded value is 0x80 that
+  // is 010xxxxxx where all x are zero. So 0b10000000 = 128 = 0x80.
+  // Following tests ensures util decodes 0x80 byte correctly and do not treat
+  // the decoded 0th value as null byte.
+  //
+  // Second byte 0x80 in a two byte sequence.
+  std::string two_bytes_seq_second_byte_zero = "Ā";   // \xc4\x80
+  auto decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      two_bytes_seq_second_byte_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xc4;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xc4, (*decoded_bytes >> 6) | 0xc0);
+  // Second byte 0x80;
+  EXPECT_EQ(0x80, (*decoded_bytes & 0x3f) | 0x80);
+  // Encode the bytes again.
+  EXPECT_EQ("Ā", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
+
+  // Second byte 0x80 in a three byte sequence.
+  std::string three_bytes_seq_second_byte_zero = "›";
+  decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      three_bytes_seq_second_byte_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xe2;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xe2, (*decoded_bytes >> 12) | 0xe0);
+  // Second byte 0x80;
+  // 0b00000000xxxxxxxx0000000000000000
+  EXPECT_EQ(0x80, ((*decoded_bytes >> 6) & 0x3f) | 0x80);
+  // Third byte 0xba;
+  // 0b0000000000000000xxxxxxxx00000000
+  EXPECT_EQ(0xba, (*decoded_bytes & 0x3f) | 0x80);
+  // Fourth byte is zero for three bytes sequence.
+  // 0b000000000000000000000000xxxxxxxx
+  EXPECT_EQ(0x00, *decoded_bytes & 0xffff0000);
+  // Encode the bytes again.
+  EXPECT_EQ("›", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
+
+  // Third byte 0x80 in a four byte sequence.
+  std::string four_bytes_seq_third_byte_zero = "𒀢";  // \xf0\x92\x80\xa2
+  decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      four_bytes_seq_third_byte_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xf0;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xf0, (*decoded_bytes >> 18) | 0xf0);
+  // Second byte 0x92;
+  // 0b00000000xxxxxxxx0000000000000000
+  EXPECT_EQ(0x92, ((*decoded_bytes >> 12) & 0x3f) | 0x80);
+  // Third byte 0xba;
+  // 0b0000000000000000xxxxxxxx00000000
+  EXPECT_EQ(0x80, ((*decoded_bytes >> 6) & 0x3f) | 0x80);
+  // Fourth byte 0xa2;
+  // 0b000000000000000000000000xxxxxxxx
+  EXPECT_EQ(0xa2, (*decoded_bytes & 0x3f) | 0x80);
+  // Encode the bytes again.
+  EXPECT_EQ("𒀢", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
+
+  // Last two decoded bytes are 0x80.
+  std::string four_bytes_seqlast_two_zero = "𒀀";  // \xf0\x92\x80\x80
+  decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      four_bytes_seqlast_two_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xf0;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xf0, (*decoded_bytes >> 18) | 0xf0);
+  // Second byte 0x92;
+  // 0b00000000xxxxxxxx0000000000000000
+  EXPECT_EQ(0x92, ((*decoded_bytes >> 12) & 0x3f) | 0x80);
+  // Third byte 0xba;
+  // 0b0000000000000000xxxxxxxx00000000
+  EXPECT_EQ(0x80, ((*decoded_bytes >> 6) & 0x3f) | 0x80);
+  // Fourth byte 0x80;
+  // 0b000000000000000000000000xxxxxxxx
+  EXPECT_EQ(0x80, (*decoded_bytes & 0x3f) | 0x80);
+  // Encode the bytes again.
+  EXPECT_EQ("𒀀", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
+
+  // Last byte is 0x80.
+  std::string four_bytes_seq_last_zero = "𒁀";  // \xf0\x92\x81\x80
+  decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      four_bytes_seq_last_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xf0;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xf0, (*decoded_bytes >> 18) | 0xf0);
+  // Second byte 0x92;
+  // 0b00000000xxxxxxxx0000000000000000
+  EXPECT_EQ(0x92, ((*decoded_bytes >> 12) & 0x3f) | 0x80);
+  // Third byte 0x81;
+  // 0b0000000000000000xxxxxxxx00000000
+  EXPECT_EQ(0x81, ((*decoded_bytes >> 6) & 0x3f) | 0x80);
+  // Fourth byte 0x80;
+  // 0b000000000000000000000000xxxxxxxx
+  EXPECT_EQ(0x80, (*decoded_bytes & 0x3f) | 0x80);
+  // Encode the bytes again.
+  EXPECT_EQ("𒁀", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
 }
+
+TEST(StringsTest, DecodePercentEncodedURLTest) {
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL(
+      "google.com%20%2F%20%3Fx%3Db").value(), "google.com / ?x=b");
+
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL(
+      "JavaScript_%d1%88%d0%B5%D0%BB%D0%BB%D1%8B%3a").value(),
+            "JavaScript_шеллы:");
+
+  // ASCII chars may also be encoded.
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL(
+      "%77%77w%2e%67o%6f%67%6c%65%2e%63%6f%6d%2f%3f%61%3d%62%3a%63"),
+            "www.google.com/?a=b:c");
+
+  // Percent character.
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL("90%25").value(),
+            "90%");
+
+  // Invalid encoding missing sequence byte (%88 after %d1).
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "JavaScript_%d1M%d0%B5%D0%BB%D0%BB%D1%8B%3a").has_value());
+
+  // Invalid encoding, sequence byte without initial byte.
+  // (%88 without %d1).
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "JavaScript_%88%d0%B5%D0%BB%D0%BB%D1%8B%3a").has_value());
+
+  // URI ends without completing the entire sequence. Checks code doesn't access
+  // uri.front() while it is empty.
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "JavaScript_%d1M%d0%B5%D0%BB%D0%BB%D1").has_value());
+
+  // Empty string.
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL("").value(), "");
+
+  // Any one byte char must be < 128.
+  // 0xff (255) char.
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "example-%FF.com").has_value());
+  // char code 128.
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "example-%80.com").has_value());
+}
+

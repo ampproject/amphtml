@@ -230,14 +230,17 @@ receive the intersection data.
 The following example shows an iframe `send-intersections` request:
 
 ```javascript
+function isAmpMessage(event, type) {
+  return (
+    event.source == window.parent &&
+    event.origin != window.location.origin &&
+    event.data &&
+    event.data.sentinel == 'amp' &&
+    event.data.type == type
+  );
+}
 window.addEventListener('message', function (event) {
-  if (
-    event.source != window.parent ||
-    event.origin == window.location.origin ||
-    !event.data ||
-    event.data.sentinel != 'amp' ||
-    event.data.type != 'intersection'
-  ) {
+  if (!isAmpMessage(event, 'intersection')) {
     return;
   }
   event.data.changes.forEach(function (change) {
@@ -246,9 +249,53 @@ window.addEventListener('message', function (event) {
 });
 ```
 
-The intersection message would be sent by the parent to the iframe when the
-iframe moves in or out of the viewport (or is partially visible), when the
-iframe is scrolled or resized.
+The intersection message would be sent by the parent to the iframe in the format of IntersectionObserver entry wheneve there is intersectionRatio change across thresholds [0, 0.05, 0.1, ... 0.9, 0.95, 1].
+
+## Iframe & Consent Data
+
+Iframes can send a `send-consent-data` message to receive consent data if a CMP is present on their parents page.
+
+_Note: In the following examples, we assume the script is in the created iframe, where `window.parent` is the top window. If the script lives in a nested iframe, change `window.parent` to the top AMP window._
+
+_Example: iframe `send-consent-data` request_
+
+```javascript
+window.parent.postMessage(
+  {
+    sentinel: 'amp',
+    type: 'send-consent-data',
+  },
+  '*'
+);
+```
+
+The iframe can receive the consent data response by listening to the `consent-data` message.
+
+**Please note:**
+
+- The `consent-data` response will only be sent once and won't update the iframe when the consent state changes (for example when the user decides to reject consent by using the post prompt ui)
+- When omitting `data-block-on-consent` the `default` policy is used and the iframe will be loaded immediately. The `consent-data` response may be delayed based on the selected policy. See [`amp-consent`](../amp-consent/amp-consent.md) for more information.
+
+_Example: iframe `send-consent-data` request_
+
+```javascript
+function isAmpMessage(event, type) {
+  return (
+    event.source == window.parent &&
+    event.origin != window.location.origin &&
+    event.data &&
+    event.data.sentinel == 'amp' &&
+    event.data.type == type
+  );
+}
+window.addEventListener('message', function (event) {
+  if (!isAmpMessage(event, 'consent-data')) {
+    return;
+  }
+  console.log(event.data.consentMetadata);
+  console.log(event.data.consentString);
+});
+```
 
 ## Attributes
 

@@ -33,6 +33,10 @@ amp-story-player a:not(:first-of-type) {
   visibility: hidden;
 }
 
+amp-story-player.i-amphtml-story-player-loaded a:first-of-type {
+  display: none;
+}
+
 amp-story-player::after {
   content: " ";
   position: absolute;

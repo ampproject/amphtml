@@ -53,6 +53,10 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ## Release Notes
 
+### 1.0.33
+
+- Update repository location.
+
 ### 1.0.32
 
 - Removal of AMP Actions format as it is deprecated.

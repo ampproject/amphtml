@@ -19,7 +19,7 @@ import {dict} from '../../../src/utils/object';
 /**
  * Get social share configurations by supported type.
  * @param  {string} type
- * @return {SocialShareDef.Config|undefined}
+ * @return {SocialShareConfigDef|undefined}
  */
 export function getSocialConfig(type) {
   return BUILTINS[type];
@@ -40,11 +40,18 @@ export function getSocialConfig(type) {
  *   bindings {?Array<string>} - Used for email, allows passing in an
  *     attribute that can be used in the endpoint, but not as a search param
  *
- * See social-share.types.js for typedef of this type.
+ * @typedef {{
+ *   shareEndpont: string,
+ *   defaultParams: Object<string, string>,
+ *   defaultColor: string,
+ *   defaultBackgroundColor: string,
+ *   bindings: (!Array<string>|undefined),
+ * }}
  */
+let SocialShareConfigDef;
 
 /**
- * @type {Object<string, SocialShareDef.Config>}
+ * @type {Object<string, SocialShareConfigDef>}
  */
 const BUILTINS = {
   'twitter': {
@@ -61,8 +68,8 @@ const BUILTINS = {
     defaultParams: dict({
       'href': 'CANONICAL_URL',
     }),
-    defaultColor: 'ffffff',
-    defaultBackgroundColor: '32529f',
+    defaultColor: '1877f2',
+    defaultBackgroundColor: 'ffffff',
   },
   'pinterest': {
     shareEndpoint: 'https://www.pinterest.com/pin/create/button/',
@@ -70,8 +77,8 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
       'description': 'TITLE',
     }),
-    defaultColor: 'ffffff',
-    defaultBackgroundColor: 'e60023',
+    defaultColor: 'e60023',
+    defaultBackgroundColor: 'ffffff',
   },
   'linkedin': {
     shareEndpoint: 'https://www.linkedin.com/shareArticle',
@@ -80,7 +87,7 @@ const BUILTINS = {
       'mini': 'true',
     }),
     'defaultColor': 'ffffff',
-    'defaultBackgroundColor': '0077b5',
+    'defaultBackgroundColor': '0a66c2',
   },
   'email': {
     shareEndpoint: 'mailto:RECIPIENT',
@@ -100,7 +107,7 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
     }),
     defaultColor: 'ffffff',
-    defaultBackgroundColor: '3c5a77',
+    defaultBackgroundColor: '001935',
   },
   'whatsapp': {
     shareEndpoint: 'https://api.whatsapp.com/send',
@@ -117,7 +124,7 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
     }),
     defaultColor: 'ffffff',
-    defaultBackgroundColor: '52b448',
+    defaultBackgroundColor: '00b900',
   },
   'sms': {
     shareEndpoint: 'sms:',
@@ -125,7 +132,7 @@ const BUILTINS = {
       'body': 'TITLE - CANONICAL_URL',
     }),
     defaultColor: 'ffffff',
-    defaultBackgroundColor: 'ca2b63',
+    defaultBackgroundColor: '000000',
   },
   'system': {
     shareEndpoint: 'navigator-share:',

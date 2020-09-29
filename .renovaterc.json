@@ -10,7 +10,7 @@
   "timezone": "America/Los_Angeles",
   "schedule": "after 12am every weekday",
 
-  "masterIssue": true,
+  "dependencyDashboard": true,
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
   "separateMinorPatch": true,
   "prBodyNotes": [
@@ -80,6 +80,16 @@
       "major": {
         "groupName": null,
         "managerBranchPrefix": "linting-"
+      }
+    },
+
+    {
+      "packagePatterns": ["\\bbabel"],
+
+      "groupName": "babel devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "babel-"
       }
     },
 

@@ -32,13 +32,12 @@ import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
-import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {poll} from '../../../../testing/iframe';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
+import {waitFor} from '../../../../testing/test-helper';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
@@ -96,17 +95,6 @@ describes.realWin(
         eventObj.initEvent(eventType, true, true);
       }
       return eventObj;
-    }
-
-    function waitFor(callback, errorMessage) {
-      return poll(
-        errorMessage,
-        () => {
-          return callback();
-        },
-        undefined /** opt_onError */,
-        200 /** opt_timeout */
-      );
     }
 
     beforeEach(() => {
@@ -297,18 +285,14 @@ describes.realWin(
       ).to.be.equal('hidden');
     });
 
-    it('builds and attaches pagination buttons ', async () => {
+    it('checks if pagination buttons exist ', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
 
       await story.layoutCallback();
-      const paginationButtonsStub = {attach: env.sandbox.spy()};
-      env.sandbox
-        .stub(PaginationButtons, 'create')
-        .returns(paginationButtonsStub);
-      story.buildPaginationButtonsForTesting();
-      expect(paginationButtonsStub.attach).to.have.been.calledWith(
-        story.element
-      );
+      expect(
+        story.element.querySelectorAll('.i-amphtml-story-button-container')
+          .length
+      ).to.equal(2);
     });
 
     it.skip('toggles `i-amphtml-story-landscape` based on height and width', () => {

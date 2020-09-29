@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.116 */
+/** Version: 0.1.22.121 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -643,7 +643,7 @@ class AnalyticsRequest {
 /**
  * @implements {Message}
  */
-class EntitlementsPingbackRequest {
+class EntitlementJwt {
   /**
    * @param {!Array<*>=} data
    * @param {boolean=} includesLabel
@@ -652,47 +652,101 @@ class EntitlementsPingbackRequest {
     const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.hashedCanonicalUrl_ = data[base] == null ? null : data[base];
+    this.jwt_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.publisherUserId_ = data[1 + base] == null ? null : data[1 + base];
+    this.source_ = data[1 + base] == null ? null : data[1 + base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getJwt() {
+    return this.jwt_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setJwt(value) {
+    this.jwt_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSource() {
+    return this.source_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSource(value) {
+    this.source_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.jwt_, // field 1 - jwt
+        this.source_, // field 2 - source
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EntitlementJwt';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EntitlementsRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?EntitlementJwt} */
+    this.usedEntitlement_ =
+      data[base] == null || data[base] == undefined
+        ? null
+        : new EntitlementJwt(data[base], includesLabel);
 
     /** @private {?Timestamp} */
     this.clientEventTime_ =
-      data[2 + base] == null || data[2 + base] == undefined
+      data[1 + base] == null || data[1 + base] == undefined
         ? null
-        : new Timestamp(data[2 + base], includesLabel);
-
-    /** @private {?string} */
-    this.signedMeter_ = data[3 + base] == null ? null : data[3 + base];
+        : new Timestamp(data[1 + base], includesLabel);
   }
 
   /**
-   * @return {?string}
+   * @return {?EntitlementJwt}
    */
-  getHashedCanonicalUrl() {
-    return this.hashedCanonicalUrl_;
+  getUsedEntitlement() {
+    return this.usedEntitlement_;
   }
 
   /**
-   * @param {string} value
+   * @param {!EntitlementJwt} value
    */
-  setHashedCanonicalUrl(value) {
-    this.hashedCanonicalUrl_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getPublisherUserId() {
-    return this.publisherUserId_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setPublisherUserId(value) {
-    this.publisherUserId_ = value;
+  setUsedEntitlement(value) {
+    this.usedEntitlement_ = value;
   }
 
   /**
@@ -710,31 +764,14 @@ class EntitlementsPingbackRequest {
   }
 
   /**
-   * @return {?string}
-   */
-  getSignedMeter() {
-    return this.signedMeter_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setSignedMeter(value) {
-    this.signedMeter_ = value;
-  }
-
-  /**
    * @param {boolean} includeLabel
    * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.hashedCanonicalUrl_,  // field 1 - hashed_canonical_url
-      this.publisherUserId_,     // field 2 - publisher_user_id
-      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) :
-                              [],  // field 3 - client_event_time
-      this.signedMeter_,           // field 4 - signed_meter
+        this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) : [], // field 1 - used_entitlement
+        this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) : [], // field 2 - client_event_time
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -747,7 +784,7 @@ class EntitlementsPingbackRequest {
    * @override
    */
   label() {
-    return 'EntitlementsPingbackRequest';
+    return 'EntitlementsRequest';
   }
 }
 
@@ -1485,7 +1522,8 @@ const PROTO_MAP = {
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
-  'EntitlementsPingbackRequest': EntitlementsPingbackRequest,
+  'EntitlementJwt': EntitlementJwt,
+  'EntitlementsRequest': EntitlementsRequest,
   'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
   'FinishedLoggingResponse': FinishedLoggingResponse,
@@ -1576,7 +1614,7 @@ class ClientEventManagerApi {
    * invoked unless the event is filtered.
    * @param {!function(!ClientEvent)} listener
    */
-  registerEventListener(listener) { }
+  registerEventListener(listener) {}
 
   /**
    * Register a filterer for events if you need to potentially prevent the
@@ -1585,7 +1623,7 @@ class ClientEventManagerApi {
    * event.
    * @param {!function(!ClientEvent):FilterResult} filterer
    */
-  registerEventFilterer(filterer) { }
+  registerEventFilterer(filterer) {}
 
   /**
    * Call this function to log an event.  It will immediately throw an error if
@@ -1594,7 +1632,7 @@ class ClientEventManagerApi {
    * listener asynchronously.
    * @param {!ClientEvent} event
    */
-  logEvent(event) { }
+  logEvent(event) {}
 }
 
 /**
@@ -1859,6 +1897,30 @@ function map(initial) {
 }
 
 /**
+ * Implements `Array.find()` method that's not yet available in all browsers.
+ *
+ * @param {?Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {?T}
+ * @template T
+ */
+function findInArray(array, predicate) {
+  if (!array) {
+    return null;
+  }
+  const len = array.length || 0;
+  if (len > 0) {
+    for (let i = 0; i < len; i++) {
+      const other = array[i];
+      if (predicate(other, i, array)) {
+        return other;
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2078,6 +2140,42 @@ function getUuid() {
 
 function getSwgTransactionId() {
   return getUuid() + '.swg';
+}
+
+/**
+ * Returns a string whose length matches the length of format.
+ * @param {string} str
+ * @param {string} format
+ * @return {string}
+ */
+function padString(str, format) {
+  return (format + str).slice(-format.length);
+}
+
+const PADDING = '00000000';
+function toHex(buffer) {
+  const hexCodes = [];
+  const view = new DataView(buffer);
+  for (let i = 0; i < view.byteLength; i += 4) {
+    // toString(16) will give the hex representation of the number without padding
+    const stringValue = view.getUint32(i).toString(16);
+    hexCodes.push(padString(stringValue, PADDING));
+  }
+  return hexCodes.join('');
+}
+
+/**
+ * Returns a hexadecimal 128 character string that is the
+ * SHA-512 hash of the passed string.
+ * @param {string} stringToHash
+ * @return {!Promise<string>}
+ */
+function hash(stringToHash) {
+  const crypto = self.crypto || self.msCrypto;
+  const subtle = crypto.subtle;
+  return subtle
+    .digest('SHA-512', utf8EncodeSync(stringToHash))
+    .then((digest) => toHex(digest));
 }
 
 /**
@@ -4743,6 +4841,9 @@ class JwtHelper {
  * limitations under the License.
  */
 
+/** Source for Google-provided metering entitlements. */
+const GOOGLE_METERING_SOURCE = 'google:metering';
+
 /**
  * The holder of the entitlements for a service.
  */
@@ -4753,6 +4854,7 @@ class Entitlements {
    * @param {!Array<!Entitlement>} entitlements
    * @param {?string} currentProduct
    * @param {function(!Entitlements)} ackHandler
+   * @param {function(!Entitlements, ?Function=)} consumeHandler
    * @param {?boolean|undefined} isReadyToPay
    * @param {?string|undefined} decryptedDocumentKey
    */
@@ -4762,6 +4864,7 @@ class Entitlements {
     entitlements,
     currentProduct,
     ackHandler,
+    consumeHandler,
     isReadyToPay,
     decryptedDocumentKey
   ) {
@@ -4780,6 +4883,8 @@ class Entitlements {
     this.product_ = currentProduct;
     /** @private @const {function(!Entitlements)} */
     this.ackHandler_ = ackHandler;
+    /** @private @const {function(!Entitlements, ?Function=)} */
+    this.consumeHandler_ = consumeHandler;
   }
 
   /**
@@ -4789,9 +4894,10 @@ class Entitlements {
     return new Entitlements(
       this.service,
       this.raw,
-      this.entitlements.map(ent => ent.clone()),
+      this.entitlements.map((ent) => ent.clone()),
       this.product_,
       this.ackHandler_,
+      this.consumeHandler_,
       this.isReadyToPay,
       this.decryptedDocumentKey
     );
@@ -4803,9 +4909,34 @@ class Entitlements {
   json() {
     return {
       'service': this.service,
-      'entitlements': this.entitlements.map(item => item.json()),
+      'entitlements': this.entitlements.map((item) => item.json()),
       'isReadyToPay': this.isReadyToPay,
     };
+  }
+
+  /**
+   * Returns true if the current article is unlocked by a
+   * cacheable entitlement. Metering entitlements aren't cacheable,
+   * because each metering entitlement is meant to be used for one article.
+   * Subscription entitlements are cacheable, because subscription entitlements
+   * are meant to be used across multiple articles on a publication.
+   * @return {boolean}
+   */
+  enablesThisWithCacheableEntitlements() {
+    const entitlement = this.getEntitlementForThis();
+    return !!entitlement && entitlement.source !== GOOGLE_METERING_SOURCE;
+  }
+
+  /**
+   * Returns true if the current article is unlocked by a
+   * Google metering entitlement. These entitlements come
+   * from Google News Intiative's licensing program to support news.
+   * https://www.blog.google/outreach-initiatives/google-news-initiative/licensing-program-support-news-industry-/
+   * @return {boolean}
+   */
+  enablesThisWithGoogleMetering() {
+    const entitlement = this.getEntitlementForThis();
+    return !!entitlement && entitlement.source === GOOGLE_METERING_SOURCE;
   }
 
   /**
@@ -4859,22 +4990,42 @@ class Entitlements {
   /**
    * Returns the first matching entitlement for the specified product,
    * optionally also matching the specified source.
+   *
+   * Returns non-metering entitlements if possible, to avoid consuming
+   * metered reads unnecessarily.
+   *
    * @param {?string} product
    * @param {string=} source
    * @return {?Entitlement}
    */
   getEntitlementFor(product, source) {
-    if (product && this.entitlements.length > 0) {
-      for (let i = 0; i < this.entitlements.length; i++) {
-        if (
-          this.entitlements[i].enables(product) &&
-          (!source || source == this.entitlements[i].source)
-        ) {
-          return this.entitlements[i];
-        }
-      }
+    if (!product) {
+      return null;
     }
-    return null;
+
+    // Prefer subscription entitlements over metering entitlements.
+    // Metering entitlements are a limited resource. When a metering entitlement
+    // unlocks an article, that depletes the user's remaining "free reads".
+    // Subscription entitlements are *not* depleted when they unlock articles.
+    // They are essentially unlimited if the subscription remains valid.
+    // For this reason, subscription entitlements are preferred.
+    const entitlementsThatUnlockArticle = this.entitlements.filter(
+      (entitlement) =>
+        entitlement.enables(product) &&
+        (!source || source === entitlement.source)
+    );
+
+    const subscriptionEntitlement = findInArray(
+      entitlementsThatUnlockArticle,
+      (entitlement) => entitlement.source !== GOOGLE_METERING_SOURCE
+    );
+
+    const meteringEntitlement = findInArray(
+      entitlementsThatUnlockArticle,
+      (entitlement) => entitlement.source === GOOGLE_METERING_SOURCE
+    );
+
+    return subscriptionEntitlement || meteringEntitlement || null;
   }
 
   /**
@@ -4903,6 +5054,17 @@ class Entitlements {
    */
   ack() {
     this.ackHandler_(this);
+  }
+
+  /**
+   * A 3p site should call this method to consume a Google metering entitlement.
+   * When a metering entitlement is consumed, SwG shows the user a metering dialog.
+   * When the user closes the dialog, SwG depletes one of the user's remaining
+   * "free reads".
+   * @param {?Function=} onCloseDialog Called after the user closes the dialog.
+   */
+  consume(onCloseDialog) {
+    this.consumeHandler_(this, onCloseDialog);
   }
 }
 
@@ -4990,7 +5152,7 @@ class Entitlement {
     const jsonList = Array.isArray(json)
       ? /** @type {!Array<Object>} */ (json)
       : [json];
-    return jsonList.map(json => Entitlement.parseFromJson(json));
+    return jsonList.map((json) => Entitlement.parseFromJson(json));
   }
 
   /**
@@ -5001,12 +5163,10 @@ class Entitlement {
     if (this.source !== 'google') {
       return null;
     }
-    const sku = (
-        /** @type {?string} */ (getPropertyFromJsonString(
-            this.subscriptionToken,
-            'productId'
-        ) || null)
-    );
+    const sku = /** @type {?string} */ (getPropertyFromJsonString(
+      this.subscriptionToken,
+      'productId'
+    ) || null);
     if (!sku) {
       log_4('Unable to retrieve SKU from SwG subscription token');
     }
@@ -5030,11 +5190,9 @@ class Entitlement {
  * limitations under the License.
  */
 
-
 /**
  */
 class UserData {
-
   /**
    * @param {string} idToken
    * @param {!Object} data
@@ -5237,11 +5395,9 @@ class PurchaseData {
  * limitations under the License.
  */
 
-
 /**
  */
 class DeferredAccountCreationResponse {
-
   /**
    * @param {!Entitlements} entitlements
    * @param {!UserData} userData
@@ -5267,10 +5423,11 @@ class DeferredAccountCreationResponse {
    */
   clone() {
     return new DeferredAccountCreationResponse(
-        this.entitlements,
-        this.userData,
-        this.purchaseDataList,
-        this.completeHandler_);
+      this.entitlements,
+      this.userData,
+      this.purchaseDataList,
+      this.completeHandler_
+    );
   }
 
   /**
@@ -5280,7 +5437,7 @@ class DeferredAccountCreationResponse {
     return {
       'entitlements': this.entitlements.json(),
       'userData': this.userData.json(),
-      'purchaseDataList': this.purchaseDataList.map(pd => pd.json()),
+      'purchaseDataList': this.purchaseDataList.map((pd) => pd.json()),
       // TODO(dvoytenko): deprecate.
       'purchaseData': this.purchaseData.json(),
     };
@@ -5554,7 +5711,9 @@ const SubscriptionFlows = {
   COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
   SHOW_LOGIN_PROMPT: 'showLoginPrompt',
+  SHOW_METER_REGWALL: 'showMeterRegwall',
   SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
+  SHOW_METER_TOAST: 'showMeterToast',
 };
 
 /**
@@ -5856,7 +6015,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.116',
+    '_client': 'SwG 0.1.22.121',
   });
 }
 
@@ -6975,7 +7134,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.116',
+        '_client': 'SwG 0.1.22.121',
         'supportsEventManager': true,
       },
       args || {}
@@ -7824,7 +7983,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.116');
+    context.setClientVersion('SwG 0.1.22.121');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10233,6 +10392,109 @@ class DialogManager {
  * limitations under the License.
  */
 
+/** @enum {number}  */
+const MeterClientTypes = {
+  /** Meter client type for content licensed by Google. */
+  LICENSED_BY_GOOGLE: 1,
+};
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class MeterToastApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/metertoastiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
+      }),
+      /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Shows the user the metering toast.
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+    this.activityIframeView_.on(
+      ViewSubscriptionsResponse,
+      this.startNativeFlow_.bind(this)
+    );
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+
+  /**
+   * Sets a callback function to happen onCancel.
+   * @param {function()} onCancelCallback
+   */
+  setOnCancelCallback(onCancelCallback) {
+    this.activityIframeView_.onCancel(onCancelCallback);
+  }
+
+  /**
+   * @param {ViewSubscriptionsResponse} response
+   * @private
+   */
+  startNativeFlow_(response) {
+    if (response.getNative()) {
+      this.deps_.callbacks().triggerSubscribeRequest();
+    }
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /** @const {!Object<string, string|number>} */
 const toastImportantStyles = {
   'height': 0,
@@ -10388,6 +10650,33 @@ class Toast {
 }
 
 /**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {!number} millis
+ * @return {!Timestamp}
+ */
+function toTimestamp(millis) {
+  return new Timestamp(
+    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
+    false
+  );
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10483,20 +10772,29 @@ class EntitlementsManager {
   }
 
   /**
-   * @return {string}
-   * @private
-   */
-  getQueryString_() {
-    return this.win_.location.search;
-  }
-
-  /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    */
-  getEntitlements(encryptedDocumentKey) {
+  getEntitlements(params) {
+    // Remain backwards compatible by accepting
+    // `encryptedDocumentKey` string as a first param.
+    if (typeof params === 'string') {
+      // TODO: Delete the fallback if nobody needs it. Use a log to verify.
+      if (Date.now() > 1600289016959) {
+        // TODO: Remove the conditional check for this warning
+        // after the AMP extension is updated to pass an object.
+        log_4(
+          `[swg.js:getEntitlements]: If present, the first param of getEntitlements() should be an object of type GetEntitlementsParamsExternalDef.`
+        );
+      }
+
+      params = {
+        encryption: {encryptedDocumentKey: /**@type {string} */ (params)},
+      };
+    }
+
     if (!this.responsePromise_) {
-      this.responsePromise_ = this.getEntitlementsFlow_(encryptedDocumentKey);
+      this.responsePromise_ = this.getEntitlementsFlow_(params);
     }
     return this.responsePromise_.then((response) => {
       if (response.isReadyToPay != null) {
@@ -10525,25 +10823,49 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
-   * @return {!Promise<!Entitlements>}
-   * @private
+   * Sends a pingback that marks a metering entitlement as used.
+   * @param {!Entitlements} entitlements
    */
-  getEntitlementsFlow_(encryptedDocumentKey) {
-    return this.fetchEntitlementsWithCaching_(encryptedDocumentKey).then(
-      (entitlements) => {
-        this.onEntitlementsFetched_(entitlements);
-        return entitlements;
-      }
-    );
+  sendPingback_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
+      return;
+    }
+
+    const jwt = new EntitlementJwt();
+    jwt.setSource(entitlement.source);
+    jwt.setJwt(entitlement.subscriptionToken);
+
+    const message = new EntitlementsRequest();
+    message.setUsedEntitlement(jwt);
+    message.setClientEventTime(toTimestamp(Date.now()));
+
+    const url =
+      '/publication/' +
+      encodeURIComponent(this.publicationId_) +
+      '/entitlements';
+
+    this.fetcher_.sendPost(serviceUrl(url), message);
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetchEntitlementsWithCaching_(encryptedDocumentKey) {
+  getEntitlementsFlow_(params) {
+    return this.fetchEntitlementsWithCaching_(params).then((entitlements) => {
+      this.onEntitlementsFetched_(entitlements);
+      return entitlements;
+    });
+  }
+
+  /**
+   * @param {!GetEntitlementsParamsExternalDef=} params
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetchEntitlementsWithCaching_(params) {
     return Promise.all([
       this.storage_.get(ENTS_STORAGE_KEY),
       this.storage_.get(IS_READY_TO_PAY_STORAGE_KEY),
@@ -10551,7 +10873,8 @@ class EntitlementsManager {
       const raw = cachedValues[0];
       const irtp = cachedValues[1];
       // Try cache first.
-      if (raw && !encryptedDocumentKey) {
+      const needsDecryption = !!(params && params.encryption);
+      if (raw && !needsDecryption) {
         const cached = this.getValidJwtEntitlements_(
           raw,
           /* requireNonExpired */ true,
@@ -10564,9 +10887,9 @@ class EntitlementsManager {
         }
       }
       // If cache didn't match, perform fetch.
-      return this.fetchEntitlements_(encryptedDocumentKey).then((ents) => {
-        // If entitlements match the product, store them in cache.
-        if (ents && ents.enablesThis() && ents.raw) {
+      return this.fetchEntitlements_(params).then((ents) => {
+        // If the product is enabled by cacheable entitlements, store them in cache.
+        if (ents && ents.enablesThisWithCacheableEntitlements() && ents.raw) {
           this.storage_.set(ENTS_STORAGE_KEY, ents.raw);
         }
         return ents;
@@ -10575,17 +10898,17 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetchEntitlements_(encryptedDocumentKey) {
+  fetchEntitlements_(params) {
     // TODO(dvoytenko): Replace retries with consistent fetch.
     let positiveRetries = this.positiveRetries_;
     this.positiveRetries_ = 0;
     const attempt = () => {
       positiveRetries--;
-      return this.fetch_(encryptedDocumentKey).then((entitlements) => {
+      return this.fetch_(params).then((entitlements) => {
         if (entitlements.enablesThis() || positiveRetries <= 0) {
           return entitlements;
         }
@@ -10716,6 +11039,7 @@ class EntitlementsManager {
       Entitlement.parseListFromJson(json),
       this.pageConfig_.getProductId(),
       this.ack_.bind(this),
+      this.consume_.bind(this),
       isReadyToPay,
       decryptedDocumentKey
     );
@@ -10739,47 +11063,43 @@ class EntitlementsManager {
       .callbacks()
       .triggerEntitlementsResponse(Promise.resolve(entitlements));
 
-    // Show a toast if needed.
-    this.maybeShowToast_(entitlements);
-  }
-
-  /**
-   * @param {!Entitlements} entitlements
-   * @return {!Promise}
-   * @private
-   */
-  maybeShowToast_(entitlements) {
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
-      return Promise.resolve();
+      return;
     }
-    // Check if storage bit is set. It's only set by the `Entitlements.ack`
-    // method.
-    return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
-      if (value == '1') {
-        // Already shown;
-        return;
-      }
-      if (entitlement) {
-        this.showToast_(entitlement);
-      }
-    });
+
+    this.maybeShowToast_(entitlement);
   }
 
   /**
    * @param {!Entitlement} entitlement
+   * @return {!Promise}
    * @private
    */
-  showToast_(entitlement) {
-    const source = entitlement.source || 'google';
-    return new Toast(
-      this.deps_,
-      feUrl('/toastiframe'),
-      feArgs({
-        'publicationId': this.publicationId_,
-        'source': source,
-      })
-    ).open();
+  maybeShowToast_(entitlement) {
+    // Don't show toast for metering entitlements.
+    if (entitlement.source === GOOGLE_METERING_SOURCE) {
+      return Promise.resolve();
+    }
+
+    // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
+    return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
+      const toastWasShown = value === '1';
+      if (toastWasShown) {
+        return;
+      }
+
+      // Show toast.
+      const source = entitlement.source || 'google';
+      return new Toast(
+        this.deps_,
+        feUrl('/toastiframe'),
+        feArgs({
+          'publicationId': this.publicationId_,
+          'source': source,
+        })
+      ).open();
+    });
   }
 
   /**
@@ -10793,21 +11113,103 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!Entitlements} entitlements
+   * @param {?Function=} onCloseDialog Called after the user closes the dialog.
+   * @private
+   */
+  consume_(entitlements, onCloseDialog) {
+    if (entitlements.enablesThisWithGoogleMetering()) {
+      const meterToastApi = new MeterToastApi(this.deps_);
+      meterToastApi.setOnCancelCallback(() => {
+        if (onCloseDialog) {
+          onCloseDialog();
+        }
+        this.sendPingback_(entitlements);
+      });
+      return meterToastApi.start();
+    }
+  }
+
+  /**
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetch_(encryptedDocumentKey) {
-    let url =
-      '/publication/' +
-      encodeURIComponent(this.publicationId_) +
-      '/entitlements';
-    if (encryptedDocumentKey) {
-      url += '?crypt=' + encodeURIComponent(encryptedDocumentKey);
-    }
-    return this.fetcher_
-      .fetchCredentialedJson(serviceUrl(url))
-      .then((json) => this.parseEntitlements(json));
+  fetch_(params) {
+    return hash(getCanonicalUrl(this.deps_.doc()))
+      .then((hashedCanonicalUrl) => {
+        const urlParams = [];
+
+        // Add encryption param.
+        if (params && params.encryption) {
+          urlParams.push(
+            'crypt=' +
+              encodeURIComponent(params.encryption.encryptedDocumentKey)
+          );
+        }
+
+        // Add metering params.
+        const productId = this.pageConfig_.getProductId();
+        if (productId && params && params.metering && params.metering.state) {
+          /** @type {!GetEntitlementsParamsInternalDef} */
+          const encodableParams = {
+            metering: {
+              clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
+              owner: productId,
+              resource: {
+                hashedCanonicalUrl,
+              },
+              state: {
+                id: params.metering.state.id,
+                attributes: [],
+              },
+            },
+          };
+
+          // Add attributes.
+          const standardAttributes = params.metering.state.standardAttributes;
+          if (standardAttributes) {
+            Object.keys(standardAttributes).forEach((key) => {
+              encodableParams.metering.state.attributes.push({
+                name: 'standard_' + key,
+                timestamp: standardAttributes[key].timestamp,
+              });
+            });
+          }
+          const customAttributes = params.metering.state.customAttributes;
+          if (customAttributes) {
+            Object.keys(customAttributes).forEach((key) => {
+              encodableParams.metering.state.attributes.push({
+                name: 'custom_' + key,
+                timestamp: customAttributes[key].timestamp,
+              });
+            });
+          }
+
+          // Encode params.
+          const encodedParams = btoa(JSON.stringify(encodableParams));
+          urlParams.push('encodedParams=' + encodedParams);
+        }
+
+        // Build URL.
+        let url =
+          '/publication/' +
+          encodeURIComponent(this.publicationId_) +
+          '/entitlements';
+        if (urlParams.length > 0) {
+          url += '?' + urlParams.join('&');
+        }
+        return serviceUrl(url);
+      })
+      .then((url) => this.fetcher_.fetchCredentialedJson(url))
+      .then((json) => {
+        if (json.errorMessages && json.errorMessages.length > 0) {
+          json.errorMessages.forEach((errorMessage) => {
+            log_4('SwG Entitlements: ' + errorMessage);
+          });
+        }
+        return this.parseEntitlements(json);
+      });
   }
 }
 
@@ -12126,6 +12528,67 @@ class LoginPromptApi {
         throw reason;
       }
     );
+  }
+}
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class MeterRegwallApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {{ gsiUrl: string, alreadyRegisteredUrl: string}} params
+   */
+  constructor(deps, params) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/meterregwalliframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        gsiUrl: params.gsiUrl,
+        alreadyRegisteredUrl: params.alreadyRegisteredUrl,
+      }),
+      /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Prompts the user to register to the meter.
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_REGWALL);
+    return this.dialogManager_.openView(this.activityIframeView_);
   }
 }
 
@@ -15325,22 +15788,8 @@ class PayClient {
     /** @private {?PaymentsAsyncClient} */
     this.client_ = null;
 
-    if (!isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD)) {
-      this.client_ = this.createClient_(
-        /** @type {!PaymentOptions} */
-        ({
-          environment: 'PRODUCTION',
-          'i': {
-            'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-          },
-        }),
-        this.analytics_.getTransactionId(),
-        this.handleResponse_.bind(this)
-      );
-    } else {
-      /** @private @const {!Preconnect} */
-      this.preconnect_ = new Preconnect(this.win_.document);
-    }
+    /** @private @const {!Preconnect} */
+    this.preconnect_ = new Preconnect(this.win_.document);
 
     // Prepare new verifier pair.
     this.redirectVerifierHelper_.prepare();
@@ -15394,10 +15843,7 @@ class PayClient {
   start(paymentRequest, options = {}) {
     this.request_ = paymentRequest;
 
-    if (
-      isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD) &&
-      !this.client_
-    ) {
+    if (!this.client_) {
       this.preconnect(this.preconnect_);
       this.client_ = this.createClient_(
         /** @type {!PaymentOptions} */
@@ -16367,9 +16813,6 @@ class ConfiguredRuntime {
     preconnect.preconnect('https://www.google.com/');
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
-    if (!isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD)) {
-      this.payClient_.preconnect(preconnect);
-    }
 
     injectStyleSheet(this.doc_, CSS$1);
 
@@ -16525,9 +16968,9 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  getEntitlements(encryptedDocumentKey) {
+  getEntitlements(params) {
     return this.entitlementsManager_
-      .getEntitlements(encryptedDocumentKey)
+      .getEntitlements(params)
       .then((entitlements) => {
         // Auto update internal things tracking the user's current SKU.
         if (entitlements) {
@@ -16611,6 +17054,14 @@ class ConfiguredRuntime {
   waitForSubscriptionLookup(accountPromise) {
     return this.documentParsed_.then(() => {
       const wait = new WaitForSubscriptionLookupApi(this, accountPromise);
+      return wait.start();
+    });
+  }
+
+  /** @override */
+  showMeterRegwall(meterRegwallArgs) {
+    return this.documentParsed_.then(() => {
+      const wait = new MeterRegwallApi(this, meterRegwallArgs);
       return wait.start();
     });
   }

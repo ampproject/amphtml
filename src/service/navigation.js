@@ -265,14 +265,10 @@ export class Navigation {
    * @param {!{
    *   target: (string|undefined),
    *   opener: (boolean|undefined),
-   * }=} opt_options
+   * }=} options
    */
-  navigateTo(
-    win,
-    url,
-    opt_requestedBy,
-    {target = '_top', opener = false} = {}
-  ) {
+  navigateTo(win, url, opt_requestedBy, options = {}) {
+    const {target = '_top', opener = false} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
@@ -285,8 +281,9 @@ export class Navigation {
       `Target '${target}' not supported.`
     );
 
-    // Resolve navigateTos relative to the source URL, not the proxy URL.
-    url = urlService.getSourceUrl(url);
+    // If we're on cache, resolve relative URLs to the publisher (non-cache) origin.
+    const sourceUrl = urlService.getSourceUrl(win.location);
+    url = urlService.resolveRelativeUrl(url, sourceUrl);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and

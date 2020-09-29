@@ -26,6 +26,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
   let manager;
+  let fakeResponse;
 
   const fireHandler = [];
   const DEFAULT_CACHE_URL =
@@ -33,7 +34,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   const DEFAULT_ORIGIN_URL =
     'https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
   let fakeMessaging;
-  let messagingMock;
 
   const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
@@ -92,20 +92,16 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     win = env.win;
     fakeMessaging = {
       setDefaultHandler: () => {},
-      sendRequest: () => {},
+      sendRequest: () => Promise.resolve(fakeResponse),
       unregisterHandler: () => {},
       registerHandler: (event, handler) => {
         fireHandler[event] = handler;
       },
     };
-    messagingMock = env.sandbox.mock(fakeMessaging);
+
     env.sandbox
       .stub(Messaging, 'waitForHandshakeFromDocument')
       .resolves(fakeMessaging);
-  });
-
-  afterEach(() => {
-    messagingMock.verify();
   });
 
   it('should build an iframe for each story', async () => {
@@ -118,6 +114,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should correctly append params at the end of the story url', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframe = playerEl.querySelector('iframe');
 
@@ -129,16 +126,21 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   it('should correctly append params at the end of a story url with existing params', async () => {
-    const existingParams = '?testParam=true#myhash=hashValue';
-    buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
+    const existingQuery = '?testParam=true';
+    const existingHash = '#myhash=hashValue';
+    buildStoryPlayer(1, DEFAULT_CACHE_URL + existingQuery + existingHash);
+
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframe = playerEl.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
-        existingParams +
-        '&amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+        existingQuery +
+        '&amp_js_v=0.1' +
+        existingHash +
+        '&visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
@@ -146,6 +148,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should set first story as visible', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[0].getAttribute('src')).to.include(
@@ -153,14 +156,41 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     );
   });
 
-  it('should prerender next stories', async () => {
+  it('should prerender next story after first one is loaded', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
+    await nextTick();
+
+    fireHandler['storyContentLoaded']('storyContentLoaded', {});
+    await nextTick();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
       '#visibilityState=prerender'
     );
+  });
+
+  it('should not load next story if first one has not finished loading', async () => {
+    buildStoryPlayer(3);
+    await manager.loadPlayers();
+    await nextTick();
+
+    const storyIframes = playerEl.querySelectorAll('iframe');
+
+    expect(storyIframes[1].getAttribute('src')).to.not.exist;
+  });
+
+  it('should load new story if user navigated before first finished loading', async () => {
+    buildStoryPlayer(3);
+    await manager.loadPlayers();
+    await nextTick();
+
+    // Swiping without waiting for story loaded event.
+    swipeLeft();
+    await nextTick();
+
+    const storyIframes = playerEl.querySelectorAll('iframe');
+    expect(storyIframes[1].getAttribute('src')).to.exist;
   });
 
   it(
@@ -203,16 +233,35 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   );
 
   it('should register handlers at build time', async () => {
+    const registerHandlerSpy = env.sandbox.spy(
+      fakeMessaging,
+      'registerHandler'
+    );
+
     buildStoryPlayer();
-
-    messagingMock.expects('registerHandler').withArgs('selectDocument');
-    messagingMock.expects('registerHandler').withArgs('touchstart');
-    messagingMock.expects('registerHandler').withArgs('touchmove');
-    messagingMock.expects('registerHandler').withArgs('touchend');
-    messagingMock.expects('registerHandler').withArgs('documentStateUpdate');
-    messagingMock.expects('setDefaultHandler');
-
     await manager.loadPlayers();
+    await nextTick();
+
+    expect(registerHandlerSpy).to.have.been.calledWith('touchstart');
+    expect(registerHandlerSpy).to.have.been.calledWith('touchmove');
+    expect(registerHandlerSpy).to.have.been.calledWith('touchend');
+    expect(registerHandlerSpy).to.have.been.calledWith('selectDocument');
+    expect(registerHandlerSpy).to.have.been.calledWith('documentStateUpdate');
+  });
+
+  it('should set up onDocumentState listeners at at build time', async () => {
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+    buildStoryPlayer();
+    await manager.loadPlayers();
+    await nextTick();
+
+    expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
+      'state': 'PAGE_ATTACHMENT_STATE',
+    });
+    expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
+      'state': 'CURRENT_PAGE_ID',
+    });
   });
 
   it('should navigate to next story when the last page of a story is tapped', async () => {
@@ -234,6 +283,93 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         remaining: 0,
       },
     });
+  });
+
+  it('should dispatch noNextStory when in last story', async () => {
+    buildStoryPlayer(1);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noNextSpy = env.sandbox.spy();
+    playerEl.addEventListener('noNextStory', noNextSpy);
+
+    fireHandler['selectDocument']('selectDocument', {next: true});
+
+    expect(noNextSpy).to.have.been.called;
+  });
+
+  it('should not dispatch noNextStory when not in last story', async () => {
+    buildStoryPlayer(2);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noNextSpy = env.sandbox.spy();
+    playerEl.addEventListener('noNextStory', noNextSpy);
+
+    fireHandler['selectDocument']('selectDocument', {next: true});
+
+    expect(noNextSpy).to.not.have.been.called;
+  });
+
+  it('should not dispatch noNextStory when circular wrapping is enabled', async () => {
+    buildStoryPlayer(1);
+    playerEl.setAttribute('enable-circular-wrapping', '');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noNextSpy = env.sandbox.spy();
+    playerEl.addEventListener('noNextStory', noNextSpy);
+
+    fireHandler['selectDocument']('selectDocument', {next: true});
+
+    expect(noNextSpy).to.not.have.been.called;
+  });
+
+  it('should dispatch noPreviousStory when in first story', async () => {
+    buildStoryPlayer(1);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noPreviousSpy = env.sandbox.spy();
+    playerEl.addEventListener('noPreviousStory', noPreviousSpy);
+
+    fireHandler['selectDocument']('selectDocument', {previous: true});
+
+    expect(noPreviousSpy).to.have.been.called;
+  });
+
+  it('should not dispatch noPreviousStory when not in first story', async () => {
+    buildStoryPlayer(2);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noPreviousSpy = env.sandbox.spy();
+    playerEl.addEventListener('noPreviousStory', noPreviousSpy);
+
+    fireHandler['selectDocument']('selectDocument', {next: true});
+    fireHandler['selectDocument']('selectDocument', {previous: true});
+
+    expect(noPreviousSpy).to.not.have.been.called;
+  });
+
+  it('should not dispatch noPreviousStory when circular wrapping is enabled', async () => {
+    buildStoryPlayer(2);
+    playerEl.setAttribute('enable-circular-wrapping', '');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noPreviousSpy = env.sandbox.spy();
+    playerEl.addEventListener('noPreviousStory', noPreviousSpy);
+
+    fireHandler['selectDocument']('selectDocument', {previous: true});
+
+    expect(noPreviousSpy).to.not.have.been.called;
   });
 
   it('should navigate when swiping', async () => {
@@ -376,9 +512,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(stories[0][IFRAME_IDX]).to.eql(undefined);
       expect(stories[1][IFRAME_IDX]).to.eql(undefined);
-      expect(stories[2][IFRAME_IDX]).to.eql(0);
-      expect(stories[3][IFRAME_IDX]).to.eql(1);
-      expect(stories[4][IFRAME_IDX]).to.eql(2);
+      expect(stories[2][IFRAME_IDX]).to.eql(2);
+      expect(stories[3][IFRAME_IDX]).to.eql(0);
+      expect(stories[4][IFRAME_IDX]).to.eql(1);
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
@@ -480,52 +616,58 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       }
     );
 
-    it('pauses programatically', async () => {
+    it('pauses programmatically', async () => {
+      const spy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
-      messagingMock.expects('sendRequest');
 
       playerEl.pause();
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('visibilitychange', {state: 'paused'});
+      expect(spy).to.have.been.calledWith('visibilitychange', {
+        state: 'paused',
+      });
     });
 
-    it('plays programatically', async () => {
+    it('plays programmatically', async () => {
+      const spy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
-      messagingMock.expects('sendRequest');
 
       playerEl.play();
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('visibilitychange', {state: 'visible'});
+      expect(spy).to.have.been.calledWith('visibilitychange', {
+        state: 'visible',
+      });
     });
 
     it('calling mute should set story muted state to true', async () => {
+      const spy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
-      messagingMock.expects('sendRequest');
 
       await playerEl.mute();
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: true});
+      expect(spy).to.have.been.calledWith('setDocumentState', {
+        state: 'MUTED_STATE',
+        value: true,
+      });
     });
 
     it('calling unmute should set the story muted state to false', async () => {
+      const spy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
-      messagingMock.expects('sendRequest');
 
       await playerEl.unmute();
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: false});
+      expect(spy).to.have.been.calledWith('setDocumentState', {
+        state: 'MUTED_STATE',
+        value: false,
+      });
     });
 
     it('back button should be created and close button should not', async () => {
@@ -606,16 +748,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
 
     it('get page attachment state should send message', async () => {
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
 
+      fakeResponse = {value: true};
       await playerEl.getStoryState('page-attachment');
 
-      messagingMock.expects('sendRequest');
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('getDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
+      expect(sendRequestSpy).to.have.been.calledWith('getDocumentState', {
+        'state': 'PAGE_ATTACHMENT_STATE',
+      });
     });
 
     it('should display button when page attachment is closed', async () => {
@@ -846,6 +990,33 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         detail: {
           index: 4,
           remaining: 0,
+        },
+      });
+    });
+
+    it('should react to CURRENT_PAGE_ID events', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('storyNavigation', navigationSpy);
+
+      fakeResponse = {value: 0.12};
+      const fakeData = {state: 'CURRENT_PAGE_ID', value: 'page-2'};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await nextTick();
+
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'storyNavigation',
+        detail: {
+          pageId: 'page-2',
+          progress: 0.12,
         },
       });
     });

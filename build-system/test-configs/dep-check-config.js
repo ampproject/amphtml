@@ -82,7 +82,6 @@ exports.rules = [
       'extensions/amp-list/**->third_party/set-dom/set-dom.js',
       'extensions/amp-mustache/**/amp-mustache.js->third_party/mustache/mustache.js',
       'extensions/amp-recaptcha-input/**/*.js->third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
-      'extensions/amp-social-share/1.0/social-share.js->third_party/optimized-svg-icons/social-share-svgs.js',
       'extensions/amp-story-360/0.1/amp-story-360.js->third_party/zuho/zuho.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
@@ -225,6 +224,10 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/0.1/carousel-events.js',
+      'extensions/amp-inline-gallery/1.0/amp-inline-gallery.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-pagination.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/inline-gallery.js->extensions/amp-base-carousel/1.0/carousel-context.js',
+      'extensions/amp-inline-gallery/1.0/pagination.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/action-source.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
@@ -259,11 +262,11 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
       // Interactive components that depend on story functionality.
-      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
-      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
-      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/utils.js',
-      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/variable-service.js',
-      'extensions/amp-story-interactive/1.0/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
