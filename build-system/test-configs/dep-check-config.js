@@ -88,6 +88,7 @@ exports.rules = [
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
       'extensions/amp-timeago/1.0/timeago.js->third_party/timeagojs/timeago.js',
+      'extensions/amp-web-vitals/0.1/amp-web-vitals.js->third_party/web-vitals/web-vitals.js',
       'src/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',

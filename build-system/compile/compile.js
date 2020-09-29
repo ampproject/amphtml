@@ -125,6 +125,7 @@ function compile(
     'third_party/subscriptions-project/',
     'third_party/vega/',
     'third_party/webcomponentsjs/',
+    'third_party/web-vitals/',
     'node_modules/',
     'build/patched-module/',
   ];

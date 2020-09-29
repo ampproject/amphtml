@@ -1,0 +1,10 @@
+URL: https://github.com/GoogleChrome/web-vitals
+License: Apache-2.0 License
+License File: https://github.com/GoogleChrome/web-vitals/blob/v0.2.4/LICENSE
+
+Description:
+Copy of minified (web-vitals.js) from release v0.2.4
+https://unpkg.com/web-vitals@0.2.4/dist/web-vitals.js?module
+
+Local Modifications:
+None

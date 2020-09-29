@@ -33,6 +33,7 @@ const COMMON_GLOBS = [
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
+  'third_party/web-vitals/**/*.js',
   'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
   'third_party/zuho/**/*.js',
@@ -60,6 +61,7 @@ const COMMON_GLOBS = [
   'node_modules/preact/hooks/package.json',
   'node_modules/preact/hooks/dist/*.js',
   'node_modules/preact/compat/package.json',
+  'node_modules/preact/compat/dist/*.js',
   'node_modules/preact/compat/dist/*.js',
 ];
 

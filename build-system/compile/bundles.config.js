@@ -1222,6 +1222,15 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
+  {
+    name: 'amp-web-vitals',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+    postPrepend: [
+      'third_party/web-vitals/web-vitals.js',
+    ],
+  },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 /**
