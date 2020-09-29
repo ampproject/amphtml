@@ -30,12 +30,13 @@ import {
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
-import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
+import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {?{getMetadata: (function():?JsonObject|undefined)}} player
@@ -175,7 +176,7 @@ function Autoplay({
 }) {
   const classes = useAutoplayStyles();
 
-  useMountEffect(() => {
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[entries.length - 1].isIntersecting) {
@@ -192,7 +193,7 @@ function Autoplay({
     return () => {
       observer.disconnect();
     };
-  });
+  }, [wrapperRef, play, pause]);
 
   return (
     <>
