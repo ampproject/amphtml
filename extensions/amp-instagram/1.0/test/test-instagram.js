@@ -64,22 +64,13 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   });
 
   it('Resize prop is called', () => {
-    mount(
-      <Instagram
-        shortcode="B8QaZW4AQY_"
-        style={{'width': 500, 'height': 600}}
-        requestResize={env.sandbox.spy()}
-      />,
-      {attachTo: document.body}
-    );
-
     const requestResizeSpy = env.sandbox.spy();
     const heightSpy = env.sandbox.spy();
     const opacitySpy = env.sandbox.spy();
 
     handleMessage(
       createMockEvent(),
-      useRef({'contentWindow': 'source'}),
+      useRef({'contentWindow': 'source'}).current,
       requestResizeSpy,
       heightSpy,
       opacitySpy
@@ -91,21 +82,12 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   });
 
   it('Height is changed', () => {
-    mount(
-      <Instagram
-        shortcode="B8QaZW4AQY_"
-        style={{'width': 500, 'height': 600}}
-        requestResize={env.sandbox.spy()}
-      />,
-      {attachTo: document.body}
-    );
-
     const heightSpy = env.sandbox.spy();
     const opacitySpy = env.sandbox.spy();
 
     handleMessage(
       createMockEvent(),
-      useRef({'contentWindow': 'source'}),
+      useRef({'contentWindow': 'source'}).current,
       null,
       heightSpy,
       opacitySpy

@@ -21,7 +21,7 @@
  *   captioned: (boolean|undefined),
  *   title: (string|undefined),
  *   requestResize: (function(number):*|undefined),
- *   loadable: (string)
+ *   loading: (string)
  * }}
  */
 var InstagramPropsDef;
