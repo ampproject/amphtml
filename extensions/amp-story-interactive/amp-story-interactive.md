@@ -133,7 +133,7 @@ Element ID that identifies the interactive component in the story, and is used t
 
 ### endpoint (required for binary-poll, poll, quiz)
 
-Complete URL of the backend, where votes for the interactive components are stored.
+Complete URL of backend. Stores interactive element votes.
 
 ### theme (optional)
 
