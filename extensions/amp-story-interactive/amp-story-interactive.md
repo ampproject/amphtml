@@ -222,7 +222,7 @@ Before setting up a backend, consider if the already existing backends satisfy y
 
 ## Styling
 
-View all theming options in action in the [example story](/documentation/examples/components/amp-story-interactive-poll/story#page=title-themes).
+View all theming options in action in the [example story](https://amp.dev/documentation/examples/components/amp-story-interactive-poll/story#page=title-themes).
 
 [tip type="read-on"]
 Check this [Codepen collection](https://codepen.io/collection/DEGRLE) to play with the components and styles.
