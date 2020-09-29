@@ -61,7 +61,6 @@ export function getOrCreateAdCid(
           scope: dev().assertString(clientIdScope),
           createCookieIfNotPresent: true,
           cookieName: opt_clientIdCookieName,
-          backupToStorage: true,
         },
         Promise.resolve(undefined)
       )

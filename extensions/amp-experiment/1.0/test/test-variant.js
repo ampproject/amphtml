@@ -366,7 +366,6 @@ describes.sandboxed('allocateVariant', {}, (env) => {
       .withArgs({
         scope: 'amp-experiment',
         createCookieIfNotPresent: true,
-        backupToStorage: true,
       })
       .returns(Promise.resolve('123abc'));
     uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
@@ -391,7 +390,6 @@ describes.sandboxed('allocateVariant', {}, (env) => {
       .withArgs({
         scope: 'custom-scope',
         createCookieIfNotPresent: true,
-        backupToStorage: true,
       })
       .returns(Promise.resolve('123abc'));
     uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
@@ -417,7 +415,6 @@ describes.sandboxed('allocateVariant', {}, (env) => {
       .withArgs({
         scope: 'amp-experiment',
         createCookieIfNotPresent: true,
-        backupToStorage: true,
       })
       .returns(Promise.resolve('123abc'));
     uniformStub.withArgs('custom-group:123abc').returns(Promise.resolve(0.4));
@@ -451,7 +448,6 @@ describes.sandboxed('allocateVariant', {}, (env) => {
       .withArgs({
         scope: 'amp-experiment',
         createCookieIfNotPresent: true,
-        backupToStorage: true,
       })
       .returns(Promise.resolve('123abc'));
     uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));

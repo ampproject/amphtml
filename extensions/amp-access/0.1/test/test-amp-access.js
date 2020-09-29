@@ -373,11 +373,7 @@ describes.fakeWin(
       cidMock
         .expects('get')
         .withExactArgs(
-          {
-            scope: 'amp-access',
-            createCookieIfNotPresent: true,
-            backupToStorage: true,
-          },
+          {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(result))
@@ -803,11 +799,7 @@ describes.fakeWin(
       cidMock
         .expects('get')
         .withExactArgs(
-          {
-            scope: 'amp-access',
-            createCookieIfNotPresent: true,
-            backupToStorage: true,
-          },
+          {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(result))
@@ -1301,11 +1293,7 @@ describes.fakeWin(
       cidMock
         .expects('get')
         .withExactArgs(
-          {
-            scope: 'amp-access',
-            createCookieIfNotPresent: true,
-            backupToStorage: true,
-          },
+          {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
         .returns(Promise.resolve('reader1'))
@@ -1326,11 +1314,7 @@ describes.fakeWin(
       cidMock
         .expects('get')
         .withExactArgs(
-          {
-            scope: 'amp-access',
-            createCookieIfNotPresent: true,
-            backupToStorage: true,
-          },
+          {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
         .returns(Promise.resolve('reader1'))
@@ -1369,11 +1353,7 @@ describes.fakeWin(
       cidMock
         .expects('get')
         .withExactArgs(
-          {
-            scope: 'amp-access',
-            createCookieIfNotPresent: true,
-            backupToStorage: true,
-          },
+          {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
         .returns(Promise.resolve('reader1'))
@@ -1891,11 +1871,7 @@ describes.fakeWin(
       cidMock
         .expects('get')
         .withExactArgs(
-          {
-            scope: 'amp-access',
-            createCookieIfNotPresent: true,
-            backupToStorage: true,
-          },
+          {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(result))

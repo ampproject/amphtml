@@ -792,11 +792,9 @@ describes.sandboxed('cid', {}, (env) => {
     });
 
   function compare(externalCidScope, compareValue) {
-    return cid
-      .get({scope: externalCidScope, backupToStorage: true}, hasConsent)
-      .then((c) => {
-        expect(c).to.equal(compareValue);
-      });
+    return cid.get({scope: externalCidScope}, hasConsent).then((c) => {
+      expect(c).to.equal(compareValue);
+    });
   }
 
   function removeMemoryCacheOfCid(opt_cid) {
@@ -889,7 +887,6 @@ describes.realWin('cid', {amp: true}, (env) => {
         {
           scope: 'foo',
           createCookieIfNotPresent: true,
-          backupToStorage: true,
         },
         hasConsent
       );
@@ -908,7 +905,6 @@ describes.realWin('cid', {amp: true}, (env) => {
         {
           scope: 'foo',
           createCookieIfNotPresent: true,
-          backupToStorage: true,
         },
         hasConsent
       );
@@ -923,7 +919,6 @@ describes.realWin('cid', {amp: true}, (env) => {
           {
             scope: 'bar',
             createCookieIfNotPresent: true,
-            backupToStorage: true,
           },
           hasConsent
         )
@@ -952,7 +947,6 @@ describes.realWin('cid', {amp: true}, (env) => {
         {
           scope: 'foo',
           createCookieIfNotPresent: true,
-          backupToStorage: true,
         },
         hasConsent
       );
@@ -984,7 +978,6 @@ describes.realWin('cid', {amp: true}, (env) => {
         {
           scope: 'foo',
           createCookieIfNotPresent: true,
-          backupToStorage: true,
         },
         hasConsent
       );
@@ -1138,7 +1131,6 @@ describes.realWin('cid', {amp: true}, (env) => {
               scope: 'AMP_ECID_GOOGLE',
               cookieName: '_ga',
               createCookieIfNotPresent: true,
-              backupToStorage: true,
             },
             hasConsent
           )

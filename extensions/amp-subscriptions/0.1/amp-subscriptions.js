@@ -245,10 +245,7 @@ export class SubscriptionService {
       const scope =
         'amp-access' + (serviceId == 'local' ? '' : '-' + serviceId);
       readerIdPromise = this.cid_.then((cid) =>
-        cid.get(
-          {scope, createCookieIfNotPresent: true, backupToStorage: true},
-          consent
-        )
+        cid.get({scope, createCookieIfNotPresent: true}, consent)
       );
       this.serviceIdToReaderIdPromiseMap_[serviceId] = readerIdPromise;
     }

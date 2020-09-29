@@ -65,7 +65,6 @@ describes.realWin('ad-cid', {amp: true}, (env) => {
         scope: cidScope,
         createCookieIfNotPresent: true,
         cookieName: undefined,
-        backupToStorage: true,
       });
     });
   });
@@ -85,7 +84,6 @@ describes.realWin('ad-cid', {amp: true}, (env) => {
         scope: cidScope,
         createCookieIfNotPresent: true,
         cookieName: 'different-cookie-name',
-        backupToStorage: true,
       });
     });
   });
