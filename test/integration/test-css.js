@@ -19,6 +19,9 @@ import {createFixtureIframe} from '../../testing/iframe.js';
 
 describe.configure().run('CSS', () => {
   it('should include height of [overflow] child in size before build', async () => {
+    // NO SUBMIT PLZ
+    expect(-1).to.be.greaterThan(0);
+
     const fixture = await createFixtureIframe(
       'test/fixtures/overflow.html',
       500
