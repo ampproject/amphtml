@@ -25,6 +25,7 @@ const glob = require('glob');
 const http = require('http');
 const log = require('fancy-log');
 const Mocha = require('mocha');
+const opn = require('opn');
 const path = require('path');
 const {
   buildRuntime,
@@ -32,7 +33,6 @@ const {
   installPackages,
 } = require('../../common/utils');
 const {cyan} = require('ansi-colors');
-const {doBrowse} = require('../browse');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isTravisBuild} = require('../../common/travis');
@@ -172,7 +172,7 @@ async function runTests_() {
       if (argv.coverage) {
         await fetchCoverage_(COV_OUTPUT_DIR);
         if (!isTravisBuild()) {
-          doBrowse(`file://${COV_OUTPUT_HTML}`);
+          opn(`file://${COV_OUTPUT_HTML}`, {wait: false});
         }
       }
       await stopServer();
