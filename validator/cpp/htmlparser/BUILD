@@ -458,9 +458,6 @@ cc_library(
     hdrs = [
         "url.h",
     ],
-    deps = [
-        ":strings",
-    ],
     copts = ["-std=c++17"],
 )
 

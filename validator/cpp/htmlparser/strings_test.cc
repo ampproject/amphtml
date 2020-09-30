@@ -645,13 +645,5 @@ TEST(StringsTest, DecodePercentEncodedURLTest) {
 
   // Empty string.
   EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL("").value(), "");
-
-  // Any one byte char must be < 128.
-  // 0xff (255) char.
-  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
-      "example-%FF.com").has_value());
-  // char code 128.
-  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
-      "example-%80.com").has_value());
 }
 
