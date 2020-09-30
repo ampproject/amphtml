@@ -392,7 +392,10 @@ export class AmpStoryPlayer {
     const shadowContainer = this.doc_.createElement('div');
 
     // For AMP version.
-    shadowContainer.classList.add('i-amphtml-fill-content');
+    shadowContainer.classList.add(
+      'i-amphtml-fill-content',
+      'i-amphtml-story-player-shadow-dom-intermediary'
+    );
 
     this.element_.appendChild(shadowContainer);
 
