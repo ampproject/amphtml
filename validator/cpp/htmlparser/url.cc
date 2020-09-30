@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the license.
 
+#include <iostream>
 #include "strings.h"
 #include "url.h"
 
@@ -38,7 +39,7 @@ std::string_view URL::ProtocolStrict(std::string_view url) {
 URL::URL(std::string_view url) : url_(url),
   is_valid_(true),
   has_protocol_(false),
-  protocol_(""),
+  protocol_(ProtocolType::UNKNOWN),
   login_(""),
   host_(""),
   port_(0) {
@@ -62,11 +63,11 @@ void URL::ProcessHostDots() {
 
 void URL::ParseProtocol() {
   if (int colon_at = url_.find(':'); colon_at != std::string_view::npos) {
-    for (int i = 0; i < colon_at; ++i) {
+    for (std::size_t i = 0; i < colon_at; ++i) {
       auto c = url_.at(i);
       if (!IsProtocolCharValidChar(c)) {
         has_protocol_ = false;
-        protocol_ = "https";
+        protocol_ = ProtocolType::HTTPS;
         return;
       }
     }
@@ -75,23 +76,23 @@ void URL::ParseProtocol() {
     auto protocol = url_.substr(0, colon_at);
     url_.remove_prefix(colon_at + 1);
     if (Strings::EqualFold(protocol, "http")) {
-      protocol_ = "http";
+      protocol_ = ProtocolType::HTTP;
     } else if (Strings::EqualFold(protocol, "https")) {
-      protocol_ = "https";
+      protocol_ = ProtocolType::HTTPS;
     } else if (Strings::EqualFold(protocol, "ftp")) {
-      protocol_ = "ftp";
+      protocol_ = ProtocolType::FTP;
     } else if (Strings::EqualFold(protocol, "sftp")) {
-      protocol_ = "sftp";
+      protocol_ = ProtocolType::SFTP;
     } else {
-      protocol_ = protocol;
+      // Unsupported protocol.
+      protocol_ = ProtocolType::UNKNOWN;
       url_.remove_prefix(url_.size());
     }
-    Strings::ToLower(&protocol_);
   } else {
     // Didn't see any colon in the URL, so make it a default protocol url and
     // parse the rest of the URL.
     has_protocol_ = false;
-    protocol_ = "https";
+    protocol_ = ProtocolType::HTTPS;
   }
 }
 
@@ -106,7 +107,7 @@ void URL::ParseAuthority() {
     idx++;
   }
 
-  if (idx >= url_.size()) {
+  if (idx > url_.size()) {
     is_valid_ = false;
     return;
   }
@@ -230,16 +231,22 @@ void URL::ParseAuthority() {
   }
 
   if (port_ == 0) {
-    if (protocol_ == "http") {
-      port_ = 80;
-    } else if (protocol_ == "https") {
-      port_ = 443;
-    } else if (protocol_ == "ftp") {
-      port_ = 21;
-    } else if (protocol_ == "sftp") {
-      port_ = 22;
-    } else {
-      port_ = 0;
+    switch (protocol_) {
+      case ProtocolType::HTTP:
+        port_ = 80;
+        break;
+      case ProtocolType::HTTPS:
+        port_ = 443;
+        break;
+      case ProtocolType::FTP:
+        port_ = 21;
+        break;
+      case ProtocolType::SFTP:
+        port_ = 22;
+        break;
+      default:
+        port_ = 0;
+        break;
     }
   }
 }
