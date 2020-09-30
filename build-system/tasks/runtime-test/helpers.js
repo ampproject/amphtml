@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const log = require('fancy-log');
-const opn = require('opn');
+const open = require('open');
 const path = require('path');
 const {green, yellow, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
@@ -156,7 +156,7 @@ function maybePrintCoverageMessage() {
 
   const url = 'file://' + path.resolve('test/coverage/index.html');
   log(green('INFO:'), 'Generated code coverage report at', cyan(url));
-  opn(url, {wait: false});
+  open(url, {wait: false});
 }
 
 /**

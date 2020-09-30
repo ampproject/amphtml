@@ -25,7 +25,7 @@ const glob = require('glob');
 const http = require('http');
 const log = require('fancy-log');
 const Mocha = require('mocha');
-const opn = require('opn');
+const open = require('open');
 const path = require('path');
 const {
   buildRuntime,
@@ -172,7 +172,7 @@ async function runTests_() {
       if (argv.coverage) {
         await fetchCoverage_(COV_OUTPUT_DIR);
         if (!isTravisBuild()) {
-          opn(`file://${COV_OUTPUT_HTML}`, {wait: false});
+          open(`file://${COV_OUTPUT_HTML}`, {wait: false});
         }
       }
       await stopServer();
