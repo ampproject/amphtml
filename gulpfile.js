@@ -37,7 +37,6 @@ const {
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {browse} = require('./build-system/tasks/browse');
 const {build, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
@@ -134,7 +133,6 @@ function checkFlags(name, taskFunc) {
 createTask('a4a', a4a);
 createTask('ava', ava);
 createTask('babel-plugin-tests', babelPluginTests);
-createTask('browse', browse);
 createTask('build', build);
 createTask('bundle-size', bundleSize);
 createTask('caches-json', cachesJson);
