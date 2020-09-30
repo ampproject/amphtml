@@ -28,6 +28,14 @@ namespace htmlparser {
 
 class URL {
  public:
+  enum ProtocolType {
+    UNKNOWN = 0,
+    HTTP,
+    HTTPS,
+    FTP,
+    SFTP
+  };
+
   // returns: the protocol (scheme) of the URL, if one could be found, according
   // to a strict interpretation of RFC 3986, Section 3.1. Otherwise returns the
   // empty string. No normalization (e.g. lower casing) is performed, and
@@ -37,21 +45,21 @@ class URL {
   explicit URL(std::string_view url);
 
   // getters.
-  bool is_valid() const { return is_valid_; }
-  bool has_protocol() const { return has_protocol_; }
-  std::string protocol() const { return protocol_; }
-  std::string hostname() const { return host_; }
-  std::string login() const { return login_; }
-  int port() const { return port_; }
+  bool is_valid() { return is_valid_; }
+  bool has_protocol() { return has_protocol_; }
+  ProtocolType protocol() { return protocol_; }
+  std::string hostname() { return host_; }
+  std::string login() { return login_; }
+  int port() { return port_; }
 
  private:
-  static bool IsAlphaNum(uint8_t c) {
+  static bool IsAlphaNum(int8_t c) {
     return (('0' <= c && c <= '9') ||
             ('a' <= c && c <= 'z') ||
             ('A' <= c && c <= 'Z'));
   }
 
-  static bool IsProtocolCharValidChar(uint8_t c) {
+  static bool IsProtocolCharValidChar(int8_t c) {
     return IsAlphaNum(c) || c == '+' || c == '-';
   }
 
@@ -63,11 +71,11 @@ class URL {
     return true;
   }
 
-  static bool HostCharIsEnd(uint8_t c) {
+  static bool HostCharIsEnd(int8_t c) {
     return c == '#' || c == '/' || c == '?' || c == '\\';
   }
 
-  static bool HostCharIsValid(uint8_t c) {
+  static bool HostCharIsValid(int8_t c) {
     static constexpr std::string_view illegal_chars =
         " !\"#$%&'()*+,/:;<=>?@[\\]^`{|}~";
     return c > 0x1f /* unprintable */ &&
@@ -88,7 +96,7 @@ class URL {
   std::string_view url_;
   bool is_valid_;
   bool has_protocol_;
-  std::string protocol_;
+  ProtocolType protocol_;
   std::string_view scheme_specific_port_;
   bool starts_with_double_slash_;
   std::string login_;

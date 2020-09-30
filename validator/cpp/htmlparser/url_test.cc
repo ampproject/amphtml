@@ -53,33 +53,33 @@ TEST(URLTest, BasicTests) {
   URL url("http://www.google.com/");
   EXPECT_TRUE(url.has_protocol());
   EXPECT_TRUE(url.is_valid());
-  EXPECT_EQ(url.protocol(), "http");
+  EXPECT_EQ(url.protocol(), URL::ProtocolType::HTTP);
   EXPECT_EQ(url.hostname(), "www.google.com");
   EXPECT_EQ(url.port(), 80);
 
   URL https_url("https://www.google.com/");
   EXPECT_TRUE(https_url.has_protocol());
   EXPECT_TRUE(https_url.is_valid());
-  EXPECT_EQ(https_url.protocol(), "https");
+  EXPECT_EQ(https_url.protocol(), URL::ProtocolType::HTTPS);
   EXPECT_EQ(https_url.hostname(), "www.google.com");
   EXPECT_EQ(https_url.port(), 443);
 
   URL ftp_url("ftp://www.google.com/");
   EXPECT_TRUE(ftp_url.has_protocol());
   EXPECT_TRUE(ftp_url.is_valid());
-  EXPECT_EQ(ftp_url.protocol(), "ftp");
+  EXPECT_EQ(ftp_url.protocol(), URL::ProtocolType::FTP);
   EXPECT_EQ(ftp_url.hostname(), "www.google.com");
 
   URL sftp_url("sftp://www.google.com/");
   EXPECT_TRUE(sftp_url.has_protocol());
   EXPECT_TRUE(sftp_url.is_valid());
-  EXPECT_EQ(sftp_url.protocol(), "sftp");
+  EXPECT_EQ(sftp_url.protocol(), URL::ProtocolType::SFTP);
   EXPECT_EQ(sftp_url.hostname(), "www.google.com");
 
   URL space_url("    http://www.google.com/");
   EXPECT_TRUE(space_url.has_protocol());
   EXPECT_TRUE(space_url.is_valid());
-  EXPECT_EQ(space_url.protocol(), "http");
+  EXPECT_EQ(space_url.protocol(), URL::ProtocolType::HTTP);
   EXPECT_EQ(space_url.hostname(), "www.google.com");
 
   // Invalid char.
@@ -87,25 +87,26 @@ TEST(URLTest, BasicTests) {
   EXPECT_FALSE(invalid_protocol.has_protocol());
   EXPECT_TRUE(invalid_protocol.is_valid());
   EXPECT_EQ(invalid_protocol.protocol(),
-            "https" /* default to https */);
+            URL::ProtocolType::HTTPS /* default to https */);
 
   URL invalid_protocol2("foo bar:baz");
   EXPECT_FALSE(invalid_protocol2.has_protocol());
   EXPECT_TRUE(invalid_protocol2.is_valid());
   EXPECT_EQ(invalid_protocol2.protocol(),
-            "https" /* default to https */);
+            URL::ProtocolType::HTTPS /* default to https */);
 
   // Unrecognized protocol.
   URL unrecognized("telnet://1.2.3.4");
   EXPECT_TRUE(unrecognized.has_protocol());
   EXPECT_TRUE(unrecognized.is_valid());
-  EXPECT_EQ(unrecognized.protocol(), "telnet");
+  EXPECT_EQ(unrecognized.protocol(),
+            URL::ProtocolType::UNKNOWN);
   EXPECT_EQ(url.hostname(), "www.google.com");
 
   URL port_url("http://www.google.com:8080/");
   EXPECT_TRUE(port_url.has_protocol());
   EXPECT_TRUE(port_url.is_valid());
-  EXPECT_EQ(port_url.protocol(), "http");
+  EXPECT_EQ(port_url.protocol(), URL::ProtocolType::HTTP);
   EXPECT_EQ(port_url.hostname(), "www.google.com");
   EXPECT_EQ(port_url.port(), 8080);
 
@@ -132,7 +133,7 @@ TEST(URLTest, BasicTests) {
   URL ipv62("http://foo:bar@[1:2:3::4]:8080/foo");
   EXPECT_TRUE(ipv62.is_valid());
   EXPECT_EQ(ipv62.hostname(), "1:2:3::4");
-  EXPECT_EQ(ipv62.protocol(), "http");
+  EXPECT_EQ(ipv62.protocol(), URL::ProtocolType::HTTP);
   EXPECT_EQ(ipv62.login(), "foo:bar");
   EXPECT_EQ(ipv62.port(), 8080);
 
@@ -148,13 +149,10 @@ TEST(URLTest, BasicTests) {
   EXPECT_FALSE(URL("http://example!.com/").is_valid());
   EXPECT_FALSE(URL("http://example\x10.com/").is_valid());
   EXPECT_FALSE(URL("http://example.com&/").is_valid());
-  // 0xff  - Invalid single byte unsigned char.
-  EXPECT_FALSE(URL("http://example-%ff.com/").is_valid());
+  EXPECT_FALSE(URL("http://example-%FF.com/").is_valid());
 
   // Accepts utf-8 chars in hostname.
-  EXPECT_TRUE(URL("http://⚡.com").is_valid());
-  EXPECT_TRUE(URL("http://⚡").is_valid());
-
+  EXPECT_TRUE(URL("⚡.com").is_valid());
 
   // Empty host is invalid.
   EXPECT_FALSE(URL("http:///").is_valid());
@@ -223,22 +221,6 @@ TEST(URLTest, PortNumbers) {
   URL url("https://www.google.com:/");
   EXPECT_TRUE(url.is_valid());
   EXPECT_EQ(url.port(), 443);
-
-  // Port number beginning with 0.
-  URL url2("https://www.google.com:01");
-  EXPECT_TRUE(url2.is_valid());
-  EXPECT_EQ(url2.port(), 1);
-
-  EXPECT_TRUE(
-      URL("https://www.google.com:000000000000000000000000000080").is_valid());
-  EXPECT_FALSE(
-      URL("https://www.google.com:123456789012345678901234567890").is_valid());
-  EXPECT_FALSE(URL("https://www.google.com:1234 5").is_valid());
-  EXPECT_FALSE(URL("https://www.google.com:1234a").is_valid());
-  EXPECT_FALSE(URL("https://www.google.com:a1234").is_valid());
-  EXPECT_FALSE(URL("https://www.google.com:123:45").is_valid());
-  EXPECT_FALSE(
-      URL("https://www.google.com:                      123").is_valid());
 }
 
 TEST(URLTest, UserInfoFields) {

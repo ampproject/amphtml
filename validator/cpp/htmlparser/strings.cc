@@ -125,11 +125,7 @@ std::optional<std::string> Strings::DecodePercentEncodedURL(
 
     auto num_bytes = Strings::CodePointByteSequenceCount(x1);
     uri_decoded.sputc(x1);
-    if (num_bytes == 1) {
-      // Single byte char must be signed char.
-      if (x1 > 127) return std::nullopt;
-      continue;
-    }
+    if (num_bytes == 1) continue;
 
     // 2 bytes sequence.
     if (num_bytes > 1) {
