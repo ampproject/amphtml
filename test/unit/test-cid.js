@@ -878,6 +878,10 @@ describes.realWin('cid', {amp: true}, (env) => {
   );
 
   describe('CID backup', () => {
+    beforeEach(() => {
+      cid.isBackupCidExpOn = true;
+    });
+
     it('generate new CID and backup', async () => {
       env.sandbox
         .stub(cid.viewerCidApi_, 'isSupported')

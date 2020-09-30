@@ -22,20 +22,20 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {GoogleCidApi, TokenStatus} from './cid-api';
-import {dev, rethrowAsync, user, userAssert} from '../log';
-import {getCookie, setCookie} from '../cookies';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
-import {parseJson, tryParseJson} from '../json';
-
 import {CacheCidApi} from './cache-cid-api';
+import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {dev, rethrowAsync, user, userAssert} from '../log';
 import {dict} from '../utils/object';
+import {getCookie, setCookie} from '../cookies';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
+import {isExperimentOn} from '../../src/experiments';
 import {isIframed} from '../dom';
+import {parseJson, tryParseJson} from '../json';
 import {tryResolve} from '../utils/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -179,6 +179,9 @@ class Cid {
 
     /** @private {?Object<string, string>} */
     this.apiKeyMap_ = null;
+
+    /** @const {boolean} */
+    this.isBackupCidExpOn = isExperimentOn(this.ampdoc.win, 'amp-cid-backup');
   }
 
   /** @override */
@@ -427,7 +430,7 @@ function getStorageKey(cookieName) {
  * @return {!Promise<?string|undefined>}
  */
 function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
-  const {ampdoc} = cid;
+  const {ampdoc, isBackupCidExpOn} = cid;
   const {win} = ampdoc;
   const {optOutBackup, scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
@@ -438,13 +441,13 @@ function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
     if (/^amp-/.test(existingCookie)) {
       setCidCookie(win, cookieName, existingCookie);
 
-      if (!optOutBackup) {
+      if (isBackupCidExpOn && !optOutBackup) {
         setCidBackup(ampdoc, cookieName, existingCookie);
       }
     }
     return Promise.resolve(existingCookie);
   }
-  if (!optOutBackup) {
+  if (isBackupCidExpOn && !optOutBackup) {
     return Services.storageForDoc(ampdoc).then((storage) => {
       const key = getStorageKey(cookieName);
       const backupCidPromise = storage.get(key);
@@ -484,7 +487,8 @@ function returnOrCreateCookie(
   persistenceConsent,
   existingCookie
 ) {
-  const {win} = cid.ampdoc;
+  const {isBackupCidExpOn, ampdoc} = cid;
+  const {win} = ampdoc;
   const {scope, optOutBackup} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
 
@@ -513,8 +517,8 @@ function returnOrCreateCookie(
     const relookup = getCookie(win, cookieName);
     if (!relookup) {
       setCidCookie(win, cookieName, newCookie);
-      if (!optOutBackup) {
-        setCidBackup(cid.ampdoc, cookieName, newCookie);
+      if (isBackupCidExpOn && !optOutBackup) {
+        setCidBackup(ampdoc, cookieName, newCookie);
       }
     }
   });

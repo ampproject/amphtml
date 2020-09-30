@@ -292,7 +292,7 @@ export class GlobalVariableSource extends VariableSource {
               {
                 /** @type {string} */ scope,
                 createCookieIfNotPresent: true,
-                cookieName: opt_cookieName,
+                cookieName: opt_cookieName || undefined,
                 optOutBackup: opt_optOutBackup,
               },
               consent
