@@ -552,13 +552,6 @@ export class PreactBaseElement extends AMP.BaseElement {
 // Ideally, these would be Static Class Fields. But Closure can't even.
 
 /**
- * An experiment required for this component.
- *
- * @protected {string}
- */
-PreactBaseElement['experiment'] = '';
-
-/**
  * Override to provide the Component definition.
  *
  * @protected {!PreactDef.FunctionalComponent}
