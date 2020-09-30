@@ -38,7 +38,7 @@
 #ifndef AMPVALIDATOR__VALIDATOR_H_
 #define AMPVALIDATOR__VALIDATOR_H_
 
-#include "../../validator.proto.h"
+#include "validator.pb.h"
 
 namespace amp::validator {
 
