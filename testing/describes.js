@@ -489,8 +489,14 @@ class IntegrationFixture {
       typeof this.spec.body == 'function' ? this.spec.body() : this.spec.body;
     const css =
       typeof this.spec.css == 'function' ? this.spec.css() : this.spec.css;
-    const experiments = this.spec.experiments?.join(',');
-    const extensions = this.spec.extensions?.join(',');
+    const experiments =
+      this.spec.experiments == undefined
+        ? undefined
+        : this.spec.experiments.join(',');
+    const extensions =
+      this.spec.extensions == undefined
+        ? undefined
+        : this.spec.extensions.join(',');
     const ampDocType = this.spec.ampdoc || 'single';
     const style = this.spec.frameStyle;
 
@@ -535,7 +541,9 @@ class IntegrationFixture {
 
   /** @override */
   teardown(env) {
-    env.iframe.parentNode?.removeChild(env.iframe);
+    if (env.iframe.parentNode) {
+      env.iframe.parentNode.removeChild(env.iframe);
+    }
   }
 }
 
