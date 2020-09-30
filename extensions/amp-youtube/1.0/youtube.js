@@ -118,7 +118,7 @@ function getEmbedUrl(credentials, videoid, liveChannelid) {
   const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
   let descriptor = '';
   if (videoid) {
-    descriptor = `${encodeURIComponent(videoid || '')}?`;
+    descriptor = `${encodeURIComponent(videoid)}?`;
   } else {
     descriptor = `live_stream?channel=${encodeURIComponent(
       liveChannelid || ''
