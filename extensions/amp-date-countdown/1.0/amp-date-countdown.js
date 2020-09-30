@@ -104,7 +104,7 @@ AmpDateCountdown['usesTemplate'] = true;
 
 /** @override */
 AmpDateCountdown['props'] = {
-  'dateTime': {
+  'datetime': {
     attrs: [
       'end-date',
       'timeleft-ms',

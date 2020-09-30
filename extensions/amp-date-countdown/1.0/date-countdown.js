@@ -79,32 +79,25 @@ export function DateCountdown({
   useResourcesNotify();
   const {playable} = useAmpContext();
 
-  const epoch = getDate(datetime);
-
-  // How much time is left in our countdown
-  const [, setTimeleft] = useState(epoch - Date.now());
-
-  // One time calculation of time labels in specified locale
+  // Compute these values once
+  const epoch = useMemo(() => getDate(datetime), [datetime]);
   const localeStrings = useMemo(
     () => getLocaleWord(/** @type {string} */ (locale)),
     [locale]
   );
 
-  // Reference to DOM element to get access to correct window
-  const rootRef = useRef(null);
+  // timeleft is updated on each interval callback
+  const [timeleft, setTimeleft] = useState(epoch - Date.now() + DELAY);
 
-  // A reference to our 'data', 'data' is used to populate the template
-  // A reference is used so we can use the same object instance between
-  // successive re-renders
-  const dataRef = useRef(
-    getYDHMSFromMs(
-      epoch - Date.now() + DELAY,
-      /** @type {string} */ (biggestUnit)
-    )
+  // Only update data when timeleft (or other dependencies) are updated
+  // Does not update on 2nd render triggered by useRenderer
+  const data = useMemo(
+    () => getDataForTemplate(timeleft, biggestUnit, localeStrings),
+    [timeleft, biggestUnit, localeStrings]
   );
 
-  // Put localeStrings into the data object
-  Object.assign(/** @type {!Object} */ (dataRef.current), localeStrings);
+  // Reference to DOM element to get access to correct window
+  const rootRef = useRef(null);
 
   useEffect(() => {
     if (!playable || !rootRef.current) {
@@ -113,29 +106,15 @@ export function DateCountdown({
     const win = rootRef.current.ownerDocument.defaultView;
     const interval = win.setInterval(() => {
       const newTimeleft = epoch - Date.now() + DELAY;
-
-      // Trigger a re-render
       setTimeleft(newTimeleft);
-
-      // Update dataRef to a new object to trigger re-calculation of 'rendered'
-      // (in the useRenderer function)
-      const data = getYDHMSFromMs(
-        newTimeleft,
-        /** @type {string} */ (biggestUnit)
-      );
-      dataRef.current = data;
-
       if (whenEnded === DEFAULT_WHEN_ENDED && newTimeleft < 1000) {
         win.clearInterval(interval);
       }
     }, DELAY);
     return () => win.clearInterval(interval);
-  }, [playable, epoch, whenEnded, biggestUnit, setTimeleft]);
+  }, [playable, epoch, whenEnded]);
 
-  const rendered = useRenderer(
-    render,
-    /** @type {!JsonObject} */ (dataRef.current)
-  );
+  const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
@@ -148,6 +127,19 @@ export function DateCountdown({
       {isHtml ? null : rendered}
     </Wrapper>
   );
+}
+
+/**
+ * @param {number} timeleft
+ * @param {string|undefined} biggestUnit
+ * @param {!JsonObject} localeStrings
+ * @return {!JsonObject}
+ */
+function getDataForTemplate(timeleft, biggestUnit, localeStrings) {
+  return /** @type {!JsonObject} */ ({
+    ...getYDHMSFromMs(timeleft, /** @type {string} */ (biggestUnit)),
+    ...localeStrings,
+  });
 }
 
 /**
