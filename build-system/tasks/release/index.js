@@ -34,7 +34,8 @@ const BASE_FLAVOR_CONFIG = {
   name: 'base',
   rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
   // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-  command: 'gulp dist --noconfig --esm && gulp dist --noconfig',
+  command:
+    'gulp dist --noconfig --esm && gulp dist --noconfig --sxg && gulp dist --noconfig',
   environment: 'AMP',
 };
 
@@ -144,7 +145,7 @@ function discoverDistFlavors_() {
       )
       .map(([flavorType, experimentConfig]) => ({
         // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-        command: `gulp dist --noconfig --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && gulp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
+        command: `gulp dist --noconfig --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && gulp dist --noconfig --sxg --define_experiment_constant ${experimentConfig.define_experiment_constant} && gulp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
         flavorType,
         rtvPrefixes: [
           EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],

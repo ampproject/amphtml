@@ -25,7 +25,7 @@ const {
   compileCoreRuntime,
   compileJs,
   endBuildStep,
-  maybeToEsmName,
+  getMinifiedName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
@@ -167,7 +167,7 @@ function buildExperiments() {
       watch: argv.watch,
       minify: true,
       includePolyfills: true,
-      minifiedName: maybeToEsmName('experiments.js'),
+      minifiedName: getMinifiedName('experiments.js'),
       esmPassCompilation: argv.esm || argv.sxg || false,
     }
   );
@@ -208,7 +208,7 @@ async function buildWebPushPublisherFiles() {
     WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
       const tempBuildDir = `build/all/amp-web-push-${version}/`;
       const builtName = fileName + '.js';
-      const minifiedName = maybeToEsmName(fileName + '.js');
+      const minifiedName = getMinifiedName(fileName + '.js');
       const p = compileJs('./' + tempBuildDir, builtName, './' + distDir, {
         watch: argv.watch,
         includePolyfills: true,
@@ -299,7 +299,7 @@ function postBuildWebPushPublisherFilesVersion() {
   WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
     const basePath = `extensions/amp-web-push/${version}/`;
     WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
-      const minifiedName = maybeToEsmName(fileName + '.js');
+      const minifiedName = getMinifiedName(fileName + '.js');
       if (!fs.existsSync(distDir + '/' + minifiedName)) {
         throw new Error(`Cannot find ${distDir}/${minifiedName}`);
       }
