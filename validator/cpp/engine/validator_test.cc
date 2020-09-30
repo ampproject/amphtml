@@ -4,7 +4,43 @@
 
 #include "glog/logging.h"
 #include "validator_pb.h"
-namespace protocolbuffer = google::protobuf;
+#include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "absl/strings/cord.h"
+#include "absl/strings/match.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_replace.h"
+#include "absl/strings/str_split.h"
+#include "testing-utils.h"
+#include "validator.h"
+#include "css/parse-css.pb.h"
+#include "validator.pb.h"
+
+using absl::StartsWith;
+using absl::StrAppend;
+using absl::StrCat;
+using absl::StrReplaceAll;
+using amp::validator::AtRuleSpec;
+using amp::validator::AttrList;
+using amp::validator::AttrSpec;
+using amp::validator::CdataSpec;
+using amp::validator::ErrorFormat;
+using amp::validator::ErrorSpecificity;
+using amp::validator::HtmlFormat;
+using amp::validator::PropertySpec;
+using amp::validator::PropertySpecList;
+using amp::validator::ReferencePoint;
+using amp::validator::TagSpec;
+using amp::validator::ValidationError;
+using amp::validator::ValidationResult;
+using amp::validator::ValidatorRules;
+using amp::validator::testing::TestCase;
+using amp::validator::testing::TestCases;
+using amp::validator::testing::RenderInlineResult;
+using amp::validator::testing::RenderResult;
+
+namespace fs = std::filesystem;
 
 namespace amp::validator {
 namespace {
