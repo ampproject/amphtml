@@ -315,6 +315,10 @@ export class AmpStory360 extends AMP.BaseElement {
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
         });
+
+        this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
+          isPaused ? this.pause() : this.play();
+        });
       }),
 
       Services.localizationServiceForOrNull(this.element).then(
