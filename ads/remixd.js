@@ -19,8 +19,8 @@
  * @param {!Object} data
  */
 export function remixd(global, data) {
-  window._rmxd = {};
-  window._rmxd.url = data.url || window.context.sourceUrl;
+  global._rmxd = {};
+  global._rmxd.url = data.url || global.context.sourceUrl;
   const sriptVersion = data.version || '5';
   const tagUrl = 'https://tags.remixd.com/player/v'+ sriptVersion +'/index.js?cb=' + Math.random();
 
@@ -32,5 +32,5 @@ export function remixd(global, data) {
       '/script>'
   );
 
-  window.context.renderStart();
+  global.context.renderStart();
 }
