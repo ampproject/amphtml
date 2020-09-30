@@ -494,6 +494,7 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 ## Attributes
 
 ### `src` (required)
+
 [filter formats="websites, stories"]
 
 The URL of the remote endpoint that returns the JSON that will be rendered
