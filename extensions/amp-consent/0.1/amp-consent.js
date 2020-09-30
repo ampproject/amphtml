@@ -290,16 +290,13 @@ export class AmpConsent extends AMP.BaseElement {
               TAG,
               'Consent string value %s not applicable on user dismiss, ' +
                 'stored value will be kept and used',
-              consentString
+              data['info']
             );
           }
           data['info'] = undefined;
         }
         consentString = data['info'];
-        metadata = this.configureMetadataByConsentString_(
-          data['consentMetadata'],
-          consentString
-        );
+        metadata = this.validateMetadata_(data['consentMetadata']);
       }
 
       const iframes = this.element.querySelectorAll('iframe');
@@ -559,10 +556,7 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
         responseConsentString,
-        this.configureMetadataByConsentString_(
-          opt_responseMetadata,
-          responseConsentString
-        )
+        this.validateMetadata_(opt_responseMetadata)
       );
     }
   }
@@ -713,22 +707,16 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * If consentString is undefined or invalid, don't
-   * include any metadata in update. Otherwise, convert to
-   * to ConsentMetadataDef
+   * Convert valid opt_metadta into ConsentMetadataDef
    * @param {JsonObject=} opt_metadata
-   * @param {string=} opt_consentString
    * @return {ConsentMetadataDef|undefined}
    */
-  configureMetadataByConsentString_(opt_metadata, opt_consentString) {
+  validateMetadata_(opt_metadata) {
     if (!opt_metadata) {
       return;
     }
-    if (!isObject(opt_metadata) || !opt_consentString) {
-      user().error(
-        TAG,
-        'CMP metadata is invalid or no consent string is found.'
-      );
+    if (!isObject(opt_metadata)) {
+      user().error(TAG, 'CMP metadata is not an object.');
       return;
     }
     assertMetadataValues(opt_metadata);
