@@ -53,17 +53,16 @@ function main() {
     ];
     // Rather than timedExecOrDie here, we want to short-circuit after the first
     // failing step, but then still try to report any collected results.
-    let errorStatus = 0;
+    let status = 0;
     for (const cmd of steps) {
-      const {status} = timedExecWithError(cmd);
+      status = timedExecWithError(cmd).status;
       if (status) {
-        errorStatus = status;
         break;
       }
     }
 
     timedExecOrDie('gulp test-report-upload');
-    if (errorStatus) {
+    if (status) {
       process.exit(status);
     }
   } else {
