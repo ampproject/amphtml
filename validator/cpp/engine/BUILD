@@ -232,7 +232,7 @@ cc_binary(
 
 genrule(
     name = "validator-pb",
-    srcs = ["@validator//:validator-protoascii"],
+    srcs = ["@validator//:validator.protoascii"],
     outs = ["validator.pb"],
     cmd = "$(location :validator-convert) " +
           "$(SRCS) $@",
@@ -322,6 +322,7 @@ cc_test(
         ":validator",
         ":validator_pb",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
         "@htmlparser//css:parse_css_cc_proto",
         "@validator//:validator_cc_proto",
     ],
