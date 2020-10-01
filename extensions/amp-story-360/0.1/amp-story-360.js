@@ -229,6 +229,9 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {boolean} */
     this.gyroscopeControls_ = false;
 
+    /** @private {?Element} */
+    this.activateButton_ = null;
+
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
@@ -338,11 +341,20 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   getPageId_() {
     if (this.pageId_ == null) {
-      this.pageId_ = closest(dev().assertElement(this.element), (el) => {
-        return el.tagName.toLowerCase() === 'amp-story-page';
-      }).getAttribute('id');
+      this.pageId_ = this.getPage_().getAttribute('id');
     }
     return this.pageId_;
+  }
+
+  /**
+   * @private
+   * @return {?Element} the parent amp-story-page
+   */
+  getPage_() {
+    return closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
+    );
   }
 
   /**
@@ -350,11 +362,16 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   onPermissionState_(permissionState) {
+    if (this.activateButton_) {
+      this.mutateElement(() => {
+        this.getPage_().removeChild(this.activateButton_);
+        this.activateButton_ = null;
+      });
+    }
     if (permissionState === 'granted') {
       this.enableGyroscope_();
     } else if (permissionState === 'denied') {
       this.gyroscopeControls_ = false;
-      this.togglePermissionClass_(true);
     }
   }
 
@@ -396,7 +413,6 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   enableGyroscope_() {
     this.gyroscopeControls_ = true;
-    this.togglePermissionClass_(true);
 
     const checkNoMotion = this.timer_.delay(() => {
       this.gyroscopeControls_ = false;
@@ -449,19 +465,21 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   renderActivateButton_() {
-    const activateButton = buildActivateButtonTemplate(this.element);
+    const ampStoryPage = this.getPage_();
+    this.activateButton_ =
+      ampStoryPage && buildActivateButtonTemplate(ampStoryPage);
 
-    activateButton.querySelector(
+    this.activateButton_.querySelector(
       '.i-amphtml-story-360-activate-text'
     ).textContent = this.localizationService_.getLocalizedString(
       LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
     );
 
-    activateButton.addEventListener('click', () =>
+    this.activateButton_.addEventListener('click', () =>
       this.requestGyroscopePermissions_()
     );
 
-    this.mutateElement(() => this.element.appendChild(activateButton));
+    this.mutateElement(() => ampStoryPage.appendChild(this.activateButton_));
   }
 
   /** @private */
@@ -487,20 +505,6 @@ export class AmpStory360 extends AMP.BaseElement {
     } else if (permissionState === 'denied') {
       this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'denied');
     }
-  }
-
-  /**
-   * Toggles class on amp-story to show or hide activate button.
-   * @param {boolean} hidePermissionButton
-   * @private
-   */
-  togglePermissionClass_(hidePermissionButton) {
-    this.mutateElement(() => {
-      this.element.classList.toggle(
-        'i-amphtml-story-360-hide-permissions-ui',
-        hidePermissionButton
-      );
-    });
   }
 
   /** @override */

@@ -24,6 +24,7 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
+const open = require('open');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
@@ -533,6 +534,20 @@ function printNobuildHelp() {
 }
 
 /**
+ * @param {string=} covPath
+ * @return {!Promise}
+ */
+async function maybePrintCoverageMessage(covPath) {
+  if (!argv.coverage || isTravisBuild()) {
+    return;
+  }
+
+  const url = 'file://' + path.resolve(covPath);
+  log(green('INFO:'), 'Generated code coverage report at', cyan(url));
+  await open(url, {wait: false});
+}
+
+/**
  * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
  * fortesting mode. Called by "gulp build" and "gulp dist" while building
  * various runtime files.
@@ -654,6 +669,7 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
+  maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,
