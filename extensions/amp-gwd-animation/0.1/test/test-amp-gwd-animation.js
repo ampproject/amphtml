@@ -83,19 +83,14 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           let element;
           let impl;
           let page1Elem;
-          let embed;
           let win;
           let doc;
           let runtime;
 
           beforeEach(() => {
             ampdoc = env.ampdoc;
-            embed = env.embed;
-            win = variant.ampdoc == 'fie' ? embed.win : ampdoc.win;
-            doc =
-              variant.ampdoc == 'fie'
-                ? embed.win.document
-                : ampdoc.getRootNode();
+            win = ampdoc.win;
+            doc = ampdoc.getRootNode();
 
             // Create a test amp-carousel GWD page deck.
             doc.body.innerHTML = `<amp-carousel id="pagedeck"
