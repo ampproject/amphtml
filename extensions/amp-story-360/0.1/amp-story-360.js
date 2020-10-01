@@ -351,9 +351,9 @@ export class AmpStory360 extends AMP.BaseElement {
    * @return {!Element} the parent amp-story-page
    */
   getPage_() {
-    return closest(dev().assertElement(this.element), (el) => {
-      return el.tagName.toLowerCase() === 'amp-story-page';
-    });
+    return closest(dev().assertElement(this.element), (el) => 
+      el.tagName.toLowerCase() === 'amp-story-page';
+    );
   }
 
   /**
