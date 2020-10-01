@@ -364,6 +364,7 @@ export class AmpStory360 extends AMP.BaseElement {
     if (this.activateButton_) {
       this.mutateElement(() => {
         this.activateButton_.remove();
+        this.activateButton_ = null;
       });
     }
     if (permissionState === 'granted') {
