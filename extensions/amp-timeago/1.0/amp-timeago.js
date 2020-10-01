@@ -16,20 +16,15 @@
 
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Timeago} from './timeago';
-import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {parseDate} from '../../../src/utils/date';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-timeago';
 
 class AmpTimeago extends PreactBaseElement {
-  /** @override */
-  init() {
-    return dict({'cutoffText': this.element.textContent});
-  }
-
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -38,23 +33,69 @@ class AmpTimeago extends PreactBaseElement {
     );
     return isLayoutSizeDefined(layout);
   }
+
+  /** @override */
+  updatePropsForRendering(props) {
+    props['placeholder'] = props['children'];
+  }
 }
 
 /** @override */
 AmpTimeago['Component'] = Timeago;
 
 /** @override */
-AmpTimeago['passthrough'] = true;
+AmpTimeago['passthroughNonEmpty'] = true;
 
 /** @override */
 AmpTimeago['layoutSizeDefined'] = true;
 
 /** @override */
 AmpTimeago['props'] = {
-  'datetime': {attr: 'datetime'},
-  'locale': {attr: 'locale', default: 'en'},
+  'datetime': {
+    attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
+    parseAttrs: parseDateAttrs,
+  },
   'cutoff': {attr: 'cutoff', type: 'number'},
+  'locale': {attr: 'locale'},
 };
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ * @visibleForTesting
+ */
+export function parseDateAttrs(element) {
+  // TODO(#29246): Is this a coincidence that timeago would have the same format
+  // as date-display? E.g. the format for date-countdown is somewhat different.
+  const epoch = userAssert(
+    parseEpoch(element),
+    'One of datetime, timestamp-ms, or timestamp-seconds is required'
+  );
+
+  const offsetSeconds =
+    (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
+  return epoch + offsetSeconds;
+}
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ */
+function parseEpoch(element) {
+  const datetime = element.getAttribute('datetime');
+  if (datetime) {
+    return userAssert(parseDate(datetime), 'Invalid date: %s', datetime);
+  }
+  const timestampMs = element.getAttribute('timestamp-ms');
+  if (timestampMs) {
+    return Number(timestampMs);
+  }
+  const timestampSeconds = element.getAttribute('timestamp-seconds');
+  if (timestampSeconds) {
+    return Number(timestampSeconds) * 1000;
+  }
+  return null;
+}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpTimeago);

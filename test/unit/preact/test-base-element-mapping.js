@@ -65,6 +65,159 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
   }
 
+  describe('attribute mapping', () => {
+    const DATE_STRING = '2018-01-01T08:00:00Z';
+    const DATE = Date.parse(DATE_STRING);
+
+    let element;
+
+    beforeEach(async () => {
+      Impl['props'] = {
+        'noValue': {attr: 'no-value'},
+        'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+        'propA': {attr: 'prop-a'},
+        'minFontSize': {attr: 'min-font-size', type: 'number'},
+        'aDate': {attr: 'a-date', type: 'date'},
+        'disabled': {attr: 'disabled', type: 'boolean'},
+        'enabled': {attr: 'enabled', type: 'boolean'},
+        'combined': {
+          attrs: ['part-a', 'part-b'],
+          parseAttrs: (e) =>
+            `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
+        },
+      };
+      element = html`
+        <amp-preact
+          layout="fixed"
+          width="100"
+          height="100"
+          prop-a="A"
+          min-font-size="72"
+          disabled
+          unknown="1"
+          part-a="A"
+          part-b="B"
+        >
+        </amp-preact>
+      `;
+      element.setAttribute('a-date', DATE_STRING);
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should render content inline', async () => {
+      expect(component).to.be.calledOnce;
+      expect(element.querySelector('#component')).to.be.ok;
+      expect(element.shadowRoot).to.not.be.ok;
+    });
+
+    it('should parse attributes on first render', async () => {
+      expect(component).to.be.calledOnce;
+      expect(lastProps).to.contain({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        aDate: DATE,
+        disabled: true,
+        enabled: false,
+        combined: 'A+B',
+      });
+    });
+
+    it('should mutate attributes', async () => {
+      element.setAttribute('prop-a', 'B');
+      element.setAttribute('min-font-size', '72.5');
+      element.setAttribute('a-date', '2018-01-01T08:00:01Z');
+      element.setAttribute('enabled', '');
+      element.removeAttribute('disabled');
+      element.setAttribute('part-b', 'C');
+
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+
+      expect(component).to.be.calledTwice;
+      expect(lastProps).to.contain({
+        valueWithDef: 'DEFAULT',
+        propA: 'B',
+        minFontSize: 72.5,
+        aDate: DATE + 1000,
+        disabled: false,
+        enabled: true,
+        combined: 'A+C',
+      });
+    });
+
+    it('should ignore non-declared attributes', async () => {
+      // Perform ignored mutations.
+      await waitForMutation(element, () => {
+        element.removeAttribute('unknown');
+        element.setAttribute('unknown2', '2');
+        element.style.background = 'red';
+        element.classList.add('class1');
+      });
+
+      // Execute a handled mutation and check that execution happened only
+      // twice.
+      element.setAttribute('prop-a', 'B');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+      expect(lastProps).to.have.property('propA', 'B');
+      expect(lastProps).to.not.have.property('unknown2');
+    });
+  });
+
+  describe('props with staticProps', () => {
+    let element;
+
+    const initProps = {x: 'x', tacos: true};
+
+    beforeEach(async () => {
+      Impl.prototype.init = () => initProps;
+      Impl['staticProps'] = {
+        a: 'a',
+        b: 123,
+      };
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"></amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('include staticProps', () => {
+      expect(lastProps).to.include(Impl['staticProps']);
+    });
+
+    it('include init() props', () => {
+      expect(lastProps).to.include(initProps);
+    });
+  });
+
+  describe('usesTemplate', () => {
+    let element;
+
+    beforeEach(async () => {
+      Impl['usesTemplate'] = true;
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"> </amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should pick-up template attribute mutations', async () => {
+      element.setAttribute('template', 't1');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+    });
+
+    it('should pick-up template child mutations', async () => {
+      element.appendChild(document.createElement('template'));
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+    });
+  });
+
   describe('shadow container rendering', () => {
     let element;
 
@@ -160,86 +313,86 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
   });
 
-  describe('no children mapping', () => {
+  describe('lightDom mapping', () => {
     let element;
+    let updateEventSpy;
 
-    beforeEach(async () => {
-      Impl['props'] = {
-        'noValue': {attr: 'no-value'},
-        'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
-        'propA': {attr: 'prop-a'},
-        'minFontSize': {attr: 'min-font-size', type: 'number'},
-        'disabled': {attr: 'disabled', type: 'boolean'},
-        'enabled': {attr: 'enabled', type: 'boolean'},
-      };
+    beforeEach(() => {
+      Impl['lightDomTag'] = 'time';
+      component = env.sandbox.stub().callsFake((props) => {
+        lastProps = props;
+        return Preact.createElement(
+          'time',
+          {...props},
+          Preact.createElement('div', {
+            id: 'component',
+            'data-name': props.name,
+          })
+        );
+      });
+      Impl['Component'] = component;
       element = html`
-        <amp-preact
-          layout="fixed"
-          width="100"
-          height="100"
-          prop-a="A"
-          min-font-size="72"
-          disabled
-          unknown="1"
-        >
-        </amp-preact>
+        <amp-preact layout="fixed" width="100" height="100"> </amp-preact>
       `;
+
+      updateEventSpy = env.sandbox.stub();
+      element.addEventListener('amp:dom-update', updateEventSpy);
+    });
+
+    it('should render from scratch', async () => {
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(
+        () => element.querySelector(':scope > time'),
+        'lightDom element created'
+      );
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(component).to.be.calledOnce;
+      const lightDom = element.querySelector(':scope > time');
+      expect(lightDom.className).to.equal('');
+      expect(lightDom.querySelector(':scope > #component')).to.be.ok;
+      expect(lastProps.as).to.equal('time');
+      await waitFor(
+        () => updateEventSpy.callCount > 0,
+        'amp:dom-update called'
+      );
+    });
+
+    it('should add fill class', async () => {
+      Impl['layoutSizeDefined'] = true;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(
+        () => element.querySelector(':scope > time'),
+        'lightDom element created'
+      );
+      const lightDom = element.querySelector(':scope > time');
+      expect(lightDom.querySelector(':scope > #component')).to.be.ok;
+      expect(lightDom.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.as).to.equal('time');
+      await waitFor(
+        () => updateEventSpy.callCount > 0,
+        'amp:dom-update called'
+      );
+    });
+
+    it('should use the existing element if exists', async () => {
+      Impl['layoutSizeDefined'] = true;
+      const existing = document.createElement('time');
+      element.appendChild(existing);
       doc.body.appendChild(element);
       await element.build();
       await waitFor(() => component.callCount > 0, 'component rendered');
-    });
-
-    it('should render content inline', async () => {
-      expect(component).to.be.calledOnce;
-      expect(element.querySelector('#component')).to.be.ok;
-      expect(element.shadowRoot).to.not.be.ok;
-    });
-
-    it('should parse attributes on first render', async () => {
-      expect(component).to.be.calledOnce;
-      expect(lastProps).to.deep.equal({
-        valueWithDef: 'DEFAULT',
-        propA: 'A',
-        minFontSize: 72,
-        disabled: true,
-        enabled: false,
-      });
-    });
-
-    it('should mutate attributes', async () => {
-      element.setAttribute('prop-a', 'B');
-      element.setAttribute('min-font-size', '72.5');
-      element.setAttribute('enabled', '');
-      element.removeAttribute('disabled');
-
-      await waitFor(() => component.callCount > 1, 'component re-rendered');
-
-      expect(component).to.be.calledTwice;
-      expect(lastProps).to.deep.equal({
-        valueWithDef: 'DEFAULT',
-        propA: 'B',
-        minFontSize: 72.5,
-        disabled: false,
-        enabled: true,
-      });
-    });
-
-    it('should ignore non-declared attributes', async () => {
-      // Perform ignored mutations.
-      await waitForMutation(element, () => {
-        element.removeAttribute('unknown');
-        element.setAttribute('unknown2', '2');
-        element.style.background = 'red';
-        element.classList.add('class1');
-      });
-
-      // Execute a handled mutation and check that execution happened only
-      // twice.
-      element.setAttribute('prop-a', 'B');
-      await waitFor(() => component.callCount > 1, 'component re-rendered');
-      expect(component).to.be.calledTwice;
-      expect(lastProps).to.have.property('propA', 'B');
-      expect(lastProps).to.not.have.property('unknown2');
+      expect(element.querySelector(':scope > time')).to.equal(existing);
+      expect(existing.querySelector(':scope > #component')).to.be.ok;
+      expect(existing.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.as).to.equal('time');
+      await waitFor(
+        () => updateEventSpy.callCount > 0,
+        'amp:dom-update called'
+      );
     });
   });
 
@@ -261,6 +414,12 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           selector: '[special2]',
           single: true,
         },
+        'cloned': {
+          name: 'cloned',
+          selector: '[cloned]',
+          single: false,
+          clone: true,
+        },
         'children': {
           name: 'children',
           selector: '*',
@@ -272,6 +431,8 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           <div special1></div>
           <div id="child1"></div>
           <div id="child2"></div>
+          <div cloned id="cloned1"></div>
+          <div cloned id="cloned2"></div>
         </amp-preact>
       `;
       doc.body.appendChild(element);
@@ -405,6 +566,33 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       element.setAttribute('prop-a', 'B');
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
+    });
+
+    it('clones children (without descendant) as vnodes into prop', async () => {
+      expect(
+        component.withArgs(
+          env.sandbox.match({
+            cloned: [
+              env.sandbox.match({
+                type: 'div',
+                key: element.querySelector('#cloned1'),
+                props: {
+                  cloned: '',
+                  id: 'cloned1',
+                },
+              }),
+              env.sandbox.match({
+                type: 'div',
+                key: element.querySelector('#cloned2'),
+                props: {
+                  cloned: '',
+                  id: 'cloned2',
+                },
+              }),
+            ],
+          })
+        )
+      ).to.be.calledOnce;
     });
   });
 

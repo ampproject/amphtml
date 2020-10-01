@@ -236,6 +236,30 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     expect(root.getRootVisibility()).to.equal(0);
   });
 
+  it('should switch visibility on window resize for inabox', () => {
+    win.__AMP_MODE = {runtime: 'inabox'};
+    root = new VisibilityManagerForDoc(ampdoc);
+
+    // Check observer is correctly set.
+    const inOb = root.intersectionObserver_;
+    expect(inOb).to.be.instanceOf(IntersectionObserverStub);
+    expect(inOb.elements).to.contain(win.document.documentElement);
+
+    inOb.callback([
+      {
+        target: win.document.documentElement,
+        intersectionRatio: 1,
+        intersectionRect: layoutRectLtwh(0, 0, 0, 0),
+        boundingClientRect: layoutRectLtwh(1, 1, 100, 0),
+      },
+    ]);
+
+    expect(root.getRootVisibility()).to.equal(0);
+    const resizeEvent = new Event('resize');
+    ampdoc.win.eventListeners.fire(resizeEvent);
+    expect(root.getRootVisibility()).to.equal(1);
+  });
+
   it('should switch root model to no-visibility on dispose', () => {
     expect(root.getRootVisibility()).to.equal(1);
     root.dispose();

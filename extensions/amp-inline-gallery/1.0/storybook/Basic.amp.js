@@ -15,37 +15,53 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {storiesOf} from '@storybook/preact';
+import {boolean, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
-// eslint-disable-next-line
-storiesOf('amp-inline-gallery-1_0', module)
-  .addDecorator(withKnobs)
-  .addDecorator(withA11y)
-  .addDecorator(withAmp)
-  .addParameters({
+export default {
+  title: 'amp-inline-gallery-1_0',
+  decorators: [withKnobs, withA11y, withAmp],
+
+  parameters: {
     extensions: [
       {name: 'amp-inline-gallery', version: '1.0'},
       {name: 'amp-base-carousel', version: '1.0'},
     ],
+
     experiments: ['amp-inline-gallery-bento', 'amp-base-carousel-bento'],
-  })
-  .add('default', () => {
-    return (
-      <amp-inline-gallery layout="container">
-        <amp-base-carousel width="440" height="225">
-          {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
-            <amp-layout width="440" height="225">
-              <svg viewBox="0 0 440 225">
-                <rect style={{fill: color}} width="440" height="225" />
-                Sorry, your browser does not support inline SVG.
-              </svg>
-            </amp-layout>
-          ))}
-        </amp-base-carousel>
-        <amp-inline-gallery-pagination layout="fixed-height" height="24" />
-      </amp-inline-gallery>
-    );
-  });
+  },
+};
+
+export const Default = () => {
+  const topInset = boolean('top indicator inset?', false);
+  const bottomInset = boolean('bottom indicator inset?', false);
+  return (
+    <amp-inline-gallery layout="container">
+      <amp-inline-gallery-pagination
+        inset={topInset}
+        layout="fixed-height"
+        height="24"
+      />
+      <amp-base-carousel width="440" height="225">
+        {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
+          <amp-layout width="440" height="225">
+            <svg viewBox="0 0 440 225">
+              <rect style={{fill: color}} width="440" height="225" />
+              Sorry, your browser does not support inline SVG.
+            </svg>
+          </amp-layout>
+        ))}
+      </amp-base-carousel>
+      <amp-inline-gallery-pagination
+        inset={bottomInset}
+        layout="fixed-height"
+        height="24"
+      />
+    </amp-inline-gallery>
+  );
+};
+
+Default.story = {
+  name: 'default',
+};

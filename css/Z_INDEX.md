@@ -33,10 +33,7 @@ Run `gulp get-zindex` to generate this file.
 | .i-amphtml-story-opacity-mask                                                                           | 100003     | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-story-has-new-page-notification-container                                                    | 100002     | extensions/amp-story/1.0/amp-story-system-layer.css                  |
 | amp-story[standalone] .i-amphtml-story-developer-log                                                    | 100002     | extensions/amp-story/1.0/amp-story.css                               |
-| .i-amphtml-story-button-move                                                                            | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-container                                    | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-desktop-panels .i-amphtml-story-button-container                                       | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-page-sentinel                                                                          | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
+| .i-amphtml-story-button-container                                                                       | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
 | .i-amphtml-ad-overlay-container                                                                         | 100001     | extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-ad-badge.css    |
 | .i-amphtml-story-bookend                                                                                | 100001     | extensions/amp-story/1.0/amp-story-bookend.css                       |
 | .i-amphtml-story-info-dialog                                                                            | 100001     | extensions/amp-story/1.0/amp-story-info-dialog.css                   |
@@ -44,6 +41,7 @@ Run `gulp get-zindex` to generate this file.
 | .i-amphtml-story-focused-state-layer                                                                    | 100001     | extensions/amp-story/1.0/amp-story-tooltip.css                       |
 | .i-amphtml-story-page-attachment-expand                                                                 | 100000     | extensions/amp-story/1.0/amp-story-page-attachment.css               |
 | .i-amphtml-story-system-layer                                                                           | 100000     | extensions/amp-story/1.0/amp-story-system-layer.css                  |
+| .i-amphtml-story-360-activate-button                                                                    | 100000     | extensions/amp-story-360.css                                         |
 | .i-amphtml-story-page-error                                                                             | 10000      | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-story-page-play-button                                                                       | 10000      | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-image-lightbox-trans                                                                         | 1001       | extensions/amp-image-lightbox/0.1/amp-image-lightbox.css             |

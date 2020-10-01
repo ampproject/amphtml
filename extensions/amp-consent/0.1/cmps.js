@@ -42,6 +42,13 @@ CMP_CONFIG['appconsent'] = {
   'promptUISrc': 'https://cdn.appconsent.io/loader.html',
 };
 
+CMP_CONFIG['ConsentManager'] = {
+  'consentInstanceId': 'ConsentManager',
+  'checkConsentHref':
+    'https://consentmanager.mgr.consensu.org/delivery/ampcheck.php',
+  'promptUISrc': 'https://consentmanager.mgr.consensu.org/delivery/ampui.php',
+};
+
 CMP_CONFIG['didomi'] = {
   'consentInstanceId': 'didomi',
   'checkConsentHref': 'https://api.privacy-center.org/amp/check-consent',
@@ -50,7 +57,7 @@ CMP_CONFIG['didomi'] = {
 
 CMP_CONFIG['iubenda'] = {
   'consentInstanceId': 'iubenda',
-  'checkConsentHref': 'https://cdn.iubenda.com/cs/amp/checkConsent',
+  'checkConsentHref': 'https://amp.iubenda.com/cs/amp/checkConsent',
   'promptUISrc': 'https://www.iubenda.com/en/help/22135-cookie-solution-amp',
 };
 
@@ -70,6 +77,12 @@ CMP_CONFIG['Ogury'] = {
   'consentInstanceId': 'Ogury',
   'checkConsentHref': 'https://api.ogury.mgr.consensu.org/v1/check-for-consent',
   'promptUISrc': 'https://www.ogury.mgr.consensu.org/amp.html',
+};
+
+CMP_CONFIG['onetrust'] = {
+  'consentInstanceId': 'onetrust',
+  'checkConsentHref': 'https://cdn.cookielaw.org/amp/consent/check',
+  'promptUISrc': ' https://amp.onetrust.mgr.consensu.org/',
 };
 
 CMP_CONFIG['opencmp'] = {

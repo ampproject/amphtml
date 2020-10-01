@@ -30,7 +30,6 @@ const COMMON_GLOBS = [
   'third_party/inputmask/**/*.js',
   'third_party/mustache/**/*.js',
   'third_party/react-dates/bundle.js',
-  'third_party/optimized-svg-icons/social-share-svgs.js',
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
@@ -55,7 +54,7 @@ const COMMON_GLOBS = [
   'node_modules/@ampproject/viewer-messaging/package.json',
   'node_modules/@ampproject/viewer-messaging/messaging.js',
   'node_modules/@ampproject/worker-dom/package.json',
-  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
+  'node_modules/@ampproject/worker-dom/dist/amp-production/main.mjs',
   'node_modules/preact/package.json',
   'node_modules/preact/dist/*.js',
   'node_modules/preact/hooks/package.json',
@@ -150,7 +149,6 @@ const CLOSURE_SRC_GLOBS = [
  */
 const THIRD_PARTY_TRANSFORM_GLOBS = [
   // JSX syntax should undergo usual transforms
-  'third_party/optimized-svg-icons/social-share-svgs.js',
 ];
 
 module.exports = {
