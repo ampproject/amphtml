@@ -75,7 +75,3 @@ amp-story-360 amp-img {
     transform: rotate(360deg);
   }
 }
-
-.i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-activate-button {
-  display: none !important;
-}
