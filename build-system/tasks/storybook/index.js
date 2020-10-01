@@ -30,12 +30,8 @@ const ENV_PORTS = {
  * @param {string} env 'amp' or 'preact'
  * @return {!ChildProcess}
  */
-function runStorybook(env) {
-  // install storybook-specific modules
-  installPackages(__dirname);
-
+function launchEnv(env) {
   const {ci, 'storybook_port': storybookPort = ENV_PORTS[env]} = argv;
-
   return execScriptAsync(
     [
       './node_modules/.bin/start-storybook',
@@ -52,35 +48,26 @@ function runStorybook(env) {
   );
 }
 
-/**
- * Simple wrapper around the storybook start script
- * for AMP components (HTML Environment)
- */
-async function storybookAmp() {
-  await runAmpDevBuildServer();
-  createCtrlcHandler('storybook-amp');
-  runStorybook('amp');
-}
-
-/**
- * Simple wrapper around the storybook start script.
- */
-function storybookPreact() {
-  runStorybook('preact');
+async function storybook() {
+  const {'storybook_env': env = 'amp,preact'} = argv;
+  const envs = env.split(',');
+  if (envs.includes('amp')) {
+    await runAmpDevBuildServer();
+  }
+  installPackages(__dirname);
+  createCtrlcHandler('storybook');
+  return Promise.all(envs.map(launchEnv));
 }
 
 module.exports = {
-  storybookAmp,
-  storybookPreact,
+  storybook,
 };
 
-storybookPreact.description =
-  'Isolated testing and development for AMP Bento components in Preact mode.';
-storybookAmp.description =
-  'Isolated testing and development for AMPHTML components.';
+storybook.description = 'Isolated testing and development for AMP components.';
 
-storybookPreact.flags = storybookAmp.flags = {
-  'storybook_port':
-    '  Change the port that the storybook dashboard is served from',
+storybook.flags = {
+  'storybook_env':
+    "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
+  'storybook_port': '  Set port from which to run the Storybook dashboard.',
   'ci': "  CI mode (skip interactive prompts, don't open browser)",
 };
