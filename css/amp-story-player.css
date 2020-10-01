@@ -15,8 +15,6 @@
  */
 
 amp-story-player {
-  width: 360px;
-  height: 600px;
   position: relative;
   display: block;
 }
