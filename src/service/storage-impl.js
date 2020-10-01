@@ -83,13 +83,26 @@ export class Storage {
   }
 
   /**
-   * Returns the promise that yields the timestamp of the property for the specified
-   * key.
+   * Returns the promise that yields the value of the property for the specified
+   * key, as long as it has a valid expiration.
    * @param {string} name
-   * @return {!Promise<number|undefined>}
+   * @param {number} duration
+   * @return {!Promise<*>}
    */
-  getTimestamp(name) {
-    return this.getStore_().then((store) => store.getTimestamp(name));
+  getUnexpiredValue(name, duration) {
+    return this.getStore_().then((store) => {
+      return Promise.all([store.get(name), store.getTimestamp(name)]).then(
+        (results) => {
+          const value = results[0];
+          const timestamp = results[1];
+          const now = Date.now();
+          if (timestamp != undefined && timestamp + duration > now) {
+            return value;
+          }
+          return;
+        }
+      );
+    });
   }
 
   /**

@@ -128,7 +128,7 @@ describes.sandboxed('cid', {}, (env) => {
     installViewerServiceForDoc(ampdoc);
     storageMock = mockServiceForDoc(env.sandbox, ampdoc, 'storage', [
       'get',
-      'getTimestamp',
+      'getUnexpiredValue',
     ]);
 
     viewer = Services.viewerForDoc(ampdoc);
@@ -819,7 +819,8 @@ describes.realWin('cid', {amp: true}, (env) => {
   let clock;
   let storageGetStub;
   let storageSetStub;
-  let storageGetTimeStub;
+  let storageGetUnexpiredStub;
+  const duration = 24 * 3600 * 1000 * 365;
   const hasConsent = Promise.resolve();
 
   beforeEach(() => {
@@ -838,11 +839,11 @@ describes.realWin('cid', {amp: true}, (env) => {
       'setNonBoolean'
     );
     storageGetStub = stubServiceForDoc(env.sandbox, ampdoc, 'storage', 'get');
-    storageGetTimeStub = stubServiceForDoc(
+    storageGetUnexpiredStub = stubServiceForDoc(
       env.sandbox,
       ampdoc,
       'storage',
-      'getTimestamp'
+      'getUnexpiredValue'
     );
   });
 
@@ -886,6 +887,9 @@ describes.realWin('cid', {amp: true}, (env) => {
       env.sandbox
         .stub(cid.viewerCidApi_, 'isSupported')
         .returns(Promise.resolve(false));
+      storageGetUnexpiredStub
+        .withArgs('amp-cid:foo', duration)
+        .returns(Promise.resolve());
       setCookie(win, 'foo', '', 0);
       const fooCid = await cid.get(
         {
@@ -895,7 +899,7 @@ describes.realWin('cid', {amp: true}, (env) => {
         hasConsent
       );
       expect(fooCid).to.have.string('amp-');
-      expect(storageSetStub).to.be.calledWith('amp-cid-backup-foo', fooCid);
+      expect(storageSetStub).to.be.calledWith('amp-cid:foo', fooCid);
     });
 
     it('should find AMP generated CID in cookie and backup', async () => {
@@ -913,7 +917,7 @@ describes.realWin('cid', {amp: true}, (env) => {
         hasConsent
       );
       expect(fooCid).to.equal(cidString);
-      expect(storageSetStub).to.be.calledWith('amp-cid-backup-foo', fooCid);
+      expect(storageSetStub).to.be.calledWith('amp-cid:foo', fooCid);
 
       storageSetStub.resetHistory();
       const nonAmpCidString = 'xyz987';
@@ -938,15 +942,10 @@ describes.realWin('cid', {amp: true}, (env) => {
       env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
         win.document.cookie = `${name}=${value}`;
       });
-      env.sandbox.stub(Date, 'now').returns(1);
-      const creationTime = 2;
       const cidString = 'amp-abc123';
-      storageGetStub
-        .withArgs('amp-cid-backup-foo')
+      storageGetUnexpiredStub
+        .withArgs('amp-cid:foo', duration)
         .returns(Promise.resolve(cidString));
-      storageGetTimeStub
-        .withArgs('amp-cid-backup-foo')
-        .returns(Promise.resolve(creationTime));
       const fooCid = await cid.get(
         {
           scope: 'foo',
@@ -956,42 +955,8 @@ describes.realWin('cid', {amp: true}, (env) => {
       );
 
       expect(fooCid).to.equal(cidString);
-      expect(storageSetStub).to.be.calledWith('amp-cid-backup-foo', fooCid);
+      expect(storageSetStub).to.be.calledWith('amp-cid:foo', fooCid);
       expect(getCookie(win, 'foo')).to.equal(cidString);
-    });
-
-    it('should not use expired CID backup', async () => {
-      env.sandbox
-        .stub(cid.viewerCidApi_, 'isSupported')
-        .returns(Promise.resolve(false));
-      const setCookieSpy = env.sandbox.spy();
-      setCookie(win, 'foo', '', 0);
-      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
-        setCookieSpy(name, value);
-      });
-      const creationTime = 0;
-      const cidString = 'amp-abc123';
-      storageGetStub
-        .withArgs('amp-cid-backup-foo')
-        .returns(Promise.resolve(cidString));
-      storageGetTimeStub
-        .withArgs('amp-cid-backup-foo')
-        .returns(Promise.resolve(creationTime));
-
-      const fooCid = await cid.get(
-        {
-          scope: 'foo',
-          createCookieIfNotPresent: true,
-        },
-        hasConsent
-      );
-
-      expect(fooCid).to.not.equal(cidString);
-      expect(storageSetStub).to.not.be.calledWith(
-        'amp-cid-backup-foo',
-        cidString
-      );
-      expect(setCookieSpy).to.not.be.calledWith('foo', cidString);
     });
   });
 

@@ -550,7 +550,7 @@ You can pass the following arguments into the Client ID variable like a function
 - `cid scope` (Required): The namespace for the Client ID.
 - `amp-user-notification id` (Optional): Use this argument to make the Client ID substitution dependent on the dismissal of a user notification shown to the visitor of the page. In amp-analytics, this is the same as using the [`data-consent-notification-id`](../extensions/amp-analytics/amp-analytics.md) attribute -- you may choose to use either one for the amp-analytics component.
 - `cookie name` (Optional): The name of the fallback cookie when the document is not served by an AMP proxy. If not provided, `cid scope` will be used as the cookie name.
-- `opt out backup` (Optional): Whether to opt-out of storing the AMP generated CID in Storage as a backup when the document is not served by an AMP proxy. Default value is `false`.
+- `opt out backup` (Optional): If set to `true`, then will opt-out of storing the AMP generated CID in Storage as a backup when the document is not served by an AMP proxy. Otherwise, will default into this behavior.
 
 #### Content Load Time
 
