@@ -26,7 +26,6 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-  installServiceInEmbedScope,
   isDisposable,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
@@ -515,21 +514,6 @@ describe('service', () => {
         expect(fromNode).to.equal(topService);
       });
 
-      it('should not fallback from FIE to parent service', () => {
-        // TODO(#22733): remove once ampdoc-fie migration is done.
-        const fromChildNode = getExistingServiceForDocInEmbedScope(
-          childWinNode,
-          'c'
-        );
-        expect(fromChildNode).to.be.null;
-
-        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
-          grandChildWinNode,
-          'c'
-        );
-        expect(fromGrandchildNode).to.be.null;
-      });
-
       it('should find ampdoc and return its service', () => {
         toggleAmpdocFieForTesting(windowApi, true);
         const fromChildNode = getExistingServiceForDocInEmbedScope(
@@ -600,31 +584,6 @@ describe('service', () => {
         // The service is NOT also registered on the embed window.
         expect(childWin.__AMP_SERVICES && childWin.__AMP_SERVICES['c']).to.not
           .exist;
-      });
-
-      it('should return overriden service', () => {
-        // TODO(#22733): remove once ampdoc-fie migration is done.
-        const overridenService = {};
-        installServiceInEmbedScope(childWin, 'c', overridenService);
-        expect(
-          getExistingServiceForDocInEmbedScope(childWinNode, 'c')
-        ).to.equal(overridenService);
-
-        // Top-level service doesn't change.
-        const fromNode = getExistingServiceForDocInEmbedScope(node, 'c');
-        expect(fromNode).to.equal(topService);
-
-        // Notice that only direct overrides are allowed for now. This is
-        // arbitrary can change in the future to allow hierarchical lookup
-        // up the window chain.
-        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
-          grandChildWinNode,
-          'c'
-        );
-        expect(fromGrandchildNode).to.be.null;
-
-        // The service is also registered on the embed window.
-        expect(childWin.__AMP_SERVICES['c']).to.exist;
       });
     });
   });

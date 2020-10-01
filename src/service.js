@@ -22,7 +22,6 @@
 
 import {Deferred} from './utils/promise';
 import {dev, devAssert} from './log';
-import {isInAmpdocFieExperiment} from './ampdoc-fie';
 import {toWin} from './types';
 
 /**
@@ -80,22 +79,8 @@ export class EmbeddableService {
  */
 export function getExistingServiceForDocInEmbedScope(element, id) {
   // TODO(#22733): completely remove this method once ampdoc-fie launches.
-  const document = element.ownerDocument;
-  const win = toWin(document.defaultView);
-  const topWin = getTopWindow(win);
-  // First, try to resolve via local embed window (if applicable).
-  const isEmbed = win != topWin;
-  const ampdocFieExperimentOn = isInAmpdocFieExperiment(topWin);
-  if (isEmbed && !ampdocFieExperimentOn) {
-    if (isServiceRegistered(win, id)) {
-      return getServiceInternal(win, id);
-    }
-    // Fallback from FIE to parent is intentionally unsupported for safety.
-    return null;
-  } else {
-    // Resolve via the element's ampdoc.
-    return getServiceForDocOrNullInternal(element, id);
-  }
+  // Resolve via the element's ampdoc.
+  return getServiceForDocOrNullInternal(element, id);
 }
 
 /**
@@ -105,6 +90,7 @@ export function getExistingServiceForDocInEmbedScope(element, id) {
  * @param {!Object} service The service.
  */
 export function installServiceInEmbedScope(embedWin, id, service) {
+  // TODO(#22733): completely remove this method once ampdoc-fie launches.
   const topWin = getTopWindow(embedWin);
   devAssert(
     embedWin != topWin,
@@ -116,24 +102,16 @@ export function installServiceInEmbedScope(embedWin, id, service) {
     'Service override has already been installed: %s',
     id
   );
-  const ampdocFieExperimentOn = isInAmpdocFieExperiment(topWin);
-  if (ampdocFieExperimentOn) {
-    const ampdoc = getAmpdoc(embedWin.document);
-    registerServiceInternal(
-      getAmpdocServiceHolder(ampdoc),
-      ampdoc,
-      id,
-      function () {
-        return service;
-      },
-      /* override */ true
-    );
-  } else {
-    registerServiceInternal(embedWin, embedWin, id, function () {
+  const ampdoc = getAmpdoc(embedWin.document);
+  registerServiceInternal(
+    getAmpdocServiceHolder(ampdoc),
+    ampdoc,
+    id,
+    function () {
       return service;
-    });
-    getServiceInternal(embedWin, id); // Force service to build.
-  }
+    },
+    /* override */ true
+  );
 }
 
 /**
