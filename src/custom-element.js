@@ -378,7 +378,6 @@ function createBaseCustomElementClass(win) {
       this.assertLayout_();
       // TODO(wg-runtime): Don't set BaseElement ivars externally.
       this.implementation_.layout_ = this.layout_;
-      this.implementation_.firstAttachedCallback();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
       this.signals_.signal(CommonSignals.UPGRADED);
@@ -749,8 +748,7 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Called when the element is first connected to the DOM. Calls
-     * {@link firstAttachedCallback} if this is the first attachment.
+     * Called when the element is first connected to the DOM. 
      *
      * This callback is guarded by checks to see if the element is still
      * connected.  Chrome and Safari can trigger connectedCallback even when

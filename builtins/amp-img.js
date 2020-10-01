@@ -52,9 +52,6 @@ export class AmpImg extends BaseElement {
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = true;
-
     /** @private {?Element} */
     this.img_ = null;
 
@@ -135,13 +132,6 @@ export class AmpImg extends BaseElement {
           onLayout
         );
       }
-    }
-  }
-
-  /** @override */
-  firstAttachedCallback() {
-    if (this.element.hasAttribute('noprerender')) {
-      this.prerenderAllowed_ = false;
     }
   }
 
@@ -262,7 +252,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.prerenderAllowed_;
+    return ! this.element.hasAttribute('noprerender');
   }
 
   /** @override */
