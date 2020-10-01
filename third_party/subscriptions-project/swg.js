@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.121 */
+/** Version: 0.1.22.123 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -76,6 +76,7 @@ const AnalyticsEvent = {
   ACTION_USER_CONSENT_DEFERRED_ACCOUNT: 1021,
   ACTION_USER_DENY_DEFERRED_ACCOUNT: 1022,
   ACTION_DEFERRED_ACCOUNT_REDIRECT: 1023,
+  ACTION_GET_ENTITLEMENTS: 1024,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -84,6 +85,10 @@ const AnalyticsEvent = {
   EVENT_GPAY_CANNOT_CONFIRM_TX_ID: 3004,
   EVENT_GOOGLE_UPDATED: 3005,
   EVENT_NEW_TX_ID: 3006,
+  EVENT_UNLOCKED_BY_SUBSCRIPTION: 3007,
+  EVENT_UNLOCKED_BY_METER: 3008,
+  EVENT_NO_ENTITLEMENTS: 3009,
+  EVENT_HAS_METERING_ENTITLEMENTS: 3010,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -6015,7 +6020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.121',
+    '_client': 'SwG 0.1.22.123',
   });
 }
 
@@ -7134,7 +7139,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.121',
+        '_client': 'SwG 0.1.22.123',
         'supportsEventManager': true,
       },
       args || {}
@@ -7983,7 +7988,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.121');
+    context.setClientVersion('SwG 0.1.22.123');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10832,6 +10837,10 @@ class EntitlementsManager {
       return;
     }
 
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_METER, false);
+
     const jwt = new EntitlementJwt();
     jwt.setSource(entitlement.source);
     jwt.setJwt(entitlement.subscriptionToken);
@@ -11065,6 +11074,9 @@ class EntitlementsManager {
 
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_NO_ENTITLEMENTS, false);
       return;
     }
 
@@ -11079,9 +11091,15 @@ class EntitlementsManager {
   maybeShowToast_(entitlement) {
     // Don't show toast for metering entitlements.
     if (entitlement.source === GOOGLE_METERING_SOURCE) {
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS, false);
       return Promise.resolve();
     }
 
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION, false);
     // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
@@ -11201,7 +11219,12 @@ class EntitlementsManager {
         }
         return serviceUrl(url);
       })
-      .then((url) => this.fetcher_.fetchCredentialedJson(url))
+      .then((url) => {
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.ACTION_GET_ENTITLEMENTS, false);
+        return this.fetcher_.fetchCredentialedJson(url);
+      })
       .then((json) => {
         if (json.errorMessages && json.errorMessages.length > 0) {
           json.errorMessages.forEach((errorMessage) => {
@@ -17069,6 +17092,11 @@ class ConfiguredRuntime {
   /** @override */
   setOnLoginRequest(callback) {
     this.callbacks_.setOnLoginRequest(callback);
+  }
+
+  /** @override */
+  triggerLoginRequest(request) {
+    this.callbacks_.triggerLoginRequest(request);
   }
 
   /** @override */
