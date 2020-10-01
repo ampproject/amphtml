@@ -183,6 +183,8 @@ function getNodeLatestLtsVersion(distributionsJson) {
 // If yarn is being run, perform a version check and proceed with the install.
 function checkYarnVersion() {
   const yarnVersion = getStdout(yarnExecutable + ' --version').trim();
+  // TODO (KB): Revert #30478 once `yarn` stable is fixed
+  // At this time current stable is failing GPG checks.
   const stableVersion = '1.22.4';
   if (stableVersion === '') {
     console.log(
@@ -199,7 +201,9 @@ function checkYarnVersion() {
     );
     console.log(
       yellow('⤷ To fix this, run'),
-      cyan('"curl -o- -L https://yarnpkg.com/install.sh | bash"'),
+      cyan(
+        `"curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${stableVersion}"`
+      ),
       yellow('or see'),
       cyan('https://yarnpkg.com/docs/install'),
       yellow('for instructions.')
