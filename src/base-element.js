@@ -311,14 +311,6 @@ export class BaseElement {
   }
 
   /**
-   * Called when the element is first created. Note that for element created
-   * using createElement this may be before any children are added.
-   */
-  createdCallback() {
-    // Subclasses may override.
-  }
-
-  /**
    * Override in subclass if the element needs to rebuilt its DOM content.
    * Until the element has been rebuilt its content are not shown with an only
    * exception of [placeholder] elements. From the moment the element is created

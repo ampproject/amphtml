@@ -374,7 +374,6 @@ function createBaseCustomElementClass(win) {
       this.implementation_ = newImpl;
       this.classList.remove('amp-unresolved');
       this.classList.remove('i-amphtml-unresolved');
-      this.implementation_.createdCallback();
       this.assertLayout_();
       // TODO(wg-runtime): Don't set BaseElement ivars externally.
       this.implementation_.layout_ = this.layout_;
