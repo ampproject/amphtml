@@ -1627,7 +1627,6 @@ function analyticsEvent(entry, eventType, opt_vars) {
   const {video} = entry;
 
   entry.getAnalyticsDetails().then((details) => {
-    console.log('Event', video.element.id, eventType, details);
     if (opt_vars) {
       Object.assign(details, opt_vars);
     }

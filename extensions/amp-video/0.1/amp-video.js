@@ -362,9 +362,7 @@ class AmpVideo extends AMP.BaseElement {
         }
         throw reason;
       })
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      });
+      .then(() => this.onVideoLoaded());
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
@@ -620,6 +618,17 @@ class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+  }
+
+  /**
+   * Once the video is loaded, with the correct duration,
+   * dispatch the `VideoEvents.LOAD` event.
+   *
+   * This should only be called once, either by amp-video
+   * or a component that manages this one (i.e. amp-story).
+   */
+  onVideoLoaded() {
+    this.element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
   /** @override */
