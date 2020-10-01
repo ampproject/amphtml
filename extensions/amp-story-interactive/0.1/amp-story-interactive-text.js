@@ -22,7 +22,7 @@ import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
-import {CSS} from '../../../build/amp-story-interactive-text-1.0.css';
+import {CSS} from '../../../build/amp-story-interactive-text-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
 
@@ -73,13 +73,12 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.element.setAttribute('interactive', '');
+    // this.element.setAttribute('interactive', '');
     this.rootEl_ = buildPollTemplate(this.element);
     const textArea = this.rootEl_.querySelector('textarea');
     this.attachPrompt_(this.rootEl_);
     textArea.placeholder = this.element.getAttribute('placeholder-text');
     textArea.onkeydown = (e) => {
-      console.log(e.key);
       if (e.key == 'Enter') {
         this.sendText_(textArea.value);
       }
@@ -87,6 +86,13 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
     textArea.onkeyup = (unusedEvent) => {
       this.toggleSendButton_(textArea.value.length > 0);
     };
+    // textArea.onblur = (event) => {
+    //   this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+    //     state: EmbeddedComponentState.HIDDEN,
+    //     element: null,
+    //   });
+    //   event.stopImmediatePropagation();
+    // };
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-text-response'
     ).textContent = this.element.getAttribute('response-text');
@@ -99,13 +105,13 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
    * @override
    */
   layoutCallback() {
-    const sendButton = this.rootEl_.querySelector(
-      '.i-amphtml-story-interacive-text-send'
-    );
-    sendButton.onclick = () => {
-      console.log('clicked');
-    };
-    console.log(sendButton.onclick);
+    // const sendButton = this.rootEl_.querySelector(
+    //   '.i-amphtml-story-interacive-text-send'
+    // );
+    // sendButton.onclick = () => {
+    //   console.log('clicked');
+    // };
+    // console.log(sendButton.onclick);
     return super.layoutCallback();
   }
 

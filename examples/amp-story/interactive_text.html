@@ -15,11 +15,22 @@
         align-self: center;
         font-size: calc(3 * var(--story-page-vmin));
       }
+
+      amp-story-grid-layer[template="center"]::after {
+        content: "";
+        width: 75%;
+        height: 19.4%;
+        background: red;
+        position: absolute;
+        left: 12.5%;
+        top: 42.4%;
+        z-index: -1;
+      }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <script async custom-element="amp-twiter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
-    <script async src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"></script>
+    <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
@@ -29,6 +40,26 @@
         publisher="AMP Story testing"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
+        <amp-story-page id="twit-1">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-twitter interactive
+              width="375"
+              height="472"
+              layout="responsive"
+              data-tweetid="885634330868850689">
+            </amp-twitter>
+            </amp-story-interactive-text>
+          </amp-story-grid-layer>
+        </amp-story-page>
         <amp-story-page id="text-1">
           <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
             <amp-img
@@ -50,7 +81,7 @@
             </amp-story-interactive-text>
           </amp-story-grid-layer>
         </amp-story-page>
-        <amp-story-page id="text-2">
+        <!-- <amp-story-page id="text-2">
           <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
             <amp-img
                 src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
@@ -114,7 +145,7 @@
               response-text="Thanks for sending feedback!">
             </amp-story-interactive-text>
           </amp-story-grid-layer>
-        </amp-story-page>
+        </amp-story-page> -->
     </amp-story>
   </body>
 </html>

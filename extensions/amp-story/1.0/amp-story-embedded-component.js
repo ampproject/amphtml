@@ -248,7 +248,8 @@ function buildStringStyleFromEl(target, embedData) {
     case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
       return buildStringStyleForTweet(embedData);
     default:
-      return buildDefaultStringStyle(embedData);
+      const val = buildDefaultStringStyle(embedData);
+      return val;
   }
 }
 
@@ -302,7 +303,7 @@ function measureStyleForEl(element, state, pageRect, elRect) {
         MAX_TWEET_WIDTH_PX
       );
     case EXPANDABLE_COMPONENTS['amp-story-interactive-text'].selector:
-      return measureStylesForCustomWidth(state, pageRect, elRect, 400);
+      return measureStylesForInteractiveText(state, pageRect, elRect);
     default:
       return measureDefaultStyles(state, pageRect, elRect);
   }
@@ -329,6 +330,36 @@ function measureStylesForCustomWidth(state, pageRect, elRect, maxWidth) {
 
   state.verticalMargin = -1 * ((elRect.height - shrinkedSize) / 2);
   state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
+
+  return state;
+}
+
+/**
+ * Since amp-twitter handles its own resize events for its height, we don't
+ * resize based on its height, but rather just based on its width.
+ * @param {!Object} state
+ * @param {!DOMRect} pageRect
+ * @param {!DOMRect} elRect
+ * @return {!Object}
+ */
+function measureStylesForInteractiveText(state, pageRect, elRect) {
+  // Get the minimum of page width and height and only take up to 90%%.
+  state.newWidth = Math.min(pageRect.width, pageRect.height) * 0.9;
+
+  console.log(
+    `elRect: (${elRect.width.toFixed(2)}, ${elRect.height.toFixed(
+      2
+    )}), pageRect: (${pageRect.width.toFixed(2)}, ${pageRect.height.toFixed(
+      2
+    )})`
+  );
+
+  state.scaleFactor = state.newWidth / elRect.width;
+
+  const shrinkedHeight = elRect.height * state.scaleFactor;
+
+  state.verticalMargin = (shrinkedHeight - elRect.height) / 2;
+  state.horizontalMargin = (elRect.width - state.newWidth) / 2;
 
   return state;
 }
@@ -554,6 +585,8 @@ export class AmpStoryEmbeddedComponent {
    * Reacts to embedded component state updates.
    * Possible state updates:
    *
+   *      ||==== skipFocused =====||
+   *      ||                      \/
    *    HIDDEN ==> FOCUSED ==> EXPANDED
    *      /\ _________|           |
    *      ||______________________|
@@ -574,7 +607,8 @@ export class AmpStoryEmbeddedComponent {
               to ${component.state}`
           );
         }
-        if (this.getEmbedConfigFor_(component.element).skipTooltip) {
+        const config = this.getEmbedConfigFor_(component.element);
+        if (config.skipTooltip) {
           this.componentPage_ = devAssert(
             this.storyEl_.querySelector('amp-story-page[active]')
           );
@@ -604,7 +638,6 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   setState_(state, component) {
-    console.log('set state', state);
     switch (state) {
       case EmbeddedComponentState.FOCUSED:
         this.state_ = state;
@@ -767,11 +800,12 @@ export class AmpStoryEmbeddedComponent {
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
-    this.tooltip_.removeEventListener(
-      'click',
-      this.expandComponentHandler_,
-      true /** capture */
-    );
+    this.tooltip_ &&
+      this.tooltip_.removeEventListener(
+        'click',
+        this.expandComponentHandler_,
+        true /** capture */
+      );
   }
 
   /**
@@ -1129,6 +1163,8 @@ export class AmpStoryEmbeddedComponent {
           pageEl.insertBefore(embedStyleEl, pageEl.firstChild);
           embedStyleEls[elId] = embedStyleEl;
         }
+
+        console.log(state);
 
         embedStyleEls[elId][AMP_EMBED_DATA] = {
           ...updateStyleForEl(element, elId, state),
