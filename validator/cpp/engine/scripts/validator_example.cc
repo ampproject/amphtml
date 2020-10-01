@@ -15,11 +15,14 @@
 //
 
 #include <cassert>
+#include <filesystem>
 #include <iostream>
 #include <string_view>
 
 #include "validator.h"
 #include "validator.pb.h"
+
+namespace fs = std::filesystem;
 
 static constexpr std::string_view kValidAMPHtml{R"HTML(
 <!--
@@ -50,4 +53,8 @@ int main(int argc, char** argv) {
   assert(result.status() == amp::validator::ValidationResult::FAIL);
   // Paste the above html in http://validator.amp.dev and see the count.
   assert(result.errors().size() == 12);
+
+  std::string path = "external/validator/testdata";
+    for (const auto & entry : fs::directory_iterator(path))
+        std::cout << entry.path() << std::endl;
 }
