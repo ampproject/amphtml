@@ -30,10 +30,6 @@ const {
 const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
-const {
-  storybookAmp,
-  storybookPreact,
-} = require('./build-system/tasks/storybook');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
@@ -72,6 +68,7 @@ const {release} = require('./build-system/tasks/release');
 const {serverTests} = require('./build-system/tasks/server-tests');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
+const {storybook} = require('./build-system/tasks/storybook');
 const {testReportUpload} = require('./build-system/tasks/test-report-upload');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
@@ -172,9 +169,7 @@ createTask('test-report-upload', testReportUpload);
 createTask('serve', serve);
 createTask('server-tests', serverTests);
 createTask('size', size);
-createTask('storybook-amp', storybookAmp);
-createTask('storybook-preact', storybookPreact);
-createTask('todos:find-closed', todosFindClosed);
+createTask('storybook', storybook);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);
 createTask('validator', validator);
