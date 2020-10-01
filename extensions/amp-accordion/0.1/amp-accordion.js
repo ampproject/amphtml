@@ -46,9 +46,7 @@ const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 const isDisplayLockingEnabledForAccordion = (win) => {
   return (
     isExperimentOn(win, 'amp-accordion-display-locking') &&
-    (('CSS' in window &&
-      window.CSS.supports &&
-      window.CSS.supports('content-visibility', 'hidden-matchable')) ||
+    (document.body.onbeforematch !== undefined ||
       getMode().test)
   );
 };
