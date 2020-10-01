@@ -60,3 +60,8 @@ local_repository(
     name = "htmlparser",
     path = "../htmlparser/",
 )
+
+local_repository(
+    name = "amphtml-extensions",
+    path = "../../../extensions",
+)
