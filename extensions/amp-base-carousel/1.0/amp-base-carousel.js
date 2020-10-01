@@ -23,7 +23,6 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -57,7 +56,7 @@ class AmpBaseCarousel extends PreactBaseElement {
       isExperimentOn(this.win, 'amp-base-carousel-bento'),
       'expected amp-base-carousel-bento experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
   }
 }
 

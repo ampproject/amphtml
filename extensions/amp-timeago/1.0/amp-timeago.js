@@ -17,7 +17,6 @@
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Timeago} from './timeago';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseDate} from '../../../src/utils/date';
 import {userAssert} from '../../../src/log';
 
@@ -31,7 +30,7 @@ class AmpTimeago extends PreactBaseElement {
       isExperimentOn(this.win, 'amp-timeago-bento'),
       'expected amp-timeago-bento experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
   }
 
   /** @override */
