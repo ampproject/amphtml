@@ -28,6 +28,10 @@ import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
+import {
+  maybeTrackImpression,
+  resetTrackImpressionPromiseForTesting,
+} from '../../../../src/impression';
 
 const fakeElement = document.documentElement;
 
@@ -35,8 +39,13 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let variables;
 
   beforeEach(() => {
+    maybeTrackImpression(env.win);
     installLinkerReaderService(env.win);
     variables = new VariableService(env.ampdoc);
+  });
+
+  afterEach(() => {
+    resetTrackImpressionPromiseForTesting();
   });
 
   describe('encodeVars', () => {
