@@ -204,7 +204,6 @@ describes.sandboxed('Accordion preact component', {}, () => {
     let wrapper;
 
     beforeEach(() => {
-      console.log('test: beforeEach');
       wrapper = mount(
         <Accordion expandSingleSection>
           <AccordionSection key={1} expanded header="header1">
