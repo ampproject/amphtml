@@ -352,7 +352,7 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   getPage_() {
     return closest(dev().assertElement(this.element), (el) => 
-      el.tagName.toLowerCase() === 'amp-story-page';
+      el.tagName.toLowerCase() === 'amp-story-page'
     );
   }
 
