@@ -611,3 +611,47 @@ TEST(Utf8UtilTest, RoundTripsAndLengths) {
   // Encode the bytes again.
   EXPECT_EQ("𒁀", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
 }
+
+TEST(StringsTest, DecodePercentEncodedURLTest) {
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL(
+      "google.com%20%2F%20%3Fx%3Db").value(), "google.com / ?x=b");
+
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL(
+      "JavaScript_%d1%88%d0%B5%D0%BB%D0%BB%D1%8B%3a").value(),
+            "JavaScript_шеллы:");
+
+  // ASCII chars may also be encoded.
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL(
+      "%77%77w%2e%67o%6f%67%6c%65%2e%63%6f%6d%2f%3f%61%3d%62%3a%63"),
+            "www.google.com/?a=b:c");
+
+  // Percent character.
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL("90%25").value(),
+            "90%");
+
+  // Invalid encoding missing sequence byte (%88 after %d1).
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "JavaScript_%d1M%d0%B5%D0%BB%D0%BB%D1%8B%3a").has_value());
+
+  // Invalid encoding, sequence byte without initial byte.
+  // (%88 without %d1).
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "JavaScript_%88%d0%B5%D0%BB%D0%BB%D1%8B%3a").has_value());
+
+  // URI ends without completing the entire sequence. Checks code doesn't access
+  // uri.front() while it is empty.
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "JavaScript_%d1M%d0%B5%D0%BB%D0%BB%D1").has_value());
+
+  // Empty string.
+  EXPECT_EQ(htmlparser::Strings::DecodePercentEncodedURL("").value(), "");
+
+  // Any one byte char must be < 128.
+  // 0xff (255) char.
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "example-%FF.com").has_value());
+  // char code 128.
+  EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
+      "example-%80.com").has_value());
+}
+

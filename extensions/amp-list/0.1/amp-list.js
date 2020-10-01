@@ -751,7 +751,8 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  fetchList_({refresh = false, append = false} = {}) {
+  fetchList_(options = {}) {
+    const {refresh = false, append = false} = options;
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();

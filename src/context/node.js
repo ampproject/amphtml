@@ -34,6 +34,17 @@ const DOCUMENT_NODE = 9;
 const FRAGMENT_NODE = 11;
 
 /**
+ * The structure for a group of nodes.
+ *
+ * @typedef {{
+ *   cn: !ContextNode,
+ *   match: function(!Node, !Node):boolean,
+ *   weight: number,
+ * }}
+ */
+let GroupDef;
+
+/**
  * The context node is a sparse tree over the DOM tree. Any node that needs
  * to manage and compute state can be attached to the context node tree. The
  * tree (mostly) automatically self-manages: the new nodes and DOM mutations
@@ -51,7 +62,7 @@ export class ContextNode {
   static get(node) {
     let contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
     if (!contextNode) {
-      contextNode = new ContextNode(node);
+      contextNode = new ContextNode(node, null);
       if (getMode().localDev || getMode().test) {
         // The `Object.defineProperty({enumerable: false})` helps tests, but
         // hurts performance. So this is only done in a dev/test modes.
@@ -157,13 +168,30 @@ export class ContextNode {
   }
 
   /**
-   * Creates the context node and automatically starts the discovery process.
+   * Reruns discovery on the children of the specified node, if any.
    *
    * @param {!Node} node
    */
-  constructor(node) {
+  static rediscoverChildren(node) {
+    const contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
+    const children = contextNode && contextNode.children;
+    if (children) {
+      children.forEach(discoverContextNode);
+    }
+  }
+
+  /**
+   * Creates the context node and automatically starts the discovery process.
+   *
+   * @param {!Node} node
+   * @param {?string} name
+   */
+  constructor(node, name) {
     /** @const {!Node} */
     this.node = node;
+
+    /** @const @package {?string} */
+    this.name = name;
 
     /**
      * Whether this node is a root. The Document DOM nodes are automatically
@@ -199,6 +227,9 @@ export class ContextNode {
      * @package {?Array<!ContextNode>}
      */
     this.children = null;
+
+    /** @package {?Map<string, !GroupDef>} */
+    this.groups = null;
 
     /** @package {!Values} */
     this.values = new Values(this);
@@ -245,6 +276,9 @@ export class ContextNode {
   discover() {
     if (this.isDiscoverable()) {
       this.scheduleDiscover_();
+    } else if (this.name && this.children) {
+      // Recursively discover the group's children.
+      this.children.forEach(discoverContextNode);
     }
   }
 
@@ -319,6 +353,55 @@ export class ContextNode {
   }
 
   /**
+   * @param {string} name
+   * @param {function(!Node):boolean} match
+   * @param {number} weight
+   * @return {!ContextNode}
+   */
+  addGroup(name, match, weight) {
+    const groups = this.groups || (this.groups = new Map());
+    const {node, children} = this;
+    const cn = new ContextNode(node, name);
+    groups.set(name, {cn, match, weight});
+    cn.setParent(this);
+    if (children) {
+      children.forEach(discoverContextNode);
+    }
+    return cn;
+  }
+
+  /**
+   * @param {string} name
+   * @return {?ContextNode}
+   */
+  group(name) {
+    const {groups} = this;
+    const group = groups && groups.get(name);
+    return (group && group.cn) || null;
+  }
+
+  /**
+   * @param {!Node} node
+   * @return {?ContextNode}
+   * @protected
+   */
+  findGroup(node) {
+    const {groups} = this;
+    if (!groups) {
+      return null;
+    }
+    let found = null;
+    let maxWeight = Number.NEGATIVE_INFINITY;
+    groups.forEach(({cn, match, weight}) => {
+      if (match(node, this.node) && weight > maxWeight) {
+        found = cn;
+        maxWeight = weight;
+      }
+    });
+    return found;
+  }
+
+  /**
    * Add or update a component with a specified ID. If component doesn't
    * yet exist, it will be created using the specified factory. The use
    * of factory is important to reduce bundling costs for context node.
@@ -386,7 +469,9 @@ export class ContextNode {
       // queue.
       return;
     }
-    const parent = ContextNode.closest(this.node, /* includeSelf */ false);
+    const closestNode = ContextNode.closest(this.node, /* includeSelf */ false);
+    const parent =
+      (closestNode && closestNode.findGroup(this.node)) || closestNode;
     this.updateTree_(parent, /* parentOverridden */ false);
   }
 

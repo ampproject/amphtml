@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../src/services';
+import {createCustomEvent} from '../../src/event-helper';
 import {createFixtureIframe, poll} from '../../testing/iframe';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
@@ -125,11 +126,11 @@ describe('amp-ad 3P', () => {
           );
         }
         expect(context.startTime).to.be.a('number');
-        // Edge has different opinion about window.location in srcdoc iframe.
+        // Edge/IE has different opinion about window.location in srcdoc iframe.
         // Nevertheless this only happens in test. In real world AMP will not
         // in srcdoc iframe.
         expect(context.sourceUrl).to.equal(
-          platform.isEdge()
+          platform.isEdge() || platform.isIe()
             ? 'http://localhost:9876/context.html'
             : 'about:srcdoc'
         );
@@ -195,7 +196,9 @@ describe('amp-ad 3P', () => {
         // Ad is still fully visible. observeIntersection fire when
         // ads is fully visible with position change
         fixture.win.scrollTo(0, 1000);
-        fixture.win.dispatchEvent(new Event('scroll'));
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'scroll', null)
+        );
         await poll('wait for new IO entry when ad is fully visible', () => {
           return (
             lastIO != null &&
@@ -210,7 +213,9 @@ describe('amp-ad 3P', () => {
 
         // Ad is partially visible (around 50%)
         fixture.win.scrollTo(0, 1125);
-        fixture.win.dispatchEvent(new Event('scroll'));
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'scroll', null)
+        );
         await poll(
           'wait for new IO entry when intersectionRatio changes',
           () => {
@@ -229,7 +234,9 @@ describe('amp-ad 3P', () => {
 
         // Ad first becomes invisible
         fixture.win.scrollTo(0, 1251);
-        fixture.win.dispatchEvent(new Event('scroll'));
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'scroll', null)
+        );
         await poll('wait for new IO entry when ad exit viewport', () => {
           return lastIO != null && lastIO.intersectionRatio == 0;
         });
@@ -241,7 +248,9 @@ describe('amp-ad 3P', () => {
 
         // Scroll when ad is invisible
         fixture.win.scrollTo(0, 1451);
-        fixture.win.dispatchEvent(new Event('scroll'));
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'scroll', null)
+        );
         await new Promise((resolve) => {
           setTimeout(resolve, 100);
         });

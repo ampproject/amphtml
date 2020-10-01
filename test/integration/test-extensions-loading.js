@@ -35,7 +35,7 @@ function checkElementUpgrade(element) {
  */
 function testLoadOrderFixture(fixtureName, testElements) {
   let fixture;
-  return createFixtureIframe(fixtureName)
+  return createFixtureIframe(fixtureName, 500)
     .then((f) => {
       fixture = f;
       for (let i = 0; i < testElements.length; i++) {

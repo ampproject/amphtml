@@ -256,7 +256,11 @@ function Autoplay({
     return () => {
       observer.disconnect();
     };
+<<<<<<< HEAD
   }, [pause, play, wrapperRef]);
+=======
+  }, [wrapperRef, play, pause]);
+>>>>>>> 67cdc734210fe70dea39a2a3fcd56987e775ff8e
 
   return (
     <>

@@ -2148,6 +2148,13 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} whether this is a sticky ad unit
+   */
+  isStickyAd() {
+    return false;
+  }
+
+  /**
    * Checks if the given lifecycle event has a corresponding amp-analytics event
    * and fires the analytics trigger if so.
    * @param {string} lifecycleStage

@@ -66,6 +66,11 @@ class Strings {
   inline static const std::string kNullReplacementChar {
     '\xef', '\xbf', '\xbd'};  // encoded \ufffd (3 bytes).
 
+  // Decodes a percent encoded string like "google.com%20%2F%20%3Fx%3Db" to
+  // "google.com / ?x=b".
+  static std::optional<std::string> DecodePercentEncodedURL(
+    std::string_view uri);
+
   // Returns hex string representation of a 4 byte codepoint.
   static std::string ToHexString(char32_t c);
 

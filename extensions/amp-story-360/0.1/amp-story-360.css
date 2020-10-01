@@ -40,6 +40,7 @@ amp-story-360 amp-img {
   font-family: 'Roboto', sans-serif !important;
   display: flex !important;
   align-items: center !important;
+  z-index: 100000 !important;
 }
 
 .i-amphtml-story-360-activate-button-icon {

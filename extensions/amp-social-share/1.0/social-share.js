@@ -17,7 +17,7 @@
 import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
-import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
+import {SocialShareIcon} from './social-share-svgs';
 import {Wrapper} from '../../../src/preact/component';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
@@ -50,12 +50,26 @@ export function SocialShare({
   ...rest
 }) {
   useResourcesNotify();
+  const checkPropsReturnValue = checkProps(
+    type,
+    endpoint,
+    target,
+    width,
+    height,
+    params
+  );
+
+  // Early exit if checkProps did not pass
+  if (!checkPropsReturnValue) {
+    return null;
+  }
+
   const {
     finalEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
-  } = checkProps(type, endpoint, target, width, height, params);
+  } = checkPropsReturnValue;
 
   return (
     <Wrapper
@@ -123,7 +137,7 @@ function processChildren(type, children, color, background) {
  * @param {number|string|undefined} width
  * @param {number|string|undefined} height
  * @param {JsonObject|Object|undefined} params
- * @return {{
+ * @return {?{
  *   finalEndpoint: string,
  *   checkedWidth: (number|string),
  *   checkedHeight: (number|string),
@@ -131,19 +145,15 @@ function processChildren(type, children, color, background) {
  * }}
  */
 function checkProps(type, endpoint, target, width, height, params) {
-  // Verify type is provided
-  if (type === undefined) {
-    throw new Error(`The type attribute is required. ${NAME}`);
-  }
-
   // User must provide endpoint if they choose a type that is not
-  // pre-configured
+  // pre-configured, early exit if not provided
   const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
   let baseEndpoint = endpoint || typeConfig.shareEndpoint;
   if (baseEndpoint === undefined) {
-    throw new Error(
+    displayWarning(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
     );
+    return null;
   }
 
   // Special case when type is 'email'
@@ -173,7 +183,7 @@ function checkProps(type, endpoint, target, width, height, params) {
 /**
  * @param {?string} message
  */
-function throwWarning(message) {
+function displayWarning(message) {
   console /*OK*/
     .warn(message);
 }
@@ -192,10 +202,10 @@ function handleActivation(finalEndpoint, target) {
         /** @type {string} */ (getQueryString(finalEndpoint))
       );
       window.navigator.share(data).catch((e) => {
-        throwWarning(`${e.message}. ${NAME}`);
+        displayWarning(`${e.message}. ${NAME}`);
       });
     } else {
-      throwWarning(
+      displayWarning(
         `Could not complete system share.  Navigator unavailable. ${NAME}`
       );
     }
