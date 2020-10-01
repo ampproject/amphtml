@@ -517,8 +517,8 @@ class VideoEntry {
       this.video.pause();
     };
 
-    listenOncePromise(video.element, VideoEvents.LOAD).then(
-      () => console.log(video.element.id, 'loaded') && this.videoLoaded()
+    listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
+      this.videoLoaded()
     );
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
@@ -720,6 +720,7 @@ class VideoEntry {
    * Called when the video is loaded and can play.
    */
   videoLoaded() {
+    console.log(this.video, 'loaded');
     this.loaded_ = true;
 
     this.internalElement_ = getInternalVideoElementFor(this.video.element);

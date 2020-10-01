@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-custom>
     body {
       max-width: 527px;
@@ -33,8 +34,50 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+  <amp-analytics id="analytics-config">
+    <script type="application/json">
+      {
+        "requests": {
+          "complete": "https://google.com/complete-session-${videoId}",
+          "midpoint": "https://google.com/midpoint-session-${videoId}",
+          "progress": "https://google.com/progress-session-${videoId}",
+          "start": "https://google.com/started-session-${videoId}",
+          "session": "https://google.com/ended-session-${videoId}"
+        },
+        "transport": {
+          "beacon": false,
+          "image": { "suppressWarnings": true },
+          "xhrpost": false
+        },
+        "triggers": {
+          "start": {
+            "on": "video-percentage-played",
+            "request": "start",
+            "selector": "#myVideo",
+            "videoSpec": { "percentages": [1] }
+          },
+          "midpoint": {
+            "on": "video-percentage-played",
+            "request": "midpoint",
+            "selector": "#myVideo",
+            "videoSpec": { "percentages": [50] }
+          },
+          "complete": {
+            "on": "video-ended",
+            "request": "complete",
+            "selector": "#myVideo"
+          },
+          "session": {
+            "on": "video-session",
+            "request": "session",
+            "selector": "#myVideo",
+            "videoSpec": { "end-session-when-invisible": true }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
   <h1>amp-video</h1>
-
   <amp-video
       id="myVideo"
       src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
