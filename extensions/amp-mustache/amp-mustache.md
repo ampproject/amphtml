@@ -179,8 +179,6 @@ When using `amp-mustache` to calculate attribute values, quote escaping can be a
 
 Using HTML character codes in the `{{foo}}` or `{{bar}}` variables won't work since Mustache will HTML escape `&` characters (e.g. `&quot;` -> `&amp;quot;`). One workaround is to use facsimile characters e.g. &prime; (`&prime;`) and &Prime; (`&Prime;`).
 
-There's an [open proposal](https://github.com/ampproject/amphtml/issues/8395) to perform this substitution in `amp-mustache` instead. Please comment on the issue if you'd like to support it.
-
 ### HTML entities
 
 HTML entities are not preserved in `<template>` elements.
