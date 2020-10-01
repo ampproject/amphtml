@@ -15,9 +15,8 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Instagram, handleMessage} from '../instagram';
+import {Instagram} from '../instagram';
 import {mount} from 'enzyme';
-import {useRef} from '../../../../src/preact';
 
 describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {
@@ -64,37 +63,45 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   });
 
   it('Resize prop is called', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
     const requestResizeSpy = env.sandbox.spy();
-    const heightSpy = env.sandbox.spy();
-    const opacitySpy = env.sandbox.spy();
-
-    handleMessage(
-      createMockEvent(),
-      useRef({'contentWindow': 'source'}).current,
-      requestResizeSpy,
-      heightSpy,
-      opacitySpy
+    mount(
+      <Instagram
+        shortcode="B8QaZW4AQY_"
+        captioned
+        style={{'width': 500, 'height': 705}}
+        requestResize={requestResizeSpy}
+      />,
+      {attachTo: el}
     );
 
+    const mockEvent = createMockEvent();
+    mockEvent.source = document.querySelector('iframe').contentWindow;
+    window.dispatchEvent(mockEvent);
+
     expect(requestResizeSpy).to.have.been.calledOnce;
-    expect(heightSpy).to.have.not.been.called;
-    expect(opacitySpy).to.have.been.calledOnce;
   });
 
   it('Height is changed', () => {
-    const heightSpy = env.sandbox.spy();
-    const opacitySpy = env.sandbox.spy();
-
-    handleMessage(
-      createMockEvent(),
-      useRef({'contentWindow': 'source'}).current,
-      null,
-      heightSpy,
-      opacitySpy
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    mount(
+      <Instagram
+        shortcode="B8QaZW4AQY_"
+        captioned
+        style={{'width': 500, 'height': 600}}
+      />,
+      {attachTo: el}
     );
 
-    expect(heightSpy).to.have.been.calledOnce;
-    expect(opacitySpy).to.have.been.calledOnce;
+    const mockEvent = createMockEvent();
+    mockEvent.source = document.querySelector('iframe').contentWindow;
+    window.dispatchEvent(mockEvent);
+
+    expect(
+      document.querySelector('iframe').parentElement.parentElement.style.height
+    ).to.equal('705px');
   });
 });
 
@@ -105,7 +112,6 @@ function createMockEvent() {
     },
   });
   mockEvent.origin = 'https://www.instagram.com';
-  mockEvent.source = 'source';
   mockEvent.data = JSON.stringify({
     'type': 'MEASURE',
     'details': {
