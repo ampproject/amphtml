@@ -40,14 +40,26 @@ export function Instagram({
   const [opacity, setOpacity] = useState(0);
 
   useLayoutEffect(() => {
-    const messageHandler = (event) =>
-      handleMessage(
-        event,
-        iframeRef.current,
-        requestResize,
-        setHeightStyle,
-        setOpacity
-      );
+    const messageHandler = (event) => {
+      if (
+        event.origin != 'https://www.instagram.com' ||
+        event.source != iframeRef.current.contentWindow
+      ) {
+        return;
+      }
+
+      const data = parseJson(getData(event));
+
+      if (data['type'] == 'MEASURE' && data['details']) {
+        const height = data['details']['height'];
+        if (requestResize) {
+          requestResize(height);
+        } else {
+          setHeightStyle(dict({'height': height}));
+        }
+        setOpacity(1);
+      }
+    };
     const {defaultView} = iframeRef.current.ownerDocument;
 
     defaultView.addEventListener('message', messageHandler);
@@ -82,40 +94,4 @@ export function Instagram({
       />
     </ContainWrapper>
   );
-}
-
-/**
- * @param {Event} event
- * @param {Object} iframe
- * @param {function(number):*|undefined} requestResize
- * @param {function(Object)} setHeightStyle
- * @param {function(number)} setOpacity
- * @return {undefined}
- * @visibleForTesting
- */
-export function handleMessage(
-  event,
-  iframe,
-  requestResize,
-  setHeightStyle,
-  setOpacity
-) {
-  if (
-    event.origin != 'https://www.instagram.com' ||
-    event.source != iframe.contentWindow
-  ) {
-    return;
-  }
-
-  const data = parseJson(getData(event));
-
-  if (data['type'] == 'MEASURE' && data['details']) {
-    const height = data['details']['height'];
-    if (requestResize) {
-      requestResize(height);
-    } else {
-      setHeightStyle(dict({'height': height}));
-    }
-    setOpacity(1);
-  }
 }
