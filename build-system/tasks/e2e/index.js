@@ -25,7 +25,6 @@ const glob = require('glob');
 const http = require('http');
 const log = require('fancy-log');
 const Mocha = require('mocha');
-const opn = require('opn');
 const path = require('path');
 const {
   buildRuntime,
@@ -36,6 +35,7 @@ const {cyan} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isTravisBuild} = require('../../common/travis');
+const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
@@ -171,9 +171,7 @@ async function runTests_() {
     mocha.run(async (failures) => {
       if (argv.coverage) {
         await fetchCoverage_(COV_OUTPUT_DIR);
-        if (!isTravisBuild()) {
-          opn(`file://${COV_OUTPUT_HTML}`, {wait: false});
-        }
+        maybePrintCoverageMessage(COV_OUTPUT_HTML);
       }
       await stopServer();
       process.exitCode = failures ? 1 : 0;
