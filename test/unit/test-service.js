@@ -26,7 +26,6 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-  installServiceInEmbedIfEmbeddable,
   installServiceInEmbedScope,
   isDisposable,
   registerServiceBuilder,
@@ -626,43 +625,6 @@ describe('service', () => {
 
         // The service is also registered on the embed window.
         expect(childWin.__AMP_SERVICES['c']).to.exist;
-      });
-    });
-
-    describe('embeddable interface', () => {
-      let embedWin;
-      let embeddable;
-      let nonEmbeddable;
-
-      beforeEach(() => {
-        embedWin = {
-          frameElement: {
-            nodeType: 1,
-            ownerDocument: {defaultView: windowApi},
-          },
-        };
-        nonEmbeddable = {};
-        embeddable = {installInEmbedWindow: window.sandbox.spy()};
-        registerServiceBuilderForDoc(ampdoc, 'embeddable', function () {
-          return embeddable;
-        });
-        registerServiceBuilderForDoc(ampdoc, 'nonEmbeddable', function () {
-          return nonEmbeddable;
-        });
-      });
-
-      describe('installServiceInEmbedIfEmbeddable()', () => {
-        it('should install embeddable if embeddable', () => {
-          let result;
-
-          result = installServiceInEmbedIfEmbeddable(embedWin, embeddable);
-          expect(result).to.be.true;
-          expect(embeddable.installInEmbedWindow).to.be.calledOnce;
-          expect(embeddable.installInEmbedWindow.args[0][0]).to.equal(embedWin);
-
-          result = installServiceInEmbedIfEmbeddable(embedWin, nonEmbeddable);
-          expect(result).to.be.false;
-        });
       });
     });
   });

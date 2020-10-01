@@ -601,29 +601,6 @@ function disposeServiceInternal(id, service) {
 }
 
 /**
- * Adopts an embeddable (implements `EmbeddableService` interface) service
- * in embed scope.
- * @param {!Window} embedWin
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} serviceClass
- * @suppress {missingProperties}
- * @return {boolean}
- */
-export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
-  const isEmbeddableService =
-    typeof serviceClass.installInEmbedWindow === 'function';
-  if (!isEmbeddableService) {
-    return false;
-  }
-  const frameElement = dev().assertElement(
-    embedWin.frameElement,
-    'frameElement not found for embed'
-  );
-  const ampdoc = getAmpdoc(frameElement);
-  serviceClass.installInEmbedWindow(embedWin, ampdoc);
-  return true;
-}
-
-/**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} id
  */

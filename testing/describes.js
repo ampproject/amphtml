@@ -97,6 +97,7 @@ import {createElementWithAttributes} from '../src/dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   installAmpdocServices,
+  installAmpdocServicesForEmbed,
   installBuiltinElements,
   installRuntimeServices,
 } from '../src/service/core-services';
@@ -732,7 +733,11 @@ class AmpFixture {
       completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
-      installAmpdocServices(ampdoc);
+      if (ampdocType == 'fie') {
+        installAmpdocServicesForEmbed(ampdoc);
+      } else {
+        installAmpdocServices(ampdoc);
+      }
       adopt(win);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Ensure cached meta name/content pairs are cleared before each test
