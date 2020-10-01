@@ -17,9 +17,6 @@ cc_binary(
     srcs = [
         "validator_example.cc",
     ],
-    data = [
-        "@validator//:testdata_files",
-    ],
     deps = [
         "@validatorcpp//:validator",
         "@validator//:validator_cc_proto",
