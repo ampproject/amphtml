@@ -348,7 +348,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {!Element} the parent amp-story-page
+   * @return {?Element} the parent amp-story-page
    */
   getPage_() {
     return closest(
@@ -364,7 +364,7 @@ export class AmpStory360 extends AMP.BaseElement {
   onPermissionState_(permissionState) {
     if (this.activateButton_) {
       this.mutateElement(() => {
-        this.activateButton_.remove();
+        this.getPage_().removeChild(this.activateButton_);
         this.activateButton_ = null;
       });
     }
@@ -466,7 +466,8 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   renderActivateButton_() {
     const ampStoryPage = this.getPage_();
-    this.activateButton_ = buildActivateButtonTemplate(ampStoryPage);
+    this.activateButton_ =
+      ampStoryPage && buildActivateButtonTemplate(ampStoryPage);
 
     this.activateButton_.querySelector(
       '.i-amphtml-story-360-activate-text'
