@@ -183,9 +183,7 @@ function getNodeLatestLtsVersion(distributionsJson) {
 // If yarn is being run, perform a version check and proceed with the install.
 function checkYarnVersion() {
   const yarnVersion = getStdout(yarnExecutable + ' --version').trim();
-  const yarnInfo = getStdout(yarnExecutable + ' info --json yarn').trim();
-  const yarnInfoJson = JSON.parse(yarnInfo.split('\n')[0]); // First line
-  const stableVersion = getYarnStableVersion(yarnInfoJson);
+  const stableVersion = '1.22.4';
   if (stableVersion === '') {
     console.log(
       yellow(
@@ -214,18 +212,6 @@ function checkYarnVersion() {
       green('version'),
       cyan(yarnVersion + ' (stable)') + green('. Installing packages...')
     );
-  }
-}
-
-function getYarnStableVersion(infoJson) {
-  if (
-    infoJson &&
-    infoJson.hasOwnProperty('data') &&
-    infoJson.data.hasOwnProperty('version')
-  ) {
-    return infoJson.data.version;
-  } else {
-    return '';
   }
 }
 
