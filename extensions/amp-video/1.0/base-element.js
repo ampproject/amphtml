@@ -72,11 +72,17 @@ VideoBaseElement['Component'] = VideoWrapper;
 /** @override */
 VideoBaseElement['layoutSizeDefined'] = true;
 
-/** @override */
-VideoBaseElement['staticProps'] = dict({
-  // defaults to 'video'. Subclasses may set.
-  // 'component': undefined,
-});
+/**
+ * Defaults to `{component: 'video'}` from `VideoWrapper` component.
+ * Subclasses may set:
+ * ```
+ *   AmpMyPlayer['staticProps'] = dict({
+ *     'component': MyPlayerComponent,
+ *   });
+ * ```
+ * @override
+ */
+VideoBaseElement['staticProps'];
 
 /** @override */
 VideoBaseElement['props'] = {
