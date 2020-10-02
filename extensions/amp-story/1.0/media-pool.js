@@ -552,13 +552,7 @@ export class MediaPool {
           poolMediaEl,
           new UpdateSourcesTask(this.win_, sources)
         );
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
-          ampMediaForDomEl.getImpl().then((impl) => {
-            if (impl.onVideoLoaded) {
-              impl.onVideoLoaded();
-            }
-          });
-        });
+        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
       },
       () => {
         this.forceDeallocateMediaElement_(poolMediaEl);
