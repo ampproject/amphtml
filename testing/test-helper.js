@@ -250,7 +250,7 @@ export class BrowserController {
    * @return {Element}
    */
   querySelectorOrElement(selectorOrElement) {
-    return selectorOrElement && selectorOrElement.constructor === String
+    return typeof selectorOrElement == 'string'
       ? this.rootNode_.querySelector(selectorOrElement)
       : selectorOrElement;
   }
@@ -261,7 +261,7 @@ export class BrowserController {
    * @return {Array<Element>}
    */
   querySelectorAllOrElement(selectorOrElement) {
-    return selectorOrElement && selectorOrElement.constructor === String
+    return typeof selectorOrElement == 'string'
       ? this.rootNode_.querySelectorAll(selectorOrElement)
       : [selectorOrElement];
   }
