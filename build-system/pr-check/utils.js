@@ -379,6 +379,7 @@ module.exports = {
   timedExec,
   timedExecOrDie,
   timedExecWithError,
+  timedExecOrThrow,
   uploadBuildOutput,
   uploadDistOutput,
   uploadEsmDistOutput,
