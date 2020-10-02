@@ -72,14 +72,6 @@ def CheckPrereqs():
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
 
-  # Ensure that yarn is installed.
-  try:
-    subprocess.check_output(['yarn', '--version'])
-  except (subprocess.CalledProcessError, OSError):
-    Die('Yarn package manager not found. Run '
-        '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
-        'or see https://yarnpkg.com/docs/install.')
-
 
 def SetupOutDir(out_dir):
   """Sets up a clean output directory.
@@ -98,13 +90,13 @@ def SetupOutDir(out_dir):
 
 
 def InstallNodeDependencies():
-  """Installs the dependencies using yarn."""
+  """Installs the dependencies using npm install."""
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator webui dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
+      ['npm', 'install'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
 
