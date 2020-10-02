@@ -517,9 +517,7 @@ class VideoEntry {
       this.video.pause();
     };
 
-    listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
-      this.videoLoaded()
-    );
+    listen(video.element, VideoEvents.LOAD, () => this.videoLoaded());
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
       this.hasSeenPlayEvent_ = true;
