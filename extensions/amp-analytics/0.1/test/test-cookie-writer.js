@@ -20,6 +20,10 @@ import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 import {installLinkerReaderService} from '../linker-reader';
 import {installVariableServiceForTesting} from '../variables';
+import {
+  maybeTrackImpression,
+  resetTrackImpressionPromiseForTesting,
+} from '../../../../src/impression';
 import {stubService} from '../../../../testing/test-helper';
 
 const TAG = '[amp-analytics/cookie-writer]';
@@ -218,12 +222,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
       target: window,
       now: new Date('2018-01-01T08:00:00Z'),
     });
+    maybeTrackImpression(env.win);
     installVariableServiceForTesting(doc);
     installLinkerReaderService(win);
   });
 
   afterEach(() => {
     clock.uninstall();
+    resetTrackImpressionPromiseForTesting();
   });
 
   it('should read value from QUERY_PARAM and LINKER_PARAM', () => {

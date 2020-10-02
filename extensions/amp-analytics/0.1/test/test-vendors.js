@@ -25,6 +25,10 @@ import {
 import {Services} from '../../../../src/services';
 import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
+import {
+  maybeTrackImpression,
+  resetTrackImpressionPromiseForTesting,
+} from '../../../../src/impression';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -52,6 +56,11 @@ describes.realWin(
         'COOKIE': null,
         'CONSENT_STATE': null,
       };
+      maybeTrackImpression(env.win);
+    });
+
+    afterEach(() => {
+      resetTrackImpressionPromiseForTesting();
     });
 
     describe('Should not contain iframe transport if not allowlisted', () => {
