@@ -83,13 +83,12 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     expect(requestResizeSpy).to.have.been.calledOnce;
   });
 
-  it('Height is changed', () => {
+  it('Height is changed', async () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
-    mount(
+    const wrapper = mount(
       <Instagram
         shortcode="B8QaZW4AQY_"
-        captioned
         style={{'width': 500, 'height': 600}}
       />,
       {attachTo: el}
@@ -99,9 +98,16 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     mockEvent.source = document.querySelector('iframe').contentWindow;
     window.dispatchEvent(mockEvent);
 
+    wrapper.update();
+
+    await waitForHeight(
+      document.querySelector('iframe').parentElement.parentElement,
+      '1000px'
+    );
+
     expect(
       document.querySelector('iframe').parentElement.parentElement.style.height
-    ).to.equal('705px');
+    ).to.equal('1000px');
   });
 });
 
@@ -115,8 +121,31 @@ function createMockEvent() {
   mockEvent.data = JSON.stringify({
     'type': 'MEASURE',
     'details': {
-      'height': 705,
+      'height': 1000,
     },
   });
   return mockEvent;
+}
+
+function waitForHeight(element, height) {
+  return new Promise((resolve, reject) => {
+    const tryInterval = 100;
+    const maxTries = 100;
+    let currentTry = 0;
+
+    const timer = setInterval(() => {
+      if (currentTry >= maxTries) {
+        clearInterval(timer);
+        return reject(new Error(`not found`));
+      }
+
+      const prop = element.style.height;
+
+      if (prop == height) {
+        clearInterval(timer);
+        resolve(element);
+      }
+      currentTry++;
+    }, tryInterval);
+  });
 }

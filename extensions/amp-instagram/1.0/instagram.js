@@ -67,7 +67,7 @@ export function Instagram({
     return () => {
       defaultView.removeEventListener('message', messageHandler);
     };
-  }, [requestResize]);
+  }, [requestResize, heightStyle]);
 
   return (
     <ContainWrapper {...rest} wrapperStyle={heightStyle} layout size paint>
