@@ -21,6 +21,7 @@
 export function remixd(global, data) {
   global._rmxd = {};
   global._rmxd.url = data.url || global.context.sourceUrl;
+  global._rmxd.amp = true;
   const sriptVersion = data.version || '5';
   const tagUrl = 'https://tags.remixd.com/player/v'+ sriptVersion +'/index.js?cb=' + Math.random();
 
