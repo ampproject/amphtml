@@ -10,3 +10,12 @@ genrule(
     outs = ["validator-extensions-protoascii"],
     cmd = "cat $(SRCS) > $(OUTS)",
 )
+
+filegroup(
+    name = "testdata_files",
+    srcs = glob([
+            "*/*/test/*.html",
+            "*/*/test/*.out",
+            "*/*/test/*.cpponly",
+        ])
+)
