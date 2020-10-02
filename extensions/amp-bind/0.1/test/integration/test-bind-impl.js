@@ -225,11 +225,11 @@ describe
           // Make sure we have a chunk instance for testing.
           chunkInstanceForTesting(env.ampdoc);
 
-          fieWindow = env.embed.win;
-          fieBind = new Bind(env.ampdoc, fieWindow);
-          fieBody = env.embed.getBodyElement();
+          fieBind = new Bind(env.ampdoc);
+          fieWindow = env.ampdoc.win;
+          fieBody = env.ampdoc.getBody();
 
-          hostWindow = env.ampdoc.win;
+          hostWindow = env.parentWin;
         });
 
         it('should scan for bindings when ampdoc is ready', () => {
