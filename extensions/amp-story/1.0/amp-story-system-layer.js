@@ -31,8 +31,9 @@ import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {matches} from '../../../src/dom';
+import {matches, scopedQuerySelector} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
+import {setStyle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
@@ -49,6 +50,12 @@ const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
 
 /** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
+
+/** @private @const {string} */
+const CLOSE_CLASS = 'i-amphtml-story-close-control';
+
+/** @private @const {string} */
+const SKIP_NEXT_CLASS = 'i-amphtml-story-skip-next';
 
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
@@ -225,9 +232,52 @@ const TEMPLATE = {
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
         },
+        {
+          tag: 'button',
+          attrs: dict({
+            'class':
+              SKIP_NEXT_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL,
+        },
+        {
+          tag: 'button',
+          attrs: dict({
+            'class':
+              CLOSE_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL,
+        },
       ],
     },
+    {
+      tag: 'div',
+      attrs: dict({
+        'class': 'i-amphtml-story-system-layer-buttons-start-position',
+      }),
+    },
   ],
+};
+
+/** @enum {string} */
+const BUTTON_TYPES = {
+  CLOSE: 'close-button',
+  SHARE: 'share-button',
+  SKIP_NEXT: 'skip-next-button',
+};
+
+const BUTTON_DEFAULTS = {
+  [BUTTON_TYPES.SHARE]: {
+    'selector': `.${SHARE_CLASS}`,
+  },
+  [BUTTON_TYPES.CLOSE]: {
+    'selector': `.${CLOSE_CLASS}`,
+  },
+  [BUTTON_TYPES.SKIP_NEXT]: {
+    'selector': `.${SKIP_NEXT_CLASS}`,
+  },
 };
 
 /**
@@ -240,6 +290,8 @@ const TEMPLATE = {
  *   - domain info button
  *   - sidebar
  *   - story updated label (for live stories)
+ *   - close (for players)
+ *   - skip (for players)
  */
 export class SystemLayer {
   /**
@@ -513,6 +565,12 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, () => {
       this.onNewPageAvailable_();
     });
+
+    this.storeService_.subscribe(
+      StateProperty.CUSTOM_UI_CONFIG,
+      (config) => this.onCustomUIConfig_(config),
+      true /* callToInitialize */
+    );
   }
 
   /**
@@ -852,6 +910,55 @@ export class SystemLayer {
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'show');
       this.hideMessageAfterTimeout_(HAS_NEW_PAGE_ATTRIBUTE);
+    });
+  }
+
+  /**
+   * Reacts to a custom configuration change coming from the player level.
+   * Updates UI to match configuration described by publisher
+   * @param {!JSONObject} config
+   * @private
+   */
+  onCustomUIConfig_(config) {
+    if (!config.header) {
+      return;
+    }
+    const {header} = config;
+    const {buttons} = header;
+
+    buttons.forEach((button) => {
+      const buttonConfig = BUTTON_DEFAULTS[button.name];
+      const el = scopedQuerySelector(
+        this.systemLayerEl_,
+        buttonConfig.selector
+      );
+
+      if (button.visibility === 'hidden') {
+        this.vsync_.mutate(() => {
+          el.classList.add('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (!button.visibility || button.visibility === 'visible') {
+        this.vsync_.mutate(() => {
+          el.classList.remove('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (button.position === 'start') {
+        const startButtonContainer = this.systemLayerEl_.querySelector(
+          '.i-amphtml-story-system-layer-buttons-start-position'
+        );
+
+        this.vsync_.mutate(() => {
+          el.parentElement.removeChild(el);
+          startButtonContainer.appendChild(el);
+        });
+      }
+
+      if (button.icon) {
+        setStyle(el, 'background-image', button.icon);
+      }
     });
   }
 
