@@ -311,9 +311,7 @@ function describeEnv(factory) {
    */
   const templateFunc = function (name, spec, fn, describeFunc) {
     const fixtures = [new SandboxFixture(spec)].concat(
-      factory(spec)
-        .filter(Boolean)
-        .filter((fixture) => fixture.isOn())
+      factory(spec).filter((fixture) => fixture && fixture.isOn())
     );
 
     return describeFunc(name, () => {
