@@ -73,7 +73,7 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    // this.element.setAttribute('interactive', '');
+    this.element.setAttribute('interactive', '');
     this.rootEl_ = buildPollTemplate(this.element);
     const textArea = this.rootEl_.querySelector('textarea');
     this.attachPrompt_(this.rootEl_);

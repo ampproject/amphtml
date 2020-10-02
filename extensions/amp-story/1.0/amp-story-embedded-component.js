@@ -344,7 +344,7 @@ function measureStylesForCustomWidth(state, pageRect, elRect, maxWidth) {
  */
 function measureStylesForInteractiveText(state, pageRect, elRect) {
   // Get the minimum of page width and height and only take up to 90%%.
-  state.newWidth = Math.min(pageRect.width, pageRect.height) * 0.9;
+  state.newWidth = Math.min(pageRect.width, pageRect.height) * 0.8;
 
   console.log(
     `elRect: (${elRect.width.toFixed(2)}, ${elRect.height.toFixed(
@@ -404,6 +404,8 @@ function updateStyleForEl(element, elId, state) {
   switch (element.tagName.toLowerCase()) {
     case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
       return updateStylesForTwitter(elId, state);
+    case EXPANDABLE_COMPONENTS['amp-story-interactive-text'].selector:
+      return updateStylesForInteractiveText(elId, state);
     default:
       return updateDefaultStyles(elId, state);
   }
@@ -444,6 +446,22 @@ function updateStylesForTwitter(elId, state) {
     transform: `scale(${state.scaleFactor})`,
     horizontalMargin: state.horizontalMargin,
     verticalMargin: state.verticalMargin,
+  };
+}
+
+/**
+ * Gets style object for twitter. Notice there is no height or vertical margin
+ * since we don't know the final height of tweets even after layout, so we just
+ * let the embed handle its own height.
+ * @param {number} elId
+ * @param {!Object} state
+ * @return {!Object}
+ */
+function updateStylesForInteractiveText(elId, state) {
+  return {
+    id: elId,
+    scaleFactor: state.scaleFactor,
+    transform: `scale(${state.scaleFactor})`,
   };
 }
 

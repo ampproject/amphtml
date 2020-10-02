@@ -15,17 +15,13 @@
  */
 
 
-.i-amphtml-story-interactive-container {
-  overflow: hidden;
-}
-
 .i-amphtml-story-interactive-container.i-amphtml-story-interative-iphone {
   transform: translateY(-50%);
 }
 
 .i-amphtml-story-interactive-input-container {
   background-color: var(--i-amphtml-interactive-option-background-color);
-  border-radius: 1em;
+  border-radius: 1.5em;
   color: var(--i-amphtml-interactive-strong-text-color);
   box-shadow: var(--i-amphtml-interactive-component-shadow);
   display: flex;
