@@ -15,6 +15,7 @@
  */
 
 import '../amp-instagram';
+import {waitFor} from '../../../../testing/test-helper';
 import {waitForChildPromise} from '../../../../src/dom';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -88,12 +89,25 @@ describes.realWin(
       element.setAttribute('layout', 'responsive');
       doc.body.appendChild(element);
       await waitForRender();
+      const {offsetHeight} = element;
 
-      expect(
-        element.shadowRoot
-          .querySelector('iframe')
-          .parentElement.parentElement.getAttribute('height')
-      ).to.not.equal(initialHeight);
+      const mockEvent = new CustomEvent('message');
+      mockEvent.origin = 'https://www.instagram.com';
+      mockEvent.data = JSON.stringify({
+        'type': 'MEASURE',
+        'details': {
+          'height': 1000,
+        },
+      });
+      mockEvent.source = element.shadowRoot.querySelector(
+        'iframe'
+      ).contentWindow;
+      win.dispatchEvent(mockEvent);
+
+      await waitFor(
+        () => element.offsetHeight != offsetHeight,
+        'Height is not changed'
+      );
     });
   }
 );

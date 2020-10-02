@@ -115,11 +115,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
 });
 
 function createMockEvent() {
-  const mockEvent = new CustomEvent('message', {
-    detail: {
-      origin: 'https://www.instagram.com',
-    },
-  });
+  const mockEvent = new CustomEvent('message');
   mockEvent.origin = 'https://www.instagram.com';
   mockEvent.data = JSON.stringify({
     'type': 'MEASURE',
