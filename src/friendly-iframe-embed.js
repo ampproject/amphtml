@@ -692,14 +692,26 @@ export function installExtensionsInEmbed(
     })
     .then(getDelayPromise)
     .then(() => {
-      // Install runtime styles.
-      installStylesForDoc(
-        ampdoc,
-        ampSharedCss,
-        /* callback */ null,
-        /* opt_isRuntimeCss */ true,
-        /* opt_ext */ 'amp-runtime'
-      );
+      if (IS_ESM) {
+        const css = parentWin.document.querySelector('style[amp-runtime]')
+          .textContent;
+        installStylesForDoc(
+          ampdoc,
+          css,
+          /* callback */ null,
+          /* opt_isRuntimeCss */ true,
+          /* opt_ext */ 'amp-runtime'
+        );
+      } else {
+        // Install runtime styles.
+        installStylesForDoc(
+          ampdoc,
+          ampSharedCss,
+          /* callback */ null,
+          /* opt_isRuntimeCss */ true,
+          /* opt_ext */ 'amp-runtime'
+        );
+      }
     })
     .then(getDelayPromise)
     .then(() => {
@@ -754,12 +766,16 @@ export function installExtensionsInEmbed(
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  installDocContains(childWin);
-  installDOMTokenList(childWin);
+  if (!IS_ESM) {
+    installDocContains(childWin);
+    installDOMTokenList(childWin);
+  }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  installCustomElements(childWin, class {});
-  installIntersectionObserver(parentWin, childWin);
+  if (!IS_SXG) {
+    installCustomElements(childWin, class {});
+    installIntersectionObserver(parentWin, childWin);
+  }
 }
 
 /**

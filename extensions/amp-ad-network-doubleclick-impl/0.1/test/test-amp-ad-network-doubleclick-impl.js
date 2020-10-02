@@ -34,7 +34,6 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  EXPAND_JSON_TARGETING_EXP,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
@@ -48,10 +47,7 @@ import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
+import {toggleExperiment} from '../../../../src/experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -811,12 +807,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
-      forceExperimentBranch(
-        win,
-        EXPAND_JSON_TARGETING_EXP.ID,
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
-      );
       element.setAttribute(
         'json',
         `{
@@ -832,12 +822,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting inside array', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
-      forceExperimentBranch(
-        win,
-        EXPAND_JSON_TARGETING_EXP.ID,
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
-      );
       element.setAttribute(
         'json',
         `{

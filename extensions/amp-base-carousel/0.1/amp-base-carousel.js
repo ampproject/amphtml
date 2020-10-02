@@ -243,7 +243,8 @@ class AmpCarousel extends AMP.BaseElement {
    *   actionSource: (!ActionSource|undefined),
    * }=} options
    */
-  goToSlide(index, {smoothScroll = false, actionSource} = {}) {
+  goToSlide(index, options = {}) {
+    const {smoothScroll = false, actionSource} = options;
     this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 
@@ -537,6 +538,7 @@ class AmpCarousel extends AMP.BaseElement {
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
     const loop = this.carousel_.isLooping();
+    const visibleCount = this.carousel_.getVisibleCount();
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
     iterateCursor(this.prevArrowSlot_.children, (child) => {
@@ -544,7 +546,7 @@ class AmpCarousel extends AMP.BaseElement {
       toggleAttribute(child, 'disabled', disabled);
     });
     iterateCursor(this.nextArrowSlot_.children, (child) => {
-      const disabled = !loop && index === this.slides_.length - 1;
+      const disabled = !loop && index >= this.slides_.length - visibleCount;
       toggleAttribute(child, 'disabled', disabled);
     });
     toggleAttribute(

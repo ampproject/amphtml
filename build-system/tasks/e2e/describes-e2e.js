@@ -17,8 +17,10 @@
 require('chromedriver'); // eslint-disable-line no-unused-vars
 require('geckodriver'); // eslint-disable-line no-unused-vars
 
+const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
+const http = require('http');
 const puppeteer = require('puppeteer');
 const {
   clearLastExpectError,
@@ -30,6 +32,7 @@ const {
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
+const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isTravisBuild} = require('../../common/travis');
 const {PuppeteerController} = require('./puppeteer-controller');
@@ -40,6 +43,7 @@ const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
@@ -254,10 +258,6 @@ const EnvironmentVariantMap = {
     name: 'AMPHTML ads FIE environment',
     value: {environment: 'a4a-fie'},
   },
-  [AmpdocEnvironment.A4A_FIE_NO_SIGNING]: {
-    name: 'AMPHTML ads FIE environment with no-signing exp enabled',
-    value: {environment: 'a4a-fie-no-signing'},
-  },
   [AmpdocEnvironment.A4A_INABOX]: {
     name: 'AMPHTML ads inabox environment',
     value: {environment: 'a4a-inabox'},
@@ -280,7 +280,6 @@ const envPresets = {
   ],
   'amp4ads-preset': [
     AmpdocEnvironment.A4A_FIE,
-    AmpdocEnvironment.A4A_FIE_NO_SIGNING,
     AmpdocEnvironment.A4A_INABOX,
     AmpdocEnvironment.A4A_INABOX_FRIENDLY,
     AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
@@ -331,6 +330,39 @@ class ItConfig {
 
     this.it(name, function () {
       return fn.apply(this, arguments);
+    });
+  }
+}
+
+/**
+ * Reports code coverage data to an aggregating endpoint.
+ * @param {!Object} env e2e driver environment
+ * @return {Promise<void>}
+ */
+async function reportCoverage(env) {
+  // Calling code only needs to wait until we've extracted the coverage data
+  // from the window, then it can begin cleaning up/resetting the state. POSTing
+  // the coverage data can happen asynchronously and doesn't need to block
+  // other testing.
+  const cov = await env.controller.evaluate(() => window.__coverage__);
+  if (cov) {
+    return new Promise((resolve, reject) => {
+      const req = http.request(
+        {
+          host: HOST,
+          port: PORT,
+          path: COV_REPORT_PATH,
+          method: 'POST',
+          headers: {'Content-type': 'application/json'},
+        },
+        (res) => {
+          res.on('data', () => {});
+          res.on('end', resolve);
+          res.on('error', reject);
+        }
+      );
+      req.write(JSON.stringify(cov));
+      req.end();
     });
   }
 }
@@ -438,6 +470,10 @@ function describeEnv(factory) {
       });
 
       afterEach(async function () {
+        if (argv.coverage) {
+          await reportCoverage(env);
+        }
+
         // If there is an async expect error, throw it in the final state.
         const lastExpectError = getLastExpectError();
         if (lastExpectError) {

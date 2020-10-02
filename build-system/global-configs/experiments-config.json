@@ -1,11 +1,11 @@
 {
-  "experimentA": {},
-  "experimentB": {},
-  "experimentC": {
-    "name": "StrictCompilation",
+  "experimentA": {
+    "name": "A4A No Signing RTV Experiment",
     "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/19380",
-    "expiration_date_utc": "2020-08-07",
-    "define_experiment_constant": "STRICT_COMPILATION"
-  }
+    "issue": "https://github.com/ampproject/amphtml/issues/27189",
+    "expiration_date_utc": "2020-12-30",
+    "define_experiment_constant": "NO_SIGNING_RTV"
+  },
+  "experimentB": {},
+  "experimentC": {}
 }

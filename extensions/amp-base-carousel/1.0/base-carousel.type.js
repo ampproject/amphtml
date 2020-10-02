@@ -27,7 +27,6 @@ var BaseCarouselDef = {};
  *   controls: (string|undefined),
  *   loop: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
- *   setAdvance: (function(function(number):undefined):undefined|undefined),
  *   snap: (boolean|undefined),
  *   snapAlign: (string|undefined),
  * }}
@@ -60,3 +59,27 @@ BaseCarouselDef.SlideProps;
  * }}
  */
 BaseCarouselDef.ArrowProps;
+
+/**
+ * @typedef {{
+ *   currentSlide: (number|undefined),
+ *   setCurrentSlide: (function(number):undefined),
+ *   slideCount: (number|undefined),
+ *   setSlideCount: (function(number):undefined),
+ * }}
+ */
+BaseCarouselDef.ContextProps;
+
+/** @interface */
+BaseCarouselDef.CarouselApi = class {
+  /**
+   * @param {number} by Number of slides to advance. Positive: advance forward,
+   * negative: advance backward.
+   */
+  advance(by) {}
+
+  /**
+   * @param {number} index
+   */
+  goToSlide(index) {}
+};

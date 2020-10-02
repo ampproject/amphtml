@@ -16,53 +16,58 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {exec} = require('../../common/exec');
+const {createCtrlcHandler} = require('../../common/ctrlcHandler');
+const {defaultTask: runAmpDevBuildServer} = require('../default-task');
+const {execScriptAsync} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
 
-let storybookArgs = '--quiet';
-if (argv.port) {
-  storybookArgs += ` -p ${argv.port}`;
-}
+const ENV_PORTS = {
+  amp: 9001,
+  preact: 9002,
+};
 
-function runStorybook(mode) {
-  // install storybook-specific modules
-  installPackages(__dirname);
-
-  exec(
-    `./node_modules/.bin/start-storybook -c ./${mode}-env ${storybookArgs}`,
+/**
+ * @param {string} env 'amp' or 'preact'
+ * @return {!ChildProcess}
+ */
+function launchEnv(env) {
+  const {ci, 'storybook_port': storybookPort = ENV_PORTS[env]} = argv;
+  return execScriptAsync(
+    [
+      './node_modules/.bin/start-storybook',
+      '--quiet',
+      `-c ./${env}-env`,
+      `-p ${storybookPort}`,
+      ci ? '--ci' : '',
+    ].join(' '),
     {
-      'stdio': [null, process.stdout, process.stderr],
+      stdio: [null, process.stdout, process.stderr],
       cwd: __dirname,
       env: process.env,
     }
   );
 }
 
-/**
- * Simple wrapper around the storybook start script
- * for AMP components (HTML Environment)
- */
-function storybookAmp() {
-  runStorybook('amp' /** mode */);
-}
-
-/**
- * Simple wrapper around the storybook start script.
- */
-function storybookPreact() {
-  runStorybook('preact' /** mode */);
+async function storybook() {
+  const {'storybook_env': env = 'amp,preact'} = argv;
+  const envs = env.split(',');
+  if (envs.includes('amp')) {
+    await runAmpDevBuildServer();
+  }
+  installPackages(__dirname);
+  createCtrlcHandler('storybook');
+  return Promise.all(envs.map(launchEnv));
 }
 
 module.exports = {
-  storybookAmp,
-  storybookPreact,
+  storybook,
 };
 
-storybookPreact.description =
-  'Isolated testing and development for AMP Bento components in Preact mode.';
-storybookAmp.description =
-  'Isolated testing and development for AMPHTML components.';
+storybook.description = 'Isolated testing and development for AMP components.';
 
-storybookPreact.flags = storybookAmp.flags = {
-  'port': '  Change the port that the storybook dashboard is served from',
+storybook.flags = {
+  'storybook_env':
+    "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
+  'storybook_port': '  Set port from which to run the Storybook dashboard.',
+  'ci': "  CI mode (skip interactive prompts, don't open browser)",
 };

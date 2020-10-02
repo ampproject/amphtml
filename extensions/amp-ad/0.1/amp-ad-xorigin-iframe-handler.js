@@ -17,16 +17,13 @@
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
-import {IntersectionObserverHostForAd} from './intersection-observer-host';
+import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
-  isPausable,
   listenFor,
   listenForOncePromise,
-  makePausable,
   postMessageToWindows,
-  setPaused,
 } from '../../../src/iframe-helper';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -66,8 +63,8 @@ export class AmpAdXOriginIframeHandler {
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserverHostForAd} */
-    this.intersectionObserverHost_ = null;
+    /** @private {?LegacyAdIntersectionObserverHost} */
+    this.legacyIntersectionObserverApiHost_ = null;
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
@@ -103,11 +100,11 @@ export class AmpAdXOriginIframeHandler {
     this.baseInstance_.applyFillContent(this.iframe);
     const timer = Services.timerFor(this.baseInstance_.win);
 
-    // Init IntersectionObserver service.
-    this.intersectionObserverHost_ = new IntersectionObserverHostForAd(
+    // Init the legacy observeInterection API service.
+    // (Behave like position observer)
+    this.legacyIntersectionObserverApiHost_ = new LegacyAdIntersectionObserverHost(
       this.baseInstance_,
-      this.iframe,
-      true
+      this.iframe
     );
 
     this.embedStateApi_ = new SubscriptionApi(
@@ -183,7 +180,7 @@ export class AmpAdXOriginIframeHandler {
       )
     );
 
-    if (this.element_.hasAttribute('sticky')) {
+    if (this.baseInstance_.isStickyAd()) {
       setStyle(iframe, 'pointer-events', 'none');
       this.unlisteners_.push(
         listenFor(
@@ -285,12 +282,6 @@ export class AmpAdXOriginIframeHandler {
       // received here as well.
       this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
     });
-
-    // If "pausable-iframe" enabled, try to make the iframe pausable. It doesn't
-    // matter here whether this will succeed or not.
-    if (isExperimentOn(this.win_, 'pausable-iframe')) {
-      makePausable(this.iframe);
-    }
 
     this.element_.appendChild(this.iframe);
     if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
@@ -434,9 +425,9 @@ export class AmpAdXOriginIframeHandler {
       this.inaboxPositionApi_.destroy();
       this.inaboxPositionApi_ = null;
     }
-    if (this.intersectionObserverHost_) {
-      this.intersectionObserverHost_.destroy();
-      this.intersectionObserverHost_ = null;
+    if (this.legacyIntersectionObserverApiHost_) {
+      this.legacyIntersectionObserverApiHost_.destroy();
+      this.legacyIntersectionObserverApiHost_ = null;
     }
   }
 
@@ -464,6 +455,7 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
+            this.baseInstance_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
               id,
@@ -601,9 +593,6 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverHost_) {
-      this.intersectionObserverHost_.onViewportCallback(inViewport);
-    }
     this.sendEmbedInfo_(inViewport);
   }
 
@@ -613,8 +602,8 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.intersectionObserverHost_) {
-      this.intersectionObserverHost_.fire();
+    if (this.legacyIntersectionObserverApiHost_) {
+      this.legacyIntersectionObserverApiHost_.fire();
     }
   }
 
@@ -633,27 +622,6 @@ export class AmpAdXOriginIframeHandler {
       const e = new Error(message);
       e.name = '3pError';
       reportErrorToAnalytics(e, this.baseInstance_.win);
-    }
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isPausable() {
-    return (
-      isExperimentOn(this.win_, 'pausable-iframe') &&
-      !!this.iframe &&
-      isPausable(this.iframe)
-    );
-  }
-
-  /**
-   * See `BaseElement.pauseCallback()` and `BaseElement.resumeCallback()`.
-   * @param {boolean} paused
-   */
-  setPaused(paused) {
-    if (isExperimentOn(this.win_, 'pausable-iframe') && this.iframe) {
-      setPaused(this.iframe, paused);
     }
   }
 }

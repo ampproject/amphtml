@@ -33,11 +33,7 @@ export const _default = () => {
   const snap = boolean('snap', true);
   const snapAlign = select('snap-align', ['start', 'center']);
   return (
-    <BaseCarousel
-      snap={snap}
-      snapAlign={snapAlign}
-      style={{width, height, position: 'relative'}}
-    >
+    <BaseCarousel snap={snap} snapAlign={snapAlign} style={{width, height}}>
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
@@ -71,7 +67,7 @@ export const provideArrows = () => {
   };
   return (
     <BaseCarousel
-      style={{width, height, position: 'relative'}}
+      style={{width, height}}
       arrowPrev={<MyButton>←</MyButton>}
       arrowNext={<MyButton>→</MyButton>}
     >
@@ -86,7 +82,7 @@ export const WithLooping = () => {
   const width = number('width', 440);
   const height = number('height', 225);
   return (
-    <BaseCarousel loop style={{width, height, position: 'relative'}}>
+    <BaseCarousel loop style={{width, height}}>
       {[
         'lightpink',
         'lightcoral',
@@ -114,10 +110,7 @@ export const WithLooping = () => {
 
 export const WithCaptions = () => {
   return (
-    <BaseCarousel
-      loop
-      style={{width: '500px', height: '400px', position: 'relative'}}
-    >
+    <BaseCarousel loop style={{width: '500px', height: '400px'}}>
       <figure>
         <img
           style={{width: '500px', height: '300px'}}

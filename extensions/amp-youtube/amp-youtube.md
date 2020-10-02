@@ -94,13 +94,14 @@ The Youtube channel id that provides a stable livestream url. For example, in th
 All `data-param-*` attributes (with the exception of `data-param-autoplay` and `data-param-loop`) will be added as query parameter to the YouTube iframe src. This may be used to pass custom values through to YouTube plugins, such as whether to show controls.
 
 Keys and values will be URI encoded. Keys will be camel cased
-<
+
 `data-param-controls=1` becomes `&controls=1`
 
 See [YouTube Embedded Player Parameters](https://developers.google.com/youtube/player_parameters) for more parameter options for YouTube.
 
 [tip type="note"]
 Use the `autoplay` attribute instead of `data-param-autoplay` and the `loop` attribute instead of `data-param-loop` since both the autoplay and looping behaviors are handled internally by AMP instead of the Youtube player.
+[/tip]
 
 ### dock
 
@@ -110,10 +111,8 @@ Requires [`amp-video-docking`](../amp-video-docking/amp-video-docking.md) compon
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
-<ul>
-  <li>Supported values: `omit`, `include`</li>
-  <li>Default: `include`</li>
-</ul>
+- Supported values: `omit`, `include`
+- Default: `include`
 
 If you want to use the [YouTube player in privacy-enhanced mode](http://www.google.com/support/youtube/bin/answer.py?answer=141046), pass the value of `omit`.
 

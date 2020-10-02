@@ -515,16 +515,18 @@ export class GoogleSubscriptionsPlatform {
     if (this.enableLAA_) {
       return this.viewerPromise_.getReferrerUrl().then((referrer) => {
         const parsedQuery = this.getLAAParams_();
+        const parsedReferrer = parseUrlDeprecated(referrer);
         if (
-          // Note we don't use the more generic this.isDev_ flag becuase that can ber triggered
-          // by a hash value which would allow non gooogle origins to construst LAA urls.
-          (GOOGLE_DOMAIN_RE.test(parseUrlDeprecated(referrer).origin) ||
+          // Note we don't use the more generic this.isDev_ flag because that can be triggered
+          // by a hash value which would allow non gooogle hostnames to construct LAA urls.
+          ((parsedReferrer.protocol === 'https' &&
+            GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) ||
             getMode(this.ampdoc_.win).localDev) &&
-          parsedQuery[`glaa_at`] == 'laa' &&
-          parsedQuery[`glaa_n`] &&
-          parsedQuery[`glaa_sig`] &&
-          parsedQuery[`glaa_ts`] &&
-          parseInt(parsedQuery[`glaa_ts`], 16) > Date.now() / 1000
+          parsedQuery[`gaa_at`] == 'laa' &&
+          parsedQuery[`gaa_n`] &&
+          parsedQuery[`gaa_sig`] &&
+          parsedQuery[`gaa_ts`] &&
+          parseInt(parsedQuery[`gaa_ts`], 16) > Date.now() / 1000
         ) {
           // All the criteria are met to return an LAA entitlement
           return Promise.resolve(
@@ -573,45 +575,49 @@ export class GoogleSubscriptionsPlatform {
       if (!this.enableEntitlements_) {
         return null;
       }
-      return this.runtime_
-        .getEntitlements(encryptedDocumentKey)
-        .then((swgEntitlements) => {
-          // Get and store the isReadyToPay signal which is independent of
-          // any entitlments existing.
-          if (swgEntitlements.isReadyToPay) {
-            this.isReadyToPay_ = true;
-          }
+      let params = {};
+      if (encryptedDocumentKey) {
+        params = {
+          encryption: {encryptedDocumentKey},
+        };
+      }
+      return this.runtime_.getEntitlements(params).then((swgEntitlements) => {
+        // Get and store the isReadyToPay signal which is independent of
+        // any entitlments existing.
+        if (swgEntitlements.isReadyToPay) {
+          this.isReadyToPay_ = true;
+        }
 
-          // Get the specifc entitlement we're looking for
-          let swgEntitlement = swgEntitlements.getEntitlementForThis();
-          let granted = false;
-          if (swgEntitlement && swgEntitlement.source) {
-            granted = true;
-          } else if (
-            swgEntitlements.entitlements.length &&
-            swgEntitlements.entitlements[0].products.length
-          ) {
-            // We didn't find a grant so see if there is a non granting
-            // and return that. Note if we start returning multiple non
-            // granting we'll need to refactor to handle returning an
-            // array of Entitlement objects.
-            // #TODO(jpettitt) - refactor to handle multi entitlement case
-            swgEntitlement = swgEntitlements.entitlements[0];
-          } else {
-            return null;
-          }
-          swgEntitlements.ack();
-          return new Entitlement({
-            source: swgEntitlement.source,
-            raw: swgEntitlements.raw,
-            service: PLATFORM_ID,
-            granted,
-            // if it's granted it must be a subscriber
-            grantReason: granted ? GrantReason.SUBSCRIBER : null,
-            dataObject: swgEntitlement.json(),
-            decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
-          });
+        // Get the specifc entitlement we're looking for
+        let swgEntitlement = swgEntitlements.getEntitlementForThis();
+        let granted = false;
+        if (swgEntitlement && swgEntitlement.source) {
+          granted = true;
+        } else if (
+          swgEntitlements.entitlements.length &&
+          swgEntitlements.entitlements[0].products.length
+        ) {
+          // We didn't find a grant so see if there is a non granting
+          // and return that. Note if we start returning multiple non
+          // granting we'll need to refactor to handle returning an
+          // array of Entitlement objects.
+          // #TODO(jpettitt) - refactor to handle multi entitlement case
+          swgEntitlement = swgEntitlements.entitlements[0];
+        } else {
+          return null;
+        }
+        swgEntitlements.ack();
+        return new Entitlement({
+          source: swgEntitlement.source,
+          raw: swgEntitlements.raw,
+          service: PLATFORM_ID,
+          granted,
+          // if it's granted it must be a subscriber
+          grantReason: granted ? GrantReason.SUBSCRIBER : null,
+          dataObject: swgEntitlement.json(),
+          decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
         });
+      });
     });
   }
 

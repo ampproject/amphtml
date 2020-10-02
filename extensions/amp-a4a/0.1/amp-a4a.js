@@ -50,7 +50,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -177,15 +176,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
-};
-
-/**
- * @const @enum {string}
- */
-export const NO_SIGNING_EXP = {
-  id: 'a4a-no-signing',
-  control: '21066324',
-  experiment: '21066325',
 };
 
 /** @const @enum {string} */
@@ -870,10 +860,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    return (
-      getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-      NO_SIGNING_EXP.experiment
-    );
+    // eslint-disable-next-line no-undef
+    return !!NO_SIGNING_RTV;
   }
 
   /**
@@ -883,7 +871,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
   streamResponse_(httpResponse, checkStillCurrent) {
-    if (!httpResponse.body) {
+    if (httpResponse.status === 204) {
       this.forceCollapse();
       return Promise.reject(NO_CONTENT_RESPONSE);
     }
@@ -2157,6 +2145,13 @@ export class AmpA4A extends AMP.BaseElement {
       'https://tpc.googlesyndication.com/safeframe/' +
       `${this.safeframeVersion}/html/container.html`
     );
+  }
+
+  /**
+   * @return {boolean} whether this is a sticky ad unit
+   */
+  isStickyAd() {
+    return false;
   }
 
   /**

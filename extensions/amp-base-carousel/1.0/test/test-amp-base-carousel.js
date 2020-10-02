@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import '../amp-base-carousel';
+import {ActionInvocation} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {
   createElementWithAttributes,
   waitForChildPromise,
@@ -21,7 +23,8 @@ import {
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {useStyles} from '../base-carousel.jss';
+import {waitFor, whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-base-carousel',
@@ -35,13 +38,31 @@ describes.realWin(
     let win;
     let element;
 
-    async function getSlidesFromShadow() {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const styles = useStyles();
+
+    async function getSlideWrappersFromShadow() {
       await whenCalled(env.sandbox.spy(element, 'attachShadow'));
       const shadow = element.shadowRoot;
       await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelectorAll('[hide-scrollbar]');
+        return shadow.querySelectorAll('[class*=hideScrollbar]');
       });
-      const slots = await shadow.querySelectorAll('[hide-scrollbar] slot');
+      await waitFor(
+        () =>
+          shadow.querySelectorAll(`[class*=${styles.hideScrollbar}] `).length >
+          0,
+        'slots rendered'
+      );
+      return shadow.querySelectorAll(
+        `[class*=${styles.hideScrollbar}] [class*=${styles.slideElement}]`
+      );
+    }
+
+    async function getSlidesFromShadow() {
+      const wrappers = await getSlideWrappersFromShadow();
+      const slots = Array.from(wrappers)
+        .map((wrapper) => wrapper.querySelector('slot'))
+        .filter((slot) => !!slot);
       return toArray(slots).reduce(
         (acc, slot) => acc.concat(slot.assignedElements()),
         []
@@ -93,7 +114,9 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
+      expect(renderedSlides).to.have.ordered.members(
+        userSuppliedChildren.slice(0, 2)
+      );
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(2);
     });
@@ -112,7 +135,9 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
+      expect(renderedSlides).to.have.ordered.members(
+        userSuppliedChildren.slice(0, 2)
+      );
 
       const defaultButtons = element.shadowRoot.querySelectorAll('button');
       expect(defaultButtons).to.have.length(0);
@@ -135,11 +160,67 @@ describes.realWin(
       userSuppliedChildren.forEach((child) => element.appendChild(child));
       win.document.body.appendChild(element);
 
-      const renderedSlides = await getSlidesFromShadow();
-      // Given slides [0][1][2] should be rendered as [2][0][1]
-      expect(renderedSlides[0]).to.equal(userSuppliedChildren[2]);
-      expect(renderedSlides[1]).to.equal(userSuppliedChildren[0]);
-      expect(renderedSlides[2]).to.equal(userSuppliedChildren[1]);
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      // Given slides [0][1][2] should be rendered as [2][0][1]. But [2] is
+      // a placeholder.
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      expect(renderedSlideWrappers[0].querySelector('slot')).to.be.null;
+      expect(
+        renderedSlideWrappers[1].querySelector('slot').assignedElements()
+      ).to.deep.equal([userSuppliedChildren[0]]);
+      expect(
+        renderedSlideWrappers[2].querySelector('slot').assignedElements()
+      ).to.deep.equal([userSuppliedChildren[1]]);
+    });
+
+    describe('imperative api', () => {
+      let scroller;
+
+      beforeEach(async () => {
+        const userSuppliedChildren = setSlides(3);
+        userSuppliedChildren.forEach((child) => element.appendChild(child));
+        win.document.body.appendChild(element);
+        await getSlidesFromShadow();
+
+        scroller = element.shadowRoot.querySelector(
+          `[class*=${styles.scrollContainer}]`
+        );
+      });
+
+      function invocation(method, args = {}) {
+        const source = null;
+        const caller = null;
+        const event = null;
+        const trust = ActionTrust.DEFAULT;
+        return new ActionInvocation(
+          element,
+          method,
+          args,
+          source,
+          caller,
+          event,
+          trust
+        );
+      }
+
+      it('should execute next and prev actions', async () => {
+        element.enqueAction(invocation('next'));
+        await waitFor(() => scroller.scrollLeft > 0, 'advanced to next slide');
+
+        element.enqueAction(invocation('prev'));
+        await waitFor(() => scroller.scrollLeft == 0, 'returned to prev slide');
+      });
+
+      it('should execute goToSlide action', async () => {
+        element.enqueAction(invocation('goToSlide', {index: 1}));
+        await waitFor(() => scroller.scrollLeft > 0, 'to to slide 1');
+
+        element.enqueAction(invocation('goToSlide', {index: 0}));
+        await waitFor(
+          () => scroller.scrollLeft == 0,
+          'returned to first slide'
+        );
+      });
     });
 
     it('should render arrows when controls=always', async () => {
