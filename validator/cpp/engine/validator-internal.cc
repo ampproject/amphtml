@@ -5684,7 +5684,7 @@ class Validator {
 
     // As some errors can be inserted out of order, sort errors at the
     // end based on their line/col numbers.
-    std::sort(result_.mutable_errors()->begin(),
+    std::stable_sort(result_.mutable_errors()->begin(),
               result_.mutable_errors()->end(),
               [](const ValidationError& lhs, const ValidationError& rhs) {
                 if (lhs.line() != rhs.line()) return lhs.line() < rhs.line();
