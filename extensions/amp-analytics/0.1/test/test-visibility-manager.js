@@ -824,24 +824,26 @@ describes.realWin(
     let clock;
     let viewer;
     let viewport;
+    let parentAmpdoc;
     let parentRoot;
     let root;
     let inob;
 
     beforeEach(() => {
       parentWin = env.parentWin;
+      parentAmpdoc = env.parentAmpdoc;
       win = env.win;
       ampdoc = env.ampdoc;
       embed = env.embed;
-      embed.host = ampdoc.win.document.createElement('amp-host');
+      embed.host = parentAmpdoc.win.document.createElement('amp-host');
       clock = env.sandbox.useFakeTimers();
       clock.tick(1);
 
       viewport = parentWin.__AMP_SERVICES.viewport.obj;
       viewer = parentWin.__AMP_SERVICES.viewer.obj;
-      env.sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
+      env.sandbox.stub(parentAmpdoc, 'getFirstVisibleTime').returns(1);
 
-      parentRoot = new VisibilityManagerForDoc(ampdoc);
+      parentRoot = new VisibilityManagerForDoc(parentAmpdoc);
       parentWin.IntersectionObserver = IntersectionObserverStub;
       parentWin.IntersectionObserverEntry = function () {};
       parentWin.IntersectionObserverEntry.prototype.intersectionRatio = 1;
@@ -879,7 +881,7 @@ describes.realWin(
       root = new VisibilityManagerForEmbed(parentRoot, embed);
 
       expect(root.parent).to.equal(parentRoot);
-      expect(root.ampdoc).to.equal(ampdoc);
+      expect(root.ampdoc).to.equal(parentAmpdoc);
       expect(root.getStartTime()).to.equal(embed.getStartTime());
       expect(root.isBackgrounded()).to.be.true;
       expect(root.isBackgroundedAtStart()).to.be.true;
@@ -890,7 +892,7 @@ describes.realWin(
 
     it('should initialize correctly in foreground', () => {
       expect(root.parent).to.equal(parentRoot);
-      expect(root.ampdoc).to.equal(ampdoc);
+      expect(root.ampdoc).to.equal(parentAmpdoc);
       expect(root.getStartTime()).to.equal(embed.getStartTime());
       expect(root.isBackgrounded()).to.be.false;
       expect(root.isBackgroundedAtStart()).to.be.false;
