@@ -84,6 +84,7 @@ function ScrollerWithRef(
     classes
   );
   const currentIndex = useRef(restingIndex);
+  const snapScroll = useRef(0);
 
   // useLayoutEffect needed to avoid FOUC while scrolling
   useLayoutEffect(() => {
@@ -93,11 +94,14 @@ function ScrollerWithRef(
     const container = containerRef.current;
     ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
-    container./* OK */ scrollLeft = loop
-      ? container./* OK */ offsetWidth * pivotIndex
-      : container./* OK */ offsetWidth * restingIndex;
+    container./* OK */ scrollLeft =
+      snap === 'false'
+        ? snapScroll.current
+        : loop
+        ? container./* OK */ offsetWidth * pivotIndex
+        : container./* OK */ offsetWidth * restingIndex;
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [loop, restingIndex, pivotIndex]);
+  }, [loop, restingIndex, pivotIndex, snap]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(
@@ -126,11 +130,13 @@ function ScrollerWithRef(
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
     const container = containerRef.current;
+    snapScroll.current =
+      container./* OK */ scrollLeft -
+      offsetRef.current * container./* OK */ offsetWidth;
     const slideOffset = Math.round(
-      (container./* OK */ scrollLeft -
-        offsetRef.current * container./* OK */ offsetWidth) /
-        container./* OK */ offsetWidth
+      snapScroll.current / container./* OK */ offsetWidth
     );
+
     currentIndex.current = mod(slideOffset, children.length);
   };
 

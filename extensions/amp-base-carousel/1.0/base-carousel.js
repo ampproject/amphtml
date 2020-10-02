@@ -119,7 +119,7 @@ function BaseCarouselWithRef(
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
         onTouchStart={() => setHadTouch(true)}
-        snap={snap}
+        snap={String(snap)}
         snapAlign={snapAlign}
       >
         {/*
