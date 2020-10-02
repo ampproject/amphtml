@@ -1009,6 +1009,11 @@ export class AmpStory extends AMP.BaseElement {
 
     this.maybeLoadStoryEducation_();
 
+    // Build pagination buttons if they can be displayed.
+    if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
+      new PaginationButtons(this);
+    }
+
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
     // visible.
@@ -1016,11 +1021,6 @@ export class AmpStory extends AMP.BaseElement {
       return whenUpgradedToCustomElement(firstPageEl).then(() => {
         return firstPageEl.whenBuilt();
       });
-    }
-
-    // Build pagination buttons if they can be displayed.
-    if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
-      new PaginationButtons(this);
     }
 
     // Will resolve when all pages are built.
