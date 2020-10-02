@@ -30,10 +30,9 @@ import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
-import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
-import {listen, loadPromise} from '../event-helper';
+import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
 import {startupChunk} from '../chunk';
@@ -1003,7 +1002,6 @@ export class ResourcesImpl {
             },
             mutate: (state) => {
               scrollAdjSet.forEach((request) => {
-                const box = request.resource.getLayoutBox();
                 request.resource.changeSize(
                   request.newHeight,
                   request.newWidth,

@@ -1612,7 +1612,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
   });
 
   it('should complete collapse', () => {
-    const oldTop = resource1.getLayoutBox().top;
     mutator.collapseElement(resource1.element);
     expect(resource1.completeCollapse).to.be.calledOnce;
   });

@@ -1280,8 +1280,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     resources.pendingBuildResources_ = [];
     parent = createElementWithResource(1)[0];
     parentResource = parent['__AMP__RESOURCE'];
-    [child1, resource1] = createElementWithResource(2);
-    [child2, resource2] = createElementWithResource(3);
+    [child1, resource1] = createElementWithResource(2); // eslint-disable-line local/no-array-destructuring
+    [child2, resource2] = createElementWithResource(3); // eslint-disable-line local/no-array-destructuring
   });
 
   it('should enforce that viewport is ready for first add', () => {
