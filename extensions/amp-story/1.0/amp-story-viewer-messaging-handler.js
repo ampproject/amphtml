@@ -107,6 +107,9 @@ export class AmpStoryViewerMessagingHandler {
     this.viewer_.onMessageRespond('setDocumentState', (data) =>
       this.onSetDocumentState_(data)
     );
+    this.viewer_.onMessageRespond('setStoryCustomUI', (data) =>
+      this.onSetStoryCustomUI_(data)
+    );
   }
 
   /**
@@ -192,5 +195,15 @@ export class AmpStoryViewerMessagingHandler {
     this.storeService_.dispatch(config.action, value);
 
     return Promise.resolve({state, value});
+  }
+
+  /**
+   * Handles 'setStoryCustomUI' viewer messages.
+   * @param {!Object=} data
+   * @return {!Promise<!Object|undefined>}
+   * @private
+   */
+  onSetStoryCustomUI_(data = {}) {
+    this.storeService_.dispatch(Action.SET_CUSTOM_UI_CONFIG, data);
   }
 }

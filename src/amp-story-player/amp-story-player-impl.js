@@ -508,6 +508,12 @@ export class AmpStoryPlayer {
             );
           });
 
+          const customUIConfig = this.getCustomUI_();
+
+          if (customUIConfig) {
+            messaging.sendRequest('setStoryCustomUI', customUIConfig, false);
+          }
+
           resolve(messaging);
         },
         (err) => {
