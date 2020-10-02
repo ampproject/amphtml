@@ -31,6 +31,7 @@ import {isInAmpdocFieExperiment} from '../ampdoc-fie';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
+import {WindowInterface} from '../window-interface';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -802,7 +803,7 @@ export class AmpDocSingle extends AmpDoc {
 
   /** @override */
   getUrl() {
-    return this.win.location.href;
+    return WindowInterface.getLocation(this.win).href;
   }
 
   /** @override */
