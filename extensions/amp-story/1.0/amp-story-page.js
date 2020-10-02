@@ -382,10 +382,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Returns true if a child of the first page.
+   * @return {boolean}
+   */
   isFirstPage() {
-    if (this.isFirstPage_=== null)  {
-      this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type'); 
-    } 
+    if (this.isFirstPage_ === null) {
+      this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
+    }
     return this.isFirstPage_;
   }
 

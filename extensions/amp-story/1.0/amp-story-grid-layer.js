@@ -83,8 +83,25 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   constructor(element) {
     super(element);
 
+    /** @private {null|boolean} */
+    this.isFirstPage_ = false;
+
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
+  }
+
+  /**
+   * Returns true if a child of the first page.
+   * @return {boolean}
+   */
+  isFirstPage() {
+    if (this.isFirstPage_ === null) {
+      this.isFirstPage_ = matches(
+        this.element,
+        'amp-story-page:first-of-type amp-story-grid-layer'
+      );
+    }
+    return this.isFirstPage_;
   }
 
   /** @override */
@@ -98,11 +115,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
-    // Only prerender if child of the first page.
-    return matches(
-      this.element,
-      'amp-story-page:first-of-type amp-story-grid-layer'
-    );
+    return this.isFirstPage();
   }
 
   /** @private */

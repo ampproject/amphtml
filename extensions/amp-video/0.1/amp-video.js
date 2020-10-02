@@ -86,6 +86,9 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.muted_ = false;
 
+    /** @private {null|boolean} */
+    this.prerenderAllowed_ = null;
+
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
@@ -147,9 +150,12 @@ class AmpVideo extends AMP.BaseElement {
    */
   prerenderAllowed() {
     // Only allow prerender if video sources are cached on CDN, or if video has
-    // a poster image. 
-    const posterAttr = this.element.getAttribute('poster');
-    return !!posterAttr || this.hasAnyCachedSources_();
+    // a poster image.
+    if (this.prerenderAllowed_ == null) {
+      const posterAttr = this.element.getAttribute('poster');
+      this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
+    }
+    return this.prerenderAllowed_;
   }
 
   /**

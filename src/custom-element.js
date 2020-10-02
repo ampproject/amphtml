@@ -747,7 +747,7 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Called when the element is first connected to the DOM. 
+     * Called when the element is first connected to the DOM.
      *
      * This callback is guarded by checks to see if the element is still
      * connected.  Chrome and Safari can trigger connectedCallback even when

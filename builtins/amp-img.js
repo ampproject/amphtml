@@ -252,7 +252,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return ! this.element.hasAttribute('noprerender');
+    return !this.element.hasAttribute('noprerender');
   }
 
   /** @override */
