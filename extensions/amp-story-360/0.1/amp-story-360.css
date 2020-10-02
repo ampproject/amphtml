@@ -147,7 +147,7 @@ amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery 
   }
 }
 
-.i-amphtml-story-360-text {
+.i-amphtml-story-360-discovery-text {
   font-family: 'Roboto', sans-serif !important;
   position: absolute !important;
   bottom: 40px !important;

@@ -84,7 +84,7 @@ const buildActivateButtonTemplate = (element) => {
 };
 
 /**
- * Generates the template for the feature discovery animation.
+ * Generates the template for the gyroscope feature discovery animation.
  *
  * @param {!Element} element
  * @return {!Element}
@@ -93,7 +93,7 @@ const buildDiscoveryTemplate = (element) => {
   return htmlFor(element)`
     <div class="i-amphtml-story-360-discovery">
       <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-text">
+      <span class="i-amphtml-story-360-discovery-text">
         Move device to explore
       </span>
     </div>
@@ -324,13 +324,17 @@ export class AmpStory360 extends AMP.BaseElement {
           this.resizeRenderer_()
         );
 
-        storeService.subscribe(
-          StateProperty.GYROSCOPE_PERMISSION_STATE,
-          (permissionState) => this.onPermissionState_(permissionState)
-        );
+        if (attr('controls') === 'gyroscope') {
+          storeService.subscribe(
+            StateProperty.GYROSCOPE_PERMISSION_STATE,
+            (permissionState) => this.onPermissionState_(permissionState)
+          );
+          this.checkGyroscopePermissions_();
+        }
 
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
+          this.maybeShowDiscoveryAnimation_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
@@ -426,9 +430,6 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   enableGyroscope_() {
-    if (this.element.getAttribute('controls') !== 'gyroscope') {
-      return;
-    }
     // Listen for one call before initiating.
     listenOncePromise(this.win, 'deviceorientation').then(() => {
       this.gyroscopeControls_ = true;
@@ -443,13 +444,22 @@ export class AmpStory360 extends AMP.BaseElement {
           );
         }
       });
-      // Display discovery animation.
-      if (this.isOnActivePage_) {
-        const storyEl = this.win.document.querySelector('amp-story');
-        const discoveryHTML = buildDiscoveryTemplate(storyEl);
-        this.mutateElement(() => storyEl.appendChild(discoveryHTML));
-      }
+      this.maybeShowDiscoveryAnimation_();
     });
+  }
+
+  /** @private */
+  maybeShowDiscoveryAnimation_() {
+    if (
+      this.isOnActivePage_ &&
+      this.gyroscopeControls_ &&
+      !this.element.ownerDocument.querySelector(
+        '.i-amphtml-story-360-discovery'
+      )
+    ) {
+      const discoveryTemplate = buildDiscoveryTemplate(this.element);
+      this.mutateElement(() => this.element.appendChild(discoveryTemplate));
+    }
   }
 
   /**
@@ -560,10 +570,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.element.getAttribute('controls') === 'gyroscope') {
-      this.checkGyroscopePermissions_();
-    }
-
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
     const owners = Services.ownersForDoc(this.element);
