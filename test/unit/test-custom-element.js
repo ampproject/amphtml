@@ -1165,7 +1165,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           container.appendChild(element1);
 
           const sizer = doc.createElement('i-amphtml-sizer');
-          expect(element1.sizerElement).to.be.undefined;
+          expect(element1.sizerElement).to.not.be.ok;
           element1.appendChild(sizer);
           element1.applySizesAndMediaQuery();
           expect(element1.sizerElement).to.equal(sizer);

@@ -177,9 +177,6 @@ export class InaboxResources {
   }
 
   /** @override */
-  setRelayoutTop(unusedRelayoutTop) {}
-
-  /** @override */
   maybeHeightChanged() {}
 
   /**

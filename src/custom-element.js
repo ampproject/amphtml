@@ -601,7 +601,7 @@ function createBaseCustomElementClass(win) {
      */
     getSizer_() {
       if (
-        this.sizerElement === undefined &&
+        ! this.sizerElement &&
         (this.layout_ === Layout.RESPONSIVE ||
           this.layout_ === Layout.INTRINSIC)
       ) {

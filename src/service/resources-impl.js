@@ -119,12 +119,7 @@ export class ResourcesImpl {
     this.firstVisibleTime_ = -1;
 
     /** @private {boolean} */
-    this.relayoutAll_ = true;
-
-    /**
-     * @private {number}
-     */
-    this.relayoutTop_ = -1;
+    this.relayoutAll_ = false;
 
     /** @private {time} */
     this.lastScrollTime_ = 0;
@@ -134,15 +129,6 @@ export class ResourcesImpl {
 
     /** @const @private {!Pass} */
     this.pass_ = new Pass(this.win, () => this.doPass());
-
-    /** @const @private {!Pass} */
-    this.remeasurePass_ = new Pass(this.win, () => {
-      // With IntersectionObserver, "remeasuring" hack no longer needed.
-      devAssert(!this.intersectionObserver_);
-
-      this.relayoutAll_ = true;
-      this.schedulePass();
-    });
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -243,10 +229,6 @@ export class ResourcesImpl {
       {root, rootMargin: '250% 31.25%'}
     );
 
-    // Wait for intersection callback instead of measuring all elements
-    // during the first pass.
-    this.relayoutAll_ = false;
-
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.
     this.viewport_.onChanged((event) => {
@@ -257,7 +239,7 @@ export class ResourcesImpl {
         this.maybeChangeHeight_ = true;
       }
       // With IntersectionObserver, we only need to handle viewport resize.
-      if (this.relayoutAll_ || !this.intersectionObserver_) {
+      if (this.relayoutAll_) {
         this.schedulePass();
       }
     });
@@ -347,39 +329,6 @@ export class ResourcesImpl {
       }
 
       ieIntrinsicCheckAndFix(this.win);
-
-      // With IntersectionObserver, no need for remeasuring hacks.
-      if (!this.intersectionObserver_) {
-        const fixPromise = ieMediaCheckAndFix(this.win);
-        const remeasure = () => this.remeasurePass_.schedule();
-        if (fixPromise) {
-          fixPromise.then(remeasure);
-        } else {
-          // No promise means that there's no problem.
-          remeasure();
-        }
-
-        // Safari 10 and under incorrectly estimates font spacing for
-        // `@font-face` fonts. This leads to wild measurement errors. The best
-        // course of action is to remeasure everything on window.onload or font
-        // timeout (3s), whichever is earlier. This has to be done on the global
-        // window because this is where the fonts are always added.
-        // Unfortunately, `document.fonts.ready` cannot be used here due to
-        // https://bugs.webkit.org/show_bug.cgi?id=174030.
-        // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
-        Promise.race([
-          loadPromise(this.win),
-          Services.timerFor(this.win).promise(3100),
-        ]).then(remeasure);
-
-        // Remeasure the document when all fonts loaded.
-        if (
-          this.win.document.fonts &&
-          this.win.document.fonts.status != 'loaded'
-        ) {
-          this.win.document.fonts.ready.then(remeasure);
-        }
-      }
     });
   }
 
@@ -676,15 +625,6 @@ export class ResourcesImpl {
   }
 
   /** @override */
-  setRelayoutTop(relayoutTop) {
-    if (this.relayoutTop_ == -1) {
-      this.relayoutTop_ = relayoutTop;
-    } else {
-      this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
-    }
-  }
-
-  /** @override */
   maybeHeightChanged() {
     this.maybeChangeHeight_ = true;
   }
@@ -748,8 +688,6 @@ export class ResourcesImpl {
       this.visible_,
       ', relayoutAll=',
       this.relayoutAll_,
-      ', relayoutTop=',
-      this.relayoutTop_,
       ', viewportSize=',
       viewportSize.width,
       viewportSize.height
@@ -862,7 +800,6 @@ export class ResourcesImpl {
       this.requestsChangeSize_ = [];
 
       // Find minimum top position and run all mutates.
-      let minTop = -1;
       const scrollAdjSet = [];
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
@@ -1037,9 +974,6 @@ export class ResourcesImpl {
         }
 
         if (resize) {
-          if (box.top >= 0) {
-            minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
-          }
           request.resource.changeSize(
             request.newHeight,
             request.newWidth,
@@ -1059,10 +993,6 @@ export class ResourcesImpl {
         }
       }
 
-      if (minTop != -1) {
-        this.setRelayoutTop(minTop);
-      }
-
       // Execute scroll-adjusting resize requests, if any.
       if (scrollAdjSet.length > 0) {
         this.vsync_.run(
@@ -1072,10 +1002,8 @@ export class ResourcesImpl {
               state./*OK*/ scrollTop = this.viewport_./*OK*/ getScrollTop();
             },
             mutate: (state) => {
-              let minTop = -1;
               scrollAdjSet.forEach((request) => {
                 const box = request.resource.getLayoutBox();
-                minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
                 request.resource.changeSize(
                   request.newHeight,
                   request.newWidth,
@@ -1087,9 +1015,7 @@ export class ResourcesImpl {
                   request.callback(/* hasSizeChanged */ true);
                 }
               });
-              if (minTop != -1) {
-                this.setRelayoutTop(minTop);
-              }
+
               // Sync is necessary here to avoid UI jump in the next frame.
               const newScrollHeight = this.viewport_./*OK*/ getScrollHeight();
               if (newScrollHeight != state./*OK*/ scrollHeight) {
@@ -1180,7 +1106,6 @@ export class ResourcesImpl {
       elementsThatScrolled_: elementsThatScrolled,
     } = this;
     this.relayoutAll_ = false;
-    this.relayoutTop_ = -1;
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     for (let i = 0; i < this.resources_.length; i++) {
@@ -1279,7 +1204,7 @@ export class ResourcesImpl {
         const r = this.resources_[i];
         // TODO(dvoytenko): This extra build has to be merged with the
         // scheduleLayoutOrPreload method below.
-        // Build all resources visible, measured, and in the viewport.
+        // Build all resources visible and in the viewport.
         if (
           !r.isBuilt() &&
           !r.isBuilding() &&
@@ -1294,6 +1219,7 @@ export class ResourcesImpl {
             /* ignoreQuota */ true
           );
         }
+
         if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
@@ -1839,7 +1765,10 @@ export class ResourcesImpl {
    * @private
    */
   cleanupTasks_(resource, opt_removePending) {
-    if (resource.getState() == ResourceState.NOT_LAID_OUT) {
+    if (
+      resource.getState() == ResourceState.NOT_LAID_OUT ||
+      resource.getState() == ResourceState.READY_FOR_LAYOUT
+    ) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
       // for layout again later on.

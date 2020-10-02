@@ -115,7 +115,7 @@ describe('mutator changeSize', () => {
 
     installInputService(resources.win);
 
-    viewportMock = window.sandbox.mock(mutator.viewport_);
+    viewportMock = window.sandbox.mock(resources.viewport_);
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
@@ -256,7 +256,6 @@ describe('mutator changeSize', () => {
   it("should NOT change size if it didn't change", () => {
     mutator.scheduleChangeSize_(resource1, 100, 100, undefined, NO_EVENT, true);
     resources.mutateWork_();
-    expect(resources.relayoutTop_).to.equal(-1);
     expect(resources.requestsChangeSize_.length).to.equal(0);
     expect(resource1.changeSize).to.have.not.been.called;
   });
@@ -264,7 +263,6 @@ describe('mutator changeSize', () => {
   it('should change size', () => {
     mutator.scheduleChangeSize_(resource1, 111, 222, undefined, NO_EVENT, true);
     resources.mutateWork_();
-    expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     expect(resources.requestsChangeSize_.length).to.equal(0);
     expect(resource1.changeSize).to.be.calledOnce;
     expect(resource1.changeSize.firstCall.args[0]).to.equal(111);
@@ -283,13 +281,6 @@ describe('mutator changeSize', () => {
     resources.mutateWork_();
     expect(resource1.changeSize).to.be.calledOnce;
     expect(resource1.changeSize.firstCall).to.have.been.calledWith(100, 111);
-  });
-
-  it('should pick the smallest relayoutTop', () => {
-    mutator.scheduleChangeSize_(resource2, 111, 222, undefined, NO_EVENT, true);
-    mutator.scheduleChangeSize_(resource1, 111, 222, undefined, NO_EVENT, true);
-    resources.mutateWork_();
-    expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
   });
 
   it('should measure non-measured elements', () => {
@@ -761,7 +752,6 @@ describe('mutator changeSize', () => {
       task.mutate(state);
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource1.changeSize).to.be.calledWith(111, 222);
-      expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     });
 
     it('should NOT resize when above vp but cannot adjust scrolling', () => {
@@ -921,7 +911,6 @@ describe('mutator changeSize', () => {
       task.mutate(state);
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource1.changeSize).to.be.calledWith(111, 222);
-      expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     });
 
     it('should adjust scrolling if height change above vp', () => {
@@ -1273,7 +1262,6 @@ describe('mutator changeSize', () => {
       expect(resource1.changeSize).to.be.calledWith(undefined, undefined, {
         top: 1,
       });
-      expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     });
 
     it('should reset pending change size when rescheduling', () => {
@@ -1428,7 +1416,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
   let resources, mutator;
   let resource1, resource2;
   let parent1, parent2;
-  let relayoutTopStub;
   let resource1RequestMeasureStub, resource2RequestMeasureStub;
 
   beforeEach(() => {
@@ -1458,7 +1445,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
         }
       },
     };
-    relayoutTopStub = env.sandbox.stub(resources, 'setRelayoutTop');
     env.sandbox.stub(resources, 'schedulePass');
 
     mutator = new MutatorImpl(env.ampdoc);
@@ -1508,8 +1494,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
       expect(mutateSpy).to.be.calledOnce;
       expect(resource1RequestMeasureStub).to.be.calledOnce;
       expect(resource2RequestMeasureStub).to.have.not.been.called;
-      expect(relayoutTopStub).to.be.calledOnce;
-      expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
     });
   });
 
@@ -1524,8 +1508,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
       expect(mutateSpy).to.be.calledOnce;
       expect(resource1RequestMeasureStub).to.be.calledOnce;
       expect(resource2RequestMeasureStub).to.have.not.been.called;
-      expect(relayoutTopStub).to.be.calledOnce;
-      expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
     });
   });
 
@@ -1540,8 +1522,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
       expect(mutateSpy).to.be.calledOnce;
       expect(resource1RequestMeasureStub).to.be.calledOnce;
       expect(resource2RequestMeasureStub).to.have.not.been.called;
-      expect(relayoutTopStub).to.be.calledOnce;
-      expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
     });
   });
 
@@ -1556,9 +1536,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
       expect(mutateSpy).to.be.calledOnce;
       expect(resource1RequestMeasureStub).to.be.calledOnce;
       expect(resource2RequestMeasureStub).to.have.not.been.called;
-      expect(relayoutTopStub).to.have.callCount(2);
-      expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
-      expect(relayoutTopStub.getCall(1).args[0]).to.equal(1010);
     });
   });
 
@@ -1634,12 +1611,10 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     expect(resource1.completeCollapse).to.not.been.called;
   });
 
-  it('should complete collapse and trigger relayout', () => {
+  it('should complete collapse', () => {
     const oldTop = resource1.getLayoutBox().top;
     mutator.collapseElement(resource1.element);
     expect(resource1.completeCollapse).to.be.calledOnce;
-    expect(relayoutTopStub).to.be.calledOnce;
-    expect(relayoutTopStub.args[0][0]).to.equal(oldTop);
   });
 
   it('should ignore relayout on an already collapsed element', () => {
@@ -1647,6 +1622,5 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     resource1.layoutBox_.height = 0;
     mutator.collapseElement(resource1.element);
     expect(resource1.completeCollapse).to.be.calledOnce;
-    expect(relayoutTopStub).to.have.not.been.called;
   });
 });

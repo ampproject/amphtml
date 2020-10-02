@@ -159,12 +159,6 @@ export class ResourcesInterface {
   ampInitComplete() {}
 
   /**
-   * @param {number} relayoutTop
-   * @package
-   */
-  setRelayoutTop(relayoutTop) {}
-
-  /**
    * Flag that the height could have been changed.
    * @package
    */

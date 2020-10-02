@@ -882,7 +882,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('unlayoutCallback').returns(true).once();
       elementMock.expects('togglePlaceholder').withArgs(true).once();
       resource.unlayout();
-      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
     });
 
     it('updated state should bypass isRelayoutNeeded', () => {
@@ -962,7 +962,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         elementMock.expects('pauseCallback').once();
         elementMock.expects('unlayoutCallback').returns(true).once();
         resource.pause();
-        expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+        expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
       });
 
       it('should call unlayoutCallback but NOT update state', () => {

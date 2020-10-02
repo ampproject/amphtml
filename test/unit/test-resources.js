@@ -512,7 +512,6 @@ describes.fakeWin(
   },
   (env) => {
     let win;
-    let clock;
     let resources;
     let schedulePassStub;
     let sandbox;
@@ -520,13 +519,12 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       sandbox = env.sandbox;
-      clock = sandbox.useFakeTimers();
       resources = Services.resourcesForDoc(win.document.body);
       resources.relayoutAll_ = false;
       schedulePassStub = sandbox.stub(resources, 'schedulePass');
     });
 
-    it('should run a full reload pass on window.onload', () => {
+    it('should not run a full reload pass on window.onload', () => {
       expect(resources.relayoutAll_).to.be.false;
       expect(schedulePassStub).to.not.be.called;
       win.readyState = 'complete';
@@ -538,99 +536,9 @@ describes.fakeWin(
           return loadPromise(win);
         })
         .then(() => {
-          expect(resources.relayoutAll_).to.be.true;
+          expect(resources.relayoutAll_).to.be.false;
           expect(schedulePassStub).to.have.been.called;
         });
-    });
-
-    it('should run a full reload pass on fonts timeout', () => {
-      win.readyState = 'complete';
-      win.document.eventListeners.fire({type: 'readystatechange'});
-      let basePassCount = 0;
-      return resources.ampdoc
-        .whenReady()
-        .then(() => {
-          expect(resources.relayoutAll_).to.be.false;
-          basePassCount = schedulePassStub.callCount;
-          clock.tick(3100);
-        })
-        .then(() => {
-          expect(resources.relayoutAll_).to.be.true;
-          expect(schedulePassStub).to.have.callCount(basePassCount + 1);
-        });
-    });
-
-    it('should run a full reload pass on document.fonts.ready', () => {
-      win.readyState = 'interactive';
-      win.document.eventListeners.fire({type: 'readystatechange'});
-      win.document.fonts.status = 'loading';
-      let basePassCount = 0;
-      return resources.ampdoc
-        .whenReady()
-        .then(() => {})
-        .then(() => {
-          // This is the regular remeasure on doc-ready.
-          expect(resources.relayoutAll_).to.be.true;
-          resources.relayoutAll_ = false;
-          basePassCount = schedulePassStub.callCount;
-          return win.document.fonts.ready;
-        })
-        .then(() => {
-          // Wait one micro task.
-          return Promise.resolve();
-        })
-        .then(() => {
-          expect(resources.relayoutAll_).to.be.true;
-          // Remeasure on doc-ready and fonts-ready.
-          expect(schedulePassStub).to.have.callCount(basePassCount + 1);
-        });
-    });
-
-    it('should not remeasure if fonts load before doc-ready', () => {
-      win.readyState = 'interactive';
-      win.document.eventListeners.fire({type: 'readystatechange'});
-      win.document.fonts.status = 'loaded';
-      let basePassCount = 0;
-      return resources.ampdoc
-        .whenReady()
-        .then(() => {})
-        .then(() => {
-          // This is the regular remeasure on doc-ready.
-          expect(resources.relayoutAll_).to.be.true;
-          resources.relayoutAll_ = false;
-          basePassCount = schedulePassStub.callCount;
-          return win.document.fonts.ready;
-        })
-        .then(() => {
-          // Wait one micro task.
-          return Promise.resolve();
-        })
-        .then(() => {
-          expect(resources.relayoutAll_).to.be.false;
-          // Only remeasure on doc-ready.
-          expect(schedulePassStub).to.have.callCount(basePassCount);
-        });
-    });
-
-    it('should run a full reload when a new element is connected', () => {
-      expect(resources.relayoutAll_).to.be.false;
-      expect(schedulePassStub).to.not.be.called;
-      const el = win.document.createElement('amp-img');
-      el.isBuilt = () => {
-        return true;
-      };
-      el.isUpgraded = () => {
-        return true;
-      };
-      el.isRelayoutNeeded = () => {
-        return true;
-      };
-      el.updateLayoutBox = () => {};
-      win.document.body.appendChild(el);
-      resources.add(el);
-      expect(resources.relayoutAll_).to.be.false;
-      clock.tick(1000);
-      expect(resources.relayoutAll_).to.be.true;
     });
   }
 );
@@ -678,7 +586,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   function createResource(id, rect) {
     const resource = new Resource(id, createElement(rect), resources);
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = rect;
+    resource.layoutBox_ = resource.initialLayoutBox_ = rect;
     return resource;
   }
 
@@ -693,7 +601,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const viewer = Services.viewerForDoc(env.ampdoc);
     sandbox.stub(viewer, 'isRuntimeOn').returns(true);
     resources = new ResourcesImpl(env.ampdoc);
-    resources.remeasurePass_.schedule = () => {};
     resources.pass_.schedule = () => {};
     viewportMock = sandbox.mock(resources.viewport_);
 
@@ -717,10 +624,11 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     viewportMock.verify();
   });
 
-  it('should set ready-scan signal on first ready pass after amp init', () => {
+  it('should set ready-scan signal on first ready pass after amp init and IO callback fired', () => {
     resources.isRuntimeOn_ = true;
     resources.documentReady_ = true;
     resources.firstPassAfterDocumentReady_ = true;
+    resources.intersectionObserverCallbackFired_ = true;
     sandbox.stub(resources.visibilityStateMachine_, 'setState');
     resources.doPass();
     expect(resources.ampdoc.signals().get('ready-scan')).to.be.null;
@@ -730,62 +638,35 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resources.ampdoc.signals().get('ready-scan')).to.be.ok;
   });
 
-  it('should measure unbuilt elements', () => {
-    resources.visible_ = true;
-    sandbox
-      .stub(resources.ampdoc, 'getVisibilityState')
-      .returns(VisibilityState.VISIBLE);
-    viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
-    resource1.isBuilt = () => false;
-    const mediaSpy = sandbox.stub(resource1.element, 'applySizesAndMediaQuery');
-    expect(resource1.hasBeenMeasured()).to.be.false;
-    resource1.isBuilt = () => false;
+  it('should not applySizesAndMediaQuery after build', () => {
+    resources.relayoutAll_ = false;
+
+    // Unmeasured elements.
+    env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
+    env.sandbox.stub(resource1, 'hasBeenMeasured').returns(false);
+
+    // Measured elements that need relayout.
+    env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
+    env.sandbox.stub(resource2, 'hasBeenMeasured').returns(true);
+    env.sandbox.stub(resource2, 'getState').returns(ResourceState.NOT_LAID_OUT);
 
     resources.discoverWork_();
 
-    expect(resource1.hasBeenMeasured()).to.be.true;
-    expect(mediaSpy).to.be.calledOnce;
+    // Neither should have applySizesOrMediaQuery() called.
+    expect(resource1.applySizesAndMediaQuery).to.not.be.called;
+    expect(resource2.applySizesAndMediaQuery).to.not.be.called;
   });
 
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      // Enable "intersect-resources" experiment.
-      resources.intersectionObserver_ = {};
-      resource1.intersect_ = resource2.intersect_ = true;
-    });
+  it('should applySizesAndMediaQuery on relayout', () => {
+    resources.relayoutAll_ = true;
 
-    it('should not applySizesAndMediaQuery after build', () => {
-      resources.relayoutAll_ = false;
+    env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
+    env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
 
-      // Unmeasured elements.
-      env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
-      env.sandbox.stub(resource1, 'hasBeenMeasured').returns(false);
+    resources.discoverWork_();
 
-      // Measured elements that need relayout.
-      env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
-      env.sandbox.stub(resource2, 'hasBeenMeasured').returns(true);
-      env.sandbox
-        .stub(resource2, 'getState')
-        .returns(ResourceState.NOT_LAID_OUT);
-
-      resources.discoverWork_();
-
-      // Neither should have applySizesOrMediaQuery() called.
-      expect(resource1.applySizesAndMediaQuery).to.not.be.called;
-      expect(resource2.applySizesAndMediaQuery).to.not.be.called;
-    });
-
-    it('should applySizesAndMediaQuery on relayout', () => {
-      resources.relayoutAll_ = true;
-
-      env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
-      env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
-
-      resources.discoverWork_();
-
-      expect(resource1.applySizesAndMediaQuery).to.be.called;
-      expect(resource2.applySizesAndMediaQuery).to.be.called;
-    });
+    expect(resource1.applySizesAndMediaQuery).to.be.called;
+    expect(resource2.applySizesAndMediaQuery).to.be.called;
   });
 
   it('should render two screens when visible', () => {
@@ -814,32 +695,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.discoverWork_();
 
     expect(resources.queue_.getSize()).to.equal(0);
-  });
-
-  it('should re-render from requested position', () => {
-    resource1.state_ = ResourceState.LAYOUT_COMPLETE;
-    resource2.state_ = ResourceState.LAYOUT_COMPLETE;
-    resource1.hasBeenMeasured = () => true;
-    resource2.hasBeenMeasured = () => true;
-    resource1.element.getBoundingClientRect = () =>
-      layoutRectLtwh(10, 10, 100, 101);
-    resource2.element.getBoundingClientRect = () =>
-      layoutRectLtwh(10, 1010, 100, 101);
-    resources.visible_ = true;
-    sandbox
-      .stub(resources.ampdoc, 'getVisibilityState')
-      .returns(VisibilityState.VISIBLE);
-    resources.relayoutAll_ = false;
-    resources.relayoutTop_ = 1000;
-    viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
-
-    resources.discoverWork_();
-
-    expect(resources.relayoutTop_).to.equal(-1);
-    expect(resources.queue_.getSize()).to.equal(1);
-    expect(resources.queue_.tasks_[0].resource).to.equal(resource2);
-    expect(resource1.state_).to.equal(ResourceState.LAYOUT_COMPLETE);
-    expect(resource2.state_).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
   it('should prerender only one screen in visibilityState=prerender', () => {
@@ -965,7 +820,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const measureSpy = sandbox.spy(resource1, 'measure');
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(1);
-    expect(measureSpy).to.be.calledOnce;
+    expect(measureSpy).not.called;
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
@@ -977,59 +832,35 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.element.layoutScheduleTime).to.be.greaterThan(0);
   });
 
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      // Enables the "intersect-resources" experiment.
-      resources.intersectionObserver_ = {};
-    });
+  it('should not remeasure before layout', () => {
+    sandbox.stub(resource1, 'hasBeenPremeasured').returns(false);
+    sandbox.stub(resource1, 'measure');
 
-    it('should not remeasure before layout', () => {
-      sandbox.stub(resource1, 'hasBeenPremeasured').returns(false);
-      sandbox.stub(resource1, 'measure');
+    resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
+    resources.work_();
 
-      resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
-      resources.work_();
-
-      expect(resources.exec_.getSize()).to.equal(1);
-      expect(resource1.measure).to.not.be.called;
-      expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
-    });
-
-    it('should check premeasured rect before layout', () => {
-      sandbox.stub(resource1, 'hasBeenMeasured').returns(true);
-      sandbox.stub(resource1, 'hasBeenPremeasured').returns(true);
-      sandbox.stub(resource1, 'isDisplayed').returns(true);
-      resource1.isDisplayed
-        .withArgs(/* usePremeasuredRect */ true)
-        .returns(false);
-      sandbox.spy(resource1, 'layoutCanceled');
-
-      resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
-      resources.work_();
-
-      expect(resources.exec_.getSize()).to.equal(0);
-      expect(resource1.isDisplayed).to.be.calledWith(
-        /* usePremeasuredRect */ true
-      );
-      expect(resource1.layoutCanceled).to.be.calledOnce;
-      expect(resource1.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-    });
+    expect(resources.exec_.getSize()).to.equal(1);
+    expect(resource1.measure).to.not.be.called;
+    expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
-  it('should not schedule resource execution outside viewport', () => {
-    resources.scheduleLayoutOrPreload(resource1, true);
-    expect(resources.queue_.getSize()).to.equal(1);
-    expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
+  it('should check premeasured rect before layout', () => {
+    sandbox.stub(resource1, 'hasBeenMeasured').returns(true);
+    sandbox.stub(resource1, 'hasBeenPremeasured').returns(true);
+    sandbox.stub(resource1, 'isDisplayed').returns(true);
+    resource1.isDisplayed
+      .withArgs(/* usePremeasuredRect */ true)
+      .returns(false);
+    sandbox.spy(resource1, 'layoutCanceled');
 
-    const measureSpy = sandbox.spy(resource1, 'measure');
-    const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
-    sandbox.stub(resource1, 'isInViewport').returns(false);
-    sandbox.stub(resource1, 'renderOutsideViewport').returns(false);
-    sandbox.stub(resource1, 'idleRenderOutsideViewport').returns(false);
+    resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
     resources.work_();
+
     expect(resources.exec_.getSize()).to.equal(0);
-    expect(measureSpy).to.be.calledOnce;
-    expect(layoutCanceledSpy).to.be.calledOnce;
+    expect(resource1.isDisplayed).to.be.calledWith(
+      /* usePremeasuredRect */ true
+    );
+    expect(resource1.layoutCanceled).to.be.calledOnce;
     expect(resource1.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
   });
 
@@ -1049,7 +880,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     sandbox.stub(resource1, 'idleRenderOutsideViewport').returns(false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(1);
-    expect(measureSpy).to.be.calledOnce;
+    expect(measureSpy).not.called;
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
@@ -1067,7 +898,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(1);
-    expect(measureSpy).to.be.calledOnce;
+    expect(measureSpy).not.called;
     expect(layoutCanceledSpy).to.not.be.called;
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
@@ -1086,7 +917,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(0);
-    expect(measureSpy).to.be.calledOnce;
+    expect(measureSpy).not.called;
     expect(layoutCanceledSpy).to.be.calledOnce;
     expect(resource1.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
   });
@@ -1105,7 +936,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(0);
-    expect(measureSpy).to.be.calledOnce;
+    expect(measureSpy).not.called;
     expect(layoutCanceledSpy).to.be.calledOnce;
   });
 
@@ -1449,13 +1280,12 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     resources.pendingBuildResources_ = [];
     parent = createElementWithResource(1)[0];
     parentResource = parent['__AMP__RESOURCE'];
-    child1 = createElementWithResource(2)[0];
-    resource1 = child1['__AMP__RESOURCE'];
-    child2 = createElementWithResource(3)[0];
-    resource2 = child2['__AMP__RESOURCE'];
+    [child1, resource1] = createElementWithResource(2);
+    [child2, resource2] = createElementWithResource(3);
   });
 
   it('should enforce that viewport is ready for first add', () => {
+    resources.intersectionObserver_ = {observe() {}};
     const ensureViewportReady = sandbox.stub(
       resources.viewport_,
       'ensureReadyForElements'
@@ -1469,6 +1299,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
   });
 
   it('should build elements immediately if the document is ready', () => {
+    resources.intersectionObserver_ = {observe() {}};
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     child1.isBuilt = () => false;
     child2.isBuilt = () => false;
