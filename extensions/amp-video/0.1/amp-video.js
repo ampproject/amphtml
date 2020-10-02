@@ -354,6 +354,12 @@ class AmpVideo extends AMP.BaseElement {
       this.propagateLayoutChildren_();
     }
 
+    // Resolve layoutCallback as soon as all sources are appended when within a
+    // story, so it can be handled by the media pool as soon as possible.
+    if (this.isManagedByPool_()) {
+      return pendingOriginPromise;
+    }
+
     // loadPromise for media elements listens to `loadedmetadata`.
     const promise = this.loadPromise(this.video_)
       .then(null, (reason) => {
@@ -367,12 +373,6 @@ class AmpVideo extends AMP.BaseElement {
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
       return;
-    }
-
-    // Resolve layoutCallback as soon as all sources are appended when within a
-    // story, so it can be handled by the media pool as soon as possible.
-    if (this.isManagedByPool_()) {
-      return pendingOriginPromise;
     }
 
     return promise;
@@ -573,6 +573,12 @@ class AmpVideo extends AMP.BaseElement {
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
+    console.log(
+      'installing event handlers for',
+      this.element.id,
+      'on',
+      this.video_.id
+    );
     video.addEventListener('error', (e) => this.handleMediaError_(e));
 
     const forwardEventsUnlisten = this.forwardEvents(
@@ -618,6 +624,8 @@ class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    console.log('resetting', this.video_.id);
+    this.loadPromise(this.video_).then(() => this.onVideoLoaded());
   }
 
   /**
