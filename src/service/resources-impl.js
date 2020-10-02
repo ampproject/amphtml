@@ -1204,7 +1204,7 @@ export class ResourcesImpl {
         const r = this.resources_[i];
         // TODO(dvoytenko): This extra build has to be merged with the
         // scheduleLayoutOrPreload method below.
-        // Build all resources visible and in the viewport.
+        // Build all resources visible, measured, and in the viewport.
         if (
           !r.isBuilt() &&
           !r.isBuilding() &&
