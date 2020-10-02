@@ -451,7 +451,7 @@ export class AmpStory360 extends AMP.BaseElement {
       )
     ) {
       const page = this.getPage_();
-      const discoveryTemplate = buildDiscoveryTemplate(page);
+      const discoveryTemplate = page && buildDiscoveryTemplate(page);
       this.mutateElement(() => page.appendChild(discoveryTemplate));
     }
   }
