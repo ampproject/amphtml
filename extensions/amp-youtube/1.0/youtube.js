@@ -15,7 +15,6 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
@@ -87,19 +86,16 @@ export function Youtube({
   src = addParamsToUrl(src, params);
 
   return (
-    <ContainWrapper
+    <VideoWrapper
+      component={VideoIframe}
+      autoplay={autoplay}
+      src={src}
       style={style}
       size={true}
       layout={true}
       paint={true}
       {...rest}
-    >
-      <VideoWrapper
-        component={VideoIframe}
-        autoplay={autoplay}
-        src={src}
-      ></VideoWrapper>
-    </ContainWrapper>
+    ></VideoWrapper>
   );
 }
 

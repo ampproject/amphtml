@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Youtube} from '../youtube';
-import {number, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -29,5 +29,16 @@ export const _default = () => {
   const width = number('width', 300);
   const height = number('height', 200);
   const videoid = text('videoid', 'IAvf-rkzNck');
-  return <Youtube videoid={videoid} style={{width, height}} />;
+  const autoplay = boolean('autoplay', false);
+  const loop = boolean('loop', false);
+  const params = object('params', {});
+  return (
+    <Youtube
+      autoplay={autoplay}
+      loop={loop}
+      videoid={videoid}
+      params={params}
+      style={{width, height}}
+    />
+  );
 };
