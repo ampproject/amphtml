@@ -244,7 +244,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       100
     );
 
-    /** @private {null|boolean}  */
+    /** @private {?boolean}  */
     this.isFirstPage_ = null;
 
     /** @private {?LoadingSpinner} */

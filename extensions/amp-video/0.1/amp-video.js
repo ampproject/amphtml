@@ -86,7 +86,7 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.muted_ = false;
 
-    /** @private {null|boolean} */
+    /** @private {?boolean} */
     this.prerenderAllowed_ = null;
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */

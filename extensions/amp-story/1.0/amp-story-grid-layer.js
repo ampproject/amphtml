@@ -83,7 +83,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   constructor(element) {
     super(element);
 
-    /** @private {null|boolean} */
+    /** @private {?boolean} */
     this.isFirstPage_ = false;
 
     /** @private {?{horiz: number, vert: number}} */
