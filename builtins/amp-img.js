@@ -52,6 +52,9 @@ export class AmpImg extends BaseElement {
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
 
+    /** @private {?boolean} */
+    this.prerenderAllowed_ = null;
+
     /** @private {?Element} */
     this.img_ = null;
 
@@ -252,7 +255,10 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return !this.element.hasAttribute('noprerender');
+    if (this.prerenderAllowed_ == null) {
+      this.prerenderAllowed_ = !this.element.hasAttribute('noprerender');
+    }
+    return this.prerenderAllowed_;
   }
 
   /** @override */

@@ -36,10 +36,6 @@ import {isArray, toWin} from './types';
  *
  * The complete lifecycle of a custom DOM element is:
  *
- *           ||
- *           || createdCallback
- *           ||
- *           \/
  *    State: <NOT BUILT> <NOT UPGRADED>
  *           ||
  *           || upgrade
