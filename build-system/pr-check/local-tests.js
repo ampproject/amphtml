@@ -28,7 +28,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  timedExecWithError: timedExecWithErrorBase,
+  timedExecOrThrow: timedExecOrThrowBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -36,7 +36,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 const FILENAME = 'local-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExecWithError = (cmd) => timedExecWithErrorBase(cmd, FILENAME);
+const timedExecOrThrow = (cmd) => timedExecOrThrowBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -46,24 +46,19 @@ function main() {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
-    const steps = [
-      'gulp integration --nobuild --headless --coverage --report',
-      'gulp unit --nobuild --headless --coverage --report',
-      'gulp codecov-upload',
-    ];
-    // Rather than timedExecOrDie here, we want to short-circuit after the first
-    // failing step, but then still try to report any collected results.
-    let status = 0;
-    for (const cmd of steps) {
-      status = timedExecWithError(cmd).status;
-      if (status) {
-        break;
+    try {
+      timedExecOrThrow(
+        'gulp integration --nobuild --headless --coverage --report'
+      );
+      timedExecOrThrow('gulp unit --nobuild --headless --coverage --report');
+      timedExecOrThrow('gulp codecov-upload');
+      timedExecOrThrow('gulp e2e --nobuild --headless --compiled');
+    } catch (e) {
+      if (e.status) {
+        process.exitCode = e.status;
       }
-    }
-
-    timedExecOrDie('gulp test-report-upload');
-    if (status) {
-      process.exit(status);
+    } finally {
+      timedExecOrDie('gulp test-report-upload');
     }
   } else {
     printChangeSummary(FILENAME);

@@ -29,7 +29,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  timedExec: timedExecBase,
+  timedExecOrThrow: timedExecOrThrowBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -37,7 +37,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 const FILENAME = 'dist-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExec = (cmd) => timedExecBase(cmd, FILENAME);
+const timedExecOrThrow = (cmd) => timedExecOrThrowBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -47,13 +47,14 @@ function main() {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
-    const {status} = timedExec(
-      'gulp integration --nobuild --headless --compiled'
-    );
-
-    timedExecOrDie('gulp test-report-upload');
-    if (status) {
-      process.exit(status);
+    try {
+      timedExecOrThrow('gulp integration --nobuild --headless --compiled');
+    } catch (e) {
+      if (e.status) {
+        process.exitCode = e.status;
+      }
+    } finally {
+      timedExecOrDie('gulp test-report-upload');
     }
   } else {
     printChangeSummary(FILENAME);

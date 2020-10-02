@@ -28,7 +28,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  timedExec: timedExecBase,
+  timedExecOrThrow: timedExecOrThrowBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -36,7 +36,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 const FILENAME = 'e2e-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExec = (cmd) => timedExecBase(cmd, FILENAME);
+const timedExecOrThrow = (cmd) => timedExecOrThrowBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -45,11 +45,15 @@ async function main() {
   if (true || !isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    const {status} = timedExec('gulp e2e --nobuild --headless --compiled');
 
-    timedExecOrDie('gulp test-report-upload');
-    if (status) {
-      process.exit(status);
+    try {
+      timedExecOrThrow('gulp e2e --nobuild --headless --compiled');
+    } catch (e) {
+      if (e.status) {
+        process.exitCode = e.status;
+      }
+    } finally {
+      timedExecOrDie('gulp test-report-upload');
     }
   } else {
     printChangeSummary(FILENAME);
@@ -71,6 +75,7 @@ async function main() {
       );
     }
   }
+
   stopTimer(FILENAME, FILENAME, startTime);
 }
 
