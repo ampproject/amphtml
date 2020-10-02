@@ -52,7 +52,6 @@ function main() {
       );
       timedExecOrThrow('gulp unit --nobuild --headless --coverage --report');
       timedExecOrThrow('gulp codecov-upload');
-      timedExecOrThrow('gulp e2e --nobuild --headless --compiled');
     } catch (e) {
       if (e.status) {
         process.exitCode = e.status;
