@@ -244,6 +244,15 @@ const TEMPLATE = {
           tag: 'button',
           attrs: dict({
             'class':
+              SKIP_NEXT_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL,
+        },
+        {
+          tag: 'button',
+          attrs: dict({
+            'class':
               CLOSE_CLASS +
               ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
           }),
