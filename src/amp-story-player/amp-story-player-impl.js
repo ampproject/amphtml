@@ -30,16 +30,17 @@ import {
   serializeQueryString,
 } from '../url';
 import {applySandbox} from '../3p-frame';
+import {childElementsByTag, tryFocus} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
+import {getChildJsonConfig} from '../json';
 import {getMode} from '../../src/mode';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
-import {tryFocus} from '../dom';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -396,6 +397,7 @@ export class AmpStoryPlayer {
 
   /**
    * Helper to create a button.
+   * TODO(#30031): delete this once new custom UI API is ready.
    * @private
    */
   initializeButton_() {
@@ -415,6 +417,21 @@ export class AmpStoryPlayer {
         createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
       );
     });
+  }
+
+  /**
+   * Gets publisher configuration for a custom system UI.
+   * @private
+   * @return {?JsonObject}
+   */
+  getCustomUI_() {
+    if (childElementsByTag(this.element_, 'script').length === 0) {
+      return null;
+    }
+
+    const config = getChildJsonConfig(this.element_);
+
+    return config;
   }
 
   /**
@@ -507,6 +524,12 @@ export class AmpStoryPlayer {
               messaging
             );
           });
+
+          const customUIConfig = this.getCustomUI_();
+
+          if (customUIConfig) {
+            messaging.sendRequest('setStoryCustomUI', customUIConfig, false);
+          }
 
           resolve(messaging);
         },
@@ -1113,6 +1136,7 @@ export class AmpStoryPlayer {
 
   /**
    * Updates the visbility state of the exit control button.
+   * TODO(#30031): delete this once new custom UI API is ready.
    * @param {boolean} isVisible
    * @private
    */
