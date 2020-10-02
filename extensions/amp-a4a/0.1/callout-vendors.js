@@ -190,8 +190,8 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   freestar: {
-    url: 'https://prebid-amp.pub.network/openrtb2/amp?tag_id=TAG_ID',
-    macros: ['TAG_ID'],
+    url: 'https://prebid-amp.pub.network/openrtb2/amp?tag_id=TAG_ID&gdpr_consent=CONSENT_STRING',
+    macros: ['TAG_ID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   hubvisor: {
