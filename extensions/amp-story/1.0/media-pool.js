@@ -31,13 +31,13 @@ import {
 import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
-import {VideoEvents, userInteractedWith} from '../../../src/video-interface';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode, matches} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
+import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
 export const MediaType = {
@@ -553,7 +553,11 @@ export class MediaPool {
           new UpdateSourcesTask(this.win_, sources)
         );
         this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
-          ampMediaForDomEl.dispatchCustomEvent(VideoEvents.LOAD);
+          ampMediaForDomEl.getImpl().then((impl) => {
+            if (impl.onVideoLoaded) {
+              impl.onVideoLoaded();
+            }
+          });
         });
       },
       () => {

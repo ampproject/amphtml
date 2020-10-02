@@ -720,7 +720,6 @@ class VideoEntry {
    * Called when the video is loaded and can play.
    */
   videoLoaded() {
-    console.log(this.video, 'loaded');
     this.loaded_ = true;
 
     this.internalElement_ = getInternalVideoElementFor(this.video.element);

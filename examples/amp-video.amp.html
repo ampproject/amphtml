@@ -34,49 +34,6 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-analytics id="analytics-config">
-    <script type="application/json">
-      {
-        "requests": {
-          "complete": "https://google.com/complete-session-${videoId}",
-          "midpoint": "https://google.com/midpoint-session-${videoId}",
-          "progress": "https://google.com/progress-session-${videoId}",
-          "start": "https://google.com/started-session-${videoId}",
-          "session": "https://google.com/ended-session-${videoId}"
-        },
-        "transport": {
-          "beacon": false,
-          "image": { "suppressWarnings": true },
-          "xhrpost": false
-        },
-        "triggers": {
-          "start": {
-            "on": "video-percentage-played",
-            "request": "start",
-            "selector": "#myVideo",
-            "videoSpec": { "percentages": [1] }
-          },
-          "midpoint": {
-            "on": "video-percentage-played",
-            "request": "midpoint",
-            "selector": "#myVideo",
-            "videoSpec": { "percentages": [50] }
-          },
-          "complete": {
-            "on": "video-ended",
-            "request": "complete",
-            "selector": "#myVideo"
-          },
-          "session": {
-            "on": "video-session",
-            "request": "session",
-            "selector": "#myVideo",
-            "videoSpec": { "end-session-when-invisible": true }
-          }
-        }
-      }
-    </script>
-  </amp-analytics>
   <h1>amp-video</h1>
   <amp-video
       id="myVideo"
