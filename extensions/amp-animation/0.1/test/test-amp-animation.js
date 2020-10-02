@@ -825,7 +825,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
       }
 
       it('should find target in the embed only via selector', function* () {
-        const parentWin = env.parentWin;
+        const {parentWin} = env;
         const embedWin = embed.win;
         const anim = yield createAnim(
           {},
@@ -845,7 +845,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
       });
 
       it('should find target in the embed only via target', function* () {
-        const parentWin = env.parentWin;
+        const {parentWin} = env;
         const embedWin = embed.win;
         const anim = yield createAnim(
           {},

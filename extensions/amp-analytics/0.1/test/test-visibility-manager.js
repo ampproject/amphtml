@@ -819,7 +819,6 @@ describes.realWin(
   (env) => {
     let parentWin;
     let win;
-    let ampdoc;
     let embed;
     let clock;
     let viewer;
@@ -833,7 +832,6 @@ describes.realWin(
       parentWin = env.parentWin;
       parentAmpdoc = env.parentAmpdoc;
       win = env.win;
-      ampdoc = env.ampdoc;
       embed = env.embed;
       embed.host = parentAmpdoc.win.document.createElement('amp-host');
       clock = env.sandbox.useFakeTimers();

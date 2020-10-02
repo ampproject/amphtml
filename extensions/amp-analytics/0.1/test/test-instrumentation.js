@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpDocFie} from '../../../../src/service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {InstrumentationService} from '../instrumentation.js';
-import {Services} from '../../../../src/services';
 
 describes.realWin('InstrumentationService', {amp: 1}, (env) => {
   let win;
