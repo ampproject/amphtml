@@ -17,6 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {Instagram} from '../instagram';
 import {mount} from 'enzyme';
+import {waitFor} from '../../../../testing/test-helper';
 
 describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {
@@ -66,7 +67,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     const el = document.createElement('div');
     document.body.appendChild(el);
     const requestResizeSpy = env.sandbox.spy();
-    mount(
+    const wrapper = mount(
       <Instagram
         shortcode="B8QaZW4AQY_"
         captioned
@@ -77,7 +78,9 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     );
 
     const mockEvent = createMockEvent();
-    mockEvent.source = document.querySelector('iframe').contentWindow;
+    mockEvent.source = wrapper
+      .getDOMNode()
+      .querySelector('iframe').contentWindow;
     window.dispatchEvent(mockEvent);
 
     expect(requestResizeSpy).to.have.been.calledOnce;
@@ -95,19 +98,19 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     );
 
     const mockEvent = createMockEvent();
-    mockEvent.source = document.querySelector('iframe').contentWindow;
+    mockEvent.source = wrapper
+      .getDOMNode()
+      .querySelector('iframe').contentWindow;
     window.dispatchEvent(mockEvent);
 
     wrapper.update();
 
-    await waitForHeight(
-      document.querySelector('iframe').parentElement.parentElement,
-      '1000px'
+    await waitFor(
+      () => wrapper.find('div').at(0).prop('style').height == 1000,
+      'Height is not changed'
     );
 
-    expect(
-      document.querySelector('iframe').parentElement.parentElement.style.height
-    ).to.equal('1000px');
+    expect(wrapper.find('div').at(0).prop('style').height).to.equal(1000);
   });
 });
 
@@ -125,27 +128,4 @@ function createMockEvent() {
     },
   });
   return mockEvent;
-}
-
-function waitForHeight(element, height) {
-  return new Promise((resolve, reject) => {
-    const tryInterval = 100;
-    const maxTries = 100;
-    let currentTry = 0;
-
-    const timer = setInterval(() => {
-      if (currentTry >= maxTries) {
-        clearInterval(timer);
-        return reject(new Error(`not found`));
-      }
-
-      const prop = element.style.height;
-
-      if (prop == height) {
-        clearInterval(timer);
-        resolve(element);
-      }
-      currentTry++;
-    }, tryInterval);
-  });
 }
