@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+ amp-story-360 {
+  font-family: 'Roboto', sans-serif !important;
+}
+
 amp-story-360 canvas {
   position: absolute; /* fixes Safari bug */
  	width: 100% !important;
@@ -37,10 +41,8 @@ amp-story-360 amp-img {
   padding-left: 10px !important;
   border-radius: 18px !important;
   font-size: 12px !important;
-  font-family: 'Roboto', sans-serif !important;
   display: flex !important;
   align-items: center !important;
-  z-index: 100000 !important;
 }
 
 .i-amphtml-story-360-activate-button-icon {
@@ -74,4 +76,84 @@ amp-story-360 amp-img {
   100% {
     transform: rotate(360deg);
   }
+}
+
+amp-story-page:not(.i-amphtml-story-page-loaded) .i-amphtml-story-360-discovery {
+  display: none !important;
+  animation-play-state: paused !important;
+}
+
+.i-amphtml-story-360-discovery {
+  pointer-events: none !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 50% !important;
+  perspective: 550px !important;
+  perspective-origin: center calc(100% - 145px);
+  background: linear-gradient(transparent, rgba(0, 0, 0, .8)) !important;
+  animation: fadeOut 1s 4s forwards ease-in-out !important;
+  z-index: 100000 !important;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.i-amphtml-story-360-discovery-animation {
+  position: absolute !important;
+  bottom: 95px !important;
+  left: calc(50% - 30px) !important;
+  width:  60px !important;
+  height: 100px !important;
+  border: 1px solid white !important;
+  border-radius: 10px !important;
+  animation: lookAround 4s !important;
+}
+
+.i-amphtml-story-360-discovery-animation:before {
+  content: "" !important;
+  position: absolute !important;
+  border-top: 1px solid white !important;
+  width: 10px !important;
+  top: 5px !important;
+  left: calc(50% - 5px) !important;
+}
+
+@keyframes lookAround {
+  0% {
+    animation-timing-function: ease-in-out;
+    transform: rotate3d(0, 0, 0, 0) translate3d(0, 0, 0);
+  }
+  25% {
+    animation-timing-function: ease-in-out;
+    transform: rotateY(45deg) rotateX(20deg) translate3d(-100px, 10px, 0);
+  }
+  50% {
+    animation-timing-function: ease-in-out;
+    transform:  rotateX(-40deg) translate3d(0, -50px, 0);
+  }
+  75% {
+    animation-timing-function: ease-in-out;
+    transform: rotateY(-45deg) rotateX(20deg) translate3d(100px, 10px, 0);
+  }
+  100% {
+    animation-timing-function: ease-in-out;
+    transform: rotate3d(0, 0, 0, 0) translate3d(0, 0, 0);
+  }
+}
+
+.i-amphtml-story-360-text {
+  position: absolute !important;
+  bottom: 40px !important;
+  width: 100% !important;
+  font-size: 16px !important;
+  text-align: center !important;
+  color: white !important;
 }

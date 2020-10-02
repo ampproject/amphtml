@@ -32,6 +32,7 @@ import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 
 /** @const {string} */
@@ -44,8 +45,7 @@ const TAG = 'AMP_STORY_360';
  * @return {!Element}
  */
 const buildActivateButtonTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return htmlFor(element)`
     <button class="i-amphtml-story-360-activate-button" role="button">
       <span class="i-amphtml-story-360-activate-text"></span>
       <span class="i-amphtml-story-360-activate-button-icon"
@@ -235,9 +235,6 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win);
-
     /** @private {?string} */
     this.pageId_ = null;
 
@@ -330,7 +327,6 @@ export class AmpStory360 extends AMP.BaseElement {
         }
       ),
     ]).then(() => {
-      attr('controls') === 'gyroscope' && this.checkGyroscopePermissions_();
       return Promise.resolve();
     });
   }
@@ -406,32 +402,39 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Creates a device orientation listener and sets gyroscopeControls_ state.
-   * If listener is not called in 1000ms, remove listener and resume animation.
-   * This happens on desktop browsers that support deviceorientation but aren't in motion.
+   * Listens for deviceorientation events.
+   *
+   * Some browsers support the 'deviceorientation' event but never call it.
+   * This waits for one call before initiating a constant listener.
    * @private
    */
   enableGyroscope_() {
-    this.gyroscopeControls_ = true;
-
-    const checkNoMotion = this.timer_.delay(() => {
-      this.gyroscopeControls_ = false;
-      if (this.isReady_ && this.isPlaying_) {
-        this.animate_();
+    // Listen for one call before initiating.
+    listenOncePromise(this.win, 'deviceorientation').then(() => {
+      this.gyroscopeControls_ = true;
+      this.togglePermissionClass_(true);
+      // Debounce onDeviceOrientation_ to rAF.
+      let rafTimeout;
+      this.win.addEventListener('deviceorientation', (e) => {
+        if (this.isReady_ && this.isOnActivePage_) {
+          rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
+          rafTimeout = this.win.requestAnimationFrame(() =>
+            this.onDeviceOrientation_(e)
+          );
+        }
+      });
+      // Display discovery animation.
+      if (this.isOnActivePage_) {
+        const discoveryHTML = htmlFor(this.element)`
+        <div class="i-amphtml-story-360-discovery">
+          <div class="i-amphtml-story-360-discovery-animation"></div>
+          <span class="i-amphtml-story-360-text">
+            Move device to explore video
+          </span>
+        </div>
+      `;
+        this.mutateElement(() => this.element.appendChild(discoveryHTML));
       }
-    }, 1000);
-
-    let rafTimeout;
-
-    this.win.addEventListener('deviceorientation', (e) => {
-      if (this.isReady_ && this.isOnActivePage_) {
-        // Debounce onDeviceOrientation_ to rAF.
-        rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
-        rafTimeout = this.win.requestAnimationFrame(() =>
-          this.onDeviceOrientation_(e)
-        );
-      }
-      this.timer_.cancel(checkNoMotion);
     });
   }
 
@@ -543,6 +546,10 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.element.getAttribute('controls') === 'gyroscope') {
+      this.checkGyroscopePermissions_();
+    }
+
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
     const owners = Services.ownersForDoc(this.element);
