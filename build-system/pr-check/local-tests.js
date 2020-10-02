@@ -41,8 +41,7 @@ const timedExecOrThrow = (cmd) => timedExecOrThrowBase(cmd, FILENAME);
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  // NO SUBMIT PLZ
-  if (true || !isTravisPullRequestBuild()) {
+  if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
