@@ -623,10 +623,10 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
-   * Once the video is loaded, with the correct duration,
+   * Once the video is loaded with the correct source,
    * dispatch the `VideoEvents.LOAD` event.
    *
-   * This should only be called once, either by amp-video
+   * This should be called either by amp-video
    * or a component that manages this one (i.e. amp-story).
    */
   onVideoLoaded() {
