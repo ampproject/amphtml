@@ -47,6 +47,38 @@ export const _default = () => {
   );
 };
 
+export const mixedLength = () => {
+  const width = number('width', 440);
+  const height = number('height', 225);
+  const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const snap = boolean('snap', true);
+  const mixedLength = boolean('mixed length', true);
+  const controls = select('show controls', ['auto', 'always', 'never']);
+
+  return (
+    <BaseCarousel
+      controls={controls}
+      mixedLength={mixedLength}
+      snap={snap}
+      style={{width, height}}
+    >
+      {Array.from({length: slideCount}, (x, i) => {
+        const v = colorIncrement * (i + 1);
+        return (
+          <div
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              width: `${Math.floor(Math.random() * 100 + 100)}px`,
+              height: `${Math.floor(Math.random() * 100 + 100)}px`,
+            }}
+          ></div>
+        );
+      })}
+    </BaseCarousel>
+  );
+};
+
 export const provideArrows = () => {
   const width = number('width', 440);
   const height = number('height', 225);
@@ -110,8 +142,13 @@ export const WithLooping = () => {
 };
 
 export const WithCaptions = () => {
+  const snapAlign = select('snap-align', ['start', 'center']);
   return (
-    <BaseCarousel loop style={{width: '500px', height: '400px'}}>
+    <BaseCarousel
+      loop
+      snapAlign={snapAlign}
+      style={{width: '500px', height: '400px'}}
+    >
       <figure>
         <img
           style={{width: '500px', height: '300px'}}

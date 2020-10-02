@@ -85,7 +85,10 @@ const slideElement = {
   justifyContent: 'center',
   scrollSnapAlign: 'start',
   scrollSnapStop: 'always',
-  '&[snap="false"]': {
+  '[mixedLength="true"] > &': {
+    flex: '0 0 auto',
+  },
+  '[snap="false"] > &': {
     scrollSnapStop: 'none',
     scrollSnapAlign: 'none',
     scrollSnapCoordinate: 'none',

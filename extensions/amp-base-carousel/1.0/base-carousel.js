@@ -52,6 +52,7 @@ function BaseCarouselWithRef(
     children,
     controls = Controls.AUTO,
     loop,
+    mixedLength = false,
     onSlideChange,
     snap = true,
     snapAlign = 'center',
@@ -70,6 +71,8 @@ function BaseCarouselWithRef(
   const scrollRef = useRef(null);
 
   const advance = useCallback((by) => scrollRef.current.advance(by), []);
+  const canScroll = scrollRef.current ? scrollRef.current.canScroll : undefined;
+
   const setRestingIndex = useCallback(
     (index) => {
       index = length > 0 ? Math.min(Math.max(index, 0), length - 1) : -1;
@@ -115,6 +118,7 @@ function BaseCarouselWithRef(
     <ContainWrapper size={true} layout={true} paint={true} {...rest}>
       <Scroller
         loop={loop}
+        mixedLength={String(mixedLength)}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
@@ -128,9 +132,14 @@ function BaseCarouselWithRef(
           placeholder. When a slide's slot is unrendered, the slide
           automatically gets unslotted and gets CanRender=false w/o any extra
           state management code.
+
+          Note: We naively display all slides for mixedLength as multiple
+          can be visible within the carousel viewport - eventually these can also
+          be optimized to only display the minimum necessary for the current 
+          and next viewport.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < 2 ? (
+          Math.abs(index - currentSlide) < 2 || mixedLength ? (
             <WithAmpContext
               key={index}
               renderable={index == currentSlide}
@@ -152,7 +161,9 @@ function BaseCarouselWithRef(
           />
           <ArrowNext
             customArrow={arrowNext}
-            disabled={disableForDir(1)}
+            disabled={
+              disableForDir(1) || (canScroll != undefined && !canScroll())
+            }
             advance={advance}
           />
         </>
