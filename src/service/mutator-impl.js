@@ -209,8 +209,6 @@ export class MutatorImpl {
           r.requestMeasure();
         }
         this.resources_.schedulePass(FOUR_FRAME_DELAY_);
-
-        // With IntersectionObserver, no need to set relayout top.
         this.resources_.maybeHeightChanged();
       },
     });
