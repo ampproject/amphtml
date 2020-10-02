@@ -48,7 +48,6 @@ export class VideoSessionManager {
    */
   endSession() {
     if (this.isSessionActive_) {
-      console.log('fire endSessionObservable');
       this.endSessionObservable_.fire();
     }
     this.isSessionActive_ = false;

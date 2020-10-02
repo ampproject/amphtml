@@ -420,7 +420,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Promise}
    */
   addTrigger_(config) {
-    console.log('added trigger', config);
     if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
@@ -602,7 +601,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
-    console.log('ANALYTICS ->', trigger, event);
     const requests = isArray(trigger['request'])
       ? trigger['request']
       : [trigger['request']];
