@@ -343,9 +343,7 @@ export class AmpStory360 extends AMP.BaseElement {
           this.localizationService_ = localizationService;
         }
       ),
-    ]).then(() => {
-      return Promise.resolve();
-    });
+    ]).then(() => Promise.resolve());
   }
 
   /**
