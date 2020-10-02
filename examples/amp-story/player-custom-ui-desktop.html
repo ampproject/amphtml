@@ -36,20 +36,13 @@
   </head>
   <body>
     <h1>This is a NON-AMP page that embeds a story below:</h1>
-    <amp-story-player style="width: 360px; height: 600px;">
+    <amp-story-player style="width: 100%; height: 100%;">
         <script type="application/json">
           {
             "header": {
               "buttons": [
                 {
                   "name": "skip-next-button"
-                },
-                {
-                  "name": "close-button"
-                },
-                {
-                  "name": "share-button",
-                  "position": "start"
                 }
               ]
             }
@@ -59,10 +52,14 @@
             class="story">
           <span class="title">A local’s guide to what to eat and do in New York City</span>
         </a>
-        <!-- <a href="./attachment.html"
+        <a href="./attachment.html"
             data-poster-portrait-src="/examples/visual-tests/amp-story/img/overview.jpg"
             class="story">
           <span class="title">A local’s guide to what to eat and do in Miami</span>
+        </a>
+        <a href="./supports-landscape-ads.html"
+            class="story">
+          <span class="title">A local’s guide to what to eat and do in New York City</span>
         </a>
         <a href="./videos.html"
             class="story">
@@ -71,17 +68,14 @@
         <a href="./amp-story-animation.html"
             class="story">
           <span class="title">A local’s guide to what to eat and do in Rome</span>
-        </a> -->
+        </a>
     </amp-story-player>
-    <!-- <script>
+    <script>
       const playerEl = document.querySelector('amp-story-player');
-      playerEl.addEventListener('amp-story-player-back', () => {
-        console.log('back');
-      });
 
       playerEl.addEventListener('amp-story-player-close', () => {
-        console.log('close');
+        console.log('close button clicked!');
       });
-    </script> -->
+    </script>
   </body>
 </html>

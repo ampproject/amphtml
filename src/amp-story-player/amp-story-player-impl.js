@@ -76,9 +76,9 @@ const TOGGLE_THRESHOLD_PX = 50;
 const MAX_IFRAMES = 3;
 
 /** @enum {string} */
-const BUTTON_TYPES = {
-  BACK: 'back-button',
+const PLAYER_BUTTON_TYPES = {
   CLOSE: 'close-button',
+  SKIP_NEXT: 'skip-next-button',
 };
 
 /** @enum {string} */
@@ -88,14 +88,13 @@ const BUTTON_CLASSES = {
   HEADER: 'amp-story-player-system-header',
   FOOTER: 'amp-story-player-system-footer',
   HIDDEN: 'amp-story-player-hide-button',
-  [BUTTON_TYPES.BACK]: 'amp-story-player-back-button',
-  [BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
+  [PLAYER_BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
 };
 
-/** @enum {string} */
-const BUTTON_EVENTS = {
-  [BUTTON_TYPES.BACK]: 'amp-story-player-back',
-  [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
+/** */
+export const BUTTON_EVENTS = {
+  [PLAYER_BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
+  [PLAYER_BUTTON_TYPES.SKIP_NEXT]: 'amp-story-player-skip-next',
 };
 
 /** @enum {string} */
@@ -104,11 +103,12 @@ const STORY_STATE_TYPE = {
 };
 
 /** @enum {string} */
-const STORY_MESSAGE_STATE_TYPE = {
+export const STORY_MESSAGE_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
+  PLAYER_STATE: 'STORY_PLAYER_STATE',
 };
 
 /** @typedef {{ state:string, value:(boolean|string) }} */
@@ -338,7 +338,6 @@ export class AmpStoryPlayer {
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
-    this.buildSystemUI_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -416,70 +415,16 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Helper to create a button.
    * @private
    */
-  buildSystemUI_() {
+  getCustomUI_() {
     if (childElementsByTag(this.element_, 'script').length === 0) {
-      return;
+      return null;
     }
 
-    // TODO: validate config structure. And 3 buttons max.
     const config = getChildJsonConfig(this.element_);
 
-    const {header} = config;
-
-    this.buildButtonContainer_(header, BUTTON_CLASSES.HEADER);
-  }
-
-  /**
-   * @param {!Object} config
-   * @param {string} type
-   * @private
-   */
-  buildButtonContainer_(config, type) {
-    if (!config) {
-      console.log('no config', type);
-      return;
-    }
-
-    const containerEl = this.doc_.createElement('div');
-    this.rootEl_.appendChild(containerEl);
-
-    containerEl.classList.add(BUTTON_CLASSES.CONTAINER);
-    containerEl.classList.add(type);
-
-    const {position, buttons} = config;
-    console.log({type}, position);
-    if (position === 'end') {
-      containerEl.classList.add(BUTTON_CLASSES.END_POSITION);
-    }
-
-    this.buildButtons_(containerEl, buttons);
-  }
-
-  /**
-   * @param {!Element} container
-   * @param {!Array<!Object>} buttons
-   * @private
-   */
-  buildButtons_(container, buttons) {
-    buttons.forEach((button) => {
-      const buttonEl = this.doc_.createElement('button');
-      container.appendChild(buttonEl);
-
-      const {name, icon, event} = button;
-      const iconClass = icon ?? BUTTON_CLASSES[name];
-      const customEvent = event ?? BUTTON_EVENTS[name];
-
-      buttonEl.classList.add(iconClass);
-
-      buttonEl.addEventListener('click', () => {
-        this.element_.dispatchEvent(
-          createCustomEvent(this.win_, customEvent, dict({}))
-        );
-      });
-    });
+    return config;
   }
 
   /**
@@ -574,6 +519,12 @@ export class AmpStoryPlayer {
               messaging
             );
           });
+
+          const customUIConfig = this.getCustomUI_();
+
+          if (customUIConfig) {
+            messaging.sendRequest('setStoryCustomUI', customUIConfig, false);
+          }
 
           resolve(messaging);
         },
@@ -1138,7 +1089,26 @@ export class AmpStoryPlayer {
           messaging
         );
         break;
+      case STORY_MESSAGE_STATE_TYPE.PLAYER_STATE:
+        this.onPlayerEvent_(data.value);
+        break;
       default:
+        break;
+    }
+  }
+
+  /**
+   * @param value
+   */
+  onPlayerEvent_(value) {
+    switch (value) {
+      case BUTTON_EVENTS[PLAYER_BUTTON_TYPES.SKIP_NEXT]:
+        this.next_();
+        break;
+      default:
+        this.element_.dispatchEvent(
+          createCustomEvent(this.win_, value, dict({}))
+        );
         break;
     }
   }

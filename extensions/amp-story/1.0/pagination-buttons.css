@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-/* 
- * In desktop panel mode i-amphtml-story-button-container acts as a sentinel 
+/*
+ * In desktop panel mode i-amphtml-story-button-container acts as a sentinel
  * and covers the previous and next pages.
- * In mobile it is focusable for screen readers and the buttons are hidden. 
+ * In mobile it is focusable for screen readers and the buttons are hidden.
  * In desktop full bleed it is not focusable since the buttons are visible.
  */
 .i-amphtml-story-button-container {
@@ -162,7 +162,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
   opacity: 1!important;
 }
 
-.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-replay >    
+.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-replay >
     .i-amphtml-story-button-move {
   opacity: 1 !important;
 }
