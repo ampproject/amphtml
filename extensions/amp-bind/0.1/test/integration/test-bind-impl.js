@@ -216,10 +216,8 @@ describe
       },
       (env) => {
         let fieBind;
-        let fieBody;
-        let fieWindow;
-
-        let hostWindow;
+        let fieWindow, fieBody;
+        let hostWindow, hostBody;
 
         beforeEach(() => {
           // Make sure we have a chunk instance for testing.
@@ -230,6 +228,7 @@ describe
           fieBody = env.ampdoc.getBody();
 
           hostWindow = env.parentWin;
+          hostBody = env.parentAmpdoc.getBody();
         });
 
         it('should scan for bindings when ampdoc is ready', () => {
@@ -260,11 +259,9 @@ describe
 
         describe('with Bind in host window', () => {
           let hostBind;
-          let hostBody;
 
           beforeEach(() => {
-            hostBind = new Bind(env.ampdoc);
-            hostBody = env.ampdoc.getBody();
+            hostBind = new Bind(env.parentAmpdoc);
           });
 
           it('should only scan elements in provided window', () => {
