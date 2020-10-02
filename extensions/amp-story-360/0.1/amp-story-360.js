@@ -450,8 +450,9 @@ export class AmpStory360 extends AMP.BaseElement {
         '.i-amphtml-story-360-discovery'
       )
     ) {
-      const discoveryTemplate = buildDiscoveryTemplate(this.element);
-      this.mutateElement(() => this.element.appendChild(discoveryTemplate));
+      const page = this.getPage_();
+      const discoveryTemplate = buildDiscoveryTemplate(page);
+      this.mutateElement(() => page.appendChild(discoveryTemplate));
     }
   }
 
