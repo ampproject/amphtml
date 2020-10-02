@@ -132,14 +132,59 @@ describe('Google A4A utils', () => {
       },
     };
 
+    const btrConfig = {
+      transport: {beacon: false, xhrpost: false},
+      requests: {
+        btr1: 'https://example.test?id=1',
+        btr2: 'https://example.test?id=2',
+      },
+      triggers: {
+        beginToRender: {
+          on: 'ini-load',
+          request: ['btr1', 'btr2'],
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+        },
+      },
+    };
+
+    const fullConfig = {
+      transport: {beacon: false, xhrpost: false},
+      requests: {
+        visibility1: 'https://foo.com?hello=world',
+        visibility2: 'https://bar.com?a=b',
+        btr1: 'https://example.test?id=1',
+        btr2: 'https://example.test?id=2',
+      },
+      triggers: {
+        continuousVisible: {
+          on: 'visible',
+          request: ['visibility1', 'visibility2'],
+          visibilitySpec: {
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+            visiblePercentageMin: 50,
+            continuousTimeMin: 1000,
+          },
+        },
+        beginToRender: {
+          on: 'ini-load',
+          request: ['btr1', 'btr2'],
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+        },
+      },
+    };
+
     it('should extract correct config from header', () => {
       return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         let url;
+        let btrUrl;
         const headers = {
           get(name) {
             if (name == 'X-AmpAnalytics') {
-              return JSON.stringify({url});
+              return JSON.stringify({url, btrUrl});
             }
             if (name == 'X-QQID') {
               return 'qqid_string';
@@ -168,13 +213,27 @@ describe('Google A4A utils', () => {
         allowConsoleError(
           () => expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null
         );
+
         url = [];
+        btrUrl = [];
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
 
         url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
-        const config = extractAmpAnalyticsConfig(a4a, headers);
+        btrUrl = [];
+        let config = extractAmpAnalyticsConfig(a4a, headers);
         expect(config).to.deep.equal(builtConfig);
+
+        url = [];
+        btrUrl = ['https://example.test?id=1', 'https://example.test?id=2'];
+        config = extractAmpAnalyticsConfig(a4a, headers);
+        expect(config).to.deep.equal(btrConfig);
+
+        url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
+        btrUrl = ['https://example.test?id=1', 'https://example.test?id=2'];
+        config = extractAmpAnalyticsConfig(a4a, headers);
+        expect(config).to.deep.equal(fullConfig);
+
         headers.has = function (name) {
           expect(name).to.equal('X-AmpAnalytics');
           return false;
@@ -321,16 +380,12 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], false, []).then((url1) => {
-            expect(url1).to.match(/ady=11.1/);
-            expect(url1).to.match(/adx=12.1/);
-            return googleAdUrl(impl, '', 0, [], true, []).then((url1) => {
-              expect(url1).to.match(/ady=11/);
-              expect(url1).to.match(/adx=12/);
-            });
-          });
-        });
+        return fixture.addElement(elem).then(() =>
+          googleAdUrl(impl, '', 0, [], []).then((url1) => {
+            expect(url1).to.match(/ady=11/);
+            expect(url1).to.match(/adx=12/);
+          })
+        );
       });
     });
 
@@ -356,13 +411,8 @@ describe('Google A4A utils', () => {
         const getScrollTop = () => 34.2;
         const viewportStub = window.sandbox.stub(Services, 'viewportForDoc');
         viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, false, []).then((url1) => {
-            expect(url1).to.match(/scr_x=12.1&scr_y=34.2/);
-          });
-          return googleAdUrl(impl, '', 0, {}, true, []).then((url1) => {
-            expect(url1).to.match(/scr_x=12&scr_y=34/);
-          });
+        return googleAdUrl(impl, '', 0, {}, []).then((url1) => {
+          expect(url1).to.match(/scr_x=12&scr_y=34/);
         });
       });
     });
@@ -383,11 +433,9 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, false, ['789', '098']).then(
-            (url1) => {
-              expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
-            }
-          );
+          return googleAdUrl(impl, '', 0, {}, ['789', '098']).then((url1) => {
+            expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
+          });
         });
       });
     });
@@ -407,7 +455,7 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], false, []).then((url1) => {
+          return googleAdUrl(impl, '', 0, [], []).then((url1) => {
             expect(url1).to.match(/[&?]debug_experiment_id=123456%2C654321/);
           });
         });
@@ -428,7 +476,7 @@ describe('Google A4A utils', () => {
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], false, []).then((url) => {
+          return googleAdUrl(impl, '', 0, [], []).then((url) => {
             expect(url).to.match(/[&?]ga_cid=foo[&$]/);
             expect(url).to.match(/[&?]ga_hid=bar[&$]/);
           });
@@ -458,9 +506,9 @@ describe('Google A4A utils', () => {
           },
         });
         return fixture.addElement(elem).then(() => {
-          return expect(
-            googleAdUrl(impl, '', 0, {}, false, [])
-          ).to.eventually.match(/[&?]bc=7[&$]/);
+          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
+            /[&?]bc=7[&$]/
+          );
         });
       });
     });
@@ -485,9 +533,9 @@ describe('Google A4A utils', () => {
           sandbox: {},
         });
         return fixture.addElement(elem).then(() => {
-          return expect(
-            googleAdUrl(impl, '', 0, {}, false, [])
-          ).to.eventually.match(/[&?]bc=1[&$]/);
+          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
+            /[&?]bc=1[&$]/
+          );
         });
       });
     });
@@ -516,7 +564,7 @@ describe('Google A4A utils', () => {
         });
         return fixture.addElement(elem).then(() => {
           return expect(
-            googleAdUrl(impl, '', 0, {}, false, [])
+            googleAdUrl(impl, '', 0, {}, [])
           ).to.eventually.not.match(/[&?]bc=1[&$]/);
         });
       });
@@ -549,7 +597,7 @@ describe('Google A4A utils', () => {
         expectAsyncConsoleError(/Referrer timeout/, 1);
         return fixture.addElement(elem).then(() => {
           return expect(
-            googleAdUrl(impl, '', 0, {}, false, [])
+            googleAdUrl(impl, '', 0, {}, [])
           ).to.eventually.not.match(/[&?]ref=[&$]/);
         });
       });
@@ -564,11 +612,9 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', Date.now(), [], false, []).then(
-            (url) => {
-              expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
-            }
-          );
+          return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
+            expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
+          });
         });
       });
     });

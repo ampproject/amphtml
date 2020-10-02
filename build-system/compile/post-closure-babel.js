@@ -26,10 +26,10 @@ const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
  * Minify passed string.
  *
  * @param {string} code
- * @return {Object<string, string>}
+ * @return {Promise<Object<string, string>>}
  */
-function terserMinify(code) {
-  const minified = terser.minify(code, {
+async function terserMinify(code) {
+  const minified = await terser.minify(code, {
     mangle: false,
     compress: {
       defaults: false,
@@ -57,8 +57,8 @@ function terserMinify(code) {
  * @return {!Promise}
  */
 exports.postClosureBabel = function () {
-  return through.obj(function (file, enc, next) {
-    if (!argv.esm || path.extname(file.path) === '.map') {
+  return through.obj(async function (file, enc, next) {
+    if ((!argv.esm && !argv.sxg) || path.extname(file.path) === '.map') {
       debug(
         CompilationLifecycles['complete'],
         file.path,
@@ -70,30 +70,34 @@ exports.postClosureBabel = function () {
 
     const map = file.sourceMap;
 
-    debug(
-      CompilationLifecycles['closured-pre-babel'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-    const {code, map: babelMap} = babel.transformSync(file.contents, {
-      caller: {name: 'post-closure'},
-    });
+    try {
+      debug(
+        CompilationLifecycles['closured-pre-babel'],
+        file.path,
+        file.contents,
+        file.sourceMap
+      );
+      const {code, map: babelMap} = babel.transformSync(file.contents, {
+        caller: {name: 'post-closure'},
+      });
 
-    debug(
-      CompilationLifecycles['closured-pre-terser'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-    const {compressed, terserMap} = terserMinify(code);
+      debug(
+        CompilationLifecycles['closured-pre-terser'],
+        file.path,
+        file.contents,
+        file.sourceMap
+      );
 
-    file.contents = Buffer.from(compressed, 'utf-8');
-    file.sourceMap = remapping(
-      [terserMap, babelMap, map],
-      () => null,
-      !argv.full_sourcemaps
-    );
+      const {compressed, terserMap} = await terserMinify(code);
+      file.contents = Buffer.from(compressed, 'utf-8');
+      file.sourceMap = remapping(
+        [terserMap, babelMap, map],
+        () => null,
+        !argv.full_sourcemaps
+      );
+    } catch (e) {
+      return next(e);
+    }
 
     debug(
       CompilationLifecycles['complete'],

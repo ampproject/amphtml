@@ -15,10 +15,9 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {Services} from '../services';
-import {dev, userAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
+import {userAssert} from '../log';
 
 /**
  * @fileoverview
@@ -26,134 +25,14 @@ import {rootNodeFor, scopedQuerySelector} from '../dom';
  * {@link https://docs.google.com/document/d/1q-5MPQHnOHLF_uL7lQsGZdzuBgrPTkCy2PdRP-YCbOw/edit#}
  */
 
-/**
- * @typedef {typeof BaseTemplate}
- */
-let TemplateClassDef;
-
 /** @private @const {string} */
 const PROP_ = '__AMP_IMPL_';
 
 /** @private @const {string} */
 const PROP_PROMISE_ = '__AMP_WAIT_';
 
-/**
- * The interface that is implemented by all templates.
- */
-export class BaseTemplate {
-  /**
-   * @param {!Element} element
-   * @param {!Window} win
-   */
-  constructor(element, win) {
-    /** @public @const */
-    this.element = element;
-
-    /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView || win;
-
-    /** @private @const */
-    this.viewer_ = Services.viewerForDoc(this.element);
-
-    this.compileCallback();
-  }
-
-  /**
-   * Override in subclass if the element needs to compile the template.
-   * @protected
-   */
-  compileCallback() {
-    // Subclasses may override.
-  }
-
-  /**
-   * Bypasses template rendering and directly sets HTML. Should only be used
-   * for server-side rendering case. To be implemented by subclasses.
-   * @param {string} unusedData
-   * @return {!Element|!Array<Element>}
-   */
-  setHtml(unusedData) {
-    throw new Error('Not implemented');
-  }
-
-  /**
-   * To be implemented by subclasses.
-   * @param {!JsonObject|string} unusedData
-   * @return {!Element}
-   */
-  render(unusedData) {
-    throw new Error('Not implemented');
-  }
-
-  /**
-   * Iterate through the child nodes of the given root, applying the
-   * given callback to non-empty text nodes and elements.
-   * @param {!Element} root
-   * @param {function((!Element|string))} callback
-   */
-  visitChildren_(root, callback) {
-    for (let n = root.firstChild; n != null; n = n.nextSibling) {
-      if (n.nodeType == /* TEXT */ 3) {
-        const text = n.textContent.trim();
-        if (text) {
-          callback(text);
-        }
-      } else if (n.nodeType == /* COMMENT */ 8) {
-        // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
-        callback(dev().assertElement(n));
-      }
-    }
-  }
-
-  /**
-   * Unwraps the root element. If root has a single element child,
-   * returns the child. Otherwise, returns root.
-   * @param {!Element} root
-   * @return {!Element}
-   * @protected @final
-   */
-  tryUnwrap(root) {
-    let onlyChild;
-    this.visitChildren_(root, (c) => {
-      if (onlyChild === undefined && c.nodeType) {
-        onlyChild = c;
-      } else {
-        onlyChild = null;
-      }
-    });
-    return onlyChild || root;
-  }
-
-  /**
-   * Unwraps the root element and returns any children in an array.
-   * Text node children are normalized inside a <div>.
-   * @param {!Element} root
-   * @return {!Array<!Element>}
-   * @protected @final
-   */
-  unwrapChildren(root) {
-    const children = [];
-    this.visitChildren_(root, (c) => {
-      if (typeof c == 'string') {
-        const element = this.win.document.createElement('div');
-        element.textContent = c;
-        children.push(element);
-      } else {
-        children.push(c);
-      }
-    });
-    return children;
-  }
-
-  /**
-   * @protected @final
-   * @return {boolean}
-   */
-  viewerCanRenderTemplates() {
-    return this.viewer_.hasCapability('viewerRenderTemplate');
-  }
-}
+/** @private @const {function()} */
+const EMPTY_FUNC = () => {};
 
 /**
  */
@@ -165,16 +44,25 @@ export class Templates {
 
     /**
      * A map from template type to template's class promise.
-     * @private @const {!Object<string, !Promise<!TemplateClassDef>>}
+     * @private @const {!Object<string, !Promise<typeof ../base-template.BaseTemplate>>}
      */
     this.templateClassMap_ = {};
 
     /**
      * A map from template type to template's class promise. This is a transient
      * storage. As soon as the template class loaded, the entry is removed.
-     * @private @const {!Object<string, function(!TemplateClassDef)>}
+     * @private @const {!Object<string, function(typeof ../base-template.BaseTemplate)>}
      */
     this.templateClassResolvers_ = {};
+  }
+
+  /**
+   * Waits for template to be fully initialized.
+   * @param {!Element} templateElement
+   * @return {!Promise}
+   */
+  whenReady(templateElement) {
+    return this.getImplementation_(templateElement).then(EMPTY_FUNC);
   }
 
   /**
@@ -198,6 +86,18 @@ export class Templates {
   renderTemplate(templateElement, data) {
     return this.getImplementation_(templateElement).then((impl) => {
       return this.render_(impl, data);
+    });
+  }
+
+  /**
+   * Renders the specified template element using the supplied data.
+   * @param {!Element} templateElement
+   * @param {!JsonObject} data
+   * @return {!Promise<!Element>}
+   */
+  renderTemplateAsString(templateElement, data) {
+    return this.getImplementation_(templateElement).then((impl) => {
+      return impl.renderAsString(data);
     });
   }
 
@@ -319,7 +219,7 @@ export class Templates {
     } else if (opt_querySelector) {
       return scopedQuerySelector(parent, opt_querySelector);
     } else {
-      return parent.querySelector('template, script[type="text/plain"]');
+      return parent.querySelector('template[type], script[type="text/plain"]');
     }
   }
 
@@ -327,11 +227,11 @@ export class Templates {
    * Returns the promise that will eventually yield the template implementation
    * for the specified template element.
    * @param {!Element} element
-   * @return {!Promise<!BaseTemplate>}
+   * @return {!Promise<!../base-template.BaseTemplate>}
    * @private
    */
   getImplementation_(element) {
-    /** @const {!BaseTemplate} */
+    /** @const {!../base-template.BaseTemplate} */
     const impl = element[PROP_];
     if (impl) {
       return Promise.resolve(impl);
@@ -353,7 +253,9 @@ export class Templates {
 
     promise = this.waitForTemplateClass_(element, type).then(
       (templateClass) => {
-        const impl = (element[PROP_] = new templateClass(element, this.win_));
+        // This is ugly workaround for https://github.com/google/closure-compiler/issues/2630.
+        const Constr = /** @type {function(new:Object, !Element, !Window)} */ (templateClass);
+        const impl = (element[PROP_] = new Constr(element, this.win_));
         delete element[PROP_PROMISE_];
         return impl;
       }
@@ -367,7 +269,7 @@ export class Templates {
    * will wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
-   * @return {!Promise<!TemplateClassDef>}
+   * @return {!Promise<typeof ../base-template.BaseTemplate>}
    * @private
    */
   waitForTemplateClass_(element, type) {
@@ -387,7 +289,7 @@ export class Templates {
    * Registers an extended template. This function should typically be called
    * through the registerTemplate method on the AMP runtime.
    * @param {string} type
-   * @param {!TemplateClassDef} templateClass
+   * @param {typeof ../base-template.BaseTemplate} templateClass
    * @private
    * @restricted
    */
@@ -403,7 +305,7 @@ export class Templates {
   }
 
   /**
-   * @param {!BaseTemplate} impl
+   * @param {!../base-template.BaseTemplate} impl
    * @param {!JsonObject} data
    * @return {!Element}
    * @private
@@ -413,7 +315,7 @@ export class Templates {
   }
 
   /**
-   * @param {!BaseTemplate} impl
+   * @param {!../base-template.BaseTemplate} impl
    * @param {string} html
    * @return {!Element|!Array<!Element>}
    * @private
@@ -435,7 +337,7 @@ export function installTemplatesService(win) {
  * through the registerTemplate method on the AMP runtime.
  * @param {!Window} win
  * @param {string} type
- * @param {!TemplateClassDef} templateClass
+ * @param {typeof ../base-template.BaseTemplate} templateClass
  * @return {undefined}
  */
 export function registerExtendedTemplate(win, type, templateClass) {

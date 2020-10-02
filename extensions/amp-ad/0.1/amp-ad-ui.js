@@ -18,6 +18,9 @@ import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
 
+const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
+const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;
+
 export class AmpAdUIHandler {
   /**
    * @param {!AMP.BaseElement} baseInstance
@@ -188,6 +191,21 @@ export class AmpAdUIHandler {
       // Special case: force collapse sticky-ad if no content.
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
+    }
+
+    // Special case: for sticky ads, we enforce 20% size limit and 50% height limit
+    if (this.element_.hasAttribute('sticky')) {
+      const viewport = this.baseInstance_.getViewport();
+      if (
+        newHeight * newWidth >
+          STICKY_AD_MAX_SIZE_LIMIT *
+            viewport.getHeight() *
+            viewport.getWidth() ||
+        newHeight > STICKY_AD_MAX_HEIGHT_LIMIT * viewport.getHeight()
+      ) {
+        resizeInfo.success = false;
+        return Promise.resolve(resizeInfo);
+      }
     }
     return this.baseInstance_
       .attemptChangeSize(newHeight, newWidth, event)

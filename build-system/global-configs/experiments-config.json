@@ -1,17 +1,11 @@
 {
-  "experimentA": {},
-  "experimentB": {
-    "name": "MoveFixedLayer",
+  "experimentA": {
+    "name": "A4A No Signing RTV Experiment",
     "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/27120",
-    "expiration_date_utc": "2021-01-01",
-    "define_experiment_constant": "MOVE_FIXED_LAYER"
+    "issue": "https://github.com/ampproject/amphtml/issues/27189",
+    "expiration_date_utc": "2020-12-30",
+    "define_experiment_constant": "NO_SIGNING_RTV"
   },
-  "experimentC": {
-    "name": "StrictCompilation",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/19380",
-    "expiration_date_utc": "2020-08-07",
-    "define_experiment_constant": "STRICT_COMPILATION"
-  }
+  "experimentB": {},
+  "experimentC": {}
 }

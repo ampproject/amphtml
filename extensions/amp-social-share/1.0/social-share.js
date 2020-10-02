@@ -17,90 +17,111 @@
 import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
-import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
+import {SocialShareIcon} from './social-share-svgs';
+import {Wrapper} from '../../../src/preact/component';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
+const NAME = 'SocialShare';
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
 const DEFAULT_TARGET = '_blank';
-const NAME = 'SocialShare';
+const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
 /**
- * @param {!JsonObject} props
- *  type: !string,
- *  endpoint: ?string,
- *  params: ?JsonObject,
- *  target: ?string,
- *  width: ?string,
- *  height: ?string,
- *  color: ?string,
- *  background: ?string,
- *  tabIndex: ?string,
- *  style: ?string,
+ * @param {!SocialSharePropsDef} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShare(props) {
+export function SocialShare({
+  type,
+  endpoint,
+  params,
+  target,
+  width,
+  height,
+  color,
+  background,
+  tabIndex = 0,
+  style,
+  children,
+  ...rest
+}) {
   useResourcesNotify();
+  const checkPropsReturnValue = checkProps(
+    type,
+    endpoint,
+    target,
+    width,
+    height,
+    params
+  );
+
+  // Early exit if checkProps did not pass
+  if (!checkPropsReturnValue) {
+    return null;
+  }
+
   const {
     finalEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
-  } = checkProps(props);
-
-  const size = dict({
-    'width': checkedWidth,
-    'height': checkedHeight,
-  });
+  } = checkPropsReturnValue;
 
   return (
-    <div
+    <Wrapper
+      {...rest}
       role="button"
-      tabindex={props['tabIndex'] || '0'}
+      tabindex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
-      style={{...size, ...props['style']}}
+      wrapperStyle={{
+        width: checkedWidth,
+        height: checkedHeight,
+        ...style,
+      }}
     >
-      {processChildren(props, size)}
-    </div>
+      {processChildren(
+        /** @type {string} */ (type),
+        children,
+        color,
+        background
+      )}
+    </Wrapper>
   );
 }
 
 /**
- * If the specified type 'canCustomize' (see config file), allow children
- * to be rendered and color / background to be passed in via props.  If the
- * specified type cannot be customized (canCustomize = false), children
- * will not be rendered and color / background will always be set to default
- * values.
- * @param {!JsonObject} props
- * @param {JsonObject} size
+ * If children exist, render the children instead of the icon.  Otherwise,
+ * render the icon associated with the specified type with specified color
+ * and background (or defaults if not specified).
+ * @param {string} type
+ * @param {?PreactDef.Renderable|undefined} children
+ * @param {string|undefined} color
+ * @param {string|undefined} background
  * @return {PreactDef.Renderable}
  */
-function processChildren(props, size) {
-  const {
-    'type': type,
-    'children': children,
-    'color': propsColor,
-    'background': propsBackground,
-  } = props;
-
+function processChildren(type, children, color, background) {
   if (children) {
     return children;
   } else {
-    const typeConfig = getSocialConfig(type) || dict();
+    const typeConfig = getSocialConfig(type) || {};
     const baseStyle = CSS.BASE_STYLE;
     const iconStyle = dict({
-      'color': propsColor || typeConfig['defaultColor'],
-      'backgroundColor':
-        propsBackground || typeConfig['defaultBackgroundColor'],
+      'color': color || typeConfig.defaultColor,
+      'backgroundColor': background || typeConfig.defaultBackgroundColor,
     });
     return (
       <SocialShareIcon
-        style={{...iconStyle, ...baseStyle, ...size}}
+        style={{
+          ...iconStyle,
+          ...baseStyle,
+          width: '100%',
+          height: '100%',
+        }}
         type={type.toUpperCase()}
       />
     );
@@ -108,37 +129,31 @@ function processChildren(props, size) {
 }
 
 /**
- * @param {!JsonObject} props
- * @return {{
+ * Verify required props and throw error if necessary.  Set default values
+ * for optional props if no value specified.
+ * @param {string|undefined} type
+ * @param {string|undefined} endpoint
+ * @param {string|undefined} target
+ * @param {number|string|undefined} width
+ * @param {number|string|undefined} height
+ * @param {JsonObject|Object|undefined} params
+ * @return {?{
  *   finalEndpoint: string,
- *   checkedWidth: number,
- *   checkedHeight: number,
+ *   checkedWidth: (number|string),
+ *   checkedHeight: (number|string),
  *   checkedTarget: string,
  * }}
  */
-function checkProps(props) {
-  const {
-    'type': type,
-    'endpoint': endpoint,
-    'target': target,
-    'width': width,
-    'height': height,
-    'params': params,
-  } = props;
-
-  // Verify type is provided
-  if (type === undefined) {
-    throw new Error(`The type attribute is required. ${NAME}`);
-  }
-
+function checkProps(type, endpoint, target, width, height, params) {
   // User must provide endpoint if they choose a type that is not
-  // pre-configured
-  const typeConfig = getSocialConfig(type) || dict();
-  let baseEndpoint = endpoint || typeConfig['shareEndpoint'];
+  // pre-configured, early exit if not provided
+  const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
+  let baseEndpoint = endpoint || typeConfig.shareEndpoint;
   if (baseEndpoint === undefined) {
-    throw new Error(
+    displayWarning(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
     );
+    return null;
   }
 
   // Special case when type is 'email'
@@ -168,7 +183,7 @@ function checkProps(props) {
 /**
  * @param {?string} message
  */
-function throwWarning(message) {
+function displayWarning(message) {
   console /*OK*/
     .warn(message);
 }
@@ -180,17 +195,17 @@ function throwWarning(message) {
  */
 function handleActivation(finalEndpoint, target) {
   const protocol = finalEndpoint.split(':', 1)[0];
-  const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+
   if (protocol === 'navigator-share') {
     if (window && window.navigator && window.navigator.share) {
       const data = parseQueryString(
         /** @type {string} */ (getQueryString(finalEndpoint))
       );
       window.navigator.share(data).catch((e) => {
-        throwWarning(`${e.message}. ${NAME}`);
+        displayWarning(`${e.message}. ${NAME}`);
       });
     } else {
-      throwWarning(
+      displayWarning(
         `Could not complete system share.  Navigator unavailable. ${NAME}`
       );
     }
@@ -199,10 +214,10 @@ function handleActivation(finalEndpoint, target) {
       window,
       protocol === 'sms' ? finalEndpoint.replace('?', '?&') : finalEndpoint,
       isIos() ? '_top' : target,
-      windowFeatures
+      WINDOW_FEATURES
     );
   } else {
-    openWindowDialog(window, finalEndpoint, target, windowFeatures);
+    openWindowDialog(window, finalEndpoint, target, WINDOW_FEATURES);
   }
 }
 

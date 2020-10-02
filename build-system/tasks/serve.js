@@ -23,7 +23,6 @@ const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
 const path = require('path');
-const watch = require('gulp-watch');
 const {
   buildNewServer,
   SERVER_TRANSFORM_PATH,
@@ -38,8 +37,12 @@ const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {watchDebounceDelay} = require('./helpers');
+const {watch} = require('gulp');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+
+const HOST = argv.host || 'localhost';
+const PORT = argv.port || 8000;
 
 // Used for logging.
 let url = null;
@@ -100,8 +103,8 @@ async function startServer(
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
-    host: argv.host || 'localhost',
-    port: argv.port || 8000,
+    host: HOST,
+    port: PORT,
     https: argv.https,
     preferHttp1: true,
     silent: true,
@@ -176,7 +179,7 @@ async function doServe(lazyBuild = false) {
   const watchFunc = async () => {
     await restartServer();
   };
-  watch(serverFiles, debounce(watchFunc, watchDebounceDelay));
+  watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
   if (argv.new_server) {
     buildNewServer();
   }
@@ -191,6 +194,8 @@ module.exports = {
   doServe,
   startServer,
   stopServer,
+  HOST,
+  PORT,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
@@ -208,4 +213,5 @@ serve.flags = {
   esm: '  Serve ESM JS (requires the use of --new_server)',
   cdn: '  Serve current prod JS',
   rtv: '  Serve JS from the RTV provided',
+  coverage: '  Serve instrumented code to collect coverage info',
 };

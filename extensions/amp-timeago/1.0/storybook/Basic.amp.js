@@ -15,28 +15,38 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {date, withKnobs} from '@storybook/addon-knobs';
-import {storiesOf} from '@storybook/preact';
+import {date, number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from '@ampproject/storybook-addon';
 
-// eslint-disable-next-line
-storiesOf('amp-timeago', module)
-  .addDecorator(withKnobs)
-  .addDecorator(withA11y)
-  .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-timeago', version: '1.0'}]})
-  .add('responsive', () => {
-    const datetime = date('Date/Time', new Date());
-    return (
-      <amp-timeago
-        layout="responsive"
-        width="100"
-        height="100"
-        datetime={String(datetime)}
-        locale="en"
-      >
-        Saturday 11 April 2018 00.37
-      </amp-timeago>
-    );
-  });
+export default {
+  title: 'amp-timeago',
+  decorators: [withKnobs, withA11y, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-timeago', version: '1.0'}],
+    experiments: ['amp-timeago-bento'],
+  },
+};
+
+export const Responsive = () => {
+  const datetime = date('Date/Time', new Date());
+  const cutoff = number('Cutoff (seconds)', 0);
+  const placeholder = text('Cutoff placeholder', 'Time passed!');
+  return (
+    <amp-timeago
+      layout="responsive"
+      width="100"
+      height="40"
+      datetime={new Date(datetime).toISOString()}
+      cutoff={cutoff}
+      locale="en"
+    >
+      {placeholder}
+    </amp-timeago>
+  );
+};
+
+Responsive.story = {
+  name: 'responsive',
+};

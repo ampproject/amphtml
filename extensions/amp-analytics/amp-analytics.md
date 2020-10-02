@@ -683,7 +683,7 @@ that indicate the boundaries that triggered a request to be sent. Use
 
 - `useInitialPageSize` (optional, default `false`)
 
-  If set to `true`, scroll position scroll position is calculated based on
+  If set to `true`, scroll position is calculated based on
   the initial sizing of the page, ignoring its new dimensions when
   resized.
 
@@ -811,7 +811,7 @@ page becomes visible. The firing of this trigger can be configured using
 }
 ```
 
-The element visibility trigger can be configured for any AMP element or a
+The element visibility trigger can be configured for any AMP or non-AMP element or a
 document root using [`selector`](#element-selector). The trigger will fire when
 the specified element matches the visibility parameters that can be customized
 using the `visibilitySpec`.
@@ -1116,8 +1116,7 @@ Configuration properties supported in `visibilitySpec` are:
 - `waitFor`: This property indicates that the visibility trigger should wait
   for a certain signal before tracking visibility. The supported values are
   `none`, `ini-load`, and `render-start`. If `waitFor` is undefined, it is
-  defaulted to [`ini-load`](#ini-load) when selector is specified, or to
-  `none` otherwise.
+  defaulted to [`ini-load`](#ini-load) (for AMP elements) when selector is specified, or to `none` otherwise. When tracking non-AMP elements, only `none` is supported, which is its default value. Tracking non-AMP elements may not always work as intended. For example, tracking a `<div>` element that contains an `<amp-iframe>`, may not accurately wait for the iframe to load before sending the signal out.
 
 - `reportWhen`: This property indicates that the visibility trigger should
   wait for a certain signal before sending the trigger. The only supported

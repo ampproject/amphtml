@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  DEFAULT_THRESHOLD,
-  IntersectionObserverPolyfill,
-  nativeIntersectionObserverSupported,
-} from '../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
+import {_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME} from './requests';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
@@ -38,6 +34,30 @@ const TAG = 'amp-analytics/visibility-manager';
 
 const PROP = '__AMP_VIS';
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
+
+export const DEFAULT_THRESHOLD = [
+  0,
+  0.05,
+  0.1,
+  0.15,
+  0.2,
+  0.25,
+  0.3,
+  0.35,
+  0.4,
+  0.45,
+  0.5,
+  0.55,
+  0.6,
+  0.65,
+  0.7,
+  0.75,
+  0.8,
+  0.85,
+  0.9,
+  0.95,
+  1,
+];
 
 /** @type {number} */
 let visibilityIdCounter = 1;
@@ -226,6 +246,35 @@ export class VisibilityManager {
   getRootLayoutBox() {}
 
   /**
+   * TODO(#29618): Remove after ampim investigation
+   * Returns the root element.
+   * @return {?Element}
+   * @abstract
+   */
+  getRootElementTemp() {}
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @return {?../../../src/layout-rect.LayoutRectDef}
+   * @abstract
+   */
+  getBoundingClientRectTemp(unusedElement) {}
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * Returns the element's layout rect calculated by AMP
+   * @param {!Element} element
+   * @return {!../../../src/layout-rect.LayoutRectDef}
+   */
+  getElementLayoutBoxTemp(element) {
+    const resource = this.resources_.getResourceForElementOptional(element);
+    const layoutBox = resource
+      ? resource.getLayoutBox()
+      : Services.viewportForDoc(this.ampdoc).getLayoutRect(element);
+    return layoutBox;
+  }
+
+  /**
    * @return {number}
    */
   getRootVisibility() {
@@ -285,8 +334,19 @@ export class VisibilityManager {
    */
   listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
     const calcVisibility = this.getRootVisibility.bind(this);
+    // TODO(#28618) Clean up calcLayoutBoxTemp & calcBoundingClientRectTemp
+    const calcLayoutBoxTemp = this.getRootLayoutBox.bind(this);
+    let calcBoundingClientRectTemp;
+    if (this.getRootElementTemp()) {
+      calcBoundingClientRectTemp = this.getBoundingClientRectTemp.bind(
+        this,
+        this.getRootElementTemp()
+      );
+    }
     return this.createModelAndListen_(
       calcVisibility,
+      calcLayoutBoxTemp,
+      calcBoundingClientRectTemp || null,
       spec,
       readyPromise,
       createReportPromiseFunc,
@@ -313,8 +373,15 @@ export class VisibilityManager {
     callback
   ) {
     const calcVisibility = this.getElementVisibility.bind(this, element);
+    const calculateLayoutBox = this.getElementLayoutBoxTemp.bind(this, element);
+    const calculateBoundingClientRect = this.getBoundingClientRectTemp.bind(
+      this,
+      element
+    );
     return this.createModelAndListen_(
       calcVisibility,
+      calculateLayoutBox,
+      calculateBoundingClientRect,
       spec,
       readyPromise,
       createReportPromiseFunc,
@@ -324,8 +391,11 @@ export class VisibilityManager {
   }
 
   /**
+   * TODO(#29618) Clean up calcLayoutBoxTemp & calcBoundingClientRectTemp
    * Create visibilityModel and listen to visible events.
    * @param {function():number} calcVisibility
+   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcLayoutBoxTemp
+   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcBoundingClientRectTemp
    * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
@@ -335,6 +405,8 @@ export class VisibilityManager {
    */
   createModelAndListen_(
     calcVisibility,
+    calcLayoutBoxTemp,
+    calcBoundingClientRectTemp,
     spec,
     readyPromise,
     createReportPromiseFunc,
@@ -391,7 +463,14 @@ export class VisibilityManager {
         const newSpec = spec;
         newSpec['visiblePercentageMin'] = min;
         newSpec['visiblePercentageMax'] = max;
-        const model = new VisibilityModel(newSpec, calcVisibility);
+        const model = new VisibilityModel(
+          newSpec,
+          calcVisibility,
+          calcLayoutBoxTemp,
+          calcBoundingClientRectTemp,
+          /** @type {?../../../src/service/viewport/viewport-impl.ViewportImpl} */
+          (Services.viewportForDoc(this.ampdoc))
+        );
         unlisteners.push(
           this.listen_(
             model,
@@ -407,7 +486,14 @@ export class VisibilityManager {
         unlisteners.forEach((unlistener) => unlistener());
       };
     }
-    const model = new VisibilityModel(spec, calcVisibility);
+    const model = new VisibilityModel(
+      spec,
+      calcVisibility,
+      calcLayoutBoxTemp,
+      calcBoundingClientRectTemp,
+      /** @type {?../../../src/service/viewport/viewport-impl.ViewportImpl} */
+      (Services.viewportForDoc(this.ampdoc))
+    );
     return this.listen_(
       model,
       spec,
@@ -459,6 +545,9 @@ export class VisibilityManager {
     model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
+
+      // TODO(#29618): Remove after ampim investigation
+      state[_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME] = model.getErrorInfoTemp();
 
       // Additional doc-level state.
       state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
@@ -590,12 +679,17 @@ export class VisibilityManagerForDoc extends VisibilityManager {
      * @private {!Object<number, {
      *   element: !Element,
      *   intersectionRatio: number,
+     *   isVisible: boolean,
+     *   boundingClientRect: ?../../../src/layout-rect.LayoutRectDef,
      *   listeners: !Array<function(number)>
      * }>}
      */
     this.trackedElements_ = map();
 
-    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    /** @private {?Element} */
+    this.rootElementTemp_ = null;
+
+    /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
     if (getMode(this.ampdoc.win).runtime == 'inabox') {
@@ -604,9 +698,34 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       const rootElement = dev().assertElement(
         root.documentElement || root.body || root
       );
+      this.rootElementTemp_ = rootElement;
       this.unsubscribe(
         this.observe(rootElement, this.setRootVisibility.bind(this))
       );
+      // Observe inabox window resize event.
+      const resizeListener = () => {
+        const id = getElementId(rootElement);
+        const trackedRoot = this.trackedElements_[id];
+        if (!trackedRoot) {
+          return;
+        }
+        if (
+          this.ampdoc.win./*OK*/ innerHeight < 1 ||
+          this.ampdoc.win./*OK*/ innerWidth < 1
+        ) {
+          trackedRoot.isVisible = false;
+        } else {
+          trackedRoot.isVisible = true;
+        }
+        this.setRootVisibility(
+          trackedRoot.isVisible ? trackedRoot.intersectionRatio : 0
+        );
+      };
+      this.ampdoc.win.addEventListener('resize', resizeListener);
+
+      this.unsubscribe(() => {
+        this.ampdoc.win.removeEventListener('resize', resizeListener);
+      });
     } else {
       // Main document: visibility is based on the ampdoc.
       this.setRootVisibility(this.ampdoc.isVisible() ? 1 : 0);
@@ -655,6 +774,14 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     return getMinOpacity(rootElement);
   }
 
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @override
+   */
+  getRootElementTemp() {
+    return this.rootElementTemp_;
+  }
+
   /** @override */
   getRootLayoutBox() {
     // This code is the same for "in-a-box" and standalone doc.
@@ -667,8 +794,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   observe(element, listener) {
-    this.polyfillAmpElementIfNeeded_(element);
-
     const id = getElementId(element);
     let trackedElement = this.trackedElements_[id];
     if (!trackedElement) {
@@ -676,10 +801,15 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         element,
         intersectionRatio: 0,
         intersectionRect: null,
+        isVisible: false,
+        boundingClientRect: null,
         listeners: [],
       };
       this.trackedElements_[id] = trackedElement;
-    } else if (trackedElement.intersectionRatio > 0) {
+    } else if (
+      trackedElement.intersectionRatio > 0 &&
+      trackedElement.isVisible
+    ) {
       // This has already been tracked and the `intersectionRatio` is fresh.
       listener(trackedElement.intersectionRatio);
     }
@@ -707,7 +837,25 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     }
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
-    return (trackedElement && trackedElement.intersectionRatio) || 0;
+    return (
+      (trackedElement &&
+        trackedElement.isVisible &&
+        trackedElement.intersectionRatio) ||
+      0
+    );
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @override
+   * */
+  getBoundingClientRectTemp(element) {
+    if (!element) {
+      return null;
+    }
+    const id = getElementId(element);
+    const trackedElement = this.trackedElements_[id];
+    return trackedElement && trackedElement.boundingClientRect;
   }
 
   /**
@@ -729,63 +877,18 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /**
-   * @return {!IntersectionObserver|!IntersectionObserverPolyfill}
+   * @return {!IntersectionObserver}
    * @private
    */
   getIntersectionObserver_() {
     if (!this.intersectionObserver_) {
-      this.intersectionObserver_ = this.createIntersectionObserver_();
-    }
-    return this.intersectionObserver_;
-  }
-
-  /**
-   * @return {!IntersectionObserver|!IntersectionObserverPolyfill}
-   * @private
-   */
-  createIntersectionObserver_() {
-    // Native.
-    const {win} = this.ampdoc;
-    if (nativeIntersectionObserverSupported(win)) {
-      return new win.IntersectionObserver(
+      const {win} = this.ampdoc;
+      this.intersectionObserver_ = new win.IntersectionObserver(
         this.onIntersectionChanges_.bind(this),
         {threshold: DEFAULT_THRESHOLD}
       );
     }
-
-    // Polyfill.
-    const intersectionObserverPolyfill = new IntersectionObserverPolyfill(
-      this.onIntersectionChanges_.bind(this),
-      {threshold: DEFAULT_THRESHOLD}
-    );
-    const ticker = () => {
-      intersectionObserverPolyfill.tick(this.viewport_.getRect());
-    };
-    this.unsubscribe(this.viewport_.onScroll(ticker));
-    this.unsubscribe(this.viewport_.onChanged(ticker));
-    // Tick in the next event loop. That's how native InOb works.
-    setTimeout(ticker);
-    return intersectionObserverPolyfill;
-  }
-
-  /**
-   * @param {!Element} element
-   * @private
-   */
-  polyfillAmpElementIfNeeded_(element) {
-    const {win} = this.ampdoc;
-    if (nativeIntersectionObserverSupported(win)) {
-      return;
-    }
-
-    // InOb polyfill requires partial AmpElement implementation.
-    if (typeof element.getLayoutBox == 'function') {
-      return;
-    }
-    element.getLayoutBox = () => {
-      return this.viewport_.getLayoutRect(element);
-    };
-    element.getOwner = () => null;
+    return this.intersectionObserver_;
   }
 
   /**
@@ -803,10 +906,20 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         Number(intersection.width),
         Number(intersection.height)
       );
+      let {boundingClientRect} = change;
+      boundingClientRect =
+        boundingClientRect &&
+        layoutRectLtwh(
+          Number(boundingClientRect.left),
+          Number(boundingClientRect.top),
+          Number(boundingClientRect.width),
+          Number(boundingClientRect.height)
+        );
       this.onIntersectionChange_(
         change.target,
         change.intersectionRatio,
-        intersection
+        intersection,
+        boundingClientRect
       );
     });
   }
@@ -815,17 +928,38 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @param {!Element} target
    * @param {number} intersectionRatio
    * @param {!../../../src/layout-rect.LayoutRectDef} intersectionRect
+   * @param {!../../../src/layout-rect.LayoutRectDef} boundingClientRect
    * @private
    */
-  onIntersectionChange_(target, intersectionRatio, intersectionRect) {
+  onIntersectionChange_(
+    target,
+    intersectionRatio,
+    intersectionRect,
+    boundingClientRect
+  ) {
     intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
+
+    // This is different from the InOb v2 isVisible definition.
+    // isVisible here only checks for element size
+    let isVisible = true;
+
+    if (boundingClientRect.width < 1 || boundingClientRect.height < 1) {
+      // Set isVisible to false when the element is not visible.
+      // Use < 1 because the width/height can
+      // be a double value on high resolution screen
+      isVisible = false;
+    }
     if (trackedElement) {
+      trackedElement.isVisible = isVisible;
       trackedElement.intersectionRatio = intersectionRatio;
       trackedElement.intersectionRect = intersectionRect;
+      trackedElement.boundingClientRect = boundingClientRect;
       for (let i = 0; i < trackedElement.listeners.length; i++) {
-        trackedElement.listeners[i](intersectionRatio);
+        trackedElement.listeners[i](
+          trackedElement.isVisible ? intersectionRatio : 0
+        );
       }
     }
   }
@@ -876,6 +1010,23 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   getRootMinOpacity() {
     const rootElement = dev().assertElement(this.embed.iframe);
     return getMinOpacity(rootElement);
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @override
+   * */
+  getRootElementTemp() {
+    // No need to track root element for embed
+    return null;
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @override
+   * */
+  getBoundingClientRectTemp() {
+    return null;
   }
 
   /**

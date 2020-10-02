@@ -17,8 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {AnimationTemplate} from './template';
 import {select, text, withKnobs} from '@storybook/addon-knobs';
-import {storiesOf} from '@storybook/preact';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from '@ampproject/storybook-addon';
 
 const KEYFRAMES_OPTIONS = {
   'rotate': {
@@ -50,30 +49,38 @@ const BLOCK_STYLE = {
   height: '100px',
 };
 
-// eslint-disable-next-line
-storiesOf('Animation', module)
-  .addDecorator(withKnobs)
-  .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-animation', version: 0.1}]})
-  .add('default', () => {
-    const keyframesOptions = Object.keys(KEYFRAMES_OPTIONS);
-    const keyframesName = select(
-      'Keyframes',
-      keyframesOptions,
-      keyframesOptions[0]
-    );
-    const keyframes = KEYFRAMES_OPTIONS[keyframesName];
-    const easing = text('Easing', 'cubic-bezier(0,0,.21,1)');
-    const spec = {
-      animations: {
-        selector: '#block',
-        easing,
-        keyframes,
-      },
-    };
-    return (
-      <AnimationTemplate spec={spec}>
-        <div id="block" style={BLOCK_STYLE} />
-      </AnimationTemplate>
-    );
-  });
+export default {
+  title: 'Animation',
+  decorators: [withKnobs, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-animation', version: 0.1}],
+  },
+};
+
+export const Default = () => {
+  const keyframesOptions = Object.keys(KEYFRAMES_OPTIONS);
+  const keyframesName = select(
+    'Keyframes',
+    keyframesOptions,
+    keyframesOptions[0]
+  );
+  const keyframes = KEYFRAMES_OPTIONS[keyframesName];
+  const easing = text('Easing', 'cubic-bezier(0,0,.21,1)');
+  const spec = {
+    animations: {
+      selector: '#block',
+      easing,
+      keyframes,
+    },
+  };
+  return (
+    <AnimationTemplate spec={spec}>
+      <div id="block" style={BLOCK_STYLE} />
+    </AnimationTemplate>
+  );
+};
+
+Default.story = {
+  name: 'default',
+};

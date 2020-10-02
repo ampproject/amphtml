@@ -23,6 +23,11 @@ import {
  * @const {!LocalizedStringBundleDef}
  */
 const strings = {
+  [LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT]: {
+    string: 'Activate',
+    description:
+      'Label for the activate button to ask for device orientation permission',
+  },
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL]: {
     string: 'Mute story',
     description:
@@ -100,7 +105,7 @@ const strings = {
       'Label for a link to documentation on how AMP links are handled.',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS]: {
-    string: 'Tip 2/2',
+    string: 'Tip 2 of 2',
     description:
       'Label for a hint indicating progress on a multistep onboarding user education tutorial.',
   },
@@ -115,7 +120,7 @@ const strings = {
       'Label for a button dismissing or advancing to the next step of an onboarding user education tutorial.',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS]: {
-    string: 'Tip 1/2',
+    string: 'Tip 1 of 2',
     description:
       'Label for a hint indicating progress on a multistep onboarding user education tutorial.',
   },
@@ -163,6 +168,11 @@ const strings = {
       'Label for a button to open a drawer containing additional ' +
       'content via a "swipe up" user gesture.',
   },
+  [LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL]: {
+    string: 'Previous page',
+    description:
+      'Label indicating that users can navigate to the previous page.',
+  },
   [LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO]: {
     string: 'Video failed to play',
     description:
@@ -172,25 +182,39 @@ const strings = {
     string: 'Play video',
     description: 'Label for a button to play the video visible on the page.',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_A]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_RESULTS_SCORE]: {
+    string: 'SCORE:',
+    description:
+      'Label for the results component preceding the score in percentages',
+  },
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A]: {
     string: 'A',
     description:
       'Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_B]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B]: {
     string: 'B',
     description:
       'Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_C]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C]: {
     string: 'C',
     description:
       'Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_D]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D]: {
     string: 'D',
     description:
       'Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)',
+  },
+  [LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL]: {
+    string: 'Pause story',
+    description:
+      'Label for a button that pauses the media content on the story',
+  },
+  [LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL]: {
+    string: 'Play story',
+    description: 'Label for a button that plays the media content on the story',
   },
   [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
     string: 'Share story',

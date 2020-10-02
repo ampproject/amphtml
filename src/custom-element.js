@@ -31,7 +31,7 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
-import {getIntersectionChangeEntry} from '../src/utils/intersection-observer-polyfill';
+import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {parseSizeList} from './size-list';
@@ -1661,6 +1661,8 @@ function createBaseCustomElementClass(win) {
       return (
         // in FIE
         (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
+        // TODO(#22733): cleanup once the ampdoc-fie is fully launched.
+        (this.ampdoc_ && !!this.ampdoc_.getParent()) ||
         // in inabox
         getMode().runtime == 'inabox'
       );

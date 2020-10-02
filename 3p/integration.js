@@ -142,7 +142,9 @@ import {eplanning} from '../ads/eplanning';
 import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
+import {fakeDelayed} from '../ads/_fakedelayed_';
 import {felmat} from '../ads/felmat';
+import {firstimpression} from '../ads/firstimpression';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {forkmedia} from '../ads/forkmedia';
@@ -150,6 +152,7 @@ import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {giraff} from '../ads/giraff';
+import {glomex} from '../ads/glomex';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -176,6 +179,8 @@ import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {logly} from '../ads/logly';
 import {loka} from '../ads/loka';
+import {luckyads} from '../ads/luckyads';
+import {macaw} from '../ads/macaw';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {marfeel} from '../ads/marfeel';
@@ -191,6 +196,7 @@ import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
 import {my6sense} from '../ads/my6sense';
+import {myoffrz} from '../ads/myoffrz';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
@@ -209,6 +215,7 @@ import {openx} from '../ads/openx';
 import {opinary} from '../ads/opinary';
 import {outbrain} from '../ads/outbrain';
 import {pixels} from '../ads/pixels';
+import {playstream} from '../ads/playstream';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
@@ -279,6 +286,7 @@ import {vdoai} from '../ads/vdoai';
 import {videointelligence} from '../ads/videointelligence';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
+import {vlyby} from '../ads/vlyby';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
@@ -317,7 +325,9 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  firstimpression: true,
   forkmedia: true,
+  glomex: true,
   idealmedia: true,
   insticator: true,
   jubna: true,
@@ -346,6 +356,7 @@ const AMP_EMBED_ALLOWED = {
   svknative: true,
   taboola: true,
   temedya: true,
+  vlyby: true,
   whopainfeed: true,
   yahoofedads: true,
   yahoonativeads: true,
@@ -358,6 +369,7 @@ init(window);
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
+  register('fake-delayed', fakeDelayed);
 }
 
 // Keep the list in alphabetic order
@@ -449,6 +461,7 @@ register('f1e', f1e);
 register('f1h', f1h);
 register('facebook', facebook);
 register('felmat', felmat);
+register('firstimpression', firstimpression);
 register('flite', flite);
 register('fluct', fluct);
 register('forkmedia', forkmedia);
@@ -457,6 +470,7 @@ register('fusion', fusion);
 register('genieessp', genieessp);
 register('giraff', giraff);
 register('github', github);
+register('glomex', glomex);
 register('gmossp', gmossp);
 register('gumgum', gumgum);
 register('holder', holder);
@@ -484,6 +498,8 @@ register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('logly', logly);
 register('loka', loka);
+register('luckyads', luckyads);
+register('macaw', macaw);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
@@ -501,6 +517,7 @@ register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mox', mox);
 register('my6sense', my6sense);
+register('myoffrz', myoffrz);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
@@ -520,6 +537,7 @@ register('openx', openx);
 register('opinary', opinary);
 register('outbrain', outbrain);
 register('pixels', pixels);
+register('playstream', playstream);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
@@ -592,6 +610,7 @@ register('videointelligence', videointelligence);
 register('videonow', videonow);
 register('viqeoplayer', viqeoplayer);
 register('viralize', viralize);
+register('vlyby', vlyby);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);

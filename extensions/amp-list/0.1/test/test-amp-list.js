@@ -167,7 +167,7 @@ describes.repeated(
           // Mock the actual network request.
           listMock
             .expects('fetch_')
-            .withExactArgs(!!opts.refresh, /* token */ undefined)
+            .withExactArgs(!!opts.refresh)
             .returns(Promise.resolve(fetched))
             .atLeast(1);
 
@@ -314,7 +314,7 @@ describes.repeated(
                   list.getPlaceholder = () => null;
                   allowConsoleError(() => {
                     expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list with layout=container relies on a placeholder/
+                      /amp-list\[layout=container\] requires a placeholder/
                     );
                   });
                 });
@@ -870,26 +870,34 @@ describes.repeated(
               const listItem = document.createElement('div');
               listItem.setAttribute('role', 'item');
               listContainer.appendChild(listItem);
+
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve({html}));
               ssrTemplateHelper.applySsrOrCsrTemplate.returns(
-                Promise.resolve(listContainer)
+                Promise.resolve(rendered)
               );
+
               listMock
                 .expects('updateBindings_')
                 .returns(Promise.resolve(listContainer))
                 .once();
+              const renderSpy = env.sandbox.spy();
               listMock
                 .expects('render_')
                 .withExactArgs(listContainer, false)
-                .returns(Promise.resolve());
+                .callsFake(() => {
+                  renderSpy();
+                  return Promise.resolve();
+                })
+                .once();
 
-              ssrTemplateHelper.applySsrOrCsrTemplate
-                .withArgs(element, html)
-                .returns(Promise.resolve(rendered));
-
-              yield list.layoutCallback();
+              const layoutSpy = env.sandbox.spy();
+              yield list.layoutCallback().then(() => {
+                layoutSpy();
+              });
+              // layoutCallback() should be chained to render_().
+              expect(renderSpy).to.be.calledBefore(layoutSpy);
 
               const request = env.sandbox.match({
                 xhrUrl:
@@ -933,7 +941,6 @@ describes.repeated(
             });
 
             it('"amp-script:" uri should skip rendering and emit an error', () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               list.element.setAttribute('src', 'amp-script:fetchData');
 
               listMock.expects('scheduleRender_').never();
@@ -941,7 +948,6 @@ describes.repeated(
               const errorMsg = /cannot be used in SSR mode/;
               expectAsyncConsoleError(errorMsg);
               expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
-              toggleExperiment(win, 'protocol-adapters', false);
             });
 
             it('Bound [src] should skip rendering and emit an error', async () => {
@@ -988,6 +994,7 @@ describes.repeated(
               return list.layoutCallback().catch(() => {});
             });
           });
+
           describe('Using amp-script: protocol', () => {
             let ampScriptEl;
             beforeEach(() => {
@@ -1004,14 +1011,7 @@ describes.repeated(
               list = createAmpList(element);
             });
 
-            it('should throw an error if used without the experiment enabled', async () => {
-              const errorMsg = /Invalid value: amp-script:example.fetchData/;
-              expectAsyncConsoleError(errorMsg);
-              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
-            });
-
             it('should throw an error if given an invalid format', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               const errorMsg = /URIs must be of the format/;
 
               element.setAttribute('src', 'amp-script:fetchData');
@@ -1028,7 +1028,6 @@ describes.repeated(
             });
 
             it('should throw if specified amp-script does not exist', () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               element.setAttribute('src', 'amp-script:doesnotexist.fn');
 
               const errorMsg = /could not find <amp-script> with/;
@@ -1037,7 +1036,6 @@ describes.repeated(
             });
 
             it('should fail if function call rejects', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction: () =>
@@ -1053,7 +1051,6 @@ describes.repeated(
             it('should render non-array if single-item is set', async () => {
               const callFunctionResult = {'items': {title: 'Title'}};
               element.setAttribute('single-item', 'true');
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {
@@ -1078,7 +1075,6 @@ describes.repeated(
             });
 
             it('should render a list from AmpScriptService provided data', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {
@@ -1192,44 +1188,6 @@ describes.repeated(
               expect(element.getAttribute('src')).to.equal('');
             });
           });
-
-          it(
-            "should fetch with viewer auth token if 'crossorigin=" +
-              "amp-viewer-auth-token-via-post' attribute is present",
-            () => {
-              env.sandbox
-                .stub(Services, 'viewerAssistanceForDocOrNull')
-                .returns(
-                  Promise.resolve({
-                    getIdTokenPromise: () => Promise.resolve('idToken'),
-                  })
-                );
-              element.setAttribute(
-                'crossorigin',
-                'amp-viewer-auth-token-via-post'
-              );
-              const fetched = {items: DEFAULT_ITEMS};
-              const foo = doc.createElement('div');
-              const rendered = [foo];
-              const opts = DEFAULT_LIST_OPTS;
-
-              listMock
-                .expects('fetch_')
-                .withExactArgs(!!opts.refresh, 'idToken')
-                .returns(Promise.resolve(fetched))
-                .atLeast(1);
-
-              // Stub the rendering of the template.
-              const itemsToRender = fetched[opts.expr];
-              ssrTemplateHelper.applySsrOrCsrTemplate
-                .withArgs(element, itemsToRender)
-                .returns(Promise.resolve(rendered));
-
-              expectRender();
-
-              return list.layoutCallback().then(() => Promise.resolve());
-            }
-          );
 
           it('should reset if `reset-on-refresh` is set (new URL)', () => {
             element.setAttribute('reset-on-refresh', '');
