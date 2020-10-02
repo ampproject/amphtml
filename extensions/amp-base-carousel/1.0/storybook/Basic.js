@@ -31,9 +31,10 @@ export const _default = () => {
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const snap = boolean('snap', true);
-  const snapAlign = select('snap-align', ['start', 'center']);
+  const controls = select('show controls', ['auto', 'always', 'never']);
+
   return (
-    <BaseCarousel snap={snap} snapAlign={snapAlign} style={{width, height}}>
+    <BaseCarousel controls={controls} snap={snap} style={{width, height}}>
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
