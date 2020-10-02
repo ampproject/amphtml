@@ -942,6 +942,7 @@ function createAmpElement(win, opt_name, opt_implementationClass) {
   const element = new ctor();
   element.implementationClassForTesting =
     opt_implementationClass || BaseElement;
+  element.createdCallback();
   element.classList.add('i-amphtml-element');
   return element;
 }
