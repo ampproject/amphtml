@@ -20,7 +20,7 @@ import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
 import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {dict} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
