@@ -15,7 +15,6 @@
  */
 
 import {FakeWindow} from '../../testing/fake-dom';
-import {Services} from '../../src/services';
 import {
   getElementService,
   getElementServiceForDoc,
@@ -35,6 +34,7 @@ import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '../../src/service/custom-element-registry';
+import {updateFieModeForTesting} from '../../src/service/ampdoc-impl';
 
 describe('getElementServiceIfAvailable()', () => {
   let doc;
@@ -423,10 +423,9 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
     embedWin.frameElement = frameElement;
     setParentWindow(embedWin, win);
 
-    Services.ampdocServiceFor(win).installFieDoc(
-      'https://example.org',
-      embedWin
-    );
+    updateFieModeForTesting(env.ampdocService, true);
+
+    env.ampdocService.installFieDoc('https://example.org', embedWin);
 
     nodeInEmbedWin = {
       nodeType: Node.ELEMENT_NODE,

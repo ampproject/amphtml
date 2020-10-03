@@ -16,10 +16,7 @@
 
 import {Observable} from '../observable';
 import {devAssert} from '../log';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 
 /**
  * MutationObserverInit options to listen for mutations to the `hidden`
@@ -35,7 +32,6 @@ const OBSERVER_OPTIONS = {
  * A document level service that will listen for mutations on the `hidden`
  * attribute and notify listeners. The `hidden` attribute is used to toggle
  * `display: none` on elements.
- * @implements {../service.EmbeddableService}
  * @implements {../service.Disposable}
  */
 export class HiddenObserver {
@@ -58,19 +54,6 @@ export class HiddenObserver {
 
     /** @private {?Observable<!Array<!MutationRecord>>} */
     this.observable_ = null;
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      'hidden-observer',
-      new HiddenObserver(ampdoc, embedWin.document)
-    );
   }
 
   /**

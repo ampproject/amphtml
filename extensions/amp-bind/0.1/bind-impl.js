@@ -35,7 +35,6 @@ import {dev, devAssert, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, remove} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
-import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
@@ -108,7 +107,6 @@ const FAST_RESCAN_TAGS = ['AMP-LIST'];
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
  * scanning for bindings to evaluating expressions to mutating elements.
- * @implements {../../../src/service.EmbeddableService}
  */
 export class Bind {
   /**
@@ -230,15 +228,6 @@ export class Bind {
     g.printState = g.printState || this.debugPrintState_.bind(this);
     g.setState = g.setState || ((state) => this.setState(state));
     g.eval = g.eval || this.debugEvaluate_.bind(this);
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(embedWin, 'bind', new Bind(ampdoc, embedWin));
   }
 
   /**

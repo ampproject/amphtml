@@ -26,16 +26,12 @@ import {
   parseUrlWithA,
   resolveRelativeUrl,
 } from '../url';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {urls} from '../config';
 
 const SERVICE = 'url';
 
 /**
- * @implements {../service.EmbeddableService}
  */
 export class Url {
   /**
@@ -53,19 +49,6 @@ export class Url {
 
     /** @private @const {!LruCache} */
     this.cache_ = new LruCache(100);
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      SERVICE,
-      new Url(ampdoc, embedWin.document)
-    );
   }
 
   /**

@@ -553,7 +553,7 @@ describes.realWin(
     let win;
     let embed;
     let ampdoc;
-    let parentRoot;
+    let parentAmpdoc, parentRoot;
     let root;
     let body, target, child, other;
 
@@ -562,7 +562,8 @@ describes.realWin(
       embed = env.embed;
       ampdoc = env.ampdoc;
       embed.host = ampdoc.win.document.createElement('amp-embed-host');
-      parentRoot = new AmpdocAnalyticsRoot(ampdoc);
+      parentAmpdoc = env.parentAmpdoc;
+      parentRoot = new AmpdocAnalyticsRoot(parentAmpdoc);
       root = new EmbedAnalyticsRoot(ampdoc, embed);
       body = win.document.body;
 
@@ -653,7 +654,9 @@ describes.realWin(
     it('should create visibility root', () => {
       const visibilityManager = root.getVisibilityManager();
       expect(visibilityManager).to.be.instanceOf(VisibilityManagerForEmbed);
-      expect(visibilityManager.ampdoc).to.equal(ampdoc);
+      // TODO(#22733): switch from `parentAmpdoc` to `ampdoc` once ampdoc-fie
+      // is cleaned up.
+      expect(visibilityManager.ampdoc).to.equal(parentAmpdoc);
       expect(visibilityManager.embed).to.equal(embed);
       expect(visibilityManager.parent).to.equal(
         parentRoot.getVisibilityManager()

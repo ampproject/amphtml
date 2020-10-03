@@ -575,7 +575,6 @@ const forbiddenTerms = {
     allowlist: ['src/log.js'],
   },
   '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
-    // eslint-disable-line max-len
     message:
       'Logging message require explicitly `TAG`, or an all uppercase' +
       ' string as the first parameter',
@@ -589,7 +588,7 @@ const forbiddenTerms = {
   },
   '\\.requireLayout\\(': {
     message:
-      'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
+      'requireLayout is restricted b/c it affects non-contained elements',
     allowlist: [
       'extensions/amp-animation/0.1/web-animations.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
@@ -702,7 +701,6 @@ const forbiddenTerms = {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
   '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {
-    // eslint-disable-line max-len
     message: 'TAG is not an argument to assert(). Will cause false positives.',
   },
   'eslint no-unused-vars': {
@@ -1046,7 +1044,6 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
-      'src/friendly-iframe-embed-legacy.js',
       'src/polyfillstub/intersection-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
@@ -1060,8 +1057,8 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-a4a/0.1/head-validation.js',
       'extensions/amp-a4a/0.1/template-validator.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
       'extensions/amp-animation/0.1/install-polyfill.js',
     ],
@@ -1088,7 +1085,6 @@ const forbiddenTermsSrcInclusive = {
       'src/base-element.js',
       'src/event-helper.js',
       'src/friendly-iframe-embed.js',
-      'src/friendly-iframe-embed-legacy.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
       'src/service/url-replacements-impl.js',
