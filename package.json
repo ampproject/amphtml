@@ -34,7 +34,8 @@
     "web-animations-js": "2.3.2"
   },
   "devDependencies": {
-   "@ampproject/filesize": "4.2.0",
+    "0x": "4.9.1",
+    "@ampproject/filesize": "4.2.0",
     "@ampproject/google-closure-compiler": "20200517.3.0",
     "@ampproject/remapping": "0.3.0",
     "@babel/core": "7.11.1",
