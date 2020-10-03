@@ -15,9 +15,7 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
-import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
