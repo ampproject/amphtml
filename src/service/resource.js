@@ -1057,14 +1057,6 @@ export class Resource {
     if (this.abortController_) {
       this.abortController_.abort();
       this.abortController_ = null;
-    } else {
-      const err = dev().createError(
-        'abortController_ not defined',
-        'current state: ',
-        this.state_
-      );
-      err.associatedElement = this.element;
-      dev().error(TAG, err);
     }
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
