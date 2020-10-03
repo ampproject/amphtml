@@ -965,6 +965,7 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, signal, opt_reason) {
+    this.abortController_ = null;
     if (signal.aborted) {
       // We hit a race condition, where `layoutCallback` -> `unlayoutCallback`
       // was called in quick succession. Since the unlayout was called before
@@ -1055,6 +1056,7 @@ export class Resource {
     }
     if (this.abortController_) {
       this.abortController_.abort();
+      this.abortController_ = null;
     } else {
       const err = dev().createError(
         'abortController_ not defined',

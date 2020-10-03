@@ -1159,7 +1159,7 @@ function createBaseCustomElementClass(win) {
       assertNotTemplate(this);
       devAssert(this.isBuilt(), 'Must be built to receive viewport events');
       if (signal.aborted) {
-        throw cancellation();
+        return Promise.reject(cancellation());
       }
 
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
