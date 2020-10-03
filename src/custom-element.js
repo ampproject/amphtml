@@ -1158,7 +1158,8 @@ function createBaseCustomElementClass(win) {
     layoutCallback(signal) {
       assertNotTemplate(this);
       devAssert(this.isBuilt(), 'Must be built to receive viewport events');
-      if (signal.aborted) {
+      // A lot of tests call layoutCallback manually, and don't pass a signal.
+      if (signal && signal.aborted) {
         return Promise.reject(cancellation());
       }
 
@@ -1178,7 +1179,7 @@ function createBaseCustomElementClass(win) {
 
       return promise.then(
         () => {
-          if (signal.aborted) {
+          if (signal && signal.aborted) {
             throw cancellation();
           }
           if (isLoadEvent) {
@@ -1196,7 +1197,7 @@ function createBaseCustomElementClass(win) {
           }
         },
         (reason) => {
-          if (signal.aborted) {
+          if (signal && signal.aborted) {
             throw cancellation();
           }
           // add layoutCount_ by 1 despite load fails or not
