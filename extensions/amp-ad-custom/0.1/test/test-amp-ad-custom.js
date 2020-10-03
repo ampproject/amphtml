@@ -44,6 +44,8 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     containerElement.setAttribute('width', 320);
     containerElement.setAttribute('src', templateUrl);
     containerElement.signals = () => ({
+      signal: () => {},
+      reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};

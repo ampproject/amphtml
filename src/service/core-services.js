@@ -15,6 +15,7 @@
  */
 
 import {adoptServiceForEmbedDoc} from '../service';
+import {devAssert} from '../log';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -78,7 +79,27 @@ export function installRuntimeServices(global) {
  * @restricted
  */
 export function installAmpdocServices(ampdoc) {
-  const isEmbedded = !!ampdoc.getParent();
+  devAssert(!ampdoc.getParent());
+  installAmpdocServicesInternal(ampdoc, /* isEmbedded */ false);
+}
+
+/**
+ * Install ampdoc-level services for an embedded doc.
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @restricted
+ */
+export function installAmpdocServicesForEmbed(ampdoc) {
+  devAssert(!!ampdoc.getParent());
+  installAmpdocServicesInternal(ampdoc, /* isEmbedded */ true);
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {boolean} isEmbedded
+ */
+function installAmpdocServicesInternal(ampdoc, isEmbedded) {
+  // This function is constructed to DCE embedded-vs-non-embedded path when
+  // a constant value passed in the `isEmbedded` arg.
 
   // When making changes to this method:
   // 1. Order is important!

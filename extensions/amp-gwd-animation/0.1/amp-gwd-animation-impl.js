@@ -17,7 +17,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {installServiceInEmbedScope} from '../../../src/service';
 import {scopedQuerySelector, waitForChild} from '../../../src/dom';
 import {toArray} from '../../../src/types';
 import {whenDocumentReady} from '../../../src/document-ready';
@@ -133,7 +132,6 @@ function setCounter(receiver, counterName, counterValue) {
 /**
  * AMP GWD animation runtime service.
  * @implements {../../../src/service.Disposable}
- * @implements {../../../src/service.EmbeddableService}
  */
 export class AmpGwdRuntimeService {
   /**
@@ -187,19 +185,6 @@ export class AmpGwdRuntimeService {
         this.initialize_.bind(this)
       );
     });
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      GWD_SERVICE_NAME,
-      new AmpGwdRuntimeService(ampdoc, embedWin)
-    );
   }
 
   /**

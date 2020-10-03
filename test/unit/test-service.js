@@ -26,8 +26,6 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-  installServiceInEmbedIfEmbeddable,
-  installServiceInEmbedScope,
   isDisposable,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
@@ -516,21 +514,6 @@ describe('service', () => {
         expect(fromNode).to.equal(topService);
       });
 
-      it('should not fallback from FIE to parent service', () => {
-        // TODO(#22733): remove once ampdoc-fie migration is done.
-        const fromChildNode = getExistingServiceForDocInEmbedScope(
-          childWinNode,
-          'c'
-        );
-        expect(fromChildNode).to.be.null;
-
-        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
-          grandChildWinNode,
-          'c'
-        );
-        expect(fromGrandchildNode).to.be.null;
-      });
-
       it('should find ampdoc and return its service', () => {
         toggleAmpdocFieForTesting(windowApi, true);
         const fromChildNode = getExistingServiceForDocInEmbedScope(
@@ -601,68 +584,6 @@ describe('service', () => {
         // The service is NOT also registered on the embed window.
         expect(childWin.__AMP_SERVICES && childWin.__AMP_SERVICES['c']).to.not
           .exist;
-      });
-
-      it('should return overriden service', () => {
-        // TODO(#22733): remove once ampdoc-fie migration is done.
-        const overridenService = {};
-        installServiceInEmbedScope(childWin, 'c', overridenService);
-        expect(
-          getExistingServiceForDocInEmbedScope(childWinNode, 'c')
-        ).to.equal(overridenService);
-
-        // Top-level service doesn't change.
-        const fromNode = getExistingServiceForDocInEmbedScope(node, 'c');
-        expect(fromNode).to.equal(topService);
-
-        // Notice that only direct overrides are allowed for now. This is
-        // arbitrary can change in the future to allow hierarchical lookup
-        // up the window chain.
-        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
-          grandChildWinNode,
-          'c'
-        );
-        expect(fromGrandchildNode).to.be.null;
-
-        // The service is also registered on the embed window.
-        expect(childWin.__AMP_SERVICES['c']).to.exist;
-      });
-    });
-
-    describe('embeddable interface', () => {
-      let embedWin;
-      let embeddable;
-      let nonEmbeddable;
-
-      beforeEach(() => {
-        embedWin = {
-          frameElement: {
-            nodeType: 1,
-            ownerDocument: {defaultView: windowApi},
-          },
-        };
-        nonEmbeddable = {};
-        embeddable = {installInEmbedWindow: window.sandbox.spy()};
-        registerServiceBuilderForDoc(ampdoc, 'embeddable', function () {
-          return embeddable;
-        });
-        registerServiceBuilderForDoc(ampdoc, 'nonEmbeddable', function () {
-          return nonEmbeddable;
-        });
-      });
-
-      describe('installServiceInEmbedIfEmbeddable()', () => {
-        it('should install embeddable if embeddable', () => {
-          let result;
-
-          result = installServiceInEmbedIfEmbeddable(embedWin, embeddable);
-          expect(result).to.be.true;
-          expect(embeddable.installInEmbedWindow).to.be.calledOnce;
-          expect(embeddable.installInEmbedWindow.args[0][0]).to.equal(embedWin);
-
-          result = installServiceInEmbedIfEmbeddable(embedWin, nonEmbeddable);
-          expect(result).to.be.false;
-        });
       });
     });
   });
