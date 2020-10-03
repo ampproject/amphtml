@@ -20,7 +20,7 @@ import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
 import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
+import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
@@ -85,8 +85,11 @@ export class Performance {
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
 
-    /** @private {!Array<string>} */
-    this.enabledExperiments_ = [];
+    /** @private {!Object<string,boolean>} */
+    this.enabledExperiments_ = map();
+
+    /** @private {string|undefined} */
+    this.ampexp_ = undefined;
 
     /** @private {Signals} */
     this.metrics_ = new Signals();
@@ -763,10 +766,13 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      if (this.ampexp_ == null) {
+        this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+      }
       this.viewer_.sendMessage(
         'sendCsi',
         dict({
-          'ampexp': this.enabledExperiments_.join(','),
+          'ampexp': this.ampexp_,
         }),
         /* cancelUnsent */ true
       );
@@ -788,7 +794,8 @@ export class Performance {
    * @param {string} experimentId
    */
   addEnabledExperiment(experimentId) {
-    this.enabledExperiments_.push(experimentId);
+    this.enabledExperiments_[experimentId] = true;
+    this.ampexp_ = undefined;
   }
 
   /**
