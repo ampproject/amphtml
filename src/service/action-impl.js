@@ -28,13 +28,10 @@ import {dict, hasOwn, map} from '../utils/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
 import {isAmp4Email} from '../format';
 import {isArray, isFiniteNumber, toArray, toWin} from '../types';
 import {isEnabled} from '../dom';
+import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 
 /** @const {string} */
@@ -242,7 +239,6 @@ export class ActionInvocation {
  *    simply can search target in DOM and trigger methods on it.
  * 2. A class that configures event recognizers and rules and then
  *    simply calls action.trigger.
- * @implements {../service.EmbeddableService}
  */
 export class ActionService {
   /**
@@ -295,19 +291,6 @@ export class ActionService {
     this.addEvent('input-throttled');
     this.addEvent('valid');
     this.addEvent('invalid');
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      'action',
-      new ActionService(ampdoc, embedWin.document)
-    );
   }
 
   /**
