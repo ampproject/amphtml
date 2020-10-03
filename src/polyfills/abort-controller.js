@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * @param {!Window} win
- */
-export function install(win) {
-  if (win.AbortController) {
-    return;
-  }
-  Object.defineProperty(win, 'AbortController', {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: AbortController,
-  });
-  Object.defineProperty(win, 'AbortSignal', {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: AbortSignal,
-  });
-}
-
 class AbortController {
   /** */
   constructor() {
@@ -68,4 +47,25 @@ class AbortSignal {
   get aborted() {
     return this.isAborted_;
   }
+}
+
+/**
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (win.AbortController) {
+    return;
+  }
+  Object.defineProperty(win, 'AbortController', {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: AbortController,
+  });
+  Object.defineProperty(win, 'AbortSignal', {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: AbortSignal,
+  });
 }
