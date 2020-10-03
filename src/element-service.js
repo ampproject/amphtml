@@ -23,9 +23,7 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-  getTopWindow,
 } from './service';
-import {toWin} from './types';
 import {userAssert} from './log';
 
 /**
@@ -165,15 +163,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
   }
-  const win = toWin(element.ownerDocument.defaultView);
-  const topWin = getTopWindow(win);
-  // In embeds, doc services are stored on the embed window.
-  if (win !== topWin) {
-    return getElementServicePromiseOrNull(win, id, extension);
-  } else {
-    // Only fallback to element's ampdoc (top-level) if not embedded.
-    return getElementServiceIfAvailableForDoc(element, id, extension);
-  }
+  return getElementServiceIfAvailableForDoc(element, id, extension);
 }
 
 /**

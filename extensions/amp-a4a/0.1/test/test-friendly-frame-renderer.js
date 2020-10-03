@@ -25,6 +25,7 @@ const realWinConfig = {
 describes.realWin('FriendlyFrameRenderer', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
+  let window, document;
   let containerElement;
   let context;
   let creativeData;
@@ -32,6 +33,9 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, (env) => {
   let renderPromise;
 
   beforeEach(() => {
+    window = env.win;
+    document = window.document;
+
     context = {
       size: {width: '320', height: '50'},
       adUrl: 'http://www.google.com',
@@ -47,6 +51,8 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, (env) => {
     renderer = new FriendlyFrameRenderer();
     containerElement = document.createElement('div');
     containerElement.signals = () => ({
+      signal: () => {},
+      reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};

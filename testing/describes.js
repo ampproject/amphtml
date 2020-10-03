@@ -103,7 +103,10 @@ import {
 import {stubService} from './test-helper';
 
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
-import {installDocService} from '../src/service/ampdoc-impl';
+import {
+  installDocService,
+  updateFieModeForTesting,
+} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {install as installIntersectionObserver} from '../src/polyfills/intersection-observer';
@@ -113,6 +116,7 @@ import {
 } from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
+
 import fetchMock from 'fetch-mock/es5/client-bundle';
 import sinon from /*OK*/ 'sinon';
 
@@ -802,6 +806,7 @@ class AmpFixture {
 
     // Friendly embed setup.
     if (ampdocType == 'fie') {
+      updateFieModeForTesting(env.ampdocService, true);
       const container = win.document.createElement('div');
       const embedIframe = win.document.createElement('iframe');
       container.appendChild(embedIframe);
@@ -837,6 +842,8 @@ class AmpFixture {
         env.embed = embed;
         env.parentWin = env.win;
         env.win = embed.win;
+        env.parentAmpdoc = env.ampdoc;
+        env.ampdoc = embed.ampdoc;
         configureAmpTestMode(embed.win);
       });
       completePromise = completePromise

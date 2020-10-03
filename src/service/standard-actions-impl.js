@@ -19,11 +19,7 @@ import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, user, userAssert} from '../log';
-import {
-  getAmpdoc,
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {isFiniteNumber, toWin} from '../types';
 import {startsWith} from '../string';
 import {tryFocus} from '../dom';
@@ -60,8 +56,7 @@ const AMP_CSS_RE = /^i-amphtml-/;
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
- * @implements {../service.EmbeddableService}
- * @private Visible for testing.
+ * @visibleForTesting
  */
 export class StandardActions {
   /**
@@ -87,19 +82,6 @@ export class StandardActions {
     // Explicitly not setting `Action` as a member to scope installation to one
     // method and for bundle size savings. 💰
     this.installActions_(Services.actionServiceForDoc(context));
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      'standard-actions',
-      new StandardActions(ampdoc, embedWin)
-    );
   }
 
   /**
