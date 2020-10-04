@@ -25,6 +25,7 @@ To use RTC, you must meet the following requirements:
 - APS
 - Automatad
 - Andbeyond
+- Andbeyond Native
 - Browsi
 - Criteo
 - FLUX
