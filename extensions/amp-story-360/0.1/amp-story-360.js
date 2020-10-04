@@ -38,6 +38,9 @@ import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
 
+/** @const {string} */
+const DISCOVERY_TEMPLATE_CLASS = 'i-amphtml-story-360-discovery';
+
 /**
  * Generates the template for the permission button.
  *
@@ -88,7 +91,7 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
  * @return {!Element}
  */
 const buildDiscoveryTemplate = (element) => htmlFor(element)`
-    <div class="i-amphtml-story-360-discovery">
+    <div class="${DISCOVERY_TEMPLATE_CLASS}">
       <div class="i-amphtml-story-360-discovery-animation"></div>
       <span class="i-amphtml-story-360-discovery-text">
         Move device to explore
@@ -446,9 +449,7 @@ export class AmpStory360 extends AMP.BaseElement {
     if (
       this.isOnActivePage_ &&
       this.gyroscopeControls_ &&
-      !this.element.ownerDocument.querySelector(
-        '.i-amphtml-story-360-discovery'
-      )
+      !this.element.ownerDocument.querySelector(`.${DISCOVERY_TEMPLATE_CLASS}`)
     ) {
       const page = this.getPage_();
       const discoveryTemplate = page && buildDiscoveryTemplate(page);
