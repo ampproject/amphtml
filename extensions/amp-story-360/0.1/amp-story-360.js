@@ -444,7 +444,10 @@ export class AmpStory360 extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * Only show once per story on first instance of 360 component.
+   * @private
+   */
   maybeShowDiscoveryAnimation_() {
     if (
       this.isOnActivePage_ &&
