@@ -52,9 +52,9 @@ function ScrollerWithRef(
     // Expose "advance" action for navigating between slides by the given quantity of slides.
     advance: (by) => {
       const container = containerRef.current;
-      // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
-      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
+      // Modify scrollLeft is preferred to enable smooth scroll.
       currentIndex.current = mod(currentIndex.current + by, children.length);
+      setRestingIndex(currentIndex.current);
       if (loop) {
         container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
       } else {
@@ -123,7 +123,7 @@ function ScrollerWithRef(
           // we stopped scrolling. If so, we do not need to move anything.
           if (
             currentIndex.current === null ||
-            (mixedLength === 'false' && currentIndex.current === restingIndex)
+            currentIndex.current === restingIndex
           ) {
             return;
           }
@@ -132,7 +132,7 @@ function ScrollerWithRef(
         },
         RESET_SCROLL_REFERENCE_POINT_WAIT_MS
       ),
-    [mixedLength, restingIndex, setRestingIndex]
+    [restingIndex, setRestingIndex]
   );
 
   // Track current slide without forcing render.
