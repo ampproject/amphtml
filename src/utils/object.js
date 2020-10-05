@@ -168,3 +168,19 @@ export function objectsEqualShallow(o1, o2) {
 
   return true;
 }
+
+/**
+ * @param {T} obj
+ * @param {string} prop
+ * @param {function(T, string):R} factory
+ * @return {R}
+ * @template T,R
+ */
+export function memo(obj, prop, factory) {
+  let result = /** @type {?R} */ (obj[prop]);
+  if (result === undefined) {
+    result = factory(obj, prop);
+    obj[prop] = result;
+  }
+  return result;
+}
