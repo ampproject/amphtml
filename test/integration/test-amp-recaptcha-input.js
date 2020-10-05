@@ -28,7 +28,6 @@ describe
     describes.integration(
       'with form and amp-mustache',
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="POST"
@@ -113,7 +112,6 @@ describe
         display: block;
       }
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -184,7 +182,6 @@ describe
     describes.integration(
       recaptchaRequestId.GET,
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="GET"
@@ -206,7 +203,6 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -239,7 +235,6 @@ describe
     describes.integration(
       recaptchaRequestId.POST,
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="POST"
@@ -261,7 +256,6 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },

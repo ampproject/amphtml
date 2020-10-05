@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 const documentModes = require('./document-modes');
 const {AmpState, ampStateKey, containsExpr} = require('./amphtml-helpers');

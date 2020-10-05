@@ -16,7 +16,7 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {
-  InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
+  InternalWebAnimationRequestDef,
   WebAnimationDef,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,

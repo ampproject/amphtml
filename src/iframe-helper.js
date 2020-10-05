@@ -586,7 +586,6 @@ export function canInspectWindow(win) {
     // to optimize this check away.
     return !!win.location.href && (win['test'] || true);
   } catch (unusedErr) {
-    // eslint-disable-line no-unused-vars
     return false;
   }
 }

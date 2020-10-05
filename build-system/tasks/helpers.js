@@ -517,7 +517,6 @@ function printConfigHelp(command) {
  */
 function printNobuildHelp() {
   for (const task of NOBUILD_HELP_TASKS) {
-    // eslint-disable-line local/no-for-of-statement
     if (argv._.includes(task)) {
       log(
         green('To skip building during future'),
