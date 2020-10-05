@@ -110,7 +110,11 @@ Display different categories based on percentage of correct user answers by pair
 
 ### amp-story-interactive-results
 
-The `amp-story-interactive-result` element displays a customized state defined by the user's selection from previous polls or quizzes. This element requires use of a poll or quiz from previous pages to calculate an answer-based state. Each result state uses a category that may include an image, title and description to display to the user.
+The `amp-story-interactive-result` element displays a customized state defined by the user's selection from previous polls or quizzes. This element requires use of polls or quizzes from previous pages to calculate an answer-based state. Each result category may include an image, title and description to display to the user.
+
+Each category specifies its content `option-{1/2/3/4}-{text/image/results-category}` attributes, where `-results-category` refers to the name of the category, `-image` refers to the image that will be displayed if that category is selected, and `-text` refers to the description.
+
+Results can feed its state from quizzes if all categories also specify `option-{1/2/3/4}-results-threshold`. If no categories have thresholds, the state will count the `option-{1/2/3/4}-results-category` from options selected in polls.
 
 <amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
 
@@ -118,12 +122,58 @@ The `amp-story-interactive-result` element displays a customized state defined b
 <amp-story-interactive-results
     theme="dark"
     prompt-text="You are a"
-    option-1-text="Dog" option-1-image="dog.png"
-    option-1-description="You always have energy and love being with friends. Outdoors is your favorite place"
-    option-2-text="Cat" option-2-image="cat.png"
-    option-2-description="Cats are great animals for WFH">
+    option-1-results-category="Dog" option-1-image="dog.png"
+    option-1-text="You always have energy and love being with friends. Outdoors is your favorite place"
+    option-2-results-category="Cat" option-2-image="cat.png"
+    option-2-text="Cats are great animals for WFH">
 </amp-story-interactive-results>
 [/sourcecode]
+
+### Store and display user selection
+
+All selectable interactive elements (amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-quiz) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
+To fetch the data for an interactive element, the necessary fields are:
+
+- <div id="interactiveId"></div> `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
+- `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
+- `endpoint`: the attribute `element.getAttribute("endpoint")`
+- `ampId`: client ID that identifies the session, optional
+
+Then, the requests and responses are:
+
+[sourcecode:js]
+// Getting the votes for an interactive.
+// If no client param, selected will always be false
+// (can be used to display the results on a dashboard).
+
+GET_URL = "{endpoint}/{interactiveId}?type={interactiveType}&client={ampId}"
+
+Response: {
+"options": [
+{"index": 0, "selected": false, "count": 0},
+{"index": 1, "selected": false, "count": 5},
+{"index": 2, "selected": false, "count": 7},
+{"index": 3, "selected": false, "count": 2}
+]
+}
+[/sourcecode]
+
+[sourcecode:js]
+// Posting the vote for an interactive. Client param is required.
+
+POST_URL = "{endpoint}/{interactiveId}:vote?type={interactiveType}&client={ampId}"
+POST_BODY = {'option_selected': 1}
+
+Response: No response necessary
+[/sourcecode]
+
+Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others. Available free-to-use backends are:
+
+- Google hosted: _coming soon_
+
+[tip type="note"]
+Before setting up a backend, consider if the already existing backends satisfy your requirements.
+[/tip]
 
 ## Attributes
 
@@ -170,55 +220,45 @@ On the results component, this attribute represents the name of the category, sh
 
 On polls it links the options to the result with that name as mentioned above. The string has to match perfectly for the options to be linked.
 
+Example:
+[sourcecode:html]
+
+<amp-story-interactive-poll
+    prompt-text="What's your favorite food"
+    endpoint="https://backend.com/v1/interactives"
+    option-1-results-category="Bunny" option-1-text="Carrots"
+    option-2-results-category="Dog" option-2-text="Bones"
+    option-3-results-category="Cat" option-3-text="Fish">
+</amp-story-interactive-poll>
+
+<!-- Each option in the poll above will count towards a category in the result's state, linked using the `option-{1/2/3/4}-results-category` attribute. -->
+
+<amp-story-interactive-results
+    prompt-text="You are a"
+    option-1-results-category="Dog" option-1-image="dog.png"
+    option-2-results-category="Cat" option-2-image="cat.png"
+    option-3-results-category="Bunny" option-3-image="bunny.png">
+</amp-story-interactive-results>
+[/sourcecode]
+
 ### option-{1/2/3/4}-results-threshold (optional for results)
 
 On the results element, it determines the lower boundary for the category when linked to quizzes. The component will calculate the score as a percentage of questions answered correctly (between 0 and 100), and it will show the category that has the best lower threshold that matches the score. The best threshold is the highest one that is lower or equal to the score, or the lowest score if all thresholds are higher than the score. If a threshold is present for any option, all other options also need a threshold.
 
-## Aggregate data source
+Example:
 
-All selectable interactive elements (binary-poll, poll, quiz) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
-To fetch the data for an interactive element, the necessary fields are:
+[sourcecode:html]
 
-- <div id="interactiveId"></div>`interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
-- `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
-- `endpoint`: the attribute `element.getAttribute("endpoint")`
-- `ampId`: client ID that identifies the session, optional
+<!-- State is "beginner" if less than 80% of the quizzes were correct, state is "expert" otherwise. -->
 
-Then, the requests and responses are:
-
-[sourcecode:js]
-// Getting the votes for an interactive.
-// If no client param, selected will always be false
-// (can be used to display the results on a dashboard).
-
-GET_URL = "{endpoint}/{interactiveId}?type={interactiveType}&client={ampId}"
-
-Response: {
-"options": [
-{"index": 0, "selected": false, "count": 0},
-{"index": 1, "selected": false, "count": 5},
-{"index": 2, "selected": false, "count": 7},
-{"index": 3, "selected": false, "count": 2}
-]
-}
+<amp-story-interactive-results
+    prompt-text="Your level is"
+    option-1-results-category="Beginner" option-1-image="beginner.png"
+    option-1-results-threshold="0"
+    option-2-results-category="Expert" option-2-image="expert.png"
+    option-2-results-threshold="80">
+</amp-story-interactive-results>
 [/sourcecode]
-
-[sourcecode:js]
-// Posting the vote for an interactive. Client param is required.
-
-POST_URL = "{endpoint}/{interactiveId}:vote?type={interactiveType}&client={ampId}"
-POST_BODY = {'option_selected': 1}
-
-Response: No response necessary
-[/sourcecode]
-
-Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others. Available free-to-use backends are:
-
-- Google hosted: _coming soon_
-
-[tip type="note"]
-Before setting up a backend, consider if the already existing backends satisfy your requirements.
-[/tip]
 
 ## Styling
 
@@ -232,11 +272,10 @@ Check this [Codepen collection](https://codepen.io/collection/DEGRLE) to play wi
 
 Style all `amp-story-interactive` elements with CSS variables and attributes. Override default variables by assigning a class to the element.
 
-- `--interactive-accent-color`: The accent color of the component. If no prompt-background is specified, it will use that for the prompt background as well.
-- `--interactive-prompt-text-color`: Color of the top text. Only used on selectable elements (binary-poll, poll, quiz) if a
-  prompt is specified, or on results components if there are thresholds (which will color the score).
-- `--interactive-prompt-background`: Background of the top text. Only used on selectable elements if a prompt is specified, or on results if there are thresholds but no image (which will color the score background). Can be a color (including transparent) or CSS gradient.
-- `--interactive-prompt-alignment`: Alignment of the prompt. Only used in selectable elements (binary-poll, poll, quiz). Will default to center if the component has the transparent style or if it's a binary poll, otherwise it will default to initial.
+- `--interactive-accent-color`: The accent color of the component.
+- `--interactive-prompt-text-color`: Color of the top text where applicable (elements with prompts or results with thresholds).
+- `--interactive-prompt-background`: Background of the top text where applicable (elements with prompts or results with thresholds but no images). Can be a color (including transparent) or CSS gradient.
+- `--interactive-prompt-alignment`: Alignment of the prompt where applicable (elements with prompts). Will default to center if the component has the transparent style or if it's a binary poll, otherwise it will default to initial.
 
 ### Themes
 
