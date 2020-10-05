@@ -54,12 +54,15 @@ function ScrollerWithRef(
       const container = containerRef.current;
       // Modify scrollLeft is preferred to enable smooth scroll.
       currentIndex.current = mod(currentIndex.current + by, children.length);
-      setRestingIndex(currentIndex.current);
-      if (loop) {
+      if (mixedLength === 'false') {
         container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
+      } else if (loop) {
+        container./* OK */ scrollLeft =
+          container.children[mod(pivotIndex + by, children.length)].offsetLeft;
       } else {
         container./* OK */ scrollLeft =
           container.children[currentIndex.current].offsetLeft;
+        setRestingIndex(currentIndex.current);
       }
     },
     canScroll: () => {
@@ -98,7 +101,7 @@ function ScrollerWithRef(
 
   // useLayoutEffect needed to avoid FOUC while scrolling
   useLayoutEffect(() => {
-    if (!containerRef.current || mixedLength === 'true') {
+    if (!containerRef.current || (mixedLength === 'true' && !loop)) {
       return;
     }
     const container = containerRef.current;
@@ -108,7 +111,8 @@ function ScrollerWithRef(
       snap === 'false'
         ? snapScroll.current
         : loop
-        ? container./* OK */ offsetWidth * pivotIndex
+        ? (container./* OK */ scrollLeft =
+            container.children[pivotIndex].offsetLeft)
         : container./* OK */ offsetWidth * restingIndex;
     setStyle(container, 'scrollBehavior', 'smooth');
   }, [loop, mixedLength, restingIndex, pivotIndex, snap]);
@@ -145,10 +149,10 @@ function ScrollerWithRef(
       container.children.forEach((x, i) => {
         if (container.scrollLeft >= acc.width) {
           acc.width += x.scrollWidth;
-          acc.index = i;
+          acc.index = loop ? restingIndex - pivotIndex + i : i;
         }
       });
-      currentIndex.current = acc.index;
+      currentIndex.current = mod(acc.index, children.length);
     } else {
       snapScroll.current =
         container./* OK */ scrollLeft -

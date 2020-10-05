@@ -50,9 +50,11 @@ export const _default = () => {
 export const mixedLength = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const slideCount = number('slide count', 7, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const loop = boolean('loop', true);
   const snap = boolean('snap', true);
+  const snapAlign = select('snap-align', ['start', 'center']);
   const mixedLength = boolean('mixed length', true);
   const controls = select('show controls', ['auto', 'always', 'never']);
 
@@ -60,7 +62,9 @@ export const mixedLength = () => {
     <BaseCarousel
       controls={controls}
       mixedLength={mixedLength}
+      loop={loop}
       snap={snap}
+      snapAlign={snapAlign}
       style={{width, height}}
     >
       {Array.from({length: slideCount}, (x, i) => {

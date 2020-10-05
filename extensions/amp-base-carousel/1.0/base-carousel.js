@@ -102,7 +102,10 @@ function BaseCarouselWithRef(
   }, [setSlideCount, length]);
 
   const disableForDir = (dir) =>
-    !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
+    !loop &&
+    (currentSlide + dir < 0 ||
+      currentSlide + dir >= length ||
+      (dir > 0 && canScroll != undefined && !canScroll()));
 
   const [hadTouch, setHadTouch] = useState(false);
   const hideControls = useMemo(() => {
@@ -161,9 +164,7 @@ function BaseCarouselWithRef(
           />
           <ArrowNext
             customArrow={arrowNext}
-            disabled={
-              disableForDir(1) || (canScroll != undefined && !canScroll())
-            }
+            disabled={disableForDir(1)}
             advance={advance}
           />
         </>
