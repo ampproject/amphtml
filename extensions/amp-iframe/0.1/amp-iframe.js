@@ -261,24 +261,6 @@ export class AmpIframe extends AMP.BaseElement {
     );
   }
 
-  /** @override */
-  firstAttachedCallback() {
-    this.sandbox_ = this.element.getAttribute('sandbox');
-
-    const iframeSrc = /** @type {string} */ (this.transformSrc_(
-      this.element.getAttribute('src')
-    ) ||
-      this.transformSrcDoc_(
-        this.element.getAttribute('srcdoc'),
-        this.sandbox_
-      ));
-    this.iframeSrc = this.assertSource_(
-      iframeSrc,
-      window.location.href,
-      this.sandbox_
-    );
-  }
-
   /**
    * @param {boolean=} onLayout
    * @override
@@ -295,6 +277,21 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.sandbox_ = this.element.getAttribute('sandbox');
+
+    const iframeSrc = /** @type {string} */ (this.transformSrc_(
+      this.element.getAttribute('src')
+    ) ||
+      this.transformSrcDoc_(
+        this.element.getAttribute('srcdoc'),
+        this.sandbox_
+      ));
+    this.iframeSrc = this.assertSource_(
+      iframeSrc,
+      window.location.href,
+      this.sandbox_
+    );
+
     this.placeholder_ = this.getPlaceholder();
     this.isClickToPlay_ = !!this.placeholder_;
 

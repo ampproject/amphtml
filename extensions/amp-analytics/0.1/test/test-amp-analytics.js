@@ -152,7 +152,6 @@ describes.realWin(
 
       el.connectedCallback();
       const analytics = new AmpAnalytics(el);
-      analytics.createdCallback();
       analytics.buildCallback();
       return analytics;
     }
@@ -201,7 +200,6 @@ describes.realWin(
         const analytics = new AmpAnalytics(el);
         doc.body.appendChild(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
         // Initialization has not started.
         expect(analytics.iniPromise_).to.be.null;
@@ -250,7 +248,6 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
@@ -266,7 +263,6 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
