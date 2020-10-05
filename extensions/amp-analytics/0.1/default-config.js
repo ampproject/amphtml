@@ -26,6 +26,7 @@ const defaultConfig = jsonConfiguration({
     'ampVersion': 'AMP_VERSION',
     'ampdocHost': 'AMPDOC_HOST',
     'ampdocHostname': 'AMPDOC_HOSTNAME',
+    'ampdocMeta': 'AMPDOC_META',
     'ampdocUrl': 'AMPDOC_URL',
     'authdata': 'AUTHDATA',
     'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
