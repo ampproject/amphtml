@@ -38,7 +38,11 @@ import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
 
-/** @const {string} */
+/**
+ * Used in buildDiscoveryTemplate and maybeShowDiscoveryAnimation_ methods.
+ *
+ * @const {string}
+ */
 const DISCOVERY_TEMPLATE_CLASS = 'i-amphtml-story-360-discovery';
 
 /**
