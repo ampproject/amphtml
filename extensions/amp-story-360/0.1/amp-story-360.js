@@ -29,7 +29,6 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
-import {listenOncePromise} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
