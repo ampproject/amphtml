@@ -32,6 +32,7 @@ import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 
 /** @const {string} */
@@ -43,9 +44,7 @@ const TAG = 'AMP_STORY_360';
  * @param {!Element} element
  * @return {!Element}
  */
-const buildActivateButtonTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+const buildActivateButtonTemplate = (element) => htmlFor(element)`
     <button class="i-amphtml-story-360-activate-button" role="button">
       <span class="i-amphtml-story-360-activate-text"></span>
       <span class="i-amphtml-story-360-activate-button-icon"
@@ -81,7 +80,24 @@ const buildActivateButtonTemplate = (element) => {
       </span>
     </button>
   `;
-};
+
+/**
+ * Generates the template for the gyroscope feature discovery animation.
+ *
+ * NOTE: i-amphtml-story-360-discovery is used in maybeShowDiscoveryAnimation_
+ * and must be changed in both places if updated.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildDiscoveryTemplate = (element) => htmlFor(element)`
+    <div class="i-amphtml-story-360-discovery" aria-live="polite">
+      <div class="i-amphtml-story-360-discovery-animation"></div>
+      <span class="i-amphtml-story-360-discovery-text" aria-hidden="true">
+        Move device to explore
+      </span>
+    </div>
+  `;
 
 /**
  * Internal helper class representing a camera orientation (POV) in polar
@@ -235,9 +251,6 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win);
-
     /** @private {?string} */
     this.pageId_ = null;
 
@@ -310,13 +323,17 @@ export class AmpStory360 extends AMP.BaseElement {
           this.resizeRenderer_()
         );
 
-        storeService.subscribe(
-          StateProperty.GYROSCOPE_PERMISSION_STATE,
-          (permissionState) => this.onPermissionState_(permissionState)
-        );
+        if (attr('controls') === 'gyroscope') {
+          storeService.subscribe(
+            StateProperty.GYROSCOPE_PERMISSION_STATE,
+            (permissionState) => this.onPermissionState_(permissionState)
+          );
+          this.checkGyroscopePermissions_();
+        }
 
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
+          this.maybeShowDiscoveryAnimation_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
@@ -329,10 +346,7 @@ export class AmpStory360 extends AMP.BaseElement {
           this.localizationService_ = localizationService;
         }
       ),
-    ]).then(() => {
-      attr('controls') === 'gyroscope' && this.checkGyroscopePermissions_();
-      return Promise.resolve();
-    });
+    ]).then(() => Promise.resolve());
   }
 
   /**
@@ -406,33 +420,46 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Creates a device orientation listener and sets gyroscopeControls_ state.
-   * If listener is not called in 1000ms, remove listener and resume animation.
-   * This happens on desktop browsers that support deviceorientation but aren't in motion.
+   * Listens for deviceorientation events.
+   *
+   * Some browsers support the 'deviceorientation' event but never call it.
+   * This waits for one call before initiating a constant listener.
    * @private
    */
   enableGyroscope_() {
-    this.gyroscopeControls_ = true;
-
-    const checkNoMotion = this.timer_.delay(() => {
-      this.gyroscopeControls_ = false;
-      if (this.isReady_ && this.isPlaying_) {
-        this.animate_();
-      }
-    }, 1000);
-
-    let rafTimeout;
-
-    this.win.addEventListener('deviceorientation', (e) => {
-      if (this.isReady_ && this.isOnActivePage_) {
-        // Debounce onDeviceOrientation_ to rAF.
-        rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
-        rafTimeout = this.win.requestAnimationFrame(() =>
-          this.onDeviceOrientation_(e)
-        );
-      }
-      this.timer_.cancel(checkNoMotion);
+    // Listen for one call before initiating.
+    listenOncePromise(this.win, 'deviceorientation').then(() => {
+      this.gyroscopeControls_ = true;
+      // Debounce onDeviceOrientation_ to rAF.
+      let rafTimeout;
+      this.win.addEventListener('deviceorientation', (e) => {
+        if (this.isReady_ && this.isOnActivePage_) {
+          rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
+          rafTimeout = this.win.requestAnimationFrame(() =>
+            this.onDeviceOrientation_(e)
+          );
+        }
+      });
+      this.maybeShowDiscoveryAnimation_();
     });
+  }
+
+  /**
+   * Only show once per story on first instance of 360 component.
+   * @private
+   */
+  maybeShowDiscoveryAnimation_() {
+    if (
+      this.isOnActivePage_ &&
+      this.gyroscopeControls_ &&
+      !this.element.ownerDocument.querySelector(
+        `.i-amphtml-story-360-discovery`
+      )
+    ) {
+      const page = this.getPage_();
+      const discoveryTemplate = page && buildDiscoveryTemplate(page);
+      this.mutateElement(() => page.appendChild(discoveryTemplate));
+    }
   }
 
   /**
