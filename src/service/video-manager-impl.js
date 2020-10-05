@@ -38,13 +38,7 @@ import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
-import {
-  createCustomEvent,
-  getData,
-  listen,
-  listenOnce,
-  listenOncePromise,
-} from '../event-helper';
+import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
