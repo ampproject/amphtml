@@ -221,5 +221,5 @@ serve.flags = {
   rtv: '  Serve JS from the RTV provided',
   coverage:
     '  Serve instrumented code to collect coverage info; use ' +
-    '--compiled=live to auto-report coverage on page unload',
+    '--coverage=live to auto-report coverage on page unload',
 };
