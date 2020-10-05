@@ -22,7 +22,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as experiments from '../../../../src/experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
