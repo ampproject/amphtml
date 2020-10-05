@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 'use strict';
 

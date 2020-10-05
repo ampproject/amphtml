@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 const {html} = require('./app-index/html');
 

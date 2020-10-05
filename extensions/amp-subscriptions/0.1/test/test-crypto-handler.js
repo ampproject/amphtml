@@ -39,13 +39,10 @@ describes.realWin(
         },
       ],
     };
-    // eslint-disable-next-line max-len
     const encryptedContent =
       '8bCQpCyIBxBHwTZVRaMuA+DGXSTzVHR/Eh/l6QqfvcXQbn5uF/HzL539jw6Ok8+oppqo2eP/H9oqaYCi4Ya50uVFzdTCBzOSTlJDmeXhqO1DIBYHIQTK3z+NweOAJci7aXwSOLtJZd1KrrCesoBjAlQ55GwyPe6xPVcUESjtT15Z7Ez1GSetSE99MIbn8fWjq5CjUZn4q3jDKdNGdM6NZ86lqL5ZsbbUQRQ2dIVExrwS9GuuFsuFi8Eahe3/eZaibZY4PzPuVR6jjCrDrgF5qw+N+uacDumoA5he/1WrHiYHzoV28Xo9yuBBm5JWEcMepoUkQgKVywOFZS4otSR81va9JNwk1F1AIQ4VOqezFE6ce92qbzo+aMVzceZJqPhVqsA=';
-    // eslint-disable-next-line max-len
     const decryptedContent =
       "\n              This is section is top secret.\n              You should only be able to read this if you have the correct permissions.\n              If you don't have the correct permissions, you shouldn't be able to read this section at all.\n            ";
-    // eslint-disable-next-line max-len
     const encryptedKey =
       "ENCRYPT({'AccessRequirements': ['googleAccessRequirements:123'], 'Key':'mSfq5tRx5omXoOX20Oqq8g=='})";
     const decryptedDocKey = 'mSfq5tRx5omXoOX20Oqq8g==';
@@ -130,7 +127,6 @@ describes.realWin(
     });
 
     describe('tryToDecryptDocument', () => {
-      // eslint-disable-next-line max-len
       it('should replace the encrypted content with decrypted content in multiple sections', async () => {
         cryptoHandler = new CryptoHandler(ampdoc);
         await cryptoHandler.tryToDecryptDocument(decryptedDocKey);

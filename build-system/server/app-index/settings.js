@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* eslint-disable indent */
 /* eslint-disable local/html-template */
 const {html, joinFragments} = require('./html');
 
