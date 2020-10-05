@@ -282,6 +282,8 @@ function renderSlides(
   }
 
   offsetRef.current = before.length ? before.length : -after.length;
+  // TODO: If mixedLength is true, it may be necessary to duplicate
+  // slides to guarantee there is enough total width to continue scrolling.
   return (
     <>
       {before}
