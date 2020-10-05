@@ -266,7 +266,7 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {number} */
     this.sceneRoll_ = 0;
 
-    /** @private {?Element} */
+    /** @private {?Element|EventTarget} */
     this.ampVideoEl_ = null;
   }
 
@@ -547,7 +547,7 @@ export class AmpStory360 extends AMP.BaseElement {
    * Scales the image down if neededed.
    * Returns the image element if image is within bounds.
    * If image is out of bounds, returns a scaled canvas element.
-   * @param {!Element} imgEl
+   * @param {Element} imgEl
    * @return {!Element}
    * @private
    */
@@ -573,9 +573,11 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const ampImgEl = this.element.querySelector('amp-img');
+    const ampImgEl = dev().assertElement(this.element.querySelector('amp-img'));
     // Used to update the video in animate_.
-    this.ampVideoEl_ = this.element.querySelector('amp-video');
+    this.ampVideoEl_ = dev().assertElement(
+      this.element.querySelector('amp-video')
+    );
     userAssert(
       ampImgEl || this.ampVideoEl_,
       'amp-story-360 must contain an amp-img or amp-video element.'
@@ -590,8 +592,8 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * @param {Element} ampImgEl
-   * @return {!Promise<!Element>}
+   * @param {!Element} ampImgEl
+   * @return {!Promise}
    * @private
    */
   setupAmpImgRenderer_(ampImgEl) {
@@ -631,7 +633,7 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise<!Element>}
+   * @return {!Promise}
    * @private
    */
   setupAmpVideoRenderer_() {
