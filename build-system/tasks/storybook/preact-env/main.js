@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const custom = require('./webpack.config.js');
+
 // eslint-disable-next-line local/no-module-exports, no-undef
 module.exports = {
   stories: [
@@ -25,4 +27,19 @@ module.exports = {
     '@storybook/addon-viewport/register',
     '@storybook/addon-knobs/register',
   ],
+  async babel(options) {
+    options.presets[0][1].useBuiltIns = false;
+    options.presets[0][1].corejs = undefined;
+    return options;
+  },
+  async webpackFinal(config) {
+    return {
+      ...config,
+      ...custom,
+      module: {
+        ...config.module,
+        rules: custom.module.rules,
+      },
+    };
+  },
 };

@@ -391,12 +391,13 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
     const isShadow = usesShadowDom(Ctor);
     const lightDomTag = isShadow ? null : Ctor['lightDomTag'];
+    const isDetached = Ctor['detached'];
 
     if (!this.container_) {
       const doc = this.win.document;
       if (isShadow) {
         devAssert(
-          !Ctor['detached'],
+          !isDetached,
           'The AMP element cannot be rendered in detached mode ' +
             'when configured with "children", "passthrough", or ' +
             '"passthroughNonEmpty" properties.'
@@ -459,7 +460,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
         this.applyFillContent(container);
-        if (!Ctor['detached']) {
+        if (!isDetached) {
           this.element.appendChild(container);
         }
       }
@@ -519,7 +520,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.
-    if (!isShadow) {
+    if (!isShadow && !isDetached) {
       this.mutateElement(() => {
         this.element.dispatchEvent(
           createCustomEvent(this.win, AmpEvents.DOM_UPDATE, /* detail */ null, {
