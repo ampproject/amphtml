@@ -37,7 +37,6 @@ const PlayerStates = {
  * Icons from Google Material Icons
  * https://material.io/tools/icons
  */
-/*eslint-disable*/
 const icons = {
   'play': `<path d="M8 5v14l11-7z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
@@ -51,8 +50,6 @@ const icons = {
      <path d="M0 0h24v24H0z" fill="none"></path>`,
   'seek': `<circle cx="12" cy="12" r="12" />`,
 };
-
-/*eslint-enable */
 
 const bigPlayDivDisplayStyle = 'table-cell';
 
