@@ -864,11 +864,6 @@ function createBaseCustomElementClass(win) {
       this.classList.remove('i-amphtml-layout-awaiting-size');
     }
 
-    /** The Custom Elements V0 sibling to `connectedCallback`. */
-    attachedCallback() {
-      this.connectedCallback();
-    }
-
     /**
      * Try to upgrade the element with the provided implementation.
      * @private @final
@@ -916,11 +911,6 @@ function createBaseCustomElementClass(win) {
      */
     disconnectedCallback() {
       this.disconnect(/* pretendDisconnected */ false);
-    }
-
-    /** The Custom Elements V0 sibling to `disconnectedCallback`. */
-    detachedCallback() {
-      this.disconnectedCallback();
     }
 
     /**
