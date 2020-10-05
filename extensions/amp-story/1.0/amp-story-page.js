@@ -244,8 +244,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       100
     );
 
-    /** @private {boolean}  */
-    this.isFirstPage_ = false;
+    /** @private {?boolean}  */
+    this.isFirstPage_ = null;
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
@@ -338,12 +338,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /** @override */
-  firstAttachedCallback() {
-    // Only prerender the first story page.
-    this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
-  }
-
-  /** @override */
   buildCallback() {
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
@@ -386,6 +380,17 @@ export class AmpStoryPage extends AMP.BaseElement {
         })
       );
     }
+  }
+
+  /**
+   * Returns true if a child of the first page.
+   * @return {boolean}
+   */
+  isFirstPage() {
+    if (this.isFirstPage_ === null) {
+      this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
+    }
+    return this.isFirstPage_;
   }
 
   /**
@@ -585,7 +590,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
     if (
-      !this.isFirstPage_ ||
+      !this.isFirstPage() ||
       (this.layoutBox_ &&
         this.layoutBox_.width === layoutBox.width &&
         this.layoutBox_.height === layoutBox.height)
@@ -836,7 +841,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.isFirstPage_;
+    return this.isFirstPage();
   }
 
   /**
