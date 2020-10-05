@@ -547,7 +547,7 @@ export class AmpStory360 extends AMP.BaseElement {
    * Scales the image down if neededed.
    * Returns the image element if image is within bounds.
    * If image is out of bounds, returns a scaled canvas element.
-   * @param {Element} imgEl
+   * @param {!Element} imgEl
    * @return {!Element}
    * @private
    */
