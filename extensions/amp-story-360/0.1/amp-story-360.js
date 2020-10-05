@@ -574,7 +574,7 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
-    // This reference is used to update the video into the renderer.
+    // Used to update the video in animate_.
     this.ampVideoEl_ = this.element.querySelector('amp-video');
     userAssert(
       ampImgEl || this.ampVideoEl_,
