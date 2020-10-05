@@ -27,6 +27,7 @@ var BaseCarouselDef = {};
  *   controls: (string|undefined),
  *   loop: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
+ *   mixedLength: (boolean|undefined),
  *   snap: (boolean|undefined),
  *   snapAlign: (string|undefined),
  * }}
