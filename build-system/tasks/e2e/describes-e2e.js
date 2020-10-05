@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 // import to install chromedriver and geckodriver
-require('chromedriver'); // eslint-disable-line no-unused-vars
-require('geckodriver'); // eslint-disable-line no-unused-vars
+require('chromedriver');
+require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');

@@ -38,7 +38,6 @@ describes.realWin(
     let win;
     let element;
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const styles = useStyles();
 
     async function getSlideWrappersFromShadow() {
