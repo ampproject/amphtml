@@ -46,7 +46,7 @@ async function main() {
     timedExecOrDie('gulp update-packages');
 
     try {
-      timedExecOrThrow('gulp e2e --nobuild --headless --compiled');
+      timedExecOrThrow('gulp e2e --nobuild --headless --compiled --report');
     } catch (e) {
       if (e.status) {
         process.exitCode = e.status;
