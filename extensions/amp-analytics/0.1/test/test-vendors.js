@@ -218,7 +218,6 @@ function getAnalyticsTag(doc, vendor) {
   doc.body.appendChild(el);
   el.connectedCallback();
   const analytics = new AmpAnalytics(el);
-  analytics.createdCallback();
   analytics.buildCallback();
   return analytics;
 }

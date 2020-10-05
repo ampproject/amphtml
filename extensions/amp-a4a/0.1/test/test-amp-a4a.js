@@ -780,8 +780,6 @@ describe('amp-a4a', () => {
       a4aElement = createA4aElement(doc);
       a4a = new MockA4AImpl(a4aElement);
       a4a.releaseType_ = '0';
-      a4a.createdCallback();
-      a4a.firstAttachedCallback();
       a4a.buildCallback();
       expect(onCreativeRenderSpy).to.not.be.called;
     });

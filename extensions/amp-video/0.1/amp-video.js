@@ -86,8 +86,8 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.muted_ = false;
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = false;
+    /** @private {?boolean} */
+    this.prerenderAllowed_ = null;
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
@@ -111,18 +111,6 @@ class AmpVideo extends AMP.BaseElement {
         opt_onLayout
       );
     });
-  }
-
-  /**
-   * @override
-   */
-  firstAttachedCallback() {
-    // Only allow prerender if video sources are cached on CDN, or if video has
-    // a poster image. Set this value in `firstAttachedCallback` since
-    // `buildCallback` is too late and the element children may not be available
-    // in the constructor.
-    const posterAttr = this.element.getAttribute('poster');
-    this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
   }
 
   /**
@@ -161,6 +149,12 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   prerenderAllowed() {
+    // Only allow prerender if video sources are cached on CDN, or if video has
+    // a poster image.
+    if (this.prerenderAllowed_ == null) {
+      const posterAttr = this.element.getAttribute('poster');
+      this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
+    }
     return this.prerenderAllowed_;
   }
 
