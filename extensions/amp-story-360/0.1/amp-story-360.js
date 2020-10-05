@@ -266,7 +266,7 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {number} */
     this.sceneRoll_ = 0;
 
-    /** @private {?Element|EventTarget} */
+    /** @private {?Element|?EventTarget} */
     this.ampVideoEl_ = null;
   }
 
@@ -637,12 +637,14 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   setupAmpVideoRenderer_() {
-    return whenUpgradedToCustomElement(this.ampVideoEl_)
+    return whenUpgradedToCustomElement(dev().assertElement(this.ampVideoEl_))
       .then(() => {
         return this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END);
       })
       .then(() => {
-        return listenOncePromise(this.ampVideoEl_, 'playing');
+        return (
+          this.ampVideoEl_ && listenOncePromise(this.ampVideoEl_, 'playing')
+        );
       })
       .then(
         () => {
