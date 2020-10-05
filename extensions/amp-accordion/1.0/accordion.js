@@ -21,6 +21,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from '../../../src/preact';
@@ -30,7 +31,7 @@ const AccordionContext = Preact.createContext(
 );
 
 /** @type {!Object<string, boolean>} */
-const EMPTY_EXPANDED_SET = {};
+const EMPTY_EXPANDED_MAP = {};
 
 const generateSectionId = sequentialIdGenerator();
 
@@ -44,47 +45,42 @@ export function Accordion({
   children,
   ...rest
 }) {
-  const [expandedSet, setExpandedSet] = useState(EMPTY_EXPANDED_SET);
+  const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
 
   useEffect(() => {
     if (!expandSingleSection) {
       return;
     }
-    setExpandedSet((expandedSet) => {
-      const newExpandedSet = {};
+    setExpandedMap((expandedMap) => {
+      const newExpandedMap = {};
       let expanded = 0;
-      for (const k in expandedSet) {
-        newExpandedSet[k] = expandedSet[k] && expanded++ == 0;
+      for (const k in expandedMap) {
+        newExpandedMap[k] = expandedMap[k] && expanded++ == 0;
       }
-      return newExpandedSet;
+      return newExpandedMap;
     });
   }, [expandSingleSection]);
 
-  const registerSection = useCallback((id) => {
-    return () => setExpandedSet((expandedSet) => omit(expandedSet, id));
-  }, []);
-
-  const toggleExpanded = useCallback(
+  const registerSection = useCallback(
     (id, defaultExpanded) => {
-      setExpandedSet((expandedSet) => {
-        const newValue = !isExpanded(
+      setExpandedMap((expandedMap) => {
+        return setExpanded(
           id,
           defaultExpanded,
-          expandedSet,
+          expandedMap,
           expandSingleSection
         );
-        let newExpandedSet;
-        if (newValue && expandSingleSection) {
-          newExpandedSet = {[id]: newValue};
-          for (const k in expandedSet) {
-            if (k != id) {
-              newExpandedSet[k] = false;
-            }
-          }
-        } else {
-          newExpandedSet = {...expandedSet, [id]: newValue};
-        }
-        return newExpandedSet;
+      });
+      return () => setExpandedMap((expandedMap) => omit(expandedMap, id));
+    },
+    [expandSingleSection]
+  );
+
+  const toggleExpanded = useCallback(
+    (id) => {
+      setExpandedMap((expandedMap) => {
+        const newValue = !expandedMap[id];
+        return setExpanded(id, newValue, expandedMap, expandSingleSection);
       });
     },
     [expandSingleSection]
@@ -95,10 +91,9 @@ export function Accordion({
       /** @type {!AccordionDef.ContextProps} */ ({
         registerSection,
         toggleExpanded,
-        isExpanded: (id, defaultExpanded) =>
-          isExpanded(id, defaultExpanded, expandedSet, expandSingleSection),
+        isExpanded: (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
       }),
-    [expandedSet, expandSingleSection, registerSection, toggleExpanded]
+    [expandedMap, registerSection, toggleExpanded]
   );
 
   return (
@@ -112,22 +107,24 @@ export function Accordion({
 
 /**
  * @param {string} id
- * @param {boolean} defaultExpanded
- * @param {!Object<string, boolean>} expandedSet
+ * @param {boolean} value
+ * @param {!Object<string, boolean>} expandedMap
  * @param {boolean} expandSingleSection
- * @return {boolean}
+ * @return {!Object<string, boolean>}
  */
-function isExpanded(id, defaultExpanded, expandedSet, expandSingleSection) {
-  const current = expandedSet[id];
-  if (current != null) {
-    return current;
+function setExpanded(id, value, expandedMap, expandSingleSection) {
+  let newExpandedMap;
+  if (expandSingleSection && value) {
+    newExpandedMap = {[id]: value};
+    for (const k in expandedMap) {
+      if (k != id) {
+        newExpandedMap[k] = false;
+      }
+    }
+  } else {
+    newExpandedMap = {...expandedMap, [id]: value};
   }
-  const adjDefaultExpanded = expandSingleSection
-    ? Object.values(expandedSet).includes(true)
-      ? false
-      : defaultExpanded
-    : defaultExpanded;
-  return adjDefaultExpanded;
+  return newExpandedMap;
 }
 
 /**
@@ -150,18 +147,19 @@ export function AccordionSection({
     AccordionContext
   );
 
-  useEffect(() => registerSection && registerSection(id), [
-    registerSection,
-    id,
-  ]);
+  useLayoutEffect(() => {
+    if (registerSection) {
+      registerSection(id, defaultExpanded);
+    }
+  }, [registerSection, id, defaultExpanded]);
 
   const expandHandler = useCallback(() => {
     if (toggleExpanded) {
-      toggleExpanded(id, defaultExpanded);
+      toggleExpanded(id);
     } else {
       setExpandedState((prev) => !prev);
     }
-  }, [id, toggleExpanded, defaultExpanded]);
+  }, [id, toggleExpanded]);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
 

@@ -117,5 +117,33 @@ describes.realWin(
         'only one element stays expanded'
       );
     });
+
+    it('should expand and collapse on attribute change', async () => {
+      const sections = element.children;
+
+      sections[1].setAttribute('expanded', '');
+      await waitForExpanded(sections[1], true);
+
+      expect(sections[0]).to.have.attribute('expanded');
+      expect(sections[0].lastElementChild).to.have.display('block');
+
+      expect(sections[1]).to.have.attribute('expanded');
+      expect(sections[1].lastElementChild).to.have.display('block');
+
+      expect(sections[2]).to.not.have.attribute('expanded');
+      expect(sections[2].lastElementChild).to.have.display('none');
+
+      sections[0].removeAttribute('expanded');
+      await waitForExpanded(sections[0], false);
+
+      expect(sections[0]).to.not.have.attribute('expanded');
+      expect(sections[0].lastElementChild).to.have.display('none');
+
+      expect(sections[1]).to.have.attribute('expanded');
+      expect(sections[1].lastElementChild).to.have.display('block');
+
+      expect(sections[2]).to.not.have.attribute('expanded');
+      expect(sections[2].lastElementChild).to.have.display('none');
+    });
   }
 );
