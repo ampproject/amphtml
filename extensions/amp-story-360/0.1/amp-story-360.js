@@ -573,11 +573,10 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const ampImgEl = dev().assertElement(this.element.querySelector('amp-img'));
+    const ampImgEl = this.element.querySelector('amp-img');
     // Used to update the video in animate_.
-    this.ampVideoEl_ = dev().assertElement(
-      this.element.querySelector('amp-video')
-    );
+    this.ampVideoEl_ = this.element.querySelector('amp-video');
+
     userAssert(
       ampImgEl || this.ampVideoEl_,
       'amp-story-360 must contain an amp-img or amp-video element.'
