@@ -83,57 +83,6 @@ export function installStylesForDoc(
 }
 
 /**
- * Adds the given css text to the given document.
- * TODO(dvoytenko, #22733): Remove this method once FIE/ampdoc migration is
- * done.
- *
- * @param {!Document} doc The document that should get the new styles.
- * @param {string} cssText
- * @param {?function(!Element)|undefined} cb Called when the new styles are
- *     available. Not using a promise, because this is synchronous when
- *     possible. for better performance.
- * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
- *     as the first element in head and all style elements will be positioned
- *     after.
- * @param {string=} opt_ext
- * @return {!Element}
- */
-export function installStylesLegacy(
-  doc,
-  cssText,
-  cb,
-  opt_isRuntimeCss,
-  opt_ext
-) {
-  const style = insertStyleElement(
-    dev().assertElement(doc.head),
-    cssText,
-    opt_isRuntimeCss || false,
-    opt_ext || null
-  );
-
-  if (cb) {
-    // Styles aren't always available synchronously. E.g. if there is a
-    // pending style download, it will have to finish before the new
-    // style is visible.
-    // For this reason we poll until the style becomes available.
-    // Sync case.
-    if (styleLoaded(doc, style)) {
-      cb(style);
-      return style;
-    }
-    // Poll until styles are available.
-    const interval = setInterval(() => {
-      if (styleLoaded(doc, style)) {
-        clearInterval(interval);
-        cb(style);
-      }
-    }, 4);
-  }
-  return style;
-}
-
-/**
  * Creates the properly configured style element.
  * @param {!Element|!ShadowRoot} cssRoot
  * @param {string} cssText
