@@ -251,7 +251,6 @@ describes.sandboxed('amp-img', {}, (env) => {
       el.getPlaceholder = sandbox.stub();
       el.getLayoutWidth = () => 100;
       impl = new AmpImg(el);
-      impl.createdCallback();
       el.toggleFallback = function () {};
       el.togglePlaceholder = function () {};
       toggleFallbackSpy = sandbox.spy(el, 'toggleFallback');
@@ -383,7 +382,6 @@ describes.sandboxed('amp-img', {}, (env) => {
     el.setAttribute('height', 100);
     el.setAttribute('noprerender', '');
     const impl = new AmpImg(el);
-    impl.firstAttachedCallback();
     expect(impl.prerenderAllowed()).to.equal(false);
   });
 
@@ -603,7 +601,6 @@ describes.sandboxed('amp-img', {}, (env) => {
       el.getPlaceholder = sandbox.stub();
       el.getLayoutWidth = () => layoutWidth;
       const impl = new AmpImg(el);
-      impl.createdCallback();
       sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
       el.toggleFallback = function () {};
       el.togglePlaceholder = function () {};
