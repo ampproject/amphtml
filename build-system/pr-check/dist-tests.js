@@ -47,7 +47,9 @@ function main() {
     timedExecOrDie('gulp update-packages');
 
     try {
-      timedExecOrThrow('gulp integration --nobuild --headless --compiled');
+      timedExecOrThrow(
+        'gulp integration --nobuild --headless --compiled --report'
+      );
     } catch (e) {
       if (e.status) {
         process.exitCode = e.status;
