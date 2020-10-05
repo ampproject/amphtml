@@ -30,7 +30,7 @@ limitations under the License.
 
 [tip type="important"]Change image sources to ampproject/amphtml/master!!![/tip]
 
-The amp-story-interactive component provides a set of experiences, such as quizzes or polls, for users in [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories). Interactive experiences provided by amp-story-interactive can integrate into tools or editors and support analytics.
+The `amp-story-interactive` component provides a set of experiences, such as quizzes or polls, in [Web Stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories).
 
 <div layout="container" width="3" height="2">
 <div style="width:32%;display:inline-block"><amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
@@ -40,7 +40,7 @@ The amp-story-interactive component provides a set of experiences, such as quizz
 
 ## Usage
 
-The amp-story-interactive component encompasses a set of interactive experiences. Specify an interactive experience by defining one of the elements below. For best results, only use one element per amp-story-page.
+The amp-story-interactive component encompasses a set of interactive experiences. Specify an interactive experience by defining one of the elements below. For best results, only use one element per [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
 
 Most elements require a backend endpoint that will store aggregate data for each interactive, as well as persist the selected option for a user across sessions. Elements will fetch the percentage of votes for each option as well as the user selection (if any) from this endpoint, and display it with the options after the user has selected one.
 
@@ -131,7 +131,7 @@ The interactive experience elements from `amp-story-interactive` share an API la
 
 ### id (required for binary-poll, poll, quiz)
 
-Element ID that identifies the interactive component in the story, and is used to compose the [`interactiveId`](#interactiveId) that is sent to the backend. Should be unique for each component in the story.
+Element ID that identifies the interactive component in the story. Used to compose the [`interactiveId`](#interactiveId) sent to the backend. Should be unique for each component in the story.
 
 ### endpoint (required for binary-poll, poll, quiz)
 
@@ -152,7 +152,9 @@ Adds a prompt to the top of the component. Use `prompt-text` to write the poll/q
 
 ### prompt-size (optional for binary-poll, poll, quiz)
 
-Controls the `font-size` of the prompt text, so it only applies for elements that have prompts. Can be `small` (), `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
+Controls the `font-size` of prompt text. Can be `small`, `medium` (default), `large`. Large prompts will hold up to 3 lines of text, other sizes will hold up to 4 lines of text.
+
+This attribute does not apply styling to `amp-story-interactive-result` category prefix text.
 
 ### option-{1/2/3/4}-text (required)
 
@@ -162,17 +164,17 @@ The `amp-story-interactive-result` element uses this string value as category de
 
 ### option-{1/2/3/4}-confetti (optional for binary-poll, poll, quiz)
 
-Emoji that bursts in an explosion animation when an option is selected. On quizzes, only the correct option should have a confetti.
+Emoji that bursts in an explosion animation when selecting an options. On quizzes, only the correct option should have a confetti.
 
 ### option-{1/2/3/4}-results-category (optional for poll, required for results)
 
-On the results component, this attribute represents the name of the category, shown in larger text after the `prompt-text` and before the category description. If the results element doesn't specify thresholds, the category strategy will be used: the category with more options selected in polls across the story will be shown.
+The name of the category on the `amp-story-interactive-results` element. Shows in large text after the `prompt-text` and before the category description. It displays category with the most options selected in polls from the entire story if `option-{1/2/3/4}-results-threshold` is not defined. 
 
-On polls it links the options to the result with that name as mentioned above. The string has to match perfectly for the options to be linked.
+On polls it links the options to the result with that name as mentioned above. The string has to match perfectly for the options to link.
 
 ### option-{1/2/3/4}-results-threshold (optional for results)
 
-On the results element, it determines the lower boundary for the category when linked to quizzes. The component will calculate the score as a percentage of questions answered correctly (between 0 and 100), and it will show the category that has the best lower threshold that matches the score. The best threshold is the highest one that is lower or equal to the score, or the lowest score if all thresholds are higher than the score. If a threshold is present for any option, all other options also need a threshold.
+Determines the lower boundary for the `amp-story-interactive-results` category when linked to quiz elements. The component calculates a score from a percentage (between 0 and 100) of questions answered correctly. It displays the category that is lower or equal to the score. If all thresholds are higher than the score, it displays the category with the lowest score.  If a threshold is present for any option, all other options also need a threshold. 
 
 ## Aggregate data source
 
@@ -225,7 +227,7 @@ Before setting up a backend, consider if the already existing backends satisfy y
 View all theming options in action in the [example story](https://amp.dev/documentation/examples/components/amp-story-interactive-poll/story#page=title-themes).
 
 [tip type="read-on"]
-Check this [Codepen collection](https://codepen.io/collection/DEGRLE) to play with the components and styles.
+View and play with `amp-story-interactive` elements and styles in this [Codepen collection](https://codepen.io/collection/DEGRLE)!
 [/tip]
 
 ### CSS Variables
@@ -279,10 +281,9 @@ Polls will also adapt the font-size of the options depending on the content. If 
 
 For a live demo, check out the [binary-poll](https://codepen.io/mszylkowski/pen/oNxogoV) and [poll](https://codepen.io/mszylkowski/pen/ZEWaBoZ) Codepens, and change the option texts (be sure to select "Answered" on the binary-poll demo to see the size change).
 
-## Animations
+### Animations
 
-The designs provide a subtle animation on page-enter that enhances the interactivity aspect of the component. Transitioning animations also triggered when an option is selected to show the aggregate data.
-To add entering animations, [amp-story animations](https://amp.dev/documentation/components/amp-story/?format=stories#animation-attributes) `animate-in` attributes can be added to all elements.
+Enhance interactivity by adding an animation to the element when entering the page or when transitioning from option selection to data display. Pick from the [`amp-story` animations](https://amp.dev/documentation/components/amp-story/?format=stories#animation-attributes) and add the `animate-in` attribute to desired elements.
 
 ## Analytics
 
