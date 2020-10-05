@@ -31,7 +31,6 @@ import {
 import {Signals} from '../../src/utils/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {setParentWindow} from '../../src/service';
-import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 import {waitFor} from '../../testing/test-helper';
 
 describes.realWin('AmpDocService', {}, (env) => {
@@ -310,7 +309,6 @@ describes.realWin('AmpDocService', {}, (env) => {
     let host, shadowRoot, content;
 
     beforeEach(() => {
-      toggleAmpdocFieForTesting(win, true);
       service = new AmpDocService(win, /* isSingleDoc */ true);
       content = doc.createElement('amp-img');
       host = doc.createElement('div');
@@ -327,7 +325,6 @@ describes.realWin('AmpDocService', {}, (env) => {
     });
 
     afterEach(() => {
-      toggleAmpdocFieForTesting(win, false);
       if (host.parentNode) {
         host.parentNode.removeChild(host);
       }
