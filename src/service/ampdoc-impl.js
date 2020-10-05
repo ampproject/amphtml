@@ -18,6 +18,7 @@ import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Signals} from '../utils/signals';
 import {VisibilityState} from '../visibility-state';
+import {WindowInterface} from '../window-interface';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
@@ -27,11 +28,9 @@ import {dev, devAssert} from '../log';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {isInAmpdocFieExperiment} from '../ampdoc-fie';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
-import {WindowInterface} from '../window-interface';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -88,8 +87,9 @@ export class AmpDocService {
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
 
+    // QQQQQQ: collect completely.
     /** @private {boolean} */
-    this.ampdocFieExperimentOn_ = isInAmpdocFieExperiment(win);
+    this.ampdocFieExperimentOn_ = true;
 
     /** @private {boolean} */
     this.mightHaveShadowRoots_ = !isSingleDoc;

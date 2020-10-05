@@ -16,6 +16,7 @@
 
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
+import {WindowInterface} from '../../../src/window-interface';
 import {
   addDataAndJsonAttributes_,
   applySandbox,
@@ -33,7 +34,6 @@ import {
 } from '../../../src/3p-frame-messaging';
 import {dev} from '../../../src/log';
 import {toggleExperiment} from '../../../src/experiments';
-import {WindowInterface} from '../../../src/window-interface';
 
 describes.realWin('3p-frame', {amp: true}, (env) => {
   let window, document;
@@ -225,7 +225,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
               'version': '$internalRuntimeVersion$',
               'esm': false,
             },
-            'canary': false,//QQQQQ: true
+            'canary': false, //QQQQQ: true
             'hidden': false,
             // Note that DOM fingerprint will change if the document DOM changes
             // Note also that running it using --files uses different DOM.
@@ -665,7 +665,9 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           expect(errorStub).to.be.calledOnce;
 
           expect(
-            deserializeMessage('amp-{"type":"msgtype"|"sentinel":"msgsentinel"}')
+            deserializeMessage(
+              'amp-{"type":"msgtype"|"sentinel":"msgsentinel"}'
+            )
           ).to.be.null;
           expect(errorStub).to.be.calledTwice;
         });
