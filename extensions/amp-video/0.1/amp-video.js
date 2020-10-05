@@ -362,7 +362,7 @@ class AmpVideo extends AMP.BaseElement {
         }
         throw reason;
       })
-      .then(() => this.onVideoLoaded());
+      .then(() => this.onVideoLoaded_());
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
@@ -619,17 +619,11 @@ class AmpVideo extends AMP.BaseElement {
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
     // When source changes, video needs to trigger loaded again.
-    this.loadPromise(this.video_).then(() => this.onVideoLoaded());
+    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
   }
 
-  /**
-   * Once the video is loaded with the correct source,
-   * dispatch the `VideoEvents.LOAD` event.
-   *
-   * This should be called either by amp-video
-   * or a component that manages this one (i.e. amp-story).
-   */
-  onVideoLoaded() {
+  /** @private */
+  onVideoLoaded_() {
     this.element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
