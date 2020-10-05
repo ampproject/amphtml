@@ -84,16 +84,16 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
 /**
  * Generates the template for the gyroscope feature discovery animation.
  *
- * NOTE: i-amphtml-story-360-discovery is used in maybeShowDiscoveryAnimation_ and must
- * be changed in both places if updated.
+ * NOTE: i-amphtml-story-360-discovery is used in maybeShowDiscoveryAnimation_
+ * and must be changed in both places if updated.
  *
  * @param {!Element} element
  * @return {!Element}
  */
 const buildDiscoveryTemplate = (element) => htmlFor(element)`
-    <div class="i-amphtml-story-360-discovery">
+    <div class="i-amphtml-story-360-discovery" aria-live="polite">
       <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-discovery-text">
+      <span class="i-amphtml-story-360-discovery-text" aria-hidden="true">
         Move device to explore
       </span>
     </div>
