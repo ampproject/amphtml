@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 /* eslint-disable require-jsdoc */
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
