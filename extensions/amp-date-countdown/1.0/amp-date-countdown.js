@@ -55,28 +55,29 @@ class AmpDateCountdown extends PreactBaseElement {
     const templates =
       this.templates_ || (this.templates_ = Services.templatesFor(this.win));
     const template = templates.maybeFindTemplate(this.element);
-    if (template != this.template_) {
-      this.template_ = template;
-      if (template) {
-        // Only overwrite `render` when template is ready to minimize FOUC.
-        templates.whenReady(template).then(() => {
-          if (template != this.template_) {
-            // A new template has been set while the old one was initializing.
-            return;
-          }
-          this.mutateProps(
-            dict({
-              'render': (data) => {
-                return templates
-                  .renderTemplateAsString(dev().assertElement(template), data)
-                  .then((html) => dict({'__html': html}));
-              },
-            })
-          );
-        });
-      } else {
-        this.mutateProps(dict({'render': null}));
-      }
+    if (template === this.template_) {
+      return;
+    }
+    this.template_ = template;
+    if (template) {
+      // Only overwrite `render` when template is ready to minimize FOUC.
+      templates.whenReady(template).then(() => {
+        if (template != this.template_) {
+          // A new template has been set while the old one was initializing.
+          return;
+        }
+        this.mutateProps(
+          dict({
+            'render': (data) => {
+              return templates
+                .renderTemplateAsString(dev().assertElement(template), data)
+                .then((html) => dict({'__html': html}));
+            },
+          })
+        );
+      });
+    } else {
+      this.mutateProps(dict({'render': null}));
     }
   }
 
@@ -128,7 +129,7 @@ AmpDateCountdown['props'] = {
 export function parseDateAttrs(element) {
   const epoch = userAssert(
     parseEpoch(element),
-    `One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds` +
+    `One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds ` +
       `is required. ${TAG}`
   );
 

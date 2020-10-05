@@ -62,7 +62,7 @@ const DEFAULT_RENDER = (data) =>
   /** @type {string} */ (`${data['days']} ${data['dd']}, ` +
     `${data['hours']} ${data['hh']}, ` +
     `${data['minutes']} ${data['mm']}, ` +
-    `${data['seconds']} ${data['ss']}, `);
+    `${data['seconds']} ${data['ss']}`);
 
 /**
  * @param {!DateCountdownPropsDef} props
@@ -114,6 +114,7 @@ export function DateCountdown({
     return () => win.clearInterval(interval);
   }, [playable, epoch, whenEnded]);
 
+  console.log(data);
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
