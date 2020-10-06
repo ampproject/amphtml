@@ -37,13 +37,10 @@ const OBSERVER_OPTIONS = {
 export class HiddenObserver {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_root
    */
-  constructor(ampdoc, opt_root) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!Document|!ShadowRoot} */
-    this.root_ = opt_root || ampdoc.getRootNode();
+    this.root_ = ampdoc.getRootNode();
     const doc = this.root_.ownerDocument || this.root_;
 
     /** @const {!Window} */
