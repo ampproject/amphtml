@@ -36,7 +36,7 @@ import {
  * @return {PreactDef.Renderable}
  */
 function BaseCarouselWithRef(
-  {arrowPrev, arrowNext, children, loop, onSlideChange, ...rest},
+  {arrowPrev, arrowNext, children, loop, snap = true, onSlideChange, ...rest},
   ref
 ) {
   const childrenArray = toChildArray(children);
@@ -86,6 +86,7 @@ function BaseCarouselWithRef(
         loop={loop}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
+        snap={snap}
         ref={scrollRef}
       >
         {/*

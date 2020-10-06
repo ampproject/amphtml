@@ -26,6 +26,7 @@ var BaseCarouselDef = {};
  *   children: (!PreactDef.Renderable),
  *   loop: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
+ *   snap: (boolean|undefined),
  * }}
  */
 BaseCarouselDef.Props;

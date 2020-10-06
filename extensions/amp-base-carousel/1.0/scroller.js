@@ -42,7 +42,10 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @return {PreactDef.Renderable}
  * @template T
  */
-function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
+function ScrollerWithRef(
+  {children, loop, restingIndex, setRestingIndex, snap},
+  ref
+) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
   useImperativeHandle(ref, () => ({
@@ -143,6 +146,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       ref={containerRef}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
+      snap={String(snap)}
       tabindex={0}
     >
       {slides}

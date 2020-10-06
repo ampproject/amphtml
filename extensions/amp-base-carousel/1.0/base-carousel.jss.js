@@ -85,6 +85,11 @@ const slideElement = {
   justifyContent: 'center',
   scrollSnapAlign: 'start',
   scrollSnapStop: 'always',
+  '[snap="false"] > &': {
+    scrollSnapStop: 'none',
+    scrollSnapAlign: 'none',
+    scrollSnapCoordinate: 'none',
+  },
 };
 
 /** Slides only have one child */

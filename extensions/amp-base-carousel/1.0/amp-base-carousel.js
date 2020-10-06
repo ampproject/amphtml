@@ -28,6 +28,21 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
+/**
+ * The boolean attribute value as resolved by string equality with "true" or "false".
+ * If the attribute is not present, default as given.
+ *
+ * @param {!Element} element
+ * @param {string} attr
+ * @param {boolean} defaultValue
+ * @return {boolean}
+ */
+function parseStrBoolAttr(element, attr, defaultValue) {
+  return element.hasAttribute(attr)
+    ? element.getAttribute(attr) === 'true'
+    : defaultValue;
+}
+
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
@@ -87,7 +102,14 @@ AmpBaseCarousel['children'] = {
 
 /** @override */
 AmpBaseCarousel['props'] = {
-  'loop': {attr: 'loop', type: 'boolean'},
+  'loop': {
+    attrs: ['loop'],
+    parseAttrs: (element) => parseStrBoolAttr(element, 'loop', true),
+  },
+  'snap': {
+    attrs: ['snap'],
+    parseAttrs: (element) => parseStrBoolAttr(element, 'snap', true),
+  },
 };
 
 /** @override */
