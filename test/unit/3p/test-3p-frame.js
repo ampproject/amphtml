@@ -207,6 +207,7 @@ describe
             'test': false,
             'version': '$internalRuntimeVersion$',
             'esm': false,
+            'sxg': false,
           },
           'canary': true,
           'hidden': false,
