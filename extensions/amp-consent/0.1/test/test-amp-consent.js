@@ -97,9 +97,6 @@ describes.realWin(
         get: (name) => {
           return Promise.resolve(storageValue[name]);
         },
-        getUnexpiredValue: () => {
-          return Promise.resolve();
-        },
         set: (name, value) => {
           storageValue[name] = value;
           return Promise.resolve();

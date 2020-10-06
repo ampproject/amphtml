@@ -267,7 +267,7 @@ export class GlobalVariableSource extends VariableSource {
         }
         return clientIds[scope];
       },
-      (scope, opt_userNotificationId, opt_cookieName, opt_optOutBackup) => {
+      (scope, opt_userNotificationId, opt_cookieName, opt_disableBackup) => {
         userAssert(
           scope,
           'The first argument to CLIENT_ID, the fallback' +
@@ -287,13 +287,13 @@ export class GlobalVariableSource extends VariableSource {
         }
         return Services.cidForDoc(this.ampdoc)
           .then((cid) => {
-            opt_optOutBackup = opt_optOutBackup == 'true' ? true : false;
+            opt_disableBackup = opt_disableBackup == 'true' ? true : false;
             return cid.get(
               {
                 /** @type {string} */ scope,
                 createCookieIfNotPresent: true,
                 cookieName: opt_cookieName || undefined,
-                optOutBackup: opt_optOutBackup,
+                disableBackup: opt_disableBackup,
               },
               consent
             );

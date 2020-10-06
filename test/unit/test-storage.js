@@ -32,6 +32,7 @@ describes.sandboxed('Storage', {}, (env) => {
   let windowApi;
   let ampdoc;
   let viewerBroadcastHandler;
+  let clock;
 
   // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
@@ -314,10 +315,7 @@ describes.sandboxed('Storage', {}, (env) => {
       });
 
       it('should get unexpired value based on duration', async () => {
-        const dateStub = env.sandbox.stub(Date, 'now');
-        dateStub.onCall(0).returns(0);
-        dateStub.returns(6);
-
+        clock = env.sandbox.useFakeTimers();
         const store1 = new Store({});
         store1.set('key1', 'value1');
         expect(store1.values_).to.deep.equal({
@@ -352,8 +350,9 @@ describes.sandboxed('Storage', {}, (env) => {
           )
           .once();
 
-        expect(await storage.getUnexpiredValue('key1', 10)).to.equal('value1');
-        expect(await storage.getUnexpiredValue('key1', 5)).to.be.undefined;
+        expect(await storage.get('key1', 10)).to.equal('value1');
+        clock.tick(100);
+        expect(await storage.get('key1', 5)).to.be.undefined;
       });
 
       it('should react to reset messages', () => {

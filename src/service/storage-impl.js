@@ -76,33 +76,11 @@ export class Storage {
    * Returns the promise that yields the value of the property for the specified
    * key.
    * @param {string} name
+   * @param {number=} opt_duration
    * @return {!Promise<*>}
    */
-  get(name) {
-    return this.getStore_().then((store) => store.get(name));
-  }
-
-  /**
-   * Returns the promise that yields the value of the property for the specified
-   * key, as long as it has a valid expiration.
-   * @param {string} name
-   * @param {number} duration
-   * @return {!Promise<*>}
-   */
-  getUnexpiredValue(name, duration) {
-    return this.getStore_().then((store) => {
-      return Promise.all([store.get(name), store.getTimestamp(name)]).then(
-        (results) => {
-          const value = results[0];
-          const timestamp = results[1];
-          const now = Date.now();
-          if (timestamp != undefined && timestamp + duration > now) {
-            return value;
-          }
-          return;
-        }
-      );
-    });
+  get(name, opt_duration) {
+    return this.getStore_().then((store) => store.get(name, opt_duration));
   }
 
   /**
@@ -246,22 +224,19 @@ export class Store {
 
   /**
    * @param {string} name
+   * @param {number|undefined} opt_duration
    * @return {*|undefined}
    */
-  get(name) {
+  get(name, opt_duration) {
     // The structure is {key: {v: *, t: time}}
     const item = this.values_[name];
-    return item ? item['v'] : undefined;
-  }
-
-  /**
-   * @param {string} name
-   * @return {number|undefined}
-   */
-  getTimestamp(name) {
-    // The structure is {key: {v: *, t: time}}
-    const item = this.values_[name];
-    return item ? item['t'] : undefined;
+    const timestamp = item ? item['t'] : undefined;
+    const isNotExpired =
+      opt_duration && timestamp != undefined
+        ? timestamp + opt_duration > Date.now()
+        : true;
+    const value = item && isNotExpired ? item['v'] : undefined;
+    return value;
   }
 
   /**

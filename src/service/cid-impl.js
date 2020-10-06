@@ -51,6 +51,8 @@ const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
 
 const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptOut';
 
+const CID_BACKUP_STORAGE_KEY = 'amp-cid:';
+
 /**
  * Tag for debug logging.
  * @const @private {string}
@@ -90,13 +92,13 @@ let BaseCidInfoDef;
  * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
  *   Default value is `false`.
  * - cookieName: Name of the cookie to be used if defined for non-proxy case.
- * - optOutBackup: Whether CID should not be backed up in Storage.
+ * - disableBackup: Whether CID should not be backed up in Storage.
  *   Default value is `false`.
  * @typedef {{
  *   scope: string,
  *   createCookieIfNotPresent: (boolean|undefined),
  *   cookieName: (string|undefined),
- *   optOutBackup: (boolean|undefined),
+ *   disableBackup: (boolean|undefined),
  * }}
  */
 let GetCidDef;
@@ -410,49 +412,38 @@ function setCidBackup(ampdoc, cookieName, cookie) {
  * @return {string}
  */
 function getStorageKey(cookieName) {
-  return 'amp-cid:' + cookieName;
+  return CID_BACKUP_STORAGE_KEY + cookieName;
 }
 
 /**
  * Maybe gets the CID from cookie or, if allowed, gets backup CID
- * from Storage and checks validitiy.
+ * from Storage.
  * @param {!Cid} cid
  * @param {!GetCidDef} getCidStruct
- * @return {!Promise<?string|undefined>}
+ * @return {!Promise<?string>}
  */
 function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
   const {ampdoc, isBackupCidExpOn} = cid;
   const {win} = ampdoc;
-  const {optOutBackup, scope} = getCidStruct;
+  const {disableBackup, scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
   const existingCookie = getCookie(win, cookieName);
 
   if (existingCookie) {
-    // If we created the cookie, update it's expiration time.
-    if (/^amp-/.test(existingCookie)) {
-      setCidCookie(win, cookieName, existingCookie);
-
-      if (isBackupCidExpOn && !optOutBackup) {
-        setCidBackup(ampdoc, cookieName, existingCookie);
-      }
-    }
     return Promise.resolve(existingCookie);
   }
-  if (isBackupCidExpOn && !optOutBackup) {
+  if (isBackupCidExpOn && !disableBackup) {
     return Services.storageForDoc(ampdoc).then((storage) => {
       const key = getStorageKey(cookieName);
-      return storage
-        .getUnexpiredValue(key, BASE_CID_MAX_AGE_MILLIS)
-        .then((backupCid) => {
-          if (backupCid) {
-            setCidCookie(win, cookieName, backupCid);
-            setCidBackup(cid.ampdoc, cookieName, backupCid);
-          }
-          return backupCid;
-        });
+      return storage.get(key, BASE_CID_MAX_AGE_MILLIS).then((backupCid) => {
+        if (!backupCid || typeof backupCid != 'string') {
+          return null;
+        }
+        return backupCid;
+      });
     });
   }
-  return Promise.resolve();
+  return Promise.resolve(null);
 }
 
 /**
@@ -466,7 +457,7 @@ function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   const {isBackupCidExpOn, ampdoc} = cid;
   const {win} = ampdoc;
-  const {scope, optOutBackup} = getCidStruct;
+  const {scope, disableBackup} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
 
   return maybeGetCidFromCookieOrBackup(cid, getCidStruct).then(
@@ -476,6 +467,13 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
       }
 
       if (existingCookie) {
+        // If we created the cookie, update it's expiration time.
+        if (/^amp-/.test(existingCookie)) {
+          setCidCookie(win, cookieName, existingCookie);
+          if (isBackupCidExpOn && !disableBackup) {
+            setCidBackup(ampdoc, cookieName, existingCookie);
+          }
+        }
         return /** @type {!Promise<?string>} */ (Promise.resolve(
           existingCookie
         ));
@@ -498,7 +496,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         const relookup = getCookie(win, cookieName);
         if (!relookup) {
           setCidCookie(win, cookieName, newCookie);
-          if (isBackupCidExpOn && !optOutBackup) {
+          if (isBackupCidExpOn && !disableBackup) {
             setCidBackup(ampdoc, cookieName, newCookie);
           }
         }
