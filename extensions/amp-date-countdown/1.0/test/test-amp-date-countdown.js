@@ -116,30 +116,6 @@ describes.realWin(
       );
     });
 
-    it('does not rerender when template is not updated', async () => {
-      element.setAttribute('end-date', '2018-01-01T08:00:10Z');
-      win.document.body.appendChild(element);
-
-      await getRenderedData();
-
-      const mo = new MutationObserver(() => {});
-      mo.observe(element, {
-        childList: true,
-        subtree: true,
-      });
-
-      element.setAttribute('end-date', '2020-01-01T08:00:10Z');
-      element.mutatedAttributesCallback({
-        'end-date': '2020-01-01T08:00:10Z',
-      });
-
-      // Since we only change the date and not the template, we confirm that
-      // Preact only updates the template attributes and does not re-paint
-      // the template's DOM nodes
-      const records = mo.takeRecords();
-      expect(records).to.be.empty;
-    });
-
     it('renders template with end-date attribute', async () => {
       element.setAttribute('end-date', '2018-01-01T08:00:10Z');
       win.document.body.appendChild(element);
