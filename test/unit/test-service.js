@@ -34,7 +34,6 @@ import {
   setParentWindow,
 } from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
-import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 
 describe('service', () => {
   describe('disposable interface', () => {
@@ -505,17 +504,12 @@ describe('service', () => {
         topService = getServiceForDoc(ampdoc, 'c');
       });
 
-      afterEach(() => {
-        toggleAmpdocFieForTesting(windowApi, false);
-      });
-
       it('should return the service via node', () => {
         const fromNode = getExistingServiceForDocInEmbedScope(node, 'c');
         expect(fromNode).to.equal(topService);
       });
 
       it('should find ampdoc and return its service', () => {
-        toggleAmpdocFieForTesting(windowApi, true);
         const fromChildNode = getExistingServiceForDocInEmbedScope(
           childWinNode,
           'c'
@@ -530,7 +524,6 @@ describe('service', () => {
       });
 
       it('should not fallback embedded ampdoc to parent', () => {
-        toggleAmpdocFieForTesting(windowApi, true);
         const childAmpdoc = {
           isSingleDoc: () => false,
           win: windowApi,
@@ -555,7 +548,6 @@ describe('service', () => {
       });
 
       it('should override services on embedded ampdoc', () => {
-        toggleAmpdocFieForTesting(windowApi, true);
         const childAmpdoc = {
           isSingleDoc: () => false,
           win: windowApi,

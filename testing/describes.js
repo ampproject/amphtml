@@ -103,10 +103,7 @@ import {
 import {stubService} from './test-helper';
 
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
-import {
-  installDocService,
-  updateFieModeForTesting,
-} from '../src/service/ampdoc-impl';
+import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {install as installIntersectionObserver} from '../src/polyfills/intersection-observer';
@@ -806,7 +803,6 @@ class AmpFixture {
 
     // Friendly embed setup.
     if (ampdocType == 'fie') {
-      updateFieModeForTesting(env.ampdocService, true);
       const container = win.document.createElement('div');
       const embedIframe = win.document.createElement('iframe');
       container.appendChild(embedIframe);
