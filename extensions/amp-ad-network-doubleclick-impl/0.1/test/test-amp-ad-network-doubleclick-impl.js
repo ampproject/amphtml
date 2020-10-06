@@ -1978,10 +1978,11 @@ describes.realWin(
           env.sandbox
             .stub(ampdocMock, 'getMetaByName')
             .withArgs('amp-usqp')
-            .returns('5798237482=45');
+            .returns('5798237482=45,3579282=0');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
           expect(impl.experimentIds).to.include('579823748245');
+          expect(impl.experimentIds).to.include('357928200');
         });
 
         it('should pad value to two chars', () => {

@@ -2328,7 +2328,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (meta) {
       const keyValues = meta.split(',');
       for (let i = 0; i < keyValues.length; i++) {
-        const kv = keyValues[0].split('=');
+        const kv = keyValues[i].split('=');
         if (kv.length !== 2) {
           continue;
         }
