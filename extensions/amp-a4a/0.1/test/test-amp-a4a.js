@@ -37,11 +37,7 @@ import {
   protectFunctionWrapper,
 } from '../amp-a4a';
 import {AmpAdXOriginIframeHandler} from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {
-  AmpDoc,
-  installDocService,
-  updateFieModeForTesting,
-} from '../../../../src/service/ampdoc-impl';
+import {AmpDoc, installDocService} from '../../../../src/service/ampdoc-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
@@ -62,7 +58,6 @@ import {
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
-import {toggleAmpdocFieForTesting} from '../../../../src/ampdoc-fie';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 // eslint-disable-next-line no-undef
@@ -2299,11 +2294,7 @@ describe('amp-a4a', () => {
       a4a.adUrl_ = 'https://nowhere.org';
     });
 
-    it('should render correctly in ampdoc-fie mode', async () => {
-      const parentWin = a4aElement.ownerDocument.defaultView;
-      const ampdocService = Services.ampdocServiceFor(parentWin);
-      toggleAmpdocFieForTesting(parentWin, true);
-      updateFieModeForTesting(ampdocService, true);
+    it('should render correctly', async () => {
       await a4a.renderAmpCreative_(metaData);
       // Verify iframe presence.
       expect(a4aElement.children.length).to.equal(1);

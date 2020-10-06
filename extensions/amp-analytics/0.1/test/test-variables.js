@@ -29,12 +29,12 @@ import {
   linkerReaderServiceFor,
 } from '../linker-reader';
 
-const fakeElement = document.documentElement;
-
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
+  let fakeElement;
   let variables;
 
   beforeEach(() => {
+    fakeElement = env.win.document.documentElement;
     installLinkerReaderService(env.win);
     variables = new VariableService(env.ampdoc);
   });
