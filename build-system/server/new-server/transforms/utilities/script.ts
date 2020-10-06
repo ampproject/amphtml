@@ -30,10 +30,10 @@ export interface ScriptNode extends PostHTML.Node {
   };
 }
 
-const VALID_SCRIPT_EXTENSION = ['.js', '.mjs'];
+const VALID_SCRIPT_EXTENSIONS = ['.js', '.mjs'];
 
 function isValidScriptExtension(url: URL): boolean {
-  return VALID_SCRIPT_EXTENSION.includes(extname(url.pathname));
+  return VALID_SCRIPT_EXTENSIONS.includes(extname(url.pathname));
 }
 
 /**

@@ -27,23 +27,21 @@ const FOR_TESTING = argv._.includes('integration');
 const PORT = FOR_TESTING ? 9876 : 8000;
 const ESM = !!argv.esm;
 
+const defaultTransformConfig = {
+  esm: ESM,
+  port: PORT,
+  fortesting: FOR_TESTING,
+};
+
 const transforms = [
-  transformScriptPaths({
-    esm: ESM,
-    port: PORT,
-    fortesting: FOR_TESTING,
-  }),
+  transformScriptPaths(defaultTransformConfig),
 ];
 
 export async function transform(fileLocation: string): Promise<string> {
   if (ESM) {
     transforms.unshift(
       transformCss(),
-      transformModules({
-        esm: ESM,
-        port: PORT,
-        fortesting: FOR_TESTING,
-      }),
+      transformModules(defaultTransformConfig),
     );
   }
 
