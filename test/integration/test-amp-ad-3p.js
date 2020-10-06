@@ -24,7 +24,8 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-describe('amp-ad 3P', () => {
+//TODO(erwinm, #30528): unskip this for IE when possible
+describe.configure().run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
