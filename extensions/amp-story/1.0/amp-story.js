@@ -961,6 +961,11 @@ export class AmpStory extends AMP.BaseElement {
           this.upgradeCtaAnchorTagsForTracking_(page, index);
         });
         this.initializeStoryNavigationPath_();
+
+        // Build pagination buttons if they can be displayed.
+        if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
+          new PaginationButtons(this);
+        }
       })
       .then(() => this.initializeBookend_())
       .then(() => {
@@ -1008,11 +1013,6 @@ export class AmpStory extends AMP.BaseElement {
       });
 
     this.maybeLoadStoryEducation_();
-
-    // Build pagination buttons if they can be displayed.
-    if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
-      new PaginationButtons(this);
-    }
 
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
