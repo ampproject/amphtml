@@ -64,7 +64,10 @@ async function buildTransformedHtml() {
 async function transformAndWriteToTestFolder(filePath) {
   try {
     const html = await htmlTransform(filePath);
-    fs.writeFileSync(`./test-bin/${filePath}`, html);
+    const fullFilePath = `./test-bin/${filePath}`;
+    const targetDir = pathModule.dirname(fullFilePath);
+    fs.ensureDirSync(targetDir);
+    fs.writeFileSync(fullFilePath, html);
   } catch (e) {
     log(
       red('ERROR:'),
