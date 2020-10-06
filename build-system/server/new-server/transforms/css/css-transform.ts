@@ -45,8 +45,28 @@ interface StyleNode extends PostHTML.Node {
   content: string[]
 }
 
+function isStyleNode(node: PostHTML.Node | string): node is StyleNode {
+  if (node === undefined) {
+    return false;
+  }
+
+  if (typeof node === 'string') {
+    return false;
+  }
+
+  const styleNode = node as StyleNode;
+  return styleNode.tag === 'style';
+}
+
 function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
   const content = head.content || [];
+
+  const firstStyleNode = content.filter(isStyleNode)[0];
+  // If 'amp-runtime' already exists bail out.
+  if (firstStyleNode && 'amp-runtime' in firstStyleNode.attrs) {
+    return head;
+  }
+
   const styleNode: StyleNode = {
     walk: head.walk,
     match: head.match,
