@@ -54,6 +54,7 @@ class Runner extends RuntimeTestRunner {
 
 async function buildTransformedHtml() {
   const filePaths = await globby(INTEGRATION_FIXTURES);
+  fs.ensureDirSync('./test-bin/');
   for (const filePath of filePaths) {
     const normalizedFilePath = pathModule.normalize(filePath);
     await transformAndWriteToTestFolder(normalizedFilePath);
@@ -63,7 +64,7 @@ async function buildTransformedHtml() {
 async function transformAndWriteToTestFolder(filePath) {
   try {
     const html = await htmlTransform(filePath);
-    await fs.writeFile(`./test-bin/${filePath}`, html);
+    fs.writeFileSync(`./test-bin/${filePath}`, html);
   } catch (e) {
     log(
       red('ERROR:'),
@@ -73,7 +74,7 @@ async function transformAndWriteToTestFolder(filePath) {
       ),
       red(`Reason: ${e.message}`)
     );
-    await fs.copy(filePath, `./test-bin/${filePath}`);
+    fs.copySync(filePath, `./test-bin/${filePath}`);
   }
 }
 
