@@ -232,7 +232,7 @@ const RTC_VENDORS = jsonConfiguration({
     url: 'https://prebid.andbeyond.media/amp_native.php?tag_id=TAG_ID',
     macros: ['TAG_ID'],
     disableKeyAppend: true,
-  }
+  },
 });
 
 // DO NOT MODIFY: Setup for tests
