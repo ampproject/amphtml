@@ -15,6 +15,7 @@ requirement: {
   value: 'Element.prototype.style'
   whitelist: 'src/style.js'
   whitelist: 'src/layout.js'
+  whitelist_regexp: '.*anim.*.js'
 }
 
 requirement: {

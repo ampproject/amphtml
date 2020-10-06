@@ -23,7 +23,7 @@ module.exports = function (context) {
       const filePath = context.getFilename();
       const filename = path.basename(filePath);
       // Ignore specific js files.
-      if (/^(keyframes-extractor|fixed-layer|style)\.js/.test(filename)) {
+      if (/^(keyframes-extractor|fixed-layer|style|anim)\.js/.test(filename)) {
         return;
       }
       // Ignore tests.

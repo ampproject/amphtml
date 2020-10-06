@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {animateCollapse, animateExpand} from './animations';
 import {omit} from '../../../src/utils/object';
 import {sequentialIdGenerator} from '../../../src/utils/id-generator';
 import {
@@ -23,6 +24,7 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from '../../../src/preact';
 
@@ -35,6 +37,17 @@ const EMPTY_EXPANDED_MAP = {};
 
 const generateSectionId = sequentialIdGenerator();
 
+const CHILD_STYLE = {
+  // Make animations measurable. Without this, padding and margin can skew
+  // animations.
+  boxSizing: 'border-box',
+  // Cancel out the margin collapse. Also helps with animations to avoid
+  // overflow.
+  overflow: 'hidden',
+  // Ensure that any absolute elements are positioned within the section.
+  position: 'relative',
+};
+
 /**
  * @param {!AccordionDef.Props} props
  * @return {PreactDef.Renderable}
@@ -42,6 +55,7 @@ const generateSectionId = sequentialIdGenerator();
 export function Accordion({
   as: Comp = 'section',
   expandSingleSection = false,
+  animate = false,
   children,
   ...rest
 }) {
@@ -92,8 +106,9 @@ export function Accordion({
         registerSection,
         toggleExpanded,
         isExpanded: (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
+        isAnimated: animate,
       }),
-    [expandedMap, registerSection, toggleExpanded]
+    [animate, expandedMap, registerSection, toggleExpanded]
   );
 
   return (
@@ -136,20 +151,28 @@ export function AccordionSection({
   headerAs: HeaderComp = 'header',
   contentAs: ContentComp = 'div',
   expanded: defaultExpanded = false,
+  animate: defaultAnimate = false,
   header,
   children,
   ...rest
 }) {
   const [id] = useState(generateSectionId);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
+  const contentRef = useRef(null);
+  const hasMountedRef = useRef(false);
 
-  const {registerSection, isExpanded, toggleExpanded} = useContext(
+  const {registerSection, isAnimated, isExpanded, toggleExpanded} = useContext(
     AccordionContext
   );
 
+  useEffect(() => {
+    hasMountedRef.current = true;
+    return () => (hasMountedRef.current = false);
+  }, []);
+
   useLayoutEffect(() => {
     if (registerSection) {
-      registerSection(id, defaultExpanded);
+      return registerSection(id, defaultExpanded);
     }
   }, [registerSection, id, defaultExpanded]);
 
@@ -162,13 +185,25 @@ export function AccordionSection({
   }, [id, toggleExpanded]);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
+  const animate = isAnimated ?? defaultAnimate;
+
+  useLayoutEffect(() => {
+    const hasMounted = hasMountedRef.current;
+    const content = contentRef.current;
+    if (!animate || !hasMounted || !content || !content.animate) {
+      return;
+    }
+    return expanded ? animateExpand(content) : animateCollapse(content);
+  }, [expanded, animate]);
 
   return (
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
-      <HeaderComp role="button" onClick={expandHandler}>
+      <HeaderComp role="button" style={CHILD_STYLE} onClick={expandHandler}>
         {header}
       </HeaderComp>
-      <ContentComp hidden={!expanded}>{children}</ContentComp>
+      <ContentComp ref={contentRef} style={CHILD_STYLE} hidden={!expanded}>
+        {children}
+      </ContentComp>
     </Comp>
   );
 }
