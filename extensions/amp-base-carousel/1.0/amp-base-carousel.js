@@ -39,7 +39,7 @@ const TAG = 'amp-base-carousel';
  */
 function parseStrBoolAttr(element, attr, defaultValue) {
   return element.hasAttribute(attr)
-    ? element.getAttribute(attr) === 'true'
+    ? element.getAttribute(attr) !== 'false'
     : defaultValue;
 }
 
@@ -104,7 +104,7 @@ AmpBaseCarousel['children'] = {
 AmpBaseCarousel['props'] = {
   'loop': {
     attrs: ['loop'],
-    parseAttrs: (element) => parseStrBoolAttr(element, 'loop', true),
+    parseAttrs: (element) => parseStrBoolAttr(element, 'loop', false),
   },
   'snap': {
     attrs: ['snap'],
