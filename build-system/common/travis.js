@@ -64,6 +64,21 @@ function travisBuildNumber() {
 }
 
 /**
+ * Return the build URL of the ongoing Travis build.
+ * @return {string}
+ */
+function travisBuildUrl() {
+  if (!isTravisBuild()) {
+    log(
+      red('ERROR:'),
+      'This is not a Travis build. Cannot get',
+      cyan('process.env.TRAVIS_BUILD_WEB_URL') + '.'
+    );
+  }
+  return process.env.TRAVIS_BUILD_WEB_URL;
+}
+
+/**
  * Returns the job number of the ongoing Travis job.
  * @return {string}
  */
@@ -173,6 +188,7 @@ module.exports = {
   isTravisPullRequestBuild,
   isTravisPushBuild,
   travisBuildNumber,
+  travisBuildUrl,
   travisCommitSha,
   travisJobNumber,
   travisJobUrl,
