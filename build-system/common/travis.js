@@ -54,7 +54,7 @@ function isTravisPushBuild() {
  * @param {function():boolean} testFn
  * @param {string} errorMsg
  * @param {string} envKey
- * @return {function()}
+ * @return {function():string}
  */
 function travisEnv(testFn, errorMsg, envKey) {
   return function () {
