@@ -15,6 +15,9 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {Wrapper, useRenderer} from '../../../src/preact/component';
+import {dict} from '../../../src/utils/object';
+import {getDate} from '../../../src/utils/date';
 import {getLocaleStrings} from './messages';
 import {useAmpContext} from '../../../src/preact/context';
 import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
@@ -47,38 +50,53 @@ const TimeUnit = {
 };
 
 // Default prop values
-const DEFAULT_OFFSET_SECONDS = 0;
 const DEFAULT_LOCALE = 'en';
 const DEFAULT_WHEN_ENDED = 'stop';
 const DEFAULT_BIGGEST_UNIT = 'DAYS';
+
+/**
+ * @param {!JsonObject} data
+ * @return {string}
+ */
+const DEFAULT_RENDER = (data) =>
+  /** @type {string} */ (`${data['days']} ${data['dd']}, ` +
+    `${data['hours']} ${data['hh']}, ` +
+    `${data['minutes']} ${data['mm']}, ` +
+    `${data['seconds']} ${data['ss']}`);
 
 /**
  * @param {!DateCountdownPropsDef} props
  * @return {PreactDef.Renderable}
  */
 export function DateCountdown({
-  endDate,
-  timeleftMs,
-  timestampMs,
-  timestampSeconds,
-  offsetSeconds = DEFAULT_OFFSET_SECONDS,
+  datetime,
   whenEnded = DEFAULT_WHEN_ENDED,
   locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
-  render,
-  children,
+  render = DEFAULT_RENDER,
   ...rest
 }) {
   useResourcesNotify();
   const {playable} = useAmpContext();
-  const epoch = useMemo(
-    () =>
-      getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
-      offsetSeconds * MILLISECONDS_IN_SECOND,
-    [endDate, timeleftMs, timestampMs, timestampSeconds, offsetSeconds]
+
+  // Compute these values once
+  const epoch = useMemo(() => getDate(datetime), [datetime]);
+  const localeStrings = useMemo(
+    () => getLocaleWord(/** @type {string} */ (locale)),
+    [locale]
   );
-  const [timeleft, setTimeleft] = useState(epoch - Date.now());
-  const localeStrings = useMemo(() => getLocaleWord(locale), [locale]);
+
+  // timeleft is updated on each interval callback
+  const [timeleft, setTimeleft] = useState(epoch - Date.now() + DELAY);
+
+  // Only update data when timeleft (or other dependencies) are updated
+  // Does not update on 2nd render triggered by useRenderer
+  const data = useMemo(
+    () => getDataForTemplate(timeleft, biggestUnit, localeStrings),
+    [timeleft, biggestUnit, localeStrings]
+  );
+
+  // Reference to DOM element to get access to correct window
   const rootRef = useRef(null);
 
   useEffect(() => {
@@ -96,46 +114,32 @@ export function DateCountdown({
     return () => win.clearInterval(interval);
   }, [playable, epoch, whenEnded]);
 
-  const data = {
-    ...getYDHMSFromMs(timeleft, biggestUnit),
-    ...localeStrings,
-  };
+  const rendered = useRenderer(render, data);
+  const isHtml =
+    rendered && typeof rendered == 'object' && '__html' in rendered;
+
   return (
-    <div ref={rootRef} {...rest}>
-      {render(data, children)}
-    </div>
+    <Wrapper
+      {...rest}
+      ref={rootRef}
+      dangerouslySetInnerHTML={isHtml ? rendered : null}
+    >
+      {isHtml ? null : rendered}
+    </Wrapper>
   );
 }
 
 /**
- * Calculate the epoch time that this component should countdown to from
- * one of multiple input options.
- * @param {string|undefined} endDate
- * @param {number|undefined} timeleftMs
- * @param {number|undefined} timestampMs
- * @param {number|undefined} timestampSeconds
- * @return {number}
+ * @param {number} timeleft
+ * @param {string|undefined} biggestUnit
+ * @param {!JsonObject} localeStrings
+ * @return {!JsonObject}
  */
-function getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) {
-  let epoch;
-
-  if (endDate) {
-    epoch = Date.parse(endDate);
-  } else if (timeleftMs) {
-    epoch = Date.now() + timeleftMs;
-  } else if (timestampMs) {
-    epoch = timestampMs;
-  } else if (timestampSeconds) {
-    epoch = timestampSeconds * 1000;
-  }
-
-  if (epoch === undefined) {
-    throw new Error(
-      `One of endDate, timeleftMs, timestampMs, timestampSeconds` +
-        `is required. ${NAME}`
-    );
-  }
-  return epoch;
+function getDataForTemplate(timeleft, biggestUnit, localeStrings) {
+  return /** @type {!JsonObject} */ ({
+    ...getYDHMSFromMs(timeleft, /** @type {string} */ (biggestUnit)),
+    ...localeStrings,
+  });
 }
 
 /**
@@ -152,14 +156,14 @@ function getLocaleWord(locale) {
     locale = DEFAULT_LOCALE;
   }
   const localeWordList = getLocaleStrings(locale);
-  return {
+  return dict({
     'years': localeWordList[0],
     'months': localeWordList[1],
     'days': localeWordList[2],
     'hours': localeWordList[3],
     'minutes': localeWordList[4],
     'seconds': localeWordList[5],
-  };
+  });
 }
 
 /**
@@ -198,7 +202,7 @@ function getYDHMSFromMs(ms, biggestUnit) {
           Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND)
         );
 
-  return {
+  return dict({
     'd': d,
     'dd': padStart(d),
     'h': h,
@@ -207,7 +211,7 @@ function getYDHMSFromMs(ms, biggestUnit) {
     'mm': padStart(m),
     's': s,
     'ss': padStart(s),
-  };
+  });
 }
 
 /**
