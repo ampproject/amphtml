@@ -134,24 +134,10 @@ function orientationChangeHandler(global, containerDiv) {
       const overflow = global.document.getElementById('overflow');
       if (overflow) {
         overflow.onclick = () =>
-          global.context
-            .requestResize(undefined, newHeightPx)
-            .then(() => {
-              resizeSuccessHandler(global, containerDiv, newHeightPx);
-            })
-            .catch(() => {
-              resizeDeniedHandler(global, containerDiv, newHeightPx);
-            });
+          requestResizeInternal(global, containerDiv, newHeightPx);
       }
       // Resize the container to the correct height.
-      global.context
-        .requestResize(undefined, newHeightPx)
-        .then(() => {
-          resizeSuccessHandler(global, containerDiv, newHeightPx);
-        })
-        .catch(() => {
-          resizeDeniedHandler(global, containerDiv, newHeightPx);
-        });
+      requestResizeInternal(global, containerDiv, newHeightPx);
     }
   }, 250); /* 250 is time in ms to wait before executing orientation */
 }
@@ -303,13 +289,23 @@ export function resizeIframe(global, containerName) {
     createOverflow(global, container, height);
   }
   // Attempt to resize to actual CSA container height
+  requestResizeInternal(global, devAssert(container), height);
+}
+
+/**
+ * Helper function to call requestResize
+ * @param {!Window} global
+ * @param {!Element} container
+ * @param {number} height
+ */
+function requestResizeInternal(global, container, height) {
   global.context
     .requestResize(undefined, height)
     .then(() => {
-      resizeSuccessHandler(global, devAssert(container), height);
+      resizeSuccessHandler(global, container, height);
     })
     .catch(() => {
-      resizeDeniedHandler(global, devAssert(container), height);
+      resizeDeniedHandler(global, container, height);
     });
 }
 
@@ -323,15 +319,7 @@ export function resizeIframe(global, containerName) {
 function createOverflow(global, container, height) {
   const overflow = getOverflowElement(global);
   // When overflow is clicked, resize to full height
-  overflow.onclick = () =>
-    global.context
-      .requestResize(undefined, height)
-      .then(() => {
-        resizeSuccessHandler(global, container, height);
-      })
-      .catch(() => {
-        resizeDeniedHandler(global, container, height);
-      });
+  overflow.onclick = () => requestResizeInternal(global, container, height);
   global.document.getElementById('c').appendChild(overflow);
   // Resize the CSA container to not conflict with overflow
   resizeCsa(container, currentAmpHeight - overflowHeight);
