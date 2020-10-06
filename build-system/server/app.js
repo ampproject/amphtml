@@ -1230,6 +1230,30 @@ app.get(
   }
 );
 
+if (argv.coverage === 'live') {
+  app.get('/dist/amp.js', async (req, res) => {
+    const ampJs = await fs.promises.readFile(`${pc.cwd()}${req.path}`);
+    res.setHeader('Content-Type', 'text/javascript');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Append an unload handler that reports coverage information each time you
+    // leave a page.
+    res.end(`${ampJs};
+window.addEventListener('beforeunload', (evt) => {
+  const COV_REPORT_URL = 'http://localhost:${TEST_SERVER_PORT}/coverage/client';
+  console.info('POSTing code coverage to', COV_REPORT_URL);
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', COV_REPORT_URL, true);
+  xhr.setRequestHeader('Content-type', 'application/json');
+  xhr.send(JSON.stringify(window.__coverage__));
+
+  // Required by Chrome
+  evt.returnValue = '';
+  return null;
+});`);
+  });
+}
+
 /**
  * Serve entry point script url
  */
