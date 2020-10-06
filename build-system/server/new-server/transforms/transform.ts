@@ -44,6 +44,7 @@ const defaultTransformConfig = {
   esm: ESM,
   port: PORT,
   fortesting: FOR_TESTING,
+<<<<<<< HEAD
   useMaxNames: !argv.compiled,
 };
 
@@ -57,12 +58,19 @@ const transforms = [
     fortesting: FOR_TESTING,
   }),
 >>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
+=======
+};
+
+const transforms = [
+  transformScriptPaths(defaultTransformConfig),
+>>>>>>> c4508f8f8 (applied recs)
 ];
 
 export async function transform(fileLocation: string): Promise<string> {
   if (ESM) {
     transforms.unshift(
       transformCss(),
+<<<<<<< HEAD
 <<<<<<< HEAD
       transformModules(defaultTransformConfig),
 =======
@@ -72,6 +80,9 @@ export async function transform(fileLocation: string): Promise<string> {
         fortesting: FOR_TESTING,
       }),
 >>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
+=======
+      transformModules(defaultTransformConfig),
+>>>>>>> c4508f8f8 (applied recs)
     );
   }
 

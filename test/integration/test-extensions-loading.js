@@ -73,7 +73,7 @@ describe('test extensions loading in multiple orders', function () {
     );
   });
 
-  // NOTE(erwinm, #30528): skip this test as it doesn't make sense. The script
+  // TODO(#30528): skip this test as it doesn't make sense. The script
   // tags are in the footer and our posthtml transforms break on the
   // transformation of these invalid html files.
   it.skip('one extension, extension loads first, all scripts in footer', () => {
@@ -83,7 +83,7 @@ describe('test extensions loading in multiple orders', function () {
     );
   });
 
-  // NOTE(erwinm, #30528): skip this test as it doesn't make sense. The script
+  // TODO(#30528): skip this test as it doesn't make sense. The script
   // tags are in the footer and our posthtml transforms break on the
   // transformation of these invalid html files.
   it.skip('one extension, v0 loads first, all scripts in footer', () => {
