@@ -404,8 +404,17 @@ export class Performance {
     }
 
     if (this.supportsNavigation_) {
-      const navigationObserver = this.createPerformanceObserver_(processEntry);
-      navigationObserver.observe({type: 'navigation', buffered: true});
+      // Wrap in a try statement as there are some browsers (ex. chrome 73)
+      // that will say it supports navigation but throws.
+      try {
+        const navigationObserver = this.createPerformanceObserver_(
+          processEntry
+        );
+        navigationObserver.observe({type: 'navigation', buffered: true});
+      } catch (err) {
+        dev() /*OK*/
+          .error(err);
+      }
     }
 
     if (entryTypesToObserve.length === 0) {
