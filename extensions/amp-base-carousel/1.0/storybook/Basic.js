@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
-import {number, withKnobs} from '@storybook/addon-knobs';
+import {number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -30,8 +30,9 @@ export const _default = () => {
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const controls = select('show controls', ['auto', 'always', 'never']);
   return (
-    <BaseCarousel style={{width, height}}>
+    <BaseCarousel controls={controls} style={{width, height}}>
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
@@ -47,6 +48,7 @@ export const _default = () => {
 export const provideArrows = () => {
   const width = number('width', 440);
   const height = number('height', 225);
+  const controls = select('show controls', ['auto', 'always', 'never']);
   const myButtonStyle = {
     background: 'lightblue',
     borderRadius: '50%',
@@ -65,6 +67,7 @@ export const provideArrows = () => {
   };
   return (
     <BaseCarousel
+      controls={controls}
       style={{width, height}}
       arrowPrev={<MyButton>←</MyButton>}
       arrowNext={<MyButton>→</MyButton>}
@@ -79,8 +82,9 @@ export const provideArrows = () => {
 export const WithLooping = () => {
   const width = number('width', 440);
   const height = number('height', 225);
+  const controls = select('show controls', ['auto', 'always', 'never']);
   return (
-    <BaseCarousel loop style={{width, height}}>
+    <BaseCarousel controls={controls} loop style={{width, height}}>
       {[
         'lightpink',
         'lightcoral',
@@ -107,8 +111,13 @@ export const WithLooping = () => {
 };
 
 export const WithCaptions = () => {
+  const controls = select('show controls', ['auto', 'always', 'never']);
   return (
-    <BaseCarousel loop style={{width: '500px', height: '400px'}}>
+    <BaseCarousel
+      controls={controls}
+      loop
+      style={{width: '500px', height: '400px'}}
+    >
       <figure>
         <img
           style={{width: '500px', height: '300px'}}
