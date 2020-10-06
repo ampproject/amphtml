@@ -30,15 +30,25 @@ export const _default = () => {
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const snap = boolean('snap', true);
+  const loop = boolean('loop', true);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
-    <BaseCarousel snap={snap} style={{width, height}}>
+    <BaseCarousel loop={loop} snap={snap} style={{width, height}}>
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
           <div
-            style={{backgroundColor: `rgb(${v}, 100, 100)`, width, height}}
-          ></div>
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              width,
+              height,
+              textAlign: 'center',
+              fontSize: '48pt',
+              lineHeight: height + 'px',
+            }}
+          >
+            {i}
+          </div>
         );
       })}
     </BaseCarousel>
@@ -72,36 +82,6 @@ export const provideArrows = () => {
     >
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <div style={{backgroundColor: color, width, height}}></div>
-      ))}
-    </BaseCarousel>
-  );
-};
-
-export const WithLooping = () => {
-  const width = number('width', 440);
-  const height = number('height', 225);
-  return (
-    <BaseCarousel loop style={{width, height}}>
-      {[
-        'lightpink',
-        'lightcoral',
-        'peachpuff',
-        'powderblue',
-        'lavender',
-        'thistle',
-      ].map((color, index) => (
-        <div
-          style={{
-            backgroundColor: color,
-            width,
-            height,
-            textAlign: 'center',
-            fontSize: '48pt',
-            lineHeight: height + 'px',
-          }}
-        >
-          {index}
-        </div>
       ))}
     </BaseCarousel>
   );
