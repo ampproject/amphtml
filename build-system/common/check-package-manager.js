@@ -185,7 +185,7 @@ function checkYarnVersion() {
   const yarnVersion = getStdout(yarnExecutable + ' --version').trim();
   // TODO (KB): Revert #30478 once `yarn` stable is fixed
   // At this time current stable is failing GPG checks.
-  const stableVersion = '1.22.5';
+  const stableVersion = '1.22.4';
   if (stableVersion === '') {
     console.log(
       yellow(
