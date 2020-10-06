@@ -62,9 +62,9 @@ quizzes; document viewers
 -   Provide test accounts for inclusion in our open source repository for
     integration tests.
 
-The following aren't hard requirements, but performance optimizations we should
-strive to incorporate. Please provide a timeline as to when you expect to follow
-these guidelines:
+The following aren't hard requirements, but are performance optimizations we
+should strive to incorporate. Please provide a timeline as to when you expect to
+follow these guidelines:
 
 -   Support pause and play APIs to turn animations on and off. Ideally also to
     interrupt loading.
