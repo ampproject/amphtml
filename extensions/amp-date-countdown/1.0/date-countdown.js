@@ -114,7 +114,6 @@ export function DateCountdown({
     return () => win.clearInterval(interval);
   }, [playable, epoch, whenEnded]);
 
-  console.log(data);
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;

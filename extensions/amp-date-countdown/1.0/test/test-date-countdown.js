@@ -57,8 +57,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       render,
       datetime: Date.parse('2018-01-01T08:00:00Z'),
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
 
     // Generic test for the Wrapper
     // This is actually fairly arbitrary that it should be a "div". But it's
@@ -77,8 +76,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2018-01-01T08:00:00Z'),
       locale: 'invalid-locale',
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Check that warning message is print to the screen
@@ -104,8 +102,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       render,
       datetime: Date.parse('2018-01-01T08:00:10Z'),
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     let data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
@@ -141,8 +138,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       render,
       datetime: Date.parse('2017-01-01T08:00:00Z'),
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
@@ -163,8 +159,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       render,
       datetime: Date.parse('2018-01-01T08:00:10Z'),
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     let data = JSON.parse(wrapper.text());
 
     // Count down 15 seconds
@@ -190,8 +185,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2018-01-01T08:00:10Z'),
       whenEnded: 'continue',
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     let data = JSON.parse(wrapper.text());
 
     // Count down 15 seconds
@@ -218,8 +212,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       render,
       datetime: Date.parse('2018-01-02T08:00:10Z'),
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
@@ -244,8 +237,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2018-01-02T08:00:10Z'),
       biggestUnit: 'HOURS',
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
@@ -270,8 +262,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2018-01-02T08:00:10Z'),
       biggestUnit: 'MINUTES',
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
@@ -296,8 +287,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       datetime: Date.parse('2018-01-02T08:00:10Z'),
       biggestUnit: 'SECONDS',
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
@@ -321,8 +311,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       render: (data) => syncPromise(render(data)),
       datetime: Date.parse('2018-01-01T08:00:10Z'),
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
@@ -343,8 +332,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
     const props = {
       datetime: Date.parse('2018-01-01T08:00:10Z'),
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
 
     // Component adds one second delay for slight execution delay in real world
     // In our mocked clock situation, we start with 11 seconds on the clock
@@ -360,8 +348,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       render,
       datetime: new Date('2018-01-01T08:00:10Z'),
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
@@ -383,8 +370,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
       render,
       datetime: '2018-01-01T08:00:10Z',
     };
-    const jsx = <DateCountdown {...props} />;
-    const wrapper = mount(jsx);
+    const wrapper = mount(<DateCountdown {...props} />);
     const data = JSON.parse(wrapper.text());
 
     // Component adds one second delay for slight execution delay in real world
