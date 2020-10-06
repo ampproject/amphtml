@@ -402,7 +402,7 @@ function beforeTest() {
   activateChunkingForTesting();
   window.__AMP_MODE = undefined;
   window.context = undefined;
-  window.AMP_CONFIG = {};
+  window.AMP_CONFIG = require('../build-system/global-configs/prod-config.json');
   window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
