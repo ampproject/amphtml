@@ -70,6 +70,13 @@ function ScrollerWithRef(
    * is with respect to its scrolling order. Only needed if loop=true.
    */
   const offsetRef = useRef(restingIndex);
+
+  /**
+   * The partial scroll position between two slides.
+   * Only needed if snap=false.
+   */
+  const scrollOffset = useRef(null);
+
   const ignoreProgrammaticScrollRef = useRef(true);
   const slides = renderSlides(
     {
@@ -91,11 +98,27 @@ function ScrollerWithRef(
     const container = containerRef.current;
     ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
-    container./* OK */ scrollLeft = loop
-      ? container./* OK */ offsetWidth * pivotIndex
-      : container./* OK */ offsetWidth * restingIndex;
+    let position;
+    if (loop) {
+      if (snap) {
+        position = container./* OK */ offsetWidth * pivotIndex;
+      } else {
+        position = mod(
+          scrollOffset.current + container.offsetWidth * offsetRef.current,
+          container.scrollWidth
+        );
+        console.log(scrollOffset.current, position);
+      }
+    } else {
+      if (snap) {
+        position = container./* OK */ offsetWidth * restingIndex;
+      } else {
+        position = scrollOffset.current;
+      }
+    }
+    container./* OK */ scrollLeft = position;
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [loop, restingIndex, pivotIndex]);
+  }, [loop, restingIndex, pivotIndex, snap]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(
@@ -124,10 +147,11 @@ function ScrollerWithRef(
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
     const container = containerRef.current;
+    scrollOffset.current =
+      container./* OK */ scrollLeft -
+      offsetRef.current * container./* OK */ offsetWidth;
     const slideOffset = Math.round(
-      (container./* OK */ scrollLeft -
-        offsetRef.current * container./* OK */ offsetWidth) /
-        container./* OK */ offsetWidth
+      scrollOffset.current / container./* OK */ offsetWidth
     );
     currentIndex.current = mod(slideOffset, children.length);
   };
