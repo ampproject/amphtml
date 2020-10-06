@@ -275,14 +275,16 @@ function buildStringStyleForTweet(embedData) {
  * @return {string}
  */
 function buildDefaultStringStyle(embedData) {
-  return `{
+  return (
+    `{
     width: ${px(embedData.width)} !important;
-    height: ${px(embedData.height)} !important;
-    transform: ${embedData.transform} !important;
-    margin: ${embedData.verticalMargin}px ${
-    embedData.horizontalMargin
-  }px !important;
-    }`;
+    height: ${px(embedData.height)} !important;` +
+    (embedData.transform
+      ? `transform: ${embedData.transform} !important;`
+      : '') +
+    `margin: ${embedData.verticalMargin}px ${embedData.horizontalMargin}px !important;
+    }`
+  );
 }
 
 /**
@@ -344,19 +346,11 @@ function measureStylesForCustomWidth(state, pageRect, elRect, maxWidth) {
  */
 function measureStylesForInteractiveText(state, pageRect, elRect) {
   // Get the minimum of page width and height and only take up to 90%%.
-  state.newWidth = Math.min(pageRect.width, pageRect.height) * 0.8;
+  state.newWidth = elRect.width;
 
-  console.log(
-    `elRect: (${elRect.width.toFixed(2)}, ${elRect.height.toFixed(
-      2
-    )}), pageRect: (${pageRect.width.toFixed(2)}, ${pageRect.height.toFixed(
-      2
-    )})`
-  );
+  state.scaleFactor = 1;
 
-  state.scaleFactor = state.newWidth / elRect.width;
-
-  const shrinkedHeight = elRect.height * state.scaleFactor;
+  const shrinkedHeight = elRect.height;
 
   state.verticalMargin = (shrinkedHeight - elRect.height) / 2;
   state.horizontalMargin = (elRect.width - state.newWidth) / 2;
@@ -460,8 +454,8 @@ function updateStylesForTwitter(elId, state) {
 function updateStylesForInteractiveText(elId, state) {
   return {
     id: elId,
+    width: state.newWidth,
     scaleFactor: state.scaleFactor,
-    transform: `scale(${state.scaleFactor})`,
   };
 }
 
@@ -1065,9 +1059,7 @@ export class AmpStoryEmbeddedComponent {
       `Failed to look up embed style element with ID ${embedId}`
     );
 
-    embedStyleEl[
-      AMP_EMBED_DATA
-    ].transform = `scale(${embedStyleEl[AMP_EMBED_DATA].scaleFactor})`;
+    embedStyleEl[AMP_EMBED_DATA].transform = undefined;
     updateEmbedStyleEl(
       this.triggeringTarget_,
       embedStyleEl,
@@ -1100,7 +1092,7 @@ export class AmpStoryEmbeddedComponent {
         const pageRect = this.componentPage_./*OK*/ getBoundingClientRect();
         const realHeight = target./*OK*/ offsetHeight;
         const maxHeight = pageRect.height - VERTICAL_PADDING;
-        state.scaleFactor = 1;
+        state.scaleFactor = (pageRect.width / targetRect.width) * 0.8;
         if (realHeight > maxHeight) {
           state.scaleFactor = maxHeight / realHeight;
         }
@@ -1151,6 +1143,7 @@ export class AmpStoryEmbeddedComponent {
     // When a window resize happens, we must reset the styles and prepare the
     // animation again.
     if (element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
+      return;
       elId = parseInt(element.getAttribute(EMBED_ID_ATTRIBUTE_NAME), 10);
       const embedStyleEl = dev().assertElement(
         embedStyleEls[elId],

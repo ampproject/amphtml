@@ -17,12 +17,15 @@
 import {
   Action,
   EmbeddedComponentState,
+  StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-text-0.1.css';
+import {closest} from '../../../src/dom';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
 
@@ -38,11 +41,7 @@ const buildPollTemplate = (element) => {
     <div class="i-amphtml-story-interactive-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-input-container">
-        <textarea
-          class="i-amphtml-story-interactive-input"
-          rows="1"
-          oninput='this.style.height="0px";this.style.height = (this.scrollHeight + 2) + "px"'
-        ></textarea>
+        <input class="i-amphtml-story-interactive-input" />
         <div class="i-amphtml-story-interactive-text-response"></div>
         <div class="i-amphtml-story-interacive-text-send">
           <svg
@@ -64,6 +63,8 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
    */
   constructor(element) {
     super(element, InteractiveType.TEXT, [0, 0]);
+
+    this.expanded = false;
   }
 
   /** @override */
@@ -75,30 +76,45 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
   buildComponent() {
     this.element.setAttribute('interactive', '');
     this.rootEl_ = buildPollTemplate(this.element);
-    const textArea = this.rootEl_.querySelector('textarea');
+    this.input = this.rootEl_.querySelector('input');
     this.attachPrompt_(this.rootEl_);
-    textArea.placeholder = this.element.getAttribute('placeholder-text');
-    textArea.onkeydown = (e) => {
+    this.input.placeholder = this.element.getAttribute('placeholder-text');
+    this.input.onkeydown = (e) => {
       if (e.key == 'Enter') {
-        this.sendText_(textArea.value);
+        this.sendText_(this.input.value);
       }
     };
-    textArea.onkeyup = (unusedEvent) => {
-      this.toggleSendButton_(textArea.value.length > 0);
-    };
-    // textArea.onblur = (event) => {
-    //   this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
-    //     state: EmbeddedComponentState.HIDDEN,
-    //     element: null,
-    //   });
-    //   event.stopImmediatePropagation();
-    // };
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-text-response'
     ).textContent = this.element.getAttribute('response-text');
-    /iPhone/.test(navigator.platform) &&
-      this.rootEl_.classList.add('i-amphtml-story-interative-iphone');
+    const type = this.element.getAttribute('input-type') || 'text';
+    if (type == 'number') {
+      this.input.setAttribute('inputmode', 'numeric');
+      this.input.setAttribute('pattern', '/d*');
+    }
+    this.input.setAttribute('type', type);
     return this.rootEl_;
+  }
+
+  /** @private
+   * @return {!Element}
+   */
+  buildFakeInput_() {
+    const html = htmlFor(this.element);
+    const fakeInput = html`
+      <div style="height:100%;pointer-events:none">
+        <input
+          type="text"
+          readonly="true"
+          style="width:0;height:0;left:50%;position:absolute;top:50%;opacity:0"
+        />
+      </div>
+    `;
+    const thisPage = closest(dev().assertElement(this.element), (el) => {
+      return el.tagName.toLowerCase() === 'amp-story-page';
+    });
+    thisPage.appendChild(fakeInput);
+    return fakeInput;
   }
 
   /**
@@ -112,6 +128,22 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
     //   console.log('clicked');
     // };
     // console.log(sendButton.onclick);
+    this.rootEl_
+      .querySelector('.i-amphtml-story-interactive-input-container')
+      .addEventListener(
+        'click',
+        (unusedEvent) => {
+          const fakeInput = this.buildFakeInput_();
+          fakeInput.querySelector('input').focus();
+          // this.input.focus();
+          setTimeout(() => {
+            this.input.focus();
+            fakeInput.remove();
+          }, 500);
+        },
+        true
+      );
+
     return super.layoutCallback();
   }
 
@@ -135,35 +167,27 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
   }
 
   /**
-   * Shows or hides the send button
-   * @param {boolean} toggle
-   * @private
-   */
-  toggleSendButton_(toggle) {
-    this.rootEl_.classList.toggle(
-      'i-amphtml-story-interactive-can-send',
-      toggle
-    );
-  }
-
-  /**
    * Sends the text and disables responses
-   * @param {string} inputText
    * @private
    */
-  sendText_(inputText) {
-    if (inputText.length == 0) {
+  sendText_() {
+    if (this.input.length == 0) {
       return;
     }
     this.rootEl_.classList.toggle(
       'i-amphtml-story-interactive-can-send',
       false
     );
-    this.rootEl_.querySelector('textarea').disabled = true;
-    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
-      state: EmbeddedComponentState.HIDDEN,
-    });
     this.updateToPostSelectionState_();
+    this.input.blur();
+    this.input.disabled = true;
+    setTimeout(
+      () =>
+        this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+          state: EmbeddedComponentState.HIDDEN,
+        }),
+      500
+    );
   }
 
   /** @override */

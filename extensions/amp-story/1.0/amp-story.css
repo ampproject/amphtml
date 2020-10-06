@@ -429,6 +429,10 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
+amp-story-interactive-text {
+  transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
 .i-amphtml-story-grid-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
@@ -974,4 +978,9 @@ amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
 
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
   --i-amphtml-interactive-animation-delay: 350ms !important;
+}
+
+amp-story-interactive-text.i-amphtml-embedded-component::after {
+  content: none !important;
+  pointer-events: none !important;
 }

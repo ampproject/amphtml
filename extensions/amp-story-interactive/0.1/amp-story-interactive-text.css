@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-
-.i-amphtml-story-interactive-container.i-amphtml-story-interative-iphone {
-  transform: translateY(-50%);
-}
-
 .i-amphtml-story-interactive-input-container {
   background-color: var(--i-amphtml-interactive-option-background-color);
   border-radius: 1.5em;
@@ -30,6 +25,7 @@
   justify-content: stretch;
   position: relative;
   z-index: 0;
+  pointer-events: all;
 }
 
 .i-amphtml-story-interactive-input {
@@ -51,11 +47,11 @@
   padding: 1em;
   margin: 1em;
   outline: none;
-  pointer-events: all;
+  pointer-events: none;
   position: relative;
   z-index: 0;
   border: 0.1em solid var(--i-amphtml-interactive-option-text-color);
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-input {
@@ -64,8 +60,14 @@
   color: var(--i-amphtml-interactive-option-text);
 }
 
+[expanded] .i-amphtml-story-interactive-input {
+  pointer-events: all;
+}
+
 .i-amphtml-story-interactive-input:focus {
   border-color: var(--i-amphtml-interactive-strong-text-color);
+  color: var(--i-amphtml-interactive-strong-text-color);
+  opacity: 1;
 }
 
 .i-amphtml-story-interacive-text-send {
@@ -100,6 +102,9 @@
   transform: translateY(0px);
   max-height: initial;
   padding-bottom: 1em;
+  pointer-events: none;
+  padding: 1em;
+  padding-top: 0;
 }
 
 .i-amphtml-story-interactive-can-send .i-amphtml-story-interacive-text-send {

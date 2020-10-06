@@ -583,6 +583,18 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * Checks if click should be handled by the interactive text
+   * than by navigation.
+   * @param {!Event} event
+   * @return {boolean}
+   * @private
+   */
+  isHandledByInteractiveText_(event) {
+    const target = dev().assertElement(event.target);
+    return target.tagName == 'AMP-STORY-INTERACTIVE-TEXT';
+  }
+
+  /**
    * Check if click should be handled by the affiliate link logic.
    * @param {!Element} target
    * @private
@@ -614,8 +626,10 @@ export class ManualAdvancement extends AdvancementConfig {
     const pageRect = this.element_.getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
-      event.stopPropagation();
-      event.preventDefault();
+      if (!this.isHandledByInteractiveText_(event)) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
       const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
       ));

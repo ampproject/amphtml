@@ -10,21 +10,37 @@
       body {
         font-family: 'Rubik', sans-serif;
       }
-      .text {
-        justify-self: center;
-        align-self: center;
-        font-size: calc(3 * var(--story-page-vmin));
+      .text-1 {
+        top: 70%;
+        position: absolute;
+        left: 10%;
+        font-size: calc(2.5 * var(--story-page-vmin));
+        transform: rotate(20deg);
+        --interactive-accent-color: #6d3c22;
       }
 
-      amp-story-grid-layer[template="center"]::after {
-        content: "";
-        width: 75%;
-        height: 19.4%;
-        background: red;
+      .text-2 {
+        top: 60%;
         position: absolute;
-        left: 12.5%;
-        top: 42.4%;
-        z-index: -1;
+        left: 13%;
+        --interactive-accent-color: #10aa25;
+      }
+
+      amp-story-interactive-text.text-3 {
+        top: 55%;
+        position: absolute;
+        left: 20%;
+        font-size: calc(2.5 * var(--story-page-vmin));
+        --interactive-prompt-alignment: center;
+        --interactive-accent-color: #fa357d;
+        width: 22em;
+      }
+
+      .red-lounge {
+        font-family: 'Playfair Display SC', serif;
+        color: white;
+        margin: 0;
+        padding: 0;
       }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -32,6 +48,7 @@
     <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
     <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display+SC:wght@700&display=swap" rel="stylesheet">
   </head>
   <body>
     <amp-story
@@ -40,91 +57,75 @@
         publisher="AMP Story testing"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
-        <!-- <amp-story-page id="twit-1">
-          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
-            <amp-img
-                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
-                layout="responsive"
-                height="1600"
-                width="900"
-                style="opacity: 0.2">
-            </amp-img>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="center">
-            <amp-twitter interactive
-              width="375"
-              height="472"
-              layout="responsive"
-              data-tweetid="885634330868850689">
-            </amp-twitter>
-            </amp-story-interactive-text>
-          </amp-story-grid-layer>
-        </amp-story-page> -->
         <amp-story-page id="text-1">
-          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
+          <amp-story-grid-layer template="fill">
             <amp-img
-                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                src="https://images.unsplash.com/photo-1592471657072-8f998e2af6aa?ixlib=rb-1.2.1&auto=format&fit=crop&w=2550&q=80"
                 layout="responsive"
                 height="1600"
-                width="900"
-                style="opacity: 0.2">
+                width="900">
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-text
-              class="text"
-              style="--interactive-accent-color: #233abc"
+              class="text-1"
               theme="light"
-              prompt-text="What did you think about the interactive components?"
-              placeholder-text="Type here..."
-              response-text="Thanks for sending feedback!">
+              input-type="email"
+              prompt-text="Sign up to our newsletter"
+              placeholder-text="Email here"
+              response-text="Thanks for signing up!">
             </amp-story-interactive-text>
           </amp-story-grid-layer>
         </amp-story-page>
-        <!-- <amp-story-page id="text-2">
-          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
+        <amp-story-page id="text-2">
+          <amp-story-grid-layer template="fill" style="background:black">
             <amp-img
-                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1275&q=80"
                 layout="responsive"
                 height="1600"
                 width="900"
-                style="opacity: 0.2">
+                style="opacity:0.8">
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-text
-              class="text"
-              style="--interactive-accent-color: #fa357d"
-              theme="dark"
-              prompt-text="What did you think about the interactive components?"
-              placeholder-text="Type here..."
-              response-text="Thanks for sending feedback!">
+              class="text-2"
+              theme="light"
+              prompt-text="Who's your favorite player?"
+              placeholder-text="Enter here"
+              response-text="That's a great player!">
             </amp-story-interactive-text>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="text-3">
-          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
+          <amp-story-grid-layer template="fill">
             <amp-img
-                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                src="https://images.unsplash.com/photo-1583376097610-516c37bb66ba?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1234&q=80"
                 layout="responsive"
                 height="1600"
-                width="900"
-                style="opacity: 0.2">
+                width="900">
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-text
-              class="text"
-              style="--interactive-accent-color: #fa357d"
+              class="text-3"
               theme="light"
-              chip-style="shadow"
-              prompt-text="What did you think about the interactive components?"
-              placeholder-text="Type here..."
-              response-text="Thanks for sending feedback!">
+              prompt-size="large"
+              input-type="number"
+              prompt-text="Want to RSVP?"
+              placeholder-text="Phone number"
+              response-text="See you there!">
             </amp-story-interactive-text>
           </amp-story-grid-layer>
+          <amp-story-grid-layer template="vertical">
+            <div style="font-size:2.5em; border-left: 0.1em solid red;padding-left: 0.2em;">
+              <h2 class="red-lounge" style="font-size:1em">The red</h2>
+              <h1 class="red-lounge" style="font-size:1.5em;margin-top:-0.5em">lounge</h1>
+              <h3 class="red-lounge" style="font-size:0.5em">Scare fest 10/31</h3>
+            </div>
+          </amp-story-grid-layer>
         </amp-story-page>
-        <amp-story-page id="text-4">
+        <!-- <amp-story-page id="text-4">
           <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
             <amp-img
                 src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
