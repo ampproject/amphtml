@@ -229,7 +229,9 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
+      expect(renderedSlides).to.have.ordered.members(
+        userSuppliedChildren.slice(0, 2)
+      );
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(2);
     });
@@ -241,7 +243,9 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
+      expect(renderedSlides).to.have.ordered.members(
+        userSuppliedChildren.slice(0, 2)
+      );
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(0);
     });
