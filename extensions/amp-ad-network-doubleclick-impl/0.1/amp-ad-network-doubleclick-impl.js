@@ -435,6 +435,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
     }
+    const ssrExpIds = this.getSsrExpIds_();
+    for (let i = 0; i < ssrExpIds.length; i++) {
+      this.experimentIds.push(ssrExpIds[i]);
+    }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
     }
