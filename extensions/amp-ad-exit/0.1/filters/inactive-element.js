@@ -15,7 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {dev, user} from '../../../../src/log';
+import {dev, userAssert} from '../../../../src/log';
 import {matches} from '../../../../src/dom';
 
 /**
@@ -29,8 +29,7 @@ export class InactiveElementFilter extends Filter {
    */
   constructor(name, spec) {
     super(name, spec.type);
-    user().assert(isValidInactiveElementSpec(spec),
-        'Invalid InactiveElementspec');
+    userAssert(isValidInactiveElementSpec(spec), 'Invalid InactiveElementspec');
 
     /** @private {string} */
     this.selector_ = spec.selector;
@@ -48,12 +47,14 @@ export class InactiveElementFilter extends Filter {
  * @return {boolean} Whether the config defines a InactiveElement filter.
  */
 function isValidInactiveElementSpec(spec) {
-  return spec.type == FilterType.INACTIVE_ELEMENT &&
-      typeof spec.selector == 'string';
+  return (
+    spec.type == FilterType.INACTIVE_ELEMENT && typeof spec.selector == 'string'
+  );
 }
 
 /**
  * @param {string} selector A CSS selector matching elements to ignore.
+ * @return {!../config.ClickLocationConfig}
  */
 export function makeInactiveElementSpec(selector) {
   return {type: FilterType.INACTIVE_ELEMENT, selector};

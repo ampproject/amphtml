@@ -27,6 +27,8 @@ FAIL
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style>body {opacity: 0}</style>
+>>   ^~~~~~~~~
+feature_tests/new_and_old_boilerplate_mixed2.html:28:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
 |    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
@@ -35,4 +37,4 @@ FAIL
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/new_and_old_boilerplate_mixed2.html:35:6 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
+feature_tests/new_and_old_boilerplate_mixed2.html:35:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)

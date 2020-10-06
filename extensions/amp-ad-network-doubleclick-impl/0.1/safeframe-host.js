@@ -15,12 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {getStyle} from '../../../src/style';
+import {getStyle, setStyles} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
 
@@ -62,9 +61,6 @@ export const SERVICE = {
 /** @private {string} */
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 
-/** @const {string} */
-export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
-
 /**
  * Event listener callback for message events. If message is a Safeframe
  * message, handles the message. This listener is registered within
@@ -73,8 +69,7 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
  */
 export function safeframeListener(event) {
   const data = tryParseJson(getData(event));
-  /** Only process messages that are valid Safeframe messages */
-  if (event.origin != SAFEFRAME_ORIGIN || !data) {
+  if (!data) {
     return;
   }
   const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]) || {};
@@ -88,12 +83,18 @@ export function safeframeListener(event) {
     dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
     return;
   }
+  if (!safeframeHost.equalsSafeframeContentWindow(event.source)) {
+    dev().warn(TAG, `Safeframe source did not match event.source.`);
+    return;
+  }
   if (!safeframeHost.channel) {
     safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
   } else if (payload) {
     // Currently we do not expect a payload on initial connection messages.
-    safeframeHost.processMessage(/** @type {!JsonObject} */(payload),
-        data[MESSAGE_FIELDS.SERVICE]);
+    safeframeHost.processMessage(
+      /** @type {!JsonObject} */ (payload),
+      data[MESSAGE_FIELDS.SERVICE]
+    );
   }
 }
 
@@ -118,20 +119,19 @@ export function safeframeListener(event) {
  *  then calls the instance of send() below whenever an update occurs.
  */
 export class SafeframeHostApi {
-
   /**
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
    * @param {{width:number, height:number}} creativeSize
-   * @param {?string} fluidImpressionUrl
    */
-  constructor(baseInstance, isFluid, creativeSize, fluidImpressionUrl) {
+  constructor(baseInstance, isFluid, creativeSize) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
     /** @private {!Function} */
     this.checkStillCurrent_ = this.baseInstance_.verifyStillCurrent.bind(
-        this.baseInstance_)();
+      this.baseInstance_
+    )();
 
     /** @private {!Window} */
     this.win_ = this.baseInstance_.win;
@@ -161,17 +161,14 @@ export class SafeframeHostApi {
     this.creativeSize_ = creativeSize;
 
     /** @private {{width:number, height:number}} */
-    this.initialCreativeSize_ =
-      /** @private {{width:number, height:number}} */
-      (Object.assign({}, creativeSize));
+    this.initialCreativeSize_ = /** @type {{width:number, height:number}} */ ({
+      ...creativeSize,
+    });
 
-    /** @private {?string} */
-    this.fluidImpressionUrl_ = fluidImpressionUrl;
-
-    /** @private {?Promise} */
+    /** @protected {?Promise} */
     this.delay_ = null;
 
-    /** @private {../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = this.baseInstance_.getViewport();
 
     /** @private {boolean} */
@@ -181,21 +178,38 @@ export class SafeframeHostApi {
     this.isRegistered_ = false;
 
     // TODO: Make this page-level.
-    const sfConfig = Object(tryParseJson(
-        this.baseInstance_.element.getAttribute(
-            'data-safeframe-config')) || {});
+    const sfConfig = Object(
+      tryParseJson(
+        this.baseInstance_.element.getAttribute('data-safeframe-config')
+      ) || {}
+    );
     /** @private {boolean} */
-    this.expandByOverlay_ = hasOwn(sfConfig, 'expandByOverlay') ?
-      sfConfig['expandByOverlay'] : true;
+    this.expandByOverlay_ = hasOwn(sfConfig, 'expandByOverlay')
+      ? sfConfig['expandByOverlay']
+      : true;
 
     /** @private {boolean} */
-    this.expandByPush_ = hasOwn(sfConfig, 'expandByPush') ?
-      sfConfig['expandByPush'] : true;
+    this.expandByPush_ = hasOwn(sfConfig, 'expandByPush')
+      ? sfConfig['expandByPush']
+      : true;
 
     /** @private {?Function} */
     this.unlisten_ = null;
 
     this.registerSafeframeHost();
+  }
+
+  /**
+   * Returns true if the given window matches the Safeframe's content window.
+   * Comparing to a null window will always return false.
+   *
+   * @param {Window|null} otherWindow
+   * @return {boolean}
+   */
+  equalsSafeframeContentWindow(otherWindow) {
+    return (
+      !!otherWindow && otherWindow === this.baseInstance_.iframe.contentWindow
+    );
   }
 
   /**
@@ -209,26 +223,28 @@ export class SafeframeHostApi {
     attributes['hostPeerName'] = this.win_.location.origin;
     attributes['initialGeometry'] = this.getInitialGeometry();
     attributes['permissions'] = JSON.stringify(
-        dict({
-          'expandByOverlay': this.expandByOverlay_,
-          'expandByPush': this.expandByPush_,
-          'readCookie': false,
-          'writeCookie': false,
-        }));
+      dict({
+        'expandByOverlay': this.expandByOverlay_,
+        'expandByPush': this.expandByPush_,
+        'readCookie': false,
+        'writeCookie': false,
+      })
+    );
     attributes['metadata'] = JSON.stringify(
-        dict({
-          'shared': {
-            'sf_ver': this.baseInstance_.safeframeVersion,
-            'ck_on': 1,
-            'flash_ver': '26.0.0',
-            // Once GPT Safeframe is updated to look in amp object,
-            // remove this canonical_url here.
+      dict({
+        'shared': {
+          'sf_ver': this.baseInstance_.safeframeVersion,
+          'ck_on': 1,
+          'flash_ver': '26.0.0',
+          // Once GPT Safeframe is updated to look in amp object,
+          // remove this canonical_url here.
+          'canonical_url': this.maybeGetCanonicalUrl(),
+          'amp': {
             'canonical_url': this.maybeGetCanonicalUrl(),
-            'amp': {
-              'canonical_url': this.maybeGetCanonicalUrl(),
-            },
           },
-        }));
+        },
+      })
+    );
     attributes['reportCreativeGeometry'] = this.isFluid_;
     attributes['isDifferentSourceWindow'] = false;
     attributes['sentinel'] = this.sentinel_;
@@ -245,14 +261,13 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const {canonicalUrl} = Services.documentInfoForDoc(
-        this.baseInstance_.getAmpDoc());
-    const metaReferrer = this.win_.document.querySelector(
-        "meta[name='referrer']");
+    const ampdoc = this.baseInstance_.getAmpDoc();
+    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+    const metaReferrer = ampdoc.getMetaByName('referrer');
     if (!metaReferrer) {
       return canonicalUrl;
     }
-    switch (metaReferrer.getAttribute('content')) {
+    switch (metaReferrer) {
       case 'same-origin':
         return;
       case 'no-referrer':
@@ -295,7 +310,7 @@ export class SafeframeHostApi {
    * that as well.
    */
   registerSafeframeHost() {
-    dev().assert(this.sentinel_);
+    devAssert(this.sentinel_);
     safeframeHosts[this.sentinel_] = safeframeHosts[this.sentinel_] || this;
     if (!safeframeListenerCreated_) {
       safeframeListenerCreated_ = true;
@@ -312,14 +327,17 @@ export class SafeframeHostApi {
     // Set the iframe here, because when class is first created the iframe
     // element does not yet exist on this.baseInstance_. The first time
     // we receive a message we know that it now exists.
-    dev().assert(this.baseInstance_.iframe);
+    devAssert(this.baseInstance_.iframe);
     this.iframe_ = this.baseInstance_.iframe;
     this.channel = channel;
     this.setupGeom_();
-    this.sendMessage_({
-      'message': 'connect',
-      'c': this.channel,
-    }, '');
+    this.sendMessage_(
+      {
+        'message': 'connect',
+        'c': this.channel,
+      },
+      ''
+    );
   }
 
   /**
@@ -331,10 +349,12 @@ export class SafeframeHostApi {
    * @private
    */
   setupGeom_() {
-    dev().assert(this.iframe_.contentWindow,
-        'Frame contentWindow unavailable.');
+    devAssert(this.iframe_.contentWindow, 'Frame contentWindow unavailable.');
     const throttledUpdate = throttle(
-        this.win_, this.updateGeometry_.bind(this), 1000);
+      this.win_,
+      this.updateGeometry_.bind(this),
+      1000
+    );
     const scrollUnlistener = this.viewport_.onScroll(throttledUpdate);
     const changedUnlistener = this.viewport_.onChanged(throttledUpdate);
     this.unlisten_ = () => {
@@ -352,14 +372,20 @@ export class SafeframeHostApi {
     if (!this.iframe_) {
       return;
     }
-    this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
-      this.checkStillCurrent_();
-      const formattedGeom = this.formatGeom_(iframeBox);
-      this.sendMessage_({
-        newGeometry: formattedGeom,
-        uid: this.uid_,
-      }, SERVICE.GEOMETRY_UPDATE);
-    }).catch(err => dev().error(TAG, err));
+    this.viewport_
+      .getClientRectAsync(this.iframe_)
+      .then((iframeBox) => {
+        this.checkStillCurrent_();
+        const formattedGeom = this.formatGeom_(iframeBox);
+        this.sendMessage_(
+          {
+            newGeometry: formattedGeom,
+            uid: this.uid_,
+          },
+          SERVICE.GEOMETRY_UPDATE
+        );
+      })
+      .catch((err) => dev().error(TAG, err));
   }
 
   /**
@@ -373,7 +399,7 @@ export class SafeframeHostApi {
     const viewportSize = this.viewport_.getSize();
     const scrollLeft = this.viewport_.getScrollLeft();
     const scrollTop = this.viewport_.getScrollTop();
-    const currentGeometry = /** @type {JsonObject} */({
+    const currentGeometry = /** @type {JsonObject} */ ({
       'windowCoords_t': 0,
       'windowCoords_r': viewportSize.width,
       'windowCoords_b': viewportSize.height,
@@ -389,16 +415,20 @@ export class SafeframeHostApi {
       'styleZIndex': getStyle(this.baseInstance_.element, 'zIndex'),
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
-      'allowedExpansion_r': viewportSize.width -
-          iframeBox.width,
-      'allowedExpansion_b': viewportSize.height -
-          iframeBox.height,
+      'allowedExpansion_r': viewportSize.width - iframeBox.width,
+      'allowedExpansion_b': viewportSize.height - iframeBox.height,
       'allowedExpansion_t': 0,
       'allowedExpansion_l': 0,
-      'yInView': this.getPercInView(viewportSize.height,
-          iframeBox.top, iframeBox.bottom),
-      'xInView': this.getPercInView(viewportSize.width,
-          iframeBox.left, iframeBox.right),
+      'yInView': this.getPercInView(
+        viewportSize.height,
+        iframeBox.top,
+        iframeBox.bottom
+      ),
+      'xInView': this.getPercInView(
+        viewportSize.width,
+        iframeBox.left,
+        iframeBox.right
+      ),
     });
     this.currentGeometry_ = currentGeometry;
     return JSON.stringify(currentGeometry);
@@ -416,8 +446,10 @@ export class SafeframeHostApi {
    * @return {number}
    */
   getPercInView(rootBoundEnd, boundingRectStart, boundingRectEnd) {
-    const lengthInView = (boundingRectEnd >= rootBoundEnd) ?
-      rootBoundEnd - boundingRectStart : boundingRectEnd;
+    const lengthInView =
+      boundingRectEnd >= rootBoundEnd
+        ? rootBoundEnd - boundingRectStart
+        : boundingRectEnd;
     const percInView = lengthInView / (boundingRectEnd - boundingRectStart);
     return Math.max(0, Math.min(1, percInView)) || 0;
   }
@@ -429,19 +461,19 @@ export class SafeframeHostApi {
    * @private
    */
   sendMessage_(payload, serviceName) {
-    if (!this.iframe_.contentWindow) {
-      dev().error(TAG, 'Frame contentWindow unavailable.');
+    if (!this.iframe_ || !this.iframe_.contentWindow) {
+      dev().expectedError(TAG, 'Frame contentWindow unavailable.');
       return;
     }
     const message = dict();
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(
-        /** @type {!JsonObject} */(payload));
+      /** @type {!JsonObject} */ (payload)
+    );
     message[MESSAGE_FIELDS.SERVICE] = serviceName;
     message[MESSAGE_FIELDS.SENTINEL] = this.sentinel_;
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
-    this.iframe_.contentWindow./*OK*/postMessage(
-        JSON.stringify(message), SAFEFRAME_ORIGIN);
+    this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
 
   /**
@@ -472,7 +504,6 @@ export class SafeframeHostApi {
     }
   }
 
-
   /**
    * @param {!JsonObject} payload
    * @private
@@ -481,33 +512,39 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
-    const expandHeight = Number(this.creativeSize_.height) +
-          payload['expand_b'] + payload['expand_t'];
-    const expandWidth = Number(this.creativeSize_.width) +
-          payload['expand_r'] + payload['expand_l'];
+    const expandHeight =
+      Number(this.creativeSize_.height) +
+      payload['expand_b'] +
+      payload['expand_t'];
+    const expandWidth =
+      Number(this.creativeSize_.width) +
+      payload['expand_r'] +
+      payload['expand_l'];
     // Verify that if expanding by push, that expandByPush is allowed.
     // If expanding by overlay, verify that expandByOverlay is allowed,
     // and that we are only expanding within the bounds of the amp-ad.
-    if (isNaN(expandHeight) || isNaN(expandWidth) ||
-        (payload['push'] && !this.expandByPush_) ||
-        (!payload['push'] && !this.expandByOverlay_ &&
-         (expandWidth > this.creativeSize_.width ||
-          expandHeight > this.creativeSize_.height))) {
+    if (
+      isNaN(expandHeight) ||
+      isNaN(expandWidth) ||
+      (payload['push'] && !this.expandByPush_) ||
+      (!payload['push'] &&
+        !this.expandByOverlay_ &&
+        (expandWidth > this.creativeSize_.width ||
+          expandHeight > this.creativeSize_.height))
+    ) {
       dev().error(TAG, 'Invalid expand values.');
-      this.sendResizeResponse(
-          /* SUCCESS? */ false, SERVICE.EXPAND_RESPONSE);
+      this.sendResizeResponse(/* SUCCESS? */ false, SERVICE.EXPAND_RESPONSE);
       return;
     }
     // Can't expand to greater than the viewport size
-    if (expandHeight > this.viewport_.getSize().height ||
-        expandWidth > this.viewport_.getSize().width) {
-      this.sendResizeResponse(
-          /* SUCCESS? */ false, SERVICE.EXPAND_RESPONSE);
+    if (
+      expandHeight > this.viewport_.getSize().height ||
+      expandWidth > this.viewport_.getSize().width
+    ) {
+      this.sendResizeResponse(/* SUCCESS? */ false, SERVICE.EXPAND_RESPONSE);
       return;
     }
-    this.handleSizeChange(expandHeight,
-        expandWidth,
-        SERVICE.EXPAND_RESPONSE);
+    this.handleSizeChange(expandHeight, expandWidth, SERVICE.EXPAND_RESPONSE);
   }
 
   /**
@@ -516,14 +553,15 @@ export class SafeframeHostApi {
   handleCollapseRequest_() {
     // Only collapse if expanded.
     if (this.isCollapsed_ || !this.isRegistered_) {
-      this.sendResizeResponse(
-          /* SUCCESS? */ false, SERVICE.COLLAPSE_RESPONSE);
+      this.sendResizeResponse(/* SUCCESS? */ false, SERVICE.COLLAPSE_RESPONSE);
       return;
     }
-    this.handleSizeChange(this.initialCreativeSize_.height,
-        this.initialCreativeSize_.width,
-        SERVICE.COLLAPSE_RESPONSE,
-        /** isCollapse */ true);
+    this.handleSizeChange(
+      this.initialCreativeSize_.height,
+      this.initialCreativeSize_.width,
+      SERVICE.COLLAPSE_RESPONSE,
+      /** isCollapse */ true
+    );
   }
 
   /**
@@ -534,21 +572,21 @@ export class SafeframeHostApi {
   resizeSafeframe(height, width, messageType) {
     this.isCollapsed_ = messageType == SERVICE.COLLAPSE_RESPONSE;
     this.baseInstance_.measureMutateElement(
-        /** MEASURER */ () => {
-          this.baseInstance_.getResource().measure();
-        },
-        /** MUTATOR */ () => {
-          if (this.iframe_) {
-            setStyles(this.iframe_, {
-              'height': height + 'px',
-              'width': width + 'px',
-            });
-            this.creativeSize_.height = height;
-            this.creativeSize_.width = width;
-          }
-          this.sendResizeResponse(/** SUCCESS */ true, messageType);
-        },
-        this.iframe_
+      /** MEASURER */ () => {
+        this.baseInstance_.getResource().measure();
+      },
+      /** MUTATOR */ () => {
+        if (this.iframe_) {
+          setStyles(this.iframe_, {
+            'height': height + 'px',
+            'width': width + 'px',
+          });
+          this.creativeSize_.height = height;
+          this.creativeSize_.width = width;
+        }
+        this.sendResizeResponse(/** SUCCESS */ true, messageType);
+      },
+      this.iframe_
     );
   }
 
@@ -568,17 +606,23 @@ export class SafeframeHostApi {
    * @param {number} width In pixels.
    * @param {string} messageType
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
+   * @return {*} TODO(#23582): Specify return type
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
-    return this.viewport_.getClientRectAsync(
-        this.baseInstance_.element).then(box => {
-      if (!optIsCollapse && width <= box.width && height <= box.height) {
-        this.resizeSafeframe(height, width, messageType);
-      } else {
-        this.resizeAmpAdAndSafeframe(height, width, messageType,
-            optIsCollapse);
-      }
-    });
+    return this.viewport_
+      .getClientRectAsync(this.baseInstance_.element)
+      .then((box) => {
+        if (!optIsCollapse && width <= box.width && height <= box.height) {
+          this.resizeSafeframe(height, width, messageType);
+        } else {
+          this.resizeAmpAdAndSafeframe(
+            height,
+            width,
+            messageType,
+            optIsCollapse
+          );
+        }
+      });
   }
 
   /**
@@ -589,21 +633,25 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
-    const resizeHeight = Number(this.creativeSize_.height) +
-          (payload['resize_b'] + payload['resize_t']);
-    const resizeWidth = Number(this.creativeSize_.width) +
-          (payload['resize_r'] + payload['resize_l']);
+    const resizeHeight =
+      Number(this.creativeSize_.height) +
+      (payload['resize_b'] + payload['resize_t']);
+    const resizeWidth =
+      Number(this.creativeSize_.width) +
+      (payload['resize_r'] + payload['resize_l']);
 
     // Make sure we are actually resizing here.
-    if (isNaN(resizeWidth) || isNaN(resizeHeight) ||
-        resizeWidth > this.creativeSize_.width ||
-        resizeHeight > this.creativeSize_.height) {
+    if (isNaN(resizeWidth) || isNaN(resizeHeight)) {
       dev().error(TAG, 'Invalid resize values.');
       return;
     }
 
-    this.resizeAmpAdAndSafeframe(resizeHeight, resizeWidth,
-        SERVICE.RESIZE_RESPONSE, true);
+    this.resizeAmpAdAndSafeframe(
+      resizeHeight,
+      resizeWidth,
+      SERVICE.RESIZE_RESPONSE,
+      true
+    );
   }
 
   /**
@@ -614,20 +662,26 @@ export class SafeframeHostApi {
     if (!this.iframe_) {
       return;
     }
-    this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
-      this.checkStillCurrent_();
-      const formattedGeom = this.formatGeom_(iframeBox);
-      this.sendMessage_({
-        uid: this.uid_,
-        success,
-        newGeometry: formattedGeom,
-        'expand_t': this.currentGeometry_['allowedExpansion_t'],
-        'expand_b': this.currentGeometry_['allowedExpansion_b'],
-        'expand_r': this.currentGeometry_['allowedExpansion_r'],
-        'expand_l': this.currentGeometry_['allowedExpansion_l'],
-        push: true,
-      }, messageType);
-    }).catch(err => dev().error(TAG, err));
+    this.viewport_
+      .getClientRectAsync(this.iframe_)
+      .then((iframeBox) => {
+        this.checkStillCurrent_();
+        const formattedGeom = this.formatGeom_(iframeBox);
+        this.sendMessage_(
+          {
+            uid: this.uid_,
+            success,
+            newGeometry: formattedGeom,
+            'expand_t': this.currentGeometry_['allowedExpansion_t'],
+            'expand_b': this.currentGeometry_['allowedExpansion_b'],
+            'expand_r': this.currentGeometry_['allowedExpansion_r'],
+            'expand_l': this.currentGeometry_['allowedExpansion_l'],
+            push: true,
+          },
+          messageType
+        );
+      })
+      .catch((err) => dev().error(TAG, err));
   }
 
   /**
@@ -642,38 +696,44 @@ export class SafeframeHostApi {
   resizeAmpAdAndSafeframe(height, width, messageType, opt_isShrinking) {
     // First, attempt to resize the Amp-Ad that is the parent of the
     // safeframe
-    this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      this.checkStillCurrent_();
-      // If this resize succeeded, we always resize the safeframe.
-      // resizeSafeframe also sends the resize response.
-      this.resizeSafeframe(height, width, messageType);
-    }, /** REJECT CALLBACK */ () => {
-      // If the resize initially failed, it may have been queued
-      // as a pendingChangeSize, which will cause the size change
-      // to execute upon the next user interaction. We don't want
-      // that for safeframe, so we reset it here.
-      this.baseInstance_.getResource().resetPendingChangeSize();
-      if (opt_isShrinking) {
-        // If this is a collapse or resize request, then even if resizing
-        // the amp-ad failed, still resize the iframe.
-        // resizeSafeframe also sends the resize response.
-        // Only register as collapsed if explicitly a collapse request.
-        this.resizeSafeframe(height, width, messageType);
-      } else {
-        // We were attempting to
-        // expand past the bounds of the amp-ad, and it failed. Thus,
-        // we need to send a failure message, and the safeframe is
-        // not resized.
+    this.baseInstance_
+      .attemptChangeSize(height, width)
+      .then(
+        () => {
+          this.checkStillCurrent_();
+          // If this resize succeeded, we always resize the safeframe.
+          // resizeSafeframe also sends the resize response.
+          this.resizeSafeframe(height, width, messageType);
+        },
+        /** REJECT CALLBACK */ () => {
+          // If the resize initially failed, it may have been queued
+          // as a pendingChangeSize, which will cause the size change
+          // to execute upon the next user interaction. We don't want
+          // that for safeframe, so we reset it here.
+          this.baseInstance_.getResource().resetPendingChangeSize();
+          if (opt_isShrinking) {
+            // If this is a collapse or resize request, then even if resizing
+            // the amp-ad failed, still resize the iframe.
+            // resizeSafeframe also sends the resize response.
+            // Only register as collapsed if explicitly a collapse request.
+            this.resizeSafeframe(height, width, messageType);
+          } else {
+            // We were attempting to
+            // expand past the bounds of the amp-ad, and it failed. Thus,
+            // we need to send a failure message, and the safeframe is
+            // not resized.
+            this.sendResizeResponse(false, messageType);
+          }
+        }
+      )
+      .catch((err) => {
+        if (err.message == 'CANCELLED') {
+          dev().error(TAG, err);
+          return;
+        }
+        dev().error(TAG, `Resizing failed: ${err}`);
         this.sendResizeResponse(false, messageType);
-      }
-    }).catch(err => {
-      if (err.message == 'CANCELLED') {
-        dev().error(TAG, err);
-        return;
-      }
-      dev().error(TAG, `Resizing failed: ${err}`);
-      this.sendResizeResponse(false, messageType);
-    });
+      });
   }
 
   /**
@@ -684,22 +744,21 @@ export class SafeframeHostApi {
   handleFluidMessage_(payload) {
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
-      // TODO(levitzky) Add actual error handling here.
-      this.baseInstance_.forceCollapse();
       return;
     }
-    this.baseInstance_.attemptChangeHeight(newHeight)
-        .then(() => {
-          this.checkStillCurrent_();
-          this.onFluidResize_(newHeight);
-        }).catch(err => {
-          if (err.message == 'CANCELLED') {
-            dev().error(TAG, err);
-            return;
-          }
-          // TODO(levitzky) Add more error handling here
-          this.baseInstance_.forceCollapse();
-        });
+    this.baseInstance_
+      .attemptChangeHeight(newHeight)
+      .then(() => {
+        this.checkStillCurrent_();
+        this.onFluidResize_(newHeight);
+      })
+      .catch((err) => {
+        user().warn(TAG, err);
+        const {width, height} = this.baseInstance_.getSlotSize();
+        if (width && height) {
+          this.onFluidResize_(height);
+        }
+      });
   }
 
   /**
@@ -714,14 +773,15 @@ export class SafeframeHostApi {
     if (iframeHeight != newHeight) {
       setStyles(iframe, {height: `${newHeight}px`});
     }
-    if (this.fluidImpressionUrl_) {
-      this.baseInstance_.fireDelayedImpressions(
-          this.fluidImpressionUrl_);
-      this.fluidImpressionUrl_ = null;
+    this.baseInstance_.fireFluidDelayedImpression();
+    // In case we've unloaded in a race condition.
+    if (!this.iframe_.contentWindow) {
+      return;
     }
-    this.iframe_.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
-        SAFEFRAME_ORIGIN);
+    this.iframe_.contentWindow./*OK*/ postMessage(
+      JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
+      '*'
+    );
   }
 
   /**

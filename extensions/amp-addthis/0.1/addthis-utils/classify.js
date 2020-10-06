@@ -26,7 +26,6 @@ const REFERRER_BITS = {
   ON_DOMAIN: 0x2,
   OFF_DOMAIN: 0x4,
 };
-// eslint-disable-next-line max-len
 const RE_SEARCH_TERMS = /^(?:q|search|bs|wd|p|kw|keyword|query|qry|querytext|text|searchcriteria|searchstring|searchtext|sp_q)=(.*)/i;
 const RE_SEARCH_REFERRER = /ws\/results\/(web|images|video|news)/;
 const RE_SEARCH_GOOGLE = /google.*\/(search|url|aclk|m\?)/;
@@ -88,9 +87,11 @@ const classifyRating = (rating = '') => {
   rating = rating.toLowerCase().replace(RE_WHITESPACE, '');
 
   // Check if the rating is adult content
-  if (rating === 'mature' ||
-      rating === 'adult' ||
-      rating === 'rta-5042-1996-1400-1577-rta') {
+  if (
+    rating === 'mature' ||
+    rating === 'adult' ||
+    rating === 'rta-5042-1996-1400-1577-rta'
+  ) {
     classification |= PORN_BIT;
   }
 
@@ -103,7 +104,7 @@ const classifyRating = (rating = '') => {
  * @private
  * @return {Array<string>}
  */
-const extractKeywordsFromContent = content => {
+const extractKeywordsFromContent = (content) => {
   const keywords = [];
   const contentSplit = content.split(',');
   let keywordsSize = 0;
@@ -131,7 +132,7 @@ const extractKeywordsFromContent = content => {
  * @param {string} url
  * @return {string|undefined}
  */
-const getSearchString = url => {
+const getSearchString = (url) => {
   const terms = url.split('?').pop().toLowerCase().split('&');
   let matches;
 
@@ -163,26 +164,28 @@ const isSearchUrl = (url = '') => {
     return false;
   }
 
-  return (lowerUrl.indexOf('addthis') === -1) && (
-    RE_SEARCH_GOOGLE.test(lowerUrl)
-      || RE_SEARCH_AOL.test(lowerUrl) /* search.aol.* /aol/search?q=*/
-      || lowerUrl.indexOf('/pagead/aclk?') > -1 /*googleadservices*/
-      || lowerUrl.indexOf(com + 'url') > -1 /*bing*/
-      || lowerUrl.indexOf(com + 'l.php') > -1 /*facebook graph search*/
-      || lowerUrl.indexOf('/search?') > -1 /* many */
-      || lowerUrl.indexOf('/search/?') > -1 /* a few */
-      || lowerUrl.indexOf('search?') > -1 /*yandex.ru, and presumably others*/
-      || lowerUrl.indexOf('yandex.ru/clck/jsredir?') > -1 /*yandex, no one else */
-      || lowerUrl.indexOf(com + 'search') > -1 /* yahoo (including yahoo int'l), many others */
-      || lowerUrl.indexOf(org + 'search') > -1 /*many .org searches*/
-      || lowerUrl.indexOf('/search.html?') > -1 /* a few */
-      || lowerUrl.indexOf('search/results.') > -1 /*cars.com, gmc.com*/
-      || lowerUrl.indexOf(com + 's?bs') > -1 /*baidu*/
-      || lowerUrl.indexOf(com + 's?wd') > -1 /*baidu*/
-      || lowerUrl.indexOf(com + 'mb?search') > -1 /*manta*/
-      || lowerUrl.indexOf(com + 'mvc/search') > -1 /*eonline*/
-      || lowerUrl.indexOf(com + 'web') > -1 /*ask.com (same in .ca), altavista*/
-      || lowerUrl.indexOf('hotbot' + com) > -1 /*hotbot*/
+  return (
+    lowerUrl.indexOf('addthis') === -1 &&
+    (RE_SEARCH_GOOGLE.test(lowerUrl) ||
+    RE_SEARCH_AOL.test(lowerUrl) /* search.aol.* /aol/search?q=*/ ||
+    lowerUrl.indexOf('/pagead/aclk?') > -1 /*googleadservices*/ ||
+    lowerUrl.indexOf(com + 'url') > -1 /*bing*/ ||
+    lowerUrl.indexOf(com + 'l.php') > -1 /*facebook graph search*/ ||
+    lowerUrl.indexOf('/search?') > -1 /* many */ ||
+    lowerUrl.indexOf('/search/?') > -1 /* a few */ ||
+    lowerUrl.indexOf('search?') > -1 /*yandex.ru, and presumably others*/ ||
+    lowerUrl.indexOf('yandex.ru/clck/jsredir?') > -1 /*yandex, no one else */ ||
+    lowerUrl.indexOf(com + 'search') >
+      -1 /* yahoo (including yahoo int'l), many others */ ||
+    lowerUrl.indexOf(org + 'search') > -1 /*many .org searches*/ ||
+    lowerUrl.indexOf('/search.html?') > -1 /* a few */ ||
+    lowerUrl.indexOf('search/results.') > -1 /*cars.com, gmc.com*/ ||
+    lowerUrl.indexOf(com + 's?bs') > -1 /*baidu*/ ||
+    lowerUrl.indexOf(com + 's?wd') > -1 /*baidu*/ ||
+    lowerUrl.indexOf(com + 'mb?search') > -1 /*manta*/ ||
+    lowerUrl.indexOf(com + 'mvc/search') > -1 /*eonline*/ ||
+    lowerUrl.indexOf(com + 'web') > -1 /*ask.com (same in .ca), altavista*/ ||
+      lowerUrl.indexOf('hotbot' + com) > -1) /*hotbot*/
   );
 };
 
@@ -194,10 +197,10 @@ const isSearchUrl = (url = '') => {
  * @return {number} classification bitmask (currently only setting a porn bit)
  */
 export const classifyPage = (pageInfo, metaElements) => {
-  let bitmask = classifyString(pageInfo.title) |
-      classifyString(pageInfo.hostname, true);
+  let bitmask =
+    classifyString(pageInfo.title) | classifyString(pageInfo.hostname, true);
 
-  metaElements.forEach(metaElement => {
+  metaElements.forEach((metaElement) => {
     const {name, content} = getDetailsForMeta(metaElement);
 
     if (name === 'description' || name === 'keywords') {
@@ -211,7 +214,6 @@ export const classifyPage = (pageInfo, metaElements) => {
 
   return bitmask;
 };
-
 
 /**
  * Returns bitmask based on detected classification
@@ -254,12 +256,14 @@ export const classifyReferrer = (
  */
 export const isProductPage = (doc, metaElements) => {
   // if a single id or class enumerated below exists, return true
-  if (doc.getElementById('product') ||
-      (doc.getElementsByClassName('product') || []).length > 0 ||
-      doc.getElementById('productDescription') ||
-      doc.getElementById('page-product') ||
-      doc.getElementById('vm_cart_products') ||
-      window['Virtuemart']) {
+  if (
+    doc.getElementById('product') ||
+    (doc.getElementsByClassName('product') || []).length > 0 ||
+    doc.getElementById('productDescription') ||
+    doc.getElementById('page-product') ||
+    doc.getElementById('vm_cart_products') ||
+    window['Virtuemart']
+  ) {
     return true;
   }
 
@@ -283,11 +287,11 @@ export const isProductPage = (doc, metaElements) => {
  * @param {Array} metaElements
  * @return {string} csv containing keywords
  */
-export const getKeywordsString = metaElements => {
+export const getKeywordsString = (metaElements) => {
   const keywords = metaElements
-      .filter(meta => getDetailsForMeta(meta).name.toLowerCase() === 'keywords')
-      .map(meta => extractKeywordsFromContent(getDetailsForMeta(meta).content))
-      .reduce((kws, subKeywords) => kws.concat(subKeywords), []);
+    .filter((meta) => getDetailsForMeta(meta).name.toLowerCase() === 'keywords')
+    .map((meta) => extractKeywordsFromContent(getDetailsForMeta(meta).content))
+    .reduce((kws, subKeywords) => kws.concat(subKeywords), []);
 
   return keywords.join(',');
 };

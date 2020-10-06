@@ -5,7 +5,6 @@
   <title>AMP Date Picker Example</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <meta name="amp-experiments-opt-in" content="amp-date-picker">
   <style amp-custom>
   body {
     padding: 20px;
@@ -47,11 +46,24 @@
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
   <h1>amp-date-picker</h1>
+  <h2>highlighted and blocked attributes</h2>
+  <amp-date-picker id="simple-date-picker-3"
+    type="single"
+    mode="static"
+    layout="fixed-height"
+    height="360"
+    on="select:AMP.setState({date3: event.date ? event.date : ''})"
+    locale="en"
+    format="YYYY-MM-DD"
+    highlighted="FREQ=WEEKLY;WKST=SU;BYDAY=TH"
+    blocked="FREQ=WEEKLY;WKST=SU;BYDAY=SA,SU">
+  </amp-date-picker>
+
   <h2><code>&lt;amp-date-range&gt;</code></h2>
   <p>Try to pick a range. This is a date-range picker</p>
   <amp-date-picker
@@ -69,9 +81,9 @@
     day-size="42"
     start-input-selector="#start"
     end-input-selector="#end"
+    minimum-nights="2"
+    maximum-nights="7"
     mode="overlay"
-    open-after-clear
-    open-after-select
   >
     <div>
       <input type="tel" placeholder="Start date" id="start">
@@ -96,7 +108,7 @@
     </template>
   </amp-date-picker>
 
-  <h2>external <code>src</code> static</h2>
+  <h2>external <code>src</code> static single</h2>
   <input id="externalSrc-static" type="tel" placeholder="Pick a date">
   <amp-date-picker
     type="single"
@@ -108,6 +120,25 @@
     height="360"
     format="DD/MM/YYYY"
     input-selector="#externalSrc-static"
+  >
+    <template type="amp-mustache" date-template id="spooky">
+      🙀
+    </template>
+  </amp-date-picker>
+  <h2>external <code>src</code> static range</h2>
+  <input id="externalSrc-static-start" type="tel" placeholder="Pick a date">
+  <input id="externalSrc-static-end" type="tel" placeholder="Pick a date">
+  <amp-date-picker
+    type="range"
+    number-of-months="2"
+    mode="static"
+    src="date-picker.json"
+    layout="fixed-height"
+    first-day-of-week="1"
+    height="360"
+    format="DD/MM/YYYY"
+    start-input-selector="#externalSrc-static-start"
+    end-input-selector="#externalSrc-static-end"
   >
     <template type="amp-mustache" date-template id="spooky">
       🙀
@@ -141,15 +172,15 @@
       ],
       "datesToDetails": {
         "2017-10-20": {
-          "imageUrl": "https://www.ampbyexample.com/img/product1_640x426.jpg",
+          "imageUrl": "https://amp.dev/static/samples/img/product1_640x426.jpg",
           "message": "We are having a special on apples!"
         },
         "2017-10-22": {
-          "imageUrl": "https://www.ampbyexample.com/img/product2_640x426.jpg",
+          "imageUrl": "https://amp.dev/static/samples/img/product2_640x426.jpg",
           "message": "We are having a special on oranges!"
         },
         "2017-10-24": {
-          "imageUrl": "https://www.ampbyexample.com/img/product3_640x426.jpg",
+          "imageUrl": "https://amp.dev/static/samples/img/product3_640x426.jpg",
           "message": "We are having a special on pears!"
         }
       }
@@ -230,7 +261,29 @@
   ></amp-date-picker>
 </amp-lightbox>
 
+<h2>Initial dates</h2>
+<h3>Today default</h3>
+<amp-date-picker date="P0D" layout="fixed-height" height="300"></amp-date-picker>
+
+<h3>Next week default</h3>
+<amp-date-picker type="range" start-date="P4W" end-date="P5W" layout="fixed-height" height="300" number-of-months=3></amp-date-picker>
+
 <h2>Actions</h2>
+<h3>setDate</h3>
+<button on="tap: sdsp.setDate(date='P0D')">Today</button>
+<button on="tap: sdsp.setDate(date='P1D')">Tomorrow</button>
+<button on="tap: sdsp.setDate(date='2018-08-09')">2018-08-09</button>
+<amp-date-picker id="sdsp" layout="fixed-height" height="360"></amp-date-picker>
+
+<h3>setDates</h3>
+<button on="tap: sdrp.setDates(startDate='P0D',endDate='P0D')">Today</button>
+<button on="tap: sdrp.setDates(startDate='P0D',endDate='P1D')">Tonight</button>
+<button on="tap: sdrp.setDates(startDate='P0D',endDate='P1W')">This week</button>
+<button on="tap: sdrp.setDates(startDate='2018-08-09')">Start 2018-08-09</button>
+<button on="tap: sdrp.setDates(endDate='2018-08-10')">End 2018-08-10</button>
+<button on="tap: sdrp.setDates(startDate='2018-08-10',endDate='2018-08-12')">Range 2018-08-10 to 2018-08-12</button>
+<amp-date-picker id="sdrp" type="range" layout="fixed-height" height="360"></amp-date-picker>
+
 <h3>Today</h3>
 <button on="tap: tsp.today">Today</button>
 <button on="tap: tsp.today(offset=1)">Tomorrow</button>
@@ -245,6 +298,60 @@
 <button on="tap: trp.clear">Clear</button>
 <amp-date-picker id="trp" type="range" layout="fixed-height" height="360"></amp-date-picker>
 
+<h2>amp-bind</h2>
+<h3>min</h3>
+<amp-state id="min"><script type="application/json">"2018-10-10"</script></amp-state>
+<div><span [text]="min">2018-10-10</span></div>
+<label>min: <input on="change:AMP.setState({min: event.value})" value="2018-10-10"></label>
+<amp-date-picker mode="static" layout="fixed-height" height="360" min="2018-10-10" [min]="min"></amp-date-picker>
+
+<h3>max</h3>
+<amp-state id="max"><script type="application/json">"2018-10-10"</script></amp-state>
+<div><span [text]="max">2018-10-10</span></div>
+<label>max: <input on="change:AMP.setState({max: event.value})" value="2018-10-10"></label>
+<amp-date-picker mode="static" layout="fixed-height" height="360" max="2018-10-10" [max]="max"></amp-date-picker>
+
+<h3>src</h3>
+<amp-state id="flipflop">
+  <script type="application/json">true</script>
+</amp-state>
+<button on="tap:AMP.setState({flipflop: !flipflop})">Toggle src</button>
+<input id="bind-src-input" type="tel" placeholder="Pick a date">
+<amp-date-picker
+  type="single"
+  number-of-months="1"
+  mode="static"
+  src="date-picker.json"
+  [src]="flipflop ? 'date-picker.json' : 'date-picker-other.json'"
+  layout="fixed-height"
+  first-day-of-week="1"
+  height="360"
+  format="DD/MM/YYYY"
+  input-selector="#bind-src-input"
+>
+  <template type="amp-mustache" date-template id="spooky">
+    🙀
+  </template>
+</amp-date-picker>
+
+<h3>range min/max</h3>
+<h3>min</h3>
+<amp-state id="rangeMin"><script type="application/json">"2018-12-10"</script></amp-state>
+<amp-state id="rangeMax"><script type="application/json">"2018-12-20"</script></amp-state>
+<div>Min: <span [text]="rangeMin">2018-12-10</span></div>
+<div>Max: <span [text]="rangeMax">2018-12-20</span></div>
+<label>min: <input on="change:AMP.setState({rangeMin: event.value})" value="2018-12-10"></label>
+<label>max: <input on="change:AMP.setState({rangeMax: event.value})" value="2018-12-20"></label>
+<amp-date-picker
+    mode="static" type="range" layout="fixed-height" height="360"
+    min="2018-12-10" [min]="rangeMin" max="2018-12-20" [max]="rangeMax"
+></amp-date-picker>
+
+<h3>hide keyboard shortcuts panel</h3>
+<amp-date-picker
+    mode="static" type="single" layout="fixed-height" height="360"
+    hide-keyboard-shortcuts-panel
+></amp-date-picker>
 <div class="spacer"></div>
 </body>
 </html>

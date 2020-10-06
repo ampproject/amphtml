@@ -15,24 +15,49 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
+import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
+import {forceExperimentBranch} from '../../../src/experiments';
+import {includes, startsWith} from '../../../src/string';
+import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
 
-export class AmpAdNetworkFakeImpl extends AmpA4A {
+/**
+ * Allow elements to opt into an experiment branch.
+ * @const {string}
+ */
+const EXPERIMENT_BRANCH_ATTR = 'data-experiment-id';
 
+export class AmpAdNetworkFakeImpl extends AmpA4A {
   /**
    * @param {!Element} element
    */
   constructor(element) {
     super(element);
+
+    /** @private {!./external-reorder-head-transformer.ExternalReorderHeadTransformer} */
+    this.reorderHeadTransformer_ = new ExternalReorderHeadTransformer();
+    /** @private {!./amp-ad-metadata-transformer.AmpAdMetadataTransformer} */
+    this.metadataTransformer_ = new AmpAdMetadataTransformer();
   }
 
   /** @override */
   buildCallback() {
-    user().assert(this.element.hasAttribute('src'),
-        'Attribute src required for <amp-ad type="fake">: %s', this.element);
+    userAssert(
+      this.element.hasAttribute('src') || this.element.hasAttribute('srcdoc'),
+      'Attribute src or srcdoc required for <amp-ad type="fake">: %s',
+      this.element
+    );
+    if (this.element.hasAttribute(EXPERIMENT_BRANCH_ATTR)) {
+      this.element
+        .getAttribute(EXPERIMENT_BRANCH_ATTR)
+        .split(',')
+        .forEach((experiment) => {
+          const expParts = experiment.split(':');
+          forceExperimentBranch(this.win, expParts[0], expParts[1]);
+        });
+    }
     super.buildCallback();
   }
 
@@ -51,29 +76,44 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return this.element.getAttribute('src');
+    const src = this.element.getAttribute('src');
+    if (src) {
+      return src;
+    }
+    const srcdoc = this.element.getAttribute('srcdoc');
+    return `data:text/html,${encodeURIComponent(srcdoc)}`;
   }
 
   /** @override */
   sendXhrRequest(adUrl) {
-    return super.sendXhrRequest(adUrl).then(response => {
+    return super.sendXhrRequest(adUrl).then((response) => {
       if (!response) {
         return null;
       }
-      const {status, headers} =
-      /** @type {{status: number, headers: !Headers}} */ (response);
+      const {
+        status,
+        headers,
+      } = /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.
-      // This mode is primarily used for A4A Envelop for testing.
+      // This mode is primarily used for A4A Envelope for testing.
       // See DEVELOPING.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
-        return response.text().then(
-            responseText => new Response(
-                this.transformCreative_(responseText),
-                {status, headers}));
+        return response.text().then((responseText) => {
+          // When using data: url the legacy amp cors param is interpreted as
+          // part of the body, so remove it.
+          if (includes(responseText, '?__amp_source_origin=')) {
+            responseText = responseText.split('?__amp_source_origin=')[0];
+          }
+          return new Response(this.transformCreative_(responseText), {
+            status,
+            headers,
+          });
+        });
       }
 
-      // Normal mode: Expect the creative is written in AMP4ADS doc.
+      // Normal mode: Expect the creative is already transformed and includes
+      // amp-ad-metadata
       return response;
     });
   }
@@ -99,49 +139,27 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       root.setAttribute('amp4ads', '');
     }
 
-    // Remove all AMP scripts.
-    const extensions = [];
-    const scripts = doc.head.querySelectorAll('script[src]');
-    for (let i = 0; i < scripts.length; i++) {
-      const script = scripts[i];
-      if (script.hasAttribute('custom-element')) {
-        extensions.push(script.getAttribute('custom-element'));
-      } else if (script.hasAttribute('custom-template')) {
-        extensions.push(script.getAttribute('custom-template'));
-      }
-      doc.head.removeChild(script);
+    this.reorderHeadTransformer_.reorderHead(doc.head);
+    const metadata = this.metadataTransformer_.generateMetadata(doc);
+
+    //Removes <amp-ad-metadata> tag if it exists
+    const oldMetadata = doc.querySelector('script[amp-ad-metadata]');
+    if (oldMetadata) {
+      oldMetadata.parentNode.removeChild(oldMetadata);
     }
 
-    // Remove boilerplate styles.
-    const styles = doc.head.querySelectorAll('style[amp-boilerplate]');
-    for (let i = 0; i < styles.length; i++) {
-      const style = styles[i];
-      style.parentNode.removeChild(style);
-    }
-
-    let creative = root./*OK*/outerHTML;
-
-    // Metadata
-    creative += '<script type="application/json" amp-ad-metadata>';
-    creative += '{';
-    creative += '"ampRuntimeUtf16CharOffsets": [0, 0],';
-    creative += '"customElementExtensions": [';
-    for (let i = 0; i < extensions.length; i++) {
-      if (i > 0) {
-        creative += ',';
-      }
-      creative += `"${extensions[i]}"`;
-    }
-    creative += ']';
-    creative += '}';
-    creative += '</script>';
-
-    return creative;
+    const creative = root./*OK*/ outerHTML;
+    const creativeSplit = creative.split('</body>');
+    const docWithMetadata =
+      creativeSplit[0] +
+      `<script type="application/json" amp-ad-metadata>` +
+      metadata +
+      '</script></body>' +
+      creativeSplit[1];
+    return docWithMetadata;
   }
 }
 
-
-AMP.extension('amp-ad-network-fake-impl', '0.1', AMP => {
-  AMP.registerElement(
-      'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+AMP.extension('amp-ad-network-fake-impl', '0.1', (AMP) => {
+  AMP.registerElement('amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
 });

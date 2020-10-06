@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
 import {Renderer} from './amp-ad-type-defs';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
-import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
-import {setStyle} from '../../../src/style';
+import {devAssert} from '../../../src/log';
+import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
  * @typedef {{
- *   creativeMetaData: ./amp-ad-type-defs.CreativeMetaDataDef,
+ *   creativeMetadata: ./amp-ad-type-defs.CreativeMetaDataDef,
  * }}
  */
 export let CreativeData;
@@ -38,77 +29,29 @@ export let CreativeData;
  * Render a validated AMP creative directly in the parent page.
  */
 export class FriendlyFrameRenderer extends Renderer {
-
   /**
    * Constructs a FriendlyFrameRenderer instance. The instance values here are
    * used by TemplateRenderer, which inherits from FriendlyFrameRenderer.
    */
   constructor() {
     super();
-
-    /**
-     * @type {?Element}
-     * @protected
-     */
-    this.iframe = null;
   }
 
   /** @override */
   render(context, element, creativeData) {
-
     creativeData = /** @type {CreativeData} */ (creativeData);
 
-    const {size, requestUrl: adUrl} = context;
+    const {size, adUrl} = context;
     const {creativeMetadata} = creativeData;
 
-    dev().assert(size, 'missing creative size');
-    dev().assert(adUrl, 'missing ad request url');
+    devAssert(size, 'missing creative size');
+    devAssert(adUrl, 'missing ad request url');
 
-    // Create and setup friendly iframe.
-    this.iframe = /** @type {!HTMLIFrameElement} */(
-      createElementWithAttributes(
-          /** @type {!Document} */(element.ownerDocument),
-          'iframe',
-          dict({
-            // NOTE: It is possible for either width or height to be 'auto',
-            // a non-numeric value.
-            'height': size.height,
-            'width': size.width,
-            'frameborder': '0',
-            'allowfullscreen': '',
-            'allowtransparency': '',
-            'scrolling': 'no',
-          })));
-    // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
-
-    const fontsArray = [];
-    if (creativeMetadata.customStylesheets) {
-      creativeMetadata.customStylesheets.forEach(s => {
-        const href = s['href'];
-        if (href) {
-          fontsArray.push(href);
-        }
-      });
-    }
-
-    return installFriendlyIframeEmbed(
-        this.iframe, element, {
-          host: element,
-          url: /** @type {string} */ (adUrl),
-          html: creativeMetadata.minifiedCreative,
-          extensionIds: creativeMetadata.customElementExtensions || [],
-          fonts: fontsArray,
-        }, embedWin => {
-          installUrlReplacementsForEmbed(context.ampDoc, embedWin,
-              new A4AVariableSource(context.ampDoc, embedWin));
-        })
-        .then(friendlyIframeEmbed => {
-          setFriendlyIframeEmbedVisible(
-              friendlyIframeEmbed, element.isInViewport());
-          // Ensure visibility hidden has been removed (set by boilerplate).
-          const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
-              friendlyIframeEmbed.win.document;
-          setStyle(frameDoc.body, 'visibility', 'visible');
-        });
+    return renderCreativeIntoFriendlyFrame(
+      adUrl,
+      size,
+      element,
+      creativeMetadata
+    );
   }
 }

@@ -13,10 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.22 */
-'use strict';
-
-
+/** Version: 0.1.22.123 */
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * @param {!Document} doc
@@ -25,7 +37,6 @@
 function getReadyState(doc) {
   return /** @type {string} */ (doc['readyState']);
 }
-
 
 /**
  * Whether the document is ready.
@@ -47,27 +58,28 @@ function onDocumentReady(doc, callback) {
 }
 
 /**
- * Calls the callback when document's state satisfies the stateFn.
+ * Calls the callback once when document's state satisfies the condition.
  * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document):boolean} condition
  * @param {function(!Document)} callback
  */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
+function onDocumentState(doc, condition, callback) {
+  if (condition(doc)) {
+    // Execute callback right now.
     callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
+    return;
   }
+
+  // Execute callback (once!) after condition is satisfied.
+  let callbackHasExecuted = false;
+  const readyListener = () => {
+    if (condition(doc) && !callbackHasExecuted) {
+      callback(doc);
+      callbackHasExecuted = true;
+      doc.removeEventListener('readystatechange', readyListener);
+    }
+  };
+  doc.addEventListener('readystatechange', readyListener);
 }
 
 /**
@@ -76,19 +88,31 @@ function onDocumentState(doc, stateFn, callback) {
  * @return {!Promise<!Document>}
  */
 function whenDocumentReady(doc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     onDocumentReady(doc, resolve);
   });
 }
 
-
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * @interface
  */
 class Doc {
-
   /**
    * @return {!Window}
    */
@@ -131,26 +155,32 @@ class Doc {
    * @return {!Promise}
    */
   whenReady() {}
-}
 
+  /**
+   * Adds the element to the fixed layer.
+   * @param {!Element} unusedElement
+   * @return {!Promise}
+   *
+   * This is a no-op for except in AMP on iOS < 13.0.
+   */
+  addToFixedLayer(unusedElement) {}
+}
 
 /** @implements {Doc} */
 class GlobalDoc {
-
   /**
    * @param {!Window|!Document} winOrDoc
    */
   constructor(winOrDoc) {
     const isWin = !!winOrDoc.document;
     /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    this.win_ = /** @type {!Window} */ (isWin
+      ? /** @type {!Window} */ (winOrDoc)
+      : /** @type {!Document} */ (winOrDoc).defaultView);
     /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
+    this.doc_ = isWin
+      ? /** @type {!Window} */ (winOrDoc).document
+      : /** @type {!Document} */ (winOrDoc);
   }
 
   /** @override */
@@ -188,8 +218,12 @@ class GlobalDoc {
   whenReady() {
     return whenDocumentReady(this.doc_);
   }
-}
 
+  /** @override */
+  addToFixedLayer(unusedElement) {
+    return Promise.resolve();
+  }
+}
 
 /**
  * @param {!Document|!Window|!Doc} input
@@ -197,23 +231,201 @@ class GlobalDoc {
  */
 function resolveDoc(input) {
   // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+  if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
     return new GlobalDoc(/** @type {!Document} */ (input));
   }
   // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
+  if (/** @type {!Window} */ (input).document) {
     return new GlobalDoc(/** @type {!Window} */ (input));
   }
   return /** @type {!Doc} */ (input);
 }
 
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+/**
+ * Triple zero width space.
+ *
+ * This is added to user error messages, so that we can later identify
+ * them, when the only thing that we have is the message. This is the
+ * case in many browsers when the global exception handler is invoked.
+ *
+ * @const {string}
+ */
+const AMP_USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 
+/**
+ * Some exceptions (DOMException, namely) have read-only message.
+ * @param {!Error} error
+ * @return {!Error}
+ */
+function duplicateErrorIfNecessary(error) {
+  const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
+  if (messageProperty && messageProperty.writable) {
+    return error;
+  }
+
+  const {message, stack} = error;
+  const e = new Error(message);
+  // Copy all the extraneous things we attach.
+  for (const prop in error) {
+    e[prop] = error[prop];
+  }
+  // Ensure these are copied.
+  e.stack = stack;
+  return e;
+}
+
+/**
+ * @param {...*} var_args
+ * @return {!Error}
+ */
+function createErrorVargs(var_args) {
+  let error = null;
+  let message = '';
+  for (let i = 0; i < arguments.length; i++) {
+    const arg = arguments[i];
+    if (arg instanceof Error && !error) {
+      error = duplicateErrorIfNecessary(arg);
+    } else {
+      if (message) {
+        message += ' ';
+      }
+      message += arg;
+    }
+  }
+
+  if (!error) {
+    error = new Error(message);
+  } else if (message) {
+    error.message = message + ': ' + error.message;
+  }
+  return error;
+}
+
+/** Helper class for throwing standardized errors. */
+class ErrorLogger {
+  /**
+   * Constructor.
+   *
+   * opt_suffix will be appended to error message to identify the type of the
+   * error message. We can't rely on the error object to pass along the type
+   * because some browsers do not have this param in its window.onerror API.
+   * See:
+   * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
+   *
+   * @param {string=} opt_suffix
+   */
+  constructor(opt_suffix = '') {
+    /** @private @const {string} */
+    this.suffix_ = opt_suffix;
+  }
+
+  /**
+   * Modifies an error before reporting, such as to add metadata.
+   * @param {!Error} error
+   * @private
+   */
+  prepareError_(error) {
+    if (this.suffix_) {
+      if (!error.message) {
+        error.message = this.suffix_;
+      } else if (error.message.indexOf(this.suffix_) === -1) {
+        error.message = this.suffix_;
+      }
+    }
+  }
+
+  /**
+   * Creates an error.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
+  createError(var_args) {
+    const error = createErrorVargs.apply(
+      null,
+      Array.prototype.slice.call(arguments)
+    );
+    this.prepareError_(error);
+    return error;
+  }
+
+  /**
+   * Creates an error object with its expected property set to true. Used for
+   * expected failure states (ex. incorrect configuration, localStorage
+   * unavailable due to browser settings, etc.) as opposed to unexpected
+   * breakages/failures.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
+  createExpectedError(var_args) {
+    const error = createErrorVargs.apply(
+      null,
+      Array.prototype.slice.call(arguments)
+    );
+    this.prepareError_(error);
+    error.expected = true;
+    return error;
+  }
+
+  /**
+   * Throws an error.
+   * @param {...*} var_args
+   * @throws {!Error}
+   */
+  error(var_args) {
+    throw this.createError.apply(this, arguments);
+  }
+
+  /**
+   * Throws an error and marks with an expected property.
+   * @param {...*} var_args
+   * @throws {!Error}
+   */
+  expectedError(var_args) {
+    throw this.createExpectedError.apply(this, arguments);
+  }
+}
+
+const userLogger = new ErrorLogger(
+  self.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : ''
+);
+
+const user = () => userLogger;
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  */
 class PageConfig {
-
   /**
    * @param {string} productOrPublicationId
    * @param {boolean} locked
@@ -226,6 +438,9 @@ class PageConfig {
       productId = productOrPublicationId;
       publicationId = productId.substring(0, div);
       label = productId.substring(div + 1);
+      if (label == '*') {
+        user().expectedError('wildcard disallowed');
+      }
     } else {
       // The argument is a publication id.
       publicationId = productOrPublicationId;
@@ -272,16 +487,139 @@ class PageConfig {
   }
 }
 
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
 
+/* eslint-disable */
 
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
 
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
 
+/**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
 
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    message = message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
 
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
 
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
 
+var log_1 = {
+  assert,
+  debugLog,
+  warn,
+  log
+};
+var log_3 = log_1.debugLog;
 
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Whether the element have a next node in the document order.
@@ -289,32 +627,42 @@ class PageConfig {
  *  a. The element itself has a nextSibling.
  *  b. Any of the element ancestors has a nextSibling.
  * @param {!Element} element
- * @param {?Node=} opt_stopNode
+ * @param {?Node=} stopNode
  * @return {boolean}
  */
-function hasNextNodeInDocumentOrder(element, opt_stopNode) {
+function hasNextNodeInDocumentOrder(element, stopNode) {
   let currentElement = element;
   do {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while ((currentElement = currentElement.parentNode) &&
-            currentElement != opt_stopNode);
+  } while (
+    (currentElement = currentElement.parentNode) &&
+    currentElement != stopNode
+  );
   return false;
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
- * Determines if value is actually an Array.
- * @param {*} value
- * @return {boolean}
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
  */
-function isArray(value) {
-  return Array.isArray(value);
-}
-
-
 
 /**
  * Simple wrapper around JSON.parse that casts the return value
@@ -324,7 +672,7 @@ function isArray(value) {
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 function parseJson(json) {
-  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**
@@ -332,30 +680,58 @@ function parseJson(json) {
  * Returns `undefined` if parsing fails.
  * Returns the `Object` corresponding to the JSON string when parsing succeeds.
  * @param {*} json JSON string to parse
- * @param {function(!Error)=} opt_onFailed Optional function that will be called
+ * @param {function(!Error)=} onFailed Optional function that will be called
  *     with the error if parsing fails.
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
-function tryParseJson(json, opt_onFailed) {
+function tryParseJson(json, onFailed) {
   try {
     return parseJson(json);
   } catch (e) {
-    if (opt_onFailed) {
-      opt_onFailed(e);
+    if (onFailed) {
+      onFailed(e);
     }
     return undefined;
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const ALREADY_SEEN = '__SWG-SEEN__';
 
+const ALLOWED_TYPES = [
+  'CreativeWork',
+  'Article',
+  'NewsArticle',
+  'Blog',
+  'Comment',
+  'Course',
+  'HowTo',
+  'Message',
+  'Review',
+  'WebPage',
+];
+
+// RegExp for quickly scanning LD+JSON for allowed types
+const RE_ALLOWED_TYPES = new RegExp(ALLOWED_TYPES.join('|'));
 
 /**
  */
 class PageConfigResolver {
-
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
    */
@@ -367,7 +743,7 @@ class PageConfigResolver {
     this.configResolver_ = null;
 
     /** @private @const {!Promise<!PageConfig>} */
-    this.configPromise_ = new Promise(resolve => {
+    this.configPromise_ = new Promise((resolve) => {
       this.configResolver_ = resolve;
     });
 
@@ -409,14 +785,73 @@ class PageConfigResolver {
       this.configResolver_(config);
       this.configResolver_ = null;
     } else if (this.doc_.isReady()) {
-      this.configResolver_(Promise.reject(
-          new Error('No config could be discovered in the page')));
+      this.configResolver_(
+        Promise.reject(
+          user().createError('No config could be discovered in the page')
+        )
+      );
       this.configResolver_ = null;
     }
+    log_3(config);
     return config;
   }
 }
 
+class TypeChecker {
+  constructor() {}
+
+  /**
+   * Check value from json
+   * @param {?Array|string} value
+   * @param {Array<string>} expectedTypes
+   * @return {boolean}
+   */
+  checkValue(value, expectedTypes) {
+    if (!value) {
+      return false;
+    }
+    return this.checkArray(this.toArray_(value), expectedTypes);
+  }
+
+  /**
+   * Checks space delimited list of types
+   * @param {?string} itemtype
+   * @param {Array<string>} expectedTypes
+   * @return {boolean}
+   */
+  checkString(itemtype, expectedTypes) {
+    if (!itemtype) {
+      return false;
+    }
+    return this.checkArray(itemtype.split(/\s+/), expectedTypes);
+  }
+
+  /**
+   * @param {Array<?string>} typeArray
+   * @param {Array<string>} expectedTypes
+   * @return {boolean}
+   */
+  checkArray(typeArray, expectedTypes) {
+    let found = false;
+    typeArray.forEach((candidateType) => {
+      found =
+        found ||
+        expectedTypes.includes(
+          candidateType.replace(/^http:\/\/schema.org\//i, '')
+        );
+    });
+    return found;
+  }
+
+  /*
+   * @param {?Array|string} value
+   * @return {Array}
+   * @private
+   */
+  toArray_(value) {
+    return Array.isArray(value) ? value : [value];
+  }
+}
 
 class MetaParser {
   /**
@@ -437,22 +872,26 @@ class MetaParser {
     }
 
     // Try to find product id.
-    const productId = getMetaTag(this.doc_.getRootNode(),
-        'subscriptions-product-id');
+    const productId = getMetaTag(
+      this.doc_.getRootNode(),
+      'subscriptions-product-id'
+    );
     if (!productId) {
       return null;
     }
 
     // Is locked?
-    const accessibleForFree = getMetaTag(this.doc_.getRootNode(),
-        'subscriptions-accessible-for-free');
-    const locked = (accessibleForFree &&
-        accessibleForFree.toLowerCase() == 'false') || false;
+    const accessibleForFree = getMetaTag(
+      this.doc_.getRootNode(),
+      'subscriptions-accessible-for-free'
+    );
+    const locked =
+      (accessibleForFree && accessibleForFree.toLowerCase() == 'false') ||
+      false;
 
     return new PageConfig(productId, locked);
   }
 }
-
 
 class JsonLdParser {
   /**
@@ -461,6 +900,8 @@ class JsonLdParser {
   constructor(doc) {
     /** @private @const {!Doc} */
     this.doc_ = doc;
+    /** @private @const @function */
+    this.checkType_ = new TypeChecker();
   }
 
   /**
@@ -475,17 +916,20 @@ class JsonLdParser {
     const domReady = this.doc_.isReady();
 
     // type: 'application/ld+json'
-    const elements = this.doc_.getRootNode().querySelectorAll(
-        'script[type="application/ld+json"]');
+    const elements = this.doc_
+      .getRootNode()
+      .querySelectorAll('script[type="application/ld+json"]');
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
-      if (element[ALREADY_SEEN] ||
-          !element.textContent ||
-          !domReady && !hasNextNodeInDocumentOrder(element)) {
+      if (
+        element[ALREADY_SEEN] ||
+        !element.textContent ||
+        (!domReady && !hasNextNodeInDocumentOrder(element))
+      ) {
         continue;
       }
       element[ALREADY_SEEN] = true;
-      if (element.textContent.indexOf('NewsArticle') == -1) {
+      if (!RE_ALLOWED_TYPES.test(element.textContent)) {
         continue;
       }
       const possibleConfig = this.tryExtractConfig_(element);
@@ -506,8 +950,8 @@ class JsonLdParser {
       return null;
     }
 
-    // Must be a NewsArticle.
-    if (!this.checkType_(json, 'NewsArticle')) {
+    // Must be an ALLOWED_TYPE
+    if (!this.checkType_.checkValue(json['@type'], ALLOWED_TYPES)) {
       return null;
     }
 
@@ -528,8 +972,9 @@ class JsonLdParser {
 
     // Found product id, just check for the access flag.
     const isAccessibleForFree = this.bool_(
-        this.singleValue_(json, 'isAccessibleForFree'),
-        /* default */ true);
+      this.singleValue_(json, 'isAccessibleForFree'),
+      /* default */ true
+    );
 
     return new PageConfig(productId, !isAccessibleForFree);
   }
@@ -564,7 +1009,7 @@ class JsonLdParser {
    */
   discoverProductId_(json) {
     // Must have type `Product`.
-    if (!this.checkType_(json, 'Product')) {
+    if (!this.checkType_.checkValue(json['@type'], ['Product'])) {
       return null;
     }
     return /** @type {?string} */ (this.singleValue_(json, 'productID'));
@@ -580,7 +1025,7 @@ class JsonLdParser {
     if (value == null || value === '') {
       return null;
     }
-    return isArray(value) ? value : [value];
+    return Array.isArray(value) ? value : [value];
   }
 
   /**
@@ -591,21 +1036,7 @@ class JsonLdParser {
   singleValue_(json, name) {
     const valueArray = this.valueArray_(json, name);
     const value = valueArray && valueArray[0];
-    return (value == null || value === '') ? null : value;
-  }
-
-  /**
-   * @param {!Object} json
-   * @param {string} expectedType
-   * @return {boolean}
-   */
-  checkType_(json, expectedType) {
-    const typeArray = this.valueArray_(json, '@type');
-    if (!typeArray) {
-      return false;
-    }
-    return (typeArray.includes(expectedType) ||
-        typeArray.includes('http://schema.org/' + expectedType));
+    return value == null || value === '' ? null : value;
   }
 }
 
@@ -620,18 +1051,19 @@ class MicrodataParser {
     this.access_ = null;
     /** @private {?string} */
     this.productId_ = null;
+    /** @private @const @function */
+    this.checkType_ = new TypeChecker();
   }
 
   /**
    * Returns false if access is restricted, otherwise true
-   * @param {!Element} root An element that is an item of type 'NewsArticle'
+   * @param {!Element} root An element that is an item of type in ALLOWED_TYPES list
    * @return {?boolean} locked access
    * @private
    */
   discoverAccess_(root) {
     const ALREADY_SEEN = 'alreadySeenForAccessInfo';
-    const nodeList = root
-        .querySelectorAll("[itemprop='isAccessibleForFree']");
+    const nodeList = root.querySelectorAll("[itemprop='isAccessibleForFree']");
     for (let i = 0; nodeList[i]; i++) {
       const element = nodeList[i];
       const content = element.getAttribute('content') || element.textContent;
@@ -653,7 +1085,7 @@ class MicrodataParser {
 
   /**
    * Verifies if an element is valid based on the following
-   * - child of an item of type 'NewsArticle'
+   * - child of an item of one the the ALLOWED_TYPES
    * - not a child of an item of any other type
    * - not seen before, marked using the alreadySeen tag
    * @param {?Element} current the element to be verified
@@ -663,17 +1095,17 @@ class MicrodataParser {
    * @private
    */
   isValidElement_(current, root, alreadySeen) {
-    for (let node = current;
-        node && !node[alreadySeen]; node = node.parentNode) {
+    for (
+      let node = current;
+      node && !node[alreadySeen];
+      node = node.parentNode
+    ) {
       node[alreadySeen] = true;
-      if (node.hasAttribute('itemscope')) {
+      // document nodes don't have hasAttribute
+      if (node.hasAttribute && node.hasAttribute('itemscope')) {
         /**{?string} */
         const type = node.getAttribute('itemtype');
-        if (type.indexOf('http://schema.org/NewsArticle') >= 0) {
-          return true;
-        } else {
-          return false;
-        }
+        return this.checkType_.checkString(type, ALLOWED_TYPES);
       }
     }
     return false;
@@ -681,17 +1113,16 @@ class MicrodataParser {
 
   /**
    * Obtains the product ID that meets the requirements
-   * - child of an item of type 'NewsArticle'
+   * - child of an item of one of ALLOWED_TYPES
    * - Not a child of an item of type 'Section'
    * - child of an item of type 'productID'
-   * @param {!Element} root An element that is an item of type 'NewsArticle'
+   * @param {!Element} root An element that is an item of an ALLOWED_TYPES
    * @return {?string} product ID, if found
    * @private
    */
   discoverProductId_(root) {
     const ALREADY_SEEN = 'alreadySeenForProductInfo';
-    const nodeList = root
-        .querySelectorAll('[itemprop="productID"]');
+    const nodeList = root.querySelectorAll('[itemprop="productID"]');
     for (let i = 0; nodeList[i]; i++) {
       const element = nodeList[i];
       const content = element.getAttribute('content') || element.textContent;
@@ -734,8 +1165,17 @@ class MicrodataParser {
     if (config) {
       return config;
     }
-    const nodeList = this.doc_.getRootNode().querySelectorAll(
-        '[itemscope][itemtype*="http://schema.org/NewsArticle"]');
+
+    // Grab all the nodes with an itemtype and filter for our allowed types
+    const nodeList = Array.prototype.slice
+      .call(this.doc_.getRootNode().querySelectorAll('[itemscope][itemtype]'))
+      .filter((node) =>
+        this.checkType_.checkString(
+          node.getAttribute('itemtype'),
+          ALLOWED_TYPES
+        )
+      );
+
     for (let i = 0; nodeList[i] && config == null; i++) {
       const element = nodeList[i];
       if (this.access_ == null) {
@@ -779,11 +1219,4 @@ function getMetaTag(rootNode, name) {
   return null;
 }
 
-
-
-
-export {
-  Doc,
-  PageConfig,
-  PageConfigResolver,
-};
+export { Doc, PageConfig, PageConfigResolver };

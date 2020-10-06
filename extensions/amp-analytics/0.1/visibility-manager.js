@@ -14,26 +14,53 @@
  * limitations under the License.
  */
 
-import {
-  DEFAULT_THRESHOLD,
-  IntersectionObserverPolyfill,
-  nativeIntersectionObserverSupported,
-} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
+import {_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME} from './requests';
 import {dev, user} from '../../../src/log';
+import {dict, map} from '../../../src/utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
+import {
+  layoutPositionRelativeToScrolledViewport,
+  layoutRectLtwh,
+} from '../../../src/layout-rect';
+import {rootNodeFor} from '../../../src/dom';
 
-const TAG = 'VISIBILITY-MANAGER';
+const TAG = 'amp-analytics/visibility-manager';
 
+const PROP = '__AMP_VIS';
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
+
+export const DEFAULT_THRESHOLD = [
+  0,
+  0.05,
+  0.1,
+  0.15,
+  0.2,
+  0.25,
+  0.3,
+  0.35,
+  0.4,
+  0.45,
+  0.5,
+  0.55,
+  0.6,
+  0.65,
+  0.7,
+  0.75,
+  0.8,
+  0.85,
+  0.9,
+  0.95,
+  1,
+];
 
 /** @type {number} */
 let visibilityIdCounter = 1;
-
 
 /**
  * @param {!Element} element
@@ -48,6 +75,35 @@ function getElementId(element) {
   return id;
 }
 
+/**
+ * @param {!Node} rootNode
+ * @return {!VisibilityManager}
+ */
+export function provideVisibilityManager(rootNode) {
+  if (!rootNode[PROP]) {
+    rootNode[PROP] = createVisibilityManager(rootNode);
+  }
+  return rootNode[PROP];
+}
+
+/**
+ * @param {!Node} rootNode
+ * @return {!VisibilityManager}
+ */
+function createVisibilityManager(rootNode) {
+  // TODO(#22733): cleanup when ampdoc-fie is launched.
+  const ampdoc = Services.ampdoc(rootNode);
+  const frame = getParentWindowFrameElement(rootNode);
+  const embed = frame && getFriendlyIframeEmbedOptional(frame);
+  const frameRootNode = frame && rootNodeFor(frame);
+  if (embed && frameRootNode) {
+    return new VisibilityManagerForEmbed(
+      provideVisibilityManager(frameRootNode),
+      embed
+    );
+  }
+  return new VisibilityManagerForDoc(ampdoc);
+}
 
 /**
  * A base class for `VisibilityManagerForDoc` and `VisibilityManagerForEmbed`.
@@ -83,9 +139,17 @@ export class VisibilityManager {
     /** @const @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
 
+    /** @private {number} Maximum scroll position attained */
+    this.maxScrollDepth_ = 0;
+
     if (this.parent) {
       this.parent.addChild_(this);
     }
+
+    const viewport = Services.viewportForDoc(this.ampdoc);
+    viewport.onChanged(() => {
+      this.maybeUpdateMaxScrollDepth(viewport.getScrollTop());
+    });
   }
 
   /**
@@ -123,7 +187,7 @@ export class VisibilityManager {
     }
 
     // Unsubscribe everything else.
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
@@ -167,11 +231,48 @@ export class VisibilityManager {
   isBackgroundedAtStart() {}
 
   /**
+   * Returns the root's, root's parent's and root's children's
+   * lowest opacity value
+   * @return {number}
+   * @abstract
+   */
+  getRootMinOpacity() {}
+
+  /**
    * Returns the root's layout rect.
-   * @return {!../../../src/layout-rect.LayoutRectDef}}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @abstract
    */
   getRootLayoutBox() {}
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * Returns the root element.
+   * @return {?Element}
+   * @abstract
+   */
+  getRootElementTemp() {}
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @return {?../../../src/layout-rect.LayoutRectDef}
+   * @abstract
+   */
+  getBoundingClientRectTemp(unusedElement) {}
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * Returns the element's layout rect calculated by AMP
+   * @param {!Element} element
+   * @return {!../../../src/layout-rect.LayoutRectDef}
+   */
+  getElementLayoutBoxTemp(element) {
+    const resource = this.resources_.getResourceForElementOptional(element);
+    const layoutBox = resource
+      ? resource.getLayoutBox()
+      : Services.viewportForDoc(this.ampdoc).getLayoutRect(element);
+    return layoutBox;
+  }
 
   /**
    * @return {number}
@@ -196,6 +297,24 @@ export class VisibilityManager {
     }
   }
 
+  /**
+   * Update the maximum amount that the user has scrolled down the page.
+   * @param {number} depth
+   */
+  maybeUpdateMaxScrollDepth(depth) {
+    if (depth > this.maxScrollDepth_) {
+      this.maxScrollDepth_ = depth;
+    }
+  }
+
+  /**
+   * Gets the maximum amount that the user has scrolled down the page.
+   * @return {number} depth
+   */
+  getMaxScrollDepth() {
+    return this.maxScrollDepth_;
+  }
+
   /** @private */
   updateModels_() {
     for (let i = 0; i < this.models_.length; i++) {
@@ -207,16 +326,32 @@ export class VisibilityManager {
    * Listens to the visibility events on the root as the whole and the given
    * visibility spec. The visibility tracking can be deferred until
    * `readyPromise` is resolved, if specified.
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *>)} callback
+   * @param {function(!JsonObject)} callback
    * @return {!UnlistenDef}
    */
   listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
     const calcVisibility = this.getRootVisibility.bind(this);
-    return this.createModelAndListen_(calcVisibility, spec, readyPromise,
-        createReportPromiseFunc, callback);
+    // TODO(#28618) Clean up calcLayoutBoxTemp & calcBoundingClientRectTemp
+    const calcLayoutBoxTemp = this.getRootLayoutBox.bind(this);
+    let calcBoundingClientRectTemp;
+    if (this.getRootElementTemp()) {
+      calcBoundingClientRectTemp = this.getBoundingClientRectTemp.bind(
+        this,
+        this.getRootElementTemp()
+      );
+    }
+    return this.createModelAndListen_(
+      calcVisibility,
+      calcLayoutBoxTemp,
+      calcBoundingClientRectTemp || null,
+      spec,
+      readyPromise,
+      createReportPromiseFunc,
+      callback
+    );
   }
 
   /**
@@ -224,34 +359,65 @@ export class VisibilityManager {
    * visibility spec. The visibility tracking can be deferred until
    * `readyPromise` is resolved, if specified.
    * @param {!Element} element
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *>)} callback
+   * @param {function(!JsonObject)} callback
    * @return {!UnlistenDef}
    */
   listenElement(
-    element, spec, readyPromise, createReportPromiseFunc, callback) {
+    element,
+    spec,
+    readyPromise,
+    createReportPromiseFunc,
+    callback
+  ) {
     const calcVisibility = this.getElementVisibility.bind(this, element);
-    return this.createModelAndListen_(calcVisibility, spec, readyPromise,
-        createReportPromiseFunc, callback, element);
+    const calculateLayoutBox = this.getElementLayoutBoxTemp.bind(this, element);
+    const calculateBoundingClientRect = this.getBoundingClientRectTemp.bind(
+      this,
+      element
+    );
+    return this.createModelAndListen_(
+      calcVisibility,
+      calculateLayoutBox,
+      calculateBoundingClientRect,
+      spec,
+      readyPromise,
+      createReportPromiseFunc,
+      callback,
+      element
+    );
   }
 
   /**
+   * TODO(#29618) Clean up calcLayoutBoxTemp & calcBoundingClientRectTemp
    * Create visibilityModel and listen to visible events.
    * @param {function():number} calcVisibility
-   * @param {!Object<string, *>} spec
+   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcLayoutBoxTemp
+   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcBoundingClientRectTemp
+   * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *>)} callback
+   * @param {function(!JsonObject)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    */
-  createModelAndListen_(calcVisibility, spec,
-    readyPromise, createReportPromiseFunc, callback, opt_element) {
-    if (spec['visiblePercentageThresholds'] &&
-        spec['visiblePercentageMin'] == undefined &&
-        spec['visiblePercentageMax'] == undefined) {
+  createModelAndListen_(
+    calcVisibility,
+    calcLayoutBoxTemp,
+    calcBoundingClientRectTemp,
+    spec,
+    readyPromise,
+    createReportPromiseFunc,
+    callback,
+    opt_element
+  ) {
+    if (
+      spec['visiblePercentageThresholds'] &&
+      spec['visiblePercentageMin'] == undefined &&
+      spec['visiblePercentageMax'] == undefined
+    ) {
       const unlisteners = [];
       const ranges = spec['visiblePercentageThresholds'];
       if (!ranges || !isArray(ranges)) {
@@ -261,14 +427,18 @@ export class VisibilityManager {
       for (let i = 0; i < ranges.length; i++) {
         const percents = ranges[i];
         if (!isArray(percents) || percents.length != 2) {
-          user().error(TAG,
-              'visiblePercentageThresholds entry length is not 2');
+          user().error(
+            TAG,
+            'visiblePercentageThresholds entry length is not 2'
+          );
           continue;
         }
         if (!isFiniteNumber(percents[0]) || !isFiniteNumber(percents[1])) {
           // not valid number
-          user().error(TAG,
-              'visiblePercentageThresholds entry is not valid number');
+          user().error(
+            TAG,
+            'visiblePercentageThresholds entry is not valid number'
+          );
           continue;
         }
         const min = Number(percents[0]);
@@ -278,57 +448,106 @@ export class VisibilityManager {
         // special cases: if min and max are both 0, or both 100, then both
         // are inclusive. Otherwise it would not be possible to trigger an
         // event on exactly 0% or 100%.
-        if (min < 0 || max > 100 || min > max ||
-            (min == max && min != 100 && max != 0)) {
-          user().error(TAG,
-              'visiblePercentageThresholds entry invalid min/max value');
+        if (
+          min < 0 ||
+          max > 100 ||
+          min > max ||
+          (min == max && min != 100 && max != 0)
+        ) {
+          user().error(
+            TAG,
+            'visiblePercentageThresholds entry invalid min/max value'
+          );
           continue;
         }
         const newSpec = spec;
         newSpec['visiblePercentageMin'] = min;
         newSpec['visiblePercentageMax'] = max;
-        const model = new VisibilityModel(newSpec, calcVisibility);
-        unlisteners.push(this.listen_(model, spec, readyPromise,
-            createReportPromiseFunc, callback, opt_element));
+        const model = new VisibilityModel(
+          newSpec,
+          calcVisibility,
+          calcLayoutBoxTemp,
+          calcBoundingClientRectTemp,
+          /** @type {?../../../src/service/viewport/viewport-impl.ViewportImpl} */
+          (Services.viewportForDoc(this.ampdoc))
+        );
+        unlisteners.push(
+          this.listen_(
+            model,
+            spec,
+            readyPromise,
+            createReportPromiseFunc,
+            callback,
+            opt_element
+          )
+        );
       }
       return () => {
-        unlisteners.forEach(unlistener => unlistener());
+        unlisteners.forEach((unlistener) => unlistener());
       };
     }
-
-    const model = new VisibilityModel(spec, calcVisibility);
-    return this.listen_(model, spec, readyPromise,
-        createReportPromiseFunc, callback, opt_element);
+    const model = new VisibilityModel(
+      spec,
+      calcVisibility,
+      calcLayoutBoxTemp,
+      calcBoundingClientRectTemp,
+      /** @type {?../../../src/service/viewport/viewport-impl.ViewportImpl} */
+      (Services.viewportForDoc(this.ampdoc))
+    );
+    return this.listen_(
+      model,
+      spec,
+      readyPromise,
+      createReportPromiseFunc,
+      callback,
+      opt_element
+    );
   }
 
   /**
    * @param {!VisibilityModel} model
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *>)} callback
+   * @param {function(!JsonObject)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    * @private
    */
-  listen_(model, spec,
-    readyPromise, createReportPromiseFunc, callback, opt_element) {
+  listen_(
+    model,
+    spec,
+    readyPromise,
+    createReportPromiseFunc,
+    callback,
+    opt_element
+  ) {
+    if (createReportPromiseFunc) {
+      model.setReportReady(createReportPromiseFunc);
+    }
+
+    const viewport = Services.viewportForDoc(this.ampdoc);
+    const scrollDepth = viewport.getScrollTop();
+    this.maybeUpdateMaxScrollDepth(scrollDepth);
+
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
         model.setReady(true);
+        model.maybeSetInitialScrollDepth(scrollDepth);
       });
-    }
-
-    if (createReportPromiseFunc) {
-      model.setReportReady(createReportPromiseFunc);
+    } else {
+      model.maybeSetInitialScrollDepth(scrollDepth);
     }
 
     // Process the event.
     model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
+
+      // TODO(#29618): Remove after ampim investigation
+      state[_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME] = model.getErrorInfoTemp();
 
       // Additional doc-level state.
       state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
@@ -338,31 +557,50 @@ export class VisibilityManager {
       // Optionally, element-level state.
       let layoutBox;
       if (opt_element) {
-        const resource =
-            this.resources_.getResourceForElementOptional(opt_element);
-        layoutBox =
-            resource ?
-              resource.getLayoutBox() :
-              Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+        state['elementId'] = opt_element.id;
+        state['opacity'] = getMinOpacity(opt_element);
+        const resource = this.resources_.getResourceForElementOptional(
+          opt_element
+        );
+        layoutBox = resource
+          ? resource.getLayoutBox()
+          : viewport.getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
-        Object.assign(state, {
-          'intersectionRatio': intersectionRatio,
-          'intersectionRect': JSON.stringify(intersectionRect),
-        });
-
+        Object.assign(
+          state,
+          dict({
+            'intersectionRatio': intersectionRatio,
+            'intersectionRect': JSON.stringify(intersectionRect),
+          })
+        );
       } else {
+        state['opacity'] = this.getRootMinOpacity();
+        state['intersectionRatio'] = this.getRootVisibility();
         layoutBox = this.getRootLayoutBox();
       }
       model.maybeDispose();
 
       if (layoutBox) {
-        Object.assign(state, {
-          'elementX': layoutBox.left,
-          'elementY': layoutBox.top,
-          'elementWidth': layoutBox.width,
-          'elementHeight': layoutBox.height,
-        });
+        Object.assign(
+          state,
+          dict({
+            'elementX': layoutBox.left,
+            'elementY': layoutBox.top,
+            'elementWidth': layoutBox.width,
+            'elementHeight': layoutBox.height,
+          })
+        );
+        state['initialScrollDepth'] = layoutPositionRelativeToScrolledViewport(
+          layoutBox,
+          viewport,
+          model.getInitialScrollDepth()
+        );
+        state['maxScrollDepth'] = layoutPositionRelativeToScrolledViewport(
+          layoutBox,
+          viewport,
+          this.getMaxScrollDepth()
+        );
       }
       callback(state);
     });
@@ -386,7 +624,7 @@ export class VisibilityManager {
 
     // Start update.
     model.update();
-    return function() {
+    return function () {
       model.dispose();
     };
   }
@@ -416,7 +654,6 @@ export class VisibilityManager {
   getElementIntersectionRect(unusedElement) {}
 }
 
-
 /**
  * The implementation of `VisibilityManager` for an AMP document. Two
  * distinct modes are supported: the main AMP doc and a in-a-box doc.
@@ -429,13 +666,10 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     super(/* parent */ null, ampdoc);
 
     /** @const @private */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
-
-    /** @const @private */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private {boolean} */
-    this.backgrounded_ = !this.viewer_.isVisible();
+    this.backgrounded_ = !ampdoc.isVisible();
 
     /** @const @private {boolean} */
     this.backgroundedAtStart_ = this.isBackgrounded();
@@ -445,32 +679,65 @@ export class VisibilityManagerForDoc extends VisibilityManager {
      * @private {!Object<number, {
      *   element: !Element,
      *   intersectionRatio: number,
+     *   isVisible: boolean,
+     *   boundingClientRect: ?../../../src/layout-rect.LayoutRectDef,
      *   listeners: !Array<function(number)>
      * }>}
      */
     this.trackedElements_ = map();
 
-    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    /** @private {?Element} */
+    this.rootElementTemp_ = null;
+
+    /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
     if (getMode(this.ampdoc.win).runtime == 'inabox') {
       // In-a-box: visibility depends on the InOb.
       const root = this.ampdoc.getRootNode();
       const rootElement = dev().assertElement(
-          root.documentElement || root.body || root);
-      this.unsubscribe(this.observe(
-          rootElement,
-          this.setRootVisibility.bind(this)));
-    } else {
-      // Main document: visibility is based on the viewer.
-      this.setRootVisibility(this.viewer_.isVisible() ? 1 : 0);
-      this.unsubscribe(this.viewer_.onVisibilityChanged(() => {
-        const isVisible = this.viewer_.isVisible();
-        if (!isVisible) {
-          this.backgrounded_ = true;
+        root.documentElement || root.body || root
+      );
+      this.rootElementTemp_ = rootElement;
+      this.unsubscribe(
+        this.observe(rootElement, this.setRootVisibility.bind(this))
+      );
+      // Observe inabox window resize event.
+      const resizeListener = () => {
+        const id = getElementId(rootElement);
+        const trackedRoot = this.trackedElements_[id];
+        if (!trackedRoot) {
+          return;
         }
-        this.setRootVisibility(isVisible ? 1 : 0);
-      }));
+        if (
+          this.ampdoc.win./*OK*/ innerHeight < 1 ||
+          this.ampdoc.win./*OK*/ innerWidth < 1
+        ) {
+          trackedRoot.isVisible = false;
+        } else {
+          trackedRoot.isVisible = true;
+        }
+        this.setRootVisibility(
+          trackedRoot.isVisible ? trackedRoot.intersectionRatio : 0
+        );
+      };
+      this.ampdoc.win.addEventListener('resize', resizeListener);
+
+      this.unsubscribe(() => {
+        this.ampdoc.win.removeEventListener('resize', resizeListener);
+      });
+    } else {
+      // Main document: visibility is based on the ampdoc.
+      this.setRootVisibility(this.ampdoc.isVisible() ? 1 : 0);
+      this.unsubscribe(
+        this.ampdoc.onVisibilityChanged(() => {
+          const isVisible = this.ampdoc.isVisible();
+          if (!isVisible) {
+            this.backgrounded_ = true;
+          }
+          this.setRootVisibility(isVisible ? 1 : 0);
+        })
+      );
     }
   }
 
@@ -485,7 +752,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   getStartTime() {
-    return dev().assertNumber(this.viewer_.getFirstVisibleTime());
+    return dev().assertNumber(this.ampdoc.getFirstVisibleTime());
   }
 
   /** @override */
@@ -499,18 +766,34 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /** @override */
+  getRootMinOpacity() {
+    const root = this.ampdoc.getRootNode();
+    const rootElement = dev().assertElement(
+      root.documentElement || root.body || root
+    );
+    return getMinOpacity(rootElement);
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @override
+   */
+  getRootElementTemp() {
+    return this.rootElementTemp_;
+  }
+
+  /** @override */
   getRootLayoutBox() {
     // This code is the same for "in-a-box" and standalone doc.
     const root = this.ampdoc.getRootNode();
     const rootElement = dev().assertElement(
-        root.documentElement || root.body || root);
+      root.documentElement || root.body || root
+    );
     return this.viewport_.getLayoutRect(rootElement);
   }
 
   /** @override */
   observe(element, listener) {
-    this.polyfillAmpElementIfNeeded_(element);
-
     const id = getElementId(element);
     let trackedElement = this.trackedElements_[id];
     if (!trackedElement) {
@@ -518,10 +801,15 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         element,
         intersectionRatio: 0,
         intersectionRect: null,
+        isVisible: false,
+        boundingClientRect: null,
         listeners: [],
       };
       this.trackedElements_[id] = trackedElement;
-    } else if (trackedElement.intersectionRatio > 0) {
+    } else if (
+      trackedElement.intersectionRatio > 0 &&
+      trackedElement.isVisible
+    ) {
       // This has already been tracked and the `intersectionRatio` is fresh.
       listener(trackedElement.intersectionRatio);
     }
@@ -549,7 +837,25 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     }
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
-    return (trackedElement && trackedElement.intersectionRatio) || 0;
+    return (
+      (trackedElement &&
+        trackedElement.isVisible &&
+        trackedElement.intersectionRatio) ||
+      0
+    );
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @override
+   * */
+  getBoundingClientRectTemp(element) {
+    if (!element) {
+      return null;
+    }
+    const id = getElementId(element);
+    const trackedElement = this.trackedElements_[id];
+    return trackedElement && trackedElement.boundingClientRect;
   }
 
   /**
@@ -571,61 +877,18 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /**
-   * @return {!IntersectionObserver|!IntersectionObserverPolyfill}
+   * @return {!IntersectionObserver}
    * @private
    */
   getIntersectionObserver_() {
     if (!this.intersectionObserver_) {
-      this.intersectionObserver_ = this.createIntersectionObserver_();
+      const {win} = this.ampdoc;
+      this.intersectionObserver_ = new win.IntersectionObserver(
+        this.onIntersectionChanges_.bind(this),
+        {threshold: DEFAULT_THRESHOLD}
+      );
     }
     return this.intersectionObserver_;
-  }
-
-  /**
-   * @return {!IntersectionObserver|!IntersectionObserverPolyfill}
-   * @private
-   */
-  createIntersectionObserver_() {
-    // Native.
-    const {win} = this.ampdoc;
-    if (nativeIntersectionObserverSupported(win)) {
-      return new win.IntersectionObserver(
-          this.onIntersectionChanges_.bind(this),
-          {threshold: DEFAULT_THRESHOLD});
-    }
-
-    // Polyfill.
-    const intersectionObserverPolyfill = new IntersectionObserverPolyfill(
-        this.onIntersectionChanges_.bind(this),
-        {threshold: DEFAULT_THRESHOLD});
-    const ticker = () => {
-      intersectionObserverPolyfill.tick(this.viewport_.getRect());
-    };
-    this.unsubscribe(this.viewport_.onScroll(ticker));
-    this.unsubscribe(this.viewport_.onChanged(ticker));
-    // Tick in the next event loop. That's how native InOb works.
-    setTimeout(ticker);
-    return intersectionObserverPolyfill;
-  }
-
-  /**
-   * @param {!Element} element
-   * @private
-   */
-  polyfillAmpElementIfNeeded_(element) {
-    const {win} = this.ampdoc;
-    if (nativeIntersectionObserverSupported(win)) {
-      return;
-    }
-
-    // InOb polyfill requires partial AmpElement implementation.
-    if (typeof element.getLayoutBox == 'function') {
-      return;
-    }
-    element.getLayoutBox = () => {
-      return this.viewport_.getLayoutRect(element);
-    };
-    element.getOwner = () => null;
   }
 
   /**
@@ -633,18 +896,31 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @private
    */
   onIntersectionChanges_(entries) {
-    entries.forEach(change => {
+    entries.forEach((change) => {
       let intersection = change.intersectionRect;
       // IntersectionRect type now changed from ClientRect to DOMRectReadOnly.
       // TODO(@zhouyx): Fix all InOb related type.
-      intersection = layoutRectLtwh(Number(intersection.left),
-          Number(intersection.top),
-          Number(intersection.width),
-          Number(intersection.height));
+      intersection = layoutRectLtwh(
+        Number(intersection.left),
+        Number(intersection.top),
+        Number(intersection.width),
+        Number(intersection.height)
+      );
+      let {boundingClientRect} = change;
+      boundingClientRect =
+        boundingClientRect &&
+        layoutRectLtwh(
+          Number(boundingClientRect.left),
+          Number(boundingClientRect.top),
+          Number(boundingClientRect.width),
+          Number(boundingClientRect.height)
+        );
       this.onIntersectionChange_(
-          change.target,
-          change.intersectionRatio,
-          intersection);
+        change.target,
+        change.intersectionRatio,
+        intersection,
+        boundingClientRect
+      );
     });
   }
 
@@ -652,22 +928,42 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @param {!Element} target
    * @param {number} intersectionRatio
    * @param {!../../../src/layout-rect.LayoutRectDef} intersectionRect
+   * @param {!../../../src/layout-rect.LayoutRectDef} boundingClientRect
    * @private
    */
-  onIntersectionChange_(target, intersectionRatio, intersectionRect) {
+  onIntersectionChange_(
+    target,
+    intersectionRatio,
+    intersectionRect,
+    boundingClientRect
+  ) {
     intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
+
+    // This is different from the InOb v2 isVisible definition.
+    // isVisible here only checks for element size
+    let isVisible = true;
+
+    if (boundingClientRect.width < 1 || boundingClientRect.height < 1) {
+      // Set isVisible to false when the element is not visible.
+      // Use < 1 because the width/height can
+      // be a double value on high resolution screen
+      isVisible = false;
+    }
     if (trackedElement) {
+      trackedElement.isVisible = isVisible;
       trackedElement.intersectionRatio = intersectionRatio;
       trackedElement.intersectionRect = intersectionRect;
+      trackedElement.boundingClientRect = boundingClientRect;
       for (let i = 0; i < trackedElement.listeners.length; i++) {
-        trackedElement.listeners[i](intersectionRatio);
+        trackedElement.listeners[i](
+          trackedElement.isVisible ? intersectionRatio : 0
+        );
       }
     }
   }
 }
-
 
 /**
  * The implementation of `VisibilityManager` for a FIE embed. This visibility
@@ -687,9 +983,12 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     /** @const @private {boolean} */
     this.backgroundedAtStart_ = this.parent.isBackgrounded();
 
-    this.unsubscribe(this.parent.observe(
+    this.unsubscribe(
+      this.parent.observe(
         dev().assertElement(embed.host),
-        this.setRootVisibility.bind(this)));
+        this.setRootVisibility.bind(this)
+      )
+    );
   }
 
   /** @override */
@@ -705,6 +1004,29 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   /** @override */
   isBackgroundedAtStart() {
     return this.backgroundedAtStart_;
+  }
+
+  /** @override */
+  getRootMinOpacity() {
+    const rootElement = dev().assertElement(this.embed.iframe);
+    return getMinOpacity(rootElement);
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @override
+   * */
+  getRootElementTemp() {
+    // No need to track root element for embed
+    return null;
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * @override
+   * */
+  getBoundingClientRectTemp() {
+    return null;
   }
 
   /**
@@ -748,5 +1070,4 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     }
     return this.parent.getElementIntersectionRect(element);
   }
-
 }

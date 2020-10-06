@@ -22,8 +22,8 @@ import {user} from '../../src/log';
 
 import GltfViewer from './viewer';
 
-const seq = (taskA, taskB) => cb => taskA(() => taskB(cb));
-const parallel = (taskA, taskB) => cb => {
+const seq = (taskA, taskB) => (cb) => taskA(() => taskB(cb));
+const parallel = (taskA, taskB) => (cb) => {
   let n = 0;
   const finish = () => {
     n++;
@@ -36,17 +36,18 @@ const parallel = (taskA, taskB) => cb => {
 };
 
 const loadThree = (global, cb) => {
-  const loadScriptCb = url => cb => loadScript(global, url, cb);
-  const loadThreeExample = examplePath =>
+  const loadScriptCb = (url) => (cb) => loadScript(global, url, cb);
+  const loadThreeExample = (examplePath) =>
     loadScriptCb(
-        'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/' + examplePath);
+      'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/' + examplePath
+    );
 
   seq(
-      loadScriptCb(
-          'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js'),
-      parallel(
-          loadThreeExample('loaders/GLTFLoader.js'),
-          loadThreeExample('controls/OrbitControls.js'))
+    loadScriptCb('https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js'),
+    parallel(
+      loadThreeExample('loaders/GLTFLoader.js'),
+      loadThreeExample('controls/OrbitControls.js')
+    )
   )(cb);
 };
 
@@ -61,23 +62,29 @@ export function gltfViewer(global) {
       onload: () => {
         nonSensitiveDataPostMessage('loaded');
       },
-      onprogress: e => {
+      onprogress: (e) => {
         if (!e.lengthComputable) {
           return;
         }
-        nonSensitiveDataPostMessage('progress', dict({
-          'total': e.total,
-          'loaded': e.loaded,
-        }));
+        nonSensitiveDataPostMessage(
+          'progress',
+          dict({
+            'total': e.total,
+            'loaded': e.loaded,
+          })
+        );
       },
-      onerror: err => {
+      onerror: (err) => {
         user().error('3DGLTF', err);
-        nonSensitiveDataPostMessage('error', dict({
-          'error': (err || '').toString(),
-        }));
+        nonSensitiveDataPostMessage(
+          'error',
+          dict({
+            'error': (err || '').toString(),
+          })
+        );
       },
     });
-    listenParent(global, 'action', msg => {
+    listenParent(global, 'action', (msg) => {
       viewer.actions[msg['action']](msg['args']);
     });
     nonSensitiveDataPostMessage('ready');

@@ -1,0 +1,13 @@
+diff --git a/third_party/inputmask/inputmask.dependencyLib.js b/third_party/inputmask/inputmask.dependencyLib.js
+index a6980ea95..ccc66a9ea 100755
+--- a/third_party/inputmask/inputmask.dependencyLib.js
++++ b/third_party/inputmask/inputmask.dependencyLib.js
+@@ -30,7 +30,7 @@ export function factory(window, document) {
+         return ltype === "array" || length === 0 || typeof length === "number" && length > 0 && length - 1 in obj;
+     }
+     function isValidElement(elem) {
+-        return elem instanceof Element;
++        return elem instanceof window.Element;
+     }
+     function DependencyLib(elem) {
+         if (elem instanceof DependencyLib) {

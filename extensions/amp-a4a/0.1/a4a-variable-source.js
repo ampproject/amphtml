@@ -21,10 +21,9 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from '../../../src/service/variable-source';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
-
-const WHITELISTED_VARIABLES = [
+const ALLOWLISTED_VARIABLES = [
   'AMPDOC_HOST',
   'AMPDOC_HOSTNAME',
   'AMPDOC_URL',
@@ -37,31 +36,22 @@ const WHITELISTED_VARIABLES = [
   'CANONICAL_HOSTNAME',
   'CANONICAL_PATH',
   'CANONICAL_URL',
-  'CLIENT_ID',
   'COUNTER',
   'DOCUMENT_CHARSET',
   'DOCUMENT_REFERRER',
-  'FIRST_CONTENTFUL_PAINT',
-  'FIRST_VIEWPORT_READY',
-  'MAKE_BODY_VISIBLE',
   'PAGE_VIEW_ID',
   'RANDOM',
   'SCREEN_COLOR_DEPTH',
   'SCREEN_HEIGHT',
   'SCREEN_WIDTH',
   'SCROLL_HEIGHT',
-  'SCROLL_LEFT',
-  'SCROLL_TOP',
   'SCROLL_WIDTH',
-  'SHARE_TRACKING_INCOMING',
-  'SHARE_TRACKING_OUTGOING',
   'SOURCE_HOST',
   'SOURCE_HOSTNAME',
   'SOURCE_PATH',
   'SOURCE_URL',
   'TIMESTAMP',
   'TIMEZONE',
-  'TIMEZONE_CODE',
   'TITLE',
   'TOTAL_ENGAGED_TIME',
   'USER_AGENT',
@@ -75,14 +65,18 @@ const WHITELISTED_VARIABLES = [
 /** Provides A4A specific variable substitution. */
 export class A4AVariableSource extends VariableSource {
   /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} parentAmpdoc
    * @param  {!Window} embedWin
    */
-  constructor(ampdoc, embedWin) {
-    super(ampdoc);
+  constructor(parentAmpdoc, embedWin) {
+    super(parentAmpdoc);
+
+    // Use parent URL replacements service for fallback.
+    const headNode = parentAmpdoc.getHeadNode();
+    const urlReplacements = Services.urlReplacementsForDoc(headNode);
+
     /** @private {VariableSource} global variable source for fallback. */
-    this.globalVariableSource_ = Services.urlReplacementsForDoc(ampdoc)
-        .getVariableSource();
+    this.globalVariableSource_ = urlReplacements.getVariableSource();
 
     /** @private {!Window} */
     this.win_ = embedWin;
@@ -90,38 +84,52 @@ export class A4AVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
-    this.set('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
-          ' start attribute name, is required');
-      return getTimingDataSync(
-          this.win_,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
-    }).setAsync('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
-          ' start attribute name, is required');
-      return getTimingDataAsync(
-          this.win_,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
-    });
-
-    this.set('AD_NAV_TYPE', () => {
-      return getNavigationData(this.win_, 'type');
-    });
-
-    this.set('AD_NAV_REDIRECT_COUNT', () => {
-      return getNavigationData(this.win_, 'redirectCount');
-    });
-
-    this.set('HTML_ATTR',
-        /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
-
-    for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
-      const varName = WHITELISTED_VARIABLES[v];
+    // Initiate allowed varaibles first in case the resolver function needs
+    // to be overwritten.
+    for (let v = 0; v < ALLOWLISTED_VARIABLES.length; v++) {
+      const varName = ALLOWLISTED_VARIABLES[v];
       const resolvers = this.globalVariableSource_.get(varName);
       this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
     }
+
+    this.set('NAV_TIMING', (startAttribute, endAttribute) => {
+      userAssert(
+        startAttribute,
+        'The first argument to NAV_TIMING, the' +
+          ' start attribute name, is required'
+      );
+      return getTimingDataSync(
+        this.win_,
+        /**@type {string}*/ (startAttribute),
+        /**@type {string}*/ (endAttribute)
+      );
+    }).setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
+      userAssert(
+        startAttribute,
+        'The first argument to NAV_TIMING, the' +
+          ' start attribute name, is required'
+      );
+      return getTimingDataAsync(
+        this.win_,
+        /**@type {string}*/ (startAttribute),
+        /**@type {string}*/ (endAttribute)
+      );
+    });
+
+    this.set('NAV_TYPE', () => {
+      return getNavigationData(this.win_, 'type');
+    });
+
+    this.set('NAV_REDIRECT_COUNT', () => {
+      return getNavigationData(this.win_, 'redirectCount');
+    });
+
+    this.set(
+      'HTML_ATTR',
+      /** @type {function(...*)} */ (this.htmlAttributeBinding_.bind(this))
+    );
+
+    this.set('CLIENT_ID', () => null);
   }
 
   /**
@@ -172,20 +180,27 @@ export class A4AVariableSource extends VariableSource {
       return '[]';
     }
     if (elements.length > HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE) {
-      user().error(TAG, 'CSS selector may match at most ' +
-          `${HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE} elements.`);
+      user().error(
+        TAG,
+        'CSS selector may match at most ' +
+          `${HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE} elements.`
+      );
       return '[]';
     }
     const result = [];
-    for (let i = 0; i < elements.length &&
-        result.length < HTML_ATTR_MAX_ELEMENTS_TO_RETURN; ++i) {
+    for (
+      let i = 0;
+      i < elements.length && result.length < HTML_ATTR_MAX_ELEMENTS_TO_RETURN;
+      ++i
+    ) {
       const currentResult = {};
       let foundAtLeastOneAttr = false;
       for (let j = 0; j < attributeNames.length; ++j) {
         const attributeName = attributeNames[j];
         if (elements[i].hasAttribute(attributeName)) {
-          currentResult[attributeName] =
-              elements[i].getAttribute(attributeName);
+          currentResult[attributeName] = elements[i].getAttribute(
+            attributeName
+          );
           foundAtLeastOneAttr = true;
         }
       }

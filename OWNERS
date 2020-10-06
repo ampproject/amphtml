@@ -1,0 +1,39 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+
+{
+  reviewerTeam: 'ampproject/reviewers-amphtml',
+  rules: [
+    {
+      owners: [
+        {name: 'cramforce', requestReviews: false},
+        {name: 'dvoytenko', requestReviews: false},
+        {name: 'jridgewell', requestReviews: false},
+      ],
+    },
+    {
+      pattern: '**/validator-*.{protoascii,html,out}',
+      owners: [{name: 'ampproject/wg-caching', required: true}],
+    },
+    {
+      pattern: '**/*.md',
+      owners: [{name: '*'}],
+    },
+    {
+      pattern: '{.*,gulpfile.js}',
+      owners: [{name: 'ampproject/wg-infra'}],
+    },
+    {
+      pattern: '{babel.config.js,package.json,yarn.lock}',
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-runtime'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
+      pattern: '**/OWNERS',
+      owners: [{name: 'mrjoro', requestReviews: false}],
+    },
+  ],
+}

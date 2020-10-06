@@ -20,28 +20,32 @@ tags: {  # amp-list
     name: "amp-list"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # amp-list
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "SCRIPT[custom-element=amp-list] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-list"
+    # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-list> with mandatory src and/or [src] attr
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "AMP-LIST"
   requires_extension: "amp-list"
+  attrs: {
+    name: "auto-resize"
+    value: ""
+    deprecation: "replacement-to-be-determined-at-a-later-date"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/18849"
+  }
   attrs: {
     name: "binding"
     value: "always"
@@ -49,33 +53,57 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "refresh"
   }
   attrs: { name: "credentials" }
+  attrs: {
+    name: "data-amp-bind-src"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
+  }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
+  attrs: {
+    name: "load-more"
+    value: "auto"
+    value: "manual"
+   }
+  attrs: {
+    name: "load-more-bookmark"
+    trigger: {
+    also_requires_attr: "load-more"
+    }
+  }
   attrs: { name: "max-items" }
   attrs: {
     name: "reset-on-refresh"
     value: ""
+    value: "always"
+    value: "fetch"
   }
   attrs: { name: "single-item" }
   attrs: {
     name: "src"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
+      protocol: "amp-state"
+      protocol: "amp-script"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
+  attrs: { name: "xssi-prefix" }
   # <amp-bind>
   attrs: {
-    name: "[src]"
-    mandatory_anyof: "['src','[src]']"
+    name: "[is-layout-container]"
   }
   attrs: {
-    name: "[state]"
-    deprecation: "[src]"
+    name: "[src]"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -87,6 +115,77 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     supported_layouts: RESPONSIVE
   }
 }
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  tag_name: "DIV"
+  spec_name: "AMP-LIST DIV [fetch-error]"
+  mandatory_ancestor: "AMP-LIST"
+  attrs: { name: "align" }
+  attrs: {
+    name: "fetch-error"
+    mandatory: true
+  }
+}
+
+tags: { # amp-list-load-more
+  html_format: AMP
+  tag_name: "AMP-LIST-LOAD-MORE"
+  requires_extension: "amp-list"
+  mandatory_parent: "AMP-LIST"
+  attrs: {
+    name: "load-more-button"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+  attrs: {
+    name: "load-more-failed"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+  attrs: {
+    name: "load-more-loading"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  }
+  attrs: {
+    name: "load-more-end"
+    value: ""
+    mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  },
+}
+
+# The button element variant allowed in amp-list-load-more.
+tags: {
+  html_format: AMP
+  requires_extension: "amp-list"
+  tag_name: "BUTTON"
+  spec_name: "amp-list-load-more button[load-more-clickable]"
+  mandatory_parent: "AMP-LIST-LOAD-MORE"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: {
+    name: "load-more-clickable"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+    value: ""
+  }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
+  }
+  attrs: { name: "type" }
+  attrs: { name: "value" }
+  attr_lists: "name-attr"
+}
+
 # AMP4EMAIL disallows mustache in src attribute.
 tags: {  # <amp-list>
   html_format: AMP4EMAIL
@@ -96,6 +195,17 @@ tags: {  # <amp-list>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
+  attrs: {
+    name: "binding"
+    value: "always"
+    value: "no"
+    value: "refresh"
+    value: "refresh-evaluate" # Experimental.
+  }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
@@ -106,16 +216,21 @@ tags: {  # <amp-list>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in src.
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
+  attrs: { name: "xssi-prefix" }
   # <amp-bind>
-  attrs: { name: "[state]" }
+  attrs: {
+    name: "[is-layout-container]"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
+    supported_layouts: CONTAINER # Experimental, email-only.
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -124,4 +239,3 @@ tags: {  # <amp-list>
     supported_layouts: RESPONSIVE
   }
 }
-

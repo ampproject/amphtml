@@ -28,12 +28,11 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
 
 export class AmpBodymovinAnimation extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -46,6 +45,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
 
     /** @private {?string} */
     this.loop_ = null;
+
+    /** @private {?string} */
+    this.renderer_ = null;
 
     /** @private {?boolean} */
     this.autoplay_ = null;
@@ -70,56 +72,93 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    const scriptToLoad =
+      this.renderer_ === 'svg'
+        ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
+        : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preconnect.url(this.getAmpDoc(), scriptToLoad, opt_onLayout);
   }
 
   /** @override */
   buildCallback() {
     this.loop_ = this.element.getAttribute('loop') || 'true';
     this.autoplay_ = !this.element.hasAttribute('noautoplay');
-    user().assert(this.element.hasAttribute('src'),
-        'The src attribute must be specified for <amp-bodymovin-animation>');
+    this.renderer_ = this.element.getAttribute('renderer') || 'svg';
+    userAssert(
+      this.element.hasAttribute('src'),
+      'The src attribute must be specified for <amp-bodymovin-animation>'
+    );
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
     // Register relevant actions
-    this.registerAction('play', () => { this.play_(); }, ActionTrust.LOW);
-    this.registerAction('pause', () => { this.pause_(); }, ActionTrust.LOW);
-    this.registerAction('stop', () => { this.stop_(); }, ActionTrust.LOW);
-    this.registerAction('seekTo', invocation => {
-      const {args} = invocation;
-      if (args) {
-        this.seekTo_(args);
-      }
-    }, ActionTrust.LOW);
+    this.registerAction(
+      'play',
+      () => {
+        this.play_();
+      },
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'pause',
+      () => {
+        this.pause_();
+      },
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'stop',
+      () => {
+        this.stop_();
+      },
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'seekTo',
+      (invocation) => {
+        const {args} = invocation;
+        if (args) {
+          this.seekTo_(args);
+        }
+      },
+      ActionTrust.LOW
+    );
   }
 
   /** @override */
   layoutCallback() {
     const animData = batchFetchJsonFor(this.ampdoc_, this.element);
-    return animData.then(data => {
+    return animData.then((data) => {
       const opt_context = {
         loop: this.loop_,
         autoplay: this.autoplay_,
+        renderer: this.renderer_,
         animationData: data,
       };
       const iframe = getIframe(
-          this.win, this.element, 'bodymovinanimation', opt_context);
-      return Services.vsyncFor(this.win).mutatePromise(() => {
-        this.applyFillContent(iframe);
-        this.unlistenMessage_ = listen(
+        this.win,
+        this.element,
+        'bodymovinanimation',
+        opt_context
+      );
+      return Services.vsyncFor(this.win)
+        .mutatePromise(() => {
+          this.applyFillContent(iframe);
+          this.unlistenMessage_ = listen(
             this.win,
             'message',
             this.handleBodymovinMessages_.bind(this)
-        );
-        this.element.appendChild(iframe);
-        this.iframe_ = iframe;
-      }).then(() => {
-        return this.playerReadyPromise_;
-      });
+          );
+          this.element.appendChild(iframe);
+          this.iframe_ = iframe;
+        })
+        .then(() => {
+          return this.playerReadyPromise_;
+        });
     });
   }
 
@@ -146,8 +185,13 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!getData(event) || !(isObject(getData(event))
-        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
+    if (
+      !getData(event) ||
+      !(
+        isObject(getData(event)) ||
+        startsWith(/** @type {string} */ (getData(event)), '{')
+      )
+    ) {
       return; // Doesn't look like JSON.
     }
 
@@ -173,12 +217,14 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   sendCommand_(action, opt_valueType, opt_value) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(dict({
-          'action': action,
-          'valueType': opt_valueType || '',
-          'value': opt_value || '',
-        }));
-        this.iframe_.contentWindow. /*OK*/postMessage(message, '*');
+        const message = JSON.stringify(
+          dict({
+            'action': action,
+            'valueType': opt_valueType || '',
+            'value': opt_value || '',
+          })
+        );
+        this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });
   }
@@ -216,6 +262,6 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBodymovinAnimation);
 });

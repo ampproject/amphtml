@@ -17,23 +17,20 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Messenger} from './iframe-api/messenger';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
-import {parseUrlDeprecated} from '../../../src/url';
 import {toggle} from '../../../src/style';
 
 const AUTHORIZATION_TIMEOUT = 3000;
 const EXPIRATION_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 days
 const TAG = 'amp-access-iframe';
 
-
 /** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessIframeAdapter {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
@@ -53,20 +50,23 @@ export class AccessIframeAdapter {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @const @private {string} */
-    this.iframeSrc_ = user().assert(configJson['iframeSrc'],
-        '"iframeSrc" URL must be specified');
+    this.iframeSrc_ = userAssert(
+      configJson['iframeSrc'],
+      '"iframeSrc" URL must be specified'
+    );
     assertHttpsUrl(this.iframeSrc_, '"iframeSrc"');
 
     /** @const @private {?Array} */
     this.iframeVars_ = configJson['iframeVars'] || null;
     if (this.iframeVars_) {
-      user().assert(isArray(this.iframeVars_),
-          '"iframeVars" must be an array');
+      userAssert(isArray(this.iframeVars_), '"iframeVars" must be an array');
     }
 
     /** @const @private {!JsonObject} */
-    this.defaultResponse_ = user().assert(configJson['defaultResponse'],
-        '"defaultResponse" must be specified');
+    this.defaultResponse_ = userAssert(
+      configJson['defaultResponse'],
+      '"defaultResponse" must be specified'
+    );
 
     /** @private @const {string} */
     this.targetOrigin_ = parseUrlDeprecated(this.iframeSrc_).origin;
@@ -83,9 +83,10 @@ export class AccessIframeAdapter {
 
     /** @private @const {!Messenger} */
     this.messenger_ = new Messenger(
-        this.ampdoc.win,
-        () => this.iframe_.contentWindow,
-        this.targetOrigin_);
+      this.ampdoc.win,
+      () => this.iframe_.contentWindow,
+      this.targetOrigin_
+    );
 
     /** @private {?Promise<!JsonObject>} */
     this.configPromise_ = null;
@@ -114,10 +115,7 @@ export class AccessIframeAdapter {
 
   /** @override */
   authorize() {
-    return Promise.race([
-      this.authorizeLocal_(),
-      this.authorizeRemote_(),
-    ]);
+    return Promise.race([this.authorizeLocal_(), this.authorizeRemote_()]);
   }
 
   /** @override */
@@ -162,17 +160,20 @@ export class AccessIframeAdapter {
    * @private
    */
   resolveConfig_() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const configJson = parseJson(JSON.stringify(this.configJson_));
       if (this.iframeVars_) {
         const varsString = this.iframeVars_.join('&');
         const varsPromise = this.context_.collectUrlVars(
-            varsString,
-            /* useAuthData */ false);
-        resolve(varsPromise.then(vars => {
-          configJson['iframeVars'] = vars;
-          return configJson;
-        }));
+          varsString,
+          /* useAuthData */ false
+        );
+        resolve(
+          varsPromise.then((vars) => {
+            configJson['iframeVars'] = vars;
+            return configJson;
+          })
+        );
       } else {
         resolve(configJson);
       }
@@ -195,15 +196,17 @@ export class AccessIframeAdapter {
    * @private
    */
   authorizeRemote_() {
-    return this.connect().then(() => {
-      return this.messenger_.sendCommandRsvp('authorize', {});
-    }).then(data => {
-      if (data) {
-        // Store the value in a non-blocking microtask.
-        Promise.resolve().then(() => this.store_(data));
-      }
-      return data;
-    });
+    return this.connect()
+      .then(() => {
+        return this.messenger_.sendCommandRsvp('authorize', {});
+      })
+      .then((data) => {
+        if (data) {
+          // Store the value in a non-blocking microtask.
+          Promise.resolve().then(() => this.store_(data));
+        }
+        return data;
+      });
   }
 
   /**
@@ -223,7 +226,7 @@ export class AccessIframeAdapter {
       }
       const parsed = parseJson(raw);
       const time = parsed['t'];
-      if ((time + EXPIRATION_TIMEOUT) < this.ampdoc.win.Date.now()) {
+      if (time + EXPIRATION_TIMEOUT < this.ampdoc.win.Date.now()) {
         // Already expired.
         return null;
       }
@@ -252,10 +255,15 @@ export class AccessIframeAdapter {
     }
     try {
       if (data) {
-        storage.setItem(TAG, JSON.stringify(dict({
-          't': this.ampdoc.win.Date.now(),
-          'd': data,
-        })));
+        storage.setItem(
+          TAG,
+          JSON.stringify(
+            dict({
+              't': this.ampdoc.win.Date.now(),
+              'd': data,
+            })
+          )
+        );
       } else {
         storage.removeItem(TAG);
       }
@@ -273,17 +281,19 @@ export class AccessIframeAdapter {
   handleCommand_(cmd, unusedPayload) {
     if (cmd == 'connect') {
       // First ever message. Indicates that the receiver is listening.
-      this.configPromise_.then(configJson => {
-        this.messenger_.sendCommandRsvp('start', {
-          'protocol': 'amp-access',
-          'config': configJson,
-        }).then(() => {
-          // Confirmation that connection has been successful.
-          if (this.connectedResolver_) {
-            this.connectedResolver_();
-            this.connectedResolver_ = null;
-          }
-        });
+      this.configPromise_.then((configJson) => {
+        this.messenger_
+          .sendCommandRsvp('start', {
+            'protocol': 'amp-access',
+            'config': configJson,
+          })
+          .then(() => {
+            // Confirmation that connection has been successful.
+            if (this.connectedResolver_) {
+              this.connectedResolver_();
+              this.connectedResolver_ = null;
+            }
+          });
       });
       return;
     }

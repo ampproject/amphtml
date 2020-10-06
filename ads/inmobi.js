@@ -22,13 +22,13 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function inmobi(global, data) {
-  validateData(data, ['siteid','slotid'], []);
+  validateData(data, ['siteid', 'slotid'], []);
 
   const inmobiConf = {
     siteid: data.siteid,
     slot: data.slotid,
     manual: true,
-    onError: code => {
+    onError: (code) => {
       if (code == 'nfr') {
         global.context.noContentAvailable();
         setStyle(document.getElementById('my-ad-slot'), 'display', 'none');
@@ -40,7 +40,7 @@ export function inmobi(global, data) {
   };
 
   writeScript(global, 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js', () => {
-    global.document.write('<div id=\'my-ad-slot\'></div>');
+    global.document.write("<div id='my-ad-slot'></div>");
     global._inmobi.getNewAd(document.getElementById('my-ad-slot'), inmobiConf);
   });
 }

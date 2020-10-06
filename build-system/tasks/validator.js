@@ -16,8 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
-const {execOrDie} = require('../exec');
+const {execOrDie} = require('../common/exec');
 
 let validatorArgs = '';
 if (argv.update_tests) {
@@ -27,17 +26,34 @@ if (argv.update_tests) {
 /**
  * Simple wrapper around the python based validator build.
  */
-function validator() {
-  execOrDie('cd validator && python build.py' + validatorArgs);
+async function validator() {
+  execOrDie('python build.py' + validatorArgs, {
+    cwd: 'validator',
+    stdio: 'inherit',
+  });
 }
 
 /**
  * Simple wrapper around the python based validator webui build.
  */
-function validatorWebui() {
-  execOrDie('cd validator/webui && python build.py' + validatorArgs);
+async function validatorWebui() {
+  execOrDie('python build.py' + validatorArgs, {
+    cwd: 'validator/js/webui',
+    stdio: 'inherit',
+  });
 }
 
-gulp.task('validator', 'Builds and tests the AMP validator.', validator);
-gulp.task('validator-webui', 'Builds and tests the AMP validator web UI.',
-    validatorWebui);
+module.exports = {
+  validator,
+  validatorWebui,
+};
+
+validator.description = 'Builds and tests the AMP validator.';
+validator.flags = {
+  'update_tests': '  Updates validation test output files',
+};
+
+validatorWebui.description = 'Builds and tests the AMP validator web UI.';
+validatorWebui.flags = {
+  'update_tests': '  Updates validation test output files',
+};

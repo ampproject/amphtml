@@ -611,7 +611,7 @@ amp-iframe iframe {
  * Display none elements
  */
 
-[amp-access][amp-access-hide],amp-experiment,amp-live-list>[update],amp-share-tracking,form [submit-error],form [submit-success],form [submitting] {
+[amp-access][amp-access-hide],amp-experiment,amp-live-list>[update],form [submit-error],form [submit-success],form [submitting] {
   display: none;
 }
 

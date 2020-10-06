@@ -17,14 +17,25 @@
 tags: {  # amp-fit-text
   html_format: AMP
   html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-fit-text"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-fit-text (AMP4EMAIL)
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-fit-text] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-fit-text"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -33,7 +44,6 @@ tags: {  # <amp-fit-text>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "AMP-FIT-TEXT"
   requires_extension: "amp-fit-text"
   attrs: { name: "max-font-size" }

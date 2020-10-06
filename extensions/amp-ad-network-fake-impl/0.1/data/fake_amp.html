@@ -2,10 +2,21 @@
   background-color: #f4f4f4;
 }
 </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body><amp-pixel src=https://securepubads.g.doubleclick.net/pcs/view?xai=AKAOjsvtqtYa0EsJ4Nx-reUVvVUxE47T2168NOpjITbBGSW6gTk6nH-_YUv6KuCJr7GDn741JGyjvPDbOctdo9TXC-7sr0ZVGxo2Tw159UTGvpOgdbB_RPx2hGetike7URzDfC6KJRLYvlolR9yGsBUc1BzHZkNCW2WytE-wSVBN1ZsjZDRH9oZekBYKKoaYuvTxmOeHz9Jg0VG3rm1rFvA2hcn-X3s3tnnTU7Wytj8vbSFi0VLRmwSUgfm7RqYCbYPLGdA&amp;sai=AMfl-YTipoc1Uj8AysSEfd1QxlnQ8oXFbtcHLZKo6D5gA4sQaYnSe89UvAfW0aU1O9E0OlQaN7pamrnB6hIBWQ3DVzUOv212COaKzCHprJRrnGwc&amp;sig=Cg0ArKJSzETQCdrEz0AMEAE&amp;urlfix=1&amp;adurl=></amp-pixel><a href=https://ampbyexample.com target=_blank>
-<amp-img alt="AMP Ad" height=250 src=https://ampbyexample.com/img/amp-300x250.jpg width=300></amp-img>
+<amp-img alt="AMP Ad" height=250 src=https://amp.dev/static/samples/img/amp-300x250.jpg width=300></amp-img>
 </a>
-<amp-pixel src=https://www.google.com></amp-pixel>
-<amp-analytics type="googleanalytics"></amp-analytics>
+<amp-pixel src="https://www.google.com/?cid=CLIENT_ID(a)"></amp-pixel>
+<amp-analytics type="googleanalytics">
+   <script type="application/json">
+      {
+         "triggers": {
+            "pageview": {
+               "on": "visible",
+               "request": "pageview"
+            }
+         }
+      }
+   </script>
+</amp-analytics>
 <script amp-ad-metadata type=application/json>
 {
    "ampRuntimeUtf16CharOffsets" : [ 134, 1129 ],

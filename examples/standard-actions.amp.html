@@ -48,6 +48,14 @@
 <div class="button-set">
   <h3>AMP.navigateTo()</h3>
   <button on="tap:AMP.navigateTo(url='http://google.com')">google.com</button>
+  <button on="tap:AMP.navigateTo(url='http://google.com', target='_top')">google.com (_top)</button>
+  <button on="tap:AMP.navigateTo(url='http://google.com', target='_blank')">google.com (_blank, noopener)</button>
+  <!--
+    Note: this will allow the tab/window opened to navigate your page to a new
+    URL. If this is a same origin request, this allows access to the full
+    window object, which may be useful.
+  -->
+  <button on="tap:AMP.navigateTo(url='http://google.com', target='_blank', opener=true)">google.com (_blank, with opener)</button>
 
   <select on="change:AMP.navigateTo(url=event.value)">
     <option value="http://google.com">google.com</option>
@@ -59,6 +67,16 @@
 <div class="button-set">
   <h3>AMP.print()</h3>
   <button on="tap:AMP.print">Print</button>
+</div>
+
+<div class="button-set">
+  <h3>AMP.scrollTo(el)</h3>
+  <button on="tap:AMP.scrollTo('id' = 'normal-element3')">Scroll to Element (Global)</button>
+  <button on="tap:AMP.scrollTo('id' = 'normal-element3', 'position' = 'bottom')">Scroll to Element Bottom (Global)</button>
+  <select id="elementScrollSelect" on="change:AMP.scrollTo('id' = event.value)">
+    <option value="normal-element2">Jump to elem 2</option>
+    <option value="normal-element3">Jump to elem 3</option>
+  </select>
 </div>
 
 <div class="button-set">
@@ -89,7 +107,7 @@
   <button on="tap:normal-element3.scrollTo('position' = 'top'), input-element.focus">ScrollTo and Focus</button>
 </div>
 
-<amp-img src="https://ampbyexample.com/img/amp.jpg" layout="responsive" width="1080" height="610" id="img-on-viewport"></amp-img>
+<amp-img src="https://amp.dev/static/samples/img/amp.jpg" layout="responsive" width="1080" height="610" id="img-on-viewport"></amp-img>
 
 <div id="normal-element" hidden>
   I was initially hidden.

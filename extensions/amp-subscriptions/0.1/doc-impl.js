@@ -15,21 +15,23 @@
  */
 
 import {Doc} from '../../../third_party/subscriptions-project/config';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-
 
 /**
  * Adopts config document to ampdoc.
  * @implements {Doc}
  */
 export class DocImpl {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
+
+    /** @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
   }
 
   /** @override */
@@ -67,10 +69,17 @@ export class DocImpl {
   whenReady() {
     return this.ampdoc_.whenReady();
   }
+
+  /** @override */
+  addToFixedLayer(element) {
+    return this.viewport_.addToFixedLayer(element, /* Force Transfer */ true);
+  }
 }
 
-
-/** @package Visible for testing only. */
+/**
+ * @package Visible for testing only.
+ * @return {typeof Doc}
+ */
 export function getDocClassForTesting() {
   return Doc;
 }

@@ -83,6 +83,16 @@ export default class PriorityQueue {
   }
 
   /**
+   * @param {function(T)} callback
+   */
+  forEach(callback) {
+    let index = this.queue_.length;
+    while (index--) {
+      callback(this.queue_[index].item);
+    }
+  }
+
+  /**
    * Dequeues the max priority item.
    * Items with the same priority are dequeued in FIFO order.
    * @return {T}

@@ -15,30 +15,34 @@
  */
 'use strict';
 
-const astUtils = require('eslint/lib/ast-utils');
+const astUtils = require('eslint/lib/rules/utils/ast-utils');
 
 const GLOBALS = Object.create(null);
 GLOBALS.window = 'Use `self` instead.';
 GLOBALS.document = 'Reference it as `self.document` or similar instead.';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    Identifier: function(node) {
+    Identifier: function (node) {
       const {name} = node;
       if (!(name in GLOBALS)) {
         return;
       }
-      if (!(/Expression/.test(node.parent.type))) {
+      if (!/Expression/.test(node.parent.type)) {
         return;
       }
 
-      if (node.parent.type === 'MemberExpression' &&
-          node.parent.property === node) {
+      if (
+        node.parent.type === 'MemberExpression' &&
+        node.parent.property === node
+      ) {
         return;
       }
 
-      const variable =
-          astUtils.getVariableByName(context.getScope(), node.name);
+      const variable = astUtils.getVariableByName(
+        context.getScope(),
+        node.name
+      );
       if (variable.defs.length > 0) {
         return;
       }

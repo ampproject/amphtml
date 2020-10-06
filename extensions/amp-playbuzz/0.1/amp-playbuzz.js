@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @fileoverview Embeds an playbuzz item.
  * The src attribute can be easily copied from a normal playbuzz URL.
@@ -41,21 +40,20 @@
 import * as events from '../../../src/event-helper';
 import * as utils from './utils';
 import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
 
 class AmpPlaybuzz extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -91,7 +89,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @override
    */
   preconnectCallback() {
-    this.preconnect.url(this.iframeSrcUrl_);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), this.iframeSrcUrl_);
   }
 
   /** @override */
@@ -103,16 +101,20 @@ class AmpPlaybuzz extends AMP.BaseElement {
   buildCallback() {
     // EXPERIMENT
     // AMP.toggleExperiment(EXPERIMENT, true); //for dev
-    user().assert(isExperimentOn(this.win, 'amp-playbuzz'),
-        'Enable amp-playbuzz experiment');
+    userAssert(
+      isExperimentOn(this.win, 'amp-playbuzz'),
+      'Enable amp-playbuzz experiment'
+    );
 
     const e = this.element;
     const src = e.getAttribute('src');
     const itemId = e.getAttribute('data-item');
 
-    user().assert(src || itemId,
-        'Either src or data-item attribute is required for <amp-playbuzz> %s',
-        this.element);
+    userAssert(
+      src || itemId,
+      'Either src or data-item attribute is required for <amp-playbuzz> %s',
+      this.element
+    );
 
     if (src) {
       assertAbsoluteHttpOrHttpsUrl(src);
@@ -129,16 +131,17 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.RESPONSIVE ||
-      layout === Layout.FIXED_HEIGHT;
+    return layout === Layout.RESPONSIVE || layout === Layout.FIXED_HEIGHT;
   }
 
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
     if (this.element.hasAttribute('aria-label')) {
-      placeholder.setAttribute('aria-label', 'Loading - '
-          + this.element.getAttribute('aria-label'));
+      placeholder.setAttribute(
+        'aria-label',
+        'Loading - ' + this.element.getAttribute('aria-label')
+      );
     } else {
       placeholder.setAttribute('aria-label', 'Loading interactive element');
     }
@@ -150,7 +153,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @param {!JsonObject} eventData */
   notifyIframe_(eventData) {
     const data = JSON.stringify(eventData);
-    this.iframe_.contentWindow./*OK*/postMessage(data, '*');
+    this.iframe_.contentWindow./*OK*/ postMessage(data, '*');
   }
   /**
    *
@@ -178,7 +181,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('scrolling', 'no');
@@ -187,22 +189,29 @@ class AmpPlaybuzz extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.generateEmbedSourceUrl_();
 
-    this.listenToPlaybuzzItemMessage_('resize_height',
-        utils.debounce(this.itemHeightChanged_.bind(this), 100));
+    this.listenToPlaybuzzItemMessage_(
+      'resize_height',
+      utils.debounce(this.itemHeightChanged_.bind(this), 100)
+    );
 
     this.element.appendChild(this.getOverflowElement_());
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    return this.iframePromise_ = this.loadPromise(iframe).then(function() {
+    return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
       this.iframeLoaded_ = true;
-      this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
+      this.attemptChangeHeight(dev().assertNumber(this.itemHeight_)).catch(
+        () => {
+          /* die */
+        }
+      );
 
       const unlisten = this.getViewport().onChanged(
-          this.sendScrollDataToItem_.bind(this));
+        this.sendScrollDataToItem_.bind(this)
+      );
       this.unlisteners_.push(unlisten);
-    }.bind(this));
+    }));
   }
 
   /** @return {!Element} @private */
@@ -213,13 +222,19 @@ class AmpPlaybuzz extends AMP.BaseElement {
     const loaderImage = createElement('img', 'pb_feed_anim_mask');
     loaderImage.src = logo;
 
-    const loadingPlaceholder =
-      createElement('div', 'pb_feed_placeholder_container',
-          createElement('div', 'pb_feed_placeholder_inner',
-              createElement('div', 'pb_feed_placeholder_content',
-                  createElement('div', 'pb_feed_placeholder_preloader',
-                      loaderImage)
-              )));
+    const loadingPlaceholder = createElement(
+      'div',
+      'pb_feed_placeholder_container',
+      createElement(
+        'div',
+        'pb_feed_placeholder_inner',
+        createElement(
+          'div',
+          'pb_feed_placeholder_content',
+          createElement('div', 'pb_feed_placeholder_preloader', loaderImage)
+        )
+      )
+    );
 
     return loadingPlaceholder;
   }
@@ -228,7 +243,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @param {number} height
    */
   itemHeightChanged_(height) {
-
     if (isNaN(height) || height === this.itemHeight_) {
       return;
     }
@@ -236,19 +250,20 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.itemHeight_ = height; //Save new height
 
     if (this.iframeLoaded_) {
-      this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
+      this.attemptChangeHeight(this.itemHeight_).catch(() => {
+        /* die */
+      });
     }
   }
-
 
   /**
    * @param {string} messageName
    * @param {Function} handler
    */
   listenToPlaybuzzItemMessage_(messageName, handler) {
-    const unlisten = events.listen(this.win, 'message',
-        event => utils.handleMessageByName(this.iframe_,
-            event, messageName, handler));
+    const unlisten = events.listen(this.win, 'message', (event) =>
+      utils.handleMessageByName(this.iframe_, event, messageName, handler)
+    );
     this.unlisteners_.push(unlisten);
   }
 
@@ -304,7 +319,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 
     if (this.iframe_) {
@@ -316,7 +331,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
   }
 }
 
-
-AMP.extension('amp-playbuzz', '0.1', AMP => {
+AMP.extension('amp-playbuzz', '0.1', (AMP) => {
   AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
 });

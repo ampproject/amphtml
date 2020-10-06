@@ -64,7 +64,7 @@ FAIL
 |  <body>
 |    <amp-story standalone title="My Story"
 >>   ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-bookend-error.html:64:2 The attribute 'bookend-config-src' in tag 'amp-story' is deprecated - use 'AMP-STORY-BOOKEND' instead. (see https://www.ampproject.org/docs/reference/components/amp-story#migrating-from-0.1-to-1.0) [DEPRECATION]
+amp-story/1.0/test/validator-amp-story-bookend-error.html:64:2 The attribute 'bookend-config-src' may not appear in tag 'amp-story'. (see https://amp.dev/documentation/components/amp-story)
 |      publisher="The AMP Team"
 |      publisher-logo-src="https://example.com/logo/1x1.png"
 |      poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
@@ -75,9 +75,9 @@ amp-story/1.0/test/validator-amp-story-bookend-error.html:64:2 The attribute 'bo
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |      <amp-story-bookend src="bookendv1.json" layout=nodisplay>
->>     ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-bookend-error.html:74:4 Tag 'amp-story-bookend' must have 0 child tags - saw 1 child tags. [AMP_TAG_PROBLEM]
 |        <h1>Illegal child inside amp-story-bookend!</h1>
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-bookend-error.html:75:6 The tag 'h1' may not appear as a descendant of tag 'amp-story-bookend'.
 |      </amp-story-bookend>
 |    </amp-story>
 |  </body>

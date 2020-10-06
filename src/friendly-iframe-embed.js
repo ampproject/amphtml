@@ -15,12 +15,24 @@
  */
 
 import {CommonSignals} from './common-signals';
-import {Observable} from './observable';
+import {FIE_EMBED_PROP} from './iframe-helper';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {closestBySelector, escapeHtml} from './dom';
-import {dev, rethrowAsync, user} from './log';
-import {disposeServicesForEmbed, getTopWindow} from './service';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {dev, devAssert, rethrowAsync, userAssert} from './log';
+import {
+  disposeServicesForEmbed,
+  getTopWindow,
+  setParentWindow,
+} from './service';
+import {escapeHtml} from './dom';
+import {installAmpdocServicesForEmbed} from './service/core-services';
+import {install as installCustomElements} from './polyfills/custom-elements';
+import {install as installDOMTokenList} from './polyfills/domtokenlist';
+import {install as installDocContains} from './polyfills/document-contains';
+import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
+import {installStylesForDoc} from './style-installer';
+import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
@@ -32,15 +44,7 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
-
-
-/** @const {string} */
-const EMBED_PROP = '__AMP_EMBED__';
-
-/** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD =
-    ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL', 'AMP-AD-EXIT'];
-
+import {whenContentIniLoad} from './ini-load';
 
 /**
  * Parameters used to create the new "friendly iframe" embed.
@@ -54,13 +58,13 @@ const EXCLUDE_INI_LOAD =
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
- *   html: string,
+ *   html: ?string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
+ *   skipHtmlMerge: (boolean|undefined),
  * }}
  */
 export let FriendlyIframeSpec;
-
 
 /**
  * @type {boolean|undefined}
@@ -77,42 +81,25 @@ export function setSrcdocSupportedForTesting(val) {
 }
 
 /**
+ * @return {function(*): !Promise<*>}
+ */
+function getDelayPromiseProducer() {
+  return (val) =>
+    new Promise((resolve) => {
+      setTimeout(() => resolve(val), 1);
+    });
+}
+
+/**
  * Returns `true` if the Friendly Iframes are supported.
  * @return {boolean}
  */
-function isSrcdocSupported() {
+export function isSrcdocSupported() {
   if (srcdocSupported === undefined) {
     srcdocSupported = 'srcdoc' in HTMLIFrameElement.prototype;
   }
   return srcdocSupported;
 }
-
-
-/**
- * Sets whether the embed is currently visible. The interpretation of visibility
- * is up to the embed parent. However, most of typical cases would rely on
- * whether the embed is currently in the viewport.
- * @param {!FriendlyIframeEmbed} embed
- * @param {boolean} visible
- * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
- */
-export function setFriendlyIframeEmbedVisible(embed, visible) {
-  embed.setVisible_(visible);
-}
-
-
-/**
- * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
- * Caution: This will only return the FIE after the iframe has 'loaded'. If you
- * are checking before this signal you may be in a race condition that returns
- * null.
- * @param {!HTMLIFrameElement} iframe
- * @return {?FriendlyIframeEmbed}
- */
-export function getFriendlyIframeEmbedOptional(iframe) {
-  return /** @type {?FriendlyIframeEmbed} */ (iframe[EMBED_PROP]);
-}
-
 
 /**
  * Creates the requested "friendly iframe" embed. Returns the promise that
@@ -122,37 +109,47 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @param {!HTMLIFrameElement} iframe
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
- * @param {function(!Window)=} opt_preinstallCallback
+ * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
-export function installFriendlyIframeEmbed(iframe, container, spec,
-  opt_preinstallCallback) {
+export function installFriendlyIframeEmbed(
+  iframe,
+  container,
+  spec,
+  opt_preinstallCallback // TODO(#22733): remove "window" argument.
+) {
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
+  /** @const {!./service/ampdoc-impl.AmpDocService} */
+  const ampdocService = Services.ampdocServiceFor(win);
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
+  iframe.setAttribute('marginheight', '0');
+  iframe.setAttribute('marginwidth', '0');
 
   // Pre-load extensions.
   if (spec.extensionIds) {
-    spec.extensionIds.forEach(
-        extensionId => extensions.preloadExtension(extensionId));
+    spec.extensionIds.forEach((extensionId) =>
+      extensions.preloadExtension(extensionId)
+    );
   }
 
-  const html = mergeHtml(spec);
-
+  const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
   iframe.onload = () => {
     // Chrome does not reflect the iframe readystate.
     iframe.readyState = 'complete';
   };
   const registerViolationListener = () => {
-    iframe.contentWindow.addEventListener('securitypolicyviolation',
-        violationEvent => {
-          dev().warn('FIE', 'security policy violation', violationEvent);
-        });
+    iframe.contentWindow.addEventListener(
+      'securitypolicyviolation',
+      (violationEvent) => {
+        dev().warn('FIE', 'security policy violation', violationEvent);
+      }
+    );
   };
   let loadedPromise;
   if (isSrcdocSupported()) {
@@ -164,9 +161,9 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
-    childDoc.open();
     registerViolationListener();
-    childDoc.write(html);
+    childDoc.open();
+    childDoc.write(devAssert(html));
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
     loadedPromise = loadPromise(iframe.contentWindow);
@@ -183,7 +180,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   if (isIframeReady(iframe)) {
     readyPromise = Promise.resolve();
   } else {
-    readyPromise = new Promise(resolve => {
+    readyPromise = new Promise((resolve) => {
       /** @const {number} */
       const interval = win.setInterval(() => {
         if (isIframeReady(iframe)) {
@@ -194,29 +191,45 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
 
       // For safety, make sure we definitely stop polling when child doc is
       // loaded.
-      loadedPromise.catch(error => {
-        rethrowAsync(error);
-      }).then(() => {
-        resolve();
-        win.clearInterval(interval);
-      });
+      loadedPromise
+        .catch((error) => {
+          rethrowAsync(error);
+        })
+        .then(() => {
+          resolve();
+          win.clearInterval(interval);
+        });
     });
   }
 
   return readyPromise.then(() => {
-    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
-    iframe[EMBED_PROP] = embed;
-
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
+    const signals = spec.host && spec.host.signals();
+    const ampdoc = ampdocService.installFieDoc(spec.url, childWin, {signals});
+    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
+    iframe[FIE_EMBED_PROP] = embed;
+
+    // Window might have been destroyed.
+    if (!childWin.frameElement) {
+      return null;
+    }
+
     // Add extensions.
-    extensions.installExtensionsInChildWindow(
-        childWin, spec.extensionIds || [], opt_preinstallCallback);
-    // Ready to be shown.
-    embed.startRender_();
-    return embed;
+    const extensionIds = spec.extensionIds || [];
+    return Installers.installExtensionsInEmbed(
+      embed,
+      extensions,
+      ampdoc,
+      extensionIds,
+      opt_preinstallCallback
+    ).then(() => {
+      if (!childWin.frameElement) {
+        return null;
+      }
+      return embed;
+    });
   });
 }
-
 
 /**
  * Returns `true` when iframe is ready.
@@ -230,16 +243,18 @@ function isIframeReady(iframe) {
   // no other reliable signal for `readyState` in a child window and thus
   // the best way to check is to see the contents of the body.
   const childDoc = iframe.contentWindow && iframe.contentWindow.document;
-  return !!(childDoc &&
-      isDocumentReady(childDoc) &&
-      childDoc.body &&
-      childDoc.body.firstChild);
+  return !!(
+    childDoc &&
+    isDocumentReady(childDoc) &&
+    childDoc.body &&
+    childDoc.body.firstChild
+  );
 }
-
 
 /**
  * Merges base and fonts into html document.
  * @param {!FriendlyIframeSpec} spec
+ * @return {string}
  */
 function mergeHtml(spec) {
   const originalHtml = spec.html;
@@ -272,15 +287,18 @@ function mergeHtml(spec) {
 
   // Load fonts.
   if (spec.fonts) {
-    spec.fonts.forEach(font => {
+    spec.fonts.forEach((font) => {
       result.push(
-          `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`);
+        `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`
+      );
     });
   }
 
   // Load CSP
-  result.push('<meta http-equiv=Content-Security-Policy ' +
-      'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
+  result.push(
+    '<meta http-equiv=Content-Security-Policy ' +
+      "content=\"script-src 'none';object-src 'none';child-src 'none'\">"
+  );
 
   // Postambule.
   if (ip > 0) {
@@ -292,16 +310,15 @@ function mergeHtml(spec) {
   return result.join('');
 }
 
-
 /**
  * Exposes `mergeHtml` for testing purposes.
  * @param {!FriendlyIframeSpec} spec
+ * @return {string}
  * @visibleForTesting
  */
 export function mergeHtmlForTesting(spec) {
   return mergeHtml(spec);
 }
-
 
 /**
  * A "friendly iframe" embed. This is the iframe that's fully accessible to
@@ -312,20 +329,25 @@ export function mergeHtmlForTesting(spec) {
  * The friendly iframe is managed by the top-level AMP Runtime. When it's
  * destroyed, the `destroy` method must be called to free up the shared
  * resources.
+ *
+ * @visibleForTesting
  */
 export class FriendlyIframeEmbed {
-
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {!FriendlyIframeSpec} spec
    * @param {!Promise} loadedPromise
+   * @param {?./service/ampdoc-impl.AmpDocFie} ampdoc
    */
-  constructor(iframe, spec, loadedPromise) {
+  constructor(iframe, spec, loadedPromise, ampdoc) {
     /** @const {!HTMLIFrameElement} */
     this.iframe = iframe;
 
     /** @const {!Window} */
-    this.win = /** @type{!Window} */(iframe.contentWindow);
+    this.win = /** @type {!Window} */ (iframe.contentWindow);
+
+    /** @const {?./service/ampdoc-impl.AmpDocFie} */
+    this.ampdoc = ampdoc;
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
@@ -336,29 +358,31 @@ export class FriendlyIframeEmbed {
     /** @const @private {time} */
     this.startTime_ = Date.now();
 
-    /**
-     * Starts out as invisible. The interpretation of this flag is up to
-     * the emded parent.
-     * @private {boolean}
-     */
-    this.visible_ = false;
-
-    /** @private {!Observable<boolean>} */
-    this.visibilityObservable_ = new Observable();
-
     /** @private @const */
-    this.signals_ = this.host ? this.host.signals() : new Signals();
+    this.signals_ = this.ampdoc
+      ? this.ampdoc.signals()
+      : this.host
+      ? this.host.signals()
+      : new Signals();
 
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
+    if (this.ampdoc) {
+      this.whenReady().then(() => this.ampdoc.setReady());
+    }
+
+    this.win.addEventListener('resize', () => this.handleResize_());
   }
 
   /**
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    this.removeResources_();
     disposeServicesForEmbed(this.win);
+    if (this.ampdoc) {
+      this.ampdoc.dispose();
+    }
   }
 
   /**
@@ -419,6 +443,7 @@ export class FriendlyIframeEmbed {
     } else {
       this.signals_.signal(CommonSignals.RENDER_START);
     }
+    // Common signal RENDER_START indicates time to toggle visibility
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
       this.win.document.documentElement.classList.add('i-amphtml-fie');
@@ -435,9 +460,11 @@ export class FriendlyIframeEmbed {
       rect = this.host.getLayoutBox();
     } else {
       rect = layoutRectLtwh(
-          0, 0,
-          this.win./*OK*/innerWidth,
-          this.win./*OK*/innerHeight);
+        0,
+        0,
+        this.win./*OK*/ innerWidth,
+        this.win./*OK*/ innerHeight
+      );
     }
     Promise.all([
       this.whenReady(),
@@ -448,53 +475,42 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * Whether the embed is currently visible. The interpretation of visibility
-   * is up to the embed parent. However, most of typical cases would rely on
-   * whether the embed is currently in the viewport.
-   * @return {boolean}
-   * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
-   */
-  isVisible() {
-    return this.visible_;
-  }
-
-  /**
-   * See `isVisible` for more info.
-   * @param {function(boolean)} handler
-   * @return {!UnlistenDef}
-   */
-  onVisibilityChanged(handler) {
-    return this.visibilityObservable_.add(handler);
-  }
-
-  /**
-   * @param {boolean} visible
-   * @private
-   * @restricted
-   */
-  setVisible_(visible) {
-    if (this.visible_ != visible) {
-      this.visible_ = visible;
-      this.visibilityObservable_.fire(this.visible_);
-    }
-  }
-
-  /**
    * @return {!HTMLBodyElement}
    * @visibleForTesting
    */
   getBodyElement() {
-    return /** @type {!HTMLBodyElement} */ (
-      (this.iframe.contentDocument || this.iframe.contentWindow.document)
-          .body);
+    return /** @type {!HTMLBodyElement} */ ((
+      this.iframe.contentDocument || this.iframe.contentWindow.document
+    ).body);
   }
 
   /**
-   * @return {!./service/resources-impl.Resources}
+   * Force remeasure inside FIE doc when iframe is resized.
+   * @private
+   */
+  handleResize_() {
+    this.getMutator_().mutateElement(
+      this.win.document.documentElement,
+      () => {} // NOOP.
+    );
+  }
+
+  /**
+   * @return {!./service/resources-interface.ResourcesInterface}
    * @private
    */
   getResources_() {
-    return Services.resourcesForDoc(this.iframe);
+    const host =
+      this.host && !this.iframe.isConnected ? this.host : this.iframe;
+    return Services.resourcesForDoc(host);
+  }
+
+  /**
+   * @return {!./service/mutator-interface.MutatorInterface}
+   * @private
+   */
+  getMutator_() {
+    return Services.mutatorForDoc(this.iframe);
   }
 
   /**
@@ -505,8 +521,26 @@ export class FriendlyIframeEmbed {
    * @private
    */
   measureMutate_(task) {
-    return this.getResources_().measureMutateElement(this.iframe,
-        task.measure || null, task.mutate);
+    return this.getMutator_().measureMutateElement(
+      this.iframe,
+      task.measure || null,
+      task.mutate
+    );
+  }
+
+  /**
+   * Removes all resources belonging to the FIE window.
+   * @private
+   */
+  removeResources_() {
+    const resources = this.getResources_();
+    const toRemove = resources
+      .get()
+      .filter((resource) => resource.hostWin == this.win);
+    toRemove.forEach((resource) => {
+      resources.remove(resource.element);
+      resource.disconnect();
+    });
   }
 
   /**
@@ -516,56 +550,56 @@ export class FriendlyIframeEmbed {
     const ampAdParent = dev().assertElement(this.iframe.parentNode);
 
     // Security assertion. Otherwise any 3p frame could request lighbox mode.
-    user().assert(ampAdParent.tagName.toLowerCase() == 'amp-ad',
-        'Only <amp-ad> is allowed to enter lightbox mode.');
+    userAssert(
+      ampAdParent.tagName.toLowerCase() == 'amp-ad',
+      'Only <amp-ad> is allowed to enter lightbox mode.'
+    );
 
-    const bodyStyle = {
-      'background': 'transparent',
-      'position': 'absolute',
-      'bottom': 'auto',
-      'right': 'auto',
-
-      // Set for replacing with vsync values.
-      'top': '',
-      'left': '',
-      'width': '',
-      'height': '',
-    };
-
-    const iframeStyle = {
-      'position': 'fixed',
-      'left': 0,
-      'right': 0,
-      'bottom': 0,
-      'width': '100vw',
-      'top': 0,
-      'height': '100vh',
-    };
+    let bodyStyle;
 
     return this.measureMutate_({
       measure: () => {
-        const rect = this.host ?
-          this.host.getLayoutBox() :
-          this.iframe./*OK*/getBoundingClientRect();
+        const rect = this.host
+          ? this.host.getLayoutBox()
+          : this.iframe./*OK*/ getBoundingClientRect();
 
         // Offset by scroll top as iframe will be position: fixed.
         const dy = -Services.viewportForDoc(this.iframe).getScrollTop();
         const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
 
         // Offset body by header height to prevent visual jump.
-        Object.assign(bodyStyle, {
-          'top': px(top),
-          'left': px(left),
-          'width': px(width),
-          'height': px(height),
-        });
+        bodyStyle = {
+          top: px(top),
+          left: px(left),
+          width: px(width),
+          height: px(height),
+        };
       },
       mutate: () => {
         // !important to prevent abuse e.g. box @ ltwh = 0, 0, 0, 0
-        setImportantStyles(this.iframe, iframeStyle);
+        setImportantStyles(this.iframe, {
+          'position': 'fixed',
+          'left': 0,
+          'right': 0,
+          'bottom': 0,
+          'width': '100vw',
+          'top': 0,
+          'height': '100vh',
+        });
 
         // We need to override runtime-level !important rules
-        setImportantStyles(this.getBodyElement(), bodyStyle);
+        setImportantStyles(this.getBodyElement(), {
+          'background': 'transparent',
+          'position': 'absolute',
+          'bottom': 'auto',
+          'right': 'auto',
+
+          // Read during vsync measure phase.
+          'top': bodyStyle.top,
+          'left': bodyStyle.left,
+          'width': bodyStyle.width,
+          'height': bodyStyle.height,
+        });
       },
     });
   }
@@ -603,31 +637,134 @@ export class FriendlyIframeEmbed {
 }
 
 /**
- * Returns the promise that will be resolved when all content elements
- * have been loaded in the initially visible set.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
- * @param {!Window} hostWin
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!Promise}
+ * Install polyfills in the child window (friendly iframe).
+ * @param {!Window} parentWin
+ * @param {!Window} childWin
  */
-export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
-  return Services.resourcesForDoc(elementOrAmpDoc)
-      .getResourcesInRect(hostWin, rect)
-      .then(resources => {
-        const promises = [];
-        resources.forEach(r => {
-          if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
-            promises.push(r.loadedOnce());
-          }
-        });
-        return Promise.all(promises);
-      });
+function installPolyfillsInChildWindow(parentWin, childWin) {
+  if (!IS_ESM) {
+    installDocContains(childWin);
+    installDOMTokenList(childWin);
+  }
+  // The anonymous class parameter allows us to detect native classes vs
+  // transpiled classes.
+  if (!IS_SXG) {
+    installCustomElements(childWin, class {});
+    installIntersectionObserver(parentWin, childWin);
+  }
 }
 
 /**
- * @param {!Element} element
- * @return {boolean}
+ * Static installers that can be easily stubbed for tests.
+ * @visibleForTesting
  */
-export function isInFie(element) {
-  return !!closestBySelector(element, '.i-amphtml-fie');
+export class Installers {
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
+   * @param {!FriendlyIframeEmbed} embed
+   * @param {!./service/extensions-impl.Extensions} extensions
+   * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)|undefined} preinstallCallback
+   * @param {function(!Promise)=} opt_installComplete
+   * @return {!Promise}
+   */
+  static installExtensionsInEmbed(
+    embed,
+    extensions,
+    ampdoc,
+    extensionIds,
+    preinstallCallback,
+    opt_installComplete
+  ) {
+    const childWin = ampdoc.win;
+    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    setParentWindow(childWin, parentWin);
+    const getDelayPromise = getDelayPromiseProducer();
+
+    return getDelayPromise(undefined)
+      .then(() => {
+        // Install necessary polyfills.
+        installPolyfillsInChildWindow(parentWin, childWin);
+      })
+      .then(getDelayPromise)
+      .then(() => {
+        if (IS_ESM) {
+          const css = parentWin.document.querySelector('style[amp-runtime]')
+            .textContent;
+          installStylesForDoc(
+            ampdoc,
+            css,
+            /* callback */ null,
+            /* opt_isRuntimeCss */ true,
+            /* opt_ext */ 'amp-runtime'
+          );
+        } else {
+          // Install runtime styles.
+          installStylesForDoc(
+            ampdoc,
+            ampSharedCss,
+            /* callback */ null,
+            /* opt_isRuntimeCss */ true,
+            /* opt_ext */ 'amp-runtime'
+          );
+        }
+      })
+      .then(getDelayPromise)
+      .then(() => {
+        if (!childWin.frameElement) {
+          return;
+        }
+        // Run pre-install callback.
+        if (preinstallCallback) {
+          preinstallCallback(ampdoc.win, ampdoc);
+        }
+      })
+      .then(getDelayPromise)
+      .then(() => {
+        if (!childWin.frameElement) {
+          return;
+        }
+        // Install embeddable standard services.
+        Installers.installStandardServicesInEmbed(ampdoc);
+      })
+      .then(getDelayPromise)
+      .then(() => {
+        if (!childWin.frameElement) {
+          return;
+        }
+        extensions.preinstallEmbed(ampdoc, extensionIds);
+      })
+      .then(getDelayPromise)
+      .then(() => {
+        if (!childWin.frameElement) {
+          return;
+        }
+        // Ready to be shown.
+        embed.startRender_();
+      })
+      .then(getDelayPromise)
+      .then(() => {
+        if (!childWin.frameElement) {
+          return;
+        }
+        // Intentionally do not wait for the full installation to complete.
+        // It's enough of initialization done to return the embed.
+        const promise = extensions.installExtensionsInDoc(ampdoc, extensionIds);
+        if (opt_installComplete) {
+          opt_installComplete(promise);
+        }
+      });
+  }
+
+  /**
+   * Adopt predefined core services for the embedded ampdoc (friendly iframe).
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  static installStandardServicesInEmbed(ampdoc) {
+    installAmpdocServicesForEmbed(ampdoc);
+    installTimerInEmbedWindow(ampdoc.win);
+  }
 }

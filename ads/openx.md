@@ -37,11 +37,14 @@ Display an OpenX Ad Unit.
   - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).
 
 ```html
-<amp-ad width="728" height="90"
-    type="openx"
-    data-host="domain.openx.net"
-    data-auid="12345"
-    json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1},"openx":{"customVars":{"marco":"polo","fates":["clothos","lachesis","atropos"]}}}'>
+<amp-ad
+  width="728"
+  height="90"
+  type="openx"
+  data-host="domain.openx.net"
+  data-auid="12345"
+  json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1},"openx":{"customVars":{"marco":"polo","fates":["clothos","lachesis","atropos"]}}}'
+>
 </amp-ad>
 ```
 
@@ -63,36 +66,42 @@ OpenX header bidding. Parameters noted in the DoubleClick amp-ad [documentation]
 
 - `json` - Additional json options.
 
-  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).  Also note that OpenX bidder limits these keys by the __whitelisted keys__ set on your publisher settings.
+  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html). Also note that OpenX bidder limits these keys by the **white listed keys** set on your publisher settings.
 
 ```html
-<amp-ad width="728" height="90"
-    type="openx"
-    data-host="domain.openx.net"
-    data-auid="12345"
-    data-nc="56789-MySite"
-    data-dfp-slot="/12345/dfp_zone"
-    json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1},"openx":{"customVars":{"marco":"polo","fates":["clothos","lachesis","atropos"]}}}'>
+<amp-ad
+  width="728"
+  height="90"
+  type="openx"
+  data-host="domain.openx.net"
+  data-auid="12345"
+  data-nc="56789-MySite"
+  data-dfp-slot="/12345/dfp_zone"
+  json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1},"openx":{"customVars":{"marco":"polo","fates":["clothos","lachesis","atropos"]}}}'
+>
 </amp-ad>
 ```
 
 ### DoubleClick Fallback
 
 If no OpenX parameters are detected, the tag falls back to a proxy for the DoubleClick ad type. The same rules for
- parameter conversion apply here as for bidder.
+parameter conversion apply here as for bidder.
 
- **Required**:
+**Required**:
 
- - `data-dfp-slot` - The DoubleClick slot
+- `data-dfp-slot` - The DoubleClick slot
 
 **Optional**:
 
- - `json` - Additional json options. Only the "dfp" is currently respected.
+- `json` - Additional json options. Only the "dfp" is currently respected.
 
 ```html
-<amp-ad width="728" height="90"
-    type="openx"
-    data-dfp-slot="12345/dfp_zone"
-    json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}}'>
+<amp-ad
+  width="728"
+  height="90"
+  type="openx"
+  data-dfp-slot="12345/dfp_zone"
+  json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}}'
+>
 </amp-ad>
 ```

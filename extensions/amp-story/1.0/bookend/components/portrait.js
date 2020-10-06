@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForBookendComponent} from './bookend-component-interface';
+import {
+  getSourceOriginForElement,
+  resolveImgSrc,
+  userAssertValidProtocol,
+} from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -50,18 +58,18 @@ let portraitElementsDef;
  * @implements {BookendComponentInterface}
  */
 export class PortraitComponent {
-
   /** @override */
   assertValidity(portraitJson, element) {
-
     const requiredFields = ['title', 'image', 'url'];
-    const hasAllRequiredFields =
-        !requiredFields.some(field => !(field in portraitJson));
-    user().assert(
-        hasAllRequiredFields,
-        'Portrait component must contain ' +
-        requiredFields.map(field => '`' + field + '`').join(', ') +
-        ' fields, skipping invalid.');
+    const hasAllRequiredFields = !requiredFields.some(
+      (field) => !(field in portraitJson)
+    );
+    userAssert(
+      hasAllRequiredFields,
+      'Portrait component must contain ' +
+        requiredFields.map((field) => '`' + field + '`').join(', ') +
+        ' fields, skipping invalid.'
+    );
 
     userAssertValidProtocol(element, portraitJson['url']);
     userAssertValidProtocol(element, portraitJson['image']);
@@ -70,7 +78,7 @@ export class PortraitComponent {
   /** @override */
   build(portraitJson, element) {
     const url = portraitJson['url'];
-    const domainName = getSourceOriginForBookendComponent(element, url);
+    const domainName = getSourceOriginForElement(element, url);
 
     const portrait = {
       url,
@@ -89,13 +97,11 @@ export class PortraitComponent {
   }
 
   /** @override */
-  buildElement(portraitData, doc) {
-    const html = htmlFor(doc);
-    const el =
-        html`
-        <a class="i-amphtml-story-bookend-portrait
-          i-amphtml-story-bookend-component"
-          target="_top">
+  buildElement(portraitData, win, data) {
+    portraitData = /** @type {PortraitComponentDef} */ (portraitData);
+    const html = htmlFor(win.document);
+    const el = html`
+        <a class="i-amphtml-story-bookend-portrait i-amphtml-story-bookend-component" target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
           <h2 class="i-amphtml-story-bookend-article-heading"
@@ -106,18 +112,40 @@ export class PortraitComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    addAttributesToElement(el, dict({'href': portraitData.url}));
+    addAttributesToElement(
+      el,
+      dict({
+        'href': resolveRelativeUrl(
+          portraitData.url,
+          getSourceUrl(win.location)
+        ),
+      })
+    );
+
+    el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.PORTRAIT,
+    };
 
     if (portraitData['amphtml'] === true) {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));
     }
 
-    const {category, title, image, meta} =
-      /** @type {!portraitElementsDef} */ (htmlRefs(el));
+    const {
+      category,
+      title,
+      image,
+      meta,
+    } = /** @type {!portraitElementsDef} */ (htmlRefs(el));
 
     category.textContent = portraitData.category;
     title.textContent = portraitData.title;
-    addAttributesToElement(image, dict({'src': portraitData.image}));
+
+    addAttributesToElement(
+      image,
+      dict({'src': resolveImgSrc(win, portraitData.image)})
+    );
+
     meta.textContent = portraitData.domainName;
 
     return el;

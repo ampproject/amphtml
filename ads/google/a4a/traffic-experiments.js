@@ -22,13 +22,9 @@
  * impacts on click-throughs.
  */
 
-import {
-  EXPERIMENT_ATTRIBUTE,
-  mergeExperimentIds,
-} from './utils';
+import {EXPERIMENT_ATTRIBUTE, mergeExperimentIds} from './utils';
 import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
-  isExperimentOn,
 } from '../../../src/experiments';
 import {Services} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
@@ -48,7 +44,8 @@ export const MANUAL_EXPERIMENT_ID = '117152632';
  * @return {?string} experiment extracted from page url.
  */
 export function extractUrlExperimentId(win, element) {
-  const expParam = Services.viewerForDoc(element).getParam('exp') ||
+  const expParam =
+    Services.ampdoc(element).getParam('exp') ||
     parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return null;
@@ -56,15 +53,20 @@ export function extractUrlExperimentId(win, element) {
   // Allow for per type experiment control with Doubleclick key set for 'da'
   // and AdSense using 'aa'.  Fallback to 'a4a' if type specific is missing.
   const expKeys = [
-    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
-      'da' : 'aa',
+    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick'
+      ? 'da'
+      : 'aa',
     'a4a',
   ];
   let arg;
   let match;
-  expKeys.forEach(key => arg = arg ||
-    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
-      match[1]));
+  expKeys.forEach(
+    (key) =>
+      (arg =
+        arg ||
+        ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
+          match[1]))
+  );
   return arg || null;
 }
 
@@ -100,7 +102,10 @@ export function parseExperimentIds(idString) {
  */
 export function isInExperiment(element, id) {
   return parseExperimentIds(element.getAttribute(EXPERIMENT_ATTRIBUTE)).some(
-      x => { return x === id; });
+    (x) => {
+      return x === id;
+    }
+  );
 }
 
 /**
@@ -118,27 +123,6 @@ export function isInManualExperiment(element) {
 }
 
 /**
- * Predicate to check whether A4A has launched yet or not.
- * If it has not yet launched, then the experimental branch serves A4A, and
- * control/filler do not. If it has not, then the filler and control branch do
- * serve A4A, and the experimental branch does not.
- *
- * @param {!Window} win  Host window for the ad.
- * @param {!Element} element  Element to check for pre-launch membership.
- * @return {boolean}
- */
-export function hasLaunched(win, element) {
-  switch (element.getAttribute('type')) {
-    case 'adsense':
-      return isExperimentOn(win, 'a4aFastFetchAdSenseLaunched');
-    case 'doubleclick':
-      return isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched');
-    default:
-      return false;
-  }
-}
-
-/**
  * Checks that all string experiment IDs in a list are syntactically valid
  * (integer base 10).
  *
@@ -146,7 +130,9 @@ export function hasLaunched(win, element) {
  * @return {boolean} Whether all list elements are valid experiment IDs.
  */
 export function validateExperimentIds(idList) {
-  return idList.every(id => { return !isNaN(parseInt(id, 10)); });
+  return idList.every((id) => {
+    return !isNaN(parseInt(id, 10));
+  });
 }
 
 /**
@@ -162,8 +148,10 @@ export function addExperimentIdToElement(experimentId, element) {
   }
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
-    element.setAttribute(EXPERIMENT_ATTRIBUTE,
-        mergeExperimentIds([experimentId], currentEids));
+    element.setAttribute(
+      EXPERIMENT_ATTRIBUTE,
+      mergeExperimentIds([experimentId], currentEids)
+    );
   } else {
     element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
   }

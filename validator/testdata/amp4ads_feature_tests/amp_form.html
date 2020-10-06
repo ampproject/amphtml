@@ -42,12 +42,12 @@
         <span>Your email</span>
         <input type="email" name="email" required>
       </label>
+      <input type="button" name="button">
       <input type="submit" value="Subscribe">
     </fieldset>
   </form>
-  <!-- Invalid: input can not be type="button|image". -->
+  <!-- Invalid: input can not be type="image". -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-    <input type="button" name="button">
     <input type="image" name="image">
   </form>
   <!-- Invalid: input can not be type="file|password". -->

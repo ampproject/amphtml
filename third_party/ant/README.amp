@@ -1,0 +1,7 @@
+URL: https://ant.apache.org/
+License: Apache
+License File: https://www.apache.org/licenses/LICENSE-2.0.txt
+
+Description:
+Copy of `bin/` and `lib/` directories of Apache Ant from release v1.10.6
+https://www-us.apache.org/dist//ant/binaries/apache-ant-1.10.6-bin.zip

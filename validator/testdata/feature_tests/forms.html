@@ -61,6 +61,7 @@
         <span>Your email</span>
         <input type="email" name="email" required>
       </label>
+      <input type="button" name="button">
       <input type="submit" value="Subscribe">
     </fieldset>
     <div>
@@ -130,9 +131,8 @@
     <option value="1">English</option>
   </select>
   <textarea name="comment"></textarea>
-  <!-- Invalid: input can not be type="button|image". -->
+  <!-- Invalid: input can not be type="image". -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-    <input type="button" name="button">
     <input type="image" name="image">
   </form>
   <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
@@ -192,6 +192,23 @@
     <div verify-error template="verify_error_template">
       <template type="amp-mustache">Verify in inlined template</template>
     </div>
+  </form>
+  <!-- Valid: form with verify-xhr and input with no-verify-->
+  <form method="post" action-xhr="https://example.com/subscribe" verify-xhr="https://example.com/verify" target="_blank">
+    <input name="do-not-verify" no-verify>
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: mask attr without the amp-inputmask extension -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input mask="L0L_0L0" type="tel">
+  </form>
+  <!-- Valid: textarea within form -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <textarea name="comment"></textarea>
+  </form>
+  <!-- Valid: textarea with autoexpand attribute -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <textarea name="comment" autoexpand></textarea>
   </form>
 </body>
 </html>

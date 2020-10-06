@@ -19,20 +19,19 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getSourceOrigin,
+  getSourceUrl,
   isProtocolValid,
   isProxyOrigin,
   isSecureUrlDeprecated,
   parseUrlWithA,
+  resolveRelativeUrl,
 } from '../url';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
+import {urls} from '../config';
 
 const SERVICE = 'url';
 
 /**
- * @implements {../service.EmbeddableService}
  */
 export class Url {
   /**
@@ -40,23 +39,16 @@ export class Url {
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
-    /** @private @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
 
     const root = opt_rootNode || ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
     /** @private @const {!HTMLAnchorElement} */
-    this.anchor_ = /** @type {!HTMLAnchorElement} */(doc.createElement('a'));
+    this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
 
     /** @private @const {!LruCache} */
     this.cache_ = new LruCache(100);
-  }
-
-  /** @override */
-  adoptEmbedWindow(embedWin) {
-    installServiceInEmbedScope(embedWin, SERVICE,
-        new Url(this.ampdoc_, embedWin.document));
   }
 
   /**
@@ -68,6 +60,18 @@ export class Url {
    */
   parse(url, opt_nocache) {
     return parseUrlWithA(this.anchor_, url, opt_nocache ? null : this.cache_);
+  }
+
+  /**
+   * @param {string|!Location} url
+   * @return {!Location}
+   * @private
+   */
+  parse_(url) {
+    if (typeof url !== 'string') {
+      return url;
+    }
+    return this.parse(url);
   }
 
   /**
@@ -87,7 +91,27 @@ export class Url {
    * @return {string} The source origin of the URL.
    */
   getSourceOrigin(url) {
-    return getSourceOrigin(url);
+    return getSourceOrigin(this.parse_(url));
+  }
+
+  /**
+   * Returns the source URL of an AMP document for documents served
+   * on a proxy origin or directly.
+   * @param {string|!Location} url URL of an AMP document.
+   * @return {string}
+   */
+  getSourceUrl(url) {
+    return getSourceUrl(this.parse_(url));
+  }
+
+  /**
+   * Returns absolute URL resolved based on the relative URL and the base.
+   * @param {string} relativeUrlString
+   * @param {string|!Location} baseUrl
+   * @return {string}
+   */
+  resolveRelativeUrl(relativeUrlString, baseUrl) {
+    return resolveRelativeUrl(relativeUrlString, this.parse_(baseUrl));
   }
 
   /**
@@ -120,7 +144,7 @@ export class Url {
    * @return {boolean}
    */
   isProxyOrigin(url) {
-    return isProxyOrigin(url);
+    return isProxyOrigin(this.parse_(url));
   }
 
   /**
@@ -130,7 +154,7 @@ export class Url {
    * @return {boolean}
    */
   isSecure(url) {
-    return isSecureUrlDeprecated(this.parse(url));
+    return isSecureUrlDeprecated(this.parse_(url));
   }
 
   /**
@@ -139,15 +163,34 @@ export class Url {
    * @return {string} origin
    */
   getWinOrigin(win) {
-    return win.origin || this.parse(win.location.href).origin;
+    return win.origin || this.parse_(win.location.href).origin;
+  }
+
+  /**
+   * If the resource URL is referenced from the publisher's origin,
+   * convert the URL to be referenced from the cache.
+   * @param {string} resourceUrl The URL of the document to load
+   * @return {string}
+   */
+  getCdnUrlOnOrigin(resourceUrl) {
+    if (isProxyOrigin(resourceUrl)) {
+      return resourceUrl;
+    }
+
+    const {host, hash, pathname, search} = this.parse_(resourceUrl);
+    const encodedHost = encodeURIComponent(host);
+    return `${urls.cdn}/c/${encodedHost}${pathname}${search}${hash}`;
   }
 }
-
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installUrlForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, SERVICE, Url,
-      /* opt_instantiate */ true);
+  registerServiceBuilderForDoc(
+    ampdoc,
+    SERVICE,
+    Url,
+    /* opt_instantiate */ true
+  );
 }

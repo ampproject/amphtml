@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
-import {tryResolve} from '../../../src/utils/promise';
-
-
 
 /**
  * The name for a boolean property on an element indicating whether that element
@@ -27,7 +24,6 @@ import {tryResolve} from '../../../src/utils/promise';
  * @const {string}
  */
 export const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
-
 
 /**
  * CSS class names that should not be removed from an element when swapping it
@@ -40,20 +36,12 @@ const PROTECTED_CSS_CLASS_NAMES = [
   'i-amphtml-pool-video',
 ];
 
-
 /**
  * Attribute names that should not be removed from an element when swapping it
  * into/out of the DOM.
  * @const {!Array<string>}
  */
-const PROTECTED_ATTRIBUTES = [
-  'id',
-  'src',
-  'class',
-  'autoplay',
-];
-
-
+const PROTECTED_ATTRIBUTES = ['id', 'src', 'class', 'autoplay'];
 
 /**
  * Determines whether a CSS class name is allowed to be removed or copied from
@@ -67,7 +55,6 @@ function isProtectedCssClassName(cssClassName) {
   return PROTECTED_CSS_CLASS_NAMES.indexOf(cssClassName) >= 0;
 }
 
-
 /**
  * Determines whether an attribute is allowed to be removed or copied from
  * media elements.
@@ -80,12 +67,11 @@ function isProtectedAttributeName(attributeName) {
   return PROTECTED_ATTRIBUTES.indexOf(attributeName) >= 0;
 }
 
-
 /**
  * Copies all unprotected CSS classes from fromEl to toEl.
- * @param {!HTMLMediaElement} fromEl The element from which CSS classes should
+ * @param {!Element} fromEl The element from which CSS classes should
  *     be copied.
- * @param {!HTMLMediaElement} toEl The element to which CSS classes should be
+ * @param {!Element} toEl The element to which CSS classes should be
  *     copied.
  * @private
  */
@@ -107,12 +93,11 @@ function copyCssClasses(fromEl, toEl) {
   }
 }
 
-
 /**
  * Copies all unprotected attributes from fromEl to toEl.
- * @param {!HTMLMediaElement} fromEl The element from which attributes should
+ * @param {!Element} fromEl The element from which attributes should
  *     be copied.
- * @param {!HTMLMediaElement} toEl The element to which attributes should be
+ * @param {!Element} toEl The element to which attributes should be
  *     copied.
  * @private
  */
@@ -130,14 +115,12 @@ function copyAttributes(fromEl, toEl) {
 
   // Copy all of the unprotected attributes from the fromEl to the toEl.
   for (let i = 0; i < fromAttributes.length; i++) {
-    const {name: attributeName, value: attributeValue} = fromAttributes[i] ;
+    const {name: attributeName, value: attributeValue} = fromAttributes[i];
     if (!isProtectedAttributeName(attributeName)) {
       toEl.setAttribute(attributeName, attributeValue);
     }
   }
 }
-
-
 
 /**
  * Base class for tasks executed in order on HTMLMediaElements.
@@ -145,8 +128,9 @@ function copyAttributes(fromEl, toEl) {
 export class MediaTask {
   /**
    * @param {string} name
+   * @param {!Object=} options
    */
-  constructor(name) {
+  constructor(name, options = {}) {
     /** @private @const {string} */
     this.name_ = name;
 
@@ -154,6 +138,9 @@ export class MediaTask {
 
     /** @private @const {!Promise} */
     this.completionPromise_ = deferred.promise;
+
+    /** @protected @const {!Object} */
+    this.options = options;
 
     /** @private {?function()} */
     this.resolve_ = deferred.resolve;
@@ -178,19 +165,19 @@ export class MediaTask {
   }
 
   /**
-   * @param {!HTMLMediaElement} mediaEl The media element on which this task
-   *     should be executed.
+   * @param {!HTMLMediaElement} mediaEl The element on which this task should be
+   *     executed.
    * @return {!Promise} A promise that is resolved when the task has completed
    *     execution.
    */
   execute(mediaEl) {
-    return this.executeInternal(mediaEl)
-        .then(this.resolve_, this.reject_);
+    return this.executeInternal(mediaEl).then(this.resolve_, this.reject_);
   }
 
   /**
-   * @param {!HTMLMediaElement} unusedMediaEl The media element on which this
-   *     task should be executed.
+   * @param {!HTMLMediaElement} unusedMediaEl The element on which this task
+   *     should be executed.
+   * @return {*} TODO(#23582): Specify return type
    * @protected
    */
   executeInternal(unusedMediaEl) {
@@ -213,7 +200,6 @@ export class MediaTask {
     this.reject_(reason);
   }
 }
-
 
 /**
  * Plays the specified media element.
@@ -241,7 +227,6 @@ export class PlayTask extends MediaTask {
   }
 }
 
-
 /**
  * Pauses the specified media element.
  */
@@ -259,7 +244,6 @@ export class PauseTask extends MediaTask {
     return Promise.resolve();
   }
 }
-
 
 /**
  * Unmutes the specified media element.
@@ -280,7 +264,6 @@ export class UnmuteTask extends MediaTask {
   }
 }
 
-
 /**
  * Mutes the specified media element.
  */
@@ -300,25 +283,23 @@ export class MuteTask extends MediaTask {
   }
 }
 
-
 /**
- * Seeks the specified media element to the beginning.
+ * Seeks the specified media element to the provided time, in seconds.
  */
-export class RewindTask extends MediaTask {
+export class SetCurrentTimeTask extends MediaTask {
   /**
-   * @public
+   * @param {!Object=} options
    */
-  constructor() {
-    super('rewind');
+  constructor(options = {currentTime: 0}) {
+    super('setCurrentTime', options);
   }
 
   /** @override */
   executeInternal(mediaEl) {
-    mediaEl.currentTime = 0;
+    mediaEl.currentTime = this.options.currentTime;
     return Promise.resolve();
   }
 }
-
 
 /**
  * Loads the specified media element.
@@ -337,7 +318,6 @@ export class LoadTask extends MediaTask {
     return Promise.resolve();
   }
 }
-
 
 /**
  * "Blesses" the specified media element for future playback without a user
@@ -368,17 +348,20 @@ export class BlessTask extends MediaTask {
   }
 }
 
-
 /**
  * Updates the sources of the specified media element.
  */
 export class UpdateSourcesTask extends MediaTask {
   /**
+   * @param {!Window} win
    * @param {!Sources} newSources The sources to which the media element should
    *     be updated.
    */
-  constructor(newSources) {
+  constructor(win, newSources) {
     super('update-src');
+
+    /** @private {!Window} */
+    this.win_ = win;
 
     /** @private @const {!Sources} */
     this.newSources_ = newSources;
@@ -386,65 +369,74 @@ export class UpdateSourcesTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    Sources.removeFrom(mediaEl);
-    this.newSources_.applyToElement(mediaEl);
+    Sources.removeFrom(this.win_, mediaEl);
+    this.newSources_.applyToElement(this.win_, mediaEl);
     return Promise.resolve();
   }
 }
 
-
 /**
- * Swaps a media element into the DOM, in the place of another media element.
+ * Swaps a media element into the DOM, in the place of a placeholder element.
  */
 export class SwapIntoDomTask extends MediaTask {
   /**
-   * @param {!HTMLMediaElement} replacedMediaEl The element to be replaced by
-   *     the media element on which this task is executed.
+   * @param {!Element} placeholderEl The element to be replaced by the media
+   *     element on which this task is executed.
    */
-  constructor(replacedMediaEl) {
+  constructor(placeholderEl) {
     super('swap-into-dom');
 
-    /** @private @const {!HTMLMediaElement} */
-    this.replacedMediaEl_ = replacedMediaEl;
+    /** @private @const {!Element} */
+    this.placeholderEl_ = placeholderEl;
   }
 
   /** @override */
   executeInternal(mediaEl) {
-    if (!isConnectedNode(this.replacedMediaEl_)) {
+    if (!isConnectedNode(this.placeholderEl_)) {
       this.failTask('Cannot swap media for element that is not in DOM.');
       return Promise.resolve();
     }
 
-    copyCssClasses(this.replacedMediaEl_, mediaEl);
-    copyAttributes(this.replacedMediaEl_, mediaEl);
-    this.replacedMediaEl_.parentElement
-        .replaceChild(mediaEl, this.replacedMediaEl_);
+    copyCssClasses(this.placeholderEl_, mediaEl);
+    copyAttributes(this.placeholderEl_, mediaEl);
+    this.placeholderEl_.parentElement.replaceChild(
+      mediaEl,
+      this.placeholderEl_
+    );
     return Promise.resolve();
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
   }
 }
 
-
 /**
- * Swaps a media element out the DOM, in the place of a placeholder media
- * element.
+ * Swaps a media element out the DOM, replacing it with a placeholder element.
  */
 export class SwapOutOfDomTask extends MediaTask {
   /**
-   * @param {!HTMLMediaElement} placeholderMediaEl The element to be replaced by
-   *     the media element on which this task is executed.
+   * @param {!Element} placeholderEl The element to replace the media element on
+   *     which this task is executed.
    */
-  constructor(placeholderMediaEl) {
+  constructor(placeholderEl) {
     super('swap-out-of-dom');
 
-    /** @private @const {!HTMLMediaElement} */
-    this.placeholderMediaEl_ = placeholderMediaEl;
+    /** @private @const {!Element} */
+    this.placeholderEl_ = placeholderEl;
   }
 
   /** @override */
   executeInternal(mediaEl) {
-    copyCssClasses(mediaEl, this.placeholderMediaEl_);
-    copyAttributes(mediaEl, this.placeholderMediaEl_);
-    mediaEl.parentElement.replaceChild(this.placeholderMediaEl_, mediaEl);
+    copyCssClasses(mediaEl, this.placeholderEl_);
+    copyAttributes(mediaEl, this.placeholderEl_);
+    mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
     return Promise.resolve();
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
   }
 }

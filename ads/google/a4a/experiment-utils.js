@@ -20,9 +20,7 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {
-  addExperimentIdToElement,
-} from './traffic-experiments';
+import {addExperimentIdToElement} from './traffic-experiments';
 
 /**
  * Attempts to select into experiment and forces branch if selected.
@@ -31,14 +29,26 @@ import {
  * @param {!Array<string>} branches
  * @param {string} expName
  * @param {boolean=} optAddExpIdToElement
+ * @return {*} TODO(#23582): Specify return type
  */
 export function selectAndSetExperiments(
-  win, element, branches, expName, optAddExpIdToElement) {
+  win,
+  element,
+  branches,
+  expName,
+  optAddExpIdToElement
+) {
   const experimentId = expUtils.maybeSelectExperiment(
-      win, element, branches, expName);
+    win,
+    element,
+    branches,
+    expName
+  );
   if (!!experimentId) {
-    addExperimentIdToElement(optAddExpIdToElement ?
-      experimentId : undefined, element);
+    addExperimentIdToElement(
+      optAddExpIdToElement ? experimentId : undefined,
+      element
+    );
     forceExperimentBranch(win, expName, experimentId);
   }
   return experimentId;
@@ -50,16 +60,16 @@ export class ExperimentUtils {
    * @param {!Element} element
    * @param {!Array<string>} selectionBranches
    * @param {string} experimentName
+   * @return {?string}
    */
-  maybeSelectExperiment(
-    win, element, selectionBranches, experimentName) {
-    const experimentInfoMap =
-    /** @type {!Object<string, !ExperimentInfo>} */ ({});
-    experimentInfoMap[experimentName] = {
+  maybeSelectExperiment(win, element, selectionBranches, experimentName) {
+    const experimentInfoList = /** @type {!Array<!ExperimentInfo>} */ ([]);
+    experimentInfoList.push({
+      experimentId: experimentName,
       isTrafficEligible: () => true,
       branches: selectionBranches,
-    };
-    randomlySelectUnsetExperiments(win, experimentInfoMap);
+    });
+    randomlySelectUnsetExperiments(win, experimentInfoList);
     return getExperimentBranch(win, experimentName);
   }
 }
@@ -67,5 +77,5 @@ export class ExperimentUtils {
 /**
  * ExperimentUtils singleton.
  * @type {!ExperimentUtils}
-*/
+ */
 const expUtils = new ExperimentUtils();

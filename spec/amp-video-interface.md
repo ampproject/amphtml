@@ -7,18 +7,31 @@ or partially.
 This document describes all the features (**work in progress, incomplete**) that
 these players implement.
 
-These players include:
+## Players
 
-- [amp-3q-player](https://www.ampproject.org/docs/reference/components/amp-3q-player)
-- [amp-brid-player](https://www.ampproject.org/docs/reference/components/amp-brid-player)
-- [amp-dailymotion](https://www.ampproject.org/docs/reference/components/amp-dailymotion)
-- [amp-gfycat](https://www.ampproject.org/docs/reference/components/amp-gfycat)
-- [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video)
-- [amp-nexxtv-player](https://www.ampproject.org/docs/reference/components/amp-nexxtv-player)
-- [amp-ooyala-player](https://www.ampproject.org/docs/reference/components/amp-ooyala-player)
-- [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-- [amp-wistia-player](https://www.ampproject.org/docs/reference/components/amp-wistia-player)
-- [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
+### Generic
+
+- [amp-video](https://amp.dev/documentation/components/amp-video)
+- [amp-video-iframe](https://amp.dev/documentation/components/amp-video-iframe)
+
+### For 3rd party services
+
+- [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
+- [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
+- [amp-brightcove](https://amp.dev/documentation/components/amp-brightcove)
+- [amp-dailymotion](https://amp.dev/documentation/components/amp-dailymotion)
+- [amp-delight-player](https://amp.dev/documentation/components/amp-delight-player)
+- [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
+- [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
+- [amp-minute-media-player](https://amp.dev/documentation/components/amp-minute-media-player)
+- [amp-mowplayer](https://amp.dev/documentation/components/amp-mowplayer)
+- [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
+- [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
+- [amp-powr-player](https://amp.dev/documentation/components/amp-powr-player)
+- [amp-vimeo](https://amp.dev/documentation/components/amp-vimeo)
+- [amp-viqeo-player](https://amp.dev/documentation/components/amp-viqeo-player)
+- [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
+- [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
 
 <a id="analytics"></a>
 
@@ -40,15 +53,15 @@ If this attribute is present, and the browser supports autoplay:
 - when the user taps the video, the video is unmuted
 - if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
-For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-video/#autoplay).
+For an example, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-video/#autoplay).
 
-<a id="rotate-to-fullscreen"></a>
+<a id="docking"></a>
 
 ## Docking (minimize to corner)
 
 attribute: **`dock`**
 
-**Experimental feature. Setting this attribute is not currently valid.**
+This attribute is currently only supported for `amp-brightcove`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
 
 If this attribute is present and the video is playing manually, the video will
 be "minimized" and fixed to a corner when the user scrolls out of the video
@@ -56,63 +69,21 @@ component's visual area.
 
 - The video can be dragged and repositioned by the user on a different corner.
 - Multiple videos on the same page can be docked.
-- Users can dismiss the docked video by flicking it out of view. Once dismissed
-by the user, docking will no longer occur.
 
-### Styling
+In order to use this attribute, the [`amp-video-docking`](https://amp.dev/documentation/components/amp-video-docking)
+extension script must be present:
 
-The docked video can be styled by selecting class names that are defined by the
-AMP runtime.
+```html
+<script
+  async
+  custom-element="amp-video-docking"
+  src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"
+></script>
+```
 
-#### `.amp-docked-video-shadow`
+For more details, see [documentation on the docking extension itself.](https://amp.dev/documentation/components/amp-video-docking)
 
-References a layer that draws a `box-shadow` under the video. The shadow can be
-overridden or removed. Its opacity will change from 0 to 1 while the video is
-being docked.
-
-#### `.amp-docked-video-controls`
-
-References a layer that contains the docked video controls. Usually, this
-doesn't need to be styled. See `.amp-docked-video-controls-bg` for a background
-layer.
-
-#### `.amp-docked-video-controls-bg`
-
-References a layer that draws an overlay background over the video and under
-the controls. It's displayed only when the controls are displayed. Its
-background can be overridden or removed.
-
-#### `.amp-docked-video-button-group`
-
-A button "group" that usually contains two buttons, with only one displayed at
-a time. It's used to draw a background when the button is active. It has a
-`border-radius` and a `background-color` set by default, both of which can be
-removed or overrridden.
-
-Direct children (`.amp-docked-video-button-group > [role=button]`) represent
-buttons, which have an SVG background. The color of the SVG can be changed by
-modifying the `fill` property. Additionally, these can be replaced by changing
-the `background` property.
-
-#### `.amp-docked-video-play`
-
-Represents the `play` button.
-
-#### `.amp-docked-video-pause`
-
-Represents the `pause` button.
-
-#### `.amp-docked-video-mute`
-
-Represents the `mute` button.
-
-#### `.amp-docked-video-unmute`
-
-Represents the `unmute` button.
-
-#### `.amp-docked-video-fullscreen`
-
-Represents the `fullscreen` button.
+<a id="rotate-to-fullscreen"></a>
 
 ## Rotate-to-fullscreen
 
@@ -130,4 +101,4 @@ fullscreen. These heuristics are applied as follows, in descending priority:
 2. If the visible percentage of the video is higher.
 3. If a video is closer to the center of the viewport.
 4. Everything else failing, select the video that is closest to the top of the
-viewport.
+   viewport.

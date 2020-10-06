@@ -171,12 +171,8 @@
       this.url = url;
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
-      this.viewportType_ = 'natural';
       this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.prerenderSize_ = 1;
       this.csi_ = 1;
-
-      this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
@@ -186,6 +182,8 @@
       this.iframe.setAttribute('sandbox',
           'allow-popups allow-scripts allow-forms allow-pointer-lock' +
           ' allow-popups-to-escape-sandbox allow-same-origin');
+      this.iframe.setAttribute('scrolling', 'yes');
+      this.viewer.classList.add('natural');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
       this.visibilityToggle_.addEventListener('click', function() {
@@ -194,13 +192,6 @@
           this.toggleVisibility(this.visibilityState_ != 'visible', true);
         }
       }.bind(this));
-      this.viewer.classList.add(this.viewportType_);
-
-      if (this.viewportType_ == 'natural' && !this.isIos_) {
-        this.iframe.setAttribute('scrolling', 'yes');
-      } else {
-        this.iframe.setAttribute('scrolling', 'no');
-      }
 
       window.addEventListener('resize', this.onResize_.bind(this));
       window.addEventListener('popstate', this.onPopState_.bind(this));
@@ -212,15 +203,13 @@
 
       var params = {
         history: 1,
-        viewportType: this.viewportType_,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
-        prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a,swipe',
+        cap: 'foo,a2a,swipe,iframeScroll',
         webview: 1, // mocking a webview
       };
       log('Params:' + JSON.stringify(params));
@@ -253,7 +242,6 @@
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.ampViewerHost_.sendRequest('visibilitychange', {
         state: this.visibilityState_,
-        prerenderSize: this.prerenderSize
       }, true);
       if (updateToggle) {
         this.updateVisibilityToggle_();

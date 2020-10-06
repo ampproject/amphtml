@@ -22,35 +22,94 @@ import {Services} from './services';
 /**
  * Returns a promise that resolve when all consent state the policy wait
  * for resolve. Or if consent service is not available.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} policyId
+ * @param {!Element|!ShadowRoot} element
+ * @param {string=} policyId
  * @return {!Promise<?CONSENT_POLICY_STATE>}
  */
-export function getConsentPolicyState(ampdoc, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
-      .then(consentPolicy => {
-        if (!consentPolicy) {
-          return null;
-        }
-        return consentPolicy.whenPolicyResolved(
-            /** @type {string} */ (policyId));
-      });
+export function getConsentPolicyState(element, policyId = 'default') {
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    (consentPolicy) => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.whenPolicyResolved(/** @type {string} */ (policyId));
+    }
+  );
 }
 
 /**
  * Returns a promise that resolves to a sharedData retrieved from consent
  * remote endpoint.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element|!ShadowRoot} element
  * @param {string} policyId
  * @return {!Promise<?Object>}
  */
-export function getConsentPolicySharedData(ampdoc, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
-      .then(consentPolicy => {
-        if (!consentPolicy) {
-          return null;
-        }
-        return consentPolicy.getMergedSharedData(
-            /** @type {string} */ (policyId));
-      });
+export function getConsentPolicySharedData(element, policyId) {
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    (consentPolicy) => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.getMergedSharedData(
+        /** @type {string} */ (policyId)
+      );
+    }
+  );
+}
+
+/**
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} policyId
+ * @return {!Promise<string>}
+ */
+export function getConsentPolicyInfo(element, policyId) {
+  // Return the stored consent string.
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    (consentPolicy) => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.getConsentStringInfo(
+        /** @type {string} */ (policyId)
+      );
+    }
+  );
+}
+
+/**
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} policyId
+ * @return {!Promise<?Object|undefined>}
+ */
+export function getConsentMetadata(element, policyId) {
+  // Return the stored consent metadata.
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    (consentPolicy) => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.getConsentMetadataInfo(
+        /** @type {string} */ (policyId)
+      );
+    }
+  );
+}
+
+/**
+ * Determine if an element needs to be blocked by consent based on meta tags.
+ * @param {*} element
+ * @return {boolean}
+ */
+export function shouldBlockOnConsentByMeta(element) {
+  const ampdoc = element.getAmpDoc();
+  let content = ampdoc.getMetaByName('amp-consent-blocking');
+  if (!content) {
+    return false;
+  }
+
+  // Handles whitespace
+  content = content.toUpperCase().replace(/\s+/g, '');
+
+  const contents = /** @type {Array<string>} */ (content.split(','));
+  return contents.includes(element.tagName);
 }

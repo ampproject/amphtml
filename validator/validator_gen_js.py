@@ -26,7 +26,7 @@ wonder why we're not just writing Javascript directly, or why we're
 not encoding our rules in JSON or YAML or even, gasp, XML? Besides the
 additional type safety that we gain from our approach, it allows us to
 share the rule specifications, error codes, etc. between multiple
-validator implemenations, including an implementation in C++. This
+validator implementations, including an implementation in C++. This
 makes it much easier to keep otherwise likely divergent behavior in
 sync.
 """
@@ -61,7 +61,7 @@ def FindDescriptors(validator_pb2, msg_desc_by_name, enum_desc_by_name):
     msg_desc_by_name: A map of message descriptors, keyed by full_name.
     enum_desc_by_name: A map of enum descriptors, keyed by full name.
   """
-  for msg_type in validator_pb2.DESCRIPTOR.message_types_by_name.values():
+  for msg_type in list(validator_pb2.DESCRIPTOR.message_types_by_name.values()):
     msg_desc_by_name[msg_type.full_name] = msg_type
     for enum_type in msg_type.enum_types:
       enum_desc_by_name[enum_type.full_name] = enum_type
@@ -321,7 +321,7 @@ def ValueToString(descriptor, field_desc, value):
   """
   if field_desc.type == descriptor.FieldDescriptor.TYPE_STRING:
     escaped = ('' + value).encode('unicode-escape')
-    return "'%s'" % escaped.replace("'", "\\'")
+    return "'%s'" % escaped.decode().replace("'", "\\'")
   if field_desc.type == descriptor.FieldDescriptor.TYPE_BOOL:
     if value:
       return 'true'
@@ -333,17 +333,14 @@ def ValueToString(descriptor, field_desc, value):
     return 'null'
   return str(value)
 
-EXPORTED_CLASSES = [
-    'amp.validator.ValidationResult', 'amp.validator.ValidationError'
-]
 CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.AmpLayout.supported_layouts',
     'amp.validator.AtRuleSpec.name',
     'amp.validator.AtRuleSpec.type',
     'amp.validator.AttrSpec.name',
     'amp.validator.AttrTriggerSpec.also_requires_attr',
-    'amp.validator.BlackListedCDataRegex.error_message',
-    'amp.validator.BlackListedCDataRegex.regex',
+    'amp.validator.DenyListedCDataRegex.error_message',
+    'amp.validator.DenyListedCDataRegex.regex',
     'amp.validator.ErrorFormat.code',
     'amp.validator.ErrorFormat.format',
     'amp.validator.PropertySpec.name',
@@ -369,17 +366,17 @@ TAG_SPEC_NAME_REFERENCE_FIELD = [
 ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 
 # These fields contain messages in the .protoascii, but we replace
-# them with message ids, which are numbers. Thus far we do this for
-# the AttrSpecs.
+# them with message ids, which are numbers.
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
-    'amp.validator.AttrSpec.blacklisted_value_regex',
+    'amp.validator.AttrSpec.disallowed_value_regex',
     'amp.validator.AttrSpec.mandatory_anyof',
     'amp.validator.AttrSpec.mandatory_oneof',
     'amp.validator.AttrSpec.value_regex',
     'amp.validator.AttrSpec.value_regex_casei',
     'amp.validator.AttrTriggerSpec.if_value_regex',
     'amp.validator.CdataSpec.cdata_regex',
+    'amp.validator.CssDeclaration.value_regex_casei',
     'amp.validator.TagSpec.attrs',
     'amp.validator.TagSpec.mandatory_alternatives',
     'amp.validator.TagSpec.requires',
@@ -409,20 +406,17 @@ def PrintClassFor(descriptor, msg_desc, out):
       constructor_arg_field_names[field.name] = 1
   out.Line('/**')
   for field in constructor_arg_fields:
-    out.Line(' * @param {%s} %s' % (FieldTypeFor(
-        descriptor, field, nullable=False), UnderscoreToCamelCase(field.name)))
+    out.Line(' * @param {%s} %s' %
+             (LocalModuleName(FieldTypeFor(descriptor, field, nullable=False)),
+              UnderscoreToCamelCase(field.name)))
   out.Line(' * @constructor')
   out.Line(' * @struct')
   out.Line(' */')
   arguments = ','.join(
       [UnderscoreToCamelCase(f.name) for f in constructor_arg_fields])
-  out.Line('%s = function(%s) {' % (msg_desc.full_name, arguments))
+  out.Line('const %s = function(%s) {' %
+           (LocalModuleName(msg_desc.full_name), arguments))
   out.PushIndent(2)
-
-  export_or_empty = ''
-  export_class = msg_desc.full_name in EXPORTED_CLASSES
-  if export_class:
-    export_or_empty = ' @export'
 
   for field in msg_desc.fields:
     # We generate ValidatorRules.directAttrLists, ValidatorRules.globalAttrs,
@@ -449,18 +443,18 @@ def PrintClassFor(descriptor, msg_desc, out):
     # TODO(johannes): Increase coverage for default values, e.g. enums.
     type_name = FieldTypeFor(
         descriptor, field, nullable=assigned_value == 'null')
-    out.Line('/**%s @type {%s} */' % (export_or_empty, type_name))
+    out.Line('/**@export @type {%s} */' % LocalModuleName(type_name))
     out.Line(
         'this.%s = %s;' % (UnderscoreToCamelCase(field.name), assigned_value))
   if msg_desc.full_name == 'amp.validator.CdataSpec':
     out.Line('/** @type {?number} */')
-    out.Line('this.combinedBlacklistedCdataRegex = null;')
+    out.Line('this.combinedDenyListedCdataRegex = null;')
   if msg_desc.full_name == 'amp.validator.ValidatorRules':
     out.Line('/** @type {!Array<!string>} */')
     out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
     out.Line('/** @type {!Array<!string>} */')
     out.Line('this.internedStrings = [];')
-    out.Line('/** @type {!Array<!amp.validator.AttrSpec>} */')
+    out.Line('/** @type {!Array<!AttrSpec>} */')
     out.Line('this.attrs = [];')
     out.Line('/** @type {!Array<!Array<number>>} */')
     out.Line('this.directAttrLists = [];')
@@ -471,9 +465,8 @@ def PrintClassFor(descriptor, msg_desc, out):
   out.PopIndent()
   out.Line('};')
 
-  if export_class:
-    out.Line('goog.exportSymbol("%s", %s);' % (msg_desc.full_name,
-                                               msg_desc.full_name))
+  out.Line('exports.%s = %s;' % (LocalModuleName(
+      msg_desc.full_name), LocalModuleName(msg_desc.full_name)))
 
 
 def PrintEnumFor(enum_desc, out):
@@ -487,7 +480,7 @@ def PrintEnumFor(enum_desc, out):
   out.Line('/**')
   out.Line(' * @enum {string}')
   out.Line(' */')
-  out.Line('%s = {' % enum_desc.full_name)
+  out.Line('%s = {' % LocalModuleName(enum_desc.full_name))
   out.PushIndent(2)
   names = []
   for v in enum_desc.values:
@@ -496,14 +489,17 @@ def PrintEnumFor(enum_desc, out):
   out.PopIndent()
   out.Line('};')
 
-  out.Line('goog.exportSymbol("%s", %s);' % (enum_desc.full_name,
-                                             enum_desc.full_name))
+  out.Line('exports.%s = %s;' % (LocalModuleName(
+      enum_desc.full_name), LocalModuleName(enum_desc.full_name)))
   out.Line('/** @type {!Array<string>} */')
+  out.Line('%s_NamesByIndex = ["%s"];' %
+           (LocalModuleName(enum_desc.full_name), '","'.join(names)))
+  out.Line('/** @type {!Array<!%s>} */' % LocalModuleName(enum_desc.full_name))
   out.Line(
-      '%s_NamesByIndex = ["%s"];' % (enum_desc.full_name, '","'.join(names)))
-  out.Line('/** @type {!Array<!%s>} */' % enum_desc.full_name)
-  out.Line('%s_ValuesByIndex = [%s];' % (enum_desc.full_name, ','.join(
-      ['%s.%s' % (enum_desc.full_name, n) for n in names])))
+      '%s_ValuesByIndex = [%s];' %
+      (LocalModuleName(enum_desc.full_name), ','.join([
+          '%s.%s' % (LocalModuleName(enum_desc.full_name), n) for n in names
+      ])))
 
 
 def TagSpecName(tag_spec):
@@ -595,7 +591,8 @@ def AssignedValueFor(descriptor, field_desc, field_val, registry, out):
     render_value = (
         lambda v: MaybePrintMessageValue(descriptor, v, registry, out))
   else:
-    render_value = (lambda v: ValueToString(descriptor, field_desc, v))  # pylint: disable=cell-var-from-loop
+    render_value = (
+        lambda v: ImportModuleName(ValueToString(descriptor, field_desc, v)))  # pylint: disable=cell-var-from-loop
 
   # Then we iterate over the field if it's repeated, or else just
   # call the render function once.
@@ -659,23 +656,23 @@ def PrintObject(descriptor, msg, registry, out):
   # set constructor instantiation.
   if fields:
     fields_string = '{' + ','.join(fields) + '}'
-    out.Line('var %s = /** @type {!%s} */ (Object.assign(new %s(%s), %s));' %
-             (this_message_reference, msg.DESCRIPTOR.full_name,
-              msg.DESCRIPTOR.full_name, ','.join(constructor_arg_values),
-              fields_string))
+    out.Line(
+        'let %s = /** @type {!%s} */ (oa(new %s(%s), %s));' %
+        (this_message_reference, ImportModuleName(msg.DESCRIPTOR.full_name),
+         ImportModuleName(msg.DESCRIPTOR.full_name),
+         ','.join(constructor_arg_values), fields_string))
   else:
-    out.Line('var %s = new %s(%s);' %
-             (this_message_reference, msg.DESCRIPTOR.full_name,
-              ','.join(constructor_arg_values)))
+    out.Line('let %s = new %s(%s);' %
+             (this_message_reference, ImportModuleName(
+                 msg.DESCRIPTOR.full_name), ','.join(constructor_arg_values)))
 
   if (msg.DESCRIPTOR.full_name == 'amp.validator.CdataSpec' and
-      msg.blacklisted_cdata_regex):
-    combined_blacklisted_cdata_regex = '(%s)' % '|'.join([
-        r.regex for r in msg.blacklisted_cdata_regex])
-    out.Line('%s.%s = %d;' % (
-        this_message_reference,
-        'combinedBlacklistedCdataRegex',
-        registry.InternString(combined_blacklisted_cdata_regex)))
+      msg.disallowed_cdata_regex):
+    combined_disallowed_cdata_regex = '(%s)' % '|'.join(
+        [r.regex for r in msg.disallowed_cdata_regex])
+    out.Line('%s.%s = %d;' %
+             (this_message_reference, 'combinedDenyListedCdataRegex',
+              registry.InternString(combined_disallowed_cdata_regex)))
 
 
 def DispatchKeyForTagSpecOrNone(tag_spec):
@@ -708,6 +705,18 @@ def DispatchKeyForTagSpecOrNone(tag_spec):
       if attr.dispatch_key == attr.NAME_VALUE_PARENT_DISPATCH:
         return '%s\\0%s\\0%s' % (attr_name, attr_value, mandatory_parent)
   return None
+
+
+# When importing the protocol buffer javascript module, we do so as
+# protoGenerated.foo();
+def ImportModuleName(module_name):
+  return module_name.replace('amp.validator', 'protoGenerated')
+
+
+# When naming the protocol buffer javascript exports locally, we do with no
+# namespace.
+def LocalModuleName(module_name):
+  return module_name.replace('amp.validator.', '')
 
 
 def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
@@ -747,7 +756,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
   FindDescriptors(validator_pb2, msg_desc_by_name, enum_desc_by_name)
 
   rules_obj = '%s.RULES' % validator_pb2.DESCRIPTOR.package
-  all_names = [rules_obj] + msg_desc_by_name.keys() + enum_desc_by_name.keys()
+  all_names = [rules_obj] + list(msg_desc_by_name.keys()) + list(enum_desc_by_name.keys())
   all_names.sort()
 
   out = OutputFormatter(out)
@@ -756,12 +765,11 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
   out.Line('//')
   out.Line('')
   if generate_proto_only:
-    for name in all_names:
-      out.Line("goog.provide('%s');" % name)
+    out.Line("goog.module('amp.validator.protogenerated');")
   if generate_spec_only:
-    for name in all_names:
-      out.Line("goog.require('%s');" % name)
-    out.Line("goog.provide('amp.validator.createRules');")
+    out.Line("goog.module('amp.validator.createRules');")
+    out.Line(
+        "const protoGenerated = goog.require('amp.validator.protogenerated');")
   out.Line('')
 
   if generate_proto_only:
@@ -775,7 +783,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     ] + [n for n in all_names if n in enum_desc_by_name]
 
     for name in all_type_names:
-      out.Line('/** @type {!Array<!%s>} */' % name)
+      out.Line('/** @type {!Array<!%s>} */' % LocalModuleName(name))
       out.Line('var EMPTY_%s_ARRAY = [];' % name.replace('.', '_'))
       out.Line('')
 
@@ -813,9 +821,12 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
       registry.RegisterAttrList(a)
 
     out.Line('/**')
-    out.Line(' * @return {!%s}' % rules.DESCRIPTOR.full_name)
+    out.Line(' * @return {!%s}' % ImportModuleName(rules.DESCRIPTOR.full_name))
     out.Line(' */')
-    out.Line('amp.validator.createRules = function() {')
+    out.Line('const createRules = function() {')
+    # Shorthand object.assign to reduce the binary size of the validator rules
+    # generated.
+    out.Line('const oa = Object.assign;')
     out.PushIndent(2)
     PrintObject(descriptor, rules, registry, out)
 
@@ -890,4 +901,28 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     out.Line('return %s;' % rules_reference)
     out.PopIndent()
     out.Line('}')
+    out.Line('exports.createRules = createRules;')
     out.Line('')
+
+
+def GenerateValidatorGeneratedJson(specfile, validator_pb2, text_format,
+                                   json_format, out):
+  """Generates a JSON file with definitions from validator.protoascii.
+
+  This method reads the specfile and emits JSON to out.
+
+  Args:
+    specfile: Path to validator.protoascii, the specfile to generate
+        Javascript from.
+    validator_pb2: The proto2 Python module generated from validator.proto.
+    text_format: The text_format module from the protobuf package, e.g.
+        google.protobuf.text_format.
+    json_format: The json_format module from the protobuf package, e.g.
+        google.protobuf.json_format.
+    out: a list of lines to output (without the newline characters), to
+        which this function will append.
+  """
+
+  rules = validator_pb2.ValidatorRules()
+  text_format.Merge(open(specfile).read(), rules)
+  out.append(json_format.MessageToJson(rules))

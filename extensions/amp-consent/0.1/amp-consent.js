@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {
+  CONSENT_ITEM_STATE,
+  ConsentMetadataDef,
+  assertMetadataValues,
+  constructMetadata,
+  convertEnumValueToState,
+  getConsentStateValue,
+  hasStoredValue,
+} from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
+import {
+  ConsentConfig,
+  expandConsentEndpointUrl,
+  expandPolicyConfig,
+} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
+import {ConsentStateManager} from './consent-state-manager';
+import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
@@ -29,18 +43,12 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {
-  childElementsByTag,
-  isJsonScriptTag,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
-import {setImportantStyles, toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+import {isEnumValue, isObject} from '../../../src/types';
+import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -56,7 +64,6 @@ export const ACTION_TYPE = {
   DISMISS: 'dismiss',
 };
 
-
 export class AmpConsent extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -71,41 +78,41 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
 
-    /** @private {!Object<string, !Element>} */
-    this.consentUI_ = map();
+    /** @private {?ConsentUI} */
+    this.consentUI_ = null;
 
-    /** @private {!JsonObject} */
-    this.consentConfig_ = dict();
+    /** @private {?JsonObject} */
+    this.consentConfig_ = null;
 
-    /** @private {!JsonObject} */
-    this.policyConfig_ = dict();
+    /** @private {?JsonObject} */
+    this.policyConfig_ = null;
 
-    /** @private {!Object} */
-    this.consentRequired_ = map();
-
-    /** @private {boolean} */
-    this.uiInit_ = false;
-
-    /** @private {?string} */
-    this.currentDisplayInstance_ = null;
-
-    /** @private {?Element} */
+    /** @private {?ConsentUI} */
     this.postPromptUI_ = null;
 
-    /** @private {!Object<string, function()>} */
-    this.dialogResolver_ = map();
-
-    /** @private {!Object<string, boolean>} */
-    this.consentUIPendingMap_ = map();
+    /** @private {?function()} */
+    this.dialogResolver_ = null;
 
     /** @private {boolean} */
-    this.isMultiSupported_ = false;
+    this.isPromptUIOn_ = false;
+
+    /** @private {boolean} */
+    this.consentStateChangedViaPromptUI_ = false;
+
+    /** @private {boolean} */
+    this.consentUIPending_ = false;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private {boolean} */
-    this.isPostPromptUIRequired_ = false;
+    /** @private {?Promise<?JsonObject>} */
+    this.remoteConfigPromise_ = null;
+
+    /** @private {?string} */
+    this.consentId_ = null;
+
+    /** @private {?string} */
+    this.matchedGeoGroup_ = null;
   }
 
   /** @override */
@@ -114,97 +121,149 @@ export class AmpConsent extends AMP.BaseElement {
     return null;
   }
 
-  /**
-   * Handles the revoke action.
-   * Display consent UI.
-   * @param {string} consentId
-   */
-  handlePostPrompt_(consentId) {
-    user().assert(this.consentConfig_[consentId],
-        `consent with id ${consentId} not found`);
-    // toggle the UI for this consent
-    this.scheduleDisplay_(consentId);
-  }
-
   /** @override */
   buildCallback() {
-    this.isMultiSupported_ = ConsentPolicyManager.isMultiSupported(this.win);
+    userAssert(
+      this.element.getAttribute('id'),
+      'amp-consent should have an id'
+    );
 
-    user().assert(this.element.getAttribute('id'),
-        'amp-consent should have an id');
+    const configManager = new ConsentConfig(this.element);
 
-    // TODO: Decide what to do with incorrect configuration.
-    this.assertAndParseConfig_();
+    return configManager.getConsentConfigPromise().then((validatedConfig) => {
+      this.matchedGeoGroup_ = configManager.getMatchedGeoGroup();
+      this.initialize_(validatedConfig);
+    });
+  }
+
+  /**
+   *
+   * @param {!JsonObject} validatedConfig
+   */
+  initialize_(validatedConfig) {
+    this.consentConfig_ = validatedConfig;
+
+    // ConsentConfig has verified that there's one and only one consent instance
+    this.consentId_ = this.consentConfig_['consentInstanceId'];
+
+    if (this.consentConfig_['postPromptUI']) {
+      this.postPromptUI_ = new ConsentUI(
+        this,
+        dict({}),
+        this.consentConfig_['postPromptUI']
+      );
+    }
+
+    /**
+     * Deprecated Format
+     * {
+     *   'consentInstanceId': {
+     *     'checkConsentHref': ...,
+     *     'promptUI': ...
+     *   }
+     * }
+     *
+     * New Format
+     * {
+     *   'consentInstanceId': ...
+     *   'checkConsentHref': ...
+     *   'promptUI': ...
+     *   'postPromptUI': ...
+     * }
+     */
+    const policyConfig = this.consentConfig_['policy'] || dict({});
+
+    this.policyConfig_ = expandPolicyConfig(
+      policyConfig,
+      /** @type {string} */ (this.consentId_)
+    );
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
-      // <amp-consent> will manualy schedule layout for its children.
-      this.setAsOwner(children[i]);
+      const child = children[i];
+      toggle(child, false);
+      // <amp-consent> will manually schedule layout for its children.
+      Services.ownersForDoc(this.element).setOwner(child, this.element);
     }
 
-    const consentPolicyManagerPromise =
-        getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
-            .then(manager => {
-              this.consentPolicyManager_ = manager;
-              this.generateDefaultPolicy_();
-              const policyKeys = Object.keys(this.policyConfig_);
-              for (let i = 0; i < policyKeys.length; i++) {
-                this.consentPolicyManager_.registerConsentPolicyInstance(
-                    policyKeys[i], this.policyConfig_[policyKeys[i]]);
-              }
-            });
+    const consentPolicyManagerPromise = getServicePromiseForDoc(
+      this.getAmpDoc(),
+      CONSENT_POLICY_MANAGER
+    ).then((manager) => {
+      this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (manager);
+      this.consentPolicyManager_.setLegacyConsentInstanceId(
+        /** @type {string} */ (this.consentId_)
+      );
+      const policyKeys = Object.keys(
+        /** @type {!Object} */ (this.policyConfig_)
+      );
+      for (let i = 0; i < policyKeys.length; i++) {
+        this.consentPolicyManager_.registerConsentPolicyInstance(
+          policyKeys[i],
+          this.policyConfig_[policyKeys[i]]
+        );
+      }
+    });
 
-    const consentStateManagerPromise =
-        getServicePromiseForDoc(this.getAmpDoc(), CONSENT_STATE_MANAGER)
-            .then(manager => {
-              this.consentStateManager_ = manager;
-            });
+    const consentStateManagerPromise = getServicePromiseForDoc(
+      this.getAmpDoc(),
+      CONSENT_STATE_MANAGER
+    ).then((manager) => {
+      manager.registerConsentInstance(this.consentId_, this.consentConfig_);
+      this.consentStateManager_ = /** @type {!ConsentStateManager} */ (manager);
+    });
 
-    const notificationUiManagerPromise =
-        getServicePromiseForDoc(this.getAmpDoc(), NOTIFICATION_UI_MANAGER)
-            .then(manager => {
-              this.notificationUiManager_ = manager;
-            });
+    const notificationUiManagerPromise = getServicePromiseForDoc(
+      this.getAmpDoc(),
+      NOTIFICATION_UI_MANAGER
+    ).then((manager) => {
+      this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
+    });
 
     Promise.all([
       consentStateManagerPromise,
       notificationUiManagerPromise,
-      consentPolicyManagerPromise])
-        .then(() => {
-          this.init_();
-        });
+      consentPolicyManagerPromise,
+    ]).then(() => {
+      this.init_();
+    });
   }
 
   /**
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept', () => this.handleAction_(ACTION_TYPE.ACCEPT));
-    this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
-    this.registerAction('dismiss',
-        () => this.handleAction_(ACTION_TYPE.DISMISS));
-
-    this.registerAction('prompt', invocation => {
-      const {args} = invocation;
-      let consentId = args && args['consent'];
-      if (!this.isMultiSupported_) {
-        consentId = Object.keys(this.consentConfig_)[0];
-      }
-      this.handlePostPrompt_(consentId || '');
+    this.registerAction('accept', () => {
+      this.handleAction_(ACTION_TYPE.ACCEPT);
     });
+
+    this.registerAction('reject', () => {
+      this.handleAction_(ACTION_TYPE.REJECT);
+    });
+
+    this.registerAction('dismiss', () => {
+      this.handleAction_(ACTION_TYPE.DISMISS);
+    });
+
+    this.registerAction('prompt', (invocation) =>
+      this.handleReprompt_(invocation)
+    );
 
     this.enableExternalInteractions_();
   }
 
   /**
    * Listen to external consent flow iframe's response
+   * with consent string and metadata.
    */
   enableExternalInteractions_() {
-    this.win.addEventListener('message', event => {
-      if (!this.currentDisplayInstance_) {
+    this.win.addEventListener('message', (event) => {
+      if (!this.isPromptUIOn_) {
         return;
       }
 
+      let consentString;
+      let metadata;
       const data = getData(event);
 
       if (!data || data['type'] != 'consent-response') {
@@ -215,13 +274,40 @@ export class AmpConsent extends AMP.BaseElement {
         user().error(TAG, 'consent-response message missing required info');
         return;
       }
+      if (data['info'] !== undefined) {
+        if (typeof data['info'] != 'string') {
+          user().error(
+            TAG,
+            'consent-response info only supports string, ' +
+              '%s, treated as undefined',
+            data['info']
+          );
+          data['info'] = undefined;
+        }
+        if (data['action'] === ACTION_TYPE.DISMISS) {
+          if (data['info']) {
+            this.user().error(
+              TAG,
+              'Consent string value %s not applicable on user dismiss, ' +
+                'stored value will be kept and used',
+              consentString
+            );
+          }
+          data['info'] = undefined;
+        }
+        consentString = data['info'];
+        metadata = this.configureMetadataByConsentString_(
+          data['consentMetadata'],
+          consentString
+        );
+      }
 
-      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+      const iframes = this.element.querySelectorAll('iframe');
 
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
           const action = data['action'];
-          this.handleAction_(action);
+          this.handleAction_(action, consentString, metadata);
           return;
         }
       }
@@ -229,60 +315,52 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Returns a promise that attempt to show prompt UI for instanceId
-   * @param {string} instanceId
+   * Returns a promise that attempt to show prompt UI
+   * @param {boolean} isActionPromptTrigger
    */
-  scheduleDisplay_(instanceId) {
+  scheduleDisplay_(isActionPromptTrigger) {
     if (!this.notificationUiManager_) {
       dev().error(TAG, 'notification ui manager not found');
     }
 
-    if (this.consentUIPendingMap_[instanceId]) {
+    if (this.consentUIPending_) {
       // Already pending to be shown. Do nothing.
+      // This is to prevent postPromptUI trying to prompt the dialog, while
+      // the prompt is waiting for previous amp-user-notification prompt to be
+      // resolved first.
+      // So prompt window won't be added to notificationUI queue duplicately.
       return;
     }
 
-    if (!this.consentUI_[instanceId]) {
+    if (!this.consentUI_) {
       // If consent UI not found. Do nothing.
       return;
     }
 
-    this.consentUIPendingMap_[instanceId] = true;
-    this.notificationUiManager_.registerUI(this.show_.bind(this, instanceId));
+    this.consentUIPending_ = true;
+    this.notificationUiManager_.registerUI(
+      this.show_.bind(this, isActionPromptTrigger)
+    );
   }
 
   /**
-   * To show prompt UI for instanceId
-   * @param {string} instanceId
+   * Show prompt UI
+   * Do not invoke the function except in scheduleDisplay_
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise}
    */
-  show_(instanceId) {
-    if (this.currentDisplayInstance_) {
-      dev().error(TAG,
-          `other consent instance on display ${this.currentDisplayInstance_}`);
+  show_(isActionPromptTrigger) {
+    if (this.isPromptUIOn_) {
+      dev().error(TAG, 'Attempt to show an already displayed prompt UI');
     }
 
     this.vsync_.mutate(() => {
-      if (!this.uiInit_) {
-        this.uiInit_ = true;
-        toggle(this.element, true);
-      }
-
-      this.element.classList.remove('amp-hidden');
-      this.element.classList.add('amp-active');
-      this.getViewport().addToFixedLayer(this.element);
-      // Display the current instance
-      this.currentDisplayInstance_ = instanceId;
-      const uiElement = this.consentUI_[this.currentDisplayInstance_];
-      setImportantStyles(uiElement, {display: 'block'});
-      // scheduleLayout is required everytime because some AMP element may
-      // get un laid out after toggle display (#unlayoutOnPause)
-      // for example <amp-iframe>
-      this.scheduleLayout(uiElement);
+      this.consentUI_.show(isActionPromptTrigger);
+      this.isPromptUIOn_ = true;
     });
 
     const deferred = new Deferred();
-    this.dialogResolver_[instanceId] = deferred.resolve;
+    this.dialogResolver_ = deferred.resolve;
     return deferred.promise;
   }
 
@@ -290,42 +368,36 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    const uiToHide = this.currentDisplayInstance_ &&
-        this.consentUI_[this.currentDisplayInstance_];
-    this.vsync_.mutate(() => {
-      this.element.classList.add('amp-hidden');
-      this.element.classList.remove('amp-active');
-      // Need to remove from fixed layer and add it back to update element's top
-      this.getViewport().removeFromFixedLayer(this.element);
-      if (!uiToHide) {
-        dev().error(TAG,
-            `${this.currentDisplayInstance_} no consent ui to hide`);
-      }
-      // Cannot use #toggle() because Safari bug with version older than 10.3
-      // element.style['display] = 'none' cannot overwrite style set with
-      // !important.
-      setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
-    });
-    if (this.dialogResolver_[this.currentDisplayInstance_]) {
-      this.dialogResolver_[this.currentDisplayInstance_]();
-      this.dialogResolver_[this.currentDisplayInstance_] = null;
+    if (!this.isPromptUIOn_) {
+      dev().error(TAG, '%s no consent ui to hide');
     }
-    this.consentUIPendingMap_[this.currentDisplayInstance_] = false;
-    this.currentDisplayInstance_ = null;
+
+    this.consentUI_.hide();
+    this.isPromptUIOn_ = false;
+
+    if (this.dialogResolver_) {
+      this.dialogResolver_();
+      this.dialogResolver_ = null;
+    }
+
+    this.consentUIPending_ = false;
   }
 
   /**
    * Handler User action
+   *
    * @param {string} action
+   * @param {string=} consentString
+   * @param {!ConsentMetadataDef=} opt_consentMetadata
    */
-  handleAction_(action) {
+  handleAction_(action, consentString, opt_consentMetadata) {
     if (!isEnumValue(ACTION_TYPE, action)) {
       // Unrecognized action
       return;
     }
 
-    if (!this.currentDisplayInstance_) {
-      // No consent instance to act to
+    if (!this.isPromptUIOn_) {
+      // No consent prompt to act to
       return;
     }
 
@@ -333,49 +405,66 @@ export class AmpConsent extends AMP.BaseElement {
       dev().error(TAG, 'No consent state manager');
       return;
     }
+
+    this.consentStateChangedViaPromptUI_ = true;
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.ACCEPTED);
+        CONSENT_ITEM_STATE.ACCEPTED,
+        consentString,
+        opt_consentMetadata
+      );
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.REJECTED);
+        CONSENT_ITEM_STATE.REJECTED,
+        consentString,
+        opt_consentMetadata
+      );
     } else if (action == ACTION_TYPE.DISMISS) {
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.DISMISSED);
+        CONSENT_ITEM_STATE.DISMISSED
+      );
     }
+
     // Hide current dialog
     this.hide_();
+  }
+
+  /**
+   * Handle the prompt action to re-prompt.
+   * Accpet arg expireCache=true
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  handleReprompt_(invocation) {
+    const {args} = invocation;
+    if (args && args['expireCache'] === true) {
+      this.consentStateManager_.setDirtyBit();
+    }
+    this.scheduleDisplay_(true);
   }
 
   /**
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
-    const instanceKeys = Object.keys(this.consentConfig_);
-    const initPromptPromises = [];
-    for (let i = 0; i < instanceKeys.length; i++) {
-      const instanceId = instanceKeys[i];
-      this.consentStateManager_.registerConsentInstance(
-          instanceId, this.consentConfig_[instanceId]);
+    this.passSharedData_();
+    this.syncRemoteConsentState_();
 
-      const isConsentRequiredPromise = this.getConsentRequiredPromise_(
-          instanceId, this.consentConfig_[instanceId]);
-
-      const handlePromptPromise = isConsentRequiredPromise.then(() => {
-        return this.initPromptUI_(instanceId);
-      }).catch(unusedError => {
+    this.getConsentRequiredPromise_()
+      .then((isConsentRequired) => {
+        return this.initPromptUI_(isConsentRequired);
+      })
+      .then((isPostPromptUIRequired) => {
+        if (isPostPromptUIRequired) {
+          this.handlePostPromptUI_();
+        }
+        this.consentPolicyManager_.enableTimeout();
+      })
+      .catch((unusedError) => {
         // TODO: Handle errors
       });
-
-      initPromptPromises.push(handlePromptPromise);
-    }
-
-    Promise.all(initPromptPromises).then(() => {
-      this.handlePostPromptUI_();
-      this.consentPolicyManager_.enableTimeout();
-    });
 
     this.enableInteractions_();
   }
@@ -383,319 +472,272 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Returns a promise that resolve when amp-consent knows
    * if the consent is required.
-   * @param {string} instanceId
-   * @param {!JsonObject} config
-   * @return {!Promise}
+   * @return {!Promise<boolean>}
    */
-  getConsentRequiredPromise_(instanceId, config) {
-    user().assert(config['checkConsentHref'] ||
-        config['promptIfUnknownForGeoGroup'],
-    'neither checkConsentHref nor ' +
-    'promptIfUnknownForGeoGroup is defined');
-    let remoteConfigPromise = Promise.resolve(null);
-    if (config['checkConsentHref']) {
-      remoteConfigPromise = this.getConsentRemote_(instanceId);
-      this.passSharedData_(instanceId, remoteConfigPromise);
-    }
-    let geoPromise = Promise.resolve();
-    if (config['promptIfUnknownForGeoGroup']) {
-      const geoGroup = config['promptIfUnknownForGeoGroup'];
-      geoPromise = this.isConsentRequiredGeo_(geoGroup);
-    }
-    return geoPromise.then(promptIfUnknown => {
-      return remoteConfigPromise.then(response => {
-        this.consentRequired_[instanceId] =
-            this.isPromptRequired_(instanceId, response, promptIfUnknown);
+  getConsentRequiredPromise_() {
+    return this.consentStateManager_
+      .getConsentInstanceInfo()
+      .then((storedInfo) => {
+        if (hasStoredValue(storedInfo)) {
+          return Promise.resolve(true);
+        }
+        const consentRequired = this.consentConfig_['consentRequired'];
+        if (typeof consentRequired === 'boolean') {
+          return Promise.resolve(consentRequired);
+        }
+        return this.getConsentRemote_().then((consentResponse) => {
+          if (!consentResponse) {
+            return false;
+          }
+          // `promptIfUnknown` is a legacy field
+          return consentResponse['consentRequired'] !== undefined
+            ? !!consentResponse['consentRequired']
+            : !!consentResponse['promptIfUnknown'];
+        });
       });
-    });
   }
 
   /**
    * Blindly pass sharedData
-   * @param {string} instanceId
-   * @param {!Promise<!JsonObject>} responsePromise
    */
-  passSharedData_(instanceId, responsePromise) {
-    const sharedDataPromise = responsePromise.then(response => {
+  passSharedData_() {
+    const responsePromise = this.getConsentRemote_();
+    const sharedDataPromise = responsePromise.then((response) => {
       if (!response || response['sharedData'] === undefined) {
         return null;
       }
       return response['sharedData'];
     });
 
-    this.consentStateManager_.setConsentInstanceSharedData(
-        instanceId, sharedDataPromise);
+    this.consentStateManager_.setConsentInstanceSharedData(sharedDataPromise);
   }
 
   /**
-   * Returns a promise that if user is in the given geoGroup
-   * @param {string} geoGroup
-   * @return {Promise<boolean>}
+   * Clear cache for server side decision and then sync.
    */
-  isConsentRequiredGeo_(geoGroup) {
-    return Services.geoForDocOrNull(this.element).then(geo => {
-      user().assert(geo,
-          'requires <amp-geo> to use promptIfUnknownForGeoGroup');
-      return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
+  syncRemoteConsentState_() {
+    this.getConsentRemote_().then((response) => {
+      if (!response) {
+        return;
+      }
+      // Ideally we should fallback to true if either are true.
+      const expireCache =
+        response['expireCache'] || response['forcePromptOnNext'];
+      if (expireCache) {
+        this.consentStateManager_.setDirtyBit();
+      }
+
+      // Decision from promptUI takes precedence over consent decision from response
+      if (
+        !!response['consentRequired'] &&
+        !this.consentStateChangedViaPromptUI_
+      ) {
+        this.updateCacheIfNotNull_(
+          response['consentStateValue'],
+          response['consentString'] || undefined,
+          response['consentMetadata'] || undefined
+        );
+      }
     });
   }
 
   /**
-   * Generate default consent policy if not defined
+   * Sync with local storage if consentRequired is true.
+   *
+   * @param {string=} responseStateValue
+   * @param {string=} responseConsentString
+   * @param {JsonObject=} opt_responseMetadata
    */
-  generateDefaultPolicy_() {
-    // Generate default policy
-    const instanceKeys = Object.keys(this.consentConfig_);
-    const defaultWaitForItems = {};
-    for (let i = 0; i < instanceKeys.length; i++) {
-      // TODO: Need to support an array.
-      defaultWaitForItems[instanceKeys[i]] = undefined;
+  updateCacheIfNotNull_(
+    responseStateValue,
+    responseConsentString,
+    opt_responseMetadata
+  ) {
+    const consentStateValue = convertEnumValueToState(responseStateValue);
+    // consentStateValue and consentString are treated as a pair that will update together
+    if (consentStateValue !== null) {
+      this.consentStateManager_.updateConsentInstanceState(
+        consentStateValue,
+        responseConsentString,
+        this.configureMetadataByConsentString_(
+          opt_responseMetadata,
+          responseConsentString
+        )
+      );
     }
-    const defaultPolicy = {
-      'waitFor': defaultWaitForItems,
-    };
-
-    // TODO(@zhouyx): unblockOn is internal now.
-    const unblockOnAll = [
-      CONSENT_POLICY_STATE.UNKNOWN,
-      CONSENT_POLICY_STATE.SUFFICIENT,
-      CONSENT_POLICY_STATE.INSUFFICIENT,
-      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
-    ];
-
-    const predefinedNone = {
-      'waitFor': defaultWaitForItems,
-      // Experimental config, do not expose
-      'unblockOn': unblockOnAll,
-    };
-
-    const rejectAllOnZero = {
-      'waitFor': defaultWaitForItems,
-      'timeout': {
-        'seconds': 0,
-        'fallbackAction': 'reject',
-      },
-      'unblockOn': unblockOnAll,
-    };
-
-    this.policyConfig_['_till_responded'] = predefinedNone;
-
-    this.policyConfig_['_till_accepted'] = defaultPolicy;
-
-    this.policyConfig_['_auto_reject'] = rejectAllOnZero;
-
-    if (this.policyConfig_ && this.policyConfig_['default']) {
-      return;
-    }
-
-    this.policyConfig_['default'] = defaultPolicy;
   }
 
   /**
    * Get localStored consent info, and send request to get consent from endpoint
-   * @param {string} instanceId
-   * @return {!Promise<!JsonObject>}
+   * if there is checkConsentHref specified.
+   * @return {!Promise<?JsonObject>}
    */
-  getConsentRemote_(instanceId) {
-    // Note: Expect the request to look different in following versions.
-    const request = /** @type {!JsonObject} */ ({
-      'consentInstanceId': instanceId,
-    });
-    const init = {
-      credentials: 'include',
-      method: 'POST',
-      body: request,
-      requireAmpResponseSourceOrigin: false,
-    };
-    const href =
-        this.consentConfig_[instanceId]['checkConsentHref'];
-    assertHttpsUrl(href, this.element);
-    const ampdoc = this.getAmpDoc();
-    const sourceBase = getSourceUrl(ampdoc.getUrl());
-    const resolvedHref = resolveRelativeUrl(href, sourceBase);
-    const viewer = Services.viewerForDoc(ampdoc);
-    return viewer.whenFirstVisible().then(() => {
-      return Services.xhrFor(this.win)
-          .fetchJson(resolvedHref, init)
-          .then(res => res.json());
-    });
-  }
-
-
-  /**
-   * Read and parse consent instance config
-   * An example valid config json looks like
-   * {
-   *   "consents": {
-   *     "consentABC": {
-   *       "checkConsentHref": "https://fake.com"
-   *     }
-   *   }
-   * }
-   * TODO: Add support for policy config
-   */
-  assertAndParseConfig_() {
-    // All consent config within the amp-consent component. There will be only
-    // one single amp-consent allowed in page.
-    // TODO: Make this a shared helper method.
-    const scripts = childElementsByTag(this.element, 'script');
-    user().assert(scripts.length == 1,
-        `${TAG} should have (only) one <script> child`);
-    const script = scripts[0];
-    user().assert(isJsonScriptTag(script),
-        `${TAG} consent instance config should be put in a <script>` +
-        'tag with type= "application/json"');
-    const config = tryParseJson(script.textContent, () => {
-      user().assert(false, `${TAG}: Error parsing config`);
-    });
-    const consents = config['consents'];
-    user().assert(consents, `${TAG}: consents config is required`);
-    user().assert(Object.keys(consents).length != 0,
-        `${TAG}: can't find consent instance`);
-    if (!this.isMultiSupported_) {
-      // Assert single consent instance
-      user().assert(Object.keys(consents).length <= 1,
-          `${TAG}: only single consent instance is supported`);
-      if (config['policy']) {
-        // Only respect 'default' consent policy;
-        const keys = Object.keys(config['policy']);
-        for (let i = 0; i < keys.length; i++) {
-          if (keys[i] != 'default') {
-            user().warn(TAG, `policy ${keys[i]} is currently not supported` +
-              'and will be ignored');
-            delete config['policy'][keys[i]];
-          }
+  getConsentRemote_() {
+    if (this.remoteConfigPromise_) {
+      return this.remoteConfigPromise_;
+    }
+    if (!this.consentConfig_['checkConsentHref']) {
+      this.remoteConfigPromise_ = Promise.resolve(null);
+    } else {
+      const storeConsentPromise = this.consentStateManager_.getLastConsentInstanceInfo();
+      this.remoteConfigPromise_ = storeConsentPromise.then((storedInfo) => {
+        // Note: Expect the request to look different in following versions.
+        const request = /** @type {!JsonObject} */ ({
+          'consentInstanceId': this.consentId_,
+          'consentStateValue': getConsentStateValue(storedInfo['consentState']),
+          'consentMetadata': storedInfo['consentMetadata'],
+          'consentString': storedInfo['consentString'],
+          'isDirty': !!storedInfo['isDirty'],
+          'matchedGeoGroup': this.matchedGeoGroup_,
+        });
+        if (this.consentConfig_['clientConfig']) {
+          request['clientConfig'] = this.consentConfig_['clientConfig'];
         }
-      }
+        const init = {
+          credentials: 'include',
+          method: 'POST',
+          body: request,
+        };
+        const href = this.consentConfig_['checkConsentHref'];
+        assertHttpsUrl(href, this.element);
+        const ampdoc = this.getAmpDoc();
+        const sourceBase = getSourceUrl(ampdoc.getUrl());
+        const resolvedHref = resolveRelativeUrl(href, sourceBase);
+        const xhrService = Services.xhrFor(this.win);
+        return ampdoc.whenFirstVisible().then(() =>
+          expandConsentEndpointUrl(this.element, resolvedHref).then(
+            (expandedHref) =>
+              xhrService.fetchJson(expandedHref, init).then((res) =>
+                xhrService
+                  .xssiJson(res, this.consentConfig_['xssiPrefix'])
+                  .catch((e) => {
+                    user().error(
+                      TAG,
+                      'Could not parse the `checkConsentHref` response.',
+                      e
+                    );
+                  })
+              )
+          )
+        );
+      });
     }
-
-    this.consentConfig_ = consents;
-    if (config['postPromptUI']) {
-      const postPromptUI = config['postPromptUI'];
-      this.postPromptUI_ = this.getAmpDoc().getElementById(postPromptUI);
-      if (!this.postPromptUI_) {
-        this.user().error(TAG, 'postPromptUI element with ' +
-          `id=${postPromptUI} not found`);
-      }
-    }
-    this.policyConfig_ = config['policy'] || this.policyConfig_;
-  }
-
-  /**
-   * Parse response from server endpoint
-   * The response format example:
-   * {
-   *   "promptIfUnknown": true/false
-   * }
-   * TODO: Support vendor lists
-   * @param {string} instanceId
-   * @param {?JsonObject} response
-   * @param {boolean=} opt_initValue
-   * @return {boolean}
-   */
-  isPromptRequired_(instanceId, response, opt_initValue) {
-    let promptIfUnknown = opt_initValue;
-    if (response && response['promptIfUnknown'] == true) {
-      promptIfUnknown = true;
-    } else if (response && response['promptIfUnknown'] == false) {
-      promptIfUnknown = false;
-    } else if (promptIfUnknown == undefined) {
-      // Set to false if not defined
-      promptIfUnknown = false;
-    }
-    return promptIfUnknown;
+    return this.remoteConfigPromise_;
   }
 
   /**
    * Handle Prompt UI.
-   * @param {string} instanceId
-   * @return {Promise}
+   * @param {boolean} isConsentRequired
+   * @return {Promise<boolean>}
    */
-  initPromptUI_(instanceId) {
-    const promptUI = this.consentConfig_[instanceId]['promptUI'];
-    if (promptUI) {
-      let element = this.getAmpDoc().getElementById(promptUI);
-      if (!element || !this.element.contains(element)) {
-        element = null;
-        this.user().error(TAG, 'child element of <amp-consent> with ' +
-          `promptUI id ${promptUI} not found`);
-      }
-      this.consentUI_[instanceId] = element;
-    }
+  initPromptUI_(isConsentRequired) {
+    this.consentUI_ = new ConsentUI(
+      this,
+      /** @type {!JsonObject} */ (devAssert(
+        this.consentConfig_,
+        'consent config not found'
+      ))
+    );
 
     // Get current consent state
-    return this.consentStateManager_.getConsentInstanceState(instanceId)
-        .then(state => {
-          if (state == CONSENT_ITEM_STATE.ACCEPTED ||
-              state == CONSENT_ITEM_STATE.REJECTED) {
-            // Need to display post prompt ui if user previous made a decision
-            this.isPostPromptUIRequired_ = true;
-          }
-          if (state == CONSENT_ITEM_STATE.UNKNOWN) {
-            if (!this.consentRequired_[instanceId]) {
-              this.consentStateManager_.updateConsentInstanceState(
-                  instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
-              return;
-            }
-            this.isPostPromptUIRequired_ = true;
-            // TODO(@zhouyx):
-            // 1. Race condition on consent state change between schedule to
-            //    display and display. Add one more check before display
-            // 2. Should not schedule display with DISMISSED UNKNOWN state
-            this.scheduleDisplay_(instanceId);
-          }
-        });
+    return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
+      if (hasStoredValue(info)) {
+        // Has user stored value, no need to prompt
+        return true;
+      }
+      if (!isConsentRequired) {
+        // no need to prompt if remote reponse say so
+        // Also no need to display postPromptUI
+        this.consentStateManager_.updateConsentInstanceState(
+          CONSENT_ITEM_STATE.NOT_REQUIRED
+        );
+        return false;
+      }
+      // Prompt
+      this.scheduleDisplay_(false);
+      return true;
+      // TODO(@zhouyx):
+      // Race condition on consent state change between schedule to
+      // display and display. Add one more check before display
+    });
   }
 
   /**
    * Handles the display of postPromptUI
    */
   handlePostPromptUI_() {
-    if (!this.isPostPromptUIRequired_) {
+    if (!this.postPromptUI_) {
       return;
     }
 
-    const {classList} = this.element;
     this.notificationUiManager_.onQueueEmpty(() => {
-      if (!this.postPromptUI_) {
-        return;
-      }
       this.vsync_.mutate(() => {
-        if (!this.uiInit_) {
-          this.uiInit_ = true;
-          toggle(this.element, true);
-        }
-        classList.add('amp-active');
-        classList.remove('amp-hidden');
-        this.getViewport().addToFixedLayer(this.element);
-        setImportantStyles(dev().assertElement(this.postPromptUI_),
-            {display: 'block'});
+        this.postPromptUI_.show(false);
         // Will need to scheduleLayout for postPromptUI
         // upon request for using AMP component.
       });
     });
 
     this.notificationUiManager_.onQueueNotEmpty(() => {
-      if (!this.postPromptUI_) {
-        return;
-      }
       this.vsync_.mutate(() => {
-        if (!this.currentDisplayInstance_) {
-          classList.add('amp-hidden');
-          classList.remove('amp-active');
-        }
-        this.getViewport().removeFromFixedLayer(this.element);
-        // Cannot use #toggle() because Safari bug with version older than 10.3
-        // element.style['display] = 'none' cannot overwrite style set with
-        // !important.
-        setImportantStyles(dev().assertElement(this.postPromptUI_),
-            {display: 'none'});
+        this.postPromptUI_.hide();
       });
     });
   }
+
+  /**
+   * @return {?ConsentStateManager}
+   * @visibleForTesting
+   */
+  getConsentStateManagerForTesting() {
+    return this.consentStateManager_;
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @visibleForTesting
+   */
+  getConsentRequiredPromiseForTesting() {
+    return this.getConsentRequiredPromise_();
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  getIsPromptUiOnForTesting() {
+    return this.isPromptUIOn_;
+  }
+
+  /**
+   * If consentString is undefined or invalid, don't
+   * include any metadata in update. Otherwise, convert to
+   * to ConsentMetadataDef
+   * @param {JsonObject=} opt_metadata
+   * @param {string=} opt_consentString
+   * @return {ConsentMetadataDef|undefined}
+   */
+  configureMetadataByConsentString_(opt_metadata, opt_consentString) {
+    if (!opt_metadata) {
+      return;
+    }
+    if (!isObject(opt_metadata) || !opt_consentString) {
+      user().error(
+        TAG,
+        'CMP metadata is invalid or no consent string is found.'
+      );
+      return;
+    }
+    assertMetadataValues(opt_metadata);
+    return constructMetadata(
+      opt_metadata['consentStringType'],
+      opt_metadata['additionalConsent'],
+      opt_metadata['gdprApplies']
+    );
+  }
 }
 
-AMP.extension('amp-consent', '0.1', AMP => {
+AMP.extension('amp-consent', '0.1', (AMP) => {
   AMP.registerElement('amp-consent', AmpConsent, CSS);
   AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
   AMP.registerServiceForDoc(CONSENT_STATE_MANAGER, ConsentStateManager);

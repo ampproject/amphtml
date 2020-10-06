@@ -15,14 +15,12 @@
  */
 
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {childElementByTag, createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 
 const CSS_PREFIX = 'i-amphtml-subs';
 
-
 export class Renderer {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -30,8 +28,8 @@ export class Renderer {
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     // Initial state is "unknown".
     this.setGrantState(null);
@@ -55,16 +53,19 @@ export class Renderer {
    * @private
    */
   setState_(type, state) {
-    this.resources_.mutateElement(this.ampdoc_.getBody() , () => {
+    this.mutator_.mutateElement(this.ampdoc_.getBody(), () => {
       this.getBodyElement_().classList.toggle(
-          `${CSS_PREFIX}-${type}-unk`,
-          state === null);
+        `${CSS_PREFIX}-${type}-unk`,
+        state === null
+      );
       this.getBodyElement_().classList.toggle(
-          `${CSS_PREFIX}-${type}-yes`,
-          state === true);
+        `${CSS_PREFIX}-${type}-yes`,
+        state === true
+      );
       this.getBodyElement_().classList.toggle(
-          `${CSS_PREFIX}-${type}-no`,
-          state === false);
+        `${CSS_PREFIX}-${type}-no`,
+        state === false
+      );
     });
   }
 
@@ -75,16 +76,19 @@ export class Renderer {
    */
   addLoadingBar() {
     return this.ampdoc_.whenReady().then(() => {
-      if (!this.ampdoc_.getBody().querySelector(
-          '[subscriptions-section=loading]')) {
-        const element = createElementWithAttributes(this.ampdoc_.win.document,
-            'div' ,
-            dict({
-              'class': 'i-amphtml-subs-progress',
-              'subscriptions-section': 'loading',
-            })
+      const body = this.ampdoc_.getBody();
+      if (!body.querySelector('[subscriptions-section=loading]')) {
+        const element = createElementWithAttributes(
+          this.ampdoc_.win.document,
+          'div',
+          dict({
+            'class': 'i-amphtml-subs-progress',
+            'subscriptions-section': 'loading',
+          })
         );
-        this.ampdoc_.getBody().appendChild(element);
+        // The loading indicator will be either inserted right before the
+        // `<footer>` node or appended as the last child.
+        body.insertBefore(element, childElementByTag(body, 'footer'));
       }
     });
   }
@@ -95,7 +99,7 @@ export class Renderer {
    * @private
    */
   toggleState_(type, state) {
-    this.resources_.mutateElement(this.ampdoc_.getBody(), () => {
+    this.mutator_.mutateElement(this.ampdoc_.getBody(), () => {
       this.getBodyElement_().classList.toggle(`${CSS_PREFIX}-${type}`, state);
     });
   }

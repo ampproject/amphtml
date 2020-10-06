@@ -21,7 +21,7 @@ tags: {  # amp-call-tracking
     name: "amp-call-tracking"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -36,14 +36,14 @@ tags: {  # <amp-call-tracking>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "A"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-call-tracking"
+  spec_url: "https://amp.dev/documentation/components/amp-call-tracking/"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL

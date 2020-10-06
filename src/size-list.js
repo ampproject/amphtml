@@ -15,8 +15,7 @@
  */
 
 import {assertLength, assertLengthOrPercent} from './layout';
-import {user} from './log';
-
+import {userAssert} from './log';
 
 /**
  * A single option within a SizeList.
@@ -26,7 +25,6 @@ import {user} from './log';
  * }}
  */
 let SizeListOptionDef;
-
 
 /**
  * Parses the text representation of "sizes" into SizeList object.
@@ -44,9 +42,9 @@ let SizeListOptionDef;
  */
 export function parseSizeList(s, opt_allowPercentAsLength) {
   const sSizes = s.split(',');
-  user().assert(sSizes.length > 0, 'sizes has to have at least one size');
+  userAssert(sSizes.length > 0, 'sizes has to have at least one size');
   const sizes = [];
-  sSizes.forEach(sSize => {
+  sSizes.forEach((sSize) => {
     sSize = sSize.replace(/\s+/g, ' ').trim();
     if (sSize.length == 0) {
       return;
@@ -84,15 +82,21 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
         div--;
         for (; div >= 0; div--) {
           const c = sSize.charAt(div);
-          if (!(c == '%' || c == '-' || c == '_' ||
-                (c >= 'a' && c <= 'z') ||
-                (c >= 'A' && c <= 'Z') ||
-                (c >= '0' && c <= '9'))) {
+          if (
+            !(
+              c == '%' ||
+              c == '-' ||
+              c == '_' ||
+              (c >= 'a' && c <= 'z') ||
+              (c >= 'A' && c <= 'Z') ||
+              (c >= '0' && c <= '9')
+            )
+          ) {
             break;
           }
         }
       }
-      user().assert(div < funcEnd, 'Invalid CSS function in "%s"', sSize);
+      userAssert(div < funcEnd, 'Invalid CSS function in "%s"', sSize);
     } else {
       // Value is the length or a percent: accept a wide range of values,
       // including invalid values - they will be later asserted to conform
@@ -100,10 +104,15 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
       div = sSize.length - 2;
       for (; div >= 0; div--) {
         const c = sSize.charAt(div);
-        if (!(c == '%' || c == '.' ||
-              (c >= 'a' && c <= 'z') ||
-              (c >= 'A' && c <= 'Z') ||
-              (c >= '0' && c <= '9'))) {
+        if (
+          !(
+            c == '%' ||
+            c == '.' ||
+            (c >= 'a' && c <= 'z') ||
+            (c >= 'A' && c <= 'Z') ||
+            (c >= '0' && c <= '9')
+          )
+        ) {
           break;
         }
       }
@@ -115,15 +124,17 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
       sizeStr = sSize;
       mediaStr = undefined;
     }
-    sizes.push({mediaQuery: mediaStr,
-      size: func ? sizeStr :
-        opt_allowPercentAsLength ?
-          assertLengthOrPercent(sizeStr) :
-          assertLength(sizeStr)});
+    sizes.push({
+      mediaQuery: mediaStr,
+      size: func
+        ? sizeStr
+        : opt_allowPercentAsLength
+        ? assertLengthOrPercent(sizeStr)
+        : assertLength(sizeStr),
+    });
   });
   return new SizeList(sizes);
 }
-
 
 /**
  * A SizeList object contains one or more sizes as typically seen in "sizes"
@@ -139,7 +150,7 @@ export class SizeList {
    * @param {!Array<!SizeListOptionDef>} sizes
    */
   constructor(sizes) {
-    user().assert(sizes.length > 0, 'SizeList must have at least one option');
+    userAssert(sizes.length > 0, 'SizeList must have at least one option');
     /** @private @const {!Array<!SizeListOptionDef>} */
     this.sizes_ = sizes;
 
@@ -148,11 +159,15 @@ export class SizeList {
     for (let i = 0; i < sizes.length; i++) {
       const option = sizes[i];
       if (i < sizes.length - 1) {
-        user().assert(option.mediaQuery,
-            'All options except for the last must have a media condition');
+        userAssert(
+          option.mediaQuery,
+          'All options except for the last must have a media condition'
+        );
       } else {
-        user().assert(!option.mediaQuery,
-            'The last option must not have a media condition');
+        userAssert(
+          !option.mediaQuery,
+          'The last option must not have a media condition'
+        );
       }
     }
   }
@@ -174,7 +189,7 @@ export class SizeList {
       const option = sizes[i];
       // Only the last item (which we don't iterate) has an undefined
       // mediaQuery.
-      const query = /** @type {string} */(option.mediaQuery);
+      const query = /** @type {string} */ (option.mediaQuery);
       if (win.matchMedia(query).matches) {
         return option.size;
       }

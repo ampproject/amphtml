@@ -83,6 +83,23 @@ export function startsWith(string, prefix) {
 }
 
 /**
+ * Polyfill for String.prototype.includes.
+ * @param {string} string
+ * @param {string} substring
+ * @param {number=} start
+ * @return {boolean}
+ */
+export function includes(string, substring, start) {
+  if (typeof start !== 'number') {
+    start = 0;
+  }
+  if (start + substring.length > string.length) {
+    return false;
+  }
+  return string.indexOf(substring, start) !== -1;
+}
+
+/**
  * Expands placeholders in a given template string with values.
  *
  * Placeholders use ${key-name} syntax and are replaced with the value
@@ -95,6 +112,7 @@ export function startsWith(string, prefix) {
  *   Defaults to 1, but should be set to a larger value your placeholder tokens
  *   can be expanded to other placeholder tokens. Take caution with large values
  *   as recursively expanding a string can be exponentially expensive.
+ * @return {string}
  */
 export function expandTemplate(template, getter, opt_maxIterations) {
   const maxIterations = opt_maxIterations || 1;
@@ -122,8 +140,86 @@ export function stringHash32(str) {
   const {length} = str;
   let hash = 5381;
   for (let i = 0; i < length; i++) {
-    hash = hash * 33 ^ str.charCodeAt(i);
+    hash = (hash * 33) ^ str.charCodeAt(i);
   }
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
+}
+
+/**
+ * Trims a string on the end, removing whitespace characters.
+ * @param {string} str  A string to trim.
+ * @return {string} The string, with trailing whitespace removed.
+ */
+export function trimEnd(str) {
+  // TODO(sparhami) Does this get inlined for an ES2019 build?
+  if (str.trimEnd) {
+    return str.trimEnd();
+  }
+
+  return ('_' + str).trim().slice(1);
+}
+
+/**
+ * Trims any leading whitespace from a string.
+ * @param {string} str  A string to trim.
+ * @return {string} The string, with leading whitespace removed.
+ */
+export function trimStart(str) {
+  if (str.trimStart) {
+    return str.trimStart();
+  }
+
+  return (str + '_').trim().slice(0, -1);
+}
+
+/**
+ * Wrapper around String.replace that handles asynchronous resolution.
+ * @param {string} str
+ * @param {RegExp} regex
+ * @param {Function|string} replacer
+ * @return {!Promise<string>}
+ */
+export function asyncStringReplace(str, regex, replacer) {
+  if (typeof replacer === 'string') {
+    return Promise.resolve(str.replace(regex, replacer));
+  }
+  const stringBuilder = [];
+  let lastIndex = 0;
+
+  str.replace(regex, function (match) {
+    // String.prototype.replace will pass 3 to n number of arguments to the
+    // callback function based on how many capture groups the regex may or may
+    // not contain. We know that the match will always be first, and the
+    // index will always be second to last.
+    const matchIndex = arguments[arguments.length - 2];
+    stringBuilder.push(str.slice(lastIndex, matchIndex));
+    lastIndex = matchIndex + match.length;
+
+    // Store the promise in it's eventual string position.
+    const replacementPromise = replacer.apply(null, arguments);
+    stringBuilder.push(replacementPromise);
+  });
+  stringBuilder.push(str.slice(lastIndex));
+
+  return Promise.all(stringBuilder).then((resolved) => resolved.join(''));
+}
+
+/**
+ * Pads the beginning of a string with a substring to a target length.
+ * @param {string} s
+ * @param {number} targetLength
+ * @param {string} padString
+ * @return {*} TODO(#23582): Specify return type
+ */
+export function padStart(s, targetLength, padString) {
+  if (s.length >= targetLength) {
+    return s;
+  }
+  targetLength = targetLength - s.length;
+  let padding = padString;
+  while (targetLength > padding.length) {
+    padding += padString;
+  }
+  return padding.slice(0, targetLength) + s;
 }

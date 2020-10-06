@@ -140,25 +140,25 @@
       </div>
     </template>
   </amp-date-countdown>
-  <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-tw' height="50" width="360">
-    <template type="amp-mustache">
-      <div class="date-count-down">
-        {{#d}} {{d}} <span>{{days}}</span> {{/d}}
-        {{h}} <span>{{hours}}</span>
-        {{m}} <span>{{minutes}}</span>
-        {{s}} <span>{{seconds}}</span>
-      </div>
-    </template>
+
+  <template type="amp-mustache" id="myTemplate">
+    <div class="date-count-down">
+      {{#d}} {{d}} <span>{{days}}</span> {{/d}}
+      {{h}} <span>{{hours}}</span>
+      {{m}} <span>{{minutes}}</span>
+      {{s}} <span>{{seconds}}</span>
+    </div>
+  </template>
+
+  <!-- Should support the `template` attribute to reference <template> by ID. -->
+  <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-tw' height="50" width="360" template="myTemplate">
   </amp-date-countdown>
-  <amp-date-countdown timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="stop" locale='de' height="50" width="360">
-    <template type="amp-mustache">
-        <div class="date-count-down">
-            {{#d}} {{d}} <span>{{days}}</span> {{/d}}
-            {{h}} <span>{{hours}}</span>
-            {{m}} <span>{{minutes}}</span>
-            {{s}} <span>{{seconds}}</span>
-          </div>
-    </template>
+
+  <amp-date-countdown timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+  </amp-date-countdown>
+
+  <!-- Should error if the `template` referent is missing. -->
+  <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-tw' height="50" width="360" template="notMyTemplate">
   </amp-date-countdown>
 </body>
 </html>

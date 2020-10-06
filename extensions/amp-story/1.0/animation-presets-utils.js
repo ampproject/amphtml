@@ -19,15 +19,8 @@
  * presets.
  */
 
-import {
-  KeyframesDef,
-  StoryAnimationDimsDef,
-} from './animation-types';
-import {
-  rotate,
-  scale,
-  translate,
-} from '../../../src/style';
+import {StoryAnimationDimsDef, WebKeyframesDef} from './animation-types';
+import {rotate, scale, translate} from '../../../src/style';
 
 /**
  * Translates the element on the 2d plane according to the given points.
@@ -35,7 +28,7 @@ import {
  * @param {number} startY Starting point in the ordinate.
  * @param {number} endX Ending point in the abscissa.
  * @param {number} endY Ending point in the ordinate.
- * @return {KeyframesDef} Keyframes that make up the animation.
+ * @return {WebKeyframesDef} Keyframes that make up the animation.
  */
 export function translate2d(startX, startY, endX, endY) {
   return [
@@ -51,11 +44,11 @@ export function translate2d(startX, startY, endX, endY) {
  * @param {number} endX Ending point in the abscissa.
  * @param {number} endY Ending point in the ordinate.
  * @param {number} direction -1 for left, 1 for right
- * @return {KeyframesDef} Keyframes that make up the animation.
+ * @return {WebKeyframesDef} Keyframes that make up the animation.
  */
 export function rotateAndTranslate(startX, startY, endX, endY, direction) {
   return [
-    {transform: translate(startX, startY) + ' ' + rotate(direction * 360)},
+    {transform: translate(startX, startY) + ' ' + rotate(direction * 120)},
     {transform: translate(endX, endY) + ' ' + rotate(0)},
   ];
 }
@@ -66,7 +59,7 @@ export function rotateAndTranslate(startX, startY, endX, endY, direction) {
  * @param {number} startY Starting point in the ordinate.
  * @param {number} endX Ending point in the abscissa.
  * @param {number} endY Ending point in the ordinate.
- * @return {KeyframesDef} Keyframes that make up the animation.
+ * @return {WebKeyframesDef} Keyframes that make up the animation.
  */
 export function whooshIn(startX, startY, endX, endY) {
   return [
@@ -89,8 +82,10 @@ export function whooshIn(startX, startY, endX, endY) {
  * @visibleForTesting
  */
 export function targetFitsWithinPage(dimensions) {
-  return dimensions.targetWidth <= dimensions.pageWidth ||
-         dimensions.targetHeight <= dimensions.pageHeight;
+  return (
+    dimensions.targetWidth <= dimensions.pageWidth ||
+    dimensions.targetHeight <= dimensions.pageHeight
+  );
 }
 
 /**
@@ -102,10 +97,14 @@ export function targetFitsWithinPage(dimensions) {
 export function calculateTargetScalingFactor(dimensions) {
   if (targetFitsWithinPage(dimensions)) {
     const scalingFactor = 1.25;
-    const widthFactor = dimensions.pageWidth > dimensions.targetWidth ?
-      dimensions.pageWidth / dimensions.targetWidth : 1;
-    const heightFactor = dimensions.pageHeight > dimensions.targetHeight ?
-      dimensions.pageHeight / dimensions.targetHeight : 1;
+    const widthFactor =
+      dimensions.pageWidth > dimensions.targetWidth
+        ? dimensions.pageWidth / dimensions.targetWidth
+        : 1;
+    const heightFactor =
+      dimensions.pageHeight > dimensions.targetHeight
+        ? dimensions.pageHeight / dimensions.targetHeight
+        : 1;
     return Math.max(widthFactor, heightFactor) * scalingFactor;
   }
   return 1;
@@ -113,12 +112,12 @@ export function calculateTargetScalingFactor(dimensions) {
 
 /**
  * Scale the image in every frame by a certain factor.
- * @param {KeyframesDef} keyframes Keyframes that will be used for the animation.
+ * @param {WebKeyframesDef} keyframes Keyframes that will be used for the animation.
  * @param {number} scalingFactor Scaling factor at which target will be scaled.
- * @return {KeyframesDef}
+ * @return {WebKeyframesDef}
  */
 function enlargeKeyFrames(keyframes, scalingFactor) {
-  keyframes.forEach(frame => {
+  /** @type {!Array} */ (keyframes).forEach((frame) => {
     frame['transform'] += ' ' + scale(scalingFactor);
     frame['transform-origin'] = 'left top';
   });
@@ -132,12 +131,14 @@ function enlargeKeyFrames(keyframes, scalingFactor) {
  * @param {number} endX Ending point in the abscissa.
  * @param {number} endY Ending point in the ordinate.
  * @param {number} scalingFactor Factor by which target will be scaled.
- * @return {KeyframesDef} Keyframes that make up the animation.
+ * @return {WebKeyframesDef} Keyframes that make up the animation.
  */
 export function scaleAndTranslate(startX, startY, endX, endY, scalingFactor) {
   if (scalingFactor === 1) {
     return translate2d(startX, startY, endX, endY);
   }
   return enlargeKeyFrames(
-      translate2d(startX, startY, endX, endY), scalingFactor);
+    translate2d(startX, startY, endX, endY),
+    scalingFactor
+  );
 }

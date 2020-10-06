@@ -21,7 +21,7 @@ tags: {  # amp-twitter
     name: "amp-twitter"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -49,27 +49,65 @@ tags: {  # <amp-twitter>
     }
   }
   attrs: {
-    name: "data-link-color"
-    trigger: {
-      also_requires_attr: "data-tweetid"
-    }
-  }
-  attrs: {
     name: "data-momentid"
-    mandatory_oneof: "['data-tweetid', 'data-momentid']"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
     value_regex: "\\d+"
   }
   attrs: {
-    name: "data-theme"
+    name: "data-timeline-id"
     trigger: {
-      also_requires_attr: "data-tweetid"
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-timeline-owner-screen-name"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
     }
   }
   attrs: {
-    name: "data-tweetid"
-    mandatory_oneof: "['data-tweetid', 'data-momentid']"
+    name: "data-timeline-slug"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
   }
-  # All
+  attrs: {
+    name: "data-timeline-source-type"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
+  attrs: {
+    name: "data-timeline-screen-name"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+  }
+    attrs: {
+    name: "data-timeline-url"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attrs: {
+    name: "data-timeline-user-id"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-tweetid"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
+  # <amp-bind>
+  attrs: {
+    name: "[data-tweetid]"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

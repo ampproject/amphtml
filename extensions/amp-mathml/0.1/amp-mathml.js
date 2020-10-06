@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {CSS} from '../../../build/amp-mathml-0.1.css';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
 export class AmpMathml extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -35,7 +36,10 @@ export class AmpMathml extends AMP.BaseElement {
    *
    */
   preconnectCallback() {
-    this.preconnect.url('https://cdnjs.cloudflare.com');
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cdnjs.cloudflare.com'
+    );
   }
 
   /**
@@ -54,7 +58,6 @@ export class AmpMathml extends AMP.BaseElement {
         height: '1rem',
       });
     });
-
   }
 
   /**
@@ -66,14 +69,22 @@ export class AmpMathml extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'mathml');
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(iframe, 'embed-size', data => {
-      if (!this.element.hasAttribute('inline')) {
-        // Don't change the width if not inlined.
-        data['width'] = undefined;
-      }
-      this.element.getResources()./*OK*/changeSize(
-          this.element, data['height'], data['width']);
-    }, /* opt_is3P */true);
+    listenFor(
+      iframe,
+      'embed-size',
+      (data) => {
+        if (!this.element.hasAttribute('inline')) {
+          // Don't change the width if not inlined.
+          data['width'] = undefined;
+        }
+        Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+          this.element,
+          data['height'],
+          data['width']
+        );
+      },
+      /* opt_is3P */ true
+    );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
@@ -98,6 +109,6 @@ export class AmpMathml extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-mathml', '0.1', AMP => {
+AMP.extension('amp-mathml', '0.1', (AMP) => {
   AMP.registerElement('amp-mathml', AmpMathml, CSS);
 });

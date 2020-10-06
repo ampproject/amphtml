@@ -35,7 +35,7 @@ let PropertyRulesDef;
  */
 const GLOBAL_PROPERTY_RULES = {
   'class': {
-    blacklistedValueRegex: '(^|\\W)i-amphtml-',
+    denylistedValueRegex: '(^|\\W)i-amphtml-',
   },
   'hidden': null,
   'text': null,
@@ -77,6 +77,14 @@ const URL_PROPERTIES = {
  */
 export class BindValidator {
   /**
+   * @param {boolean} allowUrlBindings
+   */
+  constructor(allowUrlBindings) {
+    /** @const @private {boolean} */
+    this.allowUrlBindings_ = allowUrlBindings;
+  }
+
+  /**
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
    * NOTE: `tag` and `property` are case-sensitive.
@@ -85,7 +93,7 @@ export class BindValidator {
    * @return {boolean}
    */
   canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+    return this.rulesForTagAndProperty_(tag, property) !== undefined;
   }
 
   /**
@@ -98,22 +106,18 @@ export class BindValidator {
    */
   isResultValid(tag, property, value) {
     let rules = this.rulesForTagAndProperty_(tag, property);
-
     // `alternativeName` is a reference to another property's rules.
     if (rules && rules.alternativeName) {
       rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
     }
-
     // If binding to (tag, property) is not allowed, return false.
     if (rules === undefined) {
       return false;
     }
-
     // If binding is allowed but have no specific rules, return true.
     if (rules === null) {
       return true;
     }
-
     // Validate URL(s) if applicable.
     if (value && ownProperty(URL_PROPERTIES, property)) {
       let urls;
@@ -129,18 +133,16 @@ export class BindValidator {
       } else {
         urls = [value];
       }
-
       for (let i = 0; i < urls.length; i++) {
         if (!this.isUrlValid_(urls[i], rules)) {
           return false;
         }
       }
     }
-
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const {blacklistedValueRegex} = rules;
-    if (value && blacklistedValueRegex) {
-      const re = new RegExp(blacklistedValueRegex, 'i');
+    // @see validator/js/engine/validator.ParsedTagSpec.validateAttributes()
+    const {denylistedValueRegex} = rules;
+    if (value && denylistedValueRegex) {
+      const re = new RegExp(denylistedValueRegex, 'i');
       if (re.test(value)) {
         return false;
       }
@@ -157,20 +159,24 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const {allowedProtocols} = rules;
-    if (allowedProtocols && url) {
-      const re = /^([^:\/?#.]+):[\s\S]*$/;
-      const match = re.exec(url);
-      if (match !== null) {
-        const protocol = match[1].toLowerCase().trim();
-        // hasOwnProperty() needed since nested objects are not prototype-less.
-        if (!hasOwn(allowedProtocols, protocol)) {
-          return false;
+    // @see validator/js/engine/validator.js#validateUrlAndProtocol()
+    if (url) {
+      if (/__amp_source_origin/.test(url)) {
+        return false;
+      }
+      const {allowedProtocols} = rules;
+      if (allowedProtocols) {
+        const re = /^([^:\/?#.]+):[\s\S]*$/;
+        const match = re.exec(url);
+        if (match !== null) {
+          const protocol = match[1].toLowerCase().trim();
+          // hasOwn() needed since nested objects are not prototype-less.
+          if (!hasOwn(allowedProtocols, protocol)) {
+            return false;
+          }
         }
       }
     }
-
     return true;
   }
 
@@ -187,6 +193,10 @@ export class BindValidator {
     // Allow binding to all ARIA attributes.
     if (startsWith(property, 'aria-')) {
       return null;
+    }
+    // Disallow URL property bindings if configured as such.
+    if (ownProperty(URL_PROPERTIES, property) && !this.allowUrlBindings_) {
+      return undefined;
     }
     const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
     if (globalRules !== undefined) {
@@ -211,6 +221,43 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-AUDIO': {
+      'album': null,
+      'artist': null,
+      'artwork': null,
+      'controlsList': null,
+      'loop': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'title': null,
+    },
+    'AMP-AUTOCOMPLETE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-BASE-CAROUSEL': {
+      'advance-count': null,
+      'auto-advance-count': null,
+      'auto-advance-interval': null,
+      'auto-advance-loops': null,
+      'auto-advance': null,
+      'horizontal': null,
+      'initial-index': null,
+      'loop': null,
+      'mixed-length': null,
+      'side-slide-count': null,
+      'slide': null,
+      'snap-align': null,
+      'snap-by': null,
+      'snap': null,
+      'visible-count': null,
+    },
     'AMP-BRIGHTCOVE': {
       'data-account': null,
       'data-embed': null,
@@ -222,8 +269,22 @@ function createElementRules_() {
     'AMP-CAROUSEL': {
       'slide': null,
     },
+    'AMP-DATE-PICKER': {
+      'max': null,
+      'min': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-GOOGLE-DOCUMENT-EMBED': {
+      'src': null,
+      'title': null,
+    },
     'AMP-IFRAME': {
       'src': null,
+      'title': null,
     },
     'AMP-IMG': {
       'alt': null,
@@ -239,6 +300,9 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-LIGHTBOX': {
+      'open': null,
+    },
     'AMP-LIST': {
       'src': {
         'allowedProtocols': {
@@ -246,6 +310,7 @@ function createElementRules_() {
         },
       },
       'state': null,
+      'is-layout-container': null,
     },
     'AMP-SELECTOR': {
       'disabled': null,
@@ -258,10 +323,21 @@ function createElementRules_() {
         },
       },
     },
+    'AMP-TIMEAGO': {
+      'datetime': null,
+      'title': null,
+    },
+    'AMP-TWITTER': {
+      'data-tweetid': null,
+    },
     'AMP-VIDEO': {
+      'album': null,
       'alt': null,
+      'artist': null,
+      'artwork': null,
       'attribution': null,
       'controls': null,
+      'controlslist': null,
       'loop': null,
       'poster': null,
       'preload': null,
@@ -270,19 +346,31 @@ function createElementRules_() {
           'https': true,
         },
       },
+      'title': null,
     },
     'AMP-YOUTUBE': {
       'data-videoid': null,
     },
     'A': {
       'href': {
+        // This should be kept in sync with validator-main.protoascii.
         'allowedProtocols': {
           'ftp': true,
+          'geo': true,
           'http': true,
           'https': true,
           'mailto': true,
+          'maps': true,
+          // 3rd Party Protocols
+          'bip': true,
+          'bbmi': true,
+          'chrome': true,
+          'itms-services': true,
+          'facetime': true,
+          'fb-me': true,
           'fb-messenger': true,
           'intent': true,
+          'line': true,
           'skype': true,
           'sms': true,
           'snapchat': true,
@@ -291,6 +379,9 @@ function createElementRules_() {
           'threema': true,
           'twitter': true,
           'viber': true,
+          'webcal': true,
+          'web+mastodon': true,
+          'wh': true,
           'whatsapp': true,
         },
       },
@@ -299,6 +390,9 @@ function createElementRules_() {
       'disabled': null,
       'type': null,
       'value': null,
+    },
+    'DETAILS': {
+      'open': null,
     },
     'FIELDSET': {
       'disabled': null,
@@ -333,7 +427,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
+        denylistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
       },
       'value': null,
       'width': null,
@@ -347,6 +441,9 @@ function createElementRules_() {
     'OPTGROUP': {
       'disabled': null,
       'label': null,
+    },
+    'SECTION': {
+      'data-expand': null,
     },
     'SELECT': {
       'autofocus': null,
@@ -379,6 +476,7 @@ function createElementRules_() {
       'disabled': null,
       'maxlength': null,
       'minlength': null,
+      'pattern': null,
       'placeholder': null,
       'readonly': null,
       'required': null,
@@ -388,6 +486,8 @@ function createElementRules_() {
       'selectionstart': null,
       'spellcheck': null,
       'wrap': null,
+      // Non-standard property.
+      'defaulttext': null,
     },
   };
   return rules;

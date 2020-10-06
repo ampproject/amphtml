@@ -15,13 +15,12 @@
 #
 tags: {  # amp-sidebar
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-sidebar"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -32,17 +31,17 @@ tags: {  # amp-sidebar
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-sidebar"
+    # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-sidebar>
+tags: {  # <amp-sidebar> not in amp-story or email
   html_format: AMP
-  html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "AMP-SIDEBAR"
-  mandatory_parent: "BODY"
+  spec_name: "amp-sidebar"
+  # There is an alternate spec for amp-sidebar in amp-story.
+  disallowed_ancestor: "AMP-STORY"
   requires_extension: "amp-sidebar"
   attrs: {
     name: "side"
@@ -53,11 +52,42 @@ tags: {  # <amp-sidebar>
   amp_layout: {
     supported_layouts: NODISPLAY
   }
+  mark_descendants {
+    marker: AUTOSCROLL
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-sidebar/"
+}
+tags: {  # <amp-sidebar> in email
+  html_format: AMP4EMAIL
+  tag_name: "AMP-SIDEBAR"
+  spec_name: "amp-sidebar (AMP4EMAIL)"
+  requires_extension: "amp-sidebar"
+  attrs: {
+    name: "side"
+    value: "left"
+    value: "right"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-sidebar/"
+}
+tags: { # <amp-sidebar> in amp-story
+  html_format: AMP
+  tag_name: "AMP-SIDEBAR"
+  spec_name: "amp-story >> amp-sidebar"
+  requires_extension: "amp-sidebar"
+  mandatory_parent: "AMP-STORY"
+  amp_layout: { supported_layouts: NODISPLAY }
+  mark_descendants {
+    marker: AUTOSCROLL
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-sidebar/"
 }
 tags: {  # amp-sidebar > nav
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "NAV"
   spec_name: "amp-sidebar > nav"
   mandatory_parent: "AMP-SIDEBAR"
@@ -74,6 +104,7 @@ tags: {  # amp-sidebar > nav
   }
   child_tags: {
     mandatory_num_child_tags: 1
+    child_tag_name_oneof: "OL"
     child_tag_name_oneof: "UL"
   }
 }

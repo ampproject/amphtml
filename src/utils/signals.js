@@ -17,13 +17,11 @@
 import {Deferred} from './promise';
 import {map} from './object';
 
-
 /**
  * This object tracts signals and allows blocking until a signal has been
  * received.
  */
 export class Signals {
-
   /**
    * Creates an instance of Signals.
    */
@@ -54,7 +52,8 @@ export class Signals {
    * @return {number|!Error|null}
    */
   get(name) {
-    return this.map_[name] || null;
+    const v = this.map_[name];
+    return v == null ? null : v;
   }
 
   /**
@@ -69,9 +68,10 @@ export class Signals {
       const result = this.map_[name];
       if (result != null) {
         // Immediately resolve signal.
-        const promise = typeof result == 'number' ?
-          Promise.resolve(result) :
-          Promise.reject(result);
+        const promise =
+          typeof result == 'number'
+            ? Promise.resolve(result)
+            : Promise.reject(result);
         promiseStruct = {promise};
       } else {
         // Allocate the promise/resolver for when the signal arrives in the
@@ -101,7 +101,7 @@ export class Signals {
       // Do not duplicate signals.
       return;
     }
-    const time = opt_time || Date.now();
+    const time = opt_time == undefined ? Date.now() : opt_time;
     this.map_[name] = time;
     const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
     if (promiseStruct && promiseStruct.resolve) {
@@ -126,6 +126,7 @@ export class Signals {
     const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
     if (promiseStruct && promiseStruct.reject) {
       promiseStruct.reject(error);
+      promiseStruct.promise.catch(() => {});
       promiseStruct.resolve = undefined;
       promiseStruct.reject = undefined;
     }

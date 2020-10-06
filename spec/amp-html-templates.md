@@ -34,7 +34,11 @@ document.
 Before AMP templates can be used, the templating system has to be declared in the document's `head`:
 
 ```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+<script
+  async
+  custom-template="amp-mustache"
+  src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+></script>
 ```
 
 The `script` tag must be declared as `async` and with the `custom-template` attribute.
@@ -50,13 +54,30 @@ submitted to the AMP repository.
 Templates can be defined anywhere in the AMP document's `body`, like this:
 
 ```html
+<!--
+Using the template tag
+
+The `type` attribute must reference the template's type as defined in the `custom-template` attribute when the templating system was imported in the document's `head`.
+-->
 <template type="amp-mustache">
   Hello {{world}}!
 </template>
 ```
 
-The `type` attribute must reference the template's type as defined in the `custom-template`
-attribute when the templating system was imported in the document's `head`.
+or like this:
+
+```html
+<!--
+Using the script tag
+
+The template type is defined in the `template` attribute. The template
+tag is preferred but using the script tag can be helpful when working with
+tables or server-side rendering.
+-->
+<script type="text/plain" template="amp-mustache">
+  Hello {{world}}!
+</script>
+```
 
 The use of the template is up to a specific AMP element that wants to use it. An AMP element would typically
 look for a template within its children or using a template's ID. For instance, an `amp-carousel` element
@@ -69,8 +90,8 @@ a specific AMP element how `templateElement` and `data` are provided.
 
 ## Templates
 
-Here's a list of available extended templates:
+Here's a list of available templates:
 
-| Template  | Description |
-| --------- | ----------- |
+| Template                                                     | Description                                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | [`amp-mustache`](../extensions/amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |

@@ -19,12 +19,15 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="auto" height="750"
-    type="relap"
-    layout="fixed-height"
-    data-token="D3UMgQWBqleq1tPW"
-    data-url="http://bigpicture.ru"
-    data-anchorid="i0xMMY1MoliiZWVl">
+<amp-ad
+  width="auto"
+  height="750"
+  type="relap"
+  layout="fixed-height"
+  data-token="D3UMgQWBqleq1tPW"
+  data-url="http://bigpicture.ru"
+  data-anchorid="i0xMMY1MoliiZWVl"
+>
 </amp-ad>
 ```
 

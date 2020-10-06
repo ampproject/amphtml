@@ -16,31 +16,29 @@
 
 import {ampMediaElementFor} from './utils';
 import {removeElement} from '../../../src/dom';
-
-
+import {toArray} from '../../../src/types';
 
 /**
  * Class handling HTMLMediaElements sources.
  */
 export class Sources {
   /**
-   * @param {?string=} opt_srcAttr The 'src' attribute of the media element.
-   * @param {?IArrayLike<!Element>=} opt_srcEls Any child <source> tags of the
+   * @param {?string=} srcAttr The 'src' attribute of the media element.
+   * @param {!Array<!Element>=} srcEls Any child <source> tags of the
    *     media element.
-   * @param {?IArrayLike<!Element>=} opt_trackEls Any child <track> tags of the
+   * @param {!Array<!Element>=} trackEls Any child <track> tags of the
    *     media element.
    */
-  constructor(opt_srcAttr, opt_srcEls, opt_trackEls) {
+  constructor(srcAttr = null, srcEls = [], trackEls = []) {
     /** @private @const {?string} */
-    this.srcAttr_ = opt_srcAttr && opt_srcAttr.length ? opt_srcAttr : null;
+    this.srcAttr_ = srcAttr;
 
-    /** @private @const {!IArrayLike<!Element>} */
-    this.srcEls_ = opt_srcEls || [];
+    /** @private @const {!Array<!Element>} */
+    this.srcEls_ = srcEls;
 
-    /** @private @const {!IArrayLike<!Element>} */
-    this.trackEls_ = opt_trackEls || [];
+    /** @private @const {!Array<!Element>} */
+    this.trackEls_ = trackEls;
   }
-
 
   /**
    * Applies track tags to a specified element. This is done in a separate
@@ -51,7 +49,7 @@ export class Sources {
    * @private
    */
   applyTracksToElement_(element) {
-    Array.prototype.forEach.call(this.trackEls_, trackEl => {
+    Array.prototype.forEach.call(this.trackEls_, (trackEl) => {
       const track = document.createElement('track');
       track.id = trackEl.id;
       track.kind = trackEl.kind;
@@ -67,14 +65,14 @@ export class Sources {
     });
   }
 
-
   /**
    * Applies the src attribute and source tags to a specified element.
+   * @param {!Window} win
    * @param {!HTMLMediaElement} element The element to adopt the sources
    *     represented by this object.
    */
-  applyToElement(element) {
-    Sources.removeFrom(element);
+  applyToElement(win, element) {
+    Sources.removeFrom(win, element);
 
     if (!this.srcAttr_) {
       element.removeAttribute('src');
@@ -82,8 +80,12 @@ export class Sources {
       element.setAttribute('src', this.srcAttr_);
     }
 
-    Array.prototype.forEach.call(this.srcEls_,
-        srcEl => element.appendChild(srcEl));
+    Array.prototype.forEach.call(this.srcEls_, (srcEl) =>
+      element.appendChild(srcEl)
+    );
+    if (element.changedSources) {
+      element.changedSources();
+    }
 
     if (this.trackEls_.length > 0) {
       // Wait for "loadedmetadata" before adding tracks.
@@ -102,25 +104,63 @@ export class Sources {
     }
   }
 
-
   /**
    * Removes and returns the sources from a specified element.
+   * @param {!Window} win
    * @param {!Element} element The element whose sources should be removed and
    *     returned.
    * @return {!Sources} An object representing the sources of the specified
    *     element.
    */
-  static removeFrom(element) {
+  static removeFrom(win, element) {
     const elementToUse = ampMediaElementFor(element) || element;
-    const srcAttr = elementToUse.getAttribute('src');
-    elementToUse.removeAttribute('src');
 
-    const srcEls = elementToUse.querySelectorAll('source');
-    Array.prototype.forEach.call(srcEls, srcEl => removeElement(srcEl));
+    let srcEl = null;
+    // If the src attribute is specified, create a source element from it as it
+    // prevents race conditions between amp-story and amp-video propagating or
+    // removing attributes from amp-video/video elements.
+    if (elementToUse.hasAttribute('src')) {
+      srcEl = Sources.createSourceElement(win, elementToUse);
+      elementToUse.removeAttribute('src');
+    }
 
-    const trackEls = elementToUse.querySelectorAll('track');
-    Array.prototype.forEach.call(trackEls, trackEl => removeElement(trackEl));
+    const srcEls = toArray(elementToUse.querySelectorAll('source'));
+    srcEls.forEach((srcEl) => removeElement(srcEl));
 
-    return new Sources(srcAttr, srcEls, trackEls);
+    const trackEls = toArray(elementToUse.querySelectorAll('track'));
+    trackEls.forEach((trackEl) => removeElement(trackEl));
+
+    // If the src attribute is present, browsers will follow it and ignore the
+    // HTMLSourceElements. To ensure this behavior, drop the sources if the src
+    // was specified.
+    // cf: https://html.spec.whatwg.org/#concept-media-load-algorithm
+    const sourcesToUse = srcEl ? [srcEl] : srcEls;
+
+    return new Sources(null /** srcAttr */, sourcesToUse, trackEls);
+  }
+
+  /**
+   * Creates a HTMLSourceElement from the element src attribute.
+   * @param {!Window} win
+   * @param {!Element} element
+   * @return {!Element}
+   */
+  static createSourceElement(win, element) {
+    const srcEl = win.document.createElement('source');
+
+    const srcAttr = element.getAttribute('src');
+    srcEl.setAttribute('src', srcAttr);
+
+    const origSrcAttr = element.getAttribute('amp-orig-src');
+    if (origSrcAttr) {
+      srcEl.setAttribute('amp-orig-src', origSrcAttr);
+    }
+
+    const typeAttr = element.getAttribute('type');
+    if (typeAttr) {
+      srcEl.setAttribute('type', typeAttr);
+    }
+
+    return srcEl;
   }
 }

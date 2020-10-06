@@ -31,9 +31,7 @@ tags: {  # <amp-bodymovin-animation>
 
   attrs: {
     name: "loop"
-    value_casei: "false"
-    value_casei: "number"
-    value_casei: "true"
+    value_regex_casei: "[1-9][0-9]*|false|true"
   }
   attrs: {
     name: "noautoplay"
@@ -47,7 +45,12 @@ tags: {  # <amp-bodymovin-animation>
       allow_relative: false
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bodymovin-animation"
+  attrs: {
+    name: "renderer"
+    value_casei: "svg"
+    value_casei: "html"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-bodymovin-animation/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

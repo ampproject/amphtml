@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -26,13 +28,12 @@ const TAG = 'amp-3d-gltf';
 
 const isWebGLSupported = () => {
   const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl')
-      || canvas.getContext('experimental-webgl');
+  const gl =
+    canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
   return gl && gl instanceof WebGLRenderingContext;
 };
 
 export class Amp3dGltf extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -58,10 +59,23 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js', opt_onLayout);
-    this.preconnect.url('https://cdn.jsdelivr.net/npm/three@0.91/examples/js/loaders/GLTFLoader.js', opt_onLayout);
-    this.preconnect.url('https://cdn.jsdelivr.net/npm/three@0.91/examples/js/controls/OrbitControls.js', opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
+      opt_onLayout
+    );
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/loaders/GLTFLoader.js',
+      opt_onLayout
+    );
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/controls/OrbitControls.js',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -87,27 +101,46 @@ export class Amp3dGltf extends AMP.BaseElement {
         ? fmt(this.element.getAttribute(name))
         : dflt;
 
-    const bool = x => x !== 'false';
-    const string = x => x;
-    const number = x => parseFloat(x);
+    const bool = (x) => x !== 'false';
+    const string = (x) => x;
+    const number = (x) => parseFloat(x);
 
-    const src = assertHttpsUrl(
-        getOption('src', string, ''),
-        this.element);
+    const src = assertHttpsUrl(getOption('src', string, ''), this.element);
+
+    const useAlpha = getOption('alpha', bool, false);
 
     this.context_ = dict({
       'src': resolveRelativeUrl(src, this.getAmpDoc().getUrl()),
       'renderer': {
-        'alpha': getOption('alpha', bool, false),
+        'alpha': useAlpha,
         'antialias': getOption('antialiasing', bool, true),
       },
-      'maxPixelRatio':
-          getOption('maxPixelRatio', number, devicePixelRatio || 1),
+      'rendererSettings': {
+        'clearAlpha': useAlpha ? 0 : 1,
+        'clearColor': getOption('clearColor', string, '#fff'),
+        'maxPixelRatio': getOption(
+          'maxPixelRatio',
+          number,
+          devicePixelRatio || 1
+        ),
+      },
       'controls': {
         'enableZoom': getOption('enableZoom', bool, true),
         'autoRotate': getOption('autoRotate', bool, false),
       },
     });
+    this.registerAction(
+      'setModelRotation',
+      (invocation) => {
+        this.sendCommandWhenReady_(
+          'setModelRotation',
+          invocation.args
+        ).catch((e) =>
+          dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
+        );
+      },
+      ActionTrust.LOW
+    );
   }
 
   /** @override */
@@ -117,30 +150,28 @@ export class Amp3dGltf extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const iframe = getIframe(
-        this.win, this.element, '3d-gltf', this.context_
-    );
+    const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);
 
     this.applyFillContent(iframe, true);
     this.iframe_ = iframe;
-    this.unlistenMessage_ = this.listenGltfViewerMessages_();
+    this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
 
     this.element.appendChild(this.iframe_);
 
     return this.willBeLoaded_.promise;
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {function()|undefined}
+   */
   listenGltfViewerMessages_() {
     if (!this.iframe_) {
       return;
     }
 
-    const listenIframe = (evName, cb) => listenFor(
-        dev().assertElement(this.iframe_),
-        evName,
-        cb,
-        true);
+    const listenIframe = (evName, cb) =>
+      listenFor(dev().assertElement(this.iframe_), evName, cb, true);
 
     const disposers = [
       listenIframe('ready', this.willBeReady_.resolve),
@@ -149,7 +180,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.toggleFallback(true);
       }),
     ];
-    return () => disposers.forEach(d => d());
+    return () => disposers.forEach((d) => d());
   }
 
   /**
@@ -179,12 +210,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @private
    */
   postMessage_(type, message) {
-    postMessage(
-        dev().assertElement(this.iframe_),
-        type,
-        message,
-        '*',
-        true);
+    postMessage(dev().assertElement(this.iframe_), type, message, '*', true);
   }
 
   /**
@@ -212,8 +238,9 @@ export class Amp3dGltf extends AMP.BaseElement {
   onLayoutMeasure() {
     const box = this.getLayoutBox();
     this.sendCommandWhenReady_(
-        'setSize',
-        dict({'width': box.width, 'height': box.height}));
+      'setSize',
+      dict({'width': box.width, 'height': box.height})
+    );
   }
 
   /** @override */
@@ -222,6 +249,6 @@ export class Amp3dGltf extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3dGltf);
 });

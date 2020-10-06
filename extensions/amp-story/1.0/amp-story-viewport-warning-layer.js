@@ -15,13 +15,18 @@
  */
 
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-1.0.css';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
-
+import {getLocalizationService} from './amp-story-localization-service';
+import {htmlFor} from '../../../src/static-template';
+import {listen} from '../../../src/event-helper';
+import {throttle} from '../../../src/utils/rate-limit';
 
 /**
  * CSS class indicating the format is landscape.
@@ -29,68 +34,25 @@ import {renderAsElement} from './simple-template';
  */
 const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
 
+/** @const {number} */
+const RESIZE_THROTTLE_MS = 300;
 
 /**
- * Full viewport layer advising the user to rotate his device. Mobile only.
- * @private @const {!./simple-template.ElementDef}
+ * Viewport warning layer template.
+ * @param {!Element} element
+ * @return {!Element}
  */
-const LANDSCAPE_ORIENTATION_WARNING_TEMPLATE = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-no-rotation-overlay ' +
-        'i-amphtml-story-system-reset'}),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-overlay-container'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-rotate-icon'}),
-        },
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-          localizedStringId:
-              LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT,
-        },
-      ],
-    },
-  ],
+const getTemplate = (element) => {
+  return htmlFor(element)`
+    <div class="
+        i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset">
+      <div class="i-amphtml-overlay-container">
+        <div class="i-amphtml-story-overlay-icon"></div>
+        <div class="i-amphtml-story-overlay-text"></div>
+      </div>
+    </div>
+  `;
 };
-
-
-/**
- * Full viewport layer advising the user to expand his window. Only displayed
- * for small desktop viewports.
- * @private @const {!./simple-template.ElementDef}
- */
-const DESKTOP_SIZE_WARNING_TEMPLATE = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-no-rotation-overlay ' +
-        'i-amphtml-story-system-reset'}),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-overlay-container'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-desktop-size-icon'}),
-        },
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-          localizedStringId:
-              LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT,
-        },
-      ],
-    },
-  ],
-};
-
-
 
 /**
  * Viewport warning layer UI.
@@ -99,13 +61,29 @@ export class ViewportWarningLayer {
   /**
    * @param {!Window} win
    * @param {!Element} storyElement Element where to append the component
+   * @param {number} desktopWidthThreshold Threshold in px.
+   * @param {number} desktopHeightThreshold Threshold in px.
    */
-  constructor(win, storyElement) {
+  constructor(
+    win,
+    storyElement,
+    desktopWidthThreshold,
+    desktopHeightThreshold
+  ) {
     /** @private @const {!Window} */
     this.win_ = win;
 
+    /** @private {number} */
+    this.desktopHeightThreshold_ = desktopHeightThreshold;
+
+    /** @private {number} */
+    this.desktopWidthThreshold_ = desktopWidthThreshold;
+
     /** @private {boolean} */
     this.isBuilt_ = false;
+
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
 
     /** @private {?Element} */
     this.overlayEl_ = null;
@@ -118,6 +96,9 @@ export class ViewportWarningLayer {
 
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;
+
+    /** @private {?Function} */
+    this.unlistenResizeEvents_ = null;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -133,18 +114,19 @@ export class ViewportWarningLayer {
       return;
     }
 
-    this.isBuilt_ = true;
+    this.overlayEl_ = this.getViewportWarningOverlayTemplate_();
+    this.localizationService_ = getLocalizationService(this.storyElement_);
 
+    this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
-    this.overlayEl_ =
-        renderAsElement(
-            this.win_.document, this.getViewportWarningOverlayTemplate_());
 
     createShadowRootWithStyle(root, this.overlayEl_, CSS);
 
-    // Initializes the desktop state now that the component is built.
-    this.onDesktopStateUpdate_(
-        !!this.storeService_.get(StateProperty.DESKTOP_STATE));
+    // Initializes the UI state now that the component is built.
+    this.onUIStateUpdate_(
+      /** @type {!UIType} */
+      (this.storeService_.get(StateProperty.UI_STATE))
+    );
 
     this.vsync_.mutate(() => {
       this.storyElement_.insertBefore(root, this.storyElement_.firstChild);
@@ -163,25 +145,34 @@ export class ViewportWarningLayer {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      (uiState) => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.LANDSCAPE_STATE, isLandscape => {
-      this.onLandscapeStateUpdate_(isLandscape);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.VIEWPORT_WARNING_STATE,
+      (viewportWarningState) => {
+        this.onViewportWarningStateUpdate_(viewportWarningState);
+      },
+      true /** callToInitialize */
+    );
   }
 
   /**
-   * Reacts to the landscape state update, only on mobile.
-   * @param  {boolean} isLandscape
+   * Reacts to the viewport warning state update, only on mobile.
+   * @param {boolean} viewportWarningState
    * @private
    */
-  onLandscapeStateUpdate_(isLandscape) {
-    const isDesktop = this.storeService_.get(StateProperty.DESKTOP_STATE);
+  onViewportWarningStateUpdate_(viewportWarningState) {
+    const isMobile =
+      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
 
     // Adds the landscape class if we are mobile landscape.
-    const shouldShowLandscapeOverlay = !isDesktop && isLandscape;
+    const shouldShowLandscapeOverlay = isMobile && viewportWarningState;
 
     // Don't build the layer until we need to display it.
     if (!shouldShowLandscapeOverlay && !this.isBuilt()) {
@@ -190,37 +181,132 @@ export class ViewportWarningLayer {
 
     this.build();
 
+    // Listen to resize events to update the UI message.
+    if (viewportWarningState) {
+      const resizeThrottle = throttle(
+        this.win_,
+        () => this.onResize_(),
+        RESIZE_THROTTLE_MS
+      );
+      this.unlistenResizeEvents_ = listen(this.win_, 'resize', resizeThrottle);
+    } else if (this.unlistenResizeEvents_) {
+      this.unlistenResizeEvents_();
+      this.unlistenResizeEvents_ = null;
+    }
+
+    this.updateTextContent_();
+
     this.vsync_.mutate(() => {
-      this.overlayEl_
-          .classList.toggle(LANDSCAPE_OVERLAY_CLASS, !isDesktop && isLandscape);
+      this.overlayEl_.classList.toggle(
+        LANDSCAPE_OVERLAY_CLASS,
+        shouldShowLandscapeOverlay
+      );
     });
   }
 
   /**
-   * Reacts to desktop state updates.
-   * @param {boolean} isDesktop
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
    * @private
    */
-  onDesktopStateUpdate_(isDesktop) {
+  onUIStateUpdate_(uiState) {
     if (!this.isBuilt()) {
       return;
     }
 
     this.vsync_.mutate(() => {
-      isDesktop ?
-        this.overlayEl_.setAttribute('desktop', '') :
-        this.overlayEl_.removeAttribute('desktop');
+      uiState === UIType.DESKTOP_PANELS
+        ? this.overlayEl_.setAttribute('desktop', '')
+        : this.overlayEl_.removeAttribute('desktop');
     });
   }
 
   /**
+   * @private
+   */
+  onResize_() {
+    this.updateTextContent_();
+  }
+
+  /**
    * Returns the overlay corresponding to the device currently used.
-   * @return {!./simple-template.ElementDef} template
+   * @return {!Element} template
    * @private
    */
   getViewportWarningOverlayTemplate_() {
-    return (this.platform_.isIos() || this.platform_.isAndroid()) ?
-      LANDSCAPE_ORIENTATION_WARNING_TEMPLATE :
-      DESKTOP_SIZE_WARNING_TEMPLATE;
+    const template = getTemplate(this.storyElement_);
+    const iconEl = template.querySelector('.i-amphtml-story-overlay-icon');
+
+    if (this.platform_.isIos() || this.platform_.isAndroid()) {
+      iconEl.classList.add('i-amphtml-rotate-icon');
+      return template;
+    }
+
+    iconEl.classList.add('i-amphtml-desktop-size-icon');
+    return template;
+  }
+
+  /**
+   * Updates the UI message displayed to the user.
+   * @private
+   */
+  updateTextContent_() {
+    const textEl = this.overlayEl_.querySelector(
+      '.i-amphtml-story-overlay-text'
+    );
+    let textContent;
+
+    this.vsync_.run({
+      measure: () => {
+        textContent = this.getTextContent_();
+      },
+      mutate: () => {
+        if (!textContent) {
+          return;
+        }
+
+        textEl.textContent = textContent;
+      },
+    });
+  }
+
+  /**
+   * Gets the localized message to display, depending on the viewport size. Has
+   * to run during a measure phase.
+   * @return {?string}
+   * @private
+   */
+  getTextContent_() {
+    if (this.platform_.isIos() || this.platform_.isAndroid()) {
+      return this.localizationService_.getLocalizedString(
+        LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT
+      );
+    }
+
+    const viewportHeight = this.win_./*OK*/ innerHeight;
+    const viewportWidth = this.win_./*OK*/ innerWidth;
+
+    if (
+      viewportHeight < this.desktopHeightThreshold_ &&
+      viewportWidth < this.desktopWidthThreshold_
+    ) {
+      return this.localizationService_.getLocalizedString(
+        LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT
+      );
+    }
+
+    if (viewportWidth < this.desktopWidthThreshold_) {
+      return this.localizationService_.getLocalizedString(
+        LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT
+      );
+    }
+
+    if (viewportHeight < this.desktopHeightThreshold_) {
+      return this.localizationService_.getLocalizedString(
+        LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT
+      );
+    }
+
+    return null;
   }
 }

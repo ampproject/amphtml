@@ -7,7 +7,7 @@
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-access"
         src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
-    <title>My Story with acces</title>
+    <title>My Story with access</title>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="access.html">
@@ -62,18 +62,24 @@
 
   <body>
     <amp-story standalone publisher-logo-src="https://placekitten.com/g/64/64">
-      <amp-story-access layout="nodisplay">
+      <amp-story-access type="blocking">
         <button on="tap:amp-access.login">Login to read more!</button>
+      </amp-story-access>
+
+      <amp-story-access amp-access="NOT loggedIn" type="notification">
+        <button on="tap:amp-access.login">Please subscribe or log in!</button>
       </amp-story-access>
 
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
           <h1>Free page!</h1>
-        <button on="tap:amp-access.login">Login to read more!</button>
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page1" amp-access="access">
+      <amp-story-page id="page1" amp-access="loggedIn">
+        <amp-story-grid-layer template="fill">
+          <amp-img height="800" width="450" src="https://placekitten.com/g/450/800"></amp-img>
+        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <h1>You're reading premium content!</h1>
         </amp-story-grid-layer>

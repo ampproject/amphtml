@@ -19,10 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="50"
-  type="gmossp"
-  data-id="20175">
-</amp-ad>
+<amp-ad width="320" height="50" type="gmossp" data-id="20175"> </amp-ad>
 ```
 
 ## Configuration

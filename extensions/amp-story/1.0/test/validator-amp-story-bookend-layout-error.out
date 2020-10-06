@@ -73,7 +73,7 @@ FAIL
 |      </amp-story-page>
 |      <amp-story-bookend src="bookendv1.json" layout=container>
 >>     ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-bookend-layout-error.html:73:4 The attribute 'layout' in tag 'amp-story-bookend' is set to the invalid value 'container'. [AMP_LAYOUT_PROBLEM]
+amp-story/1.0/test/validator-amp-story-bookend-layout-error.html:73:4 The attribute 'layout' in tag 'amp-story-bookend' is set to the invalid value 'container'.
 |        <h1>Illegal child inside amp-story-bookend!</h1>
 |      </amp-story-bookend>
 |    </amp-story>

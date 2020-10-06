@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,165 +14,329 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   ExpansionOptions,
-  installVariableService,
-  variableServiceFor,
+  VariableService,
+  encodeVars,
+  getNameArgsForTesting,
+  installVariableServiceForTesting,
+  variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
-import {adopt} from '../../../../src/runtime';
-import {toggleExperiment} from '../../../../src/experiments';
+import {forceExperimentBranch} from '../../../../src/experiments';
+import {
+  installLinkerReaderService,
+  linkerReaderServiceFor,
+} from '../linker-reader';
 
-adopt(window);
+const fakeElement = document.documentElement;
 
-describe('amp-analytics.VariableService', function() {
-  let variables, sandbox;
+describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
+  let variables;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    installVariableService(window);
-    variables = variableServiceFor(window);
+    installLinkerReaderService(env.win);
+    variables = new VariableService(env.ampdoc);
   });
 
-  afterEach(() => {
-    sandbox.restore();
+  describe('encodeVars', () => {
+    it('correctly encodes scalars and arrays', () => {
+      expect(encodeVars('abc %&')).to.equal('abc%20%25%26');
+      expect(encodeVars('SOME_MACRO(abc,123)')).to.equal('SOME_MACRO(abc,123)');
+
+      const array = ['abc %&', 'a b'];
+      expect(encodeVars(array)).to.equal('abc%20%25%26,a%20b');
+      // Test non-inplace semantics by testing again.
+      expect(encodeVars(array)).to.equal('abc%20%25%26,a%20b');
+      expect(encodeVars(['12.3', 'SOME_MACRO(abc,123)', 'ab/c'])).to.equal(
+        '12.3,SOME_MACRO(abc,123),ab%2Fc'
+      );
+    });
   });
 
-
-  it('correctly encodes scalars and arrays', () => {
-    expect(variables.encodeVars('v', 'abc %&')).to.equal('abc%20%25%26');
-    expect(variables.encodeVars('v', 'SOME_MACRO(abc,123)'))
-        .to.equal('SOME_MACRO(abc,123)');
-
-    const array = ['abc %&', 'a b'];
-    expect(variables.encodeVars('v', array)).to.equal('abc%20%25%26,a%20b');
-    // Test non-inplace semantics by testing again.
-    expect(variables.encodeVars('v', array)).to.equal('abc%20%25%26,a%20b');
-    expect(variables.encodeVars('v', ['12.3', 'SOME_MACRO(abc,123)', 'ab/c']))
-        .to.equal('12.3,SOME_MACRO(abc,123),ab%2Fc');
-  });
-
-  describe('expandTemplate', () => {
+  describe('expand', () => {
     const vars = {
-      '1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}', '5': 0,
-      'a': '${b}', 'b': '${c}', 'c': 'https://www.google.com/a?b=1&c=2',
+      'a': '${b}',
+      'b': '${c}',
+      'c': 'https://www.google.com/a?b=1&c=2',
     };
 
-    it('expands zeros', () => {
-      return variables.expandTemplate('${5}', new ExpansionOptions(vars))
-          .then(actual =>
-            expect(actual).to.equal('0')
-          );
-    });
+    function check(template, expected, vars, opt_freeze) {
+      const expansion = new ExpansionOptions(vars);
+      if (opt_freeze) {
+        expansion.freezeVar(opt_freeze);
+      }
+      const actual = variables.expandTemplate(template, expansion, fakeElement);
+      return expect(actual).to.eventually.equal(expected);
+    }
 
-    it('expands nested vars', () => {
-      return allowConsoleError(() => {
-        return variables.expandTemplate('${1}', new ExpansionOptions(vars))
-            .then(actual =>
-              expect(actual).to.equal('123%24%7B4%7D')
-            );
-      });
+    it('expands nested vars (encode once)', () => {
+      return check(
+        '${a}',
+        'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2',
+        vars
+      );
     });
 
     it('expands nested vars (no encode)', () => {
-      return allowConsoleError(() => {
-        return variables.expandTemplate('${1}',
-            new ExpansionOptions(vars, undefined, true))
-            .then(actual =>
-              expect(actual).to.equal('123${4}')
-            );
+      const actual = variables.expandTemplate(
+        '${a}',
+        new ExpansionOptions(vars, undefined, true),
+        fakeElement
+      );
+      expect(actual).to.eventually.equal('https://www.google.com/a?b=1&c=2');
+    });
+
+    it('expands complicated string', () => {
+      return check('${foo}', 'HELLO%2FWORLD%2BWORLD%2BHELLO%2BHELLO', {
+        'foo': '${a}+${b}+${c}+${hello}',
+        'a': '${hello}/${world}',
+        'b': '${world}',
+        'c': '${hello}',
+        'hello': 'HELLO',
+        'world': 'WORLD',
       });
     });
 
-    it('expands nested vars without double encoding', () => {
-      return allowConsoleError(() => {
-        return expect(variables.expandTemplate('${a}',
-            new ExpansionOptions(vars))).to.eventually.equal(
-            'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
+    it('expands zeros', () => {
+      return check('${zero}', '0', {'zero': 0});
+    });
+
+    it('drops unknown vars', () => {
+      return check('a=${known}&b=${unknown}', 'a=KNOWN&b=', {'known': 'KNOWN'});
+    });
+
+    it('does not expand macros', () => {
+      return check('MACRO(a,b)', 'MACRO(a,b)', {});
+    });
+
+    it('does not handle nested macros using ${} syntax', () => {
+      // VariableService.expandTemplate's regex cannot parse nested ${}.
+      return check('${a${b}}', '}', {
+        'a': 'TIMESTAMP',
+        'b': 'TIMESTAMP',
       });
     });
 
-    it('limits the recursion to n', () => {
-      expectAsyncConsoleError(
-          '[Analytics.Variables] Maximum depth reached while expanding ' +
-          'variables. Please ensure that the variables are not recursive.', 2);
+    it('supports macro args', () =>
+      check('${foo}', 'AAA(BBB(1))', {
+        'foo': 'AAA(BBB(1))',
+      })
+        .then(() =>
+          // This is a result of `getNameArgs` strange behavior. Leaving here as
+          // pseudo documentation. We mostly avoid this problem, as now we expand any
+          // valid macros when they are seen in `Variables#expandTemplate`.
+          check('${foo}', 'AAA(BBB(1%2C2))', {
+            'foo': 'AAA(BBB(1,2))',
+          })
+        )
+        .then(() =>
+          check('${foo}', 'true', {
+            'foo': '$EQUALS($SUBSTR(zyxabc,3),abc)',
+          })
+        )
+        .then(() => {
+          env.sandbox.useFakeTimers(123456789);
 
-      return variables.expandTemplate('${1}', new ExpansionOptions(vars, 3))
-          .then(actual =>
-            expect(actual).to.equal('1234%24%7B1%7D'))
-          .then(() =>
-            variables.expandTemplate('${1}', new ExpansionOptions(vars, 5))
-                .then(actual => expect(actual).to
-                    .equal('123412%24%7B3%7D')
-                ));
-    });
-
-    it('works with complex params (1)', () => {
-      const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM(foo,bar)'});
-      return variables.expandTemplate('${fooParam}', vars)
-          .then(actual =>
-            expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
-    });
-
-    it('works with complex params (2)', () => {
-      const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM'});
-      return variables.expandTemplate('${fooParam(foo,bar)}', vars)
-          .then(actual => expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
-    });
+          // Arguments (3,4) and (5,TIMESTAMP) do not include parenthesis,
+          // so they are parsed and encoded correctly when sent to urlReplacements
+          return check(
+            '${foo}&${bar(3,4)}&${bar(5,TIMESTAMP)}',
+            'FOO(1,2)&4&123456789',
+            {
+              'foo': 'FOO(1,2)',
+              'bar': 'QUERY_PARAM',
+            }
+          );
+        })
+        .then(() =>
+          // Macros that take additonal arugments in the arglist (after expansion),
+          // and getNameArgs doesn't handle them
+          check(
+            '${foo}&${bar(2,$TOUPPERCASE(lowercase)}&${bar(5,QUERY_PARAM(6,7))}&${baz($NOT(true))}',
+            'FOO(3,4)&(lowercase)(lowercase)&&',
+            {
+              'foo': 'FOO(3,4)',
+              'bar': 'QUERY_PARAM',
+              'baz': '$TOUPPERCASE',
+            }
+          )
+        )
+        .then(() =>
+          // See comment about getNameArgs above.
+          check('${all}', '2%264', {
+            'a': 'QUERY_PARAM',
+            'b': 'QUERY_PARAM(3,4)',
+            'all': '${a(1,2)}&${b}',
+          })
+        )
+        .then(() =>
+          check('${all}&${c}&${d}', 'CCC(5%2C6)%26DDD(7,8)&CCC(5,6)&DDD(7,8)', {
+            'c': 'CCC(5,6)',
+            'd': 'DDD(7,8)',
+            'all': '${c}&${d}',
+          })
+        )
+        .then(() =>
+          check('${nested}', 'default', {
+            'nested': '${deeper}',
+            'deeper': '$IF(true, QUERY_PARAM(foo, default), never)',
+          })
+        ));
 
     it('respect freeze variables', () => {
-      const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM',
-        'freeze': 'error'});
-      vars.freezeVar('freeze');
-      return variables.expandTemplate(
-          '${fooParam(foo,bar)}${nonfreeze}${freeze}', vars)
-          .then(actual => expect(actual).to.equal(
-              'QUERY_PARAM(foo,bar)${freeze}'));
+      return check(
+        '${fooParam(foo,bar)}${nonfreeze}${freeze}',
+        'bar${freeze}',
+        {
+          'fooParam': 'QUERY_PARAM',
+          'freeze': 'error',
+        },
+        'freeze'
+      );
+    });
 
+    it('expands array vars', () => {
+      return check(
+        '${array}',
+        '123,xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,bar,',
+        {
+          'foo': 'bar',
+          'array': [
+            123,
+            'xy&x', // special chars should be encoded
+            'MACRO(abc,def)', // do not encode macro
+            'MACRO(abc,def)&123', // this is not a macro
+            '${foo}', // vars in array should be expanded
+            '${bar}', // undefined vars should be empty
+          ],
+        }
+      );
+    });
+
+    it('handles array with no vars', () => {
+      return check('${array}', 'foo,bar,3', {
+        'array': ['foo', 'bar', 3],
+      });
+    });
+
+    it('handles empty var name', () => {
+      return check('${}', '', {});
+    });
+
+    it('handles null and undefined vars', () => {
+      return check('${arr}', ',,notNull', {
+        'arr': [null, undefined, 'notNull'],
+      });
+    });
+
+    describe('should handle recursive vars', () => {
+      const recursiveVars = {
+        '1': '1${2}',
+        '2': '2${3}',
+        '3': '3${4}',
+        '4': '4${1}',
+      };
+
+      it('default to 2 recursions', () => {
+        expectAsyncConsoleError(
+          /Maximum depth reached while expanding variables/
+        );
+        return check('${1}', '123%24%7B4%7D', recursiveVars);
+      });
+
+      it('customize recursions to 5', () => {
+        expectAsyncConsoleError(
+          /Maximum depth reached while expanding variables/
+        );
+        const actual = variables.expandTemplate(
+          '${1}',
+          new ExpansionOptions(recursiveVars, 5),
+          fakeElement
+        );
+        return expect(actual).to.eventually.equal('123412%24%7B3%7D');
+      });
     });
   });
 
-  describes.fakeWin('macros', {amp: true}, env => {
+  describes.fakeWin('macros', {amp: true}, (env) => {
+    let doc;
     let win;
-    let ampdoc;
     let urlReplacementService;
+    let analyticsElement;
 
     beforeEach(() => {
-      ampdoc = env.ampdoc;
       win = env.win;
-      toggleExperiment(env.win, 'url-replacement-v2', true);
-      installVariableService(win);
-      variables = variableServiceFor(win);
-      urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+      doc = win.document;
+      installLinkerReaderService(win);
+      installVariableServiceForTesting(doc);
+      variables = variableServiceForDoc(doc);
+      const {documentElement} = win.document;
+      urlReplacementService = Services.urlReplacementsForDoc(documentElement);
+      analyticsElement = doc.createElement('amp-analytics');
+      doc.body.appendChild(analyticsElement);
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getMetric(unused) {
+          return Promise.resolve(1);
+        },
+      });
     });
 
-    afterEach(() => {
-      toggleExperiment(env.win, 'url-replacement-v2');
-    });
-
-    function check(input, output) {
-      const macros = variables.getMacros();
+    function check(input, output, opt_bindings) {
+      const macros = Object.assign(
+        variables.getMacros(analyticsElement),
+        opt_bindings
+      );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
       return expect(expanded).to.eventually.equal(output);
     }
 
-    it('default works', () => check('$DEFAULT(one,two)', 'one'));
+    it('handles consecutive macros in inner arguments', () => {
+      env.sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.test/?test=yes';
+      return check(
+        '$IF(QUERY_PARAM(test), 1.$SUBSTR(TIMESTAMP, 0, 10)QUERY_PARAM(test), ``)',
+        '1.123456789yes'
+      );
+    });
+
+    it('handles consecutive macros w/o parens in inner arguments', () => {
+      env.sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.test/?test=yes';
+      return check('$IF(QUERY_PARAM(test), 1.TIMESTAMP, ``)', '1.123456789');
+    });
+
+    it('handles string + macro as inner argument', () =>
+      check('$REPLACE(testCLIENT_ID(scope), amp-, ``)', 'test12345', {
+        CLIENT_ID: 'amp-12345',
+      }));
+
+    it('should not trim right of string before macro', () => {
+      env.sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.test/?test=yes';
+      return check(
+        '$IF(QUERY_PARAM(test), foo TIMESTAMP, ``)',
+        'foo%20123456789'
+      );
+    });
 
     it('default works without first arg', () => check('$DEFAULT(,two)', 'two'));
 
-    it('default works without first arg length',
-        () => check('$DEFAULT($TRIM(), two)', 'two'));
+    it('default works without first arg length', () =>
+      check('$DEFAULT($TRIM(), two)', 'two'));
 
-    it('hash works', () => check('$HASH(test)',
-        'doQSMg97CqWBL85CjcRwazyuUOAqZMqhangiSb_o78S37xzLEmJV0ZYEff7fF6Cp'));
+    it('hash works', () =>
+      check(
+        '$HASH(test)',
+        'doQSMg97CqWBL85CjcRwazyuUOAqZMqhangiSb_o78S37xzLEmJV0ZYEff7fF6Cp'
+      ));
 
     it('substr works', () => check('$SUBSTR(Hello world!, 1, 4)', 'ello'));
 
-    it('trim works', () => check('$TRIM(hello      )', 'hello'));
+    it('substr works with number as input', () =>
+      check('$SUBSTR(NUM, 2, 5)', '3456', {NUM: 123456}));
 
-    it('json works', () =>
-      check('$JSON(Hello world!)', '%22Hello%20world!%22'));
+    it('trim works', () => check('$TRIM(hello      )', 'hello'));
 
     it('toLowerCase works', () =>
       check('$TOLOWERCASE(HeLLO WOrld!)', 'hello%20world!'));
@@ -190,17 +353,53 @@ describe('amp-analytics.VariableService', function() {
       return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
-    it('if works', () => check('$IF(hey, truthy, falsey)', 'truthy'));
+    it('if works with true', () =>
+      check('$IF(true, truthy, falsey)', 'truthy'));
+
+    it('if works with other string', () =>
+      check('$IF(test, truthy, falsey)', 'truthy'));
+
+    it('if works with false', () =>
+      check('$IF(false, truthy, falsey)', 'falsey'));
+
+    it('if works with empty string', () =>
+      check('$IF(, truthy, falsey)', 'falsey'));
+
+    it('if works with null', () =>
+      check('$IF(null, truthy, falsey)', 'falsey'));
+
+    it('if works with undefined', () =>
+      check('$IF(undefined, truthy, falsey)', 'falsey'));
+
+    it('equals works (truth-y test)', () => {
+      return check('$EQUALS(testValue, testValue)', 'true');
+    });
+
+    it('equals works (false-y test)', () => {
+      return check('$EQUALS(testValue, otherValue)', 'false');
+    });
+
+    it('equals works with if (truth-y test)', () => {
+      return check('$IF($EQUALS(A, A), truthy, falsey)', 'truthy');
+    });
+
+    it('equals works with if (false-y test)', () => {
+      return check('$IF($EQUALS(A, B), truthy, falsey)', 'falsey');
+    });
 
     it('chaining works', () => {
-      return check('$SUBSTR(Hello world!, 6)', 'world!').then(() =>
-        check('$TOUPPERCASE($SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
-        check('$BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6)))', 'V09STEQh'))
-          .then(() =>
-            check('$HASH($BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6))))',
-                'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_Q' +
-                'S7Uc5ZmODduHWdplzrZ7Jsnqx')
-          );
+      return check('$SUBSTR(Hello world!, 6)', 'world!')
+        .then(() => check('$TOUPPERCASE($SUBSTR(Hello world!, 6))', 'WORLD!'))
+        .then(() =>
+          check('$BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6)))', 'V09STEQh')
+        )
+        .then(() =>
+          check(
+            '$HASH($BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6))))',
+            'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_Q' +
+              'S7Uc5ZmODduHWdplzrZ7Jsnqx'
+          )
+        );
     });
 
     it('replaces common use case', () => {
@@ -220,8 +419,10 @@ describe('amp-analytics.VariableService', function() {
     });
 
     it('replaces respecting space as arg', () => {
-      return check('$REPLACE(this-is-a-test, `-`, ` `)',
-          'this%20is%20a%20test');
+      return check(
+        '$REPLACE(this-is-a-test, `-`, ` `)',
+        'this%20is%20a%20test'
+      );
     });
 
     it('replaces respecting backticks', () => {
@@ -231,13 +432,166 @@ describe('amp-analytics.VariableService', function() {
     it('replace with no third arg', () => {
       return check('$REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
     });
+
+    it('replaces LINKER_PARAM', () => {
+      const linkerReader = linkerReaderServiceFor(win);
+      const linkerReaderStub = env.sandbox.stub(linkerReader, 'get');
+      linkerReaderStub.withArgs('gl', 'cid').returns('a1b2c3');
+      linkerReaderStub.withArgs('gl', 'gclid').returns(123);
+      return check(
+        'LINKER_PARAM(gl, cid)&LINKER_PARAM(gl, gclid)',
+        'a1b2c3&123'
+      );
+    });
+
+    it('"COOKIE" resolves cookie value', async () => {
+      doc.cookie = 'test=123';
+      await check('COOKIE(test)', '123');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string in FIE', async () => {
+      doc.cookie = 'test=123';
+      const fakeFie = doc.createElement('div');
+      fakeFie.classList.add('i-amphtml-fie');
+      doc.body.appendChild(fakeFie);
+      fakeFie.appendChild(analyticsElement);
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string when inabox', async () => {
+      doc.cookie = 'test=123';
+      env.win.__AMP_MODE.runtime = 'inabox';
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string on cache', async () => {
+      win.location = 'https://www-example-com.cdn.ampproject.org';
+      doc.cookie = 'test=123';
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('should replace FIRST_CONTENTFUL_PAINT', () => {
+      return check('FIRST_CONTENTFUL_PAINT', '1');
+    });
+
+    it('should replace FIRST_VIEWPORT_READY', () => {
+      return check('FIRST_VIEWPORT_READY', '1');
+    });
+
+    it('should replace MAKE_BODY_VISIBLE', () => {
+      return check('MAKE_BODY_VISIBLE', '1');
+    });
+
+    it('should replace LARGEST_CONTENTFUL_PAINT', () => {
+      return check('LARGEST_CONTENTFUL_PAINT', '1');
+    });
+
+    it('should replace FIRST_INPUT_DELAY', () => {
+      return check('FIRST_INPUT_DELAY', '1');
+    });
+
+    it('should replace CUMULATIVE_LAYOUT_SHIFT', () => {
+      return check('CUMULATIVE_LAYOUT_SHIFT', '1');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES to name:value comma separated list', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      forceExperimentBranch(env.win, 'exp2', '5678');
+      return check('EXPERIMENT_BRANCHES', 'exp1%3A1234%2Cexp2%3A5678');
+    });
+
+    it('EXPERIMENT_BRANCHES should be empty string if no branches', () => {
+      return check('EXPERIMENT_BRANCHES', '');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES(expName) to experiment value', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      return check('EXPERIMENT_BRANCHES(exp1)', '1234');
+    });
+
+    it('EXPERIMENT_BRANCHES(expName) should be empty string if not set', () => {
+      return check('EXPERIMENT_BRANCHES(exp1)', '');
+    });
+
+    describe('$MATCH', () => {
+      it('handles default index', () => {
+        return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
+      });
+
+      it('matches full match', () => {
+        return check('$MATCH(thisisatest, thisisatest, 0)', 'thisisatest');
+      });
+
+      it('matches partial match', () => {
+        return check('$MATCH(thisisatest, test, 0)', 'test');
+      });
+
+      it('matches 1st group match', () => {
+        return check('$MATCH(thisisatest, `thisisa(test)`, 1)', 'test');
+      });
+
+      it('matches 2nd group match', () => {
+        return check('$MATCH(thisisatest, `this(is)a(test)`, 2)', 'test');
+      });
+
+      it('does not match non-matching group', () => {
+        return check('$MATCH(thisisatest, `thisisa(?:test)`, 1)', '');
+      });
+
+      it('handles escaped regex chars', () => {
+        return check('$MATCH(1, \\d, 0)', '1');
+      });
+
+      it('handles no full match', () => {
+        return check('$MATCH(invalid, thisisatest, 0)', '');
+      });
+
+      it('handles no group match', () => {
+        return check('$MATCH(thisisatest, `thisisa(\\d+)?test`, 1)', '');
+      });
+
+      it('handles large index', () => {
+        return check('$MATCH(thisisatest, thisisatest, 100)', '');
+      });
+
+      it('handles negative index', () => {
+        expectAsyncConsoleError(
+          /Third argument in MATCH macro must be a number >= 0/
+        );
+        return check('$MATCH(thisisatest, thisisatest, -1)', 'thisisatest');
+      });
+
+      it('handles NaN index', () => {
+        expectAsyncConsoleError(
+          /Third argument in MATCH macro must be a number >= 0/
+        );
+        return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
+      });
+    });
+
+    it('SCROLL_TOP round to integer', async () => {
+      let scrollTopValue = 100;
+      env.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getScrollTop: () => scrollTopValue,
+        };
+      });
+      await check('SCROLL_TOP', '100');
+      scrollTopValue = 99.4;
+      await check('SCROLL_TOP', '99');
+      scrollTopValue = 99.5;
+      await check('SCROLL_TOP', '100');
+    });
   });
 
   describe('getNameArgs:', () => {
-
     function check(input, name, argList) {
       it('can parse ' + name, () => {
-        expect(variables.getNameArgs_(input)).to.deep.equal({name, argList});
+        expect(getNameArgsForTesting(input)).to.deep.equal({name, argList});
       });
     }
 
@@ -247,7 +601,6 @@ describe('amp-analytics.VariableService', function() {
     check('client id (abc)', 'client id (abc)', '');
     check('client id\nand something', 'client id\nand something', '');
     check('client id\nclientId()', 'client id\nclientId()', '');
-
 
     check('clientId()', 'clientId', '()');
     check('clientId(abc)', 'clientId', '(abc)');

@@ -1,0 +1,26 @@
+{
+  "vars": {
+    "pixelId": "PIXEL-ID"
+  },
+  "requests": {
+    "host": "https://www.facebook.com",
+    "base": "${host}/tr?noscript=1",
+    "pageview": "${base}&ev=PageView&id=${pixelId}",
+    "event": "${base}&ev=${eventName}&id=${pixelId}&cd[content_name]=${content_name}",
+    "eventViewContent": "${base}&ev=ViewContent&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_name]=${content_name}&cd[content_type]=${content_type}&cd[content_ids]=${content_ids}",
+    "eventSearch": "${base}&ev=Search&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_category]=${content_category}&cd[content_ids]=${content_ids}&cd[search_string]=${search_string}",
+    "eventAddToCart": "${base}&ev=AddToCart&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_name]=${content_name}&cd[content_type]=${content_type}&cd[content_ids]=${content_ids}",
+    "eventAddToWishlist": "${base}&ev=AddToWishlist&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_name]=${content_name}&cd[content_category]=${content_category}&cd[content_ids]=${content_ids}",
+    "eventInitiateCheckout": "${base}&ev=InitiateCheckout&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_name]=${content_name}&cd[content_category]=${content_category}&cd[num_items]=${num_items}&cd[content_ids]=${content_ids}",
+    "eventAddPaymentInfo": "${base}&ev=AddPaymentInfo&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_category]=${content_category}&cd[content_ids]=${content_ids}",
+    "eventPurchase": "${base}&ev=Purchase&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_name]=${content_name}&cd[content_type]=${content_type}&cd[content_ids]=${content_ids}&cd[num_items]=${num_items}",
+    "eventLead": "${base}&ev=Lead&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_name]=${content_name}&cd[content_category]=${content_category}",
+    "eventCompleteRegistration": "${base}&ev=CompleteRegistration&id=${pixelId}&cd[value]=${value}&cd[currency]=${currency}&cd[content_name]=${content_name}&cd[status]=${status}"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  }
+}

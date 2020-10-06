@@ -1,13 +1,15 @@
 path_classifiers:
   docs:
-    - "**/*.md"
+    - '**/*.md'
   test:
-    - "**/test/**/*.js"
-    - "**/testing/**/*.js"
+    - '**/test/**/*.js'
+    - '**/testing/**/*.js'
   third_party:
-    - "third_party/**/*.*"
+    - 'third_party/**/*.*'
   externs:
-    - "**/*.extern.js"
+    - '**/*.extern.js'
+  build-system:
+    - 'build-system/**/*.*'
 extraction:
   javascript:
     index:

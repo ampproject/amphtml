@@ -47,11 +47,13 @@
         href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
 
   <!--
-  href value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|https://fast\\.fonts\\.net/.*"
-  The first two examples are valid, the third example is invalid.
+  href value_regex: "https://fonts\\.googleapis\\.com/css2?\\?.*|https://fast\\.fonts\\.net/.*"
+  The first three examples are valid, the fourth example is invalid.
   -->
   <link rel="stylesheet" type="text/css"
         href="https://fonts.googleapis.com/css?foobar">
+  <link rel="stylesheet" type="text/css"
+        href="https://fonts.googleapis.com/css2?foobar">
   <link rel="stylesheet" type="text/css"
         href="https://cloud.typography.com/6256354/724768/css/fonts.css">
   <link rel="stylesheet" type="text/css"
@@ -76,15 +78,22 @@
   <link rel="stylesheet" type="text/css"
         href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
   <!--
-    New Font Awesome url format the first four are valid the last two are not.
+    New Font Awesome url format the first five are valid the last two are not.
   -->
   <link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
   <link href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css" rel="stylesheet">
   <link href="https://use.fontawesome.com/releases/v5.0.8/css/brands.css" rel="stylesheet">
-  <link href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css"
+  rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.11.1/css/v4-shims.css"
+  rel="stylesheet">
   <!-- invalid -->
   <link href="https://use.fontawesome.com/releases/v5.0.8/css/other.css" rel="stylesheet">
   <link href="https://use.fontawesome.com/releases/v5.0.8/../css/solid.css" rel="stylesheet">
+  <!--
+    Old Font Awesome url format. Valid.
+  -->
+  <link href="https://use.fontawesome.com/abcdefghij.css" rel="stylesheet">
 
   <!--
   rel value_regex: lengthy, see protoascii
@@ -98,7 +107,7 @@
   <link rel="manifest accessibility">
 
   <!--
-  name blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
+  name disallowed_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
   The first two examples are valid. The latter two examples are invalid.
   -->
   <meta name="valid" content="">
@@ -107,7 +116,7 @@
   <meta name="invalid content-disposition" content="">
 
   <!--
-  css selector blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  css selector disallowed_value_regex: "(^|\\W)i-amphtml-"
   The first example is valid. The latter four are invalid.
   -->
   <style amp-custom>
@@ -124,7 +133,7 @@
 <body>
 
   <!--
-  class blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  class disallowed_value_regex: "(^|\\W)i-amphtml-"
   The first example is valid. The latter two are invalid.
   -->
   <div class="example-amp-font"></div>
@@ -132,7 +141,7 @@
   <div class="i-amphtml-hidden example-amp-font"></div>
 
   <!--
-  id blacklisted_value_regex: lengthy, see protoascii
+  id disallowed_value_regex: lengthy, see protoascii
   The first example is valid. The latter two are invalid.
   -->
   <div id="exampe-amp-font"></div>
@@ -140,7 +149,7 @@
   <div id="AMP"></div>
 
   <!--
-  name blacklisted_value_regex: lengthy, see protoascii
+  name disallowed_value_regex: lengthy, see protoascii
   The first two examples are valid. The latter three are invalid.
   -->
   <input name="" />

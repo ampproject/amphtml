@@ -25,7 +25,7 @@ const TAG = 'amp-ad-util';
  * Sends a CORS XHR request to the given URL.
  * @param {!Window} win
  * @param {string} url Request URL to send XHR to.
- * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+ * @return {!Promise<!Response>}
  */
 export function sendXhrRequest(win, url) {
   return Services.xhrFor(win).fetch(url, {
@@ -39,7 +39,8 @@ export function sendXhrRequest(win, url) {
 const METADATA_STRINGS = [
   '<script amp-ad-metadata type=application/json>',
   '<script type="application/json" amp-ad-metadata>',
-  '<script type=application/json amp-ad-metadata>'];
+  '<script type=application/json amp-ad-metadata>',
+];
 
 /**
  *
@@ -64,35 +65,56 @@ export function getAmpAdMetadata(creative) {
   if (metadataStart < 0) {
     // Couldn't find a metadata blob.
     dev().warn(
-        TAG, `Could not locate start index for amp meta data in: ${creative}`);
+      TAG,
+      `Could not locate start index for amp meta data in: ${creative}`
+    );
     return null;
   }
   const metadataEnd = creative.lastIndexOf('</script>');
   if (metadataEnd < 0) {
     // Couldn't find a metadata blob.
-    dev().warn(TAG,
-        'Could not locate closing script tag for amp meta data in: %s',
-        creative);
+    dev().warn(
+      TAG,
+      'Could not locate closing script tag for amp meta data in: %s',
+      creative
+    );
     return null;
   }
   try {
     const metaDataObj = parseJson(
-        creative.slice(metadataStart + metadataString.length, metadataEnd));
-    const ampRuntimeUtf16CharOffsets =
-      metaDataObj['ampRuntimeUtf16CharOffsets'];
-    if (!isArray(ampRuntimeUtf16CharOffsets) ||
-        ampRuntimeUtf16CharOffsets.length != 2 ||
-        typeof ampRuntimeUtf16CharOffsets[0] !== 'number' ||
-        typeof ampRuntimeUtf16CharOffsets[1] !== 'number') {
+      creative.slice(metadataStart + metadataString.length, metadataEnd)
+    );
+    let ampRuntimeUtf16CharOffsets = metaDataObj['ampRuntimeUtf16CharOffsets'];
+    if (!isArray(ampRuntimeUtf16CharOffsets)) {
+      const headStart = creative.indexOf('<head>');
+      const headEnd = creative.indexOf('</head>');
+      const headSubstring = creative.slice(
+        headStart,
+        headEnd + '</head>'.length
+      );
+      const scriptStart = headSubstring.indexOf('<script');
+      const scriptEnd = headSubstring.lastIndexOf('</script>');
+      if (scriptStart < 0 || scriptEnd < 0) {
+        throw new Error('The mandatory script tag is missing or incorrect.');
+      }
+      ampRuntimeUtf16CharOffsets = [
+        // This assumes all script tags are contiguous.
+        // This assumption is enforced server-side.
+        headStart + scriptStart,
+        headStart + scriptEnd + '</script>'.length,
+      ];
+    } else if (
+      ampRuntimeUtf16CharOffsets.length != 2 ||
+      typeof ampRuntimeUtf16CharOffsets[0] !== 'number' ||
+      typeof ampRuntimeUtf16CharOffsets[1] !== 'number'
+    ) {
       throw new Error('Invalid runtime offsets');
     }
     const metaData = {};
     if (metaDataObj['customElementExtensions']) {
-      metaData.customElementExtensions =
-        metaDataObj['customElementExtensions'];
+      metaData.customElementExtensions = metaDataObj['customElementExtensions'];
       if (!isArray(metaData.customElementExtensions)) {
-        throw new Error(
-            'Invalid extensions', metaData.customElementExtensions);
+        throw new Error('Invalid extensions', metaData.customElementExtensions);
       }
     } else {
       metaData.customElementExtensions = [];
@@ -105,13 +127,18 @@ export function getAmpAdMetadata(creative) {
       if (!isArray(metaData.customStylesheets)) {
         throw new Error(errorMsg);
       }
-      metaData.customStylesheets.forEach(stylesheet => {
-        if (!isObject(stylesheet) || !stylesheet['href'] ||
+      /** @type {!Array} */ (metaData.customStylesheets).forEach(
+        (stylesheet) => {
+          if (
+            !isObject(stylesheet) ||
+            !stylesheet['href'] ||
             typeof stylesheet['href'] !== 'string' ||
-            !isSecureUrlDeprecated(stylesheet['href'])) {
-          throw new Error(errorMsg);
+            !isSecureUrlDeprecated(stylesheet['href'])
+          ) {
+            throw new Error(errorMsg);
+          }
         }
-      });
+      );
     }
     if (isArray(metaDataObj['images'])) {
       // Load maximum of 5 images.
@@ -126,8 +153,10 @@ export function getAmpAdMetadata(creative) {
     return metaData;
   } catch (err) {
     dev().warn(
-        TAG, 'Invalid amp metadata: %s',
-        creative.slice(metadataStart + metadataString.length, metadataEnd));
+      TAG,
+      'Invalid amp metadata: %s',
+      creative.slice(metadataStart + metadataString.length, metadataEnd)
+    );
     return null;
   }
 }

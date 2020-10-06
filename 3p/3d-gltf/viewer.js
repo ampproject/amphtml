@@ -21,8 +21,7 @@ import AnimationLoop from './animation-loop';
 
 const CAMERA_DISTANCE_FACTOR = 1;
 const CAMERA_FAR_FACTOR = 50;
-const CAMERA_NEAR_FACTOR = .1;
-
+const CAMERA_NEAR_FACTOR = 0.1;
 
 export default class GltfViewer {
   /**
@@ -45,8 +44,9 @@ export default class GltfViewer {
 
     /** @private */
     this.controls_ = new THREE.OrbitControls(
-        this.camera_,
-        this.renderer_.domElement);
+      this.camera_,
+      this.renderer_.domElement
+    );
 
     /** @private */
     this.scene_ = new THREE.Scene();
@@ -59,10 +59,13 @@ export default class GltfViewer {
 
     /** @private */
     this.ampInViewport_ =
-        options['initialIntersection']['intersectionRatio'] > 0;
+      options['initialIntersection']['intersectionRatio'] > 0;
 
     /** @private */
     this.setSize_ = this.setupSize_();
+
+    /** @private */
+    this.model_ = new THREE.Group();
 
     this.setupRenderer_();
     this.setupControls_();
@@ -74,15 +77,58 @@ export default class GltfViewer {
       'setSize': this.setSize_,
       'toggleAmpPlay': this.toggleAmpPlay_.bind(this),
       'toggleAmpViewport': this.toggleAmpViewport_.bind(this),
+      'setModelRotation': this.setModelRotation_.bind(this),
     };
   }
 
-  /** @private */
+  /**
+   * @param {JsonObject} args
+   * @private
+   */
+  setModelRotation_(args) {
+    const xAngle =
+      'x' in args
+        ? this.getModelRotationOnAxis_(args, 'x')
+        : this.model_.rotation.x;
+
+    const yAngle =
+      'y' in args
+        ? this.getModelRotationOnAxis_(args, 'y')
+        : this.model_.rotation.y;
+
+    const zAngle =
+      'z' in args
+        ? this.getModelRotationOnAxis_(args, 'z')
+        : this.model_.rotation.z;
+
+    this.model_.rotation.set(xAngle, yAngle, zAngle);
+    this.animationLoop_.needsUpdate = true;
+  }
+
+  /**
+   * @param {JsonObject} args
+   * @param {string} axisName
+   * @return {number}
+   * @private
+   */
+  getModelRotationOnAxis_(args, axisName) {
+    const {
+      [axisName]: value,
+      [axisName + 'Min']: min = 0,
+      [axisName + 'Max']: max = Math.PI * 2,
+    } = args;
+    return value * max + (1 - value) * min;
+  }
+
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   setupSize_() {
     let oldW = null;
     let oldH = null;
     /** @param {JsonObject} box */
-    const setSize = box => {
+    const setSize = (box) => {
       const w = box['width'];
       const h = box['height'];
       if (oldW === w && oldH === h) {
@@ -121,13 +167,13 @@ export default class GltfViewer {
    *
    * @private */
   setupLight_() {
-    const amb = new THREE.AmbientLight();
+    const amb = new THREE.AmbientLight(0xedecd5, 0.5);
 
-    const dir1 = new THREE.DirectionalLight();
-    dir1.position.set(1, 2, 3);
+    const dir1 = new THREE.DirectionalLight(0xffffff, 0.5);
+    dir1.position.set(0, 5, 3);
 
-    const dir2 = new THREE.DirectionalLight();
-    dir2.position.set(1, -2, -2);
+    const dir2 = new THREE.DirectionalLight(0xaecdd6, 0.4);
+    dir2.position.set(-1, -2, 4);
 
     const light = new THREE.Group();
     light.add(amb, dir1, dir2);
@@ -145,10 +191,18 @@ export default class GltfViewer {
     setStyle(el, 'left', 0);
     document.body.appendChild(this.renderer_.domElement);
 
+    this.renderer_.gammaOutput = true;
+    this.renderer_.gammaFactor = 2.2;
     this.renderer_.setPixelRatio(
-        Math.min(
-            this.options_['maxPixelRatio'],
-            devicePixelRatio));
+      Math.min(
+        this.options_['rendererSettings']['maxPixelRatio'],
+        devicePixelRatio
+      )
+    );
+    this.renderer_.setClearColor(
+      this.options_['rendererSettings']['clearColor'],
+      this.options_['rendererSettings']['clearAlpha']
+    );
   }
 
   /**
@@ -176,9 +230,9 @@ export default class GltfViewer {
     this.camera_.far = sizeLength * CAMERA_FAR_FACTOR;
     this.camera_.near = sizeLength * CAMERA_NEAR_FACTOR;
     this.camera_.position.lerpVectors(
-        center,
-        bbox.max,
-        1 + CAMERA_DISTANCE_FACTOR
+      center,
+      bbox.max,
+      1 + CAMERA_DISTANCE_FACTOR
     );
     this.camera_.lookAt(center);
 
@@ -194,21 +248,22 @@ export default class GltfViewer {
     loader.crossOrigin = true;
 
     loader.load(
-        this.options_['src'],
-        /** @param {{scene: !THREE.Scene}} gltfData */
-        gltfData => {
-          this.setupCameraForObject_(gltfData.scene);
-          gltfData.scene.children
-              .slice()
-              .forEach(child => {
-                this.scene_.add(child);
-              });
+      this.options_['src'],
+      /** @param {{scene: !THREE.Scene}} gltfData */
+      (gltfData) => {
+        this.setupCameraForObject_(gltfData.scene);
+        gltfData.scene.children.slice().forEach((child) => {
+          this.model_.add(child);
+        });
 
-          this.animationLoop_.needsUpdate = true;
-          this.handlers_.onload();
-        },
-        this.handlers_.onprogress,
-        this.handlers_.onerror);
+        this.scene_.add(this.model_);
+
+        this.animationLoop_.needsUpdate = true;
+        this.handlers_.onload();
+      },
+      this.handlers_.onprogress,
+      this.handlers_.onerror
+    );
   }
 
   /** @private */

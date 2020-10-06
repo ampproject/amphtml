@@ -15,8 +15,8 @@
  */
 import {Builder} from './web-animations';
 import {Services} from '../../../src/services';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
-
+import {WebAnimationBuilderOptionsDef} from './web-animation-types';
+import {installWebAnimationsIfNecessary} from './install-polyfill';
 
 export class WebAnimationService {
   /**
@@ -30,21 +30,24 @@ export class WebAnimationService {
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private @const */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    this.owners_ = Services.ownersForDoc(ampdoc);
   }
 
-
   /**
-   * @return {!Builder}
+   * @param {!WebAnimationBuilderOptionsDef} options
+   * @return {!Promise<Builder>}
    */
-  createBuilder() {
-    installWebAnimationsIfNecessary(this.ampdoc_.win);
-
-    return new Builder(
-        this.ampdoc_.win,
-        this.ampdoc_.getRootNode(),
-        this.ampdoc_.getUrl(),
-        this.vsync_,
-        this.resources_);
+  createBuilder(options) {
+    return installWebAnimationsIfNecessary(this.ampdoc_).then(
+      () =>
+        new Builder(
+          this.ampdoc_.win,
+          this.ampdoc_.getRootNode(),
+          this.ampdoc_.getUrl(),
+          this.vsync_,
+          this.owners_,
+          options
+        )
+    );
   }
 }

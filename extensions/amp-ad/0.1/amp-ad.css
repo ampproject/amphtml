@@ -38,7 +38,7 @@ amp-embed iframe {
 }
 
 .i-amphtml-ad-default-holder:after {
-  content: "Ad";
+  content: 'Ad';
   content: attr(data-ad-holder-text);
   background-color: transparent;
   border-radius: 2px;
@@ -50,29 +50,68 @@ amp-embed iframe {
   border: 1px, solid, #696969;
 }
 
-amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
-amp-ad[type="adsense"] > iframe {
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%);
-}
-
-amp-ad[type="adsense"], amp-ad[type="doubleclick"] {
+amp-ad[type='adsense'],
+amp-ad[type='doubleclick'] {
   direction: ltr;
 }
 
-amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
-amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
+amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'] > iframe,
+amp-ad[data-a4a-upgrade-type='amp-ad-network-adsense-impl'] > iframe {
   min-height: 0;
   min-width: 0;
 }
 
-amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] > iframe {
+amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid']
+  > iframe {
   height: 100% !important;
   width: 100% !important;
   position: relative;
 }
 
-amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] {
+amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid'] {
   width: 100% !important;
+}
+
+amp-ad.i-amphtml-amp-ad-sticky-layout {
+  overflow: visible !important;
+}
+
+amp-ad .amp-ad-close-button {
+  position: absolute;
+  visibility: visible;
+  width: 28px;
+  height: 28px;
+  top: -28px;
+  right: 0;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="13" height="13" viewBox="341 8 13 13" xmlns="http://www.w3.org/2000/svg"><path fill="#4F4F4F" d="M354 9.31L352.69 8l-5.19 5.19L342.31 8 341 9.31l5.19 5.19-5.19 5.19 1.31 1.31 5.19-5.19 5.19 5.19 1.31-1.31-5.19-5.19z" fill-rule="evenodd"/></svg>');
+  background-size: 13px 13px;
+  background-position: 9px center;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  box-shadow: 0 -1px 1px 0 rgba(0, 0, 0, 0.2);
+  border: none;
+  border-radius: 12px 0 0 0;
+}
+
+/* Increase tapping area of the dismiss button */
+amp-ad .amp-ad-close-button:before {
+  position: absolute;
+  content: '';
+  top: -20px;
+  right: 0;
+  left: -20px;
+  bottom: 0;
+}
+
+[dir='rtl'] amp-ad .amp-ad-close-button {
+  right: auto;
+  left: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 12px;
+  background-position: 6px center;
+}
+
+[dir='rtl'] amp-ad .amp-ad-close-button:before {
+  right: -20px;
+  left: 0;
 }

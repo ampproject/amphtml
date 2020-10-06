@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
-import {user} from '../../../../../src/log';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -37,10 +41,14 @@ export class TextBoxComponent {
    * @override
    * */
   assertValidity(textboxJson) {
-    user().assert('text' in textboxJson && isArray(textboxJson['text']) &&
-      textboxJson['text'].length > 0, 'Textbox component must contain ' +
-      '`text` array and at least one element inside it, ' +
-      'skipping invalid.');
+    userAssert(
+      'text' in textboxJson &&
+        isArray(textboxJson['text']) &&
+        textboxJson['text'].length > 0,
+      'Textbox component must contain ' +
+        '`text` array and at least one element inside it, ' +
+        'skipping invalid.'
+    );
   }
 
   /**
@@ -48,20 +56,27 @@ export class TextBoxComponent {
    * @return {!TextBoxComponentDef}
    * @override
    * */
-  build({type, text}) {
+  build(textboxJson) {
+    const {type, text} = textboxJson;
     return {type, text};
   }
 
   /** @override */
-  buildElement(textboxData, doc) {
-    const html = htmlFor(doc);
-    const container =
-        html`
-        <div class="i-amphtml-story-bookend-textbox
-          i-amphtml-story-bookend-component"></div>`;
+  buildElement(textboxData, win, data) {
+    const html = htmlFor(win.document);
+    const container = html`
+      <div
+        class="i-amphtml-story-bookend-textbox
+          i-amphtml-story-bookend-component"
+      ></div>
+    `;
+    container[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.TEXTBOX,
+    };
 
-    let textSeed = html`<h3 class="i-amphtml-story-bookend-text"></h3>`;
-    textboxData['text'].forEach(currentLine => {
+    let textSeed = html` <h3 class="i-amphtml-story-bookend-text"></h3> `;
+    /** @type {!Array} */ (textboxData['text']).forEach((currentLine) => {
       const el = textSeed.cloneNode(/* deep */ true);
       el.textContent = currentLine;
       container.appendChild(el);

@@ -17,7 +17,6 @@ tags: {  # amp-fx-collection
   # Accepted amp-fx-collection attributes can be found in
   # validator-main.protoascii
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-fx-collection"

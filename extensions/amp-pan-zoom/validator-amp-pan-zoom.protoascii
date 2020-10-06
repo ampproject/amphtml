@@ -27,7 +27,10 @@ tags: {  # <amp-pan-zoom>
   html_format: AMP
   tag_name: "AMP-PAN-ZOOM"
   requires_extension: "amp-pan-zoom"
-
+  attrs: {
+    name: "disable-double-tap"
+    value: ""
+  }
   attrs: {
     name: "initial-scale"
     value_regex: "[0-9]+(\\.[0-9]+)?"

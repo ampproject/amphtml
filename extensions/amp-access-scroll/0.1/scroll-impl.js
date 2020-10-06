@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,59 +16,84 @@
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
+import {PROTOCOL_VERSION} from './scroll-protocol';
+import {ReadDepthTracker} from './read-depth-tracker.js';
+import {Relay} from './scroll-relay';
+import {ScrollBar} from './scroll-bar';
 import {Services} from '../../../src/services';
+import {Sheet} from './scroll-sheet';
+import {addParamToUrl, isProxyOrigin, parseQueryString} from '../../../src/url';
+import {buildUrl, connectHostname} from './scroll-url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-access-scroll-elt';
+/**
+ * @param {string} baseUrl
+ * @return {!JsonObject}
+ */
+const accessConfig = (baseUrl) => {
+  /** @const {!JsonObject} */
+  const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
+    'authorization':
+      `${baseUrl}/amp/access` +
+      '?rid=READER_ID' +
+      '&cid=CLIENT_ID(scroll1)' +
+      '&c=CANONICAL_URL' +
+      '&o=AMPDOC_URL' +
+      '&x=QUERY_PARAM(scrollx)' +
+      `&p=${PROTOCOL_VERSION}`,
+    'pingback':
+      `${baseUrl}/amp/pingback` +
+      '?rid=READER_ID' +
+      '&cid=CLIENT_ID(scroll1)' +
+      '&c=CANONICAL_URL' +
+      '&o=AMPDOC_URL' +
+      '&r=DOCUMENT_REFERRER' +
+      '&x=QUERY_PARAM(scrollx)' +
+      '&d=AUTHDATA(scroll)' +
+      '&v=AUTHDATA(visitId)' +
+      `&p=${PROTOCOL_VERSION}`,
+    'namespace': 'scroll',
+  });
+  return ACCESS_CONFIG;
+};
 
-/** @const {!JsonObject} */
-const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
-  'authorization': 'https://connect.scroll.com/amp/access'
-                   + '?rid=READER_ID'
-                   + '&cid=CLIENT_ID(scroll1)'
-                   + '&c=CANONICAL_URL'
-                   + '&o=AMPDOC_URL'
-                   + '&x=QUERY_PARAM(scrollx)',
-  'pingback': 'https://connect.scroll.com/amp/pingback'
-              + '?rid=READER_ID'
-              + '&cid=CLIENT_ID(scroll1)'
-              + '&c=CANONICAL_URL'
-              + '&o=AMPDOC_URL'
-              + '&r=DOCUMENT_REFERRER'
-              + '&x=QUERY_PARAM(scrollx)'
-              + '&d=AUTHDATA(scroll)'
-              + '&v=AUTHDATA(visitId)',
-  'namespace': 'scroll',
-});
-
-const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
-  'requests': {
-    'scroll': 'https://connect.scroll.com/amp/analytics'
-              + '?rid=ACCESS_READER_ID'
-              + '&cid=CLIENT_ID(scroll1)'
-              + '&c=CANONICAL_URL'
-              + '&o=AMPDOC_URL'
-              + '&r=DOCUMENT_REFERRER'
-              + '&x=QUERY_PARAM(scrollx)'
-              + '&d=AUTHDATA(scroll.scroll)'
-              + '&v=AUTHDATA(scroll.visitId)'
-              + '&h=SOURCE_HOSTNAME'
-              + '&s=${totalEngagedTime}',
-  },
-  'triggers': {
-    'trackInterval': {
-      'on': 'timer',
-      'timerSpec': {
-        'interval': 15,
-        'maxTimerLength': 7200,
-      },
-      'request': 'scroll',
+/**
+ * @param {string} baseUrl
+ * @return {!JsonObject}
+ */
+const analyticsConfig = (baseUrl) => {
+  const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+    'requests': {
+      'scroll':
+        `${baseUrl}/amp/analytics` +
+        '?rid=ACCESS_READER_ID' +
+        '&cid=CLIENT_ID(scroll1)' +
+        '&c=CANONICAL_URL' +
+        '&o=AMPDOC_URL' +
+        '&r=DOCUMENT_REFERRER' +
+        '&x=QUERY_PARAM(scrollx)' +
+        '&d=AUTHDATA(scroll.scroll)' +
+        '&v=AUTHDATA(scroll.visitId)' +
+        '&h=SOURCE_HOSTNAME' +
+        '&s=${totalEngagedTime}' +
+        `&p=${PROTOCOL_VERSION}`,
     },
-  },
-});
-
+    'triggers': {
+      'trackInterval': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 15,
+          'maxTimerLength': 7200,
+        },
+        'request': 'scroll',
+      },
+    },
+  });
+  return ANALYTICS_CONFIG;
+};
 
 /**
  * amp-access vendor that authenticates against the scroll.com service.
@@ -82,101 +107,168 @@ const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 export class ScrollAccessVendor extends AccessClientAdapter {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
-  constructor(ampdoc, accessService, accessSource) {
-    super(ampdoc, ACCESS_CONFIG, {
+  constructor(ampdoc, accessSource) {
+    const scrollConfig = accessSource.getAdapterConfig();
+    const baseUrl = connectHostname(scrollConfig);
+    super(ampdoc, accessConfig(baseUrl), {
       buildUrl: accessSource.buildUrl.bind(accessSource),
       collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
 
-    /** @private {!../../amp-access/0.1/amp-access.AccessService} */
-    this.accessService_ = accessService;
+    // Install styles
+    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
+    /** @private */
+    this.baseUrl_ = baseUrl;
   }
 
   /** @override */
   authorize() {
-    return super.authorize()
-        .then(response => {
-          const isStory = this.ampdoc.getRootNode().querySelector(
-              'amp-story[standalone]');
-          if (response && response.scroll && !isStory) {
-            new ScrollElement(this.ampdoc).show(this.accessService_);
-            addAnalytics(this.ampdoc, this.accessSource_.getAdapterConfig());
+    // TODO(dbow): Handle timeout?
+    return super.authorize().then((response) => {
+      const isStory = this.ampdoc
+        .getRootNode()
+        .querySelector('amp-story[standalone]');
+
+      if (response && response['scroll']) {
+        if (!isStory) {
+          // Display Scrollbar and set up features
+          const bar = new ScrollBar(this.ampdoc, this.accessSource_);
+          const sheet = new Sheet(this.ampdoc);
+
+          const relay = new Relay(this.baseUrl_);
+          relay.register(sheet.window, (message) => {
+            if (message['_scramp'] === 'au' || message['_scramp'] === 'st') {
+              sheet.update(message);
+            }
+          });
+          relay.register(bar.window, (message) => {
+            if (message['_scramp'] === 'st') {
+              sheet.update(message);
+              bar.update(message);
+            }
+          });
+
+          const config = this.accessSource_.getAdapterConfig();
+          addAnalytics(this.ampdoc, config);
+          if (response['features'] && response['features']['d']) {
+            new ReadDepthTracker(
+              this.ampdoc,
+              this.accessSource_,
+              connectHostname(config)
+            );
           }
-          return response;
-        });
+        }
+      } else {
+        if (
+          response &&
+          response['blocker'] &&
+          ScrollContentBlocker.shouldCheck(this.ampdoc)
+        ) {
+          new ScrollContentBlocker(
+            this.ampdoc,
+            this.accessSource_,
+            response['features'] && response['features']['r']
+          ).check();
+        }
+      }
+      return response;
+    });
   }
 }
 
 /**
- * UI for logged-in Scroll users.
- *
- * Presents a fixed bar at the bottom of the screen.
+ * Coordinate with the Scroll App's Content Blocker on Safari browsers.
  */
-class ScrollElement {
+class ScrollContentBlocker {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {boolean}
+   * @static
    */
-  constructor(ampdoc) {
-    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
-
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
-    /** @const {!Element} */
-    this.placeholder_ = document.createElement('div');
-    this.placeholder_.classList.add('amp-access-scroll-bar');
-    this.placeholder_.classList.add('amp-access-scroll-placeholder');
-    const img = document.createElement('img');
-    img.setAttribute('src',
-        'https://static.scroll.com/assets/icn-scroll-logo.svg');
-    img.setAttribute('layout', 'fixed');
-    img.setAttribute('width', 26);
-    img.setAttribute('height', 26);
-    this.placeholder_.appendChild(img);
-    ampdoc.getBody().appendChild(this.placeholder_);
-
-
-    /** @const {!Element} */
-    this.scrollBar_ = document.createElement('div');
-    this.scrollBar_.classList.add('amp-access-scroll-bar');
-    /** @const {!Element} */
-    this.iframe_ = document.createElement('iframe');
-    this.iframe_.setAttribute('scrolling', 'no');
-    this.iframe_.setAttribute('frameborder', '0');
-    this.iframe_.setAttribute('allowtransparency', 'true');
-    this.iframe_.setAttribute('title', 'Scroll');
-    this.iframe_.setAttribute('width', '100%');
-    this.iframe_.setAttribute('height', '100%');
-    this.iframe_.setAttribute('sandbox', 'allow-scripts allow-same-origin ' +
-                                         'allow-top-navigation allow-popups ' +
-                                         'allow-popups-to-escape-sandbox');
-    this.scrollBar_.appendChild(this.iframe_);
-    ampdoc.getBody().appendChild(this.scrollBar_);
+  static shouldCheck(ampdoc) {
+    const queryParams = parseQueryString(ampdoc.win.location.search);
+    return !queryParams['scrollnoblockerrefresh'];
   }
 
   /**
-   * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
+   * @param {boolean} redirect
    */
-  show(accessService) {
-    Services.viewportForDoc(this.ampdoc_).addToFixedLayer(this.scrollBar_)
-        .then(() => accessService.getAccessReaderId())
-        .then(readerId => {
-          this.iframe_.onload = () => {
-            this.ampdoc_.getBody().removeChild(this.placeholder_);
-          };
-          const docInfo = Services.documentInfoForDoc(this.ampdoc_);
-          this.iframe_.setAttribute('src',
-              'https://connect.scroll.com/amp/scrollbar'
-                + '?rid=' + encodeURIComponent(readerId)
-                + '&o=' + encodeURIComponent(this.ampdoc_.getUrl())
-                + '&c=' + encodeURIComponent(docInfo.canonicalUrl));
-        });
+  constructor(ampdoc, accessSource, redirect) {
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
+    this.accessSource_ = accessSource;
+
+    /** @const @private {boolean} */
+    this.redirect_ = redirect;
+  }
+
+  /**
+   * Check if the Scroll App blocks the resource request.
+   */
+  check() {
+    Services.xhrFor(this.ampdoc_.win)
+      .fetchJson('https://block.scroll.com/check.json')
+      .then(
+        (response) => response.json().then((json) => json['dns'] === true),
+        (e) => this.blockedByScrollApp_(e.message)
+      )
+      .then((blockedByScrollApp) => {
+        if (blockedByScrollApp === true) {
+          this.handleBlocked_();
+        }
+      });
+  }
+
+  /** @private */
+  handleBlocked_() {
+    // Redirect app auth flow if enabled and not on AMP proxy.
+    if (this.redirect_ && !isProxyOrigin(this.ampdoc_.win.location)) {
+      buildUrl(this.accessSource_, 'https://scroll.com/loginwithapp').then(
+        (url) => {
+          const navigationService = Services.navigationForDoc(this.ampdoc_);
+          navigationService.navigateTo(
+            this.ampdoc_.win,
+            addParamToUrl(url, 'feature', 'r')
+          );
+        }
+      );
+    } else {
+      // Prompt to activate.
+      const baseUrl = connectHostname(this.accessSource_.getAdapterConfig());
+      const bar = new ScrollBar(this.ampdoc_, this.accessSource_);
+      const relay = new Relay(baseUrl);
+      relay.register(bar.window, (message) => {
+        if (message['_scramp'] === 'st') {
+          bar.update(message);
+        }
+      });
+    }
+  }
+
+  /**
+   * Whether the given error message indicates the Scroll App blocked the
+   * request.
+   *
+   * @param {string} message
+   * @return {boolean}
+   * @private
+   */
+  blockedByScrollApp_(message) {
+    return (
+      message.indexOf(
+        'XHR Failed fetching (https://block.scroll.com/...): ' +
+          'Resource blocked by content blocker'
+      ) === 0
+    );
   }
 }
 
@@ -196,20 +288,26 @@ function addAnalytics(ampdoc, vendorConfig) {
   if (vendorConfig['dataConsentId']) {
     attributes['data-block-on-consent'] = '';
   }
-  const analyticsElem = createElementWithAttributes(doc, 'amp-analytics',
-      attributes);
+  const analyticsElem = createElementWithAttributes(
+    doc,
+    'amp-analytics',
+    attributes
+  );
   const scriptElem = createElementWithAttributes(
-      doc,
-      'script', dict({
-        'type': 'application/json',
-      }));
+    doc,
+    'script',
+    dict({
+      'type': 'application/json',
+    })
+  );
+  const ANALYTICS_CONFIG = analyticsConfig(connectHostname(vendorConfig));
   scriptElem.textContent = JSON.stringify(ANALYTICS_CONFIG);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = ANALYTICS_CONFIG;
 
   // Get extensions service and force load analytics extension
   const extensions = Services.extensionsFor(ampdoc.win);
-  extensions./*OK*/installExtensionForDoc(ampdoc, 'amp-analytics');
+  extensions./*OK*/ installExtensionForDoc(ampdoc, 'amp-analytics');
 
   // Append
   ampdoc.getBody().appendChild(analyticsElem);

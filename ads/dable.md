@@ -21,10 +21,13 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-embed width="500" height="200"
-     type="dable"
-     data-widget-id="jobgqR7W"
-     data-item-id="testitem">
+<amp-embed
+  width="500"
+  height="200"
+  type="dable"
+  data-widget-id="jobgqR7W"
+  data-item-id="testitem"
+>
 </amp-embed>
 ```
 

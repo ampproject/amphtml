@@ -21,8 +21,8 @@
  * Check test-yield.js for how-to.
  */
 export function installYieldIt(realIt) {
-  it = enableYield.bind(null, realIt); // eslint-disable-line no-native-reassign, no-undef
-  it./*OK*/only = enableYield.bind(null, realIt.only);
+  it = enableYield.bind(null, realIt); // eslint-disable-line no-native-reassign
+  it./*OK*/ only = enableYield.bind(null, realIt.only);
   it.skip = realIt.skip;
 }
 
@@ -36,11 +36,14 @@ export function macroTask() {
 }
 
 function enableYield(fn, message, runnable) {
-  if (!runnable || !runnable.constructor
-      || runnable.constructor.name !== 'GeneratorFunction') {
+  if (
+    !runnable ||
+    !runnable.constructor ||
+    runnable.constructor.name !== 'GeneratorFunction'
+  ) {
     return fn(message, runnable);
   }
-  return fn(message, done => {
+  return fn(message, (done) => {
     const iterator = runnable();
     function step(method, result) {
       let state;

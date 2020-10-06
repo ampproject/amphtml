@@ -14,29 +14,47 @@
  * limitations under the License.
  */
 
-
-[desktop] amp-story-page[i-amphtml-loading] {
+ .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-loading][ad] {
   /* Move below viewport so that ad preloads */
   transform: scale(1.0) translateX(-100%) translateY(200%) !important;
 }
 
+.i-amphtml-cta-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-desktop-fullbleed .i-amphtml-cta-container {
+  /* Ad will be 75vh, align bottom of container to bottom of ad. */
+  bottom: 12.5vh !important;
+  /* 80% (default) - 12.5 (new bottom)*/
+  top: 67.5% !important;
+}
+
+/* If you are changing anything here that affects font, please update measurer
+ in story-ad-button-text-fitter.js */
 .i-amphtml-story-ad-link {
   background-color: #FFFFFF !important;
   border-radius: 20px !important;
+  box-sizing: border-box !important;
   bottom: 32px !important;
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
   color: #4285F4 !important;
   font-family: 'Roboto', sans-serif !important;
   font-weight: bold !important;
   height: 36px !important;
-  left: 50% !important;
   letter-spacing: 0.2px !important;
-  line-height: 36px;
-  margin-left: -60px !important;
+  line-height: 36px !important;
+  overflow: hidden !important;
+  /* no important on opacity b/c ff does not allow keyframes to override. */
+  opacity: 0;
+  padding: 0 10px !important;
   position: absolute !important;
-  text-align: center;
+  text-align: center !important;
   text-decoration: none !important;
-  width: 120px !important;
+  min-width: 120px !important;
+  max-width: calc(100vw - 64px);
 }
 
 amp-story-page[active] .i-amphtml-story-ad-link {
@@ -50,58 +68,37 @@ amp-story-page[active] .i-amphtml-story-ad-link {
 @keyframes ad-cta {
   from {
     opacity: 0;
-    font-size: 0px;
     transform: scale(0);
   }
 
   to {
     opacity: 1;
-    font-size: 13px;
     transform: scale(1);
   }
-}
-
-.i-amphtml-ad-overlay-container {
-  height: 24px !important;
-  left: 0 !important;
-  padding: 14px 0 0 !important;
-  position: absolute !important;
-  top: 0 !important;
-  z-index: 100001 !important;
-}
-
-[desktop] .i-amphtml-ad-overlay-container {
-  /* On desktop a story page has a with of 45vh. */
-  left: calc(50vw - 22.5vh) !important;
-  /* And a height of 75 vh. */
-  top: 12.5vh !important;
-}
-
-.i-amphtml-story-ad-attribution {
-  color: #FFFFFF !important;
-  font-size: 18px !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-weight: bold !important;
-  letter-spacing: 0.5px !important;
-  margin: 0 0 0 16px !important;
-  opacity: 0 !important;
-  padding: 0 !important;
-  visibility: hidden !important;
-}
-
-amp-story[ad-showing][desktop] .i-amphtml-story-ad-attribution {
-  /* Have to wait for page to slide in. */
-  transition: opacity 0.1s linear 0.3s;
-}
-
-
-amp-story[ad-showing] .i-amphtml-story-ad-attribution {
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
 .i-amphtml-glass-pane {
   height: 100% !important;
   width: 100% !important;
   z-index: 1 !important;
+}
+
+/* TODO(ccordry): refactor centering logic in amp-ad.css and remove this hack.  */
+amp-story-page amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-story-page amp-ad[type="adsense"] > iframe {
+  top: 0 !important;
+  left: 0 !important;
+  transform: translate(0) !important;
+}
+
+/* TODO(ccordry) allow advertisers to opt-in to fullscreen ads. */
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-grid-template-fill > amp-ad > iframe {
+  left: 50% !important;
+  right: auto !important;
+  margin: auto !important;
+  min-height: 75vh !important;
+  max-height: 75vh !important;
+  min-width: calc(3/5 * 75vh) !important;
+  max-width: calc(3/5 * 75vh) !important;
+  transform: translateX(-50%) !important;
 }

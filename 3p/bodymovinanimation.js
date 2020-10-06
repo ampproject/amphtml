@@ -18,6 +18,7 @@ import {dict} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
+import {setStyles} from '../src/style';
 
 /**
  * Produces the AirBnB Bodymovin Player SDK object for the passed in callback.
@@ -29,10 +30,15 @@ let animationHandler;
 
 /**
  * @param {!Window} global
+ * @param {string} renderer
  * @param {!Function} cb
  */
-function getBodymovinAnimationSdk(global, cb) {
-  loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', function() {
+function getBodymovinAnimationSdk(global, renderer, cb) {
+  const scriptToLoad =
+    renderer === 'svg'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
+  loadScript(global, scriptToLoad, function () {
     cb(global.bodymovin);
   });
 }
@@ -53,8 +59,9 @@ function parseMessage(event) {
     if (eventMessage['valueType'] === 'time') {
       animationHandler.goToAndStop(eventMessage['value']);
     } else {
-      const frameNumber =
-        Math.round(eventMessage['value'] * animationHandler.totalFrames);
+      const frameNumber = Math.round(
+        eventMessage['value'] * animationHandler.totalFrames
+      );
       animationHandler.goToAndStop(frameNumber, true);
     }
   }
@@ -67,23 +74,29 @@ export function bodymovinanimation(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
   const dataLoop = dataReceived['loop'];
   const animatingContainer = global.document.createElement('div');
+  setStyles(animatingContainer, {
+    width: '100%',
+    height: '100%',
+  });
 
   global.document.getElementById('c').appendChild(animatingContainer);
   const shouldLoop = dataLoop != 'false';
   const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
-  getBodymovinAnimationSdk(global, function(bodymovin) {
+  const renderer = dataReceived['renderer'];
+  getBodymovinAnimationSdk(global, renderer, function (bodymovin) {
     animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
-      renderer: 'svg',
+      renderer,
       loop,
       autoplay: dataReceived['autoplay'],
       animationData: dataReceived['animationData'],
     });
-    const message = JSON.stringify(dict({
-      'action': 'ready',
-    }));
+    const message = JSON.stringify(
+      dict({
+        'action': 'ready',
+      })
+    );
     global.addEventListener('message', parseMessage, false);
-    global.parent. /*OK*/postMessage(message, '*');
+    global.parent./*OK*/ postMessage(message, '*');
   });
 }
-

@@ -18,12 +18,23 @@ import {getMode} from '../mode';
 import {urls} from '../config';
 
 /**
+ * Internal structure that maintains the state of an extension through loading.
+ *
+ * @typedef {{
+ *   extensionId: (string|undefined),
+ *   extensionVersion: (string|undefined),
+ * }}
+ * @private
+ */
+let ExtensionInfoDef;
+
+/**
  * Calculate the base url for any scripts.
  * @param {!Location} location The window's location
  * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-function calculateScriptBaseUrl(location, opt_isLocalDev) {
+export function calculateScriptBaseUrl(location, opt_isLocalDev) {
   if (opt_isLocalDev) {
     let prefix = `${location.protocol}//${location.host}`;
     if (location.protocol == 'about:') {
@@ -42,8 +53,13 @@ function calculateScriptBaseUrl(location, opt_isLocalDev) {
  * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-export function calculateExtensionScriptUrl(location, extensionId,
-  opt_extensionVersion, opt_isLocalDev) {
+export function calculateExtensionScriptUrl(
+  location,
+  extensionId,
+  opt_extensionVersion,
+  opt_isLocalDev
+) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
@@ -52,7 +68,7 @@ export function calculateExtensionScriptUrl(location, extensionId,
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}.js`;
+  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
 }
 
 /**
@@ -65,10 +81,34 @@ export function calculateExtensionScriptUrl(location, extensionId,
  * @return {string}
  */
 export function calculateEntryPointScriptUrl(
-  location, entryPoint, isLocalDev, opt_rtv) {
+  location,
+  entryPoint,
+  isLocalDev,
+  opt_rtv
+) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, isLocalDev);
-  if (opt_rtv) {
-    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+  if (isLocalDev) {
+    return `${base}/${entryPoint}${fileExtension}`;
   }
-  return `${base}/${entryPoint}.js`;
+  if (opt_rtv) {
+    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`;
+  }
+  return `${base}/${entryPoint}${fileExtension}`;
+}
+
+/**
+ * Parse the extension version from a given script URL.
+ * @param {string} scriptUrl
+ * @return {!ExtensionInfoDef}
+ */
+export function parseExtensionUrl(scriptUrl) {
+  // Note that the "(\.max)?" group only applies to local dev.
+  const matches = scriptUrl.match(
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
+  );
+  return {
+    extensionId: matches ? matches[2] : undefined,
+    extensionVersion: matches ? matches[3] : undefined,
+  };
 }

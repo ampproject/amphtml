@@ -16,7 +16,6 @@
 
 tags: {  # amp-orientation-observer
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-orientation-observer"
@@ -27,7 +26,6 @@ tags: {  # amp-orientation-observer
 }
 tags: {  # <amp-orientation-observer>
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "AMP-ORIENTATION-OBSERVER"
   requires_extension: "amp-orientation-observer"
   attr_lists: "extended-amp-global"
@@ -48,6 +46,10 @@ tags: {  # <amp-orientation-observer>
     # Regex: (\d+)\s{1}(\d+)
     # Values such as: "100 100", "0 100", etc..
     value_regex: "(\\d+)\\s{1}(\\d+)"
+  }
+  attrs: {
+    name: "smoothing"
+    value_regex: "[0-9]+|"
   }
   amp_layout {
     supported_layouts: NODISPLAY

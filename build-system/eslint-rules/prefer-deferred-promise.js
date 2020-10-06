@@ -15,7 +15,7 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   function isAssignment(node, name) {
     if (node.type !== 'AssignmentExpression') {
       return false;
@@ -38,10 +38,12 @@ module.exports = function(context) {
       }
 
       const {object, property} = callee;
-      if (object.type !== 'Identifier' ||
-          object.name !== 'Promise' ||
-          property.type !== 'Identifier' ||
-          property.name !== 'resolve') {
+      if (
+        object.type !== 'Identifier' ||
+        object.name !== 'Promise' ||
+        property.type !== 'Identifier' ||
+        property.name !== 'resolve'
+      ) {
         return;
       }
 
@@ -52,8 +54,9 @@ module.exports = function(context) {
 
       context.report({
         node,
-        message: 'Use the Promise constructor, or tryResolve in the ' +
-            'src/utils/promise.js module.',
+        message:
+          'Use the Promise constructor, or tryResolve in the ' +
+          'src/utils/promise.js module.',
       });
     },
 
@@ -64,13 +67,12 @@ module.exports = function(context) {
       }
 
       const {callee} = node;
-      if (callee.type !== 'Identifier' ||
-          callee.name !== 'Promise') {
+      if (callee.type !== 'Identifier' || callee.name !== 'Promise') {
         return;
       }
 
       const comments = context.getCommentsBefore(callee);
-      const ok = comments.some(comment => comment.value === 'OK');
+      const ok = comments.some((comment) => comment.value === 'OK');
       if (ok) {
         return;
       }
@@ -90,8 +92,10 @@ module.exports = function(context) {
       const {name} = resolve;
       let assigned = false;
 
-      if (resolver.type === 'ArrowFunctionExpression' &&
-          resolver.expression === true) {
+      if (
+        resolver.type === 'ArrowFunctionExpression' &&
+        resolver.expression === true
+      ) {
         const {body} = resolver;
         assigned = isAssignment(body, name);
       } else {

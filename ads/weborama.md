@@ -23,13 +23,16 @@ limitations under the License.
 See below for an example of usage or our display tag, adapted for use with AMP websites:
 
 ```html
-<amp-ad width="300" height="250"
-    type="weborama-display"
-    data-wbo_account_id=51
-    data-wbo_tracking_element_id=137
-    data-wbo_fullhost="certification.solution.weborama.fr"
-    data-wbo_random="[RANDOM]"
-    data-wbo_publisherclick="[PUBLISHER_TRACKING_URL]">
+<amp-ad
+  width="300"
+  height="250"
+  type="weborama-display"
+  data-wbo_account_id="51"
+  data-wbo_tracking_element_id="137"
+  data-wbo_fullhost="certification.solution.weborama.fr"
+  data-wbo_random="[RANDOM]"
+  data-wbo_publisherclick="[PUBLISHER_TRACKING_URL]"
+>
   <div placeholder>Loading ad.</div>
   <div fallback>Ad could not be loaded.</div>
 </amp-ad>
@@ -43,9 +46,10 @@ The values mentioned between brackets `[]` should be replaced by the proper valu
 `DOCUMENT_REFERRER`, `SOURCE_URL` and `RANDOM` should remain in the URL, as AMP takes care of the automatic substitution of these values.
 
 ```html
-<amp-pixel src="http://[YOUR_HOST].solution.weborama.fr/fcgi-bin/dispatch.fcgi?a.A=co&a.si=[SITE_ID]&a.cp=[CONVERSION_PAGE]&a.ct=b&g.ru=DOCUMENT_REFERRER&g.pu=SOURCE_URL&g.cb=RANDOM"></amp-pixel>
+<amp-pixel
+  src="http://[YOUR_HOST].solution.weborama.fr/fcgi-bin/dispatch.fcgi?a.A=co&a.si=[SITE_ID]&a.cp=[CONVERSION_PAGE]&a.ct=b&g.ru=DOCUMENT_REFERRER&g.pu=SOURCE_URL&g.cb=RANDOM"
+></amp-pixel>
 ```
-
 
 ## Configuration
 

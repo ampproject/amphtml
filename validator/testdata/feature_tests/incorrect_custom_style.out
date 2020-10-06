@@ -26,30 +26,34 @@ FAIL
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
 |    <style amp-custom>
->>   ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:27:2 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
 |      /* These CSS Rules violate essential CSS validation */
 |      @import url("http://somewhere/on/the/internet.css");
 >>     ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:29:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@import'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:29:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@import'.
 |      foo.i-amp-class {}
 |      foo.amp-class {}
 |      foo { b: red !important; }
+>>                  ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:32:17 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|      foo { b: red ! important; }
+>>                  ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:33:17 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|      /* This is ok though, since it's a comment: { b: red !important } */
+|
 |      @viewport (mumble mumble) { }
 >>     ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:33:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@viewport'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:36:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@viewport'.
 |      @media (whatever) { @notallowednested }
 >>                         ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:34:24 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@notallowednested'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:37:24 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@notallowednested'.
 |
 |      /* some tests for url verification - images */
 |      foo { background-image: url('') }  /* allowed for now */
 |      foo { background-image: url('invalid://invalid.com/1.jpg') }
 >>                             ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:38:28 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:41:28 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
 |      foo { background-image: url('https://valid.com/1.jpg') }
 |      foo { background-image: url('http://valid.com/1.jpg') }
-|      foo { background-image: url('absolute://disallow.com/soon.jpg') }
 |      foo { background-image: url('://valid.jpg') }
 |      foo { background-image: url('valid.jpg') }
 |
@@ -57,12 +61,9 @@ feature_tests/incorrect_custom_style.html:38:28 CSS syntax error in tag 'style a
 |      @font-face { src: url(''); } /* allowed for now */
 |      @font-face { src: url('invalid://invalid.com/1.ttf') }
 >>                       ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:47:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:49:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
 |      @font-face { src: url('https://valid.com/1.ttf') }
 |      @font-face { src: url('http://valid.com/1.ttf') }
-|      @font-face { src: url('absolute://invalid.com/1.ttf') }
->>                       ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:50:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'absolute:'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
 |      @font-face { src: url('://valid.ttf') }
 |      @font-face { src: url('valid.ttf') }
 |    </style>
@@ -70,5 +71,9 @@ feature_tests/incorrect_custom_style.html:50:22 CSS syntax error in tag 'style a
 |    <script src="https://cdn.ampproject.org/v0.js" async></script>
 |  </head>
 |  <body>
+|    <!-- Invalid due to !important -->
+|    <b style="color: red !important"></div>
+>>   ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:60:2 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  </body>
 |  </html>

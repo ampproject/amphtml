@@ -1,0 +1,31 @@
+{
+  "files.associations": {
+    // Enable JSON5 syntax highlighting and auto-formatting for OWNERS files.
+    // Until VS Code adds native JSON5 support, this needs
+    // https://marketplace.visualstudio.com/items?itemName=mrmlnc.vscode-json5
+    "OWNERS": "json5",
+
+    // Enable JSON auto-formatting for these files.
+    ".prettierrc": "json",
+    ".renovaterc.json": "json",
+
+    // Enable YAML auto-formatting for these files.
+    ".codecov.yml": "yaml",
+    ".github/workflows/continuous-integration-workflow.yml": "yaml",
+    ".lando.yml": "yaml",
+    ".lgtm.yml": "yaml",
+    ".travis.yml": "yaml"
+  },
+
+  // Auto-fix JS files with ESLint using amphtml's custom settings. Needs
+  // https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
+  "editor.codeActionsOnSave": {"source.fixAll.eslint": true},
+  "[js]": {"editor.formatOnSave": false},
+
+  // Auto-fix non-JS files with Prettier using amphtml's custom settings. Needs
+  // https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
+  "[yaml]": {"editor.formatOnSave": true},
+  "[json]": {"editor.formatOnSave": true},
+  "[json5]": {"editor.formatOnSave": true},
+  "[markdown]": {"editor.formatOnSave": true}
+}

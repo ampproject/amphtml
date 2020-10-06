@@ -19,13 +19,20 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad 
-    width=[Width of Ad Widget]
-    height=[Height of Ad Widget]
-    type="contentad"
-    data-id="[Ad Widget GUID]"
-    data-d="[Ad Widget Domain ID]"
-    data-wid="[Ad Widget ID]">
+<amp-ad
+  width="[Width"
+  of
+  Ad
+  Widget]
+  height="[Height"
+  of
+  Ad
+  Widget]
+  type="contentad"
+  data-id="[Ad Widget GUID]"
+  data-d="[Ad Widget Domain ID]"
+  data-wid="[Ad Widget ID]"
+>
 </amp-ad>
 ```
 

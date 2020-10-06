@@ -19,24 +19,30 @@ limitations under the License.
 ## Tag Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="pulsepoint"
-    data-pid="512379"
-    data-tagid="472988"
-    data-size="300X250">
+<amp-ad
+  width="300"
+  height="250"
+  type="pulsepoint"
+  data-pid="512379"
+  data-tagid="472988"
+  data-size="300X250"
+>
 </amp-ad>
 ```
 
 ## Header Bidding Tag Example
 
 ```html
-<amp-ad width=width="300" height="250"
-    type="pulsepoint"
-    data-pid="521732"
-    data-tagid="76835"
-    data-tagtype="hb"
-    data-timeout="1000"
-    data-slot="/1066621/ExchangeTech_Prebid_AdUnit">
+<amp-ad
+  width="300"
+  height="250"
+  type="pulsepoint"
+  data-pid="521732"
+  data-tagid="76835"
+  data-tagtype="hb"
+  data-timeout="1000"
+  data-slot="/1066621/ExchangeTech_Prebid_AdUnit"
+>
 </amp-ad>
 ```
 

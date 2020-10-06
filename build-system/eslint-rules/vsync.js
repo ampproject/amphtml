@@ -15,7 +15,7 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
     CallExpression(node) {
       if (/test-/.test(context.getFilename())) {
@@ -33,7 +33,7 @@ module.exports = function(context) {
       }
 
       if (property.leadingComments) {
-        const ok = property.leadingComments.some(comment => {
+        const ok = property.leadingComments.some((comment) => {
           return comment.value === 'OK';
         });
         if (ok) {
@@ -46,7 +46,7 @@ module.exports = function(context) {
         message: [
           'VSync is now a privileged service.',
           'You likely want to use the `BaseElement` methods' +
-              ' `measureElement`, `mutateElement`, or `runElement`.',
+            ' `measureElement`, `mutateElement`, or `runElement`.',
           'In the worst case use the same methods on `Resources`.',
         ].join('\n\t'),
       });

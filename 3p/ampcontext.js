@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 import {AmpEvents} from '../src/amp-events';
+import {Deferred} from '../src/utils/promise';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {dev} from '../src/log';
-import {dict} from '../src/utils/object';
+import {dev, devAssert} from '../src/log';
+import {dict, map} from '../src/utils/object';
 import {isObject} from '../src/types';
-import {nextTick} from './3p';
 import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
 
 export class AbstractAmpContext {
-
   /**
    *  @param {!Window} win The window that the instance is built inside.
    */
   constructor(win) {
-    dev().assert(!this.isAbstractImplementation_(),
-        'Should not construct AbstractAmpContext instances directly');
+    devAssert(
+      !this.isAbstractImplementation_(),
+      'Should not construct AbstractAmpContext instances directly'
+    );
 
     /** @protected {!Window} */
     this.win_ = win;
@@ -74,6 +75,9 @@ export class AbstractAmpContext {
     /** @type {?number} */
     this.initialConsentState = null;
 
+    /** @type {?string} */
+    this.initialConsentValue = null;
+
     /** @type {?Object} */
     this.initialLayoutRect = null;
 
@@ -104,14 +108,20 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.tagName = null;
 
+    /** @type {!Object<number, Deferred>} */
+    this.resizeIdToDeferred_ = map();
+
+    /** @type {number} */
+    this.nextResizeRequestId_ = 0;
+
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
-    this.client_ = new IframeMessagingClient(win);
-    this.client_.setHostWindow(this.getHostWindow_());
-    this.client_.setSentinel(dev().assertString(this.sentinel));
+    this.client_ = new IframeMessagingClient(win, this.getHostWindow_());
+    this.client_.setSentinel(devAssert(this.sentinel));
 
     this.listenForPageVisibility_();
+    this.listenToResizeResponse_();
   }
 
   /**
@@ -125,12 +135,13 @@ export class AbstractAmpContext {
   /** Registers an general handler for page visibility. */
   listenForPageVisibility_() {
     this.client_.makeRequest(
-        MessageType.SEND_EMBED_STATE,
-        MessageType.EMBED_STATE,
-        data => {
-          this.hidden = data.pageHidden;
-          this.dispatchVisibilityChangeEvent_();
-        });
+      MessageType.SEND_EMBED_STATE,
+      MessageType.EMBED_STATE,
+      (data) => {
+        this.hidden = data['pageHidden'];
+        this.dispatchVisibilityChangeEvent_();
+      }
+    );
   }
 
   /**
@@ -152,7 +163,7 @@ export class AbstractAmpContext {
    *    every time we receive a page visibility message.
    */
   onPageVisibilityChange(callback) {
-    return this.client_.registerCallback(MessageType.EMBED_STATE, data => {
+    return this.client_.registerCallback(MessageType.EMBED_STATE, (data) => {
       callback({hidden: data['pageHidden']});
     });
   }
@@ -165,36 +176,31 @@ export class AbstractAmpContext {
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {
-    const unlisten = this.client_.makeRequest(
-        MessageType.SEND_INTERSECTIONS,
-        MessageType.INTERSECTION,
-        intersection => {
-          callback(intersection.changes);
-        });
-
-    // Call the callback with the value that was transmitted when the
-    // iframe was drawn. Called in nextTick, so that callers don't
-    // have to specially handle the sync case.
-    // TODO(lannka, #8562): Deprecate this behavior
-    nextTick(this.win_, () => {
-      callback([this.initialIntersection]);
-    });
-
-    return unlisten;
+    return this.client_.makeRequest(
+      MessageType.SEND_INTERSECTIONS,
+      MessageType.INTERSECTION,
+      (intersection) => {
+        callback(intersection['changes']);
+      }
+    );
   }
 
   /**
    *  Requests HTML snippet from the parent window.
    *  @param {string} selector CSS selector
-   *  @param {!Array<string>} attributes whitelisted attributes to be kept
+   *  @param {!Array<string>} attributes permissible attributes to be kept
    *    in the returned HTML string
    *  @param {function(*)} callback to be invoked with the HTML string
    */
   getHtml(selector, attributes, callback) {
-    this.client_.getData(MessageType.GET_HTML, dict({
-      'selector': selector,
-      'attributes': attributes,
-    }), callback);
+    this.client_.getData(
+      MessageType.GET_HTML,
+      dict({
+        'selector': selector,
+        'attributes': attributes,
+      }),
+      callback
+    );
   }
 
   /**
@@ -203,8 +209,7 @@ export class AbstractAmpContext {
    * @param {function(*)} callback
    */
   getConsentState(callback) {
-    this.client_.getData(
-        MessageType.GET_CONSENT_STATE, null, callback);
+    this.client_.getData(MessageType.GET_CONSENT_STATE, null, callback);
   }
 
   /**
@@ -213,13 +218,57 @@ export class AbstractAmpContext {
    *  @param {number} width The new width for the ad we are requesting.
    *  @param {number} height The new height for the ad we are requesting.
    *  @param {boolean=} hasOverflow Whether the ad handles its own overflow ele
+   *  @return {Promise} Signify the success/failure of the request.
    */
   requestResize(width, height, hasOverflow) {
-    this.client_.sendMessage(MessageType.EMBED_SIZE, dict({
-      'width': width,
-      'height': height,
-      'hasOverflow': hasOverflow,
-    }));
+    const requestId = this.nextResizeRequestId_++;
+    this.client_.sendMessage(
+      MessageType.EMBED_SIZE,
+      dict({
+        'id': requestId,
+        'width': width,
+        'height': height,
+        'hasOverflow': hasOverflow,
+      })
+    );
+    const deferred = new Deferred();
+    this.resizeIdToDeferred_[requestId] = deferred;
+    return deferred.promise;
+  }
+
+  /**
+   *  Set up listeners to handle responses from request size.
+   */
+  listenToResizeResponse_() {
+    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, (data) => {
+      const id = data['id'];
+      if (id !== undefined) {
+        this.resizeIdToDeferred_[id].resolve();
+        delete this.resizeIdToDeferred_[id];
+      }
+    });
+
+    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, (data) => {
+      const id = data['id'];
+      if (id !== undefined) {
+        this.resizeIdToDeferred_[id].reject('Resizing is denied');
+        delete this.resizeIdToDeferred_[id];
+      }
+    });
+  }
+
+  /**
+   * @param {string} endpoint Method being called
+   * @private
+   */
+  sendDeprecationNotice_(endpoint) {
+    this.client_.sendMessage(
+      MessageType.USER_ERROR_IN_IFRAME,
+      dict({
+        'message': `${endpoint} is deprecated`,
+        'expected': true,
+      })
+    );
   }
 
   /**
@@ -230,8 +279,10 @@ export class AbstractAmpContext {
    *    request succeeds.
    */
   onResizeSuccess(callback) {
-    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
-      callback(obj['requestedHeight'], obj['requestedWidth']); });
+    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, (obj) => {
+      callback(obj['requestedHeight'], obj['requestedWidth']);
+    });
+    this.sendDeprecationNotice_('onResizeSuccess');
   }
 
   /**
@@ -242,9 +293,17 @@ export class AbstractAmpContext {
    *    request is denied.
    */
   onResizeDenied(callback) {
-    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
+    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, (obj) => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
+    this.sendDeprecationNotice_('onResizeDenied');
+  }
+
+  /**
+   *  Make the ad interactive.
+   */
+  signalInteractive() {
+    this.client_.sendMessage(MessageType.SIGNAL_INTERACTIVE);
   }
 
   /**
@@ -272,9 +331,10 @@ export class AbstractAmpContext {
    */
   setupMetadata_(data) {
     // TODO(alanorozco): Use metadata utils in 3p/frame-metadata
-    const dataObject = dev().assert(
-        typeof data === 'string' ? tryParseJson(data) : data,
-        'Could not setup metadata.');
+    const dataObject = devAssert(
+      typeof data === 'string' ? tryParseJson(data) : data,
+      'Could not setup metadata.'
+    );
 
     const context = dataObject._context || dataObject.attributes._context;
 
@@ -294,6 +354,7 @@ export class AbstractAmpContext {
     this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
     this.initialConsentState = context.initialConsentState;
+    this.initialConsentValue = context.initialConsentValue;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = parseUrlDeprecated(context.location.href);
@@ -309,19 +370,20 @@ export class AbstractAmpContext {
   }
 
   /**
-   *  Calculate the hostWindow
-   *  @private
+   * Calculate the hostWindow
+   * @private
+   * @return {!Window}
    */
   getHostWindow_() {
     const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
-    dev().assert(sentinelMatch, 'Incorrect sentinel format');
+    devAssert(sentinelMatch, 'Incorrect sentinel format');
     const depth = Number(sentinelMatch[2]);
     const ancestors = [];
     for (let win = this.win_; win && win != win.parent; win = win.parent) {
       // Add window keeping the top-most one at the front.
       ancestors.push(win.parent);
     }
-    return ancestors[(ancestors.length - 1) - depth];
+    return ancestors[ancestors.length - 1 - depth];
   }
 
   /**
@@ -335,7 +397,7 @@ export class AbstractAmpContext {
     // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
     // types? FIX THIS.
     if (isObject(this.win_.sf_) && this.win_.sf_.cfg) {
-      this.setupMetadata_(/** @type {string}*/(this.win_.sf_.cfg));
+      this.setupMetadata_(/** @type {string}*/ (this.win_.sf_.cfg));
     } else if (this.win_.AMP_CONTEXT_DATA) {
       if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
         this.sentinel = this.win_.AMP_CONTEXT_DATA;
@@ -355,9 +417,12 @@ export class AbstractAmpContext {
     if (!e.message) {
       return;
     }
-    this.client_.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
-      'message': e.message,
-    }));
+    this.client_.sendMessage(
+      MessageType.USER_ERROR_IN_IFRAME,
+      dict({
+        'message': e.message,
+      })
+    );
   }
 }
 

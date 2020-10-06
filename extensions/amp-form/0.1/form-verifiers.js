@@ -15,11 +15,13 @@
  */
 
 import {LastAddedResolver} from '../../../src/utils/promise';
+import {isFieldDefault} from '../../../src/form';
 import {iterateCursor} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
 
+export const FORM_VERIFY_OPTOUT = 'no-verify';
 
 /**
  * @typedef {{
@@ -41,7 +43,8 @@ let UpdatedErrorsDef;
  * Construct the correct form verifier based on whether
  * a config block is present.
  * @param {!HTMLFormElement} form
- * @param {function():Promise<!../../../src/service/xhr-impl.FetchResponse>} xhr
+ * @param {function():Promise<!Response>} xhr
+ * @return {!FormVerifier}
  */
 export function getFormVerifier(form, xhr) {
   if (form.hasAttribute('verify-xhr')) {
@@ -79,10 +82,12 @@ export class FormVerifier {
     if (this.isDirty_()) {
       return this.verify_();
     } else {
-      return Promise.resolve(/** @type {UpdatedErrorsDef} */ ({
-        updatedElements: [],
-        errors: [],
-      }));
+      return Promise.resolve(
+        /** @type {UpdatedErrorsDef} */ ({
+          updatedElements: [],
+          errors: [],
+        })
+      );
     }
   }
 
@@ -93,10 +98,12 @@ export class FormVerifier {
    * @protected
    */
   verify_() {
-    return Promise.resolve(/** @type {UpdatedErrorsDef} */ ({
-      updatedElements: [],
-      errors: [],
-    }));
+    return Promise.resolve(
+      /** @type {UpdatedErrorsDef} */ ({
+        updatedElements: [],
+        errors: [],
+      })
+    );
   }
 
   /**
@@ -111,27 +118,9 @@ export class FormVerifier {
       if (field.disabled) {
         continue;
       }
-      switch (field.type) {
-        case 'select-multiple':
-        case 'select-one':
-          const {options} = field;
-          for (let j = 0; j < options.length; j++) {
-            if (options[j].selected !== options[j].defaultSelected) {
-              return true;
-            }
-          }
-          break;
-        case 'checkbox':
-        case 'radio':
-          if (field.checked !== field.defaultChecked) {
-            return true;
-          }
-          break;
-        default:
-          if (field.value !== field.defaultValue) {
-            return true;
-          }
-          break;
+
+      if (!isFieldDefault(field)) {
+        return true;
       }
     }
     return false;
@@ -144,7 +133,7 @@ export class FormVerifier {
   clearVerificationErrors_() {
     const {elements} = this.form_;
     if (elements) {
-      iterateCursor(elements, e => {
+      iterateCursor(elements, (e) => {
         e.setCustomValidity('');
       });
     }
@@ -155,7 +144,7 @@ export class FormVerifier {
  * A no-op verifier.
  * @visibleForTesting
  */
-export class DefaultVerifier extends FormVerifier { }
+export class DefaultVerifier extends FormVerifier {}
 
 /**
  * A verifier that verifies values via an XHR
@@ -164,7 +153,7 @@ export class DefaultVerifier extends FormVerifier { }
 export class AsyncVerifier extends FormVerifier {
   /**
    * @param {!HTMLFormElement} form
-   * @param {function():Promise<!../../../src/service/xhr-impl.FetchResponse>} xhr
+   * @param {function():Promise<!Response>} xhr
    */
   constructor(form, xhr) {
     super(form);
@@ -181,14 +170,18 @@ export class AsyncVerifier extends FormVerifier {
 
   /** @override */
   verify_() {
-    const xhrConsumeErrors = this.doXhr_().then(() => {
-      return [];
-    }, error => {
-      return getResponseErrorData_(/** @type {!Error} */(error));
-    });
+    const xhrConsumeErrors = this.doXhr_().then(
+      () => {
+        return [];
+      },
+      (error) => {
+        return getResponseErrorData_(/** @type {!Error} */ (error));
+      }
+    );
 
-    return this.addToResolver_(xhrConsumeErrors)
-        .then(errors => this.applyErrors_(errors));
+    return this.addToResolver_(xhrConsumeErrors).then((errors) =>
+      this.applyErrors_(errors)
+    );
   }
 
   /**
@@ -201,7 +194,7 @@ export class AsyncVerifier extends FormVerifier {
   addToResolver_(promise) {
     if (!this.xhrResolver_) {
       this.xhrResolver_ = new LastAddedResolver();
-      const cleanup = () => this.xhrResolver_ = null;
+      const cleanup = () => (this.xhrResolver_ = null);
       this.xhrResolver_.then(cleanup, cleanup);
     }
     return this.xhrResolver_.add(promise);
@@ -225,15 +218,20 @@ export class AsyncVerifier extends FormVerifier {
     // Set the error message on each element that caused an error.
     for (let i = 0; i < errors.length; i++) {
       const error = errors[i];
-      const name = user().assertString(error.name,
-          'Verification errors must have a name property');
-      const message = user().assertString(error.message,
-          'Verification errors must have a message property');
+      const name = user().assertString(
+        error.name,
+        'Verification errors must have a name property'
+      );
+      const message = user().assertString(
+        error.message,
+        'Verification errors must have a message property'
+      );
       // If multiple elements share the same name, the first should be selected.
       // This matches the behavior of HTML5 validation, e.g. with radio buttons.
       const element = user().assertElement(
-          this.form_./*OK*/querySelector(`[name="${name}"]`),
-          'Verification error name property must match a field name');
+        this.form_./*OK*/ querySelector(`[name="${name}"]`),
+        'Verification error name property must match a field name'
+      );
 
       // Only put verification errors on elements that are client-side valid.
       // This prevents errors from appearing on elements that have not been
@@ -245,10 +243,11 @@ export class AsyncVerifier extends FormVerifier {
     }
 
     // Create a list of form elements that had an error, but are now fixed.
-    const isFixed = previousError => errors.every(
-        error => previousError.name !== error.name);
-    const fixedElements = previousErrors.filter(isFixed)
-        .map(e => this.form_./*OK*/querySelector(`[name="${e.name}"]`));
+    const isFixed = (previousError) =>
+      errors.every((error) => previousError.name !== error.name);
+    const fixedElements = previousErrors
+      .filter(isFixed)
+      .map((e) => this.form_./*OK*/ querySelector(`[name="${e.name}"]`));
 
     return /** @type {!UpdatedErrorsDef} */ ({
       updatedElements: errorElements.concat(fixedElements),
@@ -269,6 +268,7 @@ function getResponseErrorData_(error) {
   }
 
   return response.json().then(
-      json => json.verifyErrors || [],
-      () => []);
+    (json) => json.verifyErrors || [],
+    () => []
+  );
 }

@@ -60,100 +60,6 @@
   position: relative;
 }
 
-.amp-apester-loader-blobs {
-  filter: url('#amp-apester-goo');
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-}
-.amp-apester-loader-blob {
-  position: absolute;
-  margin: auto;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #ee2e3d;
-}
-.amp-apester-loader-blob:nth-child(1) {
-  animation: amp-apester-blob-left-anim cubic-bezier(0.77, 0, 0.175, 1) 2s infinite;
-}
-.amp-apester-loader-blob:nth-child(2) {
-  animation: amp-apester-blob-right-anim cubic-bezier(0.77, 0, 0.175, 1) 2s infinite;
-}
-
-@keyframes amp-apester-blob-left-anim {
-  0% {
-    transform: scale(1) translate(0, 0);
-  }
-  33% {
-    transform: scale(0.55, 0.5) translate(80px, 0);
-  }
-  66% {
-    transform: scale(0.8) translate(0, 0);
-  }
-  100% {
-    transform: scale(1) translate(0, 0);
-  }
-}
-
-@keyframes amp-apester-blob-right-anim {
-  0% {
-    transform: scale(1) translate(0, 0);
-  }
-  33% {
-    transform: scale(0.55, 0.5) translate(-80px, 0);
-  }
-  66% {
-    transform: scale(0.8) translate(0, 0);
-  }
-  100% {
-    transform: scale(1) translate(0, 0);
-  }
-}
-
-@keyframes amp-apester-loader-logo {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  20% {
-    transform: scale(1);
-    opacity: 0;
-  }
-  40% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  66% {
-    transform: scale(0.8);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.amp-apester-loader-logo {
-  background: url('https://app.apester.com/assets/editor/3.4.10/dist/svg/ape-loader.svg') no-repeat center;
-  position: absolute;
-  height: 28px;
-  width: 28px;
-  left: calc(50% - 14px);
-  top: calc(50% - 14px);
-}
-
-.amp-apester-loader-logo svg {
-  height: 100%;
-  width: 100%;
-}
-
 .amp-apester-fullscreen {
   background: rgba(34, 36, 38, 0.97) !important;
   position: fixed !important;
@@ -163,4 +69,8 @@
   top: 0;
   zoom: 1;
   -webkit-overflow-scrolling: touch !important;
+}
+.amp-apester-companion {
+  display: block;
+  margin: 10px auto;
 }

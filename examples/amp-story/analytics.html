@@ -42,19 +42,60 @@
             "requests": {
               "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
               "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
-              "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}"
+              "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
+              "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}"
             },
             "triggers": {
+              "trackAnchorClicks": {
+                "on": "click",
+                "selector": "amp-story-cta-layer a",
+                "request": "click",
+                "vars": {
+                  "eventId": "clickOnAnyAnchor"
+                }
+              },
+              "trackBookendClicks": {
+                "on": "story-bookend-click",
+                "request": "click",
+                "vars": {
+                  "eventId": "clickOnBookend"
+                }
+              },
+              "trackPageAttachmentOpen": {
+                "on": "story-open",
+                "tagName": "amp-story-page-attachment",
+                "request": "base"
+              },
+              "trackPageAttachmentClose": {
+                "on": "story-close",
+                "tagName": "amp-story-page-attachment",
+                "request": "base"
+              },
+              "trackFocusedState": {
+                "on": "story-focus",
+                "tagName": "a",
+                "request": "click"
+              },
+              "trackClickThru": {
+                "on": "story-click-through",
+                "tagName": "a",
+                "request": "click"
+              },
               "trackPageview": {
                 "on": "story-page-visible",
-                "request": "pageView"
+                "request": "pageView",
+                "storySpec": {
+                  "repeat": false
+                }
               },
               "trackBookendEnter": {
-                "on": "story-bookend-enter",
+                "on": "story-open",
+                "tagName": "amp-story-bookend",
                 "request": "pageView"
               },
               "trackBookendExit": {
-                "on": "story-bookend-exit",
+                "on": "story-close",
+                "tagName": "amp-story-bookend",
                 "request": "pageView"
               },
               "trackAudioEnable": {
@@ -74,6 +115,14 @@
         <amp-story-grid-layer template="vertical">
           <h1>Page One</h1>
         </amp-story-grid-layer>
+        <amp-story-page-attachment layout="nodisplay">
+          <div>
+            <h1>Some really cool video</h1>
+              <p style="color: black">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+          </div>
+        </amp-story-page-attachment>
       </amp-story-page>
 
       <amp-story-page id="p2">
@@ -85,12 +134,43 @@
       <amp-story-page id="p3">
         <amp-story-grid-layer template="vertical">
           <h1>Page Three</h1>
+          <a href="google.com">click me</a>
         </amp-story-grid-layer>
+        <amp-story-cta-layer>
+          <a>click me</a>
+        </amp-story-cta-layer>
       </amp-story-page>
 
-      <amp-story-page id="p4">
+      <amp-story-page id="p4" style="background-color: grey">
+          <amp-story-grid-layer template="vertical">
+            <h1>Page Four</h1>
+            <a id="blink-3" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="shopping-cart">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-4" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="offer">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-5" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="flight">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-6" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="hotel">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-7" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="movie">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-8" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="activity">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-9" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="more-to-read">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+          </amp-story-grid-layer>
+        </amp-story-page>
+
+      <amp-story-page id="p5">
         <amp-story-grid-layer template="vertical">
-          <h1>Page Four</h1>
+          <h1>Page Five</h1>
           <amp-video
             id="vid1"
             src="../av/ForBiggerJoyrides-short.mp4"

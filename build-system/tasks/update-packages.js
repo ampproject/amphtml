@@ -17,9 +17,9 @@
 
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const {exec, getStderr} = require('../exec');
+const {exec, execOrDie, getStderr} = require('../common/exec');
+const {isTravisBuild} = require('../common/travis');
 
 const yarnExecutable = 'npx yarn';
 
@@ -29,88 +29,93 @@ const yarnExecutable = 'npx yarn';
  * @param {string} file Contents to write
  */
 function writeIfUpdated(patchedName, file) {
-  if (!fs.existsSync(patchedName) ||
-      fs.readFileSync(patchedName) != file) {
+  if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
     fs.writeFileSync(patchedName, file);
-    if (!process.env.TRAVIS) {
+    if (!isTravisBuild()) {
       log(colors.green('Patched'), colors.cyan(patchedName));
     }
   }
 }
 
 /**
- * Patches Web Animations API by wrapping its body into `install` function.
+ * Patches Web Animations polyfill by wrapping its body into `install` function.
  * This gives us an option to call polyfill directly on the main window
  * or a friendly iframe.
  */
 function patchWebAnimations() {
   // Copies web-animations-js into a new file that has an export.
-  const patchedName = 'node_modules/web-animations-js/' +
-      'web-animations.install.js';
-  let file = fs.readFileSync(
-      'node_modules/web-animations-js/' +
-      'web-animations.min.js').toString();
+  const patchedName =
+    'node_modules/web-animations-js/web-animations.install.js';
+  let file = fs
+    .readFileSync('node_modules/web-animations-js/web-animations.min.js')
+    .toString();
+  // Replace |requestAnimationFrame| with |window|.
+  file = file.replace(/requestAnimationFrame/g, function (a, b) {
+    if (file.charAt(b - 1) == '.') {
+      return a;
+    }
+    return 'window.' + a;
+  });
+  // Fix web-animations-js code that violates strict mode.
+  // See https://github.com/ampproject/amphtml/issues/18612 and
+  // https://github.com/web-animations/web-animations-js/issues/46
+  file = file.replace(/b.true=a/g, 'b?b.true=a:true');
+
+  // Fix web-animations-js code that attempts to write a read-only property.
+  // See https://github.com/ampproject/amphtml/issues/19783 and
+  // https://github.com/web-animations/web-animations-js/issues/160
+  file = file.replace(/this\._isFinished\s*=\s*\!0,/, '');
+
   // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
-      'var document = window.document;\n' +
-      file.replace(/requestAnimationFrame/g, function(a, b) {
-        if (file.charAt(b - 1) == '.') {
-          return a;
-        }
-        return 'window.' + a;
-      }) +
-      '\n' +
-      '}\n';
+  file =
+    'export function installWebAnimations(window) {\n' +
+    'var document = window.document;\n' +
+    file +
+    '\n' +
+    '}\n';
   writeIfUpdated(patchedName, file);
 }
 
 /**
- * Creates a version of document-register-element that can be installed
- * without side effects.
+ * Patches Intersection Observer polyfill by wrapping its body into `install`
+ * function.
+ * This gives us an option to control when and how the polyfill is installed.
+ * The polyfill can only be installed on the root context.
  */
-function patchRegisterElement() {
-  let file;
-  // Copies document-register-element into a new file that has an export.
-  // This works around a bug in closure compiler, where without the
-  // export this module does not generate a goog.provide which fails
-  // compilation.
-  // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'node_modules/document-register-element' +
-      '/build/document-register-element.patched.js';
-  file = fs.readFileSync(
-      'node_modules/document-register-element/build/' +
-      'document-register-element.node.js').toString();
-  // Eliminate the immediate side effect.
-  if (!/installCustomElements\(global\);/.test(file)) {
-    throw new Error('Expected "installCustomElements(global);" ' +
-        'to appear in document-register-element');
-  }
-  file = file.replace('installCustomElements(global);', '');
-  // Closure Compiler does not generate a `default` property even though
-  // to interop CommonJS and ES6 modules. This is the same issue typescript
-  // ran into here https://github.com/Microsoft/TypeScript/issues/2719
-  if (!/module.exports = installCustomElements;/.test(file)) {
-    throw new Error('Expected "module.exports = installCustomElements;" ' +
-        'to appear in document-register-element');
-  }
-  file = file.replace('module.exports = installCustomElements;',
-      'exports.installCustomElements = installCustomElements;');
+function patchIntersectionObserver() {
+  // Copies intersection-observer into a new file that has an export.
+  const patchedName =
+    'node_modules/intersection-observer/intersection-observer.install.js';
+  let file = fs
+    .readFileSync('node_modules/intersection-observer/intersection-observer.js')
+    .toString();
+
+  // Wrap the contents inside the install function.
+  file = `export function installIntersectionObserver() {\n${file}\n}\n`;
   writeIfUpdated(patchedName, file);
 }
 
 /**
- * Installs custom lint rules from build-system/eslint-rules to node_modules.
+ * TODO(samouri): remove this patch when a better fix is upstreamed (https://github.com/jakubroztocil/rrule/pull/410).
+ *
+ * Patches rrule to remove references to luxon. Even though rrule marks luxon as an optional dependency,
+ * it is used as if it's a required one (static import). rrule relies on its consumers either
+ * installing luxon or adding it as a webpack-style external. We don't want the former and
+ * can't yet do the latter.
+ *
+ * This function replaces the reference to luxon with a mock that throws (which the code handles well).
  */
-function installCustomEslintRules() {
-  const customRuleDir = 'build-system/eslint-rules';
-  const customRuleName = 'eslint-plugin-amphtml-internal';
-  exec(yarnExecutable + ' unlink', {'stdio': 'ignore', 'cwd': customRuleDir});
-  exec(yarnExecutable + ' link', {'stdio': 'ignore', 'cwd': customRuleDir});
-  exec(yarnExecutable + ' unlink ' + customRuleName, {'stdio': 'ignore'});
-  exec(yarnExecutable + ' link ' + customRuleName, {'stdio': 'ignore'});
-  if (!process.env.TRAVIS) {
-    log(colors.green('Installed lint rules from'), colors.cyan(customRuleDir));
-  }
+function patchRRule() {
+  const path = 'node_modules/rrule/dist/es5/rrule.min.js';
+  const patchedContents = fs
+    .readFileSync(path)
+    .toString()
+    .replace(
+      /require\("luxon"\)/g,
+      `{ DateTime: { fromJSDate() { throw TypeError() } } }`
+    );
+
+  writeIfUpdated(path, patchedContents);
 }
 
 /**
@@ -119,34 +124,57 @@ function installCustomEslintRules() {
 function runYarnCheck() {
   const integrityCmd = yarnExecutable + ' check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
-    log(colors.yellow('WARNING:'), 'The packages in',
-        colors.cyan('node_modules'), 'do not match',
-        colors.cyan('package.json.'));
+    log(
+      colors.yellow('WARNING:'),
+      'The packages in',
+      colors.cyan('node_modules'),
+      'do not match',
+      colors.cyan('package.json.')
+    );
     const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
-    exec(yarnExecutable);
+    /**
+     * NOTE: executing yarn with --production=false prevents having
+     * NODE_ENV=production variable set which forces yarn to not install
+     * devDependencies. This usually breaks gulp for example.
+     */
+    execOrDie(`${yarnExecutable} install --production=false`); // Stop execution when Ctrl + C is detected.
   } else {
-    log(colors.green('All packages in'),
-        colors.cyan('node_modules'), colors.green('are up to date.'));
+    log(
+      colors.green('All packages in'),
+      colors.cyan('node_modules'),
+      colors.green('are up to date.')
+    );
+  }
+}
+
+/**
+ * Used as a pre-requisite by several gulp tasks.
+ */
+function maybeUpdatePackages() {
+  if (!isTravisBuild()) {
+    updatePackages();
   }
 }
 
 /**
  * Installs custom lint rules, updates node_modules (for local dev), and patches
- * web-animations-js and document-register-element if necessary.
+ * polyfills if necessary.
  */
-function updatePackages() {
-  installCustomEslintRules();
-  if (!process.env.TRAVIS) {
+async function updatePackages() {
+  if (!isTravisBuild()) {
     runYarnCheck();
   }
   patchWebAnimations();
-  patchRegisterElement();
+  patchIntersectionObserver();
+  patchRRule();
 }
 
-gulp.task(
-    'update-packages',
-    'Runs yarn if node_modules is out of date, and patches web-animations-js',
-    updatePackages
-);
+module.exports = {
+  maybeUpdatePackages,
+  updatePackages,
+};
+
+updatePackages.description =
+  'Runs yarn if node_modules is out of date, and applies custom patches';

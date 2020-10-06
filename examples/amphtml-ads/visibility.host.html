@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <title>amp-inabox-host example</title>
+  <style>
+    body {
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h2>
+    This page tests amp-analytics's visible trigger for inabox. Follow the instructions and check points.
+  </h2>
+  <hr>
+  <h3>Inabox above the fold</h3>
+  <iframe
+      name="inabox-atf"
+      src="//ads.localhost:8000/examples/amphtml-ads/visibility-ad.a4a.html"
+      scrolling="no"
+      width="300" height="200">
+  </iframe>
+  <div>
+    <strong>Check Point 1: Above the fold visibility tracking</strong><br/>
+    Before any scrolling, you should see 3  network requests: <code>visible</code>, <code>rootVisible</code> and <code>img2Visible</code>. Also check their URL params including verifying that intersectionRatio is included on all three.
+  </div>
+  <hr>
+  <h3>Inabox below the fold, and nested in friendly iframe </h3>
+  <div>
+    Now scroll slowly...
+  </div>
+  <div style="height: 100vh"></div>
+  <iframe
+      name="inabox-btf"
+      srcdoc="<iframe src='//ads.localhost:8000/examples/amphtml-ads/visibility-ad.a4a.html' width='300' height='200' scrolling='no' frameborder=0></iframe>"
+      scrolling="no"
+      marginwidth="0"
+      marginheight="0"
+      width="300" height="200">
+  </iframe>
+  <div>
+    <strong>Check Point 2: Below the fold visibility tracking</strong><br/>
+    You should have seen another 2 network requests: <code>visible</code>, <code>rootVisible</code> when the 2nd iframe enters viewport.
+    Then followed by <code>img2Visible</code> when the 2nd image in this iframe enters viewport.
+  </div>
+
+  <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
+</body>
+</html>

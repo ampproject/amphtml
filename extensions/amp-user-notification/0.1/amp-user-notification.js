@@ -16,19 +16,20 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
@@ -49,13 +50,11 @@ let GetResponseMetadataDef;
  */
 let UserNotificationDeferDef;
 
-
 /**
  * Defines underlying API for Notification components.
  * @interface
  */
 class NotificationInterface {
-
   /**
    * Promise that is resolved with a boolean on whether this Notification
    * should be shown or not.
@@ -83,7 +82,6 @@ class NotificationInterface {
  * @implements {NotificationInterface}
  */
 export class AmpUserNotification extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -96,7 +94,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     const deferred = new Deferred();
 
-    /** @private {Promise} */
+    /** @private {!Promise} */
     this.dialogPromise_ = deferred.promise;
 
     /** @private {?function()} */
@@ -123,7 +121,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @private {string} */
     this.storageKey_ = '';
 
-    /** @private {?Promise<!Storage>} */
+    /** @private {?Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = null;
 
     /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
@@ -138,11 +136,13 @@ export class AmpUserNotification extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
+    this.storagePromise_ = Services.storageForDoc(this.element);
 
-    this.elementId_ = user().assert(this.element.id,
-        'amp-user-notification should have an id.');
+    this.elementId_ = userAssert(
+      this.element.id,
+      'amp-user-notification should have an id.'
+    );
 
     this.storageKey_ = 'amp-user-notification:' + this.elementId_;
 
@@ -157,21 +157,20 @@ export class AmpUserNotification extends AMP.BaseElement {
     // Casts string to boolean using !!(string) then coerce that to
     // number using when we add them so we can see easily test
     // how many flags were set.  We want 0 or 1.
-    user().assert(
-        !!this.showIfHref_ +
-        !!this.showIfGeo_ +
-        !!this.showIfNotGeo_ <= 1,
-        'Only one "data-show-if-*" attribute allowed'
+    userAssert(
+      !!this.showIfHref_ + !!this.showIfGeo_ + !!this.showIfNotGeo_ <= 1,
+      'Only one "data-show-if-*" attribute allowed'
     );
 
     if (this.showIfGeo_) {
-      this.geoPromise_ =
-        this.isNotificationRequiredGeo_(this.showIfGeo_, true);
+      this.geoPromise_ = this.isNotificationRequiredGeo_(this.showIfGeo_, true);
     }
 
     if (this.showIfNotGeo_) {
-      this.geoPromise_ =
-        this.isNotificationRequiredGeo_(this.showIfNotGeo_, false);
+      this.geoPromise_ = this.isNotificationRequiredGeo_(
+        this.showIfNotGeo_,
+        false
+      );
     }
 
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
@@ -186,20 +185,26 @@ export class AmpUserNotification extends AMP.BaseElement {
     }
 
     const persistDismissal = this.element.getAttribute(
-        'data-persist-dismissal');
+      'data-persist-dismissal'
+    );
 
-    this.persistDismissal_ = (
-      persistDismissal != 'false' && persistDismissal != 'no');
+    this.persistDismissal_ =
+      persistDismissal != 'false' && persistDismissal != 'no';
 
-    this.registerAction('dismiss', () => this.dismiss(/*forceNoPersist*/false));
+    this.registerDefaultAction(
+      () => this.dismiss(/*forceNoPersist*/ false),
+      'dismiss'
+    );
     this.registerAction('optoutOfCid', () => this.optoutOfCid_());
 
     const userNotificationManagerPromise =
-        /** @type {!Promise<!UserNotificationManager>} */
-        (getServicePromiseForDoc(ampdoc, SERVICE_ID));
-    userNotificationManagerPromise.then(manager => {
+      /** @type {!Promise<!UserNotificationManager>} */
+      (getServicePromiseForDoc(ampdoc, SERVICE_ID));
+    userNotificationManagerPromise.then((manager) => {
       manager.registerUserNotification(
-          dev().assertString(this.elementId_), this);
+        dev().assertString(this.elementId_),
+        this
+      );
     });
   }
 
@@ -210,12 +215,11 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   isNotificationRequiredGeo_(geoGroup, includeGeos) {
-    return Services.geoForDocOrNull(this.element).then(geo => {
-      user().assert(geo,
-          'requires <amp-geo> to use promptIfUnknownForGeoGroup');
+    return Services.geoForDocOrNull(this.element).then((geo) => {
+      userAssert(geo, 'requires <amp-geo> to use promptIfUnknownForGeoGroup');
 
-      const matchedGeos = geoGroup.split(/,\s*/).filter(group => {
-        return geo.ISOCountryGroups.indexOf(group) >= 0;
+      const matchedGeos = geoGroup.split(/,\s*/).filter((group) => {
+        return geo.isInCountryGroup(group) == GEO_IN_GROUP.IN;
       });
 
       // Invert if includeGeos is false
@@ -232,8 +236,8 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   buildGetHref_(ampUserId) {
     const showIfHref = dev().assertString(this.showIfHref_);
-    return this.urlReplacements_.expandUrlAsync(showIfHref).then(href => {
-      const data = /** @type {!JsonObject} */({
+    return this.urlReplacements_.expandUrlAsync(showIfHref).then((href) => {
+      const data = /** @type {!JsonObject} */ ({
         'elementId': this.elementId_,
         'ampUserId': ampUserId,
       });
@@ -250,13 +254,13 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   getShowEndpoint_(ampUserId) {
     this.ampUserId_ = ampUserId;
-    return this.buildGetHref_(ampUserId).then(href => {
+    return this.buildGetHref_(ampUserId).then((href) => {
       const getReq = {
         credentials: 'include',
-        requireAmpResponseSourceOrigin: false,
       };
       return Services.xhrFor(this.win)
-          .fetchJson(href, getReq).then(res => res.json());
+        .fetchJson(href, getReq)
+        .then((res) => res.json());
     });
   }
 
@@ -266,12 +270,12 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    const enctype = this.element.getAttribute('enctype') ||
-      'application/json;charset=utf-8';
+    const enctype =
+      this.element.getAttribute('enctype') || 'application/json;charset=utf-8';
     return Services.xhrFor(this.win).fetchJson(
-        dev().assertString(this.dismissHref_),
-        this.buildPostDismissRequest_(enctype, this.elementId_,
-            this.ampUserId_));
+      dev().assertString(this.dismissHref_),
+      this.buildPostDismissRequest_(enctype, this.elementId_, this.ampUserId_)
+    );
   }
 
   /**
@@ -290,7 +294,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     return {
       method: 'POST',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: false,
       body,
       headers: {
         'Content-Type': enctype,
@@ -305,10 +308,13 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   onGetShowEndpointSuccess_(data) {
-    user().assert(typeof data['showNotification'] == 'boolean',
-        '`showNotification` ' +
+    userAssert(
+      typeof data['showNotification'] == 'boolean',
+      '`showNotification` ' +
         'should be a boolean. Got "%s" which is of type %s.',
-        data['showNotification'], typeof data['showNotification']);
+      data['showNotification'],
+      typeof data['showNotification']
+    );
 
     if (!data['showNotification']) {
       // If no notification needs to be shown, resolve the `dialogPromise_`
@@ -324,13 +330,15 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   optoutOfCid_() {
     return this.getCidService_()
-        .then(cid => cid.optOut())
-        .then(() => this.dismiss(/*forceNoPersist*/false), reason => {
-          dev().error(TAG,
-              'Failed to opt out of Cid', reason);
+      .then((cid) => cid.optOut())
+      .then(
+        () => this.dismiss(/*forceNoPersist*/ false),
+        (reason) => {
+          dev().error(TAG, 'Failed to opt out of Cid', reason);
           // If optout fails, dismiss notification without persisting.
-          this.dismiss(/*forceNoPersist*/true);
-        });
+          this.dismiss(/*forceNoPersist*/ true);
+        }
+      );
   }
 
   /**
@@ -339,7 +347,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   getAsyncCid_() {
-    return this.getCidService_().then(cid => {
+    return this.getCidService_().then((cid) => {
       // `amp-user-notification` is our cid scope, while we give it a resolved
       // promise for the 2nd argument so that the 3rd argument (the
       // persistentConsent) is the one used to resolve getting
@@ -349,8 +357,10 @@ export class AmpUserNotification extends AMP.BaseElement {
       // the notification or have the nagging notification sitting there
       // (to never resolve).
       return cid.get(
-          {scope: TAG, createCookieIfNotPresent: true},
-          Promise.resolve(), this.dialogPromise_);
+        {scope: TAG, createCookieIfNotPresent: true},
+        Promise.resolve(),
+        this.dialogPromise_
+      );
     });
   }
 
@@ -365,7 +375,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   shouldShow() {
-    return this.isDismissed().then(dismissed => {
+    return this.isDismissed().then((dismissed) => {
       if (dismissed) {
         // Consent has been accepted. Nothing more to do.
         return false;
@@ -390,13 +400,13 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   shouldShowViaXhr_() {
     return this.getAsyncCid_()
-        .then(this.getShowEndpoint_.bind(this))
-        .then(this.onGetShowEndpointSuccess_.bind(this));
+      .then(this.getShowEndpoint_.bind(this))
+      .then(this.onGetShowEndpointSuccess_.bind(this));
   }
 
   /** @override */
   show() {
-    setStyle(this.element, 'display', '');
+    toggle(this.element, true);
     this.element.classList.add('amp-active');
     this.getViewport().addToFixedLayer(this.element);
     return this.dialogPromise_;
@@ -408,16 +418,14 @@ export class AmpUserNotification extends AMP.BaseElement {
       return Promise.resolve(false);
     }
     return this.storagePromise_
-        .then(storage => storage.get(this.storageKey_))
-        .then(persistedValue => !!persistedValue, reason => {
+      .then((storage) => storage.get(this.storageKey_))
+      .then(
+        (persistedValue) => !!persistedValue,
+        (reason) => {
           dev().error(TAG, 'Failed to read storage', reason);
           return false;
-        });
-  }
-
-  /** @override */
-  activate() {
-    this.dismiss(/*forceNoPersist*/false);
+        }
+      );
   }
 
   /**
@@ -435,7 +443,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     if (this.persistDismissal_ && !forceNoPersist) {
       // Store and post.
-      this.storagePromise_.then(storage => {
+      this.storagePromise_.then((storage) => {
         storage.set(this.storageKey_, true);
       });
     }
@@ -445,14 +453,12 @@ export class AmpUserNotification extends AMP.BaseElement {
   }
 }
 
-
 /**
  * UserNotificationManager handles `amp-user-notification`
  * queuing and registration, as well as exposing the components
  * dismiss promise.
  */
 export class UserNotificationManager {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -466,20 +472,19 @@ export class UserNotificationManager {
     /** @private @const {!Object<string,!UserNotificationDeferDef>} */
     this.deferRegistry_ = Object.create(null);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.ampdoc);
-
     /** @private @const {!Promise} */
     this.documentReadyPromise_ = this.ampdoc.whenReady();
 
     /** @private @const {!Promise} */
     this.managerReadyPromise_ = Promise.all([
-      this.viewer_.whenFirstVisible(),
+      this.ampdoc.whenFirstVisible(),
       this.documentReadyPromise_,
     ]);
 
-    this.notificationUiManagerPromise_ =
-        getServicePromiseForDoc(this.ampdoc, NOTIFICATION_UI_MANAGER);
+    this.notificationUiManagerPromise_ = getServicePromiseForDoc(
+      this.ampdoc,
+      NOTIFICATION_UI_MANAGER
+    );
   }
 
   /**
@@ -520,18 +525,24 @@ export class UserNotificationManager {
     // Compose the registered notifications into a promise queue
     // that blocks until one notification is dismissed.
     return this.managerReadyPromise_
-        .then(() => userNotification.shouldShow())
-        .then(shouldShow => {
-          if (shouldShow) {
-            return this.notificationUiManagerPromise_.then(manager => {
-              return manager.registerUI(
-                  userNotification.show.bind(userNotification));
-            });
-          }
-        })
-        .then(deferred.resolve.bind(this, userNotification))
-        .catch(rethrowAsync.bind(null,
-            'Notification service failed amp-user-notification', id));
+      .then(() => userNotification.shouldShow())
+      .then((shouldShow) => {
+        if (shouldShow) {
+          return this.notificationUiManagerPromise_.then((manager) => {
+            return manager.registerUI(
+              userNotification.show.bind(userNotification)
+            );
+          });
+        }
+      })
+      .then(deferred.resolve.bind(this, userNotification))
+      .catch(
+        rethrowAsync.bind(
+          null,
+          'Notification service failed amp-user-notification',
+          id
+        )
+      );
   }
 
   /**
@@ -549,10 +560,9 @@ export class UserNotificationManager {
     const deferred = new Deferred();
     const {promise, resolve} = deferred;
 
-    return this.deferRegistry_[id] = {promise, resolve};
+    return (this.deferRegistry_[id] = {promise, resolve});
   }
 }
-
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -562,9 +572,8 @@ export function installUserNotificationManagerForTesting(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, SERVICE_ID, UserNotificationManager);
 }
 
-
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerServiceForDoc(SERVICE_ID, UserNotificationManager);
   AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
   AMP.registerElement(TAG, AmpUserNotification, CSS);

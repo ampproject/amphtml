@@ -20,7 +20,7 @@ tags: {  # amp-access
     name: "amp-access"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -32,22 +32,20 @@ tags: {  # amp-access (json)
   unique: true
   mandatory_parent: "HEAD"
   requires_extension: "amp-access"
-  satisfies: "amp-access extension .json script"
-  excludes: "amp-subscriptions extension .json script"
   attrs: {
     name: "id"
     mandatory: true
     value: "amp-access"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
   }
+  attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

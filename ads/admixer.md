@@ -19,10 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="admixer"
-    data-sizes="[[300,250]]"
-    data-zone="2eb6bd58-865c-47ce-af7f-a918108c3fd2">
+<amp-ad
+  width="300"
+  height="250"
+  type="admixer"
+  data-sizes="[[300,250]]"
+  data-zone="2eb6bd58-865c-47ce-af7f-a918108c3fd2"
+>
 </amp-ad>
 ```
 
@@ -30,11 +33,10 @@ limitations under the License.
 
 For configuration semantics, see [Admixer documentation](http://docs.admixer.net/3/en/topic/amp-configuration).
 
-### Required parameters 
+### Required parameters
 
 - `data-zone`
 
-### Optional parameters 
+### Optional parameters
 
 - `data-sizes`
-

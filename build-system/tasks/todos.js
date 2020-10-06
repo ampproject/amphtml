@@ -15,19 +15,19 @@
  */
 'use strict';
 
-const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const log = require('fancy-log');
-const request = BBPromise.promisify(require('request'));
-const srcGlobs = require('../config').presubmitGlobs;
+const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
+const util = require('util');
+
+const request = util.promisify(require('request'));
 
 const {GITHUB_ACCESS_TOKEN} = process.env;
 
 /** @type {!Object<string, !Promise<number>>} */
 const issueCache = Object.create(null);
-
 
 /**
  * Test if a file's contents contains closed TODOs.
@@ -35,11 +35,11 @@ const issueCache = Object.create(null);
  * @param {!File} file file is a vinyl file object
  * @return {Promise<number>} Number of found closed TODOs.
  */
-function findClosedTodosInFile(file) {
+async function findClosedTodosInFile(file) {
   const contents = file.contents.toString();
   const todos = contents.match(/TODO\([^\)]*\)/g);
   if (!todos || todos.length == 0) {
-    return Promise.resolve(0);
+    return 0;
   }
 
   const promises = [];
@@ -54,18 +54,20 @@ function findClosedTodosInFile(file) {
   }
 
   if (promises.length == 0) {
-    return Promise.resolve(0);
+    return 0;
   }
-  return Promise.all(promises).then(results => {
-    return results.reduce(function(acc, v) {
+
+  try {
+    const results = await Promise.all(promises);
+
+    return await results.reduce(function (acc, v) {
       return acc + v;
     }, 0);
-  }).catch(function(error) {
+  } catch (error) {
     log(colors.red('Failed in', file.path, error, error.stack));
     return 0;
-  });
+  }
 }
-
 
 /**
  * @param {!File} file file is a vinyl file object
@@ -77,17 +79,17 @@ function reportClosedIssue(file, issueId, todo) {
   if (issueCache[issueId] !== undefined) {
     return issueCache[issueId];
   }
-  return issueCache[issueId] = githubRequest('/issues/' + issueId)
-      .then(response => {
-        const issue = JSON.parse(response.body);
-        const value = issue.state == 'closed' ? 1 : 0;
-        if (value) {
-          log(colors.red(todo, 'in', file.path));
-        }
-        return value;
-      });
+  return (issueCache[issueId] = (async () => {
+    const response = await githubRequest('/issues/' + issueId);
+    // test comment
+    const issue = JSON.parse(response.body);
+    const value = issue.state == 'closed' ? 1 : 0;
+    if (value) {
+      log(colors.red(todo, 'in', file.path));
+    }
+    return value;
+  })());
 }
-
 
 /**
  * @param {string} path
@@ -116,26 +118,33 @@ function githubRequest(path, opt_method, opt_data) {
   return request(options);
 }
 
-
 /**
  * todos:find-closed task.
+ * @return {!Promise}
  */
-function findClosedTodosTask() {
+function todosFindClosed() {
   let foundCount = 0;
-  return gulp.src(srcGlobs)
-      .pipe(through2.obj(function(file, enc, cb) {
-        findClosedTodosInFile(file).then(function(count) {
+  return gulp
+    .src(srcGlobs)
+    .pipe(
+      through2.obj(function (file, enc, cb) {
+        (async () => {
+          const count = await findClosedTodosInFile(file);
           foundCount += count;
           cb();
-        });
-      }))
-      .on('end', function() {
-        if (foundCount > 0) {
-          log(colors.red('Found closed TODOs: ', foundCount));
-          process.exit(1);
-        }
-      });
+        })();
+      })
+    )
+    .on('end', function () {
+      if (foundCount > 0) {
+        log(colors.red('Found closed TODOs: ', foundCount));
+        process.exit(1);
+      }
+    });
 }
 
+module.exports = {
+  todosFindClosed,
+};
 
-gulp.task('todos:find-closed', 'Find closed TODOs', findClosedTodosTask);
+todosFindClosed.description = 'Find closed TODOs';

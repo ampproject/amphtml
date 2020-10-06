@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-
+import {Services} from '../../../src/services';
+import {createLoaderLogo} from './facebook-loader';
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -26,7 +27,6 @@ import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
 class AmpFacebook extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -35,16 +35,15 @@ class AmpFacebook extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private @const {string} */
-    this.dataLocale_ = element.hasAttribute('data-locale') ?
-      element.getAttribute('data-locale') :
-      dashToUnderline(window.navigator.language);
+    this.dataLocale_ = element.hasAttribute('data-locale')
+      ? element.getAttribute('data-locale')
+      : dashToUnderline(window.navigator.language);
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
     /** @private {number} */
     this.toggleLoadingCounter_ = 0;
-
   }
 
   /** @override */
@@ -60,11 +59,15 @@ class AmpFacebook extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://facebook.com', opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), 'https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.preload(
-        'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js', 'script');
-    preloadBootstrap(this.win, this.preconnect);
+    preconnect.preload(
+      this.getAmpDoc(),
+      'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
+      'script'
+    );
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -76,14 +79,22 @@ class AmpFacebook extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
+    if (this.element.hasAttribute('data-allowfullscreen')) {
+      iframe.setAttribute('allowfullscreen', 'true');
+    }
     // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data['height']);
-    }, /* opt_is3P */true);
+    listenFor(
+      iframe,
+      'embed-size',
+      (data) => {
+        this.forceChangeHeight(data['height']);
+      },
+      /* opt_is3P */ true
+    );
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleFacebookMessages_.bind(this)
+      this.win,
+      'message',
+      this.handleFacebookMessages_.bind(this)
     );
     this.toggleLoading(true);
     if (getMode().test) {
@@ -107,8 +118,9 @@ class AmpFacebook extends AMP.BaseElement {
       return;
     }
 
-    const parsedEventData = isObject(eventData) ?
-      eventData : tryParseJson(eventData);
+    const parsedEventData = isObject(eventData)
+      ? eventData
+      : tryParseJson(eventData);
     if (!parsedEventData) {
       return;
     }
@@ -118,6 +130,11 @@ class AmpFacebook extends AMP.BaseElement {
         this.toggleLoadingCounter_++;
       }
     }
+  }
+
+  /** @override */
+  createLoaderLogoCallback() {
+    return createLoaderLogo(this.element);
   }
 
   /** @override */
@@ -138,7 +155,6 @@ class AmpFacebook extends AMP.BaseElement {
   }
 }
 
-
-AMP.extension('amp-facebook', '0.1', AMP => {
+AMP.extension('amp-facebook', '0.1', (AMP) => {
   AMP.registerElement('amp-facebook', AmpFacebook);
 });

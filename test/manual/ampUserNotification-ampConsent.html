@@ -228,33 +228,29 @@
 </head>
 <body>
 
-  <amp-consent layout='nodisplay'>
+  <amp-consent id='ABC' layout='nodisplay'>
     <script type="application/json">{
       "consents": {
-        "DEF": {
-          "checkConsentHref": "http://localhost:8000/get-consent-v1",
-          "promptUI": "ui1",
-          "revokeUI": "revoke"
-        },
-        "ABC": {
+        "_config_": {
           "checkConsentHref": "http://localhost:8000/get-consent-v1",
           "promptUI": "ui2"
         }
-      }
+      },
+      "postPromptUI": "postPromptUI"
     }</script>
-    <div id="ui1">
-      Learn more.
-      <button on="tap:amp-consent.accept" role="button">Accept</button>
-      <button on="tap:amp-consent.reject" role="button">Reject</button>
-    </div>
-      <div id="ui2">
+    <div id="ui2">
       Learn more V2.
-      <button on="tap:amp-consent.accept" role="button">Accept</button>
-      <button on="tap:amp-consent.reject" role="button">Reject</button>
+      <button on="tap:ABC.accept" role="button">Accept</button>
+      <button on="tap:ABC.reject" role="button">Reject</button>
+      <button on="tap:ABC.dismiss" role="button">Dismiss</button>
     </div>
     <div id="revoke">
       Revoke.
       <button role="button">Ahahaha</button>
+    </div>
+    <div id="postPromptUI">
+      Post Prompt UI
+      <button on="tap:ABC.prompt(consent=_config_)" role="button">Manage</button>
     </div>
   </amp-consent>
 

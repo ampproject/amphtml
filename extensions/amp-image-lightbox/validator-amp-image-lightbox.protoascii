@@ -15,13 +15,12 @@
 #
 tags: {  # amp-image-lightbox
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-image-lightbox"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -36,6 +35,8 @@ tags: {  # amp-image-lightbox
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
+  deprecation: "amp-image-lightbox cannot be properly positioned in emails and will soon be invalid in AMP4EMAIL."
+  deprecation_url: "https://github.com/ampproject/amphtml/issues/23170"
 }
 tags: {  # <amp-image-lightbox>
   html_format: AMP

@@ -16,7 +16,6 @@
 
 import {Observable} from '../observable';
 
-
 export class VideoSessionManager {
   /**
    * Creates an instance of VideoSessionManager.
@@ -56,6 +55,7 @@ export class VideoSessionManager {
 
   /**
    * Get the current session state.
+   * @return {*} TODO(#23582): Specify return type
    */
   isSessionActive() {
     return this.isSessionActive_;

@@ -38,7 +38,7 @@ tags: {  # <amp-date-countdown>
   }
   attrs: {
     name: "end-date"
-    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
     value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])"
   }
   attrs: {
@@ -65,17 +65,27 @@ tags: {  # <amp-date-countdown>
     value_regex: "-?\\d+"
   }
   attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
+  attrs: {
+    name: "timeleft-ms"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d+"
+  }
+  attrs: {
     name: "timestamp-ms"
-    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
     value_regex: "\\d{13}"
   }
   attrs: {
     name: "timestamp-seconds"
-    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
     value_regex: "\\d{10}"
   }
   attrs: {
     name: "when-ended"
+    value_casei: "continue"
     value_casei: "stop"
   }
   attr_lists: "extended-amp-global"

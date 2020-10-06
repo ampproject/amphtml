@@ -1,87 +1,75 @@
 # Release Schedule
 
-- [Detailed schedule](#detailed-schedule)
-- [Determining if your change is in production](#determining-if-your-change-is-in-production)
-- [Cherry picks](#cherry-picks)
-	- [Cherry pick criteria](#cherry-pick-criteria)
-	- [Process for requesting a cherry pick](#process-for-requesting-a-cherry-pick)
-- [AMP Dev Channel](#amp-dev-channel)
-- [Release cadence](#release-cadence)
+- [Release Channels](#release-channels)
+  - [Nightly](#nightly)
+  - [Weekly](#weekly)
+    - [Experimental and Beta channels](#experimental-and-beta-channels)
+  - [Long-Term Stable (lts)](#long-term-stable-lts)
+- [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
+- [Release Cadence](#release-cadence)
+  - [Detailed schedule](#detailed-schedule)
+  - [Release Freezes](#release-freezes)
 
-A new release of AMP is pushed to all AMP pages every week on Tuesday.  **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
+A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
 
-["Type: Release" GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) are used to track the status of current and past releases (from the initial cut to canary testing to production).  Announcements about releases are made on the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+## Release Channels
 
-## Detailed schedule
+The AMP runtime and extensions are provided through a variety of different _release channels_. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown of how and when code from the [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository makes it into release builds.
 
-We try to stick to this schedule as closely as possible, though complications may cause delays.  You can track the latest status about any release in the ["Type: Release" GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+To determine if a PR has been included in any of the following release channels, look for the GitHub labels _PR Use: In Canary_, _PR Use: In Production_, or _PR Use: In LTS_ (see the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) for more details).
 
-- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): a new canary release build is created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and is pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel)
-- Wednesday:  we check bug reports for Dev Channel users and if everything looks fine, we push the canary to 1% of AMP pages
-- Thursday-Monday: we continue to monitor error rates and bug reports for Dev Channel users and the 1% of pages with the canary build
-- Tuesday (about a week after the canary release build was cut): the canary is fully pushed to production (i.e. all AMP pages will now use this build)
+### Nightly
 
-## Determining if your change is in production
+The **nightly** release channel is updated (as its name indicates) every weeknight. This process is automated, and there is no guarantee that any given nightly release is free of bugs or other issues. Each night after midnight (Pacific Time), the last "green" commit from the day is selected to be the release cutoff point. A green build indicates that all automated tests have passed on that build.
 
-You can determine what is in a given build using one of the following:
+The nightly release provides a mechanism to detect and resolve issues quickly and before they reach the more traffic-heavy _weekly_ release channels. It also serves to reduce the number of users affected by newly introduced issues.
 
-- The ["Type: Release" GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) for each release build will include a link to the specific [release page](https://github.com/ampproject/amphtml/releases) which lists the PRs in that release.
-  - The most recent "Type: Release" issue with `(Production)` in the title is the build currently in production.
-  - The "Type: Release" issue with `(Canary)` in the title tracks the current canary.
-- The [PR Use: In Canary](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20Canary%22) and [PR Use: In Production](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20Production%22) labels are added to PRs when they've made it into a canary/production build.  There may be a delay between when the build is created and when it goes live.
+It is possible to opt into the **nightly** channel, to test pull requests that were merged in the past few days. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
 
-## Cherry picks
+### Weekly
 
-We have a well-defined process for handling requests for changes to the canary release build or to the current production release build.  These changes are known as "cherry picks".
+The _weekly_ release channels are considered to be the primary "evergreen" release channels. Each week the **beta** release from the previous week is promoted to the **stable** release channel, and the last **nightly** release from the previous week is promoted to the **experimental** and **beta** release channels (see the [detailed schedule](#detailed-schedule)).
 
-### Cherry pick criteria
+There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit. However, the **experimental** channel uses the _canary_ configuration while the **beta** channel uses the _production_ configuration. The _canary_ configuration enables experimental components and features that may be turned off in _production_. It is possible to opt into the **experimental** or **beta** channels via the [experiments page](https://cdn.ampproject.org/experiments.html).
 
-**The bar for getting a cherry pick into canary or production is very high** because our goal is to produce high quality launches on a predictable schedule.
+The **stable** release channel is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release channel is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (with the possibility of cherry-picks to fix last-minute issues; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)).
 
-**Keep in mind that performing a cherry pick requires a significant amount of work from you and the onduty person** and they can take a long time to process.
+#### Beta and Experimental channels
 
-- In general only fixes for [P0 issues](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md) (causing "an outage or a critical production issue") may be cherry picked.  P0 issues are those that:
-  - cause privacy or security issues
-  - cause user data loss
-  - break existing AMP web pages in a significant way
-  - or would otherwise cause a significant harm to AMP's reputation if left unresolved
-- Regressions found in the canary that are not P0 *may* be approved if they can be resolved with a rollback.  Fixes other than rollbacks--no matter how simple they may seem--will not be approved because these can cause cascading problems and delay the release of canary to production for everyone.
+The _Beta_ and _Experimental Channels_ are pre-release candidates for the next Stable release of AMP. Every Tuesday (except for weeks where there is a [release freeze](#release-freezes)), last week's **nightly** is promoted to the developer opt-in channels for **beta** and **experimental**. Following a 1-day period where we verify that no feature or performance regressions were introduced in these channels, we promote this release on Wednesday to a small portion of traffic. This same release is then promoted to the **stable** channel on Tuesday the following week.
 
-### Process for requesting a cherry pick
+It is possible to opt into these channels. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
 
-Use the following process to request a cherry pick if you have a change that you believe meets the [cherry pick criteria](#cherry-pick-criteria).
+Opting into the _Beta Channel_ is intended for:
 
-If you run into any issues or have any questions when requesting a cherry pick, please use the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+- testing and playing with the version of the AMP runtime that will be released soon
+- using in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
 
-- Ensure there is a GitHub issue filed for the problem that needs to be resolved *before* filing the cherry pick request issue.
-- File the cherry pick request issue using the [Cherry pick request template](https://github.com/ampproject/amphtml/issues/new?title=%F0%9F%8C%B8%20Cherry%20pick%20request%20for%20%3CYOUR_ISSUE_NUMBER%3E%20into%20%3CRELEASE_ISSUE_NUMBER%3E%20%28Pending%29&template=cherry_pick_template.md).  Follow the instructions in the template, providing all of the requested data.  **Make sure you fill out this issue completely or your cherry pick may not be seen or acted upon.**
-- **The [TL](../GOVERNANCE.md) or their designate is the only person who may approve cherry picks.**  The TL/designate will update the issue with their decision about whether your fix warrants a cherry pick.  You should be available to respond to any questions the TL/designate has regarding your request.
-- If the TL/designate approves the cherry pick, the person currently handling releases (onduty) will work with you to ensure the cherry pick is made.
-- **Once the cherry pick is made you are responsible for verifying that the cherry pick you requested fixes the reported issue and that it does not cause other issues.**
+The _Experimental Channel_ is intended for:
 
-**If you are requesting a cherry pick to fix an issue in production** it is very likely you will *also* need a cherry pick into the canary release since otherwise the problem your cherry pick addresses would reappear as soon as the canary release is pushed to production.  Work with the onduty person to determine if you need a cherry pick to both and make sure your cherry pick request issue reflects what you determine.
+- testing and playing with new features not yet available to all users
+- using in Quality Assurance (QA) to ensure that your site is compatible with upcoming features of AMP that are still under development
 
+The _Experimental Channel_ **may be less stable** and it may contain features not yet available to all users.
 
-## AMP Dev Channel
+### Long-Term Stable (lts)
 
-The AMP Dev Channel is a way to opt a browser into using the canary release build of the AMP JS libraries.  The Dev Channel **may be less stable** and it may contain features not yet available to all users.
+The **lts** release channel provides a previous **stable** build for one-month intervals. On the second Monday of each month, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
-Opting into the Dev Channel is great to:
+In the event that the second Monday of the month falls on a holiday, the promotion will be performed after the end of the [release freeze](#release-freezes).
 
-- test and play with new features not yet available to all users
-- use in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
+Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the longer cycle, the **lts** release may be as much as seven weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
 
-When you opt into the AMP Dev Channel you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the AMP Dev Channel version of AMP.
+## Determining if your change is in a release
 
-To opt your browser into the AMP Dev Channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Dev Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
+[_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) are used to track the status of current and past releases; from the initial cut, to testing via **experimantal**/**beta** channels, to eventual release via the **stable** and **lts** channels. Announcements about releases are made on the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 
-**If you find an issue that appears to only occur in the Dev Channel version of AMP**:
-- please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem
-  - include a note that the problem is new to the Dev Channel build so that it can be properly prioritized
-  - include a URL to a page that reproduces the problem
-- ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the Dev Channel version to production if needed
+You can determine what changes are in a given build using one of the following:
 
-## Release cadence
+- The [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) for each release build will include a link to the specific [release page](https://github.com/ampproject/amphtml/releases) listing the changes contained in that release.
+- The [_PR Use: In Beta / Experimental_](https://github.com/ampproject/amphtml/issues?q=label%3A%22PR+use%3A+In+Beta+%2F+Experimental%22), [_PR Use: In Stable_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20Production%22), and [_PR Use: In LTS_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20LTS%22) labels are added to PRs when they've made it into a _weekly_ or **lts** build. There may be a delay between when the build is created and when the label is added.
+
+## Release Cadence
 
 We are intentionally cautious with our release cadence.
 
@@ -91,4 +79,35 @@ In determining how often we should push new versions of AMP to everyone, we have
 - cache busting that might happen when we push a new version
 - the desire to get new features out quickly
 
-After considering all of these factors we have arrived at the 1-2 week push cycle.  Thus far we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
+After considering all of these factors, we have arrived at the 1-2 week push cycle. Thus far, we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
+
+### Detailed schedule
+
+We try to stick to this schedule as closely as possible, though complications may cause delays. You can track the latest status about any release in the [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+
+- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
+- Wednesday: we check bug reports for _Experimental Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
+- Thursday-Monday: we continue to monitor error rates and bug reports for _Experimental Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
+- Tuesday the following week: the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)
+
+### Release Freezes
+
+There are occasions when we will skip a release of AMP to production, known as a release freeze.
+
+If a one week release freeze is announced for Week N:
+
+- The previous week's release build remains in **experimental**/**beta** for an extra week, i.e. the release cut in Week N-1 is not pushed to **stable** in Week N as would normally be the case. Instead, it will be pushed to **stable** in Week N+1.
+- A new release build is _not_ made in the freeze week (Week N).
+- The normal schedule will resume in Week N+1, i.e. **experimental**/**beta** are cut in Week N+1 and promoted to **stable** in Week N+2.
+- If the **stable** release promoted during Week N-1 was originally scheduled to be promoted to **lts** during Week N, it will now be promoted to **lts** on the Monday of Week N+1.
+- **nightly** releases are still generated and promoted, as they are fully automated.
+
+A release freeze may happen due to:
+
+- Times when there are not enough people available to push the AMP release to **stable** and monitor it. Currently most of the people performing AMP releases are based in the United States, so this will usually be the weeks of the major US holidays of Independence Day (July 4), Thanksgiving (fourth Thursday in November), Christmas (25 December) and New Year's Eve/Day (December 31/January 1).
+- An emergency situation, such as a security or privacy issue as determined by the [Technical Steering Committee (TSC)](https://github.com/ampproject/meta-tsc) or the people performing the release.
+- Other situations when stability of the codebase is deemed to be particularly important as determined by the TSC.
+
+In all cases except emergencies the release freezes will be announced at least one month in advance.
+
+Note that unless otherwise announced a release freeze does not imply a code freeze. Code may still be written, reviewed and merged during a release freeze.

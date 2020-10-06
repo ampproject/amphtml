@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {BaseTemplate} from '../../../src/base-template';
+import {Purifier} from '../../../src/purifier/purifier';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
+import {getService, registerServiceBuilder} from '../../../src/service';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
-import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
+import {rewriteAttributeValue} from '../../../src/url-rewrite';
+import {user} from '../../../src/log';
+import mustache from '../../../third_party/mustache/mustache';
+
+const TAG = 'amp-mustache';
 
 /**
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
  *
- * @private Visible for testing.
- * @extends {BaseTemplate$$module$src$service$template_impl}
+ * @visibleForTesting
  */
-export class AmpMustache extends AMP.BaseTemplate {
+export class AmpMustache extends BaseTemplate {
   /**
    * @param {!Element} element
    * @param {!Window} win
@@ -37,8 +39,16 @@ export class AmpMustache extends AMP.BaseTemplate {
   constructor(element, win) {
     super(element, win);
 
+    registerServiceBuilder(win, 'purifier', function () {
+      return new Purifier(win.document, dict(), rewriteAttributeValue);
+    });
+    /** @private @const {!Purifier} */
+    this.purifier_ = getService(win, 'purifier');
+
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizier(purifyTagsForTripleMustache);
+    mustache.setUnescapedSanitizer((value) =>
+      this.purifier_.purifyTagsForTripleMustache(value)
+    );
   }
 
   /** @override */
@@ -52,14 +62,32 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
-    const content = templateContentClone(this.element);
-    this.processNestedTemplates_(content);
-    const container = this.element.ownerDocument.createElement('div');
-    container.appendChild(content);
-
     /** @private @const {string} */
-    this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_);
+    this.template_ = this.initTemplateString_();
+
+    try {
+      mustache.parse(this.template_, /* tags */ undefined);
+    } catch (err) {
+      user().error(TAG, err.message, this.element);
+    }
+  }
+
+  /**
+   * @private
+   * @return {string}
+   */
+  initTemplateString_() {
+    if (this.element.tagName == 'TEMPLATE') {
+      const content = templateContentClone(this.element);
+      this.processNestedTemplates_(content);
+      const container = this.element.ownerDocument.createElement('div');
+      container.appendChild(content);
+      return container./*OK*/ innerHTML;
+    } else if (this.element.tagName == 'SCRIPT') {
+      return this.element.textContent;
+    }
+
+    return '';
   }
 
   /**
@@ -77,7 +105,7 @@ export class AmpMustache extends AMP.BaseTemplate {
       const key = `__AMP_NESTED_TEMPLATE_${index}`;
 
       // Store the nested template markup, keyed by index.
-      this.nestedTemplates_[key] = template./*OK*/outerHTML;
+      this.nestedTemplates_[key] = template./*OK*/ outerHTML;
 
       // Replace the markup with a pointer.
       const pointer = this.element.ownerDocument.createTextNode(`{{{${key}}}}`);
@@ -86,40 +114,52 @@ export class AmpMustache extends AMP.BaseTemplate {
   }
 
   /** @override */
+  setHtml(html) {
+    const wrapped = `<div>${html}</div>`;
+    const purified = this.tryUnwrap(this.purifyAndSetHtml_(wrapped));
+    return this.unwrapChildren(purified);
+  }
+
+  /** @override */
   render(data) {
-    let html = data;
-    if (!this.viewerCanRenderTemplates()) {
-      let mustacheData = data;
-      // Also render any nested templates.
-      if (typeof data === 'object') {
-        mustacheData = Object.assign({}, data, this.nestedTemplates_);
-      }
-      html = mustacheRender(this.template_, mustacheData);
-    }
-    return this.serializeHtml_(html);
+    return this.tryUnwrap(this.render_(data));
+  }
+
+  /** @override */
+  renderAsString(data) {
+    return this.render_(data)./*OK*/ innerHTML;
   }
 
   /**
-   * Sanitizes the html and inserts it in the DOM.
+   * @param {!JsonObject|string} data
+   * @return {!Element}
+   * @private
+   */
+  render_(data) {
+    let mustacheData = data;
+    // Also render any nested templates.
+    if (typeof data === 'object') {
+      mustacheData = {...data, ...this.nestedTemplates_};
+    }
+    const html = mustache.render(
+      this.template_,
+      mustacheData,
+      /* partials */ undefined
+    );
+    return this.purifyAndSetHtml_(html);
+  }
+
+  /**
    * @param {string} html
    * @return {!Element}
    * @private
    */
-  serializeHtml_(html) {
-    const sanitized = purifyHtml(html);
-    const root = this.win.document.createElement('div');
-    root./*OK*/innerHTML = sanitized;
-    return this.unwrap(root);
+  purifyAndSetHtml_(html) {
+    const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
+    return body.firstElementChild;
   }
 }
 
-// First, unregister template with same type to avoid "Duplicate template type"
-// error due to multiple versions of amp-mustache in the same unit test run.
-// This is due to transpilation of test code to ES5 which uses require() and,
-// unlike import, causes side effects (AMP.registerTemplate) to be run.
-// For unit tests, it doesn't actually matter which version of amp-mustache is
-// registered. Integration tests should only have one script version included.
-if (getMode().test) {
-  Services.templatesFor(window).unregisterTemplate('amp-mustache');
-}
-AMP.registerTemplate('amp-mustache', AmpMustache);
+AMP.extension(TAG, '0.2', function (AMP) {
+  AMP.registerTemplate(TAG, AmpMustache);
+});

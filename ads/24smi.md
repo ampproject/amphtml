@@ -21,10 +21,12 @@ Provides support for [24smi](https://partner.24smi.info/) widgets.
 ## Example
 
 ```html
-<amp-embed width="250" height="250"
-    type="24smi"
-    src="https://jsn.24smi.net/c/2/11232.js">
-</amp-embed>
+<amp-embed
+  width="250"
+  height="250"
+  type="24smi"
+  data-blockid="11232"
+></amp-embed>
 ```
 
 ## Configuration

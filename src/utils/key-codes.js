@@ -26,3 +26,20 @@ export const KeyCodes = {
   RIGHT_ARROW: 39,
   DOWN_ARROW: 40,
 };
+
+/**
+ * @enum {string}
+ */
+export const Keys = {
+  ENTER: 'Enter',
+  ESCAPE: 'Escape',
+  SPACE: ' ',
+  LEFT_ARROW: 'ArrowLeft',
+  UP_ARROW: 'ArrowUp',
+  RIGHT_ARROW: 'ArrowRight',
+  DOWN_ARROW: 'ArrowDown',
+  TAB: 'Tab',
+  BACKSPACE: 'Backspace',
+  HOME: 'Home',
+  END: 'End',
+};

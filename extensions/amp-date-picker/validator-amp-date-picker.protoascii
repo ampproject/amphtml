@@ -62,12 +62,14 @@ tags: {
     name: "mode"
     mandatory: true
     value_casei: "overlay"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
     value_casei: "single"
   }
   attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-overlay-mode-attributes"
   attr_lists: "amp-date-picker-single-type-attributes"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -114,6 +116,7 @@ tags: {
     name: "mode"
     mandatory: true
     value_casei: "overlay"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -121,6 +124,7 @@ tags: {
     value_casei: "range"
   }
   attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-overlay-mode-attributes"
   attr_lists: "amp-date-picker-range-type-attributes"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -131,6 +135,10 @@ tags: {
 
 attr_lists: {
   name: "amp-date-picker-common-attributes"
+  attrs: {
+    name: "allow-blocked-end-date"
+    value: ""
+  }
   attrs: {
     name: "allow-blocked-ranges"
     value: ""
@@ -163,24 +171,44 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "hide-keyboard-shortcuts-panel"
+    value: ""
+  }
+  attrs: {
     name: "src"
     value_url: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "week-day-format" }
+  # amp-bind
+  attrs: { name: "[src]" }
+  attrs: { name: "[max]" }
+  attrs: { name: "[min]" }
 }
 
 attr_lists: {
   name: "amp-date-picker-range-type-attributes"
+  attrs: { name: "end-date" }
   attrs: { name: "end-input-selector" }
+  attrs: {
+    name: "maximum-nights"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "minimum-nights"
+    value_regex: "[0-9]+"
+  }
+  attrs: { name: "start-date" }
   attrs: { name: "start-input-selector" }
+
 }
 
 attr_lists: {
   name: "amp-date-picker-single-type-attributes"
+  attrs: { name: "date" }
   attrs: { name: "input-selector" }
 }
 
@@ -188,6 +216,14 @@ attr_lists: {
   name: "amp-date-picker-static-mode-attributes"
   attrs: {
     name: "fullscreen"
+    value: ""
+  }
+}
+
+attr_lists: {
+  name: "amp-date-picker-overlay-mode-attributes"
+  attrs: {
+    name: "touch-keyboard-editable"
     value: ""
   }
 }

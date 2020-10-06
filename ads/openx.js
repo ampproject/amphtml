@@ -52,12 +52,12 @@ export function openx(global, data) {
   // conversion rules are explained in openx.md.
   if (data.dfpSlot) {
     // Anything starting with 'dfp' gets promoted.
-    openxData.forEach(openxKey => {
+    openxData.forEach((openxKey) => {
       if (openxKey in dfpData && openxKey !== 'dfp') {
         if (startsWith(openxKey, 'dfp')) {
           // Remove 'dfp' prefix, lowercase the first letter.
           let fixKey = openxKey.substring(3);
-          fixKey = fixKey.substring(0,1).toLowerCase() + fixKey.substring(1);
+          fixKey = fixKey.substring(0, 1).toLowerCase() + fixKey.substring(1);
           dfpData[fixKey] = data[openxKey];
         }
         delete dfpData[openxKey];
@@ -82,7 +82,8 @@ export function openx(global, data) {
       } else {
         standardImplementation(global, jssdk, dfpData);
       }
-    } else if (data.auid) { // Just show an ad.
+    } else if (data.auid) {
+      // Just show an ad.
       global.OX_cmds = [
         () => {
           const oxRequest = OX();
@@ -102,7 +103,8 @@ export function openx(global, data) {
       ];
       loadScript(global, jssdk);
     }
-  } else if (data.dfpSlot) { // Fall back to a DFP ad.
+  } else if (data.dfpSlot) {
+    // Fall back to a DFP ad.
     doubleclick(global, dfpData);
   }
 }
@@ -136,8 +138,9 @@ function advanceImplementation(global, jssdk, dfpData, data) {
     callback: () => {
       const priceMap = global.oxhbjs && global.oxhbjs.getPriceMap();
       const slot = priceMap && priceMap['c'];
-      const targeting = slot ?
-        `${slot.size}_${slot.price},hb-bid-${slot.bid_id}` : 'none_t';
+      const targeting = slot
+        ? `${slot.size}_${slot.price},hb-bid-${slot.bid_id}`
+        : 'none_t';
       dfpData.targeting = dfpData.targeting || {};
       assign(dfpData.targeting, {oxb: targeting});
       doubleclick(global, dfpData);
@@ -153,10 +156,10 @@ function advanceImplementation(global, jssdk, dfpData, data) {
  */
 function setCustomVars(oxRequest, customVars) {
   const customVarKeys = Object.keys(customVars);
-  customVarKeys.forEach(customVarKey => {
+  customVarKeys.forEach((customVarKey) => {
     const customVarValue = customVars[customVarKey];
     if (Array.isArray(customVarValue)) {
-      customVarValue.forEach(value => {
+      /** @type {!Array} */ (customVarValue).forEach((value) => {
         oxRequest.addVariable(customVarKey, value);
       });
     } else {
@@ -171,10 +174,11 @@ function setCustomVars(oxRequest, customVars) {
  */
 function filterCustomVar(customVars) {
   const filterPattern = /^[A-Za-z0-9._]{1,20}$/;
-  const filteredKeys = Object.keys(customVars)
-      .filter(key => filterPattern.test(key));
+  const filteredKeys = Object.keys(customVars).filter((key) =>
+    filterPattern.test(key)
+  );
   const filteredCustomVar = {};
-  filteredKeys.forEach(key => {
+  filteredKeys.forEach((key) => {
     filteredCustomVar[key.toLowerCase()] = customVars[key];
   });
   return filteredCustomVar;

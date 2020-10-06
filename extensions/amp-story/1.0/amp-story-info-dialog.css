@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 
+@import './amp-story-shadow-reset.css';
 @import './amp-story-share.css';
 
 .i-amphtml-story-info-dialog {
@@ -46,7 +47,7 @@
 }
 
 .i-amphtml-story-info-dialog.i-amphtml-story-info-dialog-visible::before {
-  opacity: 0.4 !important;
+  opacity: 0.55 !important;
   transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
@@ -57,6 +58,7 @@
   right: 0 !important;
   height: auto !important;
   background: #fff !important;
+  border-radius: 0 0 8px 8px !important;
   transform: translate3d(0, -100%, 0) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
   padding: 20px !important;

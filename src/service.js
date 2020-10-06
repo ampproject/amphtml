@@ -20,13 +20,9 @@
  * Invariant: Service getters never return null for registered services.
  */
 
-// src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
-
 import {Deferred} from './utils/promise';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {toWin} from './types';
-
 
 /**
  * Holds info about a service.
@@ -39,6 +35,7 @@ import {toWin} from './types';
  *   obj: (?Object),
  *   promise: (?Promise),
  *   resolve: (?function(!Object)),
+ *   reject: (?function((*))),
  *   context: (?Window|?./service/ampdoc-impl.AmpDoc),
  *   ctor: (?function(new:Object, !Window)|
  *          ?function(new:Object, !./service/ampdoc-impl.AmpDoc)),
@@ -46,14 +43,12 @@ import {toWin} from './types';
  */
 let ServiceHolderDef;
 
-
 /**
  * This interface provides a `dispose` method that will be called by
  * runtime when a service needs to be disposed of.
  * @interface
  */
 export class Disposable {
-
   /**
    * Instructs the service to release any resources it might be holding. Can
    * be called only once in the lifecycle of a service.
@@ -61,72 +56,18 @@ export class Disposable {
   dispose() {}
 }
 
-
-/**
- * This interface provides a `adoptEmbedWindow` method that will be called by
- * runtime for a new embed window.
- * @interface
- */
-export class EmbeddableService {
-
-  /**
-   * Instructs the service to adopt the embed window and add any necessary
-   * listeners and resources.
-   * @param {!Window} unusedEmbedWin
-   */
-  adoptEmbedWindow(unusedEmbedWin) {}
-}
-
-
-/**
- * Returns a service with the given id. Assumes that it has been registered
- * already.
- * @param {!Window} win
- * @param {string} id
- * @param {boolean=} opt_fallbackToTopWin
- * @return {Object} The service.
- */
-export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
-  // First, try to resolve via local (embed) window.
-  const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
-  if (local) {
-    return local;
-  }
-  if (opt_fallbackToTopWin) {
-    return getService(win, id);
-  }
-  return null;
-}
-
 /**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
  *
- * Unlike most service getters, passing `Node` is necessary for some FIE-scope
- * services since sometimes we only have the FIE Document for context.
- *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!ShadowRoot} element
  * @param {string} id
- * @param {boolean=} opt_fallbackToTopWin
- * @return {Object} The service.
+ * @return {?Object}
  */
-export function getExistingServiceForDocInEmbedScope(
-  nodeOrDoc, id, opt_fallbackToTopWin) {
-  // First, try to resolve via local (embed) window.
-  if (nodeOrDoc.nodeType) {
-    // If a node is passed, try to resolve via this node.
-    const win = toWin(/** @type {!Document} */ (
-      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
-    const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
-    if (local) {
-      return local;
-    }
-  }
-  // If an ampdoc is passed or fallback is allowed, continue resolving.
-  if (!nodeOrDoc.nodeType || opt_fallbackToTopWin) {
-    return getServiceForDocDeprecated(nodeOrDoc, id);
-  }
-  return null;
+export function getExistingServiceForDocInEmbedScope(element, id) {
+  // TODO(#22733): completely remove this method once ampdoc-fie launches.
+  // Resolve via the element's ampdoc.
+  return getServiceForDocOrNullInternal(element, id);
 }
 
 /**
@@ -136,30 +77,23 @@ export function getExistingServiceForDocInEmbedScope(
  * @param {!Object} service The service.
  */
 export function installServiceInEmbedScope(embedWin, id, service) {
+  // TODO(#22733): completely remove this method once ampdoc-fie launches.
   const topWin = getTopWindow(embedWin);
-  dev().assert(embedWin != topWin,
-      'Service override can only be installed in embed window: %s', id);
-  dev().assert(!getLocalExistingServiceForEmbedWinOrNull(embedWin, id),
-      'Service override has already been installed: %s', id);
-  registerServiceInternal(embedWin, embedWin, id, () => service);
-  getServiceInternal(embedWin, id); // Force service to build.
-}
-
-/**
- * @param {!Window} embedWin
- * @param {string} id
- * @return {?Object}
- */
-function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
-  // Note that this method currently only resolves against the given window.
-  // It does not try to go all the way up the parent window chain. We can change
-  // this in the future, but for now this gives us a better performance.
-  const topWin = getTopWindow(embedWin);
-  if (embedWin != topWin && isServiceRegistered(embedWin, id)) {
-    return getServiceInternal(embedWin, id);
-  } else {
-    return null;
-  }
+  devAssert(
+    embedWin != topWin,
+    'Service override can only be installed in embed window: %s',
+    id
+  );
+  const ampdoc = getAmpdoc(embedWin.document);
+  registerServiceInternal(
+    getAmpdocServiceHolder(ampdoc),
+    ampdoc,
+    id,
+    function () {
+      return service;
+    },
+    /* override */ true
+  );
 }
 
 /**
@@ -169,17 +103,13 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
  * @param {function(new:Object, !Window)} constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function registerServiceBuilder(win,
-  id,
-  constructor,
-  opt_instantiate) {
+export function registerServiceBuilder(win, id, constructor, opt_instantiate) {
   win = getTopWindow(win);
   registerServiceInternal(win, win, id, constructor);
   if (opt_instantiate) {
     getServiceInternal(win, id);
   }
 }
-
 
 /**
  * Returns a service and registers it given a class to be used as
@@ -189,10 +119,12 @@ export function registerServiceBuilder(win,
  * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function registerServiceBuilderForDoc(nodeOrDoc,
+export function registerServiceBuilderForDoc(
+  nodeOrDoc,
   id,
   constructor,
-  opt_instantiate) {
+  opt_instantiate
+) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   registerServiceInternal(holder, ampdoc, id, constructor);
@@ -201,6 +133,17 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   }
 }
 
+/**
+ * Reject a service promise.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
+ * @param {*} error
+ */
+export function rejectServicePromiseForDoc(nodeOrDoc, id, error) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  rejectServicePromiseInternal(holder, id, error);
+}
 
 /**
  * Returns a service for the given id and window (a per-window singleton). Users
@@ -217,7 +160,6 @@ export function getService(win, id) {
   return getServiceInternal(win, id);
 }
 
-
 /**
  * Returns a promise for a service for the given id and window. Also expects an
  * element that has the actual implementation. The promise resolves when the
@@ -231,7 +173,6 @@ export function getService(win, id) {
 export function getServicePromise(win, id) {
   return getServicePromiseInternal(win, id);
 }
-
 
 /**
  * Returns a service or null with the given id.
@@ -248,7 +189,6 @@ export function getExistingServiceOrNull(win, id) {
   }
 }
 
-
 /**
  * Like getServicePromise but returns null if the service was never registered.
  * @param {!Window} win
@@ -259,11 +199,10 @@ export function getServicePromiseOrNull(win, id) {
   return getServicePromiseOrNullInternal(win, id);
 }
 
-
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * Expects service `id` to be registered.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {T}
  * @template T
@@ -274,51 +213,47 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
   return getServiceInternal(holder, id);
 }
 
-
 /**
- * tl;dr -- Use getServiceForDoc() instead of this.
- *
- * Privileged variant of getServiceForDoc() that accepts non-element params,
- * e.g. window.document. This is currently necessary for doc-level services
- * used in startup, e.g. Chunks. Eventually we want to remove this function
- * and have callers find the appropriate AmpDoc and use getServiceForDoc().
- *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
+ * If service `id` is not registered, returns null.
+ * @param {!Element|!ShadowRoot} element
  * @param {string} id
- * @return {T}
- * @template T
+ * @return {?Object}
  */
-export function getServiceForDocDeprecated(nodeOrDoc, id) {
-  const ampdoc = getAmpdoc(nodeOrDoc);
+function getServiceForDocOrNullInternal(element, id) {
+  const ampdoc = getAmpdoc(element);
   const holder = getAmpdocServiceHolder(ampdoc);
-  return getServiceInternal(holder, id);
+  if (isServiceRegistered(holder, id)) {
+    return getServiceInternal(holder, id);
+  } else {
+    return null;
+  }
 }
-
 
 /**
  * Returns a promise for a service for the given id and ampdoc. Also expects
  * a service that has the actual implementation. The promise resolves when
  * the implementation loaded.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {!Promise<!Object>}
  */
 export function getServicePromiseForDoc(elementOrAmpDoc, id) {
-  return getServicePromiseInternal(
-      getAmpdocServiceHolder(elementOrAmpDoc), id);
+  return getServicePromiseInternal(getAmpdocServiceHolder(elementOrAmpDoc), id);
 }
-
 
 /**
  * Like getServicePromiseForDoc but returns null if the service was never
  * registered for this ampdoc.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {?Promise<!Object>}
  */
 export function getServicePromiseOrNullForDoc(elementOrAmpDoc, id) {
   return getServicePromiseOrNullInternal(
-      getAmpdocServiceHolder(elementOrAmpDoc), id);
+    getAmpdocServiceHolder(elementOrAmpDoc),
+    id
+  );
 }
 
 /**
@@ -331,7 +266,6 @@ export function setParentWindow(win, parentWin) {
   win.__AMP_TOP = getTopWindow(parentWin);
 }
 
-
 /**
  * Returns the parent window for a child window (friendly iframe).
  * @param {!Window} win
@@ -341,7 +275,6 @@ export function getParentWindow(win) {
   return win.__AMP_PARENT || win;
 }
 
-
 /**
  * Returns the top window where AMP Runtime is installed for a child window
  * (friendly iframe).
@@ -349,18 +282,18 @@ export function getParentWindow(win) {
  * @return {!Window}
  */
 export function getTopWindow(win) {
-  return win.__AMP_TOP || win;
+  return win.__AMP_TOP || (win.__AMP_TOP = win);
 }
-
 
 /**
  * Returns the parent "friendly" iframe if the node belongs to a child window.
  * @param {!Node} node
- * @param {!Window} topWin
+ * @param {!Window=} opt_topWin
  * @return {?HTMLIFrameElement}
  */
-export function getParentWindowFrameElement(node, topWin) {
+export function getParentWindowFrameElement(node, opt_topWin) {
   const childWin = (node.ownerDocument || node).defaultView;
+  const topWin = opt_topWin || getTopWindow(childWin);
   if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
     try {
       return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);
@@ -371,20 +304,20 @@ export function getParentWindowFrameElement(node, topWin) {
   return null;
 }
 
-
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
 export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    const win = toWin(/** @type {!Document} */ (
-      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
+    const win = toWin(
+      /** @type {!Document} */ (nodeOrDoc.ownerDocument || nodeOrDoc)
+        .defaultView
+    );
     return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }
-
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -395,7 +328,6 @@ function getAmpdocServiceHolder(nodeOrDoc) {
   return ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
 }
 
-
 /**
  * This is essentially a duplicate of `ampdoc.js`, but necessary to avoid
  * circular dependencies.
@@ -403,10 +335,11 @@ function getAmpdocServiceHolder(nodeOrDoc) {
  * @return {!./service/ampdoc-impl.AmpDocService}
  */
 function getAmpdocService(win) {
-  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
-    getService(win, 'ampdoc'));
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (getService(
+    win,
+    'ampdoc'
+  ));
 }
-
 
 /**
  * Get service `id` from `holder`. Assumes the service
@@ -417,15 +350,17 @@ function getAmpdocService(win) {
  * @template T
  */
 function getServiceInternal(holder, id) {
-  dev().assert(isServiceRegistered(holder, id),
-      `Expected service ${id} to be registered`);
+  devAssert(
+    isServiceRegistered(holder, id),
+    `Expected service ${id} to be registered`
+  );
   const services = getServices(holder);
   const s = services[id];
   if (!s.obj) {
-    dev().assert(s.ctor, `Service ${id} registered without ctor nor impl.`);
-    dev().assert(s.context, `Service ${id} registered without context.`);
+    devAssert(s.ctor, `Service ${id} registered without ctor nor impl.`);
+    devAssert(s.context, `Service ${id} registered without context.`);
     s.obj = new s.ctor(s.context);
-    dev().assert(s.obj, `Service ${id} constructed to null.`);
+    devAssert(s.obj, `Service ${id} constructed to null.`);
     s.ctor = null;
     s.context = null;
     // The service may have been requested already, in which case we have a
@@ -442,8 +377,9 @@ function getServiceInternal(holder, id) {
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
+ * @param {boolean=} opt_override
  */
-function registerServiceInternal(holder, context, id, ctor) {
+function registerServiceInternal(holder, context, id, ctor, opt_override) {
   const services = getServices(holder);
   let s = services[id];
 
@@ -452,12 +388,13 @@ function registerServiceInternal(holder, context, id, ctor) {
       obj: null,
       promise: null,
       resolve: null,
+      reject: null,
       context: null,
       ctor: null,
     };
   }
 
-  if (s.ctor || s.obj) {
+  if (!opt_override && (s.ctor || s.obj)) {
     // Service already registered.
     return;
   }
@@ -487,20 +424,29 @@ function getServicePromiseInternal(holder, id) {
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
-  const deferred = new Deferred();
-  const {promise, resolve} = deferred;
-
   const services = getServices(holder);
-  services[id] = {
-    obj: null,
-    promise,
-    resolve,
-    context: null,
-    ctor: null,
-  };
-  return promise;
+  services[id] = emptyServiceHolderWithPromise();
+  return /** @type {!Promise<!Object>} */ (services[id].promise);
 }
 
+/**
+ * @param {!Object} holder
+ * @param {string} id of the service.
+ * @param {*} error
+ */
+function rejectServicePromiseInternal(holder, id, error) {
+  const services = getServices(holder);
+  const s = services[id];
+  if (s) {
+    if (s.reject) {
+      s.reject(error);
+    }
+    return;
+  }
+
+  services[id] = emptyServiceHolderWithPromise();
+  services[id].reject(error);
+}
 
 /**
  * Returns a promise for service `id` if the service has been registered
@@ -518,12 +464,11 @@ function getServicePromiseOrNullInternal(holder, id) {
     } else {
       // Instantiate service if not already instantiated.
       getServiceInternal(holder, id);
-      return s.promise = Promise.resolve(/** @type {!Object} */ (s.obj));
+      return (s.promise = Promise.resolve(/** @type {!Object} */ (s.obj)));
     }
   }
   return null;
 }
-
 
 /**
  * Returns the object that holds the services registered in a holder.
@@ -531,13 +476,12 @@ function getServicePromiseOrNullInternal(holder, id) {
  * @return {!Object<string,!ServiceHolderDef>}
  */
 function getServices(holder) {
-  let {services} = holder;
+  let services = holder.__AMP_SERVICES;
   if (!services) {
-    services = holder.services = {};
+    services = holder.__AMP_SERVICES = {};
   }
   return services;
 }
-
 
 /**
  * Whether the specified service implements `Disposable` interface.
@@ -548,7 +492,6 @@ export function isDisposable(service) {
   return typeof service.dispose == 'function';
 }
 
-
 /**
  * Asserts that the specified service implements `Disposable` interface and
  * typecasts the instance to `Disposable`.
@@ -556,10 +499,9 @@ export function isDisposable(service) {
  * @return {!Disposable}
  */
 export function assertDisposable(service) {
-  dev().assert(isDisposable(service), 'required to implement Disposable');
+  devAssert(isDisposable(service), 'required to implement Disposable');
   return /** @type {!Disposable} */ (service);
 }
-
 
 /**
  * Disposes all disposable (implements `Disposable` interface) services in
@@ -570,7 +512,6 @@ export function disposeServicesForDoc(ampdoc) {
   disposeServicesInternal(ampdoc);
 }
 
-
 /**
  * Disposes all disposable (implements `Disposable` interface) services in
  * embed scope.
@@ -579,7 +520,6 @@ export function disposeServicesForDoc(ampdoc) {
 export function disposeServicesForEmbed(embedWin) {
   disposeServicesInternal(embedWin);
 }
-
 
 /**
  * @param {!Object} holder Object holding the service instances.
@@ -596,12 +536,12 @@ function disposeServicesInternal(holder) {
     if (serviceHolder.obj) {
       disposeServiceInternal(id, serviceHolder.obj);
     } else if (serviceHolder.promise) {
-      serviceHolder.promise.then(
-          instance => disposeServiceInternal(id, instance));
+      serviceHolder.promise.then((instance) =>
+        disposeServiceInternal(id, instance)
+      );
     }
   }
 }
-
 
 /**
  * @param {string} id
@@ -620,54 +560,24 @@ function disposeServiceInternal(id, service) {
   }
 }
 
-
 /**
- * Whether the specified service implements `EmbeddableService` interface.
- * @param {!Object} service
- * @return {boolean}
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} id
  */
-export function isEmbeddable(service) {
-  return typeof service.adoptEmbedWindow == 'function';
+export function adoptServiceForEmbedDoc(ampdoc, id) {
+  const service = getServiceInternal(
+    getAmpdocServiceHolder(devAssert(ampdoc.getParent())),
+    id
+  );
+  registerServiceInternal(
+    getAmpdocServiceHolder(ampdoc),
+    ampdoc,
+    id,
+    function () {
+      return service;
+    }
+  );
 }
-
-
-/**
- * Adopts an embeddable (implements `EmbeddableService` interface) service
- * in embed scope.
- * @param {!Window} embedWin
- * @param {string} serviceId
- */
-export function adoptServiceForEmbed(embedWin, serviceId) {
-  const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
-  dev().assert(adopted, `Service ${serviceId} not found on parent ` +
-      'or doesn\'t implement EmbeddableService.');
-}
-
-
-/**
- * Adopts an embeddable (implements `EmbeddableService` interface) service
- * in embed scope.
- * @param {!Window} embedWin
- * @param {string} serviceId
- * @return {boolean}
- */
-export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
-  const frameElement = /** @type {!Node} */ (dev().assert(
-      embedWin.frameElement,
-      'frameElement not found for embed'));
-  const ampdoc = getAmpdoc(frameElement);
-  const holder = getAmpdocServiceHolder(ampdoc);
-  if (!isServiceRegistered(holder, serviceId)) {
-    return false;
-  }
-  const service = getServiceForDocDeprecated(frameElement, serviceId);
-  if (!isEmbeddable(service)) {
-    return false;
-  }
-  service.adoptEmbedWindow(embedWin);
-  return true;
-}
-
 
 /**
  * Resets a single service, so it gets recreated on next getService invocation.
@@ -675,8 +585,8 @@ export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
  * @param {string} id of the service.
  */
 export function resetServiceForTesting(holder, id) {
-  if (holder.services) {
-    holder.services[id] = null;
+  if (holder.__AMP_SERVICES) {
+    holder.__AMP_SERVICES[id] = null;
   }
 }
 
@@ -686,7 +596,22 @@ export function resetServiceForTesting(holder, id) {
  * @return {boolean}
  */
 function isServiceRegistered(holder, id) {
-  const service = holder.services && holder.services[id];
+  const service = holder.__AMP_SERVICES && holder.__AMP_SERVICES[id];
   // All registered services must have an implementation or a constructor.
   return !!(service && (service.ctor || service.obj));
+}
+
+/** @return {!ServiceHolderDef} */
+function emptyServiceHolderWithPromise() {
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
+  promise.catch(() => {}); // avoid uncaught exception when service gets rejected
+  return {
+    obj: null,
+    promise,
+    resolve,
+    reject,
+    context: null,
+    ctor: null,
+  };
 }

@@ -18,15 +18,15 @@ import * as dom from '../../../src/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 
 export class AmpVizVega extends AMP.BaseElement {
-
-/** @param {!AmpElement} element */
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -71,29 +71,35 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-viz-vega'),
-        'Experiment amp-viz-vega disabled');
+    userAssert(
+      isExperimentOn(this.win, 'amp-viz-vega'),
+      'Experiment amp-viz-vega disabled'
+    );
 
     /**
      * Global vg (and implicitly d3) are required and they are created by
      * appending vega and d3 minified files during the build process.
      */
-    this.vega_ = this.win.vg;
-    this.inlineData_ = this.getInlineData_();
+    this.vega_ = /** @type {!VegaObject} */ (this.win.vg);
+    this.inlineData_ = /** @type {string} */ (this.getInlineData_());
     this.src_ = this.element.getAttribute('src');
     this.useDataWidth_ = this.element.hasAttribute('use-data-width');
     this.useDataHeight_ = this.element.hasAttribute('use-data-height');
 
-    user().assert(this.inlineData_ || this.src_,
-        '%s: neither `src` attribute nor a ' +
+    userAssert(
+      this.inlineData_ || this.src_,
+      '%s: neither `src` attribute nor a ' +
         'valid <script type="application/json"> child was found for Vega data.',
-        this.getName_());
+      this.getName_()
+    );
 
-    user().assert(!(this.inlineData_ && this.src_),
-        '%s: both `src` attribute and a valid ' +
+    userAssert(
+      !(this.inlineData_ && this.src_),
+      '%s: both `src` attribute and a valid ' +
         '<script type="application/json"> child were found for Vega data. ' +
         'Only one way of specifying the data is allowed.',
-        this.getName_());
+      this.getName_()
+    );
 
     if (this.src_) {
       assertHttpsUrl(this.src_, this.element, this.getName_());
@@ -109,8 +115,10 @@ export class AmpVizVega extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     const box = this.getLayoutBox();
-    if (this.measuredWidth_ == box.width &&
-        this.measuredHeight_ == box.height) {
+    if (
+      this.measuredWidth_ == box.width &&
+      this.measuredHeight_ == box.height
+    ) {
       return;
     }
     this.measuredWidth_ = box.width;
@@ -138,29 +146,33 @@ export class AmpVizVega extends AMP.BaseElement {
   loadData_() {
     // Validation in buildCallback should ensure one and only one of
     // src_/inlineData_ is ever set.
-    dev().assert(!this.src_ != !this.inlineData_);
+    devAssert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
-      this.data_ = tryParseJson(this.inlineData_, err => {
-        user().assert(!err, 'data could not be ' +
-            'parsed. Is it in a valid JSON format?: %s', err);
-      });
+      this.data_ = /** @type {JsonObject} */ (tryParseJson(
+        this.inlineData_,
+        (err) => {
+          userAssert(
+            !err,
+            'data could not be parsed. Is it in a valid JSON format?: %s',
+            err
+          );
+        }
+      ));
       return Promise.resolve();
     } else {
-      // TODO(aghassemi): We may need to expose credentials and set
-      // requireAmpResponseSourceOrigin to true as well. But for now Vega
+      // TODO(aghassemi): We may need to expose credentials. But for now Vega
       // runtime also does XHR to load subresources (e.g. Vega spec can
       // point to other Vega specs) an they don't include credentials on those
       // calls. We may want to intercept all "urls" in spec and do the loading
       // and parsing ourselves.
 
-      return Services.xhrFor(this.win).fetchJson(
-          dev().assertString(this.src_),
-          {
-            requireAmpResponseSourceOrigin: false,
-          }).then(res => res.json()).then(data => {
-        this.data_ = data;
-      });
+      return Services.xhrFor(this.win)
+        .fetchJson(dev().assertString(this.src_), {})
+        .then((res) => res.json())
+        .then((data) => {
+          this.data_ = data;
+        });
     }
   }
 
@@ -174,12 +186,18 @@ export class AmpVizVega extends AMP.BaseElement {
       return;
     }
 
-    user().assert(scripts.length == 1, '%s: more than one ' +
-        '<script> tags found. Only one allowed.', this.getName_());
+    userAssert(
+      scripts.length == 1,
+      '%s: more than one <script> tags found. Only one allowed.',
+      this.getName_()
+    );
 
     const child = scripts[0];
-    user().assert(dom.isJsonScriptTag(child), '%s: data should ' +
-        'be put in a <script type="application/json"> tag.', this.getName_());
+    userAssert(
+      dom.isJsonScriptTag(child),
+      '%s: data should be put in a <script type="application/json"> tag.',
+      this.getName_()
+    );
 
     return child.textContent;
   }
@@ -190,31 +208,40 @@ export class AmpVizVega extends AMP.BaseElement {
    */
   renderGraph_() {
     const parsePromise = new Promise((resolve, reject) => {
-      this.vega_.parse.spec(this.data_, (error, chartFactory) => {
-        if (error) {
-          reject(error);
+      this.vega_.parse.spec(
+        /** @type {!JsonObject} */ (this.data_),
+        (error, chartFactory) => {
+          if (error) {
+            reject(error);
+          }
+          resolve(/** @type {!VegaChartFactory} */ (chartFactory));
         }
-        resolve(chartFactory);
-      });
+      );
     });
 
-    return parsePromise.then(chartFactory => {
-      return Services.vsyncFor(this.win).mutatePromise(() => {
-        dom.removeChildren(dev().assertElement(this.container_));
-        this.chart_ = chartFactory({el: this.container_});
-        if (!this.useDataWidth_) {
-          const w = this.measuredWidth_ - this.getDataPadding_('width');
-          this.chart_.width(w);
-        }
-        if (!this.useDataHeight_) {
-          const h = this.measuredHeight_ - this.getDataPadding_('height');
-          this.chart_.height(h);
-        }
+    return parsePromise.then(
+      /**
+       * @param {!VegaChartFactory} chartFactory
+       * @return {*} TODO(#23582): Specify return type
+       */
+      (chartFactory) => {
+        return Services.vsyncFor(this.win).mutatePromise(() => {
+          dom.removeChildren(dev().assertElement(this.container_));
+          this.chart_ = chartFactory(dict({'el': this.container_}));
+          if (!this.useDataWidth_) {
+            const w = this.measuredWidth_ - this.getDataPadding_('width');
+            this.chart_.width(w);
+          }
+          if (!this.useDataHeight_) {
+            const h = this.measuredHeight_ - this.getDataPadding_('height');
+            this.chart_.height(h);
+          }
 
-        this.chart_.viewport([this.measuredWidth_, this.measuredHeight_]);
-        this.chart_.update();
-      });
-    });
+          this.chart_.viewport([this.measuredWidth_, this.measuredHeight_]);
+          this.chart_.update();
+        });
+      }
+    );
   }
 
   /**
@@ -224,7 +251,7 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   getDataPadding_(widthOrHeight) {
-    const p = this.data_.padding;
+    const p = this.data_['padding'];
     if (!p) {
       return 0;
     }
@@ -247,12 +274,12 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return 'amp-viz-vega ' +
-      (this.element.getAttribute('id') || '<unknown id>');
+    return (
+      'amp-viz-vega ' + (this.element.getAttribute('id') || '<unknown id>')
+    );
   }
 }
 
-
-AMP.extension('amp-viz-vega', '0.1', AMP => {
+AMP.extension('amp-viz-vega', '0.1', (AMP) => {
   AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
 });

@@ -15,12 +15,16 @@
  */
 
 import {Observable} from '../../observable';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {Services} from '../../services';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
+import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setImportantStyles} from '../../style';
-import {waitForBody} from '../../dom';
+import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
 const TAG_ = 'Viewport';
@@ -35,7 +39,6 @@ const TAG_ = 'Viewport';
  * @visibleForTesting
  */
 export class ViewportBindingIosEmbedWrapper_ {
-
   /**
    * @param {!Window} win
    */
@@ -43,10 +46,13 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
+    /** @protected {!../vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(win);
+
     const doc = this.win.document;
     const {documentElement} = doc;
     const topClasses = documentElement.className;
-    documentElement.className = 'i-amphtml-ios-embed';
+    documentElement.classList.add('i-amphtml-ios-embed');
 
     const wrapper = doc.createElement('html');
     /** @private @const {!Element} */
@@ -66,13 +72,13 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
+    /** @private {number} */
+    this.paddingTop_ = 0;
 
     // Setup UI.
     /** @private {boolean} */
     this.setupDone_ = false;
-    waitForBody(doc, this.setup_.bind(this));
+    waitForBodyOpen(doc, this.setup_.bind(this));
 
     // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
     // iOS rendering bugs. See #8798 for details.
@@ -138,6 +144,18 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
+    if (!isExperimentOn(this.win, 'ios-fixed-no-transfer')) {
+      return true;
+    }
+    // The jumping fixed elements have been fixed in iOS 12.2.
+    const iosVersion = parseFloat(
+      Services.platformFor(this.win).getIosVersionString()
+    );
+    return iosVersion < 12.2;
+  }
+
+  /** @override */
+  overrideGlobalScrollTo() {
     return true;
   }
 
@@ -158,6 +176,7 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
+    this.paddingTop_ = paddingTop;
     setImportantStyles(this.wrapper_, {
       'padding-top': px(paddingTop),
     });
@@ -198,14 +217,14 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getSize() {
     return {
-      width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight,
+      width: this.win./*OK*/ innerWidth,
+      height: this.win./*OK*/ innerHeight,
     };
   }
 
   /** @override */
   getScrollTop() {
-    return this.wrapper_./*OK*/scrollTop;
+    return this.wrapper_./*OK*/ scrollTop;
   }
 
   /** @override */
@@ -217,43 +236,54 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getScrollWidth() {
-    return this.wrapper_./*OK*/scrollWidth;
+    return this.wrapper_./*OK*/ scrollWidth;
   }
 
   /** @override */
   getScrollHeight() {
-    return this.wrapper_./*OK*/scrollHeight;
+    return this.wrapper_./*OK*/ scrollHeight;
   }
 
   /** @override */
   getContentHeight() {
-    // The reparented body inside wrapper will have the correct content height.
-    // Body is overflow: hidden so that the scrollHeight include the margins of
-    // body's first and last child.
-    // Body height doesn't include paddingTop on the parent, so we add on the
-    // position of the body from the top of the viewport and subtract the
-    // scrollTop (as position relative to the viewport changes as you scroll).
-    const rect = this.win.document.body./*OK*/getBoundingClientRect();
-    return rect.height + rect.top + this.getScrollTop();
+    // The wrapped body, not this.wrapper_ itself, will have the correct height.
+    const content = this.win.document.body;
+    const {height} = content./*OK*/ getBoundingClientRect();
+
+    // Unlike other viewport bindings, there's no need to include the
+    // rect top since the wrapped body accounts for the top margin of children.
+    // However, the parent's padding-top (this.paddingTop_) must be added.
+
+    // As of Safari 12.1.1, the getBoundingClientRect().height does not include
+    // the bottom margin of children and there's no other API that does.
+    const childMarginBottom = marginBottomOfLastChild(this.win, content);
+
+    const style = computedStyle(this.win, content);
+    return (
+      parseInt(style.marginTop, 10) +
+      this.paddingTop_ +
+      height +
+      childMarginBottom +
+      parseInt(style.marginBottom, 10)
+    );
   }
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const b = el./*OK*/getBoundingClientRect();
-    if (this.useLayers_) {
-      return layoutRectLtwh(b.left, b.top, b.width, b.height);
-    }
+  contentHeightChanged() {}
 
-    const scrollTop = opt_scrollTop != undefined
-      ? opt_scrollTop
-      : this.getScrollTop();
-    const scrollLeft = opt_scrollLeft != undefined
-      ? opt_scrollLeft
-      : this.getScrollLeft();
-    return layoutRectLtwh(Math.round(b.left + scrollLeft),
-        Math.round(b.top + scrollTop),
-        Math.round(b.width),
-        Math.round(b.height));
+  /** @override */
+  getLayoutRect(el, opt_scrollLeft, opt_scrollTop, opt_premeasuredRect) {
+    const b = opt_premeasuredRect || el./*OK*/ getBoundingClientRect();
+    const scrollTop =
+      opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
+    const scrollLeft =
+      opt_scrollLeft != undefined ? opt_scrollLeft : this.getScrollLeft();
+    return layoutRectLtwh(
+      Math.round(b.left + scrollLeft),
+      Math.round(b.top + scrollTop),
+      Math.round(b.width),
+      Math.round(b.height)
+    );
   }
 
   /** @override */
@@ -265,7 +295,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   setScrollTop(scrollTop) {
     // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue. See
     // `onScrolled_` for more details.
-    this.wrapper_./*OK*/scrollTop = scrollTop || 1;
+    this.wrapper_./*OK*/ scrollTop = scrollTop || 1;
   }
 
   /**
@@ -278,8 +308,8 @@ export class ViewportBindingIosEmbedWrapper_ {
     // This is very sad but very necessary. See #330 for more details.
     // Unfortunately, the same is very expensive to do on the bottom, due to
     // costly scrollHeight.
-    if (this.wrapper_./*OK*/scrollTop == 0) {
-      this.wrapper_./*OK*/scrollTop = 1;
+    if (this.wrapper_./*OK*/ scrollTop == 0) {
+      this.wrapper_./*OK*/ scrollTop = 1;
       if (opt_event) {
         opt_event.preventDefault();
       }
@@ -292,5 +322,10 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getScrollingElement() {
     return this.wrapper_;
+  }
+
+  /** @override */
+  getScrollingElementScrollsLikeViewport() {
+    return false;
   }
 }

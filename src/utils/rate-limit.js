@@ -20,9 +20,11 @@
  * smaller than the given minimal interval.
  *
  * @param {!Window} win
- * @param {function(...*)} callback
+ * @param {function(...T):R} callback
  * @param {number} minInterval the minimum time interval in millisecond
- * @return {function(...*)}
+ * @return {function(...T)}
+ * @template T
+ * @template R
  */
 export function throttle(win, callback, minInterval) {
   let locker = 0;
@@ -50,7 +52,7 @@ export function throttle(win, callback, minInterval) {
     }
   }
 
-  return function(...args) {
+  return function (...args) {
     if (locker) {
       nextCallArgs = args;
     } else {
@@ -65,9 +67,11 @@ export function throttle(win, callback, minInterval) {
  * invoked.
  *
  * @param {!Window} win
- * @param {function(...*)} callback
+ * @param {function(...T):R} callback
  * @param {number} minInterval the minimum time interval in millisecond
- * @return {function(...*)}
+ * @return {function(...T)}
+ * @template T
+ * @template R
  */
 export function debounce(win, callback, minInterval) {
   let locker = 0;
@@ -95,7 +99,7 @@ export function debounce(win, callback, minInterval) {
     }
   }
 
-  return function(...args) {
+  return function (...args) {
     timestamp = win.Date.now();
     nextCallArgs = args;
     if (!locker) {

@@ -25,6 +25,16 @@ amp-story-access {
   z-index: 100003 !important; /** Above the bookend and desktop navigation UI. */
   transform: translate3d(0, 100vh, 0) !important;
   transition-delay: 0.15s !important;
+  pointer-events: none !important;
+}
+
+/** Allows [amp-access="CONDITION"] rules. */
+amp-story-access[amp-access-hide] {
+  display: none !important;
+}
+
+amp-story-access[type=blocking] {
+  z-index: 100004 !important; /** Above the [type=notification]. */
 }
 
 amp-story-access.i-amphtml-story-access-visible {
@@ -32,8 +42,8 @@ amp-story-access.i-amphtml-story-access-visible {
   transition-delay: 0s !important;
 }
 
-/** Black opacity overlay. */
-amp-story-access::before {
+/** Black opacity overlay. Only on blocking story-access. */
+amp-story-access[type=blocking]::before {
   content: "" !important;
   position: absolute !important;
   top: 0 !important;
@@ -42,11 +52,12 @@ amp-story-access::before {
   width: 100% !important;
   background: #000000 !important;
   opacity: 0 !important;
+  pointer-events: auto !important;
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-amp-story-access.i-amphtml-story-access-visible::before {
-  opacity: 0.4 !important;
+amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
+  opacity: 0.55 !important;
   transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
@@ -54,19 +65,21 @@ amp-story-access.i-amphtml-story-access-visible::before {
   margin-top: auto !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
+  pointer-events: auto !important;
   /* Enable iOS momentum scrolling. */
   -webkit-overflow-scrolling: touch !important;
 }
 
 .i-amphtml-story-access-container {
   position: relative !important;
-  margin: 88px 8px 0 !important;
+  margin: 88px 0 0 !important;
+  padding: 0px !important;
   background: #FFFFFF !important;
   border-radius: 8px 8px 0 0 !important;
   color: rgba(0, 0, 0, 0.87) !important;
   font-family: 'Roboto', sans-serif !important;
-  text-align: left !important;
   overflow: hidden !important;
+  text-align: start !important;
   transform: translate3d(0, 100%, 0) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
@@ -76,13 +89,59 @@ amp-story-access.i-amphtml-story-access-visible::before {
   transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-access-fullbleed .i-amphtml-story-access-container {
-  margin: 88px 0px 0 !important;
-  padding: 0 8px !important;
-  border-radius: initial !important;
+[type=notification] .i-amphtml-story-access-container {
+  box-shadow: 0 -1px 2px 1px rgba(0, 0, 0, 0.12) !important;
+  max-height: calc(var(--story-page-vh, 1vh) * 20) !important; /** 20vh */
 }
 
-/** access content. */
+.i-amphtml-story-access-header {
+  position: relative !important;
+  margin: 0 0 48px !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  background: var(--primary-color, #F0F0F0) !important;
+  z-index: 2 !important;
+}
+
+.i-amphtml-story-access-logo {
+  position: absolute !important;
+  bottom: -32px !important;
+  margin-left: -32px !important;
+  left: 50% !important;
+  height: 64px !important;
+  width: 64px !important;
+  background: #F0F0F0 !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  border-radius: 5px !important;
+}
+
+.i-amphtml-story-access-logo::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -6px !important;
+  bottom: -6px !important;
+  left: -6px !important;
+  right: -6px !important;
+  background: #FFFFFF !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12) !important;
+  z-index: -1 !important;
+}
+
+.i-amphtml-story-access-close-button {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  height: 36px !important;
+  width: 36px !important;
+  color: #757575 !important;
+  cursor: pointer !important;
+  font-size: 24px !important;
+  line-height: 36px !important;
+  text-align: center !important;
+}
 
 .i-amphtml-story-access-content {
   padding: 16px !important;
@@ -94,23 +153,14 @@ amp-story-access.i-amphtml-story-access-visible::before {
  * Tablets and desktop UI overrides.
  * Basically triggers for anything bigger than a Pixel XL / iPhone Plus.
  */
-
 @media (min-width: 420px) {
   amp-story-access {
     align-items: center !important;
     justify-content: center !important;
   }
 
-  .i-amphtml-story-access-overflow {
-    margin-top: 0 !important;
-  }
-
   .i-amphtml-story-access-container {
-    display: flex !important;
-    flex-direction: column !important;
     margin: 0 !important;
-    max-height: 80vh !important;
-    min-height: 40vh !important;
     width: calc(100vw - 80px) !important;
     max-width: 800px !important;
   }
@@ -122,8 +172,31 @@ amp-story-access.i-amphtml-story-access-visible::before {
     overflow-y: auto !important;
   }
 
+  .i-amphtml-story-access-overflow::-webkit-scrollbar,
   .i-amphtml-story-access-content::-webkit-scrollbar {
     width: 0px !important;
     background: transparent !important;
+  }
+
+  [type="blocking"] .i-amphtml-story-access-overflow {
+    margin-top: 0 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  [type="blocking"] .i-amphtml-story-access-container {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 60vh !important;
+    min-height: 20vh !important;
+    border-radius: 0px !important;
+    opacity: 0 !important;
+    transform: translate3d(0, 0, 0) !important;
+    transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  }
+
+  [type="blocking"].i-amphtml-story-access-visible .i-amphtml-story-access-container {
+    opacity: 1 !important;
+    transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   }
 }

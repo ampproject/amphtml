@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {WindowInterface} from '../src/window-interface';
 import {createElementWithAttributes} from '../src/dom';
 import {dict} from '../src/utils/object';
 import {user} from '../src/log';
@@ -28,8 +29,9 @@ const TAG = 'pixel';
  * @return {!Element}
  */
 export function createPixel(win, src, referrerPolicy) {
+  // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
-    user().error(TAG, 'Unsupported referrerPolicy: ' + referrerPolicy);
+    user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
 
   return referrerPolicy === 'no-referrer'
@@ -49,12 +51,17 @@ function createNoReferrerPixel(win, src) {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
     const iframe = createElementWithAttributes(
-        /** @type {!Document} */ (win.document), 'iframe', dict({
-          'src': 'about:blank',
-          'style': 'display:none',
-        }));
+      /** @type {!Document} */ (win.document),
+      'iframe',
+      dict({
+        'src': 'about:blank',
+        'style': 'display:none',
+      })
+    );
+    iframe.onload = () => {
+      createImagePixel(iframe.contentWindow, src);
+    };
     win.document.body.appendChild(iframe);
-    createImagePixel(iframe.contentWindow, src);
     return iframe;
   }
 }
@@ -66,7 +73,8 @@ function createNoReferrerPixel(win, src) {
  * @return {!Image}
  */
 function createImagePixel(win, src, noReferrer = false) {
-  const image = new win.Image();
+  const Image = WindowInterface.getImage(win);
+  const image = new Image();
   if (noReferrer) {
     image.referrerPolicy = 'no-referrer';
   }

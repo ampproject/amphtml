@@ -19,9 +19,12 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="400" height="260" layout="responsive" 
-      type="revcontent"
-      heights="(max-width: 320px) 933px,
+<amp-ad
+  width="400"
+  height="260"
+  layout="responsive"
+  type="revcontent"
+  heights="(max-width: 320px) 933px,
       (max-width: 360px) 1087px,
       (max-width: 375px) 1138px,
       (max-width: 412px) 1189px,
@@ -34,8 +37,9 @@ limitations under the License.
       (max-width: 768px) 633px,
       (max-width: 1024px) 711px,
       86vw"
-      data-wrapper="rcjsload_2ff711"
-      data-id="203">
+  data-wrapper="rcjsload_2ff711"
+  data-id="203"
+>
   <div placeholder="">Loading ...</div>
 </amp-ad>
 ```
@@ -47,10 +51,14 @@ For semantics of configuration, please see [Revcontent's documentation](https://
 Supported parameters:
 
 - `data-id`
+- `data-revcontent`
+- `data-env`
 - `data-wrapper`
 - `data-endpoint`
 - `data-ssl`
 - `data-testing`
+- `data-loadscript`
+- `data-sub-ids`
 
 ## Auto-sizing of Ads
 

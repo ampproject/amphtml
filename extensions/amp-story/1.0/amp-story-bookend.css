@@ -14,62 +14,26 @@
  * limitations under the License.
  */
 
+@import './amp-story-shadow-reset.css';
 @import './amp-story-share.css';
 
 .i-amphtml-story-bookend {
-  text-align: left !important;
-  color: #fff !important;
-  bottom: 0 !important;
   display: flex !important;
-  flex-direction: column !important;
-  left: 0 !important;
-  position: absolute !important;
-  right: 0 !important;
-  top: 0 !important;
-  z-index: 100001 !important;
-  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
-
-.i-amphtml-story-bookend.i-amphtml-hidden {
-  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-  transform: translateY(100vh) !important;
-  pointer-events: none !important;
-}
-
-.i-amphtml-story-bookend-overflow {
-  overflow: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  margin-top: auto !important; /* positions it at the bottom of container */
-}
-
-.i-amphtml-story-bookend-inner {
-  margin: 88px 0 0 !important;
   font-family: 'Roboto', sans-serif !important;
-  position: relative !important;
-  padding-top: 32px !important;
-  overflow: hidden !important;
+  flex-direction: column !important;
+  background: #202125 !important;
+  border-radius: 8px 8px 0 0 !important;
+  color: #fff !important;
+  text-align: start !important;
+  z-index: 100001 !important;
 }
 
-.i-amphtml-story-bookend-inner::before {
-  content: " " !important;
-  display: block !important;
-  z-index: -1 !important; /* places it under content */
-  background: rgba(0, 0, 0, 0.70) !important;
-  position: absolute !important;
-  left: 8px !important;
-  top: 8px !important;
-  bottom: 8px !important;
-  right: 8px !important;
-  border-radius: 8px !important;
-}
-
-.i-amphtml-story-bookend-fullbleed .i-amphtml-story-bookend-inner::before,
-[desktop] .i-amphtml-story-bookend-inner::before {
-  left: 0 !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  border-radius: 0 !important;
+.i-amphtml-story-bookend-handle {
+  height: 4px !important;
+  width: 40px !important;
+  margin: 12px auto 24px !important;
+  background: rgba(255, 255, 255, 0.24) !important;
+  border-radius: 4px !important;
 }
 
 .i-amphtml-story-bookend-heading {
@@ -77,7 +41,7 @@
   text-transform: uppercase !important;
   font-size: 12px !important;
   padding-bottom: 8px !important;
-  margin: 48px 0 8px !important;
+  margin: 0 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
   color: rgba(255, 255, 255, 0.54) !important;
   font-weight: 700 !important;
@@ -86,12 +50,13 @@
   overflow: hidden !important;
 }
 
-.i-amphtml-story-bookend-consent {
-  margin: 0 32px !important;
+.i-amphtml-story-bookend-top-level {
+  margin-left: 24px !important;
+  margin-right: 24px !important;
 }
 
 .i-amphtml-story-bookend-consent:last-child {
-  margin-bottom: 32px !important;
+  margin-bottom: 24px !important;
 }
 
 .i-amphtml-story-bookend-consent .i-amphtml-story-bookend-heading {
@@ -106,21 +71,45 @@
   overflow: hidden !important;
   white-space: nowrap !important;
   line-height: 16px !important;
-  width: 50% !important;
   color: rgba(255, 255, 255, 0.6) !important;
   margin-top: 8px !important;
 }
 
 .i-amphtml-story-bookend-article {
-  box-sizing: border-box !important;
-  display: block !important;
   text-decoration: none !important;
   color: inherit !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  max-height: 100px !important;
+}
+
+.i-amphtml-story-bookend-article-text-content {
+  width: 100% !important;
   overflow: hidden !important;
-  flex: 1 0 320px !important;
-  min-width: 33% !important;
-  margin: 24px 0 !important;
-  padding: 0 32px !important;
+  padding-right: 10px !important;
+}
+
+[dir=rtl] .i-amphtml-story-bookend-article-text-content {
+  padding-right: 0px !important;
+  padding-left: 10px !important;
+}
+
+.i-amphtml-story-bookend-article-heading,
+.i-amphtml-story-bookend-text,
+.i-amphtml-story-bookend-consent-button {
+  font-weight: 400 !important;
+  font-size: 16px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: #fff !important;
+  line-height: 1.45em !important;
+  max-height: 4.35em !important;
+  margin: 0 0 8px !important;
+}
+
+.i-amphtml-story-bookend-component {
+  width: 100% !important;
+  margin-bottom: 24px !important;
 }
 
 .i-amphtml-story-bookend-landscape,
@@ -131,34 +120,29 @@
   text-decoration: none !important;
   color: inherit !important;
   overflow: hidden !important;
-  flex: 1 0 320px !important;
-  min-width: 33% !important;
-  margin: 24px 0 !important;
-  padding: 0 32px !important;
 }
 
 @media (min-width: 640px) {
-  .i-amphtml-story-bookend-component {
-    max-width: 50% !important;
+  .i-amphtml-story-bookend-component-set {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+  }
+
+  .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
+    /* 12px to match 24px margin-bottom with margin between 2 elements. */
+    width: calc(50% - 12px) !important;
   }
 }
 
 @media (min-width: 960px) {
-  .i-amphtml-story-bookend-component {
-    max-width: 33% !important;
+  .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
+    /**
+     * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
+     * 16px = (24px * 2) / 3
+     */
+    width: calc(33% - 16px) !important;
   }
-}
-
-.i-amphtml-story-bookend-article-heading,
-.i-amphtml-story-bookend-text,
-.i-amphtml-story-bookend-consent-button {
-  font-weight: 400 !important;
-  font-size: 16px !important;
-  overflow: hidden !important;
-  color: #fff !important;
-  line-height: 1.45em !important;
-  max-height: 4.35em !important;
-  margin: 0 0 8px !important;
 }
 
 .i-amphtml-story-bookend-text {
@@ -233,15 +217,15 @@
 .i-amphtml-story-bookend-article-image,
 .i-amphtml-story-bookend-replay-image,
 .i-amphtml-story-bookend-replay-icon {
-  float: right !important;
-  margin-left: 24px !important;
   position: relative !important;
+  flex: none !important;
 }
 
 .i-amphtml-story-bookend-replay {
-  padding: 16px 0 !important;
-  margin: 0 0 24px !important;
   overflow: hidden !important;
+  display: flex !important;
+  max-height: 120px !important;
+  justify-content: space-between !important;
 }
 
 .i-amphtml-story-bookend-replay-icon {
@@ -268,17 +252,7 @@
 }
 
 .i-amphtml-story-bookend-component-set {
-  margin-bottom: 32px !important;
-  display: flex !important;
-  flex-wrap: wrap !important;
-  justify-content: space-between !important;
-}
-
-/* All top-level bookend elements need to set their own left/right margins */
-.i-amphtml-story-bookend-heading,
-.i-amphtml-story-bookend-replay {
-  margin-left: 32px !important;
-  margin-right: 32px !important;
+  margin-bottom: 24px !important;
 }
 
 .i-amphtml-story-bookend-cta-link-wrapper,
@@ -288,10 +262,7 @@
   box-sizing: border-box !important;
   color: inherit !important;
   overflow: hidden !important;
-  flex: 1 0 320px !important;
   justify-content: space-between !important;
-  margin: 24px 0 !important;
-  padding: 0 32px !important;
 }
 
 .i-amphtml-story-bookend-textbox {
@@ -306,7 +277,7 @@
   text-decoration: none !important;
   width: calc(50% - 6px) !important;
   cursor: pointer !important;
-  margin-bottom: 12px;
+  margin-bottom: 12px !important;
 }
 
 .i-amphtml-story-bookend-cta-link:nth-child(2n+1):last-child {
@@ -326,54 +297,33 @@
   white-space: nowrap !important;
 }
 
-.i-amphtml-story-bookend-fullbleed::before {
-  content: " " !important;
-  display: block !important;
-  background-image: linear-gradient(0deg, rgba(1,1,1,0.00) 0%, #000000 100%) !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 40px !important;
-  pointer-events: none !important;
-  z-index: 1 !important;
-}
-
-.i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-widget {
+.i-amphtml-story-bookend .i-amphtml-story-share-widget {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
 
-.i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-list {
+.i-amphtml-story-bookend .i-amphtml-story-share-list {
   padding-left: 16px !important;
   padding-right: 16px !important;
 }
 
+.i-amphtml-story-bookend .i-amphtml-story-share-item .i-amphtml-story-share-icon {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.i-amphtml-story-bookend .i-amphtml-story-share-icon .i-amphtml-story-share-label {
+  color: #FFF !important;
+}
+
 [desktop].i-amphtml-story-bookend {
-  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-  transform: translateY(0) !important;
-  opacity: 1 !important;
-}
-
-[desktop].i-amphtml-story-bookend.i-amphtml-hidden {
-  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-  transform: translateY(100vh) !important;
-  opacity: 0 !important;
-}
-
-[desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget {
-  /* TODO(alanorozco): Don't render at all when on desktop */
-  display: none !important;
-}
-
-[desktop] .i-amphtml-story-bookend-inner {
   box-sizing: border-box !important;
   min-height: 100vh !important;
   padding: 104px 156px 64px !important;
   margin: 0 !important;
 }
 
-[desktop] .i-amphtml-story-bookend-inner::before {
+[desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget {
+  /* TODO(alanorozco): Don't render at all when on desktop */
   display: none !important;
 }
 
@@ -382,19 +332,23 @@
   display: none !important;
 }
 
-[desktop] .i-amphtml-story-bookend-overflow {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
+[desktop] .i-amphtml-story-bookend-handle {
+  display: none !important;
 }
 
 @media (min-width: 952px) {
-  [desktop] .i-amphtml-story-bookend-component {
-    max-width: 50% !important;
+  [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
+    /* 12px to match 24px margin-bottom with margin between 2 elements. */
+    width: calc(50% - 12px) !important;
   }
 }
 
 @media (min-width: 1272px) {
-  [desktop] .i-amphtml-story-bookend-component {
-    max-width: 33% !important;
+  [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
+    /**
+     * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
+     * 16px = (24px * 2) / 3
+     */
+    width: calc(33% - 16px) !important;
   }
 }

@@ -16,7 +16,6 @@
 
 import {Services} from '../../../src/services';
 
-
 /**
  * Strips everything but the domain from referrer string.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -27,7 +26,7 @@ function referrerDomain(ampdoc) {
   if (!referrer) {
     return '';
   }
-  const {hostname} = Services.urlForDoc(ampdoc).parse(referrer);
+  const {hostname} = Services.urlForDoc(ampdoc.getHeadNode()).parse(referrer);
   return hostname;
 }
 
@@ -83,7 +82,6 @@ function normalizedReferrers(ampdoc) {
   return referrers_(referrer);
 }
 
-
 /**
  * Adds CSS classes onto the HTML element.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -93,11 +91,9 @@ function addDynamicCssClasses(ampdoc, classes) {
   if (ampdoc.isBodyAvailable()) {
     addCssClassesToBody(ampdoc.getBody(), classes);
   } else {
-    ampdoc.whenBodyAvailable().then(
-        body => addCssClassesToBody(body, classes));
+    ampdoc.waitForBodyOpen().then((body) => addCssClassesToBody(body, classes));
   }
 }
-
 
 /**
  * @param {!Element} body
@@ -110,7 +106,6 @@ function addCssClassesToBody(body, classes) {
   }
 }
 
-
 /**
  * Adds dynamic css classes based on the referrer, with a separate class for
  * each level of subdomain specificity.
@@ -118,7 +113,7 @@ function addCssClassesToBody(body, classes) {
  */
 function addReferrerClasses(ampdoc) {
   const referrers = normalizedReferrers(ampdoc);
-  const classes = referrers.map(referrer => {
+  const classes = referrers.map((referrer) => {
     return `amp-referrer-${referrer.replace(/\./g, '-')}`;
   });
 
@@ -126,7 +121,6 @@ function addReferrerClasses(ampdoc) {
     addDynamicCssClasses(ampdoc, classes);
   });
 }
-
 
 /**
  * Adds a dynamic css class `amp-viewer` if this document is inside a viewer.
@@ -141,7 +135,6 @@ function addViewerClass(ampdoc) {
   }
 }
 
-
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
@@ -150,13 +143,27 @@ function addRuntimeClasses(ampdoc) {
   addViewerClass(ampdoc);
 }
 
+/** @implements {../../../src/render-delaying-services.RenderDelayingService} */
+class AmpDynamicCssClasses {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    addRuntimeClasses(ampdoc);
+  }
+
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * Implemented from RenderDelayingService
+   * @return {!Promise}
+   */
+  whenReady() {
+    return Promise.resolve();
+  }
+}
 
 // Register doc-service factory.
-AMP.extension('amp-dynamic-css-classes', '0.1', AMP => {
-  AMP.registerServiceForDoc(
-      'amp-dynamic-css-classes',
-      function(ampdoc) {
-        addRuntimeClasses(ampdoc);
-        return {};
-      });
+AMP.extension('amp-dynamic-css-classes', '0.1', (AMP) => {
+  AMP.registerServiceForDoc('amp-dynamic-css-classes', AmpDynamicCssClasses);
 });

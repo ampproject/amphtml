@@ -42,14 +42,20 @@ export function isArray(value) {
  * @template T
  */
 export function toArray(arrayLike) {
-  if (!arrayLike) {
-    return [];
-  }
-  const array = new Array(arrayLike.length);
-  for (let i = 0; i < arrayLike.length; i++) {
-    array[i] = arrayLike[i];
-  }
-  return array;
+  return arrayLike ? Array.prototype.slice.call(arrayLike) : [];
+}
+
+/**
+ * If the specified argument is an array, it's returned as is. If it's a
+ * single item, the array containing this item is created and returned.
+ * @param {!Array<T>|T} arrayOrSingleItem
+ * @return {!Array<T>}
+ * @template T
+ */
+export function arrayOrSingleItemToArray(arrayOrSingleItem) {
+  return isArray(arrayOrSingleItem)
+    ? /** @type {!Array<T>} */ (arrayOrSingleItem)
+    : [arrayOrSingleItem];
 }
 
 /**
@@ -69,7 +75,7 @@ export function isObject(value) {
  * @return {boolean}
  */
 export function isFiniteNumber(value) {
-  return (typeof value === 'number' && isFinite(value));
+  return typeof value === 'number' && isFinite(value);
 }
 
 /**
@@ -102,4 +108,3 @@ export function isEnumValue(enumObj, s) {
 export function toWin(winOrNull) {
   return /** @type {!Window} */ (winOrNull);
 }
-

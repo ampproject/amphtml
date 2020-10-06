@@ -56,7 +56,6 @@ export function appnexus(global, data) {
   }
 
   appnexusAst(global, data);
-
 }
 
 /**
@@ -66,10 +65,17 @@ export function appnexus(global, data) {
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
   let apntag;
-  if (context.isMaster) { // in case we are in the master iframe, we load AST
+  if (context.isMaster) {
+    // in case we are in the master iframe, we load AST
     context.master.apntag = context.master.apntag || {};
     context.master.apntag.anq = context.master.apntag.anq || [];
     apntag = context.master.apntag;
+
+    context.master.adUnitTargetIds = context.master.adUnitTargetIds || [];
+
+    context.master.adUnitTargetIds = data.adUnits.map(
+      (adUnit) => adUnit.targetId
+    );
 
     apntag.anq.push(() => {
       if (data.pageOpts) {
@@ -80,10 +86,9 @@ function appnexusAst(global, data) {
         });
       }
 
-      data.adUnits.forEach(adUnit => {
+      /** @type {!Array} */ (data.adUnits).forEach((adUnit) => {
         apntag.defineTag(adUnit);
       });
-
     });
     loadScript(global, APPNEXUS_AST_URL, () => {
       apntag.anq.push(() => {
@@ -113,6 +118,21 @@ function appnexusAst(global, data) {
     global.apntag = context.master.apntag;
   }
 
+  if (!context.isMaster && data.adUnits) {
+    const newAddUnits = data.adUnits.filter((adUnit) => {
+      return context.master.adUnitTargetIds.indexOf(adUnit.targetId) === -1;
+    });
+    if (newAddUnits.length) {
+      apntag.anq.push(() => {
+        /** @type {!Array} */ (newAddUnits).forEach((adUnit) => {
+          apntag.defineTag(adUnit);
+          context.master.adUnitTargetIds.push(adUnit.targetId);
+        });
+        apntag.loadTags();
+      });
+    }
+  }
+
   // check for ad responses received for a slot but before listeners are
   // registered, for example when an above-the-fold ad is scrolled into view
   apntag.anq.push(() => {
@@ -126,14 +146,14 @@ function appnexusAst(global, data) {
     apntag.onEvent('adAvailable', data.target, isAdAvailable);
     apntag.onEvent('adNoBid', data.target, context.noContentAvailable);
   });
-}
 
-/**
- * resolve getAd with an available ad object
- *
- * @param {{targetId: string}} adObj
- */
-function isAdAvailable(adObj) {
-  global.context.renderStart({width: adObj.width, height: adObj.height});
-  global.apntag.showTag(adObj.targetId, global.window);
+  /**
+   * resolve getAd with an available ad object
+   *
+   * @param {{targetId: string}} adObj
+   */
+  function isAdAvailable(adObj) {
+    global.context.renderStart({width: adObj.width, height: adObj.height});
+    global.apntag.showTag(adObj.targetId, global.window);
+  }
 }

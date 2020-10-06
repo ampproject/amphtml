@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
+
 const calendarLabel = 'Calendar';
 const jumpToPrevMonth = 'Move backward to switch to the previous month.';
 const jumpToNextMonth = 'Move forward to switch to the next month.';
@@ -30,41 +32,71 @@ const escape = 'Escape key';
 const questionMark = 'Question mark';
 const selectFocusedDate = 'Select the date in focus.';
 const moveFocusByOneDay =
-    'Move backward (left) and forward (right) by one day.';
+  'Move backward (left) and forward (right) by one day.';
 const moveFocusByOneWeek = 'Move backward (up) and forward (down) by one week.';
 const moveFocusByOneMonth = 'Switch months.';
 const moveFocustoStartAndEndOfWeek = 'Go to the first or last day of a week.';
 const returnFocusToInput = 'Return to the date input field.';
 
-const chooseAvailableStartDate =
-    ({date}) => `Choose ${date} as the first date.`;
-const chooseAvailableEndDate = ({date}) => `Choose ${date} as the last date.`;
-const chooseAvailableDate = ({date}) => date;
-const dateIsUnavailable = ({date}) => `Not available. ${date}`;
-
-export const DayPickerPhrases = {
-  calendarLabel,
-  jumpToPrevMonth,
-  jumpToNextMonth,
-  keyboardShortcuts,
-  showKeyboardShortcutsPanel,
-  hideKeyboardShortcutsPanel,
-  openThisPanel,
-  enterKey,
-  leftArrowRightArrow,
-  upArrowDownArrow,
-  pageUpPageDown,
-  homeEnd,
-  escape,
-  questionMark,
-  selectFocusedDate,
-  moveFocusByOneDay,
-  moveFocusByOneWeek,
-  moveFocusByOneMonth,
-  moveFocustoStartAndEndOfWeek,
-  returnFocusToInput,
-  chooseAvailableStartDate,
-  chooseAvailableEndDate,
-  chooseAvailableDate,
-  dateIsUnavailable,
+/**
+ * @param {!JsonObject} obj
+ * @return {string}
+ */
+const chooseAvailableStartDate = (obj) => {
+  return `Choose ${obj['date']} as the first date.`;
 };
+
+/**
+ * @param {!JsonObject} obj
+ * @return {string}
+ */
+const chooseAvailableEndDate = (obj) => {
+  return `Choose ${obj['date']} as the last date.`;
+};
+
+/**
+ * @param {!JsonObject} obj
+ * @return {string}
+ */
+const chooseAvailableDate = (obj) => {
+  return obj['date'];
+};
+
+/**
+ * @param {!JsonObject} obj
+ * @return {string}
+ */
+const dateIsUnavailable = (obj) => {
+  return `Not available. ${obj['date']}`;
+};
+
+/**
+ * @type {!JsonObject}
+ */
+// eslint-disable-next-line local/no-export-side-effect
+export const DayPickerPhrases = dict({
+  'calendarLabel': calendarLabel,
+  'jumpToPrevMonth': jumpToPrevMonth,
+  'jumpToNextMonth': jumpToNextMonth,
+  'keyboardShortcuts': keyboardShortcuts,
+  'showKeyboardShortcutsPanel': showKeyboardShortcutsPanel,
+  'hideKeyboardShortcutsPanel': hideKeyboardShortcutsPanel,
+  'openThisPanel': openThisPanel,
+  'enterKey': enterKey,
+  'leftArrowRightArrow': leftArrowRightArrow,
+  'upArrowDownArrow': upArrowDownArrow,
+  'pageUpPageDown': pageUpPageDown,
+  'homeEnd': homeEnd,
+  'escape': escape,
+  'questionMark': questionMark,
+  'selectFocusedDate': selectFocusedDate,
+  'moveFocusByOneDay': moveFocusByOneDay,
+  'moveFocusByOneWeek': moveFocusByOneWeek,
+  'moveFocusByOneMonth': moveFocusByOneMonth,
+  'moveFocustoStartAndEndOfWeek': moveFocustoStartAndEndOfWeek,
+  'returnFocusToInput': returnFocusToInput,
+  'chooseAvailableStartDate': chooseAvailableStartDate,
+  'chooseAvailableEndDate': chooseAvailableEndDate,
+  'chooseAvailableDate': chooseAvailableDate,
+  'dateIsUnavailable': dateIsUnavailable,
+});

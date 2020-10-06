@@ -16,14 +16,25 @@
 tags: {  # amp-accordion
   html_format: AMP
   html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-accordion"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-accordion
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-accordion] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-accordion"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -32,17 +43,21 @@ tags: {  # <amp-accordion>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "AMP-ACCORDION"
   requires_extension: "amp-accordion"
   attrs: { name: "animate" value: "" }
-  attrs: { name: "disable-session-states" value: "" }
+  attrs: {
+    # session-states are always disabled in AMP4EMAIL
+    disabled_by: "amp4email"
+    name: "disable-session-states"
+    value: ""
+  }
   attrs: { name: "expand-single-section" value: "" }
   attr_lists: "extended-amp-global"
   child_tags: {
     child_tag_name_oneof: "SECTION"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-accordion"
+  spec_url: "https://amp.dev/documentation/components/amp-accordion/"
   amp_layout: {
     supported_layouts: CONTAINER
   }
@@ -51,11 +66,15 @@ tags: {  # <amp-accordion> > <section>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
   tag_name: "SECTION"
   spec_name: "amp-accordion > section"
+  descriptive_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"
   attrs: { name: "expanded" value: "" }
+  # amp-bind
+  attrs: {
+    name: "[data-expand]"
+  }
   child_tags: {
     mandatory_num_child_tags: 2
     first_child_tag_name_oneof: "H1"

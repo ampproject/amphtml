@@ -14,29 +14,56 @@
  * limitations under the License.
  */
 
-import {htmlFor} from './static-template';
-
-/** @private @const */
-const LINE_LOADER_ELEMENTS = {
-  'AMP-AD': true,
-};
+import {Services} from './services';
 
 /**
- * Creates a default "loading indicator" element. This element accepts
- * `amp-active` class in which case it may choose to run an animation.
- * @param {!Document} doc
- * @param {string} elementName
- * @return {!Element}
+ * Gets a Promise for the LoaderService, initiating a request to download the
+ * code.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!Element} element
+ * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
  */
-export function createLoaderElement(doc, elementName) {
-  if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
-    return htmlFor(doc)`<div class="i-amphtml-loader-line">
-          <div class="i-amphtml-loader-moving-line"></div>
-        </div>`;
-  }
-  return htmlFor(doc)`<div class="i-amphtml-loader">
-        <div class="i-amphtml-loader-dot"></div>
-        <div class="i-amphtml-loader-dot"></div>
-        <div class="i-amphtml-loader-dot"></div>
-      </div>`;
+function getLoaderServicePromise(ampDoc, element) {
+  return Services.extensionsFor(ampDoc.win)
+    .installExtensionForDoc(ampDoc, 'amp-loader')
+    .then(() => Services.loaderServiceForDoc(element));
+}
+
+/**
+ * Creates a default "loading indicator" element based on the new design.
+ *
+ * Please see https://github.com/ampproject/amphtml/issues/20237 for details,
+ * screenshots and various states of the new loader design.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!AmpElement} element
+ * @param {number} elementWidth
+ * @param {number} elementHeight
+ * @param {number=} startTime
+ * @return {!Element} The loader root element.
+ */
+export function createLoaderElement(
+  ampDoc,
+  element,
+  elementWidth,
+  elementHeight,
+  startTime = ampDoc.win.Date.now()
+) {
+  // We create the loader root element up front, since it is needed
+  // synchronously. We create the actual element with animations when the
+  // service is ready.
+  const loaderRoot = element.ownerDocument.createElement('div');
+
+  getLoaderServicePromise(ampDoc, element).then((loaderService) => {
+    const endTime = ampDoc.win.Date.now();
+    const initDelay = endTime - startTime;
+    loaderService.initializeLoader(
+      element,
+      loaderRoot,
+      initDelay,
+      elementWidth,
+      elementHeight
+    );
+  });
+
+  return loaderRoot;
 }

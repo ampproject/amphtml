@@ -16,7 +16,7 @@
 
 import {Deferred, tryResolve} from '../utils/promise';
 import {Services} from '../services';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {
@@ -24,6 +24,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../service';
+import {getState} from '../history';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -34,26 +35,20 @@ const HISTORY_PROP_ = 'AMP.History';
 /** @typedef {number} */
 let HistoryIdDef;
 
-/** @typedef {{
-  stackIndex: HistoryIdDef,
-  title: string,
-  fragment: string,
-  data: (Object<string,*>|undefined)
-}} */
+/**
+ * @typedef {{stackIndex: HistoryIdDef, title: string, fragment: string, data: (!JsonObject|undefined)}}
+ */
 let HistoryStateDef;
 
-/** @typedef {{
-  title: (string|undefined),
-  fragment: (string|undefined),
-  data: (Object<string,*>|undefined)
-}} */
+/**
+ * @typedef {{title: (string|undefined), fragment: (string|undefined), url: (string|undefined), canonicalUrl: (string|undefined), data: (!JsonObject|undefined)}}
+ */
 let HistoryStateUpdateDef;
 
 /**
  * Wraps the browser's History API for viewer support and necessary polyfills.
  */
 export class History {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!HistoryBindingInterface} binding
@@ -101,7 +96,7 @@ export class History {
    */
   push(opt_onPop, opt_stateUpdate) {
     return this.enque_(() => {
-      return this.binding_.push(opt_stateUpdate).then(historyState => {
+      return this.binding_.push(opt_stateUpdate).then((historyState) => {
         this.onStateUpdated_(historyState);
         if (opt_onPop) {
           this.stackOnPop_[historyState.stackIndex] = opt_onPop;
@@ -122,7 +117,7 @@ export class History {
    */
   pop(stateId) {
     return this.enque_(() => {
-      return this.binding_.pop(stateId).then(historyState => {
+      return this.binding_.pop(stateId).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
     }, 'pop');
@@ -135,8 +130,7 @@ export class History {
    * @return {!Promise}
    */
   replace(opt_stateUpdate) {
-    return this.enque_(() => this.binding_.replace(opt_stateUpdate),
-        'replace');
+    return this.enque_(() => this.binding_.replace(opt_stateUpdate), 'replace');
   }
 
   /**
@@ -149,20 +143,21 @@ export class History {
   }
 
   /**
-   * Requests navigation one step back. This request is only satisifed
-   * when the history has at least one step to go back in the context
-   * of this document.
+   * Requests navigation one step back. This first attempts to go back within
+   * the context of this document.
+   *
+   * @param {boolean=} navigate
    * @return {!Promise}
    */
-  goBack() {
+  goBack(navigate) {
     return this.enque_(() => {
-      if (this.stackIndex_ <= 0) {
-        // Nothing left to pop.
+      if (this.stackIndex_ <= 0 && !navigate) {
         return Promise.resolve();
       }
+
       // Pop the current state. The binding will ignore the request if
       // it cannot satisfy it.
-      return this.binding_.pop(this.stackIndex_).then(historyState => {
+      return this.binding_.pop(this.stackIndex_).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
     }, 'goBack');
@@ -177,7 +172,7 @@ export class History {
    * @return {!Promise}
    */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     const previousHash = this.ampdoc_.win.location.hash;
     return this.push(() => {
       this.ampdoc_.win.location.replace(previousHash || '#');
@@ -279,23 +274,27 @@ export class History {
       promise = Promise.reject(e);
     }
 
-    promise.then(result => {
-      task.resolve(result);
-    }, reason => {
-      dev().error(TAG_, 'failed to execute a task:', reason);
-      // TODO(dvoytenko, #8785): cleanup after tracing.
-      if (task.trace) {
-        task.trace.message += reason;
-        dev().error(TAG_, task.trace);
-      }
-      task.reject(reason);
-    }).then(() => {
-      this.queue_.splice(0, 1);
-      this.deque_();
-    });
+    promise
+      .then(
+        (result) => {
+          task.resolve(result);
+        },
+        (reason) => {
+          dev().error(TAG_, 'failed to execute a task:', reason);
+          // TODO(dvoytenko, #8785): cleanup after tracing.
+          if (task.trace) {
+            task.trace.message += reason;
+            dev().error(TAG_, task.trace);
+          }
+          task.reject(reason);
+        }
+      )
+      .then(() => {
+        this.queue_.splice(0, 1);
+        this.deque_();
+      });
   }
 }
-
 
 /**
  * HistoryBindingInterface is an interface that defines an underlying technology
@@ -303,7 +302,6 @@ export class History {
  * @interface
  */
 class HistoryBindingInterface {
-
   /** @protected */
   cleanup() {}
 
@@ -369,7 +367,6 @@ class HistoryBindingInterface {
   updateFragment(unusedFragment) {}
 }
 
-
 /**
  * Implementation of HistoryBindingInterface based on the native window. It uses
  * window.history properties and events.
@@ -379,7 +376,6 @@ class HistoryBindingInterface {
  * @implements {HistoryBindingInterface}
  */
 export class HistoryBindingNatural_ {
-
   /**
    * @param {!Window} win
    */
@@ -394,9 +390,9 @@ export class HistoryBindingNatural_ {
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
-    if (history.state && history.state[HISTORY_PROP_] !== undefined) {
-      this.startIndex_ = Math.min(history.state[HISTORY_PROP_],
-          this.startIndex_);
+    const state = getState(history);
+    if (state && state[HISTORY_PROP_] !== undefined) {
+      this.startIndex_ = Math.min(state[HISTORY_PROP_], this.startIndex_);
     }
 
     /** @private {number} */
@@ -423,17 +419,20 @@ export class HistoryBindingNatural_ {
     let pushState, replaceState;
     if (history.pushState && history.replaceState) {
       /** @private @const {function(*, string=, string=)|undefined} */
-      this.origPushState_ = history.originalPushState ||
-          history.pushState.bind(history);
+      this.origPushState_ =
+        history.originalPushState || history.pushState.bind(history);
       /** @private @const {function(*, string=, string=)|undefined} */
-      this.origReplaceState_ = history.originalReplaceState ||
-          history.replaceState.bind(history);
+      this.origReplaceState_ =
+        history.originalReplaceState || history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origPushState_(state, opt_title,
-            // A bug in edge causes paths to become undefined if URL is
-            // undefined, filed here: https://goo.gl/KlImZu
-            opt_url || null);
+        this.origPushState_(
+          state,
+          opt_title,
+          // A bug in edge causes paths to become undefined if URL is
+          // undefined, filed here: https://goo.gl/KlImZu
+          opt_url || null
+        );
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
@@ -467,8 +466,9 @@ export class HistoryBindingNatural_ {
     this.replaceState_ = replaceState;
 
     try {
-      this.replaceState_(this.historyState_(this.stackIndex_,
-          /* replace */ true));
+      this.replaceState_(
+        this.historyState_(this.stackIndex_, /* replace */ true)
+      );
     } catch (e) {
       dev().error(TAG_, 'Initial replaceState failed: ' + e.message);
     }
@@ -476,9 +476,16 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    this.popstateHandler_ = e => {
-      dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
-          JSON.stringify(e.state));
+    this.popstateHandler_ = (e) => {
+      const event = /** @type {!PopStateEvent} */ (e);
+      const state = /** @type {!JsonObject} */ (event.state);
+      dev().fine(
+        TAG_,
+        'popstate event: ' +
+          this.win.history.length +
+          ', ' +
+          JSON.stringify(state)
+      );
       this.onHistoryEvent_();
     };
     this.win.addEventListener('popstate', this.popstateHandler_);
@@ -516,9 +523,14 @@ export class HistoryBindingNatural_ {
   push(opt_stateUpdate) {
     return this.whenReady_(() => {
       const newState = this.mergeStateUpdate_(
-          this.getState_(), opt_stateUpdate || {});
-      this.historyPushState_(newState, /* title */ undefined,
-          newState.fragment ? ('#' + newState.fragment) : undefined);
+        this.getState_(),
+        opt_stateUpdate || {}
+      );
+      this.historyPushState_(
+        newState,
+        /* title */ undefined,
+        newState.fragment ? '#' + newState.fragment : undefined
+      );
       return tryResolve(() =>
         this.mergeStateUpdate_(newState, {stackIndex: this.stackIndex_})
       );
@@ -531,7 +543,7 @@ export class HistoryBindingNatural_ {
     stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
       return this.back_(this.stackIndex_ - stackIndex + 1);
-    }).then(newStackIndex => {
+    }).then((newStackIndex) => {
       return this.mergeStateUpdate_(this.getState_(), {
         stackIndex: newStackIndex,
       });
@@ -542,9 +554,16 @@ export class HistoryBindingNatural_ {
   replace(opt_stateUpdate = {}) {
     return this.whenReady_(() => {
       const newState = this.mergeStateUpdate_(
-          this.getState_(), opt_stateUpdate || {});
-      this.historyReplaceState_(newState, /* title */ undefined,
-          newState.fragment ? ('#' + newState.fragment) : undefined);
+        this.getState_(),
+        opt_stateUpdate || {}
+      );
+      const url = (newState.url || '').replace(/#.*/, '');
+      const fragment = newState.fragment ? '#' + newState.fragment : '';
+      this.historyReplaceState_(
+        newState,
+        newState.title,
+        url || fragment ? url + fragment : undefined
+      );
       return tryResolve(() =>
         this.mergeStateUpdate_(newState, {stackIndex: this.stackIndex_})
       );
@@ -553,9 +572,11 @@ export class HistoryBindingNatural_ {
 
   /** @override */
   get() {
-    return tryResolve(() => this.mergeStateUpdate_(this.getState_(), {
-      stackIndex: this.stackIndex_,
-    }));
+    return tryResolve(() =>
+      this.mergeStateUpdate_(this.getState_(), {
+        stackIndex: this.stackIndex_,
+      })
+    );
   }
 
   /**
@@ -573,8 +594,10 @@ export class HistoryBindingNatural_ {
   /** @private */
   onHistoryEvent_() {
     let state = this.getState_();
-    dev().fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
-        JSON.stringify(state));
+    dev().fine(
+      TAG_,
+      'history event: ' + this.win.history.length + ', ' + JSON.stringify(state)
+    );
     const stackIndex = state ? state[HISTORY_PROP_] : undefined;
     let newStackIndex = this.stackIndex_;
     const waitingState = this.waitingState_;
@@ -584,8 +607,9 @@ export class HistoryBindingNatural_ {
       // Make sure stack has enough space. Whether we are going forward or
       // backward, the stack should have at least one extra cell.
       newStackIndex = this.win.history.length - 2;
-      this.updateHistoryState_(this.mergeStateUpdate_(state,
-          {stackIndex: newStackIndex}));
+      this.updateHistoryState_(
+        this.mergeStateUpdate_(state, {stackIndex: newStackIndex})
+      );
     }
 
     if (stackIndex == undefined) {
@@ -608,8 +632,9 @@ export class HistoryBindingNatural_ {
 
     // Update the stack, pop squeezed states.
     if (newStackIndex != this.stackIndex_) {
-      this.updateHistoryState_(this.mergeStateUpdate_(state,
-          {stackIndex: newStackIndex}));
+      this.updateHistoryState_(
+        this.mergeStateUpdate_(state, {stackIndex: newStackIndex})
+      );
     }
 
     // User navigation is allowed to move past the starting point of
@@ -626,15 +651,17 @@ export class HistoryBindingNatural_ {
   /** @private */
   getState_() {
     if (this.supportsState_) {
-      return this.win.history.state;
+      return getState(this.win.history);
     }
     return this.unsupportedState_;
   }
 
   /** @private */
   assertReady_() {
-    dev().assert(!this.waitingState_,
-        'The history must not be in the waiting state');
+    devAssert(
+      !this.waitingState_,
+      'The history must not be in the waiting state'
+    );
   }
 
   /**
@@ -699,7 +726,11 @@ export class HistoryBindingNatural_ {
       state[HISTORY_PROP_] = stackIndex;
       this.replaceState_(state);
     }
-    this.updateHistoryState_(this.mergeStateUpdate_(/** @type {!HistoryStateDef} */ (state), {stackIndex}));
+    const newState = this.mergeStateUpdate_(
+      /** @type {!HistoryStateDef} */ (state),
+      {stackIndex}
+    );
+    this.updateHistoryState_(newState);
   }
 
   /**
@@ -714,7 +745,7 @@ export class HistoryBindingNatural_ {
    * @override
    */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     this.whenReady_(() => {
       // location.replace will fire a popstate event which is not a history
       // event, so temporarily remove the event listener and re-add it after.
@@ -748,7 +779,11 @@ export class HistoryBindingNatural_ {
     const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
     state[HISTORY_PROP_] = stackIndex;
     this.replaceState_(state, title, url);
-    this.updateHistoryState_(this.mergeStateUpdate_(/** @type {!HistoryStateDef} */ (state), {stackIndex}));
+    const newState = this.mergeStateUpdate_(
+      /** @type {!HistoryStateDef} */ (state),
+      {stackIndex}
+    );
+    this.updateHistoryState_(newState);
   }
 
   /**
@@ -757,11 +792,18 @@ export class HistoryBindingNatural_ {
    */
   updateHistoryState_(historyState) {
     this.assertReady_();
-    historyState.stackIndex = Math.min(historyState.stackIndex,
-        this.win.history.length - 1);
+    historyState.stackIndex = Math.min(
+      historyState.stackIndex,
+      this.win.history.length - 1
+    );
     if (this.stackIndex_ != historyState.stackIndex) {
-      dev().fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
-          historyState.stackIndex);
+      dev().fine(
+        TAG_,
+        'stack index changed: ' +
+          this.stackIndex_ +
+          ' -> ' +
+          historyState.stackIndex
+      );
       this.stackIndex_ = historyState.stackIndex;
       if (this.onStateUpdated_) {
         this.onStateUpdated_(historyState);
@@ -783,19 +825,22 @@ export class HistoryBindingNatural_ {
   }
 
   /**
-   * @param {!HistoryStateDef|null} state
-   * @param {!HistoryStateUpdateDef|null} stateUpdate
+   * @param {?HistoryStateDef} state
+   * @param {!HistoryStateUpdateDef} update
    * @return {!HistoryStateDef}
    */
-  mergeStateUpdate_(state, stateUpdate) {
-    const mergedData = Object.assign({}, (state && state.data) || {},
-        (stateUpdate && stateUpdate.data) || {});
-    return /** @type {!HistoryStateDef} */(Object.assign(
-        {}, state, stateUpdate, {data: mergedData}));
+  mergeStateUpdate_(state, update) {
+    const mergedData = /** @type {!JsonObject} */ ({
+      ...((state && state.data) || {}),
+      ...(update.data || {}),
+    });
+    return /** @type {!HistoryStateDef} */ ({
+      ...(state || {}),
+      ...update,
+      data: mergedData,
+    });
   }
-
 }
-
 
 /**
  * Implementation of HistoryBindingInterface that assumes a virtual history that
@@ -807,16 +852,15 @@ export class HistoryBindingNatural_ {
  * @implements {HistoryBindingInterface}
  */
 export class HistoryBindingVirtual_ {
-
   /**
    * @param {!Window} win
-   * @param {!./viewer-impl.Viewer} viewer
+   * @param {!./viewer-interface.ViewerInterface} viewer
    */
   constructor(win, viewer) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!./viewer-impl.Viewer} */
+    /** @private @const {!./viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
 
     /** @private {number} */
@@ -826,13 +870,15 @@ export class HistoryBindingVirtual_ {
     this.onStateUpdated_ = null;
 
     /** @private {!UnlistenDef} */
-    this.unlistenOnHistoryPopped_ = this.viewer_.onMessage('historyPopped',
-        this.onHistoryPopped_.bind(this));
+    this.unlistenOnHistoryPopped_ = this.viewer_.onMessage(
+      'historyPopped',
+      (data) => this.onHistoryPopped_(data)
+    );
   }
 
   /** @override */
   replaceStateForTarget(target) {
-    dev().assert(target[0] == '#', 'target should start with a #');
+    devAssert(target[0] == '#', 'target should start with a #');
     this.win.location.replace(target);
   }
 
@@ -847,26 +893,67 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * Note: Not all viewers support `pushHistory` responses yet.
-   * @override
+   * Gets the history state from a response. This checks if `maybeHistoryState`
+   * is a history state, and returns it if so, falling back to `fallbackState`
+   * otherwise.
+   * @param {*} maybeHistoryState
+   * @param {!HistoryStateDef} fallbackState
+   * @param {string} debugId
+   * @return {!HistoryStateDef}
+   * @private
    */
-  push(opt_stateUpdate) {
-    const message = /** @type {!JsonObject} */ (
-      Object.assign({'stackIndex': this.stackIndex_ + 1}, opt_stateUpdate || {})
-    );
-    return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
-        .then(response => {
-          // Return the message if responses aren't supported.
-          const newState = /** @type {!HistoryStateDef} */ (
-            response || message
-          );
-          this.updateHistoryState_(newState);
-          return newState;
-        });
+  toHistoryState_(maybeHistoryState, fallbackState, debugId) {
+    if (this.isHistoryState_(maybeHistoryState)) {
+      return /** @type {!HistoryStateDef} */ (maybeHistoryState);
+    } else {
+      dev().warn(
+        TAG_,
+        'Ignored unexpected "%s" data:',
+        debugId,
+        maybeHistoryState
+      );
+    }
+    return fallbackState;
   }
 
   /**
-   * Note: Not all viewers support `popHistory` responses yet.
+   * @param {*} maybeHistoryState
+   * @return {boolean}
+   */
+  isHistoryState_(maybeHistoryState) {
+    return !!maybeHistoryState && maybeHistoryState['stackIndex'] !== undefined;
+  }
+
+  /**
+   * `pushHistory`
+   *
+   *   Request:  {'stackIndex': string}
+   *   Response: undefined | {'stackIndex': string}
+   *
+   * @override
+   */
+  push(opt_stateUpdate) {
+    const message = /** @type {!JsonObject} */ ({
+      'stackIndex': this.stackIndex_ + 1,
+      ...(opt_stateUpdate || {}),
+    });
+    const push = 'pushHistory';
+    return this.viewer_
+      .sendMessageAwaitResponse(push, message)
+      .then((response) => {
+        const fallbackState = /** @type {!HistoryStateDef} */ (message);
+        const newState = this.toHistoryState_(response, fallbackState, push);
+        this.updateHistoryState_(newState);
+        return newState;
+      });
+  }
+
+  /**
+   * `popHistory`
+   *
+   *   Request:  {'stackIndex': string}
+   *   Response: undefined | {'stackIndex': string}
+   *
    * @override
    */
   pop(stackIndex) {
@@ -874,103 +961,159 @@ export class HistoryBindingVirtual_ {
       return this.get();
     }
     const message = dict({'stackIndex': this.stackIndex_});
-    return this.viewer_.sendMessageAwaitResponse('popHistory', message)
-        .then(response => {
-          // Note: Return the new stackIndex if responses aren't supported.
-          const newState = /** @type {!HistoryStateDef} */ (
-            response || dict({'stackIndex': this.stackIndex_ - 1})
-          );
-          this.updateHistoryState_(newState);
-          return newState;
-        });
+    const pop = 'popHistory';
+    return this.viewer_
+      .sendMessageAwaitResponse(pop, message)
+      .then((response) => {
+        const fallbackState = /** @type {!HistoryStateDef} */ (dict({
+          'stackIndex': this.stackIndex_ - 1,
+        }));
+        const newState = this.toHistoryState_(response, fallbackState, pop);
+        this.updateHistoryState_(newState);
+        return newState;
+      });
   }
 
   /**
-   * Note: Not all viewers support `replace()` yet.
+   * `replaceHistory`
+   *
+   *   Request:   {'fragment': string}
+   *   Response:  undefined | {'stackIndex': string}
+   *
    * @override
    */
   replace(opt_stateUpdate) {
-    const message = /** @type {!JsonObject} */ (
-      Object.assign({'stackIndex': this.stackIndex_}, opt_stateUpdate || {})
-    );
-    return this.viewer_.sendMessageAwaitResponse('replaceHistory', message,
-        /* cancelUnsent */ true).then(response => {
-      const newState = /** @type {!HistoryStateDef} */ (response || message);
-      this.updateHistoryState_(newState);
-      return newState;
+    if (opt_stateUpdate && opt_stateUpdate.url) {
+      if (!this.viewer_.hasCapability('fullReplaceHistory')) {
+        // Full URL replacement requested, but not supported by the viewer.
+        // Don't update, and return the current state.
+        const curState = /** @type {!HistoryStateDef} */ (dict({
+          'stackIndex': this.stackIndex_,
+        }));
+        return Promise.resolve(curState);
+      }
+
+      // replace fragment, only explicit fragment param will be sent.
+      const url = opt_stateUpdate.url.replace(/#.*/, '');
+      opt_stateUpdate.url = url;
+    }
+
+    const message = /** @type {!JsonObject} */ ({
+      'stackIndex': this.stackIndex_,
+      ...(opt_stateUpdate || {}),
     });
+    const replace = 'replaceHistory';
+    return this.viewer_
+      .sendMessageAwaitResponse(replace, message, /* cancelUnsent */ true)
+      .then((response) => {
+        const fallbackState = /** @type {!HistoryStateDef} */ (message);
+        const newState = this.toHistoryState_(response, fallbackState, replace);
+        this.updateHistoryState_(newState);
+        return newState;
+      });
   }
 
   /**
-   * Note: Not all viewers support `get()` yet.
+   * Note: Only returns the current `stackIndex`.
    * @override
    */
   get() {
-    return this.viewer_.sendMessageAwaitResponse('getHistory', undefined,
-        /* cancelUnsent */ true).then(response => {
-      return {
-        fragment: response['fragment'],
-        stackIndex: response['stackIndex'],
-        data: response['data'],
-        title: response['title'],
-      };
-    });
+    // Not sure why this type coercion is necessary, but CC complains otherwise.
+    return Promise.resolve(
+      /** @type {!HistoryStateDef} */ ({
+        data: undefined,
+        fragment: '',
+        stackIndex: this.stackIndex_,
+        title: '',
+      })
+    );
   }
 
   /**
-   * @param {!JsonObject} historyState
+   * `historyPopped` (from viewer)
+   *
+   *   Request:  {'newStackIndex': number} | {'stackIndex': number}
+   *   Response: undefined
+   *
+   * @param {!JsonObject} data
    * @private
    */
-  onHistoryPopped_(historyState) {
-    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (historyState));
+  onHistoryPopped_(data) {
+    if (data['newStackIndex'] !== undefined) {
+      data['stackIndex'] = data['newStackIndex'];
+    }
+    if (this.isHistoryState_(data)) {
+      this.updateHistoryState_(/** @type {!HistoryStateDef} */ (data));
+    } else {
+      dev().warn(TAG_, 'Ignored unexpected "historyPopped" data:', data);
+    }
   }
 
   /**
-   * @param {!HistoryStateDef=} historyState
+   * @param {!HistoryStateDef} state
    * @private
    */
-  updateHistoryState_(historyState) {
-    if (this.stackIndex_ != historyState.stackIndex) {
-      dev().fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
-          historyState.stackIndex);
-      this.stackIndex_ = historyState.stackIndex;
+  updateHistoryState_(state) {
+    const {stackIndex} = state;
+    if (this.stackIndex_ != stackIndex) {
+      dev().fine(TAG_, `stackIndex: ${this.stackIndex_} -> ${stackIndex}`);
+      this.stackIndex_ = stackIndex;
       if (this.onStateUpdated_) {
-        this.onStateUpdated_(historyState);
+        this.onStateUpdated_(state);
       }
     }
   }
 
-  /** @override */
+  /**
+   * `getFragment`
+   *
+   *   Request:  undefined
+   *   Response: string
+   *
+   * @override
+   */
   getFragment() {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
-        /* cancelUnsent */true).then(
-        data => {
-          if (!data) {
-            return '';
-          }
-          let hash = dev().assertString(data);
-          /* Strip leading '#'*/
-          if (hash[0] == '#') {
-            hash = hash.substr(1);
-          }
-          return hash;
-        });
+    return this.viewer_
+      .sendMessageAwaitResponse(
+        'getFragment',
+        undefined,
+        /* cancelUnsent */ true
+      )
+      .then((data) => {
+        if (!data) {
+          return '';
+        }
+        let hash = dev().assertString(data);
+        /* Strip leading '#'*/
+        if (hash[0] == '#') {
+          hash = hash.substr(1);
+        }
+        return hash;
+      });
   }
 
-  /** @override */
+  /**
+   * `replaceHistory`
+   *
+   *   Request:   {'fragment': string}
+   *   Response:  undefined | {'stackIndex': string}
+   *
+   * @override
+   */
   updateFragment(fragment) {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'replaceHistory', dict({'fragment': fragment}),
-        /* cancelUnsent */true));
+      'replaceHistory',
+      dict({'fragment': fragment}),
+      /* cancelUnsent */ true
+    ));
   }
 }
-
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
@@ -980,16 +1123,20 @@ export class HistoryBindingVirtual_ {
 function createHistory(ampdoc) {
   const viewer = Services.viewerForDoc(ampdoc);
   let binding;
-  if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
-          ampdoc.win.AMP_TEST_IFRAME) {
+  if (
+    viewer.isOvertakeHistory() ||
+    getMode(ampdoc.win).test ||
+    ampdoc.win.__AMP_TEST_IFRAME
+  ) {
     binding = new HistoryBindingVirtual_(ampdoc.win, viewer);
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
     registerServiceBuilder(
-        ampdoc.win,
-        'global-history-binding',
-        HistoryBindingNatural_);
+      ampdoc.win,
+      'global-history-binding',
+      HistoryBindingNatural_
+    );
     binding = getService(ampdoc.win, 'global-history-binding');
   }
   return new History(ampdoc, binding);

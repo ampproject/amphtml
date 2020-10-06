@@ -16,7 +16,6 @@
 
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 
-
 /**
  * Returns an string with a total of 128 of random values based on the
  * `win.crypto.getRandomValues` API. If that is not available concatenates
@@ -33,6 +32,30 @@ export function getUniqueId(win) {
   }
 
   // Support for legacy browsers.
-  return String(win.location.href + Date.now() +
-      win.Math.random() + win.screen.width + win.screen.height);
+  return String(
+    win.location.href +
+      Date.now() +
+      win.Math.random() +
+      win.screen.width +
+      win.screen.height
+  );
+}
+
+/**
+ * Finds all meta tags starting with `amp4ads-vars-` or `amp-cta`.
+ * @param {Document} doc
+ * @return {!IArrayLike}
+ */
+export function getStoryAdMetaTags(doc) {
+  const selector = 'meta[name^=amp4ads-vars-],meta[name^=amp-cta-]';
+  return doc.querySelectorAll(selector);
+}
+
+/**
+ * Returns document from given iframe, or null if non FIE.
+ * @param {HTMLIFrameElement} iframe
+ * @return {!Document}
+ */
+export function getFrameDoc(iframe) {
+  return iframe.contentDocument || iframe.contentWindow.document;
 }

@@ -16,13 +16,12 @@
 
 import {Services} from '../../../src/services';
 import {removeChildren} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 
 /** @type {string} */
 const OBJ_PROP = '__BUBBLE_OBJ';
 
 export class ValidationBubble {
-
   /**
    * Creates a bubble component to display messages in.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -32,7 +31,7 @@ export class ValidationBubble {
     /** @private @const {string} */
     this.id_ = id;
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
@@ -49,6 +48,7 @@ export class ValidationBubble {
 
     /** @private @const {!Element} */
     this.bubbleElement_ = ampdoc.win.document.createElement('div');
+    toggle(this.bubbleElement_, false);
 
     this.bubbleElement_.classList.add('i-amphtml-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
@@ -75,12 +75,15 @@ export class ValidationBubble {
     this.currentTargetElement_ = null;
     this.currentMessage_ = '';
 
-    this.vsync_.run({
-      measure: undefined,
-      mutate: hideBubble,
-    }, {
-      bubbleElement: this.bubbleElement_,
-    });
+    this.vsync_.run(
+      {
+        measure: undefined,
+        mutate: hideBubble,
+      },
+      {
+        bubbleElement: this.bubbleElement_,
+      }
+    );
   }
 
   /**
@@ -103,13 +106,15 @@ export class ValidationBubble {
       viewport: this.viewport_,
       id: this.id_,
     };
-    this.vsync_.run({
-      measure: measureTargetElement,
-      mutate: showBubbleElement,
-    }, state);
+    this.vsync_.run(
+      {
+        measure: measureTargetElement,
+        mutate: showBubbleElement,
+      },
+      state
+    );
   }
 }
-
 
 /**
  * Hides the bubble element passed through state object.
@@ -120,11 +125,8 @@ function hideBubble(state) {
   state.bubbleElement.removeAttribute('aria-alert');
   state.bubbleElement.removeAttribute('role');
   removeChildren(state.bubbleElement);
-  setStyles(state.bubbleElement, {
-    display: 'none',
-  });
+  toggle(state.bubbleElement, false);
 }
-
 
 /**
  * Measures the layout for the target element passed through state object.
@@ -134,7 +136,6 @@ function hideBubble(state) {
 function measureTargetElement(state) {
   state.targetRect = state.viewport.getLayoutRect(state.targetElement);
 }
-
 
 /**
  * Updates text content, positions and displays the bubble.
@@ -150,8 +151,8 @@ function showBubbleElement(state) {
   state.bubbleElement.setAttribute('role', 'alert');
   state.bubbleElement.setAttribute('aria-live', 'assertive');
   state.bubbleElement.appendChild(messageDiv);
+  toggle(state.bubbleElement, true);
   setStyles(state.bubbleElement, {
-    display: 'block',
     top: `${state.targetRect.top - 10}px`,
     left: `${state.targetRect.left + state.targetRect.width / 2}px`,
   });

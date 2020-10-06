@@ -1,6 +1,3 @@
-import {Services} from '../../../../../src/services';
-import {getSourceOrigin} from '../../../../../src/url';
-
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -17,12 +14,28 @@ import {getSourceOrigin} from '../../../../../src/url';
  * limitations under the License.
  */
 
+/** @enum {string} */
+export const BOOKEND_COMPONENT_TYPES = {
+  SMALL: 'small',
+  CTA_LINK: 'cta-link',
+  HEADING: 'heading',
+  LANDSCAPE: 'landscape',
+  PORTRAIT: 'portrait',
+  TEXTBOX: 'textbox',
+};
+
+/**
+ *
+ * @const {string}
+ */
+export const AMP_STORY_BOOKEND_COMPONENT_DATA =
+  '__AMP_STORY_BOOKEND_COMPONENT_DATA__';
+
 /**
  * Interface implemented by the bookend components.
  * @interface
  */
 export class BookendComponentInterface {
-
   /**
    * Asserts whether the comopnent is valid.
    * @param {../bookend-component.BookendComponentDef} unusedComponentJson
@@ -41,28 +54,9 @@ export class BookendComponentInterface {
   /**
    * Builds the DOM element for the component.
    * @param {../bookend-component.BookendComponentDef} unusedComponentJson
-   * @param {!Document} unusedDoc
+   * @param {!Window} unusedWin
+   * @param {!Object} unusedData
    * @return {!Element}
    */
-  buildElement(unusedComponentJson, unusedDoc) {}
-}
-
-/**
- * Gets the origin url for components that display a url in the bookend. It
- * trims the protocol prefix and returns only the hostname of the origin.
- * @param {!Element} element
- * @param {string} url
- * @return {string}
- */
-export function getSourceOriginForBookendComponent(element, url) {
-  let domainName;
-  try {
-    domainName = getSourceOrigin(Services.urlForDoc(element).parse(url));
-    // Remove protocol prefix.
-    domainName = Services.urlForDoc(element).parse(domainName).hostname;
-  } catch (e) {
-    // Unknown path prefix in url.
-    domainName = Services.urlForDoc(element).parse(url).hostname;
-  }
-  return domainName;
+  buildElement(unusedComponentJson, unusedWin, unusedData) {}
 }

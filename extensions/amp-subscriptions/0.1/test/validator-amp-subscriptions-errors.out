@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |
@@ -31,7 +31,7 @@ FAIL
 |    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 |    <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
 |    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-|    <script type="application/json" id="amp-access">{"property": value}</script>
+|    <script type="application/json" id="amp-access">{"property": "value"}</script>
 |    <script type="application/json" id="amp-subscriptions">
 |      {
 |        "services": [
@@ -72,7 +72,3 @@ FAIL
 |    </template>
 |  </body>
 |  </html>
->>       ^~~~~~~~~
-amp-subscriptions/0.1/test/validator-amp-subscriptions-errors.html:73:6 The tag 'amp-access extension .json script' is present, but is excluded by the presence of 'amp-subscriptions extension .json script'. (see https://www.ampproject.org/docs/reference/components/amp-access) [AMP_TAG_PROBLEM]
->>       ^~~~~~~~~
-amp-subscriptions/0.1/test/validator-amp-subscriptions-errors.html:73:6 The tag 'amp-subscriptions extension .json script' is present, but is excluded by the presence of 'amp-access extension .json script'. (see https://www.ampproject.org/docs/reference/components/amp-subscriptions) [AMP_TAG_PROBLEM]

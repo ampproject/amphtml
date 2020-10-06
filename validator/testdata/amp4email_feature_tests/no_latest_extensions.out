@@ -1,0 +1,76 @@
+FAIL
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|
+|        http://www.apache.org/licenses/LICENSE-2.0
+|
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    This checks that "latest" versions of extensions are not valid.
+|  -->
+|  <!doctype html>
+|  <html ⚡4email>
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp4email-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:26:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-accordion] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-accordion-latest.js'. (see https://amp.dev/documentation/components/amp-accordion)
+|    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:27:2 The attribute 'src' in tag 'amp-anim extension .js script (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-anim-latest.js'. (see https://amp.dev/documentation/components/amp-anim)
+|    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:28:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-bind] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-bind-latest.js'. (see https://amp.dev/documentation/components/amp-bind)
+|    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:29:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-carousel] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-carousel-latest.js'. (see https://amp.dev/documentation/components/amp-carousel)
+|    <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:30:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-fit-text] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-fit-text-latest.js'. (see https://amp.dev/documentation/components/amp-fit-text)
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:31:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-form] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-form-latest.js'. (see https://amp.dev/documentation/components/amp-form)
+|    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:32:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-list] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-list-latest.js'. (see https://amp.dev/documentation/components/amp-list)
+|    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:33:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-selector] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-selector-latest.js'. (see https://amp.dev/documentation/components/amp-selector)
+|    <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:34:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-sidebar] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-sidebar-latest.js'. (see https://amp.dev/documentation/components/amp-sidebar)
+|    <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:35:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-timeago] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-timeago-latest.js'. (see https://amp.dev/documentation/components/amp-timeago)
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:36:2 The attribute 'src' in tag 'SCRIPT[custom-template=amp-mustache] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-mustache-latest.js'. (see https://amp.dev/documentation/components/amp-mustache)
+|  </head>
+|  <body>
+|  Hello, world.
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-anim' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-carousel' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-list' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-sidebar' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-timeago' was found on this page, but is unused. Please remove this extension.

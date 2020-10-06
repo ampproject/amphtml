@@ -15,87 +15,91 @@
  */
 
 import {DayPickerPhrases} from './defaultPhrases';
-import {map} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
+import {wrap as withMaximumNights} from './wrappers/maximum-nights';
 
 /**
  * Create a DateRangePicker React component
- * @return {function(new:React.Component, !Object)} A date range picker component class
+ * @return {typeof React.Component} A date range picker component class
  */
 function createDateRangePickerBase() {
-  const {
-    DAY_SIZE,
-    HORIZONTAL_ORIENTATION,
-  } = requireExternal('react-dates/constants');
-  const {DayPickerRangeController} = requireExternal('react-dates');
+  const constants = /** @type {JsonObject} */ (requireExternal(
+    'react-dates/constants'
+  ));
+  const DAY_SIZE = constants['DAY_SIZE'];
+  const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
+  const DayPickerRangeController = /** @type {typeof  React.Component} */ (requireExternal(
+    'react-dates'
+  )['DayPickerRangeController']);
 
+  const defaultProps = dict({
+    'startDate': null, // TODO: use null
+    'endDate': null, // TODO: use null
+    'onDatesChange': function () {},
 
-  const defaultProps = map({
-    startDate: null, // TODO: use null
-    endDate: null, // TODO: use null
-    onDatesChange() {},
+    'focusedInput': null,
+    'onFocusChange': function () {},
+    'onClose': function () {},
 
-    focusedInput: null,
-    onFocusChange() {},
-    onClose() {},
-
-    keepOpenOnDateSelect: false,
-    minimumNights: 1,
-    isOutsideRange() {},
-    isDayBlocked() {},
-    isDayHighlighted() {},
+    'keepOpenOnDateSelect': false,
+    'minimumNights': 1,
+    'isOutsideRange': function () {},
+    'isDayBlocked': function () {},
+    'isDayHighlighted': function () {},
 
     // DayPicker props
-    renderMonth: null,
-    enableOutsideDays: false,
-    numberOfMonths: 1,
-    orientation: HORIZONTAL_ORIENTATION,
-    withPortal: false,
-    hideKeyboardShortcutsPanel: false,
-    initialVisibleMonth: null,
-    daySize: DAY_SIZE,
+    'renderMonth': null,
+    'enableOutsideDays': false,
+    'numberOfMonths': 1,
+    'orientation': HORIZONTAL_ORIENTATION,
+    'withPortal': false,
+    'hideKeyboardShortcutsPanel': false,
+    'initialVisibleMonth': null,
+    'daySize': DAY_SIZE,
 
-    navPrev: null,
-    navNext: null,
+    'navPrev': null,
+    'navNext': null,
 
-    onPrevMonthClick() {},
-    onNextMonthClick() {},
-    onOutsideClick() {},
+    'onPrevMonthClick': function () {},
+    'onNextMonthClick': function () {},
+    'onOutsideClick': function () {},
 
-    renderDay: null,
-    renderCalendarInfo: null,
-    firstDayOfWeek: null,
-    verticalHeight: null,
-    noBorder: false,
-    transitionDuration: undefined,
+    'renderDay': null,
+    'renderCalendarInfo': null,
+    'firstDayOfWeek': null,
+    'verticalHeight': null,
+    'noBorder': false,
+    'transitionDuration': undefined,
 
     // accessibility
-    onBlur() {},
-    isFocused: false,
-    showKeyboardShortcuts: false,
+    'onBlur': function () {},
+    'isFocused': false,
+    'showKeyboardShortcuts': false,
 
     // i18n
-    monthFormat: 'MMMM YYYY',
-    weekDayFormat: 'd',
-    phrases: DayPickerPhrases,
+    'monthFormat': 'MMMM YYYY',
+    'weekDayFormat': 'd',
+    'phrases': DayPickerPhrases,
 
-    isRTL: false,
+    'isRTL': false,
   });
 
-  const WrappedDayPickerRangeController =
-      withDatePickerCommon(DayPickerRangeController);
-  WrappedDayPickerRangeController.defaultProps = defaultProps;
+  const WrappedDayPickerRangeController = withDatePickerCommon(
+    withMaximumNights(DayPickerRangeController)
+  );
+  WrappedDayPickerRangeController['defaultProps'] = defaultProps;
 
   return WrappedDayPickerRangeController;
 }
 
-/** @private {?function(new:React.Component, !Object)} */
+/** @private {?typeof React.Component} */
 let DateRangePicker_ = null;
 
 /**
  * Creates a date range picker, injecting its dependencies.
- * @return {function(new:React.Component, !Object)} A date range picker component class
+ * @return {typeof React.Component} A date range picker component class
  */
 export function createDateRangePicker() {
   if (!DateRangePicker_) {
