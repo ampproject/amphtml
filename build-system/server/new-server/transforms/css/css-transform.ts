@@ -28,9 +28,7 @@ const cwd = process.cwd();
 const cssPath = isTestMode
   ? `${cwd}/${testDir}/css.txt`
   : `${cwd}/build/css/v0.css`;
-const versionPath = isTestMode
-  ? `${cwd}/${testDir}/version.txt`
-  : `${cwd}/dist/version.txt`;
+const versionPath = `${cwd}/${testDir}/version.txt`
 
 const css = readFileSync(cssPath, 'utf8').toString().trim();
 const version = readFileSync(versionPath, 'utf8').toString().trim();
