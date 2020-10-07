@@ -80,11 +80,13 @@ Dependencies:
 - python 3 (e.g. [these instructions](https://docs.python-guide.org/starting/install3/osx/))
 
   - protobuf
+
     ```sh
     pip3 install --user protobuf
     ```
 
   - openjdk-7-jre
+
     ```sh
     brew tap homebrew/cask
     brew install Caskroom/cask/java
