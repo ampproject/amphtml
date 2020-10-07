@@ -40,7 +40,7 @@ export function animateExpand(content) {
     content.style.opacity = '0';
     content.style.overflowY = 'auto';
     content.hidden = false;
-    const targetHeight = content.scrollHeight;
+    const targetHeight = content./*OK*/scrollHeight;
 
     // Reset back. The animation will take care of these properties
     // going forward.
@@ -85,7 +85,7 @@ export function animateCollapse(content) {
       // by itself b/c flipping `hidden` back and force before measure has
       // no effect - the `useLayoutEffect` assures this.
       content.hidden = false;
-      const startHeight = content.offsetHeight;
+      const startHeight = content./*OK*/offsetHeight;
 
       const duration = getTransitionDuration(startHeight);
 
@@ -142,7 +142,7 @@ function animate(element, prepare, cleanup = undefined) {
  * @return {number}
  */
 function getTransitionDuration(dy) {
-  const maxY = window.innerHeight;
+  const maxY = window./*OK*/innerHeight;
   const distanceAdjustedDuration =
     (Math.abs(dy) / maxY) * MAX_TRANSITION_DURATION;
   return Math.min(

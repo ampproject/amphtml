@@ -376,7 +376,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     });
 
     it('should ignore animations if not available on the platform', () => {
-      animateStub.restore();
+      animateStub./*OK*/restore();
       const sections = wrapper.find(AccordionSection);
       const section = sections.at(0);
       const content = section.find('div').getDOMNode();
