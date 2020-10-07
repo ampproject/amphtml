@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AmpDocFie,
-  updateFieModeForTesting,
-} from '../../src/service/ampdoc-impl';
+import {AmpDocFie} from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {Deferred} from '../../src/utils/promise';
 import {ElementStub} from '../../src/element-stub';
@@ -43,7 +40,6 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '../../src/service/custom-element-registry';
 import {setStyles} from '../../src/style';
-import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 
 describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
   let window, document;
@@ -1074,13 +1070,11 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
 
   beforeEach(async () => {
     parentWin = env.win;
-    toggleAmpdocFieForTesting(parentWin, true);
     resetScheduledElementForTesting(parentWin, 'amp-test');
     installExtensionsService(parentWin);
     extensions = Services.extensionsFor(parentWin);
     extensionsMock = env.sandbox.mock(extensions);
     const ampdocService = Services.ampdocServiceFor(parentWin);
-    updateFieModeForTesting(ampdocService, true);
 
     iframe = parentWin.document.createElement('iframe');
     const promise = loadPromise(iframe);
