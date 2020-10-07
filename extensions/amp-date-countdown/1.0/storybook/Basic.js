@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {DateCountdown} from '../date-countdown';
-import {date, number, select, withKnobs} from '@storybook/addon-knobs';
+import {date, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -25,74 +25,102 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+const LOCALE_CONFIGURATIONS = [
+  'google',
+  'de',
+  'en',
+  'es',
+  'fr',
+  'id',
+  'it',
+  'ja',
+  'ko',
+  'nl',
+  'pt',
+  'ru',
+  'th',
+  'tr',
+  'vi',
+  'zh-cn',
+  'zh-tw',
+];
+
+const WHEN_ENDED_CONFIGURATIONS = ['stop', 'continue'];
+
+const BIGGEST_UNIT_CONFIGURATIONS = [
+  null,
+  'DAYS',
+  'HOURS',
+  'MINUTES',
+  'SECONDS',
+];
+
 export const _default = () => {
-  const localeConfigurations = [
-    'google',
-    'de',
-    'en',
-    'es',
-    'fr',
-    'id',
-    'it',
-    'ja',
-    'ko',
-    'nl',
-    'pt',
-    'ru',
-    'th',
-    'tr',
-    'vi',
-    'zh-cn',
-    'zh-tw',
-  ];
-
-  const whenEndedConfigurations = ['stop', 'continue'];
-
-  const biggestUnitConfigurations = [
-    undefined,
-    'DAYS',
-    'HOURS',
-    'MINUTES',
-    'SECONDS',
-  ];
-
-  const endDate = date('endDate', new Date());
-  const offsetSeconds = number('offsetSeconds', null);
+  const datetime = date('endDate', new Date(Date.now() + 10000));
   const locale = select(
     'locale',
-    localeConfigurations,
-    localeConfigurations[0]
+    LOCALE_CONFIGURATIONS,
+    LOCALE_CONFIGURATIONS[0]
   );
   const whenEnded = select(
     'whenEnded',
-    whenEndedConfigurations,
-    whenEndedConfigurations[0]
+    WHEN_ENDED_CONFIGURATIONS,
+    WHEN_ENDED_CONFIGURATIONS[0]
   );
   const biggestUnit = select(
     'biggestUnit',
-    biggestUnitConfigurations,
-    biggestUnitConfigurations[0]
+    BIGGEST_UNIT_CONFIGURATIONS,
+    BIGGEST_UNIT_CONFIGURATIONS[0]
   );
 
   return (
     <div>
       <DateCountdown
-        endDate={new Date(endDate).toISOString()}
-        offsetSeconds={offsetSeconds}
+        datetime={datetime}
         locale={locale}
         whenEnded={whenEnded}
         biggestUnit={biggestUnit}
         render={(data) => (
           <div>
-            <span>{`Days ${data.days} ${data.dd} ${data.d}`}</span>
+            <span>{`${data.days} ${data.dd} ${data.d}`}</span>
             <br />
-            <span>{`Hours ${data.hours} ${data.hh} ${data.h}`}</span>
+            <span>{`${data.hours} ${data.hh} ${data.h}`}</span>
             <br />
-            <span>{`Minutes ${data.minutes} ${data.mm} ${data.m}`}</span>
+            <span>{`${data.minutes} ${data.mm} ${data.m}`}</span>
             <br />
-            <span>{`Seconds ${data.seconds} ${data.ss} ${data.s}`}</span>
+            <span>{`${data.seconds} ${data.ss} ${data.s}`}</span>
           </div>
         )}
+      ></DateCountdown>
+    </div>
+  );
+};
+
+export const defaultRenderer = () => {
+  const datetime = date('endDate', new Date(Date.now() + 10000));
+  const locale = select(
+    'locale',
+    LOCALE_CONFIGURATIONS,
+    LOCALE_CONFIGURATIONS[0]
+  );
+  const whenEnded = select(
+    'whenEnded',
+    WHEN_ENDED_CONFIGURATIONS,
+    WHEN_ENDED_CONFIGURATIONS[0]
+  );
+  const biggestUnit = select(
+    'biggestUnit',
+    BIGGEST_UNIT_CONFIGURATIONS,
+    BIGGEST_UNIT_CONFIGURATIONS[0]
+  );
+
+  return (
+    <div>
+      <DateCountdown
+        datetime={datetime}
+        locale={locale}
+        whenEnded={whenEnded}
+        biggestUnit={biggestUnit}
       ></DateCountdown>
     </div>
   );
