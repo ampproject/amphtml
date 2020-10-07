@@ -27,7 +27,9 @@ const log = require('fancy-log');
 const path = require('path');
 const {
   travisBuildNumber,
+  travisBuildUrl,
   travisJobNumber,
+  travisJobUrl,
   travisCommitSha,
 } = require('../common/travis');
 const {cyan, green, red, yellow} = require('ansi-colors');
@@ -68,17 +70,19 @@ function addJobAndBuildInfo(testType, reportJson) {
     throw new ReferenceError('Travis fields are not defined.');
   }
 
-  const build = {
-    buildNumber,
-    commitSha,
+  return {
+    results: reportJson,
+    build: {
+      buildNumber,
+      commitSha,
+      url: travisBuildUrl(),
+    },
+    job: {
+      jobNumber,
+      testSuiteType: testType,
+      url: travisJobUrl(),
+    },
   };
-
-  const job = {
-    jobNumber,
-    testSuiteType: testType,
-  };
-
-  return {build, job, results: reportJson};
 }
 
 /**
