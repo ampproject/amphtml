@@ -168,7 +168,7 @@ function stopTimedJob(fileName, startTime) {
  * @return {!Function(string, string=): ?}
  */
 function timedExecFn(execFn) {
-  return (cmd, fileName = 'utils.js', ...rest) => {
+  return (cmd, fileName, ...rest) => {
     const startTime = startTimer(cmd, fileName);
     const p = execFn(cmd, ...rest);
     stopTimer(cmd, fileName, startTime);
