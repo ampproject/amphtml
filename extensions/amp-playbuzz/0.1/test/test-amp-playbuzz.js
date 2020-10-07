@@ -17,10 +17,6 @@
 import '../amp-playbuzz';
 import {toggleExperiment} from '../../../../src/experiments';
 
-function startsWith(string, searchString) {
-  return string.substr(0, searchString.length) === searchString;
-}
-
 describes.realWin(
   'amp-playbuzz',
   {
@@ -40,7 +36,7 @@ describes.realWin(
     function createOptionalParams(
       displayInfo,
       displayShareBar,
-      displayComments
+      displayComments,
     ) {
       return {
         displayItemInfo: displayInfo,
@@ -70,10 +66,10 @@ describes.realWin(
       if (itemSrc.itemId) {
         ins.setAttribute('data-item', itemSrc.itemId);
       }
-      ins.setAttribute('width', '111');
       ins.setAttribute('height', '222');
       ins.setAttribute('alt', 'Testing');
       if (opt_responsive) {
+        ins.setAttribute('width', '111');
         ins.setAttribute('layout', 'responsive');
       } else {
         ins.setAttribute('layout', 'fixed-height');
@@ -104,7 +100,7 @@ describes.realWin(
 
     function testIframe(iframe, itemSrcUrl) {
       expect(iframe).to.not.be.null;
-      expect(startsWith(iframe.src, itemSrcUrl)).to.be.true;
+      expect(iframe.src.includes(itemSrcUrl)).to.be.true;
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
       // This is important to avoid sizing issues.
       expect(iframe.getAttribute('scrolling')).to.equal('no');
@@ -112,22 +108,22 @@ describes.realWin(
 
     it('renders', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
+        'https://www.playbuzz.com/bob/bobs-life',
       );
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
+        testIframe(iframe, '/bob/bobs-life');
         // TODO: test playbuzz placeholder loader
       });
     });
 
     it('renders with false for each optional param', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
+        'https://www.playbuzz.com/bob/bobs-life',
       );
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
+        testIframe(iframe, '/bob/bobs-life');
         expect(iframe.src)
           .to.contain('&useComments=false')
           .and.to.contain('&gameInfo=false')
@@ -139,7 +135,7 @@ describes.realWin(
       const src = createItemSrc().withItemId('some-item-id');
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/item/some-item-id');
+        testIframe(iframe, '/item/some-item-id');
       });
     });
 
@@ -150,17 +146,17 @@ describes.realWin(
 
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/item/some-item-id');
+        testIframe(iframe, '/item/some-item-id');
       });
     });
 
     it('renders with true for each true optional param', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
+        'https://www.playbuzz.com/bob/bobs-life',
       );
       return getIns(src, createOptionalParams(true, true, true)).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
+        testIframe(iframe, '/bob/bobs-life');
         expect(iframe.src)
           .to.contain('&useComments=true')
           .and.to.contain('&gameInfo=true')
@@ -170,7 +166,7 @@ describes.realWin(
 
     it('builds a placeholder image without inserting iframe', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
+        'https://www.playbuzz.com/bob/bobs-life',
       );
       return getIns(src, createOptionalParams(), true, (ins) => {
         // console.log(ins);
@@ -179,7 +175,7 @@ describes.realWin(
         expect(iframe).to.be.null;
         expect(placeholder).to.not.have.display('');
         expect(placeholder.getAttribute('aria-label')).to.equal(
-          'Loading interactive element'
+          'Loading interactive element',
         );
       }).then((ins) => {
         const placeholder = ins.querySelector('[placeholder]');
@@ -190,7 +186,7 @@ describes.realWin(
             mutate: (fn) => fn(),
           };
         };
-        testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
+        testIframe(iframe, '/bob/bobs-life');
         //Should test placeholder too
         ins.implementation_.iframePromise_.then(() => {
           expect(placeholder).to.have.display('none');
@@ -199,13 +195,13 @@ describes.realWin(
     });
     it('propagates aria label to placeholder', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
+        'https://www.playbuzz.com/bob/bobs-life',
       );
       return getIns(src, {'arialabel': 'captivating quiz'}, true, (ins) => {
         // console.log(ins);
         const placeholder = ins.querySelector('[placeholder]');
         expect(placeholder.getAttribute('aria-label')).to.equal(
-          'Loading - captivating quiz'
+          'Loading - captivating quiz',
         );
       });
     });
@@ -213,9 +209,9 @@ describes.realWin(
       const src = createItemSrc().withUrl('');
       allowConsoleError(() => {
         expect(getIns(src)).to.be.rejectedWith(
-          /The item attribute is required for/
+          /The item attribute is required for/,
         );
       });
     });
-  }
+  },
 );
