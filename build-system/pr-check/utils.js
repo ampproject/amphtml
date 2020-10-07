@@ -178,6 +178,7 @@ function timedExecFn(execFn) {
 
 /**
  * Executes the provided command and times it. Errors, if any, are printed.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  * @return {!Object} Node process
@@ -186,6 +187,7 @@ const timedExec = timedExecFn(exec);
 
 /**
  * Executes the provided command and times it. Errors, if any, are returned.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  * @return {!Object} Node process
@@ -195,6 +197,7 @@ const timedExecWithError = timedExecFn(execWithError);
 /**
  * Executes the provided command and times it. The program terminates in case of
  * failure.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  */
@@ -203,6 +206,7 @@ const timedExecOrDie = timedExecFn(execOrDie);
 /**
  * Executes the provided command and times it. The program throws on error in
  * case of failure.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  */
