@@ -20,6 +20,8 @@
  */
 
 const childProcess = require('child_process');
+const log = require('fancy-log');
+const {yellow} = require('ansi-colors');
 
 const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
 
@@ -86,17 +88,18 @@ function execWithError(cmd) {
 }
 
 /**
- * Executes the provided command, piping the parent process' stderr, thorwing
- * an error if stderr is not empty, and returns process object.
+ * Executes the provided command, piping the parent process' stderr, throwing
+ * an error with the provided message the command fails, and returns the
+ * process object.
  * @param {string} cmd
+ * @param {string} msg
  * @return {!Object}
  */
-function execOrThrow(cmd) {
+function execOrThrow(cmd, msg) {
   const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
   if (p.status && p.status != 0) {
-    const error = new Error(
-      `Error executing \`${cmd}\: \n${p.stderr.toString()}`
-    );
+    log(yellow('ERROR:'), msg);
+    const error = new Error(p.stderr);
     error.status = p.status;
     throw error;
   }
