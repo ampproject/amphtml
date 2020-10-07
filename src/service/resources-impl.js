@@ -26,17 +26,13 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
+import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -55,13 +51,6 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
 const MAX_BUILD_CHUNK_SIZE = 10;
-
-/** @const {!{id: string, control: string, experiment: string}} */
-const RENDER_ON_IDLE_FIX_EXP = {
-  id: 'render-on-idle-fix',
-  control: '21066311',
-  experiment: '21066312',
-};
 
 /**
  * @implements {ResourcesInterface}
@@ -209,13 +198,7 @@ export class ResourcesImpl {
     this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
 
     /** @const @private {boolean} */
-    this.renderOnIdleFix_ = isExperimentOn(this.win, 'render-on-idle-fix');
-
-    /** @const @private {boolean} */
     this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
-
-    /** @private {boolean} */
-    this.divertedRenderOnIdleFixExperiment_ = false;
 
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
@@ -1191,28 +1174,6 @@ export class ResourcesImpl {
   }
 
   /**
-   * Selects into an experiment for render-on-idle-fix.
-   * @private
-   */
-  divertRenderOnIdleFixExperiment_() {
-    if (this.divertedRenderOnIdleFixExperiment_) {
-      return;
-    }
-    this.divertedRenderOnIdleFixExperiment_ = true;
-    const experimentInfoList = /** @type {!Array<!../experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          RENDER_ON_IDLE_FIX_EXP.control,
-          RENDER_ON_IDLE_FIX_EXP.experiment,
-        ],
-      },
-    ]);
-    randomlySelectUnsetExperiments(this.win, experimentInfoList);
-  }
-
-  /**
    * Discovers work that needs to be done since the last pass. If viewport
    * has changed, it will try to build new elements, measure changed elements,
    * and schedule layouts and preloads within a reasonable distance of the
@@ -1479,17 +1440,12 @@ export class ResourcesImpl {
    * @private
    */
   isIdle_(now = Date.now()) {
-    this.divertRenderOnIdleFixExperiment_();
     const lastDequeueTime = this.exec_.getLastDequeueTime();
     return (
       this.exec_.getSize() == 0 &&
       this.queue_.getSize() == 0 &&
       now > lastDequeueTime + 5000 &&
-      (lastDequeueTime > 0 ||
-        // TODO(powerivq): add tests for this fix once ready to launch
-        !this.renderOnIdleFix_ ||
-        getExperimentBranch(this.win, RENDER_ON_IDLE_FIX_EXP.id) ===
-          RENDER_ON_IDLE_FIX_EXP.control)
+      lastDequeueTime > 0
     );
   }
 

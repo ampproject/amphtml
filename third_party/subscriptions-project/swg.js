@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.119 */
+/** Version: 0.1.22.123 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -76,6 +76,7 @@ const AnalyticsEvent = {
   ACTION_USER_CONSENT_DEFERRED_ACCOUNT: 1021,
   ACTION_USER_DENY_DEFERRED_ACCOUNT: 1022,
   ACTION_DEFERRED_ACCOUNT_REDIRECT: 1023,
+  ACTION_GET_ENTITLEMENTS: 1024,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -84,6 +85,10 @@ const AnalyticsEvent = {
   EVENT_GPAY_CANNOT_CONFIRM_TX_ID: 3004,
   EVENT_GOOGLE_UPDATED: 3005,
   EVENT_NEW_TX_ID: 3006,
+  EVENT_UNLOCKED_BY_SUBSCRIPTION: 3007,
+  EVENT_UNLOCKED_BY_METER: 3008,
+  EVENT_NO_ENTITLEMENTS: 3009,
+  EVENT_HAS_METERING_ENTITLEMENTS: 3010,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -5711,7 +5716,9 @@ const SubscriptionFlows = {
   COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
   SHOW_LOGIN_PROMPT: 'showLoginPrompt',
+  SHOW_METER_REGWALL: 'showMeterRegwall',
   SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
+  SHOW_METER_TOAST: 'showMeterToast',
 };
 
 /**
@@ -6013,7 +6020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.119',
+    '_client': 'SwG 0.1.22.123',
   });
 }
 
@@ -7132,7 +7139,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.119',
+        '_client': 'SwG 0.1.22.123',
         'supportsEventManager': true,
       },
       args || {}
@@ -7981,7 +7988,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.119');
+    context.setClientVersion('SwG 0.1.22.123');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10374,11 +10381,108 @@ class DialogManager {
   }
 }
 
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /** @enum {number}  */
 const MeterClientTypes = {
   /** Meter client type for content licensed by Google. */
   LICENSED_BY_GOOGLE: 1,
 };
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class MeterToastApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/metertoastiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
+      }),
+      /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Shows the user the metering toast.
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+    this.activityIframeView_.on(
+      ViewSubscriptionsResponse,
+      this.startNativeFlow_.bind(this)
+    );
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+
+  /**
+   * Sets a callback function to happen onCancel.
+   * @param {function()} onCancelCallback
+   */
+  setOnCancelCallback(onCancelCallback) {
+    this.activityIframeView_.onCancel(onCancelCallback);
+  }
+
+  /**
+   * @param {ViewSubscriptionsResponse} response
+   * @private
+   */
+  startNativeFlow_(response) {
+    if (response.getNative()) {
+      this.deps_.callbacks().triggerSubscribeRequest();
+    }
+  }
+}
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -10567,11 +10671,10 @@ class Toast {
  */
 
 /**
- * @param {!Date} date
+ * @param {!number} millis
  * @return {!Timestamp}
  */
-function toTimestamp(date) {
-  const millis = date.getTime();
+function toTimestamp(millis) {
   return new Timestamp(
     [Math.floor(millis / 1000), (millis % 1000) * 1000000],
     false
@@ -10674,15 +10777,7 @@ class EntitlementsManager {
   }
 
   /**
-   * @return {string}
-   * @private
-   */
-  getQueryString_() {
-    return this.win_.location.search;
-  }
-
-  /**
-   * @param {!GetEntitlementsParamsExternal=} params
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements(params) {
@@ -10690,11 +10785,11 @@ class EntitlementsManager {
     // `encryptedDocumentKey` string as a first param.
     if (typeof params === 'string') {
       // TODO: Delete the fallback if nobody needs it. Use a log to verify.
-      if (Date.now() > 1598899876598) {
+      if (Date.now() > 1600289016959) {
         // TODO: Remove the conditional check for this warning
         // after the AMP extension is updated to pass an object.
         log_4(
-          `[swg.js:getEntitlements]: If present, the first param of getEntitlements() should be an object of type GetEntitlementsParamsExternal.`
+          `[swg.js:getEntitlements]: If present, the first param of getEntitlements() should be an object of type GetEntitlementsParamsExternalDef.`
         );
       }
 
@@ -10742,13 +10837,17 @@ class EntitlementsManager {
       return;
     }
 
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_METER, false);
+
     const jwt = new EntitlementJwt();
     jwt.setSource(entitlement.source);
     jwt.setJwt(entitlement.subscriptionToken);
 
     const message = new EntitlementsRequest();
     message.setUsedEntitlement(jwt);
-    message.setClientEventTime(toTimestamp(new Date()));
+    message.setClientEventTime(toTimestamp(Date.now()));
 
     const url =
       '/publication/' +
@@ -10759,7 +10858,7 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {!GetEntitlementsParamsExternal=} params
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
@@ -10771,7 +10870,7 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {!GetEntitlementsParamsExternal=} params
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
@@ -10808,7 +10907,7 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {!GetEntitlementsParamsExternal=} params
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
@@ -10975,6 +11074,9 @@ class EntitlementsManager {
 
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_NO_ENTITLEMENTS, false);
       return;
     }
 
@@ -10987,8 +11089,18 @@ class EntitlementsManager {
    * @private
    */
   maybeShowToast_(entitlement) {
-    // Check if storage bit is set. It's only set by the `Entitlements.ack`
-    // method.
+    // Don't show toast for metering entitlements.
+    if (entitlement.source === GOOGLE_METERING_SOURCE) {
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS, false);
+      return Promise.resolve();
+    }
+
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION, false);
+    // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
       if (toastWasShown) {
@@ -11025,35 +11137,19 @@ class EntitlementsManager {
    */
   consume_(entitlements, onCloseDialog) {
     if (entitlements.enablesThisWithGoogleMetering()) {
-      // NOTE: This is just a placeholder. Once the metering prompt UI is ready,
-      // it will be opened here instead of the contributions iframe.
-      // TODO: Open metering prompt here instead of contributions iframe.
-      const activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.deps_.activities(),
-        feUrl('/metertoastiframe'),
-        feArgs({
-          'productId': this.deps_.pageConfig().getProductId(),
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'productType': ProductType.UI_CONTRIBUTION,
-          'list': 'default',
-          'skus': null,
-          'isClosable': true,
-        }),
-        /* shouldFadeBody */ true
-      );
-      activityIframeView_.onCancel(() => {
+      const meterToastApi = new MeterToastApi(this.deps_);
+      meterToastApi.setOnCancelCallback(() => {
         if (onCloseDialog) {
           onCloseDialog();
         }
         this.sendPingback_(entitlements);
       });
-      return this.deps_.dialogManager().openView(activityIframeView_);
+      return meterToastApi.start();
     }
   }
 
   /**
-   * @param {!GetEntitlementsParamsExternal=} params
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
@@ -11073,7 +11169,7 @@ class EntitlementsManager {
         // Add metering params.
         const productId = this.pageConfig_.getProductId();
         if (productId && params && params.metering && params.metering.state) {
-          /** @type {!GetEntitlementsParamsInternal} */
+          /** @type {!GetEntitlementsParamsInternalDef} */
           const encodableParams = {
             metering: {
               clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
@@ -11123,7 +11219,12 @@ class EntitlementsManager {
         }
         return serviceUrl(url);
       })
-      .then((url) => this.fetcher_.fetchCredentialedJson(url))
+      .then((url) => {
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.ACTION_GET_ENTITLEMENTS, false);
+        return this.fetcher_.fetchCredentialedJson(url);
+      })
       .then((json) => {
         if (json.errorMessages && json.errorMessages.length > 0) {
           json.errorMessages.forEach((errorMessage) => {
@@ -12450,6 +12551,67 @@ class LoginPromptApi {
         throw reason;
       }
     );
+  }
+}
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class MeterRegwallApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {{ gsiUrl: string, alreadyRegisteredUrl: string}} params
+   */
+  constructor(deps, params) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/meterregwalliframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        gsiUrl: params.gsiUrl,
+        alreadyRegisteredUrl: params.alreadyRegisteredUrl,
+      }),
+      /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Prompts the user to register to the meter.
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_REGWALL);
+    return this.dialogManager_.openView(this.activityIframeView_);
   }
 }
 
@@ -15649,22 +15811,8 @@ class PayClient {
     /** @private {?PaymentsAsyncClient} */
     this.client_ = null;
 
-    if (!isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD)) {
-      this.client_ = this.createClient_(
-        /** @type {!PaymentOptions} */
-        ({
-          environment: 'PRODUCTION',
-          'i': {
-            'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-          },
-        }),
-        this.analytics_.getTransactionId(),
-        this.handleResponse_.bind(this)
-      );
-    } else {
-      /** @private @const {!Preconnect} */
-      this.preconnect_ = new Preconnect(this.win_.document);
-    }
+    /** @private @const {!Preconnect} */
+    this.preconnect_ = new Preconnect(this.win_.document);
 
     // Prepare new verifier pair.
     this.redirectVerifierHelper_.prepare();
@@ -15718,10 +15866,7 @@ class PayClient {
   start(paymentRequest, options = {}) {
     this.request_ = paymentRequest;
 
-    if (
-      isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD) &&
-      !this.client_
-    ) {
+    if (!this.client_) {
       this.preconnect(this.preconnect_);
       this.client_ = this.createClient_(
         /** @type {!PaymentOptions} */
@@ -16691,9 +16836,6 @@ class ConfiguredRuntime {
     preconnect.preconnect('https://www.google.com/');
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
-    if (!isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD)) {
-      this.payClient_.preconnect(preconnect);
-    }
 
     injectStyleSheet(this.doc_, CSS$1);
 
@@ -16940,8 +17082,21 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  showMeterRegwall(meterRegwallArgs) {
+    return this.documentParsed_.then(() => {
+      const wait = new MeterRegwallApi(this, meterRegwallArgs);
+      return wait.start();
+    });
+  }
+
+  /** @override */
   setOnLoginRequest(callback) {
     this.callbacks_.setOnLoginRequest(callback);
+  }
+
+  /** @override */
+  triggerLoginRequest(request) {
+    this.callbacks_.triggerLoginRequest(request);
   }
 
   /** @override */

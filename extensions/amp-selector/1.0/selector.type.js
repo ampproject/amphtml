@@ -16,20 +16,18 @@
 
 /** @externs */
 
-// TODO(#29293): Make "as" and "role" optional.
-
 /** @const */
 var SelectorDef = {};
 
 /**
  * @typedef {{
- *   as: (string|PreactDef.FunctionalComponent),
+ *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   disabled: (boolean|undefined),
  *   shimDomElement: !Element,
  *   value: (!Array|undefined),
  *   multiple: (boolean|undefined),
  *   onChange: (?function({value: !Array, option: *})|undefined),
- *   role: string,
+ *   role: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
@@ -42,7 +40,7 @@ SelectorDef.Props;
  *   disabled: (boolean|undefined),
  *   shimDomElement: !Element,
  *   onClick: (?function(!Event)|undefined),
- *   role: string,
+ *   role: (string|undefined),
  *   shimSelected: (boolean|undefined),
  *   style: (!Object|undefined),
  * }}

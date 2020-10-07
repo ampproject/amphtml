@@ -17,7 +17,6 @@
 import {FitText} from './fit-text';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -30,7 +29,7 @@ class AmpFitText extends PreactBaseElement {
       isExperimentOn(this.win, 'amp-fit-text-bento'),
       'expected amp-fit-text-bento experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
   }
 }
 

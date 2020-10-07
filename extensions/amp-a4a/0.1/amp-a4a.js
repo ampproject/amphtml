@@ -15,9 +15,7 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
-import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -50,7 +48,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -177,15 +174,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
-};
-
-/**
- * @const @enum {string}
- */
-export const NO_SIGNING_EXP = {
-  id: 'a4a-no-signing',
-  control: '21066324',
-  experiment: '21066325',
 };
 
 /** @const @enum {string} */
@@ -870,10 +858,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    return (
-      getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-      NO_SIGNING_EXP.experiment
-    );
+    // eslint-disable-next-line no-undef
+    return !!NO_SIGNING_RTV;
   }
 
   /**
@@ -2157,6 +2143,13 @@ export class AmpA4A extends AMP.BaseElement {
       'https://tpc.googlesyndication.com/safeframe/' +
       `${this.safeframeVersion}/html/container.html`
     );
+  }
+
+  /**
+   * @return {boolean} whether this is a sticky ad unit
+   */
+  isStickyAd() {
+    return false;
   }
 
   /**

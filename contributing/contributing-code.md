@@ -77,6 +77,9 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
       - Learn to create your first component in this [codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0)
       - Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
     - **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
+    - **Accessibility**:
+      - [Web Fundamentals - Accessibility](https://developers.google.com/web/fundamentals/accessibility/)
+      - [web.dev Lighthouse accessibility audits guide](https://web.dev/lighthouse-accessibility/)
   - [Put your change behind an experiment flag](./building-an-amp-extension.md#experiments) unless it is a minor fix or your reviewer indicates this is not needed.
   - [Commit your files](./getting-started-e2e.md#edit-files-and-commit-them).
 - [Test your changes](./getting-started-e2e.md#testing-your-changes).

@@ -23,7 +23,7 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills';
 
 import {IntegrationAmpContext} from './ampcontext-integration';
 import {dict} from '../src/utils/object.js';
@@ -142,6 +142,7 @@ import {eplanning} from '../ads/eplanning';
 import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
+import {fakeDelayed} from '../ads/_fakedelayed_';
 import {felmat} from '../ads/felmat';
 import {firstimpression} from '../ads/firstimpression';
 import {flite} from '../ads/flite';
@@ -195,6 +196,7 @@ import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
 import {my6sense} from '../ads/my6sense';
+import {myoffrz} from '../ads/myoffrz';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
@@ -284,6 +286,7 @@ import {vdoai} from '../ads/vdoai';
 import {videointelligence} from '../ads/videointelligence';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
+import {vlyby} from '../ads/vlyby';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
@@ -353,6 +356,7 @@ const AMP_EMBED_ALLOWED = {
   svknative: true,
   taboola: true,
   temedya: true,
+  vlyby: true,
   whopainfeed: true,
   yahoofedads: true,
   yahoonativeads: true,
@@ -365,6 +369,7 @@ init(window);
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
+  register('fake-delayed', fakeDelayed);
 }
 
 // Keep the list in alphabetic order
@@ -512,6 +517,7 @@ register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mox', mox);
 register('my6sense', my6sense);
+register('myoffrz', myoffrz);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
@@ -604,6 +610,7 @@ register('videointelligence', videointelligence);
 register('videonow', videonow);
 register('viqeoplayer', viqeoplayer);
 register('viralize', viralize);
+register('vlyby', vlyby);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);

@@ -37,17 +37,16 @@ import {rethrowAsync} from './../../../src/log';
 export function debounce(func, wait, immediate) {
   let timeout;
   return function () {
-    const context = this,
-      args = arguments;
+    const args = arguments;
     clearTimeout(timeout);
-    timeout = setTimeout(function () {
+    timeout = setTimeout(() => {
       timeout = null;
       if (!immediate) {
-        func.apply(context, args);
+        func.apply(this, args);
       }
     }, wait);
     if (immediate && !timeout) {
-      func.apply(context, args);
+      func.apply(this, args);
     }
   };
 }

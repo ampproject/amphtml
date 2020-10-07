@@ -174,7 +174,7 @@ export class AmpList extends AMP.BaseElement {
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
-        return this.fetchList_(/* opt_refresh */ true);
+        return this.fetchList_({refresh: true});
       }
     });
 
@@ -484,10 +484,6 @@ export class AmpList extends AMP.BaseElement {
     return Promise.resolve()
       .then(() => {
         userAssert(
-          isExperimentOn(this.win, 'protocol-adapters'),
-          `Experiment 'protocol-adapters' is not turned on.`
-        );
-        userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
           '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
         );
@@ -751,11 +747,12 @@ export class AmpList extends AMP.BaseElement {
    * the list has been populated with rendered list items. If the viewer is
    * capable of rendering the templates, then the fetching of the list and
    * transformation of the template is handled by the viewer.
-   * @param {boolean=} opt_refresh
+   * @param {{refresh: (boolean|undefined), append: (boolean|undefined)}=} options
    * @return {!Promise}
    * @private
    */
-  fetchList_(opt_refresh = false) {
+  fetchList_(options = {}) {
+    const {refresh = false, append = false} = options;
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
@@ -763,14 +760,14 @@ export class AmpList extends AMP.BaseElement {
 
     let fetch;
     if (this.ssrTemplateHelper_.isEnabled()) {
-      fetch = this.ssrTemplate_(opt_refresh);
+      fetch = this.ssrTemplate_(refresh);
     } else {
       if (this.isAmpStateSrc_(elementSrc)) {
         fetch = this.getAmpStateJson_(elementSrc);
       } else if (this.isAmpScriptSrc_(elementSrc)) {
         fetch = this.getAmpScriptJson_(elementSrc);
       } else {
-        fetch = this.prepareAndSendFetch_(opt_refresh);
+        fetch = this.prepareAndSendFetch_(refresh);
       }
       fetch = fetch.then((data) => {
         // Bail if the src has changed while resolving the xhr request.
@@ -783,37 +780,21 @@ export class AmpList extends AMP.BaseElement {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
 
-        return this.scheduleRender_(
-          items,
-          /*opt_append*/ false,
-          data
-        ).then(() => this.maybeSetLoadMore_());
+        return this.scheduleRender_(items, append, data).then(() =>
+          this.maybeSetLoadMore_()
+        );
       });
     }
 
     return fetch.catch((error) => {
+      // Append flow has its own error handling
+      if (append) {
+        throw error;
+      }
+
       this.triggerFetchErrorEvent_(error);
       this.showFallback_();
       throw error;
-    });
-  }
-
-  /**
-   * Fetch and render items intended to be appended to the current list
-   * @return {!Promise}
-   */
-  fetchListAndAppend_() {
-    if (!this.element.getAttribute('src')) {
-      return Promise.resolve();
-    }
-    return this.prepareAndSendFetch_().then((data) => {
-      const items = this.computeListItems_(data);
-      this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
-      return this.scheduleRender_(
-        items,
-        /*opt_append*/ true,
-        /*opt_payload*/ data
-      );
     });
   }
 
@@ -1529,7 +1510,7 @@ export class AmpList extends AMP.BaseElement {
     this.mutateElement(() => {
       this.getLoadMoreService_().toggleLoadMoreLoading(true);
     });
-    return this.fetchListAndAppend_()
+    return this.fetchList_({append: true})
       .then(() => {
         return this.mutateElement(() => {
           if (this.loadMoreSrc_) {

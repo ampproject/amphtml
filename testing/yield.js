@@ -21,7 +21,7 @@
  * Check test-yield.js for how-to.
  */
 export function installYieldIt(realIt) {
-  it = enableYield.bind(null, realIt); // eslint-disable-line no-native-reassign, no-undef
+  it = enableYield.bind(null, realIt); // eslint-disable-line no-native-reassign
   it./*OK*/ only = enableYield.bind(null, realIt.only);
   it.skip = realIt.skip;
 }

@@ -152,7 +152,6 @@ describes.realWin(
 
       el.connectedCallback();
       const analytics = new AmpAnalytics(el);
-      analytics.createdCallback();
       analytics.buildCallback();
       return analytics;
     }
@@ -201,7 +200,6 @@ describes.realWin(
         const analytics = new AmpAnalytics(el);
         doc.body.appendChild(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
         // Initialization has not started.
         expect(analytics.iniPromise_).to.be.null;
@@ -250,7 +248,6 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
@@ -266,7 +263,6 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
@@ -1469,7 +1465,10 @@ describes.realWin(
       beforeEach(() => {
         // Unfortunately need to fake sandbox analytics element's parent
         // to an AMP element
+        // Set the doc width/height to 1 to trigger visible event.
         doc.body.classList.add('i-amphtml-element');
+        doc.body.style.minWidth = '1px';
+        doc.body.style.minHeight = '1px';
       });
 
       afterEach(() => {
@@ -1750,6 +1749,11 @@ describes.realWin(
 
     describe('parentPostMessage', () => {
       let postMessageSpy;
+
+      beforeEach(() => {
+        doc.body.style.minWidth = '1px';
+        doc.body.style.minHeight = '1px';
+      });
 
       function waitForParentPostMessage(opt_max) {
         if (postMessageSpy.callCount) {
