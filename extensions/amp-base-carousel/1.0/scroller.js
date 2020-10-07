@@ -75,7 +75,7 @@ function ScrollerWithRef(
    * The partial scroll position between two slides.
    * Only needed if snap=false.
    */
-  const scrollOffset = useRef(null);
+  const scrollOffset = useRef(0);
 
   const ignoreProgrammaticScrollRef = useRef(true);
   const slides = renderSlides(
@@ -104,10 +104,10 @@ function ScrollerWithRef(
         position = container./* OK */ offsetWidth * pivotIndex;
       } else {
         position = mod(
-          scrollOffset.current + container.offsetWidth * offsetRef.current,
-          container.scrollWidth
+          scrollOffset.current +
+            container./* OK */ offsetWidth * offsetRef.current,
+          container./* OK */ scrollWidth
         );
-        console.log(scrollOffset.current, position);
       }
     } else {
       if (snap) {
