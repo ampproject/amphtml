@@ -19,6 +19,8 @@ import {BaseCarousel} from '../base-carousel';
 import {number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
+const CONTROLS = ['auto', 'always', 'never'];
+
 export default {
   title: 'BaseCarousel',
   component: BaseCarousel,
@@ -30,7 +32,7 @@ export const _default = () => {
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
-  const controls = select('show controls', ['auto', 'always', 'never']);
+  const controls = select('show controls', CONTROLS);
   return (
     <BaseCarousel controls={controls} style={{width, height}}>
       {Array.from({length: slideCount}, (x, i) => {
@@ -48,7 +50,7 @@ export const _default = () => {
 export const provideArrows = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const controls = select('show controls', ['auto', 'always', 'never']);
+  const controls = select('show controls', CONTROLS);
   const myButtonStyle = {
     background: 'lightblue',
     borderRadius: '50%',
@@ -82,7 +84,7 @@ export const provideArrows = () => {
 export const WithLooping = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const controls = select('show controls', ['auto', 'always', 'never']);
+  const controls = select('show controls', CONTROLS);
   return (
     <BaseCarousel controls={controls} loop style={{width, height}}>
       {[
@@ -111,7 +113,7 @@ export const WithLooping = () => {
 };
 
 export const WithCaptions = () => {
-  const controls = select('show controls', ['auto', 'always', 'never']);
+  const controls = select('show controls', CONTROLS);
   return (
     <BaseCarousel
       controls={controls}
