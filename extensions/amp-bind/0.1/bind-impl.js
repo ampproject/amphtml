@@ -41,7 +41,6 @@ import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
-import {whenDocumentReady} from '../../../src/document-ready';
 
 /** @const {string} */
 const TAG = 'amp-bind';
@@ -110,13 +109,9 @@ const FAST_RESCAN_TAGS = ['AMP-LIST'];
  */
 export class Bind {
   /**
-   * If `opt_win` is provided, scans its document for bindings instead.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Window=} opt_win
    */
-  constructor(ampdoc, opt_win) {
-    // TODO(#22733): remove opt_win subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -128,7 +123,7 @@ export class Bind {
      * May differ from the `ampdoc`'s window e.g. in FIE.
      * @const @private {!Window}
      */
-    this.localWin_ = opt_win || ampdoc.win;
+    this.localWin_ = ampdoc.win;
 
     /**
      * Array of ActionInvocation.sequenceId values that have been invoked.
@@ -196,14 +191,8 @@ export class Bind {
 
     /** @const @private {!Promise<!Document>} */
     this.rootNodePromise_ = ampdoc.whenFirstVisible().then(() => {
-      if (opt_win) {
-        // In FIE, scan the document node of the iframe window.
-        const {document} = opt_win;
-        return whenDocumentReady(document).then(() => document);
-      } else {
-        // Otherwise, scan the root node of the ampdoc.
-        return ampdoc.whenReady().then(() => ampdoc.getRootNode());
-      }
+      // Otherwise, scan the root node of the ampdoc.
+      return ampdoc.whenReady().then(() => ampdoc.getRootNode());
     });
 
     /**
