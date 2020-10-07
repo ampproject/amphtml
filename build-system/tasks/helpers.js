@@ -24,6 +24,7 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
+const open = require('open');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
@@ -516,7 +517,6 @@ function printConfigHelp(command) {
  */
 function printNobuildHelp() {
   for (const task of NOBUILD_HELP_TASKS) {
-    // eslint-disable-line local/no-for-of-statement
     if (argv._.includes(task)) {
       log(
         green('To skip building during future'),
@@ -530,6 +530,20 @@ function printNobuildHelp() {
       return;
     }
   }
+}
+
+/**
+ * @param {string=} covPath
+ * @return {!Promise}
+ */
+async function maybePrintCoverageMessage(covPath) {
+  if (!argv.coverage || isTravisBuild()) {
+    return;
+  }
+
+  const url = 'file://' + path.resolve(covPath);
+  log(green('INFO:'), 'Generated code coverage report at', cyan(url));
+  await open(url, {wait: false});
 }
 
 /**
@@ -654,6 +668,7 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
+  maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,

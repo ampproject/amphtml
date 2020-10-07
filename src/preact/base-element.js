@@ -31,6 +31,7 @@ import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
+import {isLayoutSizeDefined} from '../layout';
 import {startsWith} from '../string';
 
 /**
@@ -175,6 +176,15 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @return {!JsonObject|undefined}
    */
   init() {}
+
+  /** @override */
+  isLayoutSupported(layout) {
+    const Ctor = this.constructor;
+    if (Ctor['layoutSizeDefined']) {
+      return isLayoutSizeDefined(layout);
+    }
+    return super.isLayoutSupported(layout);
+  }
 
   /** @override */
   buildCallback() {
@@ -381,12 +391,13 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
     const isShadow = usesShadowDom(Ctor);
     const lightDomTag = isShadow ? null : Ctor['lightDomTag'];
+    const isDetached = Ctor['detached'];
 
     if (!this.container_) {
       const doc = this.win.document;
       if (isShadow) {
         devAssert(
-          !Ctor['detached'],
+          !isDetached,
           'The AMP element cannot be rendered in detached mode ' +
             'when configured with "children", "passthrough", or ' +
             '"passthroughNonEmpty" properties.'
@@ -449,7 +460,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
         this.applyFillContent(container);
-        if (!Ctor['detached']) {
+        if (!isDetached) {
           this.element.appendChild(container);
         }
       }
@@ -509,7 +520,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.
-    if (!isShadow) {
+    if (!isShadow && !isDetached) {
       this.mutateElement(() => {
         this.element.dispatchEvent(
           createCustomEvent(this.win, AmpEvents.DOM_UPDATE, /* detail */ null, {
@@ -571,7 +582,8 @@ PreactBaseElement['loadable'] = false;
 /**
  * An override to specify that the component requires `layoutSizeDefined`.
  * This typically means that the element's `isLayoutSupported()` is
- * implemented via `isLayoutSizeDefined()`.
+ * implemented via `isLayoutSizeDefined()`, and this is how the default
+ * `isLayoutSupported()` is implemented when this flag is set.
  *
  * @protected {string}
  */
@@ -693,7 +705,6 @@ function collectProps(Ctor, element, ref, defaultProps) {
 
   // Common styles.
   if (layoutSizeDefined) {
-    props['containSize'] = true;
     if (usesShadowDom(Ctor)) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {

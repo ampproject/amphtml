@@ -30,14 +30,9 @@ const {
 const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
-const {
-  storybookAmp,
-  storybookPreact,
-} = require('./build-system/tasks/storybook');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {browse} = require('./build-system/tasks/browse');
 const {build, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
@@ -73,6 +68,7 @@ const {release} = require('./build-system/tasks/release');
 const {serverTests} = require('./build-system/tasks/server-tests');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
+const {storybook} = require('./build-system/tasks/storybook');
 const {testReportUpload} = require('./build-system/tasks/test-report-upload');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
@@ -134,7 +130,6 @@ function checkFlags(name, taskFunc) {
 createTask('a4a', a4a);
 createTask('ava', ava);
 createTask('babel-plugin-tests', babelPluginTests);
-createTask('browse', browse);
 createTask('build', build);
 createTask('bundle-size', bundleSize);
 createTask('caches-json', cachesJson);
@@ -174,8 +169,7 @@ createTask('test-report-upload', testReportUpload);
 createTask('serve', serve);
 createTask('server-tests', serverTests);
 createTask('size', size);
-createTask('storybook-amp', storybookAmp);
-createTask('storybook-preact', storybookPreact);
+createTask('storybook', storybook);
 createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);
