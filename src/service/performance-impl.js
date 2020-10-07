@@ -87,8 +87,9 @@ export class Performance {
 
     /** @private {!Object<string,boolean>} */
     this.enabledExperiments_ = map();
-    /** @private {string} */
-    this.ampexp_ = '';
+
+    /** @private {string|undefined} */
+    this.ampexp_ = undefined;
 
     /** @private {Signals} */
     this.metrics_ = new Signals();
@@ -272,6 +273,13 @@ export class Performance {
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
         this.tick(TickLabel.TIME_ORIGIN, undefined, this.timeOrigin_);
+
+        const usqp = this.ampdoc_.getMetaByName('amp-usqp');
+        if (usqp) {
+          usqp.split(',').forEach((exp) => {
+            this.addEnabledExperiment('ssr-' + exp);
+          });
+        }
 
         return this.maybeAddStoryExperimentId_();
       })
@@ -767,6 +775,9 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      if (this.ampexp_ == null) {
+        this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+      }
       this.viewer_.sendMessage(
         'sendCsi',
         dict({
@@ -793,7 +804,7 @@ export class Performance {
    */
   addEnabledExperiment(experimentId) {
     this.enabledExperiments_[experimentId] = true;
-    this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+    this.ampexp_ = undefined;
   }
 
   /**
