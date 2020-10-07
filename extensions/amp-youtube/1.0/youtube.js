@@ -144,13 +144,7 @@ export function Youtube({
       );
     }
     if (data.event == 'infoDelivery' && playerState != undefined) {
-      const event = currentTarget.ownerDocument.createEvent('Event');
-      event.initEvent(
-        PlayerStates[playerState.toString()],
-        /* bubbles */ true,
-        /* cancelable */ true
-      );
-      currentTarget.dispatchEvent(event);
+      dispatchCustomEvent(currentTarget, PlayerStates[playerState.toString()]);
     }
     if (data.event == 'infoDelivery' && info['muted']) {
       dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
