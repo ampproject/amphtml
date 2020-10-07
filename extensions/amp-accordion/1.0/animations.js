@@ -82,7 +82,7 @@ export function animateCollapse(content) {
       // Measure the starting height.
       // This looks ugly, but avoids weird `hidden` state management in the
       // component itself. Most importantly, this has no performance issues
-      // by itself b/c flipping `hidden` back and force before measure has
+      // by itself b/c flipping `hidden` back and forth before measure has
       // no effect - the `useLayoutEffect` assures this.
       content.hidden = false;
       const startHeight = content./*OK*/ offsetHeight;
