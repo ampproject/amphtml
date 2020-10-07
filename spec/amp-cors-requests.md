@@ -16,6 +16,11 @@ limitations under the License.
 
 # CORS Requests in AMP
 
+[filter formats="email"]
+Note: AMP for Email has different CORS requirements which are described in
+[CORS in AMP for Email](https://amp.dev/documentation/guides-and-tutorials/learn/cors-in-email/?format=email).
+[/filter]
+
 Many AMP components and extensions take advantage of remote endpoints by using
 Cross-Origin Resource Sharing (CORS) requests. This document explains the key
 aspects of using CORS in AMP. To learn about CORS itself, see the
