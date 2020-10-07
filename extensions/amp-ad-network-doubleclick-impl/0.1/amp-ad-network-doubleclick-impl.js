@@ -71,6 +71,11 @@ import {
 } from './sra-utils';
 import {WindowInterface} from '../../../src/window-interface';
 import {
+  addAmpExperimentIdToElement,
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {
   assertDoesNotContainDisplay,
   setImportantStyles,
   setStyles,
@@ -84,10 +89,6 @@ import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {
-  extractUrlExperimentId,
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -235,6 +236,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
+
+    /** @type {!Array<string>} */
+    this.ampExperimentIds = [];
 
     /** @protected {boolean} */
     this.useSra = false;
@@ -437,7 +441,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
-      this.experimentIds.push(ssrExpIds[i]);
+      addAmpExperimentIdToElement(ssrExpIds[i], this.element);
     }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;

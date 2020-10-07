@@ -2320,7 +2320,7 @@ export class AmpA4A extends AMP.BaseElement {
    * 100 or less branches. So, the value is padded a leading 0 if necessary.
    *
    * @protected
-   * @return {!Array<{key: number, value: string}>}
+   * @return {!Array<string>}
    */
   getSsrExpIds_() {
     const exps = [];
@@ -2335,7 +2335,7 @@ export class AmpA4A extends AMP.BaseElement {
         // Reasonably assume that all important exps are either booleans, or
         // enums with 100 or less branches.
         const val = Number(kv[1]);
-        if (val >= 0 && val < 100) {
+        if (!isNaN(kv[0]) && val >= 0 && val < 100) {
           const padded = padStart(kv[1], 2, '0');
           exps.push(kv[0] + padded);
         }
