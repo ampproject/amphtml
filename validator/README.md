@@ -75,15 +75,13 @@ In addition, install Node.js v4.4.2. E.g.,
 Dependencies:
 
 - npm
-- python 2.7 (should already be installed on OSX)
+- python 3 (should already be installed on OSX)
 - [homebrew](https://brew.sh/)
 
   - protobuf
 
     ```sh
-    brew install protobuf
-    mkdir -p /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages
-    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+    pip3 install --user protobuf
     ```
 
   - openjdk-7-jre
