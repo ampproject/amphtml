@@ -36,7 +36,7 @@ describes.realWin(
     function createOptionalParams(
       displayInfo,
       displayShareBar,
-      displayComments,
+      displayComments
     ) {
       return {
         displayItemInfo: displayInfo,
@@ -108,7 +108,7 @@ describes.realWin(
 
     it('renders', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life',
+        'https://www.playbuzz.com/bob/bobs-life'
       );
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
@@ -119,7 +119,7 @@ describes.realWin(
 
     it('renders with false for each optional param', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life',
+        'https://www.playbuzz.com/bob/bobs-life'
       );
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
@@ -152,7 +152,7 @@ describes.realWin(
 
     it('renders with true for each true optional param', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life',
+        'https://www.playbuzz.com/bob/bobs-life'
       );
       return getIns(src, createOptionalParams(true, true, true)).then((ins) => {
         const iframe = ins.querySelector('iframe');
@@ -166,7 +166,7 @@ describes.realWin(
 
     it('builds a placeholder image without inserting iframe', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life',
+        'https://www.playbuzz.com/bob/bobs-life'
       );
       return getIns(src, createOptionalParams(), true, (ins) => {
         // console.log(ins);
@@ -175,7 +175,7 @@ describes.realWin(
         expect(iframe).to.be.null;
         expect(placeholder).to.not.have.display('');
         expect(placeholder.getAttribute('aria-label')).to.equal(
-          'Loading interactive element',
+          'Loading interactive element'
         );
       }).then((ins) => {
         const placeholder = ins.querySelector('[placeholder]');
@@ -195,13 +195,13 @@ describes.realWin(
     });
     it('propagates aria label to placeholder', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life',
+        'https://www.playbuzz.com/bob/bobs-life'
       );
       return getIns(src, {'arialabel': 'captivating quiz'}, true, (ins) => {
         // console.log(ins);
         const placeholder = ins.querySelector('[placeholder]');
         expect(placeholder.getAttribute('aria-label')).to.equal(
-          'Loading - captivating quiz',
+          'Loading - captivating quiz'
         );
       });
     });
@@ -209,9 +209,9 @@ describes.realWin(
       const src = createItemSrc().withUrl('');
       allowConsoleError(() => {
         expect(getIns(src)).to.be.rejectedWith(
-          /The item attribute is required for/,
+          /The item attribute is required for/
         );
       });
     });
-  },
+  }
 );
