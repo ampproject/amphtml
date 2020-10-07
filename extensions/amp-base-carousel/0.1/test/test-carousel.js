@@ -142,8 +142,7 @@ describes.realWin('carousel implementation', {}, (env) => {
       expect(carousel.isAtEnd()).to.be.false;
     });
 
-    // TODO(#30563): fix and unskip.
-    it.skip('should return true when at end for RTL', async () => {
+    it('should return true when at end for RTL', async () => {
       setStyle(element, 'width', '299.2px');
       element.setAttribute('dir', 'rtl');
 
@@ -209,7 +208,8 @@ describes.realWin('carousel implementation', {}, (env) => {
       expect(carousel.isAtStart()).to.be.false;
     });
 
-    it('should return true when at start for RTL', async () => {
+    // TODO(#30563): fix and unskip.
+    it.skip('should return true when at start for RTL', async () => {
       setStyle(element, 'width', '299.2px');
       element.setAttribute('dir', 'rtl');
 
