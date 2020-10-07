@@ -15,12 +15,8 @@
  */
 
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
-import {
-  AmpStoryPlayer,
-  IFRAME_IDX,
-} from '../../src/amp-story-player/amp-story-player-impl';
+import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
-import {toArray} from '../../src/types';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
@@ -201,15 +197,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
       await nextTick();
 
-      const stories = toArray(playerEl.querySelectorAll('a'));
+      const stories = playerEl.getStories();
 
       swipeLeft();
-      expect(stories[0][IFRAME_IDX]).to.eql(0);
-      expect(stories[3][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[0].iframeIdx).to.eql(0);
+      expect(stories[3].iframeIdx).to.eql(undefined);
 
       swipeLeft();
-      expect(stories[0][IFRAME_IDX]).to.eql(undefined);
-      expect(stories[3][IFRAME_IDX]).to.eql(0);
+      expect(stories[0].iframeIdx).to.eql(undefined);
+      expect(stories[3].iframeIdx).to.eql(0);
     }
   );
 
@@ -221,14 +217,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
       await nextTick();
 
-      const stories = toArray(playerEl.querySelectorAll('a'));
+      const stories = playerEl.getStories();
 
       swipeLeft();
       swipeLeft();
       swipeRight();
 
-      expect(stories[0][IFRAME_IDX]).to.eql(0);
-      expect(stories[3][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[0].iframeIdx).to.eql(0);
+      expect(stories[3].iframeIdx).to.eql(undefined);
     }
   );
 
@@ -508,13 +504,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.show('https://example.com/story3.html');
 
-      const stories = toArray(playerEl.querySelectorAll('a'));
+      const stories = playerEl.getStories();
 
-      expect(stories[0][IFRAME_IDX]).to.eql(undefined);
-      expect(stories[1][IFRAME_IDX]).to.eql(undefined);
-      expect(stories[2][IFRAME_IDX]).to.eql(2);
-      expect(stories[3][IFRAME_IDX]).to.eql(0);
-      expect(stories[4][IFRAME_IDX]).to.eql(1);
+      expect(stories[0].iframeIdx).to.eql(undefined);
+      expect(stories[1].iframeIdx).to.eql(undefined);
+      expect(stories[2].iframeIdx).to.eql(2);
+      expect(stories[3].iframeIdx).to.eql(0);
+      expect(stories[4].iframeIdx).to.eql(1);
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
@@ -589,9 +585,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[0][IFRAME_IDX]).to.exist;
-        expect(stories[1][IFRAME_IDX]).to.exist;
-        expect(stories[2][IFRAME_IDX]).to.exist;
+        expect(stories[0].iframeIdx).to.exist;
+        expect(stories[1].iframeIdx).to.exist;
+        expect(stories[2].iframeIdx).to.exist;
       }
     );
 
@@ -611,8 +607,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[3][IFRAME_IDX]).to.exist;
-        expect(stories[4][IFRAME_IDX]).to.not.exist;
+        expect(stories[3].iframeIdx).to.exist;
+        expect(stories[4].iframeIdx).to.not.exist;
       }
     );
 
