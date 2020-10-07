@@ -87,8 +87,12 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-text-response'
     ).textContent = this.element.getAttribute('response-text');
-    const type = this.element.getAttribute('input-type') || 'text';
-    if (type == 'number') {
+    let type = this.element.getAttribute('input-type') || 'text';
+    if (type === 'password') {
+      console.error('cannot use password as a type!');
+      type = 'text';
+    }
+    if (type === 'number') {
       this.input.setAttribute('inputmode', 'numeric');
       this.input.setAttribute('pattern', '/d*');
     }
@@ -139,7 +143,7 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
           setTimeout(() => {
             this.input.focus();
             fakeInput.remove();
-          }, 500);
+          }, 250);
         },
         true
       );
