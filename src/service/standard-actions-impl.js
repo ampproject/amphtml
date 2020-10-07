@@ -61,17 +61,12 @@ const AMP_CSS_RE = /^i-amphtml-/;
 export class StandardActions {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Window=} opt_win
    */
-  constructor(ampdoc, opt_win) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    const context = opt_win
-      ? opt_win.document.documentElement
-      : ampdoc.getHeadNode();
+    const context = ampdoc.getHeadNode();
 
     /** @const @private {!./mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(ampdoc);

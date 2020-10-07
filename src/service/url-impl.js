@@ -36,12 +36,9 @@ const SERVICE = 'url';
 export class Url {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
-    const root = opt_rootNode || ampdoc.getRootNode();
+  constructor(ampdoc) {
+    const root = ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
     /** @private @const {!HTMLAnchorElement} */
