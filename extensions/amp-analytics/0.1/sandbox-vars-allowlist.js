@@ -21,7 +21,6 @@
 export const SANDBOX_AVAILABLE_VARS = {
   'AMPDOC_HOST': true,
   'AMPDOC_HOSTNAME': true,
-  'AMPDOC_META': true,
   'AMPDOC_URL': true,
   'AMP_VERSION': true,
   'AVAILABLE_SCREEN_HEIGHT': true,
