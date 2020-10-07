@@ -61,9 +61,10 @@ Install these packages using apt-get:
 - `npm`
 - `openjdk-7-jre`
 - `protobuf-compiler`
-- `python2.7`
+- `python3`
+- `python3-pip`
 
-Then use pip to `pip install protobuf`.
+Then `pip3 install protobuf`.
 
 In addition, install Node.js v4.4.2. E.g.,
 [by downloading](https://nodejs.org/en/download/) or
@@ -75,18 +76,17 @@ In addition, install Node.js v4.4.2. E.g.,
 Dependencies:
 
 - npm
-- python 2.7 (should already be installed on OSX)
 - [homebrew](https://brew.sh/)
+- python 3 (e.g. [these instructions](https://docs.python-guide.org/starting/install3/osx/))
 
   - protobuf
 
     ```sh
-    brew install protobuf
-    mkdir -p /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages
-    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+    pip3 install --user protobuf
     ```
 
   - openjdk-7-jre
+
     ```sh
     brew tap homebrew/cask
     brew install Caskroom/cask/java
