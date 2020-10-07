@@ -208,7 +208,7 @@ describe
             'version': '$internalRuntimeVersion$',
             'esm': false,
           },
-          'canary': true,
+          'canary': false,
           'hidden': false,
           // Note that DOM fingerprint will change if the document DOM changes
           // Note also that running it using --files uses different DOM.
