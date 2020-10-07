@@ -23,7 +23,7 @@
  */
 const fs = require('fs');
 const https = require('https');
-const {getStdout, getStderr} = require('./exec');
+const {getStdout, getStderr} = require('./process');
 
 const setupInstructionsUrl =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';

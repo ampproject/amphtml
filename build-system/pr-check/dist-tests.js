@@ -37,7 +37,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 const FILENAME = 'dist-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExecOrThrow = (cmd) => timedExecOrThrowBase(cmd, FILENAME);
+const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -48,7 +48,8 @@ function main() {
 
     try {
       timedExecOrThrow(
-        'gulp integration --nobuild --headless --compiled --report'
+        'gulp integration --nobuild --headless --compiled --report',
+        'Integration tests failed!'
       );
     } catch (e) {
       if (e.status) {
