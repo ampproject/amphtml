@@ -779,6 +779,30 @@ describes.realWin('performance with experiment', {amp: true}, (env) => {
       );
     });
   });
+
+  it('adds ssr experiments', () => {
+    env.sandbox
+      .stub(env.ampdoc, 'getMetaByName')
+      .withArgs('amp-usqp')
+      .returns('1=1,2=0');
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub).to.be.calledWith(
+        'sendCsi',
+        env.sandbox.match((payload) => {
+          const experiments = payload.ampexp.split(',');
+          expect(experiments).to.have.length(3);
+          expect(experiments).to.have.members([
+            'rtv-' + getMode(win).rtvVersion,
+            'ssr-1=1',
+            'ssr-2=0',
+          ]);
+          return true;
+        })
+      );
+    });
+  });
 });
 
 describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
