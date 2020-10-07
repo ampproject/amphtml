@@ -172,6 +172,58 @@ describes.realWin(
       ).to.deep.equal([userSuppliedChildren[1]]);
     });
 
+    it('should snap to slides by default', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      await getSlidesFromShadow();
+      const scroller = element.shadowRoot.querySelector(
+        `[class*=${styles.scrollContainer}]`
+      );
+      expect(scroller.getAttribute('snap')).to.equal('true');
+    });
+
+    it('should snap to slides with snap attribute', async () => {
+      element.setAttribute('snap', '');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      await getSlidesFromShadow();
+      const scroller = element.shadowRoot.querySelector(
+        `[class*=${styles.scrollContainer}]`
+      );
+      expect(scroller.getAttribute('snap')).to.equal('true');
+    });
+
+    it('should snap to slides with snap="true"', async () => {
+      element.setAttribute('snap', 'true');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      await getSlidesFromShadow();
+      const scroller = element.shadowRoot.querySelector(
+        `[class*=${styles.scrollContainer}]`
+      );
+      expect(scroller.getAttribute('snap')).to.equal('true');
+    });
+
+    it('should not snap to slides with snap="false"', async () => {
+      element.setAttribute('snap', 'false');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      await getSlidesFromShadow();
+      const scroller = element.shadowRoot.querySelector(
+        `[class*=${styles.scrollContainer}]`
+      );
+
+      expect(scroller.getAttribute('snap')).to.equal('false');
+    });
+
     describe('imperative api', () => {
       let scroller;
 
@@ -212,7 +264,7 @@ describes.realWin(
 
       it('should execute goToSlide action', async () => {
         element.enqueAction(invocation('goToSlide', {index: 1}));
-        await waitFor(() => scroller.scrollLeft > 0, 'to to slide 1');
+        await waitFor(() => scroller.scrollLeft > 0, 'to slide 1');
 
         element.enqueAction(invocation('goToSlide', {index: 0}));
         await waitFor(

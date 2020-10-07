@@ -58,9 +58,9 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
   it('should not loop by default', () => {
     const jsx = (
       <BaseCarousel>
-        <div class="my-slide">slide 1</div>
-        <div class="my-slide">slide 2</div>
-        <div class="my-slide">slide 3</div>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
       </BaseCarousel>
     );
     const wrapper = mount(jsx);
@@ -77,9 +77,9 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
   it('should render in preparation for looping with loop prop', () => {
     const jsx = (
       <BaseCarousel loop>
-        <div class="my-slide">slide 1</div>
-        <div class="my-slide">slide 2</div>
-        <div class="my-slide">slide 3</div>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
       </BaseCarousel>
     );
     const wrapper = mount(jsx);
@@ -91,5 +91,29 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
     expect(slides.at(0).text()).to.equal('');
     expect(slides.at(1).text()).to.equal('slide 1');
     expect(slides.at(2).text()).to.equal('slide 2');
+  });
+
+  it('should snap to slides by default', () => {
+    const jsx = (
+      <BaseCarousel>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BaseCarousel>
+    );
+    const wrapper = mount(jsx);
+    expect(wrapper.find(`[snap="true"]`)).not.to.be.null;
+  });
+
+  it('should not snap to slides with snap="false"', () => {
+    const jsx = (
+      <BaseCarousel>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BaseCarousel>
+    );
+    const wrapper = mount(jsx);
+    expect(wrapper.find(`[snap="false"]`)).not.to.be.null;
   });
 });
