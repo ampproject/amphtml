@@ -15,8 +15,12 @@
  */
 
 import '../amp-instagram';
+import {
+  createElementWithAttributes,
+  waitForChildPromise,
+} from '../../../../src/dom';
 import {waitFor} from '../../../../testing/test-helper';
-import {waitForChildPromise} from '../../../../src/dom';
+
 import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.realWin(
@@ -45,12 +49,13 @@ describes.realWin(
     });
 
     it('renders', async () => {
-      element = win.document.createElement('amp-instagram');
-      element.setAttribute('data-shortcode', 'B8QaZW4AQY_');
-      element.setAttribute('amp', true);
-      element.setAttribute('height', 500);
-      element.setAttribute('width', 500);
-      element.setAttribute('layout', 'responsive');
+      element = createElementWithAttributes(win.document, 'amp-instagram', {
+        'data-shortcode': 'B8QaZW4AQY_',
+        'amp': true,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
       doc.body.appendChild(element);
       await waitForRender();
 
@@ -60,13 +65,14 @@ describes.realWin(
     });
 
     it('renders with caption', async () => {
-      element = win.document.createElement('amp-instagram');
-      element.setAttribute('data-shortcode', 'B8QaZW4AQY_');
-      element.setAttribute('data-captioned', true);
-      element.setAttribute('amp', true);
-      element.setAttribute('height', 500);
-      element.setAttribute('width', 500);
-      element.setAttribute('layout', 'responsive');
+      element = createElementWithAttributes(win.document, 'amp-instagram', {
+        'data-shortcode': 'B8QaZW4AQY_',
+        'data-captioned': true,
+        'amp': true,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
       doc.body.appendChild(element);
       await waitForRender();
 
@@ -78,15 +84,14 @@ describes.realWin(
     });
 
     it("Container's height is changed", async () => {
-      // With no Instagram server connection, the height is set to 0/null.
-      // Either way, the height shouldn't equal initialHeight.
       const initialHeight = 300;
-      element = win.document.createElement('amp-instagram');
-      element.setAttribute('data-shortcode', 'B8QaZW4AQY_');
-      element.setAttribute('amp', true);
-      element.setAttribute('height', initialHeight);
-      element.setAttribute('width', 500);
-      element.setAttribute('layout', 'responsive');
+      element = createElementWithAttributes(win.document, 'amp-instagram', {
+        'data-shortcode': 'B8QaZW4AQY_',
+        'amp': true,
+        'height': initialHeight,
+        'width': 500,
+        'layout': 'responsive',
+      });
       doc.body.appendChild(element);
       await waitForRender();
       const {offsetHeight} = element;
