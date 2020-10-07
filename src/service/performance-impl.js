@@ -394,7 +394,7 @@ export class Performance {
         this.win.performance.getEntriesByType('paint').forEach(processEntry);
         entryTypesToObserve.push('paint');
       } catch (err) {
-        dev().error(err);
+        dev()./*OK*/ error(err);
       }
     }
 
@@ -405,7 +405,7 @@ export class Performance {
         );
         firstInputObserver.observe({type: 'first-input', buffered: true});
       } catch (err) {
-        dev().error(err);
+        dev()./*OK*/ error(err);
       }
     }
 
@@ -419,7 +419,7 @@ export class Performance {
           buffered: true,
         });
       } catch (err) {
-        dev().error(err);
+        dev()./*OK*/ error(err);
       }
     }
 
@@ -428,7 +428,7 @@ export class Performance {
         const lcpObserver = this.createPerformanceObserver_(processEntry);
         lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
       } catch (err) {
-        dev().error(err);
+        dev()./*OK*/ error(err);
       }
     }
 
@@ -441,7 +441,7 @@ export class Performance {
         );
         navigationObserver.observe({type: 'navigation', buffered: true});
       } catch (err) {
-        dev().error(err);
+        dev()./*OK*/ error(err);
       }
     }
 

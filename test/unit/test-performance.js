@@ -16,10 +16,13 @@
 
 import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
+import {
+  Performance,
+  installPerformanceService,
+} from '../../src/service/performance-impl';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getMode} from '../../src/mode';
-import {installPerformanceService, Performance} from '../../src/service/performance-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installRuntimeServices} from '../../src/service/core-services';
 
