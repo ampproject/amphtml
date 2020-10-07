@@ -76,11 +76,7 @@ Dependencies:
 
 - npm
 - [homebrew](https://brew.sh/)
-
-  - python 3
-    ```sh
-    brew install python
-    ```
+- python 3 (e.g. [these instructions](https://docs.python-guide.org/starting/install3/osx/))
 
   - protobuf
     ```sh
