@@ -85,6 +85,7 @@ function ScrollerWithRef(
       offsetRef,
       pivotIndex,
       restingIndex,
+      snap,
     },
     classes
   );
@@ -170,7 +171,6 @@ function ScrollerWithRef(
       ref={containerRef}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
-      snap={String(snap)}
       tabindex={0}
     >
       {slides}
@@ -235,7 +235,7 @@ export {Scroller};
  * @return {PreactDef.Renderable}
  */
 function renderSlides(
-  {children, restingIndex, offsetRef, pivotIndex, loop},
+  {children, restingIndex, offsetRef, pivotIndex, snap, loop},
   classes
 ) {
   const {length} = children;
@@ -246,7 +246,9 @@ function renderSlides(
       <div
         key={key}
         data-slide={index}
-        class={`${classes.slideSizing} ${classes.slideElement}`}
+        class={`${classes.slideSizing} ${classes.slideElement} ${
+          snap ? classes.enableSnap : classes.disableSnap
+        }`}
       >
         {child}
       </div>

@@ -177,11 +177,11 @@ describes.realWin(
       userSuppliedChildren.forEach((child) => element.appendChild(child));
       win.document.body.appendChild(element);
 
-      await getSlidesFromShadow();
-      const scroller = element.shadowRoot.querySelector(
-        `[class*=${styles.scrollContainer}]`
-      );
-      expect(scroller.getAttribute('snap')).to.equal('true');
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
     });
 
     it('should snap to slides with snap attribute', async () => {
@@ -190,11 +190,11 @@ describes.realWin(
       userSuppliedChildren.forEach((child) => element.appendChild(child));
       win.document.body.appendChild(element);
 
-      await getSlidesFromShadow();
-      const scroller = element.shadowRoot.querySelector(
-        `[class*=${styles.scrollContainer}]`
-      );
-      expect(scroller.getAttribute('snap')).to.equal('true');
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
     });
 
     it('should snap to slides with snap="true"', async () => {
@@ -203,11 +203,11 @@ describes.realWin(
       userSuppliedChildren.forEach((child) => element.appendChild(child));
       win.document.body.appendChild(element);
 
-      await getSlidesFromShadow();
-      const scroller = element.shadowRoot.querySelector(
-        `[class*=${styles.scrollContainer}]`
-      );
-      expect(scroller.getAttribute('snap')).to.equal('true');
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
     });
 
     it('should not snap to slides with snap="false"', async () => {
@@ -216,12 +216,11 @@ describes.realWin(
       userSuppliedChildren.forEach((child) => element.appendChild(child));
       win.document.body.appendChild(element);
 
-      await getSlidesFromShadow();
-      const scroller = element.shadowRoot.querySelector(
-        `[class*=${styles.scrollContainer}]`
-      );
-
-      expect(scroller.getAttribute('snap')).to.equal('false');
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.disableSnap)).to.be.true;
+      });
     });
 
     describe('imperative api', () => {
