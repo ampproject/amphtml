@@ -18,7 +18,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Youtube} from './youtube';
 
 /** @const {string} */
-const TAG = 'amp-fit-text';
+const TAG = 'amp-youtube';
 
 class AmpYoutube extends PreactBaseElement {}
 
@@ -30,9 +30,10 @@ AmpYoutube['props'] = {
   'autoplay': {attr: 'autoplay'},
   'loop': {attr: 'loop'},
   'videoid': {attr: 'data-videoid'},
-  'liveChannelid': {attr: 'data-liveChannelid'},
+  'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock'},
-  'style': {attr: 'style'},
+  'credentials': {attr: 'credentials'},
+  // TODO: How do I add params here? data-param-*
 };
 
 /** @override */

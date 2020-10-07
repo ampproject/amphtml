@@ -15,9 +15,38 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
+import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
+import {useState} from '../../../src/preact';
+
+// Correct PlayerStates taken from
+// https://developers.google.com/youtube/iframe_api_reference#Playback_status
+/**
+ * @enum {string}
+ * @private
+ */
+const PlayerStates = {
+  '-1': 'unstarted',
+  '0': 'ended',
+  '1': 'playing',
+  '2': 'paused',
+  '3': 'buffering',
+  '5': 'video_cued',
+};
+
+/**
+ * @enum {string}
+ * @private
+ */
+const methods = {
+  'play': 'playVideo',
+  'pause': 'pauseVideo',
+  'unmute': 'unMute',
+};
 
 /**
  * @enum {number}
@@ -38,11 +67,15 @@ export function Youtube({
   videoid,
   liveChannelid,
   params = {},
-  dock,
+  // eslint-disable-next-line no-unused-vars
+  dock, // TODO: dock is unused... how is it meant to be used?
   credentials,
   style,
   ...rest
 }) {
+  // TODO: currentTime is unused... is it necessary?
+  // eslint-disable-next-line no-unused-vars
+  const [currentTime, setCurrentTime] = useState(null);
   const datasourceExists =
     !(videoid && liveChannelid) && (videoid || liveChannelid);
 
@@ -77,13 +110,68 @@ export function Youtube({
 
   if (loop) {
     if ('playlist' in params) {
-      params['loop'] = true;
+      params['loop'] = '1';
     } else if ('loop' in params) {
       delete params['loop'];
     }
   }
 
   src = addParamsToUrl(src, params);
+
+  const onMessage = ({data, currentTarget}) => {
+    data = objOrParseJson(data);
+    if (data == null) {
+      return;
+    }
+    if (data.event == 'initialDelivery') {
+      dispatchCustomEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      return;
+    }
+    const {info} = data;
+    if (info == undefined) {
+      return;
+    }
+    const playerState = info['playerState'];
+    if (data.event == 'infoDelivery' && playerState == 0 && loop) {
+      console.log('hit ended');
+      currentTarget.contentWindow./*OK*/ postMessage(
+        JSON.stringify(
+          dict({
+            'event': 'command',
+            'func': 'playVideo',
+          })
+        ),
+        '*'
+      );
+    }
+    if (data.event == 'infoDelivery' && playerState != undefined) {
+      const event = currentTarget.ownerDocument.createEvent('Event');
+      event.initEvent(
+        PlayerStates[playerState.toString()],
+        /* bubbles */ true,
+        /* cancelable */ true
+      );
+      currentTarget.dispatchEvent(event);
+    }
+    if (data.event == 'infoDelivery' && info['muted']) {
+      dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
+      return;
+    }
+    // TODO: Check if this is needed... we currently don't do anything with currentTime.
+    if (data.event == 'infoDelivery' && info['currentTime']) {
+      setCurrentTime(info['currentTime']);
+      return;
+    }
+  };
+
+  const sendMessage = (method) => {
+    return JSON.stringify(
+      dict({
+        'event': 'command',
+        'func': methods[method],
+      })
+    );
+  };
 
   return (
     <VideoWrapper
@@ -94,6 +182,22 @@ export function Youtube({
       size={true}
       layout={true}
       paint={true}
+      onMessage={onMessage}
+      sendMessage={sendMessage}
+      onLoad={(event) => {
+        const {currentTarget} = event;
+        dispatchCustomEvent(currentTarget, 'canplay');
+        currentTarget.contentWindow./*OK*/ postMessage(
+          JSON.stringify(
+            dict({
+              'event': 'listening',
+            })
+          ),
+          '*'
+        );
+        dispatchCustomEvent(currentTarget, VideoEvents.LOAD);
+      }}
+      sandbox="allow-scripts allow-same-origin allow-presentation"
       {...rest}
     ></VideoWrapper>
   );
@@ -121,4 +225,22 @@ function getEmbedUrl(credentials, videoid, liveChannelid) {
     )}&`;
   }
   return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
+}
+
+// TODO: Get correct type for currentTarget
+/**
+ * Dispatches a custom event.
+ *
+ * @param {*} currentTarget
+ * @param {string} name
+ * @param {!Object=} opt_data Event data.
+ * @final
+ */
+function dispatchCustomEvent(currentTarget, name, opt_data) {
+  const data = opt_data || {};
+  // Constructors of events need to come from the correct window. Sigh.
+  const event = currentTarget.ownerDocument.createEvent('Event');
+  event.data = data;
+  event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
+  currentTarget.dispatchEvent(event);
 }

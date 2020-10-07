@@ -20,7 +20,7 @@ import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
-  title: 'Youtube',
+  title: 'YouTube',
   component: Youtube,
   decorators: [withA11y, withKnobs],
 };
@@ -32,6 +32,7 @@ export const _default = () => {
   const autoplay = boolean('autoplay', false);
   const loop = boolean('loop', false);
   const params = object('params', {});
+  const credentials = text('credentials', 'include');
   return (
     <Youtube
       autoplay={autoplay}
@@ -39,6 +40,27 @@ export const _default = () => {
       videoid={videoid}
       params={params}
       style={{width, height}}
+      credentials={credentials}
+    />
+  );
+};
+
+export const liveChannelId = () => {
+  const width = number('width', 300);
+  const height = number('height', 200);
+  const liveChannelid = text('liveChannelid', 'sKCkM-f2Qk4');
+  const autoplay = boolean('autoplay', false);
+  const loop = boolean('loop', false);
+  const params = object('params', {});
+  const credentials = text('credentials', 'include');
+  return (
+    <Youtube
+      autoplay={autoplay}
+      loop={loop}
+      liveChannelid={liveChannelid}
+      params={params}
+      style={{width, height}}
+      credentials={credentials}
     />
   );
 };
