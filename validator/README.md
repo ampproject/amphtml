@@ -62,8 +62,9 @@ Install these packages using apt-get:
 - `openjdk-7-jre`
 - `protobuf-compiler`
 - `python3`
+- `python3-pip`
 
-Then use pip to `pip install protobuf`.
+Then `pip3 install protobuf`.
 
 In addition, install Node.js v4.4.2. E.g.,
 [by downloading](https://nodejs.org/en/download/) or
