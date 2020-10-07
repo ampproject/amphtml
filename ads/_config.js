@@ -349,6 +349,7 @@ const adConfig = jsonConfiguration({
 
   'broadstreetads': {
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
+    renderStartImplemented: true,
   },
 
   'byplay': {},
@@ -474,6 +475,10 @@ const adConfig = jsonConfiguration({
   },
 
   'fake': {},
+
+  'fake-delayed': {
+    renderStartImplemented: true,
+  },
 
   'felmat': {
     prefetch: 'https://t.felmat.net/js/fmamp.js',
@@ -754,6 +759,10 @@ const adConfig = jsonConfiguration({
   },
 
   'my6sense': {
+    renderStartImplemented: true,
+  },
+
+  'myoffrz': {
     renderStartImplemented: true,
   },
 
@@ -1199,6 +1208,10 @@ const adConfig = jsonConfiguration({
 
   'viralize': {
     renderStartImplemented: true,
+  },
+
+  'vlyby': {
+    prefetch: 'https://amp.vlyby.com/qad/qad-outer2.js',
   },
 
   'vmfive': {

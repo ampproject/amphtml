@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from './pagination.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {Layout} from '../../../src/layout';
 import {Pagination} from './pagination';
@@ -46,6 +47,12 @@ AmpInlineGalleryPagination['props'] = {
 
 /** @override */
 AmpInlineGalleryPagination['children'] = {};
+
+/** @override */
+AmpInlineGalleryPagination['layoutSizeDefined'] = true;
+
+/** @override */
+AmpInlineGalleryPagination['shadowCss'] = CSS;
 
 /** @override */
 AmpInlineGalleryPagination['useContexts'] = [CarouselContextProp];

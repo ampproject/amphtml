@@ -31,29 +31,27 @@
  * Out:
  * ```
  * const jss = { button: { fontSize: 12 }}
- * const _classes = {button: 'button-1', CSS: 'button-1 { font-size: 12 }'}
+ * const _classes = {button: 'button-1'}
  * export const useStyles = () => _classes;
+ * export const CSS = 'button-1 { font-size: 12px }'
  * ```
  */
 
-const crypto = require('crypto');
+const hash = require('./create-hash');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
 const {relative, join} = require('path');
+const {spawnSync} = require('child_process');
 
-module.exports = function ({types: t, template}) {
+module.exports = function ({template}) {
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
 
-  const seen = new Set();
+  const seen = new Map();
   function compileJss(JSS, filename) {
     const relativeFilepath = relative(join(__dirname, '../../..'), filename);
-    const filehash = crypto
-      .createHash('sha256')
-      .update(relativeFilepath)
-      .digest('hex')
-      .slice(0, 7);
+    const filehash = hash.createHash(relativeFilepath);
     const jss = create({
       ...preset(),
       createGenerateId: () => {
@@ -63,12 +61,12 @@ module.exports = function ({types: t, template}) {
             (c) => `-${c.toLowerCase()}`
           );
           const className = `${dashCaseKey}-${filehash}`;
-          if (seen.has(className)) {
+          if (seen.has(className) && seen.get(className) !== filename) {
             throw new Error(
               `Classnames must be unique across all files. Found a duplicate: ${className}`
             );
           }
-          seen.add(className);
+          seen.set(className, filename);
           return className;
         };
       },
@@ -79,7 +77,6 @@ module.exports = function ({types: t, template}) {
   return {
     visitor: {
       CallExpression(path, state) {
-        // TODO: Can I skip the whole file if not jss?
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
           return;
@@ -103,18 +100,27 @@ module.exports = function ({types: t, template}) {
           );
         }
 
+        // Create the classes var.
         const id = path.scope.generateUidIdentifier('classes');
-        path.scope.push({
-          id,
-          init: template.expression.ast`JSON.parse(${t.stringLiteral(
-            JSON.stringify({
-              ...sheet.classes,
-              'CSS': sheet.toString(),
-            })
-          )})`,
-        });
+        const init = template.expression.ast`${stringifyUnquotedProps(
+          sheet.classes
+        )}`;
+        path.scope.push({id, init});
+        path.scope.bindings[id.name].path.parentPath.addComment(
+          'leading',
+          '* @enum {string}'
+        );
 
+        // Replace useStyles with a getter for the new `classes` var.
         path.replaceWith(template.expression.ast`(() => ${id})`);
+
+        // Export a variable named CSS with the compiled CSS.
+        const cssExport = template.ast`export const CSS = "${transformCssSync(
+          sheet.toString()
+        )}"`;
+        path
+          .findParent((p) => p.type === 'ExportNamedDeclaration')
+          .insertAfter(cssExport);
       },
 
       // Remove the import for react-jss
@@ -131,3 +137,41 @@ module.exports = function ({types: t, template}) {
     },
   };
 };
+
+/**
+ * An equivalent to JSON.stringify except the properties are unquoted.
+ * @param {Object} obj
+ * @return {string}
+ */
+function stringifyUnquotedProps(obj) {
+  return (
+    '{' +
+    Object.entries(obj)
+      .map(([k, v]) => `${k}:"${v}"`)
+      .join(',') +
+    '}'
+  );
+}
+
+// Abuses spawnSync to let us run an async function sync.
+function transformCssSync(cssText) {
+  const programText = `
+    const {transformCss} = require('../../../build-system/tasks/jsify-css');
+    transformCss(\`${cssText}\`).then((css) => console./* OK */log(css.toString()));
+  `;
+
+  // TODO: migrate to the helpers in build-system exec.js
+  // after adding args support.
+  const spawnedProcess = spawnSync('node', ['-e', programText], {
+    cwd: __dirname,
+    env: process.env,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  });
+  if (spawnedProcess.status !== 0) {
+    throw new Error(
+      `Transforming CSS returned status code: ${spawnedProcess.status}. stderr: "${spawnedProcess.stderr}".`
+    );
+  }
+  return spawnedProcess.stdout;
+}

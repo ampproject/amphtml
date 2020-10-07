@@ -47,20 +47,6 @@ const AmpAdImplementation = {
   AMP_AD_IFRAME_GET: '5',
 };
 
-/** @const {!{id: string, control: string, experiment: string}} */
-export const RENDER_ON_IDLE_FIX_EXP = {
-  id: 'render-on-idle-fix',
-  control: '21066311',
-  experiment: '21066312',
-};
-
-/** @const {!{id: string, control: string, experiment: string}} */
-export const STICKY_AD_PADDING_BOTTOM_EXP = {
-  id: 'sticky-ad-padding-bottom',
-  control: '21066401',
-  experiment: '21066402',
-};
-
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
   'AMP-CAROUSEL': 'ac',

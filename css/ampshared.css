@@ -117,6 +117,7 @@
 }
 
 .i-amphtml-layout-fill,
+.i-amphtml-layout-fill.i-amphtml-notbuilt,
 [layout=fill]:not(.i-amphtml-layout-fill)
 {
   display: block;
@@ -152,6 +153,16 @@
 
 i-amphtml-sizer {
   display: block !important;
+}
+
+/*
+ * Disable `i-amphtml-sizer` when aspect ratio is supported by both the
+ * borwser and the optimizer.
+ */
+@supports (aspect-ratio: 1 / 1) {
+  i-amphtml-sizer.i-amphtml-disable-for-ar {
+    display: none !important;
+  }
 }
 
 .i-amphtml-fill-content,
