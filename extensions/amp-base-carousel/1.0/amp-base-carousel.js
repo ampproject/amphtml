@@ -88,6 +88,7 @@ AmpBaseCarousel['children'] = {
 /** @override */
 AmpBaseCarousel['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
+  'controls': {attr: 'controls', type: 'string'},
 };
 
 /** @override */
