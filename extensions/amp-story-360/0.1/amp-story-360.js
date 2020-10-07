@@ -461,18 +461,24 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
+   * Ensures user is facing a specified point of interest.
    * @private
    */
   maybeSetGyroscopeDefaultHeading_() {
     if (this.isOnActivePage_ && this.gyroscopeControls_ && this.isReady_) {
       const defaultHeading = parseFloat(
-        this.element.getAttribute('heading-end')
+        this.element.getAttribute('heading-end') ||
+          this.element.getAttribute('heading-start')
       );
-      this.renderer_.setImageOrientation(
-        90 + defaultHeading + this.orientationAlpha_,
-        this.scenePitch_,
-        this.sceneRoll_
-      );
+      if (defaultHeading) {
+        const offsetHeading =
+          90 + parseFloat(defaultHeading) + this.orientationAlpha_;
+        this.renderer_.setImageOrientation(
+          offsetHeading,
+          this.scenePitch_,
+          this.sceneRoll_
+        );
+      }
     }
   }
 
