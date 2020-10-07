@@ -61,7 +61,7 @@ Install these packages using apt-get:
 - `npm`
 - `openjdk-7-jre`
 - `protobuf-compiler`
-- `python2.7`
+- `python3`
 
 Then use pip to `pip install protobuf`.
 
@@ -75,11 +75,14 @@ In addition, install Node.js v4.4.2. E.g.,
 Dependencies:
 
 - npm
-- python 3 (should already be installed on OSX)
 - [homebrew](https://brew.sh/)
 
-  - protobuf
+  - python 3
+    ```sh
+    brew install python
+    ```
 
+  - protobuf
     ```sh
     pip3 install --user protobuf
     ```
