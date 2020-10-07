@@ -387,28 +387,49 @@ export class Performance {
 
     const entryTypesToObserve = [];
     if (this.win.PerformancePaintTiming) {
-      // Programmatically read once as currently PerformanceObserver does not
-      // report past entries as of Chromium 61.
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
-      this.win.performance.getEntriesByType('paint').forEach(processEntry);
-      entryTypesToObserve.push('paint');
+      try {
+        // Programmatically read once as currently PerformanceObserver does not
+        // report past entries as of Chromium 61.
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+        this.win.performance.getEntriesByType('paint').forEach(processEntry);
+        entryTypesToObserve.push('paint');
+      } catch (err) {
+        dev().error(err);
+      }
     }
 
     if (this.supportsEventTiming_) {
-      const firstInputObserver = this.createPerformanceObserver_(processEntry);
-      firstInputObserver.observe({type: 'first-input', buffered: true});
+      try {
+        const firstInputObserver = this.createPerformanceObserver_(
+          processEntry
+        );
+        firstInputObserver.observe({type: 'first-input', buffered: true});
+      } catch (err) {
+        dev().error(err);
+      }
     }
 
     if (this.supportsLayoutShift_) {
-      const layoutInstabilityObserver = this.createPerformanceObserver_(
-        processEntry
-      );
-      layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
+      try {
+        const layoutInstabilityObserver = this.createPerformanceObserver_(
+          processEntry
+        );
+        layoutInstabilityObserver.observe({
+          type: 'layout-shift',
+          buffered: true,
+        });
+      } catch (err) {
+        dev().error(err);
+      }
     }
 
     if (this.supportsLargestContentfulPaint_) {
-      const lcpObserver = this.createPerformanceObserver_(processEntry);
-      lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
+      try {
+        const lcpObserver = this.createPerformanceObserver_(processEntry);
+        lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
+      } catch (err) {
+        dev().error(err);
+      }
     }
 
     if (this.supportsNavigation_) {
@@ -420,8 +441,7 @@ export class Performance {
         );
         navigationObserver.observe({type: 'navigation', buffered: true});
       } catch (err) {
-        dev() /*OK*/
-          .error(err);
+        dev().error(err);
       }
     }
 
