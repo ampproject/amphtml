@@ -102,11 +102,11 @@ export const Default = () => {
 
   return (
     <amp-date-countdown
-      end-date={dateAttribute === 'end-date' ? new Date(endDate) : ''}
-      timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : ''}
-      timestamp-ms={dateAttribute === 'timestamp-ms' ? timestampMs : ''}
+      end-date={dateAttribute === 'end-date' ? new Date(endDate) : undefined}
+      timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : undefined}
+      timestamp-ms={dateAttribute === 'timestamp-ms' ? timestampMs : undefined}
       timestamp-seconds={
-        dateAttribute === 'timestamp-seconds' ? timestampSeconds : ''
+        dateAttribute === 'timestamp-seconds' ? timestampSeconds : undefined
       }
       offset-seconds={offsetSeconds}
       locale={locale}
@@ -167,11 +167,11 @@ export const DefaultRenderer = () => {
 
   return (
     <amp-date-countdown
-      end-date={dateAttribute === 'end-date' ? new Date(endDate) : ''}
-      timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : ''}
-      timestamp-ms={dateAttribute === 'timestamp-ms' ? timestampMs : ''}
+      end-date={dateAttribute === 'end-date' ? new Date(endDate) : undefined}
+      timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : undefined}
+      timestamp-ms={dateAttribute === 'timestamp-ms' ? timestampMs : undefined}
       timestamp-seconds={
-        dateAttribute === 'timestamp-seconds' ? timestampSeconds : ''
+        dateAttribute === 'timestamp-seconds' ? timestampSeconds : undefined
       }
       offset-seconds={offsetSeconds}
       locale={locale}
@@ -234,11 +234,13 @@ export const ExternalTemplate = () => {
         </div>
       </template>
       <amp-date-countdown
-        end-date={dateAttribute === 'end-date' ? new Date(endDate) : ''}
-        timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : ''}
-        timestamp-ms={dateAttribute === 'timestamp-ms' ? timestampMs : ''}
+        end-date={dateAttribute === 'end-date' ? new Date(endDate) : undefined}
+        timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : undefined}
+        timestamp-ms={
+          dateAttribute === 'timestamp-ms' ? timestampMs : undefined
+        }
         timestamp-seconds={
-          dateAttribute === 'timestamp-seconds' ? timestampSeconds : ''
+          dateAttribute === 'timestamp-seconds' ? timestampSeconds : undefined
         }
         offset-seconds={offsetSeconds}
         locale={locale}
