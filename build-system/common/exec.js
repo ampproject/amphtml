@@ -93,8 +93,10 @@ function execWithError(cmd) {
  */
 function execOrThrow(cmd) {
   const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
-  if (p.stderr.length > 0) {
-    const error = new Error(p.stderr.toString());
+  if (p.status && p.status != 0) {
+    const error = new Error(
+      `Error executing \`${cmd}\: \n${p.stderr.toString()}`
+    );
     error.status = p.status;
     throw error;
   }
