@@ -37,13 +37,18 @@ BaseCarouselDef.Props;
  *   loop: (boolean|undefined),
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),
+ *   snap: (boolean|undefined),
  * }}
  */
 BaseCarouselDef.ScrollerProps;
 
 /**
  * @typedef {{
- *   children: !Array<PreactDef.Renderable>
+ *   children: !Array<PreactDef.Renderable>,
+ *   loop: (boolean|undefined),
+ *   restingIndex: number,
+ *   pivotIndex: number,
+ *   snap: (boolean|undefined),
  * }}
  */
 BaseCarouselDef.SlideProps;
