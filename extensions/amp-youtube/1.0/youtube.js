@@ -133,7 +133,6 @@ export function Youtube({
     }
     const playerState = info['playerState'];
     if (data.event == 'infoDelivery' && playerState == 0 && loop) {
-      console.log('hit ended');
       currentTarget.contentWindow./*OK*/ postMessage(
         JSON.stringify(
           dict({
