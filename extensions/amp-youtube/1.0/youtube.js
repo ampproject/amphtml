@@ -220,11 +220,10 @@ function getEmbedUrl(credentials, videoid, liveChannelid) {
   return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
 }
 
-// TODO: Get correct type for currentTarget
 /**
  * Dispatches a custom event.
  *
- * @param {*} currentTarget
+ * @param {HTMLIFrameElement} currentTarget
  * @param {string} name
  * @param {!Object=} opt_data Event data.
  * @final
