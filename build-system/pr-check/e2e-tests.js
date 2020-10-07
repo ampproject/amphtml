@@ -41,7 +41,7 @@ const timedExecOrThrow = (cmd) => timedExecOrThrowBase(cmd, FILENAME);
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  if (!isTravisPullRequestBuild()) {
+  if (true || !isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
@@ -49,6 +49,7 @@ async function main() {
       timedExecOrThrow('gulp e2e --nobuild --headless --compiled --report');
     } catch (e) {
       if (e.status) {
+        console.error(e.toString());
         process.exitCode = e.status;
       }
     } finally {
