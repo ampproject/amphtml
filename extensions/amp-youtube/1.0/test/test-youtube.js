@@ -17,7 +17,6 @@
 import * as Preact from '../../../../src/preact';
 import {Youtube} from '../youtube';
 import {mount} from 'enzyme';
-// import {waitFor} from '../../../../testing/test-helper';
 
 describes.sandboxed('YouTube preact component v1.0', {}, () => {
   it('Normal render', () => {
@@ -118,15 +117,3 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
     );
   });
 });
-
-// function createMockEvent() {
-//   const mockEvent = new CustomEvent('message');
-//   mockEvent.origin = 'https://www.instagram.com';
-//   mockEvent.data = JSON.stringify({
-//     'type': 'MEASURE',
-//     'details': {
-//       'height': 1000,
-//     },
-//   });
-//   return mockEvent;
-// }
