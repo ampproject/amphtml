@@ -728,11 +728,14 @@ export class AmpStory360 extends AMP.BaseElement {
             nextOrientation.scale
           );
         }
-        // If video copy the texture on each frame.
+        // If video, check if ready and copy the texture on each frame.
         if (this.ampVideoEl_) {
-          this.renderer_.setImage(
-            dev().assertElement(this.ampVideoEl_.querySelector('video'))
+          const HTMLMediaElement = dev().assertElement(
+            this.ampVideoEl_.querySelector('video')
           );
+          if (HTMLMediaElement.readyState >= 2) {
+            this.renderer_.setImage(HTMLMediaElement);
+          }
         }
         this.renderer_.render(true);
         loop();
