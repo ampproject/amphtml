@@ -32,11 +32,6 @@ class AmpInstagram extends PreactBaseElement {
     });
   }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-}
 
 /** @override */
 AmpInstagram['Component'] = Instagram;
