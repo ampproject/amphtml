@@ -31,7 +31,9 @@ describes.realWin(
     let element;
 
     async function waitForExpanded(el, expanded) {
-      const isExpandedOrNot = () => el.hasAttribute('expanded') === expanded;
+      const isExpandedOrNot = () =>
+        el.hasAttribute('expanded') === expanded &&
+        el.lastElementChild.hidden === !expanded;
       await waitFor(isExpandedOrNot, 'element expanded updated');
     }
 
@@ -144,6 +146,67 @@ describes.realWin(
 
       expect(sections[2]).to.not.have.attribute('expanded');
       expect(sections[2].lastElementChild).to.have.display('none');
+    });
+
+    describe('animate', () => {
+      let animateStub;
+
+      beforeEach(async () => {
+        animateStub = env.sandbox.stub(win.Element.prototype, 'animate');
+        element = html`
+          <amp-accordion animate layout="fixed" width="300" height="200">
+            <section expanded>
+              <h1>header1</h1>
+              <div>content1</div>
+            </section>
+            <section>
+              <h1>header2</h1>
+              <div>content2</div>
+            </section>
+          </amp-accordion>
+        `;
+        win.document.body.appendChild(element);
+        await element.build();
+      });
+
+      it('should not animate on build', () => {
+        expect(animateStub).to.not.be.called;
+      });
+
+      it('should animate expand', async () => {
+        const animation = {};
+        animateStub.returns(animation);
+        const sections = element.children;
+        const section = sections[1];
+
+        section.setAttribute('expanded', '');
+        await waitForExpanded(sections[1], true);
+
+        expect(animateStub).to.be.calledOnce;
+        animation.onfinish();
+
+        expect(section).to.have.attribute('expanded');
+        expect(section.lastElementChild).to.have.display('block');
+      });
+
+      it('should animate collapse', async () => {
+        const animation = {};
+        animateStub.returns(animation);
+        const sections = element.children;
+        const section = sections[0];
+
+        section.removeAttribute('expanded');
+        await waitFor(() => animateStub.callCount > 0, 'animation started');
+
+        expect(animateStub).to.be.calledOnce;
+        expect(section).to.not.have.attribute('expanded');
+        // Still displayed while animating.
+        expect(section.lastElementChild).to.have.display('block');
+
+        animation.onfinish();
+        await waitForExpanded(sections[0], false);
+        expect(section.lastElementChild).to.have.display('none');
+      });
     });
   }
 );

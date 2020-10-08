@@ -31,8 +31,12 @@ export default {
 
 export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
+  const animate = boolean('animate', false);
   return (
-    <amp-accordion expand-single-section={expandSingleSection}>
+    <amp-accordion
+      expand-single-section={expandSingleSection}
+      animate={animate}
+    >
       <section>
         <h2>Section 1</h2>
         <p>Content in section 1.</p>
