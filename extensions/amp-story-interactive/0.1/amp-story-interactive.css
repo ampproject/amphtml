@@ -43,6 +43,7 @@
   line-height: var(--i-amphtml-interactive-prompt-line-height) !important;
   font-weight: bold !important;
   text-align: var(--interactive-prompt-alignment) !important;
+  width: 100% !important;
 }
 
 @keyframes i-amphtml-interactive-animation-flash-background {
