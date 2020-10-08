@@ -565,15 +565,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * amp-list reuses the loading indicator when the list is fetched again via
-   * bind mutation or refresh action
-   * @override
-   */
-  isLoadingReused() {
-    return this.element.hasAttribute('reset-on-refresh');
-  }
-
-  /**
    * Creates and returns <div> that contains the template-rendered children.
    * @return {!Element}
    * @private
@@ -663,7 +654,10 @@ export class AmpList extends AMP.BaseElement {
     ) {
       const reset = () => {
         this.togglePlaceholder(true);
-        this.toggleLoading(true);
+        const ignoreLoadingState = this.element.hasAttribute(
+          'reset-on-refresh'
+        );
+        this.toggleLoading(true, ignoreLoadingState);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
