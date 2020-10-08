@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable local/no-style-property-setting */
+import {getStyle, setStyles} from '../../../src/style';
 
 const MAX_TRANSITION_DURATION = 500; // ms
 const MIN_TRANSITION_DURATION = 200; // ms
@@ -27,26 +27,28 @@ const COLLAPSE_CURVE = 'cubic-bezier(0.39, 0.575, 0.565, 1)';
  */
 export function animateExpand(content) {
   return animate(content, () => {
-    const {
-      height: oldHeight,
-      opacity: oldOpacity,
-      overflowY: oldOverflowY,
-    } = content.style;
+    const oldHeight = getStyle(content, 'height');
+    const oldOpacity = getStyle(content, 'opacity');
+    const oldOverflowY = getStyle(content, 'overflowY');
 
     // Measure the expanded height. This is relatively heavy with a sync
     // layout. But no way around it. The hope that the `commitStyles` API
     // may eventually make this unneeded.
-    content.style.height = '0';
-    content.style.opacity = '0';
-    content.style.overflowY = 'auto';
+    setStyles(content, {
+      height: 0,
+      opacity: 0,
+      overflowY: 'auto',
+    });
     content.hidden = false;
     const targetHeight = content./*OK*/ scrollHeight;
 
     // Reset back. The animation will take care of these properties
     // going forward.
-    content.style.height = oldHeight;
-    content.style.opacity = oldOpacity;
-    content.style.overflowY = oldOverflowY;
+    setStyles(content, {
+      height: oldHeight,
+      opacity: oldOpacity,
+      overflowY: oldOverflowY,
+    });
 
     const duration = getTransitionDuration(targetHeight);
 
@@ -150,5 +152,3 @@ function getTransitionDuration(dy) {
     MAX_TRANSITION_DURATION
   );
 }
-
-/* eslint-enable local/no-style-property-setting */
