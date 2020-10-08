@@ -93,6 +93,30 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
 
     expect(iframe.prop('src')).to.contain('loop=1');
   });
+
+  it('Uses privacy-enhanced mode', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const wrapper = mount(
+      <Youtube
+        videoid="IAvf-rkzNck"
+        autoplay
+        loop
+        style={{
+          'width': 600,
+          'height': 500,
+        }}
+        credentials="omit"
+      />,
+      {attachTo: el}
+    );
+
+    const iframe = wrapper.find('iframe');
+
+    expect(iframe.prop('src')).to.equal(
+      'https://www.youtube-nocookie.com/embed/IAvf-rkzNck?enablejsapi=1&amp=1&playsinline=1&iv_load_policy=3'
+    );
+  });
 });
 
 // function createMockEvent() {
