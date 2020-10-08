@@ -35,8 +35,6 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
           },
         },
         requestResize() {},
-        onResizeSuccess() {},
-        onResizeDenied() {},
         noContentAvailable() {},
         referrer: null,
       };
