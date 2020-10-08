@@ -254,7 +254,7 @@ export class Renderer {
   /** @private */
   euler_(heading, pitch, roll) {
     const te = Matrix.identity(3);
-    const x = -roll, y = -pitch, z = heading;
+    const x = -roll, y = -pitch, z = -heading;
 
     const a = Math.cos(x), b = Math.sin(x);
     const c = Math.cos(y), d = Math.sin(y);
