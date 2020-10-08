@@ -252,7 +252,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
     this.iniPromise_.then(() => {
-      this.collapseElement(this.element);
+      this./*OK*/ collapse();
     });
     return this.iniPromise_;
   }
