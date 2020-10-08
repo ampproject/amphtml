@@ -911,18 +911,6 @@ const forbiddenTerms = {
   },
 };
 
-const ThreePTermsMessage =
-  'The 3p bootstrap iframe has no polyfills loaded' +
-  ' and can thus not use most modern web APIs.';
-
-const forbidden3pTerms = {
-  // We need to forbid promise usage because we don't have our own polyfill
-  // available. This allowlisting of callNext is a major hack to allow one
-  // usage in babel's external helpers that is in a code path that we do
-  // not use.
-  '\\.then\\((?!callNext)': ThreePTermsMessage,
-};
-
 const bannedTermsHelpString =
   'Please review viewport service for helper ' +
   'methods or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
@@ -1356,7 +1344,6 @@ function hasAnyTerms(file) {
   const basename = path.basename(pathname);
   let hasTerms = false;
   let hasSrcInclusiveTerms = false;
-  let has3pTerms = false;
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
@@ -1368,18 +1355,7 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  const is3pFile =
-    /\/(3p|ads)\//.test(pathname) ||
-    basename == '3p.js' ||
-    basename == 'style.js';
-  // Yet another reason to move ads/google/a4a somewhere else
-  const isA4A = /\/a4a\//.test(pathname);
-  const isRecaptcha = basename == 'recaptcha.js';
-  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
-    has3pTerms = matchTerms(file, forbidden3pTerms);
-  }
-
-  return hasTerms || hasSrcInclusiveTerms || has3pTerms;
+  return hasTerms || hasSrcInclusiveTerms;
 }
 
 /**

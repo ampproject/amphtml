@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {devAssert} from '../../src/log';
 import {getStyle, setStyle, setStyles} from '../../src/style';
 import {loadScript, validateData} from '../../3p/3p';
 import {tryParseJson} from '../../src/json.js';
@@ -98,14 +99,6 @@ export function csa(global, data) {
     orientationChangeHandler.bind(null, global, containerDiv)
   );
 
-  // Register resize callbacks
-  global.context.onResizeSuccess(
-    resizeSuccessHandler.bind(null, global, containerDiv)
-  );
-  global.context.onResizeDenied(
-    resizeDeniedHandler.bind(null, global, containerDiv)
-  );
-
   // Only call for ads once the script has loaded
   loadScript(
     global,
@@ -129,22 +122,22 @@ function orientationChangeHandler(global, containerDiv) {
     // eslint-disable-next-line no-unused-vars
     const ignore = global.document.body./*OK*/ offsetHeight;
     // Capture new height.
-    let newHeight = getStyle(containerDiv, 'height');
+    const newHeight = getStyle(containerDiv, 'height');
     // In older versions of iOS, this height will be different because the
     // container height is resized.
     // In Chrome and iOS 10.0.2 the height is the same because
     // the container isn't resized.
     if (oldHeight != newHeight && newHeight != currentAmpHeight) {
       // style.height returns "60px" (for example), so turn this into an int
-      newHeight = parseInt(newHeight, 10);
+      const newHeightPx = parseInt(newHeight, 10);
       // Also update the onclick function to resize to the right height.
       const overflow = global.document.getElementById('overflow');
       if (overflow) {
         overflow.onclick = () =>
-          global.context.requestResize(undefined, newHeight);
+          requestResizeInternal(global, containerDiv, newHeightPx);
       }
       // Resize the container to the correct height.
-      global.context.requestResize(undefined, newHeight);
+      requestResizeInternal(global, containerDiv, newHeightPx);
     }
   }, 250); /* 250 is time in ms to wait before executing orientation */
 }
@@ -296,7 +289,24 @@ export function resizeIframe(global, containerName) {
     createOverflow(global, container, height);
   }
   // Attempt to resize to actual CSA container height
-  global.context.requestResize(undefined, height);
+  requestResizeInternal(global, devAssert(container), height);
+}
+
+/**
+ * Helper function to call requestResize
+ * @param {!Window} global
+ * @param {!Element} container
+ * @param {number} height
+ */
+function requestResizeInternal(global, container, height) {
+  global.context
+    .requestResize(undefined, height)
+    .then(() => {
+      resizeSuccessHandler(global, container, height);
+    })
+    .catch(() => {
+      resizeDeniedHandler(global, container, height);
+    });
 }
 
 /**
@@ -309,7 +319,7 @@ export function resizeIframe(global, containerName) {
 function createOverflow(global, container, height) {
   const overflow = getOverflowElement(global);
   // When overflow is clicked, resize to full height
-  overflow.onclick = () => global.context.requestResize(undefined, height);
+  overflow.onclick = () => requestResizeInternal(global, container, height);
   global.document.getElementById('c').appendChild(overflow);
   // Resize the CSA container to not conflict with overflow
   resizeCsa(container, currentAmpHeight - overflowHeight);
