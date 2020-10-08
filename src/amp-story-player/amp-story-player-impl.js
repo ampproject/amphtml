@@ -221,17 +221,14 @@ export class AmpStoryPlayer {
    * @public
    */
   add(stories) {
-    const isStoryObject = (story) => {
-      story.iframeIdx = -1;
-      return typeof story === 'object' && story !== null && story.href;
-    };
-
-    if (!Array.isArray(stories) || !stories.every(isStoryObject)) {
+    const isStoryDef = (story) => story && story.href;
+    if (!Array.isArray(stories) || !stories.every(isStoryDef)) {
       throw new Error('"stories" parameter has the wrong structure');
     }
 
     for (let i = 0; i < stories.length; i++) {
       const story = stories[i];
+      story.iframeIdx = -1;
 
       this.stories_.push(story);
 
