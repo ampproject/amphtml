@@ -262,6 +262,11 @@ export class VariableService {
     this.register_('EXPERIMENT_BRANCHES', (opt_expName) =>
       experimentBranchesMacro(this.ampdoc_.win, opt_expName)
     );
+
+    // Returns the content of a meta tag in the ampdoc
+    this.register_('AMPDOC_META', (meta, defaultValue = '') => {
+      return this.ampdoc_.getMetaByName(meta) ?? defaultValue;
+    });
   }
 
   /**
