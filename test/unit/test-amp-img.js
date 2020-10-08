@@ -211,12 +211,11 @@ describes.sandboxed('amp-img', {}, (env) => {
       src: '/examples/img/sample.jpg',
       width: 320,
       height: 240,
-      'data-amp-bind-src': 'abc',
+      'data-amp-bind': 'abc',
       'data-amp-bind-foo': '123',
     }).then((ampImg) => {
       const img = ampImg.querySelector('img');
-      expect(img.getAttribute('data-foo')).to.equal('abc');
-      expect(img.getAttribute('data-amp-bind-src')).to.be.undefined;
+      expect(img.getAttribute('data-amp-bind')).to.equal('abc');
       expect(img.getAttribute('data-amp-bind-foo')).to.be.undefined;
     });
   });
