@@ -25,7 +25,6 @@ import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {htmlFor} from '../../src/static-template';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
-import {setParentWindow} from '../../src/service';
 import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
@@ -893,51 +892,6 @@ describes.sandboxed('StandardActions', {}, (env) => {
       invocation.node = element;
       expect(scrollStub).to.be.calledWith(invocation);
       expect(result).to.eql('scrollToResponsePromise');
-    });
-  });
-
-  describes.fakeWin('installInEmbedWindow', {}, (env) => {
-    let embedWin;
-    let embedActions;
-
-    beforeEach(() => {
-      embedWin = env.win;
-      setParentWindow(embedWin, window);
-
-      embedActions = {
-        addGlobalTarget: env.sandbox.spy(),
-        addGlobalMethodHandler: env.sandbox.spy(),
-      };
-      const embedElement = embedWin.document.documentElement;
-      env.sandbox
-        .stub(Services, 'actionServiceForDoc')
-        .withArgs(embedElement)
-        .returns(embedActions);
-    });
-
-    it('should configured the embedded actions service', () => {
-      StandardActions.installInEmbedWindow(embedWin, ampdoc);
-
-      const {
-        addGlobalTarget: target,
-        addGlobalMethodHandler: handler,
-      } = embedActions;
-
-      // Global targets.
-      expect(target).to.be.calledOnce;
-      expect(target).to.be.calledWith('AMP', env.sandbox.match.func);
-
-      // Global actions.
-      expect(handler).to.have.callCount(6);
-      expect(handler).to.be.calledWith('hide', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('show', env.sandbox.match.func);
-      expect(handler).to.be.calledWith(
-        'toggleVisibility',
-        env.sandbox.match.func
-      );
-      expect(handler).to.be.calledWith('scrollTo', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('focus', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('toggleClass', env.sandbox.match.func);
     });
   });
 });

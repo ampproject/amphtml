@@ -28,6 +28,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
+  timedExecOrThrow: timedExecOrThrowBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -35,6 +36,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 const FILENAME = 'local-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -42,10 +44,27 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --headless --coverage --report');
-    timedExecOrDie('gulp unit --nobuild --headless --coverage --report');
-    timedExecOrDie('gulp codecov-upload');
-    timedExecOrDie('gulp test-report-upload');
+
+    try {
+      timedExecOrThrow(
+        'gulp integration --nobuild --headless --coverage --report',
+        'Integration tests failed! Skipping remaining tests.'
+      );
+      timedExecOrThrow(
+        'gulp unit --nobuild --headless --coverage --report',
+        'Unit tests failed!'
+      );
+      timedExecOrThrow(
+        'gulp codecov-upload',
+        'Failed to upload code coverage to Codecov!'
+      );
+    } catch (e) {
+      if (e.status) {
+        process.exitCode = e.status;
+      }
+    } finally {
+      timedExecOrDie('gulp test-report-upload');
+    }
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);

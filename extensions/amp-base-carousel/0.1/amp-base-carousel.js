@@ -243,7 +243,8 @@ class AmpCarousel extends AMP.BaseElement {
    *   actionSource: (!ActionSource|undefined),
    * }=} options
    */
-  goToSlide(index, {smoothScroll = false, actionSource} = {}) {
+  goToSlide(index, options = {}) {
+    const {smoothScroll = false, actionSource} = options;
     this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 

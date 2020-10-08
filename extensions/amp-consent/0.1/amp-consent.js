@@ -604,25 +604,22 @@ export class AmpConsent extends AMP.BaseElement {
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
         const xhrService = Services.xhrFor(this.win);
-        return ampdoc.whenFirstVisible().then(() => {
-          return expandConsentEndpointUrl(this.element, resolvedHref).then(
-            (expandedHref) => {
-              return xhrService.fetchJson(expandedHref, init).then((res) => {
-                try {
-                  return xhrService.xssiJson(
-                    res,
-                    this.consentConfig_['xssiPrefix']
-                  );
-                } catch (e) {
-                  userAssert(
-                    false,
-                    'Could not parse the `checkConsentHref` response.'
-                  );
-                }
-              });
-            }
-          );
-        });
+        return ampdoc.whenFirstVisible().then(() =>
+          expandConsentEndpointUrl(this.element, resolvedHref).then(
+            (expandedHref) =>
+              xhrService.fetchJson(expandedHref, init).then((res) =>
+                xhrService
+                  .xssiJson(res, this.consentConfig_['xssiPrefix'])
+                  .catch((e) => {
+                    user().error(
+                      TAG,
+                      'Could not parse the `checkConsentHref` response.',
+                      e
+                    );
+                  })
+              )
+          )
+        );
       });
     }
     return this.remoteConfigPromise_;

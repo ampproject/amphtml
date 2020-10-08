@@ -20,7 +20,6 @@ import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseDate} from '../../../src/utils/date';
 
 /** @const {string} */
@@ -44,7 +43,7 @@ class AmpDateDisplay extends PreactBaseElement {
       isExperimentOn(this.win, 'amp-date-display-bento'),
       'expected amp-date-display-bento experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
   }
 
   /** @override */
