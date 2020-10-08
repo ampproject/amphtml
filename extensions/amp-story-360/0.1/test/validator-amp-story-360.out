@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 |
@@ -45,7 +45,19 @@ PASS
 |          </amp-story-360>
 |       </amp-story-grid-layer>
 |      </amp-story-page>
+|      <amp-story-page id="page1">
+|        <amp-story-grid-layer template="fill">
+|          <amp-story-360 layout="fill" heading-start="95" pitch-start="-10" zoom-start="4" heading-end="-45" pitch-end="-20" zoom-end="1" duration="30s" scene-heading="8.5" scene-pitch="5" scene-roll="-1">
+|            <amp-video autoplay layout="fill" loop>
+>>           ^~~~~~~~~
+amp-story-360/0.1/test/validator-amp-story-360.html:50:10 The mandatory attribute 'poster' is missing in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
+>>           ^~~~~~~~~
+amp-story-360/0.1/test/validator-amp-story-360.html:50:10 The tag 'amp-video' requires including the 'amp-video' extension JavaScript. (see https://amp.dev/documentation/components/amp-video/)
+|              <source src="img/NASA_VR_360_Astronaut_Training_Space_Walk.mp4" type="video/mp4" />
+|            </amp-video>
+|          </amp-story-360>
+|       </amp-story-grid-layer>
+|      </amp-story-page>    
 |    </amp-story>
-|
 |  </body>
 |  </html>
