@@ -87,9 +87,11 @@ Dependencies:
 
   - openjdk-7-jre
 
+    Install openjdk, then symlink the system Java wrappers to find it:
+
     ```sh
-    brew tap homebrew/cask
-    brew install Caskroom/cask/java
+    brew install openjdk
+    sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
     ```
 
 ### Usage
