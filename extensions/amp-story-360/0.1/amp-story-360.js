@@ -730,11 +730,11 @@ export class AmpStory360 extends AMP.BaseElement {
         }
         // If video, check if ready and copy the texture on each frame.
         if (this.ampVideoEl_) {
-          const HTMLMediaElement = dev().assertElement(
+          const videoEl = dev().assertElement(
             this.ampVideoEl_.querySelector('video')
           );
-          if (HTMLMediaElement.readyState >= 2) {
-            this.renderer_.setImage(HTMLMediaElement);
+          if (videoEl.readyState >= 2) {
+            this.renderer_.setImage(videoEl);
           }
         }
         this.renderer_.render(true);
