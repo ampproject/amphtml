@@ -150,7 +150,7 @@ export class AmpStoryPlayer {
     /** @private {!Element} */
     this.cachedA_ = this.doc_.createElement('a');
 
-    /** @private {!Array<StoryDef>} */
+    /** @private {!Array<!StoryDef>} */
     this.stories_ = [];
 
     /** @private {?Element} */
@@ -289,7 +289,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * @return {!Array<StoryDef>}
+   * @return {!Array<!StoryDef>}
    * @public
    */
   getStories() {
@@ -314,16 +314,15 @@ export class AmpStoryPlayer {
   initializeStories_() {
     const anchorEls = toArray(this.element_.querySelectorAll('a'));
 
-    anchorEls.forEach((anchorEl) => {
-      const storyObj = /** @type {!StoryDef} */ ({
-        href: anchorEl.href,
-        title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
-        poster: anchorEl.getAttribute('data-poster-portrait-src'),
-        iframeIdx: -1,
-      });
-
-      this.stories_.push(storyObj);
-    });
+    this.stories_ = anchorEls.map(
+      (anchorEl) =>
+        /** @type {!StoryDef} */ ({
+          href: anchorEl.href,
+          title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
+          poster: anchorEl.getAttribute('data-poster-portrait-src'),
+          iframeIdx: -1,
+        })
+    );
   }
 
   /** @private */
@@ -427,7 +426,9 @@ export class AmpStoryPlayer {
    */
   buildIframe_(story) {
     const iframeEl = this.doc_.createElement('iframe');
-    setStyle(iframeEl, 'backgroundImage', story.poster);
+    if (story.poster) {
+      setStyle(iframeEl, 'backgroundImage', story.poster);
+    }
     iframeEl.classList.add('story-player-iframe');
     iframeEl.setAttribute('allow', 'autoplay');
     this.iframes_.push(iframeEl);
