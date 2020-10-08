@@ -981,15 +981,14 @@ export class AmpStoryPlayer {
       ...playerFragmentParams,
     });
 
-    const ampJsQueryParam = dict({
-      'amp_js_v': '0.1',
-    });
-
-    const noFragmentUrl = removeFragment(href);
-    const inputUrl =
-      addParamsToUrl(noFragmentUrl, ampJsQueryParam) +
-      '#' +
-      serializeQueryString(fragmentParams);
+    let noFragmentUrl = removeFragment(href);
+    if (isProxyOrigin(href)) {
+      const ampJsQueryParam = dict({
+        'amp_js_v': '0.1',
+      });
+      noFragmentUrl = addParamsToUrl(noFragmentUrl, ampJsQueryParam);
+    }
+    const inputUrl = noFragmentUrl + '#' + serializeQueryString(fragmentParams);
 
     return parseUrlWithA(
       /** @type {!HTMLAnchorElement} */ (this.cachedA_),
