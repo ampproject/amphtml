@@ -206,6 +206,21 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
   });
 
+  it('should not propagate bind attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      'data-amp-bind-src': 'abc',
+      'data-amp-bind-foo': '123',
+    }).then((ampImg) => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-foo')).to.equal('abc');
+      expect(img.getAttribute('data-amp-bind-src')).to.be.undefined;
+      expect(img.getAttribute('data-amp-bind-foo')).to.be.undefined;
+    });
+  });
+
   it('should propagate srcset and sizes with disable-inline-width', async () => {
     const ampImg = await getImg({
       src: '/examples/img/sample.jpg',

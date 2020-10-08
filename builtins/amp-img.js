@@ -23,6 +23,7 @@ import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
 import {removeElement, scopedQuerySelector} from '../src/dom';
+import {startsWith} from '../src/string';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -345,6 +346,32 @@ export class AmpImg extends BaseElement {
         this.togglePlaceholder(false);
       });
       this.allowImgLoadFallback_ = false;
+    }
+  }
+
+  /**
+   * Utility method to propagate data attributes from this element
+   * to the target element. (For use with arbitrary data attributes.)
+   * Removes any data attributes that are missing on this element from
+   * the target element.
+   * AMP Bind attributes are excluded.
+   *
+   * @param {!Element} targetElement
+   */
+  propagateDataset(targetElement) {
+    for (const key in targetElement.dataset) {
+      if (!(key in this.element.dataset)) {
+        delete targetElement.dataset[key];
+      }
+    }
+
+    for (const key in this.element.dataset) {
+      if (startsWith(key, 'data-amp-bind')) {
+        continue;
+      }
+      if (targetElement.dataset[key] !== this.element.dataset[key]) {
+        targetElement.dataset[key] = this.element.dataset[key];
+      }
     }
   }
 }
