@@ -201,10 +201,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       swipeLeft();
       expect(stories[0].iframeIdx).to.eql(0);
-      expect(stories[3].iframeIdx).to.eql(undefined);
+      expect(stories[3].iframeIdx).to.eql(-1);
 
       swipeLeft();
-      expect(stories[0].iframeIdx).to.eql(undefined);
+      expect(stories[0].iframeIdx).to.eql(-1);
       expect(stories[3].iframeIdx).to.eql(0);
     }
   );
@@ -224,7 +224,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       swipeRight();
 
       expect(stories[0].iframeIdx).to.eql(0);
-      expect(stories[3].iframeIdx).to.eql(undefined);
+      expect(stories[3].iframeIdx).to.eql(-1);
     }
   );
 
@@ -451,8 +451,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       }
     }
 
+    // Creates an array of story objects with a unique random URL.
     function createStoryObjects(numberOfStories) {
-      return Array(numberOfStories).fill({href: DEFAULT_ORIGIN_URL});
+      const stories = [];
+      for (let i = 0; i < numberOfStories; i++) {
+        stories.push({
+          href: DEFAULT_ORIGIN_URL + Math.floor(Math.random() * 1000),
+        });
+      }
+      return stories;
     }
 
     it('signals when its ready to be interacted with', async () => {
@@ -506,8 +513,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const stories = playerEl.getStories();
 
-      expect(stories[0].iframeIdx).to.eql(undefined);
-      expect(stories[1].iframeIdx).to.eql(undefined);
+      expect(stories[0].iframeIdx).to.eql(-1);
+      expect(stories[1].iframeIdx).to.eql(-1);
       expect(stories[2].iframeIdx).to.eql(2);
       expect(stories[3].iframeIdx).to.eql(0);
       expect(stories[4].iframeIdx).to.eql(1);
@@ -585,9 +592,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[0].iframeIdx).to.exist;
-        expect(stories[1].iframeIdx).to.exist;
-        expect(stories[2].iframeIdx).to.exist;
+        expect(stories[0].iframeIdx).to.eql(0);
+        expect(stories[1].iframeIdx).to.eql(1);
+        expect(stories[2].iframeIdx).to.eql(2);
       }
     );
 
@@ -607,8 +614,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[3].iframeIdx).to.exist;
-        expect(stories[4].iframeIdx).to.not.exist;
+        expect(stories[3].iframeIdx).to.eql(0);
+        expect(stories[4].iframeIdx).to.eql(-1);
       }
     );
 
