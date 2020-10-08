@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {Accordion, AccordionSection} from '../accordion';
 import {mount} from 'enzyme';
 
-describes.sandboxed('Accordion preact component', {}, () => {
+describes.sandboxed('Accordion preact component', {}, (env) => {
   describe('standalone accordion section', () => {
     it('should render a default section', () => {
       const wrapper = mount(
@@ -258,6 +258,135 @@ describes.sandboxed('Accordion preact component', {}, () => {
 
       // Contents.
       expect(sections.at(0).find('div').getDOMNode().hidden).to.be.true;
+    });
+  });
+
+  describe('animate', () => {
+    let wrapper;
+    let animateStub;
+
+    beforeEach(() => {
+      animateStub = env.sandbox.stub(Element.prototype, 'animate');
+      wrapper = mount(
+        <Accordion animate>
+          <AccordionSection key={1} expanded header="header1">
+            content1
+          </AccordionSection>
+          <AccordionSection key={2} header="header2">
+            content2
+          </AccordionSection>
+        </Accordion>
+      );
+      document.body.appendChild(wrapper.getDOMNode());
+    });
+
+    it('should not animate on mount', () => {
+      expect(animateStub).to.not.be.called;
+    });
+
+    it('should animate expand on change', () => {
+      const animation = {};
+      animateStub.returns(animation);
+      const sections = wrapper.find(AccordionSection);
+      const section = sections.at(1);
+      const content = section.find('div').getDOMNode();
+
+      // Click to expand.
+      section.find('header').simulate('click');
+
+      // The state is immediately reflected.
+      expect(section.getDOMNode()).to.have.attribute('expanded');
+      expect(content.hidden).to.be.false;
+      expect(content).to.have.display('block');
+
+      // Animation has been started.
+      expect(animateStub).to.be.calledOnce;
+
+      const keyframes = animateStub.firstCall.firstArg;
+      const lastFrame = keyframes[keyframes.length - 1];
+      const options = animateStub.firstCall.args[1];
+
+      expect(parseFloat(lastFrame.height)).to.be.greaterThan(1);
+      expect(parseFloat(lastFrame.opacity)).to.equal(1);
+      expect(lastFrame.overflowY).to.equal('hidden');
+
+      expect(options.duration).to.be.greaterThan(100);
+      expect(options.easing).to.be.ok;
+    });
+
+    it('should animate collapse on change', () => {
+      const animation = {};
+      animateStub.returns(animation);
+      const sections = wrapper.find(AccordionSection);
+      const section = sections.at(0);
+      const content = section.find('div').getDOMNode();
+
+      // Click to expand.
+      section.find('header').simulate('click');
+
+      // The state is NOT immediately reflected: expanded attribute is removed,
+      // but `content[hidden]` is deferred until animation is complete.
+      expect(section.getDOMNode()).to.not.have.attribute('expanded');
+      expect(content.hidden).to.be.false;
+      expect(content).to.have.display('block');
+
+      // Animation has been started.
+      expect(animateStub).to.be.calledOnce;
+
+      const keyframes = animateStub.firstCall.firstArg;
+      const lastFrame = keyframes[keyframes.length - 1];
+      const options = animateStub.firstCall.args[1];
+
+      expect(parseFloat(lastFrame.height)).to.be.equal(0);
+      expect(parseFloat(lastFrame.opacity)).to.equal(0);
+      expect(lastFrame.overflowY).to.equal('hidden');
+
+      expect(options.duration).to.be.greaterThan(100);
+      expect(options.easing).to.be.ok;
+
+      // Cleanup the animation.
+      animation.onfinish();
+      expect(content.hidden).to.be.true;
+      expect(content).to.have.display('none');
+    });
+
+    it('should make animations cancelable', () => {
+      const animation = {
+        cancel: env.sandbox.spy(),
+      };
+      animateStub.onFirstCall().returns(animation).onSecondCall().returns({});
+      const sections = wrapper.find(AccordionSection);
+      const section = sections.at(0);
+      const content = section.find('div').getDOMNode();
+
+      // Click to expand.
+      section.find('header').simulate('click');
+      expect(animateStub).to.be.calledOnce;
+
+      // Hidden is not set yet.
+      expect(content.hidden).to.be.false;
+
+      // Unclick. This should cancel the previous animation.
+      section.find('header').simulate('click');
+      expect(animateStub).to.be.calledTwice;
+
+      expect(animation.cancel).to.be.calledOnce;
+      animation.oncancel();
+      expect(content.hidden).to.be.true;
+    });
+
+    it('should ignore animations if not available on the platform', () => {
+      animateStub./*OK*/ restore();
+      const sections = wrapper.find(AccordionSection);
+      const section = sections.at(0);
+      const content = section.find('div').getDOMNode();
+      env.sandbox.stub(content, 'animate').value(null);
+
+      // Collapse a section.
+      section.find('header').simulate('click');
+
+      // Immediately hidden, which means animation has not been even tried.
+      expect(content.hidden).to.be.true;
     });
   });
 });

@@ -173,6 +173,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element).to.have.class('i-amphtml-element');
         expect(element).to.have.class('i-amphtml-notbuilt');
         expect(element).to.have.class('amp-notbuilt');
+        expect(element).to.not.have.class('i-amphtml-built');
         expect(element.everAttached).to.equal(true);
         expect(element.isUpgraded()).to.equal(true);
         expect(build.calledOnce).to.equal(true);
@@ -197,6 +198,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element).to.have.class('i-amphtml-element');
         expect(element).to.have.class('i-amphtml-notbuilt');
         expect(element).to.have.class('amp-notbuilt');
+        expect(element).to.not.have.class('i-amphtml-built');
         expect(element.everAttached).to.equal(true);
         expect(element.isUpgraded()).to.equal(false);
         // TODO(jeffkaufman, #13422): this test was silently failing.  `build` was
@@ -215,6 +217,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element).to.not.have.class('i-amphtml-element');
         expect(element).to.not.have.class('i-amphtml-notbuilt');
         expect(element).to.not.have.class('amp-notbuilt');
+        expect(element).to.not.have.class('i-amphtml-built');
 
         container.appendChild(element);
 
@@ -243,12 +246,14 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element).to.not.have.class('i-amphtml-element');
         expect(element).to.not.have.class('i-amphtml-notbuilt');
         expect(element).to.not.have.class('amp-notbuilt');
+        expect(element).to.not.have.class('i-amphtml-built');
 
         container.appendChild(element);
 
         expect(element).to.not.have.class('i-amphtml-element');
         expect(element).to.not.have.class('i-amphtml-notbuilt');
         expect(element).to.not.have.class('amp-notbuilt');
+        expect(element).to.not.have.class('i-amphtml-built');
       });
 
       it('Element - should reset on 2nd attachedCallback when requested', () => {
@@ -571,6 +576,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(element.isBuilt()).to.equal(true);
           expect(element).to.not.have.class('i-amphtml-notbuilt');
           expect(element).to.not.have.class('amp-notbuilt');
+          expect(element).to.have.class('i-amphtml-built');
           expect(testElementBuildCallback).to.be.calledOnce;
           expect(element.signals().get(CommonSignals.BUILT)).to.be.ok;
           return element.whenBuilt(); // Should eventually resolve.

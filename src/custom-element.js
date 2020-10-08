@@ -493,6 +493,7 @@ function createBaseCustomElementClass(win) {
         () => {
           this.preconnect(/* onLayout */ false);
           this.built_ = true;
+          this.classList.add('i-amphtml-built');
           this.classList.remove('i-amphtml-notbuilt');
           this.classList.remove('amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
