@@ -20,15 +20,18 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/utils/object';
+import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
-import {useLayoutEffect} from '../../../src/preact';
+import {useImperativeHandle, useLayoutEffect} from '../../../src/preact';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
 
 const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
+const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
+const SECTION_POST_RENDER = '__AMP_PR';
 
 class AmpAccordion extends PreactBaseElement {
   /** @override */
@@ -66,24 +69,30 @@ function getState(element, mu) {
   const sections = toArray(childElementsByTag(element, 'section'));
 
   const children = sections.map((section) => {
+    // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
+    // See https://github.com/ampproject/amp-react-prototype/issues/40.
+    if (!section[SECTION_POST_RENDER]) {
+      section[SECTION_POST_RENDER] = () => mu.takeRecords();
+    }
+
     const sectionShim = memo(
       section,
       SECTION_SHIM_PROP,
       bindSectionShimToElement
     );
     const headerShim = memo(section, HEADER_SHIM_PROP, bindHeaderShimToElement);
+    const contentShim = memo(
+      section,
+      CONTENT_SHIM_PROP,
+      bindContentShimToElement
+    );
     const expanded = section.hasAttribute('expanded');
     const props = dict({
       'key': section,
       'as': sectionShim,
       'headerAs': headerShim,
+      'contentAs': contentShim,
       'expanded': expanded,
-      // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
-      // See https://github.com/ampproject/amp-react-prototype/issues/40.
-      'postRender': () => {
-        // Skip mutations to avoid cycles.
-        mu.takeRecords();
-      },
     });
     return <AccordionSection {...props} />;
   });
@@ -99,6 +108,9 @@ function SectionShim(sectionElement, {expanded, children}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
     sectionElement.setAttribute('aria-expanded', String(expanded));
+    if (sectionElement[SECTION_POST_RENDER]) {
+      sectionElement[SECTION_POST_RENDER]();
+    }
   }, [sectionElement, expanded]);
   return children;
 }
@@ -121,10 +133,13 @@ function HeaderShim(sectionElement, {onClick}) {
       return;
     }
     headerElement.addEventListener('click', onClick);
+    if (sectionElement[SECTION_POST_RENDER]) {
+      sectionElement[SECTION_POST_RENDER]();
+    }
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
     };
-  }, [headerElement, onClick]);
+  }, [sectionElement, headerElement, onClick]);
   return <header />;
 }
 
@@ -134,6 +149,39 @@ function HeaderShim(sectionElement, {onClick}) {
  */
 const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
 
+/**
+ * @param {!Element} sectionElement
+ * @param {!AccordionDef.ContentProps} props
+ * @param {{current: ?}} ref
+ * @return {PreactDef.Renderable}
+ */
+function ContentShimWithRef(sectionElement, {hidden}, ref) {
+  const contentElement = sectionElement.lastElementChild;
+  useImperativeHandle(ref, () => contentElement, [contentElement]);
+  useLayoutEffect(() => {
+    if (!contentElement) {
+      return;
+    }
+    toggleAttribute(contentElement, 'hidden', hidden);
+    if (sectionElement[SECTION_POST_RENDER]) {
+      sectionElement[SECTION_POST_RENDER]();
+    }
+  }, [sectionElement, contentElement, hidden]);
+  return <div />;
+}
+
+/**
+ * @param {!Element} element
+ * @return {function(!AccordionDef.ContentProps):PreactDef.Renderable}
+ */
+const bindContentShimToElement = (element) =>
+  forwardRef(
+    /** @type {function(?, {current:?}):PreactDef.Renderable} */ (ContentShimWithRef.bind(
+      null,
+      element
+    ))
+  );
+
 /** @override */
 AmpAccordion['Component'] = Accordion;
 
@@ -142,6 +190,7 @@ AmpAccordion['detached'] = true;
 
 /** @override */
 AmpAccordion['props'] = {
+  'animate': {attr: 'animate', type: 'boolean'},
   'expandSingleSection': {attr: 'expand-single-section', type: 'boolean'},
 };
 
