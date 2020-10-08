@@ -150,7 +150,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
       // TODO(bradfrizzell) break this out into a test-iframe-attributes
       it('should create an iframe', () => {
-        window.AMP_CONFIG = {canary: true};
         mockMode({
           localDev: true,
           development: false,
