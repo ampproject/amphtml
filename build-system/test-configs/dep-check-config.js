@@ -440,6 +440,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/object-values.js',
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
+      'src/polyfills.js->src/polyfills/string-starts-with.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
       'src/polyfills.js->src/polyfills/intersection-observer.js',
       'src/polyfills.js->src/polyfills/map-set.js',

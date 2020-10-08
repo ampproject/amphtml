@@ -16,7 +16,6 @@
 import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
 import {getDetailsForMeta} from './meta';
 import {rot13Array} from './rot13';
-import {startsWith} from '../../../../src/string';
 
 const MAX_KEYWORD_LENGTH = 200;
 const PORN_BIT = 0x1;
@@ -271,7 +270,7 @@ export const isProductPage = (doc, metaElements) => {
   const ogTags = metaElements.reduce((tags, metaElement) => {
     const {name, content} = getDetailsForMeta(metaElement);
 
-    if (startsWith(name, 'og:')) {
+    if (name.startsWith('og:')) {
       const ogProperty = name.split(':').pop();
       tags[ogProperty] = content;
     }
