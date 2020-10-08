@@ -206,6 +206,7 @@ function Autoplay({
       {displayOverlay && (
         <div
           role="button"
+          tabindex="0"
           style={fillContentOverlay}
           onClick={onOverlayClick}
         ></div>
