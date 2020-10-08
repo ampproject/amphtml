@@ -366,7 +366,7 @@ export class AmpImg extends BaseElement {
     }
 
     for (const key in this.element.dataset) {
-      if (startsWith(key, 'data-amp-bind-')) {
+      if (startsWith(key, 'ampBind') && key !== 'ampBind') {
         continue;
       }
       if (targetElement.dataset[key] !== this.element.dataset[key]) {

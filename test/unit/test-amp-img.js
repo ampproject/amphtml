@@ -216,7 +216,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     }).then((ampImg) => {
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('data-amp-bind')).to.equal('abc');
-      expect(img.getAttribute('data-amp-bind-foo')).to.be.undefined;
+      expect(img.getAttribute('data-amp-bind-foo')).to.be.null;
     });
   });
 
