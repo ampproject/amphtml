@@ -165,7 +165,8 @@ export function composeEmbedUrl(options) {
  * @return {string}
  */
 function sanitizeUrl(localtion) {
-  return removeFragment(localtion.href).replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+  const url = removeFragment(localtion.href).replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+  return url.replace(/(www\.)?playbuzz\.com/, 'app.ex.co/stories');
 }
 
 /**
@@ -176,7 +177,7 @@ function sanitizeUrl(localtion) {
  * @return {string}
  */
 export function composeItemSrcUrl(src, itemId) {
-  const DEFAULT_BASE_URL = '//www.playbuzz.com/';
+  const DEFAULT_BASE_URL = '//app.ex.co/stories/';
 
   const iframeSrcUrl = itemId
     ? DEFAULT_BASE_URL + 'item/' + itemId
