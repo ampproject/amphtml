@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* heading/clontent */
+/* heading/content */
 .i-amphtml-accordion-header,
 .i-amphtml-accordion-content {
   margin: 0;
@@ -39,9 +39,11 @@ amp-accordion.i-amphtml-display-locking
   display: block !important;
 }
 
-/* Media should never play when a section is collapsed */
-amp-accordion > section:not([expanded]) .i-amphtml-media-component,
-amp-accordion > section:not([expanded]) .i-amphtml-media-component * {
+/* Media should never play when a section is collapsed, except if it
+ * is in the heading element.
+ */
+amp-accordion > section:not([expanded]) > :not(:first-child) .i-amphtml-media-component,
+amp-accordion > section:not([expanded]) > :not(:first-child) .i-amphtml-media-component * {
   display: none !important;
   visibility: hidden !important;
 }
