@@ -16,32 +16,32 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
-import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
-// eslint-disable-next-line
-storiesOf('amp-instagram', module)
-  .addDecorator(withKnobs)
-  .addDecorator(withA11y)
-  .addDecorator(withAmp)
-  .addParameters({
-    extensions: [{name: 'amp-instagram', version: '1.0'}],
-  })
-  .add('Default', () => {
-    const width = number('width', 500);
-    const height = number('height', 600);
-    const shortcode = text('shortcode', 'B8QaZW4AQY_');
-    const captioned = boolean('captioned');
-    const layout = text('layout', 'fixed');
+export default {
+  title: 'amp-instagram',
+  decorators: [withA11y, withKnobs, withAmp],
 
-    return (
-      <amp-instagram
-        data-shortcode={shortcode}
-        data-captioned={captioned}
-        width={width}
-        height={height}
-        layout={layout}
-      ></amp-instagram>
-    );
-  });
+  parameters: {
+    extensions: [{name: 'amp-instagram', version: '1.0'}],
+  },
+};
+
+export const _default = () => {
+  const width = number('width', 500);
+  const height = number('height', 600);
+  const shortcode = text('shortcode', 'B8QaZW4AQY_');
+  const captioned = boolean('captioned');
+  const layout = text('layout', 'fixed');
+
+  return (
+    <amp-instagram
+      data-shortcode={shortcode}
+      data-captioned={captioned}
+      width={width}
+      height={height}
+      layout={layout}
+    ></amp-instagram>
+  );
+};
