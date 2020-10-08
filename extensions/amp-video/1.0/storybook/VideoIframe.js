@@ -41,11 +41,12 @@ const AmpVideoIframeLike = (props) => {
   }, []);
 
   const sendMessage = useCallback(
-    (method) => ({
-      // Like amp-video-iframe
-      'event': 'method',
-      'method': method.toLowerCase(),
-    }),
+    (method) =>
+      JSON.stringify({
+        // Like amp-video-iframe
+        'event': 'method',
+        'method': method.toLowerCase(),
+      }),
     []
   );
 
