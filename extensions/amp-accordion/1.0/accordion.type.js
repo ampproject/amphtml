@@ -64,6 +64,7 @@ AccordionDef.ContentProps;
  *   registerSection: (function(string)|undefined),
  *   isExpanded: (function(string, boolean):boolean),
  *   toggleExpanded: (function(string)|undefined),
+ *   animate: (boolean|undefined),
  * }}
  */
 AccordionDef.ContextProps;

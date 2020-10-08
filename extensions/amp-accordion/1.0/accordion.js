@@ -106,7 +106,7 @@ export function Accordion({
         registerSection,
         toggleExpanded,
         isExpanded: (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
-        isAnimated: animate,
+        animate,
       }),
     [animate, expandedMap, registerSection, toggleExpanded]
   );
@@ -161,9 +161,12 @@ export function AccordionSection({
   const contentRef = useRef(null);
   const hasMountedRef = useRef(false);
 
-  const {registerSection, isAnimated, isExpanded, toggleExpanded} = useContext(
-    AccordionContext
-  );
+  const {
+    registerSection,
+    animate: contextAnimate,
+    isExpanded,
+    toggleExpanded,
+  } = useContext(AccordionContext);
 
   useEffect(() => {
     hasMountedRef.current = true;
@@ -185,7 +188,7 @@ export function AccordionSection({
   }, [id, toggleExpanded]);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
-  const animate = isAnimated ?? defaultAnimate;
+  const animate = contextAnimate ?? defaultAnimate;
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
