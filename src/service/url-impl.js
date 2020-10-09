@@ -26,26 +26,19 @@ import {
   parseUrlWithA,
   resolveRelativeUrl,
 } from '../url';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {urls} from '../config';
 
 const SERVICE = 'url';
 
 /**
- * @implements {../service.EmbeddableService}
  */
 export class Url {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
-    const root = opt_rootNode || ampdoc.getRootNode();
+  constructor(ampdoc) {
+    const root = ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
     /** @private @const {!HTMLAnchorElement} */
@@ -53,19 +46,6 @@ export class Url {
 
     /** @private @const {!LruCache} */
     this.cache_ = new LruCache(100);
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      SERVICE,
-      new Url(ampdoc, embedWin.document)
-    );
   }
 
   /**

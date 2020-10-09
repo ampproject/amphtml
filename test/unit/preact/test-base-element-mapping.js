@@ -114,7 +114,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
 
     it('should parse attributes on first render', async () => {
       expect(component).to.be.calledOnce;
-      expect(lastProps).to.deep.equal({
+      expect(lastProps).to.contain({
         valueWithDef: 'DEFAULT',
         propA: 'A',
         minFontSize: 72,
@@ -136,7 +136,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
 
       expect(component).to.be.calledTwice;
-      expect(lastProps).to.deep.equal({
+      expect(lastProps).to.contain({
         valueWithDef: 'DEFAULT',
         propA: 'B',
         minFontSize: 72.5,
@@ -163,6 +163,34 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       expect(component).to.be.calledTwice;
       expect(lastProps).to.have.property('propA', 'B');
       expect(lastProps).to.not.have.property('unknown2');
+    });
+  });
+
+  describe('props with staticProps', () => {
+    let element;
+
+    const initProps = {x: 'x', tacos: true};
+
+    beforeEach(async () => {
+      Impl.prototype.init = () => initProps;
+      Impl['staticProps'] = {
+        a: 'a',
+        b: 123,
+      };
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"></amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('include staticProps', () => {
+      expect(lastProps).to.include(Impl['staticProps']);
+    });
+
+    it('include init() props', () => {
+      expect(lastProps).to.include(initProps);
     });
   });
 
@@ -386,6 +414,12 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           selector: '[special2]',
           single: true,
         },
+        'cloned': {
+          name: 'cloned',
+          selector: '[cloned]',
+          single: false,
+          clone: true,
+        },
         'children': {
           name: 'children',
           selector: '*',
@@ -397,6 +431,8 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           <div special1></div>
           <div id="child1"></div>
           <div id="child2"></div>
+          <div cloned id="cloned1"></div>
+          <div cloned id="cloned2"></div>
         </amp-preact>
       `;
       doc.body.appendChild(element);
@@ -530,6 +566,33 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       element.setAttribute('prop-a', 'B');
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
+    });
+
+    it('clones children (without descendant) as vnodes into prop', async () => {
+      expect(
+        component.withArgs(
+          env.sandbox.match({
+            cloned: [
+              env.sandbox.match({
+                type: 'div',
+                key: element.querySelector('#cloned1'),
+                props: {
+                  cloned: '',
+                  id: 'cloned1',
+                },
+              }),
+              env.sandbox.match({
+                type: 'div',
+                key: element.querySelector('#cloned2'),
+                props: {
+                  cloned: '',
+                  id: 'cloned2',
+                },
+              }),
+            ],
+          })
+        )
+      ).to.be.calledOnce;
     });
   });
 

@@ -258,7 +258,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-accordion',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -485,7 +485,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-date-countdown',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },

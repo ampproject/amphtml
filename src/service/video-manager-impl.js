@@ -21,6 +21,7 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../mediasession-helper';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
@@ -675,8 +676,8 @@ class VideoEntry {
       !video.preimplementsMediaSessionAPI() &&
       !element.classList.contains('i-amphtml-disable-mediasession')
     ) {
+      validateMediaMetadata(element, this.metadata_);
       setMediaSession(
-        element,
         this.ampdoc_.win,
         this.metadata_,
         this.boundMediasessionPlay_,
@@ -1445,7 +1446,7 @@ export class AnalyticsPercentageTracker {
   constructor(win, entry) {
     // This is destructured in `calculate_()`, but the linter thinks it's unused
     /** @private @const {!./timer-impl.Timer} */
-    this.timer_ = Services.timerFor(win); // eslint-disable-line
+    this.timer_ = Services.timerFor(win);
 
     /** @private @const {!VideoEntry} */
     this.entry_ = entry;

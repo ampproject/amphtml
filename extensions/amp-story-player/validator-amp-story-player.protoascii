@@ -28,9 +28,7 @@ tags: {  # <amp-story-player>
   html_format: AMP
   tag_name: "AMP-STORY-PLAYER"
   requires_extension: "amp-story-player"
-  child_tags: {
-    child_tag_name_oneof: "A"
-  }
+  descendant_tag_list: "amp-story-player-allowed-descendants"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -38,4 +36,10 @@ tags: {  # <amp-story-player>
     supported_layouts: FLEX_ITEM
     supported_layouts: RESPONSIVE
   }
+}
+descendant_tag_list {
+  name: "amp-story-player-allowed-descendants"
+  tag: "A"
+  tag: "SPAN"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
 }

@@ -484,10 +484,6 @@ export class AmpList extends AMP.BaseElement {
     return Promise.resolve()
       .then(() => {
         userAssert(
-          isExperimentOn(this.win, 'protocol-adapters'),
-          `Experiment 'protocol-adapters' is not turned on.`
-        );
-        userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
           '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
         );
@@ -755,7 +751,8 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  fetchList_({refresh = false, append = false} = {}) {
+  fetchList_(options = {}) {
+    const {refresh = false, append = false} = options;
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();

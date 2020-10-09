@@ -26,7 +26,6 @@ const REFERRER_BITS = {
   ON_DOMAIN: 0x2,
   OFF_DOMAIN: 0x4,
 };
-// eslint-disable-next-line max-len
 const RE_SEARCH_TERMS = /^(?:q|search|bs|wd|p|kw|keyword|query|qry|querytext|text|searchcriteria|searchstring|searchtext|sp_q)=(.*)/i;
 const RE_SEARCH_REFERRER = /ws\/results\/(web|images|video|news)/;
 const RE_SEARCH_GOOGLE = /google.*\/(search|url|aclk|m\?)/;
