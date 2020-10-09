@@ -30,14 +30,13 @@ import {
   serializeQueryString,
 } from '../url';
 import {applySandbox} from '../3p-frame';
-import {childElementsByTag, tryFocus} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
+import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
-import {getChildJsonConfig} from '../json';
 import {getMode} from '../../src/mode';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
@@ -174,6 +173,9 @@ export class AmpStoryPlayer {
 
     /** @private {!SwipingState} */
     this.swipingState_ = SwipingState.NOT_SWIPING;
+
+    /** @private {?JsonObject} */
+    this.playerConfig_ = null;
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -420,18 +422,29 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Gets publisher configuration for a custom system UI.
+   * Gets publisher configuration for the player
    * @private
    * @return {?JsonObject}
    */
-  getCustomUI_() {
-    if (childElementsByTag(this.element_, 'script').length === 0) {
+  readPlayerConfig_() {
+    if (this.playerConfig_) {
+      return this.playerConfig_;
+    }
+
+    const scriptTag = this.element_.querySelector('script');
+    if (!scriptTag) {
       return null;
     }
 
-    const config = getChildJsonConfig(this.element_);
+    if (!isJsonScriptTag(scriptTag)) {
+      throw new Error('<script> child must have type="application/json"');
+    }
 
-    return config;
+    this.playerConfig_ = /** @type {?JsonObject} */ (JSON.parse(
+      /** @type {string} */ (scriptTag.textContent)
+    ));
+
+    return this.playerConfig_;
   }
 
   /**
@@ -525,10 +538,11 @@ export class AmpStoryPlayer {
             );
           });
 
-          const customUIConfig = this.getCustomUI_();
+          const playerConfig = this.readPlayerConfig_();
+          const customUIConfig = playerConfig && playerConfig.uiControls;
 
           if (customUIConfig) {
-            messaging.sendRequest('setStoryCustomUI', customUIConfig, false);
+            messaging.sendRequest('updateSystemUI', customUIConfig, false);
           }
 
           resolve(messaging);
