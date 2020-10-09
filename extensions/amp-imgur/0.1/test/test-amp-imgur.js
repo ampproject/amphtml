@@ -54,7 +54,7 @@ describes.realWin(
 
     it('renders', () => {
       return getImgur('2CnX7').then((imgur) => {
-        testIframe(imgur.querySelector('iframe'), 'a/2CnX7');
+        testIframe(imgur.querySelector('iframe'), '2CnX7');
       });
     });
 

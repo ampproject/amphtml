@@ -82,7 +82,7 @@ export class AmpImgur extends AMP.BaseElement {
     const sanitizedID = this.imgurid_.replace(
       /^(a\/)?(.*)/,
       (match, aSlash, rest) => {
-        return 'a/' + encodeURIComponent(rest);
+        return (aSlash || '') + encodeURIComponent(rest);
       }
     );
     iframe.src = 'https://imgur.com/' + sanitizedID + '/embed?pub=true';
