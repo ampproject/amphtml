@@ -38,7 +38,7 @@ The `amp-story-interactive` component provides a set of experiences, such as qui
 
 ## Usage
 
-The amp-story-interactive component encompasses a set of interactive experiences. Specify an interactive experience by defining one of the elements below. For best results, only use one element per [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
+The `amp-story-interactive` component encompasses a set of interactive experiences. Specify an interactive experience by defining one of the elements below. For best results, only use one element per [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
 
 Most elements require a backend endpoint that will store aggregate data for each interactive, as well as persist the selected option for a user across sessions. Elements will fetch the percentage of votes for each option as well as the user selection (if any) from this endpoint, and display it with the options after the user has selected one.
 
@@ -129,7 +129,7 @@ Results can feed its state from quizzes if all categories also specify `option-{
 
 ### Store and display user selection
 
-All selectable interactive elements (amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-quiz) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
+All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
 To fetch the data for an interactive element, the necessary fields are:
 
 - <div id="interactiveId"></div> `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
