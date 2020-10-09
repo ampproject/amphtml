@@ -16,6 +16,7 @@
 
 /** @fileoverview */
 
+import {install as installAbortController} from './polyfills/abort-controller';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -55,5 +56,6 @@ if (self.document) {
   if (!IS_SXG) {
     installCustomElements(self, class {});
     installIntersectionObserver(self);
+    installAbortController(self);
   }
 }
