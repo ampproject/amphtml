@@ -24,6 +24,7 @@ var BaseCarouselDef = {};
  *   arrowNext: (?PreactDef.VNode|undefined),
  *   arrowPrev: (?PreactDef.VNode|undefined),
  *   children: (!PreactDef.Renderable),
+ *   controls: (string|undefined),
  *   loop: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
  *   snap: (boolean|undefined),

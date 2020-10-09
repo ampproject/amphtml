@@ -102,10 +102,8 @@ AmpBaseCarousel['children'] = {
 
 /** @override */
 AmpBaseCarousel['props'] = {
-  'loop': {
-    attrs: ['loop'],
-    parseAttrs: (element) => parseStrBoolAttr(element, 'loop', false),
-  },
+  'controls': {attr: 'controls', type: 'string'},
+  'loop': {attr: 'loop', type: 'boolean'},
   'snap': {
     attrs: ['snap'],
     parseAttrs: (element) => parseStrBoolAttr(element, 'snap', true),

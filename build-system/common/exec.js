@@ -20,19 +20,11 @@
  */
 
 const childProcess = require('child_process');
+const log = require('fancy-log');
+const {spawnProcess, getOutput, getStdout, getStderr} = require('./process');
+const {yellow} = require('ansi-colors');
 
 const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
-
-/**
- * Spawns the given command in a child process with the given options.
- *
- * @param {string} cmd
- * @param {?Object} options
- * @return {!Object}
- */
-function spawnProcess(cmd, options) {
-  return childProcess.spawnSync(cmd, {shell: shellCmd, ...options});
-}
 
 /**
  * Executes the provided command with the given options, returning the process
@@ -86,55 +78,22 @@ function execWithError(cmd) {
 }
 
 /**
- * Executes the provided command, piping the parent process' stderr, thorwing
- * an error if stderr is not empty, and returns process object.
+ * Executes the provided command, piping the parent process' stderr, throwing
+ * an error with the provided message the command fails, and returns the
+ * process object.
  * @param {string} cmd
+ * @param {string} msg
  * @return {!Object}
  */
-function execOrThrow(cmd) {
+function execOrThrow(cmd, msg) {
   const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
-  if (p.stderr.length > 0) {
-    const error = new Error(p.stderr.toString());
+  if (p.status && p.status != 0) {
+    log(yellow('ERROR:'), msg);
+    const error = new Error(p.stderr);
     error.status = p.status;
     throw error;
   }
   return p;
-}
-
-/**
- * Executes the provided command, returning the process object.
- * @param {string} cmd
- * @param {?Object} options
- * @return {!Object}
- */
-function getOutput(cmd, options = {}) {
-  const p = spawnProcess(cmd, {
-    'cwd': options.cwd || process.cwd(),
-    'env': options.env || process.env,
-    'stdio': options.stdio || 'pipe',
-    'encoding': options.encoding || 'utf-8',
-  });
-  return p;
-}
-
-/**
- * Executes the provided command, returning its stdout.
- * @param {string} cmd
- * @param {?Object} options
- * @return {string}
- */
-function getStdout(cmd, options) {
-  return getOutput(cmd, options).stdout;
-}
-
-/**
- * Executes the provided command, returning its stderr.
- * @param {string} cmd
- * @param {?Object} options
- * @return {string}
- */
-function getStderr(cmd, options) {
-  return getOutput(cmd, options).stderr;
 }
 
 module.exports = {

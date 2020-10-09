@@ -116,4 +116,28 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
     const wrapper = mount(jsx);
     expect(wrapper.find(`[snap="false"]`)).not.to.be.null;
   });
+
+  it('should render Arrows with controls=always', () => {
+    const jsx = (
+      <BaseCarousel controls="always">
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BaseCarousel>
+    );
+    const wrapper = mount(jsx);
+    expect(wrapper.find('Arrow')).to.have.lengthOf(2);
+  });
+
+  it('should not render Arrows with controls=never', () => {
+    const jsx = (
+      <BaseCarousel controls="never">
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BaseCarousel>
+    );
+    const wrapper = mount(jsx);
+    expect(wrapper.find('Arrow')).to.have.lengthOf(0);
+  });
 });
