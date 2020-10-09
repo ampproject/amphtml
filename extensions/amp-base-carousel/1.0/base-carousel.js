@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {ArrowNext, ArrowPrev} from './arrow';
+import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
@@ -47,6 +47,7 @@ const Controls = {
  */
 function BaseCarouselWithRef(
   {
+    advanceCount = 1,
     arrowPrev,
     arrowNext,
     children,
@@ -144,12 +145,14 @@ function BaseCarouselWithRef(
       </Scroller>
       {!hideControls && (
         <>
-          <ArrowPrev
+          <Arrow
+            by={-advanceCount}
             customArrow={arrowPrev}
             disabled={disableForDir(-1)}
             advance={advance}
           />
-          <ArrowNext
+          <Arrow
+            by={advanceCount}
             customArrow={arrowNext}
             disabled={disableForDir(1)}
             advance={advance}

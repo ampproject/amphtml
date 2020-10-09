@@ -21,7 +21,12 @@ import {useStyles} from './base-carousel.jss';
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow({customArrow, by, advance, disabled}) {
+export function Arrow({
+  by,
+  customArrow = <DefaultArrow by={by} />,
+  advance,
+  disabled,
+}) {
   const {
     'disabled': customDisabled,
     'onClick': onCustomClick,
@@ -46,34 +51,6 @@ export function Arrow({customArrow, by, advance, disabled}) {
         'aria-disabled': isDisabled,
       })}
     </div>
-  );
-}
-
-/**
- * @param {!BaseCarouselDef.ArrowProps} props
- * @return {PreactDef.VNode}
- */
-export function ArrowPrev({customArrow, ...rest}) {
-  return (
-    <Arrow
-      by={-1}
-      customArrow={customArrow || <DefaultArrow by={-1} />}
-      {...rest}
-    />
-  );
-}
-
-/**
- * @param {!BaseCarouselDef.ArrowProps} props
- * @return {PreactDef.Renderable}
- */
-export function ArrowNext({customArrow, ...rest}) {
-  return (
-    <Arrow
-      by={1}
-      customArrow={customArrow || <DefaultArrow by={1} />}
-      {...rest}
-    />
   );
 }
 

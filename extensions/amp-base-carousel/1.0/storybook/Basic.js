@@ -33,10 +33,12 @@ export const _default = () => {
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const snap = boolean('snap', true);
   const loop = boolean('loop', true);
+  const advanceCount = number('advance count', 1, {min: 1});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const controls = select('show controls', CONTROLS);
   return (
     <BaseCarousel
+      advanceCount={advanceCount}
       controls={controls}
       loop={loop}
       snap={snap}

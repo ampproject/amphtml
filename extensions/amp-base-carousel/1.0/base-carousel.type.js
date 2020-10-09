@@ -21,6 +21,7 @@ var BaseCarouselDef = {};
 
 /**
  * @typedef {{
+ *   advanceCount: (number|undefined),
  *   arrowNext: (?PreactDef.VNode|undefined),
  *   arrowPrev: (?PreactDef.VNode|undefined),
  *   children: (!PreactDef.Renderable),
