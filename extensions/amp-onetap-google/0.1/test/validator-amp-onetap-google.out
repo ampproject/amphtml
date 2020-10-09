@@ -30,9 +30,7 @@ PASS
 |  </head>
 |  <body>
 |    <!-- Valid: Includes data-src -->
-|    <amp-onetap-google
-|      layout="nodisplay"
-|      data-src="https://example.com/one-tap-impl"
-|    ></amp-onetap-google>
+|    <amp-onetap-google layout="nodisplay" data-src="https://example.com/one-tap-impl">
+|    </amp-onetap-google>
 |  </body>
 |  </html>

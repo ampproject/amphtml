@@ -30,10 +30,8 @@ FAIL
 |  </head>
 |  <body>
 |    <!-- Invalid: No data-src -->
-|    <amp-onetap-google
+|    <amp-onetap-google layout="nodisplay"></amp-onetap-google>
 >>   ^~~~~~~~~
 amp-onetap-google/0.1/test/validator-amp-onetap-google-no-data-src.html:32:2 The mandatory attribute 'data-src' is missing in tag 'amp-onetap-google'. (see https://amp.dev/documentation/components/amp-onetap-google)
-|      layout="nodisplay"
-|    ></amp-onetap-google>
 |  </body>
 |  </html>
