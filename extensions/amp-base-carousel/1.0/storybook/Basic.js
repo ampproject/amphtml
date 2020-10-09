@@ -34,6 +34,7 @@ export const _default = () => {
   const snap = boolean('snap', true);
   const loop = boolean('loop', true);
   const advanceCount = number('advance count', 1, {min: 1});
+  const visibleCount = number('visible count', 2, {min: 1});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const controls = select('show controls', CONTROLS);
   return (
@@ -43,6 +44,7 @@ export const _default = () => {
       loop={loop}
       snap={snap}
       style={{width, height}}
+      visibleCount={visibleCount}
     >
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
@@ -103,6 +105,7 @@ export const WithCaptions = () => {
   const controls = select('show controls', CONTROLS);
   return (
     <BaseCarousel
+      visibleCount={3}
       controls={controls}
       loop
       style={{width: '500px', height: '400px'}}

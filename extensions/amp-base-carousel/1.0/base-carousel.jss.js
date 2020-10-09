@@ -75,7 +75,6 @@ const hideScrollbar = {
 };
 
 const slideElement = {
-  flex: '0 0 100%',
   height: '100%',
   position: 'relative',
   overflow: 'hidden',

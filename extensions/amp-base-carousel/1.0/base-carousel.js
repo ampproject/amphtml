@@ -55,6 +55,7 @@ function BaseCarouselWithRef(
     loop,
     onSlideChange,
     snap = true,
+    visibleCount = 1,
     ...rest
   },
   ref
@@ -99,7 +100,8 @@ function BaseCarouselWithRef(
   }, [setSlideCount, length]);
 
   const disableForDir = (dir) =>
-    !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
+    !loop &&
+    (currentSlide + dir < 0 || currentSlide + visibleCount + dir > length);
 
   const [hadTouch, setHadTouch] = useState(false);
   const hideControls = useMemo(() => {
@@ -121,6 +123,7 @@ function BaseCarouselWithRef(
         snap={snap}
         ref={scrollRef}
         onTouchStart={() => setHadTouch(true)}
+        visibleCount={visibleCount}
       >
         {/*
           TODO(#30283): TBD: this is an interesting concept. We could decide
@@ -130,7 +133,7 @@ function BaseCarouselWithRef(
           state management code.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < 2 ? (
+          Math.abs(index - currentSlide) < visibleCount * 2 ? (
             <WithAmpContext
               key={index}
               renderable={index == currentSlide}
