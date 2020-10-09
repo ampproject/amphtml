@@ -25,6 +25,7 @@ import {
   useMemo,
   useState,
 } from '../../../src/preact';
+import {useStyles} from './accordion.jss';
 
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.ContextProps} */ ({})
@@ -136,6 +137,8 @@ export function AccordionSection({
   headerAs: HeaderComp = 'header',
   contentAs: ContentComp = 'div',
   expanded: defaultExpanded = false,
+  headerStyling,
+  contentStyling,
   header,
   children,
   ...rest
@@ -162,13 +165,26 @@ export function AccordionSection({
   }, [id, toggleExpanded]);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
+  const classes = useStyles();
 
   return (
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
-      <HeaderComp role="button" onClick={expandHandler}>
+      <HeaderComp
+        role="button"
+        onClick={expandHandler}
+        class={headerStyling || classes.defaultHeaderStyle}
+      >
         {header}
       </HeaderComp>
-      <ContentComp hidden={!expanded}>{children}</ContentComp>
+      <ContentComp
+        hidden={!expanded}
+        style={contentStyling}
+        class={`${contentStyling || classes.defaultContentStyle} ${
+          expanded ? null : classes.hiddenContentStyle
+        }`}
+      >
+        {children}
+      </ContentComp>
     </Comp>
   );
 }
