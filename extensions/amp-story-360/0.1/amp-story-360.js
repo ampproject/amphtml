@@ -276,7 +276,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.ampVideoEl_ = null;
 
     /** @private {!number} */
-    this.orientationAlpha_ = null;
+    this.orientationAlpha_ = 0;
   }
 
   /** @override */
@@ -728,7 +728,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   renderInitialPosition_() {
-    if (this.gyroscopeControls_) return;
+    if (this.gyroscopeControls_) {
+      return;
+    }
     this.mutateElement(() => {
       this.renderer_.setCamera(
         this.orientations_[0].rotation,
