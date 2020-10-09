@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, select, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -31,13 +31,17 @@ export default {
 
 export const Default = () => {
   const snap = boolean('snap', true);
+  const advanceCount = number('advance count', 1, {min: 1});
+  const visibleCount = number('visible count', 1, {min: 1});
   const controls = select('show controls', ['auto', 'always', 'never']);
   return (
     <amp-base-carousel
+      advance-count={advanceCount}
       controls={controls}
-      snap={String(snap)}
       width="440"
       height="225"
+      snap={String(snap)}
+      visible-count={visibleCount}
     >
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <amp-layout width="440" height="225">
