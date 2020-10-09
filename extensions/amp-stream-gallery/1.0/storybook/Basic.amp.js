@@ -51,7 +51,7 @@ export const Default = () => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <amp-stream-gallery
-      width="880"
+      width="735"
       height="225"
       extra-space={extraSpace}
       inset-arrow-visibility={insetArrowVisibility}
@@ -68,7 +68,7 @@ export const Default = () => {
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
-          <amp-layout width="440" height="225" layout="flex-item">
+          <amp-layout width="245" height="225" layout="flex-item">
             <svg viewBox="0 0 440 225">
               <rect
                 style={{fill: `rgb(${v}, 100, 100)`}}

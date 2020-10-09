@@ -60,7 +60,7 @@ export const _default = () => {
         minVisibleCount={minVisibleCount}
         maxVisibleCount={maxVisibleCount}
         peek={peek}
-        style={{width, height, display: 'flex'}}
+        style={{width, height}}
       >
         {Array.from({length: slideCount}, (_, i) => {
           const v = colorIncrement * (i + 1);

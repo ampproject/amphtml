@@ -85,7 +85,8 @@ export function StreamGallery({
     <ContainWrapper
       layout={true}
       size={true}
-      contentStyle={style}
+      wrapperStyle={style}
+      contentStyle={{display: 'flex'}}
       contentRef={galleryRef}
       {...rest}
     >
