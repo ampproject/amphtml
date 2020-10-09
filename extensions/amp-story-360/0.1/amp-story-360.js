@@ -650,14 +650,19 @@ export class AmpStory360 extends AMP.BaseElement {
         const alreadyHasData =
           dev().assertElement(this.ampVideoEl_.querySelector('video'))
             .readyState >= HAVE_CURRENT_DATA;
-        if (alreadyHasData) {
-          return;
-        } else {
-          return (
-            this.ampVideoEl_ &&
-            listenOncePromise(this.ampVideoEl_, 'loadeddata')
-          );
-        }
+
+        return alreadyHasData
+          ? Promise.resolve()
+          : listenOncePromise(this.ampVideoEl_, 'loadeddata');
+
+        // if (alreadyHasData) {
+        //   return Promise.resolve();
+        // } else {
+        //   return (
+        //     this.ampVideoEl_ &&
+        //     listenOncePromise(this.ampVideoEl_, 'loadeddata')
+        //   );
+        // }
       })
       .then(
         () => {
