@@ -192,6 +192,11 @@ class AmpVideo extends AMP.BaseElement {
     const {element} = this;
 
     this.configure_();
+    this.intersectionObserver_ = new IntersectionObserver(entries => {
+      const visible = entries[entries.length-1].isIntersecting;
+      this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible}); 
+    })
+    this.intersectionObserver_.observe(element);
 
     this.video_ = element.ownerDocument.createElement('video');
     if (this.element.querySelector('source[data-bitrate]')) {
@@ -292,11 +297,6 @@ class AmpVideo extends AMP.BaseElement {
     // TODO(@aghassemi, 10756) Either make metadata observable or submit
     // an event indicating metadata changed (in case metadata changes
     // while the video is playing).
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
