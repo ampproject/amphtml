@@ -128,7 +128,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - AppNexus PSP
 - APS
 - Automatad
-- Andbeyond
+- Andbeyond.Media
 - Andbeyond.Media Native
 - Browsi
 - Criteo
