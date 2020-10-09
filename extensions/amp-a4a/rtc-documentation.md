@@ -129,7 +129,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - APS
 - Automatad
 - Andbeyond
-- Andbeyond Native
+- Andbeyond.Media Native
 - Browsi
 - Criteo
 - FLUX
