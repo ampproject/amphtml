@@ -477,6 +477,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     if (optionEl) {
       this.updateStoryStoreState_(optionEl.optionIndex_);
       this.handleOptionSelection_(optionEl);
+      const confettiEmoji = this.options_[optionEl.optionIndex_].confetti;
+      if (confettiEmoji) {
+        emojiConfetti(this.rootEl_, this.win, confettiEmoji);
+      }
     }
   }
 
@@ -760,10 +764,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       selectedOption.classList.add(
         'i-amphtml-story-interactive-option-selected'
       );
-      const confettiEmoji = this.options_[selectedOption.optionIndex_].confetti;
-      if (confettiEmoji) {
-        emojiConfetti(this.rootEl_, this.win, confettiEmoji);
-      }
     }
 
     if (this.optionsData_) {
