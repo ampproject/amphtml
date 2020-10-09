@@ -191,6 +191,7 @@ describe('mutator changeSize', () => {
       false
     );
     expect(resources.requestsChangeSize_.length).to.equal(2);
+    resource1.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource1.unload();
     resources.cleanupTasks_(resource1);
     expect(resources.requestsChangeSize_.length).to.equal(1);
