@@ -39,6 +39,12 @@ import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 const TAG = 'AMP_STORY_360';
 
 /**
+ * readyState for first rendrable frame of video element.
+ * @const {number}
+ */
+const HAVE_CURRENT_DATA = 2;
+
+/**
  * Generates the template for the permission button.
  *
  * @param {!Element} element
@@ -641,9 +647,17 @@ export class AmpStory360 extends AMP.BaseElement {
         return this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END);
       })
       .then(() => {
-        return (
-          this.ampVideoEl_ && listenOncePromise(this.ampVideoEl_, 'loadeddata')
-        );
+        const alreadyHasData =
+          dev().assertElement(this.ampVideoEl_.querySelector('video'))
+            .readyState >= HAVE_CURRENT_DATA;
+        if (alreadyHasData) {
+          return;
+        } else {
+          return (
+            this.ampVideoEl_ &&
+            listenOncePromise(this.ampVideoEl_, 'loadeddata')
+          );
+        }
       })
       .then(
         () => {
@@ -733,7 +747,7 @@ export class AmpStory360 extends AMP.BaseElement {
           const videoEl = dev().assertElement(
             this.ampVideoEl_.querySelector('video')
           );
-          if (videoEl.readyState >= 2) {
+          if (videoEl.readyState >= HAVE_CURRENT_DATA) {
             this.renderer_.setImage(videoEl);
           }
         }
