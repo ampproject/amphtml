@@ -654,15 +654,6 @@ export class AmpStory360 extends AMP.BaseElement {
         return alreadyHasData
           ? Promise.resolve()
           : listenOncePromise(this.ampVideoEl_, 'loadeddata');
-
-        // if (alreadyHasData) {
-        //   return Promise.resolve();
-        // } else {
-        //   return (
-        //     this.ampVideoEl_ &&
-        //     listenOncePromise(this.ampVideoEl_, 'loadeddata')
-        //   );
-        // }
       })
       .then(
         () => {
