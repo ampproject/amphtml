@@ -34,7 +34,7 @@ import {
 /**
  * @enum {string}
  */
-const Controls = {
+export const Controls = {
   ALWAYS: 'always',
   NEVER: 'never',
   AUTO: 'auto',
