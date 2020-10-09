@@ -71,7 +71,7 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
     expect(iframe.prop('src')).to.contain('iv_load_policy=3');
   });
 
-  it('Keep param: loop in iframe src for playlists', () => {
+  it('Keep data param: loop in iframe src for playlists', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
     const wrapper = mount(
