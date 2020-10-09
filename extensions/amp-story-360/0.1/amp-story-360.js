@@ -642,7 +642,7 @@ export class AmpStory360 extends AMP.BaseElement {
       })
       .then(() => {
         return (
-          this.ampVideoEl_ && listenOncePromise(this.ampVideoEl_, 'playing')
+          this.ampVideoEl_ && listenOncePromise(this.ampVideoEl_, 'loadeddata')
         );
       })
       .then(
