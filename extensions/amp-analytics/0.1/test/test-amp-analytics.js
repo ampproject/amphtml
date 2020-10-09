@@ -231,7 +231,7 @@ describes.realWin(
         expect(whenFirstVisibleStub).to.be.calledOnce;
         return iniPromise.then(() => {
           expect(el).to.have.attribute('hidden');
-        })
+        });
       });
 
       it('does not send a hit when multiple child tags exist', function () {
