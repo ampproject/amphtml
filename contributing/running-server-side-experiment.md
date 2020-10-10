@@ -24,7 +24,7 @@ _Refer to [enabling AMP experimental features doc](https://amp.dev/documentation
 
 ## Before you start
 
-Because real traffic can be automatically assigned to the experiment, plus the experiment slots are limited. Any experiment declaration and launch requires an issue tracker and at least one approval from @ampproject/wg-approvers or @ampprojeg/wg-ads depending on the type of experiment environment(#environment).
+Because real traffic can be automatically assigned to the experiment, plus the experiment slots are limited. Any experiment declaration and launch requires an issue tracker and at least one approval from @ampproject/wg-approvers or @ampprojeg/wg-monetization depending on the type of experiment environment(#environment).
 
 ## Run an Experiment
 
@@ -114,7 +114,7 @@ There's no additional step to run an experiment with `environment = AMP`. The sa
 
 ##### AMPHTML Ads
 
-To run an experiment with `environment = INABOX`, please reach out to @ampproject/wg-ads for additional instructions.
+To run an experiment with `environment = INABOX`, please reach out to @ampproject/wg-monetization for additional instructions.
 
 ## Launch an Experiment
 

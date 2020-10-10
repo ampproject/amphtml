@@ -10,7 +10,6 @@
       pattern: '{bundles.config,sources}.js',
       owners: [
         {name: 'ampproject/wg-infra'},
-        {name: 'ampproject/wg-runtime'},
         {name: 'ampproject/wg-performance'},
       ],
     },

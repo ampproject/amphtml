@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'mixtur'}, {name: 'ampproject/wg-ui-and-a11y'}],
+      owners: [{name: 'mixtur'}, {name: 'ampproject/wg-components'}],
     },
   ],
 }

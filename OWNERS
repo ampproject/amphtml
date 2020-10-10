@@ -27,7 +27,6 @@
       pattern: '{babel.config.js,package.json,yarn.lock}',
       owners: [
         {name: 'ampproject/wg-infra'},
-        {name: 'ampproject/wg-runtime'},
         {name: 'ampproject/wg-performance'},
       ],
     },
