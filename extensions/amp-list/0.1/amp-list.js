@@ -409,7 +409,7 @@ export class AmpList extends AMP.BaseElement {
         setStyles(dev().assertElement(this.container_), {
           'max-height': `calc(100% - ${px(buttonHeight)})`,
         });
-        // TODO(wg-ui-and-a11y): Use Mutator.requestChangeSize.
+        // TODO(wg-performance): Use Mutator.requestChangeSize.
         this.element./*OK*/ applySize(listHeight + buttonHeight);
       }
     );
@@ -1116,7 +1116,7 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
-        // TODO:(wg-ui-and-a11y)(#28781) Ensure owners_.scheduleUnlayout() is
+        // TODO:(wg-performance)(#28781) Ensure owners_.scheduleUnlayout() is
         // called for diff elements that are removed
         this.diff_(container, elements);
       } else {
@@ -1401,7 +1401,7 @@ export class AmpList extends AMP.BaseElement {
       setStyles(this.element, {height: ''});
     }
 
-    // TODO(wg-ui-and-a11y): Use a new, unprivileged API.
+    // TODO(wg-performance): Use a new, unprivileged API.
     // The applySize() call removes the sizer element.
     this.element./*OK*/ applySize();
   }

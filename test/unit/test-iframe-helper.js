@@ -206,7 +206,7 @@ describe
       });
     });
 
-    // TODO(wg-runtime, #25587): Results in a cross-origin frame error.
+    // TODO(wg-performance, #25587): Results in a cross-origin frame error.
     it.skip('should set sentinel on postMessage data', () => {
       insert(testIframe);
       const postMessageSpy = window.sandbox /*OK*/

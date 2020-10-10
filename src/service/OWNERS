@@ -5,7 +5,7 @@
   rules: [
     {
       pattern: 'video-*.js',
-      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+      owners: [{name: 'ampproject/wg-components'}],
     },
     {
       pattern: '{cid-*,*-cid-*,*-cid,url-replacements-impl}.js',

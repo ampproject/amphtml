@@ -6,7 +6,7 @@
     {
       owners: [
         {name: 'itaykinnrot'},
-        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'ampproject/wg-components'},
         {name: 'mrhein'},
       ],
     },

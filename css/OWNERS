@@ -5,7 +5,8 @@
   rules: [
     {
       owners: [
-        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'ampproject/wg-components'},
+        {name: 'ampproject/wg-performance'},
         {name: 'aghassemi', requestReviews: false},
         {name: 'camelburrito', requestReviews: false},
       ],

@@ -100,7 +100,7 @@ Ideally, both should be implemented for defense-in-depth.
 It is a good idea to consider server side rendering for further
 performance optimization. For example, rewrite all script links with
 version number to get the browser cache benefit. For more details
-about server side rendering, please reach out to the @ampproject/wg-ads.
+about server side rendering, please reach out to the @ampproject/wg-monetization.
 
 ##### Cross-domain iframe
 
