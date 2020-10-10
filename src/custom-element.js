@@ -380,7 +380,7 @@ function createBaseCustomElementClass(win) {
       this.classList.remove('amp-unresolved');
       this.classList.remove('i-amphtml-unresolved');
       this.assertLayout_();
-      // TODO(wg-runtime): Don't set BaseElement ivars externally.
+      // TODO(wg-performance): Don't set BaseElement ivars externally.
       this.implementation_.layout_ = this.layout_;
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
@@ -433,7 +433,7 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * TODO(wg-runtime, #25824): Make Resource.getLayoutBox() the source of truth.
+     * TODO(wg-performance, #25824): Make Resource.getLayoutBox() the source of truth.
      * @return {number}
      * @deprecated
      */
