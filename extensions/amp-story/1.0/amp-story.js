@@ -1023,9 +1023,6 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
-      })
-      .catch(() => {
-        console.log('page ids not found');
       });
 
     this.maybeLoadStoryEducation_();
@@ -1605,9 +1602,8 @@ export class AmpStory extends AMP.BaseElement {
       list.push({page: minusOnePage, position: -1});
 
       const minusTwoId = minusOnePage.getPreviousPageId();
-      const minusTwoPage = minusTwoId & this.getPageById(minusTwoId);
-      if (minusTwoId && minusTwoPage) {
-        list.push({page: minusTwoPage, position: -2});
+      if (minusTwoId) {
+        list.push({page: this.getPageById(minusTwoId), position: -2});
       }
     }
 
