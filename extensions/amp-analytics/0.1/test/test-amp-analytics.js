@@ -214,20 +214,22 @@ describes.realWin(
         el.textContent = config;
         const whenFirstVisibleStub = env.sandbox
           .stub(ampdoc, 'whenFirstVisible')
-          .callsFake(() => new Promise(function () {}));
+          .callsFake(() => Promise.resolve());
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.getAmpDoc = () => ampdoc;
         analytics.buildCallback();
         const iniPromise = analytics.iniPromise_;
         expect(iniPromise).to.be.ok;
-        expect(el).to.have.attribute('hidden');
         // Viewer.whenFirstVisible is the first blocking call to initialize.
         expect(whenFirstVisibleStub).to.be.calledOnce;
 
         // Repeated call, returns pre-created promise.
         expect(analytics.ensureInitialized_()).to.equal(iniPromise);
         expect(whenFirstVisibleStub).to.be.calledOnce;
+        return iniPromise.then(() => {
+          expect(el).to.have.attribute('hidden');
+        });
       });
 
       it('does not send a hit when multiple child tags exist', function () {

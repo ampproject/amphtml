@@ -31,8 +31,8 @@ const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
 
 // Mapping related constants
-const expectedFirstLineFile = 'src/polyfills/array-includes.js'; // First file that is compiled into v0.js.
-const expectedFirstLineCode = 'function includes(value, opt_fromIndex) {'; // First line of code in that file.
+const expectedFirstLineFile = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.js.
+const expectedFirstLineCode = 'class AbortController {'; // First line of code in that file.
 const expectedFirstLineColumn = "'use strict;'".length; // Column at which the first line is found (after an initial 'use strict;')
 
 /**
