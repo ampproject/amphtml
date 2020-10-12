@@ -349,8 +349,8 @@ export class Resource {
           this.state_ = ResourceState.READY_FOR_LAYOUT;
           // The InOb premeasurement couldn't account for fixed position since
           // implementation wasn't loaded yet. Do so now.
-          if (this.element.isAlwaysFixed()) {
-            this.computeMeasurements_(this.getPageLayoutBox());
+          if (this.element.isAlwaysFixed() && !this.isFixed_) {
+            this.requestMeasure();
           }
           this.element.onMeasure(/* sizeChanged */ true);
         } else {
