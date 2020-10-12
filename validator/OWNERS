@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/wg-caching', notify: true}],
+      owners: [{name: 'ampproject/wg-caching', require: true}],
     },
   ],
 }
