@@ -395,7 +395,7 @@ export class Performance {
     }
 
     if (this.supportsEventTiming_) {
-      const firstInputObserver = this.createPerformanceObserver_(processEntry, {
+      this.createPerformanceObserver_(processEntry, {
         type: 'first-input',
         buffered: true,
       });
@@ -419,17 +419,17 @@ export class Performance {
     if (this.supportsNavigation_) {
       // Wrap in a try statement as there are some browsers (ex. chrome 73)
       // that will say it supports navigation but throws.
-      const navigationObserver = this.createPerformanceObserver_(processEntry, {
+      this.createPerformanceObserver_(processEntry, {
         type: 'navigation',
         buffered: true,
       });
     }
 
-    if (entryTypesToObserve.length === 0) {
-      return;
+    if (entryTypesToObserve.length > 0) {
+      this.createPerformanceObserver_(processEntry, {
+        entryTypes: entryTypesToObserve,
+      });
     }
-
-    const observer = this.createPerformanceObserver_(processEntry);
   }
 
   /**
