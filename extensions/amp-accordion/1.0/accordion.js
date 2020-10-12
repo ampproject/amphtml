@@ -48,6 +48,13 @@ const CHILD_STYLE = {
   position: 'relative',
 };
 
+const SECTION_HEADER_STYLE = {
+  cursor: 'pointer',
+  backgroundColor: '#efefef',
+  paddingRight: '20px',
+  border: 'solid 1px #dfdfdf',
+};
+
 /**
  * @param {!AccordionDef.Props} props
  * @return {PreactDef.Renderable}
@@ -152,6 +159,8 @@ export function AccordionSection({
   contentAs: ContentComp = 'div',
   expanded: defaultExpanded = false,
   animate: defaultAnimate = false,
+  headerStyle = {},
+  contentStyle = {},
   header,
   children,
   ...rest
@@ -201,10 +210,18 @@ export function AccordionSection({
 
   return (
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
-      <HeaderComp role="button" style={CHILD_STYLE} onClick={expandHandler}>
+      <HeaderComp
+        role="button"
+        style={{...CHILD_STYLE, ...SECTION_HEADER_STYLE, ...headerStyle}}
+        onClick={expandHandler}
+      >
         {header}
       </HeaderComp>
-      <ContentComp ref={contentRef} style={CHILD_STYLE} hidden={!expanded}>
+      <ContentComp
+        ref={contentRef}
+        style={{...CHILD_STYLE, ...contentStyle}}
+        hidden={!expanded}
+      >
         {children}
       </ContentComp>
     </Comp>

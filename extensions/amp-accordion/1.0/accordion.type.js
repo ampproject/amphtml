@@ -36,6 +36,8 @@ AccordionDef.Props;
  *   contentAs: (string|PreactDef.FunctionalComponent|undefined),
  *   expanded: (boolean|undefined),
  *   animate: (boolean|undefined),
+ *   headerStyle: (Object<string,string>|undefined),
+ *   contentStyle: (Object<string,string>|undefined),
  *   header: (!PreactDef.Renderable),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
