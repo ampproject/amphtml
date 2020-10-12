@@ -28,6 +28,10 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
+  getCoverageObject,
+  mergeClientCoverage,
+} = require('istanbul-middleware/lib/core');
+const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
@@ -335,36 +339,41 @@ class ItConfig {
 }
 
 /**
- * Reports code coverage data to an aggregating endpoint.
- * @param {!Object} env e2e driver environment
+ * Extracts code coverage data from the page and aggregates it with other tests.
+ * @param {!Object} env e2e driver environment.
  * @return {Promise<void>}
  */
-async function reportCoverage(env) {
-  // Calling code only needs to wait until we've extracted the coverage data
-  // from the window, then it can begin cleaning up/resetting the state. POSTing
-  // the coverage data can happen asynchronously and doesn't need to block
-  // other testing.
-  const cov = await env.controller.evaluate(() => window.__coverage__);
-  if (cov) {
-    return new Promise((resolve, reject) => {
-      const req = http.request(
-        {
-          host: HOST,
-          port: PORT,
-          path: COV_REPORT_PATH,
-          method: 'POST',
-          headers: {'Content-type': 'application/json'},
-        },
-        (res) => {
-          res.on('data', () => {});
-          res.on('end', resolve);
-          res.on('error', reject);
-        }
-      );
-      req.write(JSON.stringify(cov));
-      req.end();
-    });
+async function collectCoverage(env) {
+  const coverage = await env.controller.evaluate(() => window.__coverage__);
+  if (coverage) {
+    mergeClientCoverage(coverage);
   }
+}
+
+/**
+ * Reports code coverage data to an aggregating endpoint.
+ * @return {Promise<void>}
+ */
+async function reportCoverage() {
+  const coverage = getCoverageObject();
+  await new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        host: HOST,
+        port: PORT,
+        path: COV_REPORT_PATH,
+        method: 'POST',
+        headers: {'Content-type': 'application/json'},
+      },
+      (res) => {
+        res.on('data', () => {});
+        res.on('end', resolve);
+        res.on('error', reject);
+      }
+    );
+    req.write(JSON.stringify(coverage));
+    req.end();
+  });
 }
 
 /**
@@ -471,7 +480,7 @@ function describeEnv(factory) {
 
       afterEach(async function () {
         if (argv.coverage) {
-          await reportCoverage(env);
+          await collectCoverage(env);
         }
 
         // If there is an async expect error, throw it in the final state.
@@ -488,6 +497,12 @@ function describeEnv(factory) {
 
         if (!isTravisBuild()) {
           uninstallRepl();
+        }
+      });
+
+      after(async () => {
+        if (argv.coverage) {
+          await reportCoverage();
         }
       });
 
