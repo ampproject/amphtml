@@ -36,6 +36,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'aria-describedby',
   'aria-label',
   'aria-labelledby',
+  'crossorigin',
   'referrerpolicy',
   'sizes',
   'src',
@@ -51,8 +52,8 @@ export class AmpImg extends BaseElement {
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = true;
+    /** @private {?boolean} */
+    this.prerenderAllowed_ = null;
 
     /** @private {?Element} */
     this.img_ = null;
@@ -134,13 +135,6 @@ export class AmpImg extends BaseElement {
           onLayout
         );
       }
-    }
-  }
-
-  /** @override */
-  firstAttachedCallback() {
-    if (this.element.hasAttribute('noprerender')) {
-      this.prerenderAllowed_ = false;
     }
   }
 
@@ -261,6 +255,9 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
+    if (this.prerenderAllowed_ == null) {
+      this.prerenderAllowed_ = !this.element.hasAttribute('noprerender');
+    }
     return this.prerenderAllowed_;
   }
 

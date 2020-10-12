@@ -35,7 +35,7 @@ function checkElementUpgrade(element) {
  */
 function testLoadOrderFixture(fixtureName, testElements) {
   let fixture;
-  return createFixtureIframe(fixtureName)
+  return createFixtureIframe(fixtureName, 500)
     .then((f) => {
       fixture = f;
       for (let i = 0; i < testElements.length; i++) {
@@ -56,8 +56,7 @@ function testLoadOrderFixture(fixtureName, testElements) {
     });
 }
 
-const t = describe.configure().retryOnSaucelabs();
-t.run('test extensions loading in multiple orders', function () {
+describe('test extensions loading in multiple orders', function () {
   this.timeout(15000);
 
   it('one extension, extension loads first, all scripts in header', () => {

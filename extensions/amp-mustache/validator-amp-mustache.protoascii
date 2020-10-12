@@ -36,9 +36,8 @@ tags: {  # amp-mustache
 }
 tags: {  # amp-mustache
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
-  spec_name: "SCRIPT[custom-template=amp-mustache] (AMP4ADS/ACTIONS)"
+  spec_name: "SCRIPT[custom-template=amp-mustache] (AMP4ADS)"
   extension_spec: {
     name: "amp-mustache"
     extension_type: CUSTOM_TEMPLATE
@@ -67,7 +66,6 @@ tags: {  # amp-mustache
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "SCRIPT type=text/plain"
   disallowed_ancestor: "TEMPLATE"
@@ -389,7 +387,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TEMPLATE"
   mandatory_ancestor: "BODY"
   # <template> tags may not be nested inside other <template> tags.

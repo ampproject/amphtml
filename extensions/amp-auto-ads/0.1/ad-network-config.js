@@ -15,8 +15,10 @@
  */
 
 import {AdSenseNetworkConfig} from './adsense-network-config';
+import {AlrightNetworkConfig} from './alright-network-config';
 import {DenakopNetworkConfig} from './denakop-network-config';
 import {DoubleclickNetworkConfig} from './doubleclick-network-config';
+import {FirstImpressionIoConfig} from './firstimpression.io-network-config';
 import {PingNetworkConfig} from './ping-network-config';
 import {PremiumadsNetworkConfig} from './premiumads-network-config';
 import {getMode} from '../../../src/mode';
@@ -81,11 +83,17 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
   if (type == 'adsense') {
     return new AdSenseNetworkConfig(autoAmpAdsElement);
   }
+  if (type == 'alright') {
+    return new AlrightNetworkConfig(autoAmpAdsElement);
+  }
   if (type == 'denakop') {
     return new DenakopNetworkConfig(autoAmpAdsElement);
   }
   if (type == 'doubleclick') {
     return new DoubleclickNetworkConfig(autoAmpAdsElement);
+  }
+  if (type == 'firstimpression.io') {
+    return new FirstImpressionIoConfig(autoAmpAdsElement);
   }
   if (type == 'premiumads') {
     return new PremiumadsNetworkConfig(autoAmpAdsElement);

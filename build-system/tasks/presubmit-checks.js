@@ -65,14 +65,13 @@ const forbiddenTerms = {
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/extension-generator/index.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
       'extensions/amp-pinterest/0.1/save-button.js',
-      'validator/engine/validator_test.js',
+      'validator/js/engine/validator_test.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -80,7 +79,6 @@ const forbiddenTerms = {
     allowlist: [
       'build-system/tasks/create-golden-css/css/main.css',
       'build-system/tasks/extension-generator/index.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
     ],
@@ -128,7 +126,6 @@ const forbiddenTerms = {
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
       'build-system/pr-check/performance-tests.js',
-      'build-system/pr-check/remote-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
@@ -141,15 +138,14 @@ const forbiddenTerms = {
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/dns-monitor.js',
-      'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/prettify.js',
       'build-system/tasks/server-tests.js',
       'src/purifier/noop.js',
-      'validator/nodejs/index.js', // NodeJs only.
-      'validator/engine/parse-css.js',
-      'validator/engine/validator-in-browser.js',
-      'validator/engine/validator.js',
+      'validator/js/engine/parse-css.js',
+      'validator/js/engine/validator-in-browser.js',
+      'validator/js/engine/validator.js',
+      'validator/js/nodejs/index.js', // NodeJs only.
     ],
     checkInTestFolder: true,
   },
@@ -195,7 +191,6 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
-      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'installActivityService': {
@@ -357,7 +352,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
       'extensions/amp-viewer-integration/0.1/examples/amp-viewer-host.js',
-      'src/amp-story-player/amp-story-player-manager.js',
+      'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
@@ -434,7 +429,7 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-config.js',
-      'extensions/amp-story/1.0/amp-story-interactive.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js',
     ],
   },
   'getBaseCid': {
@@ -455,7 +450,6 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/impression.js',
       'src/ssr-template-helper.js',
-      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'prerenderSafe': {
@@ -581,7 +575,6 @@ const forbiddenTerms = {
     allowlist: ['src/log.js'],
   },
   '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
-    // eslint-disable-line max-len
     message:
       'Logging message require explicitly `TAG`, or an all uppercase' +
       ' string as the first parameter',
@@ -595,7 +588,7 @@ const forbiddenTerms = {
   },
   '\\.requireLayout\\(': {
     message:
-      'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
+      'requireLayout is restricted b/c it affects non-contained elements',
     allowlist: [
       'extensions/amp-animation/0.1/web-animations.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
@@ -663,6 +656,7 @@ const forbiddenTerms = {
       'build-system/tasks/integration.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/release/index.js',
       'build-system/tasks/visual-diff/index.js',
       'build-system/tasks/build.js',
       'build-system/tasks/default-task.js',
@@ -707,7 +701,6 @@ const forbiddenTerms = {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
   '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {
-    // eslint-disable-line max-len
     message: 'TAG is not an argument to assert(). Will cause false positives.',
   },
   'eslint no-unused-vars': {
@@ -760,14 +753,14 @@ const forbiddenTerms = {
       'test/_init_tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
-      'validator/engine/amp4ads-parse-css_test.js',
-      'validator/engine/htmlparser_test.js',
-      'validator/engine/keyframes-parse-css_test.js',
-      'validator/engine/parse-css_test.js',
-      'validator/engine/parse-srcset_test.js',
-      'validator/engine/parse-url_test.js',
-      'validator/engine/validator_test.js',
-      'validator/gulpjs/test/validate.js',
+      'validator/js/engine/amp4ads-parse-css_test.js',
+      'validator/js/engine/htmlparser_test.js',
+      'validator/js/engine/keyframes-parse-css_test.js',
+      'validator/js/engine/parse-css_test.js',
+      'validator/js/engine/parse-srcset_test.js',
+      'validator/js/engine/parse-url_test.js',
+      'validator/js/engine/validator_test.js',
+      'validator/js/gulpjs/test/validate.js',
       // Test files. TODO(#24144): Fix these and remove from the allowlist.
       'ads/google/a4a/shared/test/test-content-recommendation.js',
       'ads/google/a4a/shared/test/test-url-builder.js',
@@ -815,14 +808,20 @@ const forbiddenTerms = {
       'extensions/amp-truncate-text/0.1/test/test-binary-search.js',
       'extensions/amp-viewer-integration/0.1/test/test-findtext.js',
       'test/integration/test-3p-nameframe.js',
+      'test/integration/test-actions.js',
       'test/integration/test-amp-ad-3p.js',
       'test/integration/test-amp-ad-fake.js',
       'test/integration/test-amp-analytics.js',
       'test/integration/test-amp-pixel.js',
+      'test/integration/test-amp-recaptcha-input.js',
       'test/integration/test-amp-skimlinks.js',
       'test/integration/test-amphtml-ads.js',
       'test/integration/test-boilerplates.js',
       'test/integration/test-configuration.js',
+      'test/integration/test-css.js',
+      'test/integration/test-extensions-loading.js',
+      'test/integration/test-released.js',
+      'test/integration/test-toggle-display.js',
       'test/integration/test-video-manager.js',
       'test/integration/test-video-players.js',
       'test/unit/3p/test-3p-messaging.js',
@@ -912,18 +911,6 @@ const forbiddenTerms = {
   },
 };
 
-const ThreePTermsMessage =
-  'The 3p bootstrap iframe has no polyfills loaded' +
-  ' and can thus not use most modern web APIs.';
-
-const forbidden3pTerms = {
-  // We need to forbid promise usage because we don't have our own polyfill
-  // available. This allowlisting of callNext is a major hack to allow one
-  // usage in babel's external helpers that is in a code path that we do
-  // not use.
-  '\\.then\\((?!callNext)': ThreePTermsMessage,
-};
-
 const bannedTermsHelpString =
   'Please review viewport service for helper ' +
   'methods or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
@@ -987,13 +974,18 @@ const forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     allowlist: [
       'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
+      'src/service/viewport/viewport-impl.js',
     ],
   },
   'getComputedStyle\\(': {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: ['src/style.js', 'dist.3p/current/integration.js'],
+    allowlist: [
+      'src/style.js',
+      'dist.3p/current/integration.js',
+      'build-system/tasks/coverage-map/index.js',
+    ],
   },
   'decodeURIComponent\\(': {
     message:
@@ -1003,9 +995,9 @@ const forbiddenTermsSrcInclusive = {
       '3p/integration.js',
       'dist.3p/current/integration.js',
       'examples/pwa/pwa.js',
-      'validator/engine/parse-url.js',
-      'validator/engine/validator.js',
-      'validator/webui/webui.js',
+      'validator/js/engine/parse-url.js',
+      'validator/js/engine/validator.js',
+      'validator/js/webui/webui.js',
       'extensions/amp-pinterest/0.1/util.js',
       'src/url.js',
       'src/url-try-decode-uri-component.js',
@@ -1051,10 +1043,12 @@ const forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-a4a/0.1/head-validation.js',
       'extensions/amp-a4a/0.1/template-validator.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
+      'extensions/amp-animation/0.1/install-polyfill.js',
     ],
   },
   'loadElementClass': {
@@ -1097,6 +1091,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/timeago.js',
+      'src/utils/date.js',
     ],
   },
   '\\.expandStringSync\\(': {
@@ -1156,7 +1151,6 @@ const forbiddenTermsSrcInclusive = {
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
@@ -1165,10 +1159,10 @@ const forbiddenTermsSrcInclusive = {
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
-      'validator/engine/validator-in-browser.js',
-      'validator/engine/validator.js',
-      'validator/nodejs/index.js',
-      'validator/webui/serve-standalone.go',
+      'validator/js/engine/validator-in-browser.js',
+      'validator/js/engine/validator.js',
+      'validator/js/nodejs/index.js',
+      'validator/js/webui/serve-standalone.go',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {
@@ -1188,7 +1182,7 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
-    allowlist: ['validator/engine/validator.js'],
+    allowlist: ['validator/js/engine/validator.js'],
   },
   "process\\.env(\\.TRAVIS|\\[\\'TRAVIS)": {
     message:
@@ -1350,7 +1344,6 @@ function hasAnyTerms(file) {
   const basename = path.basename(pathname);
   let hasTerms = false;
   let hasSrcInclusiveTerms = false;
-  let has3pTerms = false;
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
@@ -1362,18 +1355,7 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  const is3pFile =
-    /\/(3p|ads)\//.test(pathname) ||
-    basename == '3p.js' ||
-    basename == 'style.js';
-  // Yet another reason to move ads/google/a4a somewhere else
-  const isA4A = /\/a4a\//.test(pathname);
-  const isRecaptcha = basename == 'recaptcha.js';
-  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
-    has3pTerms = matchTerms(file, forbidden3pTerms);
-  }
-
-  return hasTerms || hasSrcInclusiveTerms || has3pTerms;
+  return hasTerms || hasSrcInclusiveTerms;
 }
 
 /**

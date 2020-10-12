@@ -82,7 +82,7 @@ exports.rules = [
       'extensions/amp-list/**->third_party/set-dom/set-dom.js',
       'extensions/amp-mustache/**/amp-mustache.js->third_party/mustache/mustache.js',
       'extensions/amp-recaptcha-input/**/*.js->third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
-      'extensions/amp-social-share/1.0/social-share.js->third_party/optimized-svg-icons/social-share-svgs.js',
+      'extensions/amp-story-360/0.1/amp-story-360.js->third_party/zuho/zuho.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
@@ -101,6 +101,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
+      '3p/**->src/utils/promise.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
@@ -116,6 +117,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
+      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
@@ -183,6 +185,7 @@ exports.rules = [
     mustNotDependOn: 'extensions/**/*.js',
     allowlist: [
       // a4a ads depend on a4a.
+      'extensions/amp-ad-network-nws-impl/0.1/amp-ad-network-nws-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-smartads-impl/0.1/amp-ad-network-smartads-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
@@ -221,6 +224,10 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/0.1/carousel-events.js',
+      'extensions/amp-inline-gallery/1.0/amp-inline-gallery.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-pagination.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/inline-gallery.js->extensions/amp-base-carousel/1.0/carousel-context.js',
+      'extensions/amp-inline-gallery/1.0/pagination.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/action-source.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
@@ -237,6 +244,9 @@ exports.rules = [
 
       // AMP Story
       'extensions/amp-story/1.0/animation-types.js->extensions/amp-animation/0.1/web-animation-types.js',
+      // AMP Story 360
+      'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/utils.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -251,6 +261,13 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
+      // Interactive components that depend on story functionality.
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
+
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
       'extensions/amp-subscriptions/0.1/local-subscription-platform-iframe.js->extensions/amp-access/0.1/iframe-api/messenger.js',
@@ -260,6 +277,7 @@ exports.rules = [
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/doc-impl.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/entitlement.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/constants.js',
+      'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/url-builder.js',
 
       // amp-smartlinks depends on amp-skimlinks/link-rewriter
       'extensions/amp-smartlinks/0.1/amp-smartlinks.js->extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js',
@@ -274,6 +292,9 @@ exports.rules = [
         'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
         'src/service/url-replacements-impl.js',
+      // Parsing extension urls.
+      'extensions/amp-a4a/0.1/head-validation.js->' +
+        'src/service/extension-location.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -409,6 +430,8 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
+      '3p/polyfills.js->src/polyfills/promise.js',
+      'src/polyfills.js->src/polyfills/abort-controller.js',
       'src/polyfills.js->src/polyfills/domtokenlist.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/fetch.js',
@@ -443,6 +466,16 @@ exports.rules = [
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'ads/**/*.js',
     allowlist: 'src/ad-cid.js->ads/_config.js',
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/service/custom-element-registry.js',
+    allowlist: [
+      'builtins/**->src/service/custom-element-registry.js',
+      'src/amp.js->src/service/custom-element-registry.js',
+      'src/runtime.js->src/service/custom-element-registry.js',
+      'src/service/extensions-impl.js->src/service/custom-element-registry.js',
+    ],
   },
 
   // A4A

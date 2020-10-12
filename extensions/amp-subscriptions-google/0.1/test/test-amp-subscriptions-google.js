@@ -117,6 +117,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let ackStub;
   let element;
   let entitlementResponse;
+  let rtcButtonElement;
   let win;
 
   beforeEach(() => {
@@ -135,6 +136,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     env.sandbox
       .stub(serviceAdapter, 'getPageConfig')
       .callsFake(() => pageConfig);
+    env.sandbox
+      .stub(serviceAdapter, 'getReaderId')
+      .callsFake(() => Promise.resolve('ari1'));
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     analyticsMock = env.sandbox.mock(analytics);
@@ -180,6 +184,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         ConfiguredRuntime.prototype,
         'showContributionOptions'
       ),
+      subscribe: env.sandbox.stub(ConfiguredRuntime.prototype, 'subscribe'),
       showOffers: env.sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       showAbbrvOffer: env.sandbox.stub(
         ConfiguredRuntime.prototype,
@@ -227,6 +232,179 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(platform.runtime_.config()['experiments']).to.have.members([
       'gpay-api',
     ]);
+  });
+
+  it('should throw if enableLAA and enableMetering are set', () => {
+    expect(
+      () =>
+        new GoogleSubscriptionsPlatform(
+          ampdoc,
+          {enableLAA: true, enableMetering: true},
+          serviceAdapter
+        )
+    ).to.throw(/enableLAA and enableMetering are mutually exclusive/);
+  });
+
+  it('should ignore enableLAA and fallback if url params are missing', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    await platform.getEntitlements();
+    expect(fetchStub).to.be.calledOnce;
+  });
+
+  it('should ignore enableLAA and not fallback if url params are missing and enableEntitlements is false', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true, enableEntitlements: false},
+      serviceAdapter
+    );
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    await platform.getEntitlements();
+    expect(fetchStub).to.not.be.called;
+  });
+
+  it('should ignore enableLAA if url params have expired', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+
+    env.sandbox.stub(platform, 'getLAAParams_').returns({
+      'gaa_ts': (Date.now() / 1000 - 10).toString(16),
+      'gaa_at': 'laa',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+    await platform.getEntitlements();
+    expect(fetchStub).to.be.calledOnce;
+  });
+
+  it('should return LAA if url params present and are in timestamp', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getLAAParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'laa',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+    const ents = await platform.getEntitlements();
+    expect(ents.service).to.not.be.null;
+    expect(ents.source).to.equal('google:laa');
+    expect(fetchStub).to.not.be.called;
+  });
+
+  it('should ignore valid LAA if referrer domain is not allowed', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://www.example.com'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true, enableEntitlements: false},
+      serviceAdapter
+    );
+    ampdoc.win.__AMP_MODE.localDev = false;
+    env.sandbox.stub(platform, 'getLAAParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'laa',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    const ents = await platform.getEntitlements();
+    expect(ents).to.be.null;
+    expect(fetchStub).to.not.be.called;
+  });
+
+  it('should ignore valid LAA if referrer protocol is not allowed', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://google.com'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true, enableEntitlements: false},
+      serviceAdapter
+    );
+    ampdoc.win.__AMP_MODE.localDev = false;
+    env.sandbox.stub(platform, 'getLAAParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'laa',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    const ents = await platform.getEntitlements();
+    expect(ents).to.be.null;
+    expect(fetchStub).to.not.be.called;
   });
 
   it('should proxy fetch via AMP fetcher', async () => {
@@ -373,11 +551,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   });
 
   it('should start linking flow when requested', async () => {
-    serviceAdapterMock
-      .expects('getReaderId')
-      .withExactArgs('local')
-      .returns(Promise.resolve('ari1'))
-      .once();
     serviceAdapterMock.expects('delegateActionToLocal').never();
     callback(callbacks.loginRequest)({linkRequested: true});
     await 'Event loop tick';
@@ -389,7 +562,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   it('should delegate login when linking not requested', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -400,7 +573,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     platform.isGoogleViewer_ = false;
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: true});
@@ -529,7 +702,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   it('should delegate native subscribe request', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.SUBSCRIBE)
+      .withExactArgs(Action.SUBSCRIBE, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.subscribeRequest)();
@@ -539,7 +712,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -552,7 +725,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(false);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -565,7 +738,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.SUBSCRIBE)
+      .withExactArgs(Action.SUBSCRIBE, null)
       .returns(loginResult)
       .once();
     callback(callbacks.subscribeRequest)();
@@ -703,6 +876,57 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
+  it('should do nothing if rtc mapped button is not read ', () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        sku: 'testSku',
+      },
+    };
+    const executeStub = platform.runtime_.subscribe;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.not.be.called;
+  });
+
+  it('should show subscribe flow if single sku is mapped ', () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc-set', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        sku: 'testSku',
+      },
+    };
+    const executeStub = platform.runtime_.subscribe;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.be.calledWith('testSku');
+  });
+
+  it("should show offers if multiple sku's are mapped", () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc-set', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        carouselOptions: {skus: ['testSku1', 'testsku2']},
+      },
+    };
+    const executeStub = platform.runtime_.showOffers;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.be.calledWith({
+      isClosable: true,
+      skus: ['testSku1', 'testsku2'],
+    });
+  });
+
   it('should show contributions if contribute action is delegated', () => {
     const executeStub = platform.runtime_.showContributionOptions;
     platform.executeAction(Action.CONTRIBUTE);
@@ -710,11 +934,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   });
 
   it('should link accounts if login action is delegated', async () => {
-    serviceAdapterMock
-      .expects('getReaderId')
-      .withExactArgs('local')
-      .returns(Promise.resolve('ari1'))
-      .once();
     const executeStub = platform.runtime_.linkAccount;
     platform.executeAction(Action.LOGIN);
     await 'Event loop tick';

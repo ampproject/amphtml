@@ -26,17 +26,13 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
+import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -55,13 +51,6 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
 const MAX_BUILD_CHUNK_SIZE = 10;
-
-/** @const {!{id: string, control: string, experiment: string}} */
-const RENDER_ON_IDLE_FIX_EXP = {
-  id: 'render-on-idle-fix',
-  control: '21066311',
-  experiment: '21066312',
-};
 
 /**
  * @implements {ResourcesInterface}
@@ -106,9 +95,6 @@ export class ResourcesImpl {
 
     /** @private {boolean} */
     this.visible_ = this.ampdoc.isVisible();
-
-    /** @private {number} */
-    this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
     /** @private {boolean} */
     this.documentReady_ = false;
@@ -212,10 +198,7 @@ export class ResourcesImpl {
     this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
 
     /** @const @private {boolean} */
-    this.renderOnIdleFix_ = isExperimentOn(this.win, 'render-on-idle-fix');
-
-    /** @private {boolean} */
-    this.divertedRenderOnIdleFixExperiment_ = false;
+    this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
 
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
@@ -257,8 +240,9 @@ export class ResourcesImpl {
         : null);
       try {
         this.intersectionObserver_ = new IntersectionObserver(
-          (e) => this.intersects_(e),
-          {root, rootMargin: '200% 25%'}
+          (e) => this.intersect(e),
+          // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
+          {root, rootMargin: '250% 31.25%'}
         );
 
         // Wait for intersection callback instead of measuring all elements
@@ -311,10 +295,7 @@ export class ResourcesImpl {
 
     this.rebuildDomWhenReady_();
 
-    if (
-      !this.intersectionObserver_ &&
-      isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')
-    ) {
+    if (!this.intersectionObserver_) {
       /** @private @const */
       this.throttledScroll_ = throttle(this.win, (e) => this.scrolled_(e), 250);
 
@@ -332,13 +313,10 @@ export class ResourcesImpl {
 
   /**
    * @param {!Array<!IntersectionObserverEntry>} entries
-   * @private
+   * @visibleForTesting
    */
-  intersects_(entries) {
+  intersect(entries) {
     devAssert(this.intersectionObserver_);
-
-    // TODO(willchou): Remove assert once #27167 is fixed.
-    devAssert(this.prerenderSize_ == 1);
 
     if (getMode().localDev) {
       const inside = [];
@@ -457,11 +435,7 @@ export class ResourcesImpl {
       resource.getState() != ResourceState.NOT_BUILT &&
       !element.reconstructWhenReparented()
     ) {
-      // With IntersectionObserver, no need to request remeasure
-      // on reuse since initial intersection callback will trigger soon.
-      if (!this.intersectionObserver_) {
-        resource.requestMeasure();
-      }
+      resource.requestMeasure();
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
       // Create and add a new resource.
@@ -646,7 +620,7 @@ export class ResourcesImpl {
       resource.pauseOnRemove();
     }
     if (this.intersectionObserver_) {
-      // TODO(willchou): Fix observe/unobserve churn due to reparenting.
+      // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
@@ -656,8 +630,6 @@ export class ResourcesImpl {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    // TODO(willchou): Delay this until after 1vp loads. This should improve
-    // LCP and be safe since we already do something similar in prerender mode.
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'resource upgraded:', resource.debugid);
   }
@@ -751,7 +723,6 @@ export class ResourcesImpl {
     }
 
     this.visible_ = this.ampdoc.isVisible();
-    this.prerenderSize_ = this.viewer_.getPrerenderSize();
     this.buildsThisPass_ = 0;
 
     const firstPassAfterDocumentReady =
@@ -798,9 +769,7 @@ export class ResourcesImpl {
       this.relayoutTop_,
       ', viewportSize=',
       viewportSize.width,
-      viewportSize.height,
-      ', prerenderSize=',
-      this.prerenderSize_
+      viewportSize.height
     );
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
@@ -1205,25 +1174,6 @@ export class ResourcesImpl {
   }
 
   /**
-   * Selects into an experiment for render-on-idle-fix.
-   * @private
-   */
-  divertRenderOnIdleFixExperiment_() {
-    if (this.divertedRenderOnIdleFixExperiment_) {
-      return;
-    }
-    this.divertedRenderOnIdleFixExperiment_ = true;
-    const experimentInfoMap = /** @type {!Object<string,
-        !../experiments.ExperimentInfo>} */ ({
-      [RENDER_ON_IDLE_FIX_EXP.experiment]: {
-        isTrafficEligible: () => true,
-        branches: [RENDER_ON_IDLE_FIX_EXP.control, RENDER_ON_IDLE_FIX_EXP],
-      },
-    });
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-  }
-
-  /**
    * Discovers work that needs to be done since the last pass. If viewport
    * has changed, it will try to build new elements, measure changed elements,
    * and schedule layouts and preloads within a reasonable distance of the
@@ -1291,17 +1241,20 @@ export class ResourcesImpl {
       // that ignores `relayoutTop` and `elementsThatScrolled`.
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        const requested = r.isMeasureRequested();
+        if (r.hasOwner() && !requested) {
           continue;
         }
-        // Difference: if we have a "premeasured" client rect, consume it
-        // as the element's new measurements even if the element isn't built.
-        const requested = r.isMeasureRequested();
+        const premeasured = r.hasBeenPremeasured();
         if (requested) {
           dev().fine(TAG_, 'force remeasure:', r.debugid);
         }
-        const premeasured = r.hasBeenPremeasured();
-        const needsMeasure = premeasured || requested || this.relayoutAll_;
+        // Immediately measure (vs. waiting for async premeasure) for certain
+        // elements with sensitive time-to-measure.
+        const expediteFirstMeasure =
+          !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
+        const needsMeasure =
+          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,
@@ -1371,15 +1324,12 @@ export class ResourcesImpl {
     }
 
     const viewportRect = this.viewport_.getRect();
-    // Load viewport = viewport + 3x up/down when document is visible or
-    // depending on prerenderSize in pre-render mode.
+    // Load viewport = viewport + 3x up/down when document is visible.
     let loadRect;
     if (this.visible_) {
       loadRect = expandLayoutRect(viewportRect, 0.25, 2);
-    } else if (this.prerenderSize_ > 0) {
-      loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
     } else {
-      loadRect = null;
+      loadRect = viewportRect;
     }
 
     const visibleRect = this.visible_
@@ -1490,17 +1440,12 @@ export class ResourcesImpl {
    * @private
    */
   isIdle_(now = Date.now()) {
-    this.divertRenderOnIdleFixExperiment_();
     const lastDequeueTime = this.exec_.getLastDequeueTime();
     return (
       this.exec_.getSize() == 0 &&
       this.queue_.getSize() == 0 &&
       now > lastDequeueTime + 5000 &&
-      (lastDequeueTime > 0 ||
-        // TODO(powerivq): add tests for this fix once ready to launch
-        !this.renderOnIdleFix_ ||
-        getExperimentBranch(this.win, RENDER_ON_IDLE_FIX_EXP.id) ===
-          RENDER_ON_IDLE_FIX_EXP.control)
+      lastDequeueTime > 0
     );
   }
 
@@ -1522,7 +1467,9 @@ export class ResourcesImpl {
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
-      timeout = this.calcTaskTimeout_(task);
+      if (!this.removeTaskTimeout_) {
+        timeout = this.calcTaskTimeout_(task);
+      }
       dev().fine(
         TAG_,
         'peek from queue:',
@@ -1534,8 +1481,10 @@ export class ResourcesImpl {
         'timeout',
         timeout
       );
-      if (timeout > 16) {
-        break;
+      if (!this.removeTaskTimeout_) {
+        if (timeout > 16) {
+          break;
+        }
       }
 
       this.queue_.dequeue(task);
@@ -1598,10 +1547,12 @@ export class ResourcesImpl {
       this.exec_.getSize()
     );
 
-    if (timeout >= 0) {
-      // Still tasks in the queue, but we took too much time.
-      // Schedule the next work pass.
-      return timeout;
+    if (!this.removeTaskTimeout_) {
+      if (timeout >= 0) {
+        // Still tasks in the queue, but we took too much time.
+        // Schedule the next work pass.
+        return timeout;
+      }
     }
 
     // No tasks left in the queue.
@@ -1857,7 +1808,11 @@ export class ResourcesImpl {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
-      this.schedulePass(this.calcTaskTimeout_(task));
+      if (this.removeTaskTimeout_) {
+        this.schedulePass();
+      } else {
+        this.schedulePass(this.calcTaskTimeout_(task));
+      }
     }
     task.resource.layoutScheduled(task.scheduleTime);
   }

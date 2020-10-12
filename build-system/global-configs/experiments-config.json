@@ -1,17 +1,11 @@
 {
   "experimentA": {
-    "name": "IntersectionObserverPolyfillInabox",
-    "environment": "INABOX",
-    "issue": "https://github.com/ampproject/amphtml/issues/27807",
-    "expiration_date_utc": "2020-07-31",
-    "define_experiment_constant": "INTERSECTION_OBSERVER_POLYFILL_INABOX"
-  },
-  "experimentB": {
-    "name": "MoveFixedLayer",
+    "name": "A4A No Signing RTV Experiment",
     "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/27120",
-    "expiration_date_utc": "2021-01-01",
-    "define_experiment_constant": "MOVE_FIXED_LAYER"
+    "issue": "https://github.com/ampproject/amphtml/issues/27189",
+    "expiration_date_utc": "2020-12-30",
+    "define_experiment_constant": "NO_SIGNING_RTV"
   },
+  "experimentB": {},
   "experimentC": {}
 }

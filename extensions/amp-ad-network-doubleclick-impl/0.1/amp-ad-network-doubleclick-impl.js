@@ -21,21 +21,17 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
-import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
-  NO_SIGNING_EXP,
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
-  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
-  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -54,7 +50,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -100,14 +95,13 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -147,30 +141,6 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
-};
-
-/** @const {string} */
-const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
-
-/**
- * Branches of the random subdomain for SafeFrame experiment.
- * @const @enum{string}
- * @visibleForTesting
- */
-export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
-  CONTROL: '21065817',
-  EXPERIMENT: '21065818',
-};
-
-/**
- * @const @enum {string}
- * @visibleForTesting
- * TODO(#28555): Clean up experiment
- */
-export const EXPAND_JSON_TARGETING_EXP = {
-  ID: 'expand-json-targeting',
-  CONTROL: '21066261',
-  EXPERIMENT: '21066262',
 };
 
 /**
@@ -437,8 +407,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoMap = /** @type {!Object<string, !../../../src/experiments.ExperimentInfo>} */ ({
-      [DOUBLECLICK_SRA_EXP]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: DOUBLECLICK_SRA_EXP,
         isTrafficEligible: () =>
           !forcedExperimentId &&
           !this.win.document./*OK*/ querySelector(
@@ -450,55 +421,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
         ),
       },
-      [ZINDEX_EXP]: {
+      {
+        experimentId: ZINDEX_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
-      [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
-        isTrafficEligible: () => true,
-        branches: [
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
-        ],
-      },
-      [[FIE_INIT_CHUNKING_EXP.id]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_INIT_CHUNKING_EXP.control],
-          [FIE_INIT_CHUNKING_EXP.experiment],
-        ],
-      },
-      [[EXPAND_JSON_TARGETING_EXP.ID]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [EXPAND_JSON_TARGETING_EXP.CONTROL],
-          [EXPAND_JSON_TARGETING_EXP.EXPERIMENT],
-        ],
-      },
-      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [RENDER_ON_IDLE_FIX_EXP.control],
-          [RENDER_ON_IDLE_FIX_EXP.experiment],
-        ],
-      },
-      [NO_SIGNING_EXP.id]: {
-        isTrafficEligible: () => true,
-        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
-      },
-      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [STICKY_AD_PADDING_BOTTOM_EXP.control],
-          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
-        ],
-      },
-      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
-    });
-    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
+    ]);
+    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
+    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
+    if (moduleNomoduleExpId) {
+      this.experimentIds.push(moduleNomoduleExpId);
+    }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
     }
@@ -506,11 +442,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * For easier unit testing.
-   * @param {!Object<string, !../../../src/experiments.ExperimentInfo>} experimentInfoMap
+   * @param {!Array<!../../../src/experiments.ExperimentInfo>} experimentInfoList
    * @return {!Object<string, string>}
    */
-  randomlySelectUnsetExperiments_(experimentInfoMap) {
-    return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  randomlySelectUnsetExperiments_(experimentInfoList) {
+    return randomlySelectUnsetExperiments(this.win, experimentInfoList);
   }
 
   /**
@@ -766,19 +702,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return this.mergeRtcResponses_(results);
     });
 
-    // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
-    const isJsonTargetingExpOn =
-      isExperimentOn(this.win, 'expand-json-targeting') &&
-      getExperimentBranch(this.win, EXPAND_JSON_TARGETING_EXP.ID) ===
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT;
-
-    const targetingExpansionPromise = isJsonTargetingExpOn
-      ? timerService
-          .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
-          .catch(() => {
-            dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
-          })
-      : Promise.resolve();
+    const targetingExpansionPromise = timerService
+      .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
+      .catch(() => {
+        dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
+      });
 
     Promise.all([
       rtcParamsPromise,
@@ -1223,11 +1151,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getSafeframePath() {
-    const randomSubdomainExperimentBranch =
-      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
-    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
-      return super.getSafeframePath();
-    }
     safeFrameRandomSubdomain =
       safeFrameRandomSubdomain || this.getRandomString_();
 
@@ -1736,7 +1659,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         headersObj,
                         done,
                         sraRequestAdUrlResolvers,
-                        sraUrl
+                        sraUrl,
+                        this.isInNoSigningExp()
                       );
                     }
                   );

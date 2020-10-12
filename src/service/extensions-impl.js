@@ -20,16 +20,17 @@ import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
 } from './extension-location';
-import {dev, devAssert, rethrowAsync} from '../log';
+import {
+  copyElementToChildWindow,
+  stubElementIfNotKnown,
+  upgradeOrRegisterElement,
+} from './custom-element-registry';
+import {dev, devAssert, rethrowAsync, user} from '../log';
 import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
 import {map} from '../utils/object';
 import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
-import {
-  stubElementIfNotKnown,
-  upgradeOrRegisterElement,
-} from './custom-element-registry';
 
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
@@ -239,7 +240,7 @@ export class Extensions {
   /**
    * Reloads the new version of the extension.
    * @param {string} extensionId
-   * @return {!Promise<!ExtensionDef>}
+   * @return {?Promise<!ExtensionDef>}
    */
   reloadExtension(extensionId) {
     // Ignore inserted script elements to prevent recursion.
@@ -247,11 +248,15 @@ export class Extensions {
       extensionId,
       /* includeInserted */ false
     );
-    devAssert(
-      els.length > 0,
-      'Cannot find script for extension: %s',
-      extensionId
-    );
+    if (!els.length) {
+      const TAG = 'reloadExtension';
+      user().error(
+        TAG,
+        'Extension script for "%s" is missing or was already reloaded.',
+        extensionId
+      );
+      return null;
+    }
     // The previously awaited extension loader must not have finished or
     // failed.
     const holder = this.extensions_[extensionId];
@@ -418,6 +423,30 @@ export class Extensions {
   }
 
   /**
+   * Preinstalls built-ins and legacy elements in the emebedded ampdoc.
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Array<string>} extensionIds
+   * @restricted
+   */
+  preinstallEmbed(ampdoc, extensionIds) {
+    const topWin = this.win;
+    const childWin = ampdoc.win;
+
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
+
+    // Stub extensions.
+    extensionIds.forEach((extensionId) => {
+      // This will extend automatic upgrade of custom elements from top
+      // window to the child window.
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
+        stubElementIfNotKnown(childWin, extensionId);
+      }
+    });
+  }
+
+  /**
    * Installs all ampdoc factories previously registered with
    * `addDocFactory`.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
@@ -426,11 +455,11 @@ export class Extensions {
    * @restricted
    */
   installExtensionsInDoc(ampdoc, extensionIds) {
-    const promises = [];
-    extensionIds.forEach((extensionId) => {
-      promises.push(this.installExtensionInDoc(ampdoc, extensionId));
-    });
-    return Promise.all(promises);
+    return Promise.all(
+      extensionIds.map((extensionId) =>
+        this.installExtensionInDoc(ampdoc, extensionId)
+      )
+    );
   }
 
   /**
@@ -578,6 +607,9 @@ export class Extensions {
     }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
+    if (getMode().esm) {
+      scriptElement.setAttribute('type', 'module');
+    }
 
     // Propagate nonce to all generated script tags.
     const currentScript = this.win.document.head.querySelector('script[nonce]');
@@ -621,6 +653,16 @@ export function stubLegacyElements(win) {
   LEGACY_ELEMENTS.forEach((name) => {
     stubElementIfNotKnown(win, name);
   });
+}
+
+/**
+ * Copy builtins to a child window.
+ * @param {!Window} parentWin
+ * @param {!Window} childWin
+ */
+function copyBuiltinElementsToChildWindow(parentWin, childWin) {
+  copyElementToChildWindow(parentWin, childWin, 'amp-img');
+  copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
 }
 
 /**

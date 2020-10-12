@@ -19,6 +19,7 @@ const fs = require('fs');
 const gulp = require('gulp');
 const PluginError = require('plugin-error');
 const postcss = require('postcss');
+const prettier = require('prettier');
 const table = require('text-table');
 const through = require('through2');
 
@@ -31,6 +32,8 @@ const tableOptions = {
   align: ['l', 'l', 'l'],
   hsep: '   |   ',
 };
+
+const preamble = 'Run `gulp get-zindex` to generate this file.';
 
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
@@ -102,7 +105,19 @@ function createTable(filesData) {
   rows.sort((a, b) => {
     const aZIndex = parseInt(a[1], 10);
     const bZIndex = parseInt(b[1], 10);
-    return aZIndex - bZIndex;
+    // Word values sorted lexicographically.
+    if (isNaN(aZIndex) && isNaN(bZIndex)) {
+      return a[1].localeCompare(b[1]);
+    }
+    // Word values before length values.
+    if (isNaN(aZIndex)) {
+      return -1;
+    }
+    if (isNaN(bZIndex)) {
+      return 1;
+    }
+    // By length descending.
+    return bZIndex - aZIndex;
   });
   return rows;
 }
@@ -125,13 +140,21 @@ function getZindex(cb) {
     .on('data', (chunk) => {
       filesData[chunk.name] = chunk.selectors;
     })
-    .on('end', () => {
-      const rows = createTable(filesData);
-      rows.unshift.apply(rows, tableHeaders);
+    .on('end', async () => {
+      const filename = 'css/Z_INDEX.md';
+      const rows = [...tableHeaders, ...createTable(filesData)];
       const tbl = table(rows, tableOptions);
-      fs.writeFileSync('css/Z_INDEX.md', tbl);
+      const output = `${preamble}\n\n${tbl}`;
+      fs.writeFileSync(filename, await prettierFormat(filename, output));
       cb();
     });
+}
+
+async function prettierFormat(filename, output) {
+  return prettier.format(output, {
+    ...(await prettier.resolveConfig(filename)),
+    parser: 'markdown',
+  });
 }
 
 module.exports = {

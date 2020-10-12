@@ -215,14 +215,7 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    onError['call'](
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      error
-    );
+    onError['call'](self, undefined, undefined, undefined, undefined, error);
   } catch (errorReportingError) {
     setTimeout(function () {
       throw errorReportingError;
@@ -312,7 +305,9 @@ export function installErrorReporting(win) {
  */
 function onError(message, filename, line, col, error) {
   // Make an attempt to unhide the body but don't if the error is actually expected.
+  // eslint-disable-next-line local/no-invalid-this
   if (this && this.document && (!error || !error.expected)) {
+    // eslint-disable-next-line local/no-invalid-this
     makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
@@ -342,6 +337,7 @@ function onError(message, filename, line, col, error) {
     reportingBackoff(() => {
       try {
         return reportErrorToServerOrViewer(
+          // eslint-disable-next-line local/no-invalid-this
           this,
           /** @type {!JsonObject} */
           (data)
@@ -548,7 +544,10 @@ export function getErrorReportData(
   data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
-  if (IS_ESM) {
+  if (IS_SXG) {
+    runtime = 'sxg';
+    data['sxg'] = '1';
+  } else if (IS_ESM) {
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {

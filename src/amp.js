@@ -19,7 +19,7 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills';
 
 import {Services} from './services';
 import {TickLabel} from './enums';
@@ -93,7 +93,9 @@ function bootstrap(ampdoc, perf) {
   startupChunk(
     self.document,
     function final() {
-      installPullToRefreshBlocker(self);
+      if (!IS_SXG) {
+        installPullToRefreshBlocker(self);
+      }
       installAutoLightboxExtension(ampdoc);
       installStandaloneExtension(ampdoc);
       maybeValidate(self);

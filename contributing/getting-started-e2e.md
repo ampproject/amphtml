@@ -437,7 +437,7 @@ Notes:
 - This will force a clean build and run all the PR checks one by one.
 - Just like on Travis, a failing check will prevent subsequent checks from being run.
 - The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
-- Unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described in the [Testing](TESTING.md#testing-on-sauce-labs) guide.
+- Unit and integration tests will be run on local Chrome.
 
 ## Adding tests
 
@@ -463,6 +463,12 @@ Testing tips:
 - Add `--watch` to your `gulp unit` command to automatically re-run tests on code changes.
 
 For more help, see [How to get help](#how-to-get-help).
+
+# Perform manual tests
+
+Beyond technical/automated tests, manually test your changes and make sure that they work as expected, and that they follow AMP's [design principles](https://github.com/ampproject/amphtml/blob/master/contributing/DESIGN_PRINCIPLES.md). In particular, make sure that your changes are accessible - see [W3C WAI Easy Checks](https://www.w3.org/WAI/test-evaluate/preliminary/) for an initial set of suggested manual tests. Some aspects of manual testing can be semi-automated, using tools such as [Lighthouse](https://developers.google.com/web/tools/lighthouse) (which includes an accessibility audit report) and [Microsoft's Accessibility Insights](https://accessibilityinsights.io/).
+
+Note that for more extensive automated accessibility testing, there are further options available that integrate directly within existing test/integration workflows, such as [Deque's axe-core](https://github.com/dequelabs/axe-core).
 
 # Push your changes to your GitHub fork
 

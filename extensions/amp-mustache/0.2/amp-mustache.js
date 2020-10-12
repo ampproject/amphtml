@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {BaseTemplate} from '../../../src/base-template';
 import {Purifier} from '../../../src/purifier/purifier';
 import {dict} from '../../../src/utils/object';
 import {getService, registerServiceBuilder} from '../../../src/service';
@@ -23,8 +24,6 @@ import {user} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
-
-const BaseTemplate = /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -116,11 +115,27 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   setHtml(html) {
-    return this.purifyAndSetHtml_(html);
+    const wrapped = `<div>${html}</div>`;
+    const purified = this.tryUnwrap(this.purifyAndSetHtml_(wrapped));
+    return this.unwrapChildren(purified);
   }
 
   /** @override */
   render(data) {
+    return this.tryUnwrap(this.render_(data));
+  }
+
+  /** @override */
+  renderAsString(data) {
+    return this.render_(data)./*OK*/ innerHTML;
+  }
+
+  /**
+   * @param {!JsonObject|string} data
+   * @return {!Element}
+   * @private
+   */
+  render_(data) {
     let mustacheData = data;
     // Also render any nested templates.
     if (typeof data === 'object') {
@@ -135,15 +150,13 @@ export class AmpMustache extends BaseTemplate {
   }
 
   /**
-   *
    * @param {string} html
    * @return {!Element}
    * @private
    */
   purifyAndSetHtml_(html) {
     const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
-    const div = body.firstElementChild;
-    return this.unwrap(div);
+    return body.firstElementChild;
   }
 }
 

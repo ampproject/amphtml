@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {Signals} from '../utils/signals';
 import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
+import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -86,8 +87,9 @@ export class Performance {
 
     /** @private {!Object<string,boolean>} */
     this.enabledExperiments_ = map();
-    /** @private {string} */
-    this.ampexp_ = '';
+
+    /** @private {string|undefined} */
+    this.ampexp_ = undefined;
 
     /** @private {Signals} */
     this.metrics_ = new Signals();
@@ -122,7 +124,7 @@ export class Performance {
     if (!supportedEntryTypes.includes('paint')) {
       this.metrics_.rejectSignal(
         TickLabel.FIRST_CONTENTFUL_PAINT,
-        new Error('First Contentful Paint not supported')
+        dev().createExpectedError('First Contentful Paint not supported')
       );
     }
 
@@ -137,7 +139,7 @@ export class Performance {
     if (!this.supportsLayoutShift_) {
       this.metrics_.rejectSignal(
         TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        new Error('Cumulative Layout Shift not supported')
+        dev().createExpectedError('Cumulative Layout Shift not supported')
       );
     }
 
@@ -152,7 +154,7 @@ export class Performance {
     if (!this.supportsEventTiming_) {
       this.metrics_.rejectSignal(
         TickLabel.FIRST_INPUT_DELAY,
-        new Error('First Input Delay not supported')
+        dev().createExpectedError('First Input Delay not supported')
       );
     }
 
@@ -168,7 +170,7 @@ export class Performance {
     if (!this.supportsLargestContentfulPaint_) {
       this.metrics_.rejectSignal(
         TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
-        new Error('Largest Contentful Paint not supported')
+        dev().createExpectedError('Largest Contentful Paint not supported')
       );
     }
 
@@ -272,6 +274,13 @@ export class Performance {
         // Tick timeOrigin so that epoch time can be calculated by consumers.
         this.tick(TickLabel.TIME_ORIGIN, undefined, this.timeOrigin_);
 
+        const usqp = this.ampdoc_.getMetaByName('amp-usqp');
+        if (usqp) {
+          usqp.split(',').forEach((exp) => {
+            this.addEnabledExperiment('ssr-' + exp);
+          });
+        }
+
         return this.maybeAddStoryExperimentId_();
       })
       .then(() => {
@@ -347,7 +356,6 @@ export class Performance {
       ) {
         const value = entry.processingStart - entry.startTime;
         this.tickDelta(TickLabel.FIRST_INPUT_DELAY, value);
-        this.tickSinceVisible(TickLabel.FIRST_INPUT_DELAY_VISIBLE, value);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
@@ -404,8 +412,17 @@ export class Performance {
     }
 
     if (this.supportsNavigation_) {
-      const navigationObserver = this.createPerformanceObserver_(processEntry);
-      navigationObserver.observe({type: 'navigation', buffered: true});
+      // Wrap in a try statement as there are some browsers (ex. chrome 73)
+      // that will say it supports navigation but throws.
+      try {
+        const navigationObserver = this.createPerformanceObserver_(
+          processEntry
+        );
+        navigationObserver.observe({type: 'navigation', buffered: true});
+      } catch (err) {
+        dev() /*OK*/
+          .error(err);
+      }
     }
 
     if (entryTypesToObserve.length === 0) {
@@ -458,13 +475,7 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
-      this.tickSlowElementRatio_();
+      this.tickCumulativeMetrics_();
     }
   }
 
@@ -475,14 +486,22 @@ export class Performance {
    */
   onAmpDocVisibilityChange_() {
     if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
-      this.tickSlowElementRatio_();
+      this.tickCumulativeMetrics_();
     }
+  }
+
+  /**
+   * Tick the metrics whose values change over time.
+   * @private
+   */
+  tickCumulativeMetrics_() {
+    if (this.supportsLayoutShift_) {
+      this.tickLayoutShiftScore_();
+    }
+    if (this.supportsLargestContentfulPaint_) {
+      this.tickLargestContentfulPaint_();
+    }
+    this.tickSlowElementRatio_();
   }
 
   /**
@@ -691,6 +710,15 @@ export class Performance {
       data['value'] = this.timeOrigin_ + delta;
     }
 
+    // Emit events. Used by `gulp performance`.
+    this.win.dispatchEvent(
+      createCustomEvent(
+        this.win,
+        'perf',
+        /** @type {JsonObject} */ ({label, delta})
+      )
+    );
+
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
     } else {
@@ -729,11 +757,15 @@ export class Performance {
   /**
    * Tick time delta since the document has become visible.
    * @param {TickLabel} label The variable name as it will be reported.
-   * @param {number=} opt_end If present, use this value for end time instead of now()
+   * @param {number=} opt_delta The optional delta value in milliseconds.
    */
-  tickSinceVisible(label, opt_end) {
-    const end = opt_end || this.timeOrigin_ + this.win.performance.now();
-    const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
+  tickSinceVisible(label, opt_delta) {
+    const delta =
+      opt_delta == undefined ? this.win.performance.now() : opt_delta;
+    const end = this.timeOrigin_ + delta;
+
+    // Order is timeOrigin -> firstVisibleTime -> end.
+    const visibleTime = this.ampdoc_ && this.ampdoc_.getFirstVisibleTime();
     const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }
@@ -743,6 +775,9 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      if (this.ampexp_ == null) {
+        this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+      }
       this.viewer_.sendMessage(
         'sendCsi',
         dict({
@@ -769,7 +804,7 @@ export class Performance {
    */
   addEnabledExperiment(experimentId) {
     this.enabledExperiments_[experimentId] = true;
-    this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+    this.ampexp_ = undefined;
   }
 
   /**

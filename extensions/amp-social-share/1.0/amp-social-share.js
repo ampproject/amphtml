@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-social-share-1.0.css';
 import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -24,7 +25,7 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
@@ -87,20 +88,23 @@ class AmpSocialShare extends PreactBaseElement {
       return;
     }
 
-    this.renderWithHrefAndTarget_(typeConfig, platform);
+    this.element.classList.add(`amp-social-share-${type}`);
+    this.renderWithHrefAndTarget_(typeConfig);
     const responsive =
       this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
     return dict({
       'width': responsive || this.element.getAttribute('width'),
       'height': responsive || this.element.getAttribute('height'),
+      'color': 'currentColor',
+      'background': 'inherit',
     });
   }
 
   /** @override */
   isLayoutSupported() {
     userAssert(
-      isExperimentOn(this.win, 'amp-social-share-v2'),
-      'expected amp-social-share-v2 experiment to be enabled'
+      isExperimentOn(this.win, 'amp-social-share-bento'),
+      'expected amp-social-share-bento experiment to be enabled'
     );
     return true;
   }
@@ -110,14 +114,10 @@ class AmpSocialShare extends PreactBaseElement {
    * Then triggers render on the Component with updated props.
    * @private
    * @param {!JsonObject} typeConfig
-   * @param {!../../../src/service/platform-impl.Platform} platform
    */
-  renderWithHrefAndTarget_(typeConfig, platform) {
+  renderWithHrefAndTarget_(typeConfig) {
     const customEndpoint = this.element.getAttribute('data-share-endpoint');
-    const shareEndpoint = user().assertString(
-      customEndpoint || typeConfig['shareEndpoint'],
-      'The data-share-endpoint attribute is required. %s'
-    );
+    const shareEndpoint = customEndpoint || typeConfig['shareEndpoint'] || '';
     const urlParams = typeConfig['defaultParams'] || dict();
     Object.assign(urlParams, getDataParamsFromAttributes(this.element));
     const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
@@ -130,39 +130,39 @@ class AmpSocialShare extends PreactBaseElement {
         bindings[bindingName] = urlParams[name];
       });
     }
-    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then((result) => {
-      const href = result;
-      // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
-      const {protocol, search} = Services.urlForDoc(this.element).parse(href);
+    urlReplacements
+      .expandUrlAsync(hrefWithVars, bindings)
+      .then((expandedUrl) => {
+        const {search} = Services.urlForDoc(this.element).parse(expandedUrl);
+        const target = this.element.getAttribute('data-target') || '_blank';
 
-      const isMailTo = protocol === 'mailto:';
-      const isSms = protocol === 'sms:';
-      const target =
-        platform.isIos() && (isMailTo || isSms)
-          ? '_top'
-          : this.element.getAttribute('data-target') || '_blank';
-
-      if (customEndpoint) {
-        this.mutateProps(
-          dict({
-            'endpoint': href,
-            'target': target,
-          })
-        );
-      } else {
-        this.mutateProps(
-          dict({
-            'params': parseQueryString(search),
-            'target': target,
-          })
-        );
-      }
-    });
+        if (customEndpoint) {
+          this.mutateProps(
+            dict({
+              'endpoint': expandedUrl,
+              'target': target,
+            })
+          );
+        } else {
+          this.mutateProps(
+            dict({
+              'params': parseQueryString(search),
+              'target': target,
+            })
+          );
+        }
+      });
   }
 }
 
 /** @override */
 AmpSocialShare['Component'] = SocialShare;
+
+/** @override */
+AmpSocialShare['layoutSizeDefined'] = true;
+
+/** @override */
+AmpSocialShare['passthroughNonEmpty'] = true;
 
 /** @override */
 AmpSocialShare['props'] = {
@@ -171,5 +171,5 @@ AmpSocialShare['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSocialShare);
+  AMP.registerElement(TAG, AmpSocialShare, CSS);
 });

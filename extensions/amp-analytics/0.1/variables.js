@@ -21,6 +21,10 @@ import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  getActiveExperimentBranches,
+  getExperimentBranch,
+} from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
@@ -174,6 +178,24 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
+ * If given an experiment name returns the branch id if a branch is selected.
+ * If no branch name given, it returns a comma separated list of active branch
+ * experiment ids and their names or an empty string if none exist.
+ * @param {!Window} win
+ * @param {string=} opt_expName
+ * @return {string}
+ */
+function experimentBranchesMacro(win, opt_expName) {
+  if (opt_expName) {
+    return getExperimentBranch(win, opt_expName) || '';
+  }
+  const branches = getActiveExperimentBranches(win);
+  return Object.keys(branches)
+    .map((expName) => `${expName}:${branches[expName]}`)
+    .join(',');
+}
+
+/**
  * Provides support for processing of advanced variable syntax like nested
  * expansions macros etc.
  */
@@ -236,6 +258,15 @@ export class VariableService {
     this.register_('SCROLL_LEFT', () =>
       Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
     );
+
+    this.register_('EXPERIMENT_BRANCHES', (opt_expName) =>
+      experimentBranchesMacro(this.ampdoc_.win, opt_expName)
+    );
+
+    // Returns the content of a meta tag in the ampdoc
+    this.register_('AMPDOC_META', (meta, defaultValue = '') => {
+      return this.ampdoc_.getMetaByName(meta) ?? defaultValue;
+    });
   }
 
   /**
@@ -269,7 +300,7 @@ export class VariableService {
             ),
           'FIRST_INPUT_DELAY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_INPUT_DELAY_VISIBLE
+              TickLabel.FIRST_INPUT_DELAY
             ),
           'CUMULATIVE_LAYOUT_SHIFT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(

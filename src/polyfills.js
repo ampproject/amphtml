@@ -16,7 +16,7 @@
 
 /** @fileoverview */
 
-import {getMode} from './mode';
+import {install as installAbortController} from './polyfills/abort-controller';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -53,17 +53,9 @@ if (self.document) {
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  installCustomElements(self, class {});
-  // The AMP and Inabox are launched separately and so there are two
-  // experiment constants.
-  if (
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL ||
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
-    getMode().localDev ||
-    getMode().test
-  ) {
+  if (!IS_SXG) {
+    installCustomElements(self, class {});
     installIntersectionObserver(self);
+    installAbortController(self);
   }
 }

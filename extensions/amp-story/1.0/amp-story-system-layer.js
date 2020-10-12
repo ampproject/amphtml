@@ -199,12 +199,14 @@ const TEMPLATE = {
               attrs: dict({
                 'class': PAUSE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL,
             },
             {
               tag: 'button',
               attrs: dict({
                 'class': PLAY_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL,
             },
           ],
         },
@@ -406,6 +408,14 @@ export class SystemLayer {
     });
 
     this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_AUDIO_UI,
+      (show) => {
+        this.onCanShowAudioUiUpdate_(show);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
       (show) => {
         this.onCanShowSharingUisUpdate_(show);
@@ -560,6 +570,21 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to updates to whether audio UI may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowAudioUi
+   * @private
+   */
+  onCanShowAudioUiUpdate_(canShowAudioUi) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-no-audio-ui',
+        !canShowAudioUi
+      );
+    });
+  }
+
+  /**
    * Reacts to updates to whether sharing UIs may be shown, and updates the UI
    * accordingly.
    * @param {boolean} canShowSharingUis
@@ -708,12 +733,15 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
         case UIType.DESKTOP_PANELS:
+          shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-panels');
           break;
         case UIType.DESKTOP_FULLBLEED:
+          shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
           break;
       }

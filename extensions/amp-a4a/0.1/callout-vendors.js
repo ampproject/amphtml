@@ -79,6 +79,12 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['PLACEMENT_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
+  prebidappnexuspsp: {
+    url:
+      'https://ib.adnxs.com/prebid/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['PLACEMENT_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
+    disableKeyAppend: true,
+  },
   prebidrubicon: {
     url:
       'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
@@ -112,6 +118,11 @@ const RTC_VENDORS = jsonConfiguration({
     url:
       'https://ads.servebom.com/tmntag.js?v=1.2&fmt=amp&o={%22p%22%3APLACEMENT_ID}&div_id=DIV_ID',
     macros: ['PLACEMENT_ID', 'DIV_ID'],
+    disableKeyAppend: true,
+  },
+  future: {
+    url: 'https://ads.servebom.com/amp?adunit=ADUNIT',
+    macros: ['ADUNIT'],
     disableKeyAppend: true,
   },
   glxm: {
@@ -187,6 +198,34 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['PUB_KEY', 'SITE_KEY'],
     errorReportingUrl:
       'https://events.browsiprod.com/events/amp?e=ERROR_TYPE&h=HREF&et=predict_error',
+    disableKeyAppend: true,
+  },
+  freestar: {
+    url: 'https://prebid-amp.pub.network/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
+  hubvisor: {
+    url:
+      'https://pbs.hubvisor.io/openrtb2/amp?tag_id=PLACEMENT_ID&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING',
+    macros: ['PLACEMENT_ID', 'CONSENT_STRING'],
+    disableKeyAppend: true,
+  },
+  t13: {
+    url:
+      'https://s2s.t13.io/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['TAG_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
+    disableKeyAppend: true,
+  },
+  andbeyond: {
+    url: 'https://prebid.andbeyond.media/amp.php?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
+  adpushup: {
+    url:
+      'https://amp.adpushup.com/prebidserver/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&curl=CANONICAL_URL&gdpr_consent=CONSENT_STRING&adc=ADCID&purl=HREF',
+    macros: ['TAG_ID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
 });

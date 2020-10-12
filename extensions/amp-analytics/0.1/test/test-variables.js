@@ -23,17 +23,18 @@ import {
   variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
 
-const fakeElement = document.documentElement;
-
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
+  let fakeElement;
   let variables;
 
   beforeEach(() => {
+    fakeElement = env.win.document.documentElement;
     installLinkerReaderService(env.win);
     variables = new VariableService(env.ampdoc);
   });
@@ -497,6 +498,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       return check('CUMULATIVE_LAYOUT_SHIFT', '1');
     });
 
+    it('should expand EXPERIMENT_BRANCHES to name:value comma separated list', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      forceExperimentBranch(env.win, 'exp2', '5678');
+      return check('EXPERIMENT_BRANCHES', 'exp1%3A1234%2Cexp2%3A5678');
+    });
+
+    it('EXPERIMENT_BRANCHES should be empty string if no branches', () => {
+      return check('EXPERIMENT_BRANCHES', '');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES(expName) to experiment value', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      return check('EXPERIMENT_BRANCHES(exp1)', '1234');
+    });
+
+    it('EXPERIMENT_BRANCHES(expName) should be empty string if not set', () => {
+      return check('EXPERIMENT_BRANCHES(exp1)', '');
+    });
+
     describe('$MATCH', () => {
       it('handles default index', () => {
         return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
@@ -565,6 +585,32 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       await check('SCROLL_TOP', '99');
       scrollTopValue = 99.5;
       await check('SCROLL_TOP', '100');
+    });
+
+    describe('AMPDOC_META', () => {
+      it('should replace with meta tag content', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'foo': 'bar',
+        });
+        return check('AMPDOC_META(foo)', 'bar');
+      });
+
+      it('should replace with "" when no meta tag', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({});
+        return check('AMPDOC_META(foo)', '');
+      });
+
+      it('should replace with default_value when no meta tag', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({});
+        return check('AMPDOC_META(foo, default_value)', 'default_value');
+      });
+
+      it('should prefer empty meta tag over default_value', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'foo': '',
+        });
+        return check('AMPDOC_META(foo, default_value)', '');
+      });
     });
   });
 

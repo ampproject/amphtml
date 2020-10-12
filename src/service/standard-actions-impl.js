@@ -19,11 +19,7 @@ import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, user, userAssert} from '../log';
-import {
-  getAmpdoc,
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {isFiniteNumber, toWin} from '../types';
 import {startsWith} from '../string';
 import {tryFocus} from '../dom';
@@ -60,23 +56,17 @@ const AMP_CSS_RE = /^i-amphtml-/;
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
- * @implements {../service.EmbeddableService}
- * @private Visible for testing.
+ * @visibleForTesting
  */
 export class StandardActions {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Window=} opt_win
    */
-  constructor(ampdoc, opt_win) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    const context = opt_win
-      ? opt_win.document.documentElement
-      : ampdoc.getHeadNode();
+    const context = ampdoc.getHeadNode();
 
     /** @const @private {!./mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
@@ -87,19 +77,6 @@ export class StandardActions {
     // Explicitly not setting `Action` as a member to scope installation to one
     // method and for bundle size savings. 💰
     this.installActions_(Services.actionServiceForDoc(context));
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      'standard-actions',
-      new StandardActions(ampdoc, embedWin)
-    );
   }
 
   /**
@@ -174,7 +151,9 @@ export class StandardActions {
         return this.handleScrollTo_(invocation);
 
       case 'goBack':
-        Services.historyForDoc(this.ampdoc).goBack();
+        Services.historyForDoc(this.ampdoc).goBack(
+          /* navigate */ !!(args && args['navigate'] === true)
+        );
         return null;
 
       case 'print':

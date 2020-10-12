@@ -30,13 +30,6 @@ const {
 const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
-const {
-  processGithubIssues,
-} = require('./build-system/tasks/process-github-issues');
-const {
-  storybookAmp,
-  storybookPreact,
-} = require('./build-system/tasks/storybook');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
@@ -51,6 +44,7 @@ const {cherryPick} = require('./build-system/tasks/cherry-pick');
 const {clean} = require('./build-system/tasks/clean');
 const {codecovUpload} = require('./build-system/tasks/codecov-upload');
 const {compileJison} = require('./build-system/tasks/compile-jison');
+const {coverageMap} = require('./build-system/tasks/coverage-map');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
@@ -64,16 +58,18 @@ const {getZindex} = require('./build-system/tasks/get-zindex');
 const {integration} = require('./build-system/tasks/integration');
 const {lint} = require('./build-system/tasks/lint');
 const {makeExtension} = require('./build-system/tasks/extension-generator');
-const {nailgunStart, nailgunStop} = require('./build-system/tasks/nailgun');
 const {performanceUrls} = require('./build-system/tasks/performance-urls');
 const {performance} = require('./build-system/tasks/performance');
 const {prCheck} = require('./build-system/tasks/pr-check');
 const {prependGlobal} = require('./build-system/tasks/prepend-global');
 const {presubmit} = require('./build-system/tasks/presubmit-checks');
 const {prettify} = require('./build-system/tasks/prettify');
+const {release} = require('./build-system/tasks/release');
 const {serverTests} = require('./build-system/tasks/server-tests');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
+const {storybook} = require('./build-system/tasks/storybook');
+const {testReportUpload} = require('./build-system/tasks/test-report-upload');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
@@ -147,6 +143,7 @@ createTask('cherry-pick', cherryPick);
 createTask('clean', clean);
 createTask('codecov-upload', codecovUpload);
 createTask('compile-jison', compileJison);
+createTask('coverage-map', coverageMap);
 createTask('create-golden-css', createGoldenCss);
 createTask('css', css);
 createTask('csvify-size', csvifySize);
@@ -160,8 +157,6 @@ createTask('get-zindex', getZindex);
 createTask('integration', integration);
 createTask('lint', lint);
 createTask('make-extension', makeExtension);
-createTask('nailgun-start', nailgunStart);
-createTask('nailgun-stop', nailgunStop);
 createTask('performance', performance);
 createTask('performance-urls', performanceUrls);
 createTask('pr-check', prCheck);
@@ -169,12 +164,12 @@ createTask('prepend-global', prependGlobal);
 createTask('presubmit', presubmit);
 createTask('prettify', prettify);
 createTask('process-3p-github-pr', process3pGithubPr);
-createTask('process-github-issues', processGithubIssues);
+createTask('release', release);
+createTask('test-report-upload', testReportUpload);
 createTask('serve', serve);
 createTask('server-tests', serverTests);
 createTask('size', size);
-createTask('storybook-amp', storybookAmp);
-createTask('storybook-preact', storybookPreact);
+createTask('storybook', storybook);
 createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);

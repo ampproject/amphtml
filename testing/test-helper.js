@@ -87,6 +87,21 @@ export function whenCalled(spy, opt_callCount = 1) {
   );
 }
 
+/**
+ * Resolves a promise when the callback returns a truthy value.
+ * @param {function():?} callback
+ * @param {string} errorMessage
+ * @return {!Promise}
+ */
+export function waitFor(callback, errorMessage) {
+  return poll(
+    errorMessage,
+    callback,
+    undefined /* opt_onError */,
+    200 /* opt_timeout */
+  );
+}
+
 const noneValues = {
   'animation-name': ['none', 'initial'],
   'animation-duration': ['0s', 'initial'],
@@ -95,7 +110,7 @@ const noneValues = {
   'animation-iteration-count': ['1', 'initial'],
   'animation-direction': ['normal', 'initial'],
   'animation-fill-mode': ['none', 'initial'],
-  'animation-play-state': ['running', 'initial'],
+  'animation-play-state': ['running', 'initial', /* IE11 */ ''],
 };
 
 /**
@@ -143,8 +158,8 @@ export function assertScreenReaderElement(element, {index = 0} = {}) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
-// Use a browserId to avoid cross-browser race conditions
-// when testing in Saucelabs.
+// Use a browserId to avoid cross-browser race conditions.
+// TODO(amphtml): Remove browserId now that we no longer test on Sauce Labs.
 /** @const {string} */
 const browserId = (Date.now() + Math.random()).toString(32);
 
@@ -183,14 +198,14 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
+    return RequestBank.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
       res.json()
     );
   }
 
   static tearDown() {
     const url = `${REQUEST_URL}/teardown/`;
-    return this.fetch_(url, 'tearDown');
+    return RequestBank.fetch_(url, 'tearDown');
   }
 
   static fetch_(url, action, timeout = 10000) {
@@ -230,17 +245,41 @@ export class BrowserController {
   }
 
   /**
+   * Helper to support providing already-selected elements to methods.
+   * @param {string|Element} selectorOrElement
+   * @return {Element}
+   */
+  querySelectorOrElement(selectorOrElement) {
+    return typeof selectorOrElement == 'string'
+      ? this.rootNode_.querySelector(selectorOrElement)
+      : selectorOrElement;
+  }
+
+  /**
+   * Helper to support providing already-selected elements to methods.
+   * @param {string|Element} selectorOrElement
+   * @return {Array<Element>}
+   */
+  querySelectorAllOrElement(selectorOrElement) {
+    return typeof selectorOrElement == 'string'
+      ? this.rootNode_.querySelectorAll(selectorOrElement)
+      : [selectorOrElement];
+  }
+
+  /**
    * @param {string} hostSelector
    * @param {number=} timeout
    * @return {!Promise}
    */
-  waitForShadowRoot(hostSelector, timeout = 10000) {
-    const element = this.rootNode_.querySelector(hostSelector);
+  waitForShadowRoot(hostSelectorOrElement, timeout = 10000) {
+    const element = this.querySelectorOrElement(hostSelectorOrElement);
     if (!element) {
-      throw new Error(`BrowserController query failed: ${hostSelector}`);
+      throw new Error(
+        `BrowserController query failed: ${hostSelectorOrElement}`
+      );
     }
     return poll(
-      `"${hostSelector}" to host shadow doc`,
+      `"${hostSelectorOrElement}" to host shadow doc`,
       () => !!element.shadowRoot,
       /* onError */ undefined,
       timeout
@@ -252,13 +291,13 @@ export class BrowserController {
    * @param {number=} timeout
    * @return {!Promise}
    */
-  waitForElementBuild(selector, timeout = 5000) {
-    const elements = this.rootNode_.querySelectorAll(selector);
+  waitForElementBuild(selectorOrElement, timeout = 5000) {
+    const elements = this.querySelectorAllOrElement(selectorOrElement);
     if (!elements.length) {
-      throw new Error(`BrowserController query failed: ${selector}`);
+      throw new Error(`BrowserController query failed: ${selectorOrElement}`);
     }
     return poll(
-      `"${selector}" to build`,
+      `"${selectorOrElement}" to build`,
       () => {
         const someNotBuilt = [].some.call(elements, (e) =>
           e.classList.contains('i-amphtml-notbuilt')
@@ -275,13 +314,13 @@ export class BrowserController {
    * @param {number=} timeout
    * @return {!Promise}
    */
-  waitForElementLayout(selector, timeout = 10000) {
-    const elements = this.rootNode_.querySelectorAll(selector);
+  waitForElementLayout(selectorOrElement, timeout = 10000) {
+    const elements = this.querySelectorAllOrElement(selectorOrElement);
     if (!elements.length) {
-      throw new Error(`BrowserController query failed: ${selector}`);
+      throw new Error(`BrowserController query failed: ${selectorOrElement}`);
     }
     return poll(
-      `"${selector}" to layout`,
+      `"${selectorOrElement}" to layout`,
       () => {
         // AMP elements set `readyState` to complete when their
         // layoutCallback() promise is resolved.
@@ -296,8 +335,8 @@ export class BrowserController {
     );
   }
 
-  click(selector) {
-    const element = this.rootNode_.querySelector(selector);
+  click(selectorOrElement) {
+    const element = this.querySelectorOrElement(selectorOrElement);
     if (element) {
       element.dispatchEvent(new /*OK*/ CustomEvent('click', {bubbles: true}));
     }

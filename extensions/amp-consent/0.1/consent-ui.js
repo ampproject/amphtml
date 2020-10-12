@@ -32,19 +32,26 @@ import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
-const DEFAULT_INITIAL_HEIGHT = '30vh';
+const MINIMUM_INITIAL_HEIGHT = 10;
+const DEFAULT_INITIAL_HEIGHT = 30;
+const MODAL_HEIGHT_ENABLED = 60;
+const MAX_INITIAL_HEIGHT = 80;
 const DEFAULT_ENABLE_BORDER = true;
 const FULLSCREEN_SUCCESS = 'Entering fullscreen.';
 const FULLSCREEN_ERROR =
   'Could not enter fullscreen. Fullscreen is only supported ' +
-  'when the iframe is visible and after user interaction.';
+  'when the iframe is visible as a bottom sheet and after ' +
+  'user interaction.';
 const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
 const BUTTON_ACTION_CAPTION = 'Focus Prompt';
+const CANCEL_OVERLAY = 'cancelFullOverlay';
+const REQUEST_OVERLAY = 'requestFullOverlay';
+
+const IFRAME_RUNNING_TIMEOUT = 1000;
 
 export const actionState = {
   error: 'error',
@@ -59,12 +66,13 @@ export const ampConsentMessageType = {
 export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
+  modal: 'i-amphtml-consent-ui-modal',
   in: 'i-amphtml-consent-ui-in',
   loading: 'i-amphtml-consent-ui-loading',
   fill: 'i-amphtml-consent-ui-fill',
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
-  enableBorder: 'i-amphtml-consent-ui-enable-border',
+  borderEnabled: 'i-amphtml-consent-ui-border-enabled',
   screenReaderDialog: 'i-amphtml-consent-alertdialog',
 };
 
@@ -114,12 +122,6 @@ export class ConsentUI {
     this.srAlertShown_ = false;
 
     /** @private {boolean} */
-    this.restrictFullscreenOn_ = isExperimentOn(
-      baseInstance.win,
-      'amp-consent-restrict-fullscreen'
-    );
-
-    /** @private {boolean} */
     this.scrollEnabled_ = true;
 
     /** @private {?Element} */
@@ -152,6 +154,9 @@ export class ConsentUI {
     /** @private {?Deferred} */
     this.iframeReady_ = null;
 
+    /** @private {boolean} */
+    this.removeIframe_ = false;
+
     /** @private {?JsonObject} */
     this.clientConfig_ = null;
 
@@ -159,10 +164,13 @@ export class ConsentUI {
     this.placeholder_ = null;
 
     /** @private {string} */
-    this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
+    this.initialHeight_ = `${DEFAULT_INITIAL_HEIGHT}vh`;
 
     /** @private {boolean} */
-    this.enableBorder_ = DEFAULT_ENABLE_BORDER;
+    this.borderEnabled_ = DEFAULT_ENABLE_BORDER;
+
+    /** @private {boolean} */
+    this.modalEnabled_ = false;
 
     /** @private {boolean} */
     this.isActionPromptTrigger_ = false;
@@ -216,7 +224,7 @@ export class ConsentUI {
         this.parent_,
         promptUISrc
       );
-      this.ui_ = this.createPromptIframe_();
+      this.ui_ = this.createPromptIframe_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
     }
@@ -229,6 +237,10 @@ export class ConsentUI {
   show(isActionPromptTrigger) {
     if (!this.ui_) {
       // No prompt UI specified, nothing to do
+      return;
+    }
+    if (this.isPostPrompt_ && !this.parent_.contains(this.ui_)) {
+      toggle(this.ui_, true);
       return;
     }
     toggle(dev().assertElement(this.parent_), true);
@@ -258,10 +270,6 @@ export class ConsentUI {
           this.maybeShowSrAlert_();
 
           this.showIframe_();
-
-          if (!this.isPostPrompt_ && !this.restrictFullscreenOn_) {
-            this.ui_./*OK*/ focus();
-          }
         });
       });
     } else {
@@ -359,8 +367,9 @@ export class ConsentUI {
    * @param {!JsonObject} data
    */
   handleReady_(data) {
-    this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
-    this.enableBorder_ = DEFAULT_ENABLE_BORDER;
+    this.initialHeight_ = `${DEFAULT_INITIAL_HEIGHT}vh`;
+    this.borderEnabled_ = DEFAULT_ENABLE_BORDER;
+    this.modalEnabled_ = false;
 
     // Set our initial height
     if (data['initialHeight']) {
@@ -369,14 +378,25 @@ export class ConsentUI {
         data['initialHeight'].indexOf('vh') >= 0
       ) {
         const dataHeight = parseInt(data['initialHeight'], 10);
+        // Set initialHeight to max height fallback if applicable
+        this.initialHeight_ =
+          dataHeight >= MAX_INITIAL_HEIGHT
+            ? `${MAX_INITIAL_HEIGHT}vh`
+            : this.initialHeight_;
 
-        if (dataHeight >= 10 && dataHeight <= 60) {
+        if (
+          dataHeight >= MINIMUM_INITIAL_HEIGHT &&
+          dataHeight <= MAX_INITIAL_HEIGHT
+        ) {
           this.initialHeight_ = `${dataHeight}vh`;
+          this.modalEnabled_ = dataHeight > MODAL_HEIGHT_ENABLED;
+          // Force overlay if modal is enabled.
+          this.overlayEnabled_ = this.modalEnabled_ || this.overlayEnabled_;
         } else {
           user().error(
             TAG,
             `Inavlid initial height: ${data['initialHeight']}.` +
-              'Minimum: 10vh. Maximum: 60vh.'
+              `Minimum: ${MINIMUM_INITIAL_HEIGHT}vh. Maximum: ${MAX_INITIAL_HEIGHT}vh.`
           );
         }
       } else {
@@ -388,9 +408,9 @@ export class ConsentUI {
       }
     }
 
-    // Enable/disable our border
-    if (data['border'] === false) {
-      this.enableBorder_ = false;
+    // Disable our border, if set to false and not modal view.
+    if (data['border'] === false && !this.modalEnabled_) {
+      this.borderEnabled_ = false;
     }
 
     this.iframeReady_.resolve();
@@ -406,11 +426,7 @@ export class ConsentUI {
 
     this.resetAnimationStyles_();
 
-    this.viewer_.sendMessage(
-      'requestFullOverlay',
-      dict(),
-      /* cancelUnsent */ true
-    );
+    this.sendViewerEvent_(REQUEST_OVERLAY);
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
@@ -421,13 +437,22 @@ export class ConsentUI {
   }
 
   /**
+   * Send viewer an event.
+   * @param {string} event
+   */
+  sendViewerEvent_(event) {
+    this.viewer_.sendMessage(event, dict(), /* cancelUnsent */ true);
+  }
+
+  /**
    * Create the iframe if promptUISrc is valid
+   * @param {string} promptUISrc
    * @return {!Element}
    */
-  createPromptIframe_() {
+  createPromptIframe_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
     const sandbox = ['allow-scripts', 'allow-popups'];
-    const allowSameOrigin = this.allowSameOrigin_(iframe.src);
+    const allowSameOrigin = this.allowSameOrigin_(promptUISrc);
     if (allowSameOrigin) {
       sandbox.push('allow-same-origin');
     }
@@ -447,7 +472,6 @@ export class ConsentUI {
     const urlService = Services.urlForDoc(this.parent_);
     const srcUrl = urlService.parse(src);
     const containerUrl = urlService.parse(this.ampdoc_.getUrl());
-
     return srcUrl.origin != containerUrl.origin;
   }
 
@@ -521,6 +545,7 @@ export class ConsentUI {
     toggle(dev().assertElement(this.ui_), false);
 
     const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
+      this.removeIframe_ = false;
       this.ui_.src = expandedSrc;
       return this.getClientInfoPromise_().then((clientInfo) => {
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
@@ -545,6 +570,9 @@ export class ConsentUI {
   showIframe_() {
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeActive);
+    if (this.modalEnabled_) {
+      classList.add(consentUiClasses.modal);
+    }
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
 
@@ -578,25 +606,30 @@ export class ConsentUI {
    */
   resetIframe_() {
     const {classList} = this.parent_;
-
-    // Remove the iframe active to go back to our normal height
+    // It is ok to remove classes even when they're not present
     classList.remove(consentUiClasses.iframeActive);
+    classList.remove(consentUiClasses.modal);
+    classList.remove(consentUiClasses.borderEnabled);
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.iframeFullscreen);
+    // TODO(micajuineho) consolidate code to user viewport
     if (this.isFullscreen_) {
-      this.viewer_.sendMessage(
-        'cancelFullOverlay',
-        dict(),
-        /* cancelUnsent */ true
-      );
+      this.sendViewerEvent_(CANCEL_OVERLAY);
+    } else if (this.modalEnabled_) {
+      this.viewport_.leaveLightboxMode();
     }
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
     toggle(dev().assertElement(this.placeholder_), false);
-    removeElement(dev().assertElement(this.ui_));
+    this.removeIframe_ = true;
+    this.win_.setTimeout(() => {
+      if (this.removeIframe_) {
+        removeElement(dev().assertElement(this.ui_));
+      }
+    }, IFRAME_RUNNING_TIMEOUT);
   }
 
   /**
@@ -605,41 +638,39 @@ export class ConsentUI {
    * Clicking on the button will transfer focus to the iframe.
    */
   maybeShowSrAlert_() {
-    if (this.restrictFullscreenOn_) {
-      // If the SR alert has been shown, don't show it again
-      if (this.srAlertShown_) {
-        return;
-      }
-
-      const alertDialog = this.document_.createElement('div');
-      const button = this.document_.createElement('button');
-      const titleDiv = this.document_.createElement('div');
-
-      alertDialog.setAttribute('role', 'alertdialog');
-
-      titleDiv.textContent = this.consentPromptCaption_;
-      button.textContent = this.buttonActionCaption_;
-      button.onclick = () => {
-        tryFocus(dev().assertElement(this.ui_));
-      };
-
-      alertDialog.appendChild(titleDiv);
-      alertDialog.appendChild(button);
-
-      // Style to be visiblly hidden, but not hidden from the SR
-      const {classList} = alertDialog;
-      classList.add(consentUiClasses.screenReaderDialog);
-
-      this.baseInstance_.element.appendChild(alertDialog);
-      tryFocus(button);
-
-      // SR alert was shown when consent prompt loaded for
-      // the first time. Don't show it again
-      this.srAlertShown_ = true;
-
-      // Keep reference of the SR alert to remove later
-      this.srAlert_ = alertDialog;
+    // If the SR alert has been shown, don't show it again
+    if (this.srAlertShown_) {
+      return;
     }
+
+    const alertDialog = this.document_.createElement('div');
+    const button = this.document_.createElement('button');
+    const titleDiv = this.document_.createElement('div');
+
+    alertDialog.setAttribute('role', 'alertdialog');
+
+    titleDiv.textContent = this.consentPromptCaption_;
+    button.textContent = this.buttonActionCaption_;
+    button.onclick = () => {
+      tryFocus(dev().assertElement(this.ui_));
+    };
+
+    alertDialog.appendChild(titleDiv);
+    alertDialog.appendChild(button);
+
+    // Style to be visiblly hidden, but not hidden from the SR
+    const {classList} = alertDialog;
+    classList.add(consentUiClasses.screenReaderDialog);
+
+    this.baseInstance_.element.appendChild(alertDialog);
+    tryFocus(button);
+
+    // SR alert was shown when consent prompt loaded for
+    // the first time. Don't show it again
+    this.srAlertShown_ = true;
+
+    // Keep reference of the SR alert to remove later
+    this.srAlert_ = alertDialog;
   }
 
   /**
@@ -675,10 +706,15 @@ export class ConsentUI {
     }
     setImportantStyles(this.parent_, {
       transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
+      '--i-amphtml-modal-height': `${this.initialHeight_}`,
     });
-    if (this.enableBorder_) {
+    // Border is default with modal enabled and option with non-modal
+    if (this.borderEnabled_ || this.modalEnabled_) {
       const {classList} = this.parent_;
-      classList.add(consentUiClasses.enableBorder);
+      classList.add(consentUiClasses.borderEnabled);
+    }
+    if (this.modalEnabled_) {
+      this.viewport_.enterLightboxMode();
     }
   }
 
@@ -782,10 +818,11 @@ export class ConsentUI {
       // Do nothing iff:
       // - iframe not visible or
       // - iframe not active element && not called via actionPromptTrigger
+      // - iframe is not modalEnabled
       if (
         !this.isIframeVisible_ ||
-        (this.restrictFullscreenOn_ &&
-          this.document_.activeElement !== this.ui_ &&
+        this.modalEnabled_ ||
+        (this.document_.activeElement !== this.ui_ &&
           !this.isActionPromptTrigger_)
       ) {
         user().warn(TAG, FULLSCREEN_ERROR);

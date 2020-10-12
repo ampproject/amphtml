@@ -16,7 +16,6 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {STICKY_AD_PADDING_BOTTOM_EXP} from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
 import {
   computedStyle,
@@ -25,11 +24,6 @@ import {
   toggle,
 } from '../../../src/style';
 import {dev, user, userAssert} from '../../../src/log';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
 
 class AmpStickyAd extends AMP.BaseElement {
@@ -63,31 +57,6 @@ class AmpStickyAd extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
-
-    // Setting padding-bottom to avoid iPhone home bar
-    if (isExperimentOn(this.win, 'sticky-ad-padding-bottom')) {
-      const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-        [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
-          isTrafficEligible: () => true,
-          branches: [
-            [STICKY_AD_PADDING_BOTTOM_EXP.control],
-            [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
-          ],
-        },
-      });
-      randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-      if (
-        getExperimentBranch(this.win, STICKY_AD_PADDING_BOTTOM_EXP.id) ==
-        STICKY_AD_PADDING_BOTTOM_EXP.experiment
-      ) {
-        setStyle(
-          this.element,
-          'padding-bottom',
-          'env(safe-area-inset-bottom, 0px)'
-        );
-      }
-    }
 
     const children = this.getRealChildren();
     userAssert(

@@ -167,7 +167,7 @@ describes.repeated(
           // Mock the actual network request.
           listMock
             .expects('fetch_')
-            .withExactArgs(!!opts.refresh, /* token */ undefined)
+            .withExactArgs(!!opts.refresh)
             .returns(Promise.resolve(fetched))
             .atLeast(1);
 
@@ -314,7 +314,7 @@ describes.repeated(
                   list.getPlaceholder = () => null;
                   allowConsoleError(() => {
                     expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list with layout=container relies on a placeholder/
+                      /amp-list\[layout=container\] requires a placeholder/
                     );
                   });
                 });
@@ -870,26 +870,34 @@ describes.repeated(
               const listItem = document.createElement('div');
               listItem.setAttribute('role', 'item');
               listContainer.appendChild(listItem);
+
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve({html}));
               ssrTemplateHelper.applySsrOrCsrTemplate.returns(
-                Promise.resolve(listContainer)
+                Promise.resolve(rendered)
               );
+
               listMock
                 .expects('updateBindings_')
                 .returns(Promise.resolve(listContainer))
                 .once();
+              const renderSpy = env.sandbox.spy();
               listMock
                 .expects('render_')
                 .withExactArgs(listContainer, false)
-                .returns(Promise.resolve());
+                .callsFake(() => {
+                  renderSpy();
+                  return Promise.resolve();
+                })
+                .once();
 
-              ssrTemplateHelper.applySsrOrCsrTemplate
-                .withArgs(element, html)
-                .returns(Promise.resolve(rendered));
-
-              yield list.layoutCallback();
+              const layoutSpy = env.sandbox.spy();
+              yield list.layoutCallback().then(() => {
+                layoutSpy();
+              });
+              // layoutCallback() should be chained to render_().
+              expect(renderSpy).to.be.calledBefore(layoutSpy);
 
               const request = env.sandbox.match({
                 xhrUrl:
@@ -917,8 +925,6 @@ describes.repeated(
             });
 
             it('"amp-state:" uri should skip rendering and emit an error', () => {
-              toggleExperiment(win, 'amp-list-init-from-state', true);
-
               const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
               const ampStateJson = doc.createElement('script');
@@ -926,6 +932,16 @@ describes.repeated(
               ampStateEl.appendChild(ampStateJson);
               doc.body.appendChild(ampStateEl);
               list.element.setAttribute('src', 'amp-state:okapis');
+
+              listMock.expects('scheduleRender_').never();
+
+              const errorMsg = /cannot be used in SSR mode/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
+            });
+
+            it('"amp-script:" uri should skip rendering and emit an error', () => {
+              list.element.setAttribute('src', 'amp-script:fetchData');
 
               listMock.expects('scheduleRender_').never();
 
@@ -976,6 +992,106 @@ describes.repeated(
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleFallback').withExactArgs(true).once();
               return list.layoutCallback().catch(() => {});
+            });
+          });
+
+          describe('Using amp-script: protocol', () => {
+            let ampScriptEl;
+            beforeEach(() => {
+              resetExperimentTogglesForTesting(win);
+
+              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              ampScriptEl = document.createElement('amp-script');
+              ampScriptEl.setAttribute('id', 'example');
+              doc.body.appendChild(ampScriptEl);
+
+              element = createAmpListElement();
+              element.setAttribute('src', 'amp-script:example.fetchData');
+              element.toggleLoading = () => {};
+              list = createAmpList(element);
+            });
+
+            it('should throw an error if given an invalid format', async () => {
+              const errorMsg = /URIs must be of the format/;
+
+              element.setAttribute('src', 'amp-script:fetchData');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+
+              element.setAttribute('src', 'amp-script:too.many.dots');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+
+              element.setAttribute('src', 'amp-script:zeroLengthSecondArg.');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
+            it('should throw if specified amp-script does not exist', () => {
+              element.setAttribute('src', 'amp-script:doesnotexist.fn');
+
+              const errorMsg = /could not find <amp-script> with/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
+            it('should fail if function call rejects', async () => {
+              ampScriptEl.getImpl = () =>
+                Promise.resolve({
+                  callFunction: () =>
+                    Promise.reject('Invalid function identifier.'),
+                });
+
+              listMock.expects('toggleLoading').withExactArgs(false).once();
+              return expect(
+                list.layoutCallback()
+              ).to.eventually.be.rejectedWith(/Invalid function identifier/);
+            });
+
+            it('should render non-array if single-item is set', async () => {
+              const callFunctionResult = {'items': {title: 'Title'}};
+              element.setAttribute('single-item', 'true');
+              ampScriptEl.getImpl = () =>
+                Promise.resolve({
+                  callFunction(fnId) {
+                    if (fnId === 'fetchData') {
+                      return Promise.resolve(callFunctionResult);
+                    }
+                    return Promise.reject(new Error(`Invalid fnId: ${fnId}`));
+                  },
+                });
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs(
+                  [{title: 'Title'}],
+                  /*append*/ false,
+                  callFunctionResult
+                )
+                .returns(Promise.resolve())
+                .once();
+
+              await list.layoutCallback();
+            });
+
+            it('should render a list from AmpScriptService provided data', async () => {
+              ampScriptEl.getImpl = () =>
+                Promise.resolve({
+                  callFunction(fnId) {
+                    if (fnId === 'fetchData') {
+                      return Promise.resolve({items: [3, 2, 1]});
+                    }
+                    return Promise.reject(new Error(`Invalid fnId: ${fnId}`));
+                  },
+                });
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs([3, 2, 1], /*append*/ false, {items: [3, 2, 1]})
+                .returns(Promise.resolve())
+                .once();
+
+              await list.layoutCallback();
             });
           });
         }); // without amp-bind
@@ -1072,44 +1188,6 @@ describes.repeated(
               expect(element.getAttribute('src')).to.equal('');
             });
           });
-
-          it(
-            "should fetch with viewer auth token if 'crossorigin=" +
-              "amp-viewer-auth-token-via-post' attribute is present",
-            () => {
-              env.sandbox
-                .stub(Services, 'viewerAssistanceForDocOrNull')
-                .returns(
-                  Promise.resolve({
-                    getIdTokenPromise: () => Promise.resolve('idToken'),
-                  })
-                );
-              element.setAttribute(
-                'crossorigin',
-                'amp-viewer-auth-token-via-post'
-              );
-              const fetched = {items: DEFAULT_ITEMS};
-              const foo = doc.createElement('div');
-              const rendered = [foo];
-              const opts = DEFAULT_LIST_OPTS;
-
-              listMock
-                .expects('fetch_')
-                .withExactArgs(!!opts.refresh, 'idToken')
-                .returns(Promise.resolve(fetched))
-                .atLeast(1);
-
-              // Stub the rendering of the template.
-              const itemsToRender = fetched[opts.expr];
-              ssrTemplateHelper.applySsrOrCsrTemplate
-                .withArgs(element, itemsToRender)
-                .returns(Promise.resolve(rendered));
-
-              expectRender();
-
-              return list.layoutCallback().then(() => Promise.resolve());
-            }
-          );
 
           it('should reset if `reset-on-refresh` is set (new URL)', () => {
             element.setAttribute('reset-on-refresh', '');
@@ -1335,24 +1413,14 @@ describes.repeated(
           });
 
           describe('Using amp-state: protocol', () => {
-            const experimentName = 'amp-list-init-from-state';
-
             beforeEach(() => {
-              resetExperimentTogglesForTesting(win);
               element = createAmpListElement();
               element.setAttribute('src', 'amp-state:okapis');
               element.toggleLoading = () => {};
               list = createAmpList(element);
             });
 
-            it('should throw an error if used without the experiment enabled', async () => {
-              const errorMsg = /Invalid value: amp-state:okapis/;
-              expectAsyncConsoleError(errorMsg);
-              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
-            });
-
             it('should throw error if there is no associated amp-state el', async () => {
-              toggleExperiment(win, experimentName, true);
               bind.getStateAsync = () => Promise.reject();
 
               const errorMsg = /element with id 'okapis' was not found/;
@@ -1361,7 +1429,6 @@ describes.repeated(
             });
 
             it('should log an error if amp-bind was not included', async () => {
-              toggleExperiment(win, experimentName, true);
               Services.bindForDocOrNull.returns(Promise.resolve(null));
 
               const ampStateEl = doc.createElement('amp-state');
@@ -1377,7 +1444,6 @@ describes.repeated(
             });
 
             it('should render a list using local data', async () => {
-              toggleExperiment(win, experimentName, true);
               bind.getStateAsync = () => Promise.resolve({items: [1, 2, 3]});
 
               const ampStateEl = doc.createElement('amp-state');
@@ -1397,7 +1463,6 @@ describes.repeated(
             });
 
             it('should render a list using async data', async () => {
-              toggleExperiment(win, experimentName, true);
               const {resolve, promise} = new Deferred();
               bind.getStateAsync = () => promise;
 

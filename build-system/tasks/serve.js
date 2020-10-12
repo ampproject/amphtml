@@ -22,8 +22,8 @@ const header = require('connect-header');
 const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
+const open = require('opn');
 const path = require('path');
-const watch = require('gulp-watch');
 const {
   buildNewServer,
   SERVER_TRANSFORM_PATH,
@@ -36,11 +36,14 @@ const {
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
-const {distNailgunPort, stopNailgunServer} = require('./nailgun');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {watchDebounceDelay} = require('./helpers');
+const {watch} = require('gulp');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+
+const HOST = argv.host || 'localhost';
+const PORT = argv.port || 8000;
 
 // Used for logging.
 let url = null;
@@ -101,8 +104,8 @@ async function startServer(
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
-    host: argv.host || 'localhost',
-    port: argv.port || 8000,
+    host: HOST,
+    port: PORT,
     https: argv.https,
     preferHttp1: true,
     silent: true,
@@ -113,6 +116,11 @@ async function startServer(
   await startedPromise;
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
+  if (argv.coverage == 'live') {
+    const covUrl = `${url}/coverage`;
+    log(green('Collecting live code coverage at'), cyan(covUrl));
+    await Promise.all([open(covUrl), open(url)]);
+  }
   logServeMode();
 }
 
@@ -130,9 +138,6 @@ function resetServerFiles() {
  * Stops the currently running server
  */
 async function stopServer() {
-  if (lazyBuild && argv.compiled) {
-    await stopNailgunServer(distNailgunPort);
-  }
   if (url) {
     connect.serverClose();
     log(green('Stopped server at'), cyan(url));
@@ -144,7 +149,6 @@ async function stopServer() {
  * Closes the existing server and restarts it
  */
 async function restartServer() {
-  await stopServer();
   if (argv.new_server) {
     try {
       buildNewServer();
@@ -181,7 +185,7 @@ async function doServe(lazyBuild = false) {
   const watchFunc = async () => {
     await restartServer();
   };
-  watch(serverFiles, debounce(watchFunc, watchDebounceDelay));
+  watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
   if (argv.new_server) {
     buildNewServer();
   }
@@ -196,6 +200,8 @@ module.exports = {
   doServe,
   startServer,
   stopServer,
+  HOST,
+  PORT,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
@@ -213,4 +219,7 @@ serve.flags = {
   esm: '  Serve ESM JS (requires the use of --new_server)',
   cdn: '  Serve current prod JS',
   rtv: '  Serve JS from the RTV provided',
+  coverage:
+    '  Serve instrumented code to collect coverage info; use ' +
+    '--coverage=live to auto-report coverage on page unload',
 };

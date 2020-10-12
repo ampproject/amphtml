@@ -258,7 +258,7 @@ AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohib
 - [amp-img](https://amp.dev/documentation/components/amp-img)
 - [amp-layout](https://amp.dev/documentation/components/amp-layout)
 - [amp-lightbox](https://amp.dev/documentation/components/amp-lightbox)
-- amp-mraid, on an experimental basis. If you're considering using this, please open an issue at [wg-ads](https://github.com/ampproject/wg-ads/issues/new).
+- amp-mraid, on an experimental basis. If you're considering using this, please open an issue at [wg-monetization](https://github.com/ampproject/wg-monetization/issues/new).
 - [amp-mustache](https://amp.dev/documentation/components/amp-mustache)
 - [amp-pixel](https://amp.dev/documentation/components/amp-pixel)
 - [amp-position-observer](https://amp.dev/documentation/components/amp-position-observer)

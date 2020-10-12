@@ -257,7 +257,9 @@ function buildStringStyleForTweet(embedData) {
   return `{
     width: ${px(embedData.width)} !important;
     transform: ${embedData.transform} !important;
-    margin: 0 ${embedData.horizontalMargin}px !important;
+    margin: ${embedData.verticalMargin}px ${
+    embedData.horizontalMargin
+  }px !important;
     }`;
 }
 
@@ -311,6 +313,9 @@ function measureStylesForTwitter(state, pageRect, elRect) {
   state.scaleFactor =
     Math.min(elRect.width, MAX_TWEET_WIDTH_PX) / state.newWidth;
 
+  const shrinkedSize = elRect.height * state.scaleFactor;
+
+  state.verticalMargin = -1 * ((elRect.height - shrinkedSize) / 2);
   state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
 
   return state;
@@ -395,6 +400,7 @@ function updateStylesForTwitter(elId, state) {
     scaleFactor: state.scaleFactor,
     transform: `scale(${state.scaleFactor})`,
     horizontalMargin: state.horizontalMargin,
+    verticalMargin: state.verticalMargin,
   };
 }
 
@@ -736,11 +742,12 @@ export class AmpStoryEmbeddedComponent {
       this.clearTooltip_();
     }, TOOLTIP_CLOSE_ANIMATION_MS);
 
+    if (this.state_ === EmbeddedComponentState.EXPANDED) {
+      this.toggleExpandedView_(null);
+    }
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
-
-    this.toggleExpandedView_(null);
     this.tooltip_.removeEventListener(
       'click',
       this.expandComponentHandler_,

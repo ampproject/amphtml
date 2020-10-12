@@ -755,10 +755,9 @@ describes.sandboxed('reportError', {}, (env) => {
   });
 });
 
-describe.configure().run('detectJsEngineFromStack', () => {
+describe('detectJsEngineFromStack', () => {
   // Note that these are not true of every case. You can emulate iOS Safari
-  // on Desktop Chrome and break this. These tests are explicitly for
-  // SauceLabs, which runs does not masquerade with UserAgent.
+  // on Desktop Chrome and break this.
   describe
     .configure()
     .ifIos()
@@ -789,7 +788,7 @@ describe.configure().run('detectJsEngineFromStack', () => {
       it.configure()
         .ifSafari()
         .run('detects safari as safari', () => {
-          // TODO(wg-runtime): Fix detection of Safari 13+.
+          // TODO(wg-performance): Fix detection of Safari 13+.
           expect(detectJsEngineFromStack()).to.equal('unknown');
         });
 

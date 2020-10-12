@@ -20,7 +20,7 @@
 var PreactDef = {};
 
 /**
- * @typedef {function(!JsonObject):PreactDef.Renderable}
+ * @typedef {function(?):PreactDef.Renderable}
  */
 PreactDef.FunctionalComponent;
 
@@ -31,11 +31,12 @@ PreactDef.VNode = function () {};
 
 /**
  * @interface
+ * @template T
  */
 PreactDef.Context = function () {};
 
 /**
- * @param {!JsonObject} props
+ * @param {{value: T, children: (?PreactDef.Renderable|undefined)}} props
  * @return {PreactDef.Renderable}
  */
 PreactDef.Context.prototype.Provider = function (props) {};
@@ -54,3 +55,8 @@ PreactDef.SimpleRenderable;
  * @typedef {PreactDef.SimpleRenderable|!PreactDef.VNode|!Array<PreactDef.SimpleRenderable|!PreactDef.VNode|!Array<PreactDef.SimpleRenderable|!PreactDef.VNode>>}
  */
 PreactDef.Renderable;
+
+/**
+ * @typedef {{__html: ?string}}
+ */
+PreactDef.InnerHTML;

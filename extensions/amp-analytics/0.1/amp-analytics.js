@@ -44,7 +44,6 @@ import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
-import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 
@@ -53,6 +52,8 @@ const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsRep
 const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.HIDDEN,
+  AnalyticsEventType.INI_LOAD,
+  AnalyticsEventType.RENDER_START,
 ];
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -208,7 +209,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iniPromise_) {
       return this.iniPromise_;
     }
-    toggle(this.element, false);
 
     this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
@@ -251,6 +251,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
+    this.iniPromise_.then(() => {
+      this./*OK*/ collapse();
+    });
     return this.iniPromise_;
   }
 
@@ -638,7 +641,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     this.checkTriggerEnabled_(trigger, event).then((enabled) => {
-      if (!enabled) {
+      const isConnected =
+        this.element.ownerDocument && this.element.ownerDocument.defaultView;
+      if (!enabled || !isConnected) {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);

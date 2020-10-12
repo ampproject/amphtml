@@ -779,6 +779,30 @@ describes.realWin('performance with experiment', {amp: true}, (env) => {
       );
     });
   });
+
+  it('adds ssr experiments', () => {
+    env.sandbox
+      .stub(env.ampdoc, 'getMetaByName')
+      .withArgs('amp-usqp')
+      .returns('1=1,2=0');
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub).to.be.calledWith(
+        'sendCsi',
+        env.sandbox.match((payload) => {
+          const experiments = payload.ampexp.split(',');
+          expect(experiments).to.have.length(3);
+          expect(experiments).to.have.members([
+            'rtv-' + getMode(win).rtvVersion,
+            'ssr-1=1',
+            'ssr-2=0',
+          ]);
+          return true;
+        })
+      );
+    });
+  });
 });
 
 describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
@@ -819,11 +843,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     // offered in fake-dom.js. We can't immediately because
     // document.visibilityState is a read-only property in that object.
     fakeWin = {
+      CustomEvent: env.win.CustomEvent,
       Date: env.win.Date,
       PerformanceObserver: env.sandbox.stub(),
       addEventListener: env.sandbox.stub(),
       removeEventListener: env.win.removeEventListener,
-      dispatchEvent: env.win.dispatchEvent,
+      dispatchEvent: (e) => env.win.dispatchEvent(e),
       document: {
         addEventListener: env.sandbox.stub(),
         hidden: false,
@@ -1109,7 +1134,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
       });
 
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'fid',
         delta: 3,
@@ -1307,19 +1332,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       perf.tick('mbv', 1);
       const value = await perf.getMetric('mbv');
       expect(value).to.eq(1);
-    });
-
-    describe('when API not supported', () => {
-      it('throws an error', async () => {
-        const perf = getPerformance();
-        try {
-          await perf.getMetric('lcpv');
-        } catch (error) {
-          expect(error.message).to.equal(
-            'Largest Contentful Paint not supported'
-          );
-        }
-      });
     });
   });
 

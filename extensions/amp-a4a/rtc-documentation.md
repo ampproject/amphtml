@@ -123,23 +123,29 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 
 #### Currently Supported Vendors
 
+- Adpushup
 - AppNexus
+- AppNexus PSP
 - APS
 - Automatad
+- Andbeyond
 - Browsi
 - Criteo
 - FLUX
+- Freestar
+- Future Plc
+- Galaxie Media
 - IndexExchange
+- Kargo
 - Lotame
 - Media.net
-- The Ozone Project
 - PubMatic OpenWrap
 - Purch
-- Galaxie Media
 - Rubicon
 - Salesforce
+- T13
+- The Ozone Project
 - Yieldbot
-- Kargo
 - Yieldlab
 
 ### RTC Callout Request Specification

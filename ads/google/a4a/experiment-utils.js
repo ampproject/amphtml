@@ -63,12 +63,13 @@ export class ExperimentUtils {
    * @return {?string}
    */
   maybeSelectExperiment(win, element, selectionBranches, experimentName) {
-    const experimentInfoMap = /** @type {!Object<string, !ExperimentInfo>} */ ({});
-    experimentInfoMap[experimentName] = {
+    const experimentInfoList = /** @type {!Array<!ExperimentInfo>} */ ([]);
+    experimentInfoList.push({
+      experimentId: experimentName,
       isTrafficEligible: () => true,
       branches: selectionBranches,
-    };
-    randomlySelectUnsetExperiments(win, experimentInfoMap);
+    });
+    randomlySelectUnsetExperiments(win, experimentInfoList);
     return getExperimentBranch(win, experimentName);
   }
 }
