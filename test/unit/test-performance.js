@@ -16,12 +16,26 @@
 
 import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
+import {
+  Performance,
+  installPerformanceService,
+} from '../../src/service/performance-impl';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getMode} from '../../src/mode';
-import {installPerformanceService} from '../../src/service/performance-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installRuntimeServices} from '../../src/service/core-services';
+
+describes.realWin('performance', {amp: false}, (env) => {
+  it('should be resilient to unsupported PerformanceObserver entry types', () => {
+    env.sandbox.stub(env.win.PerformanceObserver.prototype, 'observe').throws();
+    allowConsoleError(() => {
+      expect(() => {
+        new Performance(env.win);
+      }).to.not.throw();
+    });
+  });
+});
 
 describes.realWin('performance', {amp: true}, (env) => {
   let perf;
