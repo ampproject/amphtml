@@ -36,6 +36,7 @@ BaseCarouselDef.Props;
 
 /**
  * @typedef {{
+ *   advanceCount: (number|undefined),
  *   children: !Array<PreactDef.Renderable>,
  *   loop: (boolean|undefined),
  *   restingIndex: number,

@@ -43,7 +43,15 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @template T
  */
 function ScrollerWithRef(
-  {children, loop, restingIndex, setRestingIndex, snap, visibleCount},
+  {
+    advanceCount,
+    children,
+    loop,
+    restingIndex,
+    setRestingIndex,
+    snap,
+    visibleCount,
+  },
   ref
 ) {
   // We still need our own ref that we can always rely on to be there.
@@ -81,6 +89,7 @@ function ScrollerWithRef(
   const ignoreProgrammaticScrollRef = useRef(true);
   const slides = renderSlides(
     {
+      advanceCount,
       children,
       loop,
       offsetRef,
@@ -166,6 +175,10 @@ function ScrollerWithRef(
     debouncedResetScrollReferencePoint();
   };
 
+  const needMoreSlidesToScroll =
+    loop &&
+    advanceCount > 1 &&
+    children.length - pivotIndex - visibleCount < advanceCount;
   return (
     <div
       ref={containerRef}
@@ -174,6 +187,7 @@ function ScrollerWithRef(
       tabindex={0}
     >
       {slides}
+      {needMoreSlidesToScroll && slides}
     </div>
   );
 }

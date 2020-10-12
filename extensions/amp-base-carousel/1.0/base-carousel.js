@@ -117,6 +117,7 @@ function BaseCarouselWithRef(
   return (
     <ContainWrapper size={true} layout={true} paint={true} {...rest}>
       <Scroller
+        advanceCount={advanceCount}
         loop={loop}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
