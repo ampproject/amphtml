@@ -539,10 +539,10 @@ export class AmpStoryPlayer {
           });
 
           const playerConfig = this.readPlayerConfig_();
-          const customUIConfig = playerConfig && playerConfig.uiControls;
+          const customControls = playerConfig && playerConfig.controls;
 
-          if (customUIConfig) {
-            messaging.sendRequest('updateSystemUI', customUIConfig, false);
+          if (customControls) {
+            messaging.sendRequest('customDocumentUI', customControls, false);
           }
 
           resolve(messaging);
