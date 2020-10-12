@@ -172,6 +172,57 @@ describes.realWin(
       ).to.deep.equal([userSuppliedChildren[1]]);
     });
 
+    it('should snap to slides by default', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
+    });
+
+    it('should snap to slides with snap attribute', async () => {
+      element.setAttribute('snap', '');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
+    });
+
+    it('should snap to slides with snap="true"', async () => {
+      element.setAttribute('snap', 'true');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
+    });
+
+    it('should not snap to slides with snap="false"', async () => {
+      element.setAttribute('snap', 'false');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.disableSnap)).to.be.true;
+      });
+    });
+
     describe('imperative api', () => {
       let scroller;
 
@@ -212,7 +263,7 @@ describes.realWin(
 
       it('should execute goToSlide action', async () => {
         element.enqueAction(invocation('goToSlide', {index: 1}));
-        await waitFor(() => scroller.scrollLeft > 0, 'to to slide 1');
+        await waitFor(() => scroller.scrollLeft > 0, 'to slide 1');
 
         element.enqueAction(invocation('goToSlide', {index: 0}));
         await waitFor(
