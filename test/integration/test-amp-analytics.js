@@ -789,7 +789,7 @@ describe
           return RequestBank.tearDown();
         });
 
-        it('should use config from server', () => {
+        it.only('should use config from server', () => {
           return RequestBank.withdraw().then((req) => {
             // The config here should have been rewritten by the /analytics/rewriter
             // endpoint. This logic is located in the file
