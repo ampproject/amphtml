@@ -42,7 +42,10 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @return {PreactDef.Renderable}
  * @template T
  */
-function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
+function ScrollerWithRef(
+  {children, loop, restingIndex, setRestingIndex, snap},
+  ref
+) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
   useImperativeHandle(ref, () => ({
@@ -67,6 +70,13 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
    * is with respect to its scrolling order. Only needed if loop=true.
    */
   const offsetRef = useRef(restingIndex);
+
+  /**
+   * The partial scroll position between two slides.
+   * Only needed if snap=false.
+   */
+  const scrollOffset = useRef(0);
+
   const ignoreProgrammaticScrollRef = useRef(true);
   const slides = renderSlides(
     {
@@ -75,6 +85,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       offsetRef,
       pivotIndex,
       restingIndex,
+      snap,
     },
     classes
   );
@@ -88,11 +99,27 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
     const container = containerRef.current;
     ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
-    container./* OK */ scrollLeft = loop
-      ? container./* OK */ offsetWidth * pivotIndex
-      : container./* OK */ offsetWidth * restingIndex;
+    let position;
+    if (loop) {
+      if (snap) {
+        position = container./* OK */ offsetWidth * pivotIndex;
+      } else {
+        position = mod(
+          scrollOffset.current +
+            container./* OK */ offsetWidth * offsetRef.current,
+          container./* OK */ scrollWidth
+        );
+      }
+    } else {
+      if (snap) {
+        position = container./* OK */ offsetWidth * restingIndex;
+      } else {
+        position = scrollOffset.current;
+      }
+    }
+    container./* OK */ scrollLeft = position;
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [loop, restingIndex, pivotIndex]);
+  }, [loop, restingIndex, pivotIndex, snap]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(
@@ -121,10 +148,11 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
     const container = containerRef.current;
+    scrollOffset.current =
+      container./* OK */ scrollLeft -
+      offsetRef.current * container./* OK */ offsetWidth;
     const slideOffset = Math.round(
-      (container./* OK */ scrollLeft -
-        offsetRef.current * container./* OK */ offsetWidth) /
-        container./* OK */ offsetWidth
+      scrollOffset.current / container./* OK */ offsetWidth
     );
     currentIndex.current = mod(slideOffset, children.length);
   };
@@ -207,7 +235,7 @@ export {Scroller};
  * @return {PreactDef.Renderable}
  */
 function renderSlides(
-  {children, restingIndex, offsetRef, pivotIndex, loop},
+  {children, restingIndex, offsetRef, pivotIndex, snap, loop},
   classes
 ) {
   const {length} = children;
@@ -218,7 +246,9 @@ function renderSlides(
       <div
         key={key}
         data-slide={index}
-        class={`${classes.slideSizing} ${classes.slideElement}`}
+        class={`${classes.slideSizing} ${classes.slideElement} ${
+          snap ? classes.enableSnap : classes.disableSnap
+        }`}
       >
         {child}
       </div>
