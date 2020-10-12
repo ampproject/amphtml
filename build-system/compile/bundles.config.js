@@ -186,7 +186,6 @@ exports.jsBundles = {
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
       esmPassCompilation: argv.esm || argv.sxg,
-      includeOnlyESMLevelPolyfills: argv.esm || argv.sxg,
     },
   },
   'amp-shadow.js': {
