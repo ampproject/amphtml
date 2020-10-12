@@ -26,7 +26,7 @@
 function startsWith(search, rawPos) {
   const pos = rawPos > 0 ? rawPos | 0 : 0;
   // eslint-disable-next-line local/no-invalid-this
-  return this.substring(pos, pos + search.length) === search;
+  return this.substr(pos, search.length) === search;
 }
 
 /**
@@ -34,7 +34,7 @@ function startsWith(search, rawPos) {
  * @param {!Window} win
  */
 export function install(win) {
-  if (!win.Array.prototype.includes) {
+  if (!win.String.prototype.startsWith) {
     win.Object.defineProperty(win.String.prototype, 'startsWith', {
       enumerable: false,
       configurable: true,
