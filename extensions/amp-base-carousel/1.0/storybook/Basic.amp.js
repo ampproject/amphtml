@@ -30,27 +30,39 @@ export default {
 };
 
 export const Default = () => {
+  const loop = boolean('loop', true);
   const snap = boolean('snap', true);
   const advanceCount = number('advance count', 1, {min: 1});
   const visibleCount = number('visible count', 1, {min: 1});
   const controls = select('show controls', ['auto', 'always', 'never']);
+  const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <amp-base-carousel
       advance-count={advanceCount}
       controls={controls}
-      width="440"
+      width="880"
       height="225"
       snap={String(snap)}
+      loop={loop}
+      layout="responsive"
       visible-count={visibleCount}
     >
-      {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
-        <amp-layout width="440" height="225">
-          <svg viewBox="0 0 440 225">
-            <rect style={{fill: color}} width="440" height="225" />
-            Sorry, your browser does not support inline SVG.
-          </svg>
-        </amp-layout>
-      ))}
+      {Array.from({length: slideCount}, (x, i) => {
+        const v = colorIncrement * (i + 1);
+        return (
+          <amp-layout width="440" height="225" layout="responsive">
+            <svg viewBox="0 0 440 225">
+              <rect
+                style={{fill: `rgb(${v}, 100, 100)`}}
+                width="440"
+                height="225"
+              />
+              Sorry, your browser does not support inline SVG.
+            </svg>
+          </amp-layout>
+        );
+      })}
     </amp-base-carousel>
   );
 };
