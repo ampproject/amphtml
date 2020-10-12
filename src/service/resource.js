@@ -350,7 +350,7 @@ export class Resource {
           // The InOb premeasurement couldn't account for fixed position since
           // implementation wasn't loaded yet. Do so now.
           if (this.element.isAlwaysFixed()) {
-            this.computeMeasurements_(this.layoutBox);
+            this.computeMeasurements_(this.getPageLayoutBox());
           }
           this.element.onMeasure(/* sizeChanged */ true);
         } else {

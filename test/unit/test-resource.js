@@ -121,6 +121,28 @@ describes.realWin('Resource', {amp: true}, (env) => {
         expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
       });
     });
+
+    it('should recalculate layoutBox if measured before upgrade and isFixed', () => {
+      // First measure
+      element.isAlwaysFixed = () => false;
+      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
+      resource.measure(/* usePremeasuredRect */ true);
+      expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 0, 100, 100));
+
+      // Now adjust implementation to be alwaysFixed and call build.
+      const viewport = Services.viewportForDoc(resource.element);
+      env.sandbox.stub(viewport, 'getScrollTop').returns(11);
+      element.isUpgraded = () => true;
+      element.isAlwaysFixed = () => true;
+      element.build = () => Promise.resolve();
+      element.onMeasure = () => {};
+      return resource.build().then(() => {
+        expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 100, 100));
+        expect(resource.getPageLayoutBox()).to.eql(
+          layoutRectLtwh(0, 0, 100, 100)
+        );
+      });
+    });
   });
 
   it('should build if element is currently building', () => {
