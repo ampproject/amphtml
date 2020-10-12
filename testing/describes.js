@@ -317,10 +317,24 @@ function describeEnv(factory) {
     return describeFunc(name, () => {
       const env = Object.create(null);
 
-      beforeEach(async () => {
-        for (let i = 0; i < fixtures.length; ++i) {
-          await fixtures[i].setup(env);
-        }
+      // Note: If this `beforeEach` function is made async/always returns a
+      // Promise, even if it resolves immediately, tests start failing. It's
+      // not entirely clear why. Don't refactor this to be an async for-loop
+      // like the `afterEach` below.
+      beforeEach(() => {
+        let totalPromise = undefined;
+        // Set up all fixtures.
+        fixtures.forEach((fixture) => {
+          if (totalPromise) {
+            totalPromise = totalPromise.then(() => fixture.setup(env));
+          } else {
+            const res = fixture.setup(env);
+            if (res && typeof res.then == 'function') {
+              totalPromise = res;
+            }
+          }
+        });
+        return totalPromise;
       });
 
       afterEach(async () => {
