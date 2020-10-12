@@ -2215,10 +2215,12 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getPageDistanceMapHelper_(distance, map, pageId) {
+    if (this.pages_[pageId] == undefined) {
+      return map;
+    }
     if (map[pageId] !== undefined && map[pageId] <= distance) {
       return map;
     }
-
     map[pageId] = distance;
     const page = this.getPageById(pageId);
     page.getAdjacentPageIds().forEach((adjacentPageId) => {
