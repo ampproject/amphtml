@@ -988,7 +988,12 @@ export class AmpStory extends AMP.BaseElement {
           HistoryState.ATTACHMENT_PAGE_ID
         );
 
-        if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
+        console.log(this.activePage_);
+
+        if (
+          this.activePage_ &&
+          shouldReOpenAttachmentForPageId === this.activePage_.element.id
+        ) {
           this.activePage_.openAttachment(false /** shouldAnimate */);
         }
 
@@ -1396,11 +1401,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId, direction) {
-    console.log(targetPageId);
+    console.log('switch to', targetPageId);
     const targetPage = this.getPageById(targetPageId);
-    if (targetPage == undefined) {
-      return Promise.reject();
-    }
     const pageIndex = this.getPageIndex(targetPage);
 
     // Step out if trying to navigate to the currently active page.
