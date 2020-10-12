@@ -446,7 +446,7 @@ export class Performance {
       });
       obs.observe(init);
     } catch (err) {
-      dev().warn(TAG, err);
+      dev().warn(err);
     }
   }
 
