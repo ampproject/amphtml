@@ -39,6 +39,8 @@ const QUEUE_LIMIT = 50;
 /** @const {string} */
 const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
 
+const TAG = 'Performance';
+
 /**
  * Fields:
  * {{
@@ -395,63 +397,59 @@ export class Performance {
     }
 
     if (this.supportsEventTiming_) {
-      const firstInputObserver = this.createPerformanceObserver_(processEntry);
-      firstInputObserver.observe({type: 'first-input', buffered: true});
+      this.createPerformanceObserver_(processEntry, {
+        type: 'first-input',
+        buffered: true,
+      });
     }
 
     if (this.supportsLayoutShift_) {
-      const layoutInstabilityObserver = this.createPerformanceObserver_(
-        processEntry
-      );
-      layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
+      this.createPerformanceObserver_(processEntry, {
+        type: 'layout-shift',
+        buffered: true,
+      });
     }
 
     if (this.supportsLargestContentfulPaint_) {
-      const lcpObserver = this.createPerformanceObserver_(processEntry);
-      lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
+      // lcpObserver
+      this.createPerformanceObserver_(processEntry, {
+        type: 'largest-contentful-paint',
+        buffered: true,
+      });
     }
 
     if (this.supportsNavigation_) {
       // Wrap in a try statement as there are some browsers (ex. chrome 73)
       // that will say it supports navigation but throws.
-      try {
-        const navigationObserver = this.createPerformanceObserver_(
-          processEntry
-        );
-        navigationObserver.observe({type: 'navigation', buffered: true});
-      } catch (err) {
-        dev() /*OK*/
-          .error(err);
-      }
+      this.createPerformanceObserver_(processEntry, {
+        type: 'navigation',
+        buffered: true,
+      });
     }
 
-    if (entryTypesToObserve.length === 0) {
-      return;
-    }
-
-    const observer = this.createPerformanceObserver_(processEntry);
-
-    // Wrap observer.observe() in a try statement for testing, because
-    // Webkit throws an error if the entry types to observe are not natively
-    // supported.
-    try {
-      observer.observe({entryTypes: entryTypesToObserve});
-    } catch (err) {
-      dev() /*OK*/
-        .warn(err);
+    if (entryTypesToObserve.length > 0) {
+      this.createPerformanceObserver_(processEntry, {
+        entryTypes: entryTypesToObserve,
+      });
     }
   }
 
   /**
    * @param {function(!PerformanceEntry)} processEntry
+   * @param {!PerformanceObserverInit} init
    * @return {!PerformanceObserver}
    * @private
    */
-  createPerformanceObserver_(processEntry) {
-    return new this.win.PerformanceObserver((list) => {
-      list.getEntries().forEach(processEntry);
-      this.flush();
-    });
+  createPerformanceObserver_(processEntry, init) {
+    try {
+      const obs = new this.win.PerformanceObserver((list) => {
+        list.getEntries().forEach(processEntry);
+        this.flush();
+      });
+      obs.observe(init);
+    } catch (err) {
+      dev().warn(TAG, err);
+    }
   }
 
   /**
@@ -549,7 +547,6 @@ export class Performance {
       return;
     }
     if (!this.resources_) {
-      const TAG = 'Performance';
       dev().error(TAG, 'Failed to tick ser due to null resources');
       return;
     }
