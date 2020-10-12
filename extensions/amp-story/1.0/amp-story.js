@@ -1010,6 +1010,9 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
+      })
+      .catch(() => {
+        console.log('page ids not found');
       });
 
     this.maybeLoadStoryEducation_();
@@ -1393,7 +1396,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId, direction) {
+    console.log(targetPageId);
     const targetPage = this.getPageById(targetPageId);
+    if (targetPage == undefined) {
+      return Promise.reject();
+    }
     const pageIndex = this.getPageIndex(targetPage);
 
     // Step out if trying to navigate to the currently active page.
@@ -1588,8 +1595,9 @@ export class AmpStory extends AMP.BaseElement {
       list.push({page: minusOnePage, position: -1});
 
       const minusTwoId = minusOnePage.getPreviousPageId();
-      if (minusTwoId) {
-        list.push({page: this.getPageById(minusTwoId), position: -2});
+      const minusTwoPage = minusTwoId & this.getPageById(minusTwoId);
+      if (minusTwoId && minusTwoPage) {
+        list.push({page: minusTwoPage, position: -2});
       }
     }
 
@@ -2405,16 +2413,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {string} id The ID of the page to be retrieved.
-   * @return {!./amp-story-page.AmpStoryPage} Retrieves the page with the
+   * @return {?./amp-story-page.AmpStoryPage} Retrieves the page with the
    *     specified ID.
    */
   getPageById(id) {
     const pageIndex = this.getPageIndexById(id);
-    return devAssert(
-      this.pages_[pageIndex],
-      'Page at index %s exists, but is missing from the array.',
-      pageIndex
-    );
+    this.pages_[pageIndex];
   }
 
   /**
