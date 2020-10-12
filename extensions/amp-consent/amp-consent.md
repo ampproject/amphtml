@@ -404,7 +404,7 @@ A couple of implications with this behavior:
 
 ### Basic blocking behaviors
 
-To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
+To block components, either add the `data-block-on-consent` attribute to the AMP component or add the `amp-consent-blocking` meta tag with the list of extensions to be blocked. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
 
@@ -412,6 +412,12 @@ _Example: Blocking the analytics until user accepts consent_
 
 ```html
 <amp-analytics data-block-on-consent type="googleanalytics"> </amp-analytics>
+```
+
+or
+
+```html
+<meta name="amp-consent-blocking" content="amp-analytics,amp-ad" />
 ```
 
 ### Advanced predefined consent blocking behaviors
@@ -621,6 +627,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
 - Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
+- OneTrust: [Website](https://www.onetrust.com/) - [Documentation](./cmps/onetrust.md)
 - opencmp : [Documentation](./cmps/opencmp.md)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 - Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)

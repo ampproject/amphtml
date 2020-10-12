@@ -17,9 +17,9 @@
 import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
+import {cancellation, isBlockedByConsent, reportError} from '../error';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent, reportError} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -175,6 +175,13 @@ export class Resource {
 
     /** @private {number} */
     this.layoutCount_ = 0;
+
+    /**
+     * Used to signal that the current layoutCallback has been aborted by an
+     * unlayoutCallback.
+     * @private {?AbortController}
+     */
+    this.abortController_ = null;
 
     /** @private {*} */
     this.lastLayoutError_ = null;
@@ -932,30 +939,42 @@ export class Resource {
     dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.abortController_ = new AbortController();
+    const {signal} = this.abortController_;
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
         try {
-          resolve(this.element.layoutCallback());
+          resolve(this.element.layoutCallback(signal));
         } catch (e) {
           reject(e);
         }
       });
-    });
-
-    this.layoutPromise_ = promise.then(
-      () => this.layoutComplete_(true),
-      (reason) => this.layoutComplete_(false, reason)
+    }).then(
+      () => this.layoutComplete_(true, signal),
+      (reason) => this.layoutComplete_(false, signal, reason)
     );
-    return this.layoutPromise_;
+
+    return (this.layoutPromise_ = promise);
   }
 
   /**
    * @param {boolean} success
+   * @param {!AbortSignal} signal
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
    */
-  layoutComplete_(success, opt_reason) {
+  layoutComplete_(success, signal, opt_reason) {
+    this.abortController_ = null;
+    if (signal.aborted) {
+      // We hit a race condition, where `layoutCallback` -> `unlayoutCallback`
+      // was called in quick succession. Since the unlayout was called before
+      // the layout completed, we want to remain in the unlayout state.
+      const err = dev().createError('layoutComplete race');
+      err.associatedElement = this.element;
+      dev().expectedError(TAG, err);
+      throw cancellation();
+    }
     if (this.loadPromiseResolve_) {
       this.loadPromiseResolve_();
       this.loadPromiseResolve_ = null;
@@ -1030,9 +1049,14 @@ export class Resource {
   unlayout() {
     if (
       this.state_ == ResourceState.NOT_BUILT ||
-      this.state_ == ResourceState.NOT_LAID_OUT
+      this.state_ == ResourceState.NOT_LAID_OUT ||
+      this.state_ == ResourceState.READY_FOR_LAYOUT
     ) {
       return;
+    }
+    if (this.abortController_) {
+      this.abortController_.abort();
+      this.abortController_ = null;
     }
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {

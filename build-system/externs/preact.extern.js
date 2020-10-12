@@ -55,3 +55,8 @@ PreactDef.SimpleRenderable;
  * @typedef {PreactDef.SimpleRenderable|!PreactDef.VNode|!Array<PreactDef.SimpleRenderable|!PreactDef.VNode|!Array<PreactDef.SimpleRenderable|!PreactDef.VNode>>}
  */
 PreactDef.Renderable;
+
+/**
+ * @typedef {{__html: ?string}}
+ */
+PreactDef.InnerHTML;
