@@ -39,6 +39,8 @@ const QUEUE_LIMIT = 50;
 /** @const {string} */
 const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
 
+const TAG = 'Performance';
+
 /**
  * Fields:
  * {{
@@ -446,7 +448,7 @@ export class Performance {
       });
       obs.observe(init);
     } catch (err) {
-      dev().warn(err);
+      dev().warn(TAG, err);
     }
   }
 
@@ -545,7 +547,6 @@ export class Performance {
       return;
     }
     if (!this.resources_) {
-      const TAG = 'Performance';
       dev().error(TAG, 'Failed to tick ser due to null resources');
       return;
     }
