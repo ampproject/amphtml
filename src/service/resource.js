@@ -348,7 +348,8 @@ export class Resource {
         if (this.intersect_ && this.hasBeenMeasured()) {
           this.state_ = ResourceState.READY_FOR_LAYOUT;
           // The InOb premeasurement couldn't account for fixed position since
-          // implementation wasn't loaded yet. Do so now.
+          // implementation wasn't loaded yet. Perform a remeasure now that we know it
+          // is fixed.
           if (this.element.isAlwaysFixed() && !this.isFixed_) {
             this.requestMeasure();
           }
