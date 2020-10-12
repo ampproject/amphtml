@@ -581,10 +581,6 @@ export class SystemLayer {
         'i-amphtml-story-no-audio-ui',
         !canShowAudioUi
       );
-      this.parentEl_.classList.toggle(
-        'i-amphtml-story-no-audio-ui',
-        !canShowAudioUi
-      );
     });
   }
 
