@@ -129,11 +129,11 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
  */
 function HeaderShim(sectionElement, {onClick}) {
   const headerElement = sectionElement.firstElementChild;
-  headerElement.classList.add('i-amphtml-accordion-header');
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
       return;
     }
+    headerElement.classList.add('i-amphtml-accordion-header');
     headerElement.addEventListener('click', onClick);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
@@ -159,12 +159,12 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
  */
 function ContentShimWithRef(sectionElement, {hidden}, ref) {
   const contentElement = sectionElement.lastElementChild;
-  contentElement.classList.add('i-amphtml-accordion-content');
   useImperativeHandle(ref, () => contentElement, [contentElement]);
   useLayoutEffect(() => {
     if (!contentElement) {
       return;
     }
+    contentElement.classList.add('i-amphtml-accordion-content');
     toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();

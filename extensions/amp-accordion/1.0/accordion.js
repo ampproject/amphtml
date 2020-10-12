@@ -27,6 +27,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+import {useStyles} from './accordion.jss';
 
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.ContextProps} */ ({})
@@ -36,24 +37,6 @@ const AccordionContext = Preact.createContext(
 const EMPTY_EXPANDED_MAP = {};
 
 const generateSectionId = sequentialIdGenerator();
-
-const CHILD_STYLE = {
-  // Make animations measurable. Without this, padding and margin can skew
-  // animations.
-  boxSizing: 'border-box',
-  // Cancel out the margin collapse. Also helps with animations to avoid
-  // overflow.
-  overflow: 'hidden',
-  // Ensure that any absolute elements are positioned within the section.
-  position: 'relative',
-};
-
-const SECTION_HEADER_STYLE = {
-  cursor: 'pointer',
-  backgroundColor: '#efefef',
-  paddingRight: '20px',
-  border: 'solid 1px #dfdfdf',
-};
 
 /**
  * @param {!AccordionDef.Props} props
@@ -159,8 +142,8 @@ export function AccordionSection({
   contentAs: ContentComp = 'div',
   expanded: defaultExpanded = false,
   animate: defaultAnimate = false,
-  headerStyle = {},
-  contentStyle = {},
+  headerClassName,
+  contentClassName,
   header,
   children,
   ...rest
@@ -198,6 +181,7 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
+  const classes = useStyles();
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
@@ -212,14 +196,18 @@ export function AccordionSection({
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
       <HeaderComp
         role="button"
-        style={{...CHILD_STYLE, ...SECTION_HEADER_STYLE, ...headerStyle}}
+        className={`${headerClassName || ''} ${classes.sectionChild} ${
+          classes.header
+        }`}
         onClick={expandHandler}
       >
         {header}
       </HeaderComp>
       <ContentComp
         ref={contentRef}
-        style={{...CHILD_STYLE, ...contentStyle}}
+        className={`${contentClassName || ''} ${classes.sectionChild} ${
+          classes.content
+        }`}
         hidden={!expanded}
       >
         {children}

@@ -21,7 +21,7 @@
 }
 
 /* heading
- * TODO(dvoytenko): remove most of these styles, except maybe for `cursor`.
+ * TODO(#30445): update these styles after team agrees on styling
  */
 .i-amphtml-accordion-header {
   cursor: pointer;
