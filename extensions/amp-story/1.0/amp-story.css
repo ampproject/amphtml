@@ -193,7 +193,7 @@ amp-story .amp-video-eq .amp-video-eq-col:last-child {
   margin-right: 0 !important;
 }
 
-amp-story .amp-video-eq:not(.amp-video-eq-play) {
+amp-story .amp-video-eq:not(.amp-video-eq-play), .i-amphtml-story-no-audio-ui .amp-video-eq {
   display: none !important;
 }
 
