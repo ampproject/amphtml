@@ -479,7 +479,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       this.handleOptionSelection_(optionEl);
       const confettiEmoji = this.options_[optionEl.optionIndex_].confetti;
       if (confettiEmoji) {
-        emojiConfetti(this.rootEl_, this.win, confettiEmoji);
+        emojiConfetti(
+          dev().assertElement(this.rootEl_),
+          this.win,
+          confettiEmoji
+        );
       }
     }
   }
