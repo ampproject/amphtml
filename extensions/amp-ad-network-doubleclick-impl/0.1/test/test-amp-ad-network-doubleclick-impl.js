@@ -21,6 +21,10 @@
 import '../../../amp-ad/0.1/amp-ad';
 import * as bytesUtils from '../../../../src/utils/bytes';
 import {
+  AMP_EXPERIMENT_ATTRIBUTE,
+  QQID_HEADER,
+} from '../../../../ads/google/a4a/utils';
+import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
 } from '../../../amp-a4a/0.1/signature-verifier';
@@ -43,7 +47,6 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
-import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -1981,8 +1984,9 @@ describes.realWin(
             .returns('5798237482=45,3579282=0');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds).to.include('579823748245');
-          expect(impl.experimentIds).to.include('357928200');
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+            '579823748245,357928200'
+          );
         });
 
         it('should pad value to two chars', () => {
@@ -1992,7 +1996,9 @@ describes.realWin(
             .returns('5798237482=1');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds).to.include('579823748201');
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+            '579823748201'
+          );
         });
 
         it('should ignore excessively large value', () => {
@@ -2002,7 +2008,7 @@ describes.realWin(
             .returns('5798237482=100');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds).not.to.include('5798237482');
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
         });
 
         it('should ignore negative values', () => {
@@ -2012,7 +2018,7 @@ describes.realWin(
             .returns('5798237482=-1');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds).not.to.include('5798237482');
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
         });
 
         it('should ignore non-number values', () => {
@@ -2022,7 +2028,7 @@ describes.realWin(
             .returns('5798237482=testing');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds).not.to.include('5798237482');
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
         });
       });
     });

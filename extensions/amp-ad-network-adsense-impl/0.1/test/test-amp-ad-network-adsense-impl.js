@@ -939,7 +939,7 @@ describes.realWin(
             .returns('5798237482=45,3579282=0');
           impl.buildCallback();
           return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string('579823748245%2C357928200');
+            expect(url).to.have.string('579823748245!357928200');
           });
         });
 
