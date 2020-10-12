@@ -83,17 +83,8 @@ const slideElement = {
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-};
-
-const enableSnap = {
   scrollSnapAlign: 'start',
   scrollSnapStop: 'always',
-};
-
-const disableSnap = {
-  scrollSnapStop: 'none',
-  scrollSnapAlign: 'none',
-  scrollSnapCoordinate: 'none',
 };
 
 /** Slides only have one child */
@@ -195,8 +186,6 @@ const JSS = {
   hideScrollbar,
   horizontalScroll,
   slideElement,
-  enableSnap,
-  disableSnap,
   slideSizing,
   arrowPlacement,
   arrowPrev,

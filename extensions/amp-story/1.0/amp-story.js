@@ -677,14 +677,6 @@ export class AmpStory extends AMP.BaseElement {
       );
     });
 
-    this.storeService_.subscribe(
-      StateProperty.CAN_SHOW_AUDIO_UI,
-      (show) => {
-        this.element.classList.toggle('i-amphtml-story-no-audio-ui', !show);
-      },
-      true /** callToInitialize */
-    );
-
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         // Disallow switching pages while the bookend is active.
@@ -996,12 +988,7 @@ export class AmpStory extends AMP.BaseElement {
           HistoryState.ATTACHMENT_PAGE_ID
         );
 
-        console.log(this.activePage_);
-
-        if (
-          this.activePage_ &&
-          shouldReOpenAttachmentForPageId === this.activePage_.element.id
-        ) {
+        if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
           this.activePage_.openAttachment(false /** shouldAnimate */);
         }
 
@@ -1406,7 +1393,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId, direction) {
-    console.log('switch to', targetPageId);
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
@@ -2419,12 +2405,16 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {string} id The ID of the page to be retrieved.
-   * @return {?./amp-story-page.AmpStoryPage} Retrieves the page with the
+   * @return {!./amp-story-page.AmpStoryPage} Retrieves the page with the
    *     specified ID.
    */
   getPageById(id) {
     const pageIndex = this.getPageIndexById(id);
-    this.pages_[pageIndex];
+    return devAssert(
+      this.pages_[pageIndex],
+      'Page at index %s exists, but is missing from the array.',
+      pageIndex
+    );
   }
 
   /**

@@ -73,8 +73,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
-    // Makes whenUpgradedToCustomElement() resolve immediately.
-    story.createdCallback = Promise.resolve();
 
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');

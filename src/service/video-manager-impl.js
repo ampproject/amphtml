@@ -38,7 +38,13 @@ import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
-import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
+import {
+  createCustomEvent,
+  getData,
+  listen,
+  listenOnce,
+  listenOncePromise,
+} from '../event-helper';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -511,7 +517,9 @@ class VideoEntry {
       this.video.pause();
     };
 
-    listen(video.element, VideoEvents.LOAD, () => this.videoLoaded());
+    listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
+      this.videoLoaded()
+    );
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
       this.hasSeenPlayEvent_ = true;

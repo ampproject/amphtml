@@ -356,7 +356,9 @@ class AmpVideo extends AMP.BaseElement {
         }
         throw reason;
       })
-      .then(() => this.onVideoLoaded_());
+      .then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
@@ -612,13 +614,6 @@ class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
-    // When source changes, video needs to trigger loaded again.
-    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
-  }
-
-  /** @private */
-  onVideoLoaded_() {
-    this.element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
   /** @override */

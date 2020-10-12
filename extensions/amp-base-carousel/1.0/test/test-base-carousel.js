@@ -20,13 +20,14 @@ import {mount} from 'enzyme';
 
 describes.sandboxed('BaseCarousel preact component', {}, () => {
   it('should render Arrows and propagates children to Scroller', () => {
-    const wrapper = mount(
+    const jsx = (
       <BaseCarousel>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
       </BaseCarousel>
     );
+    const wrapper = mount(jsx);
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
 
     const slides = wrapper.find('[data-slide]');
@@ -40,13 +41,14 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
   it('should render custom Arrows when given', () => {
     const arrowPrev = <div class="my-custom-arrow-prev">left</div>;
     const arrowNext = <div class="my-custom-arrow-next">right</div>;
-    const wrapper = mount(
+    const jsx = (
       <BaseCarousel arrowPrev={arrowPrev} arrowNext={arrowNext}>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
       </BaseCarousel>
     );
+    const wrapper = mount(jsx);
     const arrows = wrapper.find('Arrow');
     expect(arrows).to.have.lengthOf(2);
     expect(arrows.first().props().customArrow).to.equal(arrowPrev);
@@ -54,13 +56,14 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
   });
 
   it('should not loop by default', () => {
-    const wrapper = mount(
+    const jsx = (
       <BaseCarousel>
-        <div>slide 1</div>
-        <div>slide 2</div>
-        <div>slide 3</div>
+        <div class="my-slide">slide 1</div>
+        <div class="my-slide">slide 2</div>
+        <div class="my-slide">slide 3</div>
       </BaseCarousel>
     );
+    const wrapper = mount(jsx);
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
 
@@ -72,13 +75,14 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
   });
 
   it('should render in preparation for looping with loop prop', () => {
-    const wrapper = mount(
+    const jsx = (
       <BaseCarousel loop>
-        <div>slide 1</div>
-        <div>slide 2</div>
-        <div>slide 3</div>
+        <div class="my-slide">slide 1</div>
+        <div class="my-slide">slide 2</div>
+        <div class="my-slide">slide 3</div>
       </BaseCarousel>
     );
+    const wrapper = mount(jsx);
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
 
@@ -89,47 +93,27 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
     expect(slides.at(2).text()).to.equal('slide 2');
   });
 
-  it('should snap to slides by default', () => {
-    const wrapper = mount(
-      <BaseCarousel>
-        <div>slide 1</div>
-        <div>slide 2</div>
-        <div>slide 3</div>
-      </BaseCarousel>
-    );
-    expect(wrapper.find(`[snap="true"]`)).not.to.be.null;
-  });
-
-  it('should not snap to slides with snap="false"', () => {
-    const wrapper = mount(
-      <BaseCarousel>
-        <div>slide 1</div>
-        <div>slide 2</div>
-        <div>slide 3</div>
-      </BaseCarousel>
-    );
-    expect(wrapper.find(`[snap="false"]`)).not.to.be.null;
-  });
-
   it('should render Arrows with controls=always', () => {
-    const wrapper = mount(
+    const jsx = (
       <BaseCarousel controls="always">
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
       </BaseCarousel>
     );
+    const wrapper = mount(jsx);
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
   });
 
   it('should not render Arrows with controls=never', () => {
-    const wrapper = mount(
+    const jsx = (
       <BaseCarousel controls="never">
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
       </BaseCarousel>
     );
+    const wrapper = mount(jsx);
     expect(wrapper.find('Arrow')).to.have.lengthOf(0);
   });
 });

@@ -186,11 +186,7 @@ function compile(
         // custom-elements polyfill must be included.
         // install intersection-observer to esm build as iOS safari 11.1 to
         // 12.1 do not have InObs.
-        return ![
-          'abort-controller.js',
-          'custom-elements.js',
-          'intersection-observer.js',
-        ].includes(p);
+        return !['custom-elements.js', 'intersection-observer.js'].includes(p);
       });
       srcs.push(
         '!build/fake-module/src/polyfills.js',

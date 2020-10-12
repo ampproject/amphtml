@@ -53,7 +53,6 @@ function BaseCarouselWithRef(
     controls = Controls.AUTO,
     loop,
     onSlideChange,
-    snap = true,
     ...rest
   },
   ref
@@ -117,7 +116,6 @@ function BaseCarouselWithRef(
         loop={loop}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
-        snap={snap}
         ref={scrollRef}
         onTouchStart={() => setHadTouch(true)}
       >
