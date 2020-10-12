@@ -409,14 +409,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       'amp-story-page must be a descendant of amp-story.'
     );
 
-    whenUpgradedToCustomElement(storyEl).then(() => {
-      storyEl.getImpl().then(
+    whenUpgradedToCustomElement(storyEl)
+      .then(() => storyEl.getImpl())
+      .then(
         (storyImpl) => {
           this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
         },
         (reason) => this.mediaPoolRejectFn_(reason)
       );
-    });
   }
 
   /**
