@@ -138,12 +138,12 @@ export function validateCtaMetadata(metadata) {
 }
 
 /**
- * Creates ad attribution UI if sufficent metadata. Returns boolean indicating
- * if attribution was successfully created.
+ * Creates ad attribution UI if sufficent metadata. Returns element if
+ * successfully created.
  * @param {!Window} win
  * @param {!StoryAdUIMetadata} metadata
  * @param {!Element} container
- * @return {boolean}
+ * @return {?Element}
  */
 export function maybeCreateAttribution(win, metadata, container) {
   const doc = win.document;

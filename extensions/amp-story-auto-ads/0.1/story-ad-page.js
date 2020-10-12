@@ -260,7 +260,13 @@ export class StoryAdPage {
         )
       );
 
-      if (maybeCreateAttribution(this.win_, uiMetaData, this.pageElement_)) {
+      if (
+        (this.adChoicesIcon_ = maybeCreateAttribution(
+          this.win_,
+          uiMetaData,
+          this.pageElement_
+        ))
+      ) {
         // WIP make sure this works in new case.
         this.storeService_.subscribe(
           StateProperty.UI_STATE,
