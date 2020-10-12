@@ -36,7 +36,6 @@ tags: {  # <amp-onetap-google>
     mandatory: true,
     value_url: {
       protocol: "https"
-      allow_relative: true
     }
   }
   attr_lists: "extended-amp-global"
