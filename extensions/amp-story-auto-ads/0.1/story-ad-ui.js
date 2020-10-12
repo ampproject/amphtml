@@ -77,7 +77,7 @@ export function getStoryAdMetaTags(doc) {
  * @param {!Document} doc
  * @return {Object}
  */
-export function generateStoryAdUIMetadata(doc) {
+export function getStoryAdMetadataFromDoc(doc) {
   const storyMetaTags = getStoryAdMetaTags(doc);
   const vars = map();
   iterateCursor(storyMetaTags, (tag) => {
@@ -98,7 +98,7 @@ export function generateStoryAdUIMetadata(doc) {
  * @param {!Element} adElement
  * @return {!Object}
  */
-export function getMetaDataFromAdElement(adElement) {
+export function getStoryAdMetadataFromElement(adElement) {
   const ctaUrl = adElement.getAttribute(DataAttrs.CTA_URL);
   const ctaType = adElement.getAttribute(DataAttrs.CTA_TYPE);
   return {

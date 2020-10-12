@@ -16,8 +16,8 @@
 
 import {
   A4AVarNames,
-  generateStoryAdUIMetadata,
-  getMetaDataFromAdElement,
+  getStoryAdMetadataFromDoc,
+  getStoryAdMetadataFromElement,
   localizeCtaText,
   maybeCreateAttribution,
   validateCtaMetadata,
@@ -232,11 +232,14 @@ export class StoryAdPage {
 
       // Template Ads.
       if (!this.adDoc_) {
-        Object.assign(uiMetaData, getMetaDataFromAdElement(this.adElement_));
+        Object.assign(
+          uiMetaData,
+          getStoryAdMetadataFromElement(this.adElement_)
+        );
       } else {
         Object.assign(
           uiMetaData,
-          generateStoryAdUIMetadata(this.adDoc_),
+          getStoryAdMetadataFromDoc(this.adDoc_),
           // TODO(ccordry): Depricate when possible.
           this.readAmpAdExit_()
         );
