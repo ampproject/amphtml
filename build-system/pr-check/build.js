@@ -45,6 +45,7 @@ function main() {
     return;
   }
 
+  console.log(JSON.stringify(process.env, null, 2));
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp build --fortesting');

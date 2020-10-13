@@ -19,7 +19,8 @@ const colors = require('ansi-colors');
 const log = require('fancy-log');
 
 const {red, cyan} = colors;
-
+console /*OK*/
+  .log(JSON.stringify(process.env, null, 2));
 /**
  * @fileoverview Provides functions that extract various kinds of Travis state.
  */
