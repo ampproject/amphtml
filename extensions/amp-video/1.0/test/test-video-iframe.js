@@ -115,6 +115,18 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
     expect(onMessage).to.not.have.been.called;
   });
 
+  it('stops listening to messages on unmount', async () => {
+    const onMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframe src="about:blank" onMessage={onMessage} />,
+      {attachTo: document.body}
+    );
+    const iframe = videoIframe.getDOMNode();
+    videoIframe.unmount();
+    dispatchMessage(window, {source: iframe.contentWindow, data: 'whatever'});
+    expect(onMessage).to.not.have.been.called;
+  });
+
   describe('posts imperative handle methods to makeMethodMessage', () => {
     ['play', 'pause'].forEach((method) => {
       it(`with \`${method}\``, async () => {
