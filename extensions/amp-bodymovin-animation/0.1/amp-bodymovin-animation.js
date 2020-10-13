@@ -27,7 +27,6 @@ import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
@@ -189,7 +188,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       !getData(event) ||
       !(
         isObject(getData(event)) ||
-        startsWith(/** @type {string} */ (getData(event)), '{')
+        /** @type {string} */ (getData(event)).startsWith('{')
       )
     ) {
       return; // Doesn't look like JSON.

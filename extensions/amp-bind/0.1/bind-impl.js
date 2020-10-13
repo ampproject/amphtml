@@ -40,7 +40,6 @@ import {isAmp4Email} from '../../../src/format';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
-import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const TAG = 'amp-bind';
@@ -1022,7 +1021,7 @@ export class Bind {
     let property;
     if (attr.length > 2 && attr[0] === '[' && attr[attr.length - 1] === ']') {
       property = attr.substr(1, attr.length - 2);
-    } else if (startsWith(attr, 'data-amp-bind-')) {
+    } else if (attr.startsWith('data-amp-bind-')) {
       property = attr.substr(14);
       // Ignore `data-amp-bind-foo` if `[foo]` already exists.
       if (element.hasAttribute(`[${property}]`)) {

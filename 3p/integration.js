@@ -41,7 +41,6 @@ import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
 import {parseJson} from '../src/json';
 import {register, run, setExperimentToggles} from './3p';
-import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
 
 // 3P - please keep in alphabetic order
@@ -868,7 +867,7 @@ export function parseFragment(fragment) {
     // Some browser, notably Firefox produce an encoded version of the fragment
     // while most don't. Since we know how the string should start, this is easy
     // to detect.
-    if (startsWith(json, '{%22')) {
+    if (json.startsWith('{%22')) {
       json = decodeURIComponent(json);
     }
     return /** @type {!JsonObject} */ (json ? parseJson(json) : dict());

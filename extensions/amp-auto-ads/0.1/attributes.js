@@ -16,7 +16,6 @@
 
 import {dict} from '../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
-import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 /** @const */
@@ -64,7 +63,7 @@ export function getAttributesFromConfigObj(configObj, attributes) {
 function parseAttributes(attributeObject) {
   const attributes = dict();
   for (const key in attributeObject) {
-    if (!NON_DATA_ATTRIBUTE_ALLOWLIST[key] && !startsWith(key, 'data-')) {
+    if (!NON_DATA_ATTRIBUTE_ALLOWLIST[key] && !key.startsWith('data-')) {
       user().warn(TAG, 'Attribute not whitlisted: ' + key);
       continue;
     }

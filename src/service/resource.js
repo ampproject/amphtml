@@ -26,7 +26,6 @@ import {
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
-import {startsWith} from '../string';
 import {toWin} from '../types';
 
 const TAG = 'Resource';
@@ -471,7 +470,7 @@ export class Resource {
       this.element.parentElement &&
       // Use prefix to recognize AMP element. This is necessary because stub
       // may not be attached yet.
-      startsWith(this.element.parentElement.tagName, 'AMP-') &&
+      this.element.parentElement.tagName.startsWith('AMP-') &&
       !(RESOURCE_PROP_ in this.element.parentElement)
     ) {
       return;

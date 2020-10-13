@@ -32,7 +32,6 @@ import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -463,7 +462,7 @@ export class ManualAdvancement extends AdvancementConfig {
         }
 
         if (
-          startsWith(tagName, 'amp-story-interactive-') &&
+          tagName.startsWith('amp-story-interactive-') &&
           !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
