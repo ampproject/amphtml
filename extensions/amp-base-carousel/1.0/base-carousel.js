@@ -50,9 +50,10 @@ function BaseCarouselWithRef(
     arrowPrev,
     arrowNext,
     children,
-    controls = Controls.AUTO,
+    controls = outsetArrows ? Controls.ALWAYS : Controls.AUTO,
     loop,
     onSlideChange,
+    outsetArrows,
     snap = true,
     ...rest
   },
@@ -112,7 +113,21 @@ function BaseCarouselWithRef(
   }, [hadTouch, controls]);
 
   return (
-    <ContainWrapper size={true} layout={true} paint={true} {...rest}>
+    <ContainWrapper
+      size={true}
+      layout={true}
+      paint={true}
+      contentStyle={{display: 'flex'}}
+      {...rest}
+    >
+      {!hideControls && (
+        <ArrowPrev
+          advance={advance}
+          customArrow={arrowPrev}
+          disabled={disableForDir(-1)}
+          outsetArrows={outsetArrows}
+        />
+      )}
       <Scroller
         loop={loop}
         restingIndex={currentSlide}
@@ -143,18 +158,12 @@ function BaseCarouselWithRef(
         )}
       </Scroller>
       {!hideControls && (
-        <>
-          <ArrowPrev
-            customArrow={arrowPrev}
-            disabled={disableForDir(-1)}
-            advance={advance}
-          />
-          <ArrowNext
-            customArrow={arrowNext}
-            disabled={disableForDir(1)}
-            advance={advance}
-          />
-        </>
+        <ArrowNext
+          advance={advance}
+          customArrow={arrowNext}
+          disabled={disableForDir(1)}
+          outsetArrows={outsetArrows}
+        />
       )}
     </ContainWrapper>
   );
