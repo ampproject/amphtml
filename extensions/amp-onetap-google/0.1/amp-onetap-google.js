@@ -127,7 +127,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         break;
       case ACTIONS.RESIZE:
         const height = data['height'];
-        if (typeof height === 'number' && !isNaN(height) && height > 0) {
+        if (typeof height === 'number' && !isNaN(height) && height >= 0) {
           this.mutateElement(() => {
             toggle(this.element, height > 0);
             // We resize indiscriminately since the iframe is always

@@ -26,14 +26,16 @@ limitations under the License.
 
 ## Overview
 
-You can use the `amp-onetap-google` component to embed a Google One Tap on the page, to allow users to sign into your websites with Google accounts.
+You can use the `amp-onetap-google` component to embed a
+[Google One Tap](https://developers.google.com/identity/one-tap/web)
+on the page, to allow users to sign in to your websites with Google accounts.
 
 #### Example
 
 ```html
 <amp-onetap-google
   layout="nodisplay"
-  data-src="https://rp.com/intermediate"
+  data-src="https://example.com/intermediate"
 ></amp-onetap-google>
 ```
 
@@ -42,7 +44,7 @@ You can use the `amp-onetap-google` component to embed a Google One Tap on the p
 <table>
   <tr>
     <td width="40%"><strong>data-src (required)</strong></td>
-    <td>The URL of the intermediate iframe.</td>
+    <td>The URL of the One Tap intermediate iframe.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
