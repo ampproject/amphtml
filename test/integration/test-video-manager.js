@@ -301,9 +301,7 @@ describe
         },
       };
 
-      win = {
-        document: doc,
-      };
+      win = {document: doc};
 
       isLite = false;
 
@@ -437,11 +435,6 @@ function createFakeVideoPlayerClass(win) {
       return Promise.resolve().then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
       });
-    }
-
-    /** @override */
-    viewportCallback(visible) {
-      this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
     }
 
     // VideoInterface Implementation. See ../src/video-interface.VideoInterface
