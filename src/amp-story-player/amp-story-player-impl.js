@@ -38,6 +38,7 @@ import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
 import {getMode} from '../../src/mode';
+import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
 
@@ -119,6 +120,9 @@ let DocumentStateTypeDef;
  * }}
  */
 let StoryDef;
+
+/** @type {string} */
+const TAG = 'amp-story-player';
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -306,6 +310,7 @@ export class AmpStoryPlayer {
     this.initializeShadowRoot_();
     this.initializeIframes_();
     this.initializeButton_();
+    this.readPlayerConfig_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -440,9 +445,12 @@ export class AmpStoryPlayer {
       throw new Error('<script> child must have type="application/json"');
     }
 
-    this.playerConfig_ = /** @type {?JsonObject} */ (JSON.parse(
-      /** @type {string} */ (scriptTag.textContent)
-    ));
+    try {
+      this.playerConfig_ = parseJson(scriptTag.textContent);
+    } catch (reason) {
+      console /*OK*/
+        .error(`[${TAG}] `, reason);
+    }
 
     return this.playerConfig_;
   }
@@ -538,8 +546,8 @@ export class AmpStoryPlayer {
             );
           });
 
-          const playerConfig = this.readPlayerConfig_();
-          const customControls = playerConfig && playerConfig.controls;
+          const customControls =
+            this.playerConfig_ && this.playerConfig_['controls'];
 
           if (customControls) {
             messaging.sendRequest('customDocumentUI', customControls, false);
