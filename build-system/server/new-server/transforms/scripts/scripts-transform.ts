@@ -38,7 +38,7 @@ function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
 
   const url = tryGetUrl(script.attrs.src || '');
   const parsedPath = parse(url.pathname);
-  const src = CDNURLToLocalDistURL(url, [null, null], parsedPath.ext, options.port)
+  const src = CDNURLToLocalDistURL(url, [null, null], parsedPath.ext, options.port, options.useMaxNames)
       .toString();
   script.attrs.src = src;
   return script;

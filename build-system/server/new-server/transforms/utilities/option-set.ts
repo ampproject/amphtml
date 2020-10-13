@@ -25,4 +25,5 @@ export interface OptionSet {
   port?: number;
   fortesting?: boolean;
   looseScriptSrcCheck?: boolean;
+  useMaxNames?: boolean;
 }

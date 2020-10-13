@@ -15,9 +15,34 @@
  */
 
 import {URL} from 'url';
-import {parse, format} from 'path';
+import {parse, format, basename} from 'path';
 
 export const VALID_CDN_ORIGIN = 'https://cdn.ampproject.org';
+
+export const AMP_MAIN_BINARIES_RENAMES = new Map([
+  ['v0', 'amp'],
+  ['f', 'integration'],
+  ['shadow-v0', 'amp-shadow'],
+  ['ampcontext-v0', 'ampcontext-lib'],
+  ['amp4ads-v0', 'amp-inabox'],
+  ['amp4ads-host-v0', 'amp-inabox-host'],
+  ['iframe-transport-client-v0', 'iframe-transform-client-lib'],
+  ['video-iframe-integration-v0', 'video-iframe-integration'],
+  ['amp-story-entry-point-v0', 'amp-story-entry-point'],
+  ['amp-story-player-v0', 'amp-story-player'],
+]);
+
+/**
+ * @param minifiedBasename should be without extension
+ */
+function getMinifiedName(minifiedBasename: string): string {
+  const renamedBasename = AMP_MAIN_BINARIES_RENAMES.get(minifiedBasename);
+  if (renamedBasename) {
+    return renamedBasename;
+  }
+
+  return `${minifiedBasename}.max`;
+}
 
 /**
  * Convert an existing URL to one from the local `serve` command.
@@ -27,6 +52,7 @@ export function CDNURLToLocalDistURL(
   pathnames: [string | null, string | null] = [null, null],
   extension: string = '.js',
   port: number = 8000,
+  useMaxNames = false,
 ): URL {
   url.protocol = 'http';
   url.hostname = 'localhost';
@@ -38,10 +64,14 @@ export function CDNURLToLocalDistURL(
   }
 
   const parsedPath = parse('/dist' + url.pathname);
+  let curBasename = basename(parsedPath.base, parsedPath.ext);
+  if (useMaxNames) {
+    curBasename = getMinifiedName(curBasename);
+  }
   if (parsedPath.ext !== extension) {
-    parsedPath.base = parsedPath.base.replace(parsedPath.ext, extension);
     parsedPath.ext = extension;
   }
+  parsedPath.base = `${curBasename}${parsedPath.ext}`;
   url.pathname = format(parsedPath);
 
   return url;
@@ -71,3 +101,4 @@ export function CDNURLToRTVURL(
 
   return url;
 }
+
