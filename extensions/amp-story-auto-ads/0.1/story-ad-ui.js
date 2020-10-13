@@ -25,7 +25,6 @@ import {
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
-import {startsWith} from '../../../src/string';
 
 /**
  * @typedef {{
@@ -82,10 +81,10 @@ export function getStoryAdMetadataFromDoc(doc) {
   const vars = map();
   iterateCursor(storyMetaTags, (tag) => {
     const {name, content} = tag;
-    if (startsWith(name, CTA_META_PREFIX)) {
+    if (name.startsWith(CTA_META_PREFIX)) {
       const key = name.split('amp-')[1];
       vars[key] = content;
-    } else if (startsWith(name, A4A_VARS_META_PREFIX)) {
+    } else if (name.startsWith(A4A_VARS_META_PREFIX)) {
       const key = name.split(A4A_VARS_META_PREFIX)[1];
       vars[key] = content;
     }
