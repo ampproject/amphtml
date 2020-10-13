@@ -18,16 +18,17 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Deferred} from '../../../src/utils/promise';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {dict} from '../../../src/utils/object';
-import {fillContentOverlay, fillStretch} from './video-wrapper.css';
-import {forwardRef} from '../../../src/preact/compat';
-import {once} from '../../../src/utils/function';
 import {
+  MetadataDef,
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
+import {dict} from '../../../src/utils/object';
+import {fillContentOverlay, fillStretch} from './video-wrapper.css';
+import {forwardRef} from '../../../src/preact/compat';
+import {once} from '../../../src/utils/function';
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
@@ -42,11 +43,11 @@ import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {?{getMetadata: (function():?JsonObject|undefined)}} player
- * @param {!VideoWrapperProps} props
- * @return {!JsonObject}
+ * @param {!VideoWrapperDef.Props} props
+ * @return {!MetadataDef}
  */
 const getMetadata = (player, props) =>
-  /** @type {!JsonObject} */ Object.assign(
+  /** @type {!MetadataDef} */ (Object.assign(
     dict({
       'title': props.title || props['aria-label'] || document.title,
       'artist': props.artist || '',
@@ -64,12 +65,13 @@ const getMetadata = (player, props) =>
       ],
     }),
     player && player.getMetadata ? player.getMetadata() : Object.create(null)
-  );
+  ));
 
 /**
  * @param {!VideoWrapperDef.Props} props
  * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
+ * @template T
  */
 function VideoWrapperWithRef(
   {
@@ -90,7 +92,7 @@ function VideoWrapperWithRef(
 
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying] = useState(false);
-  const [metadata, setMetadata] = useState(null);
+  const [metadata, setMetadata] = useState(/** @type {?MetadataDef}*/ (null));
   const [hasUserInteracted, setHasUserInteracted] = useState(!autoplay);
 
   const wrapperRef = useRef(null);
@@ -275,13 +277,14 @@ function Autoplay({
   );
 }
 
-/**
- * @return {!PreactDef.Renderable}
- */
-const AutoplayIconContent = once(() => {
-  const classes = useAutoplayStyles();
-  return [1, 2, 3, 4].map((i) => <div className={classes.eqCol} key={i}></div>);
-});
+const AutoplayIconContent = /** @type {function():!PreactDef.Renderable} */ (once(
+  () => {
+    const classes = useAutoplayStyles();
+    return [1, 2, 3, 4].map((i) => (
+      <div className={classes.eqCol} key={i}></div>
+    ));
+  }
+));
 
 const VideoWrapper = forwardRef(VideoWrapperWithRef);
 VideoWrapper.displayName = 'VideoWrapper'; // Make findable for tests.

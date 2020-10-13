@@ -39,8 +39,8 @@ export class VideoBaseElement extends PreactBaseElement {
 
   /**
    * @param {string} alias
-   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
-   * @param {../action-constants.ActionTrust=} minTrust
+   * @param {function(!VideoWrapperDef.Api, !../../../src/service/action-impl.ActionInvocation)} handler
+   * @param {!../../../src/action-constants.ActionTrust=} minTrust
    * @private
    */
   registerApiAction_(alias, handler, minTrust = ActionTrust.HIGH) {

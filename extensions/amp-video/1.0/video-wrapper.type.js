@@ -49,7 +49,7 @@ VideoWrapperDef.PlayerComponent;
  *   autoplay: (boolean|undefined),
  *   controls: (boolean|undefined),
  *   noaudio: (boolean|undefined),
- *   mediasession: (boolean|undefined)
+ *   mediasession: (boolean|undefined),
  *   title: (string|undefined),
  *   artist: (string|undefined),
  *   album: (string|undefined),
