@@ -26,9 +26,19 @@ import {
   useContext,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
+
+/**
+ * @enum {string}
+ */
+const Controls = {
+  ALWAYS: 'always',
+  NEVER: 'never',
+  AUTO: 'auto',
+};
 
 /**
  * @param {!BaseCarouselDef.Props} props
@@ -36,7 +46,16 @@ import {
  * @return {PreactDef.Renderable}
  */
 function BaseCarouselWithRef(
-  {arrowPrev, arrowNext, children, loop, onSlideChange, ...rest},
+  {
+    arrowPrev,
+    arrowNext,
+    children,
+    controls = Controls.AUTO,
+    loop,
+    onSlideChange,
+    snap = true,
+    ...rest
+  },
   ref
 ) {
   const childrenArray = toChildArray(children);
@@ -80,13 +99,27 @@ function BaseCarouselWithRef(
 
   const disableForDir = (dir) =>
     !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
+
+  const [hadTouch, setHadTouch] = useState(false);
+  const hideControls = useMemo(() => {
+    if (controls === Controls.NEVER) {
+      return true;
+    }
+    if (controls === Controls.ALWAYS) {
+      return false;
+    }
+    return hadTouch;
+  }, [hadTouch, controls]);
+
   return (
     <ContainWrapper size={true} layout={true} paint={true} {...rest}>
       <Scroller
         loop={loop}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
+        snap={snap}
         ref={scrollRef}
+        onTouchStart={() => setHadTouch(true)}
       >
         {/*
           TODO(#30283): TBD: this is an interesting concept. We could decide
@@ -109,16 +142,20 @@ function BaseCarouselWithRef(
           )
         )}
       </Scroller>
-      <ArrowPrev
-        customArrow={arrowPrev}
-        disabled={disableForDir(-1)}
-        advance={advance}
-      />
-      <ArrowNext
-        customArrow={arrowNext}
-        disabled={disableForDir(1)}
-        advance={advance}
-      />
+      {!hideControls && (
+        <>
+          <ArrowPrev
+            customArrow={arrowPrev}
+            disabled={disableForDir(-1)}
+            advance={advance}
+          />
+          <ArrowNext
+            customArrow={arrowNext}
+            disabled={disableForDir(1)}
+            advance={advance}
+          />
+        </>
+      )}
     </ContainWrapper>
   );
 }

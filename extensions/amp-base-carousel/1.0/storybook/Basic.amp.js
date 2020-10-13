@@ -15,9 +15,9 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-base-carousel',
@@ -30,8 +30,15 @@ export default {
 };
 
 export const Default = () => {
+  const snap = boolean('snap', true);
+  const controls = select('show controls', ['auto', 'always', 'never']);
   return (
-    <amp-base-carousel width="440" height="225">
+    <amp-base-carousel
+      controls={controls}
+      snap={String(snap)}
+      width="440"
+      height="225"
+    >
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <amp-layout width="440" height="225">
           <svg viewBox="0 0 440 225">

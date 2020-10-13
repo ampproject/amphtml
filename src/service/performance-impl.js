@@ -39,6 +39,8 @@ const QUEUE_LIMIT = 50;
 /** @const {string} */
 const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
 
+const TAG = 'Performance';
+
 /**
  * Fields:
  * {{
@@ -87,8 +89,9 @@ export class Performance {
 
     /** @private {!Object<string,boolean>} */
     this.enabledExperiments_ = map();
-    /** @private {string} */
-    this.ampexp_ = '';
+
+    /** @private {string|undefined} */
+    this.ampexp_ = undefined;
 
     /** @private {Signals} */
     this.metrics_ = new Signals();
@@ -273,6 +276,13 @@ export class Performance {
         // Tick timeOrigin so that epoch time can be calculated by consumers.
         this.tick(TickLabel.TIME_ORIGIN, undefined, this.timeOrigin_);
 
+        const usqp = this.ampdoc_.getMetaByName('amp-usqp');
+        if (usqp) {
+          usqp.split(',').forEach((exp) => {
+            this.addEnabledExperiment('ssr-' + exp);
+          });
+        }
+
         return this.maybeAddStoryExperimentId_();
       })
       .then(() => {
@@ -387,54 +397,59 @@ export class Performance {
     }
 
     if (this.supportsEventTiming_) {
-      const firstInputObserver = this.createPerformanceObserver_(processEntry);
-      firstInputObserver.observe({type: 'first-input', buffered: true});
+      this.createPerformanceObserver_(processEntry, {
+        type: 'first-input',
+        buffered: true,
+      });
     }
 
     if (this.supportsLayoutShift_) {
-      const layoutInstabilityObserver = this.createPerformanceObserver_(
-        processEntry
-      );
-      layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
+      this.createPerformanceObserver_(processEntry, {
+        type: 'layout-shift',
+        buffered: true,
+      });
     }
 
     if (this.supportsLargestContentfulPaint_) {
-      const lcpObserver = this.createPerformanceObserver_(processEntry);
-      lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
+      // lcpObserver
+      this.createPerformanceObserver_(processEntry, {
+        type: 'largest-contentful-paint',
+        buffered: true,
+      });
     }
 
     if (this.supportsNavigation_) {
-      const navigationObserver = this.createPerformanceObserver_(processEntry);
-      navigationObserver.observe({type: 'navigation', buffered: true});
+      // Wrap in a try statement as there are some browsers (ex. chrome 73)
+      // that will say it supports navigation but throws.
+      this.createPerformanceObserver_(processEntry, {
+        type: 'navigation',
+        buffered: true,
+      });
     }
 
-    if (entryTypesToObserve.length === 0) {
-      return;
-    }
-
-    const observer = this.createPerformanceObserver_(processEntry);
-
-    // Wrap observer.observe() in a try statement for testing, because
-    // Webkit throws an error if the entry types to observe are not natively
-    // supported.
-    try {
-      observer.observe({entryTypes: entryTypesToObserve});
-    } catch (err) {
-      dev() /*OK*/
-        .warn(err);
+    if (entryTypesToObserve.length > 0) {
+      this.createPerformanceObserver_(processEntry, {
+        entryTypes: entryTypesToObserve,
+      });
     }
   }
 
   /**
    * @param {function(!PerformanceEntry)} processEntry
+   * @param {!PerformanceObserverInit} init
    * @return {!PerformanceObserver}
    * @private
    */
-  createPerformanceObserver_(processEntry) {
-    return new this.win.PerformanceObserver((list) => {
-      list.getEntries().forEach(processEntry);
-      this.flush();
-    });
+  createPerformanceObserver_(processEntry, init) {
+    try {
+      const obs = new this.win.PerformanceObserver((list) => {
+        list.getEntries().forEach(processEntry);
+        this.flush();
+      });
+      obs.observe(init);
+    } catch (err) {
+      dev().warn(TAG, err);
+    }
   }
 
   /**
@@ -532,7 +547,6 @@ export class Performance {
       return;
     }
     if (!this.resources_) {
-      const TAG = 'Performance';
       dev().error(TAG, 'Failed to tick ser due to null resources');
       return;
     }
@@ -758,6 +772,9 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      if (this.ampexp_ == null) {
+        this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+      }
       this.viewer_.sendMessage(
         'sendCsi',
         dict({
@@ -784,7 +801,7 @@ export class Performance {
    */
   addEnabledExperiment(experimentId) {
     this.enabledExperiments_[experimentId] = true;
-    this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+    this.ampexp_ = undefined;
   }
 
   /**

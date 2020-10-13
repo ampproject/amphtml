@@ -26,11 +26,8 @@ import {dict} from '../utils/object';
 import {escapeCssSelectorIdent} from '../css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
 import {isLocalhostOrigin} from '../url';
+import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -91,22 +88,18 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
 export class Navigation {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const {!Document|!ShadowRoot} */
-    this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getRootNode();
 
     /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
@@ -197,19 +190,6 @@ export class Navigation {
       'click',
       maybeExpandUrlParams.bind(null, ampdoc),
       /* capture */ true
-    );
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      TAG,
-      new Navigation(ampdoc, embedWin.document)
     );
   }
 
@@ -420,7 +400,7 @@ export class Navigation {
    * @private
    */
   handleContextMenuClick_(element, e) {
-    // TODO(wg-runtime): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
+    // TODO(wg-performance): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
     this.expandVarsForAnchor_(element);
     this.applyAnchorMutators_(element, e);
   }

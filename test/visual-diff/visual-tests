@@ -236,7 +236,7 @@
       "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
-      // TODO(#27455, @ampproject/wg-ads): see https://percy.io/ampproject/amphtml/builds/4672752
+      // TODO(#27455, @ampproject/wg-monetization): see https://percy.io/ampproject/amphtml/builds/4672752
       "flaky": true,
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
       "name": "AMP Sticky Ad",
@@ -562,7 +562,7 @@
       ]
     },
     {
-      // TODO(#27453, @ampproject/wg-ads): disabled in #21935 because this test is not hermetic.
+      // TODO(#27453, @ampproject/wg-monetization): disabled in #21935 because this test is not hermetic.
       "flaky": true,
       "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
       "name": "AMP Inabox GPT Ad",
@@ -751,7 +751,7 @@
       "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
     },
     {
-      // TODO(#27454, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4672992/view/274790617/375?mode=diff&browser=firefox&snapshot=274790617
+      // TODO(#27454, @ampproject/wg-components): see https://percy.io/ampproject/amphtml/builds/4672992/view/274790617/375?mode=diff&browser=firefox&snapshot=274790617
       "flaky": true,
       "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu-with-list.amp.html",
       "name": "amp-mega-menu: template render",

@@ -16,8 +16,10 @@
 
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
-import {number, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
+
+const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'BaseCarousel',
@@ -29,15 +31,32 @@ export const _default = () => {
   const width = number('width', 440);
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const snap = boolean('snap', true);
+  const loop = boolean('loop', true);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const controls = select('show controls', CONTROLS);
   return (
-    <BaseCarousel style={{width, height}}>
+    <BaseCarousel
+      controls={controls}
+      loop={loop}
+      snap={snap}
+      style={{width, height}}
+    >
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
           <div
-            style={{backgroundColor: `rgb(${v}, 100, 100)`, width, height}}
-          ></div>
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              width,
+              height,
+              textAlign: 'center',
+              fontSize: '48pt',
+              lineHeight: height + 'px',
+            }}
+          >
+            {i}
+          </div>
         );
       })}
     </BaseCarousel>
@@ -47,6 +66,7 @@ export const _default = () => {
 export const provideArrows = () => {
   const width = number('width', 440);
   const height = number('height', 225);
+  const controls = select('show controls', CONTROLS);
   const myButtonStyle = {
     background: 'lightblue',
     borderRadius: '50%',
@@ -65,6 +85,7 @@ export const provideArrows = () => {
   };
   return (
     <BaseCarousel
+      controls={controls}
       style={{width, height}}
       arrowPrev={<MyButton>←</MyButton>}
       arrowNext={<MyButton>→</MyButton>}
@@ -76,39 +97,14 @@ export const provideArrows = () => {
   );
 };
 
-export const WithLooping = () => {
-  const width = number('width', 440);
-  const height = number('height', 225);
-  return (
-    <BaseCarousel loop style={{width, height}}>
-      {[
-        'lightpink',
-        'lightcoral',
-        'peachpuff',
-        'powderblue',
-        'lavender',
-        'thistle',
-      ].map((color, index) => (
-        <div
-          style={{
-            backgroundColor: color,
-            width,
-            height,
-            textAlign: 'center',
-            fontSize: '48pt',
-            lineHeight: height + 'px',
-          }}
-        >
-          {index}
-        </div>
-      ))}
-    </BaseCarousel>
-  );
-};
-
 export const WithCaptions = () => {
+  const controls = select('show controls', CONTROLS);
   return (
-    <BaseCarousel loop style={{width: '500px', height: '400px'}}>
+    <BaseCarousel
+      controls={controls}
+      loop
+      style={{width: '500px', height: '400px'}}
+    >
       <figure>
         <img
           style={{width: '500px', height: '300px'}}

@@ -575,7 +575,6 @@ const forbiddenTerms = {
     allowlist: ['src/log.js'],
   },
   '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
-    // eslint-disable-line max-len
     message:
       'Logging message require explicitly `TAG`, or an all uppercase' +
       ' string as the first parameter',
@@ -589,7 +588,7 @@ const forbiddenTerms = {
   },
   '\\.requireLayout\\(': {
     message:
-      'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
+      'requireLayout is restricted b/c it affects non-contained elements',
     allowlist: [
       'extensions/amp-animation/0.1/web-animations.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
@@ -688,21 +687,10 @@ const forbiddenTerms = {
       'formDataWrapper.getFormData() to get the native FormData object.',
     allowlist: ['src/form-data-wrapper.js'],
   },
-  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
-    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
-    allowlist: [
-      'ads/google/imaVideo.js',
-      'dist.3p/current/integration.js',
-      'src/video-iframe-integration.js',
-      'extensions/amp-consent/0.1/amp-consent.js',
-      'extensions/amp-consent/0.1/consent-ui.js',
-    ],
-  },
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
   '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {
-    // eslint-disable-line max-len
     message: 'TAG is not an argument to assert(). Will cause false positives.',
   },
   'eslint no-unused-vars': {
@@ -913,18 +901,6 @@ const forbiddenTerms = {
   },
 };
 
-const ThreePTermsMessage =
-  'The 3p bootstrap iframe has no polyfills loaded' +
-  ' and can thus not use most modern web APIs.';
-
-const forbidden3pTerms = {
-  // We need to forbid promise usage because we don't have our own polyfill
-  // available. This allowlisting of callNext is a major hack to allow one
-  // usage in babel's external helpers that is in a code path that we do
-  // not use.
-  '\\.then\\((?!callNext)': ThreePTermsMessage,
-};
-
 const bannedTermsHelpString =
   'Please review viewport service for helper ' +
   'methods or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
@@ -1046,7 +1022,6 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
-      'src/friendly-iframe-embed-legacy.js',
       'src/polyfillstub/intersection-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
@@ -1060,8 +1035,8 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-a4a/0.1/head-validation.js',
       'extensions/amp-a4a/0.1/template-validator.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
       'extensions/amp-animation/0.1/install-polyfill.js',
     ],
@@ -1088,7 +1063,6 @@ const forbiddenTermsSrcInclusive = {
       'src/base-element.js',
       'src/event-helper.js',
       'src/friendly-iframe-embed.js',
-      'src/friendly-iframe-embed-legacy.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
       'src/service/url-replacements-impl.js',
@@ -1360,7 +1334,6 @@ function hasAnyTerms(file) {
   const basename = path.basename(pathname);
   let hasTerms = false;
   let hasSrcInclusiveTerms = false;
-  let has3pTerms = false;
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
@@ -1372,18 +1345,7 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  const is3pFile =
-    /\/(3p|ads)\//.test(pathname) ||
-    basename == '3p.js' ||
-    basename == 'style.js';
-  // Yet another reason to move ads/google/a4a somewhere else
-  const isA4A = /\/a4a\//.test(pathname);
-  const isRecaptcha = basename == 'recaptcha.js';
-  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
-    has3pTerms = matchTerms(file, forbidden3pTerms);
-  }
-
-  return hasTerms || hasSrcInclusiveTerms || has3pTerms;
+  return hasTerms || hasSrcInclusiveTerms;
 }
 
 /**

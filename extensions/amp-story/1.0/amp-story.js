@@ -677,6 +677,14 @@ export class AmpStory extends AMP.BaseElement {
       );
     });
 
+    this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_AUDIO_UI,
+      (show) => {
+        this.element.classList.toggle('i-amphtml-story-no-audio-ui', !show);
+      },
+      true /** callToInitialize */
+    );
+
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         // Disallow switching pages while the bookend is active.
@@ -961,6 +969,11 @@ export class AmpStory extends AMP.BaseElement {
           this.upgradeCtaAnchorTagsForTracking_(page, index);
         });
         this.initializeStoryNavigationPath_();
+
+        // Build pagination buttons if they can be displayed.
+        if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
+          new PaginationButtons(this);
+        }
       })
       .then(() => this.initializeBookend_())
       .then(() => {
@@ -1016,11 +1029,6 @@ export class AmpStory extends AMP.BaseElement {
       return whenUpgradedToCustomElement(firstPageEl).then(() => {
         return firstPageEl.whenBuilt();
       });
-    }
-
-    // Build pagination buttons if they can be displayed.
-    if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
-      new PaginationButtons(this);
     }
 
     // Will resolve when all pages are built.

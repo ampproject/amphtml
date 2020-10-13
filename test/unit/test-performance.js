@@ -16,12 +16,26 @@
 
 import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
+import {
+  Performance,
+  installPerformanceService,
+} from '../../src/service/performance-impl';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getMode} from '../../src/mode';
-import {installPerformanceService} from '../../src/service/performance-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installRuntimeServices} from '../../src/service/core-services';
+
+describes.realWin('performance', {amp: false}, (env) => {
+  it('should be resilient to unsupported PerformanceObserver entry types', () => {
+    env.sandbox.stub(env.win.PerformanceObserver.prototype, 'observe').throws();
+    allowConsoleError(() => {
+      expect(() => {
+        new Performance(env.win);
+      }).to.not.throw();
+    });
+  });
+});
 
 describes.realWin('performance', {amp: true}, (env) => {
   let perf;
@@ -773,6 +787,30 @@ describes.realWin('performance with experiment', {amp: true}, (env) => {
             'rtv-' + getMode(win).rtvVersion,
             'experiment-a',
             'experiment-b',
+          ]);
+          return true;
+        })
+      );
+    });
+  });
+
+  it('adds ssr experiments', () => {
+    env.sandbox
+      .stub(env.ampdoc, 'getMetaByName')
+      .withArgs('amp-usqp')
+      .returns('1=1,2=0');
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub).to.be.calledWith(
+        'sendCsi',
+        env.sandbox.match((payload) => {
+          const experiments = payload.ampexp.split(',');
+          expect(experiments).to.have.length(3);
+          expect(experiments).to.have.members([
+            'rtv-' + getMode(win).rtvVersion,
+            'ssr-1=1',
+            'ssr-2=0',
           ]);
           return true;
         })

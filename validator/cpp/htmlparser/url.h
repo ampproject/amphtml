@@ -45,13 +45,13 @@ class URL {
   int port() const { return port_; }
 
  private:
-  static bool IsAlphaNum(int8_t c) {
+  static bool IsAlphaNum(uint8_t c) {
     return (('0' <= c && c <= '9') ||
             ('a' <= c && c <= 'z') ||
             ('A' <= c && c <= 'Z'));
   }
 
-  static bool IsProtocolCharValidChar(int8_t c) {
+  static bool IsProtocolCharValidChar(uint8_t c) {
     return IsAlphaNum(c) || c == '+' || c == '-';
   }
 
@@ -63,11 +63,11 @@ class URL {
     return true;
   }
 
-  static bool HostCharIsEnd(int8_t c) {
+  static bool HostCharIsEnd(uint8_t c) {
     return c == '#' || c == '/' || c == '?' || c == '\\';
   }
 
-  static bool HostCharIsValid(char c) {
+  static bool HostCharIsValid(uint8_t c) {
     static constexpr std::string_view illegal_chars =
         " !\"#$%&'()*+,/:;<=>?@[\\]^`{|}~";
     return c > 0x1f /* unprintable */ &&

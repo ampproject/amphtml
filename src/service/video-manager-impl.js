@@ -38,13 +38,7 @@ import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
-import {
-  createCustomEvent,
-  getData,
-  listen,
-  listenOnce,
-  listenOncePromise,
-} from '../event-helper';
+import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -517,9 +511,7 @@ class VideoEntry {
       this.video.pause();
     };
 
-    listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
-      this.videoLoaded()
-    );
+    listen(video.element, VideoEvents.LOAD, () => this.videoLoaded());
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
       this.hasSeenPlayEvent_ = true;
@@ -1446,7 +1438,7 @@ export class AnalyticsPercentageTracker {
   constructor(win, entry) {
     // This is destructured in `calculate_()`, but the linter thinks it's unused
     /** @private @const {!./timer-impl.Timer} */
-    this.timer_ = Services.timerFor(win); // eslint-disable-line
+    this.timer_ = Services.timerFor(win);
 
     /** @private @const {!VideoEntry} */
     this.entry_ = entry;

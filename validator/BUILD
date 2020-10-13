@@ -31,8 +31,10 @@ genrule(
 # </validator rules all protoascii>
 
 filegroup(
-    name = "validator-protoascii",
-    srcs = [
-        "validator-main.protoascii",
-    ],
+    name = "testdata_files",
+    srcs = glob([
+        "testdata/*/*.html",
+        "testdata/*/*.out",
+        "testdata/*/*.out.cpponly",
+    ]),
 )

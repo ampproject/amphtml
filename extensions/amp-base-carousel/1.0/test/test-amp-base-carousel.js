@@ -38,7 +38,6 @@ describes.realWin(
     let win;
     let element;
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const styles = useStyles();
 
     async function getSlideWrappersFromShadow() {
@@ -108,7 +107,7 @@ describes.realWin(
       toggleExperiment(win, 'amp-base-carousel-bento', false);
     });
 
-    it('should render slides and buttons when built', async () => {
+    it('should render slides and arrows when built', async () => {
       const userSuppliedChildren = setSlides(3);
       userSuppliedChildren.forEach((child) => element.appendChild(child));
       win.document.body.appendChild(element);
@@ -173,6 +172,57 @@ describes.realWin(
       ).to.deep.equal([userSuppliedChildren[1]]);
     });
 
+    it('should snap to slides by default', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
+    });
+
+    it('should snap to slides with snap attribute', async () => {
+      element.setAttribute('snap', '');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
+    });
+
+    it('should snap to slides with snap="true"', async () => {
+      element.setAttribute('snap', 'true');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.enableSnap)).to.be.true;
+      });
+    });
+
+    it('should not snap to slides with snap="false"', async () => {
+      element.setAttribute('snap', 'false');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlideWrappers = await getSlideWrappersFromShadow();
+      expect(renderedSlideWrappers).to.have.lengthOf(3);
+      renderedSlideWrappers.forEach((slide) => {
+        expect(slide.classList.contains(styles.disableSnap)).to.be.true;
+      });
+    });
+
     describe('imperative api', () => {
       let scroller;
 
@@ -213,7 +263,7 @@ describes.realWin(
 
       it('should execute goToSlide action', async () => {
         element.enqueAction(invocation('goToSlide', {index: 1}));
-        await waitFor(() => scroller.scrollLeft > 0, 'to to slide 1');
+        await waitFor(() => scroller.scrollLeft > 0, 'to slide 1');
 
         element.enqueAction(invocation('goToSlide', {index: 0}));
         await waitFor(
@@ -221,6 +271,34 @@ describes.realWin(
           'returned to first slide'
         );
       });
+    });
+
+    it('should render arrows when controls=always', async () => {
+      element.setAttribute('controls', 'always');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlides = await getSlidesFromShadow();
+      expect(renderedSlides).to.have.ordered.members(
+        userSuppliedChildren.slice(0, 2)
+      );
+      const buttons = element.shadowRoot.querySelectorAll('button');
+      expect(buttons).to.have.length(2);
+    });
+
+    it('should render not arrows when controls=never', async () => {
+      element.setAttribute('controls', 'never');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlides = await getSlidesFromShadow();
+      expect(renderedSlides).to.have.ordered.members(
+        userSuppliedChildren.slice(0, 2)
+      );
+      const buttons = element.shadowRoot.querySelectorAll('button');
+      expect(buttons).to.have.length(0);
     });
   }
 );
