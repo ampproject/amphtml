@@ -409,12 +409,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       'amp-story-page must be a descendant of amp-story.'
     );
 
-    storyEl.getImpl().then(
-      (storyImpl) => {
-        this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
-      },
-      (reason) => this.mediaPoolRejectFn_(reason)
-    );
+    whenUpgradedToCustomElement(storyEl)
+      .then(() => storyEl.getImpl())
+      .then(
+        (storyImpl) => this.mediaPoolResolveFn_(MediaPool.for(storyImpl)),
+        (reason) => this.mediaPoolRejectFn_(reason)
+      );
   }
 
   /**
@@ -1338,7 +1338,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       closestAncestorElementBySelector(this.element, 'amp-story'),
       'amp-story-page must be a descendant of amp-story.'
     );
-    console.log(storyEl);
     return toArray(storyEl.children).some(
       (e) => e.tagName.toLowerCase() === TAG && e.id === id
     );
@@ -1357,7 +1356,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     const navigationPath = this.storeService_.get(
       StateProperty.NAVIGATION_PATH
     );
-    console.log(navigationPath);
 
     const pagePathIndex = navigationPath.lastIndexOf(this.element.id);
     const previousPageId = navigationPath[pagePathIndex - 1];
