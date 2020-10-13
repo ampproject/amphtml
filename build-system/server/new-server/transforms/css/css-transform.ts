@@ -51,7 +51,6 @@ function isStyleNode(node: PostHTML.Node | string): node is StyleNode {
 function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
   const content = head.content || [];
 
-  debugger;
   const firstStyleNode = content.filter(isStyleNode)[0];
 
   // If 'amp-runtime' already exists bail out.
