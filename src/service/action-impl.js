@@ -581,7 +581,7 @@ export class ActionService {
    * @param {Array<string>=} opt_forFormat
    */
   addToAllowlist(tagOrTarget, methods, opt_forFormat) {
-    // TODO(wg-runtime): When it becomes possible to getFormat(),
+    // TODO(wg-performance): When it becomes possible to getFormat(),
     // we can store `format_` instead of `isEmail_` and check
     // (opt_forFormat && !opt_forFormat.includes(this.format_))
     if (opt_forFormat && opt_forFormat.includes('email') !== this.isEmail_) {

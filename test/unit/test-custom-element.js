@@ -323,7 +323,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       });
 
       it('should tolerate errors in onLayoutMeasure', () => {
-        expectAsyncConsoleError(/intentional/, 1);
         const element = new ElementClass();
         env.sandbox
           .stub(element.implementation_, 'onLayoutMeasure')
@@ -905,6 +904,89 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           return p.then(() => {
             expect(element.readyState).to.equal('complete');
             expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
+          });
+        });
+      });
+
+      it('Element - layoutCallback aborted waiting for mutate phase', () => {
+        const element = new ElementClass();
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
+        return element.build().then(() => {
+          expect(element.isBuilt()).to.equal(true);
+          expect(testElementLayoutCallback).to.have.not.been.called;
+
+          const controller = new AbortController();
+          controller.abort();
+          const p = element.layoutCallback(controller.signal);
+          expect(testElementLayoutCallback).not.to.be.called;
+          expect(element.signals().get(CommonSignals.LOAD_START)).to.be.null;
+          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          setTimeout(() => {
+            expect(testElementPreconnectCallback).to.have.callCount(1);
+          }, 0);
+          return expect(p).to.be.rejected.then(() => {
+            expect(element.readyState).to.equal('loading');
+            expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          });
+        });
+      });
+
+      it('Element - layoutCallback aborted before completing layout', () => {
+        const element = new ElementClass();
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
+        return element.build().then(() => {
+          expect(element.isBuilt()).to.equal(true);
+          expect(testElementLayoutCallback).to.have.not.been.called;
+
+          const controller = new AbortController();
+          const stub = env.sandbox
+            .stub(element.implementation_, 'layoutCallback')
+            .callsFake(() => {
+              controller.abort();
+            });
+          const p = element.layoutCallback(controller.signal);
+          expect(testElementLayoutCallback).not.to.be.called;
+          expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
+          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          setTimeout(() => {
+            expect(testElementPreconnectCallback).to.have.callCount(2);
+          }, 0);
+          return expect(p).to.be.rejected.then(() => {
+            expect(stub).to.have.been.called;
+            expect(element.readyState).to.equal('loading');
+            expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          });
+        });
+      });
+
+      it('Element - layoutCallback aborted before throwing in layout', () => {
+        const element = new ElementClass();
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
+        return element.build().then(() => {
+          expect(element.isBuilt()).to.equal(true);
+          expect(testElementLayoutCallback).to.have.not.been.called;
+
+          const controller = new AbortController();
+          const stub = env.sandbox
+            .stub(element.implementation_, 'layoutCallback')
+            .callsFake(() => {
+              controller.abort();
+              throw new Error('throwaway');
+            });
+          const p = element.layoutCallback(controller.signal);
+          expect(testElementLayoutCallback).not.to.be.called;
+          expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
+          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          setTimeout(() => {
+            expect(testElementPreconnectCallback).to.have.callCount(2);
+          }, 0);
+          return expect(p).to.be.rejected.then(() => {
+            expect(stub).to.have.been.called;
+            expect(element.readyState).to.equal('loading');
+            expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
           });
         });
       });
