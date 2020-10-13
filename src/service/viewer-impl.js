@@ -24,7 +24,7 @@ import {
   duplicateErrorIfNecessary,
   stripUserError,
 } from '../log';
-import {endsWith, startsWith} from '../string';
+import {endsWith} from '../string';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -370,7 +370,7 @@ export class ViewerImpl {
       const queryParams = parseQueryString(this.win.location.search);
       this.isCctEmbedded_ =
         queryParams['amp_gsa'] === '1' &&
-        startsWith(queryParams['amp_js_v'] || '', 'a');
+        (queryParams['amp_js_v'] || '').startsWith('a');
     }
     return this.isCctEmbedded_;
   }

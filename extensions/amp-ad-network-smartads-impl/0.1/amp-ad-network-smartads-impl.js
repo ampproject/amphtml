@@ -15,7 +15,6 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
 
 /**
  * Base URL
@@ -49,7 +48,7 @@ export class AmpAdNetworkSmartAdsImpl extends AmpA4A {
     const src = this.element.getAttribute('src') || '';
     return (
       this.isAmpAdElement() &&
-      (startsWith(src, BASE_URL_) || startsWith(src, BASE_A4A_URL_))
+      (src.startsWith(BASE_URL_) || src.startsWith(BASE_A4A_URL_))
     );
   }
 }

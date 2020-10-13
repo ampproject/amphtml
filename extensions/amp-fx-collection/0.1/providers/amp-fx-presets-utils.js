@@ -22,7 +22,6 @@
 import {FxType} from '../fx-type';
 import {Services} from '../../../../src/services';
 import {mapRange} from '../../../../src/utils/math';
-import {startsWith} from '../../../../src/string';
 import {userAssert} from '../../../../src/log';
 
 const MAX_MOBILE_WIDTH = 480;
@@ -45,7 +44,7 @@ export function convertEasingKeyword(keyword) {
     return curves[keyword];
   }
   userAssert(
-    startsWith(keyword, 'cubic-bezier'),
+    keyword.startsWith('cubic-bezier'),
     'All custom bezier curves should be specified by following the ' +
       '`cubic-bezier()` function notation.'
   );

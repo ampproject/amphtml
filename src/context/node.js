@@ -18,7 +18,6 @@ import {Values} from './values';
 import {devAssert} from '../log';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../utils/array';
-import {startsWith} from '../string';
 import {throttleTail} from './scheduler';
 
 // Properties set on the DOM nodes to track the context state.
@@ -113,7 +112,7 @@ export class ContextNode {
           // becomes available.
           return ContextNode.get(n);
         }
-        if (nodeType == ELEMENT_NODE && startsWith(n.tagName, AMP_PREFIX)) {
+        if (nodeType == ELEMENT_NODE && n.tagName.startsWith(AMP_PREFIX)) {
           // An AMP node will always have a context node backing it at some
           // point.
           return ContextNode.get(n);

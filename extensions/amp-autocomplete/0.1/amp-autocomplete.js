@@ -33,7 +33,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {includes, startsWith} from '../../../src/string';
+import {includes} from '../../../src/string';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, isEnumValue} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
@@ -789,7 +789,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.SUBSTRING:
           return includes(item, input);
         case FilterType.PREFIX:
-          return startsWith(item, input);
+          return item.startsWith(input);
         case FilterType.TOKEN_PREFIX:
           return this.tokenPrefixMatch_(item, input);
         case FilterType.FUZZY:
@@ -865,7 +865,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       match &&
       (lastInputToken === '' ||
         remainingItemTokens.some((itemToken) => {
-          return startsWith(itemToken, lastInputToken);
+          return itemToken.startsWith(lastInputToken);
         }))
     );
   }

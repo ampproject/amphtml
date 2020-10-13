@@ -48,7 +48,6 @@ import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {startsWith} from '../string';
 import {toggle} from '../style';
 
 /** @private @const {string} */
@@ -1379,7 +1378,7 @@ function centerDist(viewport, rect) {
  */
 function isLandscape(win) {
   if (win.screen && 'orientation' in win.screen) {
-    return startsWith(win.screen.orientation.type, 'landscape');
+    return win.screen.orientation.type.startsWith('landscape');
   }
   return Math.abs(win.orientation) == 90;
 }

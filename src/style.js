@@ -17,7 +17,6 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 import {dev, devAssert} from './log';
 import {map} from './utils/object.js';
-import {startsWith} from './string';
 
 /** @type {Object<string, string>} */
 let propertyNameCache;
@@ -375,5 +374,5 @@ export function propagateObjectFitStyles(fromEl, toEl) {
  * @return {boolean}
  */
 function isVar(property) {
-  return startsWith(property, '--');
+  return property.startsWith('--');
 }

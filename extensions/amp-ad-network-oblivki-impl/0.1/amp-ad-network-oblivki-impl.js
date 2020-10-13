@@ -15,7 +15,6 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
 
 /**
  * Oblivki base URL
@@ -51,8 +50,8 @@ export class AmpAdNetworkOblivkiImpl extends AmpA4A {
     const src = this.element.getAttribute('src') || '';
     return (
       this.isAmpAdElement() &&
-      (startsWith(src, OBLIVKI_BASE_URL_) ||
-        startsWith(src, OBLIVKI_BASE_A4A_URL_))
+      (src.startsWith(OBLIVKI_BASE_URL_) ||
+        src.startsWith(OBLIVKI_BASE_A4A_URL_))
     );
   }
 }

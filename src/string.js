@@ -70,19 +70,6 @@ export function endsWith(string, suffix) {
 }
 
 /**
- * Polyfill for String.prototype.startsWith.
- * @param {string} string
- * @param {string} prefix
- * @return {boolean}
- */
-export function startsWith(string, prefix) {
-  if (prefix.length > string.length) {
-    return false;
-  }
-  return string.lastIndexOf(prefix, 0) == 0;
-}
-
-/**
  * Polyfill for String.prototype.includes.
  * @param {string} string
  * @param {string} substring

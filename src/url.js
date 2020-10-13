@@ -16,7 +16,7 @@
 
 import {LruCache} from './utils/lru-cache';
 import {dict, hasOwn} from './utils/object';
-import {endsWith, startsWith} from './string';
+import {endsWith} from './string';
 import {getMode} from './mode';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
@@ -589,17 +589,17 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   const relativeUrl = parseUrlDeprecated(relativeUrlString);
 
   // Absolute URL.
-  if (startsWith(relativeUrlString.toLowerCase(), relativeUrl.protocol)) {
+  if (relativeUrlString.toLowerCase().startsWith(relativeUrl.protocol)) {
     return relativeUrl.href;
   }
 
   // Protocol-relative URL.
-  if (startsWith(relativeUrlString, '//')) {
+  if (relativeUrlString.startsWith('//')) {
     return baseUrl.protocol + relativeUrlString;
   }
 
   // Absolute path.
-  if (startsWith(relativeUrlString, '/')) {
+  if (relativeUrlString.startsWith('/')) {
     return baseUrl.origin + relativeUrlString;
   }
 

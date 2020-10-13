@@ -43,7 +43,6 @@ import {getFrameDoc, getStoryAdMetaTags} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -434,10 +433,10 @@ export class StoryAdPage {
     const storyMetaTags = getStoryAdMetaTags(this.adDoc_);
     iterateCursor(storyMetaTags, (tag) => {
       const {name, content} = tag;
-      if (startsWith(name, CTA_META_PREFIX)) {
+      if (name.startsWith(CTA_META_PREFIX)) {
         const key = name.split('amp-')[1];
         this.a4aVars_[key] = content;
-      } else if (startsWith(name, A4A_VARS_META_PREFIX)) {
+      } else if (name.startsWith(A4A_VARS_META_PREFIX)) {
         const key = name.split(A4A_VARS_META_PREFIX)[1];
         this.a4aVars_[key] = content;
       }
