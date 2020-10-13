@@ -282,6 +282,15 @@ export const VideoEvents = {
   LOADEDMETADATA: 'loadedmetadata',
 
   /**
+   * loadeddata
+   *
+   * Fired when the user agent can render the media for the first time.
+   *
+   * @event loadeddata
+   */
+  LOADEDDATA: 'loadeddata',
+
+  /**
    * play
    *
    * Fired when the video plays (either because of autoplay or the play method).
