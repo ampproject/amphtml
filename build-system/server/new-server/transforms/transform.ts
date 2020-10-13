@@ -45,6 +45,9 @@ const defaultTransformConfig = {
   port: PORT,
   fortesting: FOR_TESTING,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8a7de039f (fix max builds and integration tests against max files)
   useMaxNames: !argv.compiled,
 };
 
