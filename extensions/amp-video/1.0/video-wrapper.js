@@ -86,6 +86,8 @@ export function VideoWrapper({
   const [metadata, setMetadata] = useState(null);
   const [userInteracted, setUserInteracted] = useState(false);
 
+  const clearMediaSession = useRef(null);
+
   const wrapperRef = useRef(null);
   const playerRef = useRef(null);
 
@@ -107,13 +109,24 @@ export function VideoWrapper({
 
   useLayoutEffect(() => {
     if (mediasession && playing && metadata) {
-      setMediaSession(window, metadata, play, pause);
+      clearMediaSession.current = setMediaSession(
+        window,
+        metadata,
+        play,
+        pause
+      );
     }
-    return () => {
-      // TODO(alanorozco): Clear media session.
-      // (Tricky because we don't want to clear a different active session.)
-    };
   }, [mediasession, playing, metadata, play, pause]);
+
+  useEffect(
+    // Clear only on unmount.
+    () => () => {
+      if (clearMediaSession.current) {
+        clearMediaSession.current();
+      }
+    },
+    []
+  );
 
   return (
     <ContainWrapper

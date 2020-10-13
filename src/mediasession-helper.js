@@ -36,26 +36,39 @@ export const EMPTY_METADATA = {
   'artwork': [{'src': ''}],
 };
 
+let lastMediaSession = 0;
+
 /**
  * Updates the Media Session API's metadata
  * @param {!Window} win
  * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
+ * @return {!UnlistenDef|undefined} Clears it, undefined when session not set.
  */
 export function setMediaSession(win, metadata, playHandler, pauseHandler) {
-  const {navigator} = win;
-  if ('mediaSession' in navigator && win.MediaMetadata) {
+  if ('mediaSession' in win.navigator && win.MediaMetadata) {
+    const {mediaSession} = win.navigator;
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)
-    navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
+    mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
 
-    navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
+    mediaSession.metadata = new win.MediaMetadata(metadata);
 
-    navigator.mediaSession.setActionHandler('play', playHandler);
-    navigator.mediaSession.setActionHandler('pause', pauseHandler);
+    mediaSession.setActionHandler('play', playHandler);
+    mediaSession.setActionHandler('pause', pauseHandler);
 
     // TODO(@wassgha) Implement seek & next/previous
+
+    const currentMediaSession = ++lastMediaSession;
+    return () => {
+      if (currentMediaSession !== lastMediaSession) {
+        return;
+      }
+      mediaSession.metadata = null;
+      mediaSession.setActionHandler('play', null);
+      mediaSession.setActionHandler('pause', null);
+    };
   }
 }
 
