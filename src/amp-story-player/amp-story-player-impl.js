@@ -32,14 +32,15 @@ import {
 import {applySandbox} from '../3p-frame';
 import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
+import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
 import {getMode} from '../../src/mode';
+import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
-import {tryFocus} from '../dom';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -120,6 +121,9 @@ let DocumentStateTypeDef;
  */
 let StoryDef;
 
+/** @type {string} */
+const TAG = 'amp-story-player';
+
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
@@ -173,6 +177,9 @@ export class AmpStoryPlayer {
 
     /** @private {!SwipingState} */
     this.swipingState_ = SwipingState.NOT_SWIPING;
+
+    /** @private {?JsonObject} */
+    this.playerConfig_ = null;
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -303,6 +310,7 @@ export class AmpStoryPlayer {
     this.initializeShadowRoot_();
     this.initializeIframes_();
     this.initializeButton_();
+    this.readPlayerConfig_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -396,6 +404,7 @@ export class AmpStoryPlayer {
 
   /**
    * Helper to create a button.
+   * TODO(#30031): delete this once new custom UI API is ready.
    * @private
    */
   initializeButton_() {
@@ -415,6 +424,35 @@ export class AmpStoryPlayer {
         createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
       );
     });
+  }
+
+  /**
+   * Gets publisher configuration for the player
+   * @private
+   * @return {?JsonObject}
+   */
+  readPlayerConfig_() {
+    if (this.playerConfig_) {
+      return this.playerConfig_;
+    }
+
+    const scriptTag = this.element_.querySelector('script');
+    if (!scriptTag) {
+      return null;
+    }
+
+    if (!isJsonScriptTag(scriptTag)) {
+      throw new Error('<script> child must have type="application/json"');
+    }
+
+    try {
+      this.playerConfig_ = parseJson(scriptTag.textContent);
+    } catch (reason) {
+      console /*OK*/
+        .error(`[${TAG}] `, reason);
+    }
+
+    return this.playerConfig_;
   }
 
   /**
@@ -507,6 +545,13 @@ export class AmpStoryPlayer {
               messaging
             );
           });
+
+          const customControls =
+            this.playerConfig_ && this.playerConfig_['controls'];
+
+          if (customControls) {
+            messaging.sendRequest('customDocumentUI', customControls, false);
+          }
 
           resolve(messaging);
         },
@@ -1113,6 +1158,7 @@ export class AmpStoryPlayer {
 
   /**
    * Updates the visbility state of the exit control button.
+   * TODO(#30031): delete this once new custom UI API is ready.
    * @param {boolean} isVisible
    * @private
    */
