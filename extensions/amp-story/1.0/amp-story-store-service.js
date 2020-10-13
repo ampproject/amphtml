@@ -95,7 +95,7 @@ export let InteractiveReactData;
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
  *    canShowSystemLayerButtons: boolean,
- *    customUI: JSONObject,
+ *    customControls: JSONObject,
  *    accessState: boolean,
  *    adState: boolean,
  *    pageAttachmentState: boolean,
@@ -145,7 +145,7 @@ export const StateProperty = {
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
-  CUSTOM_UI: 'customUI',
+  CUSTOM_CONTROLS: 'customControls',
 
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
@@ -229,6 +229,7 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
+  SET_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
 /**
@@ -482,10 +483,10 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PAGE_SIZE]: data,
       });
-    case Action.SET_CUSTOM_UI:
+    case Action.SET_CUSTOM_CONTROLS:
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.CUSTOM_UI]: data,
+        [StateProperty.CUSTOM_CONTROLS]: data,
       });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
@@ -589,7 +590,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
-      [StateProperty.CUSTOM_UI]: {},
+      [StateProperty.CUSTOM_CONTROLS]: {},
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
