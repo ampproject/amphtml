@@ -96,29 +96,31 @@ async function sendTravisKarmaReport(testType) {
     return;
   }
 
-  const response = await fetch(REPORTING_API_URL, {
-    method: 'post',
-    body: JSON.stringify(body),
-    headers: {'Content-Type': 'application/json'},
-  });
+  console.log(body);
 
-  if (response.ok) {
-    log(
-      green('INFO:'),
-      `Test results of type`,
-      cyan(testType),
-      'reported to',
-      cyan(REPORTING_API_URL)
-    );
-  } else {
-    log(
-      yellow('WARNING:'),
-      'failed to report results of type',
-      cyan(testType),
-      ': \n',
-      yellow(response.statusText)
-    );
-  }
+  // const response = await fetch(REPORTING_API_URL, {
+  //   method: 'post',
+  //   body: JSON.stringify(body),
+  //   headers: {'Content-Type': 'application/json'},
+  // });
+
+  // if (response.ok) {
+  //   log(
+  //     green('INFO:'),
+  //     `Test results of type`,
+  //     cyan(testType),
+  //     'reported to',
+  //     cyan(REPORTING_API_URL)
+  //   );
+  // } else {
+  //   log(
+  //     yellow('WARNING:'),
+  //     'failed to report results of type',
+  //     cyan(testType),
+  //     ': \n',
+  //     yellow(response.statusText)
+  //   );
+  // }
 }
 
 /**
