@@ -620,27 +620,6 @@ export class BaseElement {
   }
 
   /**
-   * Utility method to propagate all data attributes from this element
-   * to the target element. (For use with arbitrary data attributes.)
-   * Removes any data attributes that are missing on this element from
-   * the target element.
-   * @param {!Element} targetElement
-   */
-  propagateDataset(targetElement) {
-    for (const key in targetElement.dataset) {
-      if (!(key in this.element.dataset)) {
-        delete targetElement.dataset[key];
-      }
-    }
-
-    for (const key in this.element.dataset) {
-      if (targetElement.dataset[key] !== this.element.dataset[key]) {
-        targetElement.dataset[key] = this.element.dataset[key];
-      }
-    }
-  }
-
-  /**
    * Utility method that forwards the given list of non-bubbling events
    * from the given element to this element as custom events with the same name.
    * @param  {string|!Array<string>} events
