@@ -208,6 +208,18 @@ describes.realWin('carousel implementation', {}, (env) => {
       expect(carousel.isAtStart()).to.be.false;
     });
 
+    it('should go to slide 0 when index is set to 0', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        loop: false,
+        forwards: false,
+      });
+      carousel.goToSlide(1);
+      carousel.goToSlide(0);
+
+      expect(carousel.getCurrentIndex()).to.equal(0);
+    });
+
     // TODO(#30563): fix and unskip.
     it.skip('should return true when at start for RTL', async () => {
       setStyle(element, 'width', '299.2px');

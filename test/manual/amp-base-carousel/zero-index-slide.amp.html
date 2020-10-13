@@ -10,37 +10,32 @@
 </head>
 
 <body>
-<amp-base-carousel
-    id="carousel"
-	auto-advance="true" 
-    auto-advance-interval="3000" 
-    height="120" 
-    snap-align="center" 
-    layout="fixed-height"
-    loop="true" 
-    visible-count="1"
-    amp-fx="fade-in">
-  	
-        <div style="text-align:center;">
-          <h5>Slide Title 1</h5>
-          <h6>Content Text 1</h6>
-        </div>
-        <div style="text-align:center;">
-          <h5>Slide Title 2</h5>
-          <h6>Content Text 2</h6>
-        </div>
-        <div style="text-align:center;">
-          <h5>Slide Title 3</h5>
-          <h6>Content Text 3</h6>
-        </div>
-
-</amp-base-carousel>
-
-<div style="text-align:center; cursor:pointer">
-  <i on="tap:carousel.goToSlide(index=0)">0</i>
-  <i on="tap:carousel.goToSlide(index=1)">1</i>
-  <i on="tap:carousel.goToSlide(index=2)">2</i>
-</div>
-
-
+  <amp-base-carousel
+      id="carousel"
+    auto-advance="true" 
+      auto-advance-interval="3000" 
+      height="120" 
+      snap-align="center" 
+      layout="fixed-height"
+      loop="true" 
+      visible-count="1"
+      amp-fx="fade-in">
+      <div style="text-align:center;">
+        <h5>Slide Title 1</h5>
+        <h6>Content Text 1</h6>
+      </div>
+      <div style="text-align:center;">
+        <h5>Slide Title 2</h5>
+        <h6>Content Text 2</h6>
+      </div>
+      <div style="text-align:center;">
+        <h5>Slide Title 3</h5>
+        <h6>Content Text 3</h6>
+      </div>
+  </amp-base-carousel>
+  <div style="text-align:center; cursor:pointer">
+    <i on="tap:carousel.goToSlide(index=0)">0</i>
+    <i on="tap:carousel.goToSlide(index=1)">1</i>
+    <i on="tap:carousel.goToSlide(index=2)">2</i>
+  </div>
 </body>
