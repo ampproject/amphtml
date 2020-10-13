@@ -1,0 +1,117 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as Preact from '../../../../src/preact';
+import {VideoIframe} from '../video-iframe';
+import {mount} from 'enzyme';
+
+function dispatchMessage(window, opt_event) {
+  const event = window.document.createEvent('Event');
+  event.initEvent('message', /* bubbles */ true, /* cancelable */ true);
+  window.dispatchEvent(Object.assign(event, opt_event));
+}
+
+describes.sandboxed('VideoIframe Preact component', {}, (env) => {
+  beforeEach(() => {});
+
+  it('unmutes per lack of `muted` prop', async () => {
+    const makeMethodMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframe src="about:blank" makeMethodMessage={makeMethodMessage} />,
+      {attachTo: document.body}
+    );
+
+    await videoIframe.find('iframe').invoke('onCanPlay')();
+
+    expect(makeMethodMessage.withArgs('unmute')).to.have.been.calledOnce;
+  });
+
+  it('mutes per `muted` prop', async () => {
+    const makeMethodMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframe
+        src="about:blank"
+        makeMethodMessage={makeMethodMessage}
+        muted
+      />,
+      {attachTo: document.body}
+    );
+
+    await videoIframe.find('iframe').invoke('onCanPlay')();
+
+    expect(makeMethodMessage.withArgs('mute')).to.have.been.calledOnce;
+  });
+
+  it('hides controls per lack of `controls` prop', async () => {
+    const makeMethodMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframe src="about:blank" makeMethodMessage={makeMethodMessage} />,
+      {attachTo: document.body}
+    );
+
+    await videoIframe.find('iframe').invoke('onCanPlay')();
+
+    expect(makeMethodMessage.withArgs('hideControls')).to.have.been.calledOnce;
+  });
+
+  it('shows controls per `controls` prop', async () => {
+    const makeMethodMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframe
+        src="about:blank"
+        makeMethodMessage={makeMethodMessage}
+        controls
+      />,
+      {attachTo: document.body}
+    );
+
+    await videoIframe.find('iframe').invoke('onCanPlay')();
+
+    expect(makeMethodMessage.withArgs('showControls')).to.have.been.calledOnce;
+  });
+
+  it('passes messages to onMessage', async () => {
+    const onMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframe src="about:blank" onMessage={onMessage} controls />,
+      {attachTo: document.body}
+    );
+
+    const iframe = videoIframe.getDOMNode();
+
+    const data = {foo: 'bar'};
+    dispatchMessage(window, {source: iframe.contentWindow, data});
+
+    expect(
+      onMessage.withArgs(
+        env.sandbox.match({
+          currentTarget: iframe,
+          target: iframe,
+          data,
+        })
+      )
+    ).to.have.been.calledOnce;
+  });
+
+  it("does not pass messages to onMessage if source doesn't match", async () => {
+    const onMessage = env.sandbox.spy();
+    mount(<VideoIframe src="about:blank" onMessage={onMessage} controls />, {
+      attachTo: document.body,
+    });
+    dispatchMessage(window, {source: null, data: 'whatever'});
+    expect(onMessage).to.not.have.been.called;
+  });
+});
