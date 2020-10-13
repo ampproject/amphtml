@@ -21,8 +21,6 @@ import {waitFor} from '../../../../testing/test-helper';
 
 describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
     const wrapper = mount(
       <Instagram
         shortcode="B8QaZW4AQY_"
@@ -30,8 +28,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
           'width': 500,
           'height': 600,
         }}
-      />,
-      {attachTo: el}
+      />
     );
 
     const iframe = wrapper.find('iframe');
@@ -45,15 +42,12 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   });
 
   it('Render with caption', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
     const wrapper = mount(
       <Instagram
         shortcode="B8QaZW4AQY_"
         captioned
         style={{'width': 500, 'height': 705}}
-      />,
-      {attachTo: el}
+      />
     );
     expect(wrapper.find('iframe').prop('src')).to.equal(
       'https://www.instagram.com/p/B8QaZW4AQY_/embed/captioned/?cr=1&v=12'
@@ -64,8 +58,6 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   });
 
   it('Resize prop is called', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
     const requestResizeSpy = env.sandbox.spy();
     const wrapper = mount(
       <Instagram
@@ -73,8 +65,7 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
         captioned
         style={{'width': 500, 'height': 705}}
         requestResize={requestResizeSpy}
-      />,
-      {attachTo: el}
+      />
     );
 
     const mockEvent = createMockEvent();
@@ -87,14 +78,11 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   });
 
   it('Height is changed', async () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
     const wrapper = mount(
       <Instagram
         shortcode="B8QaZW4AQY_"
         style={{'width': 500, 'height': 600}}
-      />,
-      {attachTo: el}
+      />
     );
 
     const mockEvent = createMockEvent();
