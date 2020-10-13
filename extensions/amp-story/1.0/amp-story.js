@@ -2165,6 +2165,7 @@ export class AmpStory extends AMP.BaseElement {
       /* map */ {},
       this.activePage_.element.id
     );
+    console.log(distanceMap);
 
     // Transpose the map into a 2D array.
     const pagesByDistance = [];
@@ -2223,7 +2224,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getPageDistanceMapHelper_(distance, map, pageId) {
-    if (this.pages_[pageId] == undefined) {
+    if (!this.pages_.some((page) => page.element.id === pageId)) {
       return map;
     }
     if (map[pageId] !== undefined && map[pageId] <= distance) {
