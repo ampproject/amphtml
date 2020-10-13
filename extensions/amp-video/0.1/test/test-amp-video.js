@@ -37,6 +37,10 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
+    afterEach(() => {
+      Services.videoManagerForDoc(doc).dispose();
+    });
+
     function getFooVideoSrc(filetype) {
       return '//someHost/foo.' + filetype.slice(filetype.indexOf('/') + 1); // assumes no optional params
     }
