@@ -41,9 +41,11 @@ const DEFAULT_SANDBOX = [
  *    render(<VideoWrapper component={VideoIframe} ... />)
  *
  * Usable on the AMP layer through VideoBaseElement.
+ *
  * @param {!VideoIframeDef.Props} props
  * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
+ * @template T
  */
 function VideoIframeWithRef(
   {
