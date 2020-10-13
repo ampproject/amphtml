@@ -1329,6 +1329,22 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Returns whether a page with the given ID exists
+   * @param id of the page we want to know if it exists
+   * @return {boolean}
+   */
+  pageExistsWithId_(id) {
+    const storyEl = dev().assertElement(
+      closestAncestorElementBySelector(this.element, 'amp-story'),
+      'amp-story-page must be a descendant of amp-story.'
+    );
+    console.log(storyEl);
+    return toArray(storyEl.children).some(
+      (e) => e.tagName.toLowerCase() === TAG && e.id === id
+    );
+  }
+
+  /**
    * Gets the ID of the previous page in the story (before the current page).
    * @return {?string} Returns the ID of the next page in the story, or null if
    *     there isn't one.
@@ -1341,11 +1357,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     const navigationPath = this.storeService_.get(
       StateProperty.NAVIGATION_PATH
     );
+    console.log(navigationPath);
 
     const pagePathIndex = navigationPath.lastIndexOf(this.element.id);
     const previousPageId = navigationPath[pagePathIndex - 1];
 
-    if (previousPageId) {
+    if (previousPageId && this.pageExistsWithId_(previousPageId)) {
       return previousPageId;
     }
 
