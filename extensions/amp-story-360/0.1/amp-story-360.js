@@ -39,6 +39,12 @@ import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 const TAG = 'AMP_STORY_360';
 
 /**
+ * readyState for first rendrable frame of video element.
+ * @const {number}
+ */
+const HAVE_CURRENT_DATA = 2;
+
+/**
  * Generates the template for the permission button.
  *
  * @param {!Element} element
@@ -265,6 +271,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {number} */
     this.sceneRoll_ = 0;
+
+    /** @private {?Element|?EventTarget} */
+    this.ampVideoEl_ = null;
   }
 
   /** @override */
@@ -571,7 +580,28 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
-    userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
+    // Used to update the video in animate_.
+    this.ampVideoEl_ = this.element.querySelector('amp-video');
+
+    userAssert(
+      ampImgEl || this.ampVideoEl_,
+      'amp-story-360 must contain an amp-img or amp-video element.'
+    );
+
+    if (ampImgEl) {
+      return this.setupAmpImgRenderer_(ampImgEl);
+    }
+    if (this.ampVideoEl_) {
+      return this.setupAmpVideoRenderer_();
+    }
+  }
+
+  /**
+   * @param {!Element} ampImgEl
+   * @return {!Promise}
+   * @private
+   */
+  setupAmpImgRenderer_(ampImgEl) {
     const owners = Services.ownersForDoc(this.element);
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
@@ -603,6 +633,51 @@ export class AmpStory360 extends AMP.BaseElement {
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
+        }
+      );
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  setupAmpVideoRenderer_() {
+    return whenUpgradedToCustomElement(dev().assertElement(this.ampVideoEl_))
+      .then(() => {
+        return this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END);
+      })
+      .then(() => {
+        const alreadyHasData =
+          dev().assertElement(this.ampVideoEl_.querySelector('video'))
+            .readyState >= HAVE_CURRENT_DATA;
+
+        return alreadyHasData
+          ? Promise.resolve()
+          : listenOncePromise(this.ampVideoEl_, 'loadeddata');
+      })
+      .then(
+        () => {
+          this.renderer_ = new Renderer(this.canvas_);
+          this.renderer_.setImageOrientation(
+            this.sceneHeading_,
+            this.scenePitch_,
+            this.sceneRoll_
+          );
+          this.renderer_.setImage(
+            dev().assertElement(this.ampVideoEl_.querySelector('video'))
+          );
+          this.renderer_.resize();
+          if (this.orientations_.length < 1) {
+            return;
+          }
+          this.renderInitialPosition_();
+          this.isReady_ = true;
+          if (this.isPlaying_) {
+            this.animate_();
+          }
+        },
+        () => {
+          user().error(TAG, 'Failed to load the amp-video.');
         }
       );
   }
@@ -643,26 +718,38 @@ export class AmpStory360 extends AMP.BaseElement {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
     const loop = () => {
-      if (!this.isPlaying_ || !this.animation_ || this.gyroscopeControls_) {
+      if (!this.isPlaying_ || !this.animation_) {
         this.renderer_.render(false);
         return;
       }
       const nextOrientation = this.animation_.getNextOrientation();
-      if (nextOrientation) {
-        // mutateElement causes inaccurate animation speed here, so we use rAF.
-        this.win.requestAnimationFrame(() => {
+      // mutateElement causes inaccurate animation speed here, so we use rAF.
+      this.win.requestAnimationFrame(() => {
+        // Stop loop if no next orientation and not a video.
+        if (!nextOrientation && !this.ampVideoEl_) {
+          this.isPlaying_ = false;
+          this.renderer_.render(false);
+          return;
+        }
+        // Only apply next orientation if not in gyroscope mode.
+        if (nextOrientation && !this.gyroscopeControls_) {
           this.renderer_.setCamera(
             nextOrientation.rotation,
             nextOrientation.scale
           );
-          this.renderer_.render(true);
-          loop();
-        });
-      } else {
-        this.isPlaying_ = false;
-        this.renderer_.render(false);
-        return;
-      }
+        }
+        // If video, check if ready and copy the texture on each frame.
+        if (this.ampVideoEl_) {
+          const videoEl = dev().assertElement(
+            this.ampVideoEl_.querySelector('video')
+          );
+          if (videoEl.readyState >= HAVE_CURRENT_DATA) {
+            this.renderer_.setImage(videoEl);
+          }
+        }
+        this.renderer_.render(true);
+        loop();
+      });
     };
     this.mutateElement(() => loop());
   }
