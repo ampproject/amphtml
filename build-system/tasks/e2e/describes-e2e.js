@@ -19,8 +19,8 @@ require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
+const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
-const http = require('http');
 const puppeteer = require('puppeteer');
 const {
   clearLastExpectError,
@@ -356,23 +356,10 @@ async function collectCoverage(env) {
  */
 async function reportCoverage() {
   const coverage = getCoverageObject();
-  await new Promise((resolve, reject) => {
-    const req = http.request(
-      {
-        host: HOST,
-        port: PORT,
-        path: COV_REPORT_PATH,
-        method: 'POST',
-        headers: {'Content-type': 'application/json'},
-      },
-      (res) => {
-        res.on('data', () => {});
-        res.on('end', resolve);
-        res.on('error', reject);
-      }
-    );
-    req.write(JSON.stringify(coverage));
-    req.end();
+  await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
+    method: 'POST',
+    body: JSON.stringify(coverage),
+    headers: {'Content-type': 'application/json'},
   });
 }
 
