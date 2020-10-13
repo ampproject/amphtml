@@ -250,16 +250,16 @@ describes.realWin(
       expect(buttons).to.have.length(0);
     });
 
-    const userSuppliedChildren = setSlides(3);
-    userSuppliedChildren.forEach((child) => element.appendChild(child));
-    win.document.body.appendChild(element);
-    await getSlidesFromShadow();
-
-    let scroller = element.shadowRoot.querySelector(
-      `[class*=${styles.scrollContainer}]`
-    );
-
     it('should go to slide 0 when index is set to 0', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+      await getSlidesFromShadow();
+
+      let scroller = element.shadowRoot.querySelector(
+        `[class*=${styles.scrollContainer}]`
+      );
+
       function invocation(method, args = {}) {
         const source = null;
         const caller = null;
