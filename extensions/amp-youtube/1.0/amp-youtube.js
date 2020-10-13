@@ -33,7 +33,7 @@ AmpYoutube['props'] = {
   'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock'},
   'credentials': {attr: 'credentials'},
-  // TODO: How do I add params here? data-param-*
+  'params': {attrPrefix: 'data-param-'},
 };
 
 /** @override */
