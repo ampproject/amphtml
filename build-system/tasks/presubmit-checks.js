@@ -687,16 +687,6 @@ const forbiddenTerms = {
       'formDataWrapper.getFormData() to get the native FormData object.',
     allowlist: ['src/form-data-wrapper.js'],
   },
-  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
-    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
-    allowlist: [
-      'ads/google/imaVideo.js',
-      'dist.3p/current/integration.js',
-      'src/video-iframe-integration.js',
-      'extensions/amp-consent/0.1/amp-consent.js',
-      'extensions/amp-consent/0.1/consent-ui.js',
-    ],
-  },
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
