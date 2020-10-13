@@ -237,7 +237,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       it('should be able to use user-error API', () => {
         const err = new Error();
         err.message = 'error test';
-        const userErrorReportSpy = window.sandbox./*OK*/ spy(
+        const userErrorReportSpy = window.sandbox.stub(
           iframeHandler,
           'userErrorForAnalytics_'
         );
