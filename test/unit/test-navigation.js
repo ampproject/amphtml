@@ -67,11 +67,7 @@ describes.sandboxed('Navigation', {}, () => {
         handler = Services.navigationForDoc(documentElement);
         handler.isIframed_ = true;
 
-        decorationSpy = env.sandbox
-          .stub(Impression, 'getExtraParamsUrl')
-          .callsFake(() => {
-            throw new Error();
-          });
+        decorationSpy = env.sandbox.spy(Impression, 'getExtraParamsUrl');
 
         handleNavSpy = env.sandbox.spy(handler, 'handleNavigation_');
 
@@ -276,7 +272,6 @@ describes.sandboxed('Navigation', {}, () => {
         let test1Url;
         let test2Url;
         beforeEach(() => {
-          console.error('beforeEach');
           // set canonical url;
           handler.isEmbed_ = false;
           handler.appendExtraParams_ = true;
@@ -299,16 +294,13 @@ describes.sandboxed('Navigation', {}, () => {
           expect(decorationSpy).to.be.calledOnce;
         });
 
-        it.only('should not decorate for page w/o ga tag', function* () {
-          console.error('start');
+        it('should not decorate for page w/o ga tag', function* () {
           handler.isEmbed_ = false;
           const ga = win.document.getElementsByTagName('amp-analytics');
           ga[0].parentNode.removeChild(ga[0]);
           yield macroTask();
-          console.error('macro');
           handler.handle_(event);
           expect(decorationSpy).to.not.be.called;
-          console.error('done');
         });
 
         it('should not decorate for embed', () => {
