@@ -287,7 +287,7 @@ describes.realWin(
       expect(buttons).to.have.length(2);
     });
 
-    it('should render not arrows when controls=never', async () => {
+    it('should not render arrows when controls=never', async () => {
       element.setAttribute('controls', 'never');
       const userSuppliedChildren = setSlides(3);
       userSuppliedChildren.forEach((child) => element.appendChild(child));
@@ -301,7 +301,8 @@ describes.realWin(
       expect(buttons).to.have.length(0);
     });
 
-    it('should respect outset-arrows', async () => {
+    it('should respect outset-arrows even if controls=never', async () => {
+      element.setAttribute('controls', 'never');
       element.setAttribute('outset-arrows', '');
       const userSuppliedChildren = setSlides(3);
       userSuppliedChildren.forEach((child) => element.appendChild(child));

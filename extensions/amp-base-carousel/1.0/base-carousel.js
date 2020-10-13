@@ -50,7 +50,7 @@ function BaseCarouselWithRef(
     arrowPrev,
     arrowNext,
     children,
-    controls = outsetArrows ? Controls.ALWAYS : Controls.AUTO,
+    controls = Controls.AUTO,
     loop,
     onSlideChange,
     outsetArrows,
@@ -103,14 +103,14 @@ function BaseCarouselWithRef(
 
   const [hadTouch, setHadTouch] = useState(false);
   const hideControls = useMemo(() => {
+    if (controls === Controls.ALWAYS || outsetArrows) {
+      return false;
+    }
     if (controls === Controls.NEVER) {
       return true;
     }
-    if (controls === Controls.ALWAYS) {
-      return false;
-    }
     return hadTouch;
-  }, [hadTouch, controls]);
+  }, [hadTouch, controls, outsetArrows]);
 
   return (
     <ContainWrapper
