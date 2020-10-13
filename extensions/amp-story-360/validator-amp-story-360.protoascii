@@ -73,6 +73,7 @@ tags: {  # <amp-story-360>
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "AMP-IMG"
+    child_tag_name_oneof: "AMP-VIDEO"
   }
   amp_layout: {
     supported_layouts: FILL
