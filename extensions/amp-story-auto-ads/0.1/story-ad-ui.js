@@ -153,7 +153,7 @@ export function maybeCreateAttribution(win, metadata, container) {
     const src = metadata[A4AVarNames.ATTRIBUTION_ICON];
 
     // Ad attribution is optional, but need both to render.
-    if (!href && !src) {
+    if (!href || !src) {
       return null;
     }
 

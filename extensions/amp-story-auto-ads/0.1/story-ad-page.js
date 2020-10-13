@@ -249,10 +249,11 @@ export class StoryAdPage {
         return false;
       }
 
-      const ctaText = localizeCtaText(
-        uiMetaData[A4AVarNames.CTA_TYPE],
-        this.localizationService_
-      );
+      const ctaText =
+        localizeCtaText(
+          uiMetaData[A4AVarNames.CTA_TYPE],
+          this.localizationService_
+        ) || '';
 
       // Store the cta-type as an accesible var for any further pings.
       this.analytics_.then((analytics) =>

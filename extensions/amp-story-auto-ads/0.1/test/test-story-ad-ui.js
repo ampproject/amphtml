@@ -125,30 +125,26 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       const metadata = {
         'attribution-url': 'https://www.kittens.com/moreinfo',
       };
-      allowConsoleError(() => {
-        const element = maybeCreateAttribution(
-          win,
-          metadata,
-          doc.body /* container */
-        );
-        expect(element).to.be.null;
-        expect(doc.querySelector('.i-amphtml-attribution-host')).not.to.exist;
-      });
+      const element = maybeCreateAttribution(
+        win,
+        metadata,
+        doc.body /* container */
+      );
+      expect(element).to.be.null;
+      expect(doc.querySelector('.i-amphtml-attribution-host')).not.to.exist;
     });
 
     it('returns null and does not create if no landing url', () => {
       const metadata = {
         'attribution-icon': 'https://www.kittens.com/img1',
       };
-      allowConsoleError(() => {
-        const element = maybeCreateAttribution(
-          win,
-          metadata,
-          doc.body /* container */
-        );
-        expect(element).to.be.null;
-        expect(doc.querySelector('.i-amphtml-attribution-host')).not.to.exist;
-      });
+      const element = maybeCreateAttribution(
+        win,
+        metadata,
+        doc.body /* container */
+      );
+      expect(element).to.be.null;
+      expect(doc.querySelector('.i-amphtml-attribution-host')).not.to.exist;
     });
 
     it('returns null and does not create if not https', () => {
