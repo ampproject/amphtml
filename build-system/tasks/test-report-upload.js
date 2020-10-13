@@ -96,7 +96,8 @@ async function sendTravisKarmaReport(testType) {
     return;
   }
 
-  console.log(body);
+  console /*OK*/
+    .log(body);
   return;
 
   const response = await fetch(REPORTING_API_URL, {
