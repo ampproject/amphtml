@@ -126,20 +126,31 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
  * @param {!AccordionDef.HeaderProps} props
  * @return {PreactDef.Renderable}
  */
-function HeaderShim(sectionElement, {onClick}) {
+function HeaderShim(sectionElement, props) {
+  const {onClick} = props;
+  const ariaControls = props['aria-controls'];
   const headerElement = sectionElement.firstElementChild;
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
       return;
     }
     headerElement.addEventListener('click', onClick);
+    const hasTabIndex = headerElement.hasAttribute('tabindex');
+    if (!hasTabIndex) {
+      headerElement.setAttribute('tabindex', 0);
+    }
+    headerElement.setAttribute('aria-controls', ariaControls);
+    headerElement.setAttribute('role', 'button');
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
+      if (!hasTabIndex) {
+        headerElement.removeAttribute('tabindex');
+      }
     };
-  }, [sectionElement, headerElement, onClick]);
+  }, [sectionElement, headerElement, onClick, ariaControls]);
   return <header />;
 }
 
@@ -155,18 +166,19 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
  * @param {{current: ?}} ref
  * @return {PreactDef.Renderable}
  */
-function ContentShimWithRef(sectionElement, {hidden}, ref) {
+function ContentShimWithRef(sectionElement, {hidden, id}, ref) {
   const contentElement = sectionElement.lastElementChild;
   useImperativeHandle(ref, () => contentElement, [contentElement]);
   useLayoutEffect(() => {
     if (!contentElement) {
       return;
     }
+    contentElement.setAttribute('id', id);
     toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, contentElement, hidden]);
+  }, [sectionElement, contentElement, hidden, id]);
   return <div />;
 }
 

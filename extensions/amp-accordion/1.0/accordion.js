@@ -57,9 +57,11 @@ export function Accordion({
   expandSingleSection = false,
   animate = false,
   children,
+  id,
   ...rest
 }) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
+  const [prefix] = useState(id ? id : Math.floor(Math.random() * 100));
 
   useEffect(() => {
     if (!expandSingleSection) {
@@ -107,12 +109,13 @@ export function Accordion({
         toggleExpanded,
         isExpanded: (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
         animate,
+        prefix,
       }),
-    [animate, expandedMap, registerSection, toggleExpanded]
+    [animate, expandedMap, registerSection, toggleExpanded, prefix]
   );
 
   return (
-    <Comp {...rest}>
+    <Comp id={id} {...rest}>
       <AccordionContext.Provider value={context}>
         {children}
       </AccordionContext.Provider>
@@ -166,6 +169,7 @@ export function AccordionSection({
     animate: contextAnimate,
     isExpanded,
     toggleExpanded,
+    prefix,
   } = useContext(AccordionContext);
 
   useEffect(() => {
@@ -189,6 +193,7 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
+  const contentId = prefix + '_AMP_content_' + id;
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
@@ -201,10 +206,21 @@ export function AccordionSection({
 
   return (
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
-      <HeaderComp role="button" style={CHILD_STYLE} onClick={expandHandler}>
+      <HeaderComp
+        role="button"
+        aria-controls={contentId}
+        tabIndex="0"
+        style={CHILD_STYLE}
+        onClick={expandHandler}
+      >
         {header}
       </HeaderComp>
-      <ContentComp ref={contentRef} style={CHILD_STYLE} hidden={!expanded}>
+      <ContentComp
+        id={contentId}
+        ref={contentRef}
+        style={CHILD_STYLE}
+        hidden={!expanded}
+      >
         {children}
       </ContentComp>
     </Comp>
