@@ -64,12 +64,12 @@ function VideoIframeWithRef(
   const readyDeferred = useMemo(() => new Deferred(), []);
 
   const postMethodMessage = useCallback(
-    (message) => {
+    (method) => {
       if (!iframeRef.current || !iframeRef.current.contentWindow) {
         return;
       }
       readyDeferred.promise.then(() => {
-        const message = makeMethodMessage(message);
+        const message = makeMethodMessage(method);
         iframeRef.current.contentWindow./*OK*/ postMessage(message, '*');
       });
     },
