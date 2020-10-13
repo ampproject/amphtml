@@ -726,6 +726,19 @@ function collectProps(Ctor, element, ref, defaultProps) {
       devAssert(def.attrs);
       value = def.parseAttrs(element);
     }
+    if (def.attrPrefix) {
+      const currObj = {};
+      const attrs = element.attributes;
+      for (let i = 0; i < attrs.length; i++) {
+        const attrib = attrs[i];
+        if (attrib.specified && attrib.name.startsWith(def.attrPrefix)) {
+          currObj[
+            attrib.name.substring(def.attrPrefix.length, attrib.name.length)
+          ] = attrib.value;
+        }
+      }
+      props[name] = currObj;
+    }
     if (value == null) {
       if (def.default !== undefined) {
         props[name] = def.default;
