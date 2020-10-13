@@ -23,7 +23,6 @@ import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
 import {removeElement, scopedQuerySelector} from '../src/dom';
-import {startsWith} from '../src/string';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -366,7 +365,7 @@ export class AmpImg extends BaseElement {
     }
 
     for (const key in this.element.dataset) {
-      if (startsWith(key, 'ampBind') && key !== 'ampBind') {
+      if (key.startsWith('ampBind') && key !== 'ampBind') {
         continue;
       }
       if (targetElement.dataset[key] !== this.element.dataset[key]) {
