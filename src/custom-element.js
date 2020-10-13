@@ -934,6 +934,7 @@ function createBaseCustomElementClass(win) {
       this.isConnected_ = false;
       this.getResources().remove(this);
       this.implementation_.detachedCallback();
+      this.toggleLoading(false);
     }
 
     /**
