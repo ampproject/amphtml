@@ -300,5 +300,25 @@ describes.realWin(
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(0);
     });
+
+    it('should respect outset-arrows', async () => {
+      element.setAttribute('outset-arrows', '');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      await whenCalled(env.sandbox.spy(element, 'attachShadow'));
+      const shadow = element.shadowRoot;
+
+      // Container is 300px and arrows each take up 50px after padding
+      expect(element.offsetWidth).to.equal(300);
+      const scroller = shadow.querySelector(`[class*=${styles.hideScrollbar}]`);
+      expect(scroller.offsetWidth).to.equal(200);
+
+      const prevButton = shadow.querySelector(`[class*=${styles.arrowPrev}]`);
+      expect(prevButton.offsetWidth).to.equal(36);
+      const nextButton = shadow.querySelector(`[class*=${styles.arrowNext}]`);
+      expect(nextButton.offsetWidth).to.equal(36);
+    });
   }
 );

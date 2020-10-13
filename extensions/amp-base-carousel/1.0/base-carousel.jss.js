@@ -143,7 +143,6 @@ const outsetArrow = {
   position: 'relative',
   flexShrink: 0,
   height: '100%',
-  padding: '4px',
   borderRadius: '50%',
   backgroundSize: '24px 24px',
   // Center the button vertically.
@@ -152,12 +151,12 @@ const outsetArrow = {
   alignItems: 'center',
   pointerEvents: 'auto',
   '&$arrowPrev': {
-    marginInlineStart: '3px',
-    marginInlineEnd: '9px',
+    marginInlineStart: '4px',
+    marginInlineEnd: '10px',
   },
   '&$arrowNext': {
-    marginInlineStart: '9px',
-    marginInlineEnd: '3px',
+    marginInlineStart: '10px',
+    marginInlineEnd: '4px',
   },
 };
 
