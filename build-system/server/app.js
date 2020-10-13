@@ -1538,8 +1538,7 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
     return;
   }
 
-  const max = serveMode === 'default' ? '.max' : '';
-  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
+  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}.json`;
 
   fs.promises
     .readFile(localVendorConfigPath)
