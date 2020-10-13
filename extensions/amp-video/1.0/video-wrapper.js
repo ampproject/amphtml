@@ -101,12 +101,7 @@ function VideoWrapperWithRef(
   const readyDeferred = useMemo(() => new Deferred(), []);
 
   const play = useCallback(() => {
-    return readyDeferred.promise.then(() =>
-      Promise.resolve(playerRef.current.play()).catch(() => {
-        // Empty catch to prevent useless unhandled rejection logging.
-        // play() can fail for benign reasons like pausing.
-      })
-    );
+    return readyDeferred.promise.then(() => playerRef.current.play());
   }, [readyDeferred]);
 
   const pause = useCallback(() => {
@@ -243,7 +238,10 @@ function Autoplay({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[entries.length - 1].isIntersecting) {
-          play();
+          play().catch(() => {
+            // Empty catch to prevent useless unhandled rejection logging.
+            // play() can fail for benign reasons like pausing.
+          });
         } else {
           pause();
         }
