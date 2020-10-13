@@ -28,6 +28,9 @@ export function Arrow({customArrow, by, advance, disabled, outsetArrows}) {
   } = customArrow.props;
   const isDisabled = disabled || customDisabled;
   const onClick = (e) => {
+    if (isDisabled) {
+      return;
+    }
     if (onCustomClick) {
       onCustomClick(e);
     }

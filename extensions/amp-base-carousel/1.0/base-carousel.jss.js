@@ -125,8 +125,13 @@ const arrow = {
 const arrowPrev = {left: 0};
 const arrowNext = {right: 0};
 const arrowDisabled = {
-  opacity: 0,
   pointerEvents: 'none',
+  '&$insetArrow': {
+    opacity: 0,
+  },
+  '&$outsetArrow': {
+    opacity: 0.5,
+  },
 };
 
 const insetArrow = {
@@ -170,16 +175,16 @@ const defaultArrowButton = {
   stroke: 'currentColor',
   transition: '200ms stroke',
   color: '#FFF',
-  '&:hover': {
+  '&:hover:not([disabled])': {
     color: '#222',
   },
-  '&:active': {
+  '&:active:not([disabled])': {
     transitionDuration: '0ms',
   },
-  '&:hover $arrowBackground': {
+  '&:hover:not([disabled]) $arrowBackground': {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
-  '&:active $arrowBackground': {
+  '&:active:not([disabled]) $arrowBackground': {
     backgroundColor: 'rgba(255, 255, 255, 1.0)',
     transitionDuration: '0ms',
   },
