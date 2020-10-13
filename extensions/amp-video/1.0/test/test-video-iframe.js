@@ -106,12 +106,49 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
     ).to.have.been.calledOnce;
   });
 
-  it("does not pass messages to onMessage if source doesn't match", async () => {
+  it("ignores messages if source doesn't match iframe", async () => {
     const onMessage = env.sandbox.spy();
     mount(<VideoIframe src="about:blank" onMessage={onMessage} controls />, {
       attachTo: document.body,
     });
     dispatchMessage(window, {source: null, data: 'whatever'});
     expect(onMessage).to.not.have.been.called;
+  });
+
+  describe('posts imperative handle methods to makeMethodMessage', () => {
+    ['play', 'pause'].forEach((method) => {
+      it(`with \`${method}\``, async () => {
+        let videoIframeRef;
+
+        const makeMethodMessage = (method) => ({makeMethodMessageFor: method});
+
+        const makeMethodMessageSpy = env.sandbox.spy(makeMethodMessage);
+
+        const videoIframe = mount(
+          <VideoIframe
+            ref={(ref) => (videoIframeRef = ref)}
+            src="about:blank"
+            makeMethodMessage={makeMethodMessageSpy}
+          />,
+          {attachTo: document.body}
+        );
+
+        const postMessage = env.sandbox.stub(
+          videoIframe.getDOMNode().contentWindow,
+          'postMessage'
+        );
+
+        videoIframeRef[method]();
+        await videoIframe.find('iframe').invoke('onCanPlay')();
+
+        expect(makeMethodMessageSpy.withArgs(method)).to.have.been.calledOnce;
+        expect(
+          postMessage.withArgs(
+            env.sandbox.match(makeMethodMessage(method)),
+            '*'
+          )
+        ).to.have.been.calledOnce;
+      });
+    });
   });
 });
