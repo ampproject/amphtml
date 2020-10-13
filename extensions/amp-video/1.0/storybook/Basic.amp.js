@@ -15,18 +15,18 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {VideoWrapper} from '../video-wrapper';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
+import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'Video Wrapper',
-  component: VideoWrapper,
-  decorators: [withA11y, withKnobs],
+  title: 'amp-video-1_0',
+  decorators: [withA11y, withKnobs, withAmp],
+  parameters: {extensions: [{name: 'amp-video', version: '1.0'}]},
 };
 
-const VideoTagPlayer = ({i}) => {
-  const group = `Player ${i + 1}`;
+const AmpVideoWithKnobs = ({i, ...rest}) => {
+  const group = i ? `Player ${i + 1}` : undefined;
 
   const width = text('width', '640px', group);
   const height = text('height', '360px', group);
@@ -65,8 +65,8 @@ const VideoTagPlayer = ({i}) => {
   );
 
   return (
-    <VideoWrapper
-      component="video"
+    <amp-video
+      {...rest}
       ariaLabel={ariaLabel}
       autoplay={autoplay}
       controls={controls}
@@ -78,11 +78,14 @@ const VideoTagPlayer = ({i}) => {
       album={album}
       artwork={artwork}
       title={title}
-      style={{width, height}}
-      sources={sources.map((props) => (
+      layout="responsive"
+      width={width}
+      height={height}
+    >
+      {sources.map((props) => (
         <source {...props}></source>
       ))}
-    />
+    </amp-video>
   );
 };
 
@@ -106,7 +109,7 @@ export const Default = () => {
 
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<VideoTagPlayer key={i} i={i} />);
+    players.push(<AmpVideoWithKnobs key={i} i={i} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -118,5 +121,31 @@ export const Default = () => {
       {players}
       {spaceBelow && <Spacer height={spacerHeight} />}
     </>
+  );
+};
+
+const ActionButton = ({children, ...props}) => (
+  <button style={{flex: 1, margin: '0 4px'}} {...props}>
+    {children}
+  </button>
+);
+
+export const Actions = () => {
+  return (
+    <div style="max-width: 800px">
+      <AmpVideoWithKnobs id="player" />
+      <div
+        style={{
+          margin: '12px 0',
+          display: 'flex',
+        }}
+      >
+        <ActionButton on="tap:player.play">Play</ActionButton>
+        <ActionButton on="tap:player.pause">Pause</ActionButton>
+        <ActionButton on="tap:player.mute">Mute</ActionButton>
+        <ActionButton on="tap:player.unmute">Unmute</ActionButton>
+        <ActionButton on="tap:player.fullscreen">Fullscreen</ActionButton>
+      </div>
+    </div>
   );
 };
