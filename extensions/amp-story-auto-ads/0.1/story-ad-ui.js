@@ -111,7 +111,7 @@ export function getStoryAdMetadataFromElement(adElement) {
  * Localizes CTA text if it is chosen from our predefined types.a
  * @param {string} ctaType
  * @param {!./story-ad-localization.StoryAdLocalization} localizationService
- * @return {string}
+ * @return {string|null}
  */
 export function localizeCtaText(ctaType, localizationService) {
   // CTA picked from predefined choices.
@@ -154,7 +154,7 @@ export function maybeCreateAttribution(win, metadata, container) {
 
     // Ad attribution is optional, but need both to render.
     if (!href && !src) {
-      return;
+      return null;
     }
 
     assertHttpsUrl(

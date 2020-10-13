@@ -39,7 +39,7 @@ import {
   isJsonScriptTag,
   toggleAttribute,
 } from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -234,7 +234,7 @@ export class StoryAdPage {
       if (!this.adDoc_) {
         Object.assign(
           uiMetaData,
-          getStoryAdMetadataFromElement(this.adElement_)
+          getStoryAdMetadataFromElement(devAssert(this.adElement_))
         );
       } else {
         Object.assign(
@@ -267,10 +267,9 @@ export class StoryAdPage {
         (this.adChoicesIcon_ = maybeCreateAttribution(
           this.win_,
           uiMetaData,
-          this.pageElement_
+          devAssert(this.pageElement_)
         ))
       ) {
-        // WIP make sure this works in new case.
         this.storeService_.subscribe(
           StateProperty.UI_STATE,
           (uiState) => {
