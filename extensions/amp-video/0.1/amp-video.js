@@ -573,6 +573,7 @@ class AmpVideo extends AMP.BaseElement {
       [
         VideoEvents.ENDED,
         VideoEvents.LOADEDMETADATA,
+        VideoEvents.LOADEDDATA,
         VideoEvents.PAUSE,
         VideoEvents.PLAYING,
         VideoEvents.PLAY,
