@@ -1155,6 +1155,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-video',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-video-docking',
     version: '0.1',
     latestVersion: '0.1',

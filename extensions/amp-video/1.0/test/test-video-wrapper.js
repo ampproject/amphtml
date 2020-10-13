@@ -65,7 +65,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     });
   });
 
-  it('should pass children and props to inner instance', () => {
+  it('should pass props to inner instance, sources as children', () => {
     const expectedPassthroughProps = {foo: 1, bar: 2};
     const wrapper = mount(
       <VideoWrapper
@@ -73,15 +73,14 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         autoplay
         controls
         noaudio
+        sources={<div></div>}
         {...expectedPassthroughProps}
-      >
-        <div></div>
-      </VideoWrapper>
+      />
     );
     const player = wrapper.find(TestPlayer);
     expect(player).to.have.lengthOf(1);
     expect(player.props()).to.include(expectedPassthroughProps);
-    expect(player.props().children).to.equal(wrapper.props().children);
+    expect(player.props().children).to.equal(wrapper.props().sources);
   });
 
   describe('MediaSession', () => {
