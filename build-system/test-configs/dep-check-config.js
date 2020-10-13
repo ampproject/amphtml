@@ -432,6 +432,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/polyfills.js->src/polyfills/promise.js',
+      '3p/polyfills.js->src/polyfills/string-starts-with.js',
       'src/polyfills.js->src/polyfills/abort-controller.js',
       'src/polyfills.js->src/polyfills/domtokenlist.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
