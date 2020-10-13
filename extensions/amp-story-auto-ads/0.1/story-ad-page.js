@@ -228,30 +228,30 @@ export class StoryAdPage {
    */
   maybeCreateCta() {
     return Promise.resolve().then(() => {
-      const uiMetaData = map();
+      const uiMetadata = map();
 
       // Template Ads.
       if (!this.adDoc_) {
         Object.assign(
-          uiMetaData,
+          uiMetadata,
           getStoryAdMetadataFromElement(devAssert(this.adElement_))
         );
       } else {
         Object.assign(
-          uiMetaData,
+          uiMetadata,
           getStoryAdMetadataFromDoc(this.adDoc_),
           // TODO(ccordry): Depricate when possible.
           this.readAmpAdExit_()
         );
       }
 
-      if (!validateCtaMetadata(uiMetaData)) {
+      if (!validateCtaMetadata(uiMetadata)) {
         return false;
       }
 
       const ctaText =
         localizeCtaText(
-          uiMetaData[A4AVarNames.CTA_TYPE],
+          uiMetadata[A4AVarNames.CTA_TYPE],
           this.localizationService_
         ) || '';
 
@@ -267,7 +267,7 @@ export class StoryAdPage {
       if (
         (this.adChoicesIcon_ = maybeCreateAttribution(
           this.win_,
-          uiMetaData,
+          uiMetadata,
           devAssert(this.pageElement_)
         ))
       ) {
@@ -280,7 +280,7 @@ export class StoryAdPage {
         );
       }
 
-      const ctaUrl = uiMetaData[A4AVarNames.CTA_URL];
+      const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
       return this.createCtaLayer_(ctaUrl, ctaText);
     });
   }
