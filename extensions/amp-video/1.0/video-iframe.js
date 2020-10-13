@@ -117,7 +117,7 @@ function VideoIframeWithRef(
     defaultView.addEventListener('message', handleMessage);
 
     return () => defaultView.removeEventListener('message', handleMessage);
-  }, [onMessage]);
+  }, [onMessage, origin]);
 
   useLayoutEffect(() => {
     postMethodMessage(muted ? 'mute' : 'unmute');
