@@ -26,7 +26,7 @@ const {
 } = require('./runtime-test/runtime-test-base');
 const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
-const {cyan, red} = require('ansi-colors');
+const {cyan, yellow} = require('ansi-colors');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
 const INTEGRATION_FIXTURES = [
@@ -70,12 +70,12 @@ async function transformAndWriteToTestFolder(filePath) {
     fs.writeFileSync(fullFilePath, html);
   } catch (e) {
     log(
-      red('ERROR:'),
+      yellow('WARNING:'),
       cyan(
         `${filePath} could not be transformed by the postHTML ` +
           'pipeline. Falling back to copying.'
       ),
-      red(`Reason: ${e.message}`)
+      yellow(`Reason: ${e.message}`)
     );
     fs.copySync(filePath, `./test-bin/${filePath}`);
   }
