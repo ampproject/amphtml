@@ -16,7 +16,7 @@
 import * as Preact from '../../../../src/preact';
 import {VideoIframe} from '../video-iframe';
 import {VideoWrapper} from '../video-wrapper';
-import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {useCallback} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -40,7 +40,7 @@ const AmpVideoIframeLike = (props) => {
     }
   }, []);
 
-  const sendMessage = useCallback(
+  const makeMethodMessage = useCallback(
     (method) =>
       JSON.stringify({
         // Like amp-video-iframe
@@ -56,7 +56,7 @@ const AmpVideoIframeLike = (props) => {
       component={VideoIframe}
       allow="autoplay" // this is not safe for a generic frame
       onMessage={onMessage}
-      sendMessage={sendMessage}
+      makeMethodMessage={makeMethodMessage}
     />
   );
 };
