@@ -343,7 +343,7 @@ class ItConfig {
  * @param {!Object} env e2e driver environment.
  * @return {Promise<void>}
  */
-async function collectCoverage(env) {
+async function updateCoverage(env) {
   const coverage = await env.controller.evaluate(() => window.__coverage__);
   if (coverage) {
     mergeClientCoverage(coverage);
@@ -467,7 +467,7 @@ function describeEnv(factory) {
 
       afterEach(async function () {
         if (argv.coverage) {
-          await collectCoverage(env);
+          await updateCoverage(env);
         }
 
         // If there is an async expect error, throw it in the final state.
