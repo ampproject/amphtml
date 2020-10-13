@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 import {ActionTrust} from '../../../src/action-constants';
+import {CSS} from './autoplay.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {VideoWrapper} from './video-wrapper';
-import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {useStyles as useAutoplayStyles} from './autoplay.jss';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
 export class VideoBaseElement extends PreactBaseElement {
@@ -118,5 +117,4 @@ VideoBaseElement['children'] = {
 };
 
 /** @override */
-// eslint-disable-next-line
-VideoBaseElement['shadowCss'] = useAutoplayStyles().CSS;
+VideoBaseElement['shadowCss'] = CSS;
