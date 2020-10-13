@@ -42,7 +42,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
@@ -209,8 +208,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (
       !eventData ||
       !(
-        isObject(eventData) ||
-        startsWith(/** @type {string} */ (eventData), '{')
+        isObject(eventData) || /** @type {string} */ (eventData).startsWith('{')
       )
     ) {
       return; // Doesn't look like JSON.

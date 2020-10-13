@@ -29,7 +29,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -128,10 +127,9 @@ export class AmpSlideScroll extends BaseSlides {
     // - iOS devices on version 10.3
     // - Non iOS devices with the flag turned off.
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = startsWith(
-      Services.platformFor(this.win).getIosVersionString(),
-      '10.3'
-    )
+    this.shouldDisableCssSnap_ = Services.platformFor(this.win)
+      .getIosVersionString()
+      .startsWith('10.3')
       ? true
       : this.isIos_
       ? false

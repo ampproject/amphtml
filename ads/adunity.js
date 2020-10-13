@@ -15,7 +15,6 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
-import {startsWith} from '../src/string';
 
 /**
  * @param {!Window} global
@@ -65,11 +64,11 @@ export function adunity(global, data) {
       }
 
       //skip if attribute is type or ampSlotIndex
-      if (startsWith(key, 'type') || startsWith(key, 'ampSlotIndex')) {
+      if (key.startsWith('type') || key.startsWith('ampSlotIndex')) {
         continue;
       }
 
-      if (startsWith(key, 'au')) {
+      if (key.startsWith('au')) {
         if (key == 'auVideo') {
           tag.setAttribute('class', 'au-video');
         } else {

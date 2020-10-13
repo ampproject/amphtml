@@ -18,7 +18,6 @@ import {VideoEvents} from './video-interface';
 import {dev} from './log';
 import {htmlFor} from './static-template';
 import {isArray, isObject} from './types';
-import {startsWith} from './string';
 import {tryParseJson} from './json';
 
 /** @enum {string} */
@@ -108,9 +107,7 @@ export function isJsonOrObj(anything) {
   if (!anything) {
     return false;
   }
-  return (
-    isObject(anything) || startsWith(/** @type {string} */ (anything), '{')
-  );
+  return isObject(anything) || /** @type {string} */ (anything).startsWith('{');
 }
 
 /**

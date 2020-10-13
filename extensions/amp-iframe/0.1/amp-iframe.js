@@ -24,7 +24,7 @@ import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {endsWith, startsWith} from '../../../src/string';
+import {endsWith} from '../../../src/string';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -510,7 +510,7 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
     const data = getData(event);
-    if (typeof data !== 'string' || !startsWith(data, 'pym')) {
+    if (typeof data !== 'string' || !data.startsWith('pym')) {
       return;
     }
 

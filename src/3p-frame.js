@@ -21,7 +21,6 @@ import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {setStyle} from './style';
-import {startsWith} from './string';
 import {tryParseJson} from './json';
 import {urls} from './config';
 
@@ -176,7 +175,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
   for (const name in dataset) {
     // data-vars- is reserved for amp-analytics
     // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
-    if (!startsWith(name, 'vars')) {
+    if (!name.startsWith('vars')) {
       attributes[name] = dataset[name];
     }
   }

@@ -22,7 +22,6 @@ import {
   resolveRelativeUrl,
 } from './url';
 import {parseSrcset} from './srcset';
-import {startsWith} from './string';
 import {urls} from './config';
 import {user} from './log';
 
@@ -130,7 +129,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrlDeprecated(getSourceUrl(windowLocation));
 
-  if (attrName == 'href' && !startsWith(attrValue, '#')) {
+  if (attrName == 'href' && !attrValue.startsWith('#')) {
     return resolveRelativeUrl(attrValue, baseUrl);
   }
 
