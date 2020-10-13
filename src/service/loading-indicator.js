@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as dom from '../dom';
 import {createLoaderElement} from './loader-element';
 import {htmlFor} from '../static-template';
+import {isIframed, removeElement} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 
 const MIN_SIZE = 20;
@@ -52,15 +52,29 @@ export class LoadingIndicatorImpl {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
+    const {win} = ampdoc;
     const inViewport = this.inViewport_.bind(this);
+    const ioCallback = (records) =>
+      /** @type {!Array<!IntersectionObserverEntry>} */ (records).forEach(
+        inViewport
+      );
+    const iframed = isIframed(win);
+    const root = iframed ? win.document : null;
+    const rootMargin = '25%';
+    // Classic IntersectionObserver doesn't support viewport tracking and
+    // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
+    // supports it via {root: document}, which throws on other browsers.
+    let io;
+    try {
+      io = new win.IntersectionObserver(ioCallback, {
+        root,
+        rootMargin,
+      });
+    } catch (e) {
+      io = new win.IntersectionObserver(ioCallback, {rootMargin});
+    }
     /** @private @const {!IntersectionObserver} */
-    this.io_ = new ampdoc.win.IntersectionObserver(
-      (records) =>
-        /** @type {!Array<!IntersectionObserverEntry>} */ (records).forEach(
-          inViewport
-        ),
-      {rootMargin: '25%'}
-    );
+    this.io_ = io;
 
     /** @private @const {!WeakMap<!AmpElement, !LoadingIndicatorStateDef>} */
     this.states_ = new WeakMap();
@@ -158,6 +172,6 @@ export class LoadingIndicatorImpl {
     }
 
     this.states_.delete(element);
-    dom.removeElement(state.container);
+    removeElement(state.container);
   }
 }
