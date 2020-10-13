@@ -81,11 +81,11 @@ export class VideoManager {
       installAutoplayStylesForDoc(this.ampdoc)
     );
 
-    /** @private {!../service/viewport/viewport-interface.ViewportInterface} */
-    this.viewport_ = Services.viewportForDoc(this.ampdoc);
-
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
+
+    /** @private {IntersectionObserver} */
+    this.viewportObserver_ = null;
 
     /**
      * Keeps last found entry as a small optimization for multiple state calls
@@ -93,9 +93,6 @@ export class VideoManager {
      * @private {?VideoEntry}
      */
     this.lastFoundEntry_ = null;
-
-    /** @private {boolean} */
-    this.scrollListenerInstalled_ = false;
 
     /** @private @const */
     this.timer_ = Services.timerFor(ampdoc.win);
@@ -124,6 +121,8 @@ export class VideoManager {
   /** @override */
   dispose() {
     this.getAutoFullscreenManager_().dispose();
+    this.viewportObserver_.disconnect();
+    this.viewportObserver_ = null;
 
     if (!this.entries_) {
       return;
@@ -185,11 +184,30 @@ export class VideoManager {
     if (!video.supportsPlatform()) {
       return;
     }
+    if (!this.viewportObserver_) {
+      this.viewportObserver_ = new this.ampdoc.win.IntersectionObserver(
+        (records) => {
+          for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            const videoEntry = this.getEntry_(record.target);
+            videoEntry.updateVisibility(/* isVisible */ record.isIntersecting);
+          }
+        },
+        {rootMargin: '25%'}
+      );
+    }
+    this.viewportObserver_.observe(
+      /** @type {!AMP.BaseElement} */ (video).element
+    );
 
     this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
-    this.maybeInstallVisibilityObserver_(entry);
     this.entries_.push(entry);
+    listen(
+      /** @type {!AMP.BaseElement} */ (video).element,
+      VideoEvents.RELOAD,
+      () => entry.videoLoaded()
+    );
 
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
@@ -246,45 +264,6 @@ export class VideoManager {
         },
         trust
       );
-    }
-  }
-
-  /**
-   * Install the necessary listeners to be notified when a video becomes visible
-   * in the viewport.
-   *
-   * Visibility of a video is defined by being in the viewport AND having
-   * {@link MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} of the video element visible.
-   *
-   * @param {VideoEntry} entry
-   * @private
-   */
-  maybeInstallVisibilityObserver_(entry) {
-    const {element} = entry.video;
-
-    listen(element, VideoEvents.VISIBILITY, (details) => {
-      const data = getData(details);
-      if (data && data['visible'] == true) {
-        entry.updateVisibility(/* opt_forceVisible */ true);
-      } else {
-        entry.updateVisibility();
-      }
-    });
-
-    listen(element, VideoEvents.RELOAD, () => {
-      entry.videoLoaded();
-    });
-
-    // TODO(aghassemi, #6425): Use IntersectionObserver
-    if (!this.scrollListenerInstalled_) {
-      const scrollListener = () => {
-        for (let i = 0; i < this.entries_.length; i++) {
-          this.entries_[i].updateVisibility();
-        }
-      };
-      this.viewport_.onScroll(scrollListener);
-      this.viewport_.onChanged(scrollListener);
-      this.scrollListenerInstalled_ = true;
     }
   }
 
@@ -622,7 +601,6 @@ class VideoEntry {
       this.manager_.registerForAutoFullscreen(this);
     }
 
-    this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
@@ -719,7 +697,6 @@ class VideoEntry {
 
     this.getAnalyticsPercentageTracker_().start();
 
-    this.updateVisibility();
     if (this.isVisible_) {
       // Handles the case when the video becomes visible before loading
       this.loadedVideoVisibilityChanged_();
@@ -948,25 +925,14 @@ class VideoEntry {
   }
 
   /**
-   * Called by all possible events that might change the visibility of the video
-   * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
-   * @param {?boolean=} opt_forceVisible
+   * Called by an IntersectionObserver.
+   * @param {boolean} isVisible
    * @package
    */
-  updateVisibility(opt_forceVisible) {
+  updateVisibility(isVisible) {
     const wasVisible = this.isVisible_;
-
-    if (opt_forceVisible) {
-      this.isVisible_ = true;
-    } else {
-      const {element} = this.video;
-      const ratio = element.getIntersectionChangeEntry().intersectionRatio;
-      this.isVisible_ =
-        (!isFiniteNumber(ratio) ? 0 : ratio) >=
-        MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
-    }
-
-    if (this.isVisible_ != wasVisible) {
+    this.isVisible_ = isVisible;
+    if (isVisible != wasVisible) {
       this.videoVisibilityChanged_();
     }
   }
