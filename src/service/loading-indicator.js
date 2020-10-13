@@ -54,10 +54,12 @@ export class LoadingIndicatorImpl {
 
     const inViewport = this.inViewport_.bind(this);
     /** @private @const {!IntersectionObserver} */
-    this.io_ = new ampdoc.win.IntersectionObserver((records) =>
-      /** @type {!Array<!IntersectionObserverEntry>} */ (records).forEach(
-        inViewport
-      )
+    this.io_ = new ampdoc.win.IntersectionObserver(
+      (records) =>
+        /** @type {!Array<!IntersectionObserverEntry>} */ (records).forEach(
+          inViewport
+        ),
+      {rootMargin: '25%'}
     );
 
     /** @private @const {!WeakMap<!AmpElement, !LoadingIndicatorStateDef>} */
@@ -103,7 +105,7 @@ export class LoadingIndicatorImpl {
     }
 
     if (show && !state) {
-      state = this.createState_(element, width, height);
+      state = this.createLoaderState_(element, width, height);
       this.states_.set(element, state);
     }
     if (state) {
@@ -120,7 +122,7 @@ export class LoadingIndicatorImpl {
    * @return {!LoadingIndicatorStateDef}
    * @private
    */
-  createState_(element, width, height) {
+  createLoaderState_(element, width, height) {
     const startTime = Date.now();
 
     const loader = createLoaderElement(

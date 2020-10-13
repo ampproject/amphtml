@@ -654,10 +654,10 @@ export class AmpList extends AMP.BaseElement {
     ) {
       const reset = () => {
         this.togglePlaceholder(true);
-        const ignoreLoadingState = this.element.hasAttribute(
+        const forceLoadingIndicator = this.element.hasAttribute(
           'reset-on-refresh'
         );
-        this.toggleLoading(true, ignoreLoadingState);
+        this.toggleLoading(true, forceLoadingIndicator);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {

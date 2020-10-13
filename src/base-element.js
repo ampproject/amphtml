@@ -698,11 +698,11 @@ export class BaseElement {
   /**
    * Hides or shows the loading indicator.
    * @param {boolean} state
-   * @param {boolean=} ignoreLoadingState
+   * @param {boolean=} force
    * @public @final
    */
-  toggleLoading(state, ignoreLoadingState = false) {
-    this.element.toggleLoading(state, ignoreLoadingState);
+  toggleLoading(state, force = false) {
+    this.element.toggleLoading(state, force);
   }
 
   /**

@@ -143,7 +143,8 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
   if (!isEmbedded) {
-    // Embeds do not show loading indicators.
+    // Embeds do not show loading indicators, since the whole embed is
+    // usually behind a parent loading indicator.
     installLoadingIndicatorForDoc(ampdoc);
   }
 }

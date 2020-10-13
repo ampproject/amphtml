@@ -1590,11 +1590,11 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Whether the loading can be shown for this element.
-     * @param {boolean} ignoreLoadingState
+     * @param {boolean} force
      * @return {boolean}
      * @private
      */
-    isLoadingEnabled_(ignoreLoadingState) {
+    isLoadingEnabled_(force) {
       // No loading indicator will be shown if either one of these conditions
       // true:
       // 1. The document is A4A.
@@ -1611,7 +1611,7 @@ function createBaseCustomElementClass(win) {
       if (
         this.layout_ == Layout.NODISPLAY ||
         this.hasAttribute('noloading') ||
-        (laidOut && !ignoreLoadingState) ||
+        (laidOut && !force) ||
         !isLoadingAllowed(this) ||
         isInternalOrServiceNode(this)
       ) {
@@ -1624,10 +1624,10 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {boolean=} ignoreLoadingState
+     * @param {boolean=} force
      * @public @final
      */
-    toggleLoading(state, ignoreLoadingState = false) {
+    toggleLoading(state, force = false) {
       // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
       // once investigation is complete. It appears that we get a lot of
       // errors here once the iframe is destroyed due to timer.
@@ -1639,7 +1639,7 @@ function createBaseCustomElementClass(win) {
         this.getAmpDoc()
       );
       if (loadingIndicator) {
-        state = state && this.isLoadingEnabled_(ignoreLoadingState);
+        state = state && this.isLoadingEnabled_(force);
         if (state) {
           loadingIndicator.track(this);
         } else {
