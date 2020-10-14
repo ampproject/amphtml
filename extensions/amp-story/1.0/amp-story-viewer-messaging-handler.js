@@ -200,7 +200,6 @@ export class AmpStoryViewerMessagingHandler {
   /**
    * Handles 'customDocumentUI' viewer messages.
    * @param {!Object} data
-   * @return {!Promise<!Object|undefined>}
    * @private
    */
   onCustomDocumentUI_(data) {
