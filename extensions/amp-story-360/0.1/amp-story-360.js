@@ -274,6 +274,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {?Element|?EventTarget} */
     this.ampVideoEl_ = null;
+
+    /** @private {!number} */
+    this.orientationAlpha_ = null;
   }
 
   /** @override */
@@ -343,6 +346,7 @@ export class AmpStory360 extends AMP.BaseElement {
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
           this.maybeShowDiscoveryAnimation_();
+          this.maybeSetGyroscopeDefaultHeading_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
@@ -437,11 +441,14 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   enableGyroscope_() {
     // Listen for one call before initiating.
-    listenOncePromise(this.win, 'deviceorientation').then(() => {
+    listenOncePromise(this.win, 'deviceorientation').then((e) => {
       this.gyroscopeControls_ = true;
+      this.orientationAlpha_ = e.alpha;
+      this.maybeSetGyroscopeDefaultHeading_();
       // Debounce onDeviceOrientation_ to rAF.
       let rafTimeout;
       this.win.addEventListener('deviceorientation', (e) => {
+        this.orientationAlpha_ = e.alpha;
         if (this.isReady_ && this.isOnActivePage_) {
           rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
           rafTimeout = this.win.requestAnimationFrame(() =>
@@ -451,6 +458,22 @@ export class AmpStory360 extends AMP.BaseElement {
       });
       this.maybeShowDiscoveryAnimation_();
     });
+  }
+
+  /**
+   * @private
+   */
+  maybeSetGyroscopeDefaultHeading_() {
+    if (this.isOnActivePage_ && this.gyroscopeControls_ && this.isReady_) {
+      const defaultHeading = parseFloat(
+        this.element.getAttribute('heading-end')
+      );
+      this.renderer_.setImageOrientation(
+        90 + defaultHeading + this.orientationAlpha_,
+        this.scenePitch_,
+        this.sceneRoll_
+      );
+    }
   }
 
   /**
@@ -627,6 +650,9 @@ export class AmpStory360 extends AMP.BaseElement {
           }
           this.renderInitialPosition_();
           this.isReady_ = true;
+          if (this.gyroscopeControls_) {
+            this.maybeSetGyroscopeDefaultHeading_();
+          }
           if (this.isPlaying_) {
             this.animate_();
           }
@@ -696,6 +722,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   renderInitialPosition_() {
+    if (this.gyroscopeControls_) return;
     this.mutateElement(() => {
       this.renderer_.setCamera(
         this.orientations_[0].rotation,
