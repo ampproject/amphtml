@@ -1,11 +1,11 @@
 ---
 name: Release tracking issue
-about:
-  Create a tracking issue for a new AMP release (to be used by release on-duty
+about: Create a tracking issue for a new AMP release (to be used by release on-duty
   engineers)
 title: "\U0001F684 Release tracking issue for release <RELEASE_NUMBER>"
 labels: 'Type: Release'
 assignees: ''
+
 ---
 
 # Release tracking issue
