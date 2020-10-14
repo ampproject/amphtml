@@ -59,7 +59,7 @@ function main() {
       buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp build --fortesting');
+      timedExecOrDie('gulp build --fortesting --coverage');
       uploadBuildOutput(FILENAME);
     } else {
       console.log(
