@@ -19,12 +19,12 @@ import {createUseStyles} from 'react-jss';
 const sectionChild = {
   // Make animations measurable. Without this, padding and margin can skew
   // animations.
-  boxSizing: 'border-box',
+  boxSizing: 'border-box !important',
   // Cancel out the margin collapse. Also helps with animations to avoid
   // overflow.
-  overflow: 'hidden',
+  overflow: 'hidden !important',
   // Ensure that any absolute elements are positioned within the section.
-  position: 'relative',
+  position: 'relative !important',
 };
 
 // TODO(#30445): update these styles after team agrees on styling
