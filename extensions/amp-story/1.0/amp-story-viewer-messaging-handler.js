@@ -199,11 +199,11 @@ export class AmpStoryViewerMessagingHandler {
 
   /**
    * Handles 'customDocumentUI' viewer messages.
-   * @param {!Object=} data
+   * @param {!Object} data
    * @return {!Promise<!Object|undefined>}
    * @private
    */
-  onCustomDocumentUI_(data = {}) {
-    this.storeService_.dispatch(Action.SET_CUSTOM_CONTROLS, data);
+  onCustomDocumentUI_(data) {
+    this.storeService_.dispatch(Action.SET_CUSTOM_CONTROLS, data.controls);
   }
 }
