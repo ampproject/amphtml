@@ -17,7 +17,10 @@
 import * as Preact from '../../../src/preact';
 import {animateCollapse, animateExpand} from './animations';
 import {omit} from '../../../src/utils/object';
-import {sequentialIdGenerator} from '../../../src/utils/id-generator';
+import {
+  randomIdGenerator,
+  sequentialIdGenerator,
+} from '../../../src/utils/id-generator';
 import {
   useCallback,
   useContext,
@@ -36,6 +39,7 @@ const AccordionContext = Preact.createContext(
 const EMPTY_EXPANDED_MAP = {};
 
 const generateSectionId = sequentialIdGenerator();
+const generateRandomId = randomIdGenerator();
 
 const CHILD_STYLE = {
   // Make animations measurable. Without this, padding and margin can skew
@@ -61,7 +65,8 @@ export function Accordion({
   ...rest
 }) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
-  const [prefix] = useState(id ? id : Math.floor(Math.random() * 100));
+  const [randomPrefix] = useState(generateRandomId);
+  const prefix = id || randomPrefix;
 
   useEffect(() => {
     if (!expandSingleSection) {
@@ -193,7 +198,7 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
-  const contentId = prefix + '_AMP_content_' + id;
+  const contentId = `${prefix || 'a'}_AMP_content_'${id}-${generateRandomId()}`;
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;

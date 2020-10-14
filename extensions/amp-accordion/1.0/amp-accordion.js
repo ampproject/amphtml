@@ -126,9 +126,7 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
  * @param {!AccordionDef.HeaderProps} props
  * @return {PreactDef.Renderable}
  */
-function HeaderShim(sectionElement, props) {
-  const {onClick} = props;
-  const ariaControls = props['aria-controls'];
+function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
   const headerElement = sectionElement.firstElementChild;
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
@@ -146,9 +144,6 @@ function HeaderShim(sectionElement, props) {
     }
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
-      if (!hasTabIndex) {
-        headerElement.removeAttribute('tabindex');
-      }
     };
   }, [sectionElement, headerElement, onClick, ariaControls]);
   return <header />;
