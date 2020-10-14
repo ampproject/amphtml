@@ -1,7 +1,7 @@
 ---
-name: Page experience 
+name: Page experience
 about: Used to report issues where AMP pages don't meet page experience criteria.
-title: "Page experience issue"
+title: Page experience issue
 labels: 'Type: Page experience'
 assignees: ''
 
