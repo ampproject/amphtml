@@ -458,6 +458,7 @@ export class AmpStory360 extends AMP.BaseElement {
       // Debounce onDeviceOrientation_ to rAF.
       let rafTimeout;
       this.win.addEventListener('deviceorientation', (e) => {
+        // Used to set default heading when navigating to this page.
         this.orientationAlpha_ = e.alpha;
         if (this.isReady_ && this.isOnActivePage_) {
           rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
@@ -701,6 +702,9 @@ export class AmpStory360 extends AMP.BaseElement {
           }
           this.renderInitialPosition_();
           this.isReady_ = true;
+          if (this.gyroscopeControls_) {
+            this.maybeSetGyroscopeDefaultHeading_();
+          }
           if (this.isPlaying_) {
             this.animate_();
           }
