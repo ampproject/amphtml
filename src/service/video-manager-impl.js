@@ -1607,9 +1607,6 @@ export function installVideoManagerForDoc(nodeOrDoc) {
  */
 function getViewportObserver(ioCallback, win) {
   const iframed = isIframed(win);
-  // Classic IntersectionObserver doesn't support viewport tracking and
-  // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
-  // supports it via {root: document}, which throws on other browsers.
   const root = /** @type {?Element} */ (iframed
     ? /** @type {*} */ (win.document)
     : null);
