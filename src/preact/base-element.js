@@ -26,13 +26,13 @@ import {cancellation} from '../error';
 import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
+import {dashToCamelCase, startsWith} from '../string';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {isLayoutSizeDefined} from '../layout';
-import {startsWith} from '../string';
 
 /**
  * The following combinations are allowed.
@@ -44,6 +44,7 @@ import {startsWith} from '../string';
  * @typedef {{
  *   attr: (string|undefined),
  *   type: (string|undefined),
+ *   attrPrefix: (string|undefined),
  *   attrs: (!Array<string>|undefined),
  *   parseAttrs: ((function(!Element):*)|undefined),
  *   default: *,
@@ -731,9 +732,11 @@ function collectProps(Ctor, element, ref, defaultProps) {
       const attrs = element.attributes;
       for (let i = 0; i < attrs.length; i++) {
         const attrib = attrs[i];
-        if (attrib.specified && attrib.name.startsWith(def.attrPrefix)) {
+        if (attrib.name.startsWith(def.attrPrefix)) {
           currObj[
-            attrib.name.substring(def.attrPrefix.length, attrib.name.length)
+            dashToCamelCase(
+              attrib.name.substring(def.attrPrefix.length, attrib.name.length)
+            )
           ] = attrib.value;
         }
       }
@@ -906,7 +909,8 @@ function shouldMutationBeRerendered(Ctor, m) {
       const def = /** @type {!AmpElementPropDef} */ (props[name]);
       if (
         m.attributeName == def.attr ||
-        (def.attrs && def.attrs.includes(devAssert(m.attributeName)))
+        (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
+        m.attributeName.startsWith(def.attrPrefix)
       ) {
         return true;
       }

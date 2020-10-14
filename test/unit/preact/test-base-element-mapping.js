@@ -99,6 +99,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           part-a="A"
           part-b="B"
           data-param-test="helloworld"
+          data-param-test-two="confirm"
         >
         </amp-preact>
       `;
@@ -126,6 +127,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         combined: 'A+B',
       });
       expect(lastProps.params.test).to.equal('helloworld');
+      expect(lastProps.params.testTwo).to.equal('confirm');
     });
 
     it('should mutate attributes', async () => {
@@ -136,6 +138,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       element.removeAttribute('disabled');
       element.setAttribute('part-b', 'C');
       element.setAttribute('data-param-test', 'worldhello');
+      element.setAttribute('data-param-test-two', 'confirmAgain');
 
       await waitFor(() => component.callCount > 1, 'component re-rendered');
 
@@ -150,6 +153,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         combined: 'A+C',
       });
       expect(lastProps.params.test).to.equal('worldhello');
+      expect(lastProps.params.testTwo).to.equal('confirmAgain');
     });
 
     it('should ignore non-declared attributes', async () => {
