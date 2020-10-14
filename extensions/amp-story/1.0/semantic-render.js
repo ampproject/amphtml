@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {includes, startsWith} from '../../../src/string';
+import {includes} from '../../../src/string';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.
@@ -108,7 +108,7 @@ function fetchCaptions(page, videoEl) {
  */
 export function extractTextContent(text) {
   text = text.trim();
-  if (startsWith(text, 'WEBVTT')) {
+  if (text.startsWith('WEBVTT')) {
     return extractTextContentWebVtt(text);
   }
   if (includes(text, 'http://www.w3.org/ns/ttml')) {

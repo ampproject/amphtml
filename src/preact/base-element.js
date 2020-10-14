@@ -877,7 +877,7 @@ function shouldMutationForNodeListBeRerendered(nodeList) {
       // `<x slot="i-amphtml-svc">`.
       if (
         node[RENDERED_PROP] ||
-        startsWith(node.tagName, 'I-') ||
+        node.tagName.startsWith('I-') ||
         node.getAttribute('slot') == 'i-amphtml-svc'
       ) {
         continue;
