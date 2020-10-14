@@ -106,6 +106,14 @@ const buildDiscoveryTemplate = (element) => htmlFor(element)`
   `;
 
 /**
+ * @param {number} deg
+ * @return {number}
+ * */
+function deg2rad(deg) {
+  return (deg * Math.PI) / 180;
+}
+
+/**
  * Internal helper class representing a camera orientation (POV) in polar
  * coordinates.
  */
@@ -128,7 +136,6 @@ class CameraOrientation {
    * @return {!CameraOrientation}
    */
   static fromDegrees(heading, pitch, zoom) {
-    const deg2rad = (deg) => (deg * Math.PI) / 180;
     return new CameraOrientation(
       deg2rad(-pitch - 90),
       deg2rad(90 + heading),
@@ -277,6 +284,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {!number} */
     this.orientationAlpha_ = 0;
+
+    /** @private {!number} */
+    this.headingOffset_ = 0;
   }
 
   /** @override */
@@ -466,19 +476,14 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   maybeSetGyroscopeDefaultHeading_() {
     if (this.isOnActivePage_ && this.gyroscopeControls_ && this.isReady_) {
-      const defaultHeading = parseFloat(
-        this.element.getAttribute('heading-end') ||
-          this.element.getAttribute('heading-start')
-      );
-      if (defaultHeading) {
-        const offsetHeading =
-          90 + parseFloat(defaultHeading) + this.orientationAlpha_;
-        this.renderer_.setImageOrientation(
-          this.sceneHeading_ + offsetHeading,
-          this.scenePitch_,
-          this.sceneRoll_
-        );
-      }
+      this.headingOffset_ =
+        parseFloat(
+          this.element.getAttribute('heading-end') ||
+            this.element.getAttribute('heading-start') ||
+            0
+        ) +
+        90 +
+        this.orientationAlpha_;
     }
   }
 
@@ -508,19 +513,11 @@ export class AmpStory360 extends AMP.BaseElement {
     let rot = Matrix.identity(3);
     rot = Matrix.mul(
       3,
-      Matrix.rotation(3, 1, 0, (Math.PI / 180.0) * e.alpha),
+      Matrix.rotation(3, 1, 0, deg2rad(e.alpha - this.headingOffset_)),
       rot
     );
-    rot = Matrix.mul(
-      3,
-      Matrix.rotation(3, 2, 1, (Math.PI / 180.0) * e.beta),
-      rot
-    );
-    rot = Matrix.mul(
-      3,
-      Matrix.rotation(3, 0, 2, (Math.PI / 180.0) * e.gamma),
-      rot
-    );
+    rot = Matrix.mul(3, Matrix.rotation(3, 2, 1, deg2rad(e.beta)), rot);
+    rot = Matrix.mul(3, Matrix.rotation(3, 0, 2, deg2rad(e.gamma)), rot);
     this.renderer_.setCamera(rot, 1);
     this.renderer_.render(true);
   }
