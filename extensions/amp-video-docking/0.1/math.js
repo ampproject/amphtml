@@ -76,8 +76,8 @@ const mapStep = (step, min, max) => mapRange(step, 0, 1, min, max);
 
 /**
  * Provides offset coords to interpolate `from` rect `to` rect.
- * @param {!LayoutRectDef} from
- * @param {!LayoutRectDef} to
+ * @param {!LayoutRectDef|!DOMRect} from
+ * @param {!LayoutRectDef|!DOMRect} to
  * @param {number=} step  in [0..1]
  * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
  *  - x is offset from the original box in pixels.

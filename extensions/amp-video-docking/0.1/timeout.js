@@ -16,15 +16,33 @@
 
 import {Services} from '../../../src/services';
 
+/**
+ * @typedef {{
+ *   setTimeout: function(function(), time):number,
+ *   clearTimeout: function(number),
+ * }}
+ */
+let TimerDef;
+
+/**
+ * @param {!Window} win
+ * @return {!TimerDef}
+ */
+const usingTimerService = (win) => ({
+  setTimeout: (handler, time) => Services.timerFor(win).delay(handler, time),
+  clearTimeout: (id) => Services.timerFor(win).cancel(id),
+});
+
 /** Timeout that can be postponed, repeated or cancelled. */
 export class Timeout {
   /**
    * @param {!Window} win
    * @param {!Function} handler
+   * @param {!TimerDef=} timer
    */
-  constructor(win, handler) {
+  constructor(win, handler, timer) {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(win);
+    this.timer_ = timer || usingTimerService(win);
 
     /** @private @const {!Function} */
     this.handler_ = handler;
@@ -39,13 +57,16 @@ export class Timeout {
    */
   trigger(time, ...args) {
     this.cancel();
-    this.id_ = this.timer_.delay(() => this.handler_.apply(null, args), time);
+    this.id_ = this.timer_.setTimeout(
+      () => this.handler_.apply(null, args),
+      time
+    );
   }
 
   /** @public */
   cancel() {
     if (this.id_ !== null) {
-      this.timer_.cancel(this.id_);
+      this.timer_.clearTimeout(this.id_);
       this.id_ = null;
     }
   }
