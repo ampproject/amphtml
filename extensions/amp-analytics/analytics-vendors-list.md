@@ -240,7 +240,7 @@ Adds support for Linkpulse. Configuration details can be found at [docs.linkpuls
 
 Type attribute value: `lotame`
 
-Adds support for Lotame. More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
+Adds support for Lotame. More information and configuration details can be found at [my.lotame.com](https://my.lotame.com/t/83h37h9/overview-1st-party-data-collection-in-google-amp).
 
 ### Mapp Intelligence
 
