@@ -69,7 +69,8 @@ export class AlrightNetworkConfig {
   /** @override */
   getAttributes() {
     const attributes = dict({
-      'layout': 'fixed',
+      'layout': 'fluid',
+      'height': 'fluid',
       'data-multi-size-validation': 'false',
       'type': 'doubleclick',
       'data-ad': 'alright',
