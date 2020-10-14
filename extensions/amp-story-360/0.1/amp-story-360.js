@@ -282,10 +282,10 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {?Element|?EventTarget} */
     this.ampVideoEl_ = null;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.orientationAlpha_ = 0;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.headingOffset_ = 0;
   }
 
