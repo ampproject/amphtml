@@ -555,7 +555,7 @@ export class AmpStoryPlayer {
             );
           });
 
-          if (this.playerConfig_) {
+          if (this.playerConfig_ && this.playerConfig_.controls) {
             messaging.sendRequest(
               'customDocumentUI',
               dict({'controls': this.playerConfig_.controls}),
