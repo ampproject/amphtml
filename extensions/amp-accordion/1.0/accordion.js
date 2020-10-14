@@ -198,7 +198,7 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}_AMP_content_'${id}-${generateRandomId()}`;
+  const contentId = `${prefix || 'a'}_AMP_content_${id}-${generateRandomId()}`;
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
