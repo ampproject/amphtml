@@ -28,9 +28,7 @@ const cwd = process.cwd();
 const cssPath = isTestMode
   ? `${cwd}/${testDir}/css.txt`
   : `${cwd}/build/css/v0.css`;
-const versionPath = isTestMode
-  ? `${cwd}/${testDir}/version.txt`
-  : `${cwd}/dist/version.txt`;
+const versionPath = `${cwd}/${testDir}/version.txt`
 
 const css = readFileSync(cssPath, 'utf8').toString().trim();
 const version = readFileSync(versionPath, 'utf8').toString().trim();
@@ -45,8 +43,21 @@ interface StyleNode extends PostHTML.Node {
   content: string[]
 }
 
+function isStyleNode(node: PostHTML.Node | string): node is StyleNode {
+  return node !== undefined && typeof node !== 'string' &&
+    (node as StyleNode).tag === 'style';
+}
+
 function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
   const content = head.content || [];
+
+  const firstStyleNode = content.filter(isStyleNode)[0];
+
+  // If 'amp-runtime' already exists bail out.
+  if (firstStyleNode?.attrs && 'amp-runtime' in firstStyleNode.attrs) {
+    return head;
+  }
+
   const styleNode: StyleNode = {
     walk: head.walk,
     match: head.match,
