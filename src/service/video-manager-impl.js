@@ -185,7 +185,9 @@ export class VideoManager {
       return;
     }
     if (!this.viewportObserver_) {
-      const viewportCallback = (records) =>
+      const viewportCallback = (
+        /** @type {!Array<!IntersectionObserverEntry>} */ records
+      ) =>
         records.forEach(({target, isIntersecting}) => {
           this.getEntry_(target).updateVisibility(
             /* isVisible */ isIntersecting
