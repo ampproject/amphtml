@@ -96,6 +96,10 @@ const disableSnap = {
   scrollSnapCoordinate: 'none',
 };
 
+const mixedLength = {
+  flex: '0 0 auto',
+};
+
 /** Slides only have one child */
 const slideSizing = {
   '& > :first-child, & > ::slotted(*)': {
@@ -197,6 +201,7 @@ const JSS = {
   slideElement,
   enableSnap,
   disableSnap,
+  mixedLength,
   slideSizing,
   arrowPlacement,
   arrowPrev,
