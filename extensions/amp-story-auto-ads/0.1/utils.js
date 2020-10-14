@@ -42,16 +42,6 @@ export function getUniqueId(win) {
 }
 
 /**
- * Finds all meta tags starting with `amp4ads-vars-` or `amp-cta`.
- * @param {Document} doc
- * @return {!IArrayLike}
- */
-export function getStoryAdMetaTags(doc) {
-  const selector = 'meta[name^=amp4ads-vars-],meta[name^=amp-cta-]';
-  return doc.querySelectorAll(selector);
-}
-
-/**
  * Returns document from given iframe, or null if non FIE.
  * @param {HTMLIFrameElement} iframe
  * @return {!Document}
