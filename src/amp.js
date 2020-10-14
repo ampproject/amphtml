@@ -64,7 +64,9 @@ import {stubElementsForDoc} from './service/custom-element-registry';
  * @type {boolean|undefined}
  */
 const shouldMainBootstrapRun = !self.IS_AMP_ALT;
-
+// NO SUBMIT PLZ
+console /*OK*/
+  .log('hello');
 /**
  * Execute the bootstrap
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
