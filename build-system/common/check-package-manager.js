@@ -183,9 +183,10 @@ function getNodeLatestLtsVersion(distributionsJson) {
 // If yarn is being run, perform a version check and proceed with the install.
 function checkYarnVersion() {
   const yarnVersion = getStdout(yarnExecutable + ' --version').trim();
-  // TODO (KB): Revert #30478 once `yarn` stable is fixed
-  // At this time current stable is failing GPG checks.
-  const stableVersion = '1.22.5';
+  // TODO (kristoferbaxter): Remove once yarn stable is fixed.
+  // TODO (rsimha): Revisit the use of yarn v1 for AMP package management.
+  // At this time current stable version is failing GPG checks, so we use 1.22.4.
+  const stableVersion = '1.22.4';
   if (stableVersion === '') {
     console.log(
       yellow(
