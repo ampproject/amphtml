@@ -564,7 +564,7 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new UpdateSourcesTask(this.win_, defaultSources)
-    );
+    ).then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()));
   }
 
   /**
