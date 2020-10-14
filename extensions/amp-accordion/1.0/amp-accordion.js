@@ -133,8 +133,7 @@ function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
       return;
     }
     headerElement.addEventListener('click', onClick);
-    const hasTabIndex = headerElement.hasAttribute('tabindex');
-    if (!hasTabIndex) {
+    if (!headerElement.hasAttribute('tabindex')) {
       headerElement.setAttribute('tabindex', 0);
     }
     headerElement.setAttribute('aria-controls', ariaControls);
