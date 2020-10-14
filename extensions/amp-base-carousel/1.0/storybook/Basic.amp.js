@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, select, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -47,6 +47,41 @@ export const Default = () => {
           </svg>
         </amp-layout>
       ))}
+    </amp-base-carousel>
+  );
+};
+
+export const mixedLength = () => {
+  const width = number('width', 440);
+  const height = number('height', 225);
+  const slideCount = number('slide count', 7, {min: 0, max: 99});
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const loop = boolean('loop', true);
+  const snap = boolean('snap', true);
+  const mixedLength = boolean('mixed length', true);
+  const controls = select('show controls', ['auto', 'always', 'never']);
+
+  return (
+    <amp-base-carousel
+      controls={controls}
+      mixed-length={mixedLength}
+      loop={loop}
+      snap={String(snap)}
+      width={width}
+      height={height}
+    >
+      {Array.from({length: slideCount}, (x, i) => {
+        const v = colorIncrement * (i + 1);
+        return (
+          <div
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              width: `${Math.floor(Math.random() * 200 + 100)}px`,
+              height: `${Math.floor(Math.random() * 100 + 100)}px`,
+            }}
+          ></div>
+        );
+      })}
     </amp-base-carousel>
   );
 };
