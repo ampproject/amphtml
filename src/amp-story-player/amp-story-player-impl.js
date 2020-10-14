@@ -121,6 +121,13 @@ let DocumentStateTypeDef;
  */
 let StoryDef;
 
+/**
+ * @typedef {{
+ *   controls: (!Array),
+ * }}
+ */
+let ConfigDef;
+
 /** @type {string} */
 const TAG = 'amp-story-player';
 
@@ -178,7 +185,7 @@ export class AmpStoryPlayer {
     /** @private {!SwipingState} */
     this.swipingState_ = SwipingState.NOT_SWIPING;
 
-    /** @private {?JsonObject} */
+    /** @private {?ConfigDef} */
     this.playerConfig_ = null;
 
     /** @private {!Object} */
@@ -429,7 +436,7 @@ export class AmpStoryPlayer {
   /**
    * Gets publisher configuration for the player
    * @private
-   * @return {?JsonObject}
+   * @return {?ConfigDef}
    */
   readPlayerConfig_() {
     if (this.playerConfig_) {
@@ -445,12 +452,15 @@ export class AmpStoryPlayer {
       throw new Error('<script> child must have type="application/json"');
     }
 
+    let config;
     try {
-      this.playerConfig_ = parseJson(scriptTag.textContent);
+      config = parseJson(scriptTag.textContent);
     } catch (reason) {
       console /*OK*/
         .error(`[${TAG}] `, reason);
     }
+    this.playerConfig_ = {};
+    this.playerConfig_.controls = config['controls'];
 
     return this.playerConfig_;
   }
@@ -546,11 +556,12 @@ export class AmpStoryPlayer {
             );
           });
 
-          const customControls =
-            this.playerConfig_ && this.playerConfig_['controls'];
-
-          if (customControls) {
-            messaging.sendRequest('customDocumentUI', customControls, false);
+          if (this.playerConfig_) {
+            messaging.sendRequest(
+              'customDocumentUI',
+              /** @type {!JsonObject} */ (this.playerConfig_),
+              false
+            );
           }
 
           resolve(messaging);
