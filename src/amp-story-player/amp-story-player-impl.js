@@ -452,15 +452,14 @@ export class AmpStoryPlayer {
       throw new Error('<script> child must have type="application/json"');
     }
 
-    let config;
     try {
-      config = parseJson(scriptTag.textContent);
+      this.playerConfig_ = /** @type {@ConfigDef} */ (parseJson(
+        scriptTag.textContent
+      ));
     } catch (reason) {
       console /*OK*/
         .error(`[${TAG}] `, reason);
     }
-    this.playerConfig_ = {};
-    this.playerConfig_.controls = config['controls'];
 
     return this.playerConfig_;
   }
@@ -559,7 +558,7 @@ export class AmpStoryPlayer {
           if (this.playerConfig_) {
             messaging.sendRequest(
               'customDocumentUI',
-              /** @type {!JsonObject} */ (this.playerConfig_),
+              dict({'controls': this.playerConfig_.controls}),
               false
             );
           }
