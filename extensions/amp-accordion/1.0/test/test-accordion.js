@@ -119,18 +119,39 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(sections.at(1).getDOMNode()).to.not.have.attribute('expanded');
       expect(sections.at(2).getDOMNode()).to.not.have.attribute('expanded');
 
+      const header0 = sections.at(0).find('header').getDOMNode();
+      const header1 = sections.at(1).find('header').getDOMNode();
+      const header2 = sections.at(2).find('header').getDOMNode();
+      const content0 = sections.at(0).find('div').getDOMNode();
+      const content1 = sections.at(1).find('div').getDOMNode();
+      const content2 = sections.at(2).find('div').getDOMNode();
+
       // Headers.
-      expect(sections.at(0).find('header').text()).to.equal('header1');
-      expect(sections.at(1).find('header').text()).to.equal('header2');
-      expect(sections.at(2).find('header').text()).to.equal('header3');
+      expect(header0.textContent).to.equal('header1');
+      expect(header1.textContent).to.equal('header2');
+      expect(header2.textContent).to.equal('header3');
 
       // Contents.
-      expect(sections.at(0).find('div').text()).to.equal('content1');
-      expect(sections.at(1).find('div').text()).to.equal('content2');
-      expect(sections.at(2).find('div').text()).to.equal('content3');
-      expect(sections.at(0).find('div').getDOMNode().hidden).to.be.false;
-      expect(sections.at(1).find('div').getDOMNode().hidden).to.be.true;
-      expect(sections.at(2).find('div').getDOMNode().hidden).to.be.true;
+      expect(content0.textContent).to.equal('content1');
+      expect(content1.textContent).to.equal('content2');
+      expect(content2.textContent).to.equal('content3');
+      expect(content0.hidden).to.be.false;
+      expect(content1.hidden).to.be.true;
+      expect(content2.hidden).to.be.true;
+
+      // Styling.
+      expect(header0.className.includes('section-child')).to.be.true;
+      expect(header0.className.includes('header')).to.be.true;
+      expect(header1.className.includes('section-child')).to.be.true;
+      expect(header1.className.includes('header')).to.be.true;
+      expect(header2.className.includes('section-child')).to.be.true;
+      expect(header2.className.includes('header')).to.be.true;
+      expect(content0.className.includes('section-child')).to.be.true;
+      expect(content0.className.includes('content')).to.be.true;
+      expect(content1.className.includes('section-child')).to.be.true;
+      expect(content1.className.includes('content')).to.be.true;
+      expect(content2.className.includes('section-child')).to.be.true;
+      expect(content2.className.includes('content')).to.be.true;
     });
 
     it('should expand a section on click', () => {

@@ -76,6 +76,28 @@ describes.realWin(
       expect(sections[2].lastElementChild).to.have.display('none');
     });
 
+    it('should have amp specific classes for CSS', () => {
+      const sections = element.children;
+      expect(sections[0].firstElementChild.className).to.include(
+        'i-amphtml-accordion-header'
+      );
+      expect(sections[1].firstElementChild.className).to.include(
+        'i-amphtml-accordion-header'
+      );
+      expect(sections[2].firstElementChild.className).to.include(
+        'i-amphtml-accordion-header'
+      );
+      expect(sections[0].lastElementChild.className).to.include(
+        'i-amphtml-accordion-content'
+      );
+      expect(sections[1].lastElementChild.className).to.include(
+        'i-amphtml-accordion-content'
+      );
+      expect(sections[2].lastElementChild.className).to.include(
+        'i-amphtml-accordion-content'
+      );
+    });
+
     it('should expand and collapse on click', async () => {
       const sections = element.children;
 
