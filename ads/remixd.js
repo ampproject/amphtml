@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+​
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -23,8 +23,12 @@ export function remixd(global, data) {
   global._rmxd.url = data.url || global.context.sourceUrl;
   global._rmxd.amp = true;
   const sriptVersion = data.version || '5';
-  const tagUrl = 'https://tags.remixd.com/player/v'+ sriptVersion +'/index.js?cb=' + Math.random();
-
+  const tagUrl =
+    'https://tags.remixd.com/player/v' +
+    sriptVersion +
+    '/index.js?cb=' +
+    Math.random();
+​
   document.write(
     '<' +
       'script src="' +
@@ -32,6 +36,6 @@ export function remixd(global, data) {
       '" id="remixd-audio-player-script"><' +
       '/script>'
   );
-
+​
   global.context.renderStart();
 }
