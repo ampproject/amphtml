@@ -73,20 +73,14 @@ describe('test extensions loading in multiple orders', function () {
     );
   });
 
-  // TODO(#30528): skip this test as it doesn't make sense. The script
-  // tags are in the footer and our posthtml transforms break on the
-  // transformation of these invalid html files.
-  it.skip('one extension, extension loads first, all scripts in footer', () => {
+  it('one extension, extension loads first, all scripts in footer', () => {
     return testLoadOrderFixture(
       'test/fixtures/script-load-extension-footer-v0-footer.html',
       ['amp-fit-text']
     );
   });
 
-  // TODO(#30528): skip this test as it doesn't make sense. The script
-  // tags are in the footer and our posthtml transforms break on the
-  // transformation of these invalid html files.
-  it.skip('one extension, v0 loads first, all scripts in footer', () => {
+  it('one extension, v0 loads first, all scripts in footer', () => {
     return testLoadOrderFixture(
       'test/fixtures/script-load-v0-footer-extension-footer.html',
       ['amp-fit-text']

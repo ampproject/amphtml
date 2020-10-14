@@ -39,8 +39,8 @@ async function vendorConfigs(opt_options) {
   const srcPath = ['extensions/amp-analytics/0.1/vendors/*.json'];
   const destPath = 'dist/v0/analytics-vendors/';
 
-  // ignore test json if not fortesting or build.
-  if (!(argv.fortesting || options.fortesting || argv._.includes('build'))) {
+  // ignore test json if not fortesting
+  if (!(argv.fortesting || options.fortesting)) {
     srcPath.push('!extensions/amp-analytics/0.1/vendors/_fake_.json');
   }
 
