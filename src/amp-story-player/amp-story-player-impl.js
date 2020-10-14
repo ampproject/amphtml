@@ -72,6 +72,12 @@ const SwipingState = {
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
 
+/**
+ * Fetches more stories when reaching the threshold.
+ * @const {number}
+ */
+const FETCH_STORIES_THRESHOLD = 2;
+
 /** @const {number} */
 const MAX_IFRAMES = 3;
 
@@ -123,7 +129,17 @@ let StoryDef;
 
 /**
  * @typedef {{
+ *   on: string,
+ *   action: string,
+ *   endpoint: string,
+ * }}
+ */
+let BehaviorDef;
+
+/**
+ * @typedef {{
  *   controls: (!Array),
+ *   behavior: !BehaviorDef,
  * }}
  */
 let ConfigDef;
@@ -187,6 +203,9 @@ export class AmpStoryPlayer {
 
     /** @private {?ConfigDef} */
     this.playerConfig_ = null;
+
+    /** @private {boolean} */
+    this.shouldFetch_ = true;
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -631,6 +650,28 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Fetches more stories from the publisher's endpoint.
+   * @return {!Promise}
+   * @private
+   */
+  fetchStories_() {
+    const url = this.readPlayerConfig_().behavior.endpoint;
+    const init = {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    };
+
+    return fetch(url, init)
+      .then((response) => response.json())
+      .catch((reason) => {
+        console /*OK*/
+          .error(`[${TAG}] `, reason);
+      });
+  }
+
+  /**
    * Resolves when story in given iframe is finished loading.
    * @param {number} iframeIdx
    * @private
@@ -698,7 +739,7 @@ export class AmpStoryPlayer {
     });
 
     this.currentIdx_ = storyIdx;
-    this.signalNavigation_();
+    this.onNavigation_();
   }
 
   /** Sends a message muting the current story. */
@@ -730,20 +771,80 @@ export class AmpStoryPlayer {
 
   /**
    * Indicates the player changed story.
+   * @param {!Object} data
    * @private
    */
-  signalNavigation_() {
+  signalNavigation_(data) {
+    const event = createCustomEvent(this.win_, 'navigation', data);
+    this.element_.dispatchEvent(event);
+  }
+
+  /**
+   * Triggers when swithing from one story to another.
+   * @private
+   */
+  onNavigation_() {
     const index = this.currentIdx_;
     const remaining = this.stories_.length - this.currentIdx_ - 1;
-    const event = createCustomEvent(
-      this.win_,
-      'navigation',
-      dict({
-        'index': index,
-        'remaining': remaining,
-      })
-    );
-    this.element_.dispatchEvent(event);
+    const navigation = {
+      'index': index,
+      'remaining': remaining,
+    };
+
+    this.signalNavigation_(navigation);
+    this.maybeFetchMoreStories_(navigation);
+  }
+
+  /**
+   * Fetches more stories if appropiate.
+   * @param {!Object} data
+   */
+  maybeFetchMoreStories_(data) {
+    if (
+      data.remaining <= FETCH_STORIES_THRESHOLD &&
+      this.isFetchingEnabled_()
+    ) {
+      this.fetchStories_()
+        .then((stories) => {
+          this.add(stories);
+          console.log('added', {stories});
+        })
+        .catch((reason) => {
+          console /*OK*/
+            .error(`[${TAG}] `, reason);
+        });
+    }
+  }
+
+  /**
+   * Checks if fetching more stories is enabled and validates the configuration.
+   * @return {boolean}
+   * @private
+   */
+  isFetchingEnabled_() {
+    const {behavior} = this.readPlayerConfig_();
+
+    if (!behavior) {
+      return false;
+    }
+
+    const isBehaviorDef = (behavior) => behavior.on && behavior.action;
+
+    const hasEndFetchBehavior = (behavior) =>
+      behavior.on === 'end' &&
+      behavior.action === 'fetch' &&
+      behavior.endpoint.length > 0;
+
+    if (
+      isBehaviorDef(behavior) &&
+      hasEndFetchBehavior(behavior) &&
+      this.shouldFetch_
+    ) {
+      this.shouldFetch_ = false;
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -781,7 +882,7 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx);
     }
-    this.signalNavigation_();
+    this.onNavigation_();
   }
 
   /**
@@ -816,7 +917,7 @@ export class AmpStoryPlayer {
     if (nextStoryIdx >= 0 && this.stories_[nextStoryIdx].iframeIdx === -1) {
       this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
     }
-    this.signalNavigation_();
+    this.onNavigation_();
   }
 
   /**
