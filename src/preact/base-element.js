@@ -26,7 +26,7 @@ import {cancellation} from '../error';
 import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
-import {dashToCamelCase, startsWith} from '../string';
+import {dashToCamelCase} from '../string';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
