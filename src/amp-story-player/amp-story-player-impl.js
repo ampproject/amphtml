@@ -453,7 +453,7 @@ export class AmpStoryPlayer {
     }
 
     try {
-      this.playerConfig_ = /** @type {@ConfigDef} */ (parseJson(
+      this.playerConfig_ = /** @type {!ConfigDef} */ (parseJson(
         scriptTag.textContent
       ));
     } catch (reason) {
