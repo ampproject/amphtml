@@ -659,7 +659,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   selectHandler_(event) {
     const element = dev().assertElement(event.target);
-    const selectedValue = this.setInputValue_(this.getItemElement_(element));
+    const selectedElement = this.getItemElement_(element);
+    this.setInputValue_(selectedElement);
+    const selectedValue = this.getSelectedValue_(selectedElement);
     return this.mutateElement(() => {
       this.selectItem_(selectedValue);
     });
@@ -703,8 +705,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     const filteredData = this.filterData_(sourceData, input);
+    const dataWithConverter = filteredData.map((item) => {
+      let itemWithConverter = item;
+      // Add a function that converts the object itself to a JSON string.
+      // This function is then available in mustache templates.
+      if (typeof item === 'object') {
+        itemWithConverter = {...item, objToJson: () => JSON.stringify(item)};
+      }
+      return itemWithConverter;
+    });
     return this.renderResults_(
-      filteredData,
+      dataWithConverter,
       dev().assertElement(this.container_),
       input
     );
@@ -1037,14 +1048,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Writes the selected value into the input field.
+   * Writes the textual representation of the select element into the input field.
    * @param {?Element} element
-   * @return {?string}
    * @private
    */
   setInputValue_(element) {
     if (element === null || element.hasAttribute('data-disabled')) {
-      return null;
+      return;
     }
 
     const selectedValue =
@@ -1056,13 +1066,37 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.userInput_
     );
     this.userInput_ = this.binding_.getUserInputForUpdate(this.inputElement_);
+  }
 
-    return selectedValue;
+  /**
+   * Returns the value that was was selected either as an object if data-json
+   * was specified in the template, or as a string otherwise.
+   * @param {?Element} element
+   * @return {?JsonObject|string}
+   * @private
+   */
+  getSelectedValue_(element) {
+    if (element === null || element.hasAttribute('data-disabled')) {
+      return null;
+    }
+
+    const dataJson =
+      element.getAttribute('data-json') &&
+      tryParseJson(element.getAttribute('data-json'), (error) => {
+        throw error;
+      });
+
+    return (
+      dataJson ||
+      element.getAttribute('data-value') ||
+      element.textContent ||
+      ''
+    );
   }
 
   /**
    * Finish item selection with the selected value.
-   * @param {?string} value
+   * @param {?JsonObject|string} value
    * @private
    */
   selectItem_(value) {
@@ -1078,15 +1112,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Triggers select event on amp-autocomplete element and change events (bind
    * and native, for amp-script) on child input/textarea with the given value
    * as the value emitted.
-   * @param {string} value
+   * @param {JsonObject|string} value
    * @private
    */
   fireSelectAndChangeEvents_(value) {
     const selectName = 'select';
+    const eventValue = /** @type {!JsonObject} */ ({value});
     const selectEvent = createCustomEvent(
       this.win,
       `amp-autocomplete.${selectName}`,
-      /** @type {!JsonObject} */ ({value})
+      eventValue
     );
     this.action_.trigger(
       this.element,
@@ -1099,7 +1134,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const nativeChangeEvent = createCustomEvent(
       this.win,
       'change',
-      /** @type {!JsonObject} */ ({value}),
+      eventValue,
       {bubbles: true}
     );
     this.inputElement_.dispatchEvent(nativeChangeEvent);
@@ -1271,7 +1306,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         this.binding_.removeSelectionHighlighting(this.inputElement_);
         if (this.areResultsDisplayed_() && this.activeElement_) {
-          const selectedValue = this.setInputValue_(this.activeElement_);
+          this.setInputValue_(this.activeElement_);
+          const selectedValue = this.getSelectedValue_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedValue);
             this.resetActiveElement_();
@@ -1292,7 +1328,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
-          const selectedValue = this.setInputValue_(this.activeElement_);
+          this.setInputValue_(this.activeElement_);
+          const selectedValue = this.getSelectedValue_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedValue);
           });

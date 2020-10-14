@@ -286,6 +286,82 @@ describes.realWin(
       });
     });
 
+    describe('filterDataAndRenderResults_()', () => {
+      let renderSpy;
+
+      describe('with string data', () => {
+        beforeEach(() => {
+          // Use prefix filter for these tests.
+          impl.filter_ = 'prefix';
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
+        });
+
+        it('should resolve when data is []', async () => {
+          await impl.filterDataAndRenderResults_([], '');
+          expect(renderSpy).not.to.have.been.called;
+        });
+
+        it('should render data unchanged when input empty', async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], '');
+          expect(renderSpy).to.have.been.calledWith(
+            ['aa', 'bb', 'cc'],
+            impl.container_,
+            ''
+          );
+        });
+
+        it("should render no data when input doesn't match", async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], 'd');
+          expect(renderSpy).to.have.been.calledWith([], impl.container_, 'd');
+        });
+
+        it('should filter string data when input provided', async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], 'a');
+          expect(renderSpy).to.have.been.calledWith(
+            ['aa'],
+            impl.container_,
+            'a'
+          );
+        });
+      });
+
+      describe('with object data', () => {
+        beforeEach(async () => {
+          impl = await buildAmpAutocomplete(true);
+          impl.filter_ = 'prefix';
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
+          env.sandbox
+            .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
+            .returns(Promise.resolve(getRenderedSuggestions()));
+        });
+
+        it('should add objToJson property to objects', async () => {
+          const obj1 = {value: 'aa', any: 'zz'};
+          const obj2 = {value: 'bb', any: 'yy'};
+          await impl.filterDataAndRenderResults_([obj1, obj2], '');
+          expect(renderSpy).to.have.been.calledWithMatch(
+            [
+              {...obj1, objToJson: env.sandbox.match.func},
+              {...obj2, objToJson: env.sandbox.match.func},
+            ],
+            impl.container_,
+            ''
+          );
+        });
+
+        it('should add objToJson property to objects and filter', async () => {
+          const obj1 = {value: 'aa', any: 'zz'};
+          const obj2 = {value: 'bb', any: 'yy'};
+          await impl.filterDataAndRenderResults_([obj1, obj2], 'a');
+          expect(renderSpy).to.have.been.calledWithMatch(
+            [{...obj1, objToJson: env.sandbox.match.func}],
+            impl.container_,
+            'a'
+          );
+        });
+      });
+    });
+
     describe('renderResults()', () => {
       it('should delegate template rendering to viewer', async () => {
         impl = await buildAmpAutocomplete(true);
@@ -843,6 +919,19 @@ describes.realWin(
           expect(selectItemSpy).to.have.been.calledWith('abc');
           expect(impl.inputElement_.value).to.equal('abc');
         });
+    });
+
+    it('should set input based on data-value and select item from data-json', async () => {
+      const selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
+      const mockEl = impl.createElementFromItem_('abc');
+      const object = {a: 'aa', b: 'bb'};
+      mockEl.setAttribute('data-json', JSON.stringify(object));
+
+      await impl.layoutCallback();
+      await impl.selectHandler_({target: mockEl});
+
+      expect(impl.inputElement_.value).to.equal('abc');
+      expect(selectItemSpy).to.have.been.calledWith(object);
     });
 
     it('should fire events from selectItem_', () => {
