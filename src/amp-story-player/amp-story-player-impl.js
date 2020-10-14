@@ -807,7 +807,6 @@ export class AmpStoryPlayer {
       this.fetchStories_()
         .then((stories) => {
           this.add(stories);
-          console.log('added', {stories});
         })
         .catch((reason) => {
           console /*OK*/
