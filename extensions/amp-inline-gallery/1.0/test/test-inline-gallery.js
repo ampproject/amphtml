@@ -18,6 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
 import {InlineGallery} from '../inline-gallery';
 import {Pagination} from '../pagination';
+import {Thumbnails} from '../thumbnails';
 import {mount} from 'enzyme';
 
 describes.sandboxed('InlineGallery preact component', {}, () => {
@@ -37,6 +38,27 @@ describes.sandboxed('InlineGallery preact component', {}, () => {
     expect(carousel).to.have.lengthOf(1);
 
     const pagination = wrapper.find('Pagination');
+    expect(pagination).to.have.lengthOf(1);
+  });
+
+  it('should render BaseCarousel and Thumbnails', () => {
+    const jsx = (
+      <InlineGallery>
+        <BaseCarousel>
+          <div>slide 1</div>
+          <div>slide 2</div>
+          <div>slide 3</div>
+        </BaseCarousel>
+        <Thumbnails />
+      </InlineGallery>
+    );
+    const wrapper = mount(jsx);
+
+    // First is user provided, second is created by Thumbnails
+    const carousel = wrapper.find('BaseCarousel');
+    expect(carousel).to.have.lengthOf(2);
+
+    const pagination = wrapper.find('Thumbnails');
     expect(pagination).to.have.lengthOf(1);
   });
 });

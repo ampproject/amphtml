@@ -40,3 +40,12 @@ InlineGalleryDef.Props;
  * }}
  */
 InlineGalleryDef.PaginationProps;
+
+/**
+ * @typedef {{
+ *   aspectRatio: number,
+ *   loop: (boolean|undefined),
+ *   children: !Array<PreactDef.Renderable>
+ * }}
+ */
+InlineGalleryDef.ThumbnailProps;

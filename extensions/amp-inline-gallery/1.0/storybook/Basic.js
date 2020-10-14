@@ -18,6 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
 import {InlineGallery} from '../inline-gallery';
 import {Pagination} from '../pagination';
+import {Thumbnails} from '../thumbnails';
 import {boolean, number, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -35,6 +36,10 @@ export const _default = () => {
   const bottomInset = boolean('bottom indicator inset?', false);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const thumbnailHeight = number('thumbnail height', 50);
+  const loop = boolean('thumbnail loop', true);
+  const aspectRatio = number('thumbnail aspect ratio', 2);
+
   return (
     <>
       <InlineGallery style={{width}}>
@@ -54,6 +59,24 @@ export const _default = () => {
           })}
         </BaseCarousel>
         <Pagination inset={bottomInset} />
+        <Thumbnails
+          aspectRatio={aspectRatio}
+          loop={loop}
+          style={{height: thumbnailHeight}}
+        >
+          {Array.from({length: slideCount}, (_, i) => {
+            const v = colorIncrement * (i + 1);
+            return (
+              <div
+                style={{
+                  backgroundColor: `rgb(${v}, 100, 100)`,
+                  width,
+                  height,
+                }}
+              ></div>
+            );
+          })}
+        </Thumbnails>
       </InlineGallery>
       Content below carousel
     </>
@@ -65,32 +88,47 @@ export const WithLooping = () => {
   const height = number('height', 225);
   const paginationHeight = number('indicator height', 20);
   const inset = boolean('inset?', false);
+  const thumbnailHeight = number('thumbnail height', 50);
+  const loop = boolean('thumbnail loop', true);
+  const aspectRatio = number('thumbnail aspect ratio', 2);
+  const slides = [
+    'lightpink',
+    'lightcoral',
+    'peachpuff',
+    'powderblue',
+    'lavender',
+    'thistle',
+  ].map((color, index) => (
+    <div
+      style={{
+        backgroundColor: color,
+        width,
+        height,
+        textAlign: 'center',
+        fontSize: '48pt',
+        lineHeight: height + 'px',
+      }}
+    >
+      {index + 1}
+    </div>
+  ));
+
   return (
     <InlineGallery style={{width, position: 'relative'}}>
       <BaseCarousel loop style={{height, position: 'relative'}}>
-        {[
-          'lightpink',
-          'lightcoral',
-          'peachpuff',
-          'powderblue',
-          'lavender',
-          'thistle',
-        ].map((color, index) => (
-          <div
-            style={{
-              backgroundColor: color,
-              width,
-              height,
-              textAlign: 'center',
-              fontSize: '48pt',
-              lineHeight: height + 'px',
-            }}
-          >
-            {index + 1}
-          </div>
-        ))}
+        {slides}
       </BaseCarousel>
       <Pagination inset={inset} style={{height: paginationHeight}} />
+      <Thumbnails
+        aspectRatio={aspectRatio}
+        loop={loop}
+        style={{height: thumbnailHeight}}
+      >
+        <div>a</div>
+        <div>b</div>
+        <div>c</div>
+        <div>d</div>
+      </Thumbnails>
     </InlineGallery>
   );
 };
