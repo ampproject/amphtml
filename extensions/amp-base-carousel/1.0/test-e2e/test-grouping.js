@@ -51,15 +51,15 @@ describes.endtoend(
     it('should move forwards by the advance-count', async () => {
       await controller.click(btnNext);
       const slide2 = await getSlide(styles, controller, 2);
-      await expect(rect(slide2)).to.include({x: 800});
+      await expect(rect(slide2)).to.include({x: 0});
 
       await controller.click(btnNext);
       const slide4 = await getSlide(styles, controller, 4);
-      await expect(rect(slide4)).to.include({x: 800});
+      await expect(rect(slide4)).to.include({x: 0});
 
       await controller.click(btnNext);
       const slide6 = await getSlide(styles, controller, 6);
-      await expect(rect(slide6)).to.include({x: 800});
+      await expect(rect(slide6)).to.include({x: 0});
     });
 
     it('should move backwards by the advance-count', async () => {
