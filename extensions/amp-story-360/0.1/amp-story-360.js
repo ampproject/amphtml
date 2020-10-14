@@ -474,7 +474,7 @@ export class AmpStory360 extends AMP.BaseElement {
         const offsetHeading =
           90 + parseFloat(defaultHeading) + this.orientationAlpha_;
         this.renderer_.setImageOrientation(
-          offsetHeading,
+          this.sceneHeading_ + offsetHeading,
           this.scenePitch_,
           this.sceneRoll_
         );
