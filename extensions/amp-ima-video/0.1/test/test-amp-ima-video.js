@@ -41,10 +41,6 @@ describes.realWin(
       timer = Services.timerFor(env.win);
     });
 
-    afterEach(() => {
-      Services.videoManagerForDoc(doc).dispose();
-    });
-
     function getVideoPlayerMock() {
       return {
         load: function () {},
