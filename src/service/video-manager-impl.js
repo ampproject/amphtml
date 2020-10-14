@@ -44,9 +44,9 @@ import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
+import {isIframed, removeElement} from '../dom';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
-import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {toggle} from '../style';
 
@@ -185,15 +185,15 @@ export class VideoManager {
       return;
     }
     if (!this.viewportObserver_) {
-      this.viewportObserver_ = new this.ampdoc.win.IntersectionObserver(
-        (records) => {
-          for (let i = 0; i < records.length; i++) {
-            const record = records[i];
-            const videoEntry = this.getEntry_(record.target);
-            videoEntry.updateVisibility(/* isVisible */ record.isIntersecting);
-          }
-        },
-        {rootMargin: '25%'}
+      const viewportCallback = (records) =>
+        records.forEach(({target, isIntersecting}) => {
+          this.getEntry_(target).updateVisibility(
+            /* isVisible */ isIntersecting
+          );
+        });
+      this.viewportObserver_ = getViewportObserver(
+        viewportCallback,
+        this.ampdoc.win
       );
     }
     this.viewportObserver_.observe(
@@ -1594,4 +1594,33 @@ function analyticsEvent(entry, eventType, opt_vars) {
 /** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
 export function installVideoManagerForDoc(nodeOrDoc) {
   registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
+}
+
+/**
+ * A helper that uses feature detection to get the best InOb it can.
+ * If iframed: rootMargin is ignored unless natively supported (Chrome 81+).
+ * If not iframed: all features work properly in both polyfill and built-in.
+ *
+ * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
+ * @param {!Window} win
+ * @return {!IntersectionObserver}
+ */
+function getViewportObserver(ioCallback, win) {
+  const iframed = isIframed(win);
+  // Classic IntersectionObserver doesn't support viewport tracking and
+  // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
+  // supports it via {root: document}, which throws on other browsers.
+  const root = /** @type {?Element} */ (iframed
+    ? /** @type {*} */ (win.document)
+    : null);
+  const rootMargin = '25%';
+
+  try {
+    return new win.IntersectionObserver(ioCallback, {
+      root,
+      rootMargin,
+    });
+  } catch (e) {
+    return new win.IntersectionObserver(ioCallback, {rootMargin});
+  }
 }
