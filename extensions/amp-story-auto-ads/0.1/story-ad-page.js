@@ -40,7 +40,7 @@ import {
   isJsonScriptTag,
   toggleAttribute,
 } from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -348,14 +348,14 @@ export class StoryAdPage {
 
   /**
    * Create layer to contain outlink button.
-   * @param {!StoryAdUIMetadata} uiMetadata
+   * @param {!./story-ad-ui.StoryAdUIMetadata} uiMetadata
    * @return {Promise<boolean>}
    */
   createCtaLayer_(uiMetadata) {
     return createCta(
       this.doc_,
-      this.buttonFitter_,
-      this.pageElement_, // Container.
+      devAssert(this.buttonFitter_),
+      dev().assertElement(this.pageElement_), // Container.
       uiMetadata
     ).then((anchor) => {
       if (anchor) {

@@ -212,7 +212,7 @@ export function handleAttributionClick(win, href) {
 
 /**
  * @param {!Document} doc
- * @param {ButtonFitter} buttonFitter
+ * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
  * @param {!Element} container
  * @param {!StoryAdUIMetadata} uiMetadata
  * @return {!Promise<?Element>} If anchor was successfully created.
