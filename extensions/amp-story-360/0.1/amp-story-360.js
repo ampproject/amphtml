@@ -138,7 +138,7 @@ class CameraOrientation {
   static fromDegrees(heading, pitch, zoom) {
     return new CameraOrientation(
       deg2rad(-pitch - 90),
-      deg2rad(90 + heading),
+      deg2rad(heading),
       1 / zoom
     );
   }
@@ -482,9 +482,7 @@ export class AmpStory360 extends AMP.BaseElement {
           this.element.getAttribute('heading-end') ||
             this.element.getAttribute('heading-start') ||
             0
-        ) +
-        90 +
-        this.orientationAlpha_;
+        ) + this.orientationAlpha_;
     }
   }
 
