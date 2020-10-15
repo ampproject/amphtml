@@ -112,18 +112,6 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should render all sections', () => {
       const dom = wrapper.getDOMNode();
-      const winner = dom.ownerDocument.defaultView;
-
-      winner.document.body.appendChild(dom);
-
-      const sections = wrapper.find(AccordionSection);
-      const header0 = sections.at(0).find('header').getDOMNode();
-      const headerStyles = winner.getComputedStyle(header0);
-
-      expect(headerStyles.paddingRight).to.equal('20px');
-      expect(headerStyles.cursor).to.equal('pointer');
-
-      /*
       expect(dom.localName).to.equal('section');
 
       const sections = wrapper.find(AccordionSection);
@@ -154,19 +142,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(content1.hidden).to.be.true;
       expect(content2.hidden).to.be.true;
 
-      const headerStyles = win.getComputedStyle(header0);
-      let blah = '';
-      Object.keys(headerStyles).forEach((p) => {
-        if (headerStyles[p] != '') {
-          blah = `${blah},${p}:${headerStyles[p]}`;
-        }
-      });
-
-      expect(header0.style).to.equal('cats!');
-      expect(blah).to.equal('cat');
-
       // Styling.
-      expect(win.getComputedStyle(header0).overflow).to.equal('expanded');
       expect(header0.className.includes('section-child')).to.be.true;
       expect(header0.className.includes('header')).to.be.true;
       expect(header1.className.includes('section-child')).to.be.true;
@@ -179,7 +155,6 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(content1.className.includes('content')).to.be.true;
       expect(content2.className.includes('section-child')).to.be.true;
       expect(content2.className.includes('content')).to.be.true;
-      */
     });
 
     /*
