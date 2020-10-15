@@ -19,6 +19,7 @@ import {Accordion, AccordionSection} from '../accordion';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Accordion preact component', {}, (env) => {
+  let win;
   describe('standalone accordion section', () => {
     it('should render a default section', () => {
       const wrapper = mount(
@@ -92,6 +93,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     let wrapper;
 
     beforeEach(() => {
+      win = env.win;
       wrapper = mount(
         <Accordion>
           <AccordionSection key={1} expanded header="header1">
@@ -103,12 +105,25 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
           <AccordionSection key={3} header="header3">
             content3
           </AccordionSection>
-        </Accordion>
+        </Accordion>,
+        {attachTo: win}
       );
     });
 
     it('should render all sections', () => {
       const dom = wrapper.getDOMNode();
+      const winner = dom.ownerDocument.defaultView;
+
+      winner.document.body.appendChild(dom);
+
+      const sections = wrapper.find(AccordionSection);
+      const header0 = sections.at(0).find('header').getDOMNode();
+      const headerStyles = winner.getComputedStyle(header0);
+
+      expect(headerStyles.paddingRight).to.equal('20px');
+      expect(headerStyles.cursor).to.equal('pointer');
+
+      /*
       expect(dom.localName).to.equal('section');
 
       const sections = wrapper.find(AccordionSection);
@@ -139,7 +154,19 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(content1.hidden).to.be.true;
       expect(content2.hidden).to.be.true;
 
+      const headerStyles = win.getComputedStyle(header0);
+      let blah = '';
+      Object.keys(headerStyles).forEach((p) => {
+        if (headerStyles[p] != '') {
+          blah = `${blah},${p}:${headerStyles[p]}`;
+        }
+      });
+
+      expect(header0.style).to.equal('cats!');
+      expect(blah).to.equal('cat');
+
       // Styling.
+      expect(win.getComputedStyle(header0).overflow).to.equal('expanded');
       expect(header0.className.includes('section-child')).to.be.true;
       expect(header0.className.includes('header')).to.be.true;
       expect(header1.className.includes('section-child')).to.be.true;
@@ -152,7 +179,29 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(content1.className.includes('content')).to.be.true;
       expect(content2.className.includes('section-child')).to.be.true;
       expect(content2.className.includes('content')).to.be.true;
+      */
     });
+
+    /*
+const sectionChild = {
+  // Make animations measurable. Without this, padding and margin can skew
+  // animations.
+  boxSizing: 'border-box !important',
+  // Cancel out the margin collapse. Also helps with animations to avoid
+  // overflow.
+  overflow: 'hidden !important',
+  // Ensure that any absolute elements are positioned within the section.
+  position: 'relative !important',
+};
+
+// TODO(#30445): update these styles after team agrees on styling
+const header = {
+  cursor: 'pointer',
+  backgroundColor: '#efefef',
+  paddingRight: '20px',
+  border: 'solid 1px #dfdfdf',
+};
+*/
 
     it('should expand a section on click', () => {
       const dom = wrapper.getDOMNode();
