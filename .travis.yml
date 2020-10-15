@@ -51,7 +51,7 @@ jobs:
     - stage: build
       name: 'Unminified Build'
       script:
-        - unbuffer node build-system/pr-check/unminified-build.js
+        - travis wait 30 unbuffer node build-system/pr-check/unminified-build.js
     - stage: build
       name: 'Checks'
       script:
