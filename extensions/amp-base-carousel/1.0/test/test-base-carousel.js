@@ -122,6 +122,17 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
   });
 
+  it('should render Arrows with controls=never and outset-arrows', () => {
+    const wrapper = mount(
+      <BaseCarousel controls="never" outsetArrows>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BaseCarousel>
+    );
+    expect(wrapper.find('Arrow')).to.have.lengthOf(2);
+  });
+
   it('should not render Arrows with controls=never', () => {
     const wrapper = mount(
       <BaseCarousel controls="never">
