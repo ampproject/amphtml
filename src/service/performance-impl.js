@@ -81,7 +81,7 @@ export class Performance {
     /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
-    /** @private {?./service/document-info-impl.DocumentInfoDef} */
+    /** @private {?./document-info-impl.DocumentInfoDef} */
     this.documentInfo_ = null;
 
     /** @private {boolean} */
