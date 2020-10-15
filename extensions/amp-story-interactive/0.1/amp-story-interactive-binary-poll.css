@@ -117,12 +117,12 @@
   margin: 0 !important;
   line-height: 1.3em !important;
   width: 4.42em !important;
-  height: 1.3em !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   transition: transform var(--i-amphtml-interactive-animation-time)
     var(--i-amphtml-interactive-ease-out-curve) !important;
+  height: 2.6em !important;
 }
 
 .i-amphtml-story-interactive-post-selection
@@ -138,6 +138,7 @@
   -webkit-box-orient: vertical !important;
   transition: transform var(--i-amphtml-interactive-animation-time)
     var(--i-amphtml-interactive-ease-out-curve) !important;
+  max-height: 2.6em !important;
 }
 
 .i-amphtml-story-interactive-post-selection
@@ -156,7 +157,7 @@
 
 .i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-option-percentage-text {
-  transform: scale(1) !important;
+  transform: scale(1) translateY(-0.75em) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
