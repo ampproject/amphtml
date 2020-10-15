@@ -39,7 +39,7 @@ const AccordionContext = Preact.createContext(
 const EMPTY_EXPANDED_MAP = {};
 
 const generateSectionId = sequentialIdGenerator();
-const generateRandomId = randomIdGenerator();
+const generateRandomId = randomIdGenerator(100000);
 
 const CHILD_STYLE = {
   // Make animations measurable. Without this, padding and margin can skew
@@ -199,7 +199,7 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}_AMP_content_${id}-${suffix}`;
+  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
