@@ -58,10 +58,10 @@ function ScrollerWithRef(
   const containerRef = useRef(null);
   const advance = (by) => {
     const container = containerRef.current;
+    const slideWidth = container./* OK */ offsetWidth / visibleCount;
     // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
     // Note: `setRestingIndex` will still be called on debounce by scroll handler.
-    container./* OK */ scrollLeft +=
-      (container./* OK */ offsetWidth / visibleCount) * by;
+    container./* OK */ scrollLeft += slideWidth * by;
   };
   useImperativeHandle(ref, () => ({
     next: () => advance(advanceCount),
@@ -111,19 +111,19 @@ function ScrollerWithRef(
     ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
     let position;
-    const offset = container./* OK */ offsetWidth / visibleCount;
+    const slideWidth = container./* OK */ offsetWidth / visibleCount;
     if (loop) {
       if (snap) {
-        position = offset * pivotIndex;
+        position = slideWidth * pivotIndex;
       } else {
         position = mod(
-          scrollOffset.current + offset * offsetRef.current,
+          scrollOffset.current + slideWidth * offsetRef.current,
           container./* OK */ scrollWidth
         );
       }
     } else {
       if (snap) {
-        position = offset * restingIndex;
+        position = slideWidth * restingIndex;
       } else {
         position = scrollOffset.current;
       }
