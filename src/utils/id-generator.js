@@ -25,12 +25,9 @@ export function sequentialIdGenerator() {
 
 /**
  * Returns a function that generates a random id in string format.  The random
- * id is an [a-zA-Z] character followed by an integer from 0-99,999.
+ * id will be an integer from 0-99999.
  * @return {function():string}
  */
 export function randomIdGenerator() {
-  return () =>
-    `${'abcdefghijklmnopqrstuvxwyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(
-      Math.floor(Math.random() * 52)
-    )}${Math.floor(Math.random() * 100000)}`;
+  return () => String(Math.floor(Math.random() * 100000));
 }

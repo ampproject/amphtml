@@ -66,7 +66,7 @@ export function Accordion({
 }) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
   const [randomPrefix] = useState(generateRandomId);
-  const prefix = id || randomPrefix;
+  const prefix = id || `a${randomPrefix}`;
 
   useEffect(() => {
     if (!expandSingleSection) {
@@ -165,6 +165,7 @@ export function AccordionSection({
   ...rest
 }) {
   const [id] = useState(generateSectionId);
+  const [suffix] = useState(generateRandomId);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
   const contentRef = useRef(null);
   const hasMountedRef = useRef(false);
@@ -198,7 +199,7 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}_AMP_content_${id}-${generateRandomId()}`;
+  const contentId = `${prefix || 'a'}_AMP_content_${id}-${suffix}`;
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
