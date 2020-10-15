@@ -42,7 +42,11 @@ Adds support for AFS Analytics. Additionally, the `websiteid` and `server` varia
 
 Type attribute value: `alexametrics`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Alexa Certified Site Metrics. The `atrk_acct` and `domain` variables must be specified. More information can be found at [Alexa’s Certified Metrics FAQ](https://support.alexa.com/hc/en-us/sections/200063374-Certified-Site-Metrics).
+
+<!-- markdown-link-check-enable -->
 
 ### Amplitude
 
@@ -228,7 +232,11 @@ Adds support for Kenshoo. More information and configuration details can be foun
 
 Type attribute value: `krux`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Krux. Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
+
+<!-- markdown-link-check-enable -->
 
 ### Linkpulse
 
@@ -366,7 +374,7 @@ Type attribute value: `piStats`
 
 Type attribute value: `piano`
 
-Adds support for Piano. Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
+Adds support for Piano. Configuration details can be found at `http://vx.piano.io/javascript-tracking-amp`
 
 ### Pinpoll
 
@@ -384,7 +392,11 @@ Adds support for Pressboard. Configuration details can be found at [help.pressbo
 
 Type attribute value: `quantcast`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
+
+<!-- markdown-link-check-enable -->
 
 ### Rakam
 
@@ -403,7 +415,7 @@ Type attribute value: `retargetly`
 Type attribute value: `rudderstack`
 
 Adds support for RudderStack page views and events.
-Find out more on the implementation check our [documentation](https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics).
+Find out more on the implementation check our documentation at `https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics`.
 
 ### Segment
 
@@ -462,7 +474,7 @@ Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru
 
 Type attribute value: `treasuredata`
 
-Adds support for Treasure Data. Configuration details can be found at [treasuredata.com](https://docs.treasuredata.com/articles/javascript-sdk-google-amp).
+Adds support for Treasure Data. Configuration details can be found at `https://docs.treasuredata.com/articles/javascript-sdk-google-amp`.
 
 ### Umeng+ Analytics
 
