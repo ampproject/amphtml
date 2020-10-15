@@ -136,7 +136,7 @@ function BaseCarouselWithRef(
           state management code.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < visibleCount * 2 ? (
+          Math.abs(index - currentSlide) < visibleCount * 3 ? (
             <WithAmpContext
               key={index}
               renderable={index == currentSlide}
