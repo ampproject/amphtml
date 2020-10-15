@@ -203,7 +203,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
-  const aexps = adElement.getAttribute(AMP_EXPERIMENT_ATTRIBUTE);
+  const aexp = adElement.getAttribute(AMP_EXPERIMENT_ATTRIBUTE);
   return {
     'adf': DomFingerprint.generate(adElement),
     'nhd': iframeDepth,
@@ -213,7 +213,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'oid': '2',
     'act': enclosingContainers.length ? enclosingContainers.join() : null,
     // aexp URL param is separated by `!`, not `,`.
-    'aexp': aexps ? aexps.replace(/,/g, '!') : null,
+    'aexp': aexp ? aexp.replace(/,/g, '!') : null,
   };
 }
 
@@ -794,10 +794,10 @@ export function addCsiSignalsToAmpAnalyticsConfig(
   const correlator = getCorrelator(win, element);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
   const eids = encodeURIComponent(element.getAttribute(EXPERIMENT_ATTRIBUTE));
-  let aexps = element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE);
-  if (aexps) {
+  let aexp = element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE);
+  if (aexp) {
     // aexp URL param is separated by `!`, not `,`.
-    aexps = aexps.replace(/,/g, '!');
+    aexp = aexp.replace(/,/g, '!');
   }
   const adType = element.getAttribute('type');
   const initTime = Number(
@@ -813,7 +813,7 @@ export function addCsiSignalsToAmpAnalyticsConfig(
     `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
     `&dt=${initTime}` +
     (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
-    (aexps ? `&aexp=${aexps}` : '') +
+    (aexp ? `&aexp=${aexp}` : '') +
     `&rls=${internalRuntimeVersion()}&adt.${slotId}=${adType}`;
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
   config['triggers']['continuousVisibleIniLoad'] = {
