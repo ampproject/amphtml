@@ -631,5 +631,6 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - opencmp : [Documentation](./cmps/opencmp.md)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 - Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
+- LiveRamp : [Website](https://liveramp.com/our-platform/preference-consent-management/) - [Documentation](./cmps/liveramp.md)
 
 - Your Integrated platform here!
