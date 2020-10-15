@@ -18,10 +18,6 @@ import {createUseStyles} from 'react-jss';
 
 const scrollContainer = {
   position: 'relative',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
   boxSizing: 'content-box !important',
   width: '100%',
   height: '100%',
