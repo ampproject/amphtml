@@ -81,6 +81,9 @@ export class Performance {
     /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
+    /** @private {?./service/document-info-impl.DocumentInfoDef} */
+    this.documentInfo_ = null;
+
     /** @private {boolean} */
     this.isMessagingReady_ = false;
 
@@ -226,6 +229,7 @@ export class Performance {
     this.ampdoc_ = Services.ampdoc(documentElement);
     this.viewer_ = Services.viewerForDoc(documentElement);
     this.resources_ = Services.resourcesForDoc(documentElement);
+    this.documentInfo_ = Services.documentInfoForDoc(this.ampdoc_);
 
     this.isPerformanceTrackingOn_ =
       this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
@@ -779,6 +783,7 @@ export class Performance {
         'sendCsi',
         dict({
           'ampexp': this.ampexp_,
+          'canonicalUrl': this.documentInfo_.canonicalUrl,
         }),
         /* cancelUnsent */ true
       );
