@@ -157,27 +157,6 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(content2.className.includes('content')).to.be.true;
     });
 
-    /*
-const sectionChild = {
-  // Make animations measurable. Without this, padding and margin can skew
-  // animations.
-  boxSizing: 'border-box !important',
-  // Cancel out the margin collapse. Also helps with animations to avoid
-  // overflow.
-  overflow: 'hidden !important',
-  // Ensure that any absolute elements are positioned within the section.
-  position: 'relative !important',
-};
-
-// TODO(#30445): update these styles after team agrees on styling
-const header = {
-  cursor: 'pointer',
-  backgroundColor: '#efefef',
-  paddingRight: '20px',
-  border: 'solid 1px #dfdfdf',
-};
-*/
-
     it('should expand a section on click', () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
