@@ -207,9 +207,6 @@ export class AmpStoryPlayer {
     /** @private {?boolean} */
     this.isFetchingStoriesEnabled_ = null;
 
-    /** @private {number} */
-    this.fetchStoriesOffset_ = 0;
-
     /** @private {!Object} */
     this.touchEventState_ = {
       startX: 0,
@@ -344,6 +341,7 @@ export class AmpStoryPlayer {
     this.initializeIframes_();
     this.initializeButton_();
     this.readPlayerConfig_();
+    this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -675,7 +673,7 @@ export class AmpStoryPlayer {
       },
     };
 
-    endpoint = endpoint.replace(/\${offset}/, this.fetchStoriesOffset_);
+    endpoint = endpoint.replace(/\${offset}/, this.stories_.length);
 
     return fetch(endpoint, init)
       .then((response) => response.json())
@@ -810,26 +808,26 @@ export class AmpStoryPlayer {
     };
 
     this.signalNavigation_(navigation);
-    if (this.playerConfig_ && this.playerConfig_.behavior) {
-      this.maybeFetchMoreStories_(remaining);
-    }
+    this.maybeFetchMoreStories_(remaining);
   }
 
   /**
    * Fetches more stories if appropiate.
    * @param {number} remaining Number of stories remaining in the player.
+   * @private
    */
   maybeFetchMoreStories_(remaining) {
     if (
-      remaining <= FETCH_STORIES_THRESHOLD &&
-      this.shouldFetchMoreStories_()
+      this.playerConfig_ &&
+      this.playerConfig_.behavior &&
+      this.shouldFetchMoreStories_() &&
+      remaining <= FETCH_STORIES_THRESHOLD
     ) {
       this.fetchStories_()
         .then((stories) => {
           if (!stories) {
             return;
           }
-          this.fetchStoriesOffset_ += stories.length;
           this.add(stories);
         })
         .catch((reason) => {
