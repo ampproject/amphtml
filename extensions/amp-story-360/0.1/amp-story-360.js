@@ -45,6 +45,12 @@ const TAG = 'AMP_STORY_360';
 const HAVE_CURRENT_DATA = 2;
 
 /**
+ * Centers heading value between [-90; 90]
+ * @const {number}
+ */
+const CENTER_OFFSET = 90;
+
+/**
  * Generates the template for the permission button.
  *
  * @param {!Element} element
@@ -138,7 +144,7 @@ class CameraOrientation {
   static fromDegrees(heading, pitch, zoom) {
     return new CameraOrientation(
       deg2rad(-pitch - 90),
-      deg2rad(heading),
+      deg2rad(CENTER_OFFSET + heading),
       1 / zoom
     );
   }
@@ -482,7 +488,9 @@ export class AmpStory360 extends AMP.BaseElement {
           this.element.getAttribute('heading-end') ||
             this.element.getAttribute('heading-start') ||
             0
-        ) + this.orientationAlpha_;
+        ) +
+        CENTER_OFFSET +
+        this.orientationAlpha_;
     }
   }
 
