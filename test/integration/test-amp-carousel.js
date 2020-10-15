@@ -16,7 +16,7 @@
 
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe.configure().ifChrome(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+const t = describe.configure().ifChrome();
 
 t.run('amp-carousel', function () {
   this.timeout(10000);
