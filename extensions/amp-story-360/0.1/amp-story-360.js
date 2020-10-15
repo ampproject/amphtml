@@ -772,6 +772,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   play_() {
+    if (!this.canAnimate) {
+      return;
+    }
     userAssert(
       this.canAnimate,
       'amp-story-360 is either not configured to play an animation or ' +
