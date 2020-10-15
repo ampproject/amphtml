@@ -45,7 +45,7 @@ const TAG = 'AMP_STORY_360';
 const HAVE_CURRENT_DATA = 2;
 
 /**
- * Centers heading value between [-90; 90]
+ * Centers heading and pitch value between [-90; 90]
  * @const {number}
  */
 const CENTER_OFFSET = 90;
