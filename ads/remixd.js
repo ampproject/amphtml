@@ -28,7 +28,7 @@ export function remixd(global, data) {
     sriptVersion +
     '/index.js?cb=' +
     Math.random();
-​
+
   document.write(
     '<' +
       'script src="' +
@@ -36,6 +36,5 @@ export function remixd(global, data) {
       '" id="remixd-audio-player-script"><' +
       '/script>'
   );
-​
   global.context.renderStart();
 }
