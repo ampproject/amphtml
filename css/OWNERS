@@ -6,6 +6,7 @@
     {
       owners: [
         {name: 'ampproject/wg-components'},
+        {name: 'ampproject/wg-bento'},
         {name: 'ampproject/wg-performance'},
         {name: 'aghassemi', requestReviews: false},
         {name: 'camelburrito', requestReviews: false},
