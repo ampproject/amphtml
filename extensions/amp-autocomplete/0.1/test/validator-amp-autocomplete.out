@@ -411,6 +411,20 @@ FAIL
 |        </template>
 |      </amp-autocomplete>
 |
+|      <!-- Valid: amp-component with static data and rich content template with data-json -->
+|      <amp-autocomplete filter="prefix">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|        <template type="amp-mustache" id="amp-template-default">
+|          <div class="city-item" data-value="{{value}}" data-json="{{objToJson}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|        </template>
+|      </amp-autocomplete>
+|
 |      <!-- Valid: amp-component with remote data and rich content template -->
 |      <amp-autocomplete
 |        filter="prefix"
