@@ -361,12 +361,13 @@ export class AmpStory360 extends AMP.BaseElement {
 
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
+          this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
           this.maybeSetGyroscopeDefaultHeading_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-          isPaused ? this.pause() : this.play();
+          isPaused ? this.pause_() : this.play_();
         });
       }),
 
@@ -398,6 +399,16 @@ export class AmpStory360 extends AMP.BaseElement {
       dev().assertElement(this.element),
       (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
+  }
+
+  /** @private */
+  onPageNavigation_() {
+    if (this.isOnActivePage_) {
+      this.play_();
+    } else {
+      this.pause_();
+      this.rewind_();
+    }
   }
 
   /**
@@ -796,13 +807,16 @@ export class AmpStory360 extends AMP.BaseElement {
     this.mutateElement(() => loop());
   }
 
-  /** @public */
-  pause() {
+  /** @private */
+  pause_() {
     this.isPlaying_ = false;
   }
 
-  /** @public */
-  play() {
+  /** @private */
+  play_() {
+    if (!this.canAnimate) {
+      return;
+    }
     userAssert(
       this.canAnimate,
       'amp-story-360 is either not configured to play an animation or ' +
@@ -814,8 +828,8 @@ export class AmpStory360 extends AMP.BaseElement {
     }
   }
 
-  /** @public */
-  rewind() {
+  /** @private */
+  rewind_() {
     if (!this.canAnimate) {
       return;
     }
