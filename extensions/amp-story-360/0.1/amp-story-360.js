@@ -143,7 +143,7 @@ class CameraOrientation {
    */
   static fromDegrees(heading, pitch, zoom) {
     return new CameraOrientation(
-      deg2rad(-pitch - 90),
+      deg2rad(-pitch - CENTER_OFFSET),
       deg2rad(CENTER_OFFSET + heading),
       1 / zoom
     );
