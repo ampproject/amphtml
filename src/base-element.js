@@ -677,20 +677,11 @@ export class BaseElement {
   /**
    * Hides or shows the loading indicator.
    * @param {boolean} state
+   * @param {boolean=} force
    * @public @final
    */
-  toggleLoading(state) {
-    this.element.toggleLoading(state);
-  }
-
-  /**
-   * Returns whether the loading indicator is reused again after the first
-   * render.
-   * @return {boolean}
-   * @public
-   */
-  isLoadingReused() {
-    return false;
+  toggleLoading(state, force = false) {
+    this.element.toggleLoading(state, force);
   }
 
   /**

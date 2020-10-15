@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from '../services';
 
 /**
  * Gets a Promise for the LoaderService, initiating a request to download the
  * code.
- * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!./ampdoc-impl.AmpDoc} ampDoc
  * @param {!Element} element
- * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
+ * @return {!Promise<!../../extensions/amp-loader/0.1/amp-loader.LoaderService>}
  */
 function getLoaderServicePromise(ampDoc, element) {
   return Services.extensionsFor(ampDoc.win)
@@ -34,7 +34,7 @@ function getLoaderServicePromise(ampDoc, element) {
  *
  * Please see https://github.com/ampproject/amphtml/issues/20237 for details,
  * screenshots and various states of the new loader design.
- * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!./ampdoc-impl.AmpDoc} ampDoc
  * @param {!AmpElement} element
  * @param {number} elementWidth
  * @param {number} elementHeight
