@@ -780,7 +780,11 @@ export class AmpStoryPlayer {
    * @private
    */
   signalNavigation_(data) {
-    const event = createCustomEvent(this.win_, 'navigation', data);
+    const event = createCustomEvent(
+      this.win_,
+      'navigation',
+      /** @type {!JsonObject} */ (data)
+    );
     this.element_.dispatchEvent(event);
   }
 
