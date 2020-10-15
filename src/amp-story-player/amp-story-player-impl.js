@@ -204,8 +204,8 @@ export class AmpStoryPlayer {
     /** @private {?ConfigDef} */
     this.playerConfig_ = null;
 
-    /** @private {boolean} */
-    this.shouldFetch_ = true;
+    /** @private {?boolean} */
+    this.isFetchingStoriesEnabled_ = null;
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -655,7 +655,12 @@ export class AmpStoryPlayer {
    * @private
    */
   fetchStories_() {
-    const url = this.readPlayerConfig_().behavior.endpoint;
+    const {endpoint} = this.playerConfig_.behavior;
+    if (!endpoint) {
+      this.isFetchingStoriesEnabled_ = false;
+      return Promise.resolve();
+    }
+
     const init = {
       method: 'GET',
       headers: {
@@ -663,7 +668,7 @@ export class AmpStoryPlayer {
       },
     };
 
-    return fetch(url, init)
+    return fetch(endpoint, init)
       .then((response) => response.json())
       .catch((reason) => {
         console /*OK*/
@@ -792,21 +797,25 @@ export class AmpStoryPlayer {
     };
 
     this.signalNavigation_(navigation);
-    this.maybeFetchMoreStories_(navigation);
+    this.maybeFetchMoreStories_(remaining);
   }
 
   /**
    * Fetches more stories if appropiate.
-   * @param {!Object} data
+   * @param {number} remaining Number of stories remaining in the player.
    */
-  maybeFetchMoreStories_(data) {
+  maybeFetchMoreStories_(remaining) {
     if (
-      data.remaining <= FETCH_STORIES_THRESHOLD &&
-      this.isFetchingEnabled_()
+      remaining <= FETCH_STORIES_THRESHOLD &&
+      this.shouldFetchMoreStories_()
     ) {
       this.fetchStories_()
-        .then((stories) => {
-          this.add(stories);
+        .then((response) => {
+          if (!response) {
+            return;
+          }
+          this.playerConfig_.behavior.endpoint = response.next || null;
+          this.add(response.stories);
         })
         .catch((reason) => {
           console /*OK*/
@@ -820,30 +829,23 @@ export class AmpStoryPlayer {
    * @return {boolean}
    * @private
    */
-  isFetchingEnabled_() {
-    const {behavior} = this.readPlayerConfig_();
-
-    if (!behavior) {
-      return false;
+  shouldFetchMoreStories_() {
+    if (this.isFetchingStoriesEnabled_ !== null) {
+      return this.isFetchingStoriesEnabled_;
     }
 
-    const isBehaviorDef = (behavior) => behavior.on && behavior.action;
+    const {behavior} = this.playerConfig_;
+
+    const isBehaviorDef = (behavior) =>
+      behavior && behavior.on && behavior.action;
 
     const hasEndFetchBehavior = (behavior) =>
-      behavior.on === 'end' &&
-      behavior.action === 'fetch' &&
-      behavior.endpoint.length > 0;
+      behavior.on === 'end' && behavior.action === 'fetch' && behavior.endpoint;
 
-    if (
-      isBehaviorDef(behavior) &&
-      hasEndFetchBehavior(behavior) &&
-      this.shouldFetch_
-    ) {
-      this.shouldFetch_ = false;
-      return true;
-    }
+    this.isFetchingStoriesEnabled_ =
+      isBehaviorDef(behavior) && hasEndFetchBehavior(behavior);
 
-    return false;
+    return this.isFetchingStoriesEnabled_;
   }
 
   /**
