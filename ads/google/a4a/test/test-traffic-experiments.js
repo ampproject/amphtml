@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {EXPERIMENT_ATTRIBUTE} from '../utils';
+import {AMP_EXPERIMENT_ATTRIBUTE, EXPERIMENT_ATTRIBUTE} from '../utils';
 import {
+  addAmpExperimentIdToElement,
   addExperimentIdToElement,
   isInExperiment,
   validateExperimentIds,
@@ -81,6 +82,45 @@ describe('all-traffic-experiments-tests', () => {
       element.setAttribute(EXPERIMENT_ATTRIBUTE, '99,14,873,k,44');
       addExperimentIdToElement('3', element);
       expect(element.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('3');
+    });
+  });
+
+  describe('#addAmpExperimentIdToElement', () => {
+    it('should add attribute when there is none present to begin with', () => {
+      const element = document.createElement('div');
+      expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+      addAmpExperimentIdToElement('3', element);
+      expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal('3');
+    });
+
+    it('should append experiment to already valid single experiment', () => {
+      const element = document.createElement('div');
+      element.setAttribute(AMP_EXPERIMENT_ATTRIBUTE, '99');
+      addAmpExperimentIdToElement('3', element);
+      expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal('99,3');
+    });
+
+    it('should do nothing to already valid single experiment', () => {
+      const element = document.createElement('div');
+      element.setAttribute(AMP_EXPERIMENT_ATTRIBUTE, '99');
+      addAmpExperimentIdToElement(undefined, element);
+      expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal('99');
+    });
+
+    it('should append experiment to already valid multiple experiments', () => {
+      const element = document.createElement('div');
+      element.setAttribute(AMP_EXPERIMENT_ATTRIBUTE, '99,77,11,0122345');
+      addAmpExperimentIdToElement('3', element);
+      expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+        '99,77,11,0122345,3'
+      );
+    });
+
+    it('should should replace existing invalid experiments', () => {
+      const element = document.createElement('div');
+      element.setAttribute(AMP_EXPERIMENT_ATTRIBUTE, '99,14,873,k,44');
+      addAmpExperimentIdToElement('3', element);
+      expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal('3');
     });
   });
 

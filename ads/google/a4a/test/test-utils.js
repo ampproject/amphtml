@@ -17,8 +17,8 @@
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as IniLoad from '../../../../src/ini-load';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
+  AMP_EXPERIMENT_ATTRIBUTE,
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
   ValidAdContainerTypes,
@@ -37,6 +37,7 @@ import {
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
@@ -203,7 +204,7 @@ describe('Google A4A utils', () => {
           'width': '200',
           'height': '50',
           'type': 'adsense',
-          'data-experiment-id': '00000001,0000002',
+          [EXPERIMENT_ATTRIBUTE]: '00000001,0000002',
         });
         const a4a = new MockA4AImpl(element);
         url = 'not an array';
@@ -251,6 +252,8 @@ describe('Google A4A utils', () => {
           switch (name) {
             case EXPERIMENT_ATTRIBUTE:
               return '00000001,00000002';
+            case AMP_EXPERIMENT_ATTRIBUTE:
+              return '103,204';
             case 'type':
               return 'fake-type';
             case 'data-amp-slot-index':
@@ -285,6 +288,7 @@ describe('Google A4A utils', () => {
         new RegExp(`(\\?|&)met\\.a4a\\.0=${metricName}\\.-?[0-9]+(&|$)`),
         /(\?|&)dt=-?[0-9]+(&|$)/,
         /(\?|&)e\.0=00000001%2C00000002(&|$)/,
+        /(\?|&)aexp=103!204(&|$)/,
         /(\?|&)rls=\$internalRuntimeVersion\$(&|$)/,
         /(\?|&)adt.0=fake-type(&|$)/,
       ];
@@ -428,13 +432,15 @@ describe('Google A4A utils', () => {
           'type': 'adsense',
           'width': '320',
           'height': '50',
-          'data-experiment-id': '123,456',
+          [EXPERIMENT_ATTRIBUTE]: '123,456',
+          [AMP_EXPERIMENT_ATTRIBUTE]: '111,222',
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, ['789', '098']).then((url1) => {
             expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
+            expect(url1).to.match(/aexp=111!222/);
           });
         });
       });
