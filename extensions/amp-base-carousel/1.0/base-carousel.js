@@ -70,7 +70,8 @@ function BaseCarouselWithRef(
   const {setSlideCount} = carouselContext;
   const scrollRef = useRef(null);
 
-  const advance = useCallback((by) => scrollRef.current.advance(by), []);
+  const next = useCallback(() => scrollRef.current.next(), []);
+  const prev = useCallback(() => scrollRef.current.prev(), []);
   const setRestingIndex = useCallback(
     (index) => {
       index = length > 0 ? Math.min(Math.max(index, 0), length - 1) : -1;
@@ -89,10 +90,11 @@ function BaseCarouselWithRef(
     ref,
     () =>
       /** @type {!BaseCarouselDef.CarouselApi} */ ({
-        advance,
         goToSlide: (index) => setRestingIndex(index),
+        next,
+        prev,
       }),
-    [advance, setRestingIndex]
+    [next, prev, setRestingIndex]
   );
 
   useLayoutEffect(() => {
@@ -153,13 +155,13 @@ function BaseCarouselWithRef(
             by={-advanceCount}
             customArrow={arrowPrev}
             disabled={disableForDir(-1)}
-            advance={advance}
+            advance={prev}
           />
           <Arrow
             by={advanceCount}
             customArrow={arrowNext}
             disabled={disableForDir(1)}
-            advance={advance}
+            advance={next}
           />
         </>
       )}

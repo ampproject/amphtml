@@ -56,15 +56,16 @@ function ScrollerWithRef(
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
+  const advance = (by) => {
+    const container = containerRef.current;
+    // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
+    // Note: `setRestingIndex` will still be called on debounce by scroll handler.
+    container./* OK */ scrollLeft +=
+      (container./* OK */ offsetWidth / visibleCount) * by;
+  };
   useImperativeHandle(ref, () => ({
-    // Expose "advance" action for navigating between slides by the given quantity of slides.
-    advance: (by) => {
-      const container = containerRef.current;
-      // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
-      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
-      container./* OK */ scrollLeft +=
-        (container./* OK */ offsetWidth / visibleCount) * by;
-    },
+    next: () => advance(advanceCount),
+    prev: () => advance(-advanceCount),
   }));
   const classes = useStyles();
 
@@ -89,7 +90,6 @@ function ScrollerWithRef(
   const ignoreProgrammaticScrollRef = useRef(true);
   const slides = renderSlides(
     {
-      advanceCount,
       children,
       loop,
       offsetRef,

@@ -48,17 +48,8 @@ class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   init() {
     const {element} = this;
-    const advanceCount = Number(element.getAttribute('advance-count')) || 1;
-    this.registerApiAction(
-      'prev',
-      (api) => api.advance(-advanceCount),
-      ActionTrust.LOW
-    );
-    this.registerApiAction(
-      'next',
-      (api) => api.advance(advanceCount),
-      ActionTrust.LOW
-    );
+    this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);
+    this.registerApiAction('next', (api) => api.next(), ActionTrust.LOW);
     this.registerApiAction(
       'goToSlide',
       (api, invocation) => {
@@ -68,7 +59,6 @@ class AmpBaseCarousel extends PreactBaseElement {
       ActionTrust.LOW
     );
     return dict({
-      'advanceCount': advanceCount,
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },
@@ -112,6 +102,7 @@ AmpBaseCarousel['children'] = {
 
 /** @override */
 AmpBaseCarousel['props'] = {
+  'advanceCount': {attr: 'advance-count', type: 'number'},
   'controls': {attr: 'controls', type: 'string'},
   'loop': {attr: 'loop', type: 'boolean'},
   'snap': {

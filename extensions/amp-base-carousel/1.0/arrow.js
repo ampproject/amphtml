@@ -36,7 +36,7 @@ export function Arrow({
     if (onCustomClick) {
       onCustomClick(e);
     }
-    advance(by);
+    advance();
   };
   const classes = useStyles();
   const classNames = `${classes.arrowPlacement} ${
