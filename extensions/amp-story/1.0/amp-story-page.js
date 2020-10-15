@@ -316,8 +316,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
 
-    /** @private {?Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}*/
-    this.story360componentsCache_ = null;
+    // /** @private {?Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}*/
+    // this.story360componentsCache_ = null;
   }
 
   /**
@@ -511,12 +511,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.animationManager_.cancelAll();
     }
 
-    this.story360components_.forEach((componentPromise) => {
-      componentPromise.then((component) => {
-        component.pause();
-        component.rewind();
-      });
-    });
+    // this.story360components_.forEach((componentPromise) => {
+    //   componentPromise.then((component) => {
+    //     component.pause();
+    //     component.rewind();
+    //   });
+    // });
   }
 
   /**
@@ -550,13 +550,13 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
-      this.story360components_.forEach((componentPromise) => {
-        componentPromise.then((component) => {
-          if (component.canAnimate) {
-            component.play();
-          }
-        });
-      });
+      // this.story360components_.forEach((componentPromise) => {
+      //   componentPromise.then((component) => {
+      //     if (component.canAnimate) {
+      //       component.play();
+      //     }
+      //   });
+      // });
     }
 
     this.reportDevModeErrors_();
@@ -1857,20 +1857,20 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.advancement_.isAutoAdvance();
   }
 
-  /**
-   * @private
-   * @return {!Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}
-   */
-  get story360components_() {
-    if (!this.story360componentsCache_) {
-      this.story360componentsCache_ = toArray(
-        scopedQuerySelectorAll(this.element, Selectors.ALL_STORY_360)
-      ).map((element) =>
-        whenUpgradedToCustomElement(element).then((customEl) =>
-          customEl.getImpl()
-        )
-      );
-    }
-    return this.story360componentsCache_;
-  }
+  // /**
+  //  * @private
+  //  * @return {!Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}
+  //  */
+  // get story360components_() {
+  //   if (!this.story360componentsCache_) {
+  //     this.story360componentsCache_ = toArray(
+  //       scopedQuerySelectorAll(this.element, Selectors.ALL_STORY_360)
+  //     ).map((element) =>
+  //       whenUpgradedToCustomElement(element).then((customEl) =>
+  //         customEl.getImpl()
+  //       )
+  //     );
+  //   }
+  //   return this.story360componentsCache_;
+  // }
 }

@@ -342,6 +342,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
+          this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
         });
 
@@ -378,6 +379,16 @@ export class AmpStory360 extends AMP.BaseElement {
       dev().assertElement(this.element),
       (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
+  }
+
+  /** @private */
+  onPageNavigation_() {
+    if (this.isOnActivePage_) {
+      this.play();
+    } else {
+      this.pause();
+      this.rewind();
+    }
   }
 
   /**
