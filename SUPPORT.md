@@ -6,7 +6,7 @@ There are many ways to get help for questions and issues related to AMP:
 
 **Need help with AMP?**
 
-If you are looking for help to get started using AMP on your site or you are having issues using AMP, consult these resources:
+If you're looking for help to get started using AMP on your site or you are having issues using AMP, consult these resources:
 
 - [Official documentation](https://amp.dev/documentation/guides-and-tutorials/) with guides and tutorials to help you learn about AMP.
 - [Hands-on samples and demos](https://amp.dev/documentation/examples/) for using AMP components.
