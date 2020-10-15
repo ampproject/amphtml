@@ -108,7 +108,6 @@ export const Selectors = {
   // work with this current implementation.
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
-  ALL_STORY_360: 'amp-story-360',
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
 
@@ -315,9 +314,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
-
-    // /** @private {?Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}*/
-    // this.story360componentsCache_ = null;
   }
 
   /**
@@ -510,13 +506,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
     }
-
-    // this.story360components_.forEach((componentPromise) => {
-    //   componentPromise.then((component) => {
-    //     component.pause();
-    //     component.rewind();
-    //   });
-    // });
   }
 
   /**
@@ -550,13 +539,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
-      // this.story360components_.forEach((componentPromise) => {
-      //   componentPromise.then((component) => {
-      //     if (component.canAnimate) {
-      //       component.play();
-      //     }
-      //   });
-      // });
     }
 
     this.reportDevModeErrors_();
@@ -1856,21 +1838,4 @@ export class AmpStoryPage extends AMP.BaseElement {
   isAutoAdvance() {
     return this.advancement_.isAutoAdvance();
   }
-
-  // /**
-  //  * @private
-  //  * @return {!Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}
-  //  */
-  // get story360components_() {
-  //   if (!this.story360componentsCache_) {
-  //     this.story360componentsCache_ = toArray(
-  //       scopedQuerySelectorAll(this.element, Selectors.ALL_STORY_360)
-  //     ).map((element) =>
-  //       whenUpgradedToCustomElement(element).then((customEl) =>
-  //         customEl.getImpl()
-  //       )
-  //     );
-  //   }
-  //   return this.story360componentsCache_;
-  // }
 }
