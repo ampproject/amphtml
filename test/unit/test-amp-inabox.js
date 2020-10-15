@@ -18,6 +18,7 @@ import * as Service from '../../src/service';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {installAmpdocServices} from '../../src/service/core-services';
 import {installAmpdocServicesForInabox} from '../../src/inabox/inabox-services';
+import {removeItem} from '../../src/utils/array';
 
 describe('amp-inabox', () => {
   describes.realWin('installAmpdocServicesForInabox', {amp: false}, (env) => {
@@ -38,6 +39,8 @@ describe('amp-inabox', () => {
       installAmpdocServices(ampdoc);
 
       const installedServicesByRegularAmp = installedServices.slice(0);
+      // The inabox mode does not need the loading indicator.
+      removeItem(installedServicesByRegularAmp, 'loadingIndicator');
       installedServices = [];
       installAmpdocServicesForInabox(ampdoc);
       expect(installedServices).to.deep.equal(installedServicesByRegularAmp);

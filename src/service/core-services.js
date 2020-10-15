@@ -28,6 +28,7 @@ import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
+import {installLoadingIndicatorForDoc} from './loading-indicator';
 import {installMutatorServiceForDoc} from './mutator-impl';
 import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
@@ -141,4 +142,9 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
     : installStorageServiceForDoc(ampdoc);
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
+  if (!isEmbedded) {
+    // Embeds do not show loading indicators, since the whole embed is
+    // usually behind a parent loading indicator.
+    installLoadingIndicatorForDoc(ampdoc);
+  }
 }
