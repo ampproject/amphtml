@@ -73,7 +73,7 @@ export const QQID_HEADER = 'X-QQID';
 export const SANDBOX_HEADER = 'amp-ff-sandbox';
 
 /**
- * Element attribute that stores experiment IDs.
+ * Element attribute that stores Google ads experiment IDs.
  *
  * Note: This attribute should be used only for tracking experimental
  * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
@@ -83,6 +83,18 @@ export const SANDBOX_HEADER = 'amp-ff-sandbox';
  * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
+
+/**
+ * Element attribute that stores AMP experiment IDs.
+ *
+ * Note: This attribute should be used only for tracking experimental
+ * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
+ * added by a publisher page.
+ *
+ * @const {string}
+ * @visibleForTesting
+ */
+export const AMP_EXPERIMENT_ATTRIBUTE = 'data-amp-experiment-id';
 
 /** @typedef {{urls: !Array<string>}}
  */
@@ -187,10 +199,11 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
-  let eids = adElement.getAttribute('data-experiment-id');
+  let eids = adElement.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
+  const aexp = adElement.getAttribute(AMP_EXPERIMENT_ATTRIBUTE);
   return {
     'adf': DomFingerprint.generate(adElement),
     'nhd': iframeDepth,
@@ -199,6 +212,8 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'ady': Math.round(slotRect.top),
     'oid': '2',
     'act': enclosingContainers.length ? enclosingContainers.join() : null,
+    // aexp URL param is separated by `!`, not `,`.
+    'aexp': aexp ? aexp.replace(/,/g, '!') : null,
   };
 }
 
@@ -779,6 +794,11 @@ export function addCsiSignalsToAmpAnalyticsConfig(
   const correlator = getCorrelator(win, element);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
   const eids = encodeURIComponent(element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  let aexp = element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE);
+  if (aexp) {
+    // aexp URL param is separated by `!`, not `,`.
+    aexp = aexp.replace(/,/g, '!');
+  }
   const adType = element.getAttribute('type');
   const initTime = Number(
     getTimingDataSync(win, 'navigationStart') || Date.now()
@@ -793,6 +813,7 @@ export function addCsiSignalsToAmpAnalyticsConfig(
     `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
     `&dt=${initTime}` +
     (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
+    (aexp ? `&aexp=${aexp}` : '') +
     `&rls=${internalRuntimeVersion()}&adt.${slotId}=${adType}`;
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
   config['triggers']['continuousVisibleIniLoad'] = {
