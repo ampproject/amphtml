@@ -207,6 +207,9 @@ export class AmpStoryPlayer {
     /** @private {?boolean} */
     this.isFetchingStoriesEnabled_ = null;
 
+    /** @private {number} */
+    this.fetchStoriesOffset_ = 0;
+
     /** @private {!Object} */
     this.touchEventState_ = {
       startX: 0,
@@ -254,6 +257,10 @@ export class AmpStoryPlayer {
    * @public
    */
   add(stories) {
+    if (stories.length <= 0) {
+      return;
+    }
+
     const isStoryDef = (story) => story && story.href;
     if (!Array.isArray(stories) || !stories.every(isStoryDef)) {
       throw new Error('"stories" parameter has the wrong structure');
@@ -655,7 +662,7 @@ export class AmpStoryPlayer {
    * @private
    */
   fetchStories_() {
-    const {endpoint} = this.playerConfig_.behavior;
+    let {endpoint} = this.playerConfig_.behavior;
     if (!endpoint) {
       this.isFetchingStoriesEnabled_ = false;
       return Promise.resolve();
@@ -667,6 +674,8 @@ export class AmpStoryPlayer {
         Accept: 'application/json',
       },
     };
+
+    endpoint = endpoint.replace(/\${offset}/, this.fetchStoriesOffset_);
 
     return fetch(endpoint, init)
       .then((response) => response.json())
@@ -816,12 +825,12 @@ export class AmpStoryPlayer {
       this.shouldFetchMoreStories_()
     ) {
       this.fetchStories_()
-        .then((response) => {
-          if (!response) {
+        .then((stories) => {
+          if (!stories) {
             return;
           }
-          this.playerConfig_.behavior.endpoint = response.next || null;
-          this.add(response.stories);
+          this.fetchStoriesOffset_ += stories.length;
+          this.add(stories);
         })
         .catch((reason) => {
           console /*OK*/
