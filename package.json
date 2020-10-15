@@ -182,7 +182,7 @@
     "sourcemap-codec": "1.4.8",
     "tar": "6.0.2",
     "tcp-port-used": "1.0.1",
-    "tempy": "0.6.0",
+    "tempy": "1.0.0",
     "terser": "5.1.0",
     "text-table": "0.2.0",
     "through2": "3.0.1",
