@@ -33,12 +33,14 @@ export const _default = () => {
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const snap = boolean('snap', true);
   const loop = boolean('loop', true);
+  const outsetArrows = boolean('outset arrows', false);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const controls = select('show controls', CONTROLS);
   return (
     <BaseCarousel
       controls={controls}
       loop={loop}
+      outsetArrows={outsetArrows}
       snap={snap}
       style={{width, height}}
     >
@@ -64,6 +66,7 @@ export const _default = () => {
 };
 
 export const provideArrows = () => {
+  const outsetArrows = boolean('outset arrows', false);
   const width = number('width', 440);
   const height = number('height', 225);
   const controls = select('show controls', CONTROLS);
@@ -87,6 +90,7 @@ export const provideArrows = () => {
     <BaseCarousel
       controls={controls}
       style={{width, height}}
+      outsetArrows={outsetArrows}
       arrowPrev={<MyButton>←</MyButton>}
       arrowNext={<MyButton>→</MyButton>}
     >

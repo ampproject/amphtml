@@ -43,6 +43,7 @@ import {
 import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
+  addAmpExperimentIdToElement,
   addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -230,6 +231,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
     if (moduleNomoduleExpId) {
       addExperimentIdToElement(moduleNomoduleExpId, this.element);
+    }
+    const ssrExpIds = this.getSsrExpIds_();
+    for (let i = 0; i < ssrExpIds.length; i++) {
+      addAmpExperimentIdToElement(ssrExpIds[i], this.element);
     }
   }
 
