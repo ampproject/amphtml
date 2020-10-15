@@ -451,7 +451,11 @@ class AmpCarousel extends AMP.BaseElement {
         const {args, trust} = actionInvocation;
         this.carousel_.goToSlide(args['index'] ?? -1, {
           actionSource: this.getActionSource_(trust),
+<<<<<<< HEAD
         });
+=======
+        }); 
+>>>>>>> 7c2f50d3a967356ac83c5e888ce48009221c6d23
       },
       ActionTrust.LOW
     );
