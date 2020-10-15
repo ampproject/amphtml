@@ -801,7 +801,9 @@ export class AmpStoryPlayer {
     };
 
     this.signalNavigation_(navigation);
-    this.maybeFetchMoreStories_(remaining);
+    if (this.playerConfig_ && this.playerConfig_.behavior) {
+      this.maybeFetchMoreStories_(remaining);
+    }
   }
 
   /**
