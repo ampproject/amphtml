@@ -19,6 +19,7 @@ import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
 import {
+  useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -56,17 +57,24 @@ function ScrollerWithRef(
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
-  const advance = (by) => {
-    const container = containerRef.current;
-    const slideWidth = container./* OK */ offsetWidth / visibleCount;
-    // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
-    // Note: `setRestingIndex` will still be called on debounce by scroll handler.
-    container./* OK */ scrollLeft += slideWidth * by;
-  };
-  useImperativeHandle(ref, () => ({
-    next: () => advance(advanceCount),
-    prev: () => advance(-advanceCount),
-  }));
+  const advance = useCallback(
+    (by) => {
+      const container = containerRef.current;
+      const slideWidth = container./* OK */ offsetWidth / visibleCount;
+      // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
+      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
+      container./* OK */ scrollLeft += slideWidth * by;
+    },
+    [visibleCount]
+  );
+  useImperativeHandle(
+    ref,
+    () => ({
+      next: () => advance(advanceCount),
+      prev: () => advance(-advanceCount),
+    }),
+    [advance, advanceCount]
+  );
   const classes = useStyles();
 
   /**
