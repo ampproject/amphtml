@@ -23,15 +23,7 @@ export interface OptionSet {
   compiled?: boolean;
   esm?: boolean;
   port?: number;
-<<<<<<< HEAD
-<<<<<<< HEAD
   fortesting?: boolean;
-=======
-  fortesting?: boolean,
->>>>>>> 08f9ad245 (add more tests and fix bug for extention retention)
-=======
-  fortesting?: boolean;
->>>>>>> 8500d4dbd (Update build-system/server/new-server/transforms/utilities/option-set.ts)
   looseScriptSrcCheck?: boolean;
   useMaxNames?: boolean;
 }

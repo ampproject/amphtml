@@ -44,15 +44,7 @@ export function isValidScript(node: posthtml.Node, looseScriptSrcCheck?: boolean
   }
 
   const attrs = node.attrs || {};
-<<<<<<< HEAD
-<<<<<<< HEAD
   const url = tryGetUrl(attrs.src || '');
-=======
-  const url = tryGetURL(attrs.src || '');
->>>>>>> 277be82a3 (lint html)
-=======
-  const url = tryGetUrl(attrs.src || '');
->>>>>>> fa0f1e62c (apply recs)
   if (looseScriptSrcCheck) {
     return isValidScriptExtension(url);
   }
