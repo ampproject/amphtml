@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
-import {number, select, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 const CONTROLS = ['auto', 'always', 'never'];
@@ -31,16 +31,34 @@ export const _default = () => {
   const width = number('width', 440);
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const snap = boolean('snap', true);
+  const loop = boolean('loop', true);
+  const outsetArrows = boolean('outset arrows', false);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const controls = select('show controls', CONTROLS);
   return (
-    <BaseCarousel controls={controls} style={{width, height}}>
+    <BaseCarousel
+      controls={controls}
+      loop={loop}
+      outsetArrows={outsetArrows}
+      snap={snap}
+      style={{width, height}}
+    >
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
           <div
-            style={{backgroundColor: `rgb(${v}, 100, 100)`, width, height}}
-          ></div>
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              width,
+              height,
+              textAlign: 'center',
+              fontSize: '48pt',
+              lineHeight: height + 'px',
+            }}
+          >
+            {i}
+          </div>
         );
       })}
     </BaseCarousel>
@@ -48,6 +66,7 @@ export const _default = () => {
 };
 
 export const provideArrows = () => {
+  const outsetArrows = boolean('outset arrows', false);
   const width = number('width', 440);
   const height = number('height', 225);
   const controls = select('show controls', CONTROLS);
@@ -71,42 +90,12 @@ export const provideArrows = () => {
     <BaseCarousel
       controls={controls}
       style={{width, height}}
+      outsetArrows={outsetArrows}
       arrowPrev={<MyButton>←</MyButton>}
       arrowNext={<MyButton>→</MyButton>}
     >
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <div style={{backgroundColor: color, width, height}}></div>
-      ))}
-    </BaseCarousel>
-  );
-};
-
-export const WithLooping = () => {
-  const width = number('width', 440);
-  const height = number('height', 225);
-  const controls = select('show controls', CONTROLS);
-  return (
-    <BaseCarousel controls={controls} loop style={{width, height}}>
-      {[
-        'lightpink',
-        'lightcoral',
-        'peachpuff',
-        'powderblue',
-        'lavender',
-        'thistle',
-      ].map((color, index) => (
-        <div
-          style={{
-            backgroundColor: color,
-            width,
-            height,
-            textAlign: 'center',
-            fontSize: '48pt',
-            lineHeight: height + 'px',
-          }}
-        >
-          {index}
-        </div>
       ))}
     </BaseCarousel>
   );

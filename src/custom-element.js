@@ -28,18 +28,21 @@ import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
-import {createLoaderElement} from '../src/loader.js';
+import {
+  blockedByConsentError,
+  cancellation,
+  isBlockedByConsent,
+  reportError,
+} from './error';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
-import {htmlFor} from './static-template';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
-import {shouldBlockOnConsentByMeta} from '../src/consent';
+import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
 import {toWin} from './types';
-import {tryResolve} from '../src/utils/promise';
+import {tryResolve} from './utils/promise';
 
 const TAG = 'CustomElement';
 
@@ -189,18 +192,6 @@ function createBaseCustomElementClass(win) {
        * @package {?Element|undefined}
        */
       this.sizerElement = undefined;
-
-      /** @private {boolean|undefined} */
-      this.loadingDisabled_ = undefined;
-
-      /** @private {boolean|undefined} */
-      this.loadingState_ = undefined;
-
-      /** @private {?Element} */
-      this.loadingContainer_ = null;
-
-      /** @private {?Element} */
-      this.loadingElement_ = null;
 
       /** @private {?Element|undefined} */
       this.overflowElement_ = undefined;
@@ -375,7 +366,7 @@ function createBaseCustomElementClass(win) {
       this.classList.remove('amp-unresolved');
       this.classList.remove('i-amphtml-unresolved');
       this.assertLayout_();
-      // TODO(wg-runtime): Don't set BaseElement ivars externally.
+      // TODO(wg-performance): Don't set BaseElement ivars externally.
       this.implementation_.layout_ = this.layout_;
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
@@ -428,7 +419,7 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * TODO(wg-runtime, #25824): Make Resource.getLayoutBox() the source of truth.
+     * TODO(wg-performance, #25824): Make Resource.getLayoutBox() the source of truth.
      * @return {number}
      * @deprecated
      */
@@ -833,8 +824,6 @@ function createBaseCustomElementClass(win) {
         if (!this.isUpgraded()) {
           this.classList.add('amp-unresolved');
           this.classList.add('i-amphtml-unresolved');
-          // amp:attached is dispatched from the ElementStub class when it
-          // replayed the firstAttachedCallback call.
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
         // Classically, sizes/media queries are applied just before
@@ -845,6 +834,8 @@ function createBaseCustomElementClass(win) {
           this.applySizesAndMediaQuery();
         }
       }
+
+      this.toggleLoading(true);
     }
 
     /**
@@ -943,6 +934,7 @@ function createBaseCustomElementClass(win) {
       this.isConnected_ = false;
       this.getResources().remove(this);
       this.implementation_.detachedCallback();
+      this.toggleLoading(false);
     }
 
     /**
@@ -1134,12 +1126,18 @@ function createBaseCustomElementClass(win) {
      *
      * Can only be called on a upgraded and built element.
      *
+     * @param {!AbortSignal} signal
      * @return {!Promise}
      * @package @final
      */
-    layoutCallback() {
+    layoutCallback(signal) {
       assertNotTemplate(this);
       devAssert(this.isBuilt(), 'Must be built to receive viewport events');
+      // A lot of tests call layoutCallback manually, and don't pass a signal.
+      if ((!getMode().test || signal) && signal.aborted) {
+        return Promise.reject(cancellation());
+      }
+
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = this.layoutCount_ == 0; // First layout is "load".
       this.signals_.reset(CommonSignals.UNLOAD);
@@ -1150,18 +1148,24 @@ function createBaseCustomElementClass(win) {
         this.getLayoutDelayMeter_().startLayout();
       }
 
+      // Potentially start the loading indicator.
+      this.toggleLoading(true);
+
       const promise = tryResolve(() => this.implementation_.layoutCallback());
       this.preconnect(/* onLayout */ true);
       this.classList.add('i-amphtml-layout');
 
       return promise.then(
         () => {
+          if ((!getMode().test || signal) && signal.aborted) {
+            throw cancellation();
+          }
           if (isLoadEvent) {
             this.signals_.signal(CommonSignals.LOAD_END);
           }
           this.readyState = 'complete';
           this.layoutCount_++;
-          this.toggleLoading(false, {cleanup: true});
+          this.toggleLoading(false);
           // Check if this is the first success layout that needs
           // to call firstLayoutCompleted.
           if (!this.isFirstLayoutCompleted_) {
@@ -1171,6 +1175,9 @@ function createBaseCustomElementClass(win) {
           }
         },
         (reason) => {
+          if ((!getMode().test || signal) && signal.aborted) {
+            throw cancellation();
+          }
           // add layoutCount_ by 1 despite load fails or not
           if (isLoadEvent) {
             this.signals_.rejectSignal(
@@ -1179,7 +1186,7 @@ function createBaseCustomElementClass(win) {
             );
           }
           this.layoutCount_++;
-          this.toggleLoading(false, {cleanup: true});
+          this.toggleLoading(false);
           throw reason;
         }
       );
@@ -1214,28 +1221,6 @@ function createBaseCustomElementClass(win) {
         return;
       }
       this.isInViewport_ = inViewport;
-      if (this.layoutCount_ == 0) {
-        if (!inViewport) {
-          this.toggleLoading(false);
-        } else {
-          // Set a minimum delay in case the element loads very fast or if it
-          // leaves the viewport.
-          const loadingStartTime = win.Date.now();
-          Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
-            // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
-            // once investigation is complete. It appears that we get a lot of
-            // errors here once the iframe is destroyed due to timer.
-            if (
-              this.isInViewport_ &&
-              this.ownerDocument &&
-              this.ownerDocument.defaultView &&
-              this.layoutCount_ === 0 // Ensures that layoutCallback hasn't completed in this 100ms window.
-            ) {
-              this.toggleLoading(true, {startTime: loadingStartTime});
-            }
-          }, 100);
-        }
-      }
       if (this.isBuilt()) {
         this.updateInViewport_(inViewport);
       }
@@ -1605,10 +1590,11 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Whether the loading can be shown for this element.
+     * @param {boolean} force
      * @return {boolean}
      * @private
      */
-    isLoadingEnabled_() {
+    isLoadingEnabled_(force) {
       // No loading indicator will be shown if either one of these conditions
       // true:
       // 1. The document is A4A.
@@ -1619,22 +1605,15 @@ function createBaseCustomElementClass(win) {
       // 5. The element has not been allowlisted;
       // 6. The element is an internal node (e.g. `placeholder` or `fallback`);
       // 7. The element's layout is not nodisplay.
-      if (this.isInA4A()) {
-        return false;
-      }
-      if (this.loadingDisabled_ === undefined) {
-        this.loadingDisabled_ = this.hasAttribute('noloading');
-      }
 
       const laidOut =
         this.layoutCount_ > 0 || this.signals_.get(CommonSignals.RENDER_START);
       if (
-        this.loadingDisabled_ ||
-        (laidOut && !this.implementation_.isLoadingReused()) ||
-        this.layoutWidth_ <= 0 || // Layout is not ready or invisible
+        this.layout_ == Layout.NODISPLAY ||
+        this.hasAttribute('noloading') ||
+        (laidOut && !force) ||
         !isLoadingAllowed(this) ||
-        isInternalOrServiceNode(this) ||
-        this.layout_ == Layout.NODISPLAY
+        isInternalOrServiceNode(this)
       ) {
         return false;
       }
@@ -1643,113 +1622,30 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * @return {boolean}
-     */
-    isInA4A() {
-      return (
-        // in FIE
-        (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
-        // TODO(#22733): cleanup once the ampdoc-fie is fully launched.
-        (this.ampdoc_ && !!this.ampdoc_.getParent()) ||
-        // in inabox
-        getMode().runtime == 'inabox'
-      );
-    }
-
-    /**
-     * Creates a loading object. The caller must ensure that loading can
-     * actually be shown. This method must also be called in the mutate
-     * context.
-     * @private
-     * @param {number=} startTime
-     */
-    prepareLoading_(startTime) {
-      if (!this.isLoadingEnabled_()) {
-        return;
-      }
-      if (!this.loadingContainer_) {
-        const doc = this.ownerDocument;
-        devAssert(doc);
-
-        const container = htmlFor(/** @type {!Document} */ (doc))`
-            <div class="i-amphtml-loading-container i-amphtml-fill-content
-              amp-hidden"></div>`;
-        const loadingElement = createLoaderElement(
-          this.getAmpDoc(),
-          this,
-          this.layoutWidth_,
-          this.layoutHeight_,
-          startTime
-        );
-
-        container.appendChild(loadingElement);
-
-        this.appendChild(container);
-        this.loadingContainer_ = container;
-        this.loadingElement_ = loadingElement;
-      }
-    }
-
-    /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:(boolean|undefined), startTime:(number|undefined)}=} opt_options
+     * @param {boolean=} force
      * @public @final
      */
-    toggleLoading(state, opt_options) {
-      const cleanup = opt_options && opt_options.cleanup;
-      const startTime = opt_options && opt_options.startTime;
-      assertNotTemplate(this);
-
-      if (state === this.loadingState_ && !opt_options) {
-        // Loading state is the same.
-        return;
-      }
-      this.loadingState_ = state;
-      if (!state && !this.loadingContainer_) {
+    toggleLoading(state, force = false) {
+      // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
+      // once investigation is complete. It appears that we get a lot of
+      // errors here once the iframe is destroyed due to timer.
+      if (!this.ownerDocument || !this.ownerDocument.defaultView) {
         return;
       }
 
-      // Check if loading should be shown.
-      if (state && !this.isLoadingEnabled_()) {
-        this.loadingState_ = false;
-        return;
-      }
-
-      this.mutateOrInvoke_(
-        () => {
-          let state = this.loadingState_;
-          // Repeat "loading enabled" check because it could have changed while
-          // waiting for vsync.
-          if (state && !this.isLoadingEnabled_()) {
-            state = false;
-          }
-          if (state) {
-            this.prepareLoading_(startTime);
-          }
-          if (!this.loadingContainer_) {
-            return;
-          }
-
-          this.loadingContainer_.classList.toggle('amp-hidden', !state);
-          this.loadingElement_.classList.toggle('amp-active', state);
-
-          if (!state && cleanup && !this.implementation_.isLoadingReused()) {
-            const loadingContainer = this.loadingContainer_;
-            this.loadingContainer_ = null;
-            this.loadingElement_ = null;
-            this.mutateOrInvoke_(
-              () => {
-                dom.removeElement(loadingContainer);
-              },
-              undefined,
-              true
-            );
-          }
-        },
-        undefined,
-        /* skipRemeasure */ true
+      const loadingIndicator = Services.loadingIndicatorOrNull(
+        this.getAmpDoc()
       );
+      if (loadingIndicator) {
+        state = state && this.isLoadingEnabled_(force);
+        if (state) {
+          loadingIndicator.track(this);
+        } else {
+          loadingIndicator.untrack(this);
+        }
+      }
     }
 
     /**

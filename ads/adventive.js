@@ -16,7 +16,7 @@
 
 import {addParamsToUrl} from '../src/url.js';
 import {dict, hasOwn} from '../src/utils/object';
-import {endsWith, startsWith} from '../src/string';
+import {endsWith} from '../src/string';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /**
@@ -100,8 +100,8 @@ function updateMode(mode, hostname) {
   mode.localDev = hostname === 'localhost';
   mode.dev = !mode.localDev && endsWith(hostname, `${sld[false]}.com`);
   mode.prod = !mode.localDev && endsWith(hostname, `${sld[true]}.com`);
-  mode.preview = (mode.dev || mode.prod) && startsWith(hostname, '/ad');
-  mode.testing = (mode.dev || mode.prod) && startsWith(hostname, '/testing');
+  mode.preview = (mode.dev || mode.prod) && hostname.startsWith('/ad');
+  mode.testing = (mode.dev || mode.prod) && hostname.startsWith('/testing');
   mode.live = (mode.testing || !mode.preview) && !mode.localDev;
 
   Object.freeze(mode);

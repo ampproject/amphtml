@@ -113,7 +113,7 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
     });
 
-    // TODO(wg-ui-and-a11y, #27701): Flaky on Chrome+viewer environment.
+    // TODO(wg-components, #27701): Flaky on Chrome+viewer environment.
     it.skip('should have the correct scroll position when resizing', async function () {
       this.timeout(testTimeout);
       // Note: 513 seems to be the smallest settable width.

@@ -23,7 +23,6 @@ import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {computedStyle, setStyle} from '../../../src/style';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
-import {startsWith} from '../../../src/string';
 
 /**
  * @typedef {{
@@ -291,7 +290,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
       )
     )['background'];
     // Check the background starts with rgba and doesn't contain other colors (no gradients)
-    if (startsWith(bgColor, 'rgba') && bgColor.lastIndexOf('rgb') == 0) {
+    if (bgColor.startsWith('rgba') && bgColor.lastIndexOf('rgb') == 0) {
       // If single rgba color, return alpha == 0
       return parseFloat(bgColor.split(', ')[3].split(')')[0]) == 0;
     }
