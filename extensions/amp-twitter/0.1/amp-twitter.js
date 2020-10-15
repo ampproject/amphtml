@@ -154,14 +154,6 @@ class AmpTwitter extends AMP.BaseElement {
     });
   }
 
-  /**
-   * amp-twitter reuses the loading indicator when id changes via bind mutation
-   * @override
-   */
-  isLoadingReused() {
-    return true;
-  }
-
   /** @override */
   createLoaderLogoCallback() {
     const html = htmlFor(this.element);
@@ -201,7 +193,7 @@ class AmpTwitter extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     if (this.iframe_ && mutations['data-tweetid'] != null) {
       this.unlayoutCallback();
-      this.toggleLoading(true);
+      this.toggleLoading(true, /* force */ true);
       this.layoutCallback();
     }
   }

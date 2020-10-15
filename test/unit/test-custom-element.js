@@ -490,29 +490,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           });
       });
 
-      it('Element - re-upgrade with a failed promised', () => {
-        expectAsyncConsoleError(/upgrade failed/, 1);
-        const element = new ElementClass();
-        expect(element.isUpgraded()).to.equal(false);
-        const oldImpl = element.implementation_;
-        const promise = Promise.reject(new Error('upgrade failed'));
-        oldImpl.upgradeCallback = () => promise;
-
-        container.appendChild(element);
-        expect(element.implementation_).to.equal(oldImpl);
-        expect(element.isUpgraded()).to.equal(false);
-        expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
-        return promise
-          .catch(() => {
-            // Ignore error.
-          })
-          .then(() => {
-            expect(element.implementation_).to.equal(oldImpl);
-            expect(element.isUpgraded()).to.equal(false);
-            expect(element.upgradeState_).to.equal(/* UPGRADE_FAILED */ 3);
-          });
-      });
-
       it('Element - can only re-upgrade once', () => {
         const element = new ElementClass();
         expect(element.isUpgraded()).to.equal(false);
@@ -1815,10 +1792,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         }
       }
 
-      function stubInA4A(isInA4A) {
-        env.sandbox.stub(element, 'isInA4A').callsFake(() => isInA4A);
-      }
-
       beforeEach(() => {
         win = env.win;
         doc = win.document;
@@ -1853,333 +1826,162 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         resourcesMock.verify();
       });
 
-      it('should be enabled by default', () => {
-        stubInA4A(false);
-        expect(element.isLoadingEnabled_()).to.be.true;
-      });
+      describe('toggleLoading', () => {
+        let loadingIndicatorServiceStub;
 
-      it('should be disabled in A4A', () => {
-        stubInA4A(true);
-        expect(element.isLoadingEnabled_()).to.be.false;
-      });
+        beforeEach(() => {
+          loadingIndicatorServiceStub = {
+            track: env.sandbox.spy(),
+            untrack: env.sandbox.spy(),
+          };
+          env.sandbox.stub(element, 'getAmpDoc').returns({});
+          env.sandbox
+            .stub(Services, 'loadingIndicatorOrNull')
+            .returns(loadingIndicatorServiceStub);
+        });
 
-      it('should disable when explicitly disabled by the attribute', () => {
-        stubInA4A(false);
-        element.setAttribute('noloading', '');
-        expect(element.isLoadingEnabled_()).to.be.false;
-      });
+        it('should be enabled by default', () => {
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.be.calledOnce.calledWith(
+            element
+          );
+        });
 
-      it('should disable when element is not allowlisted', () => {
-        stubInA4A(false);
-        LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
-        expect(element.isLoadingEnabled_()).to.be.false;
-      });
+        it('should disable when explicitly disabled by the attribute', () => {
+          element.setAttribute('noloading', '');
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.not.be.called;
+        });
 
-      it('should disable when not measured', () => {
-        stubInA4A(false);
-        element.layoutWidth_ = 0;
-        expect(element.isLoadingEnabled_()).to.be.false;
-      });
+        it('should disable when element is not allowlisted', () => {
+          LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.not.be.called;
+        });
 
-      it('should disable when element has already been laid out', () => {
-        stubInA4A(false);
-        element.layoutCount_ = 1;
-        expect(element.isLoadingEnabled_()).to.be.false;
-      });
+        it('should disable when element has already been laid out', () => {
+          element.layoutCount_ = 1;
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.not.be.called;
+        });
 
-      it('should disable when element is a placeholder itself', () => {
-        stubInA4A(false);
-        element.setAttribute('placeholder', '');
-        expect(element.isLoadingEnabled_()).to.be.false;
-      });
+        it('should disable when element is a placeholder itself', () => {
+          element.setAttribute('placeholder', '');
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.not.be.called;
+        });
 
-      it('should disable when element is layout=nodisplay', () => {
-        stubInA4A(false);
-        element.layout_ = Layout.NODISPLAY;
-        expect(element.isLoadingEnabled_()).to.be.false;
-      });
+        it('should disable when element is layout=nodisplay', () => {
+          element.layout_ = Layout.NODISPLAY;
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.not.be.called;
+        });
 
-      it('should enable when element is layout=container', () => {
-        stubInA4A(false);
-        element.layout_ = Layout.CONTAINER;
-        expect(element.isLoadingEnabled_()).to.be.true;
-      });
+        it('should enable when element is layout=container', () => {
+          element.layout_ = Layout.CONTAINER;
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.be.calledOnce;
+        });
 
-      it('should ignore loading-off if never created', () => {
-        stubInA4A(false);
-        element.toggleLoading(false);
-        expect(element.loadingElement_).to.be.null;
-      });
+        it('should ignore loading-on if already rendered', () => {
+          clock.tick(1);
+          element.signals().signal(CommonSignals.RENDER_START);
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.not.be.called;
+        });
 
-      it('should ignore loading-on if not allowed', () => {
-        stubInA4A(false);
-        element.setAttribute('noloading', '');
-        element.toggleLoading(true);
-        expect(element.loadingElement_).to.be.null;
-      });
+        it('should ignore loading-on if already loaded', () => {
+          element.layoutCount_ = 1;
+          element.toggleLoading(true);
+          expect(loadingIndicatorServiceStub.track).to.not.be.called;
+        });
 
-      it('should ignore loading-on if already rendered', () => {
-        stubInA4A(false);
-        clock.tick(1);
-        element.signals().signal(CommonSignals.RENDER_START);
-        element.toggleLoading(true);
-        expect(element.loadingElement_).to.be.null;
-      });
+        it('should cancel loading on render-start', () => {
+          clock.tick(1);
+          const stub = env.sandbox.stub(element, 'toggleLoading');
+          element.renderStarted();
+          expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
+          expect(stub).to.be.calledOnce.calledWith(false);
+        });
 
-      it('should ignore loading-on if already loaded', () => {
-        stubInA4A(false);
-        element.layoutCount_ = 1;
-        element.toggleLoading(true);
-        expect(element.loadingElement_).to.be.null;
-      });
-
-      it('should cancel loading on render-start', () => {
-        stubInA4A(false);
-        clock.tick(1);
-        const stub = env.sandbox.stub(element, 'toggleLoading');
-        element.renderStarted();
-        expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
-        expect(stub).to.be.calledOnce;
-        expect(stub.args[0][0]).to.be.false;
-      });
-
-      it('should create and turn on', () => {
-        stubInA4A(false);
-        element.setAttribute('layout', 'fill');
-        container.appendChild(element);
-        element.toggleLoading(true);
-
-        expect(element.loadingContainer_).to.not.be.null;
-        expect(element.loadingContainer_).to.not.have.class('amp-hidden');
-        expect(element.loadingElement_).to.not.be.null;
-        expect(element.loadingElement_).to.have.class('amp-active');
-      });
-
-      it('should turn on already created', () => {
-        stubInA4A(false);
-        element.setAttribute('layout', 'fill');
-        container.appendChild(element);
-        element.prepareLoading_();
-        const {
-          loadingContainer_: prevLoadingContainer,
-          loadingElement_: prevLoadingElement_,
-        } = element;
-        element.toggleLoading(true);
-
-        expect(element.loadingContainer_).to.equal(prevLoadingContainer);
-        expect(element.loadingContainer_).to.not.have.class('amp-hidden');
-        expect(element.loadingElement_).to.equal(prevLoadingElement_);
-        expect(element.loadingElement_).to.have.class('amp-active');
-      });
-
-      it('should turn off', () => {
-        stubInA4A(false);
-        element.setAttribute('layout', 'fill');
-        container.appendChild(element);
-        element.prepareLoading_();
-        element.toggleLoading(false);
-
-        expect(element.loadingContainer_).to.not.be.null;
-        expect(element.loadingContainer_).to.have.class('amp-hidden');
-        expect(element.loadingElement_).to.not.be.null;
-        expect(element.loadingElement_).to.not.have.class('amp-active');
-      });
-
-      it('should turn off and cleanup', () => {
-        stubInA4A(false);
-        element.setAttribute('layout', 'fill');
-        container.appendChild(element);
-        element.prepareLoading_();
-        element.toggleLoading(false, {cleanup: true});
-
-        expect(element.loadingContainer_).to.be.null;
-        expect(element.loadingElement_).to.be.null;
-      });
-
-      it('should NOT cleanup if re-used', () => {
-        stubInA4A(false);
-        element.setAttribute('layout', 'fill');
-        container.appendChild(element);
-        element.prepareLoading_();
-        env.sandbox
-          .stub(element.implementation_, 'isLoadingReused')
-          .callsFake(() => true);
-        element.toggleLoading(false, {cleanup: true});
-
-        expect(element.loadingContainer_).to.not.be.null;
-        expect(element.loadingElement_).to.not.be.null;
-      });
-
-      it('should ignore loading-off if never created', () => {
-        stubInA4A(false);
-        element.isInTemplate_ = true;
-        allowConsoleError(() => {
-          expect(() => {
-            element.toggleLoading(false);
-          }).to.throw(/Must never be called in template/);
+        it('should untrack when toggled off', () => {
+          element.toggleLoading(false);
+          expect(
+            loadingIndicatorServiceStub.untrack
+          ).to.be.calledOnce.calledWith(element);
         });
       });
 
-      it('should turn off when exits viewport', () => {
-        stubInA4A(false);
-        element.isInViewport_ = true;
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.viewportCallback(false);
-        expect(toggle).to.be.calledOnce;
-        expect(toggle.firstCall.args[0]).to.equal(false);
-        expect(toggle.firstCall.args[1]).to.be.undefined;
-      });
+      describe('toggleLoading with layout', () => {
+        let toggle;
 
-      it('should NOT turn off when exits viewport but already laid out', () => {
-        stubInA4A(false);
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.layoutCount_ = 1;
-        element.viewportCallback(false);
-        expect(toggle).to.have.not.been.called;
-      });
+        beforeEach(() => {
+          toggle = env.sandbox.spy(element, 'toggleLoading');
+        });
 
-      it('should turn on when enters viewport, after a 100ms delay', () => {
-        stubInA4A(false);
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.setAttribute('layout', 'fill');
-        container.appendChild(element);
-        element.viewportCallback(true);
-        clock.tick(99);
-        expect(toggle).not.called;
-        clock.tick(100);
-        expect(toggle).calledOnceWith(true, {startTime: 42});
-      });
+        it('should toggle loading off after layout complete', () => {
+          element.setAttribute('height', '10');
+          element.setAttribute('width', '10');
+          container.appendChild(element);
+          return element.buildingPromise_
+            .then(() => {
+              toggle.resetHistory();
+              return element.layoutCallback();
+            })
+            .then(() => {
+              expect(toggle).to.be.calledTwice;
+              expect(toggle.firstCall).calledWith(true);
+              expect(toggle.secondCall).calledWith(false);
+            });
+        });
 
-      it('should not schedule it to turn on if already laid out when enters viewport', () => {
-        stubInA4A(false);
-        const timerDelay = env.sandbox.spy(Services.timerFor(win), 'delay');
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.layoutCount_ = 1;
-        element.viewportCallback(true);
-        clock.tick(1000);
+        it('should toggle loading off after layout failed', () => {
+          env.sandbox
+            .stub(element.implementation_, 'layoutCallback')
+            .returns(Promise.reject());
+          element.setAttribute('height', '10');
+          element.setAttribute('width', '10');
+          container.appendChild(element);
+          return element.buildingPromise_
+            .then(() => {
+              toggle.resetHistory();
+              return element.layoutCallback();
+            })
+            .then(
+              () => {
+                throw new Error('Must have failed.');
+              },
+              () => {
+                expect(toggle).to.be.calledTwice;
+                expect(toggle.firstCall).calledWith(true);
+                expect(toggle.secondCall).calledWith(false);
+              }
+            );
+        });
 
-        expect(timerDelay).to.have.not.been.called;
-        expect(toggle).to.have.not.been.called;
-      });
-
-      it('should NOT turn on when enters viewport but already laid out', () => {
-        stubInA4A(false);
-        const timerDelay = env.sandbox.spy(Services.timerFor(win), 'delay');
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.viewportCallback(true);
-        element.layoutCount_ = 1;
-        clock.tick(1000);
-        expect(timerDelay).to.have.been.called;
-        expect(toggle).to.have.not.been.called;
-      });
-
-      it('should not start loading when measured if already in viewport', () => {
-        stubInA4A(false);
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.isInViewport_ = true;
-        element.setAttribute('layout', 'fill');
-        container.appendChild(element);
-        element.updateLayoutBox({top: 0, width: 300});
-        expect(toggle).to.not.be.called;
-      });
-
-      it('should toggle loading off after layout complete', () => {
-        stubInA4A(false);
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.setAttribute('height', '10');
-        element.setAttribute('width', '10');
-        container.appendChild(element);
-        return element.buildingPromise_
-          .then(() => {
-            return element.layoutCallback();
-          })
-          .then(() => {
-            expect(toggle).to.be.calledOnce;
-            expect(toggle.firstCall.args[0]).to.equal(false);
-            expect(toggle.firstCall.args[1].cleanup).to.equal(true);
-          });
-      });
-
-      it('should toggle loading off after layout failed', () => {
-        stubInA4A(false);
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        env.sandbox
-          .stub(element.implementation_, 'layoutCallback')
-          .callsFake(() => {
-            return Promise.reject();
-          });
-        element.setAttribute('height', '10');
-        element.setAttribute('width', '10');
-        container.appendChild(element);
-        return element.buildingPromise_
-          .then(() => {
-            return element.layoutCallback();
-          })
-          .then(
-            () => {
-              throw new Error('Must have failed.');
-            },
-            () => {
-              expect(toggle).to.be.calledOnce;
-              expect(toggle.firstCall.args[0]).to.equal(false);
-              expect(toggle.firstCall.args[1].cleanup).to.equal(true);
-            }
-          );
-      });
-
-      it('should disable toggle loading on after layout failed', () => {
-        stubInA4A(false);
-        const prepareLoading = env.sandbox.spy(element, 'prepareLoading_');
-        env.sandbox
-          .stub(element.implementation_, 'layoutCallback')
-          .callsFake(() => {
-            return Promise.reject();
-          });
-        element.setAttribute('height', '10');
-        element.setAttribute('width', '10');
-        container.appendChild(element);
-        return element.buildingPromise_
-          .then(() => {
-            expect(element.layoutCount_).to.equal(0);
-            expect(element.isLoadingEnabled_()).to.equal(true);
-            return element.layoutCallback();
-          })
-          .then(
-            () => {
-              throw new Error('Must have failed.');
-            },
-            () => {
-              expect(element.layoutCount_).to.equal(1);
-              expect(element.isLoadingEnabled_()).to.equal(false);
-              element.toggleLoading(true);
-              expect(prepareLoading).to.not.have.been.called;
-            }
-          );
-      });
-
-      // TODO(jridgewell): fix this test
-      it.skip('should ignore loading "on" if layout completed before vsync', () => {
-        stubInA4A(false);
-        resourcesMock.expects('mutateElement').once();
-        container.appendChild(element);
-        element.prepareLoading_();
-        element.toggleLoading(true);
-        return element
-          .build()
-          .then(() => {
-            return element.layoutCallback();
-          })
-          .then(() => {
-            // The first mutate started by toggleLoading(true), but it must
-            // immediately proceed to switch it to off.
-            // vsyncTasks.shift()();
-            expect(element.loadingContainer_).to.have.class('amp-hidden');
-            expect(element.loadingElement_).to.not.have.class('amp-active');
-
-            // Second vsync should perform cleanup.
-            // vsyncTasks.shift()();
-            expect(element.loadingContainer_).to.be.null;
-          });
+        it('should disable toggle loading on after layout failed', () => {
+          env.sandbox
+            .stub(element.implementation_, 'layoutCallback')
+            .returns(Promise.reject());
+          element.setAttribute('height', '10');
+          element.setAttribute('width', '10');
+          container.appendChild(element);
+          return element.buildingPromise_
+            .then(() => {
+              expect(element.layoutCount_).to.equal(0);
+              expect(element.isLoadingEnabled_()).to.equal(true);
+              return element.layoutCallback();
+            })
+            .then(
+              () => {
+                throw new Error('Must have failed.');
+              },
+              () => {
+                expect(element.layoutCount_).to.equal(1);
+                expect(element.isLoadingEnabled_()).to.equal(false);
+              }
+            );
+        });
       });
     });
 });
