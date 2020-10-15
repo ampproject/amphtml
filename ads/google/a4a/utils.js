@@ -73,7 +73,7 @@ export const QQID_HEADER = 'X-QQID';
 export const SANDBOX_HEADER = 'amp-ff-sandbox';
 
 /**
- * Element attribute that stores mendel experiment IDs.
+ * Element attribute that stores Google ads experiment IDs.
  *
  * Note: This attribute should be used only for tracking experimental
  * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
