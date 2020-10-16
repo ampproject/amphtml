@@ -963,9 +963,9 @@ export class SystemLayer {
         });
       }
 
-      if (control.icon) {
+      if (control.backgroundImageUrl) {
         setImportantStyles(dev().assertElement(element), {
-          'background-image': `url(${control.icon})`,
+          'background-image': `url(${control.backgroundImageUrl})`,
         });
       }
     });

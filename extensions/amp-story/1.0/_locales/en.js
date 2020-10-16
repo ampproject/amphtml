@@ -77,7 +77,9 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL]: {
     string: 'Close',
-    description: 'Label for a button that closes the story after they click it',
+    description:
+      'Label for a button that closes the full page experience ' +
+      'and takes the user back to where they were originally',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accept',
@@ -316,7 +318,8 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL]: {
     string: 'Skip next',
-    description: 'Label for a button that advances the story to the next page',
+    description:
+      'Label for a button that advances to the next element in the carousel',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
     string: 'Expand Tweet',
