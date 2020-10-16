@@ -347,7 +347,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'prev_slotnames': sharedStateParams.prevSlotnames || null,
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.ifi_,
-      'rc': this.fromResumeCallback ? 1 : null,
       'rafmt':
         this.responsiveState_ != null
           ? this.responsiveState_.getRafmtParam()

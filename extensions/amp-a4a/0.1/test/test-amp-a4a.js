@@ -1266,7 +1266,6 @@ describe('amp-a4a', () => {
       const onLayoutMeasureSpy = window.sandbox.spy(a4a, 'onLayoutMeasure');
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.be.calledOnce;
-      expect(a4a.fromResumeCallback).to.be.true;
     });
     it('resumeCallback does not call onLayoutMeasure for FIE', async () => {
       const fixture = await createIframePromise();
@@ -1299,7 +1298,6 @@ describe('amp-a4a', () => {
       const onLayoutMeasureSpy = window.sandbox.spy(a4a, 'onLayoutMeasure');
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.not.be.called;
-      expect(a4a.fromResumeCallback).to.be.false;
     });
     it('resumeCallback w/ measure required no onLayoutMeasure', async () => {
       // Force non-FIE
@@ -1336,7 +1334,6 @@ describe('amp-a4a', () => {
       getResourceStub.returns({'hasBeenMeasured': () => false});
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.not.be.called;
-      expect(a4a.fromResumeCallback).to.be.true;
     });
     it('should run end-to-end and render in friendly iframe', async () => {
       // TODO(ccordry): delete this test when no signing launches.
