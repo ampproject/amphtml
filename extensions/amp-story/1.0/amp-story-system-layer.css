@@ -72,7 +72,7 @@
   padding: 8px 4px 0 !important;
 }
 
-.i-amphtml-story-ui-hide-button.i-amphtml-story-button {
+.i-amphtml-story-system-layer-buttons .i-amphtml-story-ui-hide-button.i-amphtml-story-button {
   display: none !important;
 }
 
@@ -91,7 +91,8 @@
 
 [desktop] .i-amphtml-story-button {
   margin: 0 4px !important;
-  background-size: auto !important;
+  background-size: 32px 32px !important;
+  padding: 8px !important;
 }
 
 .i-amphtml-story-button:active {
@@ -235,7 +236,8 @@
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text,
-.i-amphtml-story-sidebar-control {
+.i-amphtml-story-sidebar-control,
+.i-amphtml-story-skip-next  {
   display: none !important;
 }
 
@@ -252,7 +254,7 @@
   display: block !important;
 }
 
-.i-amphtml-paused-display button[disabled] {
+.i-amphtml-story-system-layer-buttons button[disabled] {
   opacity: 0.3 !important;
   cursor: initial !important;
 }
@@ -322,8 +324,8 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 32 32" fill="#FFFFFF"><path d="M19.3333 16L8 24V8L19.3333 16ZM24 24H21.3333V8H24V24Z"/></svg>') !important;
 }
 
-.i-amphtml-story-skip-next[disabled] {
-  opacity: 0.3 !important;
+[desktop] .i-amphtml-story-skip-next {
+  display: block !important;
 }
 
 .i-amphtml-story-has-new-page-notification-container {
