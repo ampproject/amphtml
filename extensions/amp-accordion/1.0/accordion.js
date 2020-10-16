@@ -17,7 +17,10 @@
 import * as Preact from '../../../src/preact';
 import {animateCollapse, animateExpand} from './animations';
 import {omit} from '../../../src/utils/object';
-import {sequentialIdGenerator} from '../../../src/utils/id-generator';
+import {
+  randomIdGenerator,
+  sequentialIdGenerator,
+} from '../../../src/utils/id-generator';
 import {
   useCallback,
   useContext,
@@ -36,6 +39,7 @@ const AccordionContext = Preact.createContext(
 const EMPTY_EXPANDED_MAP = {};
 
 const generateSectionId = sequentialIdGenerator();
+const generateRandomId = randomIdGenerator(100000);
 
 const CHILD_STYLE = {
   // Make animations measurable. Without this, padding and margin can skew
@@ -57,9 +61,12 @@ export function Accordion({
   expandSingleSection = false,
   animate = false,
   children,
+  id,
   ...rest
 }) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
+  const [randomPrefix] = useState(generateRandomId);
+  const prefix = id || `a${randomPrefix}`;
 
   useEffect(() => {
     if (!expandSingleSection) {
@@ -107,12 +114,13 @@ export function Accordion({
         toggleExpanded,
         isExpanded: (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
         animate,
+        prefix,
       }),
-    [animate, expandedMap, registerSection, toggleExpanded]
+    [animate, expandedMap, registerSection, toggleExpanded, prefix]
   );
 
   return (
-    <Comp {...rest}>
+    <Comp id={id} {...rest}>
       <AccordionContext.Provider value={context}>
         {children}
       </AccordionContext.Provider>
@@ -157,6 +165,7 @@ export function AccordionSection({
   ...rest
 }) {
   const [id] = useState(generateSectionId);
+  const [suffix] = useState(generateRandomId);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
   const contentRef = useRef(null);
   const hasMountedRef = useRef(false);
@@ -166,6 +175,7 @@ export function AccordionSection({
     animate: contextAnimate,
     isExpanded,
     toggleExpanded,
+    prefix,
   } = useContext(AccordionContext);
 
   useEffect(() => {
@@ -189,6 +199,7 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
+  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
@@ -201,10 +212,21 @@ export function AccordionSection({
 
   return (
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
-      <HeaderComp role="button" style={CHILD_STYLE} onClick={expandHandler}>
+      <HeaderComp
+        role="button"
+        aria-controls={contentId}
+        tabIndex="0"
+        style={CHILD_STYLE}
+        onClick={expandHandler}
+      >
         {header}
       </HeaderComp>
-      <ContentComp ref={contentRef} style={CHILD_STYLE} hidden={!expanded}>
+      <ContentComp
+        id={contentId}
+        ref={contentRef}
+        style={CHILD_STYLE}
+        hidden={!expanded}
+      >
         {children}
       </ContentComp>
     </Comp>
