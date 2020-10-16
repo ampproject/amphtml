@@ -78,10 +78,10 @@ export function getConsentPolicyInfo(element, policyId) {
 
 /**
  * @param {!Element|!ShadowRoot} element
- * @param {string} policyId
+ * @param {string=} policyId
  * @return {!Promise<?Object|undefined>}
  */
-export function getConsentMetadata(element, policyId) {
+export function getConsentMetadata(element, policyId = 'default') {
   // Return the stored consent metadata.
   return Services.consentPolicyServiceForDocOrNull(element).then(
     (consentPolicy) => {

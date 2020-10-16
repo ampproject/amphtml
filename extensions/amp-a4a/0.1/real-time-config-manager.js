@@ -106,6 +106,9 @@ export class RealTimeConfigManager {
 
     /** @private {?string} */
     this.consentString_ = null;
+
+    /** @private {?Object<string, string|number|boolean|undefined>} */
+    this.consentMetadata_ = null;
   }
 
   /**
@@ -166,15 +169,22 @@ export class RealTimeConfigManager {
    *   substitutions available to use.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    * @visibleForTesting
    */
-  maybeExecuteRealTimeConfig(customMacros, consentState, consentString) {
+  maybeExecuteRealTimeConfig(
+    customMacros,
+    consentState,
+    consentString,
+    consentMetadata
+  ) {
     if (!this.validateRtcConfig_(this.a4aElement_.element)) {
       return;
     }
     this.consentState_ = consentState;
     this.consentString_ = consentString;
+    this.consentMetadata_ = consentMetadata;
     this.modifyRtcConfigForConsentStateSettings();
     customMacros = this.assignMacros(customMacros);
     this.rtcStartTime_ = Date.now();
@@ -276,6 +286,14 @@ export class RealTimeConfigManager {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
     macros['CONSENT_STATE'] = () => this.consentState_;
     macros['CONSENT_STRING'] = () => this.consentString_;
+    macros[
+      'CONSENT_METADATA'
+    ] = /** @type {!../../../src/service/variable-source.AsyncResolverDef} */ ((
+      key
+    ) => {
+      userAssert(key, 'CONSENT_METADATA macro must contian a key');
+      return this.consentMetadata_ ? this.consentMetadata_[key] : null;
+    });
     return macros;
   }
 
