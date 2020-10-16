@@ -27,7 +27,7 @@
  */
 const fs = require('fs');
 const https = require('https');
-const {getStdout, getStderr} = require('./process');
+const {getStdout} = require('./process');
 
 const setupInstructionsUrl =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
@@ -48,6 +48,28 @@ const warningDelaySecs = 10;
 
 const updatesNeeded = new Set();
 
+const npmInfoMessage = `${red(
+  '*** The AMP project now uses npm for package management ***'
+)}
+For more info, see ${cyan('http://go.amp.dev/issue/30518')}.
+
+${yellow('To install all packages:')}
+${cyan('$')} npm install
+
+${yellow('To install a new (runtime) package to "dependencies":')}
+${cyan('$')} npm install [package_name@version]
+
+${yellow('To install a new (toolset) package to "devDependencies":')}
+${cyan('$')} npm install --save-dev [package_name@version]
+
+${yellow('To update a package:')}
+${cyan('$')} npm update [package_name@version]
+
+${yellow('To uninstall a package:')}
+${cyan('$')} npm uninstall [package_name]
+
+${yellow('For detailed instructions, see')} ${cyan(setupInstructionsUrl)}`;
+
 // Color formatting libraries may not be available when this script is run.
 function red(text) {
   return '\x1b[31m' + text + '\x1b[0m';
@@ -64,40 +86,12 @@ function yellow(text) {
 
 /**
  * If yarn is being run, print a message and cause 'yarn install' to fail.
+ * See https://github.com/yarnpkg/yarn/issues/5063 for details on how the
+ * package manager being used is determined.
  **/
 function ensureNpm() {
-  if (process.env.npm_execpath.indexOf('npm') === -1) {
-    console.log(
-      red('*** The AMP project now uses npm for package management ***')
-    );
-    console.log(
-      'For more info, see',
-      cyan('https://github.com/ampproject/amphtml/issues/30518') + '.',
-      '\n'
-    );
-    console.log(yellow('To install all packages:'));
-    console.log(cyan('$'), 'npm install', '\n');
-    console.log(
-      yellow('To install a new (runtime) package to "dependencies":')
-    );
-    console.log(cyan('$'), 'npm install [package_name@version]', '\n');
-    console.log(
-      yellow('To install a new (toolset) package to "devDependencies":')
-    );
-    console.log(
-      cyan('$'),
-      'npm install --save-dev [package_name@version]',
-      '\n'
-    );
-    console.log(yellow('To update a package:'));
-    console.log(cyan('$'), 'npm update [package_name@version]', '\n');
-    console.log(yellow('To uninstall a package:'));
-    console.log(cyan('$'), 'npm uninstall [package_name]', '\n');
-    console.log(
-      yellow('For detailed instructions, see'),
-      cyan(setupInstructionsUrl),
-      '\n'
-    );
+  if (!process.env.npm_execpath.includes('npm')) {
+    console.log(npmInfoMessage);
     process.exit(1);
   }
 }
@@ -326,9 +320,7 @@ function checkPythonVersion() {
 
   // Python2 prints its version to stderr (fixed in Python 3.4)
   // See: https://bugs.python.org/issue18338
-  const pythonVersionResult =
-    getStderr('python --version').trim() ||
-    getStdout('python --version').trim();
+  const pythonVersionResult = getStdout('python --version 2>&1').trim();
   const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
   if (pythonVersion && pythonVersion.length == 2) {
     const versionNumber = pythonVersion[1];
@@ -374,14 +366,14 @@ async function main() {
   // NPM is already used by default on Travis and Github Actions, so there is
   // nothing more to do.
   if (process.env.TRAVIS || process.env.GITHUB_ACTIONS) {
-    return Promise.resolve();
+    return;
   }
   ensureNpm();
   await checkNodeVersion();
   runGulpChecks();
   checkPythonVersion();
   logNpmVersion();
-  if (updatesNeeded.size > 0) {
+  if (updatesNeeded.size) {
     console.log(
       yellow('\nWARNING: Detected problems with'),
       cyan(Array.from(updatesNeeded).join(', '))

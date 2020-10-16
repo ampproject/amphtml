@@ -30,7 +30,7 @@ const {gitDiffColor, gitDiffNameOnly} = require('../common/git');
  * @param {string} fileName
  * @return {boolean}
  */
-function isPackageLockFileInSync(fileName = 'npm-checks.js') {
+function isPackageLockFileInSync(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   const results = checkDependencies.sync({
     verbose: true,
@@ -69,7 +69,7 @@ function isPackageLockFileInSync(fileName = 'npm-checks.js') {
  * @param {string} fileName
  * @return {boolean}
  */
-function isPackageLockFileProperlyUpdated(fileName = 'npm-checks.js') {
+function isPackageLockFileProperlyUpdated(fileName) {
   const filesChanged = gitDiffNameOnly();
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
 
