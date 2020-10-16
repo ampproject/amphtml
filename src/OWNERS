@@ -11,7 +11,7 @@
       owners: [{name: 'ampproject/wg-components'}],
     },
     {
-      pattern: '{cid-*,*-cid-*,*-cid,extension-analytics,analytics,storage-impl}.js',
+      pattern: '{cid-*,*-cid-*,*-cid,extension-analytics,analytics}.js',
       owners: [{name: 'ampproject/wg-components'}],
     },
     {
