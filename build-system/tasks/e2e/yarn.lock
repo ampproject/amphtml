@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@babel/register@7.12.0":
-  version "7.12.0"
-  resolved "https://registry.yarnpkg.com/@babel/register/-/register-7.12.0.tgz#fa5fa900bd79380ff508ae963a5766172d3a9e56"
-  integrity sha512-2F2v0qYSAwrGyK9mZ8lIoUluHRzLTgkJ2oRXlLV9GVe/ze/sTFBiOocLRMSJYDB2lLiABlVC+pZHlZ8qihO1Xg==
+"@babel/register@7.12.1":
+  version "7.12.1"
+  resolved "https://registry.yarnpkg.com/@babel/register/-/register-7.12.1.tgz#cdb087bdfc4f7241c03231f22e15d211acf21438"
+  integrity sha512-XWcmseMIncOjoydKZnWvWi0/5CUCD+ZYKhRwgYlWOrA8fGZ/FjuLRpqtIhLOVD/fvR1b9DQHtZPn68VvhpYf+Q==
   dependencies:
     find-cache-dir "^2.0.0"
     lodash "^4.17.19"

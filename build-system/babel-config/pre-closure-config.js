@@ -54,7 +54,6 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
-    './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
     argv.esm || argv.sxg
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
