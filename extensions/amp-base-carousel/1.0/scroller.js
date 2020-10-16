@@ -95,7 +95,6 @@ function ScrollerWithRef(
    */
   const scrollOffset = useRef(0);
 
-  const ignoreProgrammaticScrollRef = useRef(true);
   const slides = renderSlides(
     {
       children,
@@ -109,6 +108,7 @@ function ScrollerWithRef(
     classes
   );
   const currentIndex = useRef(restingIndex);
+  const restingIndexRef = useRef(restingIndex);
 
   // useLayoutEffect needed to avoid FOUC while scrolling
   useLayoutEffect(() => {
@@ -116,7 +116,6 @@ function ScrollerWithRef(
       return;
     }
     const container = containerRef.current;
-    ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
     let position;
     const slideWidth = container./* OK */ offsetWidth / visibleCount;
@@ -150,16 +149,16 @@ function ScrollerWithRef(
           // we stopped scrolling. If so, we do not need to move anything.
           if (
             currentIndex.current === null ||
-            currentIndex.current === restingIndex
+            currentIndex.current === restingIndexRef.current
           ) {
             return;
           }
-          ignoreProgrammaticScrollRef.current = true;
+          restingIndexRef.current = currentIndex.current;
           setRestingIndex(currentIndex.current);
         },
         RESET_SCROLL_REFERENCE_POINT_WAIT_MS
       ),
-    [restingIndex, setRestingIndex]
+    [setRestingIndex]
   );
 
   // Track current slide without forcing render.
@@ -175,10 +174,6 @@ function ScrollerWithRef(
   };
 
   const handleScroll = () => {
-    if (ignoreProgrammaticScrollRef.current) {
-      ignoreProgrammaticScrollRef.current = false;
-      return;
-    }
     updateCurrentIndex();
     debouncedResetScrollReferencePoint();
   };
