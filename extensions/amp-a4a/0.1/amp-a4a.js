@@ -320,13 +320,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.iframe = null;
 
-    /**
-     * TODO(keithwrightbos) - remove once resume behavior is verified.
-     * {boolean} whether most recent ad request was generated as part
-     *    of resume callback.
-     */
-    this.fromResumeCallback = false;
-
     /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
@@ -539,7 +532,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.friendlyIframeEmbed_) {
       return;
     }
-    this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
     const resource = this.getResource();
@@ -1372,7 +1364,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
     this.transferDomBody_ = null;
-    this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
   }
