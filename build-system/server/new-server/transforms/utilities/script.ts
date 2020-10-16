@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PostHTML} from 'posthtml';
+import posthtml from 'posthtml';
 import {URL} from 'url';
 import {extname} from 'path';
 import {VALID_CDN_ORIGIN} from './cdn';
@@ -22,7 +22,7 @@ import {parse, format} from 'path';
 import log from 'fancy-log';
 import {cyan, yellow} from 'ansi-colors';
 
-export interface ScriptNode extends PostHTML.Node {
+export interface ScriptNode extends posthtml.Node {
   tag: 'script';
   attrs: {
     [key: string]: string | undefined;
@@ -40,7 +40,7 @@ function isValidScriptExtension(url: URL): boolean {
  * Determines if a Node is really a ScriptNode.
  * @param node
  */
-export function isValidScript(node: PostHTML.Node, looseScriptSrcCheck?: boolean): node is ScriptNode {
+export function isValidScript(node: posthtml.Node, looseScriptSrcCheck?: boolean): node is ScriptNode {
   if (node.tag !== 'script') {
     return false;
   }
@@ -53,7 +53,7 @@ export function isValidScript(node: PostHTML.Node, looseScriptSrcCheck?: boolean
   return url.origin === VALID_CDN_ORIGIN && isValidScriptExtension(url);
 }
 
-export function isJsonScript(node: PostHTML.Node): boolean {
+export function isJsonScript(node: posthtml.Node): boolean {
   if (node.tag !== 'script') {
     return false;
   }
