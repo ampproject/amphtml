@@ -94,12 +94,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     beforeEach(() => {
       wrapper = mount(
         <Accordion>
-          <AccordionSection
-            key={1}
-            expanded
-            header="header1"
-            contentId="testId"
-          >
+          <AccordionSection key={1} expanded header="header1">
             content1
           </AccordionSection>
           <AccordionSection key={2} header="header2">
@@ -160,8 +155,6 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(header0.getAttribute('aria-controls')).to.equal(
         content0.getAttribute('id')
       );
-      expect(header0.getAttribute('aria-controls')).to.equal('testId');
-      expect(content0.getAttribute('id')).to.equal('testId');
 
       expect(sections.at(1).getDOMNode()).to.have.attribute('aria-expanded');
       expect(header1).to.have.attribute('tabindex');

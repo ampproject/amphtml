@@ -75,27 +75,31 @@ function getState(element, mu) {
       section[SECTION_POST_RENDER] = () => mu.takeRecords();
     }
 
+    const contentId =
+      section.lastElementChild && section.lastElementChild.getAttribute('id');
+
     const sectionShim = memo(
       section,
       SECTION_SHIM_PROP,
       bindSectionShimToElement
     );
-    const headerShim = memo(section, HEADER_SHIM_PROP, bindHeaderShimToElement);
+    const headerShim = memo(
+      section,
+      HEADER_SHIM_PROP,
+      bindHeaderShimToElement.bind(null, contentId)
+    );
     const contentShim = memo(
       section,
       CONTENT_SHIM_PROP,
       bindContentShimToElement
     );
     const expanded = section.hasAttribute('expanded');
-    const contentId =
-      section.lastElementChild && section.lastElementChild.getAttribute('id');
     const props = dict({
       'key': section,
       'as': sectionShim,
       'headerAs': headerShim,
       'contentAs': contentShim,
       'expanded': expanded,
-      'contentId': contentId,
     });
     return <AccordionSection {...props} />;
   });
@@ -126,10 +130,15 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
+ * @param {?string} contentId
  * @param {!AccordionDef.HeaderProps} props
  * @return {PreactDef.Renderable}
  */
-function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
+function HeaderShim(
+  sectionElement,
+  contentId,
+  {onClick, 'aria-controls': ariaControls}
+) {
   const headerElement = sectionElement.firstElementChild;
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
@@ -139,7 +148,7 @@ function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
     if (!headerElement.hasAttribute('tabindex')) {
       headerElement.setAttribute('tabindex', 0);
     }
-    headerElement.setAttribute('aria-controls', ariaControls);
+    headerElement.setAttribute('aria-controls', contentId || ariaControls);
     headerElement.setAttribute('role', 'button');
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
@@ -147,15 +156,17 @@ function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
     };
-  }, [sectionElement, headerElement, onClick, ariaControls]);
+  }, [sectionElement, headerElement, onClick, ariaControls, contentId]);
   return <header />;
 }
 
 /**
+ * @param {?string} contentId
  * @param {!Element} element
  * @return {function(!AccordionDef.HeaderProps):PreactDef.Renderable}
  */
-const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
+const bindHeaderShimToElement = (contentId, element) =>
+  HeaderShim.bind(null, element, contentId);
 
 /**
  * @param {!Element} sectionElement
@@ -170,7 +181,9 @@ function ContentShimWithRef(sectionElement, {hidden, id}, ref) {
     if (!contentElement) {
       return;
     }
-    contentElement.setAttribute('id', id);
+    if (!contentElement.hasAttribute('id')) {
+      contentElement.setAttribute('id', id);
+    }
     toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
