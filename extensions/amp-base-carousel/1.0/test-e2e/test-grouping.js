@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {getCarousel, getSlide} from './helpers';
+import {getCarousel, getScrollingElement, getSlide} from './helpers';
 import {useStyles} from '../base-carousel.jss';
 
 const pageWidth = 800;
 const pageHeight = 600;
+const advanceCount = 2;
+const slideCount = 8;
+const pivotIndex = Math.floor(slideCount / 2);
+const expectedScrollPosition = (pageWidth / advanceCount) * pivotIndex;
 
 describes.endtoend(
   'AMP carousel grouping',
@@ -35,8 +39,8 @@ describes.endtoend(
 
     const styles = useStyles();
 
-    function rect(el) {
-      return controller.getElementRect(el);
+    function prop(el, name) {
+      return controller.getElementProperty(el, name);
     }
 
     beforeEach(async function () {
@@ -49,31 +53,43 @@ describes.endtoend(
     });
 
     it('should move forwards by the advance-count', async () => {
+      const el = await getScrollingElement(styles, controller);
+      await expect(prop(el, 'scrollLeft')).to.equal(expectedScrollPosition);
+
+      const slide0 = await getSlide(styles, controller, 0);
+      await expect(prop(slide0, 'offsetLeft')).to.equal(expectedScrollPosition);
+
       await controller.click(btnNext);
       const slide2 = await getSlide(styles, controller, 2);
-      await expect(rect(slide2)).to.include({x: 0});
+      await expect(prop(slide2, 'offsetLeft')).to.equal(expectedScrollPosition);
 
       await controller.click(btnNext);
       const slide4 = await getSlide(styles, controller, 4);
-      await expect(rect(slide4)).to.include({x: 0});
+      await expect(prop(slide4, 'offsetLeft')).to.equal(expectedScrollPosition);
 
       await controller.click(btnNext);
       const slide6 = await getSlide(styles, controller, 6);
-      await expect(rect(slide6)).to.include({x: 0});
+      await expect(prop(slide6, 'offsetLeft')).to.equal(expectedScrollPosition);
     });
 
     it('should move backwards by the advance-count', async () => {
+      const el = await getScrollingElement(styles, controller);
+      await expect(prop(el, 'scrollLeft')).to.equal(expectedScrollPosition);
+
+      const slide0 = await getSlide(styles, controller, 0);
+      await expect(prop(slide0, 'offsetLeft')).to.equal(expectedScrollPosition);
+
       await controller.click(btnPrev);
       const slide6 = await getSlide(styles, controller, 6);
-      await expect(rect(slide6)).to.include({x: 0});
+      await expect(prop(slide6, 'offsetLeft')).to.equal(expectedScrollPosition);
 
       await controller.click(btnPrev);
       const slide4 = await getSlide(styles, controller, 4);
-      await expect(rect(slide4)).to.include({x: 0});
+      await expect(prop(slide4, 'offsetLeft')).to.equal(expectedScrollPosition);
 
       await controller.click(btnPrev);
       const slide2 = await getSlide(styles, controller, 2);
-      await expect(rect(slide2)).to.include({x: 0});
+      await expect(prop(slide2, 'offsetLeft')).to.equal(expectedScrollPosition);
     });
   }
 );
