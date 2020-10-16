@@ -185,6 +185,7 @@ export class VideoManager {
     if (!video.supportsPlatform()) {
       return;
     }
+    let viewportObserver;
     if (!this.viewportObserver_) {
       const viewportCallback = (
         /** @type {!Array<!IntersectionObserverEntry>} */ records
@@ -194,7 +195,7 @@ export class VideoManager {
             /* isVisible */ isIntersecting
           );
         });
-      this.viewportObserver_ = getViewportObserver(
+      this.viewportObserver_ = viewportObserver = getViewportObserver(
         viewportCallback,
         this.ampdoc.win
       );
@@ -202,19 +203,19 @@ export class VideoManager {
 
     let reloadUnlistener;
     const originalLayoutCallback = videoBE.layoutCallback;
-    videoBE.layoutCallback = () => {
-      originalLayoutCallback.apply(videoBE);
-      this.viewportObserver_.observe(videoBE.element);
+    videoBE.layoutCallback = (() => {
+      viewportObserver.observe(videoBE.element);
       reloadUnlistener = listen(videoBE.element, VideoEvents.RELOAD, () =>
         entry.videoLoaded()
       );
-    };
+      return originalLayoutCallback.apply(videoBE);
+    }).bind(videoBE);
     const originalUnlayoutCallback = videoBE.unlayoutCallback;
-    videoBE.unlayoutCallback = () => {
-      originalUnlayoutCallback.apply(videoBE);
-      this.viewportObserver_.unobserve(videoBE.element);
+    videoBE.unlayoutCallback = (() => {
+      viewportObserver.unobserve(videoBE.element);
       reloadUnlistener();
-    };
+      return originalUnlayoutCallback.apply(videoBE);
+    }).bind(videoBE);
 
     // While register() is called during build and so the layoutCallback
     // should catch, guard against a potential future race condition by
@@ -1630,11 +1631,13 @@ function getViewportObserver(ioCallback, win) {
     ? /** @type {*} */ (win.document)
     : null);
   const rootMargin = '25%';
+  const threshold = MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
 
   try {
     return new win.IntersectionObserver(ioCallback, {
       root,
       rootMargin,
+      threshold
     });
   } catch (e) {
     return new win.IntersectionObserver(ioCallback, {rootMargin});
