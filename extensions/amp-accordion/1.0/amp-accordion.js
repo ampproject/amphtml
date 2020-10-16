@@ -87,12 +87,15 @@ function getState(element, mu) {
       bindContentShimToElement
     );
     const expanded = section.hasAttribute('expanded');
+    const contentId =
+      section.lastElementChild && section.lastElementChild.getAttribute('id');
     const props = dict({
       'key': section,
       'as': sectionShim,
       'headerAs': headerShim,
       'contentAs': contentShim,
       'expanded': expanded,
+      'contentId': contentId,
     });
     return <AccordionSection {...props} />;
   });

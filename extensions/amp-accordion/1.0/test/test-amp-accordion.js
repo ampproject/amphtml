@@ -45,7 +45,7 @@ describes.realWin(
         <amp-accordion layout="fixed" width="300" height="200">
           <section expanded>
             <h1>header1</h1>
-            <div>content1</div>
+            <div id="testId">content1</div>
           </section>
           <section>
             <h1>header2</h1>
@@ -172,6 +172,8 @@ describes.realWin(
       expect(header0.getAttribute('aria-controls')).to.equal(
         content0.getAttribute('id')
       );
+      expect(header0.getAttribute('aria-controls')).to.equal('testId');
+      expect(content0.getAttribute('id')).to.equal('testId');
 
       expect(sections[1]).to.have.attribute('aria-expanded');
       expect(header1).to.have.attribute('tabindex');

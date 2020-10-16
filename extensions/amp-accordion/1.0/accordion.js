@@ -160,6 +160,7 @@ export function AccordionSection({
   contentAs: ContentComp = 'div',
   expanded: defaultExpanded = false,
   animate: defaultAnimate = false,
+  contentId,
   header,
   children,
   ...rest
@@ -199,7 +200,8 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
+  const finalContentId =
+    contentId || `${prefix || 'a'}-content-${id}-${suffix}`;
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
@@ -214,7 +216,7 @@ export function AccordionSection({
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
       <HeaderComp
         role="button"
-        aria-controls={contentId}
+        aria-controls={finalContentId}
         tabIndex="0"
         style={CHILD_STYLE}
         onClick={expandHandler}
@@ -222,7 +224,7 @@ export function AccordionSection({
         {header}
       </HeaderComp>
       <ContentComp
-        id={contentId}
+        id={finalContentId}
         ref={contentRef}
         style={CHILD_STYLE}
         hidden={!expanded}
