@@ -27,7 +27,7 @@ describes.endtoend(
   'amp-consent',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=mx',
+      'http://localhost:8000/test/fixtures/e2e/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=mx',
     // TODO (micajuineho): Add shadow-demo after #25985 is fixed, and viewer-demo when...
     environments: ['single'],
   },
