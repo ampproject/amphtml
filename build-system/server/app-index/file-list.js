@@ -111,9 +111,7 @@ const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
 
 const FileListHeading = ({basepath, selectModePrefix}) => html`
   <div class="file-list-heading">
-    <h3 class="code" id="basepath">
-      ${basepath}
-    </h3>
+    <h3 class="code" id="basepath">${basepath}</h3>
     ${FileListSearchInput({basepath})}
     <div class="file-list-right-section">
       ${AmpState(selectModeStateId, {
@@ -127,9 +125,7 @@ const FileListHeading = ({basepath, selectModePrefix}) => html`
 
 const wrapFileList = (rendered) => html`
   <div class="file-list-container">
-    <div class="wrap">
-      ${rendered}
-    </div>
+    <div class="wrap">${rendered}</div>
   </div>
 `;
 
