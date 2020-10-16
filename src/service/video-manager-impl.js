@@ -38,13 +38,7 @@ import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
-import {
-  createCustomEvent,
-  getData,
-  listen,
-  listenOnce,
-  listenOncePromise,
-} from '../event-helper';
+import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -54,7 +48,6 @@ import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {startsWith} from '../string';
 import {toggle} from '../style';
 
 /** @private @const {string} */
@@ -517,9 +510,7 @@ class VideoEntry {
       this.video.pause();
     };
 
-    listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
-      this.videoLoaded()
-    );
+    listen(video.element, VideoEvents.LOAD, () => this.videoLoaded());
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
       this.hasSeenPlayEvent_ = true;
@@ -1387,7 +1378,7 @@ function centerDist(viewport, rect) {
  */
 function isLandscape(win) {
   if (win.screen && 'orientation' in win.screen) {
-    return startsWith(win.screen.orientation.type, 'landscape');
+    return win.screen.orientation.type.startsWith('landscape');
   }
   return Math.abs(win.orientation) == 90;
 }

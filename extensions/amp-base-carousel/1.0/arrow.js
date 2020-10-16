@@ -22,10 +22,11 @@ import {useStyles} from './base-carousel.jss';
  * @return {PreactDef.Renderable}
  */
 export function Arrow({
+  advance,
   by,
   customArrow = <DefaultArrow by={by} />,
-  advance,
   disabled,
+  outsetArrows,
 }) {
   const {
     'disabled': customDisabled,
@@ -33,15 +34,20 @@ export function Arrow({
   } = customArrow.props;
   const isDisabled = disabled || customDisabled;
   const onClick = (e) => {
+    if (isDisabled) {
+      return;
+    }
     if (onCustomClick) {
       onCustomClick(e);
     }
     advance();
   };
   const classes = useStyles();
-  const classNames = `${classes.arrowPlacement} ${
+  const classNames = `${classes.arrow} ${
     by < 0 ? classes.arrowPrev : classes.arrowNext
-  } ${isDisabled ? classes.arrowDisabled : ''}`;
+  } ${isDisabled ? classes.arrowDisabled : ''} ${
+    outsetArrows ? classes.outsetArrow : classes.insetArrow
+  }`;
 
   return (
     <div class={classNames}>

@@ -105,6 +105,7 @@ AmpBaseCarousel['props'] = {
   'advanceCount': {attr: 'advance-count', type: 'number'},
   'controls': {attr: 'controls', type: 'string'},
   'loop': {attr: 'loop', type: 'boolean'},
+  'outsetArrows': {attr: 'outset-arrows', type: 'boolean'},
   'snap': {
     attrs: ['snap'],
     parseAttrs: (element) => parseStrBoolAttr(element, 'snap', true),

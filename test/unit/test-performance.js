@@ -16,12 +16,26 @@
 
 import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
+import {
+  Performance,
+  installPerformanceService,
+} from '../../src/service/performance-impl';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getMode} from '../../src/mode';
-import {installPerformanceService} from '../../src/service/performance-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installRuntimeServices} from '../../src/service/core-services';
+
+describes.realWin('performance', {amp: false}, (env) => {
+  it('should be resilient to unsupported PerformanceObserver entry types', () => {
+    env.sandbox.stub(env.win.PerformanceObserver.prototype, 'observe').throws();
+    allowConsoleError(() => {
+      expect(() => {
+        new Performance(env.win);
+      }).to.not.throw();
+    });
+  });
+});
 
 describes.realWin('performance', {amp: true}, (env) => {
   let perf;
@@ -893,6 +907,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       whenFirstVisible: () => unresolvedPromise,
       getVisibilityState: () => viewerVisibilityState,
       getFirstVisibleTime: () => 0,
+      isSingleDoc: () => true,
     });
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => {},
@@ -905,6 +920,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     });
     env.sandbox.stub(Services, 'viewportForDoc').returns({
       getSize: () => viewportSize,
+    });
+    env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+      canonicalUrl: 'https://example.com/amp.html',
     });
   }
 
@@ -1438,6 +1456,37 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       Services.performanceFor(env.win);
       // Each supported entryType currently leads to creation of new observer.
       expect(PerformanceObserverConstructorStub).not.to.be.called;
+    });
+  });
+});
+
+describes.realWin('log canonicalUrl', {amp: true}, (env) => {
+  let win;
+  let perf;
+  let viewerSendMessageStub;
+  const canonicalUrl = 'https://example.com/amp.html';
+
+  beforeEach(() => {
+    win = env.win;
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    viewerSendMessageStub = env.sandbox.stub(viewer, 'sendMessage');
+    env.sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
+    env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
+    env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+    env.sandbox.stub(Services, 'documentInfoForDoc').returns({canonicalUrl});
+    installPlatformService(win);
+    installPerformanceService(win);
+    perf = Services.performanceFor(win);
+  });
+
+  it('should add the canonical URL to sendCsi messages', () => {
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub.lastCall.args[0]).to.equal('sendCsi');
+      expect(viewerSendMessageStub.lastCall.args[1].canonicalUrl).to.equal(
+        canonicalUrl
+      );
     });
   });
 });

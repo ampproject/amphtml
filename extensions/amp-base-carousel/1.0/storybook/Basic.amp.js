@@ -34,6 +34,7 @@ export const Default = () => {
   const snap = boolean('snap', true);
   const advanceCount = number('advance count', 1, {min: 1});
   const visibleCount = number('visible count', 1, {min: 1});
+  const outsetArrows = boolean('outset arrows', false);
   const controls = select('show controls', ['auto', 'always', 'never']);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
@@ -41,6 +42,7 @@ export const Default = () => {
     <amp-base-carousel
       advance-count={advanceCount}
       controls={controls}
+      outset-arrows={outsetArrows}
       width="880"
       height="225"
       snap={String(snap)}

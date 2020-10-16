@@ -54,6 +54,7 @@ function BaseCarouselWithRef(
     controls = Controls.AUTO,
     loop,
     onSlideChange,
+    outsetArrows,
     snap = true,
     visibleCount = 1,
     ...rest
@@ -107,17 +108,32 @@ function BaseCarouselWithRef(
 
   const [hadTouch, setHadTouch] = useState(false);
   const hideControls = useMemo(() => {
+    if (controls === Controls.ALWAYS || outsetArrows) {
+      return false;
+    }
     if (controls === Controls.NEVER) {
       return true;
     }
-    if (controls === Controls.ALWAYS) {
-      return false;
-    }
     return hadTouch;
-  }, [hadTouch, controls]);
+  }, [hadTouch, controls, outsetArrows]);
 
   return (
-    <ContainWrapper size={true} layout={true} paint={true} {...rest}>
+    <ContainWrapper
+      size={true}
+      layout={true}
+      paint={true}
+      contentStyle={{display: 'flex'}}
+      {...rest}
+    >
+      {!hideControls && (
+        <Arrow
+          advance={prev}
+          by={-advanceCount}
+          customArrow={arrowPrev}
+          disabled={disableForDir(-1)}
+          outsetArrows={outsetArrows}
+        />
+      )}
       <Scroller
         advanceCount={advanceCount}
         loop={loop}
@@ -150,20 +166,13 @@ function BaseCarouselWithRef(
         )}
       </Scroller>
       {!hideControls && (
-        <>
-          <Arrow
-            by={-advanceCount}
-            customArrow={arrowPrev}
-            disabled={disableForDir(-1)}
-            advance={prev}
-          />
-          <Arrow
-            by={advanceCount}
-            customArrow={arrowNext}
-            disabled={disableForDir(1)}
-            advance={next}
-          />
-        </>
+        <Arrow
+          advance={next}
+          by={advanceCount}
+          customArrow={arrowNext}
+          disabled={disableForDir(1)}
+          outsetArrows={outsetArrows}
+        />
       )}
     </ContainWrapper>
   );
