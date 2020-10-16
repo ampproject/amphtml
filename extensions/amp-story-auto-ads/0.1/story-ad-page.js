@@ -16,6 +16,7 @@
 
 import {
   A4AVarNames,
+  createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
   localizeCtaText,
@@ -39,7 +40,7 @@ import {
   isJsonScriptTag,
   toggleAttribute,
 } from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -249,18 +250,18 @@ export class StoryAdPage {
         return false;
       }
 
-      const ctaText =
+      uiMetadata[A4AVarNames.CTA_TYPE] =
         localizeCtaText(
           uiMetadata[A4AVarNames.CTA_TYPE],
           this.localizationService_
-        ) || '';
+        ) || uiMetadata[A4AVarNames.CTA_TYPE];
 
       // Store the cta-type as an accesible var for any further pings.
       this.analytics_.then((analytics) =>
         analytics.setVar(
           this.index_, // adIndex
           AnalyticsVars.CTA_TYPE,
-          ctaText
+          uiMetadata[A4AVarNames.CTA_TYPE]
         )
       );
 
@@ -280,8 +281,7 @@ export class StoryAdPage {
         );
       }
 
-      const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
-      return this.createCtaLayer_(ctaUrl, ctaText);
+      return this.createCtaLayer_(uiMetadata);
     });
   }
 
@@ -348,56 +348,28 @@ export class StoryAdPage {
 
   /**
    * Create layer to contain outlink button.
-   * @param {string} ctaUrl
-   * @param {string} ctaText
+   * @param {!./story-ad-ui.StoryAdUIMetadata} uiMetadata
    * @return {Promise<boolean>}
    */
-  createCtaLayer_(ctaUrl, ctaText) {
-    // TODO(ccordry): Move button to shadow root.
-    const a = createElementWithAttributes(
+  createCtaLayer_(uiMetadata) {
+    return createCta(
       this.doc_,
-      'a',
-      dict({
-        'class': 'i-amphtml-story-ad-link',
-        'target': '_blank',
-        'href': ctaUrl,
-      })
-    );
-
-    const fitPromise = this.buttonFitter_.fit(
-      dev().assertElement(this.pageElement_),
-      a, // Container
-      ctaText // Content
-    );
-
-    return fitPromise.then((success) => {
-      if (!success) {
-        user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
-        return false;
+      devAssert(this.buttonFitter_),
+      dev().assertElement(this.pageElement_), // Container.
+      uiMetadata
+    ).then((anchor) => {
+      if (anchor) {
+        // Click listener so that we can fire `story-ad-click` analytics trigger at
+        // the appropriate time.
+        anchor.addEventListener('click', () => {
+          const vars = {
+            [AnalyticsVars.AD_CLICKED]: Date.now(),
+          };
+          this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
+        });
+        return true;
       }
-
-      a.href = ctaUrl;
-      a.textContent = ctaText;
-
-      if (a.protocol !== 'https:' && a.protocol !== 'http:') {
-        user().warn(TAG, 'CTA url is not valid. Ad was discarded');
-        return false;
-      }
-
-      // Click listener so that we can fire `story-ad-click` analytics trigger at
-      // the appropriate time.
-      a.addEventListener('click', () => {
-        const vars = {
-          [AnalyticsVars.AD_CLICKED]: Date.now(),
-        };
-        this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
-      });
-
-      const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
-      ctaLayer.className = 'i-amphtml-cta-container';
-      ctaLayer.appendChild(a);
-      this.pageElement_.appendChild(ctaLayer);
-      return true;
+      return false;
     });
   }
 

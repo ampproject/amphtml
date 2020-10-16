@@ -15,11 +15,14 @@
  */
 
 import {
+  A4AVarNames,
+  createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
   maybeCreateAttribution,
   validateCtaMetadata,
 } from '../story-ad-ui';
+import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 
 describes.realWin('story-ad-ui', {amp: true}, (env) => {
   let win;
@@ -160,6 +163,65 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         );
         expect(element).to.be.null;
         expect(doc.querySelector('.i-amphtml-attribution-host')).not.to.exist;
+      });
+    });
+  });
+
+  describe('createCta', () => {
+    let buttonFitter;
+
+    beforeEach(() => {
+      buttonFitter = new ButtonTextFitter(env.ampdoc);
+    });
+
+    it('returns the created anchor', () => {
+      const metadata = {
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((anchor) => {
+        expect(anchor).to.exist;
+        expect(anchor.href).to.equal('https://www.cats.com/');
+        expect(anchor.textContent).to.equal('SHOP');
+        expect(doc.querySelector('amp-story-cta-layer')).to.exist;
+        expect(doc.querySelector('a')).to.exist;
+      });
+    });
+
+    it('returns null if button text is too long', () => {
+      const metadata = {
+        [A4AVarNames.CTA_TYPE]: 'cta that is way too long to fit in a button',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      const container = doc.createElement('div');
+      container.width = '400px';
+
+      return createCta(doc, buttonFitter, container, metadata).then(
+        (anchor) => {
+          expect(anchor).to.be.null;
+          expect(container.querySelector('amp-story-cta-layer')).not.to.exist;
+        }
+      );
+    });
+
+    it('returns null if url protocol is not http || https', () => {
+      const metadata = {
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'mailto:meow@cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((anchor) => {
+        expect(anchor).to.be.null;
+        expect(doc.querySelector('amp-story-cta-layer')).not.to.exist;
       });
     });
   });
