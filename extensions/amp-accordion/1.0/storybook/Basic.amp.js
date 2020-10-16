@@ -39,7 +39,7 @@ export const _default = () => {
     >
       <section>
         <h2>Section 1</h2>
-        <p>Content in section 1.</p>
+        <p id="test">Content in section 1.</p>
       </section>
       <section>
         <h2>Section 2</h2>

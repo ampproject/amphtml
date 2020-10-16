@@ -30,7 +30,7 @@ export const _default = () => {
   const animate = boolean('animate', false);
   return (
     <Accordion expandSingleSection={expandSingleSection} animate={animate}>
-      <AccordionSection key={1} header={<h2>Section 1</h2>}>
+      <AccordionSection key={1} header={<h2>Section 1</h2>} contentId="test">
         <p>Content in section 1.</p>
       </AccordionSection>
       <AccordionSection key={2} header={<h2>Section 2</h2>}>
