@@ -185,7 +185,6 @@ export class VideoManager {
     if (!video.supportsPlatform()) {
       return;
     }
-    let viewportObserver;
     if (!this.viewportObserver_) {
       const viewportCallback = (
         /** @type {!Array<!IntersectionObserverEntry>} */ records
@@ -195,35 +194,28 @@ export class VideoManager {
             /* isVisible */ isIntersecting
           );
         });
-      this.viewportObserver_ = viewportObserver = getViewportObserver(
+      this.viewportObserver_ = getViewportObserver(
         viewportCallback,
         this.ampdoc.win
       );
     }
+    const viewportObserver = this.viewportObserver_;
 
     let reloadUnlistener;
     const originalLayoutCallback = videoBE.layoutCallback;
-    videoBE.layoutCallback = (() => {
+    videoBE.layoutCallback = () => {
       viewportObserver.observe(videoBE.element);
       reloadUnlistener = listen(videoBE.element, VideoEvents.RELOAD, () =>
         entry.videoLoaded()
       );
       return originalLayoutCallback.apply(videoBE);
-    }).bind(videoBE);
+    };
     const originalUnlayoutCallback = videoBE.unlayoutCallback;
-    videoBE.unlayoutCallback = (() => {
+    videoBE.unlayoutCallback = () => {
       viewportObserver.unobserve(videoBE.element);
       reloadUnlistener();
       return originalUnlayoutCallback.apply(videoBE);
-    }).bind(videoBE);
-
-    // While register() is called during build and so the layoutCallback
-    // should catch, guard against a potential future race condition by
-    // also observing here.
-    this.viewportObserver_.observe(videoBE.element);
-    reloadUnlistener = listen(videoBE.element, VideoEvents.RELOAD, () =>
-      entry.videoLoaded()
-    );
+    };
 
     this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
@@ -1637,7 +1629,7 @@ function getViewportObserver(ioCallback, win) {
     return new win.IntersectionObserver(ioCallback, {
       root,
       rootMargin,
-      threshold
+      threshold,
     });
   } catch (e) {
     return new win.IntersectionObserver(ioCallback, {rootMargin});
