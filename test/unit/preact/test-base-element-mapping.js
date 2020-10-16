@@ -685,9 +685,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       };
       Impl['passthroughNonEmpty'] = true;
       element = html`
-        <amp-preact layout="fixed" width="100" height="100">
-          text
-        </amp-preact>
+        <amp-preact layout="fixed" width="100" height="100"> text </amp-preact>
       `;
       doc.body.appendChild(element);
       await element.build();
