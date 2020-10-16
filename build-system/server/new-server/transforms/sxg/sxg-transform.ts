@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {PostHTML} from 'posthtml';
+import posthtml from 'posthtml';
 import {URL} from 'url';
 import {isJsonScript, isValidScript} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
 
-function sxgTransform(node: PostHTML.Node, options: OptionSet = {}): PostHTML.Node {
+function sxgTransform(node: posthtml.Node, options: OptionSet = {}): posthtml.Node {
   // Make sure that isJsonScript is used before `isValidScript`. We bail out
   // early if the ScriptNode is of type="application/json" since it wouldn't
   // have any src url to modify.
@@ -47,8 +47,8 @@ function sxgTransform(node: PostHTML.Node, options: OptionSet = {}): PostHTML.No
  * Returns a function that will transform script node sources into their sxg counterparts.
  * @param options
  */
-export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
-  return function(tree: PostHTML.Node) {
+export default function(options: OptionSet = {}): (tree: posthtml.Node) => void {
+  return function(tree: posthtml.Node) {
     tree.match({tag: 'script'}, (script) => {
       return sxgTransform(script, options);
     });
