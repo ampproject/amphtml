@@ -178,6 +178,7 @@ export class VideoManager {
   /** @param {!../video-interface.VideoInterface} video */
   register(video) {
     devAssert(video);
+    const videoBE = /** @type {!AMP.BaseElement} */ (video);
 
     this.registerCommonActions_(video);
 
@@ -198,18 +199,34 @@ export class VideoManager {
         this.ampdoc.win
       );
     }
-    this.viewportObserver_.observe(
-      /** @type {!AMP.BaseElement} */ (video).element
+
+    let reloadUnlistener;
+    const originalLayoutCallback = videoBE.layoutCallback;
+    videoBE.layoutCallback = () => {
+      originalLayoutCallback.apply(videoBE);
+      this.viewportObserver_.observe(videoBE.element);
+      reloadUnlistener = listen(videoBE.element, VideoEvents.RELOAD, () =>
+        entry.videoLoaded()
+      );
+    };
+    const originalUnlayoutCallback = videoBE.unlayoutCallback;
+    videoBE.unlayoutCallback = () => {
+      originalUnlayoutCallback.apply(videoBE);
+      this.viewportObserver_.unobserve(videoBE.element);
+      reloadUnlistener();
+    };
+
+    // While register() is called during build and so the layoutCallback
+    // should catch, guard against a potential future race condition by
+    // also observing here.
+    this.viewportObserver_.observe(videoBE.element);
+    reloadUnlistener = listen(videoBE.element, VideoEvents.RELOAD, () =>
+      entry.videoLoaded()
     );
 
     this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
     this.entries_.push(entry);
-    listen(
-      /** @type {!AMP.BaseElement} */ (video).element,
-      VideoEvents.RELOAD,
-      () => entry.videoLoaded()
-    );
 
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
