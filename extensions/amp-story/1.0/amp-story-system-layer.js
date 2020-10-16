@@ -33,7 +33,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {matches, scopedQuerySelector} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
-import {setStyle} from '../../../src/style';
+import {setImportantStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
@@ -218,6 +218,15 @@ const TEMPLATE = {
           ],
         },
         {
+          tag: 'button',
+          attrs: dict({
+            'class':
+              SKIP_NEXT_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL,
+        },
+        {
           tag: 'a',
           attrs: dict({
             'role': 'button',
@@ -231,15 +240,6 @@ const TEMPLATE = {
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class':
-              SKIP_NEXT_CLASS +
-              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL,
         },
         {
           tag: 'button',
@@ -262,20 +262,20 @@ const TEMPLATE = {
 };
 
 /** @enum {string} */
-const BUTTON_TYPES = {
+const CONTROL_TYPES = {
   CLOSE: 'close-button',
   SHARE: 'share-button',
   SKIP_NEXT: 'skip-next-button',
 };
 
-const BUTTON_DEFAULTS = {
-  [BUTTON_TYPES.SHARE]: {
+const CONTROL_DEFAULTS = {
+  [CONTROL_TYPES.SHARE]: {
     'selector': `.${SHARE_CLASS}`,
   },
-  [BUTTON_TYPES.CLOSE]: {
+  [CONTROL_TYPES.CLOSE]: {
     'selector': `.${CLOSE_CLASS}`,
   },
-  [BUTTON_TYPES.SKIP_NEXT]: {
+  [CONTROL_TYPES.SKIP_NEXT]: {
     'selector': `.${SKIP_NEXT_CLASS}`,
   },
 };
@@ -567,8 +567,8 @@ export class SystemLayer {
     });
 
     this.storeService_.subscribe(
-      StateProperty.CUSTOM_UI_CONFIG,
-      (config) => this.onCustomUIConfig_(config),
+      StateProperty.CUSTOM_CONTROLS,
+      (config) => this.onCustomControls_(config),
       true /* callToInitialize */
     );
   }
@@ -915,49 +915,58 @@ export class SystemLayer {
 
   /**
    * Reacts to a custom configuration change coming from the player level.
-   * Updates UI to match configuration described by publisher
-   * @param {!JSONObject} config
+   * Updates UI to match configuration described by publisher.
+   * @param {!Array<!Object>} controls
    * @private
    */
-  onCustomUIConfig_(config) {
-    if (!config.header) {
+  onCustomControls_(controls) {
+    if (controls.length <= 0) {
       return;
     }
-    const {header} = config;
-    const {buttons} = header;
 
-    buttons.forEach((button) => {
-      const buttonConfig = BUTTON_DEFAULTS[button.name];
-      const el = scopedQuerySelector(
-        this.systemLayerEl_,
-        buttonConfig.selector
+    controls.forEach((control) => {
+      if (!control.name) {
+        return;
+      }
+
+      const defaultConfig = CONTROL_DEFAULTS[control.name];
+
+      if (!defaultConfig) {
+        return;
+      }
+
+      const element = scopedQuerySelector(
+        this.getShadowRoot(),
+        defaultConfig.selector
       );
 
-      if (button.visibility === 'hidden') {
+      if (control.visibility === 'hidden') {
         this.vsync_.mutate(() => {
-          el.classList.add('i-amphtml-story-ui-hide-button');
+          element.classList.add('i-amphtml-story-ui-hide-button');
         });
       }
 
-      if (!button.visibility || button.visibility === 'visible') {
+      if (!control.visibility || control.visibility === 'visible') {
         this.vsync_.mutate(() => {
-          el.classList.remove('i-amphtml-story-ui-hide-button');
+          element.classList.remove('i-amphtml-story-ui-hide-button');
         });
       }
 
-      if (button.position === 'start') {
+      if (control.position === 'start') {
         const startButtonContainer = this.systemLayerEl_.querySelector(
           '.i-amphtml-story-system-layer-buttons-start-position'
         );
 
         this.vsync_.mutate(() => {
-          el.parentElement.removeChild(el);
-          startButtonContainer.appendChild(el);
+          element.parentElement.removeChild(element);
+          startButtonContainer.appendChild(element);
         });
       }
 
-      if (button.icon) {
-        setStyle(el, 'background-image', button.icon);
+      if (control.icon) {
+        setImportantStyles(dev().assertElement(element), {
+          'background-image': `url(${control.icon})`,
+        });
       }
     });
   }
