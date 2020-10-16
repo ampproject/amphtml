@@ -673,7 +673,7 @@ export class AmpStoryPlayer {
       },
     };
 
-    endpoint = endpoint.replace(/\${offset}/, this.stories_.length);
+    endpoint = endpoint.replace(/\${offset}/, this.stories_.length.toString());
 
     return fetch(endpoint, init)
       .then((response) => response.json())
