@@ -40,6 +40,8 @@ import {isLayoutSizeDefined} from '../layout';
  *   a component prop 1:1.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
+ * - `attrPrefix` can be specified when multiple attributes with the same prefix
+ *   map to a single prop object. The prefix cannot equal the attribute name.
  *
  * @typedef {{
  *   attr: (string|undefined),
@@ -732,7 +734,10 @@ function collectProps(Ctor, element, ref, defaultProps) {
       const attrs = element.attributes;
       for (let i = 0; i < attrs.length; i++) {
         const attrib = attrs[i];
-        if (attrib.name.startsWith(def.attrPrefix)) {
+        if (
+          attrib.name.startsWith(def.attrPrefix) &&
+          attrib.name !== def.attrPrefix
+        ) {
           currObj[
             dashToCamelCase(
               attrib.name.substring(def.attrPrefix.length, attrib.name.length)
@@ -740,7 +745,9 @@ function collectProps(Ctor, element, ref, defaultProps) {
           ] = attrib.value;
         }
       }
-      props[name] = currObj;
+      if (Object.keys(currObj).length > 0) {
+        props[name] = currObj;
+      }
     }
     if (value == null) {
       if (def.default !== undefined) {
@@ -910,7 +917,8 @@ function shouldMutationBeRerendered(Ctor, m) {
       if (
         m.attributeName == def.attr ||
         (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
-        m.attributeName.startsWith(def.attrPrefix)
+        (m.attributeName.startsWith(def.attrPrefix) &&
+          m.attributeName !== def.attrPrefix)
       ) {
         return true;
       }
