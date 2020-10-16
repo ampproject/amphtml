@@ -2447,7 +2447,11 @@ describe('amp-a4a', () => {
         a4a = new MockA4AImpl(a4aElement);
         consentString = 'test-consent-string';
         gdprApplies = true;
-        consentMetadata = {gdprApplies};
+        consentMetadata = {
+          gdprApplies,
+          'consentStringType': 1,
+          'additionalConsent': 'abc123',
+        };
         return fixture;
       });
 
@@ -2492,7 +2496,8 @@ describe('amp-a4a', () => {
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
-            consentString
+            consentString,
+            consentMetadata
           )
         ).calledOnce;
       });
@@ -2545,7 +2550,8 @@ describe('amp-a4a', () => {
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
-            consentString
+            consentString,
+            consentMetadata
           )
         ).calledOnce;
       });
@@ -2590,6 +2596,7 @@ describe('amp-a4a', () => {
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.UNKNOWN,
+            null,
             null
           )
         ).calledOnce;
