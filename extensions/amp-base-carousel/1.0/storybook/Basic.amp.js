@@ -31,10 +31,12 @@ export default {
 
 export const Default = () => {
   const snap = boolean('snap', true);
+  const outsetArrows = boolean('outset arrows', false);
   const controls = select('show controls', ['auto', 'always', 'never']);
   return (
     <amp-base-carousel
       controls={controls}
+      outset-arrows={outsetArrows}
       snap={String(snap)}
       width="440"
       height="225"

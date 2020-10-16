@@ -98,8 +98,9 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   lotame: {
-    url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK',
-    macros: ['CLIENT_ID', 'AD_NETWORK'],
+    url:
+      'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK/ma=MAX_AUDIENCES',
+    macros: ['CLIENT_ID', 'AD_NETWORK', 'MAX_AUDIENCES'],
     disableKeyAppend: true,
   },
   yieldbot: {
