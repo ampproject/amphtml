@@ -32,7 +32,7 @@ describes.endtoend(
       'grouping-move-by-2.amp.html',
     experiments: ['amp-base-carousel-bento'],
     initialRect: {width: pageWidth, height: pageHeight},
-    environments: ['single', 'viewer-demo'],
+    environments: ['single'],
   },
   async (env) => {
     let controller, btnPrev, btnNext;
