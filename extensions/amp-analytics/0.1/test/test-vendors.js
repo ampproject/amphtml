@@ -51,6 +51,7 @@ describes.realWin(
       elementMacros = {
         'COOKIE': null,
         'CONSENT_STATE': null,
+        'CONSENT_METADATA': null,
       };
     });
 
