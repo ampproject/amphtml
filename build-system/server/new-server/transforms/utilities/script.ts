@@ -19,8 +19,6 @@ import {URL} from 'url';
 import {extname} from 'path';
 import {VALID_CDN_ORIGIN} from './cdn';
 import {parse, format} from 'path';
-import log from 'fancy-log';
-import {cyan, yellow} from 'ansi-colors';
 
 export interface ScriptNode extends PostHTML.Node {
   tag: 'script';
@@ -76,17 +74,14 @@ export function toExtension(url: URL, extension: string): URL {
 
 /**
  * This is a temporary measure to allow for a relaxed parsing of our
- * fixture files src url's before they are all fixed accordingly.
+ * fixture files' src urls before they are all fixed accordingly.
  */
 export function tryGetUrl(src: string, port: number = 8000): URL {
   let url;
   try {
     url = new URL(src);
   } catch (e) {
-    const resource = `http://localhost:${port}`;
-    log(yellow('WARNING:'), cyan(`Resource name given "${src}" is implied ` +
-      `to be localhost. Using ${resource}.`));
-    url = new URL(src, resource);
+    url = new URL(src, `http://localhost:${port}`);
   } finally {
     return url as URL;
   }
