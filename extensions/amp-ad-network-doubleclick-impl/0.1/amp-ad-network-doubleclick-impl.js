@@ -613,7 +613,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
-      'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
       'msz': msz,
