@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PostHTML} from 'posthtml';
+import posthtml from 'posthtml';
 import {isJsonScript, isValidScript, tryGetUrl} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
@@ -24,7 +24,7 @@ import {parse} from 'path';
  * For any script, with a valid path to AMP Project CDN, replace it with a local value.
  * @param script
  */
-function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
+function modifySrc(script: posthtml.Node, options: OptionSet): posthtml.Node {
   // Make sure that isJsonScript is used before `isValidScript`. We bail out
   // early if the ScriptNode is of type="application/json" since it wouldn't
   // have any src url to modify.
@@ -47,8 +47,8 @@ function modifySrc(script: PostHTML.Node, options: OptionSet): PostHTML.Node {
 /**
  * Replace the src for every script tag to the local value.
  */
-export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
-  return function(tree: PostHTML.Node) {
+export default function(options: OptionSet = {}): (tree: posthtml.Node) => void {
+  return function(tree: posthtml.Node) {
     tree.match({tag: 'script'}, (script) => {
       return modifySrc(script, options);
     });
