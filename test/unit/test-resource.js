@@ -121,6 +121,23 @@ describes.realWin('Resource', {amp: true}, (env) => {
         expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
       });
     });
+
+    it('should remeasure if measured before upgrade and isFixed', () => {
+      // First measure
+      element.isAlwaysFixed = () => false;
+      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
+      resource.measure(/* usePremeasuredRect */ true);
+
+      // Now adjust implementation to be alwaysFixed and call build.
+      element.isUpgraded = () => true;
+      element.isAlwaysFixed = () => true;
+      element.build = () => Promise.resolve();
+      element.onMeasure = () => {};
+      resource.requestMeasure = env.sandbox.stub();
+      return resource.build().then(() => {
+        expect(resource.requestMeasure).calledOnce;
+      });
+    });
   });
 
   it('should build if element is currently building', () => {
