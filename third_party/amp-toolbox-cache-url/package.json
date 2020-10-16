@@ -35,7 +35,7 @@
     "@ampproject/rollup-plugin-closure-compiler": "0.26.0",
     "eslint": "7.4.0",
     "eslint-config-google": "0.14.0",
-    "jasmine": "3.6.1",
+    "jasmine": "3.6.2",
     "karma": "5.1.1",
     "karma-chrome-launcher": "3.1.0",
     "karma-jasmine": "4.0.1",
