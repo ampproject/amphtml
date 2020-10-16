@@ -346,6 +346,12 @@ export class Resource {
         // so check if we're "ready for layout" (measured and built) here.
         if (this.intersect_ && this.hasBeenMeasured()) {
           this.state_ = ResourceState.READY_FOR_LAYOUT;
+          // The InOb premeasurement couldn't account for fixed position since
+          // implementation wasn't loaded yet. Perform a remeasure now that we know it
+          // is fixed.
+          if (this.element.isAlwaysFixed() && !this.isFixed_) {
+            this.requestMeasure();
+          }
           this.element.onMeasure(/* sizeChanged */ true);
         } else {
           this.state_ = ResourceState.NOT_LAID_OUT;
