@@ -191,7 +191,7 @@ function getFilesToLint(files) {
  */
 function lint() {
   maybeUpdatePackages();
-  let filesToLint = config.lintGlobs;
+  let filesToLint = globby.sync(config.lintGlobs, {gitignore: true});
   if (argv.files) {
     filesToLint = getFilesToLint(getFilesFromArgv());
   } else if (!eslintRulesChanged() && argv.local_changes) {
