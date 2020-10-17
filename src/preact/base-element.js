@@ -676,6 +676,19 @@ function usesShadowDom(Ctor) {
 }
 
 /**
+ * @param {string} attributeName
+ * @param {string} attributePrefix
+ * @return {boolean}
+ */
+function matchesAttrPrefix(attributeName, attributePrefix) {
+  return (
+    attributePrefix !== undefined &&
+    attributeName.startsWith(attributePrefix) &&
+    attributeName !== attributePrefix
+  );
+}
+
+/**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
  * @param {{current: ?}} ref
@@ -734,10 +747,7 @@ function collectProps(Ctor, element, ref, defaultProps) {
       const attrs = element.attributes;
       for (let i = 0; i < attrs.length; i++) {
         const attrib = attrs[i];
-        if (
-          attrib.name.startsWith(def.attrPrefix) &&
-          attrib.name !== def.attrPrefix
-        ) {
+        if (matchesAttrPrefix(attrib.name, def.attrPrefix)) {
           currObj[
             dashToCamelCase(
               attrib.name.substring(def.attrPrefix.length, attrib.name.length)
@@ -917,8 +927,7 @@ function shouldMutationBeRerendered(Ctor, m) {
       if (
         m.attributeName == def.attr ||
         (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
-        (m.attributeName.startsWith(def.attrPrefix) &&
-          m.attributeName !== def.attrPrefix)
+        matchesAttrPrefix(m.attributeName, def.attrPrefix)
       ) {
         return true;
       }
