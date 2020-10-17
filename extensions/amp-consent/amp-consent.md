@@ -404,7 +404,7 @@ A couple of implications with this behavior:
 
 ### Basic blocking behaviors
 
-To block components, either add the `data-block-on-consent` attribute to the AMP component or add the `amp-consent-blocking` meta tag with the list of extensions to be blocked. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
+To block components, either add the `data-block-on-consent` attribute to the AMP component or add the `amp-consent-blocking` meta tag with the list of extensions to be blocked. Note, that if you're using the `type` attribute for CMP integration, you must also include the `amp-consent-blocking` meta tag. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
 
