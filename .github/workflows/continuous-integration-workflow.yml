@@ -17,22 +17,12 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-      - name: Get yarn Cache Path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ matrix.platform }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ matrix.platform }}-yarn-
-      - name: Install Gulp CLI
-        run: yarn global add gulp-cli
-      - name: Install Dependencies
-        run: yarn
       - name: Set Up Environment
-        if: ${{ matrix.platform == 'macos-latest' }}
+        if: ${{ matrix.platform == 'macos-latest' || matrix.platform == 'ubuntu-latest'}}
         run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
+      - name: Install Gulp CLI
+        run: npm install --global --force gulp-cli
+      - name: Install Dependencies
+        run: npm install
       - name: Build and Test
         run: node build-system/pr-check/cross-browser-tests.js

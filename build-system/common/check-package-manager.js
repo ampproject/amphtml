@@ -15,6 +15,10 @@
  */
 'use strict';
 
+/**
+ * @fileoverview Perform checks on the AMP toolchain.
+ */
+
 /*
  * NOTE: DO NOT use non-native node modules in this file.
  *       This file runs before installing any packages,
@@ -23,17 +27,13 @@
  */
 const fs = require('fs');
 const https = require('https');
-const {getStdout, getStderr} = require('./process');
+const {getStdout} = require('./process');
 
 const setupInstructionsUrl =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
 const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
 const gulpHelpUrl =
   'https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467';
-
-const yarnExecutable = 'npx yarn';
-const gulpExecutable = 'npx gulp';
-const pythonExecutable = 'python';
 
 const wrongGulpPaths = [
   '/bin/',
@@ -47,6 +47,28 @@ const wrongGulpPaths = [
 const warningDelaySecs = 10;
 
 const updatesNeeded = new Set();
+
+const npmInfoMessage = `${red(
+  '*** The AMP project now uses npm for package management ***'
+)}
+For more info, see ${cyan('http://go.amp.dev/issue/30518')}.
+
+${yellow('To install all packages:')}
+${cyan('$')} npm install
+
+${yellow('To install a new (runtime) package to "dependencies":')}
+${cyan('$')} npm install [package_name@version]
+
+${yellow('To install a new (toolset) package to "devDependencies":')}
+${cyan('$')} npm install --save-dev [package_name@version]
+
+${yellow('To update a package:')}
+${cyan('$')} npm update [package_name@version]
+
+${yellow('To uninstall a package:')}
+${cyan('$')} npm uninstall [package_name]
+
+${yellow('For detailed instructions, see')} ${cyan(setupInstructionsUrl)}`;
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {
@@ -63,44 +85,22 @@ function yellow(text) {
 }
 
 /**
- * @fileoverview Perform checks on the AMP toolchain.
- */
-
-// If npm is being run, print a message and cause 'npm install' to fail.
-function ensureYarn() {
-  if (process.env.npm_execpath.indexOf('yarn') === -1) {
-    console.log(
-      red('*** The AMP project uses yarn for package management ***'),
-      '\n'
-    );
-    console.log(yellow('To install all packages:'));
-    console.log(cyan('$'), 'yarn', '\n');
-    console.log(
-      yellow('To install a new (runtime) package to "dependencies":')
-    );
-    console.log(cyan('$'), 'yarn add --exact [package_name@version]', '\n');
-    console.log(
-      yellow('To install a new (toolset) package to "devDependencies":')
-    );
-    console.log(
-      cyan('$'),
-      'yarn add --dev --exact [package_name@version]',
-      '\n'
-    );
-    console.log(yellow('To upgrade a package:'));
-    console.log(cyan('$'), 'yarn upgrade --exact [package_name@version]', '\n');
-    console.log(yellow('To remove a package:'));
-    console.log(cyan('$'), 'yarn remove [package_name]', '\n');
-    console.log(
-      yellow('For detailed instructions, see'),
-      cyan(setupInstructionsUrl),
-      '\n'
-    );
+ * If yarn is being run, print a message and cause 'yarn install' to fail.
+ * See https://github.com/yarnpkg/yarn/issues/5063 for details on how the
+ * package manager being used is determined.
+ **/
+function ensureNpm() {
+  if (!process.env.npm_execpath.includes('npm')) {
+    console.log(npmInfoMessage);
     process.exit(1);
   }
 }
 
-// Check the node version and print a warning if it is not the latest LTS.
+/**
+ * Check the node version and print a warning if it is not the latest LTS.
+ *
+ * @return {Promise}
+ **/
 function checkNodeVersion() {
   const nodeVersion = getStdout('node --version').trim();
   return new Promise((resolve) => {
@@ -165,6 +165,12 @@ function checkNodeVersion() {
   });
 }
 
+/**
+ * Extracts the latest node version from a JSON object containing version info
+ *
+ * @param {!Object} distributionsJson
+ * @return {string}
+ */
 function getNodeLatestLtsVersion(distributionsJson) {
   if (distributionsJson) {
     // Versions are in descending order, so the first match is the latest lts.
@@ -180,46 +186,24 @@ function getNodeLatestLtsVersion(distributionsJson) {
   }
 }
 
-// If yarn is being run, perform a version check and proceed with the install.
-function checkYarnVersion() {
-  const yarnVersion = getStdout(yarnExecutable + ' --version').trim();
-  // TODO (kristoferbaxter): Remove once yarn stable is fixed.
-  // TODO (rsimha): Revisit the use of yarn v1 for AMP package management.
-  // At this time current stable version is failing GPG checks, so we use 1.22.4.
-  const stableVersion = '1.22.4';
-  if (stableVersion === '') {
-    console.log(
-      yellow(
-        'WARNING: Something went wrong. ' +
-          'Could not determine the stable version of yarn.'
-      )
-    );
-  } else if (yarnVersion !== stableVersion) {
-    console.log(
-      yellow('WARNING: Detected yarn version'),
-      cyan(yarnVersion) + yellow('. Recommended (stable) version is'),
-      cyan(stableVersion) + yellow('.')
-    );
-    console.log(
-      yellow('⤷ To fix this, run'),
-      cyan(
-        `"curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${stableVersion}"`
-      ),
-      yellow('or see'),
-      cyan('https://yarnpkg.com/docs/install'),
-      yellow('for instructions.')
-    );
-    updatesNeeded.add('yarn');
-  } else {
-    console.log(
-      green('Detected'),
-      cyan('yarn'),
-      green('version'),
-      cyan(yarnVersion + ' (stable)') + green('. Installing packages...')
-    );
-  }
+/**
+ * If npm is being run, log its version and proceed with the install.
+ */
+function logNpmVersion() {
+  const npmVersion = getStdout('npm --version').trim();
+  console.log(
+    green('Detected'),
+    cyan('npm'),
+    green('version'),
+    cyan(npmVersion) + green('. Installing packages...')
+  );
 }
 
+/**
+ * Gets the PATH variable from the parent shell of the node process
+ *
+ * @return {string}
+ */
 function getParentShellPath() {
   const nodePath = process.env.PATH;
   const pathSeparator = process.platform == 'win32' ? ';' : ':';
@@ -228,10 +212,15 @@ function getParentShellPath() {
   return nodePath.split(`node-gyp-bin${pathSeparator}`).pop();
 }
 
+/**
+ * Checks for the absence of global gulp, and the presence of gulp-cli and local
+ * gulp.
+ */
 function runGulpChecks() {
   const firstInstall = !fs.existsSync('node_modules');
-  const globalPackages = getStdout(yarnExecutable + ' global list').trim();
-  const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
+  const globalPackages = getStdout('npm list --global --depth 0').trim();
+  const globalGulp = globalPackages.match(/gulp@.*/);
+  const globalGulpCli = globalPackages.match(/gulp-cli@.*/);
   const defaultGulpPath = getStdout('which gulp', {
     'env': {'PATH': getParentShellPath()},
   }).trim();
@@ -247,9 +236,9 @@ function runGulpChecks() {
     );
     console.log(
       yellow('⤷ To fix this, run'),
-      cyan('"yarn global remove gulp"'),
+      cyan('"npm uninstall --global gulp"'),
       yellow('followed by'),
-      cyan('"yarn global add gulp-cli"') + yellow('.')
+      cyan('"npm install --global gulp-cli"') + yellow('.')
     );
     console.log(
       yellow('⤷ See'),
@@ -257,6 +246,18 @@ function runGulpChecks() {
       yellow('for more information.')
     );
     updatesNeeded.add('gulp');
+  } else if (!globalGulpCli) {
+    console.log(
+      yellow('WARNING: Could not find a global install of'),
+      cyan('gulp-cli') + yellow('.')
+    );
+    console.log(
+      yellow('⤷ To fix this, run'),
+      cyan('"npm install --global gulp-cli"') + yellow('.')
+    );
+    updatesNeeded.add('gulp-cli');
+  } else {
+    printGulpVersion('gulp-cli');
   }
   if (wrongGulp) {
     console.log(
@@ -279,27 +280,37 @@ function runGulpChecks() {
     updatesNeeded.add('gulp');
   }
   if (!firstInstall) {
-    const gulpVersions = getStdout(gulpExecutable + ' --version').trim();
-    const gulpVersion = gulpVersions.match(/Local version[:]? (.*?)$/);
-    if (gulpVersion && gulpVersion.length == 2) {
-      console.log(
-        green('Detected'),
-        cyan('gulp'),
-        green('version'),
-        cyan(gulpVersion[1]) + green('.')
-      );
-    } else {
-      console.log(
-        yellow(
-          'WARNING: ' +
-            'Could not determine the local version of gulp. ' +
-            '(This is normal during install / upgrade.)'
-        )
-      );
-    }
+    printGulpVersion('gulp');
   }
 }
 
+/**
+ * Prints version info for the given gulp command
+ *
+ * @param {string} gulpCmd
+ */
+function printGulpVersion(gulpCmd) {
+  const versionRegex =
+    gulpCmd == 'gulp' ? /Local version[:]? (.*?)$/ : /^CLI version[:]? (.*?)\n/;
+  const gulpVersions = getStdout('gulp --version').trim();
+  const gulpVersion = gulpVersions.match(versionRegex);
+  if (gulpVersion && gulpVersion.length == 2) {
+    console.log(
+      green('Detected'),
+      cyan(gulpCmd),
+      green('version'),
+      cyan(gulpVersion[1]) + green('.')
+    );
+  } else {
+    console.log(
+      yellow(`WARNING: Could not determine the version of ${gulpCmd}.`)
+    );
+  }
+}
+
+/**
+ * Checks if the local version of python is 2.7 or 3
+ */
 function checkPythonVersion() {
   // Python 2.7 is EOL but still supported
   // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
@@ -309,9 +320,7 @@ function checkPythonVersion() {
 
   // Python2 prints its version to stderr (fixed in Python 3.4)
   // See: https://bugs.python.org/issue18338
-  const pythonVersionResult =
-    getStderr(`${pythonExecutable} --version`).trim() ||
-    getStdout(`${pythonExecutable} --version`).trim();
+  const pythonVersionResult = getStdout('python --version 2>&1').trim();
   const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
   if (pythonVersion && pythonVersion.length == 2) {
     const versionNumber = pythonVersion[1];
@@ -340,7 +349,7 @@ function checkPythonVersion() {
     );
     console.log(
       yellow('⤷ To fix this, make sure'),
-      cyan(pythonExecutable),
+      cyan('python'),
       yellow('is in your'),
       cyan('PATH'),
       yellow('and is version'),
@@ -349,17 +358,22 @@ function checkPythonVersion() {
   }
 }
 
+/**
+ * Runs checks for the package manager and tooling being used.
+ * @return {Promise}
+ */
 async function main() {
-  // Yarn is already used by default on Travis, so there is nothing more to do.
-  if (process.env.TRAVIS) {
-    return 0;
+  // NPM is already used by default on Travis and Github Actions, so there is
+  // nothing more to do.
+  if (process.env.TRAVIS || process.env.GITHUB_ACTIONS) {
+    return;
   }
-  ensureYarn();
+  ensureNpm();
   await checkNodeVersion();
   runGulpChecks();
   checkPythonVersion();
-  checkYarnVersion();
-  if (!process.env.TRAVIS && updatesNeeded.size > 0) {
+  logNpmVersion();
+  if (updatesNeeded.size) {
     console.log(
       yellow('\nWARNING: Detected problems with'),
       cyan(Array.from(updatesNeeded).join(', '))
