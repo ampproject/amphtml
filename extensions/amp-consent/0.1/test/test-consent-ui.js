@@ -764,6 +764,31 @@ describes.realWin(
         });
       });
 
+      it('should focus on ui when modal', async () => {
+        consentUI = new ConsentUI(mockInstance, {
+          'promptUISrc': 'https//promptUISrc',
+          'uiConfig': {},
+        });
+
+        consentUI.show(true);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+            border: false,
+          },
+        });
+        await macroTask();
+
+        expect(consentUI.srAlertShown_).to.be.false;
+        expect(consentUI.srAlert_).to.be.null;
+        expect(doc.activeElement).to.equal(consentUI.ui_);
+        expect(consentUI.parent_.classList.contains(consentUiClasses.modal)).to
+          .be.true;
+      });
+
       it('should handle a border value', () => {
         return getReadyIframeCmpConsentUi().then((consentUI) => {
           expect(consentUI.borderEnabled_).to.be.equal(true);
