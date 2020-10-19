@@ -206,6 +206,20 @@ describes.realWin(
       });
     });
 
+    it('overwrites default aria-label value when a non-empty value is provided', () => {
+      const share = doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+      share.setAttribute('aria-label', 'test value');
+
+      doc.body.appendChild(share);
+      return loaded(share).then((el) => {
+        expect(el.getAttribute('aria-label')).to.be.equal('test value');
+      });
+    });
+
     it('opens share window in _blank', () => {
       return getShare('twitter').then((el) => {
         el.implementation_.handleClick_();
