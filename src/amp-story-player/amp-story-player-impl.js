@@ -85,6 +85,7 @@ const MAX_IFRAMES = 3;
 const BUTTON_TYPES = {
   BACK: 'back-button',
   CLOSE: 'close-button',
+  SKIP_NEXT: 'skip-next-button',
 };
 
 /** @enum {string} */
@@ -96,9 +97,10 @@ const BUTTON_CLASSES = {
 };
 
 /** @enum {string} */
-const BUTTON_EVENTS = {
+export const CONTROL_EVENTS = {
   [BUTTON_TYPES.BACK]: 'amp-story-player-back',
   [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
+  [BUTTON_TYPES.SKIP_NEXT]: 'amp-story-player-skip-next',
 };
 
 /** @enum {string} */
@@ -112,7 +114,11 @@ const STORY_MESSAGE_STATE_TYPE = {
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
+  CAN_SKIP_STORY: 'CAN_SKIP_STORY',
 };
+
+/** @const {string} */
+export const AMP_STORY_PLAYER_EVENT = 'AMP_STORY_PLAYER_EVENT';
 
 /** @typedef {{ state:string, value:(boolean|string) }} */
 let DocumentStateTypeDef;
@@ -120,6 +126,7 @@ let DocumentStateTypeDef;
 /**
  * @typedef {{
  *   href: string,
+ *   idx: number,
  *   iframeIdx: number,
  *   title: (?string),
  *   poster: (?string)
@@ -267,7 +274,7 @@ export class AmpStoryPlayer {
       const story = stories[i];
       story.iframeIdx = -1;
 
-      this.stories_.push(story);
+      story.idx = this.stories_.push(story) - 1;
 
       if (this.iframes_.length < MAX_IFRAMES) {
         this.createIframeForStory_(this.stories_.length - 1);
@@ -351,12 +358,13 @@ export class AmpStoryPlayer {
     const anchorEls = toArray(this.element_.querySelectorAll('a'));
 
     this.stories_ = anchorEls.map(
-      (anchorEl) =>
+      (anchorEl, idx) =>
         /** @type {!StoryDef} */ ({
           href: anchorEl.href,
           title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
           poster: anchorEl.getAttribute('data-poster-portrait-src'),
           iframeIdx: -1,
+          idx,
         })
     );
   }
@@ -452,7 +460,7 @@ export class AmpStoryPlayer {
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
+        createCustomEvent(this.win_, CONTROL_EVENTS[option], dict({}))
       );
     });
   }
@@ -585,6 +593,11 @@ export class AmpStoryPlayer {
               dict({'controls': this.playerConfig_.controls}),
               false
             );
+
+            messaging.sendRequest('setDocumentState', {
+              state: [STORY_MESSAGE_STATE_TYPE.CAN_SKIP_STORY],
+              value: story.idx < this.stories_.length - 1,
+            });
           }
 
           resolve(messaging);
@@ -1239,7 +1252,28 @@ export class AmpStoryPlayer {
           messaging
         );
         break;
+      case AMP_STORY_PLAYER_EVENT:
+        this.onPlayerEvent_(data.value);
+        break;
       default:
+        break;
+    }
+  }
+
+  /**
+   * Reacts to events coming from the story.
+   * @private
+   * @param {string} value
+   */
+  onPlayerEvent_(value) {
+    switch (value) {
+      case CONTROL_EVENTS[BUTTON_TYPES.SKIP_NEXT]:
+        this.next_();
+        break;
+      default:
+        this.element_.dispatchEvent(
+          createCustomEvent(this.win_, value, dict({}))
+        );
         break;
     }
   }

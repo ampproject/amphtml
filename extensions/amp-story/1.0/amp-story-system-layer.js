@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 import {
+  AMP_STORY_PLAYER_EVENT,
+  CONTROL_EVENTS,
+} from '../../../src/amp-story-player/amp-story-player-impl';
+import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
@@ -30,6 +35,7 @@ import {Services} from '../../../src/services';
 import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {matches, scopedQuerySelector} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
@@ -273,9 +279,11 @@ const CONTROL_DEFAULTS = {
   },
   [CONTROL_TYPES.CLOSE]: {
     'selector': `.${CLOSE_CLASS}`,
+    'event': CONTROL_EVENTS[CONTROL_TYPES.CLOSE],
   },
   [CONTROL_TYPES.SKIP_NEXT]: {
     'selector': `.${SKIP_NEXT_CLASS}`,
+    'event': CONTROL_EVENTS[CONTROL_TYPES.SKIP_NEXT],
   },
 };
 
@@ -342,6 +350,12 @@ export class SystemLayer {
 
     /** @private {?number|?string} */
     this.timeoutId_ = null;
+
+    /** @private @const {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
+
+    /** @private @const {?AmpStoryViewerMessagingconst ha} */
+    this.viewerMessagingHandler_ = null;
   }
 
   /**
@@ -395,9 +409,12 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    const viewer = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewer_ = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
+      : null;
 
-    if (shouldShowStoryUrlInfo(viewer)) {
+    if (shouldShowStoryUrlInfo(this.viewer_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
@@ -457,6 +474,14 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
+
+    this.storeService_.subscribe(
+      StateProperty.SKIP_NEXT_STORY_STATE,
+      (hasNextStory) => {
+        this.onSkipStoryStateUpdate_(hasNextStory);
+      },
+      true /** callToInitialize */
+    );
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_AUDIO_UI,
@@ -610,6 +635,21 @@ export class SystemLayer {
       'i-amphtml-story-bookend-active',
       isActive
     );
+  }
+
+  /**
+   * Reacts to the next story state updates and updates the UI accordingly.
+   * @param {boolean} hasNextStory
+   * @private
+   */
+  onSkipStoryStateUpdate_(hasNextStory) {
+    this.vsync_.mutate(() => {
+      const button = this.getShadowRoot().querySelector(
+        `.${escapeCssSelectorIdent(SKIP_NEXT_CLASS)}`
+      );
+
+      button.disabled = !hasNextStory;
+    });
   }
 
   /**
@@ -966,6 +1006,21 @@ export class SystemLayer {
         setImportantStyles(dev().assertElement(element), {
           'background-image': `url(${control.backgroundImageUrl})`,
         });
+      }
+
+      if (control.event || defaultConfig.event) {
+        const handleClick = () => {
+          this.viewerMessagingHandler_ &&
+            this.viewerMessagingHandler_.send(
+              'documentStateUpdate',
+              dict({
+                'state': AMP_STORY_PLAYER_EVENT,
+                'value': control.event || defaultConfig.event,
+              })
+            );
+        };
+
+        element.addEventListener('click', handleClick.bind(this));
       }
     });
   }

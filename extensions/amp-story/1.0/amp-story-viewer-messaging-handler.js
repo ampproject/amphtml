@@ -73,6 +73,10 @@ const SET_STATE_CONFIGURATIONS = {
     action: Action.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',
   },
+  'CAN_SKIP_STORY': {
+    action: Action.TOGGLE_SKIP_NEXT_STORY,
+    isValueValid: (value) => typeof value === 'boolean',
+  },
 };
 
 /**
