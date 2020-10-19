@@ -1096,7 +1096,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Returns the object representation of the selected element.
-   * @param {Element} element
+   * @param {!Element} element
    * @return {!JsonObject}
    * @private
    */
