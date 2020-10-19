@@ -47,6 +47,14 @@ import {
 import {toggle} from '../../../src/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
+/**
+ * @typedef {{
+ *   selectedObject: ?JsonObject,
+ *   selectedText: ?string,
+ * }}
+ */
+let SelectionValues;
+
 const TAG = 'amp-autocomplete';
 
 /**
@@ -660,12 +668,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
   selectHandler_(event) {
     const element = dev().assertElement(event.target);
     const selectedElement = this.getItemElement_(element);
-    const {
-      selectedText,
-      selectedObjectValue,
-    } = this.updateAndGetElementSelections_(selectedElement);
+    const {selectedObject, selectedText} = this.updateAndGetElementSelections_(
+      selectedElement
+    );
     return this.mutateElement(() => {
-      this.selectItem_(selectedText, selectedObjectValue);
+      this.selectItem_(selectedText, selectedObject);
     });
   }
 
@@ -1056,18 +1063,21 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * and returns an object containing both the textual representation of the selected element
    * as well as its object representation, if available.
    * @param {?Element} element Element selected by the user
-   * @return {!JsonObject}
+   * @return {!SelectionValues}
    * @private
    */
   updateAndGetElementSelections_(element) {
     if (element === null || element.hasAttribute('data-disabled')) {
-      return {selectedText: null, selectedObjectValue: null};
+      return /** @type {!SelectionValues} */ ({
+        selectedObject: null,
+        selectedText: null,
+      });
     }
 
     const selectedText = this.getSelectedTextValue_(element);
     this.setInputValue_(selectedText);
-    const selectedObjectValue = this.getSelectedObjectValue_(element);
-    return {selectedText, selectedObjectValue};
+    const selectedObject = this.getSelectedObjectValue_(element);
+    return /** @type {!SelectionValues} */ ({selectedObject, selectedText});
   }
 
   /**
@@ -1097,16 +1107,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Returns the object representation of the selected element.
    * @param {!Element} element
-   * @return {!JsonObject}
+   * @return {?JsonObject}
    * @private
    */
   getSelectedObjectValue_(element) {
-    return (
-      element.getAttribute('data-json') &&
-      tryParseJson(element.getAttribute('data-json'), (error) => {
-        throw error;
-      })
-    );
+    if (!element.hasAttribute('data-json')) {
+      return null;
+    }
+
+    return tryParseJson(element.getAttribute('data-json'), (error) => {
+      throw error;
+    });
   }
 
   /**
@@ -1327,11 +1338,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.binding_.removeSelectionHighlighting(this.inputElement_);
         if (this.areResultsDisplayed_() && this.activeElement_) {
           const {
+            selectedObject,
             selectedText,
-            selectedObjectValue,
           } = this.updateAndGetElementSelections_(this.activeElement_);
           return this.mutateElement(() => {
-            this.selectItem_(selectedText, selectedObjectValue);
+            this.selectItem_(selectedText, selectedObject);
             this.resetActiveElement_();
           });
         }
@@ -1351,11 +1362,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
           const {
+            selectedObject,
             selectedText,
-            selectedObjectValue,
           } = this.updateAndGetElementSelections_(this.activeElement_);
           return this.mutateElement(() => {
-            this.selectItem_(selectedText, selectedObjectValue);
+            this.selectItem_(selectedText, selectedObject);
           });
         }
         return Promise.resolve();
