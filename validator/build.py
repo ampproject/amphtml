@@ -128,10 +128,10 @@ def InstallNodeDependencies():
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
-      ['npm', 'install'],
+      ['npm', 'install', '--userconfig', '../.npmrc'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
-  subprocess.check_call(['npm', 'install'],
+  subprocess.check_call(['npm', 'install', '--userconfig', '../../../.npmrc'],
                         cwd='js/nodejs',
                         stdout=(open(os.devnull, 'wb')
                                 if os.environ.get('TRAVIS') else sys.stdout))
