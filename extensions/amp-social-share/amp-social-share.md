@@ -228,7 +228,7 @@ All `data-param-*` prefixed attributes are turned into URL parameters and passed
 
 ### aria-label
 
-By default, the `aria-label` attribute will be populated with `Share by type` where 'type' is the `type` attribute provided to the component. If a value is passed in to `aria-label` it will overwrite the default value.
+By default, the `aria-label` attribute will be populated with `Share by type` where 'type' is the `type` attribute provided to the component. If a non-empty value is passed in to `aria-label` it will overwrite the default value.
 
 ## Styling
 
