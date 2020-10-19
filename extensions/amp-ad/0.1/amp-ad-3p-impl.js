@@ -50,6 +50,7 @@ import {
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listen} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {observe, unobserve} from '../../../src/viewport-observer';
 import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */
@@ -394,6 +395,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.element
     );
 
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
     const consentStringPromise = consentPolicyId
@@ -456,9 +458,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /**
    * @param {boolean} inViewport
-   * @override
+   * @private
    */
-  viewportCallback(inViewport) {
+  viewportCallback_(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -471,6 +473,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    unobserve(this.element);
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 

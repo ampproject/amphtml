@@ -18,6 +18,7 @@ import * as st from '../../../src/style';
 import {dev} from '../../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {observe, unobserve} from '../../../src/viewport-observer';
 import {propagateObjectFitStyles} from '../../../src/style';
 
 const TAG = 'amp-anim';
@@ -40,9 +41,6 @@ export class AmpAnim extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.img_ = null;
-
-    /** @private {boolean} */
-    this.hasLoaded_ = false;
   }
 
   /** @override */
@@ -84,6 +82,7 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observe(this.element, () => this.updateInViewport_());
     const img = dev().assertElement(this.img_);
     // Remove missing attributes to remove the placeholder srcset if none is
     // specified on the element.
@@ -104,16 +103,8 @@ export class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(unusedInViewport) {
-    if (!this.hasLoaded_) {
-      // do nothing if element has not laid out.
-      return;
-    }
-    this.updateInViewport_();
-  }
-
-  /** @override */
   unlayoutCallback() {
+    unobserve(this.element);
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;
     this.img_.srcset = SRC_PLACEHOLDER;

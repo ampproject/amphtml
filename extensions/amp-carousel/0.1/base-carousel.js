@@ -16,6 +16,7 @@
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {isAmp4Email} from '../../../src/format';
+import {observe, unobserve} from '../../../src/viewport-observer';
 import {toggleAttribute} from '../../../src/dom';
 
 /**
@@ -38,6 +39,7 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
     const input = Services.inputFor(this.win);
     const doc = /** @type {!Document} */ (this.element.ownerDocument);
     this.showControls_ =
@@ -54,8 +56,11 @@ export class BaseCarousel extends AMP.BaseElement {
     this.setControlsState();
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  viewportCallback_(inViewport) {
     this.onViewportCallback(inViewport);
     if (inViewport) {
       this.hintControls();
@@ -232,7 +237,13 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  layoutCallback() {
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
+  }
+
+  /** @override */
   unlayoutCallback() {
+    unobserve(this.element);
     return true;
   }
 

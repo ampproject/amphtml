@@ -111,6 +111,7 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
+import {observe, unobserve} from '../../../src/viewport-observer';
 import {parseQueryString} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -1132,9 +1133,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return super.renderNonAmpCreative();
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  viewportCallback_(inViewport) {
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
@@ -1143,8 +1146,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
   }
 
+  /** @override */
+  layoutCallback() {
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
+  }
+
   /** @override  */
   unlayoutCallback() {
+    unobserve(this.element);
     if (this.refreshManager_) {
       this.refreshManager_.unobserve();
     }

@@ -73,7 +73,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observe(this.element, this.viewportCallback);
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
   }
 
   /** @override */

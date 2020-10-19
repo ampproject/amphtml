@@ -28,8 +28,10 @@ import {
 } from './utils';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {handleCompanionAds} from './monetization';
+import {observe, unobserve} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
+
 /** @const */
 const TAG = 'amp-apester-media';
 /**
@@ -112,8 +114,11 @@ class AmpApesterMedia extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  viewportCallback_(inViewport) {
     if (inViewport && !this.seen_) {
       if (this.iframe_ && this.iframe_.contentWindow) {
         dev().fine(TAG, 'media seen');
@@ -151,11 +156,12 @@ class AmpApesterMedia extends AMP.BaseElement {
       renderer: true,
       tags: extractTags(this.getAmpDoc(), this.element),
     };
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
   }
 
   /** @override */
   firstLayoutCompleted() {
-    this.viewportCallback(this.isInViewport());
+    this.viewportCallback_(this.isInViewport());
     // Do not hide placeholder
   }
 
@@ -279,6 +285,7 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
     this.element.classList.add('amp-apester-container');
     const vsync = Services.vsyncFor(this.win);
     return this.queryMedia_().then(
@@ -388,6 +395,7 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    unobserve(this.element);
     if (this.iframe_) {
       this.intersectionObserverHostApi_.destroy();
       this.intersectionObserverHostApi_ = null;
