@@ -402,49 +402,58 @@ describes.realWin(
       });
     });
 
-    // TODO(zhouyx, #18574): Fix failing borderWidth check and re-enable.
-    it.skip('should collapse and reset borderBottom when its child do', () => {
-      impl.viewport_.getScrollTop = function () {
-        return 100;
-      };
-      impl.viewport_.getSize = function () {
-        return {height: 50};
-      };
-      impl.viewport_.getScrollHeight = function () {
-        return 300;
-      };
-      impl.mutateElement = function (callback) {
-        callback();
-      };
+    it('should collapse and reset borderBottom when its ad does', () => {
       impl.vsync_.mutate = function (callback) {
         callback();
       };
-      env.sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
-
-      impl.display_();
+      const layoutAdSpy = env.sandbox.spy(impl, 'layoutAd_');
+      impl.scheduleLayoutForAd_();
+      expect(layoutAdSpy).to.not.been.called;
       impl.ad_.signals().signal('built');
-      impl.ad_.signals().signal('load-end');
-      const layoutPromise = impl.layoutAd_();
-      const bodyPromise = impl.viewport_.ampdoc.waitForBodyOpen();
-      const p = Promise.all([
-        addToFixedLayerPromise,
-        layoutPromise,
-        bodyPromise,
-      ]);
-      return p.then(() => {
-        let borderWidth = win
-          .getComputedStyle(win.document.body, null)
-          .getPropertyValue('border-bottom-width');
-        expect(borderWidth).to.equal('54px');
-        impl.collapsedCallback();
-        return impl.viewport_.ampdoc.waitForBodyOpen().then(() => {
-          borderWidth = win
-            .getComputedStyle(win.document.body, null)
-            .getPropertyValue('border-bottom-width');
-          expect(borderWidth).to.equal('0px');
+      return Promise.resolve()
+        .then(() => {
+          return impl.ad_.signals().whenSignal('built');
+        })
+        .then(() => {
+          expect(layoutAdSpy).to.be.called;
+          expect(ampStickyAd).to.not.have.attribute('visible');
+          impl.ad_.signals().signal('render-start');
+          return poll('visible attribute must be set', () => {
+            return ampStickyAd.hasAttribute('visible');
+          });
+        })
+        .then(() => {
+          expect(ampStickyAd).not.to.have.display('none');
+          impl.ad_.collapse();
           expect(ampStickyAd).to.have.display('none');
         });
-      });
+    });
+
+    it.only('should ignore collapsing children that are not the ad', () => {
+      impl.vsync_.mutate = function (callback) {
+        callback();
+      };
+      const layoutAdSpy = env.sandbox.spy(impl, 'layoutAd_');
+      impl.scheduleLayoutForAd_();
+      expect(layoutAdSpy).to.not.been.called;
+      impl.ad_.signals().signal('built');
+      return Promise.resolve()
+        .then(() => {
+          return impl.ad_.signals().whenSignal('built');
+        })
+        .then(() => {
+          expect(layoutAdSpy).to.be.called;
+          expect(ampStickyAd).to.not.have.attribute('visible');
+          impl.ad_.signals().signal('render-start');
+          return poll('visible attribute must be set', () => {
+            return ampStickyAd.hasAttribute('visible');
+          });
+        })
+        .then(() => {
+          expect(ampStickyAd).not.to.have.display('none');
+          impl.collapsedCallback(document.createElement('div'));
+          expect(ampStickyAd).not.to.have.display('none');
+        });
     });
   }
 );

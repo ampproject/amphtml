@@ -127,7 +127,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   collapsedCallback(element) {
-    // We will only collapse the stick-ad when the ad collapses. The analytics
+    // We will only collapse the sticky-ad when the ad collapses. The analytics
     // element will collapse after it's done initializing, which is normal.
     if (element !== this.ad_) {
       return;
