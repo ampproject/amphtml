@@ -346,9 +346,9 @@ export class AmpStory360 extends AMP.BaseElement {
     }
 
     this.canvasContainer_ = this.element.ownerDocument.createElement('div');
-    this.applyFillContent(this.canvasContainer_, /* replacedContent */ true);
     this.element.appendChild(this.canvasContainer_);
-    this.setUpCanvas_();
+    this.applyFillContent(this.canvasContainer_, /* replacedContent */ true);
+    this.setupCanvas_();
 
     // Initialize all services before proceeding
     return Promise.all([
@@ -439,7 +439,7 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /** @private */
-  setUpCanvas_() {
+  setupCanvas_() {
     this.canvas_ = this.element.ownerDocument.createElement('canvas');
     this.canvasContainer_.appendChild(this.canvas_);
 
@@ -459,7 +459,7 @@ export class AmpStory360 extends AMP.BaseElement {
     const distance = this.getPage_().getAttribute('distance');
     if (distance) {
       if (parseInt(distance) < MIN_ACTIVE_WEBGL_DISTANCE && !this.canvas_) {
-        this.setUpCanvas_();
+        this.setupCanvas_();
         this.layoutCallback();
       }
     }
