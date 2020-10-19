@@ -211,13 +211,14 @@ export function AccordionSection({
   }, [expanded, animate]);
 
   return (
-    <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
+    <Comp {...rest} expanded={expanded}>
       <HeaderComp
         role="button"
         aria-controls={contentId}
         tabIndex="0"
         style={CHILD_STYLE}
         onClick={expandHandler}
+        aria-expanded={String(expanded)}
       >
         {header}
       </HeaderComp>

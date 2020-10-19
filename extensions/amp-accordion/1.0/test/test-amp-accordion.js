@@ -64,15 +64,21 @@ describes.realWin(
     it('should render expanded and collapsed sections', () => {
       const sections = element.children;
       expect(sections[0]).to.have.attribute('expanded');
-      expect(sections[0].getAttribute('aria-expanded')).to.equal('true');
+      expect(
+        sections[0].firstElementChild.getAttribute('aria-expanded')
+      ).to.equal('true');
       expect(sections[0].lastElementChild).to.have.display('block');
 
       expect(sections[1]).to.not.have.attribute('expanded');
-      expect(sections[1].getAttribute('aria-expanded')).to.equal('false');
+      expect(
+        sections[1].firstElementChild.getAttribute('aria-expanded')
+      ).to.equal('false');
       expect(sections[1].lastElementChild).to.have.display('none');
 
       expect(sections[2]).to.not.have.attribute('expanded');
-      expect(sections[2].getAttribute('aria-expanded')).to.equal('false');
+      expect(
+        sections[2].firstElementChild.getAttribute('aria-expanded')
+      ).to.equal('false');
       expect(sections[2].lastElementChild).to.have.display('none');
     });
 
@@ -164,28 +170,31 @@ describes.realWin(
         lastElementChild: content2,
       } = sections[2];
 
-      expect(sections[0]).to.have.attribute('aria-expanded');
       expect(header0).to.have.attribute('tabindex');
       expect(header0).to.have.attribute('aria-controls');
       expect(header0).to.have.attribute('role');
+      expect(header0).to.have.attribute('aria-expanded');
+      expect(header0.getAttribute('aria-expanded')).to.equal('true');
       expect(content0).to.have.attribute('id');
       expect(header0.getAttribute('aria-controls')).to.equal(
         content0.getAttribute('id')
       );
 
-      expect(sections[1]).to.have.attribute('aria-expanded');
       expect(header1).to.have.attribute('tabindex');
       expect(header1).to.have.attribute('aria-controls');
       expect(header1).to.have.attribute('role');
+      expect(header1).to.have.attribute('aria-expanded');
+      expect(header1.getAttribute('aria-expanded')).to.equal('false');
       expect(content1).to.have.attribute('id');
       expect(header1.getAttribute('aria-controls')).to.equal(
         content1.getAttribute('id')
       );
 
-      expect(sections[2]).to.have.attribute('aria-expanded');
       expect(header2).to.have.attribute('tabindex');
       expect(header2).to.have.attribute('aria-controls');
       expect(header2).to.have.attribute('role');
+      expect(header2).to.have.attribute('aria-expanded');
+      expect(header2.getAttribute('aria-expanded')).to.equal('false');
       expect(content2).to.have.attribute('id');
       expect(header2.getAttribute('aria-controls')).to.equal(
         content2.getAttribute('id')

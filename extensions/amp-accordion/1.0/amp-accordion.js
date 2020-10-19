@@ -107,7 +107,6 @@ function getState(element, mu) {
 function SectionShim(sectionElement, {expanded, children}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
-    sectionElement.setAttribute('aria-expanded', String(expanded));
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
@@ -126,7 +125,10 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
  * @param {!AccordionDef.HeaderProps} props
  * @return {PreactDef.Renderable}
  */
-function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
+function HeaderShim(
+  sectionElement,
+  {onClick, 'aria-controls': ariaControls, 'aria-expanded': ariaExpanded}
+) {
   const headerElement = sectionElement.firstElementChild;
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
@@ -136,6 +138,7 @@ function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
     if (!headerElement.hasAttribute('tabindex')) {
       headerElement.setAttribute('tabindex', 0);
     }
+    headerElement.setAttribute('aria-expanded', ariaExpanded);
     headerElement.setAttribute('aria-controls', ariaControls);
     headerElement.setAttribute('role', 'button');
     if (sectionElement[SECTION_POST_RENDER]) {
@@ -144,7 +147,7 @@ function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
     };
-  }, [sectionElement, headerElement, onClick, ariaControls]);
+  }, [sectionElement, headerElement, onClick, ariaControls, ariaExpanded]);
   return <header />;
 }
 
