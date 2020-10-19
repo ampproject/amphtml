@@ -179,7 +179,7 @@
     "rocambole": "0.7.0",
     "sinon": "9.2.0",
     "sinon-chai": "3.5.0",
-    "sleep-promise": "8.0.1",
+    "sleep-promise": "9.0.0",
     "sourcemap-codec": "1.4.8",
     "tar": "6.0.5",
     "tcp-port-used": "1.0.1",
