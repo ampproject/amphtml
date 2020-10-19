@@ -36,7 +36,7 @@ const header = {
 };
 
 // TODO(#30445): update these styles after team agrees on styling
-// or delete is not used
+// or delete if not used
 const content = {};
 
 const JSS = {

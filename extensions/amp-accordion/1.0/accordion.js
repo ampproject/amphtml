@@ -142,8 +142,8 @@ export function AccordionSection({
   contentAs: ContentComp = 'div',
   expanded: defaultExpanded = false,
   animate: defaultAnimate = false,
-  headerClassName,
-  contentClassName,
+  headerClassName = '',
+  contentClassName = '',
   header,
   children,
   ...rest
@@ -196,18 +196,14 @@ export function AccordionSection({
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
       <HeaderComp
         role="button"
-        className={`${headerClassName || ''} ${classes.sectionChild} ${
-          classes.header
-        }`}
+        className={`${headerClassName} ${classes.sectionChild} ${classes.header}`}
         onClick={expandHandler}
       >
         {header}
       </HeaderComp>
       <ContentComp
         ref={contentRef}
-        className={`${contentClassName || ''} ${classes.sectionChild} ${
-          classes.content
-        }`}
+        className={`${contentClassName} ${classes.sectionChild} ${classes.content}`}
         hidden={!expanded}
       >
         {children}
