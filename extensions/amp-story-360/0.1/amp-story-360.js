@@ -51,6 +51,12 @@ const HAVE_CURRENT_DATA = 2;
 const CENTER_OFFSET = 90;
 
 /**
+ * Minimum distance for active WebGL instances.
+ * @const {number}
+ */
+const MIN_ACTIVE_WEBGL_DISTANCE = 2;
+
+/**
  * Generates the template for the permission button.
  *
  * @param {!Element} element
@@ -247,6 +253,9 @@ export class AmpStory360 extends AMP.BaseElement {
     this.duration_ = 0;
 
     /** @private {?Element} */
+    this.canvasContainer_ = null;
+
+    /** @private {?Element} */
     this.canvas_ = null;
 
     /** @private {?Renderer} */
@@ -336,11 +345,10 @@ export class AmpStory360 extends AMP.BaseElement {
       this.sceneRoll_ = attrAsFloat('scene-roll');
     }
 
-    const container = this.element.ownerDocument.createElement('div');
-    this.canvas_ = this.element.ownerDocument.createElement('canvas');
-    this.element.appendChild(container);
-    container.appendChild(this.canvas_);
-    this.applyFillContent(container, /* replacedContent */ true);
+    this.canvasContainer_ = this.element.ownerDocument.createElement('div');
+    this.applyFillContent(this.canvasContainer_, /* replacedContent */ true);
+    this.element.appendChild(this.canvasContainer_);
+    this.setUpCanvas_();
 
     // Initialize all services before proceeding
     return Promise.all([
@@ -364,6 +372,7 @@ export class AmpStory360 extends AMP.BaseElement {
           this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
           this.maybeSetGyroscopeDefaultHeading_();
+          this.maybeRestoreCanvas_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
@@ -426,6 +435,34 @@ export class AmpStory360 extends AMP.BaseElement {
       this.enableGyroscope_();
     } else if (permissionState === 'denied') {
       this.gyroscopeControls_ = false;
+    }
+  }
+
+  /** @private */
+  setUpCanvas_() {
+    this.canvas_ = this.element.ownerDocument.createElement('canvas');
+    this.canvasContainer_.appendChild(this.canvas_);
+
+    // This is called when there are too many WebGL instances for the browser.
+    // The canvas is removed so that the WebGL context can be reset.
+    this.canvas_.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      this.canvasContainer_.removeChild(this.canvas_);
+      this.canvas_ = null;
+    });
+  }
+
+  /**
+   * Used only if a canvas is removed due to the 'webglcontextlost' event handler.
+   * @private
+   */
+  maybeRestoreCanvas_() {
+    const distance = this.getPage_().getAttribute('distance');
+    if (distance) {
+      if (parseInt(distance) < MIN_ACTIVE_WEBGL_DISTANCE && !this.canvas_) {
+        this.setUpCanvas_();
+        this.layoutCallback();
+      }
     }
   }
 
@@ -602,9 +639,9 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   checkImageReSize_(imgEl) {
-    const canvasForGL = document.createElement('canvas');
-    const gl = canvasForGL.getContext('webgl');
-    const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const MAX_TEXTURE_SIZE = this.renderer_.gl.getParameter(
+      this.renderer_.gl.MAX_TEXTURE_SIZE
+    );
 
     if (
       imgEl.naturalWidth > MAX_TEXTURE_SIZE ||
