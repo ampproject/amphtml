@@ -226,6 +226,10 @@ Some popular providers have pre-configured share endpoints. For details, see the
 
 All `data-param-*` prefixed attributes are turned into URL parameters and passed to the share endpoint.
 
+### aria-label
+
+By default, the `aria-label` attribute will be populated with `Share by type` where 'type' is the `type` attribute provided to the component. If a value is passed in to `aria-label` it will overwrite the default value.
+
 ## Styling
 
 ### Default Styles
