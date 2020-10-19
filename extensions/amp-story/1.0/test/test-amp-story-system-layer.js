@@ -142,7 +142,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
       .getShadowRoot()
       .querySelector('.i-amphtml-story-share-control');
     expect(shareButton).to.not.be.null;
-    expect(shareButton.tagName).to.equal('A');
+    expect(shareButton.tagName).to.equal('BUTTON');
     // Default "canonical"
     expect(shareButton.href).to.equal('http://localhost:9876/context.html');
   });
