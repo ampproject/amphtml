@@ -63,7 +63,7 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
 ## Implementation
 
 - (optional) [Join AMP on GitHub](https://goo.gl/forms/T65peVtfQfEoDWeD3). You don't need to wait to be added to the org before you start coding.
-- [Perform the one-time setup if needed](./getting-started-quick.md#one-time-setup): Set up your GitHub account, install Node, Yarn, Gulp CLI, fork repo, track repo, etc.
+- [Perform the one-time setup if needed](./getting-started-quick.md#one-time-setup): Set up your GitHub account, install Node, Gulp CLI, fork repo, track repo, etc.
 - [Create a working branch](./getting-started-e2e.md#create-a-git-branch).
 - [Build AMP](./getting-started-e2e.md#building-amp-and-starting-a-local-server).
 - Write your code.

@@ -21,7 +21,7 @@ Make sure you are a member of the [#contributing](https://amphtml.slack.com/mess
         - Restart the build on Travis by clicking the "Restart build" button on the build page (you must be signed into GitHub).
       - If the issue is due to a real breakage, work with the appropriate owner to rollback the offending PR. Rollbacks are preferable to fixes because fixes can often cause their own breakages.
 2. Keep an eye on incoming [Renovate PRs](https://github.com/ampproject/amphtml/pulls/renovate-bot), which result from an automated process to update our dependencies.
-   1. Make sure that the PR updates both package.json and yarn.lock
+   1. Make sure that the PR updates both package.json and package-lock.json
    2. Check the Travis logs for the PR for any new failures or unexpected results
       - If there’s a failure due to a flaky test, try restarting the shard that failed
       - If that doesn’t work, try syncing the branch to HEAD (tests will automatically be re-run)
