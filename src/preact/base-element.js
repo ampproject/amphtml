@@ -676,12 +676,13 @@ function usesShadowDom(Ctor) {
 }
 
 /**
- * @param {string} attributeName
- * @param {string} attributePrefix
+ * @param {null|string} attributeName
+ * @param {string|undefined} attributePrefix
  * @return {boolean}
  */
 function matchesAttrPrefix(attributeName, attributePrefix) {
   return (
+    attributeName !== null &&
     attributePrefix !== undefined &&
     attributeName.startsWith(attributePrefix) &&
     attributeName !== attributePrefix
