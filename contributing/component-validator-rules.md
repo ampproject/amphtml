@@ -38,11 +38,11 @@ Common usage of this extended component might look like:
 
 Your first step will be writing the extended component JavaScript code. Place
 this code in the amphtml src tree at the location of
-`amphtml/extensions/amp-cat/0.1/`. This document only describes how to
-specify validation rules for an extended component - it does not cover
-implementing its runtime behavior. For the latter, see the codelab [Creating
-your first AMP
-Component](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/).
+`amphtml/extensions/amp-cat/0.1/`. This document only describes how to specify
+validation rules for an extended component - it does not cover implementing its
+runtime behavior. For the latter, see the [Building an AMP
+Extension](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md)
+guide.
 
 ## Validation Rules
 
