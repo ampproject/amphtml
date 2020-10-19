@@ -193,6 +193,19 @@ describes.realWin(
       });
     });
 
+    it('adds a default value for aria-label', () => {
+      const share = doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+
+      doc.body.appendChild(share);
+      return loaded(share).then((el) => {
+        expect(el.getAttribute('aria-label')).to.be.equal('Share by twitter');
+      });
+    });
+
     it('opens share window in _blank', () => {
       return getShare('twitter').then((el) => {
         el.implementation_.handleClick_();
