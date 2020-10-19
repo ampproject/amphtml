@@ -118,7 +118,7 @@ class AmpSocialShare extends AMP.BaseElement {
     if (!element.hasAttribute('tabindex')) {
       element.setAttribute('tabindex', '0');
     }
-    if (!element.hasAttribute('aria-label')) {
+    if (!element.getAttribute('aria-label')) {
       element.setAttribute('aria-label', `Share by ${typeAttr}`);
     }
     element.addEventListener('click', () => this.handleClick_());
