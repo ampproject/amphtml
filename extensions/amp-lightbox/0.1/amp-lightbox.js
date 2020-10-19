@@ -408,7 +408,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.triggerEvent_(LightboxEvents.OPEN, trust);
 
     this.getHistory_()
-      .push(this.close.bind(this))
+      .push((unused) => this.close(ActionTrust.HIGH))
       .then((historyId) => {
         this.historyId_ = historyId;
       });
