@@ -443,7 +443,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.canvas_ = this.element.ownerDocument.createElement('canvas');
     this.canvasContainer_.appendChild(this.canvas_);
 
-    // This is called when there are too many WebGL instances for the browser.
+    // Called when there are too many WebGL instances for the browser.
     // The canvas is removed so that the WebGL context can be reset.
     this.canvas_.addEventListener('webglcontextlost', () => {
       this.canvasContainer_.removeChild(this.canvas_);
