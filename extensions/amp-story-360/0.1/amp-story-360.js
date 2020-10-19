@@ -458,7 +458,7 @@ export class AmpStory360 extends AMP.BaseElement {
   maybeRestoreCanvas_() {
     const distance = this.getPage_().getAttribute('distance');
     if (distance) {
-      if (parseInt(distance) < MIN_ACTIVE_WEBGL_DISTANCE && !this.canvas_) {
+      if (parseInt(distance, 10) < MIN_ACTIVE_WEBGL_DISTANCE && !this.canvas_) {
         this.setupCanvas_();
         this.layoutCallback();
       }
