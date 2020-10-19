@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getViewportObserver} from '../../../src/viewport-observer';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {userAssert} from '../../../src/log';
@@ -37,6 +38,9 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.cutOffReached_ = false;
+
+    /** @private {IntersectionObserver} */
+    this.viewportObserver_ = null;
   }
 
   /** @override */
@@ -61,13 +65,28 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
     this.setFuzzyTimestampValue_();
     this.element.appendChild(this.timeElement_);
+
+    this.viewportObserver_ = getViewportObserver((records) => {
+      let shouldUpdate = false;
+      records.forEach(({isIntersecting}) => {
+        if (isIntersecting && !this.cutOffReached_) {
+          shouldUpdate = true;
+        }
+      });
+      if (shouldUpdate) {
+        this.setFuzzyTimestampValue_();
+      }
+    }, this.win);
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    if (inViewport && !this.cutOffReached_) {
-      this.setFuzzyTimestampValue_();
-    }
+  layoutCallback() {
+    this.viewportObserver_.observe(this.element);
+  }
+
+  /** @override */
+  unLayoutCallback() {
+    this.viewportObserver_.unobserve(this.element);
   }
 
   /** @override */
