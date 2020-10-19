@@ -334,7 +334,6 @@ t.run('A more real AMPHTML image ad', () => {
       });
 
       it('should properly render ad in a friendly iframe with viewability pings', () => {
-        debugger;
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
