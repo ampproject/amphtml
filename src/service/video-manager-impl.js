@@ -176,6 +176,7 @@ export class VideoManager {
     }
   }
 
+  // TODO(#30723): create unregister() for cleanup.
   /** @param {!../video-interface.VideoInterface} video */
   register(video) {
     devAssert(video);
