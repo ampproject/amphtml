@@ -42,11 +42,12 @@ import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
+import {getViewportObserver} from './viewport-observer';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
-import {isIframed, removeElement} from '../dom';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
+import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {toggle} from '../style';
 
@@ -196,26 +197,12 @@ export class VideoManager {
         });
       this.viewportObserver_ = getViewportObserver(
         viewportCallback,
-        this.ampdoc.win
+        this.ampdoc.win,
+        /* threshold */ MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
       );
     }
-    const viewportObserver = this.viewportObserver_;
-
-    let reloadUnlistener;
-    const originalLayoutCallback = videoBE.layoutCallback;
-    videoBE.layoutCallback = () => {
-      viewportObserver.observe(videoBE.element);
-      reloadUnlistener = listen(videoBE.element, VideoEvents.RELOAD, () =>
-        entry.videoLoaded()
-      );
-      return originalLayoutCallback.apply(videoBE);
-    };
-    const originalUnlayoutCallback = videoBE.unlayoutCallback;
-    videoBE.unlayoutCallback = () => {
-      viewportObserver.unobserve(videoBE.element);
-      reloadUnlistener();
-      return originalUnlayoutCallback.apply(videoBE);
-    };
+    this.viewportObserver_.observe(videoBE.element);
+    listen(videoBE.element, VideoEvents.RELOAD, () => entry.videoLoaded());
 
     this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
@@ -1606,32 +1593,4 @@ function analyticsEvent(entry, eventType, opt_vars) {
 /** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
 export function installVideoManagerForDoc(nodeOrDoc) {
   registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
-}
-
-/**
- * A helper that uses feature detection to get the best InOb it can.
- * If iframed: rootMargin is ignored unless natively supported (Chrome 81+).
- * If not iframed: all features work properly in both polyfill and built-in.
- *
- * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
- * @param {!Window} win
- * @return {!IntersectionObserver}
- */
-function getViewportObserver(ioCallback, win) {
-  const iframed = isIframed(win);
-  const root = /** @type {?Element} */ (iframed
-    ? /** @type {*} */ (win.document)
-    : null);
-  const rootMargin = '25%';
-  const threshold = MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
-
-  try {
-    return new win.IntersectionObserver(ioCallback, {
-      root,
-      rootMargin,
-      threshold,
-    });
-  } catch (e) {
-    return new win.IntersectionObserver(ioCallback, {rootMargin});
-  }
 }

@@ -1,0 +1,50 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import {isIframed} from './dom';
+
+/**
+ * Returns an IntersectionObserver tracking the Viewport.
+ * Only use this if x-origin iframe rootMargin support is considered nice-to-have,
+ * since if not supported this InOb will fallback to one without rootMargin.
+ *
+ * - If iframed: rootMargin is ignored unless natively supported (Chrome 81+).
+ * - If not iframed: all features work properly in both polyfill and built-in.
+ *
+ * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
+ * @param {!Window} win
+ * @param {string} threshold
+ *
+ * @return {!IntersectionObserver}
+ */
+export function getViewportObserver(ioCallback, win, threshold) {
+  const iframed = isIframed(win);
+  const root = /** @type {?Element} */ (iframed
+    ? /** @type {*} */ (win.document)
+    : null);
+
+  // TODO(amphtml): Determine if rootMargin is still necessary.
+  const rootMargin = '25%';
+
+  try {
+    return new win.IntersectionObserver(ioCallback, {
+      root,
+      rootMargin,
+      threshold,
+    });
+  } catch (e) {
+    return new win.IntersectionObserver(ioCallback, {rootMargin, threshold});
+  }
+}
