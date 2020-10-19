@@ -108,7 +108,6 @@ function ScrollerWithRef(
     classes
   );
   const currentIndex = useRef(restingIndex);
-  const restingIndexRef = useRef(restingIndex);
 
   // useLayoutEffect needed to avoid FOUC while scrolling
   useLayoutEffect(() => {
@@ -149,16 +148,15 @@ function ScrollerWithRef(
           // we stopped scrolling. If so, we do not need to move anything.
           if (
             currentIndex.current === null ||
-            currentIndex.current === restingIndexRef.current
+            currentIndex.current === restingIndex
           ) {
             return;
           }
-          restingIndexRef.current = currentIndex.current;
           setRestingIndex(currentIndex.current);
         },
         RESET_SCROLL_REFERENCE_POINT_WAIT_MS
       ),
-    [setRestingIndex]
+    [restingIndex, setRestingIndex]
   );
 
   // Track current slide without forcing render.
