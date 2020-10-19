@@ -43,7 +43,7 @@ const {default: preset} = require('jss-preset-default');
 const {relative, join} = require('path');
 const {spawnSync} = require('child_process');
 
-module.exports = function ({template}) {
+module.exports = function ({template, types: t}) {
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
@@ -61,7 +61,7 @@ module.exports = function ({template}) {
             (c) => `-${c.toLowerCase()}`
           );
           const className = `${dashCaseKey}-${filehash}`;
-          if (seen.has(className) && seen.get(className) !== filename) {
+          if (seen.has(className)) {
             throw new Error(
               `Classnames must be unique across all files. Found a duplicate: ${className}`
             );
@@ -76,6 +76,15 @@ module.exports = function ({template}) {
 
   return {
     visitor: {
+      Program(path, state) {
+        const {filename} = state.file.opts;
+        seen.forEach((file, key) => {
+          if (file === filename) {
+            seen.delete(key);
+          }
+        });
+      },
+
       CallExpression(path, state) {
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
@@ -102,9 +111,7 @@ module.exports = function ({template}) {
 
         // Create the classes var.
         const id = path.scope.generateUidIdentifier('classes');
-        const init = template.expression.ast`${stringifyUnquotedProps(
-          sheet.classes
-        )}`;
+        const init = t.valueToNode(sheet.classes);
         path.scope.push({id, init});
         path.scope.bindings[id.name].path.parentPath.addComment(
           'leading',
@@ -112,12 +119,12 @@ module.exports = function ({template}) {
         );
 
         // Replace useStyles with a getter for the new `classes` var.
-        path.replaceWith(template.expression.ast`(() => ${id})`);
+        path.replaceWith(template.expression.ast`(() => ${t.cloneNode(id)})`);
 
         // Export a variable named CSS with the compiled CSS.
-        const cssExport = template.ast`export const CSS = "${transformCssSync(
-          sheet.toString()
-        )}"`;
+        const cssExport = template.ast`export const CSS = ${t.stringLiteral(
+          transformCssSync(sheet.toString())
+        )}`;
         path
           .findParent((p) => p.type === 'ExportNamedDeclaration')
           .insertAfter(cssExport);
@@ -137,21 +144,6 @@ module.exports = function ({template}) {
     },
   };
 };
-
-/**
- * An equivalent to JSON.stringify except the properties are unquoted.
- * @param {Object} obj
- * @return {string}
- */
-function stringifyUnquotedProps(obj) {
-  return (
-    '{' +
-    Object.entries(obj)
-      .map(([k, v]) => `${k}:"${v}"`)
-      .join(',') +
-    '}'
-  );
-}
 
 // Abuses spawnSync to let us run an async function sync.
 function transformCssSync(cssText) {
