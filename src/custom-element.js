@@ -1232,7 +1232,6 @@ function createBaseCustomElementClass(win) {
      */
     updateInViewport_(inViewport) {
       this.implementation_.inViewport_ = inViewport;
-      this.implementation_.viewportCallback(inViewport);
       if (inViewport && this.perfOn_) {
         this.getLayoutDelayMeter_().enterViewport();
       }
