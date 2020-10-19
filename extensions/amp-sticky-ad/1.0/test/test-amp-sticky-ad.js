@@ -429,7 +429,7 @@ describes.realWin(
         });
     });
 
-    it.only('should ignore collapsing children that are not the ad', () => {
+    it('should ignore collapsing children that are not the ad', () => {
       impl.vsync_.mutate = function (callback) {
         callback();
       };
