@@ -1073,7 +1073,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Updates the input value with the provided textual representation of the selected element.
    * @param {string} selectedText textual representation of the selected element
-   * @param element
    * @private
    */
   setInputValue_(selectedText) {
