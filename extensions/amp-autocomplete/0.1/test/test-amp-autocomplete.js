@@ -931,7 +931,7 @@ describes.realWin(
       await impl.selectHandler_({target: mockEl});
 
       expect(impl.inputElement_.value).to.equal('abc');
-      expect(selectItemSpy).to.have.been.calledWith(object);
+      expect(selectItemSpy).to.have.been.calledWith('abc', object);
     });
 
     it('should fire events from selectItem_', () => {
@@ -940,9 +940,30 @@ describes.realWin(
       const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
       return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
-        impl.selectItem_('test');
+        impl.selectItem_('test', {val: 'v'});
         expect(fireEventSpy).to.have.been.calledOnce;
-        expect(fireEventSpy).to.have.been.calledWith('test');
+        expect(fireEventSpy).to.have.been.calledWith('test', {val: 'v'});
+        expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
+        expect(triggerSpy).to.have.been.calledWith(
+          impl.inputElement_,
+          'change'
+        );
+        expect(dispatchSpy).to.have.been.calledOnce;
+      });
+    });
+
+    it('should fire event if when selectedObject is null', () => {
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
+      const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
+      const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
+      return impl.layoutCallback().then(() => {
+        impl.toggleResults_(true);
+        impl.selectItem_('test', /* selectedObject= */ null);
+        expect(fireEventSpy).to.have.been.calledOnce;
+        expect(fireEventSpy).to.have.been.calledWith(
+          'test',
+          /* selectedObject= */ null
+        );
         expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
         expect(triggerSpy).to.have.been.calledWith(
           impl.inputElement_,

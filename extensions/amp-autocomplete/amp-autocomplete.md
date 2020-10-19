@@ -206,12 +206,13 @@ Whether the <code>amp-autocomplete</code> should autosuggest on the full user in
 via click, tap, keyboard navigation or accepting typeahead. It also fires the
 `select` event if a user keyboard navigates to an item and Tabs away from the
 input field. `event` contains the `value` attribute value of the selected
-element, which usually is a string.
+element which is its textual representation (e.g., value of data-value).
 
-If you'd like the `event` value to contain an entire object, you should add
-`data-json={{objToJson}}` to your suggestion template. This causes
+`event` may also contain the entire object in the `valueAsObject` field, if
+the suggestion template contains `data-json={{objToJson}}`. This causes
 the rendered element to have a `data-json` data attribute with a JSON string
-representation of the corresponding object.
+representation of the corresponding object, which is then made available in
+the `valueAsObject` field of the `event`.
 
 Example:
 
@@ -219,7 +220,7 @@ Example:
 <amp-autocomplete
   filter="substring"
   id="myAutocomplete"
-  on="select:AMP.setState({chosenFruit: event.value})"
+  on="select:AMP.setState({chosenFruit: event.valueAsObject})"
 >
   <input />
   <script type="application/json">

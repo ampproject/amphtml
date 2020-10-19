@@ -186,7 +186,7 @@
     <amp-autocomplete filter="token-prefix"
         filter-value="city"
         min-characters=0
-        on="select:AMP.setState({chosenPlace: event.value})">
+        on="select:AMP.setState({chosenPlace: event.valueAsObject})">
       <input type="search" name="city">
       <script type="application/json">
         {
