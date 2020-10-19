@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PostHTML} from 'posthtml';
+import posthtml from 'posthtml';
 import {isJsonScript, isValidScript, toExtension, ScriptNode, tryGetUrl} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
 
@@ -22,7 +22,7 @@ import {OptionSet} from '../utilities/option-set';
  * @param head
  * @param script
  */
-function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode, options: OptionSet): void {
+function appendModuleScript(head: posthtml.Node, nomoduleScript: ScriptNode, options: OptionSet): void {
   const modulePath = toExtension(tryGetUrl(nomoduleScript.attrs.src), '.mjs').toString();
   const moduleScript : ScriptNode = {
     ...nomoduleScript,
@@ -51,9 +51,9 @@ function appendModuleScript(head: PostHTML.Node, nomoduleScript: ScriptNode, opt
  * Returns a function that will transform script node sources into module/nomodule pair.
  * @param options
  */
-export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
-  return function(tree: PostHTML.Node): void {
-    let head: PostHTML.Node | undefined = undefined;
+export default function(options: OptionSet = {}): (tree: posthtml.Node) => void {
+  return function(tree: posthtml.Node): void {
+    let head: posthtml.Node | undefined = undefined;
     const scripts: Array<ScriptNode> = [];
     tree.walk(node => {
       if (node.tag === 'head') {
