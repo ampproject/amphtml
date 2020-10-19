@@ -20,10 +20,8 @@ typings.json
 /test/manual/amp-ad.adtech.html
 test/coverage
 test/coverage-e2e
-./package-lock.json
 *.swp
 *.swo
-yarn-error.log
 deps.txt
 firebase
 .firebaserc

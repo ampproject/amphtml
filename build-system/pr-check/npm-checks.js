@@ -17,49 +17,46 @@
 
 /**
  * @fileoverview
- * This script makes sure that package.json and yarn.lock
- * are in sync and up to date.
+ * This script makes sure that package.json and package-lock.json are in sync
+ * and up to date.
  */
 
+const checkDependencies = require('check-dependencies');
 const colors = require('ansi-colors');
-const {getStderr} = require('../common/exec');
 const {gitDiffColor, gitDiffNameOnly} = require('../common/git');
 
 /**
- * Makes sure package.json and yarn.lock are in sync.
+ * Makes sure package.json and package-lock.json are in sync.
  * @param {string} fileName
  * @return {boolean}
  */
-function isYarnLockFileInSync(fileName = 'yarn-checks.js') {
+function isPackageLockFileInSync(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
-  if (yarnIntegrityCheck.includes('error')) {
-    console.error(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'Found the following',
-      colors.cyan('yarn'),
-      'errors:\n' + colors.cyan(yarnIntegrityCheck)
-    );
+  const results = checkDependencies.sync({
+    verbose: true,
+    log: () => {},
+    error: console.log,
+  });
+  if (!results.depsWereOk) {
     console.error(
       fileLogPrefix,
       colors.red('ERROR:'),
       'Updates to',
       colors.cyan('package.json'),
       'must be accompanied by a corresponding update to',
-      colors.cyan('yarn.lock')
+      colors.cyan('package-lock.json')
     );
     console.error(
       fileLogPrefix,
       colors.yellow('NOTE:'),
       'To update',
-      colors.cyan('yarn.lock'),
+      colors.cyan('package-lock.json'),
       'after changing',
       colors.cyan('package.json') + ',',
       'run',
-      '"' + colors.cyan('yarn install') + '"',
+      '"' + colors.cyan('npm install') + '"',
       'and include the updated',
-      colors.cyan('yarn.lock'),
+      colors.cyan('package-lock.json'),
       'in your PR.'
     );
     return false;
@@ -68,20 +65,20 @@ function isYarnLockFileInSync(fileName = 'yarn-checks.js') {
 }
 
 /**
- * Makes sure that yarn.lock was properly updated.
+ * Makes sure that package-lock.json was properly updated.
  * @param {string} fileName
  * @return {boolean}
  */
-function isYarnLockFileProperlyUpdated(fileName = 'yarn-checks.js') {
+function isPackageLockFileProperlyUpdated(fileName) {
   const filesChanged = gitDiffNameOnly();
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
 
-  if (filesChanged.includes('yarn.lock')) {
+  if (filesChanged.includes('package-lock.json')) {
     console.error(
       fileLogPrefix,
       colors.red('ERROR:'),
       'This PR did not properly update',
-      colors.cyan('yarn.lock') + '.'
+      colors.cyan('package-lock.json') + '.'
     );
     console.error(
       fileLogPrefix,
@@ -99,16 +96,17 @@ function isYarnLockFileProperlyUpdated(fileName = 'yarn-checks.js') {
 }
 
 /**
- * Runs both yarn checks, and returns false if either one fails.
+ * Runs both npm checks, and returns false if either one fails.
  * @param {string} filename
  * @return {boolean}
  */
-function runYarnChecks(filename) {
+function runNpmChecks(filename) {
   return (
-    isYarnLockFileInSync(filename) && isYarnLockFileProperlyUpdated(filename)
+    isPackageLockFileInSync(filename) &&
+    isPackageLockFileProperlyUpdated(filename)
   );
 }
 
 module.exports = {
-  runYarnChecks,
+  runNpmChecks,
 };

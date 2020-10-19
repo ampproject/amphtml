@@ -157,18 +157,18 @@ function usesFilesOrLocalChanges(taskName) {
 }
 
 /**
- * Runs 'yarn' to install packages in a given directory.
+ * Runs 'npm install' to install packages in a given directory.
  *
  * @param {string} dir
  */
 function installPackages(dir) {
   log(
     'Running',
-    cyan('yarn'),
+    cyan('npm install'),
     'to install packages in',
     cyan(path.relative(ROOT_DIR, dir)) + '...'
   );
-  execOrDie(`npx yarn --cwd ${dir}`, {'stdio': 'ignore'});
+  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore'});
 }
 
 module.exports = {

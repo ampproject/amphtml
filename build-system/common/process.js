@@ -17,7 +17,7 @@
 
 /**
  * @fileoverview Provides functions for executing tasks in a child process.
- * Separated from `exec` to allow import before `yarn` installs dependencies.
+ * Separated from `exec` to allow import before `npm` installs dependencies.
  */
 
 const childProcess = require('child_process');

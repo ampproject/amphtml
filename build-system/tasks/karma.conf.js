@@ -46,7 +46,7 @@ const createHash = (input) =>
 const persistentCache = browserifyPersistFs(
   '.karma-cache',
   {
-    deps: createHash(fs.readFileSync('./yarn.lock')),
+    deps: createHash(fs.readFileSync('./package-lock.json')),
     build: globby
       .sync([
         'build-system/**/*.js',
