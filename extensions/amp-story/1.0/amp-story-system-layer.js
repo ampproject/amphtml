@@ -227,9 +227,8 @@ const TEMPLATE = {
           localizedLabelId: LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL,
         },
         {
-          tag: 'a',
+          tag: 'button',
           attrs: dict({
-            'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
