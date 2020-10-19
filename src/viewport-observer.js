@@ -48,3 +48,53 @@ export function getViewportObserver(ioCallback, win, threshold) {
     return new win.IntersectionObserver(ioCallback, {rootMargin, threshold});
   }
 }
+
+/**
+ * @type Map<!Window, !IntersectionObserver}>
+ */
+const viewportObservers = new Map();
+
+/** @type WeakMap<!Element, function(bool)> */
+const viewportCallbacks = new WeakMap();
+
+/**
+ * Lazily creates an IntersectionObserver per Window to track when elements
+ * enter and exit the viewport. Fires viewportCallback when this happens.
+ *
+ * @param {!Element} element
+ * @param {function(boolean)} viewportCallback
+ */
+export function observe(element, viewportCallback) {
+  const win = element.ownerDocument.defaultView;
+  if (!viewportObservers.has(win)) {
+    viewportObservers.set(win, getViewportObserver(ioCallback, win));
+  }
+  viewportCallbacks.set(element, viewportCallback);
+  viewportObservers.get(win).observe(element);
+}
+
+/**
+ * Unobserve an element.
+ * @param {!Element} element
+ */
+export function unobserve(element) {
+  const win = element.ownerDocument.defaultView;
+  if (viewportObservers.has(win)) {
+    viewportObservers.get(win).unobserve(element);
+  }
+  viewportCallbacks.delete(element);
+}
+
+/**
+ * Call the registered callbacks for each element that has crossed the
+ * viewport bounday.
+ *
+ * @param {!Array<!IntersectionObserverEntry>} entries
+ */
+function ioCallback(entries) {
+  for (let i = 0; i < entries.length; i++) {
+    const {isIntersecting, target} = entries[i];
+    const viewportCallback = viewportCallbacks.get(target);
+    viewportCallback(isIntersecting);
+  }
+}

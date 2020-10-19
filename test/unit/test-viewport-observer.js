@@ -14,69 +14,149 @@
  * limitations under the License.
  */
 
-import {getViewportObserver} from '../../src/viewport-observer';
+import {
+  getViewportObserver,
+  observe,
+  unobserve,
+} from '../../src/viewport-observer';
 
 describes.sandboxed('Viewport Observer', {}, (env) => {
-  let win;
-  let ctorSpy;
-  const noop = () => {};
+  describe('getViewportObserver', () => {
+    let win;
+    let ctorSpy;
+    const noop = () => {};
 
-  const setIframed = () => (win.parent = {});
-  beforeEach(() => {
-    ctorSpy = env.sandbox.stub();
-    win = {
-      parent: null,
-      document: {},
-      IntersectionObserver: ctorSpy,
-    };
-  });
+    const setIframed = () => (win.parent = {});
+    beforeEach(() => {
+      ctorSpy = env.sandbox.stub();
+      win = {
+        parent: null,
+        document: {},
+        IntersectionObserver: ctorSpy,
+      };
+    });
 
-  it('When not iframed, uses null root.', () => {
-    getViewportObserver(noop, win);
+    it('When not iframed, uses null root.', () => {
+      getViewportObserver(noop, win);
 
-    expect(ctorSpy).calledWith(noop, {
-      root: null,
-      rootMargin: '25%',
-      threshold: undefined,
+      expect(ctorSpy).calledWith(noop, {
+        root: null,
+        rootMargin: '25%',
+        threshold: undefined,
+      });
+    });
+
+    it('When iframed, use document root.', () => {
+      setIframed();
+      getViewportObserver(noop, win);
+
+      expect(ctorSpy).calledWith(noop, {
+        root: win.document,
+        rootMargin: '25%',
+        threshold: undefined,
+      });
+    });
+
+    it('If ctor throws, fallback to rootless', () => {
+      setIframed();
+      ctorSpy.callsFake((_cb, {root}) => {
+        if (root === win.document) {
+          throw new Error();
+        }
+      });
+      getViewportObserver(noop, win);
+
+      expect(ctorSpy).calledWith(noop, {
+        root: win.document,
+        rootMargin: '25%',
+        threshold: undefined,
+      });
+      expect(ctorSpy).calledWith(noop, {
+        rootMargin: '25%',
+        threshold: undefined,
+      });
+    });
+
+    it('Pass along threshold argument', () => {
+      getViewportObserver(noop, win, '50%');
+      expect(ctorSpy).calledWith(noop, {
+        root: null,
+        rootMargin: '25%',
+        threshold: '50%',
+      });
     });
   });
 
-  it('When iframed, use document root.', () => {
-    setIframed();
-    getViewportObserver(noop, win);
+  describe('Shared viewport observer', () => {
+    let inOb;
+    let win;
+    let doc;
+    let el1;
+    let el2;
+    let tracked;
 
-    expect(ctorSpy).calledWith(noop, {
-      root: win.document,
-      rootMargin: '25%',
-      threshold: undefined,
+    beforeEach(() => {
+      inOb = env.sandbox.stub();
+      tracked = new Set();
+      inOb.callsFake(() => ({
+        observe: (el) => tracked.add(el),
+        unobserve: (el) => tracked.delete(el),
+      }));
+
+      win = {IntersectionObserver: inOb};
+      doc = {defaultView: win};
+      el1 = {ownerDocument: doc};
+      el2 = {ownerDocument: doc};
     });
-  });
 
-  it('If ctor throws, fallback to rootless', () => {
-    setIframed();
-    ctorSpy.callsFake((_cb, {root}) => {
-      if (root === win.document) {
-        throw new Error();
+    /**
+     * Simulate an IntersectionObserver callback for an element.
+     * @param {!Element} el
+     * @param {boolean} inViewport
+     */
+    function toggleViewport(el, inViewport) {
+      const win = el.ownerDocument.defaultView;
+      // Grabs the IO Callback shared by all the viewport observers.
+      const ioCallback = win.IntersectionObserver.getCall(0).args[0];
+      if (tracked.has(el)) {
+        ioCallback([{target: el, isIntersecting: inViewport}]);
       }
-    });
-    getViewportObserver(noop, win);
+    }
 
-    expect(ctorSpy).calledWith(noop, {
-      root: win.document,
-      rootMargin: '25%',
-      threshold: undefined,
-    });
-    expect(ctorSpy).calledWith(noop, {
-      rootMargin: '25%',
-      threshold: undefined,
-    });
-  });
+    it('observed element should have its callback fired each time it enters/exist the viewport.', () => {
+      const viewportEvents = [];
+      observe(el1, (inViewport) => viewportEvents.push(inViewport));
+      toggleViewport(el1, true);
+      toggleViewport(el1, false);
 
-  it('Pass along threshold argument', () => {
-    getViewportObserver(noop, win, '50%');
-    expect(ctorSpy).calledWith(noop, {
-      rootMargin: '25%',
-      threshold: '50%',
+      expect(viewportEvents).eql([true, false]);
+    });
+
+    it('can independently observe multiple elements', () => {
+      const el1Events = [];
+      const el2Events = [];
+
+      observe(el1, (inViewport) => el1Events.push(inViewport));
+      observe(el2, (inViewport) => el2Events.push(inViewport));
+      toggleViewport(el1, false);
+      toggleViewport(el2, true);
+      toggleViewport(el1, true);
+
+      expect(el1Events).eql([false, true]);
+      expect(el2Events).eql([true]);
+    });
+
+    it('once unobserved, the callback is no longer fired', () => {
+      const el1Events = [];
+
+      observe(el1, (inViewport) => el1Events.push(inViewport));
+      toggleViewport(el1, false);
+
+      unobserve(el1);
+      toggleViewport(el1, true);
+      toggleViewport(el1, false);
+
+      expect(el1Events).eql([false]);
     });
   });
 });
