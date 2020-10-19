@@ -54,7 +54,7 @@ const CENTER_OFFSET = 90;
  * Minimum distance for active WebGL instances.
  * @const {number}
  */
-const MIN_ACTIVE_WEBGL_DISTANCE = 2;
+const MIN_ACTIVE_WEBGL_DISTANCE = 3;
 
 /**
  * Generates the template for the permission button.
@@ -445,8 +445,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
     // This is called when there are too many WebGL instances for the browser.
     // The canvas is removed so that the WebGL context can be reset.
-    this.canvas_.addEventListener('webglcontextlost', (e) => {
-      e.preventDefault();
+    this.canvas_.addEventListener('webglcontextlost', () => {
       this.canvasContainer_.removeChild(this.canvas_);
       this.canvas_ = null;
     });
