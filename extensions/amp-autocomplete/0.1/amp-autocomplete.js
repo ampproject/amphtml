@@ -50,9 +50,10 @@ import fuzzysearch from '../../../third_party/fuzzysearch/index';
 /**
  * @typedef {{
  *   selectedObject: ?JsonObject,
- *   selectedText: ?string,
+ *   selectedText: ?string
  * }}
  */
+// eslint-disable-next-line no-unused-vars
 let SelectionValues;
 
 const TAG = 'amp-autocomplete';
