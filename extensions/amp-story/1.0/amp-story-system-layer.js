@@ -354,7 +354,7 @@ export class SystemLayer {
     /** @private @const {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private @const {?AmpStoryViewerMessagingconst ha} */
+    /** @private @const {?AmpStoryViewerMessaging} */
     this.viewerMessagingHandler_ = null;
   }
 
@@ -476,9 +476,9 @@ export class SystemLayer {
     });
 
     this.storeService_.subscribe(
-      StateProperty.SKIP_NEXT_STORY_STATE,
+      StateProperty.PLAYER_HAS_NEXT_STORY_STATE,
       (hasNextStory) => {
-        this.onSkipStoryStateUpdate_(hasNextStory);
+        this.onPlayerHasNextStoryStateUpdate_(hasNextStory);
       },
       true /** callToInitialize */
     );
@@ -642,7 +642,7 @@ export class SystemLayer {
    * @param {boolean} hasNextStory
    * @private
    */
-  onSkipStoryStateUpdate_(hasNextStory) {
+  onPlayerHasNextStoryStateUpdate_(hasNextStory) {
     this.vsync_.mutate(() => {
       const button = this.getShadowRoot().querySelector(
         `.${escapeCssSelectorIdent(SKIP_NEXT_CLASS)}`

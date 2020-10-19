@@ -114,7 +114,7 @@ const STORY_MESSAGE_STATE_TYPE = {
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
-  CAN_SKIP_STORY: 'CAN_SKIP_STORY',
+  PLAYER_HAS_NEXT_STORY: 'PLAYER_HAS_NEXT_STORY',
 };
 
 /** @const {string} */
@@ -595,7 +595,7 @@ export class AmpStoryPlayer {
             );
 
             messaging.sendRequest('setDocumentState', {
-              state: [STORY_MESSAGE_STATE_TYPE.CAN_SKIP_STORY],
+              state: [STORY_MESSAGE_STATE_TYPE.PLAYER_HAS_NEXT_STORY],
               value: story.idx < this.stories_.length - 1,
             });
           }
