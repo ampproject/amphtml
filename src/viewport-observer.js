@@ -85,7 +85,7 @@ export function unobserve(element) {
 
 /**
  * Call the registered callbacks for each element that has crossed the
- * viewport bounday.
+ * viewport boundary.
  *
  * @param {!Array<!IntersectionObserverEntry>} entries
  */
@@ -94,10 +94,13 @@ function ioCallback(entries) {
     const {isIntersecting, target} = entries[i];
     const viewportCallback = viewportCallbacks.get(target);
 
-    // The callback may not exist if it wasn't cleaned up
+    // The callback may not exist if unobserve wasn't called
     // but the element has been GCed.
-    if (viewportCallback) {
-      viewportCallback(isIntersecting);
+    if (!viewportCallback) {
+      unobserve(target);
+      return;
     }
+
+    viewportCallback(isIntersecting);
   }
 }
