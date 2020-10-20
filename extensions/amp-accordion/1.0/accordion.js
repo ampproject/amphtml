@@ -30,6 +30,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+import {useStyles} from './accordion.jss';
 
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.ContextProps} */ ({})
@@ -40,17 +41,6 @@ const EMPTY_EXPANDED_MAP = {};
 
 const generateSectionId = sequentialIdGenerator();
 const generateRandomId = randomIdGenerator(100000);
-
-const CHILD_STYLE = {
-  // Make animations measurable. Without this, padding and margin can skew
-  // animations.
-  boxSizing: 'border-box',
-  // Cancel out the margin collapse. Also helps with animations to avoid
-  // overflow.
-  overflow: 'hidden',
-  // Ensure that any absolute elements are positioned within the section.
-  position: 'relative',
-};
 
 /**
  * @param {!AccordionDef.Props} props
@@ -160,6 +150,8 @@ export function AccordionSection({
   contentAs: ContentComp = 'div',
   expanded: defaultExpanded = false,
   animate: defaultAnimate = false,
+  headerClassName = '',
+  contentClassName = '',
   header,
   children,
   ...rest
@@ -200,6 +192,7 @@ export function AccordionSection({
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
   const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
+  const classes = useStyles();
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
@@ -214,17 +207,17 @@ export function AccordionSection({
     <Comp {...rest} expanded={expanded} aria-expanded={String(expanded)}>
       <HeaderComp
         role="button"
+        className={`${headerClassName} ${classes.sectionChild} ${classes.header}`}
         aria-controls={contentId}
         tabIndex="0"
-        style={CHILD_STYLE}
         onClick={expandHandler}
       >
         {header}
       </HeaderComp>
       <ContentComp
-        id={contentId}
         ref={contentRef}
-        style={CHILD_STYLE}
+        className={`${contentClassName} ${classes.sectionChild} ${classes.content}`}
+        id={contentId}
         hidden={!expanded}
       >
         {children}

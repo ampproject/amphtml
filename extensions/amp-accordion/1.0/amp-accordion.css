@@ -13,3 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/* heading/content */
+.i-amphtml-accordion-header,
+.i-amphtml-accordion-content {
+  margin: 0;
+}
+
+/* heading
+ * TODO(#30445): update these styles after team agrees on styling
+ */
+.i-amphtml-accordion-header {
+  cursor: pointer;
+  background-color: #efefef;
+  padding-right: 20px;
+  border: solid 1px #dfdfdf;
+}
