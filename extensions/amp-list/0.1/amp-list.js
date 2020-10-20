@@ -63,7 +63,6 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
-import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -423,7 +422,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   isAmpStateSrc_(src) {
-    return startsWith(src, AMP_STATE_URI_SCHEME);
+    return src.startsWith(AMP_STATE_URI_SCHEME);
   }
 
   /**
@@ -434,7 +433,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   isAmpScriptSrc_(src) {
-    return startsWith(src, AMP_SCRIPT_URI_SCHEME);
+    return src.startsWith(AMP_SCRIPT_URI_SCHEME);
   }
 
   /**
@@ -565,15 +564,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * amp-list reuses the loading indicator when the list is fetched again via
-   * bind mutation or refresh action
-   * @override
-   */
-  isLoadingReused() {
-    return this.element.hasAttribute('reset-on-refresh');
-  }
-
-  /**
    * Creates and returns <div> that contains the template-rendered children.
    * @return {!Element}
    * @private
@@ -663,7 +653,10 @@ export class AmpList extends AMP.BaseElement {
     ) {
       const reset = () => {
         this.togglePlaceholder(true);
-        this.toggleLoading(true);
+        const forceLoadingIndicator = this.element.hasAttribute(
+          'reset-on-refresh'
+        );
+        this.toggleLoading(true, forceLoadingIndicator);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
@@ -1072,7 +1065,7 @@ export class AmpList extends AMP.BaseElement {
     };
 
     // binding=refresh: Only do render-blocking update after initial render.
-    if (binding && startsWith(binding, 'refresh')) {
+    if (binding && binding.startsWith('refresh')) {
       // Bind service must be available after first mutation, so don't
       // wait on the async service getter.
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
@@ -1236,7 +1229,7 @@ export class AmpList extends AMP.BaseElement {
       // Remove missing, non-internal classes.
       for (let i = 0; i < before.classList.length; i++) {
         const c = before.classList[i];
-        if (!startsWith(c, 'i-amphtml-') && !after.classList.contains(c)) {
+        if (!c.startsWith('i-amphtml-') && !after.classList.contains(c)) {
           before.classList.remove(c);
         }
       }

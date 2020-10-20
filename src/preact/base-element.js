@@ -32,7 +32,6 @@ import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {isLayoutSizeDefined} from '../layout';
-import {startsWith} from '../string';
 
 /**
  * The following combinations are allowed.
@@ -861,7 +860,7 @@ function shouldMutationForNodeListBeRerendered(nodeList) {
       // `<x slot="i-amphtml-svc">`.
       if (
         node[RENDERED_PROP] ||
-        startsWith(node.tagName, 'I-') ||
+        node.tagName.startsWith('I-') ||
         node.getAttribute('slot') == 'i-amphtml-svc'
       ) {
         continue;

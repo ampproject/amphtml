@@ -31,51 +31,43 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
    nvm install --lts
    ```
 
-5. Install the stable version of [Yarn](https://yarnpkg.com/). (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
+5. If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
 
    ```shell
-   curl -o- -L https://yarnpkg.com/install.sh | bash
+   npm uninstall --global gulp
    ```
 
-   An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
-
-6. If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
+6. Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
 
    ```shell
-   yarn global remove gulp
-   ```
-
-7. Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
-
-   ```shell
-   yarn global add gulp-cli
+   npm install --global gulp-cli
    ```
 
    An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local
    development. This will also use the version of `gulp` packaged with the amphtml repository.
 
-8. Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
+7. Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
 
-9. Download your fork to a local repository.
+8. Download your fork to a local repository.
 
    ```shell
    git clone git@github.com:<your username>/amphtml.git
    ```
 
-10. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
-    newly created local repository directory and run:
+9. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
+   newly created local repository directory and run:
 
-    ```shell
-    git remote add upstream git@github.com:ampproject/amphtml.git
-    ```
+   ```shell
+   git remote add upstream git@github.com:ampproject/amphtml.git
+   ```
 
-11. Fetch data from the `upstream` remote:
+10. Fetch data from the `upstream` remote:
 
     ```shell
     git fetch upstream master
     ```
 
-12. Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become
+11. Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become
     outdated).
 
     ```shell
@@ -92,7 +84,7 @@ git checkout -b <branch name> master
 
 ## Build AMP & run a local server
 
-1. Make sure you have the latest packages (after you pull): `yarn`
+1. Make sure you have the latest packages (after you pull): `npm install`
 1. Start the server: `gulp`
 1. Access your server at [http://localhost:8000](http://localhost:8000)
 1. Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
@@ -110,10 +102,10 @@ git checkout -b <branch name> master
 
 1. Edit files in your favorite editor
 2. Make sure your changes satisfy AMP's [code quality and style rules](getting-started-e2e.md#code-quality-and-style)
-3. If your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which automatically updates `package.json` and `yarn.lock`
+3. If your code requires a new dependency, run `npm install --save-dev [packagename]`, which automatically updates `package.json` and `package-lock.json`
    - If it is a build-time dependency, use the `--dev` flag
    - If it is a runtime dependency, add it to `build-system/compile/sources.js`
-4. If you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
+4. If you manually edited `package.json`, run `npm install` to install the dependency and generate an updated `package-lock.json` file
 5. Add each file you change: `git add <file>`
 6. Create a commit: `git commit -m "<your commit message>"`
 7. To avoid having to run `git add` on each file, you can use `git commit -a -m "<your commit message>"` instead.

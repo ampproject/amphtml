@@ -125,11 +125,11 @@ const forbiddenTerms = {
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/npm-checks.js',
       'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
-      'build-system/pr-check/yarn-checks.js',
       'build-system/server/app.js',
       'build-system/server/amp4test.js',
       'build-system/tasks/build.js',
@@ -686,16 +686,6 @@ const forbiddenTerms = {
       'Use createFormDataWrapper() instead and call ' +
       'formDataWrapper.getFormData() to get the native FormData object.',
     allowlist: ['src/form-data-wrapper.js'],
-  },
-  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
-    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
-    allowlist: [
-      'ads/google/imaVideo.js',
-      'dist.3p/current/integration.js',
-      'src/video-iframe-integration.js',
-      'extensions/amp-consent/0.1/amp-consent.js',
-      'extensions/amp-consent/0.1/consent-ui.js',
-    ],
   },
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',

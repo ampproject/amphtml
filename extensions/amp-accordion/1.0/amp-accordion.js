@@ -127,7 +127,7 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
  * @param {!AccordionDef.HeaderProps} props
  * @return {PreactDef.Renderable}
  */
-function HeaderShim(sectionElement, {onClick}) {
+function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
   const headerElement = sectionElement.firstElementChild;
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
@@ -135,13 +135,18 @@ function HeaderShim(sectionElement, {onClick}) {
     }
     headerElement.classList.add('i-amphtml-accordion-header');
     headerElement.addEventListener('click', onClick);
+    if (!headerElement.hasAttribute('tabindex')) {
+      headerElement.setAttribute('tabindex', 0);
+    }
+    headerElement.setAttribute('aria-controls', ariaControls);
+    headerElement.setAttribute('role', 'button');
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
     };
-  }, [sectionElement, headerElement, onClick]);
+  }, [sectionElement, headerElement, onClick, ariaControls]);
   return <header />;
 }
 
@@ -157,7 +162,7 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
  * @param {{current: ?}} ref
  * @return {PreactDef.Renderable}
  */
-function ContentShimWithRef(sectionElement, {hidden}, ref) {
+function ContentShimWithRef(sectionElement, {hidden, id}, ref) {
   const contentElement = sectionElement.lastElementChild;
   useImperativeHandle(ref, () => contentElement, [contentElement]);
   useLayoutEffect(() => {
@@ -165,11 +170,12 @@ function ContentShimWithRef(sectionElement, {hidden}, ref) {
       return;
     }
     contentElement.classList.add('i-amphtml-accordion-content');
+    contentElement.setAttribute('id', id);
     toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, contentElement, hidden]);
+  }, [sectionElement, contentElement, hidden, id]);
   return <div />;
 }
 
