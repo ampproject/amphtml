@@ -163,7 +163,7 @@
     "npm-exact-versions": "0.0.5",
     "plugin-error": "1.0.1",
     "postcss": "8.1.2",
-    "postcss-import": "12.0.1",
+    "postcss-import": "13.0.0",
     "posthtml": "0.13.4",
     "prettier": "2.1.2",
     "pretty-bytes": "5.4.1",
