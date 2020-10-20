@@ -573,8 +573,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {consentString, gdprApplies} = consentTuple;
 
     return {
-      'ptt':
-        this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT) ? 13 : null,
+      'ptt': this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT)
+        ? 13
+        : null,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
         consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN

@@ -736,7 +736,8 @@ describes.realWin(
         it('sets ptt parameter', () => {
           forceExperimentBranch(impl.win, 'adsense-ptt-exp', '21068092');
           return expect(impl.getAdUrl()).to.eventually.match(
-            /(\?|&)ptt=12(&|$)/);
+            /(\?|&)ptt=12(&|$)/
+          );
         });
       });
 

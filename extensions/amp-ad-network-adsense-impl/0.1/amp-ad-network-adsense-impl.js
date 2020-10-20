@@ -232,11 +232,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @visibleForTesting
    */
   divertExperiments() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([{
-      experimentId: PTT_EXP,
-      isTrafficEligible: () => true,
-      branches: Object.values(PTT_EXP_BRANCHES),
-    }]);
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: PTT_EXP,
+        isTrafficEligible: () => true,
+        branches: Object.values(PTT_EXP_BRANCHES),
+      },
+    ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
       experimentInfoList
@@ -340,8 +342,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'w': sizeToSend.width,
       'h': sizeToSend.height,
       'ptt':
-        getExperimentBranch(this.win, PTT_EXP) ===	PTT_EXP_BRANCHES.EXPERIMENT
-          ? 12 : null,
+        getExperimentBranch(this.win, PTT_EXP) === PTT_EXP_BRANCHES.EXPERIMENT
+          ? 12
+          : null,
       'iu': slotname,
       'npa':
         consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
