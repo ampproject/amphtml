@@ -43,7 +43,7 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     downloadEsmDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --compiled --headless');
+    timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
