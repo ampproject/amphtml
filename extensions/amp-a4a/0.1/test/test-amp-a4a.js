@@ -37,11 +37,7 @@ import {
   protectFunctionWrapper,
 } from '../amp-a4a';
 import {AmpAdXOriginIframeHandler} from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {
-  AmpDoc,
-  installDocService,
-  updateFieModeForTesting,
-} from '../../../../src/service/ampdoc-impl';
+import {AmpDoc, installDocService} from '../../../../src/service/ampdoc-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
@@ -62,7 +58,6 @@ import {
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
-import {toggleAmpdocFieForTesting} from '../../../../src/ampdoc-fie';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 // eslint-disable-next-line no-undef
@@ -780,8 +775,6 @@ describe('amp-a4a', () => {
       a4aElement = createA4aElement(doc);
       a4a = new MockA4AImpl(a4aElement);
       a4a.releaseType_ = '0';
-      a4a.createdCallback();
-      a4a.firstAttachedCallback();
       a4a.buildCallback();
       expect(onCreativeRenderSpy).to.not.be.called;
     });
@@ -921,7 +914,7 @@ describe('amp-a4a', () => {
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
         (headerVal) => {
-          // TODO(wg-ads, #25690): Fails on Travis.
+          // TODO(wg-monetization, #25690): Fails on Travis.
           it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = window.sandbox.stub(dev(), 'error');
             // Make sure there's no signature, so that we go down the 3p
@@ -2300,37 +2293,8 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.adUrl_ = 'https://nowhere.org';
     });
+
     it('should render correctly', async () => {
-      // TODO(#22733): remove this test once ampdoc-fie is launched.
-      const parentWin = a4aElement.ownerDocument.defaultView;
-      await a4a.renderAmpCreative_(metaData);
-      // Verify iframe presence.
-      expect(a4aElement.children.length).to.equal(1);
-      const friendlyIframe = a4aElement.children[0];
-      expect(friendlyIframe.tagName).to.equal('IFRAME');
-      expect(friendlyIframe.src).to.not.be.ok;
-      expect(friendlyIframe.srcdoc).to.be.ok;
-      const frameDoc = friendlyIframe.contentDocument;
-      const styles = frameDoc.querySelectorAll('style[amp-custom]');
-      expect(
-        Array.prototype.some.call(styles, (s) => {
-          return s.innerHTML == 'p { background: green }';
-        }),
-        'Some style is "background: green"'
-      ).to.be.true;
-      expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
-      expect(
-        Services.urlReplacementsForDoc(frameDoc.documentElement)
-      ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
-      expect(
-        Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
-      ).to.equal(parentWin);
-    });
-    it('should render correctly in ampdoc-fie mode', async () => {
-      const parentWin = a4aElement.ownerDocument.defaultView;
-      const ampdocService = Services.ampdocServiceFor(parentWin);
-      toggleAmpdocFieForTesting(parentWin, true);
-      updateFieModeForTesting(ampdocService, true);
       await a4a.renderAmpCreative_(metaData);
       // Verify iframe presence.
       expect(a4aElement.children.length).to.equal(1);

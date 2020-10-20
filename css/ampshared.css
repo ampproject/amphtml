@@ -155,6 +155,16 @@ i-amphtml-sizer {
   display: block !important;
 }
 
+/*
+ * Disable `i-amphtml-sizer` when aspect ratio is supported by both the
+ * borwser and the optimizer.
+ */
+@supports (aspect-ratio: 1 / 1) {
+  i-amphtml-sizer.i-amphtml-disable-for-ar {
+    display: none !important;
+  }
+}
+
 .i-amphtml-fill-content,
 .i-amphtml-blurry-placeholder {
   display: block;
@@ -510,11 +520,11 @@ amp-accordion > section {
 }
 
 /* Collapse content by default. */
-amp-accordion > section > :last-child {
+amp-accordion:not(.i-amphtml-built) > section > :last-child {
   display: none !important;
 }
 
 /* Expand content when needed. */
-amp-accordion > section[expanded] > :last-child {
+amp-accordion:not(.i-amphtml-built) > section[expanded] > :last-child {
   display: block !important;
 }

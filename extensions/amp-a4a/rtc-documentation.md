@@ -123,7 +123,9 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 
 #### Currently Supported Vendors
 
+- Adpushup
 - AppNexus
+- AppNexus PSP
 - APS
 - Automatad
 - Andbeyond
@@ -131,6 +133,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - Criteo
 - FLUX
 - Freestar
+- Future Plc
 - Galaxie Media
 - IndexExchange
 - Kargo

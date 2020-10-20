@@ -68,12 +68,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25022',
   },
   {
-    id: 'ampdoc-fie',
-    name: 'Install AmpDoc on FIE level',
-    spec: 'https://github.com/ampproject/amphtml/issues/22734',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22733',
-  },
-  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -124,13 +118,6 @@ export const EXPERIMENTS = [
       'If applicable, let the browser paint the current frame before ' +
       'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
-  },
-  {
-    id: 'version-locking',
-    name:
-      'Force all extensions to have the same release ' +
-      'as the main JS binary',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
     id: 'web-worker',
@@ -225,17 +212,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'pausable-iframe',
-    name: 'Use iframe freezing instead of recreating iframes.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24110',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
-  },
-  {
-    id: 'protocol-adapters',
-    name: 'Allow amp-list to get its data from amp-script functions.',
-    spec: 'https://github.com/ampproject/amphtml/issues/26474',
-  },
-  {
     id: 'adsense-ad-size-optimization',
     name:
       'Per publisher server side settings for changing the ad size ' +
@@ -299,5 +275,10 @@ export const EXPERIMENTS = [
     name: 'Backup AMP-generated CIDs to Storage.',
     spec: 'https://github.com/ampproject/amphtml/issues/29484',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
+  },
+  {
+    id: 'layout-aspect-ratio-css',
+    name: 'Responsive layouts implemented via aspect-ratio CSS',
+    spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
 ];

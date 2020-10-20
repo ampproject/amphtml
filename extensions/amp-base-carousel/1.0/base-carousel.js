@@ -18,6 +18,7 @@ import {ArrowNext, ArrowPrev} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
+import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   toChildArray,
@@ -25,9 +26,19 @@ import {
   useContext,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
+
+/**
+ * @enum {string}
+ */
+const Controls = {
+  ALWAYS: 'always',
+  NEVER: 'never',
+  AUTO: 'auto',
+};
 
 /**
  * @param {!BaseCarouselDef.Props} props
@@ -35,7 +46,15 @@ import {
  * @return {PreactDef.Renderable}
  */
 function BaseCarouselWithRef(
-  {arrowPrev, arrowNext, children, loop, onSlideChange, ...rest},
+  {
+    arrowPrev,
+    arrowNext,
+    children,
+    controls = Controls.AUTO,
+    loop,
+    onSlideChange,
+    ...rest
+  },
   ref
 ) {
   const childrenArray = toChildArray(children);
@@ -79,6 +98,18 @@ function BaseCarouselWithRef(
 
   const disableForDir = (dir) =>
     !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
+
+  const [hadTouch, setHadTouch] = useState(false);
+  const hideControls = useMemo(() => {
+    if (controls === Controls.NEVER) {
+      return true;
+    }
+    if (controls === Controls.ALWAYS) {
+      return false;
+    }
+    return hadTouch;
+  }, [hadTouch, controls]);
+
   return (
     <ContainWrapper size={true} layout={true} paint={true} {...rest}>
       <Scroller
@@ -86,19 +117,43 @@ function BaseCarouselWithRef(
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
+        onTouchStart={() => setHadTouch(true)}
       >
-        {childrenArray}
+        {/*
+          TODO(#30283): TBD: this is an interesting concept. We could decide
+          to render only N slides at a time and for others just output an empty
+          placeholder. When a slide's slot is unrendered, the slide
+          automatically gets unslotted and gets CanRender=false w/o any extra
+          state management code.
+        */}
+        {childrenArray.map((child, index) =>
+          Math.abs(index - currentSlide) < 2 ? (
+            <WithAmpContext
+              key={index}
+              renderable={index == currentSlide}
+              playable={index == currentSlide}
+            >
+              {child}
+            </WithAmpContext>
+          ) : (
+            <></>
+          )
+        )}
       </Scroller>
-      <ArrowPrev
-        customArrow={arrowPrev}
-        disabled={disableForDir(-1)}
-        advance={advance}
-      />
-      <ArrowNext
-        customArrow={arrowNext}
-        disabled={disableForDir(1)}
-        advance={advance}
-      />
+      {!hideControls && (
+        <>
+          <ArrowPrev
+            customArrow={arrowPrev}
+            disabled={disableForDir(-1)}
+            advance={advance}
+          />
+          <ArrowNext
+            customArrow={arrowNext}
+            disabled={disableForDir(1)}
+            advance={advance}
+          />
+        </>
+      )}
     </ContainWrapper>
   );
 }

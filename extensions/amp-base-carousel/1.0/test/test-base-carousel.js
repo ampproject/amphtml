@@ -30,11 +30,12 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
     const wrapper = mount(jsx);
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
 
-    const scroller = wrapper.find('Scroller');
-    expect(scroller).to.have.lengthOf(1);
-    expect(scroller.props().children).to.have.ordered.members(
-      wrapper.props().children
-    );
+    const slides = wrapper.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
+
+    expect(slides.first().text()).to.equal('slide 1');
+    expect(slides.at(1).text()).to.equal('slide 2');
+    expect(slides.last().text()).to.equal('');
   });
 
   it('should render custom Arrows when given', () => {
@@ -63,13 +64,14 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
       </BaseCarousel>
     );
     const wrapper = mount(jsx);
-    const slides = wrapper.find('div.my-slide');
+    const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
 
-    // Given slides [1][2][3] should be rendered as is
+    // Given slides [1][2][3] should be rendered as is, but [3] is a
+    // placeholder.
     expect(slides.first().text()).to.equal('slide 1');
     expect(slides.at(1).text()).to.equal('slide 2');
-    expect(slides.last().text()).to.equal('slide 3');
+    expect(slides.last().text()).to.equal('');
   });
 
   it('should render in preparation for looping with loop prop', () => {
@@ -81,12 +83,37 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
       </BaseCarousel>
     );
     const wrapper = mount(jsx);
-    const slides = wrapper.find('div.my-slide');
+    const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
 
-    // Given slides [1][2][3] should be rendered as [3][1][2]
-    expect(slides.first().text()).to.equal('slide 3');
+    // Given slides [1][2][3] should be rendered as [3][1][2]. But [3] is a
+    // placeholder.
+    expect(slides.at(0).text()).to.equal('');
     expect(slides.at(1).text()).to.equal('slide 1');
-    expect(slides.last().text()).to.equal('slide 2');
+    expect(slides.at(2).text()).to.equal('slide 2');
+  });
+
+  it('should render Arrows with controls=always', () => {
+    const jsx = (
+      <BaseCarousel controls="always">
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BaseCarousel>
+    );
+    const wrapper = mount(jsx);
+    expect(wrapper.find('Arrow')).to.have.lengthOf(2);
+  });
+
+  it('should not render Arrows with controls=never', () => {
+    const jsx = (
+      <BaseCarousel controls="never">
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BaseCarousel>
+    );
+    const wrapper = mount(jsx);
+    expect(wrapper.find('Arrow')).to.have.lengthOf(0);
   });
 });

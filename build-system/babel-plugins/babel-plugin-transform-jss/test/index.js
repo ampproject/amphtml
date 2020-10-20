@@ -20,7 +20,6 @@ const runner = require('@babel/helper-plugin-test-runner').default;
 
 runner(__dirname);
 
-// eslint-disable-next-line no-undef
 const fileContents = `
 import {createUseStyles} from 'react-jss';
 export const useStyles = createUseStyles({button: {fontSize: 12}});`;

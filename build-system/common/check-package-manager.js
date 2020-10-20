@@ -23,7 +23,7 @@
  */
 const fs = require('fs');
 const https = require('https');
-const {getStdout, getStderr} = require('./exec');
+const {getStdout, getStderr} = require('./process');
 
 const setupInstructionsUrl =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
@@ -183,9 +183,9 @@ function getNodeLatestLtsVersion(distributionsJson) {
 // If yarn is being run, perform a version check and proceed with the install.
 function checkYarnVersion() {
   const yarnVersion = getStdout(yarnExecutable + ' --version').trim();
-  const yarnInfo = getStdout(yarnExecutable + ' info --json yarn').trim();
-  const yarnInfoJson = JSON.parse(yarnInfo.split('\n')[0]); // First line
-  const stableVersion = getYarnStableVersion(yarnInfoJson);
+  // TODO (KB): Revert #30478 once `yarn` stable is fixed
+  // At this time current stable is failing GPG checks.
+  const stableVersion = '1.22.5';
   if (stableVersion === '') {
     console.log(
       yellow(
@@ -201,7 +201,9 @@ function checkYarnVersion() {
     );
     console.log(
       yellow('⤷ To fix this, run'),
-      cyan('"curl -o- -L https://yarnpkg.com/install.sh | bash"'),
+      cyan(
+        `"curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${stableVersion}"`
+      ),
       yellow('or see'),
       cyan('https://yarnpkg.com/docs/install'),
       yellow('for instructions.')
@@ -214,18 +216,6 @@ function checkYarnVersion() {
       green('version'),
       cyan(yarnVersion + ' (stable)') + green('. Installing packages...')
     );
-  }
-}
-
-function getYarnStableVersion(infoJson) {
-  if (
-    infoJson &&
-    infoJson.hasOwnProperty('data') &&
-    infoJson.data.hasOwnProperty('version')
-  ) {
-    return infoJson.data.version;
-  } else {
-    return '';
   }
 }
 
