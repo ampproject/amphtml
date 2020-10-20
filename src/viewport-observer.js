@@ -49,12 +49,10 @@ export function getViewportObserver(ioCallback, win, threshold) {
   }
 }
 
-/**
- * @type Map<!Window, !IntersectionObserver}>
- */
+/** @type {Map<!Window, !IntersectionObserver>} */
 const viewportObservers = new Map();
 
-/** @type WeakMap<!Element, function(bool)> */
+/** @type {WeakMap<!Element, function(bool)>} */
 const viewportCallbacks = new WeakMap();
 
 /**
