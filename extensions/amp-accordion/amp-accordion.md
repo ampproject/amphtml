@@ -351,7 +351,7 @@ Keep the following points in mind when you style an amp-accordion:
 - `aria-expanded (state)`: Applied to the header element of each `amp-accordion` section.
 - `aria-labelledby`: Applied to the content element of each `amp-accordion` section.
 
-`amp-accordion` automatically adds the following
+`amp-accordion` also automatically adds the following accessibility attributes:
 
 - `tabindex`: Applied to the header element of each `amp-accordion` section.
 - `role=button`: Applied to the header element of each `amp-accordion` section.
