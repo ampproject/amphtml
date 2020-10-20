@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {animateCollapse, animateExpand} from './animations';
+import {forwardRef} from '../../../src/preact/compat';
 import {omit} from '../../../src/utils/object';
 import {
   randomIdGenerator,
@@ -25,6 +26,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -44,16 +46,20 @@ const generateRandomId = randomIdGenerator(100000);
 
 /**
  * @param {!AccordionDef.Props} props
+ * @param ref
  * @return {PreactDef.Renderable}
  */
-export function Accordion({
-  as: Comp = 'section',
-  expandSingleSection = false,
-  animate = false,
-  children,
-  id,
-  ...rest
-}) {
+function AccordionWithRef(
+  {
+    as: Comp = 'section',
+    expandSingleSection = false,
+    animate = false,
+    children,
+    id,
+    ...rest
+  },
+  ref
+) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
   const [randomPrefix] = useState(generateRandomId);
   const prefix = id || `a${randomPrefix}`;
@@ -71,6 +77,18 @@ export function Accordion({
       return newExpandedMap;
     });
   }, [expandSingleSection]);
+
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        registerSection,
+        toggleExpanded,
+        isExpanded,
+      };
+    },
+    [registerSection, toggleExpanded, isExpanded]
+  );
 
   const registerSection = useCallback(
     (id, defaultExpanded) => {
@@ -97,16 +115,21 @@ export function Accordion({
     [expandSingleSection]
   );
 
+  const isExpanded = useCallback(
+    (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
+    [expandedMap]
+  );
+
   const context = useMemo(
     () =>
       /** @type {!AccordionDef.ContextProps} */ ({
         registerSection,
         toggleExpanded,
-        isExpanded: (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
+        isExpanded,
         animate,
         prefix,
       }),
-    [animate, expandedMap, registerSection, toggleExpanded, prefix]
+    [animate, registerSection, toggleExpanded, prefix, isExpanded]
   );
 
   return (
@@ -117,6 +140,10 @@ export function Accordion({
     </Comp>
   );
 }
+
+const Accordion = forwardRef(AccordionWithRef);
+Accordion.displayName = 'Accordion'; // Make findable for tests.
+export {Accordion};
 
 /**
  * @param {string} id
