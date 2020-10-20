@@ -81,6 +81,7 @@ export const Default = () => {
   const appId = text('data-param-app_id', '254325784911610');
   const width = text('width', null);
   const height = text('height', null);
+  const ariaLabel = text('aria-label', null);
   return (
     <amp-social-share
       type={type}
@@ -92,6 +93,7 @@ export const Default = () => {
       data-param-app_id={appId}
       width={width}
       height={height}
+      aria-label={ariaLabel}
     ></amp-social-share>
   );
 };
