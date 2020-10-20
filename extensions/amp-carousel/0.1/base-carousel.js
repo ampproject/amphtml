@@ -47,10 +47,14 @@ export class BaseCarousel extends AMP.BaseElement {
       this.showControls_ = true;
       this.element.classList.add(_HAS_CONTROL_CLASS);
     } else {
-      input.onMouseDetected(mouseDetected => {
+      input.onMouseDetected((mouseDetected) => {
         if (mouseDetected) {
           this.showControls_ = true;
-          toggleAttribute(this.element, _CONTROL_HIDE_ATTRIBUTE, !this.showControls_);
+          toggleAttribute(
+            this.element,
+            _CONTROL_HIDE_ATTRIBUTE,
+            !this.showControls_
+          );
           this.element.classList.add(_HAS_CONTROL_CLASS);
         }
       }, true);
