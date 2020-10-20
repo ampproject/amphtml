@@ -207,6 +207,9 @@ export class AmpStoryPlayer {
     /** @private {?boolean} */
     this.isFetchingStoriesEnabled_ = null;
 
+    /** @private {?boolean} */
+    this.isCircularWrappingEnabled_ = null;
+
     /** @private {!Object} */
     this.touchEventState_ = {
       startX: 0,
@@ -342,6 +345,7 @@ export class AmpStoryPlayer {
     this.initializeButton_();
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
+    this.shouldWrapOnEnd_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -838,6 +842,15 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * @param {!Object} behavior
+   * @return {boolean}
+   * @private
+   */
+  validateBehaviorDef_(behavior) {
+    return behavior && behavior.on && behavior.action;
+  }
+
+  /**
    * Checks if fetching more stories is enabled and validates the configuration.
    * @return {boolean}
    * @private
@@ -849,14 +862,11 @@ export class AmpStoryPlayer {
 
     const {behavior} = this.playerConfig_;
 
-    const isBehaviorDef = (behavior) =>
-      behavior && behavior.on && behavior.action;
-
     const hasEndFetchBehavior = (behavior) =>
       behavior.on === 'end' && behavior.action === 'fetch' && behavior.endpoint;
 
     this.isFetchingStoriesEnabled_ =
-      isBehaviorDef(behavior) && hasEndFetchBehavior(behavior);
+      this.validateBehaviorDef_(behavior) && hasEndFetchBehavior(behavior);
 
     return this.isFetchingStoriesEnabled_;
   }
@@ -867,14 +877,14 @@ export class AmpStoryPlayer {
    */
   next_() {
     if (
-      !this.isCircularWrappingEnabled_() &&
+      !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
       return;
     }
 
     if (
-      this.isCircularWrappingEnabled_() &&
+      this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
       this.go(1);
@@ -905,14 +915,14 @@ export class AmpStoryPlayer {
    */
   previous_() {
     if (
-      !this.isCircularWrappingEnabled_() &&
+      !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
       return;
     }
 
     if (
-      this.isCircularWrappingEnabled_() &&
+      this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
       this.go(-1);
@@ -943,7 +953,7 @@ export class AmpStoryPlayer {
       return;
     }
     if (
-      !this.isCircularWrappingEnabled_() &&
+      !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + storyDelta)
     ) {
       throw new Error('Out of Story range.');
@@ -1335,7 +1345,7 @@ export class AmpStoryPlayer {
    * @private
    */
   dispatchEndOfStoriesEvent_(data) {
-    if (this.isCircularWrappingEnabled_() || (!data.next && !data.previous)) {
+    if (this.isCircularWrappingEnabled_ || (!data.next && !data.previous)) {
       return;
     }
 
@@ -1436,14 +1446,14 @@ export class AmpStoryPlayer {
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_LEFT) {
         delta > TOGGLE_THRESHOLD_PX &&
-        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_())
+        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
           ? this.next_()
           : this.resetIframeStyles_();
       }
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_RIGHT) {
         delta > TOGGLE_THRESHOLD_PX &&
-        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_())
+        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
           ? this.previous_()
           : this.resetIframeStyles_();
       }
@@ -1510,12 +1520,28 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Checks if circular wrapping attribute is present.
    * @private
    * @return {boolean}
    */
-  isCircularWrappingEnabled_() {
-    return this.element_.hasAttribute('enable-circular-wrapping');
+  shouldWrapOnEnd_() {
+    if (this.isCircularWrappingEnabled_ !== null) {
+      return this.isCircularWrappingEnabled_;
+    }
+
+    if (!this.playerConfig_) {
+      return false;
+    }
+
+    const {behavior} = this.playerConfig_;
+
+    const hasCircularWrappingEnabled = (behavior) =>
+      behavior.on === 'end' && behavior.action === 'circular-wrapping';
+
+    this.isCircularWrappingEnabled_ =
+      this.validateBehaviorDef_(behavior) &&
+      hasCircularWrappingEnabled(behavior);
+
+    return this.isCircularWrappingEnabled_;
   }
 
   /**
