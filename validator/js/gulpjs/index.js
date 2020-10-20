@@ -94,7 +94,7 @@ module.exports.format = function(logger) {
   }
 
   function formatResults(callback) {
-    logger.log('AMP Validation results:\n\n' +
+    logger.info('AMP Validation results:\n\n' +
         results.map(printResult).join('\n'));
     return callback();
   }
