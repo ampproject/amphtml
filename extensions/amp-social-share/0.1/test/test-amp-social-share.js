@@ -402,10 +402,11 @@ describes.realWin(
         tryFocus(el);
         expect(doc.activeElement).to.equal(el);
 
-        expect(win.getComputedStyle(share)['outline']).to.equal(
+        // updated styles after focusing on element
+        expect(win.getComputedStyle(el)['outline']).to.equal(
           'rgb(3, 137, 255) solid 2px'
         );
-        expect(win.getComputedStyle(share)['outline-offset']).to.equal('2px');
+        expect(win.getComputedStyle(el)['outline-offset']).to.equal('2px');
       });
     });
 
