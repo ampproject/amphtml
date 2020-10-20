@@ -41,6 +41,10 @@ To treat warnings as errors, replace the last line of the validation closure wit
 
 ## Release Notes
 
+### 1.0.6
+
+- Use fancy-log log.info (#30744)
+
 ### 1.0.5
 
 - Update repository location.
