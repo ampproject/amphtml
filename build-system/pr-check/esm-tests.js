@@ -41,8 +41,8 @@ function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
+    downloadEsmDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting --esm');
     timedExecOrDie('gulp integration --nobuild --compiled --headless');
   } else {
     printChangeSummary(FILENAME);
@@ -54,7 +54,7 @@ function main() {
     ) {
       downloadEsmDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless');
+      timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
