@@ -114,14 +114,11 @@ class AmpAccordion extends AMP.BaseElement {
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
-      const header = sectionComponents[0];
-      const content = sectionComponents[1];
+      const {0: header, 1: content} = sectionComponents;
       content.classList.add('i-amphtml-accordion-content');
 
-      // To ensure that we pass Accessibility audits -
-      // we need to make sure that each accordion has a unique ID.
-      // In case the accordion doesn't have an ID we use a
-      // random number to ensure uniqueness.
+      // Ensure each accordion has a unique id, helping screen readers
+      // understand the relationship between the pieces of content.
       let contentId = content.getAttribute('id');
       if (!contentId) {
         contentId = this.prefix_ + '_AMP_content_' + index;
