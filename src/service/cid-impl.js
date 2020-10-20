@@ -433,15 +433,17 @@ function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
     return Promise.resolve(existingCookie);
   }
   if (isBackupCidExpOn && !disableBackup) {
-    return Services.storageForDoc(ampdoc).then((storage) => {
-      const key = getStorageKey(cookieName);
-      return storage.get(key, BASE_CID_MAX_AGE_MILLIS);
-    }).then((backupCid) => {
-      if (!backupCid || typeof backupCid != 'string') {
-        return null;
-      }
-      return backupCid;
-    });
+    return Services.storageForDoc(ampdoc)
+      .then((storage) => {
+        const key = getStorageKey(cookieName);
+        return storage.get(key, BASE_CID_MAX_AGE_MILLIS);
+      })
+      .then((backupCid) => {
+        if (!backupCid || typeof backupCid != 'string') {
+          return null;
+        }
+        return backupCid;
+      });
   }
   return Promise.resolve(null);
 }
