@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1105
+spec_file_revision: 1106
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -4064,7 +4064,7 @@ tags: {
 # 4.11.3 The template element
 # See extensions/amp-mustache/validator-amp-mustache.protoascii.
 
-# 11 Obsolute features
+# 11 Obsolete features
 # 11.2 Non-conforming features
 tags: {
   html_format: AMP
