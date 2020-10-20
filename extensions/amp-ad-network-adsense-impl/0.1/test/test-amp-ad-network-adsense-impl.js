@@ -731,6 +731,13 @@ describes.realWin(
             /(\?|&)is_amp=5(&|$)/
           );
         });
+        it('does not set ptt parameter by default', () =>
+          expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=12(&|$)/));
+        it('sets ptt parameter', () => {
+          forceExperimentBranch(impl.win, 'adsensePttExp', '21068092');
+          return expect(impl.getAdUrl()).to.eventually.match(
+            /(\?|&)ptt=12(&|$)/);
+        });
       });
 
       // Not using arrow function here because otherwise the way closure behaves
