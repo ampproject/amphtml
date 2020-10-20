@@ -15,13 +15,13 @@
  */
 
 import {
-  getViewportObserver,
+  createViewportObserver,
   observe,
   unobserve,
 } from '../../src/viewport-observer';
 
 describes.sandboxed('Viewport Observer', {}, (env) => {
-  describe('getViewportObserver', () => {
+  describe('createViewportObserver', () => {
     let win;
     let ctorSpy;
     const noop = () => {};
@@ -37,7 +37,7 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
     });
 
     it('When not iframed, uses null root.', () => {
-      getViewportObserver(noop, win);
+      createViewportObserver(noop, win);
 
       expect(ctorSpy).calledWith(noop, {
         root: null,
@@ -48,7 +48,7 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
 
     it('When iframed, use document root.', () => {
       setIframed();
-      getViewportObserver(noop, win);
+      createViewportObserver(noop, win);
 
       expect(ctorSpy).calledWith(noop, {
         root: win.document,
@@ -64,7 +64,7 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
           throw new Error();
         }
       });
-      getViewportObserver(noop, win);
+      createViewportObserver(noop, win);
 
       expect(ctorSpy).calledWith(noop, {
         root: win.document,
@@ -78,11 +78,11 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
     });
 
     it('Pass along threshold argument', () => {
-      getViewportObserver(noop, win, '50%');
+      createViewportObserver(noop, win, 0.5);
       expect(ctorSpy).calledWith(noop, {
         root: null,
         rootMargin: '25%',
-        threshold: '50%',
+        threshold: 0.5,
       });
     });
   });

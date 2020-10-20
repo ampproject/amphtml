@@ -25,17 +25,17 @@ import {isIframed} from './dom';
  *
  * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
  * @param {!Window} win
- * @param {string=} threshold
+ * @param {number=|!Array<number>=} threshold
  *
  * @return {!IntersectionObserver}
  */
-export function getViewportObserver(ioCallback, win, threshold) {
+export function createViewportObserver(ioCallback, win, threshold) {
   const iframed = isIframed(win);
   const root = /** @type {?Element} */ (iframed
     ? /** @type {*} */ (win.document)
     : null);
 
-  // TODO(amphtml): Determine if rootMargin is still necessary.
+  // Historically viewportCallback used a 25% rootMargin, so emulate it here.
   const rootMargin = '25%';
 
   try {
@@ -49,10 +49,10 @@ export function getViewportObserver(ioCallback, win, threshold) {
   }
 }
 
-/** @type {Map<!Window, !IntersectionObserver>} */
-const viewportObservers = new Map();
+/** @type {!WeakMap<!Window, !IntersectionObserver>} */
+const viewportObservers = new WeakMap();
 
-/** @type {WeakMap<!Element, function(bool)>} */
+/** @type {!WeakMap<!Element, function(boolean)>} */
 const viewportCallbacks = new WeakMap();
 
 /**
@@ -60,12 +60,12 @@ const viewportCallbacks = new WeakMap();
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
  * @param {!Element} element
- * @param {function(boolean)} viewportCallback
+ * @param {!function(boolean)} viewportCallback
  */
 export function observe(element, viewportCallback) {
   const win = element.ownerDocument.defaultView;
   if (!viewportObservers.has(win)) {
-    viewportObservers.set(win, getViewportObserver(ioCallback, win));
+    viewportObservers.set(win, createViewportObserver(ioCallback, win));
   }
   viewportCallbacks.set(element, viewportCallback);
   viewportObservers.get(win).observe(element);
@@ -98,7 +98,7 @@ function ioCallback(entries) {
     // but the element has been GCed.
     if (!viewportCallback) {
       unobserve(target);
-      return;
+      continue;
     }
 
     viewportCallback(isIntersecting);
