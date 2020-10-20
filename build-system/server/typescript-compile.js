@@ -45,7 +45,7 @@ function buildNewServer() {
   const result = exec(getBuildCmd(), {'stdio': ['inherit', 'inherit', 'pipe']});
   if (result.status != 0) {
     const err = new Error('Could not build AMP Dev Server');
-    err.showStack = true;
+    err.showStack = false;
     throw err;
   }
 }
