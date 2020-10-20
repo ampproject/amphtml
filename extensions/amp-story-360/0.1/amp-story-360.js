@@ -51,6 +51,12 @@ const HAVE_CURRENT_DATA = 2;
 const CENTER_OFFSET = 90;
 
 /**
+ * Min value for WebGL context to be active.
+ * @const {number}
+ */
+const MIN_WEBGL_DISTANCE = 3;
+
+/**
  * Generates the template for the permission button.
  *
  * @param {!Element} element
@@ -293,6 +299,8 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {number} */
     this.headingOffset_ = 0;
+
+    this.lostGlContext_ = null;
   }
 
   /** @override */
@@ -364,6 +372,7 @@ export class AmpStory360 extends AMP.BaseElement {
           this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
           this.maybeSetGyroscopeDefaultHeading_();
+          this.maybeActivateGlContext_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
@@ -408,6 +417,20 @@ export class AmpStory360 extends AMP.BaseElement {
     } else {
       this.pause_();
       this.rewind_();
+    }
+  }
+
+  /** @private */
+  maybeActivateGlContext_() {
+    const distance = this.getPage_().getAttribute('distance');
+    if (distance && this.isReady_) {
+      if (parseInt(distance, 10) < MIN_WEBGL_DISTANCE) {
+        if (this.renderer_.gl.isContextLost()) {
+          this.lostGlContext_.restoreContext();
+        }
+      } else if (!this.renderer_.gl.isContextLost()) {
+        this.lostGlContext_.loseContext();
+      }
     }
   }
 
@@ -604,7 +627,9 @@ export class AmpStory360 extends AMP.BaseElement {
   checkImageReSize_(imgEl) {
     const canvasForGL = document.createElement('canvas');
     const gl = canvasForGL.getContext('webgl');
-    const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const MAX_TEXTURE_SIZE = this.renderer_.gl.getParameter(
+      this.renderer_.gl.MAX_TEXTURE_SIZE
+    );
 
     if (
       imgEl.naturalWidth > MAX_TEXTURE_SIZE ||
@@ -656,7 +681,9 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          const img = this.checkImageReSize_(
+          this.renderer_.init();
+          this.setUpCanvasGlListeners_();
+          this.image_ = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
           this.renderer_.setImageOrientation(
@@ -664,7 +691,7 @@ export class AmpStory360 extends AMP.BaseElement {
             this.scenePitch_,
             this.sceneRoll_
           );
-          this.renderer_.setImage(img);
+          this.renderer_.setImage(this.image_);
           this.renderer_.resize();
           if (this.orientations_.length < 1) {
             return;
@@ -705,6 +732,9 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
+          this.setUpCanvasGlListeners_();
+
+          this.renderer_.init();
           this.renderer_.setImageOrientation(
             this.sceneHeading_,
             this.scenePitch_,
@@ -730,6 +760,26 @@ export class AmpStory360 extends AMP.BaseElement {
           user().error(TAG, 'Failed to load the amp-video.');
         }
       );
+  }
+
+  /** @private */
+  setUpCanvasGlListeners_() {
+    this.lostGlContext_ = this.renderer_.gl.getExtension('WEBGL_lose_context');
+    this.renderer_.canvas.addEventListener('webglcontextlost', (e) => {
+      console.log('context lost');
+      e.preventDefault();
+    });
+    this.renderer_.canvas.addEventListener('webglcontextrestored', () => {
+      console.log('context restored');
+      this.renderer_.init();
+      if (this.ampVideoEl_) {
+        this.renderer_.setImage(
+          dev().assertElement(this.ampVideoEl_.querySelector('video'))
+        );
+      } else {
+        this.renderer_.setImage(this.image_);
+      }
+    });
   }
 
   /** @private */
