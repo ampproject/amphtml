@@ -253,6 +253,10 @@ amp-social-share[type='twitter'] {
 
 When customizing the style of an `amp-social-share` icon please ensure that the customized icon meets the branding guidelines set out by the provider (e.g Twitter, Facebook, etc.)
 
+## Accessibility
+
+The `amp-social-share` element defaults to a blue outline as a visible focus indicator. It also defaults `tabindex=0` making it easy for a user to follow along as he or she tabs through multiple `amp-social-share` elements used together on a page.
+
 ## Validation
 
 See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.
