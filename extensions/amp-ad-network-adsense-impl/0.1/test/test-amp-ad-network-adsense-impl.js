@@ -732,11 +732,11 @@ describes.realWin(
           );
         });
         it('does not set ptt parameter by default', () =>
-          expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=12(&|$)/));
+          expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=(&|$)/));
         it('sets ptt parameter', () => {
-          forceExperimentBranch(impl.win, 'adsensePttExp', '21068092');
+          forceExperimentBranch(impl.win, 'adsense-ptt-exp', '21068092');
           return expect(impl.getAdUrl()).to.eventually.match(
-            /(\?|&)ptt=12(&|$)/);
+            /(\?|&)ptt=(&|$)/);
         });
       });
 

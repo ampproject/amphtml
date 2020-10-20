@@ -36,6 +36,6 @@
   "analytics-chunks": 1,
   "render-on-idle-fix": 1,
   "build-in-chunks": 1,
-  "adsensePttExp": 0.02,
-  "doubleclickPttExp": 0.02
+  "adsense-ptt-exp": 0.02,
+  "doubleclick-ptt-exp": 0.02
 }

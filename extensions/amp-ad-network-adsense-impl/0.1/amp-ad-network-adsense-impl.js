@@ -70,7 +70,7 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 const TAG = 'amp-ad-network-adsense-impl';
 
 /** @const {string} */
-const PTT_EXP = 'adsensePttExp';
+const PTT_EXP = 'adsense-ptt-exp';
 
 /** @const @enum{string} */
 const PTT_EXP_BRANCHES = {

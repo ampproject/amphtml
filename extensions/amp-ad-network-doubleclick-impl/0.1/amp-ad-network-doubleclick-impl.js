@@ -145,7 +145,7 @@ const ZINDEX_EXP_BRANCHES = {
 };
 
 /** @const {string} */
-const PTT_EXP = 'doubleclickPttExp';
+const PTT_EXP = 'doubleclick-ptt-exp';
 
 /** @const @enum{string} */
 const PTT_EXP_BRANCHES = {
