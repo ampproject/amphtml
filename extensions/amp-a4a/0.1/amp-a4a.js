@@ -320,13 +320,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.iframe = null;
 
-    /**
-     * TODO(keithwrightbos) - remove once resume behavior is verified.
-     * {boolean} whether most recent ad request was generated as part
-     *    of resume callback.
-     */
-    this.fromResumeCallback = false;
-
     /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
@@ -539,7 +532,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.friendlyIframeEmbed_) {
       return;
     }
-    this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
     const resource = this.getResource();
@@ -737,7 +729,11 @@ export class AmpA4A extends AMP.BaseElement {
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
           {consentState, consentString, gdprApplies},
-          this.tryExecuteRealTimeConfig_(consentState, consentString)
+          this.tryExecuteRealTimeConfig_(
+            consentState,
+            consentString,
+            /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
+          )
         ));
       })
       // This block returns the (possibly empty) response to the XHR request.
@@ -1368,7 +1364,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
     this.transferDomBody_ = null;
-    this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
   }
@@ -2203,15 +2198,17 @@ export class AmpA4A extends AMP.BaseElement {
    * the rtc-config attribute on the amp-ad element, warn.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState, consentString) {
+  tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
     if (!!AMP.RealTimeConfigManager) {
       try {
         return new AMP.RealTimeConfigManager(this).maybeExecuteRealTimeConfig(
           this.getCustomRealTimeConfigMacros_(),
           consentState,
-          consentString
+          consentString,
+          consentMetadata
         );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);

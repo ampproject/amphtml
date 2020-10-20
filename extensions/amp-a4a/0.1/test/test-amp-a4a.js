@@ -1266,7 +1266,6 @@ describe('amp-a4a', () => {
       const onLayoutMeasureSpy = window.sandbox.spy(a4a, 'onLayoutMeasure');
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.be.calledOnce;
-      expect(a4a.fromResumeCallback).to.be.true;
     });
     it('resumeCallback does not call onLayoutMeasure for FIE', async () => {
       const fixture = await createIframePromise();
@@ -1299,7 +1298,6 @@ describe('amp-a4a', () => {
       const onLayoutMeasureSpy = window.sandbox.spy(a4a, 'onLayoutMeasure');
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.not.be.called;
-      expect(a4a.fromResumeCallback).to.be.false;
     });
     it('resumeCallback w/ measure required no onLayoutMeasure', async () => {
       // Force non-FIE
@@ -1336,7 +1334,6 @@ describe('amp-a4a', () => {
       getResourceStub.returns({'hasBeenMeasured': () => false});
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.not.be.called;
-      expect(a4a.fromResumeCallback).to.be.true;
     });
     it('should run end-to-end and render in friendly iframe', async () => {
       // TODO(ccordry): delete this test when no signing launches.
@@ -2447,7 +2444,11 @@ describe('amp-a4a', () => {
         a4a = new MockA4AImpl(a4aElement);
         consentString = 'test-consent-string';
         gdprApplies = true;
-        consentMetadata = {gdprApplies};
+        consentMetadata = {
+          gdprApplies,
+          'consentStringType': 1,
+          'additionalConsent': 'abc123',
+        };
         return fixture;
       });
 
@@ -2492,7 +2493,8 @@ describe('amp-a4a', () => {
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
-            consentString
+            consentString,
+            consentMetadata
           )
         ).calledOnce;
       });
@@ -2545,7 +2547,8 @@ describe('amp-a4a', () => {
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
-            consentString
+            consentString,
+            consentMetadata
           )
         ).calledOnce;
       });
@@ -2590,6 +2593,7 @@ describe('amp-a4a', () => {
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.UNKNOWN,
+            null,
             null
           )
         ).calledOnce;

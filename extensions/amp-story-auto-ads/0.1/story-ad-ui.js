@@ -209,3 +209,53 @@ export function maybeCreateAttribution(win, metadata, container) {
 export function handleAttributionClick(win, href) {
   openWindowDialog(win, href, '_blank');
 }
+
+/**
+ * @param {!Document} doc
+ * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
+ * @param {!Element} container
+ * @param {!StoryAdUIMetadata} uiMetadata
+ * @return {!Promise<?Element>} If anchor was successfully created.
+ */
+export function createCta(doc, buttonFitter, container, uiMetadata) {
+  const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
+  const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
+
+  // TODO(ccordry): Move button to shadow root.
+  const a = createElementWithAttributes(
+    doc,
+    'a',
+    dict({
+      'class': 'i-amphtml-story-ad-link',
+      'target': '_blank',
+      'href': ctaUrl,
+    })
+  );
+
+  const fitPromise = buttonFitter.fit(
+    dev().assertElement(container),
+    a, // Container
+    ctaText // Content
+  );
+
+  return fitPromise.then((success) => {
+    if (!success) {
+      user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
+      return null;
+    }
+
+    a.href = ctaUrl;
+    a.textContent = ctaText;
+
+    if (a.protocol !== 'https:' && a.protocol !== 'http:') {
+      user().warn(TAG, 'CTA url is not valid. Ad was discarded');
+      return null;
+    }
+
+    const ctaLayer = doc.createElement('amp-story-cta-layer');
+    ctaLayer.className = 'i-amphtml-cta-container';
+    ctaLayer.appendChild(a);
+    container.appendChild(ctaLayer);
+    return a;
+  });
+}

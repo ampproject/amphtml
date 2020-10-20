@@ -133,6 +133,48 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(sections.at(2).find('div').getDOMNode().hidden).to.be.true;
     });
 
+    it('should include a11y related attributes', () => {
+      const dom = wrapper.getDOMNode();
+      expect(dom.localName).to.equal('section');
+
+      const sections = wrapper.find(AccordionSection);
+      expect(sections).to.have.lengthOf(3);
+
+      const header0 = sections.at(0).find('header').getDOMNode();
+      const header1 = sections.at(1).find('header').getDOMNode();
+      const header2 = sections.at(2).find('header').getDOMNode();
+      const content0 = sections.at(0).find('div').getDOMNode();
+      const content1 = sections.at(1).find('div').getDOMNode();
+      const content2 = sections.at(2).find('div').getDOMNode();
+
+      expect(sections.at(0).getDOMNode()).to.have.attribute('aria-expanded');
+      expect(header0).to.have.attribute('tabindex');
+      expect(header0).to.have.attribute('aria-controls');
+      expect(header0).to.have.attribute('role');
+      expect(content0).to.have.attribute('id');
+      expect(header0.getAttribute('aria-controls')).to.equal(
+        content0.getAttribute('id')
+      );
+
+      expect(sections.at(1).getDOMNode()).to.have.attribute('aria-expanded');
+      expect(header1).to.have.attribute('tabindex');
+      expect(header1).to.have.attribute('aria-controls');
+      expect(header1).to.have.attribute('role');
+      expect(content1).to.have.attribute('id');
+      expect(header1.getAttribute('aria-controls')).to.equal(
+        content1.getAttribute('id')
+      );
+
+      expect(sections.at(2).getDOMNode()).to.have.attribute('aria-expanded');
+      expect(header2).to.have.attribute('tabindex');
+      expect(header2).to.have.attribute('aria-controls');
+      expect(header2).to.have.attribute('role');
+      expect(content2).to.have.attribute('id');
+      expect(header2.getAttribute('aria-controls')).to.equal(
+        content2.getAttribute('id')
+      );
+    });
+
     it('should expand a section on click', () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
