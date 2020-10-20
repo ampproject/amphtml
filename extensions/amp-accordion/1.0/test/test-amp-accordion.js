@@ -76,6 +76,65 @@ describes.realWin(
       expect(sections[2].lastElementChild).to.have.display('none');
     });
 
+    it('should have amp specific classes for CSS', () => {
+      const sections = element.children;
+      const {
+        firstElementChild: header0,
+        lastElementChild: content0,
+      } = sections[0];
+      const {
+        firstElementChild: header1,
+        lastElementChild: content1,
+      } = sections[1];
+      const {
+        firstElementChild: header2,
+        lastElementChild: content2,
+      } = sections[2];
+
+      // Check classes
+      expect(header0.className).to.include('i-amphtml-accordion-header');
+      expect(header1.className).to.include('i-amphtml-accordion-header');
+      expect(header2.className).to.include('i-amphtml-accordion-header');
+      expect(content0.className).to.include('i-amphtml-accordion-content');
+      expect(content1.className).to.include('i-amphtml-accordion-content');
+      expect(content2.className).to.include('i-amphtml-accordion-content');
+
+      // Check computed styles
+      expect(win.getComputedStyle(header0).margin).to.equal('0px');
+      expect(win.getComputedStyle(header0).cursor).to.equal('pointer');
+      expect(win.getComputedStyle(header0).backgroundColor).to.equal(
+        'rgb(239, 239, 239)'
+      );
+      expect(win.getComputedStyle(header0).paddingRight).to.equal('20px');
+      expect(win.getComputedStyle(header0).border).to.equal(
+        '1px solid rgb(223, 223, 223)'
+      );
+
+      expect(win.getComputedStyle(header1).margin).to.equal('0px');
+      expect(win.getComputedStyle(header1).cursor).to.equal('pointer');
+      expect(win.getComputedStyle(header1).backgroundColor).to.equal(
+        'rgb(239, 239, 239)'
+      );
+      expect(win.getComputedStyle(header1).paddingRight).to.equal('20px');
+      expect(win.getComputedStyle(header1).border).to.equal(
+        '1px solid rgb(223, 223, 223)'
+      );
+
+      expect(win.getComputedStyle(header2).margin).to.equal('0px');
+      expect(win.getComputedStyle(header2).cursor).to.equal('pointer');
+      expect(win.getComputedStyle(header2).backgroundColor).to.equal(
+        'rgb(239, 239, 239)'
+      );
+      expect(win.getComputedStyle(header2).paddingRight).to.equal('20px');
+      expect(win.getComputedStyle(header2).border).to.equal(
+        '1px solid rgb(223, 223, 223)'
+      );
+
+      expect(win.getComputedStyle(content0).margin).to.equal('0px');
+      expect(win.getComputedStyle(content1).margin).to.equal('0px');
+      expect(win.getComputedStyle(content2).margin).to.equal('0px');
+    });
+
     it('should expand and collapse on click', async () => {
       const sections = element.children;
 

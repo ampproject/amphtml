@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {Accordion, AccordionSection} from './accordion';
+import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
 import {devAssert, userAssert} from '../../../src/log';
@@ -132,6 +133,7 @@ function HeaderShim(sectionElement, {onClick, 'aria-controls': ariaControls}) {
     if (!headerElement || !onClick) {
       return;
     }
+    headerElement.classList.add('i-amphtml-accordion-header');
     headerElement.addEventListener('click', onClick);
     if (!headerElement.hasAttribute('tabindex')) {
       headerElement.setAttribute('tabindex', 0);
@@ -167,6 +169,7 @@ function ContentShimWithRef(sectionElement, {hidden, id}, ref) {
     if (!contentElement) {
       return;
     }
+    contentElement.classList.add('i-amphtml-accordion-content');
     contentElement.setAttribute('id', id);
     toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
@@ -201,5 +204,5 @@ AmpAccordion['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpAccordion);
+  AMP.registerElement(TAG, AmpAccordion, CSS);
 });
