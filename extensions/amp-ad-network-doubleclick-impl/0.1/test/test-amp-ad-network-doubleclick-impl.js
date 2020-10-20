@@ -1085,7 +1085,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     it('sets ptt parameter', () => {
       impl.experimentIds = ['21068094'];
       return expect(impl.getAdUrl()).to.eventually.match(
-        /(\?|&)ptt=(&|$)/);
+        /(\?|&)ptt=13(&|$)/);
     });
   });
 
