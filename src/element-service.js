@@ -17,8 +17,8 @@
 import * as dom from './dom';
 import {
   getAmpdoc,
-  getExistingServiceForDocInEmbedScope,
   getService,
+  getServiceForDocOrNull,
   getServicePromise,
   getServicePromiseForDoc,
   getServicePromiseOrNull,
@@ -159,7 +159,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
   id,
   extension
 ) {
-  const s = getExistingServiceForDocInEmbedScope(element, id);
+  const s = getServiceForDocOrNull(element, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
   }
