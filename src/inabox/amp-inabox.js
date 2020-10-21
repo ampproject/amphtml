@@ -112,6 +112,7 @@ startupChunk(self.document, function initial() {
         self.document,
         function final() {
           Navigation.installAnchorClickInterceptor(ampdoc, self);
+          // eslint-disable-next-line no-undef
           if (STORY_AD_INABOX) {
             maybeRenderInaboxAsStoryAd(ampdoc);
           }
