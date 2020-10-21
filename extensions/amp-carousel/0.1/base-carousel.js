@@ -56,18 +56,10 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    this.onViewportCallback(inViewport);
     if (inViewport) {
       this.hintControls();
     }
   }
-
-  /**
-   * Handles element specific viewport based events.
-   * @param {boolean} unusedInViewport
-   * @protected
-   */
-  onViewportCallback(unusedInViewport) {}
 
   /**
    * Builds a carousel button for next/prev.
