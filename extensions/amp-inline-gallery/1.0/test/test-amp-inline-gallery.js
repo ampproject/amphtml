@@ -28,7 +28,6 @@ describes.realWin(
   'amp-inline-gallery',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-inline-gallery:1.0', 'amp-base-carousel:1.0'],
     },
   },

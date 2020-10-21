@@ -21,7 +21,13 @@ import {useStyles} from './base-carousel.jss';
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow({customArrow, by, advance, disabled, outsetArrows}) {
+export function Arrow({
+  advance,
+  by,
+  customArrow = <DefaultArrow by={by} />,
+  disabled,
+  outsetArrows,
+}) {
   const {
     'disabled': customDisabled,
     'onClick': onCustomClick,
@@ -34,7 +40,7 @@ export function Arrow({customArrow, by, advance, disabled, outsetArrows}) {
     if (onCustomClick) {
       onCustomClick(e);
     }
-    advance(by);
+    advance();
   };
   const classes = useStyles();
   const classNames = `${classes.arrow} ${
@@ -51,34 +57,6 @@ export function Arrow({customArrow, by, advance, disabled, outsetArrows}) {
         'aria-disabled': isDisabled,
       })}
     </div>
-  );
-}
-
-/**
- * @param {!BaseCarouselDef.ArrowProps} props
- * @return {PreactDef.VNode}
- */
-export function ArrowPrev({customArrow, ...rest}) {
-  return (
-    <Arrow
-      by={-1}
-      customArrow={customArrow || <DefaultArrow by={-1} />}
-      {...rest}
-    />
-  );
-}
-
-/**
- * @param {!BaseCarouselDef.ArrowProps} props
- * @return {PreactDef.Renderable}
- */
-export function ArrowNext({customArrow, ...rest}) {
-  return (
-    <Arrow
-      by={1}
-      customArrow={customArrow || <DefaultArrow by={1} />}
-      {...rest}
-    />
   );
 }
 
