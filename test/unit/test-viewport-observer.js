@@ -158,5 +158,15 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
 
       expect(el1Events).eql([false]);
     });
+
+    it('Observing twice with the same callback is fine, but unique ones throw', () => {
+      const noop = () => {};
+      observe(el1, noop);
+      observe(el1, noop);
+
+      allowConsoleError(() => {
+        expect(() => observe(el1, () => {})).throws('Assertion failed');
+      });
+    });
   });
 });

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {devAssert} from '../src/log';
 import {isIframed} from './dom';
 
 /**
@@ -60,9 +61,15 @@ const viewportCallbacks = new WeakMap();
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
  * @param {!Element} element
- * @param {!function(boolean)} viewportCallback
+ * @param {function(boolean)} viewportCallback
  */
 export function observe(element, viewportCallback) {
+  // There should never be two unique observers of the same element.
+  devAssert(
+    !viewportCallbacks.has(element) ||
+      viewportCallbacks.get(element) === viewportCallback
+  );
+
   const win = element.ownerDocument.defaultView;
   if (!viewportObservers.has(win)) {
     viewportObservers.set(win, createViewportObserver(ioCallback, win));
