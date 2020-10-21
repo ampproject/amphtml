@@ -114,16 +114,20 @@ class AmpAccordion extends AMP.BaseElement {
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
-      const content = sectionComponents[1];
+      const {0: header, 1: content} = sectionComponents;
       content.classList.add('i-amphtml-accordion-content');
+
+      // Ensure each accordion has a unique id, helping screen readers
+      // understand the relationship between the pieces of content.
       let contentId = content.getAttribute('id');
       if (!contentId) {
-        // To ensure that we pass Accessibility audits -
-        // we need to make sure that each accordion has a unique ID.
-        // In case the accordion doesn't have an ID we use a
-        // random number to ensure uniqueness.
         contentId = this.prefix_ + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
+      }
+      let headerId = header.getAttribute('id');
+      if (!headerId) {
+        headerId = this.prefix_ + '_AMP_header_' + index;
+        header.setAttribute('id', headerId);
       }
 
       this.registerAction('toggle', (i) => this.handleAction_(i));
@@ -161,7 +165,6 @@ class AmpAccordion extends AMP.BaseElement {
       });
 
       const isExpanded = section.hasAttribute('expanded');
-      const header = sectionComponents[0];
       header.classList.add('i-amphtml-accordion-header');
       header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
@@ -170,6 +173,8 @@ class AmpAccordion extends AMP.BaseElement {
         header.setAttribute('tabindex', 0);
       }
       this.headers_.push(header);
+      content.setAttribute('aria-labelledby', headerId);
+      content.setAttribute('role', 'region');
 
       userAssert(
         this.action_.hasAction(header, 'tap', section) == false,
