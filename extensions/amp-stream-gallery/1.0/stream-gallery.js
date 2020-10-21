@@ -41,7 +41,6 @@ export function StreamGallery({
   minVisibleCount = 1,
   outsetArrows,
   peek = 0,
-  slideAlign,
   snap,
   style,
   ...rest
@@ -101,7 +100,6 @@ export function StreamGallery({
           loop={loop}
           outsetArrows={outsetArrows}
           snap={snap}
-          snapAlign={slideAlign}
           style={{
             flexGrow: 1,
             maxWidth: maxContainerWidth,
