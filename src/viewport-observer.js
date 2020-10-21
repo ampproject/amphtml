@@ -40,6 +40,8 @@ export function createViewportObserver(ioCallback, win, threshold) {
   // affecting metrics.
   const rootMargin = '25%';
 
+  // Chrome 81+ supports rootMargin in x-origin iframes via {root: document}
+  // but this throws in other browsers.
   try {
     return new win.IntersectionObserver(ioCallback, {
       root,
@@ -64,7 +66,7 @@ const viewportCallbacks = new WeakMap();
  * @param {!Element} element
  * @param {function(boolean)} viewportCallback
  */
-export function observe(element, viewportCallback) {
+export function observeWithSharedInOb(element, viewportCallback) {
   // There should never be two unique observers of the same element.
   devAssert(
     !viewportCallbacks.has(element) ||
@@ -72,21 +74,26 @@ export function observe(element, viewportCallback) {
   );
 
   const win = element.ownerDocument.defaultView;
-  if (!viewportObservers.has(win)) {
-    viewportObservers.set(win, createViewportObserver(ioCallback, win));
+  let viewportObserver = viewportObservers.get(win);
+  if (!viewportObserver) {
+    viewportObservers.set(
+      win,
+      (viewportObserver = createViewportObserver(ioCallback, win))
+    );
   }
   viewportCallbacks.set(element, viewportCallback);
-  viewportObservers.get(win).observe(element);
+  viewportObserver.observe(element);
 }
 
 /**
  * Unobserve an element.
  * @param {!Element} element
  */
-export function unobserve(element) {
+export function unobserveWithSharedInOb(element) {
   const win = element.ownerDocument.defaultView;
-  if (viewportObservers.has(win)) {
-    viewportObservers.get(win).unobserve(element);
+  const viewportObserver = viewportObservers.get(win);
+  if (viewportObserver) {
+    viewportObserver.unobserve(element);
   }
   viewportCallbacks.delete(element);
 }
@@ -101,14 +108,6 @@ function ioCallback(entries) {
   for (let i = 0; i < entries.length; i++) {
     const {isIntersecting, target} = entries[i];
     const viewportCallback = viewportCallbacks.get(target);
-
-    // The callback may not exist if unobserve wasn't called
-    // but the element has been GCed.
-    if (!viewportCallback) {
-      unobserve(target);
-      continue;
-    }
-
     viewportCallback(isIntersecting);
   }
 }

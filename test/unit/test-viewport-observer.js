@@ -16,8 +16,8 @@
 
 import {
   createViewportObserver,
-  observe,
-  unobserve,
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
 } from '../../src/viewport-observer';
 
 describes.sandboxed('Viewport Observer', {}, (env) => {
@@ -125,7 +125,9 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
 
     it('observed element should have its callback fired each time it enters/exist the viewport.', () => {
       const viewportEvents = [];
-      observe(el1, (inViewport) => viewportEvents.push(inViewport));
+      observeWithSharedInOb(el1, (inViewport) =>
+        viewportEvents.push(inViewport)
+      );
       toggleViewport(el1, true);
       toggleViewport(el1, false);
 
@@ -136,8 +138,8 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
       const el1Events = [];
       const el2Events = [];
 
-      observe(el1, (inViewport) => el1Events.push(inViewport));
-      observe(el2, (inViewport) => el2Events.push(inViewport));
+      observeWithSharedInOb(el1, (inViewport) => el1Events.push(inViewport));
+      observeWithSharedInOb(el2, (inViewport) => el2Events.push(inViewport));
       toggleViewport(el1, false);
       toggleViewport(el2, true);
       toggleViewport(el1, true);
@@ -149,10 +151,10 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
     it('once unobserved, the callback is no longer fired', () => {
       const el1Events = [];
 
-      observe(el1, (inViewport) => el1Events.push(inViewport));
+      observeWithSharedInOb(el1, (inViewport) => el1Events.push(inViewport));
       toggleViewport(el1, false);
 
-      unobserve(el1);
+      unobserveWithSharedInOb(el1);
       toggleViewport(el1, true);
       toggleViewport(el1, false);
 
@@ -161,11 +163,13 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
 
     it('Observing twice with the same callback is fine, but unique ones throw', () => {
       const noop = () => {};
-      observe(el1, noop);
-      observe(el1, noop);
+      observeWithSharedInOb(el1, noop);
+      observeWithSharedInOb(el1, noop);
 
       allowConsoleError(() => {
-        expect(() => observe(el1, () => {})).throws('Assertion failed');
+        expect(() => observeWithSharedInOb(el1, () => {})).throws(
+          'Assertion failed'
+        );
       });
     });
   });
