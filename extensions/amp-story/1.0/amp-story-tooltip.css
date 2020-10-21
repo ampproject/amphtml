@@ -123,7 +123,6 @@
   text-overflow: ellipsis !important;
   overflow: hidden !important;
   white-space: nowrap !important;
-  max-width: 172px !important;
   margin: 0px 5px !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 14px !important;
@@ -144,6 +143,7 @@
   background-position: center !important;
   background-repeat: no-repeat !important;
   filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.08)) !important;
+  flex-shrink: 0;
 }
 
 .i-amphtml-story-tooltip-custom-icon.i-amphtml-hidden {
@@ -155,6 +155,7 @@
   height: 16px !important;
   margin: 0px 5px !important;
   padding-bottom: 2px !important;
+  flex-shrink: 0;
 }
 
 .i-amphtml-tooltip-action-icon-launch {
