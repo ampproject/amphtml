@@ -801,6 +801,11 @@
       "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
       "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
       "no_base_test": true
-    }
+    },
+    {
+      "url": "examples/visual-tests/amp-carousel/amp-carousel.html",
+      "name": "amp-carousel",
+      "interactive_tests": "examples/visual-tests/amp-carousel/amp-carousel.js"
+    },
   ]
 }
