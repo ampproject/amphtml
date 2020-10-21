@@ -118,7 +118,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
-  onViewportCallback(unusedInViewport) {
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     this.updateInViewport_(this.pos_, this.pos_);
   }
 
