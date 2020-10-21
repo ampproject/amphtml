@@ -67,7 +67,7 @@ export class Disposable {
 export function getExistingServiceForDocInEmbedScope(element, id) {
   // TODO(#22733): completely remove this method once ampdoc-fie launches.
   // Resolve via the element's ampdoc.
-  return getServiceForDocOrNullInternal(element, id);
+  return getServiceForDocOrNull(element, id);
 }
 
 /**
@@ -216,12 +216,12 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * If service `id` is not registered, returns null.
- * @param {!Element|!ShadowRoot} element
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {?Object}
  */
-function getServiceForDocOrNullInternal(element, id) {
-  const ampdoc = getAmpdoc(element);
+export function getServiceForDocOrNull(elementOrAmpDoc, id) {
+  const ampdoc = getAmpdoc(elementOrAmpDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (isServiceRegistered(holder, id)) {
     return getServiceInternal(holder, id);

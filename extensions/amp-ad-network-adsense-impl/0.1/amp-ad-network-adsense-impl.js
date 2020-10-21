@@ -43,6 +43,7 @@ import {
 import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
+  addAmpExperimentIdToElement,
   addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -231,6 +232,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (moduleNomoduleExpId) {
       addExperimentIdToElement(moduleNomoduleExpId, this.element);
     }
+    const ssrExpIds = this.getSsrExpIds_();
+    for (let i = 0; i < ssrExpIds.length; i++) {
+      addAmpExperimentIdToElement(ssrExpIds[i], this.element);
+    }
   }
 
   /**
@@ -342,7 +347,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'prev_slotnames': sharedStateParams.prevSlotnames || null,
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.ifi_,
-      'rc': this.fromResumeCallback ? 1 : null,
       'rafmt':
         this.responsiveState_ != null
           ? this.responsiveState_.getRafmtParam()

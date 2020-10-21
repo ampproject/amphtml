@@ -20,6 +20,7 @@ import {
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
+  getServiceForDocOrNull,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -350,6 +351,17 @@ export class Services {
       element,
       'inputmask',
       'amp-inputmask'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {?./service/loading-indicator.LoadingIndicatorImpl}
+   */
+  static loadingIndicatorOrNull(elementOrAmpDoc) {
+    return /** @type {?./service/loading-indicator.LoadingIndicatorImpl} */ (getServiceForDocOrNull(
+      elementOrAmpDoc,
+      'loadingIndicator'
     ));
   }
 

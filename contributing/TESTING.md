@@ -39,7 +39,7 @@ This document provides details for testing and building your AMP code.
 
 ## Testing commands
 
-Before running these commands, make sure you have Node.js, yarn, and Gulp installed. For installation instructions, see the [One-time setup](getting-started-quick.md#one-time-setup) section in the Quick Start guide.
+Before running these commands, make sure you have Node.js and Gulp installed. For installation instructions, see the [One-time setup](getting-started-quick.md#one-time-setup) section in the Quick Start guide.
 
 **Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp help`.
 
@@ -159,7 +159,7 @@ There are 5 serving modes:
 - RTV mode serves the bundle from the given RTV number (a 15 digit number). E.g. `001907161745080`. Serve RTV mode by running `gulp serve --rtv <rtv_number>`
 - ESM mode serves the esm (module) binaries. First run `gulp dist --fortesting --esm` and then serve esm mode by running `gulp serve --new_server --esm`. _This mode is new, and under active development._
 
-To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
+To switch serving mode during runtime, go to http://localhost:8000/serve_mode=MODE and set `MODE` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
 
 ### Examples
 
@@ -410,7 +410,7 @@ You can create flamecharts for any node process used by the build system by leve
 Here's an example for `gulp dist --closure_concurrency=1`:
 
 ```sh
-yarn 0x -o node_modules/.bin/gulp dist --closure_concurrency=1
+npx 0x -o node_modules/.bin/gulp dist --closure_concurrency=1
 ```
 
-Important to node is `0x` will automatically create a flamechart and a serving folder locally within the repository, please don't add them to PRs!
+Important to note is `0x` will automatically create a flamechart and a serving folder locally within the repository, please don't add them to PRs!

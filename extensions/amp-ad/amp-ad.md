@@ -421,6 +421,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
 - [RelapPro](../../ads/relappro.md)
+- [Remixd](../../ads/remixd.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [rnetplus](../../ads/rnetplus.md)

@@ -15,35 +15,37 @@
  */
 
 import {
+  A4AVarNames,
+  createCta,
+  getStoryAdMetadataFromDoc,
+  getStoryAdMetadataFromElement,
+  localizeCtaText,
+  maybeCreateAttribution,
+  validateCtaMetadata,
+} from './story-ad-ui';
+import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {CommonSignals} from '../../../src/common-signals';
-import {CtaTypes} from './story-ad-localization';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
-import {assertHttpsUrl} from '../../../src/url';
-import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {
   createElementWithAttributes,
   elementByTag,
   isJsonScriptTag,
-  iterateCursor,
-  openWindowDialog,
   toggleAttribute,
 } from '../../../src/dom';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getFrameDoc, getStoryAdMetaTags} from './utils';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict, map} from '../../../src/utils/object';
+import {getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -57,30 +59,10 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 /** @const {string} */
 const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-ad-fullbleed';
 
-/** @const {string} */
-const CTA_META_PREFIX = 'amp-cta-';
-
-/** @const {string} */
-const A4A_VARS_META_PREFIX = 'amp4ads-vars-';
-
 /** @enum {string} */
 const PageAttributes = {
   LOADING: 'i-amphtml-loading',
   IFRAME_BODY_VISIBLE: 'amp-story-visible',
-};
-
-/** @enum {string} */
-const DataAttrs = {
-  CTA_TYPE: 'data-vars-ctatype',
-  CTA_URL: 'data-vars-ctaurl',
-};
-
-/** @enum {string} */
-const A4AVarNames = {
-  ATTRIBUTION_ICON: 'attribution-icon',
-  ATTRIBUTION_URL: 'attribution-url',
-  CTA_TYPE: 'cta-type',
-  CTA_URL: 'cta-url',
 };
 
 export class StoryAdPage {
@@ -129,14 +111,8 @@ export class StoryAdPage {
     /** @private {?Document} */
     this.adDoc_ = null;
 
-    /** @private {?string} */
-    this.ampAdExitOutlink_ = null;
-
     /** @private {boolean} */
     this.loaded_ = false;
-
-    /** @private @const {!JsonObject} */
-    this.a4aVars_ = dict();
 
     /** @private @const {!Array<Function>} */
     this.loadCallbacks_ = [];
@@ -253,59 +229,59 @@ export class StoryAdPage {
    */
   maybeCreateCta() {
     return Promise.resolve().then(() => {
-      // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
-      if (this.adDoc_) {
-        this.extractA4AVars_();
-        this.readAmpAdExit_();
+      const uiMetadata = map();
+
+      // Template Ads.
+      if (!this.adDoc_) {
+        Object.assign(
+          uiMetadata,
+          getStoryAdMetadataFromElement(devAssert(this.adElement_))
+        );
+      } else {
+        Object.assign(
+          uiMetadata,
+          getStoryAdMetadataFromDoc(this.adDoc_),
+          // TODO(ccordry): Depricate when possible.
+          this.readAmpAdExit_()
+        );
       }
 
-      // If making a CTA layer we need a button name & outlink url.
-      const ctaUrl =
-        this.ampAdExitOutlink_ ||
-        this.a4aVars_[A4AVarNames.CTA_URL] ||
-        this.adElement_.getAttribute(DataAttrs.CTA_URL);
-
-      const ctaType =
-        this.a4aVars_[A4AVarNames.CTA_TYPE] ||
-        this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
-
-      if (!ctaUrl || !ctaType) {
-        user().error(
-          TAG,
-          'Both CTA Type & CTA Url are required in ad response.'
-        );
+      if (!validateCtaMetadata(uiMetadata)) {
         return false;
       }
 
-      let ctaText;
-      // CTA picked from predefined choices.
-      if (CtaTypes[ctaType]) {
-        const ctaLocalizedStringId = CtaTypes[ctaType];
-        ctaText = this.localizationService_.getLocalizedString(
-          ctaLocalizedStringId
-        );
-      } else {
-        // Custom CTA text - Should already be localized.
-        ctaText = ctaType;
-      }
+      uiMetadata[A4AVarNames.CTA_TYPE] =
+        localizeCtaText(
+          uiMetadata[A4AVarNames.CTA_TYPE],
+          this.localizationService_
+        ) || uiMetadata[A4AVarNames.CTA_TYPE];
 
       // Store the cta-type as an accesible var for any further pings.
       this.analytics_.then((analytics) =>
         analytics.setVar(
           this.index_, // adIndex
           AnalyticsVars.CTA_TYPE,
-          ctaText
+          uiMetadata[A4AVarNames.CTA_TYPE]
         )
       );
 
-      try {
-        this.maybeCreateAttribution_();
-      } catch (e) {
-        // Failure due to missing adchoices icon or url.
-        return false;
+      if (
+        (this.adChoicesIcon_ = maybeCreateAttribution(
+          this.win_,
+          uiMetadata,
+          devAssert(this.pageElement_)
+        ))
+      ) {
+        this.storeService_.subscribe(
+          StateProperty.UI_STATE,
+          (uiState) => {
+            this.onUIStateUpdate_(uiState);
+          },
+          true /** callToInitialize */
+        );
       }
 
-      return this.createCtaLayer_(ctaUrl, ctaText);
+      return this.createCtaLayer_(uiMetadata);
     });
   }
 
@@ -372,75 +348,28 @@ export class StoryAdPage {
 
   /**
    * Create layer to contain outlink button.
-   * @param {string} ctaUrl
-   * @param {string} ctaText
+   * @param {!./story-ad-ui.StoryAdUIMetadata} uiMetadata
    * @return {Promise<boolean>}
    */
-  createCtaLayer_(ctaUrl, ctaText) {
-    // TODO(ccordry): Move button to shadow root.
-    const a = createElementWithAttributes(
+  createCtaLayer_(uiMetadata) {
+    return createCta(
       this.doc_,
-      'a',
-      dict({
-        'class': 'i-amphtml-story-ad-link',
-        'target': '_blank',
-        'href': ctaUrl,
-      })
-    );
-
-    const fitPromise = this.buttonFitter_.fit(
-      dev().assertElement(this.pageElement_),
-      a, // Container
-      ctaText // Content
-    );
-
-    return fitPromise.then((success) => {
-      if (!success) {
-        user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
-        return false;
+      devAssert(this.buttonFitter_),
+      dev().assertElement(this.pageElement_), // Container.
+      uiMetadata
+    ).then((anchor) => {
+      if (anchor) {
+        // Click listener so that we can fire `story-ad-click` analytics trigger at
+        // the appropriate time.
+        anchor.addEventListener('click', () => {
+          const vars = {
+            [AnalyticsVars.AD_CLICKED]: Date.now(),
+          };
+          this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
+        });
+        return true;
       }
-
-      a.href = ctaUrl;
-      a.textContent = ctaText;
-
-      if (a.protocol !== 'https:' && a.protocol !== 'http:') {
-        user().warn(TAG, 'CTA url is not valid. Ad was discarded');
-        return false;
-      }
-
-      // Click listener so that we can fire `story-ad-click` analytics trigger at
-      // the appropriate time.
-      a.addEventListener('click', () => {
-        const vars = {
-          [AnalyticsVars.AD_CLICKED]: Date.now(),
-        };
-        this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
-      });
-
-      const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
-      ctaLayer.className = 'i-amphtml-cta-container';
-      ctaLayer.appendChild(a);
-      this.pageElement_.appendChild(ctaLayer);
-      return true;
-    });
-  }
-
-  /**
-   * Find all `amp4ads-vars-` & `amp-cta-` prefixed meta tags and store them
-   * in single obj.
-   * @private
-   */
-  extractA4AVars_() {
-    const storyMetaTags = getStoryAdMetaTags(this.adDoc_);
-    iterateCursor(storyMetaTags, (tag) => {
-      const {name, content} = tag;
-      if (startsWith(name, CTA_META_PREFIX)) {
-        const key = name.split('amp-')[1];
-        this.a4aVars_[key] = content;
-      } else if (startsWith(name, A4A_VARS_META_PREFIX)) {
-        const key = name.split(A4A_VARS_META_PREFIX)[1];
-        this.a4aVars_[key] = content;
-      }
+      return false;
     });
   }
 
@@ -453,6 +382,7 @@ export class StoryAdPage {
    * If there are multiple exits present, behavior is unpredictable due to
    * JSON parse.
    * @private
+   * @return {!Object}
    */
   readAmpAdExit_() {
     const ampAdExit = elementByTag(
@@ -473,71 +403,17 @@ export class StoryAdPage {
             'be inside a <script> tag with type="application/json"'
         );
         const config = assertConfig(parseJson(child.textContent));
-        const target = config['targets'][Object.keys(config['targets'])[0]];
-        this.ampAdExitOutlink_ = target['finalUrl'];
+        const target =
+          config['targets'] &&
+          Object.keys(config['targets']) &&
+          config['targets'][Object.keys(config['targets'])[0]];
+        const finalUrl = target && target['finalUrl'];
+        return target ? {[A4AVarNames.CTA_URL]: finalUrl} : {};
       } catch (e) {
         dev().error(TAG, e);
+        return {};
       }
     }
-  }
-
-  /**
-   * Create attribution if creative contains the appropriate meta tags.
-   * @private
-   */
-  maybeCreateAttribution_() {
-    const href = this.a4aVars_[A4AVarNames.ATTRIBUTION_URL];
-    const src = this.a4aVars_[A4AVarNames.ATTRIBUTION_ICON];
-
-    // Ad attribution is optional, but need both to render.
-    if (!href && !src) {
-      return;
-    }
-
-    assertHttpsUrl(
-      href,
-      dev().assertElement(this.pageElement_),
-      'amp-story-auto-ads attribution url'
-    );
-
-    assertHttpsUrl(
-      src,
-      dev().assertElement(this.pageElement_),
-      'amp-story-auto-ads attribution icon'
-    );
-
-    const root = createElementWithAttributes(
-      this.doc_,
-      'div',
-      dict({
-        'role': 'button',
-        'class': 'i-amphtml-attribution-host',
-      })
-    );
-
-    this.adChoicesIcon_ = createElementWithAttributes(
-      this.doc_,
-      'img',
-      dict({
-        'class': 'i-amphtml-story-ad-attribution',
-        'src': src,
-      })
-    );
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
-    );
-
-    this.adChoicesIcon_.addEventListener(
-      'click',
-      this.handleAttributionClick_.bind(this, href)
-    );
-
-    createShadowRootWithStyle(root, this.adChoicesIcon_, attributionCSS);
-    this.pageElement_.appendChild(root);
   }
 
   /**
@@ -555,15 +431,6 @@ export class StoryAdPage {
       DESKTOP_FULLBLEED_CLASS,
       uiState === UIType.DESKTOP_FULLBLEED
     );
-  }
-
-  /**
-   * @private
-   * @param {string} href
-   * @param {!Event} unusedEvent
-   */
-  handleAttributionClick_(href, unusedEvent) {
-    openWindowDialog(this.win_, href, '_blank');
   }
 
   /**

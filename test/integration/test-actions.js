@@ -14,76 +14,92 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
-import {createFixtureIframe, poll} from '../../testing/iframe.js';
+import {BrowserController} from '../../testing/test-helper';
+import {poll} from '../../testing/iframe.js';
 
-describe.configure().run('on="..."', () => {
-  let fixture;
+describes.integration(
+  'on="..."',
+  {
+    body: `
+  <span id="spanToHide">This text will be hidden by #hideBtn</span>
+  <button id="hideBtn" on="tap:spanToHide.hide">Hide #spanToHide</button>
 
-  beforeEach(() => {
-    return createFixtureIframe('test/fixtures/actions.html', 500).then((f) => {
-      fixture = f;
+  <amp-img id="imgToToggle" width=200 height=100 src="/examples/img/sample.jpg" layout=fixed></amp-img>
+  <button id="toggleBtn" on="tap:imgToToggle.toggleVisibility">Toggle visibility for #img</button>
 
-      // Wait for one <amp-img> element to load.
-      return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
-    });
-  });
+  <button id="navigateBtn" on="tap:AMP.navigateTo(url='https://google.com')">Navigate to google.com</button>
 
-  function waitForDisplay(element, display) {
-    return () => fixture.win.getComputedStyle(element)['display'] === display;
-  }
+  <button id="printBtn" on="tap:AMP.print">Print</button>
+  `,
+  },
+  (env) => {
+    let browser, win, doc;
 
-  describe('"tap" event', () => {
-    it('<non-AMP element>.toggleVisibility', function* () {
-      const span = fixture.doc.getElementById('spanToHide');
-      const button = fixture.doc.getElementById('hideBtn');
-
-      button.click();
-      yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
-    });
-
-    it('<AMP element>.toggleVisibility', function* () {
-      const img = fixture.doc.getElementById('imgToToggle');
-      const button = fixture.doc.getElementById('toggleBtn');
-
-      button.click();
-      yield poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
-
-      button.click();
-      yield poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
+    beforeEach(async () => {
+      win = env.win;
+      doc = win.document;
+      browser = new BrowserController(win);
+      await browser.waitForElementLayout('amp-img');
     });
 
-    describe
-      .configure()
-      .skipIfPropertiesObfuscated()
-      .run('navigate', function () {
-        it('AMP.navigateTo(url=)', function* () {
-          const button = fixture.doc.getElementById('navigateBtn');
+    async function waitForDisplayChange(description, elementId, displayValue) {
+      const element = doc.getElementById(elementId);
+      await poll(
+        description,
+        () => win.getComputedStyle(element)['display'] === displayValue
+      );
+    }
 
-          // This is brittle but I don't know how else to stub
-          // window navigation.
-          const navigationService = fixture.win.__AMP_SERVICES.navigation.obj;
-          const navigateTo = window.sandbox.stub(
-            navigationService,
-            'navigateTo'
-          );
+    describe('"tap" event', () => {
+      it('<non-AMP element>.toggleVisibility', async () => {
+        doc.getElementById('hideBtn').click();
+        await waitForDisplayChange('#spanToHide hidden', 'spanToHide', 'none');
+      });
 
-          button.click();
-          yield poll('navigateTo() called with correct args', () => {
-            return navigateTo.calledWith(fixture.win, 'https://google.com');
+      it('<AMP element>.toggleVisibility', async () => {
+        const toggleBtn = doc.getElementById('toggleBtn');
+
+        toggleBtn.click();
+        await waitForDisplayChange(
+          '#imgToToggle hidden',
+          'imgToToggle',
+          'none'
+        );
+
+        toggleBtn.click();
+        await waitForDisplayChange(
+          '#imgToToggle displayed',
+          'imgToToggle',
+          'inline-block'
+        );
+      });
+
+      describe
+        .configure()
+        .skipIfPropertiesObfuscated()
+        .run('navigate', function () {
+          it('AMP.navigateTo(url=)', async () => {
+            // This is brittle but I don't know how else to stub
+            // window navigation.
+            const navigationService = win.__AMP_SERVICES.navigation.obj;
+            const navigateTo = window.sandbox.stub(
+              navigationService,
+              'navigateTo'
+            );
+
+            doc.getElementById('navigateBtn').click();
+            await poll('navigateTo() called with correct args', () =>
+              navigateTo.calledWith(win, 'https://google.com')
+            );
           });
         });
-      });
 
-    it('AMP.print()', function* () {
-      const button = fixture.doc.getElementById('printBtn');
+      it('AMP.print()', async () => {
+        const print = window.sandbox.stub(win, 'print');
 
-      const print = window.sandbox.stub(fixture.win, 'print');
-
-      button.click();
-      yield poll('print() called once', () => {
-        return print.calledOnce;
+        doc.getElementById('printBtn').click();
+        await poll('print() called once', () => print.calledOnce);
       });
     });
-  });
-});
+  }
+);

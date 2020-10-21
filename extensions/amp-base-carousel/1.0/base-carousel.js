@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {ArrowNext, ArrowPrev} from './arrow';
+import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
@@ -47,12 +47,16 @@ export const Controls = {
  */
 function BaseCarouselWithRef(
   {
+    advanceCount = 1,
     arrowPrev,
     arrowNext,
     children,
     controls = Controls.AUTO,
     loop,
     onSlideChange,
+    outsetArrows,
+    snap = true,
+    visibleCount = 1,
     ...rest
   },
   ref
@@ -67,7 +71,8 @@ function BaseCarouselWithRef(
   const {setSlideCount} = carouselContext;
   const scrollRef = useRef(null);
 
-  const advance = useCallback((by) => scrollRef.current.advance(by), []);
+  const next = useCallback(() => scrollRef.current.next(), []);
+  const prev = useCallback(() => scrollRef.current.prev(), []);
   const setRestingIndex = useCallback(
     (index) => {
       index = length > 0 ? Math.min(Math.max(index, 0), length - 1) : -1;
@@ -86,10 +91,11 @@ function BaseCarouselWithRef(
     ref,
     () =>
       /** @type {!BaseCarouselDef.CarouselApi} */ ({
-        advance,
         goToSlide: (index) => setRestingIndex(index),
+        next,
+        prev,
       }),
-    [advance, setRestingIndex]
+    [next, prev, setRestingIndex]
   );
 
   useLayoutEffect(() => {
@@ -97,27 +103,46 @@ function BaseCarouselWithRef(
   }, [setSlideCount, length]);
 
   const disableForDir = (dir) =>
-    !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
+    !loop &&
+    (currentSlide + dir < 0 || currentSlide + visibleCount + dir > length);
 
   const [hadTouch, setHadTouch] = useState(false);
   const hideControls = useMemo(() => {
+    if (controls === Controls.ALWAYS || outsetArrows) {
+      return false;
+    }
     if (controls === Controls.NEVER) {
       return true;
     }
-    if (controls === Controls.ALWAYS) {
-      return false;
-    }
     return hadTouch;
-  }, [hadTouch, controls]);
+  }, [hadTouch, controls, outsetArrows]);
 
   return (
-    <ContainWrapper size={true} layout={true} paint={true} {...rest}>
+    <ContainWrapper
+      size={true}
+      layout={true}
+      paint={true}
+      contentStyle={{display: 'flex'}}
+      {...rest}
+    >
+      {!hideControls && (
+        <Arrow
+          advance={prev}
+          by={-advanceCount}
+          customArrow={arrowPrev}
+          disabled={disableForDir(-1)}
+          outsetArrows={outsetArrows}
+        />
+      )}
       <Scroller
+        advanceCount={advanceCount}
         loop={loop}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
+        snap={snap}
         ref={scrollRef}
         onTouchStart={() => setHadTouch(true)}
+        visibleCount={visibleCount}
       >
         {/*
           TODO(#30283): TBD: this is an interesting concept. We could decide
@@ -127,7 +152,7 @@ function BaseCarouselWithRef(
           state management code.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < 2 ? (
+          Math.abs(index - currentSlide) < visibleCount * 3 ? (
             <WithAmpContext
               key={index}
               renderable={index == currentSlide}
@@ -141,18 +166,13 @@ function BaseCarouselWithRef(
         )}
       </Scroller>
       {!hideControls && (
-        <>
-          <ArrowPrev
-            customArrow={arrowPrev}
-            disabled={disableForDir(-1)}
-            advance={advance}
-          />
-          <ArrowNext
-            customArrow={arrowNext}
-            disabled={disableForDir(1)}
-            advance={advance}
-          />
-        </>
+        <Arrow
+          advance={next}
+          by={advanceCount}
+          customArrow={arrowNext}
+          disabled={disableForDir(1)}
+          outsetArrows={outsetArrows}
+        />
       )}
     </ContainWrapper>
   );
