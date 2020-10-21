@@ -26,6 +26,7 @@ import {cancellation} from '../error';
 import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
+import {dashToCamelCase} from '../string';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
@@ -39,10 +40,13 @@ import {isLayoutSizeDefined} from '../layout';
  *   a component prop 1:1.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
+ * - `attrPrefix` can be specified when multiple attributes with the same prefix
+ *   map to a single prop object. The prefix cannot equal the attribute name.
  *
  * @typedef {{
  *   attr: (string|undefined),
  *   type: (string|undefined),
+ *   attrPrefix: (string|undefined),
  *   attrs: (!Array<string>|undefined),
  *   parseAttrs: ((function(!Element):*)|undefined),
  *   default: *,
@@ -672,6 +676,20 @@ function usesShadowDom(Ctor) {
 }
 
 /**
+ * @param {null|string} attributeName
+ * @param {string|undefined} attributePrefix
+ * @return {boolean}
+ */
+function matchesAttrPrefix(attributeName, attributePrefix) {
+  return (
+    attributeName !== null &&
+    attributePrefix !== undefined &&
+    attributeName.startsWith(attributePrefix) &&
+    attributeName !== attributePrefix
+  );
+}
+
+/**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
  * @param {{current: ?}} ref
@@ -724,6 +742,23 @@ function collectProps(Ctor, element, ref, defaultProps) {
     } else if (def.parseAttrs) {
       devAssert(def.attrs);
       value = def.parseAttrs(element);
+    }
+    if (def.attrPrefix) {
+      const currObj = {};
+      const attrs = element.attributes;
+      for (let i = 0; i < attrs.length; i++) {
+        const attrib = attrs[i];
+        if (matchesAttrPrefix(attrib.name, def.attrPrefix)) {
+          currObj[
+            dashToCamelCase(
+              attrib.name.substring(def.attrPrefix.length, attrib.name.length)
+            )
+          ] = attrib.value;
+        }
+      }
+      if (Object.keys(currObj).length > 0) {
+        props[name] = currObj;
+      }
     }
     if (value == null) {
       if (def.default !== undefined) {
@@ -892,7 +927,8 @@ function shouldMutationBeRerendered(Ctor, m) {
       const def = /** @type {!AmpElementPropDef} */ (props[name]);
       if (
         m.attributeName == def.attr ||
-        (def.attrs && def.attrs.includes(devAssert(m.attributeName)))
+        (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
+        matchesAttrPrefix(m.attributeName, def.attrPrefix)
       ) {
         return true;
       }
