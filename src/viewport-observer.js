@@ -36,7 +36,8 @@ export function createViewportObserver(ioCallback, win, threshold) {
     ? /** @type {*} */ (win.document)
     : null);
 
-  // Historically viewportCallback used a 25% rootMargin, so emulate it here.
+  // TODO(30794): See if we can safely remove rootMargin without adversely
+  // affecting metrics.
   const rootMargin = '25%';
 
   try {
