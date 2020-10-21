@@ -36,7 +36,7 @@ export function createViewportObserver(ioCallback, win, threshold) {
     ? /** @type {*} */ (win.document)
     : null);
 
-  // TODO(30794): See if we can safely remove rootMargin without adversely
+  // TODO(#30794): See if we can safely remove rootMargin without adversely
   // affecting metrics.
   const rootMargin = '25%';
 
