@@ -33,8 +33,11 @@ let z = [];
 
 for (let i = 0; i < 10; i++) {
   z.push(function() {
-    return function() {
-      console.log(i);
-    };
+    console.log(i);
+  });
+
+  let x = i;
+  z.push(function() {
+    console.log(x);
   });
 }
