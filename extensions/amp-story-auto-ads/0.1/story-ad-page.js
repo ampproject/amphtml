@@ -231,6 +231,7 @@ export class StoryAdPage {
    */
   maybeCreateCta() {
     return Promise.resolve().then(() => {
+      // Inabox story ads control their own CTA creation.
       if (this.is3pAdFrame_) {
         return true;
       }
@@ -325,8 +326,9 @@ export class StoryAdPage {
   }
 
   /**
-   * Sets listeners to receive signal that ad is ready to be shown
+   * Creates listeners to receive signal that ad is ready to be shown
    * for both FIE & inabox case.
+   * @private
    */
   listenForAdLoadSignals_() {
     // Friendly frame INI_LOAD.
