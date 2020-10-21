@@ -17,11 +17,11 @@
 import {
   assertDisposable,
   disposeServicesForDoc,
-  getExistingServiceForDocInEmbedScope,
   getExistingServiceOrNull,
   getParentWindowFrameElement,
   getService,
   getServiceForDoc,
+  getServiceForDocOrNull,
   getServicePromise,
   getServicePromiseForDoc,
   getServicePromiseOrNull,
@@ -505,18 +505,15 @@ describe('service', () => {
       });
 
       it('should return the service via node', () => {
-        const fromNode = getExistingServiceForDocInEmbedScope(node, 'c');
+        const fromNode = getServiceForDocOrNull(node, 'c');
         expect(fromNode).to.equal(topService);
       });
 
       it('should find ampdoc and return its service', () => {
-        const fromChildNode = getExistingServiceForDocInEmbedScope(
-          childWinNode,
-          'c'
-        );
+        const fromChildNode = getServiceForDocOrNull(childWinNode, 'c');
         expect(fromChildNode).to.equal(topService);
 
-        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
+        const fromGrandchildNode = getServiceForDocOrNull(
           grandChildWinNode,
           'c'
         );
@@ -534,13 +531,10 @@ describe('service', () => {
           }
           return ampdoc;
         });
-        const fromChildNode = getExistingServiceForDocInEmbedScope(
-          childWinNode,
-          'c'
-        );
+        const fromChildNode = getServiceForDocOrNull(childWinNode, 'c');
         expect(fromChildNode).to.equal(null);
 
-        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
+        const fromGrandchildNode = getServiceForDocOrNull(
           grandChildWinNode,
           'c'
         );
@@ -559,14 +553,11 @@ describe('service', () => {
           }
           return ampdoc;
         });
-        const fromChildNode = getExistingServiceForDocInEmbedScope(
-          childWinNode,
-          'c'
-        );
+        const fromChildNode = getServiceForDocOrNull(childWinNode, 'c');
         expect(fromChildNode).to.deep.equal({count: 2});
         expect(fromChildNode).to.not.equal(topService);
 
-        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
+        const fromGrandchildNode = getServiceForDocOrNull(
           grandChildWinNode,
           'c'
         );

@@ -25,7 +25,7 @@ import {
 import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
 import {Services} from '../../../../src/services';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {getExistingServiceForDocInEmbedScope} from '../../../../src/service';
+import {getServiceForDocOrNull} from '../../../../src/service';
 
 describes.sandboxed('AMP GWD Animation', {}, () => {
   /**
@@ -115,10 +115,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             return createGwdAnimationElement(doc, config).then((el) => {
               element = el;
               impl = element.implementation_;
-              runtime = getExistingServiceForDocInEmbedScope(
-                element,
-                GWD_SERVICE_NAME
-              );
+              runtime = getServiceForDocOrNull(element, GWD_SERVICE_NAME);
               page1Elem = doc.getElementById('page1');
             });
           });
