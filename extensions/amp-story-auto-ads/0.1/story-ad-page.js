@@ -44,6 +44,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {listen} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 
@@ -106,6 +107,9 @@ export class StoryAdPage {
     this.adElement_ = null;
 
     /** @private {?Element} */
+    this.adFrame_ = null;
+
+    /** @private {?Element} */
     this.adChoicesIcon_ = null;
 
     /** @private {?Document} */
@@ -125,6 +129,9 @@ export class StoryAdPage {
 
     /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
+
+    /** @private {boolean} */
+    this.is3pAdFrame_ = false;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -208,12 +215,7 @@ export class StoryAdPage {
     this.pageElement_.appendChild(gridLayer);
     this.pageElement_.appendChild(paneGridLayer);
 
-    // Set up listener for ad-loaded event.
-    this.adElement_
-      .signals()
-      // TODO(ccordry): Investigate using a better signal waiting for video loads.
-      .whenSignal(CommonSignals.INI_LOAD)
-      .then(() => this.onAdLoaded_());
+    this.listenForAdLoadSignals_();
 
     this.analyticsEvent_(AnalyticsEvents.AD_REQUESTED, {
       [AnalyticsVars.AD_REQUESTED]: Date.now(),
@@ -229,6 +231,10 @@ export class StoryAdPage {
    */
   maybeCreateCta() {
     return Promise.resolve().then(() => {
+      if (this.is3pAdFrame_) {
+        return true;
+      }
+
       const uiMetadata = map();
 
       // Template Ads.
@@ -319,6 +325,43 @@ export class StoryAdPage {
   }
 
   /**
+   * Sets listeners to receive signal that ad is ready to be shown
+   * for both FIE & inabox case.
+   */
+  listenForAdLoadSignals_() {
+    // Friendly frame INI_LOAD.
+    this.adElement_
+      .signals()
+      // TODO(ccordry): Investigate using a better signal waiting for video loads.
+      .whenSignal(CommonSignals.INI_LOAD)
+      .then(() => this.onAdLoaded_());
+
+    // Inabox custom event.
+    const removeListener = listen(this.win_, 'message', (e) => {
+      if (e.data !== 'amp-story-ad-load') {
+        return;
+      }
+      if (this.getAdFrame_() && e.source === this.adFrame_.contentWindow) {
+        this.is3pAdFrame_ = true;
+        this.pageElement_.setAttribute('xdomain-ad', '');
+        this.onAdLoaded_();
+        removeListener();
+      }
+    });
+  }
+
+  /**
+   * Returns the iframe containing the creative if it exists.
+   * @return {?HTMLIFrameElement}
+   */
+  getAdFrame_() {
+    if (this.adFrame_) {
+      return this.adFrame_;
+    }
+    return (this.adFrame_ = elementByTag(this.pageElement_, 'iframe'));
+  }
+
+  /**
    * Things that need to happen after the created ad is "loaded".
    * @private
    */
@@ -336,9 +379,10 @@ export class StoryAdPage {
       [AnalyticsVars.AD_LOADED]: Date.now(),
     });
 
-    const adFrame = elementByTag(this.pageElement_, 'iframe');
-    if (adFrame) {
-      this.adDoc_ = getFrameDoc(/** @type {!HTMLIFrameElement} */ (adFrame));
+    if (this.getAdFrame_() && !this.is3pAdFrame_) {
+      this.adDoc_ = getFrameDoc(
+        /** @type {!HTMLIFrameElement} */ (this.adFrame_)
+      );
     }
 
     this.loaded_ = true;
