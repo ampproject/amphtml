@@ -51,6 +51,7 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
+import {observe, unobserve} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 
 class AmpPlaybuzz extends AMP.BaseElement {
@@ -78,6 +79,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     /** @private {?boolean} */
     this.iframeLoaded_ = false;
+
+    /** @private {?boolean} */
+    this.inViewport_ = false;
 
     /** @private {Array<Function>} */
     this.unlisteners_ = [];
@@ -181,6 +185,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observe(this.element, (inViewport) => (this.inViewport_ = inViewport));
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('scrolling', 'no');
@@ -296,7 +301,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @param {{height: number, left: number, relayoutAll: boolean, top: number, velocity: number, width: number }} changeEvent
    */
   sendScrollDataToItem_(changeEvent) {
-    if (!this.isInViewport()) {
+    if (!this.inViewport_) {
       return;
     }
 
@@ -319,6 +324,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    unobserve(this.element);
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 

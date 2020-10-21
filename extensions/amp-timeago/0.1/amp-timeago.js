@@ -64,10 +64,10 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.element.appendChild(this.timeElement_);
   }
 
-  /** 
-   * @param {boolean} inViewport 
+  /**
+   * @param {boolean} inViewport
    * @private
-  */
+   */
   viewportCallback_(inViewport) {
     if (inViewport && !this.cutOffReached_) {
       this.setFuzzyTimestampValue_();

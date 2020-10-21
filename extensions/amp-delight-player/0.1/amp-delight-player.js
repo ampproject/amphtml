@@ -34,6 +34,7 @@ import {getData, listen, listenOncePromise} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {observe, unobserve} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
@@ -89,6 +90,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {boolean} */
+    this.inViewport_ = false;
 
     /** @private {string} */
     this.baseURL_ = 'https://players.delight-vr.com';
@@ -170,6 +174,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observe(this.element, (inViewport) => (this.inViewport_ = inViewport));
     const src = `${this.baseURL_}/player/${this.contentID_}?amp=1`;
     const iframe = createFrameFor(this, src);
 
@@ -205,6 +210,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     this.unregisterEventHandlers_();
+    unobserve(this.element);
 
     return true;
   }
@@ -234,7 +240,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
   firstLayoutCompleted() {
     const el = this.placeholderEl_;
     let promise = null;
-    if (el && this.isInViewport()) {
+    if (el && this.inViewport_) {
       el.classList.add('i-amphtml-delight-player-faded');
       promise = listenOncePromise(el, 'transitionend');
     } else {
