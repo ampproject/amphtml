@@ -57,20 +57,6 @@ export class Disposable {
 }
 
 /**
- * Returns a service with the given id. Assumes that it has been constructed
- * already.
- *
- * @param {!Element|!ShadowRoot} element
- * @param {string} id
- * @return {?Object}
- */
-export function getExistingServiceForDocInEmbedScope(element, id) {
-  // TODO(#22733): completely remove this method once ampdoc-fie launches.
-  // Resolve via the element's ampdoc.
-  return getServiceForDocOrNull(element, id);
-}
-
-/**
  * Installs a service override on amp-doc level.
  * @param {!Window} embedWin
  * @param {string} id
