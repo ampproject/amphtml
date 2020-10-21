@@ -168,7 +168,7 @@
     "prettier": "2.1.2",
     "pretty-bytes": "5.4.1",
     "pumpify": "2.0.1",
-    "react": "16.14.0",
+    "react": "17.0.0",
     "react-addons-shallow-compare": "15.6.2",
     "react-dom": "16.14.0",
     "react-externs": "0.13.6",
