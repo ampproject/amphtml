@@ -42,9 +42,9 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
 import {getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {listen} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 
@@ -106,7 +106,7 @@ export class StoryAdPage {
     /** @private {?Element} */
     this.adElement_ = null;
 
-    /** @private {?Element} */
+    /** @private {?HTMLIFrameElement} */
     this.adFrame_ = null;
 
     /** @private {?Element} */
@@ -340,7 +340,7 @@ export class StoryAdPage {
 
     // Inabox custom event.
     const removeListener = listen(this.win_, 'message', (e) => {
-      if (e.data !== 'amp-story-ad-load') {
+      if (getData(e) !== 'amp-story-ad-load') {
         return;
       }
       if (this.getAdFrame_() && e.source === this.adFrame_.contentWindow) {
@@ -360,7 +360,10 @@ export class StoryAdPage {
     if (this.adFrame_) {
       return this.adFrame_;
     }
-    return (this.adFrame_ = elementByTag(this.pageElement_, 'iframe'));
+    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (elementByTag(
+      devAssert(this.pageElement_),
+      'iframe'
+    )));
   }
 
   /**

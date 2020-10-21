@@ -21,7 +21,6 @@ import {
   maybeCreateAttribution,
   validateCtaMetadata,
 } from '../../extensions/amp-story-auto-ads/0.1/story-ad-ui';
-import {createElementWithAttributes} from '../dom';
 import {CSS as inaboxCSS} from '../../build/amp-story-auto-ads-inabox-0.1.css';
 import {installStylesForDoc} from '../style-installer';
 import {CSS as sharedCSS} from '../../build/amp-story-auto-ads-shared-0.1.css';
@@ -37,11 +36,11 @@ export function maybeRenderInaboxAsStoryAd(ampdoc) {
   if (!validateCtaMetadata(storyAdMetadata)) {
     return;
   }
-  installStylesForDoc(ampdoc, sharedCSS + inaboxCSS);
+  installStylesForDoc(ampdoc, sharedCSS + inaboxCSS, () => {});
   maybeCreateAttribution(win, storyAdMetadata, doc.body);
 
   const buttonFitter = new ButtonTextFitter(ampdoc);
-  const ctaContainer = createElementWithAttributes(doc, 'div');
+  const ctaContainer = doc.createElement('div');
   createCta(doc, buttonFitter, ctaContainer, storyAdMetadata);
   doc.body.appendChild(ctaContainer);
 
