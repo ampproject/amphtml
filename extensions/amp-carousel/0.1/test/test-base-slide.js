@@ -35,7 +35,7 @@ import {BaseSlides} from '../base-slides';
 describes.fakeWin('BaseSlides', {amp: true}, (env) => {
   let win, doc;
   let buildSlidesSpy;
-  let onViewportCallbackSpy;
+  let viewportCallbackSpy;
   let hasPrevSpy;
   let hasNextSpy;
   let goCallbackSpy;
@@ -52,7 +52,7 @@ describes.fakeWin('BaseSlides', {amp: true}, (env) => {
     win = env.win;
     doc = win.document;
     buildSlidesSpy = env.sandbox.spy();
-    onViewportCallbackSpy = env.sandbox.spy();
+    viewportCallbackSpy = env.sandbox.spy();
     hasPrevSpy = env.sandbox.spy();
     hasNextSpy = env.sandbox.spy();
     goCallbackSpy = env.sandbox.spy();
@@ -66,9 +66,9 @@ describes.fakeWin('BaseSlides', {amp: true}, (env) => {
     hintControlsSpy = env.sandbox.spy(BaseSlides.prototype, 'hintControls');
     autoplaySpy = env.sandbox.spy(BaseSlides.prototype, 'autoplay_');
     clearAutoplaySpy = env.sandbox.spy(BaseSlides.prototype, 'clearAutoplay');
-    onViewportCallbackSpy = env.sandbox.spy(
+    viewportCallbackSpy = env.sandbox.spy(
       BaseSlides.prototype,
-      'onViewportCallback'
+      'viewportCallback'
     );
   });
 
@@ -175,7 +175,7 @@ describes.fakeWin('BaseSlides', {amp: true}, (env) => {
     );
 
     carousel.viewportCallback(true);
-    expect(onViewportCallbackSpy).to.have.been.calledWith(true);
+    expect(viewportCallbackSpy).to.have.been.calledWith(true);
     expect(hintControlsSpy).to.have.been.called;
     expect(autoplaySpy).to.have.been.called;
     expect(clearAutoplaySpy).to.not.have.been.called;
@@ -190,7 +190,7 @@ describes.fakeWin('BaseSlides', {amp: true}, (env) => {
     );
 
     carousel.viewportCallback(false);
-    expect(onViewportCallbackSpy).to.have.been.calledWith(false);
+    expect(viewportCallbackSpy).to.have.been.calledWith(false);
     expect(hintControlsSpy).to.not.have.been.called;
     expect(autoplaySpy).to.not.have.been.called;
     expect(clearAutoplaySpy).to.have.been.called;
