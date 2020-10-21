@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getCarousel, getScrollingElement, getSlide} from './helpers';
+import {getCarousel, getScrollingElement, getSlide, getSlides} from './helpers';
 import {useStyles} from '../base-carousel.jss';
 
 const pageWidth = 800;
@@ -135,7 +135,8 @@ describes.endtoend(
       it('should display slides correctly when moving forwards', async function () {
         this.timeout(testTimeout);
         const el = await getScrollingElement(styles, controller);
-        const lastSlide = await getSlide(styles, controller, SLIDE_COUNT - 1);
+        const slides = await getSlides(styles, controller);
+        const lastSlide = slides[SLIDE_COUNT - 1];
 
         // Go to the last slide, wait for scrolling to move.
         const slideWidth = await prop(lastSlide, 'offsetWidth');

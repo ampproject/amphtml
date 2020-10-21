@@ -48,8 +48,8 @@ class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   init() {
     const {element} = this;
-    this.registerApiAction('prev', (api) => api.advance(-1), ActionTrust.LOW);
-    this.registerApiAction('next', (api) => api.advance(1), ActionTrust.LOW);
+    this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);
+    this.registerApiAction('next', (api) => api.next(), ActionTrust.LOW);
     this.registerApiAction(
       'goToSlide',
       (api, invocation) => {
@@ -102,6 +102,7 @@ AmpBaseCarousel['children'] = {
 
 /** @override */
 AmpBaseCarousel['props'] = {
+  'advanceCount': {attr: 'advance-count', type: 'number'},
   'controls': {attr: 'controls', type: 'string'},
   'loop': {attr: 'loop', type: 'boolean'},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean'},
@@ -109,6 +110,7 @@ AmpBaseCarousel['props'] = {
     attrs: ['snap'],
     parseAttrs: (element) => parseStrBoolAttr(element, 'snap', true),
   },
+  'visibleCount': {attr: 'visible-count', type: 'number'},
 };
 
 /** @override */

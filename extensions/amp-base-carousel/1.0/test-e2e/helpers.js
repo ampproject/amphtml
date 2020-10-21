@@ -31,8 +31,7 @@ export function getSlides(styles, controller) {
 }
 
 export async function getSlide(styles, controller, n) {
-  const slides = await getSlides(styles, controller);
-  return slides[n];
+  return controller.findElement(`.${styles[SLIDE_CLASS]}[data-slide="${n}"]`);
 }
 
 export async function getScrollingElement(styles, controller) {

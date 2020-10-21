@@ -21,6 +21,7 @@ var BaseCarouselDef = {};
 
 /**
  * @typedef {{
+ *   advanceCount: (number|undefined),
  *   arrowNext: (?PreactDef.VNode|undefined),
  *   arrowPrev: (?PreactDef.VNode|undefined),
  *   children: (!PreactDef.Renderable),
@@ -28,17 +29,20 @@ var BaseCarouselDef = {};
  *   loop: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
  *   snap: (boolean|undefined),
+ *   visibleCount: (number|undefined),
  * }}
  */
 BaseCarouselDef.Props;
 
 /**
  * @typedef {{
+ *   advanceCount: (number|undefined),
  *   children: !Array<PreactDef.Renderable>,
  *   loop: (boolean|undefined),
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),
  *   snap: (boolean|undefined),
+ *   visibleCount: (number|undefined),
  * }}
  */
 BaseCarouselDef.ScrollerProps;
@@ -47,16 +51,18 @@ BaseCarouselDef.ScrollerProps;
  * @typedef {{
  *   children: !Array<PreactDef.Renderable>,
  *   loop: (boolean|undefined),
- *   restingIndex: number,
+ *   offsetRef: {current: (null|number)},
  *   pivotIndex: number,
+ *   restingIndex: number,
  *   snap: (boolean|undefined),
+ *   visibleCount: (number|undefined),
  * }}
  */
 BaseCarouselDef.SlideProps;
 
 /**
  * @typedef {{
- *   advance: (function(number):undefined|undefined),
+ *   advance: (function():undefined|undefined),
  *   customArrow: (PreactDef.VNode|undefined),
  *   by: number,
  *   disabled: (boolean|undefined),
@@ -78,13 +84,13 @@ BaseCarouselDef.ContextProps;
 /** @interface */
 BaseCarouselDef.CarouselApi = class {
   /**
-   * @param {number} by Number of slides to advance. Positive: advance forward,
-   * negative: advance backward.
-   */
-  advance(by) {}
-
-  /**
    * @param {number} index
    */
   goToSlide(index) {}
+
+  /** Advance slides forward by `advanceCount` */
+  next() {}
+
+  /** Advance slides backward by `advanceCount` */
+  prev() {}
 };

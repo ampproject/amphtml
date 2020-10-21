@@ -95,7 +95,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      toggleExperiment(win, 'amp-base-carousel-bento', true);
+      toggleExperiment(win, 'amp-base-carousel-bento', true, true);
       element = createElementWithAttributes(win.document, 'amp-base-carousel', {
         'layout': 'fixed',
         'width': '300px',
@@ -104,7 +104,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-base-carousel-bento', false);
+      toggleExperiment(win, 'amp-base-carousel-bento', false, true);
     });
 
     it('should render slides and arrows when built', async () => {
@@ -113,9 +113,7 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(
-        userSuppliedChildren.slice(0, 2)
-      );
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(2);
     });
@@ -134,9 +132,7 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(
-        userSuppliedChildren.slice(0, 2)
-      );
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
 
       const defaultButtons = element.shadowRoot.querySelectorAll('button');
       expect(defaultButtons).to.have.length(0);
@@ -163,7 +159,9 @@ describes.realWin(
       // Given slides [0][1][2] should be rendered as [2][0][1]. But [2] is
       // a placeholder.
       expect(renderedSlideWrappers).to.have.lengthOf(3);
-      expect(renderedSlideWrappers[0].querySelector('slot')).to.be.null;
+      expect(
+        renderedSlideWrappers[0].querySelector('slot').assignedElements()
+      ).to.deep.equal([userSuppliedChildren[2]]);
       expect(
         renderedSlideWrappers[1].querySelector('slot').assignedElements()
       ).to.deep.equal([userSuppliedChildren[0]]);
@@ -280,9 +278,7 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(
-        userSuppliedChildren.slice(0, 2)
-      );
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(2);
     });
@@ -294,9 +290,7 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(
-        userSuppliedChildren.slice(0, 2)
-      );
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(0);
     });
