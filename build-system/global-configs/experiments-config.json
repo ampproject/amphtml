@@ -6,6 +6,12 @@
     "expiration_date_utc": "2020-12-30",
     "define_experiment_constant": "NO_SIGNING_RTV"
   },
-  "experimentB": {},
+  "experimentB": {
+    "name": "Inabox Story Ads",
+    "environment": "INABOX",
+    "issue": "https://github.com/ampproject/amphtml/issues/27189",
+    "expiration_date_utc": "2020-12-30",
+    "define_experiment_constant": "STORY_AD_INABOX"
+  },
   "experimentC": {}
 }

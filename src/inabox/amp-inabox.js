@@ -44,6 +44,7 @@ import {
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
+import {maybeRenderInaboxAsStoryAd} from './inabox-story-ad';
 import {maybeValidate} from '../validator-integration';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -111,6 +112,9 @@ startupChunk(self.document, function initial() {
         self.document,
         function final() {
           Navigation.installAnchorClickInterceptor(ampdoc, self);
+          if (STORY_AD_INABOX) {
+            maybeRenderInaboxAsStoryAd(ampdoc);
+          }
           maybeValidate(self);
           makeBodyVisible(self.document);
         },
