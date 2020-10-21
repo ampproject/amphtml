@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 // import to install chromedriver and geckodriver
-require('chromedriver'); // eslint-disable-line no-unused-vars
-require('geckodriver'); // eslint-disable-line no-unused-vars
+require('chromedriver');
+require('geckodriver');
 
+const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
+const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
@@ -26,10 +28,15 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
+  getCoverageObject,
+  mergeClientCoverage,
+} = require('istanbul-middleware/lib/core');
+const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
+const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isTravisBuild} = require('../../common/travis');
 const {PuppeteerController} = require('./puppeteer-controller');
@@ -40,6 +47,7 @@ const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
@@ -254,10 +262,6 @@ const EnvironmentVariantMap = {
     name: 'AMPHTML ads FIE environment',
     value: {environment: 'a4a-fie'},
   },
-  [AmpdocEnvironment.A4A_FIE_NO_SIGNING]: {
-    name: 'AMPHTML ads FIE environment with no-signing exp enabled',
-    value: {environment: 'a4a-fie-no-signing'},
-  },
   [AmpdocEnvironment.A4A_INABOX]: {
     name: 'AMPHTML ads inabox environment',
     value: {environment: 'a4a-inabox'},
@@ -280,7 +284,6 @@ const envPresets = {
   ],
   'amp4ads-preset': [
     AmpdocEnvironment.A4A_FIE,
-    AmpdocEnvironment.A4A_FIE_NO_SIGNING,
     AmpdocEnvironment.A4A_INABOX,
     AmpdocEnvironment.A4A_INABOX_FRIENDLY,
     AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
@@ -333,6 +336,31 @@ class ItConfig {
       return fn.apply(this, arguments);
     });
   }
+}
+
+/**
+ * Extracts code coverage data from the page and aggregates it with other tests.
+ * @param {!Object} env e2e driver environment.
+ * @return {Promise<void>}
+ */
+async function updateCoverage(env) {
+  const coverage = await env.controller.evaluate(() => window.__coverage__);
+  if (coverage) {
+    mergeClientCoverage(coverage);
+  }
+}
+
+/**
+ * Reports code coverage data to an aggregating endpoint.
+ * @return {Promise<void>}
+ */
+async function reportCoverage() {
+  const coverage = getCoverageObject();
+  await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
+    method: 'POST',
+    body: JSON.stringify(coverage),
+    headers: {'Content-type': 'application/json'},
+  });
 }
 
 /**
@@ -438,6 +466,10 @@ function describeEnv(factory) {
       });
 
       afterEach(async function () {
+        if (argv.coverage) {
+          await updateCoverage(env);
+        }
+
         // If there is an async expect error, throw it in the final state.
         const lastExpectError = getLastExpectError();
         if (lastExpectError) {
@@ -452,6 +484,12 @@ function describeEnv(factory) {
 
         if (!isTravisBuild()) {
           uninstallRepl();
+        }
+      });
+
+      after(async () => {
+        if (argv.coverage) {
+          await reportCoverage();
         }
       });
 

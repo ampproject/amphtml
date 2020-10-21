@@ -2,10 +2,10 @@
 name: Cherry-pick request
 about: Used to request a cherry-pick. See go.amp.dev/cherry-picks
 title: "\U0001F338 Cherry-pick request for #<ISSUE_NUMBER> into #<RELEASE_ISSUE> (Pending)"
-labels:
-  'Cherry-pick: Beta, Cherry-pick: Experimental, Cherry-pick: LTS, Cherry-pick: Stable, Type:
-  Release'
+labels: 'Cherry-pick: Beta, Cherry-pick: Experimental, Cherry-pick: LTS, Cherry-pick:
+  Stable, Type: Release'
 assignees: ''
+
 ---
 
 <!--
@@ -48,6 +48,10 @@ CONDITION: Cherry-picking into LTS. Otherwise, delete.
 ## Why is an LTS cherry-pick needed?
 
 <_YOUR_REASONS_>
+
+## List the steps to manually verify the changes in this cherry-pick
+
+<_TEST_STEPS_>
 
 <!--
 MUST: Filling out the mini-PM template is required _after_ the deployment of a stable cherry-pick. If this cherry-pick does not include stable, the mini-PM section can be deleted.

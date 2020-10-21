@@ -21,6 +21,7 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../mediasession-helper';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
@@ -37,13 +38,7 @@ import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
-import {
-  createCustomEvent,
-  getData,
-  listen,
-  listenOnce,
-  listenOncePromise,
-} from '../event-helper';
+import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -53,7 +48,6 @@ import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {startsWith} from '../string';
 import {toggle} from '../style';
 
 /** @private @const {string} */
@@ -516,9 +510,7 @@ class VideoEntry {
       this.video.pause();
     };
 
-    listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
-      this.videoLoaded()
-    );
+    listen(video.element, VideoEvents.LOAD, () => this.videoLoaded());
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
       this.hasSeenPlayEvent_ = true;
@@ -675,8 +667,8 @@ class VideoEntry {
       !video.preimplementsMediaSessionAPI() &&
       !element.classList.contains('i-amphtml-disable-mediasession')
     ) {
+      validateMediaMetadata(element, this.metadata_);
       setMediaSession(
-        element,
         this.ampdoc_.win,
         this.metadata_,
         this.boundMediasessionPlay_,
@@ -1386,7 +1378,7 @@ function centerDist(viewport, rect) {
  */
 function isLandscape(win) {
   if (win.screen && 'orientation' in win.screen) {
-    return startsWith(win.screen.orientation.type, 'landscape');
+    return win.screen.orientation.type.startsWith('landscape');
   }
   return Math.abs(win.orientation) == 90;
 }
@@ -1445,7 +1437,7 @@ export class AnalyticsPercentageTracker {
   constructor(win, entry) {
     // This is destructured in `calculate_()`, but the linter thinks it's unused
     /** @private @const {!./timer-impl.Timer} */
-    this.timer_ = Services.timerFor(win); // eslint-disable-line
+    this.timer_ = Services.timerFor(win);
 
     /** @private @const {!VideoEntry} */
     this.entry_ = entry;

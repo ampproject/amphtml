@@ -31,8 +31,9 @@ import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {matches} from '../../../src/dom';
+import {matches, scopedQuerySelector} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
+import {setImportantStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
@@ -49,6 +50,12 @@ const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
 
 /** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
+
+/** @private @const {string} */
+const CLOSE_CLASS = 'i-amphtml-story-close-control';
+
+/** @private @const {string} */
+const SKIP_NEXT_CLASS = 'i-amphtml-story-skip-next';
 
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
@@ -199,19 +206,29 @@ const TEMPLATE = {
               attrs: dict({
                 'class': PAUSE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL,
             },
             {
               tag: 'button',
               attrs: dict({
                 'class': PLAY_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL,
             },
           ],
         },
         {
-          tag: 'a',
+          tag: 'button',
           attrs: dict({
-            'role': 'button',
+            'class':
+              SKIP_NEXT_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL,
+        },
+        {
+          tag: 'button',
+          attrs: dict({
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
@@ -223,9 +240,43 @@ const TEMPLATE = {
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
         },
+        {
+          tag: 'button',
+          attrs: dict({
+            'class':
+              CLOSE_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL,
+        },
       ],
     },
+    {
+      tag: 'div',
+      attrs: dict({
+        'class': 'i-amphtml-story-system-layer-buttons-start-position',
+      }),
+    },
   ],
+};
+
+/** @enum {string} */
+const CONTROL_TYPES = {
+  CLOSE: 'close-button',
+  SHARE: 'share-button',
+  SKIP_NEXT: 'skip-next-button',
+};
+
+const CONTROL_DEFAULTS = {
+  [CONTROL_TYPES.SHARE]: {
+    'selector': `.${SHARE_CLASS}`,
+  },
+  [CONTROL_TYPES.CLOSE]: {
+    'selector': `.${CLOSE_CLASS}`,
+  },
+  [CONTROL_TYPES.SKIP_NEXT]: {
+    'selector': `.${SKIP_NEXT_CLASS}`,
+  },
 };
 
 /**
@@ -238,6 +289,8 @@ const TEMPLATE = {
  *   - domain info button
  *   - sidebar
  *   - story updated label (for live stories)
+ *   - close (for players)
+ *   - skip (for players)
  */
 export class SystemLayer {
   /**
@@ -511,6 +564,12 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, () => {
       this.onNewPageAvailable_();
     });
+
+    this.storeService_.subscribe(
+      StateProperty.CUSTOM_CONTROLS,
+      (config) => this.onCustomControls_(config),
+      true /* callToInitialize */
+    );
   }
 
   /**
@@ -731,12 +790,15 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
         case UIType.DESKTOP_PANELS:
+          shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-panels');
           break;
         case UIType.DESKTOP_FULLBLEED:
+          shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
           break;
       }
@@ -847,6 +909,64 @@ export class SystemLayer {
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'show');
       this.hideMessageAfterTimeout_(HAS_NEW_PAGE_ATTRIBUTE);
+    });
+  }
+
+  /**
+   * Reacts to a custom configuration change coming from the player level.
+   * Updates UI to match configuration described by publisher.
+   * @param {!Array<!Object>} controls
+   * @private
+   */
+  onCustomControls_(controls) {
+    if (controls.length <= 0) {
+      return;
+    }
+
+    controls.forEach((control) => {
+      if (!control.name) {
+        return;
+      }
+
+      const defaultConfig = CONTROL_DEFAULTS[control.name];
+
+      if (!defaultConfig) {
+        return;
+      }
+
+      const element = scopedQuerySelector(
+        this.getShadowRoot(),
+        defaultConfig.selector
+      );
+
+      if (control.visibility === 'hidden') {
+        this.vsync_.mutate(() => {
+          element.classList.add('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (!control.visibility || control.visibility === 'visible') {
+        this.vsync_.mutate(() => {
+          element.classList.remove('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (control.position === 'start') {
+        const startButtonContainer = this.systemLayerEl_.querySelector(
+          '.i-amphtml-story-system-layer-buttons-start-position'
+        );
+
+        this.vsync_.mutate(() => {
+          element.parentElement.removeChild(element);
+          startButtonContainer.appendChild(element);
+        });
+      }
+
+      if (control.backgroundImageUrl) {
+        setImportantStyles(dev().assertElement(element), {
+          'background-image': `url(${control.backgroundImageUrl})`,
+        });
+      }
     });
   }
 

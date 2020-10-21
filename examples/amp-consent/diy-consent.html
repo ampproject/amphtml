@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" type="text/css" href="https://raw.githack.com/ganapativs/bttn.css/master/dist/bttn.min.css">
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.0/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
 html {
   width: 100%;
@@ -228,6 +228,9 @@ function registerClickConsentMessage(querySelector, type, action, info, consentM
         info,
         consentMetadata,
       }, '*');
+      setTimeout(() => {
+        navigator.sendBeacon('https://example.test/beacon');
+      }, 500);
     }, timeout);
   };
 }
@@ -282,8 +285,8 @@ const consentObjects = [
     action: 'accept',
     info: getConsentString(),
     consentMetadata: {
-      'consentStringType': 2, 
-      'additionalConsent': getAdditionalConsentString(), 
+      'consentStringType': 2,
+      'additionalConsent': getAdditionalConsentString(),
       'gdprApplies': true
     },
     timeout: 1000,

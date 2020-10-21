@@ -75,6 +75,12 @@ const strings = {
       'Label for a button that allows the user to change their ' +
       'choice to consent to providing their cookie access.',
   },
+  [LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL]: {
+    string: 'Close',
+    description:
+      'Label for a button that closes the full page experience ' +
+      'and takes the user back to where they were originally',
+  },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accept',
     description:
@@ -207,6 +213,15 @@ const strings = {
     description:
       'Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)',
   },
+  [LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL]: {
+    string: 'Pause story',
+    description:
+      'Label for a button that pauses the media content on the story',
+  },
+  [LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL]: {
+    string: 'Play story',
+    description: 'Label for a button that plays the media content on the story',
+  },
   [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
     string: 'Share story',
     description:
@@ -300,6 +315,11 @@ const strings = {
     description:
       'Label for the sidebar button that pulls up a menu ' +
       'of options for interacting with the story',
+  },
+  [LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL]: {
+    string: 'Skip next',
+    description:
+      'Label for a button that advances to the next element in the carousel',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
     string: 'Expand Tweet',

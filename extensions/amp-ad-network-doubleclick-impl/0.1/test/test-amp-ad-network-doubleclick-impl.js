@@ -21,6 +21,10 @@
 import '../../../amp-ad/0.1/amp-ad';
 import * as bytesUtils from '../../../../src/utils/bytes';
 import {
+  AMP_EXPERIMENT_ATTRIBUTE,
+  QQID_HEADER,
+} from '../../../../ads/google/a4a/utils';
+import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
 } from '../../../amp-a4a/0.1/signature-verifier';
@@ -43,7 +47,6 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
-import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -807,7 +810,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
       element.setAttribute(
         'json',
         `{
@@ -823,7 +825,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting inside array', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
       element.setAttribute(
         'json',
         `{
@@ -977,15 +978,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
             return impl.getAdUrl().then((url2) => {
               expect(url2).to.match(/(\?|&)rc=1(&|$)/);
               expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
-              expect(url2).to.not.match(/(\?|&)frc=1(&|$)/);
             });
           });
-      });
-    });
-    it('has correct frc value', () => {
-      impl.fromResumeCallback = true;
-      impl.getAdUrl().then((url) => {
-        expect(url).to.match(/(\?|&)frc=1(&|$)/);
       });
     });
     it('should include identity', () => {
@@ -1842,7 +1836,11 @@ describes.realWin(
     describe('#setPageLevelExperiments', () => {
       let randomlySelectUnsetExperimentsStub;
       let extractUrlExperimentIdStub;
-      let getAmpDocStub;
+      const ampdocMock = {
+        whenFirstVisible: () => new Deferred().promise,
+        getMetaByName: () => null,
+      };
+
       beforeEach(() => {
         randomlySelectUnsetExperimentsStub = env.sandbox.stub(
           impl,
@@ -1853,11 +1851,9 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         env.sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        getAmpDocStub = env.sandbox.stub(impl, 'getAmpDoc').returns({
-          whenFirstVisible: () => new Deferred().promise,
-          getMetaByName: () => null,
-        });
+        env.sandbox.stub(impl, 'getAmpDoc').returns(ampdocMock);
       });
+
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
       });
@@ -1882,14 +1878,14 @@ describes.realWin(
         });
         extractUrlExperimentIdStub.returns(undefined);
         impl.buildCallback();
-        expect(impl.experimentIds.includes('117152667')).to.be.true;
+        expect(impl.experimentIds).to.include('117152667');
         expect(impl.useSra).to.be.true;
       });
 
       it('should force-select SRA experiment from URL experiment ID', () => {
         randomlySelectUnsetExperimentsStub.returns({});
         impl.setPageLevelExperiments('8');
-        expect(impl.experimentIds.includes('117152667')).to.be.true;
+        expect(impl.experimentIds).to.include('117152667');
       });
 
       describe('should properly limit SRA traffic', () => {
@@ -1933,38 +1929,35 @@ describes.realWin(
 
       describe('detect module/nomodule experiment', () => {
         it('should identify module/nomodule control when runtime-type is 10', () => {
-          getAmpDocStub./*OK*/ restore();
-          env.sandbox.stub(impl, 'getAmpDoc').returns({
-            whenFirstVisible: () => new Deferred().promise,
-            getMetaByName: () => '10',
-          });
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('10');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(
-            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
-          ).to.be.true;
+          expect(impl.experimentIds).to.include(
+            MODULE_NOMODULE_PARAMS_EXP.CONTROL
+          );
         });
 
         it('should identify module/nomodule experiment when runtime-type is 2', () => {
-          getAmpDocStub./*OK*/ restore();
-          env.sandbox.stub(impl, 'getAmpDoc').returns({
-            whenFirstVisible: () => new Deferred().promise,
-            getMetaByName: () => '2',
-          });
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('2');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(
-            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
-          ).to.be.true;
+          expect(impl.experimentIds).to.include(
+            MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT
+          );
         });
 
         // Only 2, 4, 10 should be recognized.
         it('should ignore module/nomodule experiment when runtime-type is 6', () => {
-          getAmpDocStub./*OK*/ restore();
-          env.sandbox.stub(impl, 'getAmpDoc').returns({
-            whenFirstVisible: () => new Deferred().promise,
-            getMetaByName: () => '6',
-          });
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('6');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
           expect(
@@ -1973,6 +1966,62 @@ describes.realWin(
           expect(
             impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
           ).to.be.false;
+        });
+      });
+
+      describe('SSR experiments', () => {
+        it('should include SSR experiments', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=45,3579282=0');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+            '579823748245,357928200'
+          );
+        });
+
+        it('should pad value to two chars', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=1');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+            '579823748201'
+          );
+        });
+
+        it('should ignore excessively large value', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=100');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
+        });
+
+        it('should ignore negative values', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=-1');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
+        });
+
+        it('should ignore non-number values', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=testing');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
         });
       });
     });

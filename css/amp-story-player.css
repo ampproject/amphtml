@@ -15,8 +15,6 @@
  */
 
 amp-story-player {
-  width: 360px;
-  height: 600px;
   position: relative;
   display: block;
 }
@@ -31,6 +29,10 @@ amp-story-player a:first-of-type {
 
 amp-story-player a:not(:first-of-type) {
   visibility: hidden;
+}
+
+amp-story-player.i-amphtml-story-player-loaded a:first-of-type {
+  display: none;
 }
 
 amp-story-player::after {

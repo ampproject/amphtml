@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-:host {
-  all: initial;
-  display: block;
-  border-radius: 0 !important;
-  width: 360px;
-  height: 600px;
-  overflow: auto;
-}
-
 .story-player-iframe {
   height: 100%;
   width: 100%;
@@ -33,7 +24,12 @@
   position: absolute;
 }
 
-main {
+.i-amphtml-story-player-shadow-root-intermediary {
+  width: 100%;
+  height: 100%;
+}
+
+.i-amphtml-story-player-main-container {
   height: 100%;
   position: relative;
   overflow: hidden;
@@ -45,21 +41,22 @@ main {
   transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.story-player-iframe:nth-child(1),
-main .story-player-iframe[i-amphtml-iframe-position="0"] {
+.i-amphtml-story-player-main-container iframe:nth-of-type(1),
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="0"] {
   transform: translate3d(0, 0, 1px);
 }
 
-.story-player-iframe:nth-child(2),
-.story-player-iframe:nth-child(3),
-main .story-player-iframe[i-amphtml-iframe-position="1"] {
+.i-amphtml-story-player-main-container iframe:nth-of-type(2),
+.i-amphtml-story-player-main-container iframe:nth-of-type(3),
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="1"] {
   transform: translate3d(100%, 0, 0);
 }
 
-main .story-player-iframe[i-amphtml-iframe-position="-1"] {
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="-1"] {
   transform: translate3d(-100%, 0, 0);
 }
 
+/* TODO(#30031): delete this once new custom UI API is ready. */
 .amp-story-player-exit-control-button {
   position: absolute;
   height: 48px;
@@ -72,16 +69,20 @@ main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   background-color: transparent;
   outline: transparent;
   cursor: pointer;
+  z-index: 1;
 }
 
+/* TODO(#30031): delete this once new custom UI API is ready. */
 .amp-story-player-close-button {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="%23FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
 }
 
+/* TODO(#30031): delete this once new custom UI API is ready. */
 .amp-story-player-back-button {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="%23FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>');
 }
 
+/* TODO(#30031): delete this once new custom UI API is ready. */
 .amp-story-player-hide-button {
   display: none;
 }

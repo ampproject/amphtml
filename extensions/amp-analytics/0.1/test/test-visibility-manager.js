@@ -236,6 +236,30 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     expect(root.getRootVisibility()).to.equal(0);
   });
 
+  it('should switch visibility on window resize for inabox', () => {
+    win.__AMP_MODE = {runtime: 'inabox'};
+    root = new VisibilityManagerForDoc(ampdoc);
+
+    // Check observer is correctly set.
+    const inOb = root.intersectionObserver_;
+    expect(inOb).to.be.instanceOf(IntersectionObserverStub);
+    expect(inOb.elements).to.contain(win.document.documentElement);
+
+    inOb.callback([
+      {
+        target: win.document.documentElement,
+        intersectionRatio: 1,
+        intersectionRect: layoutRectLtwh(0, 0, 0, 0),
+        boundingClientRect: layoutRectLtwh(1, 1, 100, 0),
+      },
+    ]);
+
+    expect(root.getRootVisibility()).to.equal(0);
+    const resizeEvent = new Event('resize');
+    ampdoc.win.eventListeners.fire(resizeEvent);
+    expect(root.getRootVisibility()).to.equal(1);
+  });
+
   it('should switch root model to no-visibility on dispose', () => {
     expect(root.getRootVisibility()).to.equal(1);
     root.dispose();
@@ -795,29 +819,29 @@ describes.realWin(
   (env) => {
     let parentWin;
     let win;
-    let ampdoc;
     let embed;
     let clock;
     let viewer;
     let viewport;
+    let parentAmpdoc;
     let parentRoot;
     let root;
     let inob;
 
     beforeEach(() => {
       parentWin = env.parentWin;
+      parentAmpdoc = env.parentAmpdoc;
       win = env.win;
-      ampdoc = env.ampdoc;
       embed = env.embed;
-      embed.host = ampdoc.win.document.createElement('amp-host');
+      embed.host = parentAmpdoc.win.document.createElement('amp-host');
       clock = env.sandbox.useFakeTimers();
       clock.tick(1);
 
       viewport = parentWin.__AMP_SERVICES.viewport.obj;
       viewer = parentWin.__AMP_SERVICES.viewer.obj;
-      env.sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
+      env.sandbox.stub(parentAmpdoc, 'getFirstVisibleTime').returns(1);
 
-      parentRoot = new VisibilityManagerForDoc(ampdoc);
+      parentRoot = new VisibilityManagerForDoc(parentAmpdoc);
       parentWin.IntersectionObserver = IntersectionObserverStub;
       parentWin.IntersectionObserverEntry = function () {};
       parentWin.IntersectionObserverEntry.prototype.intersectionRatio = 1;
@@ -855,7 +879,7 @@ describes.realWin(
       root = new VisibilityManagerForEmbed(parentRoot, embed);
 
       expect(root.parent).to.equal(parentRoot);
-      expect(root.ampdoc).to.equal(ampdoc);
+      expect(root.ampdoc).to.equal(parentAmpdoc);
       expect(root.getStartTime()).to.equal(embed.getStartTime());
       expect(root.isBackgrounded()).to.be.true;
       expect(root.isBackgroundedAtStart()).to.be.true;
@@ -866,7 +890,7 @@ describes.realWin(
 
     it('should initialize correctly in foreground', () => {
       expect(root.parent).to.equal(parentRoot);
-      expect(root.ampdoc).to.equal(ampdoc);
+      expect(root.ampdoc).to.equal(parentAmpdoc);
       expect(root.getStartTime()).to.equal(embed.getStartTime());
       expect(root.isBackgrounded()).to.be.false;
       expect(root.isBackgroundedAtStart()).to.be.false;

@@ -16,7 +16,7 @@
 
 amp-sticky-ad {
   position: fixed !important;
-  text-align:center;
+  text-align: center;
   bottom: 0 !important;
   left: 0;
   width: 100% !important;
@@ -26,8 +26,9 @@ amp-sticky-ad {
   opacity: 1 !important;
   background-image: none !important;
   background-color: #fff;
-  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2) !important;
   margin-bottom: 0 !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 amp-sticky-ad-top-padding {
@@ -58,7 +59,6 @@ amp-sticky-ad[visible] {
   display: block;
 }
 
-
 .amp-sticky-ad-close-button {
   position: absolute;
   visibility: hidden;
@@ -71,7 +71,7 @@ amp-sticky-ad[visible] {
   background-position: 9px center;
   background-color: #fff;
   background-repeat: no-repeat;
-  box-shadow: 0 -1px 1px 0 rgba(0,0,0, 0.2);
+  box-shadow: 0 -1px 1px 0 rgba(0, 0, 0, 0.2);
   border: none;
   border-radius: 12px 0 0 0;
 }
@@ -90,7 +90,7 @@ amp-sticky-ad[visible] > .amp-sticky-ad-close-button {
   bottom: 0;
 }
 
-[dir=rtl] .amp-sticky-ad-close-button {
+[dir='rtl'] .amp-sticky-ad-close-button {
   right: auto;
   left: 0;
   border-top-left-radius: 0;
@@ -98,7 +98,7 @@ amp-sticky-ad[visible] > .amp-sticky-ad-close-button {
   background-position: 6px center;
 }
 
-[dir=rtl] .amp-sticky-ad-close-button:before {
+[dir='rtl'] .amp-sticky-ad-close-button:before {
   right: -20px;
   left: 0;
 }

@@ -27,7 +27,6 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
-import {startsWith} from '../../../src/string';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -148,7 +147,7 @@ export const trackerTypeForTesting = TRACKER_TYPE;
  * @return {boolean}
  */
 function isAmpStoryTriggerType(triggerType) {
-  return startsWith(triggerType, 'story');
+  return triggerType.startsWith('story');
 }
 
 /**
@@ -156,7 +155,7 @@ function isAmpStoryTriggerType(triggerType) {
  * @return {boolean}
  */
 function isVideoTriggerType(triggerType) {
-  return startsWith(triggerType, 'video');
+  return triggerType.startsWith('video');
 }
 
 /**
@@ -199,7 +198,7 @@ export function getTrackerTypesForParentType(parentType) {
     ) {
       filtered[key] = TRACKER_TYPE[key].klass;
     }
-  }, this);
+  });
   return filtered;
 }
 
@@ -352,7 +351,7 @@ export class CustomEventTracker extends EventTracker {
       selectionMethod
     );
 
-    const isSandboxEvent = startsWith(eventType, 'sandbox-');
+    const isSandboxEvent = eventType.startsWith('sandbox-');
 
     // Push recent events if any.
     const buffer = isSandboxEvent
@@ -400,7 +399,7 @@ export class CustomEventTracker extends EventTracker {
    */
   trigger(event) {
     const eventType = event['type'];
-    const isSandboxEvent = startsWith(eventType, 'sandbox-');
+    const isSandboxEvent = eventType.startsWith('sandbox-');
     const observables = this.observables_[eventType];
 
     // If listeners already present - trigger right away.

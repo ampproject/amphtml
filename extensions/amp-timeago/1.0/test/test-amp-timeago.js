@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../amp-timeago';
+import {parseDateAttrs} from '../amp-timeago';
 import {toggleExperiment} from '../../../../src/experiments';
-import {waitForChildPromise} from '../../../../src/dom';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {waitFor} from '../../../../testing/test-helper.js';
 
 describes.realWin(
-  'amp-timeago',
+  'amp-timeago 1.0',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-timeago:1.0'],
     },
   },
@@ -31,23 +29,31 @@ describes.realWin(
     let element;
 
     const getTimeFromShadow = async () => {
-      await whenCalled(env.sandbox.spy(element, 'attachShadow'));
-      const shadow = element.shadowRoot;
-      await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelector('time');
-      });
-      const time = shadow.querySelector('time');
-      if (time.textContent) {
-        return time.textContent;
-      }
-      await new Promise((resolve) => {
-        const mo = new MutationObserver(() => {
-          mo.disconnect();
-          resolve();
-        });
-        mo.observe(time, {characterData: true, subtree: true});
-      });
-      return time.textContent;
+      await element.build();
+      const getTimeContent = () =>
+        element.shadowRoot &&
+        element.shadowRoot.querySelector('time') &&
+        element.shadowRoot.querySelector('time').textContent;
+      await waitFor(getTimeContent, 'Timeago rendered');
+      return getTimeContent();
+    };
+
+    const getTimeFromSlot = async () => {
+      await element.build();
+      const getTimeContent = () => {
+        const slot =
+          element.shadowRoot && element.shadowRoot.querySelector('slot');
+        if (!slot) {
+          return null;
+        }
+        return slot
+          .assignedNodes()
+          .map((n) => n.textContent)
+          .join('')
+          .trim();
+      };
+      await waitFor(getTimeContent, 'Timeago rendered as slot');
+      return getTimeContent();
     };
 
     beforeEach(() => {
@@ -64,8 +70,7 @@ describes.realWin(
       toggleExperiment(win, 'amp-timeago-bento', false);
     });
 
-    // TODO (#29246): De-flake and un-skip this test.
-    it.skip('should render display 2 days ago when built', async () => {
+    it('should render display 2 days ago when built', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
@@ -75,19 +80,27 @@ describes.realWin(
       expect(time).to.equal('2 days ago');
     });
 
-    // TODO (#29246): De-flake and un-skip this test.
-    it.skip('should display original date when older than cutoff', async () => {
+    it('should render display 2 days ago using "timestamp-ms"', async () => {
+      const date = new Date();
+      date.setDate(date.getDate() - 2);
+      element.setAttribute('timestamp-ms', date.getTime());
+      element.textContent = date.toString();
+      win.document.body.appendChild(element);
+      const time = await getTimeFromShadow();
+      expect(time).to.equal('2 days ago');
+    });
+
+    it('should display original date when older than cutoff', async () => {
       const date = new Date('2017-01-01');
       element.setAttribute('datetime', date.toISOString());
       element.textContent = 'Sunday 1 January 2017';
       element.setAttribute('cutoff', '8640000');
       win.document.body.appendChild(element);
-      const time = await getTimeFromShadow();
+      const time = await getTimeFromSlot();
       expect(time).to.equal('Sunday 1 January 2017');
     });
 
-    // TODO (#29246): De-flake and un-skip this test.
-    it.skip('should update after mutation of datetime attribute', async () => {
+    it('should update after mutation of datetime attribute', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
@@ -103,3 +116,70 @@ describes.realWin(
     });
   }
 );
+
+describes.sandboxed('amp-date-display 1.0: parseDateAttrs', {}, (env) => {
+  const DATE = new Date(1514793600000);
+  const DATE_STRING = DATE.toISOString();
+
+  let element;
+
+  beforeEach(() => {
+    element = document.createElement('amp-date-display');
+  });
+
+  it('should throw when no date is specified', () => {
+    expect(() => parseDateAttrs(element)).to.throw(/required/);
+  });
+
+  it('should throw when invalid date is specified', () => {
+    element.setAttribute('datetime', 'invalid');
+    expect(() => parseDateAttrs(element)).to.throw(/Invalid date/);
+  });
+
+  it('should parse the "datetime" attribute', () => {
+    element.setAttribute('datetime', DATE_STRING);
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
+
+    // With offset.
+    element.setAttribute('offset-seconds', '1');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+
+  it('should accept "datetime=now"', () => {
+    env.sandbox.useFakeTimers(DATE);
+    element.setAttribute('datetime', 'now');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
+
+    // With offset.
+    element.setAttribute('offset-seconds', '1');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+
+  it('should parse the "timestamp-ms" attribute', () => {
+    element.setAttribute('timestamp-ms', DATE.getTime());
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
+
+    // With offset.
+    element.setAttribute('offset-seconds', '1');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+
+  it('should throw when invalid "timestamp-ms" is specified', () => {
+    element.setAttribute('timestamp-ms', 'invalid');
+    expect(() => parseDateAttrs(element)).to.throw(/required/);
+  });
+
+  it('should parse the "timestamp-seconds" attribute', () => {
+    element.setAttribute('timestamp-seconds', DATE.getTime() / 1000);
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
+
+    // With offset.
+    element.setAttribute('offset-seconds', '1');
+    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
+  });
+
+  it('should throw when invalid "timestamp-seconds" is specified', () => {
+    element.setAttribute('timestamp-seconds', 'invalid');
+    expect(() => parseDateAttrs(element)).to.throw(/required/);
+  });
+});

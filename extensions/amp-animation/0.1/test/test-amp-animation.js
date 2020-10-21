@@ -33,9 +33,13 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
         ioCallback = callback;
         ioCallbacks.push(callback);
       }
-      observe() {
+      observe(target) {
         ioCallback([
-          {isIntersecting: (config && config.isIntersecting) ?? true},
+          {
+            target,
+            isIntersecting: (config && config.isIntersecting) ?? true,
+            boundingClientRect: target.getBoundingClientRect(),
+          },
         ]);
       }
       unobserve() {}
@@ -65,9 +69,15 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
     return element.build().then(() => element.implementation_);
   }
 
-  function updateIntersection(isIntersecting) {
+  function updateIntersection(target, isIntersecting) {
     ioCallbacks.forEach((callback) => {
-      callback([{isIntersecting}]);
+      callback([
+        {
+          target,
+          isIntersecting,
+          boundingClientRect: target.getBoundingClientRect(),
+        },
+      ]);
     });
   }
 
@@ -176,7 +186,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
         viewer.setVisibilityState_('visible');
         expect(anim.visible_).to.be.false;
 
-        updateIntersection(true);
+        updateIntersection(anim.element.parentElement, true);
         expect(anim.visible_).to.be.true;
       });
 
@@ -825,7 +835,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
       }
 
       it('should find target in the embed only via selector', function* () {
-        const parentWin = env.ampdoc.win;
+        const {parentWin} = env;
         const embedWin = embed.win;
         const anim = yield createAnim(
           {},
@@ -845,7 +855,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
       });
 
       it('should find target in the embed only via target', function* () {
-        const parentWin = env.ampdoc.win;
+        const {parentWin} = env;
         const embedWin = embed.win;
         const anim = yield createAnim(
           {},
