@@ -19,6 +19,11 @@ amp-story-player {
   display: block;
 }
 
+.i-amphtml-story-player-shadow-root-intermediary {
+  width: 100%;
+  height: 100%;
+}
+
 amp-story-player a:first-of-type {
   width: 100%;
   height: 100%;
