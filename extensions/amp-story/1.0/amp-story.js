@@ -2823,3 +2823,5 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });
+
+// TODO(raxsha): delete this comment.
