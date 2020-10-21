@@ -27,7 +27,7 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
  * @param {!Element} el
- * @param {number=} index An intex to wait for.
+ * @param {number=} index An index to wait for.
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
@@ -59,6 +59,13 @@ function getPrevTitle(el) {
 function getSlideWrappers(el) {
   return el.querySelectorAll(
     '.i-amphtml-carousel-scroll > .i-amphtml-carousel-slide-item'
+  );
+}
+
+function isScreenReaderHidden(element) {
+  const computedStyle = getComputedStyle(element);
+  return (
+    computedStyle.visibility === 'hidden' || computedStyle.display === 'none'
   );
 }
 
@@ -198,6 +205,28 @@ describes.realWin(
         expect(getNextButton(carousel).getAttribute('aria-disabled')).to.equal(
           'true'
         );
+      });
+
+      it('should correctly style controls; focusable but not visible', async () => {
+        const carousel = await getCarousel({loop: false});
+
+        getNextButton(carousel).focus();
+        carousel.implementation_.goToSlide(4);
+        await afterIndexUpdate(carousel);
+        expect(getNextButton(carousel).getAttribute('tabIndex')).to.equal('-1');
+        expect(getPrevButton(carousel).getAttribute('tabIndex')).to.equal('0');
+        expect(isScreenReaderHidden(getPrevButton(carousel))).to.be.false;
+        expect(isScreenReaderHidden(getNextButton(carousel))).to.be.false;
+        expect(doc.activeElement).to.equal(getNextButton(carousel));
+
+        getPrevButton(carousel).focus();
+        carousel.implementation_.goToSlide(0);
+        await afterIndexUpdate(carousel);
+        expect(getNextButton(carousel).getAttribute('tabIndex')).to.equal('0');
+        expect(getPrevButton(carousel).getAttribute('tabIndex')).to.equal('-1');
+        expect(isScreenReaderHidden(getPrevButton(carousel))).to.be.false;
+        expect(isScreenReaderHidden(getNextButton(carousel))).to.be.false;
+        expect(doc.activeElement).to.equal(getPrevButton(carousel));
       });
     });
 
