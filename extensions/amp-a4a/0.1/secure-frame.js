@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 
@@ -62,13 +63,19 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
 
 /**
  * Create iframe with predefined CSP and sandbox attributes for security.
- * @param {!Document} document
+ * @param {!Window} win
  * @param {string} title
  * @param {string} height
  * @param {string} width
  * @return {!HTMLIFrameElement}
  */
-export function createSecureFrame(document, title, height, width) {
+export function createSecureFrame(win, title, height, width) {
+  let sandbox = sandboxVals.join(' ');
+  if (Services.platformFor(win).isSafari()) {
+    sandbox += ' allow-scripts';
+  }
+
+  const {document} = win;
   const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
     document,
     'iframe',
@@ -82,7 +89,7 @@ export function createSecureFrame(document, title, height, width) {
       'allowfullscreen': '',
       'allowtransparency': '',
       'scrolling': 'no',
-      'sandbox': sandboxVals.join(' '),
+      'sandbox': sandbox,
     })
   ));
   return iframe;
