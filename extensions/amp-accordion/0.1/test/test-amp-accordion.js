@@ -860,6 +860,71 @@ describes.realWin(
         );
       });
     });
+
+    it('should include a11y related attributes', () => {
+      return getAmpAccordion().then(() => {
+        const sectionElements = doc.querySelectorAll('section');
+        expect(sectionElements.length).to.equal(3);
+
+        const section0 = sectionElements[0];
+        const section1 = sectionElements[1];
+        const section2 = sectionElements[2];
+        const {
+          firstElementChild: header0,
+          lastElementChild: content0,
+        } = section0;
+        const {
+          firstElementChild: header1,
+          lastElementChild: content1,
+        } = section1;
+        const {
+          firstElementChild: header2,
+          lastElementChild: content2,
+        } = section2;
+
+        expect(header0).to.have.attribute('id');
+        expect(header0.getAttribute('aria-controls')).to.equal('test0');
+        expect(header0.getAttribute('tabindex')).to.equal('0');
+        expect(header0.getAttribute('role')).to.equal('button');
+        expect(content0).to.have.attribute('aria-labelledby');
+        expect(content0.getAttribute('id')).to.equal('test0');
+        expect(content0.getAttribute('role')).to.equal('region');
+        expect(header0.getAttribute('aria-controls')).to.equal(
+          content0.getAttribute('id')
+        );
+        expect(header0.getAttribute('id')).to.equal(
+          content0.getAttribute('aria-labelledby')
+        );
+
+        expect(header1).to.have.attribute('id');
+        expect(header1.getAttribute('aria-controls')).to.equal('test1');
+        expect(header1.getAttribute('tabindex')).to.equal('0');
+        expect(header1.getAttribute('role')).to.equal('button');
+        expect(content1).to.have.attribute('aria-labelledby');
+        expect(content1.getAttribute('id')).to.equal('test1');
+        expect(content1.getAttribute('role')).to.equal('region');
+        expect(header1.getAttribute('aria-controls')).to.equal(
+          content1.getAttribute('id')
+        );
+        expect(header1.getAttribute('id')).to.equal(
+          content1.getAttribute('aria-labelledby')
+        );
+
+        expect(header2).to.have.attribute('id');
+        expect(header2.getAttribute('aria-controls')).to.equal('test2');
+        expect(header2.getAttribute('tabindex')).to.equal('0');
+        expect(header2.getAttribute('role')).to.equal('button');
+        expect(content2).to.have.attribute('aria-labelledby');
+        expect(content2.getAttribute('id')).to.equal('test2');
+        expect(content2.getAttribute('role')).to.equal('region');
+        expect(header2.getAttribute('aria-controls')).to.equal(
+          content2.getAttribute('id')
+        );
+        expect(header2.getAttribute('id')).to.equal(
+          content2.getAttribute('aria-labelledby')
+        );
+      });
+    });
   }
 );
 
