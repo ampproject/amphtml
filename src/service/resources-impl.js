@@ -1928,7 +1928,10 @@ export class ResourcesImpl {
    * @private
    */
   cleanupTasks_(resource, opt_removePending) {
-    if (resource.getState() == ResourceState.NOT_LAID_OUT) {
+    if (
+      resource.getState() == ResourceState.NOT_LAID_OUT ||
+      resource.getState() == ResourceState.READY_FOR_LAYOUT
+    ) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
       // for layout again later on.
