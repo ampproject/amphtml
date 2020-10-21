@@ -805,7 +805,8 @@
     {
       "url": "examples/visual-tests/amp-carousel/amp-carousel.html",
       "name": "amp-carousel",
-      "interactive_tests": "examples/visual-tests/amp-carousel/amp-carousel.js"
+      "interactive_tests": "examples/visual-tests/amp-carousel/amp-carousel.js",
+      "loading_complete_selectors": [".amp-carousel-button-next"],
     },
   ]
 }

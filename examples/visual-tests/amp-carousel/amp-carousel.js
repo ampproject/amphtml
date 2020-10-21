@@ -16,7 +16,7 @@
 'use strict';
 
 const {
-  verifySelectorsVisible,
+  verifySelectorsVisible
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
@@ -25,5 +25,11 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
         '.amp-carousel-button-prev'
     ]);
+  },
+  'back to previous slide': async (page, name) => {
+    await page.tap('.amp-carousel-button-next');
+    await page.tap('.amp-carousel-button-prev');
+    // We cannot await verifySelectorsInvisible(page, name, ['.amp-carousel-button-prev']) since prev button is hidden using
+    // opacity: 0 and visibility: hidden
   },
 };
