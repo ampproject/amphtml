@@ -15,6 +15,7 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {observe, unobserve} from '../../../src/viewport-observer';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {userAssert} from '../../../src/log';
 
@@ -63,11 +64,24 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.element.appendChild(this.timeElement_);
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
+  /** 
+   * @param {boolean} inViewport 
+   * @private
+  */
+  viewportCallback_(inViewport) {
     if (inViewport && !this.cutOffReached_) {
       this.setFuzzyTimestampValue_();
     }
+  }
+
+  /** @override */
+  layoutCallback() {
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
+  }
+
+  /** @override */
+  unLayoutCallback() {
+    unobserve(this.element);
   }
 
   /** @override */

@@ -17,6 +17,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {isAmp4Email} from '../../../src/format';
 import {toggleAttribute} from '../../../src/dom';
+import {observe, unobserve} from '../../../src/viewport-observer'; 
 
 const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
 const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
@@ -66,8 +67,11 @@ export class BaseCarousel extends AMP.BaseElement {
     this.setControlsState();
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
+  /** 
+   * @param {boolean} inViewport
+   * @private 
+   */
+  viewportCallback_(inViewport) {
     if (inViewport) {
       this.hintControls();
     }
@@ -236,7 +240,12 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  layoutCallback() {
+    observe(this.element, (inViewport) => this.viewportCallback_(inViewport)) 
+  }
+  /** @override */
   unlayoutCallback() {
+    unobserve(this.element); 
     return true;
   }
 
