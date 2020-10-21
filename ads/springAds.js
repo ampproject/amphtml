@@ -51,7 +51,7 @@ export function springAds(global, data) {
     );
   } else {
     registerSlot({
-      window,
+      global,
       document,
       context,
       slotName: data['adslot'],
