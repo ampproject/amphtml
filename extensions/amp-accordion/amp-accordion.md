@@ -345,9 +345,17 @@ Keep the following points in mind when you style an amp-accordion:
 
 ## Accessibility
 
-- `amp-accordion` automatically adds the following [ARIA attributes](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA):
+`amp-accordion` automatically adds the following [ARIA attributes](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA):
+
 - `aria-controls`: Applied to the header element of each `amp-accordion` section.
 - `aria-expanded (state)`: Applied to the header element of each `amp-accordion` section.
+- `aria-labelledby`: Applied to the content element of each `amp-accordion` section.
+
+`amp-accordion` also automatically adds the following accessibility attributes:
+
+- `tabindex`: Applied to the header element of each `amp-accordion` section.
+- `role=button`: Applied to the header element of each `amp-accordion` section.
+- `role=region`: Applied to the content element of each `amp-accordion` section.
 
 ## Validation
 
