@@ -33,7 +33,7 @@ export default {
 };
 
 export const Default = () => {
-  const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const slideCount = number('slide count', 15, {min: 3, max: 99});
   const extraSpace = boolean('extra space around?', true);
   const insetArrowVisibility = select(
     'inset arrow visibility',
@@ -53,6 +53,7 @@ export const Default = () => {
     <amp-stream-gallery
       width="735"
       height="225"
+      layout="responsive"
       extra-space={extraSpace}
       inset-arrow-visibility={insetArrowVisibility}
       loop={loop}

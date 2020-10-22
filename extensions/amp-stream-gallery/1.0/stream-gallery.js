@@ -169,7 +169,7 @@ function DefaultArrow({advance, by, outsetArrows, ...rest}) {
  * @param {number} minVisibleCount
  * @param {number} slideCount
  * @param {number} peek
- * @param {number} width
+ * @param {(null|number)} width
  * @return {{visibleCount: number, maxContainerWidth: number}}
  */
 function getVisibleCount(

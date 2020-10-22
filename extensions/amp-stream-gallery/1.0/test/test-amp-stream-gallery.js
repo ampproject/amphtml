@@ -46,7 +46,6 @@ describes.realWin(
     before(() => {
       window.onerror = function (err) {
         if (err === 'ResizeObserver loop limit exceeded') {
-          console.warn('Ignored: ResizeObserver loop limit exceeded');
           return false;
         } else {
           return err;

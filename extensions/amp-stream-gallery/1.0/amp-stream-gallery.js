@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {CSS} from './stream-gallery.jss';
+import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
+import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {StreamGallery} from './stream-gallery';
 import {isExperimentOn} from '../../../src/experiments';
@@ -76,7 +77,7 @@ AmpStreamGallery['props'] = {
 };
 
 /** @override */
-AmpStreamGallery['shadowCss'] = CSS;
+AmpStreamGallery['shadowCss'] = GALLERY_CSS + CAROUSEL_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpStreamGallery);
