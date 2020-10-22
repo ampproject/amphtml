@@ -102,7 +102,10 @@ export function StreamGallery({
         style={{
           ...style,
           flexGrow: 1,
-          maxWidth: measurements.maxContainerWidth,
+          maxWidth:
+            measurements.maxContainerWidth >= Number.MAX_VALUE
+              ? ''
+              : measurements.maxContainerWidth,
           justifyContent: extraSpace === 'around' ? 'center' : 'initial',
         }}
         visibleCount={measurements.visibleCount}
