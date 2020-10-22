@@ -77,4 +77,49 @@ tags: {
     value_regex: "data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height=\"\\d+(\\.\\d+)?\" width=\"\\d+(\\.\\d+)?\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height='\\d+(\\.\\d+)?\' width='\\d+(\\.\\d+)?\' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>|data:image\\/svg\\+xml;base64,[a-zA-Z0-9+\\/=]+"
     mandatory: true
   }
+  tag: "IMG"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMG"
+  mandatory_ancestor: "AMP-STORY-PLAYER"
+  attrs: {
+    name: "loading"
+    value: "lazy"
+  }
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
+  attrs: {
+    name: "decoding"
+    value: "async"
+    value: "auto"
+    value: "sync"
+  }
+  attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "ismap" }
+  attrs: {
+    name: "longdesc"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "importance" }  # Not yet part of the html spec
+  attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
+  attrs: {
+    name: "src"
+    alternative_names: "srcset"
+    mandatory: true
+    value_url: {
+      protocol: "data"
+      protocol: "http" # For parity with amp-img's mandatory-src-or-srcset.
+      protocol: "https"
+      allow_relative: true
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "sizes" }
+  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
