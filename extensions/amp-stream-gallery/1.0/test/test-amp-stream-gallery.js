@@ -40,6 +40,20 @@ describes.realWin(
 
     const styles = useStyles();
 
+    // ignore ResizeObserver loop limit exceeded
+    // this is ok in several scenarios according to
+    // https://github.com/WICG/resize-observer/issues/38
+    before(() => {
+      window.onerror = function (err) {
+        if (err === 'ResizeObserver loop limit exceeded') {
+          console.warn('Ignored: ResizeObserver loop limit exceeded');
+          return false;
+        } else {
+          return err;
+        }
+      };
+    });
+
     beforeEach(async () => {
       win = env.win;
       toggleExperiment(win, 'amp-stream-gallery-bento', true, true);
@@ -153,7 +167,9 @@ describes.realWin(
       // Given slides [0][1][2] should be rendered as [2][0][1]. But [2] is
       // a placeholder.
       expect(renderedSlideWrappers).to.have.lengthOf(3);
-      expect(renderedSlideWrappers[0].querySelector('slot')).to.be.null;
+      expect(
+        renderedSlideWrappers[0].querySelector('slot').assignedElements()
+      ).to.deep.equal([userSuppliedChildren[2]]);
       expect(
         renderedSlideWrappers[1].querySelector('slot').assignedElements()
       ).to.deep.equal([userSuppliedChildren[0]]);
