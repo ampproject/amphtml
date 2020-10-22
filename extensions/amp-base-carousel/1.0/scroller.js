@@ -164,6 +164,9 @@ function ScrollerWithRef(
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
     const container = containerRef.current;
+    if (!container) {
+      return;
+    }
     const slideWidth = container./* OK */ offsetWidth / visibleCount;
     scrollOffset.current =
       container./* OK */ scrollLeft - offsetRef.current * slideWidth;
