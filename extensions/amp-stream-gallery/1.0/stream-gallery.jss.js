@@ -36,27 +36,22 @@ const insetArrow = {
   width: '40px',
   height: '40px',
   padding: '8px',
+  margin: '-12px',
+  '&$arrowPrev': {
+    borderRadius: '0px 4px 4px 0px',
+  },
+  '&$arrowNext': {
+    borderRadius: '4px 0px 0px 4px',
+  },
 };
 const outsetArrow = {
   flexShrink: 0,
   width: '32px',
   height: '32px',
   padding: '4px',
+  margin: '2px',
   borderRadius: '50%',
-  backgroundSize: '24px 24px',
-  // Center the button vertically.
-  top: '50%',
-  transform: 'translateY(-50%)',
-  alignItems: 'center',
   pointerEvents: 'auto',
-  '&$arrowPrev': {
-    marginInlineStart: '6px',
-    marginInlineEnd: '12px',
-  },
-  '&$arrowNext': {
-    marginInlineStart: '12px',
-    marginInlineEnd: '6px',
-  },
 };
 
 const JSS = {

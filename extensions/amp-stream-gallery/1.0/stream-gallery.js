@@ -15,13 +15,13 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {
-  BaseCarousel,
-  Controls,
-} from '../../amp-base-carousel/1.0/base-carousel';
-import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {ContainWrapper} from '../../../src/preact/component';
-import {useCallback, useMemo, useRef, useState} from '../../../src/preact';
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from '../../../src/preact';
 import {useStyles} from './stream-gallery.jss';
 
 /**
@@ -45,73 +45,66 @@ export function StreamGallery({
   style,
   ...rest
 }) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [slideCount, setSlideCount] = useState(null);
-  const carouselContext = useMemo(
-    () => ({currentSlide, setCurrentSlide, slideCount, setSlideCount}),
-    [currentSlide, slideCount]
-  );
   const galleryRef = useRef(null);
-  const carouselRef = useRef(null);
-  const advance = useCallback((by) => carouselRef.current.advance(by), []);
-  const {visibleCount, maxContainerWidth} = getVisibleCount(
-    maxItemWidth,
-    minItemWidth,
-    maxVisibleCount,
-    minVisibleCount,
-    children.length,
-    peek,
-    galleryRef
-  );
+  const [measurements, setMeasurements] = useState({
+    visibleCount: 1,
+    maxContainerWidth: Number.MAX_VALUE,
+  });
   const arrowPrev = customArrowPrev || (
-    <DefaultArrow
-      advance={advance}
-      by={-visibleCount}
-      outsetArrows={outsetArrows}
-      setCurrentSlide={setCurrentSlide}
-    />
+    <DefaultArrow by={-1} outsetArrows={outsetArrows} />
   );
   const arrowNext = customArrowNext || (
-    <DefaultArrow
-      advance={advance}
-      by={visibleCount}
-      outsetArrows={outsetArrows}
-      setCurrentSlide={setCurrentSlide}
-    />
+    <DefaultArrow by={1} outsetArrows={outsetArrows} />
   );
 
+  const measure = useCallback(
+    () =>
+      getVisibleCount(
+        maxItemWidth,
+        minItemWidth,
+        maxVisibleCount,
+        minVisibleCount,
+        children.length,
+        peek,
+        galleryRef
+      ),
+    [
+      maxItemWidth,
+      minItemWidth,
+      maxVisibleCount,
+      minVisibleCount,
+      children.length,
+      peek,
+    ]
+  );
+
+  // Adjust visible slide count when parameters change.
+  useLayoutEffect(() => {
+    setMeasurements(measure());
+  }, [measure]);
+
   return (
-    <ContainWrapper
-      layout={true}
-      size={true}
-      wrapperStyle={style}
-      contentStyle={{display: 'flex'}}
-      contentRef={galleryRef}
-      {...rest}
-    >
-      <CarouselContext.Provider value={carouselContext}>
-        {outsetArrows && arrowPrev}
-        <BaseCarousel
-          ref={carouselRef}
-          advanceCount={Math.floor(visibleCount)}
-          arrowPrev={arrowPrev}
-          arrowNext={arrowNext}
-          controls={outsetArrows ? Controls.NEVER : insetArrowVisibility}
-          loop={loop}
-          outsetArrows={outsetArrows}
-          snap={snap}
-          style={{
-            flexGrow: 1,
-            maxWidth: maxContainerWidth,
-            justifyContent: extraSpace === 'around' ? 'center' : 'initial',
-          }}
-          visibleCount={visibleCount}
-        >
-          {children}
-        </BaseCarousel>
-        {outsetArrows && arrowNext}
-      </CarouselContext.Provider>
-    </ContainWrapper>
+    <div ref={galleryRef}>
+      <BaseCarousel
+        advanceCount={Math.floor(measurements.visibleCount)}
+        arrowPrev={arrowPrev}
+        arrowNext={arrowNext}
+        controls={insetArrowVisibility}
+        loop={loop}
+        outsetArrows={outsetArrows}
+        snap={snap}
+        style={{
+          ...style,
+          flexGrow: 1,
+          maxWidth: measurements.maxContainerWidth,
+          justifyContent: extraSpace === 'around' ? 'center' : 'initial',
+        }}
+        visibleCount={measurements.visibleCount}
+        {...rest}
+      >
+        {children}
+      </BaseCarousel>
+    </div>
   );
 }
 
@@ -178,9 +171,6 @@ function getVisibleCount(
   peek,
   galleryRef
 ) {
-  if (!galleryRef.current) {
-    return {visibleCount: 1, maxContainerWidth: Number.MAX_VALUE};
-  }
   const width = galleryRef.current./* OK */ offsetWidth;
   const items = getItemsForWidth(width, minItemWidth, peek);
   const maxVisibleSlides = Math.min(slideCount, maxVisibleCount);
