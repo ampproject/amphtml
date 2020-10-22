@@ -42,7 +42,7 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'amp-stream-gallery-bento', true);
+      toggleExperiment(win, 'amp-stream-gallery-bento', true, true);
       element = createElementWithAttributes(
         win.document,
         'amp-stream-gallery',
@@ -62,7 +62,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-stream-gallery-bento', false);
+      toggleExperiment(win, 'amp-stream-gallery-bento', false, true);
     });
 
     function newSlide(id) {
@@ -109,9 +109,7 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(
-        userSuppliedChildren.slice(0, 2)
-      );
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(2);
     });
@@ -129,9 +127,7 @@ describes.realWin(
       await element.build();
 
       const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(
-        userSuppliedChildren.slice(0, 2)
-      );
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
 
       const defaultButtons = element.shadowRoot.querySelectorAll('button');
       expect(defaultButtons).to.have.length(0);
