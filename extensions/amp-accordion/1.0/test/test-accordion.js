@@ -29,12 +29,12 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
       expect(dom).to.not.have.attribute('expanded');
-      expect(dom.getAttribute('aria-expanded')).to.equal('false');
       expect(dom.children).to.have.lengthOf(2);
 
       const header = dom.children[0];
       expect(header.localName).to.equal('header');
       expect(header.innerHTML).to.equal('<h1>header1</h1>');
+      expect(header.getAttribute('aria-expanded')).to.equal('false');
 
       const content = dom.children[1];
       expect(content.localName).to.equal('div');
@@ -51,11 +51,11 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
       const dom = wrapper.getDOMNode();
       expect(dom).to.have.attribute('expanded');
-      expect(dom.getAttribute('aria-expanded')).to.equal('true');
 
       const header = dom.children[0];
       expect(header.localName).to.equal('header');
       expect(header.innerHTML).to.equal('<h1>header1</h1>');
+      expect(header.getAttribute('aria-expanded')).to.equal('true');
 
       const content = dom.children[1];
       expect(content.localName).to.equal('div');
@@ -68,23 +68,24 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         <AccordionSection header={<h1>header1</h1>}>content1</AccordionSection>
       );
       const dom = wrapper.getDOMNode();
+      const header = dom.children[0];
       const content = dom.children[1];
 
       // Start unexpanded.
       expect(dom).to.not.have.attribute('expanded');
-      expect(dom.getAttribute('aria-expanded')).to.equal('false');
+      expect(header.getAttribute('aria-expanded')).to.equal('false');
       expect(content.hidden).to.be.true;
 
       // Click on header to expand.
       wrapper.find('header').simulate('click');
       expect(dom).to.have.attribute('expanded');
-      expect(dom.getAttribute('aria-expanded')).to.equal('true');
+      expect(header.getAttribute('aria-expanded')).to.equal('true');
       expect(content.hidden).to.be.false;
 
       // Click on header again to collapse.
       wrapper.find('header').simulate('click');
       expect(dom).to.not.have.attribute('expanded');
-      expect(dom.getAttribute('aria-expanded')).to.equal('false');
+      expect(header.getAttribute('aria-expanded')).to.equal('false');
       expect(content.hidden).to.be.true;
     });
   });
@@ -171,28 +172,31 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const content1 = sections.at(1).find('div').getDOMNode();
       const content2 = sections.at(2).find('div').getDOMNode();
 
-      expect(sections.at(0).getDOMNode()).to.have.attribute('aria-expanded');
       expect(header0).to.have.attribute('tabindex');
       expect(header0).to.have.attribute('aria-controls');
       expect(header0).to.have.attribute('role');
+      expect(header0).to.have.attribute('aria-expanded');
+      expect(header0.getAttribute('aria-expanded')).to.equal('true');
       expect(content0).to.have.attribute('id');
       expect(header0.getAttribute('aria-controls')).to.equal(
         content0.getAttribute('id')
       );
 
-      expect(sections.at(1).getDOMNode()).to.have.attribute('aria-expanded');
       expect(header1).to.have.attribute('tabindex');
       expect(header1).to.have.attribute('aria-controls');
       expect(header1).to.have.attribute('role');
+      expect(header1).to.have.attribute('aria-expanded');
+      expect(header1.getAttribute('aria-expanded')).to.equal('false');
       expect(content1).to.have.attribute('id');
       expect(header1.getAttribute('aria-controls')).to.equal(
         content1.getAttribute('id')
       );
 
-      expect(sections.at(2).getDOMNode()).to.have.attribute('aria-expanded');
       expect(header2).to.have.attribute('tabindex');
       expect(header2).to.have.attribute('aria-controls');
       expect(header2).to.have.attribute('role');
+      expect(header2).to.have.attribute('aria-expanded');
+      expect(header2.getAttribute('aria-expanded')).to.equal('false');
       expect(content2).to.have.attribute('id');
       expect(header2.getAttribute('aria-controls')).to.equal(
         content2.getAttribute('id')
