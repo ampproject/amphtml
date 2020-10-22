@@ -26,7 +26,7 @@ import {isIframed} from './dom';
  *
  * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
  * @param {!Window} win
- * @param {number=|!Array<number>=} threshold
+ * @param {(number|!Array<number>)=} threshold
  *
  * @return {!IntersectionObserver}
  */
