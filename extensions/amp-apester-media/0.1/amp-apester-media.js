@@ -28,7 +28,10 @@ import {
 } from './utils';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {handleCompanionAds} from './monetization';
-import {observe, unobserve} from '../../../src/viewport-observer';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
@@ -337,8 +340,10 @@ class AmpApesterMedia extends AMP.BaseElement {
               });
             });
           })
-          .then(() => { 
-            observe(this.element, (inViewport) => this.viewportCallback_(inViewport)); 
+          .then(() => {
+            observeWithSharedInOb(this.element, (inViewport) =>
+              this.viewportCallback_(inViewport)
+            );
           })
           .catch((error) => {
             dev().error(TAG, 'Display', error);
@@ -383,7 +388,7 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserve(this.element);
+    unobserveWithSharedInOb(this.element);
     if (this.iframe_) {
       this.intersectionObserverHostApi_.destroy();
       this.intersectionObserverHostApi_ = null;

@@ -51,7 +51,10 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
-import {observe, unobserve} from '../../../src/viewport-observer';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 
 class AmpPlaybuzz extends AMP.BaseElement {
@@ -185,7 +188,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observe(this.element, (inViewport) => (this.inViewport_ = inViewport));
+    observeWithSharedInOb(
+      this.element,
+      (inViewport) => (this.inViewport_ = inViewport)
+    );
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('scrolling', 'no');
@@ -324,7 +330,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserve(this.element);
+    unobserveWithSharedInOb(this.element);
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 

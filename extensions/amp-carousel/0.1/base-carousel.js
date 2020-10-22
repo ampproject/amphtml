@@ -16,7 +16,10 @@
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {isAmp4Email} from '../../../src/format';
-import {observe, unobserve} from '../../../src/viewport-observer';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {toggleAttribute} from '../../../src/dom';
 
 const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
@@ -241,11 +244,13 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
   }
   /** @override */
   unlayoutCallback() {
-    unobserve(this.element);
+    unobserveWithSharedInOb(this.element);
     return true;
   }
 

@@ -18,7 +18,10 @@ import * as st from '../../../src/style';
 import {dev} from '../../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {observe, unobserve} from '../../../src/viewport-observer';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {propagateObjectFitStyles} from '../../../src/style';
 
 const TAG = 'amp-anim';
@@ -92,7 +95,9 @@ export class AmpAnim extends AMP.BaseElement {
     );
     guaranteeSrcForSrcsetUnsupportedBrowsers(img);
     return this.loadPromise(img).then(() => {
-      observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
+      observeWithSharedInOb(this.element, (inViewport) =>
+        this.viewportCallback_(inViewport)
+      );
     });
   }
 
@@ -103,7 +108,7 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserve(this.element);
+    unobserveWithSharedInOb(this.element);
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;
     this.img_.srcset = SRC_PLACEHOLDER;

@@ -22,7 +22,10 @@ import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {observe, unobserve} from '../../../src/viewport-observer';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-3d-gltf';
@@ -81,7 +84,7 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserve(this.element);
+    unobserveWithSharedInOb(this.element);
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -147,7 +150,9 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
     if (!isWebGLSupported()) {
       this.toggleFallback(true);
       return Promise.resolve();

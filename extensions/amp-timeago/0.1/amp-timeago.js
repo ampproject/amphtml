@@ -15,7 +15,10 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {observe, unobserve} from '../../../src/viewport-observer';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {userAssert} from '../../../src/log';
 
@@ -76,12 +79,14 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observe(this.element, (inViewport) => this.viewportCallback_(inViewport));
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
   }
 
   /** @override */
   unLayoutCallback() {
-    unobserve(this.element);
+    unobserveWithSharedInOb(this.element);
   }
 
   /** @override */
