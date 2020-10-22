@@ -115,12 +115,11 @@ const std::map<std::string, TestCase>& TestCases() {
     std::vector<TestCase> cases;
     std::vector<std::string> html_files;
     CHECK(htmlparser::FileUtil::Glob(
-            "external/validator/testdata/*/*.html",
-            &html_files)) << "Test cases file pattern not found.";
-
+           "external/validator/testdata/*/*.html",
+           &html_files)) << "Test cases file pattern not found.";
     CHECK(htmlparser::FileUtil::Glob(
-            "external/amphtml-extensions/*/*/test/*.html",
-             &html_files)) << "Test cases file pattern not found.";
+           "external/amphtml-extensions/*/*/test/*.html",
+            &html_files)) << "Test cases file pattern not found.";
 
     std::sort(html_files.begin(), html_files.end());
     for (const std::string& html_file : html_files) {
