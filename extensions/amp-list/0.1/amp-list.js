@@ -699,8 +699,16 @@ export class AmpList extends AMP.BaseElement {
       itemsExpr,
       this.element
     );
-    if (this.element.hasAttribute('single-item') && !isArray(items)) {
-      items = [items];
+    if (this.element.hasAttribute('single-item')) {
+      if (!isArray(items)) {
+        items = [items];
+      } else {
+        user().warn(
+          TAG,
+          'items must be a non-array Object if "single-item" is enabled.',
+          this.element
+        );
+      }
     }
     items = user().assertArray(items);
     if (this.element.hasAttribute('max-items')) {
