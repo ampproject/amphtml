@@ -19,10 +19,16 @@ import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {
   useCallback,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
 import {useStyles} from './stream-gallery.jss';
+
+const DEFAULT_MEASUREMENT = {
+  visibleCount: 1,
+  maxContainerWidth: Number.MAX_VALUE,
+};
 
 /**
  * @param {!StreamGalleryDef.Props} props
@@ -46,15 +52,17 @@ export function StreamGallery({
   ...rest
 }) {
   const galleryRef = useRef(null);
-  const [measurements, setMeasurements] = useState({
-    visibleCount: 1,
-    maxContainerWidth: Number.MAX_VALUE,
-  });
-  const arrowPrev = customArrowPrev || (
-    <DefaultArrow by={-1} outsetArrows={outsetArrows} />
+  const galleryWidthRef = useRef(0);
+  const [measurements, setMeasurements] = useState(DEFAULT_MEASUREMENT);
+  const arrowPrev = useMemo(
+    () =>
+      customArrowPrev || <DefaultArrow by={-1} outsetArrows={outsetArrows} />,
+    [customArrowPrev, outsetArrows]
   );
-  const arrowNext = customArrowNext || (
-    <DefaultArrow by={1} outsetArrows={outsetArrows} />
+  const arrowNext = useMemo(
+    () =>
+      customArrowNext || <DefaultArrow by={1} outsetArrows={outsetArrows} />,
+    [customArrowNext, outsetArrows]
   );
 
   const measure = useCallback(
@@ -66,7 +74,7 @@ export function StreamGallery({
         minVisibleCount,
         children.length,
         peek,
-        galleryRef
+        galleryWidthRef.current
       ),
     [
       maxItemWidth,
@@ -84,7 +92,13 @@ export function StreamGallery({
     if (!node) {
       return;
     }
-    const observer = new ResizeObserver(() => setMeasurements(measure()));
+    const observer = new ResizeObserver(() => {
+      if (galleryWidthRef.current === node./* OK */ offsetWidth) {
+        return;
+      }
+      galleryWidthRef.current = node./* OK */ offsetWidth;
+      setMeasurements(measure());
+    });
     observer.observe(node);
     return () => observer.disconnect();
   }, [measure]);
@@ -155,7 +169,7 @@ function DefaultArrow({advance, by, outsetArrows, ...rest}) {
  * @param {number} minVisibleCount
  * @param {number} slideCount
  * @param {number} peek
- * @param {{current: Element}} galleryRef
+ * @param {number} width
  * @return {{visibleCount: number, maxContainerWidth: number}}
  */
 function getVisibleCount(
@@ -165,9 +179,11 @@ function getVisibleCount(
   minVisibleCount,
   slideCount,
   peek,
-  galleryRef
+  width
 ) {
-  const width = galleryRef.current./* OK */ offsetWidth;
+  if (!width) {
+    return DEFAULT_MEASUREMENT;
+  }
   const items = getItemsForWidth(width, minItemWidth, peek);
   const maxVisibleSlides = Math.min(slideCount, maxVisibleCount);
   const visibleCount = Math.min(
