@@ -625,8 +625,6 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   checkImageReSize_(imgEl) {
-    const canvasForGL = document.createElement('canvas');
-    const gl = canvasForGL.getContext('webgl');
     const MAX_TEXTURE_SIZE = this.renderer_.gl.getParameter(
       this.renderer_.gl.MAX_TEXTURE_SIZE
     );
