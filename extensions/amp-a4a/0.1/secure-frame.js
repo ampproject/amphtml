@@ -31,13 +31,12 @@ const fontProviderAllowList = [
   'https://use.typekit.net',
 ].join(' ');
 
-const sandboxVals = [
-  'allow-forms',
-  'allow-popups',
-  'allow-popups-to-escape-sandbox',
-  'allow-same-origin',
-  'allow-top-navigation',
-];
+const sandboxVals =
+  'allow-forms ' +
+  'allow-popups ' +
+  'allow-popups-to-escape-sandbox ' +
+  'allow-same-origin ' +
+  'allow-top-navigation';
 
 export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
   `<!DOCTYPE html>
@@ -70,10 +69,9 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
  * @return {!HTMLIFrameElement}
  */
 export function createSecureFrame(win, title, height, width) {
-  let sandbox = sandboxVals.join(' ');
-  if (Services.platformFor(win).isSafari()) {
-    sandbox += ' allow-scripts';
-  }
+  const sandbox = Services.platformFor(win).isSafari()
+    ? sandboxVals + ' allow scripts'
+    : sandboxVals;
 
   const {document} = win;
   const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
