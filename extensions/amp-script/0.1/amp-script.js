@@ -144,11 +144,12 @@ export class AmpScript extends AMP.BaseElement {
     if (
       this.nodom_ &&
       (this.element.hasAttribute('width') ||
-        this.element.hasAttribute('height'))
+        this.element.hasAttribute('height') ||
+        this.element.hasAttribute('layout'))
     ) {
       user().warn(
         TAG,
-        'Cannot set width or height of a nodom <amp-script>',
+        'Cannot set width, height, or layout of a nodom <amp-script>',
         this.element
       );
     }
