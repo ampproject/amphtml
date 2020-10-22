@@ -27,7 +27,6 @@ import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
-import {isAmp4Email} from '../../../src/format';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -121,7 +120,7 @@ class AmpCarousel extends AMP.BaseElement {
      * Whether to show control buttons
      * @private {boolean}
      */
-    this.alwaysShowControls_ = false;
+    this.showControls_ = false;
   }
 
   /** @override */
@@ -201,15 +200,12 @@ class AmpCarousel extends AMP.BaseElement {
     this.carousel_.goToSlide(Number(this.element.getAttribute('slide') || '0'));
     // Signal for runtime to check children for layout.
 
-    if (
-      isAmp4Email(this.element.ownerDocument) ||
-      this.element.hasAttribute('controls')
-    ) {
-      this.alwaysShowControls_ = true;
+    if (this.element.hasAttribute('controls')) {
+      this.showControls_ = true;
     } else {
       Services.inputFor(this.win).onMouseDetected((mouseDetected) => {
         if (mouseDetected) {
-          this.alwaysShowControls_ = true;
+          this.showControls_ = true;
           this.updateUi_();
         }
       }, true);
@@ -492,7 +488,7 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    const bothDisabled = this.hadTouch_ && !this.alwaysShowControls_;
+    const bothDisabled = this.hadTouch_ && !this.showControls_;
     const prevDisabled = bothDisabled || this.carousel_.isAtStart();
     const nextDisabled = bothDisabled || this.carousel_.isAtEnd();
 
