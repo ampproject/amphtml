@@ -87,6 +87,7 @@ tags: {
     name: "loading"
     value: "lazy"
   }
+  attrs: { name: "data-amp-story-player-poster-img" }
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.

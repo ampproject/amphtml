@@ -54,7 +54,7 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a AMP we
 <body>
   <amp-story-player layout="fixed" width="360" height="600">
     <a href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/">
-      <img src="https://amp.dev/static/samples/img/story_dog2_portrait.jpg" width="100%" height="100%" loading="lazy" amp-story-player-poster-img>
+      <img src="https://amp.dev/static/samples/img/story_dog2_portrait.jpg" width="100%" height="100%" loading="lazy" data-amp-story-player-poster-img>
       Stories in AMP - Hello World
     </a>
   </amp-story-player>
