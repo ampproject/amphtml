@@ -78,9 +78,15 @@ export function StreamGallery({
     ]
   );
 
-  // Adjust visible slide count when parameters change.
+  // Adjust visible slide count when container size changes.
   useLayoutEffect(() => {
-    setMeasurements(measure());
+    const node = galleryRef.current;
+    if (!node) {
+      return;
+    }
+    const observer = new ResizeObserver(() => setMeasurements(measure()));
+    observer.observe(node);
+    return () => observer.disconnect();
   }, [measure]);
 
   return (
