@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {devAssert} from '../src/log';
+import {getMode} from './mode';
 import {isIframed} from './dom';
 
 /**
@@ -68,10 +69,12 @@ const viewportCallbacks = new WeakMap();
  */
 export function observeWithSharedInOb(element, viewportCallback) {
   // There should never be two unique observers of the same element.
-  devAssert(
-    !viewportCallbacks.has(element) ||
-      viewportCallbacks.get(element) === viewportCallback
-  );
+  if (getMode().localDev) {
+    devAssert(
+      !viewportCallbacks.has(element) ||
+        viewportCallbacks.get(element) === viewportCallback
+    );
+  }
 
   const win = element.ownerDocument.defaultView;
   let viewportObserver = viewportObservers.get(win);
