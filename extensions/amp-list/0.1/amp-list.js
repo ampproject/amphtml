@@ -590,12 +590,6 @@ export class AmpList extends AMP.BaseElement {
       if (!element.hasAttribute('role')) {
         this.setRoleAttribute_(element, 'listitem');
       }
-      if (
-        !element.hasAttribute('tabindex') &&
-        !this.isTabbable_(dev().assertElement(element))
-      ) {
-        element.setAttribute('tabindex', '0');
-      }
       container.appendChild(element);
     });
   }
