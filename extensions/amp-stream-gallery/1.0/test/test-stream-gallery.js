@@ -37,7 +37,7 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
 
     expect(slides.first().text()).to.equal('slide 1');
     expect(slides.at(1).text()).to.equal('slide 2');
-    expect(slides.last().text()).to.equal('');
+    expect(slides.last().text()).to.equal('slide 3');
   });
 
   it('should render custom Arrows when given', () => {
