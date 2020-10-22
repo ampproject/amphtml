@@ -129,29 +129,16 @@ function DefaultArrow({advance, by, outsetArrows, ...rest}) {
       aria-hidden="true"
       {...rest}
     >
-      {by < 0 ? (
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M14,7.4 L9.4,12 L14,16.6"
-            fill="none"
-            stroke="#000"
-            stroke-width="2"
-            stroke-linejoin="round"
-            stroke-linecap="round"
-          />
-        </svg>
-      ) : (
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M10,7.4 L14.6,12 L10,16.6"
-            fill="none"
-            stroke="#000"
-            stroke-width="2"
-            stroke-linejoin="round"
-            stroke-linecap="round"
-          />
-        </svg>
-      )}
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
+          fill="none"
+          stroke="#000"
+          stroke-width="2"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        />
+      </svg>
     </button>
   );
 }
