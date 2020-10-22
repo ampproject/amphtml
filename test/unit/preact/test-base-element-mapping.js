@@ -85,6 +85,8 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           parseAttrs: (e) =>
             `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
         },
+        'params': {attrPrefix: 'data-param-'},
+        'prefix': {attrPrefix: 'prefix'},
       };
       element = html`
         <amp-preact
@@ -97,6 +99,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           unknown="1"
           part-a="A"
           part-b="B"
+          data-param-test="helloworld"
+          data-param-test-two="confirm"
+          prefix="pref"
         >
         </amp-preact>
       `;
@@ -123,6 +128,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         enabled: false,
         combined: 'A+B',
       });
+      expect(lastProps.params.test).to.equal('helloworld');
+      expect(lastProps.params.testTwo).to.equal('confirm');
+      expect(lastProps).to.not.haveOwnProperty('prefix');
     });
 
     it('should mutate attributes', async () => {
@@ -132,6 +140,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       element.setAttribute('enabled', '');
       element.removeAttribute('disabled');
       element.setAttribute('part-b', 'C');
+      element.setAttribute('data-param-test', 'worldhello');
+      element.setAttribute('data-param-test-two', 'confirmAgain');
+      element.setAttribute('prefix', 'prefTwo');
 
       await waitFor(() => component.callCount > 1, 'component re-rendered');
 
@@ -145,6 +156,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         enabled: true,
         combined: 'A+C',
       });
+      expect(lastProps.params.test).to.equal('worldhello');
+      expect(lastProps.params.testTwo).to.equal('confirmAgain');
+      expect(lastProps).to.not.haveOwnProperty('prefix');
     });
 
     it('should ignore non-declared attributes', async () => {
