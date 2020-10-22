@@ -624,11 +624,12 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - ConsentManager : [Website](https://www.consentmanager.net/) - [Documentation](https://help.consentmanager.net/books/cmp/page/using-the-cmp-with-amp-websites)
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
 - iubenda : [Website](https://www.iubenda.com/) - [Documentation](./cmps/iubenda.md)
-- Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
+- LiveRamp : [Website](https://liveramp.com/our-platform/preference-consent-management/) - [Documentation](./cmps/liveramp.md)
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
 - Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
 - OneTrust: [Website](https://www.onetrust.com/) - [Documentation](./cmps/onetrust.md)
 - opencmp : [Documentation](./cmps/opencmp.md)
+- Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 - Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
 
