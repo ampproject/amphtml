@@ -345,7 +345,7 @@ export class AmpStoryPlayer {
     this.initializeButton_();
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
-    this.shouldWrapOnEnd_();
+    this.initializeCircularWrapping_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -1523,7 +1523,7 @@ export class AmpStoryPlayer {
    * @private
    * @return {boolean}
    */
-  shouldWrapOnEnd_() {
+  initializeCircularWrapping_() {
     if (this.isCircularWrappingEnabled_ !== null) {
       return this.isCircularWrappingEnabled_;
     }
