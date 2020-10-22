@@ -16,19 +16,36 @@
 'use strict';
 
 const {
-  verifySelectorsVisible
+  verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'advance to next slide': async (page, name) => {
     await page.tap('.amp-carousel-button-next');
     await verifySelectorsVisible(page, name, [
-        '.amp-carousel-button-prev'
+      '.amp-carousel-button-next[title="Go to next slide (3 of 3)"]',
     ]);
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-slide-item-show:nth-child(2)',
+    ]);
+
+    // await verifySelectorsVisible(page, name, ['.amp-carousel-button-prev']);
+    // await page.tap('.amp-carousel-button-next');
+    // await verifySelectorsVisible(page, name, ['.amp-carousel-button-prev']);
   },
   'back to previous slide': async (page, name) => {
     await page.tap('.amp-carousel-button-next');
-    await page.tap('.amp-carousel-button-prev');
+    // await verifySelectorsVisible(page, name, [
+    //   '.amp-carousel-button-next[title="Go to next slide (3 of 3)"]',
+    // ]);
+
+    await page.tap('.amp-carousel-button-next');
+    // await verifySelectorsVisible(page, name, [
+    //   '.amp-carousel-button-prev[title="Go to next slide (2 of 3)"]',
+    // ]);
+
+    // await page.tap('.amp-carousel-button-prev');
+    // await verifySelectorsVisible(page, name, ['.amp-carousel-button-prev']);
     // We cannot await verifySelectorsInvisible(page, name, ['.amp-carousel-button-prev']) since prev button is hidden using
     // opacity: 0 and visibility: hidden
   },
