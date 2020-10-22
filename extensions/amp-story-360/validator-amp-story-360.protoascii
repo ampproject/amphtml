@@ -59,6 +59,10 @@ tags: {  # <amp-story-360>
     value_regex: "\\d+\\.?\\d*"
   }
   attrs: {
+    name: "controls"
+    value: "gyroscope"
+  }  
+  attrs: {
     name: "scene-heading"
     value_regex: "-?\\d+\\.?\\d*"
   }
