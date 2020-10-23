@@ -82,6 +82,7 @@ tags: {
 tags: {
   html_format: AMP
   tag_name: "IMG"
+  spec_name: "AMP-STORY-PLAYER IMG"
   mandatory_ancestor: "AMP-STORY-PLAYER"
   attrs: {
     name: "loading"
