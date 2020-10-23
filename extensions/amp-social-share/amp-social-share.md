@@ -253,6 +253,34 @@ amp-social-share[type='twitter'] {
 
 When customizing the style of an `amp-social-share` icon please ensure that the customized icon meets the branding guidelines set out by the provider (e.g Twitter, Facebook, etc.)
 
+## Accessibility
+
+The `amp-social-share` element defaults to a blue outline as a visible focus indicator. It also defaults `tabindex=0` making it easy for a user to follow along as he or she tabs through multiple `amp-social-share` elements used together on a page.
+
+The default focus indicator is achieved with the following CSS rule-set.
+
+```css
+amp-social-share:focus {
+  outline: #0389ff solid 2px;
+  outline-offset: 2px;
+}
+```
+
+The default focus indicator can be overwritten by defining CSS styles for focus and including them within a `style` tag on an AMP HTML page. In the example below, the first CSS rule-set removes the focus indicator on all `amp-social-share` elements by setting the `outline` property to `none`. The second rule-set specifies a red outline (instead of the default blue) and also sets the `outline-offset` to be `3px` for all `amp-social-share` elements with the class `custom-focus`.
+
+```css
+amp-social-share:focus{
+  outline: none;
+}
+
+amp-social-share.custom-focus:focus {
+  outline: red solid 2px;
+  outline-offset: 3px;
+}
+```
+
+With these CSS rules, `amp-social-share` elements would not show the visible focus indicator unless they included the class `custom-focus` in which case they would have the red outlined indicator.
+
 ## Validation
 
 See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.
