@@ -617,7 +617,10 @@ export class AmpStoryPlayer {
       const skipButtonIdx = this.playerConfig_.controls.findIndex(
         (control) => control.name === 'skip-next-button'
       );
-      this.playerConfig_.controls[skipButtonIdx].state = 'disabled';
+
+      if (skipButtonIdx >= 0) {
+        this.playerConfig_.controls[skipButtonIdx].state = 'disabled';
+      }
     }
   }
 
