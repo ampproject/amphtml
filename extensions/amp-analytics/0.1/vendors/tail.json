@@ -1,0 +1,21 @@
+{
+  "requests": {
+    "host": "https://amp.t.tailtarget.com/amp/${account}",
+    "baseData": "uid=${clientId(tt.u)}&url=${canonicalUrl}&ref=${documentReferrer}&lang=${browserLanguage}",
+    "pageview": "${host}?v=1&${baseData}",
+    "event": "${host}?v=1&${baseData}&type=event&category=${eventCategory}&action=${eventAction}&label=${eventLabel}&value=${eventValue}"
+  },
+  "triggers": {
+    "trackpageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": {
+      "suppressWarnings": true
+    }
+  }
+}

@@ -112,6 +112,7 @@
       <option>simplereach</option>
       <option>snowplow</option>
       <option>snowplow_v2</option>
+      <option>tail</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
@@ -1615,6 +1616,33 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
+
+<!-- Tail Analytics Example
+    Ensure you replace account with your account id.
+ -->
+<amp-analytics type="tail" id="tail">
+  <script type="application/json">
+    {
+      "vars": {
+        "account": "TT-0000-0"
+      },
+      "triggers": {
+        "click": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventValue": "value1",
+            "eventCategory": "category1",
+            "eventAction": "action1",
+            "eventLabel": "label1"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Tail Analytics example -->
 
 <!-- TEA Analytics Example
     Ensure you replace app_id with your appId.
