@@ -1121,6 +1121,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.setNonBoolean\\(': {
     message: requiresReviewPrivacy,
     allowlist: [
+      'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
