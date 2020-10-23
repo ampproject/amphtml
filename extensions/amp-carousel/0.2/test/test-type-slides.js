@@ -27,7 +27,7 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
  * @param {!Element} el
- * @param {number=} index An intex to wait for.
+ * @param {number=} index An index to wait for.
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
@@ -154,6 +154,33 @@ describes.realWin(
       expect(slideWrappers[4].getAttribute('aria-hidden')).to.equal('true');
       expect(slideWrappers[0].getAttribute('aria-hidden')).to.equal('false');
       expect(slideWrappers[1].getAttribute('aria-hidden')).to.equal('true');
+    });
+
+    it('should show focus outline and border on next and prev buttons', async () => {
+      const carousel = await getCarousel({loop: false});
+
+      carousel.implementation_.interactionNext();
+      await afterIndexUpdate(carousel);
+
+      const impl = carousel.implementation_;
+      impl.prevButton_.focus();
+      console.log(win.getComputedStyle(impl.prevButton_), '****');
+      expect(doc.activeElement).to.equal(impl.prevButton_);
+      expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
+        'rgb(255, 255, 255) solid 1px'
+      );
+      expect(win.getComputedStyle(impl.prevButton_).border).to.equal(
+        '1px solid rgb(0, 0, 0)'
+      );
+
+      impl.nextButton_.focus();
+      expect(doc.activeElement).to.equal(impl.nextButton_);
+      expect(win.getComputedStyle(impl.nextButton_).outline).to.equal(
+        'rgb(255, 255, 255) solid 1px'
+      );
+      expect(win.getComputedStyle(impl.nextButton_).border).to.equal(
+        '1px solid rgb(0, 0, 0)'
+      );
     });
 
     describe('loop', () => {
