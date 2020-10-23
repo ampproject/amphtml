@@ -127,6 +127,8 @@ AMP requires all contributors to agree to the OpenJSF Contributor License Agreem
 
 To agree to the OpenJSF Contributor License Agreement, visit https://cla-assistant.io/ampproject/amphtml/, read through the agreement, and click "Login with GitHub to Agree."
 
+Alternatively, you also have the option of downloading the Contributor License Agreement from https://individual-cla.openjsf.org, filling it in, signing it, writing in your GitHub handle, and emailing it to operations@openjsf.org. As processing your CLA is done manually, this takes much longer and is therefore not recommended.
+
 **Make sure that the email you associate with your CLA is the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
 
 ## Code review and approval
