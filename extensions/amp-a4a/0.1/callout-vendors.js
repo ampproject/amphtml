@@ -230,6 +230,11 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['TAG_ID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
+  andbeyondnative: {
+    url: 'https://prebid.andbeyond.media/amp_native.php?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests

@@ -24,7 +24,8 @@ To use RTC, you must meet the following requirements:
 - AppNexus PSP
 - APS
 - Automatad
-- Andbeyond
+- Andbeyond.Media
+- Andbeyond.Media Native
 - Browsi
 - Criteo
 - FLUX
