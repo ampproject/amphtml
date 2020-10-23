@@ -34,7 +34,7 @@ export function ieIntrinsicCheckAndFix(win, opt_platform) {
 
   const {document} = win;
   const intrinsics = document.querySelectorAll(
-    '.i-amphtml-intrinsic-sizer[src^=data:image/svg]'
+    '.i-amphtml-intrinsic-sizer[src^="data:image/svg"]'
   );
   for (let i = 0; i < intrinsics.length; i++) {
     const intrinsic = intrinsics[i];
