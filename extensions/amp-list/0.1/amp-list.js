@@ -705,7 +705,7 @@ export class AmpList extends AMP.BaseElement {
       } else {
         user().warn(
           TAG,
-          'items must be a non-array Object if "single-item" is enabled.',
+          'Expected response to contain a non-array Object due to "single-item" attribute.',
           this.element
         );
       }
