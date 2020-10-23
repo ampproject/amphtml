@@ -271,6 +271,12 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
   {
+    id: 'amp-cid-backup',
+    name: 'Backup AMP-generated CIDs to Storage.',
+    spec: 'https://github.com/ampproject/amphtml/issues/29484',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
+  },
+  {
     id: 'layout-aspect-ratio-css',
     name: 'Responsive layouts implemented via aspect-ratio CSS',
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
