@@ -1,4 +1,4 @@
-workspace(name = "validatorcpp")
+workspace(name = "ampvalidator")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -59,9 +59,4 @@ local_repository(
 local_repository(
     name = "htmlparser",
     path = "../htmlparser/",
-)
-
-local_repository(
-    name = "amphtml-extensions",
-    path = "../../../extensions",
 )
