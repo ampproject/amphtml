@@ -151,7 +151,7 @@ export class Amp3dGltf extends AMP.BaseElement {
     }
 
     const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);
-    iframe.setAttribute('title', 'AMP GLTF 3D model');
+    iframe.setAttribute('title', this.element.title || 'GLTF 3D model');
     this.applyFillContent(iframe, true);
     this.iframe_ = iframe;
     this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());

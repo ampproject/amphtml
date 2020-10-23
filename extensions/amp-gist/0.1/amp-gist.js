@@ -63,7 +63,7 @@ export class AmpGist extends AMP.BaseElement {
   layoutCallback() {
     /* the third parameter 'github' ties it to the 3p/github.js */
     const iframe = getIframe(this.win, this.element, 'github');
-    iframe.setAttribute('title', 'AMP Github gist');
+    iframe.setAttribute('title', this.element.title || 'Github gist');
     this.applyFillContent(iframe);
     // Triggered by window.context.requestResize() inside the iframe.
     listenFor(
