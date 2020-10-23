@@ -144,10 +144,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
         'bodymovinanimation',
         opt_context
       );
-      iframe.setAttribute(
-        'title',
-        this.element.title || 'Airbnb BodyMovin animation'
-      );
+      iframe.title = this.element.title || 'Airbnb BodyMovin animation';
       return Services.vsyncFor(this.win)
         .mutatePromise(() => {
           this.applyFillContent(iframe);

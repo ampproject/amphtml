@@ -84,7 +84,7 @@ export class AmpYotpo extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'yotpo');
-    iframe.setAttribute('title', this.element.title || 'Yotpo widget');
+    iframe.title = this.element.title || 'Yotpo widget';
     this.applyFillContent(iframe);
 
     const unlisten = listenFor(

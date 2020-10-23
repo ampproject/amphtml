@@ -78,7 +78,7 @@ class AmpFacebook extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'facebook');
-    iframe.setAttribute('title', this.element.title || 'Facebook');
+    iframe.title = this.element.title || 'Facebook';
     this.applyFillContent(iframe);
     if (this.element.hasAttribute('data-allowfullscreen')) {
       iframe.setAttribute('allowfullscreen', 'true');

@@ -75,7 +75,7 @@ class AmpReddit extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'reddit', null, {
       allowFullscreen: true,
     });
-    iframe.setAttribute('title', this.element.title || 'Reddit');
+    iframe.title = this.element.title || 'Reddit';
     this.applyFillContent(iframe);
     listenFor(
       iframe,
