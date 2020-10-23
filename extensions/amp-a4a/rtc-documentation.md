@@ -139,6 +139,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - Kargo
 - Lotame
 - Media.net
+- Nexx360.io
 - PubMatic OpenWrap
 - Purch
 - Rubicon
