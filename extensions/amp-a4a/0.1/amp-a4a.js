@@ -1653,7 +1653,7 @@ export class AmpA4A extends AMP.BaseElement {
     const {height, width} = this.creativeSize_;
     const {extensions, fonts, head} = headData;
     this.iframe = createSecureFrame(
-      this.element.ownerDocument,
+      this.win,
       this.getIframeTitle(),
       height,
       width

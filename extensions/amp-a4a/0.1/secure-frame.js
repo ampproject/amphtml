@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 
@@ -30,13 +31,12 @@ const fontProviderAllowList = [
   'https://use.typekit.net',
 ].join(' ');
 
-const sandboxVals = [
-  'allow-forms',
-  'allow-popups',
-  'allow-popups-to-escape-sandbox',
-  'allow-same-origin',
-  'allow-top-navigation',
-];
+const sandboxVals =
+  'allow-forms ' +
+  'allow-popups ' +
+  'allow-popups-to-escape-sandbox ' +
+  'allow-same-origin ' +
+  'allow-top-navigation';
 
 export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
   `<!DOCTYPE html>
@@ -62,13 +62,18 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
 
 /**
  * Create iframe with predefined CSP and sandbox attributes for security.
- * @param {!Document} document
+ * @param {!Window} win
  * @param {string} title
  * @param {string} height
  * @param {string} width
  * @return {!HTMLIFrameElement}
  */
-export function createSecureFrame(document, title, height, width) {
+export function createSecureFrame(win, title, height, width) {
+  const sandbox = Services.platformFor(win).isSafari()
+    ? sandboxVals + ' allow scripts'
+    : sandboxVals;
+
+  const {document} = win;
   const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
     document,
     'iframe',
@@ -82,7 +87,7 @@ export function createSecureFrame(document, title, height, width) {
       'allowfullscreen': '',
       'allowtransparency': '',
       'scrolling': 'no',
-      'sandbox': sandboxVals.join(' '),
+      'sandbox': sandbox,
     })
   ));
   return iframe;
