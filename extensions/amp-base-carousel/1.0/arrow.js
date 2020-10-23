@@ -78,23 +78,13 @@ function DefaultArrow({by, ...rest}) {
       <div class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}></div>
       <div class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}></div>
       <svg class={classes.arrowIcon} viewBox="0 0 24 24">
-        {by < 0 ? (
-          <path
-            d="M14,7.4 L9.4,12 L14,16.6"
-            fill="none"
-            stroke-width="2px"
-            stroke-linejoin="round"
-            stroke-linecap="round"
-          />
-        ) : (
-          <path
-            d="M10,7.4 L14.6,12 L10,16.6"
-            fill="none"
-            stroke-width="2px"
-            stroke-linejoin="round"
-            stroke-linecap="round"
-          />
-        )}
+        <path
+          d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
+          fill="none"
+          stroke-width="2px"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        />
       </svg>
     </button>
   );
