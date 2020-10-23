@@ -31,23 +31,19 @@ tags: {  # <amp-story-360>
   mandatory_ancestor: "AMP-STORY"
   spec_url: "https://amp.dev/documentation/components/amp-story-360"
   attrs: {
+    name: "controls"
+    value: "gyroscope"
+  }    
+  attrs: {
     name: "duration"
     value_regex: "([0-9\\.]+)\\s*(s|ms)"
   }
   attrs: {
-    name: "heading-start"
-    value_regex: "-?\\d+\\.?\\d*"
-  }
-  attrs: {
-    name: "pitch-start"
-    value_regex: "-?\\d+\\.?\\d*"
-  }
-  attrs: {
-    name: "zoom-start"
-    value_regex: "\\d+\\.?\\d*"
-  }
-  attrs: {
     name: "heading-end"
+    value_regex: "-?\\d+\\.?\\d*"
+  }  
+  attrs: {
+    name: "heading-start"
     value_regex: "-?\\d+\\.?\\d*"
   }
   attrs: {
@@ -55,13 +51,9 @@ tags: {  # <amp-story-360>
     value_regex: "-?\\d+\\.?\\d*"
   }
   attrs: {
-    name: "zoom-end"
-    value_regex: "\\d+\\.?\\d*"
+    name: "pitch-start"
+    value_regex: "-?\\d+\\.?\\d*"
   }
-  attrs: {
-    name: "controls"
-    value: "gyroscope"
-  }  
   attrs: {
     name: "scene-heading"
     value_regex: "-?\\d+\\.?\\d*"
@@ -73,6 +65,14 @@ tags: {  # <amp-story-360>
   attrs: {
     name: "scene-roll"
     value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "zoom-end"
+    value_regex: "\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "zoom-start"
+    value_regex: "\\d+\\.?\\d*"
   }
   child_tags: {
     mandatory_num_child_tags: 1
