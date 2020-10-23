@@ -265,10 +265,6 @@ export class AmpList extends AMP.BaseElement {
       this.element.appendChild(this.container_);
     }
 
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
-    }
-
     // auto-resize is deprecated and will be removed per deprecation schedule
     // It will relaunched under a new attribute (resizable-children) soon.
     // please see https://github.com/ampproject/amphtml/issues/18849

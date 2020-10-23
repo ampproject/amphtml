@@ -32,7 +32,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
-const {runYarnChecks} = require('./yarn-checks');
+const {runNpmChecks} = require('./npm-checks');
 
 const FILENAME = 'module-dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -40,7 +40,7 @@ const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
+  if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
     return;
   }

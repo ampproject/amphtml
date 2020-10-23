@@ -34,7 +34,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
-const {runYarnChecks} = require('./yarn-checks');
+const {runNpmChecks} = require('./npm-checks');
 const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const FILENAME = 'dist-bundle-size.js';
@@ -43,7 +43,7 @@ const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
+  if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
     return;
   }
