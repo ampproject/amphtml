@@ -247,6 +247,7 @@ export class BaseCarousel extends AMP.BaseElement {
     observeWithSharedInOb(this.element, (inViewport) =>
       this.viewportCallback_(inViewport)
     );
+    return Promise.resolve();
   }
   /** @override */
   unlayoutCallback() {

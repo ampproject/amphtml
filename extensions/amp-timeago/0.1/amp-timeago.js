@@ -82,11 +82,13 @@ export class AmpTimeAgo extends AMP.BaseElement {
     observeWithSharedInOb(this.element, (inViewport) =>
       this.viewportCallback_(inViewport)
     );
+    return Promise.resolve();
   }
 
   /** @override */
-  unLayoutCallback() {
+  unlayoutCallback() {
     unobserveWithSharedInOb(this.element);
+    return false;
   }
 
   /** @override */

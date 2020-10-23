@@ -95,7 +95,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
     super(element);
 
     /** @private {boolean} */
-    this.inViewport_ = false;
+    this.isInViewport_ = false;
 
     /** @private {string} */
     this.baseURL_ = 'https://players.delight-vr.com';
@@ -179,7 +179,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
   layoutCallback() {
     observeWithSharedInOb(
       this.element,
-      (inViewport) => (this.inViewport_ = inViewport)
+      (isInViewport) => (this.isInViewport_ = isInViewport)
     );
     const src = `${this.baseURL_}/player/${this.contentID_}?amp=1`;
     const iframe = createFrameFor(this, src);
@@ -246,7 +246,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
   firstLayoutCompleted() {
     const el = this.placeholderEl_;
     let promise = null;
-    if (el && this.inViewport_) {
+    if (el && this.isInViewport_) {
       el.classList.add('i-amphtml-delight-player-faded');
       promise = listenOncePromise(el, 'transitionend');
     } else {
