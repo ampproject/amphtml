@@ -38,34 +38,49 @@ export const Default = () => {
   const controls = select('show controls', ['auto', 'always', 'never']);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
+
   return (
-    <amp-base-carousel
-      advance-count={advanceCount}
-      controls={controls}
-      outset-arrows={outsetArrows}
-      width="880"
-      height="225"
-      snap={String(snap)}
-      loop={loop}
-      layout="responsive"
-      visible-count={visibleCount}
-    >
-      {Array.from({length: slideCount}, (x, i) => {
-        const v = colorIncrement * (i + 1);
-        return (
-          <amp-layout width="440" height="225" layout="responsive">
-            <svg viewBox="0 0 440 225">
-              <rect
-                style={{fill: `rgb(${v}, 100, 100)`}}
-                width="440"
-                height="225"
-              />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-          </amp-layout>
-        );
-      })}
-    </amp-base-carousel>
+    <main>
+      <amp-base-carousel
+        id="carousel"
+        advance-count={advanceCount}
+        controls={controls}
+        outset-arrows={outsetArrows}
+        width="880"
+        height="225"
+        snap={String(snap)}
+        loop={loop}
+        layout="responsive"
+        visible-count={visibleCount}
+      >
+        {Array.from({length: slideCount}, (x, i) => {
+          const v = colorIncrement * (i + 1);
+          return (
+            <amp-layout width="440" height="225" layout="responsive">
+              <div
+                style={{
+                  backgroundColor: `rgb(${v}, 100, 100)`,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '48pt',
+                }}
+              >
+                {i}
+              </div>
+            </amp-layout>
+          );
+        })}
+      </amp-base-carousel>
+
+      <div class="buttons" style={{marginTop: 8}}>
+        <button on="tap:carousel.goToSlide(index=3)">goToSlide(index=3)</button>
+        <button on="tap:carousel.next">Next</button>
+        <button on="tap:carousel.prev">Prev</button>
+      </div>
+    </main>
   );
 };
 
