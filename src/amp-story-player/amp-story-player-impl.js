@@ -114,7 +114,6 @@ const STORY_MESSAGE_STATE_TYPE = {
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
-  PLAYER_HAS_NEXT_STORY: 'PLAYER_HAS_NEXT_STORY',
 };
 
 /** @const {string} */
@@ -588,16 +587,13 @@ export class AmpStoryPlayer {
           });
 
           if (this.playerConfig_ && this.playerConfig_.controls) {
+            this.updateControlsStateForStory_(story.idx);
+
             messaging.sendRequest(
               'customDocumentUI',
               dict({'controls': this.playerConfig_.controls}),
               false
             );
-
-            messaging.sendRequest('setDocumentState', {
-              state: [STORY_MESSAGE_STATE_TYPE.PLAYER_HAS_NEXT_STORY],
-              value: story.idx < this.stories_.length - 1,
-            });
           }
 
           resolve(messaging);
@@ -608,6 +604,21 @@ export class AmpStoryPlayer {
         }
       );
     });
+  }
+
+  /**
+   * Updates the controls config for a given story.
+   * @param {number} storyIdx
+   * @private
+   */
+  updateControlsStateForStory_(storyIdx) {
+    // Disables skip-next-button when story is the last one in the player.
+    if (storyIdx === this.stories_.length - 1) {
+      const skipButtonIdx = this.playerConfig_.controls.findIndex(
+        (control) => control.name === 'skip-next-button'
+      );
+      this.playerConfig_.controls[skipButtonIdx].state = 'disabled';
+    }
   }
 
   /**

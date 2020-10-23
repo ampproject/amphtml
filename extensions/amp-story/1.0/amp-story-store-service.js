@@ -96,7 +96,6 @@ export let InteractiveReactData;
  *    canShowSharingUis: boolean,
  *    canShowSystemLayerButtons: boolean,
  *    customControls: !Array<!Object>,
- *    playerHasNextStoryState: boolean,
  *    accessState: boolean,
  *    adState: boolean,
  *    pageAttachmentState: boolean,
@@ -147,7 +146,6 @@ export const StateProperty = {
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
   CUSTOM_CONTROLS: 'customControls',
-  PLAYER_HAS_NEXT_STORY_STATE: 'playerHasNextStoryState',
 
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
@@ -218,7 +216,6 @@ export const Action = {
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
-  TOGGLE_PLAYER_HAS_NEXT_STORY: 'togglePlayerHasNextStory',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_SIDEBAR: 'toggleSidebar',
@@ -380,11 +377,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.MUTED_STATE]: !!data,
-      });
-    case Action.TOGGLE_PLAYER_HAS_NEXT_STORY:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.PLAYER_HAS_NEXT_STORY_STATE]: !!data,
       });
     case Action.TOGGLE_PAGE_HAS_AUDIO:
       return /** @type {!State} */ ({
@@ -599,7 +591,6 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.CUSTOM_CONTROLS]: [],
-      [StateProperty.PLAYER_HAS_NEXT_STORY_STATE]: true,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,

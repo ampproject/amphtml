@@ -35,7 +35,6 @@ import {Services} from '../../../src/services';
 import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {matches, scopedQuerySelector} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
@@ -476,14 +475,6 @@ export class SystemLayer {
     });
 
     this.storeService_.subscribe(
-      StateProperty.PLAYER_HAS_NEXT_STORY_STATE,
-      (hasNextStory) => {
-        this.onPlayerHasNextStoryStateUpdate_(hasNextStory);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
       StateProperty.CAN_SHOW_AUDIO_UI,
       (show) => {
         this.onCanShowAudioUiUpdate_(show);
@@ -635,21 +626,6 @@ export class SystemLayer {
       'i-amphtml-story-bookend-active',
       isActive
     );
-  }
-
-  /**
-   * Reacts to the next story state updates and updates the UI accordingly.
-   * @param {boolean} hasNextStory
-   * @private
-   */
-  onPlayerHasNextStoryStateUpdate_(hasNextStory) {
-    this.vsync_.mutate(() => {
-      const button = this.getShadowRoot().querySelector(
-        `.${escapeCssSelectorIdent(SKIP_NEXT_CLASS)}`
-      );
-
-      button.disabled = !hasNextStory;
-    });
   }
 
   /**
@@ -988,6 +964,12 @@ export class SystemLayer {
       if (!control.visibility || control.visibility === 'visible') {
         this.vsync_.mutate(() => {
           element.classList.remove('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (control.state === 'disabled') {
+        this.vsync_.mutate(() => {
+          element.disabled = true;
         });
       }
 
