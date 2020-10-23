@@ -75,6 +75,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
     }
 
     const iframe = getIframe(this.win, this.element, 'embedly');
+    iframe.setAttribute('title', 'AMP Embedly card');
 
     const opt_is3P = true;
     listenFor(

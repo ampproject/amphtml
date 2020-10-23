@@ -265,6 +265,7 @@ class AmpYoutube extends AMP.BaseElement {
   layoutCallback() {
     // See https://developers.google.com/youtube/iframe_api_reference
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
+    iframe.setAttribute('title', 'AMP YouTube video');
 
     // This is temporary until M74 launches.
     // TODO(aghassemi, #21247)

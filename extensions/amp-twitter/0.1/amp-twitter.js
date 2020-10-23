@@ -77,6 +77,7 @@ class AmpTwitter extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'twitter', null, {
       allowFullscreen: true,
     });
+    iframe.setAttribute('title', 'AMP Twitter');
     this.applyFillContent(iframe);
     this.updateForLoadingState_();
     listenFor(

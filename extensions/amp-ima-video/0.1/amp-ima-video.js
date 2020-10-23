@@ -179,6 +179,7 @@ class AmpImaVideo extends AMP.BaseElement {
         {initialConsentState},
         {allowFullscreen: true}
       );
+      iframe.setAttribute('title', 'AMP IMA video');
 
       this.applyFillContent(iframe);
 
