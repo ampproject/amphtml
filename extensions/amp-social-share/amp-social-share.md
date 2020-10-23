@@ -253,6 +253,12 @@ amp-social-share[type='twitter'] {
 
 When customizing the style of an `amp-social-share` icon please ensure that the customized icon meets the branding guidelines set out by the provider (e.g Twitter, Facebook, etc.)
 
+## Accessibility
+
+Note that `amp-social-share` with a `type` value of `twitter`, `whatsapp`, or `line` will display a button with a foreground/background color combination that falls below the 3:1 threshold recommended for non-text content defined in [WCAG 2.1 SC 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html).
+
+Without sufficient contrast, content can be difficult to perceive and therefore difficult to identify. In extreme cases, content with low contrast may not be visible at all to people with colour perception impairments. In the case of the above share buttons, users may not be able to appropriately perceive/understand what the share controls are, what service they relate to.
+
 ## Validation
 
 See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.
