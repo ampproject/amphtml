@@ -41,7 +41,6 @@ import {
 } from '../../../src/batched-json';
 import {
   childElementByAttr,
-  matches,
   removeChildren,
   scopedQuerySelector,
   scopedQuerySelectorAll,
@@ -589,12 +588,6 @@ export class AmpList extends AMP.BaseElement {
     elements.forEach((element) => {
       if (!element.hasAttribute('role')) {
         this.setRoleAttribute_(element, 'listitem');
-      }
-      if (
-        !element.hasAttribute('tabindex') &&
-        !this.isTabbable_(dev().assertElement(element))
-      ) {
-        element.setAttribute('tabindex', '0');
       }
       container.appendChild(element);
     });
@@ -1652,27 +1645,6 @@ export class AmpList extends AMP.BaseElement {
     return allTabbableChildren
       ? allTabbableChildren[allTabbableChildren.length - 1]
       : null;
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {?Element}
-   * @private
-   */
-  firstTabbableChild_(element) {
-    return scopedQuerySelector(element, TABBABLE_ELEMENTS_QUERY);
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   * @private
-   */
-  isTabbable_(element) {
-    return (
-      matches(element, TABBABLE_ELEMENTS_QUERY) ||
-      !!this.firstTabbableChild_(element)
-    );
   }
 }
 
