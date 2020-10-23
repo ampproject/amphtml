@@ -125,7 +125,7 @@ For further detail on integrating third-party services (e.g., fonts, embeds, etc
 
 AMP requires all contributors to agree to the OpenJSF Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
 
-To agree to the OpenJSF Contributor License Agreement, visit https://cla-assistant.io/ampproject/amphtml, read through the agreement, and click "Login with GitHub to Agree."
+To agree to the OpenJSF Contributor License Agreement, visit https://cla-assistant.io/ampproject/amphtml/, read through the agreement, and click "Login with GitHub to Agree."
 
 **Make sure that the email you associate with your CLA is the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
 
