@@ -76,7 +76,7 @@ export function observeWithSharedInOb(element, viewportCallback) {
     );
   }
 
-  const win = element.ownerDocument.defaultView;
+  const win = devAssert(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
@@ -93,7 +93,7 @@ export function observeWithSharedInOb(element, viewportCallback) {
  * @param {!Element} element
  */
 export function unobserveWithSharedInOb(element) {
-  const win = element.ownerDocument.defaultView;
+  const win = devAssert(element.ownerDocument.defaultView);
   const viewportObserver = viewportObservers.get(win);
   if (viewportObserver) {
     viewportObserver.unobserve(element);
