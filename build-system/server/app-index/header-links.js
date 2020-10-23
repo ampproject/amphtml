@@ -36,7 +36,7 @@ module.exports = [
   },
   {
     'name': 'Travis',
-    'href': 'https://travis-ci.org/ampproject/amphtml',
+    'href': 'https://travis-ci.com/ampproject/amphtml',
   },
   {
     'name': 'Percy',
