@@ -234,6 +234,11 @@ const RTC_VENDORS = jsonConfiguration({
     url:
       'https://prebid.admaxmedia.io/openrtb2/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
     macros: ['PLACEMENT_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
+  },
+  nexx360: {
+    url:
+      'https://pbs.nexx360.io/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['TAG_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
 });
