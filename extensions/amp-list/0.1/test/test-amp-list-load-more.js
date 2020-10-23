@@ -255,7 +255,7 @@ describes.realWin(
       });
 
       // TODO(cathyxz) Create a mirror test for automatic amp-list loading once the automatic tests are unskipped
-      it('should call focus on the last element after load more is clicked', async () => {
+      it('should call focus on the last focusable element after load more is clicked', async () => {
         env.sandbox
           .stub(list.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
           .returns(Promise.resolve([]));
@@ -264,20 +264,21 @@ describes.realWin(
           .stub(list, 'maybeRenderLoadMoreTemplates_')
           .returns(Promise.resolve([]));
 
-        const div1 = doc.createElement('div');
-        div1.textContent = '1';
-        const div2 = doc.createElement('div');
-        div2.textContent = '2';
-        updateBindingsStub.onCall(0).returns(Promise.resolve([div1, div2]));
-        const focusSpy = env.sandbox.spy(div2, 'focus');
+        const el1 = doc.createElement('div');
+        el1.textContent = '1';
+        const el2 = doc.createElement('a');
+        el2.setAttribute('href', 'https://google.com/');
+        el2.textContent = '2';
+        updateBindingsStub.onCall(0).returns(Promise.resolve([el1, el2]));
+        const focusSpy = env.sandbox.spy(el2, 'focus');
 
         await list.layoutCallback();
 
-        const div3 = doc.createElement('div');
-        div3.textContent = '3';
-        const div4 = doc.createElement('div');
-        div4.textContent = '4';
-        updateBindingsStub.onCall(1).returns(Promise.resolve([div3, div4]));
+        const el3 = doc.createElement('div');
+        el3.textContent = '3';
+        const el4 = doc.createElement('div');
+        el4.textContent = '4';
+        updateBindingsStub.onCall(1).returns(Promise.resolve([el3, el4]));
 
         await list.loadMoreCallback_(
           /* opt_reload */ false,

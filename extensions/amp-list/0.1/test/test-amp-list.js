@@ -610,7 +610,7 @@ describes.repeated(
             });
           });
 
-          it('should set tabbindex only if the list item is not tabbable', () => {
+          it('should not override or set missing tabindex', () => {
             // A list item with a no tabindex value or tabbable child
             const nonTabbableItemElement = doc.createElement('div');
 
@@ -631,9 +631,8 @@ describes.repeated(
             ]);
 
             return list.layoutCallback().then(() => {
-              expect(nonTabbableItemElement.getAttribute('tabindex')).to.equal(
-                '0'
-              );
+              expect(nonTabbableItemElement.getAttribute('tabindex')).to.be
+                .null;
               expect(tabbableItemElement.getAttribute('tabindex')).to.equal(
                 '4'
               );
