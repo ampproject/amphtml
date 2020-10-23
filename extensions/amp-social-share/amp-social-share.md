@@ -255,6 +255,8 @@ When customizing the style of an `amp-social-share` icon please ensure that the 
 
 ## Accessibility
 
+### Indication of focus
+
 The `amp-social-share` element defaults to a blue outline as a visible focus indicator. It also defaults `tabindex=0` making it easy for a user to follow along as he or she tabs through multiple `amp-social-share` elements used together on a page.
 
 The default focus indicator is achieved with the following CSS rule-set.
@@ -280,6 +282,12 @@ amp-social-share.custom-focus:focus {
 ```
 
 With these CSS rules, `amp-social-share` elements would not show the visible focus indicator unless they included the class `custom-focus` in which case they would have the red outlined indicator.
+
+### Color contrast
+
+Note that `amp-social-share` with a `type` value of `twitter`, `whatsapp`, or `line` will display a button with a foreground/background color combination that falls below the 3:1 threshold recommended for non-text content defined in [WCAG 2.1 SC 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html).
+
+Without sufficient contrast, content can be difficult to perceive and therefore difficult to identify. In extreme cases, content with low contrast may not be visible at all to people with colour perception impairments. In the case of the above share buttons, users may not be able to appropriately perceive/understand what the share controls are, what service they relate to.
 
 ## Validation
 
