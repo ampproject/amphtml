@@ -89,7 +89,7 @@ if (NO_SIGNING_RTV) {
       );
     });
 
-    it('should contain the correct security features', async () => {
+    it('should contain the correct csp meta content', async () => {
       await a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
@@ -120,6 +120,32 @@ if (NO_SIGNING_RTV) {
           'https://use.fontawesome.com ' +
           'https://use.typekit.net ' +
           "'unsafe-inline';"
+      );
+    });
+
+    it('should set the correct sandbox features', async () => {
+      env.sandbox
+        .stub(Services.platformFor(env.win), 'isSafari')
+        .returns(false);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      expect(fie.getAttribute('sandbox')).to.equal(
+        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
+          'allow-same-origin allow-top-navigation'
+      );
+    });
+
+    it('should add allow-scripts to sandbox in Safari', async () => {
+      env.sandbox.stub(Services.platformFor(env.win), 'isSafari').returns(true);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      expect(fie.getAttribute('sandbox')).to.equal(
+        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
+          'allow-same-origin allow-top-navigation allow-scripts'
       );
     });
 
