@@ -74,7 +74,7 @@ export function getStoryAdMetaTags(doc) {
  * Creates object containing information extracted from the creative
  * that is needed to render story ad ui e.g. cta, attribution, etc.
  * @param {!Document} doc
- * @return {Object}
+ * @return {StoryAdUIMetadata}
  */
 export function getStoryAdMetadataFromDoc(doc) {
   const storyMetaTags = getStoryAdMetaTags(doc);

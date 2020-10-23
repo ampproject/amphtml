@@ -38,6 +38,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {lastItem} from '../../../src/utils/array';
+import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
 
 /** @const {number} */
 const FIRST_AD_MIN = 7;
@@ -701,6 +702,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story-auto-ads', '0.1', (AMP) => {
-  AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds, CSS);
+  AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds, CSS + sharedCSS);
   AMP.registerServiceForDoc(STORY_AD_ANALYTICS, StoryAdAnalytics);
 });
