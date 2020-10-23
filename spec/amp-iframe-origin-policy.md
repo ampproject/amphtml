@@ -1,3 +1,5 @@
+<!-- TODO(#30824): remove or completely rewrite when same-origin-iframe launches. -->
+
 # Iframe origin policy
 
 Various AMP features allow loading iframes from arbitrary origins into AMP pages. Examples are the [`amp-iframe`](../extensions/amp-iframe/amp-iframe.md) element and [the custom domain feature of `amp-ad`](../builtins/amp-ad.md#running-ads-from-a-custom-domain). The origin of a URL such as `https://example.com/some/path` is `https://example.com`. See [the HTML5 spec](https://www.w3.org/TR/2011/WD-html5-20110525/origin-0.html#origin) for details.
