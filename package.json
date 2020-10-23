@@ -72,6 +72,7 @@
     "codecov": "3.8.0",
     "commander": "6.1.0",
     "connect-header": "0.0.5",
+    "css-what": "4.0.0",
     "cssnano": "4.1.10",
     "debounce": "1.2.0",
     "del": "6.0.0",
