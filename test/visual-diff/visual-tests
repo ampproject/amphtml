@@ -64,7 +64,7 @@
    *   "loading_complete_delay_ms": 1000,
    *
    *   // [optional, EXPERIMENTAL] Allow running "dirty" JavaScript code on
-   *   // on Percy in this AMP page. The code being executed *must* be inlined
+   *   // Percy in this AMP page. The code being executed *must* be inlined
    *   // inside a <script> tag, not be an externally loaded script via a
    *   // <script src="..."> tag.
    *   // The code *WILL BE EXECUTED TWICE*! Once locally, before the DOM is
