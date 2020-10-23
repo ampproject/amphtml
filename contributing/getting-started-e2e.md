@@ -532,7 +532,7 @@ When you're done click "Create pull request." This will bring you to your Pull R
 
 On the Pull Request page you can see that a few checks are running:
 
-- The tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
+- The tests are being run on [Travis](https://travis-ci.com/ampproject/amphtml/pull_requests)
 
 - The system is verifying that you have signed a CLA (Contributor License Agreement). If this is your first time submitting a Pull Request for AMP on GitHub you'll need to sign a CLA. (Make sure the email address you use to sign the CLA is the same one that you configured Git with.) See details in the [Contributing code](../CONTRIBUTING.md#contributing-code) documentation.
 

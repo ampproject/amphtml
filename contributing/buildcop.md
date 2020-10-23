@@ -1,6 +1,6 @@
 # AMP Buildcop
 
-The AMP buildcop is responsible for ensuring that the [master build](https://travis-ci.org/ampproject/amphtml/branches) remains green. The AMP buildcop responsibility rotates between members of the community.
+The AMP buildcop is responsible for ensuring that the [master build](https://travis-ci.com/ampproject/amphtml/branches) remains green. The AMP buildcop responsibility rotates between members of the community.
 
 Make sure you are a member of the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack while you are buildcop.
 
@@ -9,7 +9,7 @@ Make sure you are a member of the [#contributing](https://amphtml.slack.com/mess
 
 ## Buildcop Tasks
 
-1. Ensure the [master build](https://travis-ci.org/ampproject/amphtml/branches) remains green. Your goal is to keep the build from being red for more than an hour.
+1. Ensure the [master build](https://travis-ci.com/ampproject/amphtml/branches) remains green. Your goal is to keep the build from being red for more than an hour.
    1. Note that yellow builds are in the process of being created/tested so you do not need to do anything special with them.
    2. Keep an eye out for emails sent to an address starting with amp-build-cop. **You are encouraged to set up a filter so that these emails will stand out to you.**
    3. You will need to investigate whether a red build is due to a flake or due to a real issue.
