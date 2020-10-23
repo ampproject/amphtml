@@ -115,6 +115,12 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
+
+    /**
+     * Whether to show control buttons
+     * @private {boolean}
+     */
+    this.showControls_ = false;
   }
 
   /** @override */
@@ -193,6 +199,18 @@ class AmpCarousel extends AMP.BaseElement {
     // Need to wait for slides to exist first.
     this.carousel_.goToSlide(Number(this.element.getAttribute('slide') || '0'));
     // Signal for runtime to check children for layout.
+
+    if (this.element.hasAttribute('controls')) {
+      this.showControls_ = true;
+    } else {
+      Services.inputFor(this.win).onMouseDetected((mouseDetected) => {
+        if (mouseDetected) {
+          this.showControls_ = true;
+          this.updateUi_();
+        }
+      }, true);
+    }
+
     return this.mutateElement(() => {});
   }
 
@@ -470,8 +488,7 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    const bothDisabled =
-      this.hadTouch_ && !this.element.hasAttribute('controls');
+    const bothDisabled = this.hadTouch_ && !this.showControls_;
     const prevDisabled = bothDisabled || this.carousel_.isAtStart();
     const nextDisabled = bothDisabled || this.carousel_.isAtEnd();
 
