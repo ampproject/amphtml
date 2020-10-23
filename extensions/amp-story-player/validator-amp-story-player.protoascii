@@ -109,18 +109,7 @@ tags: {
   }
   attrs: { name: "importance" }  # Not yet part of the html spec
   attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
-  attrs: {
-    name: "src"
-    alternative_names: "srcset"
-    mandatory: true
-    value_url: {
-      protocol: "data"
-      protocol: "http" # For parity with amp-img's mandatory-src-or-srcset.
-      protocol: "https"
-      allow_relative: true
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
+  attr_lists: "mandatory-src-or-srcset"
   attrs: { name: "sizes" }
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
