@@ -350,6 +350,17 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
+    // Mutation observer for distance attribute
+    const config = {attributes: true, attributeFilter: ['distance']};
+    const callback = (mutationsList) => {
+      this.distance_ = parseInt(
+        mutationsList[0].target.getAttribute('distance')
+      );
+      this.maybeActivateGlContext_();
+    };
+    const observer = new MutationObserver(callback);
+    observer.observe(this.getPage_(), config);
+
     // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
@@ -372,7 +383,6 @@ export class AmpStory360 extends AMP.BaseElement {
           this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
           this.maybeSetGyroscopeDefaultHeading_();
-          this.maybeActivateGlContext_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
@@ -422,9 +432,8 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   maybeActivateGlContext_() {
-    const distance = this.getPage_().getAttribute('distance');
-    if (distance && this.isReady_) {
-      if (parseInt(distance, 10) < MIN_WEBGL_DISTANCE) {
+    if (this.distance_ && this.isReady_) {
+      if (this.distance_ < MIN_WEBGL_DISTANCE) {
         if (this.renderer_.gl.isContextLost()) {
           this.lostGlContext_.restoreContext();
         }
