@@ -206,7 +206,41 @@ Whether the <code>amp-autocomplete</code> should autosuggest on the full user in
 via click, tap, keyboard navigation or accepting typeahead. It also fires the
 `select` event if a user keyboard navigates to an item and Tabs away from the
 input field. `event` contains the `value` attribute value of the selected
-element.
+element which is its textual representation (e.g., value of data-value).
+
+`event` may also contain the entire object in the `valueAsObject` field, if
+the suggestion template contains `data-json={{objToJson}}`. This causes
+the rendered element to have a `data-json` data attribute with a JSON string
+representation of the corresponding object, which is then made available in
+the `valueAsObject` field of the `event`.
+
+Example:
+
+```html
+<amp-autocomplete
+  filter="substring"
+  id="myAutocomplete"
+  on="select:AMP.setState({chosenFruit: event.valueAsObject})"
+>
+  <input />
+  <script type="application/json">
+    {
+      "items": [
+        {"fruit": "apple", "color": "red"},
+        {"fruit": "banana", "color": "yellow"}
+      ]
+    }
+  </script>
+  <template type="amp-mustache">
+    <div data-value="{{fruit}}" data-json="{{objToJson}}">
+      {{color}} {{fruit}}
+    </div>
+  </template>
+</amp-autocomplete>
+<p [text]="'Your fruit: ' + chosenFruit.color + ', ' + chosenFruit.fruit">
+  No fruit selected
+</p>
+```
 
 ## Validation
 
