@@ -36,6 +36,7 @@ function launchEnv(env) {
     [
       './node_modules/.bin/start-storybook',
       '--quiet',
+      '-s ../../../',
       `-c ./${env}-env`,
       `-p ${storybookPort}`,
       ci ? '--ci' : '',
