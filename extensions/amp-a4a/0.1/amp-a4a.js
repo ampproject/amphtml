@@ -1412,7 +1412,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @param {boolean}  inViewport
-   * @private
+   * @protected
    */
   viewportCallback_(inViewport) {
     if (this.xOriginIframeHandler_) {
