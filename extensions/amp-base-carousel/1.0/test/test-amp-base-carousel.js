@@ -301,7 +301,7 @@ describes.realWin(
       win.document.body.appendChild(element);
       await getSlidesFromShadow();
 
-      let scroller = element.shadowRoot.querySelector(
+      const scroller = element.shadowRoot.querySelector(
         `[class*=${styles.scrollContainer}]`
       );
 
