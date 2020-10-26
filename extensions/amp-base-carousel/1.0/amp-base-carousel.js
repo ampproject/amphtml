@@ -111,7 +111,7 @@ AmpBaseCarousel['props'] = {
     attrs: ['snap'],
     parseAttrs: (element) => parseStrBoolAttr(element, 'snap', true),
   },
-  'visibleCount': {attr: 'visible-count', type: 'number'},
+  'visibleCount': {attr: 'visible-count', type: 'number', media: true},
 };
 
 /** @override */
