@@ -188,7 +188,7 @@ export class ResourcesImpl {
     /** @private {!VisibilityState} */
     this.visibilityState_ = this.ampdoc.getVisibilityState();
 
-    /** @private {!function(!VisibilityState):undefined} */
+    /** @private {function(!VisibilityState):undefined} */
     this.transitionVisibilityState_ = this.getVisibilityTransitionFn();
 
     // When user scrolling stops, run pass to check newly in-viewport elements.
@@ -1696,43 +1696,42 @@ export class ResourcesImpl {
     };
 
     // A FiniteStateMachine encoded in JSON
-    // Key1 = from, Key2 = to, Value: transition effect.
-    const transitions = {
-      [prerender]: {
-        [visible]: doWork,
-        [hidden]: doWork,
-        [inactive]: doWork,
-        [paused]: doWork,
-      },
-      [visible]: {
-        [visible]: doWork,
-        [hidden]: doWork,
-        [inactive]: unload,
-        [paused]: pause,
-      },
-      [hidden]: {
-        [visible]: doWork,
-        [hidden]: doWork,
-        [inactive]: unload,
-        [paused]: pause,
-      }, 
-      [inactive]: {
-        [visible]: resume,
-        [hidden]: resume,
-        [inactive]: noop,
-        [paused]: doWork, 
-      },
-      [paused]: {
-        [visible]: resume,
-        [hidden]: doWork,
-        [inactive]: unload,
-        [paused]: noop, 
-      }
+    const transitions = {};
+    const addTransition = (from, to, fn) => {
+      transitions[from] = transitions[from] ?? {};
+      transitions[from][to] = fn;
     };
-    const transition = (from, to) => {
-      transitions[from][to]()
+    addTransition(prerender, prerender, doWork);
+    addTransition(prerender, visible, doWork);
+    addTransition(prerender, hidden, doWork);
+    addTransition(prerender, inactive, doWork);
+    addTransition(prerender, paused, doWork);
+
+    addTransition(visible, visible, doWork);
+    addTransition(visible, hidden, doWork);
+    addTransition(visible, inactive, unload);
+    addTransition(visible, paused, pause);
+
+    addTransition(hidden, visible, doWork);
+    addTransition(hidden, hidden, doWork);
+    addTransition(hidden, inactive, unload);
+    addTransition(hidden, paused, pause);
+
+    addTransition(inactive, visible, resume);
+    addTransition(inactive, hidden, resume);
+    addTransition(inactive, inactive, noop);
+    addTransition(inactive, paused, doWork);
+
+    addTransition(paused, visible, resume);
+    addTransition(paused, hidden, doWork);
+    addTransition(paused, inactive, unload);
+    addTransition(paused, paused, noop);
+
+    const transition = (to) => {
+      const from = this.visibilityState_;
+      transitions[from][to]();
       this.visibilityState_ = to;
-    } 
+    };
 
     return transition;
   }
