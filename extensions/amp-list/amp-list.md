@@ -345,6 +345,8 @@ For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.htm
 
 [tip type="important"]
 
+When using `<amp-list>` infinite scroll, content placed below the component may not be accessible, and it is recommended to place the infinite scroll content at the bottom of the document.
+
 When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll position that ignores the height changes caused by `<amp-list>`.
 
 Without `useInitialPageSize`, the `100%` scroll trigger point might never fire as more documents get loaded. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
