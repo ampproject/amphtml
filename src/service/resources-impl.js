@@ -15,7 +15,6 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
@@ -186,10 +185,11 @@ export class ResourcesImpl {
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
-    /** @private @const {!FiniteStateMachine<!VisibilityState>} */
-    this.visibilityStateMachine_ = new FiniteStateMachine(
-      this.ampdoc.getVisibilityState()
-    );
+    /** @private {!VisibilityState} */
+    this.visibilityState_ = this.ampdoc.getVisibilityState();
+
+    /** @private {!function(!VisibilityState):undefined} */
+    this.transitionVisibilityState_ = this.getVisibilityTransitionFn();
 
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.
@@ -225,7 +225,6 @@ export class ResourcesImpl {
     // Schedule initial passes. This must happen in a startup task
     // to avoid blocking body visible.
     startupChunk(this.ampdoc, () => {
-      this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
       this.schedulePass(0);
     });
 
@@ -662,7 +661,7 @@ export class ResourcesImpl {
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
-    this.visibilityStateMachine_.setState(this.ampdoc.getVisibilityState());
+    this.transitionVisibilityState_(this.ampdoc.getVisibilityState());
 
     this.signalIfReady_();
 
@@ -1642,9 +1641,8 @@ export class ResourcesImpl {
 
   /**
    * Calls iterator on each sub-resource
-   * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
-  setupVisibilityStateMachine_(vsm) {
+  getVisibilityTransitionFn() {
     const {
       HIDDEN: hidden,
       INACTIVE: inactive,
@@ -1697,31 +1695,46 @@ export class ResourcesImpl {
       doWork();
     };
 
-    vsm.addTransition(prerender, prerender, doWork);
-    vsm.addTransition(prerender, visible, doWork);
-    vsm.addTransition(prerender, hidden, doWork);
-    vsm.addTransition(prerender, inactive, doWork);
-    vsm.addTransition(prerender, paused, doWork);
+    // A FiniteStateMachine encoded in JSON
+    // Key1 = from, Key2 = to, Value: transition effect.
+    const transitions = {
+      [prerender]: {
+        [visible]: doWork,
+        [hidden]: doWork,
+        [inactive]: doWork,
+        [paused]: doWork,
+      },
+      [visible]: {
+        [visible]: doWork,
+        [hidden]: doWork,
+        [inactive]: unload,
+        [paused]: pause,
+      },
+      [hidden]: {
+        [visible]: doWork,
+        [hidden]: doWork,
+        [inactive]: unload,
+        [paused]: pause,
+      }, 
+      [inactive]: {
+        [visible]: resume,
+        [hidden]: resume,
+        [inactive]: noop,
+        [paused]: doWork, 
+      },
+      [paused]: {
+        [visible]: resume,
+        [hidden]: doWork,
+        [inactive]: unload,
+        [paused]: noop, 
+      }
+    };
+    const transition = (from, to) => {
+      transitions[from][to]()
+      this.visibilityState_ = to;
+    } 
 
-    vsm.addTransition(visible, visible, doWork);
-    vsm.addTransition(visible, hidden, doWork);
-    vsm.addTransition(visible, inactive, unload);
-    vsm.addTransition(visible, paused, pause);
-
-    vsm.addTransition(hidden, visible, doWork);
-    vsm.addTransition(hidden, hidden, doWork);
-    vsm.addTransition(hidden, inactive, unload);
-    vsm.addTransition(hidden, paused, pause);
-
-    vsm.addTransition(inactive, visible, resume);
-    vsm.addTransition(inactive, hidden, resume);
-    vsm.addTransition(inactive, inactive, noop);
-    vsm.addTransition(inactive, paused, doWork);
-
-    vsm.addTransition(paused, visible, resume);
-    vsm.addTransition(paused, hidden, doWork);
-    vsm.addTransition(paused, inactive, unload);
-    vsm.addTransition(paused, paused, noop);
+    return transition;
   }
 
   /**
