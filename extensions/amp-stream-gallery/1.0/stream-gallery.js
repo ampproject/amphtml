@@ -169,7 +169,7 @@ function DefaultArrow({advance, by, outsetArrows, ...rest}) {
  * @param {number} minVisibleCount
  * @param {number} slideCount
  * @param {number} peek
- * @param {(null|number)} width
+ * @param {(null|number)} containerWidth
  * @return {{visibleCount: number, maxContainerWidth: number}}
  */
 function getVisibleCount(
@@ -179,12 +179,12 @@ function getVisibleCount(
   minVisibleCount,
   slideCount,
   peek,
-  width
+  containerWidth
 ) {
-  if (!width) {
+  if (!containerWidth) {
     return DEFAULT_MEASUREMENT;
   }
-  const items = getItemsForWidth(width, minItemWidth, peek);
+  const items = getItemsForWidth(containerWidth, minItemWidth, peek);
   const maxVisibleSlides = Math.min(slideCount, maxVisibleCount);
   const visibleCount = Math.min(
     Math.max(minVisibleCount, items),
