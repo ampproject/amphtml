@@ -51,7 +51,7 @@ export function StreamGallery({
   style,
   ...rest
 }) {
-  const galleryRef = useRef(null);
+  const ref = useRef(null);
   const [measurements, setMeasurements] = useState(DEFAULT_MEASUREMENT);
   const arrowPrev = useMemo(
     () =>
@@ -87,7 +87,7 @@ export function StreamGallery({
 
   // Adjust visible slide count when container size or parameters change.
   useLayoutEffect(() => {
-    const node = galleryRef.current;
+    const {node} = ref.current;
     if (!node) {
       return;
     }
@@ -100,30 +100,29 @@ export function StreamGallery({
   }, [measure]);
 
   return (
-    <div ref={galleryRef}>
-      <BaseCarousel
-        advanceCount={Math.floor(measurements.visibleCount)}
-        arrowPrev={arrowPrev}
-        arrowNext={arrowNext}
-        controls={insetArrowVisibility}
-        loop={loop}
-        outsetArrows={outsetArrows}
-        snap={snap}
-        style={{
-          ...style,
-          flexGrow: 1,
-          maxWidth:
-            measurements.maxContainerWidth >= Number.MAX_VALUE
-              ? ''
-              : measurements.maxContainerWidth,
-          justifyContent: extraSpace === 'around' ? 'center' : 'initial',
-        }}
-        visibleCount={measurements.visibleCount}
-        {...rest}
-      >
-        {children}
-      </BaseCarousel>
-    </div>
+    <BaseCarousel
+      advanceCount={Math.floor(measurements.visibleCount)}
+      arrowPrev={arrowPrev}
+      arrowNext={arrowNext}
+      controls={insetArrowVisibility}
+      loop={loop}
+      outsetArrows={outsetArrows}
+      snap={snap}
+      ref={ref}
+      style={{
+        ...style,
+        flexGrow: 1,
+        maxWidth:
+          measurements.maxContainerWidth >= Number.MAX_VALUE
+            ? ''
+            : measurements.maxContainerWidth,
+        justifyContent: extraSpace === 'around' ? 'center' : 'initial',
+      }}
+      visibleCount={measurements.visibleCount}
+      {...rest}
+    >
+      {children}
+    </BaseCarousel>
   );
 }
 

@@ -94,6 +94,7 @@ function BaseCarouselWithRef(
         goToSlide: (index) => setRestingIndex(index),
         next,
         prev,
+        node: scrollRef.current.node,
       }),
     [next, prev, setRestingIndex]
   );
