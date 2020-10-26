@@ -294,7 +294,7 @@ describes.realWin(
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(0);
     });
-    
+
     it('should go to slide 0 when index is set to 0', async () => {
       const userSuppliedChildren = setSlides(3);
       userSuppliedChildren.forEach((child) => element.appendChild(child));
