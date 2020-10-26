@@ -72,6 +72,12 @@ const SwipingState = {
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
 
+/**
+ * Fetches more stories when reaching the threshold.
+ * @const {number}
+ */
+const FETCH_STORIES_THRESHOLD = 2;
+
 /** @const {number} */
 const MAX_IFRAMES = 3;
 
@@ -120,6 +126,23 @@ let DocumentStateTypeDef;
  * }}
  */
 let StoryDef;
+
+/**
+ * @typedef {{
+ *   on: string,
+ *   action: string,
+ *   endpoint: string,
+ * }}
+ */
+let BehaviorDef;
+
+/**
+ * @typedef {{
+ *   controls: (!Array),
+ *   behavior: !BehaviorDef,
+ * }}
+ */
+let ConfigDef;
 
 /** @type {string} */
 const TAG = 'amp-story-player';
@@ -178,8 +201,11 @@ export class AmpStoryPlayer {
     /** @private {!SwipingState} */
     this.swipingState_ = SwipingState.NOT_SWIPING;
 
-    /** @private {?JsonObject} */
+    /** @private {?ConfigDef} */
     this.playerConfig_ = null;
+
+    /** @private {?boolean} */
+    this.isFetchingStoriesEnabled_ = null;
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -228,6 +254,10 @@ export class AmpStoryPlayer {
    * @public
    */
   add(stories) {
+    if (stories.length <= 0) {
+      return;
+    }
+
     const isStoryDef = (story) => story && story.href;
     if (!Array.isArray(stories) || !stories.every(isStoryDef)) {
       throw new Error('"stories" parameter has the wrong structure');
@@ -311,6 +341,7 @@ export class AmpStoryPlayer {
     this.initializeIframes_();
     this.initializeButton_();
     this.readPlayerConfig_();
+    this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -429,7 +460,7 @@ export class AmpStoryPlayer {
   /**
    * Gets publisher configuration for the player
    * @private
-   * @return {?JsonObject}
+   * @return {?ConfigDef}
    */
   readPlayerConfig_() {
     if (this.playerConfig_) {
@@ -446,7 +477,9 @@ export class AmpStoryPlayer {
     }
 
     try {
-      this.playerConfig_ = parseJson(scriptTag.textContent);
+      this.playerConfig_ = /** @type {!ConfigDef} */ (parseJson(
+        scriptTag.textContent
+      ));
     } catch (reason) {
       console /*OK*/
         .error(`[${TAG}] `, reason);
@@ -546,11 +579,12 @@ export class AmpStoryPlayer {
             );
           });
 
-          const customControls =
-            this.playerConfig_ && this.playerConfig_['controls'];
-
-          if (customControls) {
-            messaging.sendRequest('customDocumentUI', customControls, false);
+          if (this.playerConfig_ && this.playerConfig_.controls) {
+            messaging.sendRequest(
+              'customDocumentUI',
+              dict({'controls': this.playerConfig_.controls}),
+              false
+            );
           }
 
           resolve(messaging);
@@ -621,6 +655,35 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Fetches more stories from the publisher's endpoint.
+   * @return {!Promise}
+   * @private
+   */
+  fetchStories_() {
+    let {endpoint} = this.playerConfig_.behavior;
+    if (!endpoint) {
+      this.isFetchingStoriesEnabled_ = false;
+      return Promise.resolve();
+    }
+
+    const init = {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    };
+
+    endpoint = endpoint.replace(/\${offset}/, this.stories_.length.toString());
+
+    return fetch(endpoint, init)
+      .then((response) => response.json())
+      .catch((reason) => {
+        console /*OK*/
+          .error(`[${TAG}] `, reason);
+      });
+  }
+
+  /**
    * Resolves when story in given iframe is finished loading.
    * @param {number} iframeIdx
    * @private
@@ -688,7 +751,7 @@ export class AmpStoryPlayer {
     });
 
     this.currentIdx_ = storyIdx;
-    this.signalNavigation_();
+    this.onNavigation_();
   }
 
   /** Sends a message muting the current story. */
@@ -720,20 +783,82 @@ export class AmpStoryPlayer {
 
   /**
    * Indicates the player changed story.
+   * @param {!Object} data
    * @private
    */
-  signalNavigation_() {
-    const index = this.currentIdx_;
-    const remaining = this.stories_.length - this.currentIdx_ - 1;
+  signalNavigation_(data) {
     const event = createCustomEvent(
       this.win_,
       'navigation',
-      dict({
-        'index': index,
-        'remaining': remaining,
-      })
+      /** @type {!JsonObject} */ (data)
     );
     this.element_.dispatchEvent(event);
+  }
+
+  /**
+   * Triggers when swithing from one story to another.
+   * @private
+   */
+  onNavigation_() {
+    const index = this.currentIdx_;
+    const remaining = this.stories_.length - this.currentIdx_ - 1;
+    const navigation = {
+      'index': index,
+      'remaining': remaining,
+    };
+
+    this.signalNavigation_(navigation);
+    this.maybeFetchMoreStories_(remaining);
+  }
+
+  /**
+   * Fetches more stories if appropiate.
+   * @param {number} remaining Number of stories remaining in the player.
+   * @private
+   */
+  maybeFetchMoreStories_(remaining) {
+    if (
+      this.playerConfig_ &&
+      this.playerConfig_.behavior &&
+      this.shouldFetchMoreStories_() &&
+      remaining <= FETCH_STORIES_THRESHOLD
+    ) {
+      this.fetchStories_()
+        .then((stories) => {
+          if (!stories) {
+            return;
+          }
+          this.add(stories);
+        })
+        .catch((reason) => {
+          console /*OK*/
+            .error(`[${TAG}] `, reason);
+        });
+    }
+  }
+
+  /**
+   * Checks if fetching more stories is enabled and validates the configuration.
+   * @return {boolean}
+   * @private
+   */
+  shouldFetchMoreStories_() {
+    if (this.isFetchingStoriesEnabled_ !== null) {
+      return this.isFetchingStoriesEnabled_;
+    }
+
+    const {behavior} = this.playerConfig_;
+
+    const isBehaviorDef = (behavior) =>
+      behavior && behavior.on && behavior.action;
+
+    const hasEndFetchBehavior = (behavior) =>
+      behavior.on === 'end' && behavior.action === 'fetch' && behavior.endpoint;
+
+    this.isFetchingStoriesEnabled_ =
+      isBehaviorDef(behavior) && hasEndFetchBehavior(behavior);
+
+    return this.isFetchingStoriesEnabled_;
   }
 
   /**
@@ -771,7 +896,7 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx);
     }
-    this.signalNavigation_();
+    this.onNavigation_();
   }
 
   /**
@@ -806,7 +931,7 @@ export class AmpStoryPlayer {
     if (nextStoryIdx >= 0 && this.stories_[nextStoryIdx].iframeIdx === -1) {
       this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
     }
-    this.signalNavigation_();
+    this.onNavigation_();
   }
 
   /**

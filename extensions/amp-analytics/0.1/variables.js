@@ -25,7 +25,7 @@ import {
   getActiveExperimentBranches,
   getExperimentBranch,
 } from '../../../src/experiments';
-import {getConsentPolicyState} from '../../../src/consent';
+import {getConsentMetadata, getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
@@ -278,6 +278,11 @@ export class VariableService {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
+      'CONSENT_METADATA': (key) =>
+        getConsentMetadataValue(
+          element,
+          userAssert(key, 'CONSENT_METADATA macro must contain a key')
+        ),
     };
     const perfMacros = isInFie(element)
       ? {}
@@ -527,6 +532,22 @@ function getConsentStateStr(element) {
       return null;
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
+  });
+}
+
+/**
+ * Get the associated value from the resolved consent metadata object
+ * @param {!Element} element
+ * @param {string} key
+ * @return {!Promise<?Object>}
+ */
+function getConsentMetadataValue(element, key) {
+  // Get the metadata using the default policy id
+  return getConsentMetadata(element).then((consentMetadata) => {
+    if (!consentMetadata) {
+      return null;
+    }
+    return consentMetadata[key];
   });
 }
 

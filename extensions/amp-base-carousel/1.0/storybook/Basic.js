@@ -27,20 +27,46 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function CarouselWithActions(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <BaseCarousel ref={ref} {...props} />
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current.goToSlide(3)}>goToSlide(3)</button>
+        <button onClick={() => ref.current.next()}>next</button>
+        <button onClick={() => ref.current.prev()}>prev</button>
+      </div>
+    </section>
+  );
+}
+
 export const _default = () => {
   const width = number('width', 440);
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const snap = boolean('snap', true);
   const loop = boolean('loop', true);
+  const advanceCount = number('advance count', 1, {min: 1});
+  const visibleCount = number('visible count', 2, {min: 1});
+  const outsetArrows = boolean('outset arrows', false);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const controls = select('show controls', CONTROLS);
   return (
-    <BaseCarousel
+    <CarouselWithActions
+      advanceCount={advanceCount}
       controls={controls}
       loop={loop}
+      outsetArrows={outsetArrows}
       snap={snap}
       style={{width, height}}
+      visibleCount={visibleCount}
     >
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
@@ -59,7 +85,7 @@ export const _default = () => {
           </div>
         );
       })}
-    </BaseCarousel>
+    </CarouselWithActions>
   );
 };
 
@@ -98,6 +124,7 @@ export const mixedLength = () => {
 };
 
 export const provideArrows = () => {
+  const outsetArrows = boolean('outset arrows', false);
   const width = number('width', 440);
   const height = number('height', 225);
   const controls = select('show controls', CONTROLS);
@@ -121,6 +148,7 @@ export const provideArrows = () => {
     <BaseCarousel
       controls={controls}
       style={{width, height}}
+      outsetArrows={outsetArrows}
       arrowPrev={<MyButton>←</MyButton>}
       arrowNext={<MyButton>→</MyButton>}
     >
@@ -135,6 +163,7 @@ export const WithCaptions = () => {
   const controls = select('show controls', CONTROLS);
   return (
     <BaseCarousel
+      visibleCount={3}
       controls={controls}
       loop
       style={{width: '500px', height: '400px'}}

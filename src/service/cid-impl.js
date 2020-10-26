@@ -22,20 +22,20 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {GoogleCidApi, TokenStatus} from './cid-api';
-import {dev, rethrowAsync, user, userAssert} from '../log';
-import {getCookie, setCookie} from '../cookies';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
-import {parseJson, tryParseJson} from '../json';
-
 import {CacheCidApi} from './cache-cid-api';
+import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {dev, rethrowAsync, user, userAssert} from '../log';
 import {dict} from '../utils/object';
+import {getCookie, setCookie} from '../cookies';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
+import {isExperimentOn} from '../../src/experiments';
 import {isIframed} from '../dom';
+import {parseJson, tryParseJson} from '../json';
 import {tryResolve} from '../utils/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -50,6 +50,8 @@ const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
 
 const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptOut';
+
+const CID_BACKUP_STORAGE_KEY = 'amp-cid:';
 
 /**
  * Tag for debug logging.
@@ -89,10 +91,14 @@ let BaseCidInfoDef;
  * The "get CID" parameters.
  * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
  *   Default value is `false`.
+ * - cookieName: Name of the cookie to be used if defined for non-proxy case.
+ * - disableBackup: Whether CID should not be backed up in Storage.
+ *   Default value is `false`.
  * @typedef {{
  *   scope: string,
  *   createCookieIfNotPresent: (boolean|undefined),
  *   cookieName: (string|undefined),
+ *   disableBackup: (boolean|undefined),
  * }}
  */
 let GetCidDef;
@@ -173,6 +179,9 @@ class Cid {
 
     /** @private {?Object<string, string>} */
     this.apiKeyMap_ = null;
+
+    /** @const {boolean} */
+    this.isBackupCidExpOn = isExperimentOn(this.ampdoc.win, 'amp-cid-backup');
   }
 
   /** @override */
@@ -383,52 +392,120 @@ function setCidCookie(win, scope, cookie) {
 }
 
 /**
+ * Sets a new CID backup in Storage
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} cookieName
+ * @param {string} cookie
+ */
+function setCidBackup(ampdoc, cookieName, cookie) {
+  Services.storageForDoc(ampdoc).then((storage) => {
+    const isViewerStorage = storage.isViewerStorage();
+    if (!isViewerStorage) {
+      const key = getStorageKey(cookieName);
+      storage.setNonBoolean(key, cookie);
+    }
+  });
+}
+
+/**
+ * @param {string} cookieName
+ * @return {string}
+ */
+function getStorageKey(cookieName) {
+  return CID_BACKUP_STORAGE_KEY + cookieName;
+}
+
+/**
+ * Maybe gets the CID from cookie or, if allowed, gets backup CID
+ * from Storage.
+ * @param {!Cid} cid
+ * @param {!GetCidDef} getCidStruct
+ * @return {!Promise<?string>}
+ */
+function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
+  const {ampdoc, isBackupCidExpOn} = cid;
+  const {win} = ampdoc;
+  const {disableBackup, scope} = getCidStruct;
+  const cookieName = getCidStruct.cookieName || scope;
+  const existingCookie = getCookie(win, cookieName);
+
+  if (existingCookie) {
+    return Promise.resolve(existingCookie);
+  }
+  if (isBackupCidExpOn && !disableBackup) {
+    return Services.storageForDoc(ampdoc)
+      .then((storage) => {
+        const key = getStorageKey(cookieName);
+        return storage.get(key, BASE_CID_MAX_AGE_MILLIS);
+      })
+      .then((backupCid) => {
+        if (!backupCid || typeof backupCid != 'string') {
+          return null;
+        }
+        return backupCid;
+      });
+  }
+  return Promise.resolve(null);
+}
+
+/**
  * If cookie exists it's returned immediately. Otherwise, if instructed, the
  * new cookie is created.
- *
  * @param {!Cid} cid
  * @param {!GetCidDef} getCidStruct
  * @param {!Promise} persistenceConsent
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const {win} = cid.ampdoc;
-  const {scope} = getCidStruct;
+  const {isBackupCidExpOn, ampdoc} = cid;
+  const {win} = ampdoc;
+  const {scope, disableBackup} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
-  const existingCookie = getCookie(win, cookieName);
 
-  if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
-    return /** @type {!Promise<?string>} */ (Promise.resolve(null));
-  }
+  return maybeGetCidFromCookieOrBackup(cid, getCidStruct).then(
+    (existingCookie) => {
+      if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
+        return /** @type {!Promise<?string>} */ (Promise.resolve(null));
+      }
 
-  if (existingCookie) {
-    // If we created the cookie, update it's expiration time.
-    if (/^amp-/.test(existingCookie)) {
-      setCidCookie(win, cookieName, existingCookie);
+      if (existingCookie) {
+        // If we created the cookie, update it's expiration time.
+        if (/^amp-/.test(existingCookie)) {
+          setCidCookie(win, cookieName, existingCookie);
+          if (isBackupCidExpOn && !disableBackup) {
+            setCidBackup(ampdoc, cookieName, existingCookie);
+          }
+        }
+        return /** @type {!Promise<?string>} */ (Promise.resolve(
+          existingCookie
+        ));
+      }
+
+      if (cid.externalCidCache_[scope]) {
+        return /** @type {!Promise<?string>} */ (cid.externalCidCache_[scope]);
+      }
+
+      const newCookiePromise = getRandomString64(win)
+        // Create new cookie, always prefixed with "amp-", so that we can see from
+        // the value whether we created it.
+        .then((randomStr) => 'amp-' + randomStr);
+
+      // Store it as a cookie based on the persistence consent.
+      Promise.all([newCookiePromise, persistenceConsent]).then((results) => {
+        // The initial CID generation is inherently racy. First one that gets
+        // consent wins.
+        const newCookie = results[0];
+        const relookup = getCookie(win, cookieName);
+        if (!relookup) {
+          setCidCookie(win, cookieName, newCookie);
+          if (isBackupCidExpOn && !disableBackup) {
+            setCidBackup(ampdoc, cookieName, newCookie);
+          }
+        }
+      });
+      return (cid.externalCidCache_[scope] = newCookiePromise);
     }
-    return /** @type {!Promise<?string>} */ (Promise.resolve(existingCookie));
-  }
-
-  if (cid.externalCidCache_[scope]) {
-    return /** @type {!Promise<?string>} */ (cid.externalCidCache_[scope]);
-  }
-
-  const newCookiePromise = getRandomString64(win)
-    // Create new cookie, always prefixed with "amp-", so that we can see from
-    // the value whether we created it.
-    .then((randomStr) => 'amp-' + randomStr);
-
-  // Store it as a cookie based on the persistence consent.
-  Promise.all([newCookiePromise, persistenceConsent]).then((results) => {
-    // The initial CID generation is inherently racy. First one that gets
-    // consent wins.
-    const newCookie = results[0];
-    const relookup = getCookie(win, cookieName);
-    if (!relookup) {
-      setCidCookie(win, cookieName, newCookie);
-    }
-  });
-  return (cid.externalCidCache_[scope] = newCookiePromise);
+  );
 }
 
 /**

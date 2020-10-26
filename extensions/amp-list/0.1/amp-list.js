@@ -41,7 +41,6 @@ import {
 } from '../../../src/batched-json';
 import {
   childElementByAttr,
-  matches,
   removeChildren,
   scopedQuerySelector,
   scopedQuerySelectorAll,
@@ -263,10 +262,6 @@ export class AmpList extends AMP.BaseElement {
     if (!this.container_) {
       this.container_ = this.createContainer_();
       this.element.appendChild(this.container_);
-    }
-
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
     }
 
     // auto-resize is deprecated and will be removed per deprecation schedule
@@ -564,15 +559,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * amp-list reuses the loading indicator when the list is fetched again via
-   * bind mutation or refresh action
-   * @override
-   */
-  isLoadingReused() {
-    return this.element.hasAttribute('reset-on-refresh');
-  }
-
-  /**
    * Creates and returns <div> that contains the template-rendered children.
    * @return {!Element}
    * @private
@@ -602,12 +588,6 @@ export class AmpList extends AMP.BaseElement {
     elements.forEach((element) => {
       if (!element.hasAttribute('role')) {
         this.setRoleAttribute_(element, 'listitem');
-      }
-      if (
-        !element.hasAttribute('tabindex') &&
-        !this.isTabbable_(dev().assertElement(element))
-      ) {
-        element.setAttribute('tabindex', '0');
       }
       container.appendChild(element);
     });
@@ -662,7 +642,10 @@ export class AmpList extends AMP.BaseElement {
     ) {
       const reset = () => {
         this.togglePlaceholder(true);
-        this.toggleLoading(true);
+        const forceLoadingIndicator = this.element.hasAttribute(
+          'reset-on-refresh'
+        );
+        this.toggleLoading(true, forceLoadingIndicator);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
@@ -1662,27 +1645,6 @@ export class AmpList extends AMP.BaseElement {
     return allTabbableChildren
       ? allTabbableChildren[allTabbableChildren.length - 1]
       : null;
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {?Element}
-   * @private
-   */
-  firstTabbableChild_(element) {
-    return scopedQuerySelector(element, TABBABLE_ELEMENTS_QUERY);
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   * @private
-   */
-  isTabbable_(element) {
-    return (
-      matches(element, TABBABLE_ELEMENTS_QUERY) ||
-      !!this.firstTabbableChild_(element)
-    );
   }
 }
 

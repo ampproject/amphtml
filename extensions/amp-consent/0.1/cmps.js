@@ -102,3 +102,9 @@ CMP_CONFIG['Usercentrics'] = {
   'checkConsentHref': 'https://consents.usercentrics.eu/amp/checkConsent',
   'promptUISrc': 'https://amp.usercentrics.eu/amp.html',
 };
+
+CMP_CONFIG['LiveRamp'] = {
+  'consentInstanceId': 'LiveRamp',
+  'checkConsentHref': 'https://api.privacymanager.io/amp/check-consent',
+  'promptUISrc': 'https://amp-consent-tool.privacymanager.io/1/index.html',
+};

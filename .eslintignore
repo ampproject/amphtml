@@ -1,5 +1,4 @@
 # Output directories
-node_modules
 build/**
 dist/**
 dist.3p/**
