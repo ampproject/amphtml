@@ -36,7 +36,6 @@ describes.realWin(
   (env) => {
     let win;
     let element;
-    let onerror;
     const userSuppliedChildren = [];
 
     const styles = useStyles();
@@ -45,7 +44,6 @@ describes.realWin(
     // this is ok in several scenarios according to
     // https://github.com/WICG/resize-observer/issues/38
     before(() => {
-      onerror = window.onerror;
       window.onerror = (err) => {
         if (err === 'ResizeObserver loop limit exceeded') {
           return false;
@@ -78,10 +76,6 @@ describes.realWin(
 
     afterEach(() => {
       toggleExperiment(win, 'amp-stream-gallery-bento', false, true);
-    });
-
-    after(() => {
-      window.onerror = onerror;
     });
 
     function newSlide(id) {
