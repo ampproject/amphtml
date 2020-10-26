@@ -85,6 +85,7 @@ export class Amp3dGltf extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     unobserveWithSharedInOb(this.element);
+    this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;

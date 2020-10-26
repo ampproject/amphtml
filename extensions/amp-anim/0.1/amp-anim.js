@@ -109,6 +109,7 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     unobserveWithSharedInOb(this.element);
+    this.viewportCallback_(false);
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;
     this.img_.srcset = SRC_PLACEHOLDER;
