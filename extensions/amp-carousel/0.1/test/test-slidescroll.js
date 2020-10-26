@@ -447,6 +447,31 @@ describes.realWin(
       });
     });
 
+    it('should show focus outline and border on next and prev buttons', () => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
+        const impl = ampSlideScroll.implementation_;
+        impl.showSlide_(1);
+
+        impl.prevButton_.focus();
+        expect(doc.activeElement).to.equal(impl.prevButton_);
+        expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
+          'rgb(255, 255, 255) solid 1px'
+        );
+        expect(win.getComputedStyle(impl.prevButton_).border).to.equal(
+          '1px solid rgb(0, 0, 0)'
+        );
+
+        impl.nextButton_.focus();
+        expect(doc.activeElement).to.equal(impl.nextButton_);
+        expect(win.getComputedStyle(impl.nextButton_).outline).to.equal(
+          'rgb(255, 255, 255) solid 1px'
+        );
+        expect(win.getComputedStyle(impl.nextButton_).border).to.equal(
+          '1px solid rgb(0, 0, 0)'
+        );
+      });
+    });
+
     it('should set the correct scrollLeft when there is only one slide', () => {
       return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;

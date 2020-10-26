@@ -47,6 +47,11 @@ amp-carousel {
   z-index: 10;
 }
 
+.amp-carousel-button:focus {
+  border: 1px black solid;
+  outline: 1px white solid;
+}
+
 amp-carousel[controls] .amp-carousel-button,
 amp-carousel.i-amphtml-carousel-has-controls .amp-carousel-button,
 .amp-mode-mouse .amp-carousel-button {
