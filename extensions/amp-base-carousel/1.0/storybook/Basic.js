@@ -92,13 +92,18 @@ export const _default = () => {
 export const mixedLength = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const slideCount = number('slide count', 7, {min: 0, max: 99});
+  const slideCount = 15;
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
   const mixedLength = boolean('mixed length', true);
   const controls = select('show controls', ['auto', 'always', 'never']);
-
+  const randomPreset = [
+    [143, 245, 289, 232, 280, 233, 182, 155, 114, 269, 242, 196, 249, 265, 241],
+    [225, 158, 201, 205, 230, 233, 231, 255, 143, 264, 227, 157, 120, 203, 144],
+    [252, 113, 115, 186, 248, 188, 162, 104, 100, 109, 175, 227, 143, 249, 280],
+  ];
+  const preset = select('random preset', [1, 2, 3]);
   return (
     <BaseCarousel
       controls={controls}
@@ -113,8 +118,9 @@ export const mixedLength = () => {
           <div
             style={{
               backgroundColor: `rgb(${v}, 100, 100)`,
-              width: `${Math.floor(Math.random() * 200 + 100)}px`,
-              height: `${Math.floor(Math.random() * 100 + 100)}px`,
+              border: 'solid white 1px',
+              width: `${randomPreset[preset - 1 || 0][i]}px`,
+              height: `100px`,
             }}
           ></div>
         );
