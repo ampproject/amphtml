@@ -64,13 +64,13 @@ function LightboxWithRef({
   });
   return (
     <ContainWrapper
+      {...rest}
       ref={lightboxRef}
       id={id}
       layout={layout}
       size={true}
       layout={true}
       paint={true}
-      {...rest}
       style={{
         zIndex: 1000,
         backgroundColor: 'rgba(0, 0, 0, 0.9)',

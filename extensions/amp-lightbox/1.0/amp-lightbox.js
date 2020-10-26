@@ -20,13 +20,13 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
-class AmpFitText extends PreactBaseElement {}
+class AmpLightbox extends PreactBaseElement {}
 
 /** @override */
-AmpFitText['Component'] = Lightbox;
+AmpLightbox['Component'] = Lightbox;
 
 /** @override */
-AmpFitText['props'] = {
+AmpLightbox['props'] = {
   'animateIn': {attr: 'animate-in'},
   'scrollable': {attr: 'scrollable'},
   'id': {attr: 'id'},
@@ -35,11 +35,11 @@ AmpFitText['props'] = {
 };
 
 /** @override */
-AmpFitText['passthrough'] = true;
+AmpLightbox['passthrough'] = true;
 
 /** @override */
-AmpFitText['layoutSizeDefined'] = true;
+AmpLightbox['layoutSizeDefined'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpFitText);
+  AMP.registerElement(TAG, AmpLightbox);
 });

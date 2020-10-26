@@ -15,32 +15,31 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Lightbox} from '../lightbox';
-import {boolean, text, withKnobs} from '@storybook/addon-knobs';
+import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
+import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'Lightbox',
-  component: Lightbox,
-  decorators: [withA11y, withKnobs],
+  title: 'amp-lightbox',
+  decorators: [withKnobs, withA11y, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-lightbox', version: '1.0'}],
+  },
 };
 
-export const _default = () => {
+export const Default = () => {
   const id = text('id', 'lightbox');
-  const open = boolean('open', false);
-  const animateIn = text('animateIn', 'fade-in');
+  const animateIn = text('animate-in', 'fade-in');
   return (
-    <div>
-      <Lightbox
-        id={id}
-        layout="nodisplay"
-        open={open}
-        animateIn={animateIn}
-        style={{display: 'block'}}
-      >
-        Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
-        aeque inermis reprehendunt.
-      </Lightbox>
-    </div>
+    <amp-lightbox
+      id={id}
+      layout="nodisplay"
+      animate-in={animateIn}
+    ></amp-lightbox>
   );
+};
+
+Default.story = {
+  name: 'Default',
 };
