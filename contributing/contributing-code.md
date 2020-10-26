@@ -125,7 +125,7 @@ For further detail on integrating third-party services (e.g., fonts, embeds, etc
 
 AMP requires all contributors to agree to the OpenJSF Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
 
-To agree to the OpenJSF Contributor License Agreement, visit [https://cla-assistant.io/ampproject/amphtml](https://cla-assistant.io/ampproject/amphtml), read through the agreement, and click "Login with GitHub to Agree."
+To agree to the OpenJSF Contributor License Agreement, visit [https://cla-assistant.io/ampproject/amphtml](https://cla-assistant.io/ampproject/amphtml), read through the agreement, and click "Sign in with GitHub to agree."
 
 Alternatively, you also have the option of downloading the Contributor License Agreement from https://individual-cla.openjsf.org, filling it in, signing it, writing in your GitHub handle, and emailing it to operations@openjsf.org. As processing your CLA is done manually, this takes much longer and is therefore not recommended.
 
