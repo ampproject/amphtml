@@ -30,12 +30,14 @@ export const _default = () => {
   const width = number('width', 600);
   const height = number('height', 600);
   const open = boolean('open', false);
+  const animateIn = text('animateIn', 'fade-in');
   return (
     <div>
       <Lightbox
         id={id}
         layout="nodisplay"
         open={open}
+        animateIn={animateIn}
         style={{display: 'block', width, height}}
       >
         Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at

@@ -17,16 +17,20 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
-import {
-  toChildArray,
-  useCallback,
-  useContext,
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '../../../src/preact';
+import {setStyle} from '../../../src/style';
+import {useLayoutEffect, useRef} from '../../../src/preact';
+
+const ANIMATION_PRESETS = {
+  'fade-in': [{opacity: 0}, {opacity: 1}],
+  'fly-in-top': [
+    {opacity: 0, transform: 'translate(0,-100%)'},
+    {opacity: 1, transform: 'translate: (0, 0)'},
+  ],
+  'fly-in-bottom': [
+    {opacity: 0, transform: 'translate(0, 100%)'},
+    {opacity: 1, transform: 'translate: (0, 0)'},
+  ],
+};
 
 /**
  * @param {!LightboxProps} props
@@ -37,7 +41,8 @@ function LightboxWithRef({
   layout = 'nodisplay',
   animateIn = 'fade-in',
   closeButtonAriaLabel,
-  scrollable,
+  // eslint-disable-next-line no-unused-vars
+  scrollable, // (TODO: discussion)
   children,
   onOpen,
   open,
@@ -46,38 +51,70 @@ function LightboxWithRef({
   const lightboxRef = useRef();
 
   useLayoutEffect(() => {
-    if (open && onOpen) {
-      onOpen();
+    if (open) {
+      const element = lightboxRef.current;
+      element.hidden = false;
+      setStyle(element, 'opacity', 1);
+      setStyle(element, 'visibility', 'visible');
+      element.animate(ANIMATION_PRESETS[animateIn], {duration: 200});
+      if (onOpen) {
+        onOpen();
+      }
     }
   });
-  if (open) {
-    return (
-      <ContainWrapper
-        ref={lightboxRef}
-        id={id}
-        layout={layout}
-        size={true}
-        layout={true}
-        paint={true}
-        ariaLabel={closeButtonAriaLabel} // TOOD: Double check
-        {...rest}
+  return (
+    <ContainWrapper
+      ref={lightboxRef}
+      id={id}
+      layout={layout}
+      size={true}
+      layout={true}
+      paint={true}
+      {...rest}
+      style={{
+        zIndex: 1000,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        color: '#fff',
+        width: window.innerWidth,
+        height: window.innerHeight,
+        opacity: 0,
+        visibility: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'right',
+      }}
+      hidden
+    >
+      <button
+        textContent={closeButtonAriaLabel}
+        tabIndex={-1}
         style={{
-          zIndex: 1000,
-          backgroundColor: '#000',
-          color: '#fff',
-          // TODO: address eslint error.
-          width: rest.style.width,
-          height: rest.style.height,
-          opacity: 1,
-          // TODO: Transition needed
+          position: 'fixed',
+          /* keep it on viewport */
+          top: 0,
+          left: 0,
+          /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
+     before allowing buttons to be activated. */
+          width: '2px',
+          height: '2px',
+          /* visually hide it with overflow and opacity */
+          opacity: 0,
+          overflow: 'hidden',
+          /* remove any margin or padding */
+          border: 'none',
+          margin: 0,
+          padding: 0,
+          /* ensure no other style sets display to none */
+          display: 'block',
+          visibility: 'visible',
         }}
-      >
-        {children}
-      </ContainWrapper>
-    );
-  } else {
-    return;
-  }
+        onClick={() => {
+          open = false;
+        }}
+      />
+      {children}
+    </ContainWrapper>
+  );
 }
 
 const Lightbox = forwardRef(LightboxWithRef);
