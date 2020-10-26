@@ -16,6 +16,7 @@
 import {devAssert} from '../src/log';
 import {getMode} from './mode';
 import {isIframed} from './dom';
+import {toWin} from './types';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.
@@ -76,7 +77,7 @@ export function observeWithSharedInOb(element, viewportCallback) {
     );
   }
 
-  const win = element.ownerDocument.defaultView;
+  const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
@@ -93,7 +94,7 @@ export function observeWithSharedInOb(element, viewportCallback) {
  * @param {!Element} element
  */
 export function unobserveWithSharedInOb(element) {
-  const win = element.ownerDocument.defaultView;
+  const win = toWin(element.ownerDocument.defaultView);
   const viewportObserver = viewportObservers.get(win);
   if (viewportObserver) {
     viewportObserver.unobserve(element);
