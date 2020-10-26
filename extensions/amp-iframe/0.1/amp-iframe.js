@@ -160,14 +160,25 @@ export class AmpIframe extends AMP.BaseElement {
       element
     );
     const containerUrl = urlService.parse(containerSrc);
-    userAssert(
-      !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
-        (origin != containerUrl.origin && protocol != 'data:'),
-      'Origin of <amp-iframe> must not be equal to container %s' +
-        'if allow-same-origin is set. See https://github.com/ampproject/' +
-        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
-      element
-    );
+    if (isExperimentOn(this.win, 'same-origin-iframe')) {
+      userAssert(
+        protocol != 'data:' ||
+          !this.sandboxContainsToken_(sandbox, 'allow-same-origin'),
+        'The allow-same-origin sandbox cannot be used with data URLs: %s',
+        element
+      );
+    } else {
+      // TODO(#30824): cleanup when same-origin-iframe launches and
+      // update docs.
+      userAssert(
+        !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
+          (origin != containerUrl.origin && protocol != 'data:'),
+        'Origin of <amp-iframe> must not be equal to container %s' +
+          ' if allow-same-origin is set. See https://github.com/ampproject/' +
+          'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
+        element
+      );
+    }
     userAssert(
       !(
         endsWith(hostname, `.${urls.thirdPartyFrameHost}`) ||
@@ -406,6 +417,9 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     const iframe = this.element.ownerDocument.createElement('iframe');
+    if (isExperimentOn(this.win, 'same-origin-iframe')) {
+      iframe.setAttribute('disallowdocumentaccess', '');
+    }
 
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
