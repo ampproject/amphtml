@@ -95,8 +95,8 @@ export class BaseSlides extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
+  viewportCallback_(inViewport) {
+    super.viewportCallback_(inViewport);
     if (inViewport) {
       this.autoplay_();
     } else {

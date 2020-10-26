@@ -174,7 +174,7 @@ describes.fakeWin('BaseSlides', {amp: true}, (env) => {
       })
     );
 
-    carousel.viewportCallback(true);
+    carousel.viewportCallback_(true);
     expect(viewportCallbackSpy).to.have.been.calledWith(true);
     expect(hintControlsSpy).to.have.been.called;
     expect(autoplaySpy).to.have.been.called;
