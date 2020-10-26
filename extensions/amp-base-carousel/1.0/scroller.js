@@ -84,10 +84,17 @@ function ScrollerWithRef(
           setRestingIndex(currentIndex.current);
         }
       } else {
-        container./* OK */ scrollLeft += slideWidth * by - scrollOffset.current;
+        container./* OK */ scrollLeft += slideWidth * by;
       }
     },
-    [visibleCount]
+    [
+      children.length,
+      loop,
+      mixedLength,
+      pivotIndex,
+      setRestingIndex,
+      visibleCount,
+    ]
   );
   useImperativeHandle(
     ref,
@@ -143,8 +150,11 @@ function ScrollerWithRef(
     const slideWidth = container./* OK */ offsetWidth / visibleCount;
     if (loop) {
       if (snap) {
-        position = container.children[pivotIndex]./* OK */ offsetLeft;
-        // position = slideWidth * pivotIndex;
+        if (mixedLength) {
+          position = container.children[pivotIndex]./* OK */ offsetLeft;
+        } else {
+          position = slideWidth * pivotIndex;
+        }
       } else {
         if (mixedLength) {
           position =
@@ -159,8 +169,11 @@ function ScrollerWithRef(
       }
     } else {
       if (snap) {
-        position = container.children[restingIndex]./* OK */ offsetLeft;
-        // position = slideWidth * restingIndex;
+        if (mixedLength) {
+          position = container.children[restingIndex]./* OK */ offsetLeft;
+        } else {
+          position = slideWidth * restingIndex;
+        }
       } else {
         if (mixedLength) {
           position =

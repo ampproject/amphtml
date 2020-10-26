@@ -105,7 +105,8 @@ function BaseCarouselWithRef(
 
   const disableForDir = (dir) =>
     !loop &&
-    (currentSlide + dir < 0 || currentSlide + visibleCount + dir > length);
+    (currentSlide + dir < 0 ||
+      (!mixedLength && currentSlide + visibleCount + dir > length));
 
   const [hadTouch, setHadTouch] = useState(false);
   const hideControls = useMemo(() => {
@@ -144,7 +145,7 @@ function BaseCarouselWithRef(
         snap={snap}
         ref={scrollRef}
         onTouchStart={() => setHadTouch(true)}
-        visibleCount={visibleCount}
+        visibleCount={mixedLength ? 1 : visibleCount}
       >
         {/*
           TODO(#30283): TBD: this is an interesting concept. We could decide
