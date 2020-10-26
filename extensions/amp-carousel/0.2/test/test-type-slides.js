@@ -164,7 +164,6 @@ describes.realWin(
 
       const impl = carousel.implementation_;
       impl.prevButton_.focus();
-      console.log(win.getComputedStyle(impl.prevButton_), '****');
       expect(doc.activeElement).to.equal(impl.prevButton_);
       expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
         'rgb(255, 255, 255) solid 1px'
