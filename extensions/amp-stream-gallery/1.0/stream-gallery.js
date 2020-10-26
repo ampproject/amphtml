@@ -52,7 +52,6 @@ export function StreamGallery({
   ...rest
 }) {
   const galleryRef = useRef(null);
-  const galleryWidthRef = useRef(0);
   const [measurements, setMeasurements] = useState(DEFAULT_MEASUREMENT);
   const arrowPrev = useMemo(
     () =>
@@ -66,7 +65,7 @@ export function StreamGallery({
   );
 
   const measure = useCallback(
-    () =>
+    (containerWidth) =>
       getVisibleCount(
         maxItemWidth,
         minItemWidth,
@@ -74,7 +73,7 @@ export function StreamGallery({
         minVisibleCount,
         children.length,
         peek,
-        galleryWidthRef.current
+        containerWidth
       ),
     [
       maxItemWidth,
@@ -92,12 +91,9 @@ export function StreamGallery({
     if (!node) {
       return;
     }
-    const observer = new ResizeObserver(() => {
-      if (galleryWidthRef.current === node./* OK */ offsetWidth) {
-        return;
-      }
-      galleryWidthRef.current = node./* OK */ offsetWidth;
-      setMeasurements(measure());
+    const observer = new ResizeObserver((entries) => {
+      const last = entries[entries.length - 1];
+      setMeasurements(measure(last.contentRect.width));
     });
     observer.observe(node);
     return () => observer.disconnect();
