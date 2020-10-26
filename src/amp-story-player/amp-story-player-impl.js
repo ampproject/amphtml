@@ -1529,6 +1529,7 @@ export class AmpStoryPlayer {
     }
 
     if (!this.playerConfig_) {
+      this.isCircularWrappingEnabled_ = false;
       return false;
     }
 
