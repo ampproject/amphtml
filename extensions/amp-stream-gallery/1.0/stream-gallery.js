@@ -55,12 +55,12 @@ export function StreamGallery({
   const [measurements, setMeasurements] = useState(DEFAULT_MEASUREMENT);
   const arrowPrev = useMemo(
     () =>
-      customArrowPrev || <DefaultArrow by={-1} outsetArrows={outsetArrows} />,
+      customArrowPrev ?? <DefaultArrow by={-1} outsetArrows={outsetArrows} />,
     [customArrowPrev, outsetArrows]
   );
   const arrowNext = useMemo(
     () =>
-      customArrowNext || <DefaultArrow by={1} outsetArrows={outsetArrows} />,
+      customArrowNext ?? <DefaultArrow by={1} outsetArrows={outsetArrows} />,
     [customArrowNext, outsetArrows]
   );
 
