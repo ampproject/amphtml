@@ -1556,8 +1556,9 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * If the bottom of the list is within three viewports of the current
-   * viewport, then load more items.
+   * If the bottom of the list is visible and
+   * within three viewports of the current viewport,
+   * then load more items.
    * @private
    */
   maybeLoadMoreItems_() {
@@ -1570,7 +1571,10 @@ export class AmpList extends AMP.BaseElement {
       .getClientRectAsync(dev().assertElement(endoOfListMarker))
       .then((positionRect) => {
         const viewportHeight = this.viewport_.getHeight();
-        if (3 * viewportHeight > positionRect.bottom) {
+        if (
+          positionRect.bottom > 0 &&
+          3 * viewportHeight > positionRect.bottom
+        ) {
           return this.loadMoreCallback_();
         }
       });
