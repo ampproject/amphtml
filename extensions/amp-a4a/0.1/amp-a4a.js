@@ -1236,13 +1236,14 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) => {
-      this.viewportCallback_(inViewport);
-    });
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
-    return this.attemptToRenderCreative();
+    return this.attemptToRenderCreative().then(() => {
+      observeWithSharedInOb(this.element, (inViewport) => {
+        this.viewportCallbackTemp(inViewport);
+      });
+    });
   }
 
   /**
@@ -1410,11 +1411,12 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
+  // TODO: Rename to viewportCallback once BaseElement.viewportCallback has been removed.
   /**
    * @param {boolean}  inViewport
    * @protected
    */
-  viewportCallback_(inViewport) {
+  viewportCallbackTemp(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
