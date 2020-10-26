@@ -78,6 +78,10 @@ describes.realWin(
       toggleExperiment(win, 'amp-stream-gallery-bento', false, true);
     });
 
+    after(() => {
+      window.onerror = null;
+    });
+
     function newSlide(id) {
       const slide = document.createElement('div');
       slide.className = 'test-slide';
