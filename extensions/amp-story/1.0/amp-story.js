@@ -946,6 +946,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
+    if (this.maybeLoadStoryDevTools_()) {
+      return;
+    }
     const firstPageEl = user().assertElement(
       this.element.querySelector('amp-story-page'),
       'Story must have at least one page.'
@@ -2318,6 +2321,36 @@ export class AmpStory extends AMP.BaseElement {
       this.getAmpDoc(),
       'amp-story-education'
     );
+  }
+
+  /**
+   * Loads amp-story-dev-tools if it is enabled.
+   * @private
+   */
+  maybeLoadStoryDevTools_() {
+    const params = parseQueryString(this.win.location.hash);
+    const devToolsEnabled = params['devTools'];
+
+    if (
+      devToolsEnabled != 'true' ||
+      this.element.getAttribute('mode') === 'inspect'
+    ) {
+      return false;
+    }
+
+    this.element.setAttribute('mode', 'inspect');
+
+    this.mutateElement(() => {
+      const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
+      devToolsEl.appendChild(this.element);
+      this.win.document.body.appendChild(devToolsEl);
+    });
+
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-story-dev-tools'
+    );
+    return true;
   }
 
   /**

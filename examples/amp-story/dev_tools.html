@@ -1,0 +1,231 @@
+<!-- 
+  Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <meta name="description" content="This is a story to test dev tools">
+    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">
+    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-story-1.0.js">
+    <link rel="preconnect dns-prefetch" href="https://fonts.gstatic.com/" crossorigin>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">    <style amp-custom>
+    /* Add your styles here */
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: white;
+    }
+
+    .grid-layer-white {
+      border: 5px solid #ffffffaa;
+      background: repeating-linear-gradient(
+        45deg,
+        #ffffff33 0px,
+        #ffffff33 10px,
+        #ffffff00 10px,
+        #ffffff00 20px
+      );
+      color: white;
+    }
+
+    .grid-layer-green {
+      border: 2px solid #00aa00;
+      color: rgb(0, 201, 0);
+    }
+
+    .grid-layer-black {
+      border: 2px solid #000000aa;
+      background-color: #aaaaaa22;
+      color: black;
+    }
+
+    .center-item {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      text-align: center;
+      font-size: .8em;
+      line-height: 1em;
+    }
+
+    .top-item {
+      position: absolute;
+      left: 50%;
+      top: 30%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      text-align: center;
+      font-size: .4em;
+      line-height: 1em;
+    }
+
+    .circle {
+      width: 1em;
+      height: 1em;
+      border: 2px solid red;
+      position: absolute;
+      left: 25%;
+      top: 70%;
+      border-radius: 50%;
+    }
+
+    .page-fullbleed-area-wp {
+      position: absolute;
+      overflow: hidden;
+      width: 100%;
+      left: 0;
+      height: calc(1.1851851851851851 * 100%);
+      top: calc((1 - 1.1851851851851851) * 100% / 2);
+    }
+
+    amp-story-grid-layer {
+      overflow-y: visible;
+      overflow-x: visible;
+    }
+
+    amp-story-page {
+      background: red;
+    }
+
+    .page-fullbleed-area-new {
+      position: absolute;
+      overflow: hidden;
+      width: calc(1.142 * 100%);
+      left: calc((1 - 1.142) * 100% / 2);
+      height: calc(1.142 * 100%);
+      top: calc((1 - 1.142) * 100% / 2);
+    }
+
+    .blue-layer {
+      background: blue;
+    }
+
+    </style>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <link rel="canonical" href=".">
+    <title>Dev Tools tester</title>
+  </head>
+  <body>
+    <amp-story standalone
+      publisher="Stories Format"
+      title="Dev tools tester"
+      poster-portrait-src="./last_supper.jpg"
+      publisher-logo-src="https://amp.dev/static/img/icons/icon-512x512.png">
+      <amp-story-page id="9by16" class="blue-layer">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+          style="opacity: 0.5;"
+            class="cover-img"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1527902661156-1e6711d84e13?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="9:16" class="grid-layer-white">
+          <div class="cover-content space-vertical">
+            <div id="cover-top">
+              <h2 id="cover-title" class="center-item">THIS IS 9:16</h2>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="69by116">
+        <amp-story-grid-layer template="fill" class="blue-layer">
+          <amp-img
+          style="opacity: 0.5;"
+            class="cover-img"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1527902661156-1e6711d84e13?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="9:16" class="grid-layer-green">
+          <div class="cover-content space-vertical">
+            <div id="cover-top">
+              <h2 id="cover-title" class="top-item">THIS IS 9:16</h2>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="69:116" class="grid-layer-white">
+          <div class="cover-content space-vertical">
+            <div id="cover-top">
+              <h2 id="cover-title" class="center-item">THIS IS 69:116</h2>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="69by116showcase">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            class="cover-img"
+            layout="fixed" width="9" height="16"
+            src="https://images.unsplash.com/photo-1603192399946-8bbb0703cfc4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=933&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="69:116" class="grid-layer-black">
+          <div class="cover-content space-vertical">
+            <div id="cover-top">
+              <div class="top-item"><span style="font-size: 0.5em">The circle doesn't stay in the same place on the background, because the background is not aspect-ratio</span></div>
+              <h2 id="cover-title" class="center-item">THIS IS 69:116</h2>
+              <div class="circle"></div>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="2by3wordpress">
+        <amp-story-grid-layer template="vertical" aspect-ratio="2:3">
+          <div class="page-fullbleed-area-wp">
+            <amp-img
+            class="cover-img"
+            layout="fill" width="9" height="18"
+            src="https://images.unsplash.com/photo-1603192399946-8bbb0703cfc4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=933&q=80"/>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="2:3" class="grid-layer-black">
+          <div class="cover-content space-vertical">
+            <div id="cover-top ">
+              <div class="top-item"><span style="font-size: 0.5em">The circle stays in the same place on the background, but the background doesn't cover all the story</span></div>
+              <h2 id="cover-title" class="center-item">THIS IS 2:3 WP</h2>
+              <div class="circle"></div>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="69by116new">
+        <amp-story-grid-layer template="vertical" aspect-ratio="69:116">
+          <div class="page-fullbleed-area-new">
+            <amp-img
+            class="cover-img"
+            layout="fill" width="69" height="116"
+            src="https://images.unsplash.com/photo-1603192399946-8bbb0703cfc4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=933&q=80"/>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="69:116" class="grid-layer-black">
+          <div class="cover-content space-vertical">
+            <div id="cover-top">
+              <div class="top-item"><span style="font-size: 0.5em">The circle stays in the same place on the background, and the background covers all the story</span></div>
+              <h2 id="cover-title" class="center-item">THIS IS 69:116 PROPOSAL</h2>
+              <div class="circle"></div>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>
