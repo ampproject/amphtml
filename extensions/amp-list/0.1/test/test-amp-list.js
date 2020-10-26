@@ -466,12 +466,13 @@ describes.repeated(
             });
           });
 
-          it('should resize with viewport', () => {
+          it('should resize with viewport', async () => {
             const resize = env.sandbox.spy(list, 'attemptToFit_');
-            list.layoutCallback().then(() => {
-              list.viewport_.resize_();
-              expect(resize).to.have.been.called;
-            });
+            const itemElement = doc.createElement('div');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+            await list.layoutCallback();
+            list.viewport_.resize_();
+            expect(resize).to.be.calledOnce;
           });
 
           // TODO(choumx, #14772): Flaky.
