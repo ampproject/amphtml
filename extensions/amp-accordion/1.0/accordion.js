@@ -17,7 +17,8 @@
 import * as Preact from '../../../src/preact';
 import {animateCollapse, animateExpand} from './animations';
 import {forwardRef} from '../../../src/preact/compat';
-import {omit} from '../../../src/utils/object';
+import {hasOwn, omit} from '../../../src/utils/object';
+
 import {
   randomIdGenerator,
   sequentialIdGenerator,
@@ -41,8 +42,6 @@ const AccordionContext = Preact.createContext(
 /** @type {!Object<string, boolean>} */
 const EMPTY_EXPANDED_MAP = {};
 
-const EMPTY_REAL_ID_MAP = {};
-
 const generateSectionId = sequentialIdGenerator();
 const generateRandomId = randomIdGenerator(100000);
 
@@ -63,7 +62,6 @@ function AccordionWithRef(
   ref
 ) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
-  const realIdMap = useRef(EMPTY_REAL_ID_MAP);
   const [randomPrefix] = useState(generateRandomId);
   const prefix = id || `a${randomPrefix}`;
 
@@ -81,73 +79,8 @@ function AccordionWithRef(
     });
   }, [expandSingleSection]);
 
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        toggle,
-        expand,
-        collapse,
-      };
-    },
-    // Does not like expandedMap, but w/o it does not work
-    [toggle, collapse, expand, expandedMap]
-  );
-
-  const toggle = useCallback(
-    (id) => {
-      if (id) {
-        if (realIdMap.current[id]) {
-          toggleExpanded(realIdMap.current[id]);
-        }
-      } else {
-        for (const k in expandedMap) {
-          toggleExpanded(k);
-        }
-      }
-    },
-    [expandedMap, toggleExpanded]
-  );
-  const expand = useCallback(
-    (id) => {
-      if (id) {
-        const internalId = realIdMap.current[id];
-        if (internalId && !isExpanded(internalId)) {
-          toggleExpanded(internalId);
-        }
-      } else {
-        for (const k in expandedMap) {
-          if (!isExpanded(k)) {
-            toggleExpanded(k);
-          }
-        }
-      }
-    },
-    [expandedMap, toggleExpanded, isExpanded]
-  );
-  const collapse = useCallback(
-    (id) => {
-      if (id) {
-        const internalId = realIdMap.current[id];
-        if (internalId && isExpanded(internalId)) {
-          toggleExpanded(internalId);
-        }
-      } else {
-        for (const k in expandedMap) {
-          if (isExpanded(k)) {
-            toggleExpanded(k);
-          }
-        }
-      }
-    },
-    [expandedMap, toggleExpanded, isExpanded]
-  );
-
   const registerSection = useCallback(
-    (id, defaultExpanded, realId) => {
-      if (realId && !realIdMap.current[realId]) {
-        realIdMap.current[realId] = id;
-      }
+    (id, defaultExpanded) => {
       setExpandedMap((expandedMap) => {
         return setExpanded(
           id,
@@ -174,6 +107,67 @@ function AccordionWithRef(
   const isExpanded = useCallback(
     (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
     [expandedMap]
+  );
+
+  const toggle = useCallback(
+    (id) => {
+      if (id) {
+        if (hasOwn(expandedMap, id)) {
+          toggleExpanded(id);
+        }
+      } else {
+        for (const k in expandedMap) {
+          toggleExpanded(k);
+        }
+      }
+    },
+    [expandedMap, toggleExpanded]
+  );
+
+  const expand = useCallback(
+    (id) => {
+      if (id) {
+        if (hasOwn(expandedMap, id) && !isExpanded(id)) {
+          toggleExpanded(id);
+        }
+      } else {
+        for (const k in expandedMap) {
+          if (!isExpanded(k)) {
+            toggleExpanded(k);
+          }
+        }
+      }
+    },
+    [expandedMap, toggleExpanded, isExpanded]
+  );
+
+  const collapse = useCallback(
+    (id) => {
+      if (id) {
+        if (hasOwn(expandedMap, id) && isExpanded(id)) {
+          toggleExpanded(id);
+        }
+      } else {
+        for (const k in expandedMap) {
+          if (isExpanded(k)) {
+            toggleExpanded(k);
+          }
+        }
+      }
+    },
+    [expandedMap, toggleExpanded, isExpanded]
+  );
+
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        toggle,
+        expand,
+        collapse,
+      };
+    },
+    [toggle, collapse, expand]
   );
 
   const context = useMemo(
@@ -235,12 +229,12 @@ export function AccordionSection({
   animate: defaultAnimate = false,
   headerClassName = '',
   contentClassName = '',
+  id,
   header,
   children,
   ...rest
 }) {
-  const propId = rest['id'];
-  const [id] = useState(generateSectionId);
+  const [internalId] = useState(id || generateSectionId);
   const [suffix] = useState(generateRandomId);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
   const contentRef = useRef(null);
@@ -261,21 +255,23 @@ export function AccordionSection({
 
   useLayoutEffect(() => {
     if (registerSection) {
-      return registerSection(id, defaultExpanded, propId);
+      return registerSection(internalId, defaultExpanded);
     }
-  }, [registerSection, id, defaultExpanded, propId]);
+  }, [registerSection, internalId, defaultExpanded]);
 
   const expandHandler = useCallback(() => {
     if (toggleExpanded) {
-      toggleExpanded(id);
+      toggleExpanded(internalId);
     } else {
       setExpandedState((prev) => !prev);
     }
-  }, [id, toggleExpanded]);
+  }, [internalId, toggleExpanded]);
 
-  const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
+  const expanded = isExpanded
+    ? isExpanded(internalId, defaultExpanded)
+    : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
+  const contentId = `${prefix || 'a'}-content-${internalId}-${suffix}`;
   const classes = useStyles();
 
   useLayoutEffect(() => {
