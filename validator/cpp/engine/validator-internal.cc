@@ -4594,7 +4594,7 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
     if (!tagspec->has_extension_spec()) continue;
     const ExtensionSpec& extension_spec = tagspec->extension_spec();
     if (!tagspec->has_spec_name())
-      tagspec->set_spec_name(extension_spec.name() + " extension .js script");
+      tagspec->set_spec_name(extension_spec.name() + " extension script");
     if (!tagspec->has_descriptive_name())
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
