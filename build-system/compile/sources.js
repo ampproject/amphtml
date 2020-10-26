@@ -119,6 +119,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-access/**/*.js',
   // Needed for AmpStoryVariableService
   'extensions/amp-story/**/*.js',
+  // Needed for story ad inabox
+  'extensions/amp-story-auto-ads/**/*.js',
   // Needed for SubscriptionsService
   'extensions/amp-subscriptions/**/*.js',
   // Needed to access UserNotificationManager from other extensions
