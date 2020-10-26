@@ -282,7 +282,7 @@ describes.realWin(
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(2);
     });
-    
+
     it('should not render arrows when controls=never', async () => {
       element.setAttribute('controls', 'never');
       const userSuppliedChildren = setSlides(3);
