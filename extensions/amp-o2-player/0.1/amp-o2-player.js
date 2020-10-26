@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setIsMediaComponent} from '../../../src/video-interface';
-import {userAssert} from '../../../src/log';
-import {MessageType} from '../../../src/3p-frame-messaging';
 import {
-  getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {
-  listenFor,
-} from '../../../src/iframe-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
+import {setIsMediaComponent} from '../../../src/video-interface';
+import {userAssert} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -132,16 +130,17 @@ class AmpO2Player extends AMP.BaseElement {
     iframe.src = this.src_;
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
 
     listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
       this.sendConsentData_(source, origin);
     });
-    
+
+    this.element.appendChild(iframe);
+
     return this.loadPromise(iframe);
   }
 
-   /**
+  /**
    * Requests consent data from consent module
    * and forwards information to iframe
    * @param {Window} source
@@ -151,28 +150,47 @@ class AmpO2Player extends AMP.BaseElement {
   sendConsentData_(source, origin) {
     const consentPolicyId = super.getConsentPolicy() || 'default';
     const consentStringPromise = this.getConsentString_(consentPolicyId);
-    const metadataPromise = this.getConsentMetadata_(consentPolicyId);
     const consentPolicyStatePromise = this.getConsentPolicyState_(
       consentPolicyId
     );
 
-    Promise.all([
-      metadataPromise,
-      consentStringPromise,
-      consentPolicyStatePromise,
-    ]).then((consents) => {
-      this.sendConsentDataToIframe_(
-        source,
-        origin,
-        dict({
-          'sentinel': 'amp',
-          'type': MessageType.CONSENT_DATA,
-          'consentMetadata': consents[0],
-          'consentString': consents[1],
-          'consentPolicyState': consents[2],
-        })
-      );
-    });
+    Promise.all([consentPolicyStatePromise, consentStringPromise]).then(
+      (consents) => {
+        let consentData;
+        switch (consents[0]) {
+          case CONSENT_POLICY_STATE.SUFFICIENT:
+            consentData = {
+              'gdprApplies': true,
+              'user_consent': 1,
+              'gdprString': consents[1],
+            };
+            break;
+          case CONSENT_POLICY_STATE.INSUFFICIENT:
+          case CONSENT_POLICY_STATE.UNKNOWN:
+            consentData = {
+              'gdprApplies': true,
+              'user_consent': 0,
+              'gdprString': consents[1],
+            };
+            break;
+          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+          default:
+            consentData = {
+              'gdprApplies': false,
+            };
+        }
+
+        this.sendConsentDataToIframe_(
+          source,
+          origin,
+          dict({
+            'sentinel': 'amp',
+            'type': MessageType.CONSENT_DATA,
+            'consentData': consentData,
+          })
+        );
+      }
+    );
   }
 
   /**
@@ -197,16 +215,6 @@ class AmpO2Player extends AMP.BaseElement {
   }
 
   /**
-   * Get the consent metadata
-   * @param {string} consentPolicyId
-   * @private
-   * @return {Promise}
-   */
-  getConsentMetadata_(consentPolicyId = 'default') {
-    return getConsentMetadata(this.element, consentPolicyId);
-  }
-
-  /**
    * Get the consent policy state
    * @param {string} consentPolicyId
    * @private
@@ -215,7 +223,6 @@ class AmpO2Player extends AMP.BaseElement {
   getConsentPolicyState_(consentPolicyId = 'default') {
     return getConsentPolicyState(this.element, consentPolicyId);
   }
-
 
   /** @override */
   pauseCallback() {
