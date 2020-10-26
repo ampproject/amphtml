@@ -58,6 +58,10 @@ import {installUrlReplacementsForEmbed} from '../../../src/service/url-replaceme
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {padStart} from '../../../src/string';
 import {parseJson} from '../../../src/json';
 import {processHead} from './head-validation';
@@ -1232,6 +1236,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) => {
+      this.viewportCallback_(inViewport);
+    });
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
@@ -1326,6 +1333,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.tearDownSlot();
     return true;
   }
@@ -1402,8 +1410,11 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
-  /** @override  */
-  viewportCallback(inViewport) {
+  /**
+   * @param {boolean}  inViewport
+   * @private
+   */
+  viewportCallback_(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
