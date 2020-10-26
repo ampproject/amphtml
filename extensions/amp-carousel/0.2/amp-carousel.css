@@ -93,6 +93,11 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
   pointer-events: all;
 }
 
+.amp-carousel-button:focus {
+  border: 1px black solid;
+  outline: 1px white solid;
+}
+
 .amp-carousel-button.amp-disabled {
   animation: none;
   opacity: 0;
