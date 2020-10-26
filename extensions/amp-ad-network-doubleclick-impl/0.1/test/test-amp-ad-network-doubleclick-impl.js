@@ -1079,6 +1079,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(url).to.not.match(/(=|%2C)2106317(3|4)(%2C|&|$)/);
       });
     });
+
+    it('does not set ptt parameter by default', () =>
+      expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=(&|$)/));
+    it('sets ptt parameter', () => {
+      impl.experimentIds = ['21068094'];
+      return expect(impl.getAdUrl()).to.eventually.match(/(\?|&)ptt=13(&|$)/);
+    });
   });
 
   describe('#getPageParameters', () => {
