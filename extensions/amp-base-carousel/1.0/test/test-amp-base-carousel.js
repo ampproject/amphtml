@@ -294,6 +294,39 @@ describes.realWin(
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(0);
     });
+    
+    it('should go to slide 0 when index is set to 0', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+      await getSlidesFromShadow();
+
+      let scroller = element.shadowRoot.querySelector(
+        `[class*=${styles.scrollContainer}]`
+      );
+
+      function invocation(method, args = {}) {
+        const source = null;
+        const caller = null;
+        const event = null;
+        const trust = ActionTrust.DEFAULT;
+        return new ActionInvocation(
+          element,
+          method,
+          args,
+          source,
+          caller,
+          event,
+          trust
+        );
+      }
+
+      element.enqueAction(invocation('goToSlide', {index: 1}));
+      await waitFor(() => scroller.scrollLeft > 0, 'to to slide 1');
+
+      element.enqueAction(invocation('goToSlide', {index: 0}));
+      await waitFor(() => scroller.scrollLeft == 0, 'returned to first slide');
+    });
 
     it('should respect outset-arrows even if controls=never', async () => {
       element.setAttribute('controls', 'never');
