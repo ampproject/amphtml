@@ -282,6 +282,18 @@ describes.realWin(
       const buttons = element.shadowRoot.querySelectorAll('button');
       expect(buttons).to.have.length(2);
     });
+    
+    it('should not render arrows when controls=never', async () => {
+      element.setAttribute('controls', 'never');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlides = await getSlidesFromShadow();
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
+      const buttons = element.shadowRoot.querySelectorAll('button');
+      expect(buttons).to.have.length(0);
+    });
 
     it('should respect outset-arrows even if controls=never', async () => {
       element.setAttribute('controls', 'never');
