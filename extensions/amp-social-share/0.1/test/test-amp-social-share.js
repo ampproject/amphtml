@@ -17,6 +17,7 @@
 import '../amp-social-share';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
+import {tryFocus} from '../../../../src/dom';
 
 const STRINGS = {
   'text': 'Hello world',
@@ -193,6 +194,33 @@ describes.realWin(
       });
     });
 
+    it('adds a default value for aria-label', () => {
+      const share = doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+
+      doc.body.appendChild(share);
+      return loaded(share).then((el) => {
+        expect(el.getAttribute('aria-label')).to.be.equal('Share by twitter');
+      });
+    });
+
+    it('overwrites default aria-label value when a non-empty value is provided', () => {
+      const share = doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+      share.setAttribute('aria-label', 'test value');
+
+      doc.body.appendChild(share);
+      return loaded(share).then((el) => {
+        expect(el.getAttribute('aria-label')).to.be.equal('test value');
+      });
+    });
+
     it('opens share window in _blank', () => {
       return getShare('twitter').then((el) => {
         el.implementation_.handleClick_();
@@ -353,6 +381,32 @@ describes.realWin(
     it('has tabindex set to 0 by default', () => {
       return getShare('twitter').then((el) => {
         expect(el.getAttribute('tabindex')).to.equal('0');
+      });
+    });
+
+    it('uses custom CSS when element is focused', () => {
+      const share = doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+
+      doc.body.appendChild(share);
+
+      return loaded(share).then((el) => {
+        expect(win.getComputedStyle(el)['outline']).to.equal(
+          'rgb(0, 0, 0) none 0px'
+        );
+        expect(win.getComputedStyle(el)['outline-offset']).to.equal('0px');
+
+        tryFocus(el);
+        expect(doc.activeElement).to.equal(el);
+
+        // updated styles after focusing on element
+        expect(win.getComputedStyle(el)['outline']).to.equal(
+          'rgb(3, 137, 255) solid 2px'
+        );
+        expect(win.getComputedStyle(el)['outline-offset']).to.equal('2px');
       });
     });
 

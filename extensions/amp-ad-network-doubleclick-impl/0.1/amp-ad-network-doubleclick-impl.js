@@ -144,6 +144,15 @@ const ZINDEX_EXP_BRANCHES = {
   HOLDBACK: '21065357',
 };
 
+/** @const {string} */
+const PTT_EXP = 'doubleclick-ptt-exp';
+
+/** @const @enum{string} */
+const PTT_EXP_BRANCHES = {
+  CONTROL: '21068093',
+  EXPERIMENT: '21068094',
+};
+
 /**
  * Required size to be sent with fluid requests.
  * @const {string}
@@ -430,6 +439,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
+      {
+        experimentId: PTT_EXP,
+        isTrafficEligible: () => true,
+        branches: Object.values(PTT_EXP_BRANCHES),
+      },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
@@ -559,6 +573,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {consentString, gdprApplies} = consentTuple;
 
     return {
+      'ptt': this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT)
+        ? 13
+        : null,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
         consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN

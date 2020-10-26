@@ -41,7 +41,6 @@ import {
 } from '../../../src/batched-json';
 import {
   childElementByAttr,
-  matches,
   removeChildren,
   scopedQuerySelector,
   scopedQuerySelectorAll,
@@ -263,10 +262,6 @@ export class AmpList extends AMP.BaseElement {
     if (!this.container_) {
       this.container_ = this.createContainer_();
       this.element.appendChild(this.container_);
-    }
-
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
     }
 
     // auto-resize is deprecated and will be removed per deprecation schedule
@@ -593,12 +588,6 @@ export class AmpList extends AMP.BaseElement {
     elements.forEach((element) => {
       if (!element.hasAttribute('role')) {
         this.setRoleAttribute_(element, 'listitem');
-      }
-      if (
-        !element.hasAttribute('tabindex') &&
-        !this.isTabbable_(dev().assertElement(element))
-      ) {
-        element.setAttribute('tabindex', '0');
       }
       container.appendChild(element);
     });
@@ -1567,8 +1556,9 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * If the bottom of the list is within three viewports of the current
-   * viewport, then load more items.
+   * If the bottom of the list is visible and
+   * within three viewports of the current viewport,
+   * then load more items.
    * @private
    */
   maybeLoadMoreItems_() {
@@ -1581,7 +1571,10 @@ export class AmpList extends AMP.BaseElement {
       .getClientRectAsync(dev().assertElement(endoOfListMarker))
       .then((positionRect) => {
         const viewportHeight = this.viewport_.getHeight();
-        if (3 * viewportHeight > positionRect.bottom) {
+        if (
+          positionRect.bottom > 0 &&
+          3 * viewportHeight > positionRect.bottom
+        ) {
           return this.loadMoreCallback_();
         }
       });
@@ -1656,27 +1649,6 @@ export class AmpList extends AMP.BaseElement {
     return allTabbableChildren
       ? allTabbableChildren[allTabbableChildren.length - 1]
       : null;
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {?Element}
-   * @private
-   */
-  firstTabbableChild_(element) {
-    return scopedQuerySelector(element, TABBABLE_ELEMENTS_QUERY);
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   * @private
-   */
-  isTabbable_(element) {
-    return (
-      matches(element, TABBABLE_ELEMENTS_QUERY) ||
-      !!this.firstTabbableChild_(element)
-    );
   }
 }
 
