@@ -58,6 +58,13 @@ function ScrollerWithRef(
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
+
+  /**
+   * The number of slides we want to place before the
+   * reference or resting index. Only needed if loop=true.
+   */
+  const pivotIndex = Math.floor(children.length / 2);
+
   const advance = useCallback(
     (by) => {
       const container = containerRef.current;
@@ -105,12 +112,6 @@ function ScrollerWithRef(
     [advance, advanceCount]
   );
   const classes = useStyles();
-
-  /**
-   * The number of slides we want to place before the
-   * reference or resting index. Only needed if loop=true.
-   */
-  const pivotIndex = Math.floor(children.length / 2);
 
   /**
    * The dynamic position that the slide at the resting index
