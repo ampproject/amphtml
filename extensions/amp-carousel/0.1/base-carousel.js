@@ -72,9 +72,9 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /**
    * @param {boolean} inViewport
-   * @private
+   * @protected
    */
-  viewportCallback_(inViewport) {
+  viewportCallbackTemp(inViewport) {
     if (inViewport) {
       this.hintControls();
     }
@@ -245,7 +245,7 @@ export class BaseCarousel extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallback_(inViewport)
+      this.viewportCallbackTemp(inViewport)
     );
     return Promise.resolve();
   }

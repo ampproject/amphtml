@@ -350,8 +350,8 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /** @override */
-  viewportCallback_(inViewport) {
-    super.viewportCallback_(inViewport);
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     if (this.slideIndex_ !== null) {
       Services.ownersForDoc(this.element).updateInViewport(
         this.element,
