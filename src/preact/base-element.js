@@ -745,18 +745,17 @@ function collectProps(Ctor, element, ref, defaultProps) {
     }
     if (def.attrPrefix) {
       const currObj = {};
+      let objContains = false;
       const attrs = element.attributes;
       for (let i = 0; i < attrs.length; i++) {
         const attrib = attrs[i];
         if (matchesAttrPrefix(attrib.name, def.attrPrefix)) {
-          currObj[
-            dashToCamelCase(
-              attrib.name.substring(def.attrPrefix.length, attrib.name.length)
-            )
-          ] = attrib.value;
+          currObj[dashToCamelCase(attrib.name.slice(def.attrPrefix.length))] =
+            attrib.value;
+          objContains = true;
         }
       }
-      if (Object.keys(currObj).length > 0) {
+      if (objContains) {
         props[name] = currObj;
       }
     }
