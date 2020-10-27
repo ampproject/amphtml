@@ -85,6 +85,5 @@ tags: {  # <amp-story-360>
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
   }
 }
