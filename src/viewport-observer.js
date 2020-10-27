@@ -39,18 +39,20 @@ export function createViewportObserver(ioCallback, win, threshold) {
 
   // TODO(#30794): See if we can safely remove rootMargin without adversely
   // affecting metrics.
-  const rootMargin = '25%';
 
   // Chrome 81+ supports rootMargin in x-origin iframes via {root: document}
   // but this throws in other browsers.
   try {
     return new win.IntersectionObserver(ioCallback, {
       root,
-      rootMargin,
+      rootMargin: '25%',
       threshold,
     });
   } catch (e) {
-    return new win.IntersectionObserver(ioCallback, {rootMargin, threshold});
+    return new win.IntersectionObserver(ioCallback, {
+      rootMargin: '150px',
+      threshold,
+    });
   }
 }
 
