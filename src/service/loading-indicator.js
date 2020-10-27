@@ -59,7 +59,6 @@ export class LoadingIndicatorImpl {
         inViewport
       );
     const iframed = isIframed(win);
-    const rootMargin = '25%';
     // Classic IntersectionObserver doesn't support viewport tracking and
     // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
     // supports it via {root: document}, which throws on other browsers.
@@ -68,12 +67,9 @@ export class LoadingIndicatorImpl {
       : null);
     let io;
     try {
-      io = new win.IntersectionObserver(ioCallback, {
-        root,
-        rootMargin,
-      });
+      io = new win.IntersectionObserver(ioCallback, {root, rootMargin: '25%'});
     } catch (e) {
-      io = new win.IntersectionObserver(ioCallback, {rootMargin});
+      io = new win.IntersectionObserver(ioCallback, {rootMargin: '150px'});
     }
     /** @private @const {!IntersectionObserver} */
     this.io_ = io;
