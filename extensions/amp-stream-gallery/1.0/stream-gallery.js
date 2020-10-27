@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
+import {setStyle} from '../../../src/style';
 import {
   useCallback,
   useLayoutEffect,
@@ -29,6 +30,7 @@ const DEFAULT_MEASUREMENT = {
   visibleCount: 1,
   maxContainerWidth: Number.MAX_VALUE,
 };
+const OUTSET_ARROWS_WIDTH = 100;
 
 /**
  * @param {!StreamGalleryDef.Props} props
@@ -38,6 +40,7 @@ export function StreamGallery({
   arrowPrev: customArrowPrev,
   arrowNext: customArrowNext,
   children,
+  className,
   extraSpace,
   insetArrowVisibility,
   loop,
@@ -48,9 +51,9 @@ export function StreamGallery({
   outsetArrows,
   peek = 0,
   snap,
-  style,
   ...rest
 }) {
+  const classes = useStyles();
   const ref = useRef(null);
   const [measurements, setMeasurements] = useState(DEFAULT_MEASUREMENT);
   const arrowPrev = useMemo(
@@ -72,8 +75,10 @@ export function StreamGallery({
         maxVisibleCount,
         minVisibleCount,
         children.length,
+        outsetArrows,
         peek,
-        containerWidth
+        containerWidth,
+        ref.current.node
       ),
     [
       maxItemWidth,
@@ -81,6 +86,7 @@ export function StreamGallery({
       maxVisibleCount,
       minVisibleCount,
       children.length,
+      outsetArrows,
       peek,
     ]
   );
@@ -90,7 +96,7 @@ export function StreamGallery({
     if (!ref.current) {
       return;
     }
-    const {node} = ref.current;
+    const node = ref.current.root;
     if (!node) {
       return;
     }
@@ -109,20 +115,12 @@ export function StreamGallery({
       advanceCount={Math.floor(measurements.visibleCount)}
       arrowPrev={arrowPrev}
       arrowNext={arrowNext}
+      className={`${className ?? ''} ${classes.gallery} ${classes[extraSpace]}`}
       controls={insetArrowVisibility}
       loop={loop}
       outsetArrows={outsetArrows}
       snap={snap}
       ref={ref}
-      style={{
-        ...style,
-        flexGrow: 1,
-        maxWidth:
-          measurements.maxContainerWidth >= Number.MAX_VALUE
-            ? ''
-            : measurements.maxContainerWidth,
-        justifyContent: extraSpace === 'around' ? 'center' : 'initial',
-      }}
       visibleCount={measurements.visibleCount}
       {...rest}
     >
@@ -168,8 +166,10 @@ function DefaultArrow({advance, by, outsetArrows, ...rest}) {
  * @param {number} maxVisibleCount
  * @param {number} minVisibleCount
  * @param {number} slideCount
+ * @param {boolean} outsetArrows
  * @param {number} peek
  * @param {(null|number)} containerWidth
+ * @param {Element} container
  * @return {{visibleCount: number, maxContainerWidth: number}}
  */
 function getVisibleCount(
@@ -178,8 +178,10 @@ function getVisibleCount(
   maxVisibleCount,
   minVisibleCount,
   slideCount,
+  outsetArrows,
   peek,
-  containerWidth
+  containerWidth,
+  container
 ) {
   if (!containerWidth) {
     return DEFAULT_MEASUREMENT;
@@ -197,9 +199,12 @@ function getVisibleCount(
    * width for each item.
    */
   const maxContainerWidth =
-    items > maxVisibleSlides
+    (items > maxVisibleSlides
       ? maxVisibleSlides * maxItemWidth
-      : items * maxItemWidth;
+      : items * maxItemWidth) + (outsetArrows ? OUTSET_ARROWS_WIDTH : 0);
+  const maxWidthValue =
+    maxContainerWidth < Number.MAX_VALUE ? `${maxContainerWidth}px` : '';
+  setStyle(container, 'max-width', maxWidthValue);
   return {visibleCount, maxContainerWidth};
 }
 

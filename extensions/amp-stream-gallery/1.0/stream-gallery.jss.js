@@ -16,6 +16,14 @@
 
 import {createUseStyles} from 'react-jss';
 
+const gallery = {
+  display: 'flex',
+  flexGrow: 1,
+  '&$around': {
+    justifyContent: 'center',
+  },
+};
+const around = {};
 const arrow = {
   position: 'relative',
   zIndex: 1,
@@ -58,6 +66,8 @@ const JSS = {
   arrow,
   arrowPrev,
   arrowNext,
+  around,
+  gallery,
   insetArrow,
   outsetArrow,
 };
