@@ -17,7 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {animateCollapse, animateExpand} from './animations';
 import {forwardRef} from '../../../src/preact/compat';
-import {hasOwn, omit} from '../../../src/utils/object';
+import {omit} from '../../../src/utils/object';
 
 import {
   randomIdGenerator,
@@ -112,7 +112,7 @@ function AccordionWithRef(
   const toggle = useCallback(
     (id) => {
       if (id) {
-        if (hasOwn(expandedMap, id)) {
+        if (id in expandedMap) {
           toggleExpanded(id);
         }
       } else {
@@ -130,7 +130,7 @@ function AccordionWithRef(
   const expand = useCallback(
     (id) => {
       if (id) {
-        if (hasOwn(expandedMap, id) && !isExpanded(id)) {
+        if (id in expandedMap && !isExpanded(id)) {
           toggleExpanded(id);
         }
       } else {
@@ -150,7 +150,7 @@ function AccordionWithRef(
   const collapse = useCallback(
     (id) => {
       if (id) {
-        if (hasOwn(expandedMap, id) && isExpanded(id)) {
+        if (id in expandedMap && isExpanded(id)) {
           toggleExpanded(id);
         }
       } else {
