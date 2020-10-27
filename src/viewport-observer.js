@@ -16,7 +16,7 @@
 import {devAssert} from '../src/log';
 import {getMode} from './mode';
 import {isIframed} from './dom';
-import {toWin} from '../src/types';
+import {toWin} from './types';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.
