@@ -453,6 +453,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         opt_context,
         {disallowCustom: this.config.remoteHTMLDisabled}
       );
+      iframe.title = this.element.title || 'Advertisement';
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
       return this.xOriginIframeHandler_.init(iframe);
     });
