@@ -166,11 +166,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   pauseCallback() {
     // Only send pauseVideo command if the player is playing. Otherwise
     // The player breaks if the user haven't played the video yet specially

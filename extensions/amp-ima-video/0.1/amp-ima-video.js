@@ -206,11 +206,6 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);

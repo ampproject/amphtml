@@ -146,11 +146,6 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   buildCallback() {
     this.videoid_ = userAssert(
       this.element.getAttribute('data-videoid'),
