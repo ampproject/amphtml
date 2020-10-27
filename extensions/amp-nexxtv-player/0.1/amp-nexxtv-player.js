@@ -137,11 +137,6 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   layoutCallback() {
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
