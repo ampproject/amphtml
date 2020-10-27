@@ -203,6 +203,9 @@ export class AmpStoryViewerMessagingHandler {
    * @private
    */
   onCustomDocumentUI_(data) {
-    this.storeService_.dispatch(Action.SET_CUSTOM_CONTROLS, data.controls);
+    this.storeService_.dispatch(
+      Action.SET_VIEWER_CUSTOM_CONTROLS,
+      data.controls
+    );
   }
 }
