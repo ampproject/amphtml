@@ -808,5 +808,11 @@
       "interactive_tests": "examples/visual-tests/amp-carousel/amp-carousel.js",
       "loading_complete_selectors": [".amp-carousel-button-next"],
     },
+    {
+      "url": "examples/visual-tests/amp-carousel/amp-carousel-slides.html",
+      "name": "amp-carousel-slides",
+      "interactive_tests": "examples/visual-tests/amp-carousel/amp-carousel-slides.js",
+      "loading_complete_selectors": [".amp-carousel-button-next"],
+    },
   ]
 }
