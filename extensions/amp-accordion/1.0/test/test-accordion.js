@@ -19,7 +19,6 @@ import {Accordion, AccordionSection} from '../accordion';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Accordion preact component', {}, (env) => {
-  let win;
   describe('standalone accordion section', () => {
     it('should render a default section', () => {
       const wrapper = mount(
@@ -468,7 +467,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     describe('multi-expand accordion', () => {
       beforeEach(() => {
-        ref = Preact.useRef();
+        ref = Preact.createRef();
         wrapper = mount(
           <Accordion ref={ref}>
             <AccordionSection key={1} expanded header="header1" id="section1">

@@ -16,7 +16,6 @@
 
 import * as Preact from '../../../src/preact';
 import {Accordion, AccordionSection} from './accordion';
-import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
@@ -39,23 +38,14 @@ const SECTION_POST_RENDER = '__AMP_PR';
 class AmpAccordion extends PreactBaseElement {
   /** @override */
   init() {
-    this.registerApiAction(
-      'toggle',
-      (api, invocation) =>
-        api.toggle(invocation.args && invocation.args['section']),
-      ActionTrust.LOW
+    this.registerApiAction('toggle', (api, invocation) =>
+      api.toggle(invocation.args && invocation.args['section'])
     );
-    this.registerApiAction(
-      'expand',
-      (api, invocation) =>
-        api.expand(invocation.args && invocation.args['section']),
-      ActionTrust.LOW
+    this.registerApiAction('expand', (api, invocation) =>
+      api.expand(invocation.args && invocation.args['section'])
     );
-    this.registerApiAction(
-      'collapse',
-      (api, invocation) =>
-        api.collapse(invocation.args && invocation.args['section']),
-      ActionTrust.LOW
+    this.registerApiAction('collapse', (api, invocation) =>
+      api.collapse(invocation.args && invocation.args['section'])
     );
 
     const {element} = this;
