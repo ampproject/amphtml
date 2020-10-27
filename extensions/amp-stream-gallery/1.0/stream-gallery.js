@@ -112,7 +112,9 @@ export function StreamGallery({
       advanceCount={Math.floor(visibleCount)}
       arrowPrev={arrowPrev}
       arrowNext={arrowNext}
-      className={`${className ?? ''} ${classes.gallery} ${classes[extraSpace]}`}
+      className={`${className ?? ''} ${classes.gallery} ${
+        extraSpace === 'around' ? classes.extraSpace : ''
+      }`}
       controls={insetArrowVisibility}
       loop={loop}
       outsetArrows={outsetArrows}
