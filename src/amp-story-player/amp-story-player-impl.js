@@ -144,11 +144,23 @@ let BehaviorDef;
 
 /**
  * @typedef {{
- *   controls: (!Array),
+ *   controls: (!Array<!ViewerControlDef>),
  *   behavior: !BehaviorDef,
  * }}
  */
 let ConfigDef;
+
+/**
+ * @typedef {{
+ *   name: string,
+ *   state: (?string),
+ *   event: (?string),
+ *   visibility: (?string),
+ *   position: (?string),
+ *   backgroundImageUrl: (?string)
+ * }}
+ */
+export let ViewerControlDef;
 
 /** @type {string} */
 const TAG = 'amp-story-player';
@@ -614,7 +626,8 @@ export class AmpStoryPlayer {
   updateControlsStateForAllStories_(storyIdx) {
     // Disables skip-next-button when story is the last one in the player.
     if (storyIdx === this.stories_.length - 1) {
-      const skipButtonIdx = this.playerConfig_.controls.findIndex(
+      const skipButtonIdx = findIndex(
+        this.playerConfig_.controls,
         (control) => control.name === 'skip-next-button'
       );
 
@@ -1267,7 +1280,7 @@ export class AmpStoryPlayer {
         );
         break;
       case AMP_STORY_PLAYER_EVENT:
-        this.onPlayerEvent_(data.value);
+        this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
       default:
         break;

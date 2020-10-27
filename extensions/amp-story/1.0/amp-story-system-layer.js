@@ -356,10 +356,10 @@ export class SystemLayer {
     /** @private {?number|?string} */
     this.timeoutId_ = null;
 
-    /** @private @const {?../../../src/service/viewer-interface.ViewerInterface} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private @const {?AmpStoryViewerMessaging} */
+    /** @private {?AmpStoryViewerMessagingHandler} */
     this.viewerMessagingHandler_ = null;
   }
 
@@ -470,11 +470,11 @@ export class SystemLayer {
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
       } else if (matches(target, `.${CLOSE_CLASS}, .${CLOSE_CLASS} *`)) {
-        this.onViewerControlClick_(event.target);
+        this.onViewerControlClick_(dev().assertElement(event.target));
       } else if (
         matches(target, `.${SKIP_NEXT_CLASS}, .${SKIP_NEXT_CLASS} *`)
       ) {
-        this.onViewerControlClick_(event.target);
+        this.onViewerControlClick_(dev().assertElement(event.target));
       }
     });
 
@@ -909,7 +909,7 @@ export class SystemLayer {
   onShareClick_(event) {
     event.preventDefault();
     if (event.target[VIEWER_CONTROL_EVENT_NAME]) {
-      this.onViewerControlClick_(event.target);
+      this.onViewerControlClick_(dev().assertElement(event.target));
       return;
     }
 
@@ -966,7 +966,7 @@ export class SystemLayer {
   /**
    * Reacts to a custom configuration change coming from the player level.
    * Updates UI to match configuration described by publisher.
-   * @param {!Array<!Object>} controls
+   * @param {!Array<!../../../src/amp-story-player/amp-story-player-impl.ViewerControlDef>} controls
    * @private
    */
   onViewerCustomControls_(controls) {
