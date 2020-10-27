@@ -374,9 +374,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
     impl.isVerifiedAmpCreative_ = true;
     impl.reattemptToExpandFluidCreative_ = true;
     // Should do nothing
-    impl.viewportCallback_(true);
+    impl.viewportCallbackTemp(true);
     expect(attemptChangeHeightStub).to.not.be.called;
-    impl.viewportCallback_(false);
+    impl.viewportCallbackTemp(false);
     expect(attemptChangeHeightStub).to.be.calledOnce;
   });
 
