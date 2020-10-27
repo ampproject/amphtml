@@ -69,6 +69,7 @@ class AmpBeOpinion extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'beopinion');
+    iframe.title = this.element.title || 'BeOpinion content';
     this.applyFillContent(iframe);
     listenFor(
       iframe,
