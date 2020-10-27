@@ -72,7 +72,7 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
         threshold: undefined,
       });
       expect(ctorSpy).calledWith(noop, {
-        rootMargin: '25%',
+        rootMargin: '150px',
         threshold: undefined,
       });
     });
