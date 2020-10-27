@@ -146,7 +146,7 @@ describes.realWin(
         });
       });
 
-      it('should propagate consent state to ad iframe', () => {
+      it('should propagate consent values to ad iframe', () => {
         ad3p.element.setAttribute('data-block-on-consent', '');
         env.sandbox
           .stub(consent, 'getConsentPolicyState')
@@ -154,6 +154,9 @@ describes.realWin(
         env.sandbox
           .stub(consent, 'getConsentPolicySharedData')
           .resolves({a: 1, b: 2});
+        env.sandbox
+          .stub(consent, 'getConsentMetadata')
+          .resolves({consentStringType: 2, gdprApplies: true});
 
         return ad3p.layoutCallback().then(() => {
           const frame = ad3p.element.querySelector('iframe[src]');
@@ -165,6 +168,10 @@ describes.realWin(
             CONSENT_POLICY_STATE.SUFFICIENT
           );
           expect(data._context.consentSharedData).to.deep.equal({a: 1, b: 2});
+          expect(data._context.initialConsentMetadata).to.deep.equal({
+            consentStringType: 2,
+            gdprApplies: true,
+          });
         });
       });
 

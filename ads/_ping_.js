@@ -89,6 +89,10 @@ export function _ping_(global, data) {
       const TAG = 'consentStringValue';
       dev().info(TAG, global.context.initialConsentValue);
     }
+    if (global.context.initialConsentMetadata) {
+      const TAG = 'consentMetadata';
+      dev().info(TAG, global.context.initialConsentMetadata);
+    }
   } else {
     global.setTimeout(() => {
       global.context.noContentAvailable();
