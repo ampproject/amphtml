@@ -366,6 +366,15 @@ const strings = {
       'Text for a warning screen that informs the user that ' +
       'their browser does not support stories.',
   },
+  [LocalizedStringId.AMP_STORY_PAUSE_LABEL_PAUSE]: {
+    string: 'Pause',
+    description: 'Label for pausing a video as it plays in a story page.',
+  },
+  [LocalizedStringId.AMP_STORY_PAUSE_LABEL_PLAY]: {
+    string: 'Play',
+    description:
+      'Label for playing (un-pausing) a video as it plays in a story page.',
+  },
 };
 
 export default strings;

@@ -1229,6 +1229,12 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
+  {
+    name: 'amp-story-pause',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 /**
