@@ -37,18 +37,18 @@ function AccordionWithActions(props) {
     <section>
       <Accordion ref={ref} {...props} />
       <div style={{marginTop: 8}}>
-        <button onClick={() => ref.current.toggle('blah')}>
-          Toggle('blah')
+        <button onClick={() => ref.current.toggle('section1')}>
+          toggle(section1)
         </button>
-        <button onClick={() => ref.current.toggle()}>Toggle All</button>' ---- '
-        <button onClick={() => ref.current.expand('blah')}>
-          Expand('blah')
+        <button onClick={() => ref.current.toggle()}>toggle all</button>
+        <button onClick={() => ref.current.expand('section1')}>
+          expand(section1)
         </button>
-        <button onClick={() => ref.current.expand()}>Expand All</button>' ---- '
-        <button onClick={() => ref.current.collapse('blah')}>
-          Collapse('blah')
+        <button onClick={() => ref.current.expand()}>expand all</button>
+        <button onClick={() => ref.current.collapse('section1')}>
+          collapse(section1)
         </button>
-        <button onClick={() => ref.current.collapse()}>Collapse All</button>
+        <button onClick={() => ref.current.collapse()}>collapse all</button>
       </div>
     </section>
   );
@@ -63,18 +63,13 @@ export const _default = () => {
         expandSingleSection={expandSingleSection}
         animate={animate}
       >
-        <AccordionSection key={1} header={<h2>Section 1</h2>}>
+        <AccordionSection id="section1" key={1} header={<h2>Section 1</h2>}>
           <p>Content in section 1.</p>
         </AccordionSection>
         <AccordionSection key={2} header={<h2>Section 2</h2>}>
           <div>Content in section 2.</div>
         </AccordionSection>
-        <AccordionSection
-          id="blah"
-          key={3}
-          expanded
-          header={<h2>Section 3</h2>}
-        >
+        <AccordionSection key={3} expanded header={<h2>Section 3</h2>}>
           <div>Content in section 2.</div>
         </AccordionSection>
       </AccordionWithActions>

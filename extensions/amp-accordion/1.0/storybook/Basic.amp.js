@@ -33,22 +33,40 @@ export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
   return (
-    <amp-accordion
-      expand-single-section={expandSingleSection}
-      animate={animate}
-    >
-      <section>
-        <h2>Section 1</h2>
-        <p>Content in section 1.</p>
-      </section>
-      <section>
-        <h2>Section 2</h2>
-        <div>Content in section 2.</div>
-      </section>
-      <section expanded>
-        <h2>Section 3</h2>
-        <div>Content in section 3.</div>
-      </section>
-    </amp-accordion>
+    <main>
+      <amp-accordion
+        id="accordion"
+        expand-single-section={expandSingleSection}
+        animate={animate}
+      >
+        <section id="section1">
+          <h2>Section 1</h2>
+          <p>Content in section 1.</p>
+        </section>
+        <section>
+          <h2>Section 2</h2>
+          <div>Content in section 2.</div>
+        </section>
+        <section expanded>
+          <h2>Section 3</h2>
+          <div>Content in section 3.</div>
+        </section>
+      </amp-accordion>
+
+      <div class="buttons" style={{marginTop: 8}}>
+        <button on="tap:accordion.toggle(section='section1')">
+          toggle(section1)
+        </button>
+        <button on="tap:accordion.toggle()">toggle all</button>
+        <button on="tap:accordion.expand(section='section1')">
+          expand(section1)
+        </button>
+        <button on="tap:accordion.expand()">expand all</button>
+        <button on="tap:accordion.collapse(section='section1')">
+          collapse(section1)
+        </button>
+        <button on="tap:accordion.collapse()">collapse all</button>
+      </div>
+    </main>
   );
 };

@@ -94,7 +94,6 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     let wrapper;
 
     beforeEach(() => {
-      win = env.win;
       wrapper = mount(
         <Accordion>
           <AccordionSection key={1} expanded header="header1">
@@ -106,8 +105,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
           <AccordionSection key={3} header="header3">
             content3
           </AccordionSection>
-        </Accordion>,
-        {attachTo: win}
+        </Accordion>
       );
     });
 
@@ -457,6 +455,200 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
       // Immediately hidden, which means animation has not been even tried.
       expect(content.hidden).to.be.true;
+    });
+  });
+
+  describe('imperative api', () => {
+    let wrapper;
+    let ref;
+
+    let section1;
+    let section2;
+    let section3;
+
+    describe('multi-expand accordion', () => {
+      beforeEach(() => {
+        ref = Preact.useRef();
+        wrapper = mount(
+          <Accordion ref={ref}>
+            <AccordionSection key={1} expanded header="header1" id="section1">
+              content1
+            </AccordionSection>
+            <AccordionSection key={2} header="header2" id="section2">
+              content2
+            </AccordionSection>
+            <AccordionSection key={3} header="header3">
+              content3
+            </AccordionSection>
+          </Accordion>
+        );
+
+        const sections = wrapper.find(AccordionSection);
+        section1 = sections.at(0).getDOMNode();
+        section2 = sections.at(1).getDOMNode();
+        section3 = sections.at(2).getDOMNode();
+      });
+
+      it('toggle all', () => {
+        ref.current.toggle();
+        wrapper.update();
+
+        // All sections are toggled
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+      });
+
+      it('toggle one section', async () => {
+        ref.current.toggle('section1');
+        wrapper.update();
+
+        // Only section 1 is toggled
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('expand all', async () => {
+        ref.current.expand();
+        wrapper.update();
+
+        // All sections are expanded
+        expect(section1).to.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+      });
+
+      it('expand one section', async () => {
+        // Collapse first section to setup the test
+        ref.current.collapse();
+        wrapper.update();
+
+        // Expand the first section
+        ref.current.expand('section1');
+        wrapper.update();
+
+        // Only the first section is expanded
+        expect(section1).to.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('collapse all', async () => {
+        ref.current.collapse();
+        wrapper.update();
+
+        // All sections are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('collapse one section', async () => {
+        ref.current.collapse('section1');
+        wrapper.update();
+
+        // Only the first section is collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+    });
+
+    describe('single-expand accordion', () => {
+      beforeEach(() => {
+        ref = Preact.useRef();
+        wrapper = mount(
+          <Accordion ref={ref} expandSingleSection>
+            <AccordionSection key={1} expanded header="header1" id="section1">
+              content1
+            </AccordionSection>
+            <AccordionSection key={2} header="header2" id="section2">
+              content2
+            </AccordionSection>
+            <AccordionSection key={3} header="header3">
+              content3
+            </AccordionSection>
+          </Accordion>
+        );
+
+        const sections = wrapper.find(AccordionSection);
+        section1 = sections.at(0).getDOMNode();
+        section2 = sections.at(1).getDOMNode();
+        section3 = sections.at(2).getDOMNode();
+      });
+
+      it('toggle all', async () => {
+        ref.current.toggle();
+        wrapper.update();
+
+        // Accordion is unchanged (toggle does nothing for single-expand
+        // accordion)
+        expect(section1).to.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('toggle one section', async () => {
+        ref.current.toggle('section2');
+        wrapper.update();
+
+        // Verify that the second section is expanded and the first
+        // section is un-expanded
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+
+        ref.current.toggle('section2');
+        wrapper.update();
+
+        // Verify that the second section is collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('expand all', async () => {
+        ref.current.expand();
+        wrapper.update();
+
+        // Accordion is unchanged (expand does nothing for single-expand
+        // accordion)
+        expect(section1).to.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('expand one section', async () => {
+        ref.current.expand('section2');
+        wrapper.update();
+
+        // Verify that the second section is expanded and the first
+        // section is un-expanded
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('collapse all', async () => {
+        ref.current.collapse();
+        wrapper.update();
+
+        // All sections are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('collapse one section', async () => {
+        ref.current.collapse('section1');
+        wrapper.update();
+
+        // Section 1 is collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
     });
   });
 });

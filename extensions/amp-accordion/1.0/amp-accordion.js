@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {Accordion, AccordionSection} from './accordion';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
@@ -34,9 +35,29 @@ const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
 
+/** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
   /** @override */
   init() {
+    this.registerApiAction(
+      'toggle',
+      (api, invocation) =>
+        api.toggle(invocation.args && invocation.args['section']),
+      ActionTrust.LOW
+    );
+    this.registerApiAction(
+      'expand',
+      (api, invocation) =>
+        api.expand(invocation.args && invocation.args['section']),
+      ActionTrust.LOW
+    );
+    this.registerApiAction(
+      'collapse',
+      (api, invocation) =>
+        api.collapse(invocation.args && invocation.args['section']),
+      ActionTrust.LOW
+    );
+
     const {element} = this;
 
     const mu = new MutationObserver(() => {
@@ -94,6 +115,7 @@ function getState(element, mu) {
       'headerAs': headerShim,
       'contentAs': contentShim,
       'expanded': expanded,
+      'id': section.getAttribute('id'),
     });
     return <AccordionSection {...props} />;
   });

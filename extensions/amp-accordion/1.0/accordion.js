@@ -47,7 +47,7 @@ const generateRandomId = randomIdGenerator(100000);
 
 /**
  * @param {!AccordionDef.Props} props
- * @param ref
+ * @param {{current: (!AccordionDef.AccordionApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function AccordionWithRef(
@@ -116,12 +116,15 @@ function AccordionWithRef(
           toggleExpanded(id);
         }
       } else {
-        for (const k in expandedMap) {
-          toggleExpanded(k);
+        // Toggle all should do nothing when expandSingleSection is true
+        if (!expandSingleSection) {
+          for (const k in expandedMap) {
+            toggleExpanded(k);
+          }
         }
       }
     },
-    [expandedMap, toggleExpanded]
+    [expandedMap, toggleExpanded, expandSingleSection]
   );
 
   const expand = useCallback(
@@ -131,14 +134,17 @@ function AccordionWithRef(
           toggleExpanded(id);
         }
       } else {
-        for (const k in expandedMap) {
-          if (!isExpanded(k)) {
-            toggleExpanded(k);
+        // Expand all should do nothing when expandSingleSection is true
+        if (!expandSingleSection) {
+          for (const k in expandedMap) {
+            if (!isExpanded(k)) {
+              toggleExpanded(k);
+            }
           }
         }
       }
     },
-    [expandedMap, toggleExpanded, isExpanded]
+    [expandedMap, toggleExpanded, isExpanded, expandSingleSection]
   );
 
   const collapse = useCallback(
@@ -160,13 +166,12 @@ function AccordionWithRef(
 
   useImperativeHandle(
     ref,
-    () => {
-      return {
+    () =>
+      /** @type {!AccordionDef.AccordionApi} */ ({
         toggle,
         expand,
         collapse,
-      };
-    },
+      }),
     [toggle, collapse, expand]
   );
 
@@ -229,12 +234,12 @@ export function AccordionSection({
   animate: defaultAnimate = false,
   headerClassName = '',
   contentClassName = '',
-  id,
+  id: propId,
   header,
   children,
   ...rest
 }) {
-  const [internalId] = useState(id || generateSectionId);
+  const [id] = useState(propId || generateSectionId);
   const [suffix] = useState(generateRandomId);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
   const contentRef = useRef(null);
@@ -255,23 +260,21 @@ export function AccordionSection({
 
   useLayoutEffect(() => {
     if (registerSection) {
-      return registerSection(internalId, defaultExpanded);
+      return registerSection(id, defaultExpanded);
     }
-  }, [registerSection, internalId, defaultExpanded]);
+  }, [registerSection, id, defaultExpanded]);
 
   const expandHandler = useCallback(() => {
     if (toggleExpanded) {
-      toggleExpanded(internalId);
+      toggleExpanded(id);
     } else {
       setExpandedState((prev) => !prev);
     }
-  }, [internalId, toggleExpanded]);
+  }, [id, toggleExpanded]);
 
-  const expanded = isExpanded
-    ? isExpanded(internalId, defaultExpanded)
-    : expandedState;
+  const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}-content-${internalId}-${suffix}`;
+  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
   const classes = useStyles();
 
   useLayoutEffect(() => {
