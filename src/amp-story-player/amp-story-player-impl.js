@@ -85,6 +85,7 @@ const MAX_IFRAMES = 3;
 const BUTTON_TYPES = {
   BACK: 'back-button',
   CLOSE: 'close-button',
+  SKIP_NEXT: 'skip-next-button',
 };
 
 /** @enum {string} */
@@ -96,9 +97,10 @@ const BUTTON_CLASSES = {
 };
 
 /** @enum {string} */
-const BUTTON_EVENTS = {
+export const VIEWER_CONTROL_EVENTS = {
   [BUTTON_TYPES.BACK]: 'amp-story-player-back',
   [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
+  [BUTTON_TYPES.SKIP_NEXT]: 'amp-story-player-skip-next',
 };
 
 /** @enum {string} */
@@ -114,12 +116,16 @@ const STORY_MESSAGE_STATE_TYPE = {
   STORY_PROGRESS: 'STORY_PROGRESS',
 };
 
+/** @const {string} */
+export const AMP_STORY_PLAYER_EVENT = 'AMP_STORY_PLAYER_EVENT';
+
 /** @typedef {{ state:string, value:(boolean|string) }} */
 let DocumentStateTypeDef;
 
 /**
  * @typedef {{
  *   href: string,
+ *   idx: number,
  *   iframeIdx: number,
  *   title: (?string),
  *   poster: (?string)
@@ -138,11 +144,23 @@ let BehaviorDef;
 
 /**
  * @typedef {{
- *   controls: (!Array),
+ *   controls: (!Array<!ViewerControlDef>),
  *   behavior: !BehaviorDef,
  * }}
  */
 let ConfigDef;
+
+/**
+ * @typedef {{
+ *   name: string,
+ *   state: (?string),
+ *   event: (?string),
+ *   visibility: (?string),
+ *   position: (?string),
+ *   backgroundImageUrl: (?string)
+ * }}
+ */
+export let ViewerControlDef;
 
 /** @type {string} */
 const TAG = 'amp-story-player';
@@ -270,7 +288,7 @@ export class AmpStoryPlayer {
       const story = stories[i];
       story.iframeIdx = -1;
 
-      this.stories_.push(story);
+      story.idx = this.stories_.push(story) - 1;
 
       if (this.iframes_.length < MAX_IFRAMES) {
         this.createIframeForStory_(this.stories_.length - 1);
@@ -355,12 +373,13 @@ export class AmpStoryPlayer {
     const anchorEls = toArray(this.element_.querySelectorAll('a'));
 
     this.stories_ = anchorEls.map(
-      (anchorEl) =>
+      (anchorEl, idx) =>
         /** @type {!StoryDef} */ ({
           href: anchorEl.href,
           title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
           poster: anchorEl.getAttribute('data-poster-portrait-src'),
           iframeIdx: -1,
+          idx,
         })
     );
   }
@@ -456,7 +475,7 @@ export class AmpStoryPlayer {
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
+        createCustomEvent(this.win_, VIEWER_CONTROL_EVENTS[option], dict({}))
       );
     });
   }
@@ -584,6 +603,8 @@ export class AmpStoryPlayer {
           });
 
           if (this.playerConfig_ && this.playerConfig_.controls) {
+            this.updateControlsStateForAllStories_(story.idx);
+
             messaging.sendRequest(
               'customDocumentUI',
               dict({'controls': this.playerConfig_.controls}),
@@ -599,6 +620,25 @@ export class AmpStoryPlayer {
         }
       );
     });
+  }
+
+  /**
+   * Updates the controls config for a given story.
+   * @param {number} storyIdx
+   * @private
+   */
+  updateControlsStateForAllStories_(storyIdx) {
+    // Disables skip-next-button when story is the last one in the player.
+    if (storyIdx === this.stories_.length - 1) {
+      const skipButtonIdx = findIndex(
+        this.playerConfig_.controls,
+        (control) => control.name === 'skip-next-button'
+      );
+
+      if (skipButtonIdx >= 0) {
+        this.playerConfig_.controls[skipButtonIdx].state = 'disabled';
+      }
+    }
   }
 
   /**
@@ -1249,7 +1289,28 @@ export class AmpStoryPlayer {
           messaging
         );
         break;
+      case AMP_STORY_PLAYER_EVENT:
+        this.onPlayerEvent_(/** @type {string} */ (data.value));
+        break;
       default:
+        break;
+    }
+  }
+
+  /**
+   * Reacts to events coming from the story.
+   * @private
+   * @param {string} value
+   */
+  onPlayerEvent_(value) {
+    switch (value) {
+      case VIEWER_CONTROL_EVENTS[BUTTON_TYPES.SKIP_NEXT]:
+        this.next_();
+        break;
+      default:
+        this.element_.dispatchEvent(
+          createCustomEvent(this.win_, value, dict({}))
+        );
         break;
     }
   }
