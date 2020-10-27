@@ -295,11 +295,6 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   layoutCallback() {
     this.video_ = dev().assertElement(this.video_);
 
