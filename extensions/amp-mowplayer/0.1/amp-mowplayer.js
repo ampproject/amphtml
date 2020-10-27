@@ -95,11 +95,6 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   buildCallback() {
     this.mediaid_ = userAssert(
       this.element.getAttribute('data-mediaid'),
