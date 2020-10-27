@@ -20,14 +20,13 @@ import {mount} from 'enzyme';
 
 describes.sandboxed('StreamGallery preact component', {}, () => {
   it('should render BaseCarousel', () => {
-    const jsx = (
+    const wrapper = mount(
       <StreamGallery>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
       </StreamGallery>
     );
-    const wrapper = mount(jsx);
     const carousel = wrapper.find('BaseCarousel');
     expect(carousel).to.have.lengthOf(1);
     expect(wrapper.find('Arrow')).to.have.lengthOf(2);
@@ -43,14 +42,13 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
   it('should render custom Arrows when given', () => {
     const arrowPrev = <div class="my-custom-arrow-prev">left</div>;
     const arrowNext = <div class="my-custom-arrow-next">right</div>;
-    const jsx = (
+    const wrapper = mount(
       <StreamGallery arrowPrev={arrowPrev} arrowNext={arrowNext}>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
       </StreamGallery>
     );
-    const wrapper = mount(jsx);
     const arrows = wrapper.find('Arrow');
     expect(arrows).to.have.lengthOf(2);
     expect(arrows.first().props().customArrow).to.equal(arrowPrev);
@@ -58,14 +56,13 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
   });
 
   it('should not loop by default', () => {
-    const jsx = (
+    const wrapper = mount(
       <StreamGallery>
         <div class="my-slide">slide 1</div>
         <div class="my-slide">slide 2</div>
         <div class="my-slide">slide 3</div>
       </StreamGallery>
     );
-    const wrapper = mount(jsx);
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
 
@@ -77,14 +74,13 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
   });
 
   it('should render in preparation for looping with loop prop', () => {
-    const jsx = (
+    const wrapper = mount(
       <StreamGallery loop>
         <div class="my-slide">slide 1</div>
         <div class="my-slide">slide 2</div>
         <div class="my-slide">slide 3</div>
       </StreamGallery>
     );
-    const wrapper = mount(jsx);
     const slides = wrapper.find('[data-slide]');
     expect(slides).to.have.lengthOf(3);
 
