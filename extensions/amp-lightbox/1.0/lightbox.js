@@ -19,7 +19,6 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {
-  useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useRef,

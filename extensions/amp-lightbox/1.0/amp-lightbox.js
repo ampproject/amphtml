@@ -17,7 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-// import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -27,6 +27,7 @@ class AmpLightbox extends PreactBaseElement {
   init() {
     this.registerApiAction('open', (api) => api.open(), ActionTrust.DEFAULT);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.DEFAULT);
+    return dict({'open': false});
   }
 }
 
@@ -47,6 +48,15 @@ AmpLightbox['passthrough'] = true;
 
 /** @override */
 AmpLightbox['layoutSizeDefined'] = true;
+
+/** @override */
+AmpLightbox['children'] = {
+  'children': {
+    name: 'children',
+    selector: '*',
+    single: false,
+  },
+};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpLightbox);

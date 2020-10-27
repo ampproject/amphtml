@@ -29,14 +29,17 @@ export default {
 };
 
 export const Default = () => {
-  const id = text('id', 'lightbox');
   const animateIn = text('animate-in', 'fade-in');
   return (
-    <amp-lightbox
-      id={id}
-      layout="nodisplay"
-      animate-in={animateIn}
-    ></amp-lightbox>
+    <main>
+      <amp-lightbox id="lightbox" layout="nodisplay" animate-in={animateIn}>
+        <p>Test</p>
+      </amp-lightbox>
+      <div class="buttons" style={{marginTop: 8}}>
+        <button on="tap:lightbox.open">Open</button>
+        <button on="tap:lightbox.close">Close</button>
+      </div>
+    </main>
   );
 };
 
