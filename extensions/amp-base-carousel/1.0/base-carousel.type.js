@@ -27,6 +27,7 @@ var BaseCarouselDef = {};
  *   children: (!PreactDef.Renderable),
  *   controls: (string|undefined),
  *   loop: (boolean|undefined),
+ *   mixedLength: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
  *   snap: (boolean|undefined),
  *   visibleCount: (number|undefined),
@@ -39,6 +40,7 @@ BaseCarouselDef.Props;
  *   advanceCount: (number|undefined),
  *   children: !Array<PreactDef.Renderable>,
  *   loop: (boolean|undefined),
+ *   mixedLength: (boolean|undefined),
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),
  *   snap: (boolean|undefined),
@@ -51,6 +53,7 @@ BaseCarouselDef.ScrollerProps;
  * @typedef {{
  *   children: !Array<PreactDef.Renderable>,
  *   loop: (boolean|undefined),
+ *   mixedLength: (boolean|undefined),
  *   offsetRef: {current: (null|number)},
  *   pivotIndex: number,
  *   restingIndex: number,

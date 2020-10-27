@@ -179,6 +179,7 @@ class AmpImaVideo extends AMP.BaseElement {
         {initialConsentState},
         {allowFullscreen: true}
       );
+      iframe.title = this.element.title || 'IMA video';
 
       this.applyFillContent(iframe);
 
@@ -203,11 +204,6 @@ class AmpImaVideo extends AMP.BaseElement {
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */

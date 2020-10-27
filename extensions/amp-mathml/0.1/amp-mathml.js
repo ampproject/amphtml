@@ -67,6 +67,7 @@ export class AmpMathml extends AMP.BaseElement {
    */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'mathml');
+    iframe.title = this.element.title || 'MathML formula';
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(
