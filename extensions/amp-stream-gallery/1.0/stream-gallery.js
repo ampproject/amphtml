@@ -26,10 +26,7 @@ import {
 } from '../../../src/preact';
 import {useStyles} from './stream-gallery.jss';
 
-const DEFAULT_MEASUREMENT = {
-  visibleCount: 1,
-  maxContainerWidth: Number.MAX_VALUE,
-};
+const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
 
 /**
@@ -55,7 +52,7 @@ export function StreamGallery({
 }) {
   const classes = useStyles();
   const ref = useRef(null);
-  const [measurements, setMeasurements] = useState(DEFAULT_MEASUREMENT);
+  const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
   const arrowPrev = useMemo(
     () =>
       customArrowPrev ?? <DefaultArrow by={-1} outsetArrows={outsetArrows} />,
@@ -104,7 +101,7 @@ export function StreamGallery({
     const win = node.ownerDocument.defaultView;
     const observer = new win.ResizeObserver((entries) => {
       const last = entries[entries.length - 1];
-      setMeasurements(measure(last.contentRect.width));
+      setVisibleCount(measure(last.contentRect.width));
     });
     observer.observe(node);
     return () => observer.disconnect();
@@ -112,7 +109,7 @@ export function StreamGallery({
 
   return (
     <BaseCarousel
-      advanceCount={Math.floor(measurements.visibleCount)}
+      advanceCount={Math.floor(visibleCount)}
       arrowPrev={arrowPrev}
       arrowNext={arrowNext}
       className={`${className ?? ''} ${classes.gallery} ${classes[extraSpace]}`}
@@ -121,7 +118,7 @@ export function StreamGallery({
       outsetArrows={outsetArrows}
       snap={snap}
       ref={ref}
-      visibleCount={measurements.visibleCount}
+      visibleCount={visibleCount}
       {...rest}
     >
       {children}
@@ -184,7 +181,7 @@ function getVisibleCount(
   container
 ) {
   if (!containerWidth) {
-    return DEFAULT_MEASUREMENT;
+    return DEFAULT_VISIBLE_COUNT;
   }
   const items = getItemsForWidth(containerWidth, minItemWidth, peek);
   const maxVisibleSlides = Math.min(slideCount, maxVisibleCount);
@@ -205,7 +202,7 @@ function getVisibleCount(
   const maxWidthValue =
     maxContainerWidth < Number.MAX_VALUE ? `${maxContainerWidth}px` : '';
   setStyle(container, 'max-width', maxWidthValue);
-  return {visibleCount, maxContainerWidth};
+  return visibleCount;
 }
 
 /**
@@ -222,5 +219,5 @@ function getItemsForWidth(containerWidth, itemWidth, peek) {
   const fractionalItems = availableWidth / itemWidth;
   const wholeItems = Math.floor(fractionalItems);
   // Always show at least 1 whole item.
-  return Math.max(1, wholeItems) + peek;
+  return Math.max(DEFAULT_VISIBLE_COUNT, wholeItems) + peek;
 }
