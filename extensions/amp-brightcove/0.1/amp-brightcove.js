@@ -101,13 +101,6 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {
-      visible,
-    });
-  }
-
-  /** @override */
   buildCallback() {
     this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
 
