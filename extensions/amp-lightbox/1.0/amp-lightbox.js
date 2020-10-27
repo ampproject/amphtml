@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+// import {dict} from '../../../src/utils/object';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
-class AmpLightbox extends PreactBaseElement {}
+class AmpLightbox extends PreactBaseElement {
+  /** @override */
+  init() {
+    this.registerApiAction('open', (api) => api.open(), ActionTrust.DEFAULT);
+    this.registerApiAction('close', (api) => api.close(), ActionTrust.DEFAULT);
+  }
+}
 
 /** @override */
 AmpLightbox['Component'] = Lightbox;

@@ -18,7 +18,12 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
-import {useLayoutEffect, useRef} from '../../../src/preact';
+import {
+  useCallback,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+} from '../../../src/preact';
 
 const ANIMATION_PRESETS = {
   'fade-in': [{opacity: 0}, {opacity: 1}],
@@ -49,6 +54,15 @@ function LightboxWithRef({
   ...rest
 }) {
   const lightboxRef = useRef();
+
+  useImperativeHandle(lightboxRef, () => ({
+    open: () => {
+      open = true;
+    },
+    close: () => {
+      open = false;
+    },
+  }));
 
   useLayoutEffect(() => {
     if (open) {
