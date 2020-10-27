@@ -18,7 +18,6 @@ import * as Preact from '../../../src/preact';
 import {animateCollapse, animateExpand} from './animations';
 import {forwardRef} from '../../../src/preact/compat';
 import {omit} from '../../../src/utils/object';
-
 import {
   randomIdGenerator,
   sequentialIdGenerator,
@@ -239,7 +238,8 @@ export function AccordionSection({
   children,
   ...rest
 }) {
-  const [id] = useState(propId || generateSectionId);
+  const [genId] = useState(generateSectionId);
+  const id = propId || genId;
   const [suffix] = useState(generateRandomId);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
   const contentRef = useRef(null);

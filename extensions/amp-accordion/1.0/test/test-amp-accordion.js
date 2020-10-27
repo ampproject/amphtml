@@ -445,6 +445,7 @@ describes.realWin(
 
           section1 = element.children[0];
           section2 = element.children[1];
+          section3 = element.children[2];
         });
 
         it('toggle all', async () => {
