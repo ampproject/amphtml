@@ -91,7 +91,9 @@ export function StreamGallery({
     if (!node) {
       return;
     }
-    const observer = new ResizeObserver((entries) => {
+    // Use local window.
+    const win = node.ownerDocument.defaultView;
+    const observer = new win.ResizeObserver((entries) => {
       const last = entries[entries.length - 1];
       setMeasurements(measure(last.contentRect.width));
     });

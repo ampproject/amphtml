@@ -29,7 +29,6 @@ describes.realWin(
   'amp-stream-gallery',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-stream-gallery:1.0'],
     },
   },
@@ -39,19 +38,6 @@ describes.realWin(
     const userSuppliedChildren = [];
 
     const styles = useStyles();
-
-    // ignore ResizeObserver loop limit exceeded
-    // this is ok in several scenarios according to
-    // https://github.com/WICG/resize-observer/issues/38
-    before(() => {
-      window.onerror = (err) => {
-        if (err === 'ResizeObserver loop limit exceeded') {
-          return false;
-        } else {
-          return onerror(err);
-        }
-      };
-    });
 
     beforeEach(async () => {
       win = env.win;
@@ -76,10 +62,6 @@ describes.realWin(
 
     afterEach(() => {
       toggleExperiment(win, 'amp-stream-gallery-bento', false, true);
-    });
-
-    after(() => {
-      window.onerror = null;
     });
 
     function newSlide(id) {
@@ -124,6 +106,7 @@ describes.realWin(
 
     it('should render slides and arrows when built', async () => {
       win.document.body.appendChild(element);
+      await element.build();
 
       const renderedSlides = await getSlidesFromShadow();
       expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
