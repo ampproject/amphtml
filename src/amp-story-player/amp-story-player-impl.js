@@ -97,7 +97,7 @@ const BUTTON_CLASSES = {
 };
 
 /** @enum {string} */
-export const CONTROL_EVENTS = {
+export const VIEWER_CONTROL_EVENTS = {
   [BUTTON_TYPES.BACK]: 'amp-story-player-back',
   [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
   [BUTTON_TYPES.SKIP_NEXT]: 'amp-story-player-skip-next',
@@ -459,7 +459,7 @@ export class AmpStoryPlayer {
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, CONTROL_EVENTS[option], dict({}))
+        createCustomEvent(this.win_, VIEWER_CONTROL_EVENTS[option], dict({}))
       );
     });
   }
@@ -587,7 +587,7 @@ export class AmpStoryPlayer {
           });
 
           if (this.playerConfig_ && this.playerConfig_.controls) {
-            this.updateControlsStateForStory_(story.idx);
+            this.updateControlsStateForAllStories_(story.idx);
 
             messaging.sendRequest(
               'customDocumentUI',
@@ -611,7 +611,7 @@ export class AmpStoryPlayer {
    * @param {number} storyIdx
    * @private
    */
-  updateControlsStateForStory_(storyIdx) {
+  updateControlsStateForAllStories_(storyIdx) {
     // Disables skip-next-button when story is the last one in the player.
     if (storyIdx === this.stories_.length - 1) {
       const skipButtonIdx = this.playerConfig_.controls.findIndex(
@@ -1281,7 +1281,7 @@ export class AmpStoryPlayer {
    */
   onPlayerEvent_(value) {
     switch (value) {
-      case CONTROL_EVENTS[BUTTON_TYPES.SKIP_NEXT]:
+      case VIEWER_CONTROL_EVENTS[BUTTON_TYPES.SKIP_NEXT]:
         this.next_();
         break;
       default:

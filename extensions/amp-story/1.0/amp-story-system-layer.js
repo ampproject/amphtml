@@ -15,7 +15,7 @@
  */
 import {
   AMP_STORY_PLAYER_EVENT,
-  CONTROL_EVENTS,
+  VIEWER_CONTROL_EVENTS,
 } from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
@@ -265,24 +265,30 @@ const TEMPLATE = {
   ],
 };
 
+/**
+ * Contains the event name belonging to the viewer control.
+ * @const {string}
+ */
+const VIEWER_CONTROL_EVENT_NAME = '__AMP_VIEWER_CONTROL_EVENT_NAME__';
+
 /** @enum {string} */
-const CONTROL_TYPES = {
+const VIEWER_CONTROL_TYPES = {
   CLOSE: 'close-button',
   SHARE: 'share-button',
   SKIP_NEXT: 'skip-next-button',
 };
 
-const CONTROL_DEFAULTS = {
-  [CONTROL_TYPES.SHARE]: {
+const VIEWER_CONTROL_DEFAULTS = {
+  [VIEWER_CONTROL_TYPES.SHARE]: {
     'selector': `.${SHARE_CLASS}`,
   },
-  [CONTROL_TYPES.CLOSE]: {
+  [VIEWER_CONTROL_TYPES.CLOSE]: {
     'selector': `.${CLOSE_CLASS}`,
-    'event': CONTROL_EVENTS[CONTROL_TYPES.CLOSE],
+    'event': VIEWER_CONTROL_EVENTS[VIEWER_CONTROL_TYPES.CLOSE],
   },
-  [CONTROL_TYPES.SKIP_NEXT]: {
+  [VIEWER_CONTROL_TYPES.SKIP_NEXT]: {
     'selector': `.${SKIP_NEXT_CLASS}`,
-    'event': CONTROL_EVENTS[CONTROL_TYPES.SKIP_NEXT],
+    'event': VIEWER_CONTROL_EVENTS[VIEWER_CONTROL_TYPES.SKIP_NEXT],
   },
 };
 
@@ -463,6 +469,12 @@ export class SystemLayer {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
+      } else if (matches(target, `.${CLOSE_CLASS}, .${CLOSE_CLASS} *`)) {
+        this.onViewerControlClick_(event.target);
+      } else if (
+        matches(target, `.${SKIP_NEXT_CLASS}, .${SKIP_NEXT_CLASS} *`)
+      ) {
+        this.onViewerControlClick_(event.target);
       }
     });
 
@@ -582,8 +594,8 @@ export class SystemLayer {
     });
 
     this.storeService_.subscribe(
-      StateProperty.CUSTOM_CONTROLS,
-      (config) => this.onCustomControls_(config),
+      StateProperty.VIEWER_CUSTOM_CONTROLS,
+      (config) => this.onViewerCustomControls_(config),
       true /* callToInitialize */
     );
   }
@@ -896,8 +908,31 @@ export class SystemLayer {
    */
   onShareClick_(event) {
     event.preventDefault();
+    if (event.target[VIEWER_CONTROL_EVENT_NAME]) {
+      this.onViewerControlClick_(event.target);
+      return;
+    }
+
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+  }
+
+  /**
+   * Sends message back to the viewer with the corresponding event.
+   * @param {!Element} element
+   * @private
+   */
+  onViewerControlClick_(element) {
+    const eventName = element[VIEWER_CONTROL_EVENT_NAME];
+
+    this.viewerMessagingHandler_ &&
+      this.viewerMessagingHandler_.send(
+        'documentStateUpdate',
+        dict({
+          'state': AMP_STORY_PLAYER_EVENT,
+          'value': eventName,
+        })
+      );
   }
 
   /**
@@ -934,7 +969,7 @@ export class SystemLayer {
    * @param {!Array<!Object>} controls
    * @private
    */
-  onCustomControls_(controls) {
+  onViewerCustomControls_(controls) {
     if (controls.length <= 0) {
       return;
     }
@@ -944,7 +979,7 @@ export class SystemLayer {
         return;
       }
 
-      const defaultConfig = CONTROL_DEFAULTS[control.name];
+      const defaultConfig = VIEWER_CONTROL_DEFAULTS[control.name];
 
       if (!defaultConfig) {
         return;
@@ -991,18 +1026,8 @@ export class SystemLayer {
       }
 
       if (control.event || defaultConfig.event) {
-        const handleClick = () => {
-          this.viewerMessagingHandler_ &&
-            this.viewerMessagingHandler_.send(
-              'documentStateUpdate',
-              dict({
-                'state': AMP_STORY_PLAYER_EVENT,
-                'value': control.event || defaultConfig.event,
-              })
-            );
-        };
-
-        element.addEventListener('click', handleClick.bind(this));
+        element[VIEWER_CONTROL_EVENT_NAME] =
+          control.event || defaultConfig.event;
       }
     });
   }
