@@ -24,7 +24,12 @@ import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {addGroup, setGroupProp, setParent, subscribe} from '../context';
 import {cancellation} from '../error';
-import {childElementByTag, createElementWithAttributes, matches} from '../dom';
+import {
+  childElementByTag,
+  createElementWithAttributes,
+  matches,
+  parseBooleanAttribute,
+} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
 import {dashToCamelCase} from '../string';
@@ -66,6 +71,11 @@ let AmpElementPropDef;
  * }}
  */
 let ChildDef;
+
+/** @type {!Object<string, *>} */
+const TYPE_DEFAULTS = {
+  'boolean': false,
+};
 
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
@@ -753,10 +763,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
     const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
     let value;
     if (def.attr) {
-      value =
-        def.type == 'boolean'
-          ? element.hasAttribute(def.attr)
-          : element.getAttribute(def.attr);
+      value = element.getAttribute(def.attr);
       if (def.media && value != null) {
         value = mediaQueryProps.resolve(String(value));
       }
@@ -780,13 +787,16 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
       }
     }
     if (value == null) {
-      if (def.default !== undefined) {
-        props[name] = def.default;
+      const defValue = def.default ?? (def.type && TYPE_DEFAULTS[def.type]);
+      if (defValue != null) {
+        props[name] = defValue;
       }
     } else {
       const v =
         def.type == 'number'
           ? parseFloat(value)
+          : def.type == 'boolean'
+          ? parseBooleanAttribute(/** @type {string} */ (value))
           : def.type == 'date'
           ? getDate(value)
           : value;

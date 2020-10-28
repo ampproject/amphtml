@@ -927,6 +927,21 @@ export function toggleAttribute(element, name, forced) {
 }
 
 /**
+ * Parses a string as a boolean value using the expanded rules for DOM boolean
+ * attributes:
+ * - a `null` or `undefined` returns `null`;
+ * - an empty string returns `true`;
+ * - a "true" string returns `true`;
+ * - otherwise, `false` is returned.
+ *
+ * @param {?string|undefined} s
+ * @return {?boolean}
+ */
+export function parseBooleanAttribute(s) {
+  return s == null ? null : s === '' || s === 'true';
+}
+
+/**
  * @param {!Window} win
  * @return {number} The width of the vertical scrollbar, in pixels.
  */

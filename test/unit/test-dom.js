@@ -1333,5 +1333,32 @@ describes.realWin(
         expect(el.getAttribute('foo')).to.equal('asdf');
       });
     });
+
+    describe('parseBooleanAttribute', () => {
+      it('should return null for null/undefined', () => {
+        expect(dom.parseBooleanAttribute(null)).to.be.null;
+        expect(dom.parseBooleanAttribute(undefined)).to.be.null;
+      });
+
+      it('should return true for empty string', () => {
+        expect(dom.parseBooleanAttribute('')).to.be.true;
+      });
+
+      it('should return true for "true" string', () => {
+        expect(dom.parseBooleanAttribute('true')).to.be.true;
+      });
+
+      it('should return false for wrong capitalization', () => {
+        expect(dom.parseBooleanAttribute('TRUE')).to.be.false;
+      });
+
+      it('should return false for "false" string', () => {
+        expect(dom.parseBooleanAttribute('false')).to.be.false;
+      });
+
+      it('should return false for a random string', () => {
+        expect(dom.parseBooleanAttribute('a')).to.be.false;
+      });
+    });
   }
 );
