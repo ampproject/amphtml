@@ -17,7 +17,6 @@
 import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {Wrapper} from '../../../src/preact/component';
 import {cloneElement, toChildArray, useContext} from '../../../src/preact';
 
 /**
@@ -27,21 +26,24 @@ import {cloneElement, toChildArray, useContext} from '../../../src/preact';
 export function Thumbnails({loop = true, children, ...rest}) {
   const childrenArray = toChildArray(children);
   const {setCurrentSlide} = useContext(CarouselContext);
+  const pointerFine = window.matchMedia('(pointer: fine)');
+  // Note: The carousel is aria-hidden since it just duplicates the
+  // information of the original carousel.
   return (
-    <Wrapper aria-hidden="true" {...rest}>
-      <BaseCarousel
-        mixedLength={true}
-        snap={false}
-        controls={window.matchMedia('(pointer: fine)') ? 'always' : 'never'}
-        loop={loop}
-        style={{width: '100%', height: '100%'}}
-      >
-        {childrenArray.map((slide, i) =>
-          cloneElement(slide, {
-            onclick: () => setCurrentSlide(i),
-          })
-        )}
-      </BaseCarousel>
-    </Wrapper>
+    <BaseCarousel
+      aria-hidden={true}
+      mixedLength={true}
+      snap={false}
+      controls={pointerFine ? 'always' : 'never'}
+      loop={loop}
+      style={{width: '100%', height: '100%'}}
+      {...rest}
+    >
+      {childrenArray.map((slide, i) =>
+        cloneElement(slide, {
+          onClick: () => setCurrentSlide(i),
+        })
+      )}
+    </BaseCarousel>
   );
 }
