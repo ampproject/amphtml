@@ -100,6 +100,10 @@ center. To enable rotation, set the value to `true`. `autorotate` defaults to
 Use the `enableZoom` attribute to disable zooming in and out of the model. To
 disable zoom, set the value to `false`. `autororate` defaults to `true`.
 
+### title (optional)
+
+Define a `title` attribute for the component. The default is `GLTF 3D model`.
+
 ## Actions
 
 ### setModelRotation

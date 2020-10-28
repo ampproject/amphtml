@@ -65,6 +65,10 @@ For details, see the
 The order to use when displaying comments. For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
+### title (optional)
+
+Define a `title` attribute for the component. The default is `Facebook comments`.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)

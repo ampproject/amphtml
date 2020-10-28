@@ -72,6 +72,10 @@ Specifies the formula to render.
 
 If specified, the component renders inline (`inline-block` in CSS).
 
+### title (optional)
+
+Define a `title` attribute for the component. The default is `MathML formula`.
+
 ## Validation
 
 See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-mathml.protoascii) in the AMP validator specification.

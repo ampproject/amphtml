@@ -95,6 +95,10 @@ A format string that looks like "Ad (%s of %s)", used to generate the ad disclos
 Requires `amp-video-docking` extension. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
 For more details, see [documentation on the docking extension itself](https://amp.dev/documentation/components/amp-video-docking).
 
+### title (optional)
+
+Define a `title` attribute for the component. The default is `IMA video`.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.

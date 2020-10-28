@@ -78,6 +78,10 @@ resize to fit so that its contents will fit.
 
 If specified, display only one file in a gist.
 
+### title (optional)
+
+Define a `title` attribute for the component. The default is `Github gist`.
+
 ## Validation
 
 See [amp-gist rules](validator-amp-gist.protoascii) in the AMP validator specification.

@@ -114,6 +114,10 @@ specify a locale as well.
 For details on strings accepted here please visit the
 [Facebook API Localization page](https://developers.facebook.com/docs/internationalization).
 
+### title (optional)
+
+Define a `title` attribute for the component. The default is `Facebook`.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)

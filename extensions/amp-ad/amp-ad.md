@@ -237,6 +237,10 @@ parent of the ad. When the `data-ad-container-id` is specified, and such a
 the container component instead of the ad component during no fill. This feature
 can be useful when an ad indicator is in presence.
 
+### title (optional)
+
+Define a `title` attribute for the component. The default is `Advertisement`.
+
 ### common attributes
 
 This element includes
