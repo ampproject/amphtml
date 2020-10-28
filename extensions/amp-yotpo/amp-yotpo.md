@@ -73,7 +73,7 @@ _Example: Display the reviews widget_
 When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>product-id</code> attribute becomes <code>data-product-id</code>.</td>
   </tr>
    <tr>
-    <td width="40%"><strong>title</strong></td>
+    <td width="40%"><strong>title (optional)</strong></td>
     <td>Define a <code>title</code> attribute for the component. The default is <code>Yotpo widget</code>.</td>
   </tr>
   <tr>

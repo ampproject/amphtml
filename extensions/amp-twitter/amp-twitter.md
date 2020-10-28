@@ -133,7 +133,7 @@ For details on the available arguments, see the "Timelines" section in <a href="
 For details on the available options, see Twitter's docs <a href="https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference">for tweets</a>, <a href="https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0">for moments</a> and <a href="https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference">for timelines</a>.</td>
   </tr>
    <tr>
-    <td width="40%"><strong>title</strong></td>
+    <td width="40%"><strong>title (optional)</strong></td>
     <td>Define a <code>title</code> attribute for the component. The default is <code>Twitter</code>.</td>
   </tr>
   <tr>
