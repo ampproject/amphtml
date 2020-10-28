@@ -39,13 +39,13 @@ class AmpAccordion extends PreactBaseElement {
   /** @override */
   init() {
     this.registerApiAction('toggle', (api, invocation) =>
-      api.toggle(invocation.args && invocation.args['section'])
+      api./*OK*/ toggle(invocation.args && invocation.args['section'])
     );
     this.registerApiAction('expand', (api, invocation) =>
-      api.expand(invocation.args && invocation.args['section'])
+      api./*OK*/ expand(invocation.args && invocation.args['section'])
     );
     this.registerApiAction('collapse', (api, invocation) =>
-      api.collapse(invocation.args && invocation.args['section'])
+      api./*OK*/ collapse(invocation.args && invocation.args['section'])
     );
 
     const {element} = this;

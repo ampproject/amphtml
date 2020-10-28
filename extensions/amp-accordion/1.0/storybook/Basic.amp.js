@@ -32,6 +32,8 @@ export default {
 export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
+  const createApiString = (action, section) =>
+    `tap:accordion.${action}(${section ? `section='${section}'` : ''})`;
   return (
     <main>
       <amp-accordion
@@ -54,18 +56,18 @@ export const _default = () => {
       </amp-accordion>
 
       <div class="buttons" style={{marginTop: 8}}>
-        <button on="tap:accordion.toggle(section='section1')">
+        <button on={createApiString('toggle', 'section1')}>
           toggle(section1)
         </button>
-        <button on="tap:accordion.toggle()">toggle all</button>
-        <button on="tap:accordion.expand(section='section1')">
+        <button on={createApiString('toggle')}>toggle all</button>
+        <button on={createApiString('expand', 'section1')}>
           expand(section1)
         </button>
-        <button on="tap:accordion.expand()">expand all</button>
-        <button on="tap:accordion.collapse(section='section1')">
+        <button on={createApiString('expand')}>expand all</button>
+        <button on={createApiString('collapse', 'section1')}>
           collapse(section1)
         </button>
-        <button on="tap:accordion.collapse()">collapse all</button>
+        <button on={createApiString('collapse')}>collapse all</button>
       </div>
     </main>
   );

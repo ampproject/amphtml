@@ -37,18 +37,20 @@ function AccordionWithActions(props) {
     <section>
       <Accordion ref={ref} {...props} />
       <div style={{marginTop: 8}}>
-        <button onClick={() => ref.current.toggle('section1')}>
+        <button onClick={() => ref.current./*OK*/ toggle('section1')}>
           toggle(section1)
         </button>
-        <button onClick={() => ref.current.toggle()}>toggle all</button>
-        <button onClick={() => ref.current.expand('section1')}>
+        <button onClick={() => ref.current./*OK*/ toggle()}>toggle all</button>
+        <button onClick={() => ref.current./*OK*/ expand('section1')}>
           expand(section1)
         </button>
-        <button onClick={() => ref.current.expand()}>expand all</button>
-        <button onClick={() => ref.current.collapse('section1')}>
+        <button onClick={() => ref.current./*OK*/ expand()}>expand all</button>
+        <button onClick={() => ref.current./*OK*/ collapse('section1')}>
           collapse(section1)
         </button>
-        <button onClick={() => ref.current.collapse()}>collapse all</button>
+        <button onClick={() => ref.current./*OK*/ collapse()}>
+          collapse all
+        </button>
       </div>
     </section>
   );
