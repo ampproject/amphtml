@@ -488,6 +488,9 @@ function createBaseCustomElementClass(win) {
           this.classList.remove('i-amphtml-notbuilt');
           this.classList.remove('amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
+          if (this.isConnected_) {
+            this.connected_();
+          }
           if (this.isInViewport_) {
             this.updateInViewport_(true);
           }
@@ -805,6 +808,7 @@ function createBaseCustomElementClass(win) {
           if (reconstruct) {
             this.getResources().upgraded(this);
           }
+          this.connected_();
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
       } else {
@@ -900,6 +904,13 @@ function createBaseCustomElementClass(win) {
      */
     disconnectedCallback() {
       this.disconnect(/* pretendDisconnected */ false);
+    }
+
+    /** @private */
+    connected_() {
+      if (this.built_) {
+        this.implementation_.attachedCallback();
+      }
     }
 
     /**
