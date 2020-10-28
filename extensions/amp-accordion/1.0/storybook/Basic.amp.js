@@ -24,7 +24,10 @@ export default {
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
-    extensions: [{name: 'amp-accordion', version: '1.0'}],
+    extensions: [
+      {name: 'amp-bind', version: '0.1'},
+      {name: 'amp-accordion', version: '1.0'},
+    ],
     experiments: ['amp-accordion-bento'],
   },
 };
@@ -68,6 +71,39 @@ export const _default = () => {
           collapse(section1)
         </button>
         <button on={createApiString('collapse')}>collapse all</button>
+      </div>
+    </main>
+  );
+};
+
+export const bindExample = () => {
+  const expandSingleSection = boolean('expandSingleSection', false);
+  const animate = boolean('animate', false);
+  return (
+    <main>
+      <amp-accordion
+        expand-single-section={expandSingleSection}
+        animate={animate}
+      >
+        <section data-amp-bind-expanded="expandAc1">
+          <h2>Section 1</h2>
+          <p>Content in section 1.</p>
+        </section>
+        <section>
+          <h2>Section 2</h2>
+          <div>Content in section 2.</div>
+        </section>
+        <section expanded>
+          <h2>Section 3</h2>
+          <div>Content in section 3.</div>
+        </section>
+      </amp-accordion>
+
+      <div class="buttons" style={{marginTop: 8}}>
+        <button on="tap:AMP.setState({expandAc1: true})">Expand item 1</button>
+        <button on="tap:AMP.setState({expandAc1: false})">
+          Collapse item 1
+        </button>
       </div>
     </main>
   );
