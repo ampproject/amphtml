@@ -15,6 +15,7 @@
  */
 
 import * as Preact from './index';
+import {ActionTrust} from '../action-constants';
 import {AmpEvents} from '../amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../contextprops';
 import {Deferred} from '../utils/promise';
@@ -308,7 +309,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @param {../action-constants.ActionTrust} minTrust
    * @protected
    */
-  registerApiAction(alias, handler, minTrust) {
+  registerApiAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.registerAction(
       alias,
       (invocation) => handler(this.api(), invocation),

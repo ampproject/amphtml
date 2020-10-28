@@ -129,14 +129,14 @@ function AccordionWithRef(
   const expand = useCallback(
     (id) => {
       if (id) {
-        if (id in expandedMap && !isExpanded(id)) {
+        if (!isExpanded(id, true)) {
           toggleExpanded(id);
         }
       } else {
         // Expand all should do nothing when expandSingleSection is true
         if (!expandSingleSection) {
           for (const k in expandedMap) {
-            if (!isExpanded(k)) {
+            if (!isExpanded(k, true)) {
               toggleExpanded(k);
             }
           }
@@ -149,12 +149,12 @@ function AccordionWithRef(
   const collapse = useCallback(
     (id) => {
       if (id) {
-        if (id in expandedMap && isExpanded(id)) {
+        if (isExpanded(id, false)) {
           toggleExpanded(id);
         }
       } else {
         for (const k in expandedMap) {
-          if (isExpanded(k)) {
+          if (isExpanded(k, false)) {
             toggleExpanded(k);
           }
         }
