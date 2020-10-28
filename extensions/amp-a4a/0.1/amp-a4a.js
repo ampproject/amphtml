@@ -371,6 +371,9 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?function(!Element)}
      */
     this.transferDomBody_ = null;
+
+    /** @private {function(boolean)} */
+    this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
   }
 
   /** @override */
@@ -1240,9 +1243,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.destroyFrame(true);
     }
     return this.attemptToRenderCreative().then(() => {
-      observeWithSharedInOb(this.element, (inViewport) => {
-        this.viewportCallbackTemp(inViewport);
-      });
+      observeWithSharedInOb(this.element, this.boundViewportCallback_);
     });
   }
 
