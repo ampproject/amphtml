@@ -74,7 +74,6 @@ function LightboxWithRef(
   );
 
   useEffect(() => {
-    console.log('hit show', show);
     const element = lightboxRef.current;
     if (show) {
       setStyle(element, 'visibility', 'visible');
