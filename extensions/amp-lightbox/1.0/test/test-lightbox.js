@@ -21,14 +21,7 @@ import {mount} from 'enzyme';
 describes.sandboxed('Lightbox preact component v1.0', {}, () => {
   it('Normal lightbox render', () => {
     const wrapper = mount(
-      <Lightbox
-        id="lightbox"
-        open={true}
-        style={{
-          'width': 500,
-          'height': 600,
-        }}
-      >
+      <Lightbox id="lightbox" openOnLoad={true}>
         <div>
           <p>Hello World</p>
         </div>

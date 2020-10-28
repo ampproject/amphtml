@@ -27,7 +27,7 @@ class AmpLightbox extends PreactBaseElement {
   init() {
     this.registerApiAction('open', (api) => api.open(), ActionTrust.DEFAULT);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.DEFAULT);
-    return dict({'open': false});
+    return dict({'openOnLoad': false});
   }
 }
 
@@ -40,7 +40,7 @@ AmpLightbox['props'] = {
   'scrollable': {attr: 'scrollable'},
   'id': {attr: 'id'},
   'layout': {attr: 'layout'},
-  'open': {attr: 'open'},
+  'openOnLoad': {attr: 'openOnLoad'},
   'closeButtonAriaLabel': {attr: 'data-close-button-aria-label'},
 };
 
