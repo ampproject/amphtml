@@ -83,34 +83,32 @@ tags: {
   html_format: AMP
   tag_name: "IMG"
   spec_name: "AMP-STORY-PLAYER IMG"
+  spec_url: "https://amp.dev/documentation/components/amp-story-player/"
   mandatory_ancestor: "AMP-STORY-PLAYER"
   attrs: {
     name: "loading"
+    mandatory: true
     value: "lazy"
   }
-  attrs: { name: "data-amp-story-player-poster-img" }
+  attrs: {
+    name: "data-amp-story-player-poster-img"
+    mandatory: true
+    value: ""
+  }
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: {
     name: "decoding"
     value: "async"
-    value: "auto"
-    value: "sync"
   }
-  attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
-  attrs: { name: "ismap" }
   attrs: {
-    name: "longdesc"
-    value_url: {
-      protocol: "http"
-      protocol: "https"
-    }
-    disallowed_value_regex: "__amp_source_origin"
+    name: "height"
+    value_regex: "[0-9]+"
   }
-  attrs: { name: "importance" }  # Not yet part of the html spec
-  attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
   attr_lists: "mandatory-src-or-srcset"
   attrs: { name: "sizes" }
-  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
+  attrs: {
+    name: "width"
+    value_regex: "[0-9]+"
+  }
 }
