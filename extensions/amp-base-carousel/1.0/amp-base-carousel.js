@@ -102,8 +102,10 @@ AmpBaseCarousel['children'] = {
 
 /** @override */
 AmpBaseCarousel['props'] = {
-  'advanceCount': {attr: 'advance-count', type: 'number'},
-  'controls': {attr: 'controls', type: 'string'},
+  'advanceCount': {attr: 'advance-count', type: 'number', media: true},
+  'controls': {attr: 'controls', type: 'string', media: true},
+  'visibleCount': {attr: 'visible-count', type: 'number', media: true},
+  // TODO(#28284): support media queries as well?
   'loop': {attr: 'loop', type: 'boolean'},
   'mixedLength': {attr: 'mixed-length', type: 'boolean'},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean'},
@@ -111,7 +113,6 @@ AmpBaseCarousel['props'] = {
     attrs: ['snap'],
     parseAttrs: (element) => parseStrBoolAttr(element, 'snap', true),
   },
-  'visibleCount': {attr: 'visible-count', type: 'number'},
 };
 
 /** @override */
