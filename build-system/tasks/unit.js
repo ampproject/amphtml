@@ -66,6 +66,7 @@ unit.flags = {
   'chrome_canary': '  Runs tests on Chrome Canary',
   'chrome_flags': '  Uses the given flags to launch Chrome',
   'coverage': '  Run tests in code coverage mode',
+  'edge': '  Runs tests on Edge',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',

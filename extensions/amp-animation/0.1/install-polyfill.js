@@ -16,41 +16,46 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 
-/** @type {!WeakMap<Window, Deferred>} */
+/** @type {!WeakMap<!../../../src/service/ampdoc-impl.AmpDoc, !Promise>} */
 const polyfillPromiseMap = new WeakMap();
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {Promise<void>}
  */
-export function installWebAnimationsIfNecessary(win) {
-  if (polyfillPromiseMap.has(win)) {
-    return polyfillPromiseMap.get(win).promise;
+export function installWebAnimationsIfNecessary(ampdoc) {
+  if (polyfillPromiseMap.has(ampdoc)) {
+    return polyfillPromiseMap.get(ampdoc);
   }
 
-  const polyfillPromise = new Deferred();
-  polyfillPromiseMap.set(win, polyfillPromise);
+  const {promise, resolve} = new Deferred();
+  polyfillPromiseMap.set(ampdoc, promise);
 
-  if (Services.platformFor(win).isSafari()) {
+  const {win} = ampdoc;
+  const platform = Services.platformFor(win);
+  if (platform.isSafari() && platform.getMajorVersion() < 14) {
     /*
-      Force Web Animations polyfill on Safari.
-      Native Web Animations on WebKit do not respect easing for individual
-      keyframes and break overall timing. See https://go.amp.dev/issue/27762 and 
+      Force Web Animations polyfill on Safari versions before 14.
+      Native Web Animations on WebKit did not respect easing for individual
+      keyframes and break overall timing. See https://go.amp.dev/issue/27762 and
       https://bugs.webkit.org/show_bug.cgi?id=210526
       */
     // Using string access syntax to bypass typecheck.
     win.Element.prototype['animate'] = null;
   }
 
-  if (!!win.Element.prototype['animate']) {
+  if (win.Element.prototype['animate']) {
     // Native Support exists, there is no reason to load the polyfill.
-    polyfillPromise.resolve();
-    return polyfillPromise.promise;
+    resolve();
+    return promise;
   }
 
-  Services.extensionsFor(win)
-    .preloadExtension('amp-animation-polyfill')
-    .then(() => polyfillPromise.resolve());
+  resolve(
+    Services.extensionsFor(win).installExtensionForDoc(
+      ampdoc,
+      'amp-animation-polyfill'
+    )
+  );
 
-  return polyfillPromise.promise;
+  return promise;
 }

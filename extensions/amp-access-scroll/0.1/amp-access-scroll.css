@@ -24,6 +24,8 @@
   left: auto;
   right: 0px;
   width: 48px;
+  margin: 0;
+  padding: 0;
 }
 
 .amp-access-scroll-sheet {

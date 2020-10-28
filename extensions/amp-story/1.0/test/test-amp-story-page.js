@@ -73,6 +73,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
+    // Makes whenUpgradedToCustomElement() resolve immediately.
+    story.createdCallback = Promise.resolve();
 
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');
@@ -299,6 +301,10 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
     await page.layoutCallback();
 
+    page.setState(PageState.PLAYING);
+
+    await nextTick();
+
     const audioEl = scopedQuerySelectorAll(
       element,
       Selectors.ALL_PLAYBACK_MEDIA
@@ -343,6 +349,10 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPool = await page.mediaPoolPromise_;
     const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
     await page.layoutCallback();
+
+    page.setState(PageState.PLAYING);
+
+    await nextTick();
 
     const audioEl = scopedQuerySelectorAll(
       element,

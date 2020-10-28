@@ -185,8 +185,7 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      esmPassCompilation: argv.esm,
-      includeOnlyESMLevelPolyfills: argv.esm,
+      esmPassCompilation: argv.esm || argv.sxg,
     },
   },
   'amp-shadow.js': {
@@ -258,7 +257,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-accordion',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -485,7 +484,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-date-countdown',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -660,6 +659,20 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-inline-gallery',
+    version: '1.0',
+    latestVersion: '0.1',
+    options: {
+      hasCss: false,
+      cssBinaries: [
+        'amp-inline-gallery',
+        'amp-inline-gallery-pagination',
+        'amp-inline-gallery-thumbnails',
+      ],
+    },
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-inputmask',
     version: '0.1',
     latestVersion: '0.1',
@@ -783,6 +796,13 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-onetap-google',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
   },
   {
     name: 'amp-ooyala-player',
@@ -917,6 +937,8 @@ exports.extensionBundles = [
       cssBinaries: [
         'amp-story-auto-ads-ad-badge',
         'amp-story-auto-ads-attribution',
+        'amp-story-auto-ads-inabox',
+        'amp-story-auto-ads-shared',
       ],
     },
     type: TYPES.MISC,
@@ -930,8 +952,8 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story-interactive',
-    version: '1.0',
-    latestVersion: '1.0',
+    version: '0.1',
+    latestVersion: '0.1',
     options: {
       hasCss: true,
       cssBinaries: [
@@ -1116,12 +1138,6 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-viewer-assistance',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
     name: 'amp-viewer-integration',
     version: '0.1',
     latestVersion: '0.1',
@@ -1137,6 +1153,12 @@ exports.extensionBundles = [
   {
     name: 'amp-video',
     version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-video',
+    version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },

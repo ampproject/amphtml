@@ -145,7 +145,7 @@ const targetMatchers = {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
   'PACKAGE_UPGRADE': (file) => {
-    return file == 'package.json' || file == 'yarn.lock';
+    return file == 'package.json' || file == 'package-lock.json';
   },
   'RENOVATE_CONFIG': (file) => {
     return (
@@ -182,7 +182,7 @@ const targetMatchers = {
     );
   },
   'VALIDATOR': (file) => {
-    if (isOwnersFile(file) || file.startsWith('validator/webui/')) {
+    if (isOwnersFile(file) || file.startsWith('validator/js/webui/')) {
       return false;
     }
     return (
@@ -196,7 +196,7 @@ const targetMatchers = {
       return false;
     }
     return (
-      file.startsWith('validator/webui/') ||
+      file.startsWith('validator/js/webui/') ||
       file === 'build-system/tasks/validator.js'
     );
   },

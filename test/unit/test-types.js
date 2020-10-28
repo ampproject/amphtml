@@ -59,6 +59,32 @@ describe('Types', () => {
     });
   });
 
+  describe('arrayOrSingleItemToArray', () => {
+    it('should return empty array for an empty array', () => {
+      const input = [];
+      const result = types.arrayOrSingleItemToArray(input);
+      expect(result).to.deep.equal([]);
+      expect(result).to.equal(input);
+    });
+
+    it('should return the array array as specified', () => {
+      const input = [1, 2, 3];
+      const result = types.arrayOrSingleItemToArray(input);
+      expect(result).to.deep.equal([1, 2, 3]);
+      expect(result).to.equal(input);
+    });
+
+    it('should return the item as an array', () => {
+      const result = types.arrayOrSingleItemToArray(1);
+      expect(result).to.deep.equal([1]);
+    });
+
+    it('should return a null as an array', () => {
+      const result = types.arrayOrSingleItemToArray(null);
+      expect(result).to.deep.equal([null]);
+    });
+  });
+
   describe('isFiniteNumber', () => {
     it('should yield false for non-numbers', () => {
       expect(types.isFiniteNumber(null)).to.be.false;

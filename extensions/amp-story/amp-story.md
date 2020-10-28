@@ -290,6 +290,15 @@ These guidelines apply to the story poster image(s):
   - Landscape: 853px x 640px
   - Square: 640px x 640px
 
+### Story generator meta tags
+
+Optional HTML meta tags can be used to indicate which Story generator the document was created with. There are two meta tags, respectively indicating the generator name and its version.
+
+```html
+<meta name="amp-story-generator-name" content="Story generator name" />
+<meta name="amp-story-generator-version" content="0.1" />
+```
+
 ### Landscape orientation and full bleed desktop experience opt in
 
 If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
@@ -589,17 +598,19 @@ The following animation effects are available as presets for AMP stories:
 | Preset name       | Default duration (ms) | Default delay (ms) |
 | ----------------- | --------------------- | ------------------ |
 | `drop`            | 1600                  | 0                  |
-| `fade-in`         | 500                   | 0                  |
-| `fly-in-bottom`   | 500                   | 0                  |
-| `fly-in-left`     | 500                   | 0                  |
-| `fly-in-right`    | 500                   | 0                  |
-| `fly-in-top`      | 500                   | 0                  |
-| `pulse`           | 500                   | 0                  |
-| `rotate-in-left`  | 700                   | 0                  |
-| `rotate-in-right` | 700                   | 0                  |
+| `fade-in`         | 600                   | 0                  |
+| `fly-in-bottom`   | 600                   | 0                  |
+| `fly-in-left`     | 600                   | 0                  |
+| `fly-in-right`    | 600                   | 0                  |
+| `fly-in-top`      | 600                   | 0                  |
+| `pulse`           | 600                   | 0                  |
+| `rotate-in-left`  | 1000                  | 0                  |
+| `rotate-in-right` | 1000                  | 0                  |
+| `scale-fade-down` | 600                   | 0                  |
+| `scale-fade-up`   | 600                   | 0                  |
 | `twirl-in`        | 1000                  | 0                  |
-| `whoosh-in-left`  | 500                   | 0                  |
-| `whoosh-in-right` | 500                   | 0                  |
+| `whoosh-in-left`  | 600                   | 0                  |
+| `whoosh-in-right` | 600                   | 0                  |
 | `pan-left`        | 1000                  | 0                  |
 | `pan-right`       | 1000                  | 0                  |
 | `pan-down`        | 1000                  | 0                  |

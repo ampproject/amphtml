@@ -15,8 +15,9 @@
  */
 
 import minimist from 'minimist';
-import {PostHTML} from 'posthtml';
+import posthtml from 'posthtml';
 import {readFileSync} from 'fs';
+import {OptionSet} from '../utilities/option-set';
 
 const argv = minimist(process.argv.slice(2));
 const isTestMode: boolean = argv._.includes('server-tests');
@@ -27,14 +28,12 @@ const cwd = process.cwd();
 const cssPath = isTestMode
   ? `${cwd}/${testDir}/css.txt`
   : `${cwd}/build/css/v0.css`;
-const versionPath = isTestMode
-  ? `${cwd}/${testDir}/version.txt`
-  : `${cwd}/dist/version.txt`;
+const versionPath = `${cwd}/${testDir}/version.txt`
 
 const css = readFileSync(cssPath, 'utf8').toString().trim();
 const version = readFileSync(versionPath, 'utf8').toString().trim();
 
-interface StyleNode extends PostHTML.Node {
+interface StyleNode extends posthtml.Node {
   tag: 'style',
   attrs: {
     [key: string]: string | undefined
@@ -44,8 +43,21 @@ interface StyleNode extends PostHTML.Node {
   content: string[]
 }
 
-function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
+function isStyleNode(node: posthtml.Node | string): node is StyleNode {
+  return node !== undefined && typeof node !== 'string' &&
+    (node as StyleNode).tag === 'style';
+}
+
+function prependAmpStyles(head: posthtml.Node): posthtml.Node {
   const content = head.content || [];
+
+  const firstStyleNode = content.filter(isStyleNode)[0];
+
+  // If 'amp-runtime' already exists bail out.
+  if (firstStyleNode?.attrs && 'amp-runtime' in firstStyleNode.attrs) {
+    return head;
+  }
+
   const styleNode: StyleNode = {
     walk: head.walk,
     match: head.match,
@@ -64,6 +76,8 @@ function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
 /**
  * Replace the src for every stories script tag.
  */
-export default function(tree: PostHTML.Node): void {
-  tree.match({tag: 'head'}, prependAmpStyles);
+export default function(options: OptionSet = {}): (tree: posthtml.Node) => void {
+  return function(tree: posthtml.Node) {
+    tree.match({tag: 'head'}, prependAmpStyles);
+  }
 }

@@ -46,7 +46,7 @@ const createHash = (input) =>
 const persistentCache = browserifyPersistFs(
   '.karma-cache',
   {
-    deps: createHash(fs.readFileSync('./yarn.lock')),
+    deps: createHash(fs.readFileSync('./package-lock.json')),
     build: globby
       .sync([
         'build-system/**/*.js',
@@ -230,10 +230,10 @@ module.exports = {
   // So we instantly have all the custom server endpoints available
   beforeMiddleware: ['custom'],
   plugins: [
+    '@chiragrupani/karma-chromium-edge-launcher',
     'karma-browserify',
     'karma-chai',
     'karma-chrome-launcher',
-    'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',

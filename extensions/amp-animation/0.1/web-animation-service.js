@@ -38,7 +38,7 @@ export class WebAnimationService {
    * @return {!Promise<Builder>}
    */
   createBuilder(options) {
-    return installWebAnimationsIfNecessary(this.ampdoc_.win).then(
+    return installWebAnimationsIfNecessary(this.ampdoc_).then(
       () =>
         new Builder(
           this.ampdoc_.win,

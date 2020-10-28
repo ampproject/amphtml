@@ -3,14 +3,13 @@
   "node": {
     "supportPolicy": ["lts_active"]
   },
-  "statusCheckVerify": true,
   "ignorePaths": [],
 
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",
   "schedule": "after 12am every weekday",
 
-  "masterIssue": true,
+  "dependencyDashboard": true,
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
   "separateMinorPatch": true,
   "prBodyNotes": [
@@ -27,7 +26,7 @@
       "groupName": "subpackage devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "subpackage-"
+        "additionalBranchPrefix": "subpackage-"
       }
     },
     {
@@ -37,7 +36,7 @@
       "groupName": "runtime devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "runtime-"
+        "additionalBranchPrefix": "runtime-"
       }
     },
 
@@ -48,7 +47,7 @@
       "groupName": "build system devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "build-system-"
+        "additionalBranchPrefix": "build-system-"
       }
     },
 
@@ -59,7 +58,7 @@
       "groupName": "validator devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "validator-"
+        "additionalBranchPrefix": "validator-"
       }
     },
 
@@ -69,7 +68,7 @@
       "groupName": "core devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "core-"
+        "additionalBranchPrefix": "core-"
       }
     },
 
@@ -79,7 +78,17 @@
       "groupName": "linting devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "linting-"
+        "additionalBranchPrefix": "linting-"
+      }
+    },
+
+    {
+      "packagePatterns": ["\\bbabel"],
+
+      "groupName": "babel devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "babel-"
       }
     },
 
@@ -102,7 +111,7 @@
       "groupName": "ampproject devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "ampproject-"
+        "additionalBranchPrefix": "ampproject-"
       }
     },
 
@@ -113,7 +122,7 @@
       "groupName": "ampproject dependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "ampproject-"
+        "additionalBranchPrefix": "ampproject-"
       }
     }
   ]

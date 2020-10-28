@@ -24,9 +24,9 @@ limitations under the License.
 
 # amp-byside-content
 
-Displays dynamic content from the [BySide service](http://www.byside.com/).
+## Usage
 
-## Behavior
+Displays dynamic content from the [BySide service](http://www.byside.com/).
 
 The `amp-byside-content` component is available for BySide customers and
 displays dynamic content that can be retrieved from the [BySide](http://www.byside.com/) customization mechanisms.
@@ -48,45 +48,47 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
 </amp-byside-content>
 ```
 
-## Attributes
-
-<table>
-  <tr>
-    <td width="40%"><strong>data-webcare-id (required)</strong></td>
-    <td>The BySide customer account ID.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-label (required)</strong></td>
-    <td>The content label as seen in your BySide account.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-webcare-zone</strong></td>
-    <td>The webcare zone property, as specified in the BySide customer account geographic zone. Defaults to main zone ("we1").</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-lang</strong></td>
-    <td>The language to show the contents in, as specified in the BySide customer account localization. Defaults to Portuguese ("pt").</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-channel</strong></td>
-    <td>The channel identifier to use for content validation. Defaults to an empty string.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-fid</strong></td>
-    <td>The visitor force id. Use this when a unique visitor identifier is available, usually for authenticated users. Defaults to an empty string.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
-
-## Privacy and cookies policy
+### Privacy and cookies policy
 
 [BySide](http://www.byside.com) is committed to respect and protect your privacy and developing technology that gives you the most powerful and safe online experience. BySide privacy statement and cookies policy can be found on the following url's:
 
 - [http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
 - [http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
+
+## Attributes
+
+### `data-webcare-id`
+
+The BySide customer account ID.
+
+### `data-label`
+
+The content label as seen in your BySide account.
+
+### `data-webcare-zone`
+
+The webcare zone property, as specified in the BySide customer account
+geographic zone. Defaults to main zone ("we1").
+
+### `data-lang`
+
+The language to show the contents in, as specified in the BySide customer
+account localization. Defaults to Portuguese ("pt").
+
+### `data-channel`
+
+The channel identifier to use for content validation. Defaults to an empty
+string.
+
+### `data-fid`
+
+The visitor force id. Use this when a unique visitor identifier is available,
+usually for authenticated users. Defaults to an empty string.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 

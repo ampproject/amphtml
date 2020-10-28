@@ -20,12 +20,12 @@
   "homepage": "https://github.com/ampproject/amphtml/tree/master/src/purifier",
   "devDependencies": {
     "@rollup/plugin-alias": "3.1.1",
-    "rollup": "2.23.1"
+    "rollup": "2.32.0"
   },
   "dependencies": {
     "dompurify": "2.0.7"
   },
   "optionalDependencies": {
-    "@types/dompurify": "2.0.3"
+    "@types/dompurify": "2.0.4"
   }
 }

@@ -35,8 +35,6 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
           },
         },
         requestResize() {},
-        onResizeSuccess() {},
-        onResizeDenied() {},
         noContentAvailable() {},
         referrer: null,
       };
@@ -160,7 +158,6 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
 
     expect(win.uAd.embed).to.have.been.calledOnce;
     expect(win.uAd.embed.getCall(0).args[1].gdpr).to.be.true;
-    // eslint-disable-next-line google-camelcase/google-camelcase
     expect(win.uAd.embed.getCall(0).args[1].gdpr_consent).to.equal(
       'realConsentString'
     );

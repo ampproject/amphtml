@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" type="text/css" href="https://raw.githack.com/ganapativs/bttn.css/master/dist/bttn.min.css">
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.0/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
 html {
   width: 100%;
@@ -195,9 +195,10 @@ setTimeout(() => {
   // Check if we should randomly do some custom stuff
   const shouldApplyCustom = Math.random() > 0.5;
   if (shouldApplyCustom) {
-    const initialHeight = 30 + Math.floor(Math.random() * 30);
+    // 30-60 is bottom pane, 60 > is modal
+    const initialHeight = 30 + Math.floor(Math.random() * 50);
     readyObject.initialHeight = `${initialHeight}vh`;
-    readyObject.border = Math.random() < 0.5
+    readyObject.border = Math.random() < 0.5;
   }
 
   console.log('diy-consent: Sending Ready Message!', readyObject);
@@ -227,6 +228,9 @@ function registerClickConsentMessage(querySelector, type, action, info, consentM
         info,
         consentMetadata,
       }, '*');
+      setTimeout(() => {
+        navigator.sendBeacon('https://example.test/beacon');
+      }, 500);
     }, timeout);
   };
 }
@@ -254,13 +258,37 @@ function showConfirmation() {
   document.querySelector('#confirmation-wrapper').style = 'display: block';
 }
 
+function getConsentString() {
+  // Check if served from a viewer
+  if (window.location.ancestorOrigins.length == 2) {
+    // Return full consent string
+    return 'full-accept-string';
+  }
+  // Otherwise return abbriviated version
+  return 'accept-string';
+}
+
+function getAdditionalConsentString() {
+  // Check if served from a viewer
+  if (window.location.ancestorOrigins.length == 2) {
+    // Return full consent string
+    return 'full-additional-consent-string';
+  }
+  // Otherwise return abbriviated version
+  return 'additional-consent-string';
+}
+
 const consentObjects = [
   {
     querySelector: '#a',
     type: 'consent-response',
     action: 'accept',
-    info: 'accept-str',
-    consentMetadata: {'consentStringType': 2, 'additionalConsent': '1~1.35.41.101', 'gdprApplies': true},
+    info: getConsentString(),
+    consentMetadata: {
+      'consentStringType': 2,
+      'additionalConsent': getAdditionalConsentString(),
+      'gdprApplies': true
+    },
     timeout: 1000,
     onclick: () => {
       showConfirmation();

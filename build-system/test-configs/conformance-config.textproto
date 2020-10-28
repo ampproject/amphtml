@@ -65,12 +65,6 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'Use string.js#startsWith'
-  value: 'string.prototype.startsWith'
-}
-
-requirement: {
-  type: BANNED_PROPERTY_CALL
   error_message: 'string.prototype.endsWith is not allowed'
   value: 'string.prototype.endsWith'
 }
@@ -398,6 +392,7 @@ requirement: {
   whitelist: 'ads/zen.js'
   whitelist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
   whitelist: 'src/json.js' # Where parseJson itself is implemented.
+  whitelist_regexp: '.*\\.jss\\.js'
 }
 
 requirement: {

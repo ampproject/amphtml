@@ -24,7 +24,9 @@ import {
   isLoadingAllowed,
   parseLayout,
   parseLength,
+  resetShouldUseAspectRatioCssForTesting,
 } from '../../src/layout';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('Layout', () => {
   let div;
@@ -612,4 +614,98 @@ describe('Layout', () => {
     expect(applyStaticLayout(clone)).to.equal(Layout.RESPONSIVE);
     expect(clone.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
   });
+});
+
+describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
+  let win, doc;
+  let element;
+  let ssrSizer;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    toggleExperiment(win, 'layout-aspect-ratio-css', true, true);
+    resetShouldUseAspectRatioCssForTesting();
+
+    element = doc.createElement('amp-element');
+    element.classList.add('i-amphtml-element');
+    doc.body.appendChild(element);
+
+    ssrSizer = doc.createElement('i-amphtml-sizer');
+    ssrSizer.classList.add('i-amphtml-disable-for-ar');
+  });
+
+  afterEach(() => {
+    resetShouldUseAspectRatioCssForTesting();
+  });
+
+  describe
+    .configure()
+    .enableIe()
+    .run('aspect-ratio not supported', function () {
+      before(function () {
+        if (CSS.supports('aspect-ratio: 1/1')) {
+          this.skipTest();
+        }
+      });
+
+      it('should apply legacy layout for layout=responsive', () => {
+        element.setAttribute('layout', 'responsive');
+        element.setAttribute('width', 100);
+        element.setAttribute('height', 200);
+        expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
+        expect(element.style.aspectRatio).to.not.be.ok;
+        expect(element.style.width).to.equal('');
+        expect(element.style.height).to.equal('');
+        expect(element).to.have.class('i-amphtml-layout-responsive');
+        expect(element).to.have.class('i-amphtml-layout-size-defined');
+        // Sizer has been added.
+        const sizer = element.querySelector('i-amphtml-sizer');
+        expect(sizer).to.be.ok;
+        expect(getComputedStyle(sizer).display).to.equal('block');
+      });
+
+      it('should pass through SSR sizer for responsive layout', () => {
+        element.setAttribute('i-amphtml-layout', 'responsive');
+        element.appendChild(ssrSizer);
+        expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
+        expect(element.sizerElement).to.equal(ssrSizer);
+        expect(ssrSizer.getAttribute('slot')).to.equal('i-amphtml-svc');
+        expect(getComputedStyle(ssrSizer).display).to.equal('block');
+      });
+    });
+
+  describe
+    .configure()
+    .enableIe()
+    .run('aspect-ratio supported', function () {
+      before(function () {
+        if (!CSS.supports('aspect-ratio: 1/1')) {
+          this.skipTest();
+        }
+      });
+
+      it('should apply layout=responsive via aspect-ratio', () => {
+        element.setAttribute('layout', 'responsive');
+        element.setAttribute('width', 100);
+        element.setAttribute('height', 200);
+        expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
+        expect(element.style.aspectRatio).to.equal('100 / 200');
+        expect(element.style.width).to.equal('');
+        expect(element.style.height).to.equal('');
+        expect(element).to.have.class('i-amphtml-layout-responsive');
+        expect(element).to.have.class('i-amphtml-layout-size-defined');
+        // No sizer added.
+        expect(element.querySelector('i-amphtml-sizer')).to.be.null;
+      });
+
+      it('should disable SSR sizer for responsive layout', () => {
+        element.setAttribute('i-amphtml-layout', 'responsive');
+        element.appendChild(ssrSizer);
+        expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
+        expect(element.sizerElement).to.equal(ssrSizer);
+        expect(ssrSizer.getAttribute('slot')).to.equal('i-amphtml-svc');
+        expect(getComputedStyle(ssrSizer).display).to.equal('none');
+      });
+    });
 });

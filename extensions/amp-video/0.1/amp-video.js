@@ -86,8 +86,8 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.muted_ = false;
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = false;
+    /** @private {?boolean} */
+    this.prerenderAllowed_ = null;
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
@@ -111,18 +111,6 @@ class AmpVideo extends AMP.BaseElement {
         opt_onLayout
       );
     });
-  }
-
-  /**
-   * @override
-   */
-  firstAttachedCallback() {
-    // Only allow prerender if video sources are cached on CDN, or if video has
-    // a poster image. Set this value in `firstAttachedCallback` since
-    // `buildCallback` is too late and the element children may not be available
-    // in the constructor.
-    const posterAttr = this.element.getAttribute('poster');
-    this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
   }
 
   /**
@@ -161,6 +149,12 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   prerenderAllowed() {
+    // Only allow prerender if video sources are cached on CDN, or if video has
+    // a poster image.
+    if (this.prerenderAllowed_ == null) {
+      const posterAttr = this.element.getAttribute('poster');
+      this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
+    }
     return this.prerenderAllowed_;
   }
 
@@ -301,11 +295,6 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   layoutCallback() {
     this.video_ = dev().assertElement(this.video_);
 
@@ -362,9 +351,7 @@ class AmpVideo extends AMP.BaseElement {
         }
         throw reason;
       })
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      });
+      .then(() => this.onVideoLoaded_());
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
@@ -581,6 +568,7 @@ class AmpVideo extends AMP.BaseElement {
       [
         VideoEvents.ENDED,
         VideoEvents.LOADEDMETADATA,
+        VideoEvents.LOADEDDATA,
         VideoEvents.PAUSE,
         VideoEvents.PLAYING,
         VideoEvents.PLAY,
@@ -620,6 +608,13 @@ class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    // When source changes, video needs to trigger loaded again.
+    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
+  }
+
+  /** @private */
+  onVideoLoaded_() {
+    this.element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
   /** @override */

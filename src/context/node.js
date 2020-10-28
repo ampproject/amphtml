@@ -18,7 +18,6 @@ import {Values} from './values';
 import {devAssert} from '../log';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../utils/array';
-import {startsWith} from '../string';
 import {throttleTail} from './scheduler';
 
 // Properties set on the DOM nodes to track the context state.
@@ -32,6 +31,17 @@ const ELEMENT_NODE = 1;
 const DOCUMENT_NODE = 9;
 // Includes shadow root, template, etc.
 const FRAGMENT_NODE = 11;
+
+/**
+ * The structure for a group of nodes.
+ *
+ * @typedef {{
+ *   cn: !ContextNode,
+ *   match: function(!Node, !Node):boolean,
+ *   weight: number,
+ * }}
+ */
+let GroupDef;
 
 /**
  * The context node is a sparse tree over the DOM tree. Any node that needs
@@ -51,7 +61,7 @@ export class ContextNode {
   static get(node) {
     let contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
     if (!contextNode) {
-      contextNode = new ContextNode(node);
+      contextNode = new ContextNode(node, null);
       if (getMode().localDev || getMode().test) {
         // The `Object.defineProperty({enumerable: false})` helps tests, but
         // hurts performance. So this is only done in a dev/test modes.
@@ -102,7 +112,7 @@ export class ContextNode {
           // becomes available.
           return ContextNode.get(n);
         }
-        if (nodeType == ELEMENT_NODE && startsWith(n.tagName, AMP_PREFIX)) {
+        if (nodeType == ELEMENT_NODE && n.tagName.startsWith(AMP_PREFIX)) {
           // An AMP node will always have a context node backing it at some
           // point.
           return ContextNode.get(n);
@@ -138,7 +148,7 @@ export class ContextNode {
       return;
     }
     node[ASSIGNED_SLOT_PROP] = slot;
-    forEachContained(node, (cn) => cn.discover());
+    discoverContained(node);
   }
 
   /**
@@ -153,17 +163,34 @@ export class ContextNode {
       return;
     }
     node[ASSIGNED_SLOT_PROP] = undefined;
-    forEachContained(node, (cn) => cn.discover());
+    discoverContained(node);
+  }
+
+  /**
+   * Reruns discovery on the children of the specified node, if any.
+   *
+   * @param {!Node} node
+   */
+  static rediscoverChildren(node) {
+    const contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
+    const children = contextNode && contextNode.children;
+    if (children) {
+      children.forEach(discoverContextNode);
+    }
   }
 
   /**
    * Creates the context node and automatically starts the discovery process.
    *
    * @param {!Node} node
+   * @param {?string} name
    */
-  constructor(node) {
+  constructor(node, name) {
     /** @const {!Node} */
     this.node = node;
+
+    /** @const @package {?string} */
+    this.name = name;
 
     /**
      * Whether this node is a root. The Document DOM nodes are automatically
@@ -200,6 +227,9 @@ export class ContextNode {
      */
     this.children = null;
 
+    /** @package {?Map<string, !GroupDef>} */
+    this.groups = null;
+
     /** @package {!Values} */
     this.values = new Values(this);
 
@@ -209,11 +239,30 @@ export class ContextNode {
     /** @private {boolean} */
     this.parentOverridden_ = false;
 
+    /** @private {?Array<function(!ContextNode)>} */
+    this.cleanups_ = null;
+
     /** @const @private {function()} */
     this.scheduleDiscover_ = throttleTail(
       this.discover_.bind(this),
       setTimeout
     );
+
+    // Shadow root: track slot changes.
+    if (node.nodeType == FRAGMENT_NODE) {
+      node.addEventListener('slotchange', (e) => {
+        const slot = /** @type {!HTMLSlotElement} */ (e.target);
+        // Rediscover newly assigned nodes.
+        const assignedNodes = slot.assignedNodes();
+        assignedNodes.forEach(discoverContained);
+        // Rediscover unassigned nodes.
+        const closest = ContextNode.closest(slot);
+        const closestChildren = closest && closest.children;
+        if (closestChildren) {
+          closestChildren.forEach(discoverContextNode);
+        }
+      });
+    }
 
     this.discover();
   }
@@ -226,6 +275,9 @@ export class ContextNode {
   discover() {
     if (this.isDiscoverable()) {
       this.scheduleDiscover_();
+    } else if (this.name && this.children) {
+      // Recursively discover the group's children.
+      this.children.forEach(discoverContextNode);
     }
   }
 
@@ -271,6 +323,13 @@ export class ContextNode {
     devAssert(!root || root.isRoot);
     const oldRoot = this.root;
     if (root != oldRoot) {
+      // Call root cleanups.
+      const cleanups = this.cleanups_;
+      if (cleanups) {
+        cleanups.forEach((cleanup) => cleanup(this));
+        this.cleanups_ = null;
+      }
+
       // The root has changed.
       this.root = root;
 
@@ -293,6 +352,55 @@ export class ContextNode {
   }
 
   /**
+   * @param {string} name
+   * @param {function(!Node):boolean} match
+   * @param {number} weight
+   * @return {!ContextNode}
+   */
+  addGroup(name, match, weight) {
+    const groups = this.groups || (this.groups = new Map());
+    const {node, children} = this;
+    const cn = new ContextNode(node, name);
+    groups.set(name, {cn, match, weight});
+    cn.setParent(this);
+    if (children) {
+      children.forEach(discoverContextNode);
+    }
+    return cn;
+  }
+
+  /**
+   * @param {string} name
+   * @return {?ContextNode}
+   */
+  group(name) {
+    const {groups} = this;
+    const group = groups && groups.get(name);
+    return (group && group.cn) || null;
+  }
+
+  /**
+   * @param {!Node} node
+   * @return {?ContextNode}
+   * @protected
+   */
+  findGroup(node) {
+    const {groups} = this;
+    if (!groups) {
+      return null;
+    }
+    let found = null;
+    let maxWeight = Number.NEGATIVE_INFINITY;
+    groups.forEach(({cn, match, weight}) => {
+      if (match(node, this.node) && weight > maxWeight) {
+        found = cn;
+        maxWeight = weight;
+      }
+    });
+    return found;
+  }
+
+  /**
    * Add or update a component with a specified ID. If component doesn't
    * yet exist, it will be created using the specified factory. The use
    * of factory is important to reduce bundling costs for context node.
@@ -303,7 +411,7 @@ export class ContextNode {
    * @param {!Array<!ContextProp>} deps
    * @param {*} input
    */
-  setComponent(id, factory, func, deps, input) {
+  mountComponent(id, factory, func, deps, input) {
     const components = this.components_ || (this.components_ = new Map());
     let comp = components.get(id);
     if (!comp) {
@@ -314,16 +422,39 @@ export class ContextNode {
   }
 
   /**
-   * Removes the component previously set with `setComponent`.
+   * Removes the component previously set with `mountComponent`.
    *
    * @param {*} id
    */
-  removeComponent(id) {
+  unmountComponent(id) {
     const components = this.components_;
     const comp = components && components.get(id);
     if (comp) {
       comp.dispose();
       components.delete(id);
+    }
+  }
+
+  /**
+   * Registers a root cleanup handler that will be called each time the
+   * root has changed or the node has been disconnected.
+   *
+   * @param {function(!ContextNode)} cleanup
+   */
+  pushCleanup(cleanup) {
+    const cleanups = this.cleanups_ || (this.cleanups_ = []);
+    pushIfNotExist(cleanups, cleanup);
+  }
+
+  /**
+   * Unregisters a cleanup handler previously registered with `pushCleanup`.
+   *
+   * @param {function(!ContextNode)} cleanup
+   */
+  popCleanup(cleanup) {
+    const cleanups = this.cleanups_;
+    if (cleanups) {
+      removeItem(cleanups, cleanup);
     }
   }
 
@@ -337,7 +468,9 @@ export class ContextNode {
       // queue.
       return;
     }
-    const parent = ContextNode.closest(this.node, /* includeSelf */ false);
+    const closestNode = ContextNode.closest(this.node, /* includeSelf */ false);
+    const parent =
+      (closestNode && closestNode.findGroup(this.node)) || closestNode;
     this.updateTree_(parent, /* parentOverridden */ false);
   }
 
@@ -370,11 +503,7 @@ export class ContextNode {
         // fast operation.
         for (let i = 0; i < parentChildren.length; i++) {
           const child = parentChildren[i];
-          if (
-            child != this &&
-            child.isDiscoverable() &&
-            this.node.contains(child.node)
-          ) {
+          if (child != this && child.isDiscoverable()) {
             child.discover();
           }
         }
@@ -410,4 +539,18 @@ function forEachContained(node, callback, includeSelf = true) {
       }
     });
   }
+}
+
+/**
+ * @param {!Node} node
+ */
+function discoverContained(node) {
+  forEachContained(node, discoverContextNode);
+}
+
+/**
+ * @param {!ContextNode} cn
+ */
+function discoverContextNode(cn) {
+  cn.discover();
 }

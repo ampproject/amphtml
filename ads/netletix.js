@@ -18,7 +18,6 @@ import {addParamsToUrl, assertHttpsUrl} from '../src/url.js';
 import {dev} from '../src/log.js';
 import {dict} from '../src/utils/object';
 import {loadScript, validateData, writeScript} from '../3p/3p';
-import {startsWith} from '../src/string.js';
 
 const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';
 const NX_URL_PATHPREFIX = '/pb/';
@@ -68,7 +67,7 @@ export function netletix(global, data) {
   window.addEventListener('message', (event) => {
     if (
       event.data.type &&
-      startsWith(dev().assertString(event.data.type), 'nx-')
+      dev().assertString(event.data.type).startsWith('nx-')
     ) {
       switch (event.data.type) {
         case 'nx-resize':

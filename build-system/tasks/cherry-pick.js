@@ -17,35 +17,20 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
-const {getOutput} = require('../common/exec');
+const {execOrThrow, getOutput} = require('../common/exec');
 const {green, cyan, red, yellow} = require('ansi-colors');
-
-/**
- * Executes a shell command, and logs an error message if the command fails.
- *
- * @param {string} cmd
- * @param {string} msg
- * @return {!Object}
- */
-function execOrThrow(cmd, msg) {
-  const result = getOutput(cmd);
-  if (result.status) {
-    log(yellow('ERROR:'), msg);
-    throw new Error(result.stderr);
-  }
-
-  return result;
-}
 
 /**
  * Determines the name of the cherry-pick branch.
  *
  * @param {string} version
+ * @param {number} numCommits
  * @return {string}
  */
-function cherryPickBranchName(version) {
+function cherryPickBranchName(version, numCommits) {
   const timestamp = version.slice(0, -3);
-  const suffix = String(Number(version.slice(-3)) + 1).padStart(3, '0');
+  const suffixNumber = Number(version.slice(-3)) + numCommits;
+  const suffix = String(suffixNumber).padStart(3, '0');
   return `amp-release-${timestamp}${suffix}`;
 }
 
@@ -53,27 +38,15 @@ function cherryPickBranchName(version) {
  * Updates tags from the remote and creates a branch at the release commit.
  *
  * @param {string} ref
- * @param {!Array<string>} commits
  * @param {string} branch
  * @param {string} remote
  */
-function prepareBranch(ref, commits, branch, remote) {
-  const needsFetch = [ref]
-    .concat(commits)
-    .some((r) => getOutput(`git rev-parse ${r}`).status);
-
-  if (needsFetch) {
-    log(green('INFO:'), 'Fetching latest tags and commits from', cyan(remote));
-    execOrThrow(
-      `git fetch ${remote}`,
-      `Failed to fetch updates from remote ${cyan(remote)}`
-    );
-  } else {
-    log(
-      green('INFO:'),
-      'Identified tag and all commits available in local repository'
-    );
-  }
+function prepareBranch(ref, branch, remote) {
+  log(green('INFO:'), 'Pulling latest from', cyan(remote));
+  execOrThrow(
+    `git pull ${remote}`,
+    `Failed to pull latest from remote ${cyan(remote)}`
+  );
 
   execOrThrow(
     `git checkout -b ${branch} ${ref}`,
@@ -132,9 +105,9 @@ async function cherryPick() {
     throw error;
   }
 
-  const branch = cherryPickBranchName(onto);
+  const branch = cherryPickBranchName(onto, commits.length);
   try {
-    prepareBranch(onto, commits, branch, remote);
+    prepareBranch(onto, branch, remote);
     commits.forEach(performCherryPick);
 
     if (push) {

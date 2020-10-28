@@ -21,39 +21,79 @@ var BaseCarouselDef = {};
 
 /**
  * @typedef {{
+ *   advanceCount: (number|undefined),
  *   arrowNext: (?PreactDef.VNode|undefined),
  *   arrowPrev: (?PreactDef.VNode|undefined),
  *   children: (!PreactDef.Renderable),
+ *   controls: (string|undefined),
  *   loop: (boolean|undefined),
+ *   mixedLength: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
- *   setAdvance: (function(function(number):undefined):undefined|undefined),
+ *   snap: (boolean|undefined),
+ *   visibleCount: (number|undefined),
  * }}
  */
 BaseCarouselDef.Props;
 
 /**
  * @typedef {{
+ *   advanceCount: (number|undefined),
  *   children: !Array<PreactDef.Renderable>,
  *   loop: (boolean|undefined),
+ *   mixedLength: (boolean|undefined),
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),
+ *   snap: (boolean|undefined),
+ *   visibleCount: (number|undefined),
  * }}
  */
 BaseCarouselDef.ScrollerProps;
 
 /**
  * @typedef {{
- *   children: !Array<PreactDef.Renderable>
+ *   children: !Array<PreactDef.Renderable>,
+ *   loop: (boolean|undefined),
+ *   mixedLength: (boolean|undefined),
+ *   offsetRef: {current: (null|number)},
+ *   pivotIndex: number,
+ *   restingIndex: number,
+ *   snap: (boolean|undefined),
+ *   visibleCount: (number|undefined),
  * }}
  */
 BaseCarouselDef.SlideProps;
 
 /**
  * @typedef {{
- *   advance: (function(number):undefined|undefined),
+ *   advance: (function():undefined|undefined),
  *   customArrow: (PreactDef.VNode|undefined),
  *   by: number,
- *   disabled: (boolean|undefined)
+ *   disabled: (boolean|undefined),
+ *   outsetArrows: (boolean|undefined),
  * }}
  */
 BaseCarouselDef.ArrowProps;
+
+/**
+ * @typedef {{
+ *   currentSlide: (number|undefined),
+ *   setCurrentSlide: (function(number):undefined),
+ *   slideCount: (number|undefined),
+ *   setSlideCount: (function(number):undefined),
+ * }}
+ */
+BaseCarouselDef.ContextProps;
+
+/** @interface */
+BaseCarouselDef.CarouselApi = class {
+  /**
+   * @param {number} index
+   */
+  goToSlide(index) {}
+
+  /** Advance slides forward by `advanceCount` */
+  next() {}
+
+  /** Advance slides backward by `advanceCount` */
+  prev() {}
+};

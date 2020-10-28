@@ -206,6 +206,20 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
   });
 
+  it('should not propagate bind attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      'data-amp-bind': 'abc',
+      'data-amp-bind-foo': '123',
+    }).then((ampImg) => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-amp-bind')).to.equal('abc');
+      expect(img.getAttribute('data-amp-bind-foo')).to.be.null;
+    });
+  });
+
   it('should propagate srcset and sizes with disable-inline-width', async () => {
     const ampImg = await getImg({
       src: '/examples/img/sample.jpg',
@@ -251,7 +265,6 @@ describes.sandboxed('amp-img', {}, (env) => {
       el.getPlaceholder = sandbox.stub();
       el.getLayoutWidth = () => 100;
       impl = new AmpImg(el);
-      impl.createdCallback();
       el.toggleFallback = function () {};
       el.togglePlaceholder = function () {};
       toggleFallbackSpy = sandbox.spy(el, 'toggleFallback');
@@ -383,7 +396,6 @@ describes.sandboxed('amp-img', {}, (env) => {
     el.setAttribute('height', 100);
     el.setAttribute('noprerender', '');
     const impl = new AmpImg(el);
-    impl.firstAttachedCallback();
     expect(impl.prerenderAllowed()).to.equal(false);
   });
 
@@ -603,7 +615,6 @@ describes.sandboxed('amp-img', {}, (env) => {
       el.getPlaceholder = sandbox.stub();
       el.getLayoutWidth = () => layoutWidth;
       const impl = new AmpImg(el);
-      impl.createdCallback();
       sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
       el.toggleFallback = function () {};
       el.togglePlaceholder = function () {};

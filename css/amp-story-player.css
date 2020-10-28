@@ -15,10 +15,13 @@
  */
 
 amp-story-player {
-  width: 360px;
-  height: 600px;
   position: relative;
   display: block;
+}
+
+.i-amphtml-story-player-shadow-root-intermediary {
+  width: 100%;
+  height: 100%;
 }
 
 amp-story-player a:first-of-type {
@@ -31,6 +34,10 @@ amp-story-player a:first-of-type {
 
 amp-story-player a:not(:first-of-type) {
   visibility: hidden;
+}
+
+amp-story-player.i-amphtml-story-player-loaded a:first-of-type {
+  display: none;
 }
 
 amp-story-player::after {

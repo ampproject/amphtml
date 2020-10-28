@@ -152,7 +152,6 @@ describes.realWin(
 
       el.connectedCallback();
       const analytics = new AmpAnalytics(el);
-      analytics.createdCallback();
       analytics.buildCallback();
       return analytics;
     }
@@ -201,7 +200,6 @@ describes.realWin(
         const analytics = new AmpAnalytics(el);
         doc.body.appendChild(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
         // Initialization has not started.
         expect(analytics.iniPromise_).to.be.null;
@@ -216,20 +214,22 @@ describes.realWin(
         el.textContent = config;
         const whenFirstVisibleStub = env.sandbox
           .stub(ampdoc, 'whenFirstVisible')
-          .callsFake(() => new Promise(function () {}));
+          .callsFake(() => Promise.resolve());
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.getAmpDoc = () => ampdoc;
         analytics.buildCallback();
         const iniPromise = analytics.iniPromise_;
         expect(iniPromise).to.be.ok;
-        expect(el).to.have.attribute('hidden');
         // Viewer.whenFirstVisible is the first blocking call to initialize.
         expect(whenFirstVisibleStub).to.be.calledOnce;
 
         // Repeated call, returns pre-created promise.
         expect(analytics.ensureInitialized_()).to.equal(iniPromise);
         expect(whenFirstVisibleStub).to.be.calledOnce;
+        return iniPromise.then(() => {
+          expect(el).to.have.attribute('hidden');
+        });
       });
 
       it('does not send a hit when multiple child tags exist', function () {
@@ -250,7 +250,6 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
@@ -266,7 +265,6 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
@@ -1469,7 +1467,10 @@ describes.realWin(
       beforeEach(() => {
         // Unfortunately need to fake sandbox analytics element's parent
         // to an AMP element
+        // Set the doc width/height to 1 to trigger visible event.
         doc.body.classList.add('i-amphtml-element');
+        doc.body.style.minWidth = '1px';
+        doc.body.style.minHeight = '1px';
       });
 
       afterEach(() => {
@@ -1750,6 +1751,11 @@ describes.realWin(
 
     describe('parentPostMessage', () => {
       let postMessageSpy;
+
+      beforeEach(() => {
+        doc.body.style.minWidth = '1px';
+        doc.body.style.minHeight = '1px';
+      });
 
       function waitForParentPostMessage(opt_max) {
         if (postMessageSpy.callCount) {

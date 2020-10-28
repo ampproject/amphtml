@@ -15,9 +15,7 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
-import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -31,7 +29,7 @@ import {
 import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
 import {createElementWithAttributes} from '../../../src/dom';
-import {createSecureFrame} from './secure-frame';
+import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {
   dev,
   devAssert,
@@ -50,13 +48,17 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
+import {
+  installFriendlyIframeEmbed,
+  isSrcdocSupported,
+} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {listenOnce} from '../../../src/event-helper';
+import {padStart} from '../../../src/string';
 import {parseJson} from '../../../src/json';
 import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
@@ -173,15 +175,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
-};
-
-/**
- * @const @enum {string}
- */
-export const NO_SIGNING_EXP = {
-  id: 'a4a-no-signing',
-  control: '21066324',
-  experiment: '21066325',
 };
 
 /** @const @enum {string} */
@@ -326,13 +319,6 @@ export class AmpA4A extends AMP.BaseElement {
      * @type {?HTMLIFrameElement}
      */
     this.iframe = null;
-
-    /**
-     * TODO(keithwrightbos) - remove once resume behavior is verified.
-     * {boolean} whether most recent ad request was generated as part
-     *    of resume callback.
-     */
-    this.fromResumeCallback = false;
 
     /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
@@ -546,7 +532,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.friendlyIframeEmbed_) {
       return;
     }
-    this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
     const resource = this.getResource();
@@ -744,7 +729,11 @@ export class AmpA4A extends AMP.BaseElement {
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
           {consentState, consentString, gdprApplies},
-          this.tryExecuteRealTimeConfig_(consentState, consentString)
+          this.tryExecuteRealTimeConfig_(
+            consentState,
+            consentString,
+            /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
+          )
         ));
       })
       // This block returns the (possibly empty) response to the XHR request.
@@ -866,10 +855,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    return (
-      getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-      NO_SIGNING_EXP.experiment
-    );
+    // eslint-disable-next-line no-undef
+    return !!NO_SIGNING_RTV;
   }
 
   /**
@@ -879,7 +866,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
   streamResponse_(httpResponse, checkStillCurrent) {
-    if (!httpResponse.body) {
+    if (httpResponse.status === 204) {
       this.forceCollapse();
       return Promise.reject(NO_CONTENT_RESPONSE);
     }
@@ -1377,7 +1364,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
     this.transferDomBody_ = null;
-    this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
   }
@@ -1667,34 +1653,44 @@ export class AmpA4A extends AMP.BaseElement {
     const {height, width} = this.creativeSize_;
     const {extensions, fonts, head} = headData;
     this.iframe = createSecureFrame(
-      this.element.ownerDocument,
-      devAssert(this.adUrl_),
-      head,
+      this.win,
       this.getIframeTitle(),
       height,
       width
     );
     this.applyFillContent(this.iframe);
 
+    let body = '';
+    // If srcdoc is not supported, streaming is also not supported so we
+    // can go ahead and write the ad content body.
+    if (!isSrcdocSupported()) {
+      body = head.ownerDocument.body./*OK */ outerHTML;
+    } else {
+      // Once skeleton doc has be written to srcdoc we start transferring
+      // body chunks.
+      listenOnce(this.iframe, 'load', () => {
+        const fieBody = this.iframe.contentDocument.body;
+        this.transferDomBody_(devAssert(fieBody));
+      });
+    }
+
+    const secureDoc = createSecureDocSkeleton(
+      devAssert(this.adUrl_),
+      head./*OK*/ outerHTML,
+      body
+    );
+
     // TODO(ccordry): FIE does not handle extension versioning, but we have
     // it accessible here.
     const extensionIds = extensions.map((extension) => extension.extensionId);
 
-    return installFriendlyIframeEmbed(
-      devAssert(this.iframe),
-      this.element,
-      {
-        host: this.element,
-        url: devAssert(this.adUrl_),
-        html: null,
-        extensionIds,
-        fonts,
-      },
-      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
+    return this.installFriendlyIframeEmbed_(
+      secureDoc,
+      extensionIds,
+      fonts,
+      true // skipHtmlMerge
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
-      const fieBody = this.getFieBody_(friendlyIframeEmbed);
-      const renderComplete = this.transferDomBody_(devAssert(fieBody));
       this.makeFieVisible_(
         friendlyIframeEmbed,
         // TODO(ccordry): subclasses are passed creativeMetadata which does
@@ -1707,7 +1703,6 @@ export class AmpA4A extends AMP.BaseElement {
         },
         checkStillCurrent
       );
-      return renderComplete;
     });
   }
 
@@ -1753,7 +1748,8 @@ export class AmpA4A extends AMP.BaseElement {
     return this.installFriendlyIframeEmbed_(
       minifiedCreative,
       customElementExtensions,
-      fontsArray || []
+      fontsArray || [],
+      false // skipHtmlMerge
     ).then((friendlyIframeEmbed) =>
       this.makeFieVisible_(
         friendlyIframeEmbed,
@@ -1768,9 +1764,10 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {string} html
    * @param {!Array<string>} extensionIds
    * @param {!Array<string>} fonts
+   * @param {boolean} skipHtmlMerge
    * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
    */
-  installFriendlyIframeEmbed_(html, extensionIds, fonts) {
+  installFriendlyIframeEmbed_(html, extensionIds, fonts, skipHtmlMerge) {
     return installFriendlyIframeEmbed(
       devAssert(this.iframe),
       this.element,
@@ -1781,6 +1778,7 @@ export class AmpA4A extends AMP.BaseElement {
         html,
         extensionIds,
         fonts,
+        skipHtmlMerge,
       },
       (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
     );
@@ -2144,6 +2142,13 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} whether this is a sticky ad unit
+   */
+  isStickyAd() {
+    return false;
+  }
+
+  /**
    * Checks if the given lifecycle event has a corresponding amp-analytics event
    * and fires the analytics trigger if so.
    * @param {string} lifecycleStage
@@ -2193,15 +2198,17 @@ export class AmpA4A extends AMP.BaseElement {
    * the rtc-config attribute on the amp-ad element, warn.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState, consentString) {
+  tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
     if (!!AMP.RealTimeConfigManager) {
       try {
         return new AMP.RealTimeConfigManager(this).maybeExecuteRealTimeConfig(
           this.getCustomRealTimeConfigMacros_(),
           consentState,
-          consentString
+          consentString,
+          consentMetadata
         );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
@@ -2298,6 +2305,40 @@ export class AmpA4A extends AMP.BaseElement {
       return MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT;
     }
     return null;
+  }
+
+  /**
+   * Returns any enabled SSR experiments via the amp-usqp meta tag. These
+   * correspond to the proto field ids in cs/AmpTransformerParams.
+   *
+   * These experiments do not have a fully unique experiment id for each value,
+   * so we concatenate the key and value to generate a psuedo id. We assume
+   * that any experiment is either a boolean (so two branches), or an enum with
+   * 100 or less branches. So, the value is padded a leading 0 if necessary.
+   *
+   * @protected
+   * @return {!Array<string>}
+   */
+  getSsrExpIds_() {
+    const exps = [];
+    const meta = this.getAmpDoc().getMetaByName('amp-usqp');
+    if (meta) {
+      const keyValues = meta.split(',');
+      for (let i = 0; i < keyValues.length; i++) {
+        const kv = keyValues[i].split('=');
+        if (kv.length !== 2) {
+          continue;
+        }
+        // Reasonably assume that all important exps are either booleans, or
+        // enums with 100 or less branches.
+        const val = Number(kv[1]);
+        if (!isNaN(kv[0]) && val >= 0 && val < 100) {
+          const padded = padStart(kv[1], 2, '0');
+          exps.push(kv[0] + padded);
+        }
+      }
+    }
+    return exps;
   }
 }
 

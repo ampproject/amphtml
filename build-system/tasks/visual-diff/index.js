@@ -28,7 +28,7 @@ const {
 const {
   escapeHtml,
   log,
-  waitForLoaderDots,
+  waitForPageLoad,
   verifySelectorsInvisible,
   verifySelectorsVisible,
 } = require('./helpers');
@@ -527,7 +527,7 @@ async function snapshotWebpages(browser, webpages) {
         // displayed), then, depending on the test configurations, wait for
         // invisibility/visibility of specific elements that match the
         // configured CSS selectors.
-        await waitForLoaderDots(page, name);
+        await waitForPageLoad(page, name);
         if (webpage.loading_incomplete_selectors) {
           await verifySelectorsInvisible(
             page,
@@ -760,7 +760,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 }
 
 function installPercy_() {
-  if (!argv.noyarn) {
+  if (!argv.noinstall) {
     installPackages(__dirname);
   }
 
@@ -819,6 +819,6 @@ visualDiff.flags = {
   'percy_disabled':
     '  Disables Percy integration (for testing local changes only)',
   'nobuild': '  Skip build',
-  'noyarn': '  Skip calling yarn to install dependencies',
+  'noinstall': '  Skip installing npm dependencies',
   'compiled': '  Runs tests against minified JS',
 };

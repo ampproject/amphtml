@@ -19,12 +19,19 @@ import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {Services} from '../../../src/services';
-import {devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
+import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
 
 const BATCH_INTERVAL_MIN = 200;
+
+// TODO(#29618): Remove after ampim investigation
+const _GOOGLE_ACTIVEVIEW_HOSTNAME = 'pagead2.googlesyndication.com';
+const _GOOGLE_ACTIVEVIEW_REQUEST_ID = 'ampim';
+export const GOOGLE_ACTIVEVIEW_ERROR_TAG = 'active-view-debug';
+export const _GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME = '_avError_';
 
 export class RequestHandler {
   /**
@@ -107,6 +114,9 @@ export class RequestHandler {
     /** @private @const {number} */
     this.startTime_ = Date.now();
 
+    /** @private {*} */
+    this.errorReportingStates_ = null;
+
     this.initReportWindow_();
     this.initBatchInterval_();
   }
@@ -123,6 +133,13 @@ export class RequestHandler {
     if (!this.reportRequest_ && !isImportant) {
       // Ignore non important trigger out reportWindow
       return;
+    }
+
+    if (expansionOption.getVar(_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME)) {
+      this.errorReportingStates_ = expansionOption.getVar(
+        _GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME
+      );
+      delete expansionOption.vars[_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME];
     }
 
     this.queueSize_++;
@@ -273,6 +290,18 @@ export class RequestHandler {
       if (batchSegments.length === 0) {
         return;
       }
+      // TODO(#29618): Remove after ampim investigation
+      // It's fine to report error without checking segmentPromises
+      // activeview request is not using extraUrlParams
+      if (this.errorReportingStates_) {
+        try {
+          reportErrorTemp(requestUrl, this.errorReportingStates_);
+        } catch (e) {
+          dev().error(GOOGLE_ACTIVEVIEW_ERROR_TAG, e);
+        }
+        this.errorReportingStates_ = null;
+      }
+
       // TODO: iframePing will not work with batch. Add a config validation.
       if (trigger['iframePing']) {
         userAssert(
@@ -515,4 +544,62 @@ function expandExtraUrlParams(
   }
 
   return Promise.all(requestPromises).then(() => newParams);
+}
+
+/**
+ * TODO(#29618): Remove after ampim investigation
+ * @param {string} url
+ * @param {*} info
+ */
+function reportErrorTemp(url, info) {
+  if (!isObject(info)) {
+    return;
+  }
+  const location = parseUrlDeprecated(url);
+  if (location.hostname != _GOOGLE_ACTIVEVIEW_HOSTNAME) {
+    return;
+  }
+  const queryString = parseQueryString(location.search);
+  const requestId = queryString['id'];
+  if (requestId != _GOOGLE_ACTIVEVIEW_REQUEST_ID) {
+    return;
+  }
+  const elementSize = queryString['d'] && queryString['d'].split(',');
+  const viewportSize = queryString['bs'] && queryString['bs'].split(',');
+  const REPORTING_THRESHOLD = 0.1;
+  if (isArray(elementSize)) {
+    const elementWidth = Number(elementSize[0]);
+    const elementHeight = Number(elementSize[1]);
+    if (elementWidth == 0 || elementHeight == 0) {
+      if (Math.random() > REPORTING_THRESHOLD) {
+        return;
+      }
+      dev().expectedError(
+        GOOGLE_ACTIVEVIEW_ERROR_TAG,
+        'Debugging: Activeview request with zero element size',
+        elementWidth,
+        elementHeight,
+        url,
+        JSON.stringify(/** @type {!JsonObject} */ (info))
+      );
+    }
+  }
+  if (isArray(viewportSize)) {
+    const viewportWidth = Number(viewportSize[0]);
+    const viewportHeight = Number(viewportSize[1]);
+
+    if (viewportWidth == 0 || viewportHeight == 0) {
+      if (Math.random() > REPORTING_THRESHOLD) {
+        return;
+      }
+      dev().expectedError(
+        GOOGLE_ACTIVEVIEW_ERROR_TAG,
+        'Debugging: Activeview request with zero viewport size',
+        viewportWidth,
+        viewportHeight,
+        url,
+        JSON.stringify(/** @type {!JsonObject} */ (info))
+      );
+    }
+  }
 }

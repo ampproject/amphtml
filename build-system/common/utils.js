@@ -92,8 +92,16 @@ function logFiles(files) {
  * @return {Array<string>}
  */
 function getFilesFromArgv() {
+  // TODO: https://github.com/ampproject/amphtml/issues/30223
+  // Switch from globby to a lib that supports Windows.
+  const toPosix = (str) => str.replace(/\\\\?/g, '/');
   return argv.files
-    ? globby.sync(argv.files.split(',').map((s) => s.trim()))
+    ? globby.sync(
+        argv.files
+          .split(',')
+          .map((s) => s.trim())
+          .map(toPosix)
+      )
     : [];
 }
 
@@ -149,18 +157,18 @@ function usesFilesOrLocalChanges(taskName) {
 }
 
 /**
- * Runs 'yarn' to install packages in a given directory.
+ * Runs 'npm install' to install packages in a given directory.
  *
  * @param {string} dir
  */
 function installPackages(dir) {
   log(
     'Running',
-    cyan('yarn'),
+    cyan('npm install'),
     'to install packages in',
     cyan(path.relative(ROOT_DIR, dir)) + '...'
   );
-  execOrDie(`npx yarn --cwd ${dir}`, {'stdio': 'ignore'});
+  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore'});
 }
 
 module.exports = {

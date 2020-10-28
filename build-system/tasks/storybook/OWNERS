@@ -6,7 +6,7 @@
     {
       owners: [
         {name: 'ampproject/wg-infra'},
-        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'ampproject/wg-bento'},
         {name: 'ampproject/wg-performance'},
         {name: 'wassgha', notify: true},
       ],

@@ -78,9 +78,9 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
- *    option: ?../../amp-story-interactive/1.0/amp-story-interactive-abstract.OptionConfigType,
+ *    option: ?../../amp-story-interactive/0.1/amp-story-interactive-abstract.OptionConfigType,
  *    interactiveId: string,
- *    type: ../../amp-story-interactive/1.0/amp-story-interactive-abstract.InteractiveType
+ *    type: ../../amp-story-interactive/0.1/amp-story-interactive-abstract.InteractiveType
  * }}
  */
 export let InteractiveReactData;
@@ -95,6 +95,7 @@ export let InteractiveReactData;
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
  *    canShowSystemLayerButtons: boolean,
+ *    viewerCustomControls: !Array<!Object>,
  *    accessState: boolean,
  *    adState: boolean,
  *    pageAttachmentState: boolean,
@@ -102,6 +103,7 @@ export let InteractiveReactData;
  *    bookendState: boolean,
  *    desktopState: boolean,
  *    educationState: boolean,
+ *    gyroscopeEnabledState: string,
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
@@ -143,6 +145,7 @@ export const StateProperty = {
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
+  VIEWER_CUSTOM_CONTROLS: 'viewerCustomControls',
 
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
@@ -152,6 +155,7 @@ export const StateProperty = {
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
   EDUCATION_STATE: 'educationState',
+  GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
@@ -221,9 +225,11 @@ export const Action = {
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
+  SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
+  SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
 /**
@@ -436,6 +442,11 @@ const actions = (state, action, data) => {
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
         [StateProperty.UI_STATE]: data,
       });
+    case Action.SET_GYROSCOPE_PERMISSION:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.GYROSCOPE_PERMISSION_STATE]: data,
+      });
     case Action.TOGGLE_VIEWPORT_WARNING:
       return /** @type {!State} */ ({
         ...state,
@@ -471,6 +482,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_SIZE]: data,
+      });
+    case Action.SET_VIEWER_CUSTOM_CONTROLS:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
       });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
@@ -574,12 +590,14 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.EDUCATION_STATE]: false,
+      [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {

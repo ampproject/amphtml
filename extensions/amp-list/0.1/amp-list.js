@@ -41,7 +41,6 @@ import {
 } from '../../../src/batched-json';
 import {
   childElementByAttr,
-  matches,
   removeChildren,
   scopedQuerySelector,
   scopedQuerySelectorAll,
@@ -53,18 +52,16 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
-import {
-  getViewerAuthTokenIfAvailable,
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
-import {startsWith} from '../../../src/string';
+import {
+  setupAMPCors,
+  setupInput,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -175,7 +172,7 @@ export class AmpList extends AMP.BaseElement {
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
-        return this.fetchList_(/* opt_refresh */ true);
+        return this.fetchList_({refresh: true});
       }
     });
 
@@ -265,10 +262,6 @@ export class AmpList extends AMP.BaseElement {
     if (!this.container_) {
       this.container_ = this.createContainer_();
       this.element.appendChild(this.container_);
-    }
-
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
     }
 
     // auto-resize is deprecated and will be removed per deprecation schedule
@@ -410,7 +403,7 @@ export class AmpList extends AMP.BaseElement {
         setStyles(dev().assertElement(this.container_), {
           'max-height': `calc(100% - ${px(buttonHeight)})`,
         });
-        // TODO(wg-ui-and-a11y): Use Mutator.requestChangeSize.
+        // TODO(wg-performance): Use Mutator.requestChangeSize.
         this.element./*OK*/ applySize(listHeight + buttonHeight);
       }
     );
@@ -424,7 +417,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   isAmpStateSrc_(src) {
-    return startsWith(src, AMP_STATE_URI_SCHEME);
+    return src.startsWith(AMP_STATE_URI_SCHEME);
   }
 
   /**
@@ -435,7 +428,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   isAmpScriptSrc_(src) {
-    return startsWith(src, AMP_SCRIPT_URI_SCHEME);
+    return src.startsWith(AMP_SCRIPT_URI_SCHEME);
   }
 
   /**
@@ -484,10 +477,6 @@ export class AmpList extends AMP.BaseElement {
   getAmpScriptJson_(src) {
     return Promise.resolve()
       .then(() => {
-        userAssert(
-          isExperimentOn(this.win, 'protocol-adapters'),
-          `Experiment 'protocol-adapters' is not turned on.`
-        );
         userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
           '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
@@ -570,15 +559,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * amp-list reuses the loading indicator when the list is fetched again via
-   * bind mutation or refresh action
-   * @override
-   */
-  isLoadingReused() {
-    return this.element.hasAttribute('reset-on-refresh');
-  }
-
-  /**
    * Creates and returns <div> that contains the template-rendered children.
    * @return {!Element}
    * @private
@@ -608,12 +588,6 @@ export class AmpList extends AMP.BaseElement {
     elements.forEach((element) => {
       if (!element.hasAttribute('role')) {
         this.setRoleAttribute_(element, 'listitem');
-      }
-      if (
-        !element.hasAttribute('tabindex') &&
-        !this.isTabbable_(dev().assertElement(element))
-      ) {
-        element.setAttribute('tabindex', '0');
       }
       container.appendChild(element);
     });
@@ -668,7 +642,10 @@ export class AmpList extends AMP.BaseElement {
     ) {
       const reset = () => {
         this.togglePlaceholder(true);
-        this.toggleLoading(true);
+        const forceLoadingIndicator = this.element.hasAttribute(
+          'reset-on-refresh'
+        );
+        this.toggleLoading(true, forceLoadingIndicator);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
@@ -722,8 +699,16 @@ export class AmpList extends AMP.BaseElement {
       itemsExpr,
       this.element
     );
-    if (this.element.hasAttribute('single-item') && !isArray(items)) {
-      items = [items];
+    if (this.element.hasAttribute('single-item')) {
+      if (!isArray(items)) {
+        items = [items];
+      } else {
+        user().warn(
+          TAG,
+          'Expected response to contain a non-array Object due to "single-item" attribute.',
+          this.element
+        );
+      }
     }
     items = user().assertArray(items);
     if (this.element.hasAttribute('max-items')) {
@@ -752,11 +737,12 @@ export class AmpList extends AMP.BaseElement {
    * the list has been populated with rendered list items. If the viewer is
    * capable of rendering the templates, then the fetching of the list and
    * transformation of the template is handled by the viewer.
-   * @param {boolean=} opt_refresh
+   * @param {{refresh: (boolean|undefined), append: (boolean|undefined)}=} options
    * @return {!Promise}
    * @private
    */
-  fetchList_(opt_refresh = false) {
+  fetchList_(options = {}) {
+    const {refresh = false, append = false} = options;
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
@@ -764,14 +750,14 @@ export class AmpList extends AMP.BaseElement {
 
     let fetch;
     if (this.ssrTemplateHelper_.isEnabled()) {
-      fetch = this.ssrTemplate_(opt_refresh);
+      fetch = this.ssrTemplate_(refresh);
     } else {
       if (this.isAmpStateSrc_(elementSrc)) {
         fetch = this.getAmpStateJson_(elementSrc);
       } else if (this.isAmpScriptSrc_(elementSrc)) {
         fetch = this.getAmpScriptJson_(elementSrc);
       } else {
-        fetch = this.prepareAndSendFetch_(opt_refresh);
+        fetch = this.prepareAndSendFetch_(refresh);
       }
       fetch = fetch.then((data) => {
         // Bail if the src has changed while resolving the xhr request.
@@ -784,37 +770,21 @@ export class AmpList extends AMP.BaseElement {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
 
-        return this.scheduleRender_(
-          items,
-          /*opt_append*/ false,
-          data
-        ).then(() => this.maybeSetLoadMore_());
+        return this.scheduleRender_(items, append, data).then(() =>
+          this.maybeSetLoadMore_()
+        );
       });
     }
 
     return fetch.catch((error) => {
+      // Append flow has its own error handling
+      if (append) {
+        throw error;
+      }
+
       this.triggerFetchErrorEvent_(error);
       this.showFallback_();
       throw error;
-    });
-  }
-
-  /**
-   * Fetch and render items intended to be appended to the current list
-   * @return {!Promise}
-   */
-  fetchListAndAppend_() {
-    if (!this.element.getAttribute('src')) {
-      return Promise.resolve();
-    }
-    return this.prepareAndSendFetch_().then((data) => {
-      const items = this.computeListItems_(data);
-      this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
-      return this.scheduleRender_(
-        items,
-        /*opt_append*/ true,
-        /*opt_payload*/ data
-      );
     });
   }
 
@@ -1092,7 +1062,7 @@ export class AmpList extends AMP.BaseElement {
     };
 
     // binding=refresh: Only do render-blocking update after initial render.
-    if (binding && startsWith(binding, 'refresh')) {
+    if (binding && binding.startsWith('refresh')) {
       // Bind service must be available after first mutation, so don't
       // wait on the async service getter.
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
@@ -1136,7 +1106,7 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
-        // TODO:(wg-ui-and-a11y)(#28781) Ensure owners_.scheduleUnlayout() is
+        // TODO:(wg-performance)(#28781) Ensure owners_.scheduleUnlayout() is
         // called for diff elements that are removed
         this.diff_(container, elements);
       } else {
@@ -1256,7 +1226,7 @@ export class AmpList extends AMP.BaseElement {
       // Remove missing, non-internal classes.
       for (let i = 0; i < before.classList.length; i++) {
         const c = before.classList[i];
-        if (!startsWith(c, 'i-amphtml-') && !after.classList.contains(c)) {
+        if (!c.startsWith('i-amphtml-') && !after.classList.contains(c)) {
           before.classList.remove(c);
         }
       }
@@ -1421,7 +1391,7 @@ export class AmpList extends AMP.BaseElement {
       setStyles(this.element, {height: ''});
     }
 
-    // TODO(wg-ui-and-a11y): Use a new, unprivileged API.
+    // TODO(wg-performance): Use a new, unprivileged API.
     // The applySize() call removes the sizer element.
     this.element./*OK*/ applySize();
   }
@@ -1530,7 +1500,7 @@ export class AmpList extends AMP.BaseElement {
     this.mutateElement(() => {
       this.getLoadMoreService_().toggleLoadMoreLoading(true);
     });
-    return this.fetchListAndAppend_()
+    return this.fetchList_({append: true})
       .then(() => {
         return this.mutateElement(() => {
           if (this.loadMoreSrc_) {
@@ -1569,16 +1539,14 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {boolean=} refresh
-   * @param {string=} token
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
    */
-  fetch_(refresh = false, token = undefined) {
+  fetch_(refresh = false) {
     return batchFetchJsonFor(this.getAmpDoc(), this.element, {
       expr: '.',
       urlReplacement: this.getPolicy_(),
       refresh,
-      token,
       xssiPrefix: this.element.getAttribute('xssi-prefix') || undefined,
     });
   }
@@ -1596,8 +1564,9 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * If the bottom of the list is within three viewports of the current
-   * viewport, then load more items.
+   * If the bottom of the list is visible and
+   * within three viewports of the current viewport,
+   * then load more items.
    * @private
    */
   maybeLoadMoreItems_() {
@@ -1610,7 +1579,10 @@ export class AmpList extends AMP.BaseElement {
       .getClientRectAsync(dev().assertElement(endoOfListMarker))
       .then((positionRect) => {
         const viewportHeight = this.viewport_.getHeight();
-        if (3 * viewportHeight > positionRect.bottom) {
+        if (
+          positionRect.bottom > 0 &&
+          3 * viewportHeight > positionRect.bottom
+        ) {
           return this.loadMoreCallback_();
         }
       });
@@ -1622,9 +1594,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   prepareAndSendFetch_(opt_refresh = false) {
-    return getViewerAuthTokenIfAvailable(this.element).then((token) =>
-      this.fetch_(opt_refresh, token)
-    );
+    return this.fetch_(opt_refresh);
   }
 
   /**
@@ -1687,27 +1657,6 @@ export class AmpList extends AMP.BaseElement {
     return allTabbableChildren
       ? allTabbableChildren[allTabbableChildren.length - 1]
       : null;
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {?Element}
-   * @private
-   */
-  firstTabbableChild_(element) {
-    return scopedQuerySelector(element, TABBABLE_ELEMENTS_QUERY);
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   * @private
-   */
-  isTabbable_(element) {
-    return (
-      matches(element, TABBABLE_ELEMENTS_QUERY) ||
-      !!this.firstTabbableChild_(element)
-    );
   }
 }
 

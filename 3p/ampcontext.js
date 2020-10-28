@@ -79,6 +79,9 @@ export class AbstractAmpContext {
     this.initialConsentValue = null;
 
     /** @type {?Object} */
+    this.initialConsentMetadata = null;
+
+    /** @type {?Object} */
     this.initialLayoutRect = null;
 
     /** @type {?Object} */
@@ -215,8 +218,8 @@ export class AbstractAmpContext {
   /**
    *  Send message to runtime requesting to resize ad to height and width.
    *    This is not guaranteed to succeed. All this does is make the request.
-   *  @param {number} width The new width for the ad we are requesting.
-   *  @param {number} height The new height for the ad we are requesting.
+   *  @param {number|undefined} width The new width for the ad we are requesting.
+   *  @param {number|undefined} height The new height for the ad we are requesting.
    *  @param {boolean=} hasOverflow Whether the ad handles its own overflow ele
    *  @return {Promise} Signify the success/failure of the request.
    */
@@ -300,6 +303,13 @@ export class AbstractAmpContext {
   }
 
   /**
+   *  Make the ad interactive.
+   */
+  signalInteractive() {
+    this.client_.sendMessage(MessageType.SIGNAL_INTERACTIVE);
+  }
+
+  /**
    *  Takes the current name on the window, and attaches it to
    *  the name of the iframe.
    *  @param {HTMLIFrameElement} iframe The iframe we are adding the context to.
@@ -348,6 +358,7 @@ export class AbstractAmpContext {
     this.hidden = context.hidden;
     this.initialConsentState = context.initialConsentState;
     this.initialConsentValue = context.initialConsentValue;
+    this.initialConsentMetadata = context.initialConsentMetadata;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = parseUrlDeprecated(context.location.href);

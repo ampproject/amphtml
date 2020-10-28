@@ -162,31 +162,26 @@ Once the request is processed the AMP runtime will try to accommodate this reque
 possible, but it will take into account where the reader is currently reading, whether the scrolling
 is ongoing and any other UX or performance factors.
 
-Ads can observe whether resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
+The API will return a promise and the ads can observe whether resize request were successful by checking whether that promise resolves or rejects. `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods are to be deprecated.
 
 The `opt_hasOverflow` is an optional boolean value, ads can specify `opt_hasOverflow` to `true` to let AMP runtime know that the ad context can handle overflow when attempt to resize is denied, and not to throw warning in such cases.
 
 _Example:_
 
 ```javascript
-var unlisten = window.context.onResizeSuccess(function (
-  requestedHeight,
-  requestedWidth
-) {
-  // Hide any overflow elements that were shown.
-  // The requestedHeight and requestedWidth arguments may be used to
-  // check which size change the request corresponds to.
-});
-
-var unlisten = window.context.onResizeDenied(function (
-  requestedHeight,
-  requestedWidth
-) {
-  // Show the overflow element and send a window.context.requestResize(width, height)
-  // when the overflow element is clicked.
-  // You may use the requestedHeight and requestedWidth to check which
-  // size change the request corresponds to.
-});
+window.context
+  .requestResize(requestedWidth, requestedHeight)
+  .then(function () {
+    // Hide any overflow elements that were shown.
+    // The requestedHeight and requestedWidth arguments may be used to
+    // check which size change the request corresponds to.
+  })
+  .catch(function () {
+    // Show the overflow element and send a window.context.requestResize(width, height)
+    // when the overflow element is clicked.
+    // You may use the requestedHeight and requestedWidth to check which
+    // size change the request corresponds to.
+  });
 ```
 
 Here are some factors that affect whether the resize will be executed:
@@ -251,6 +246,16 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
   <dd>
     Provides additional user privacy related data retrieved from publishers.
     See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response">here</a> for details.
+  </dd>
+  <dt><code>window.context.initialConsentState</code></dt>
+  <dd>
+    Provides the initial consent string when the ad is unblocked.
+    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-string">here</a> for details.
+  </dd>
+  <dt><code>window.context.initialConsentMetadata</code></dt>
+  <dd>
+    Provides initial consent metadata when the ad is unblocked.
+    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-metadata">here</a> for details.
   </dd>
 </dl>
 
@@ -361,7 +366,7 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ### Other tips
 
-- Add **cc ampproject/wg-ads** in all pull request's descriptions.
+- Add **cc ampproject/wg-monetization** in all pull request's descriptions.
 - It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
 - [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:

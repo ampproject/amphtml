@@ -27,6 +27,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
   <script async custom-element="amp-story-360" src="https://cdn.ampproject.org/v0/amp-story-360-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 </head>
 <body>
 
@@ -39,12 +40,20 @@
         poster-portrait-src="example.com/poster.jpg">
     <amp-story-page id="cover">
       <amp-story-grid-layer template="fill">
-        <amp-story-360 layout="fill" heading-start="95" pitch-start="-10" zoom-start="4" heading-end="-45" pitch-end="-20" zoom-end="1" duration="30s">
+        <amp-story-360 layout="fill" heading-start="95" pitch-start="-10" zoom-start="4" heading-end="-45" pitch-end="-20" zoom-end="1" duration="30s" scene-heading="8.5" scene-pitch="5" scene-roll="-1" controls="gyroscope">
           <amp-img src="img/panorama1.jpg" width="7168" height="3584"></amp-img>
         </amp-story-360>
      </amp-story-grid-layer>
     </amp-story-page>
+    <amp-story-page id="page1">
+      <amp-story-grid-layer template="fill">
+        <amp-story-360 layout="fill" heading-start="95" pitch-start="-10" zoom-start="4" heading-end="-45" pitch-end="-20" zoom-end="1" duration="30s" scene-heading="8.5" scene-pitch="5" scene-roll="-1">
+          <amp-video poster="img/nasa_training_poster.jpg" autoplay layout="fill" loop>
+            <source src="img/NASA_VR_360_Astronaut_Training_Space_Walk.mp4" type="video/mp4" />
+          </amp-video>
+        </amp-story-360>
+     </amp-story-grid-layer>
+    </amp-story-page>    
   </amp-story>
-
 </body>
 </html>

@@ -396,7 +396,8 @@ event.response</pre></td>
     <code>position</code> is optional. One of <code>top</code>, <code>center</code>
     or <code>bottom</code> (default <code>top</code>).
     Specifies the position of the element relative to the viewport after
-    scrolling.</td>
+    scrolling.<br>
+    As an accessibility best practice, pair this with a call to <code>focus()</code> to focus on the element being scrolled to.</td>
   </tr>
   <tr>
     <td><code>focus</code></td>
@@ -700,11 +701,17 @@ actions that apply to the whole document.
   </tr>
   <tr>
     <td><code>navigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
-    <td>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener<code></a>. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</td>
+    <td>
+      <p>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener</code></a>. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</p>
+      <p><strong>Caveat:</strong> Using normal <code>&lt;a&gt;</code> links is recommended wherever possible since <code>AMP.navigateTo</code> is not recognized by web crawlers.</p>
+    </td>
   </tr>
   <tr>
     <td><code>closeOrNavigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
-    <td>Tries to close the window if allowed, otherwise it navigates similar to <code>navigateTo</code> Action. Useful for use-cases where a "Back" button may need to close the window if it were opened in a new window from previous page or navigate if it wasn't opened.</td>
+    <td>
+      <p>Tries to close the window if allowed, otherwise it navigates similar to <code>navigateTo</code> Action. Useful for use-cases where a "Back" button may need to close the window if it were opened in a new window from previous page or navigate if it wasn't opened.</p>
+      <p><strong>Caveat:</strong> Using normal <code>&lt;a&gt;</code> links is recommended wherever possible since <code>AMP.closeOrNavigateTo</code> is not recognized by web crawlers.</p>
+    </td>
   </tr>
   <tr>
     <td><code>goBack</code></td>

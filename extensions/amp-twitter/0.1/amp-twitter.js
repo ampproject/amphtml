@@ -77,6 +77,7 @@ class AmpTwitter extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'twitter', null, {
       allowFullscreen: true,
     });
+    iframe.title = this.element.title || 'Twitter';
     this.applyFillContent(iframe);
     this.updateForLoadingState_();
     listenFor(
@@ -154,14 +155,6 @@ class AmpTwitter extends AMP.BaseElement {
     });
   }
 
-  /**
-   * amp-twitter reuses the loading indicator when id changes via bind mutation
-   * @override
-   */
-  isLoadingReused() {
-    return true;
-  }
-
   /** @override */
   createLoaderLogoCallback() {
     const html = htmlFor(this.element);
@@ -201,7 +194,7 @@ class AmpTwitter extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     if (this.iframe_ && mutations['data-tweetid'] != null) {
       this.unlayoutCallback();
-      this.toggleLoading(true);
+      this.toggleLoading(true, /* force */ true);
       this.layoutCallback();
     }
   }

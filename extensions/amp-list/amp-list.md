@@ -110,7 +110,13 @@ The request is always made from the client, even if the document was served from
 
 If `<amp-list>` needs more space after loading, it requests the AMP runtime to update its height using the normal AMP flow. If the AMP runtime cannot satisfy the request for the new height, it will display the `overflow` element when available. Notice however, that the typical placement of `<amp-list>` elements at the bottom of the document almost always guarantees that the AMP runtime can resize them.
 
-By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item.
+### Accessibility considerations for `amp-list`
+
+By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item. This behaviour is arguably not always appropriate - generally, only interactive controls/content should be focusable. If you want to suppress this behaviour, make sure to include `tabindex="-1"` as part of the outermost element of your template.
+
+[tip type="important"]
+Currently, the rendered list element is declared as an ARIA live region (using `aria-live="polite"`), meaning that any change to the content of the list results in the entire list being read out/announced by assistive technologies (such as screen readers). Due to the way lists are initially rendered, this can also result in lists being announced in their entirety when a page is loaded. To work around this issue for now, you can add `aria-live="off"` to `<amp-list>`, which will override the addition of `aria-live="polite"`.
+[/tip]
 
 [tip type="note"]
 Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This means the following input:
@@ -280,9 +286,47 @@ See below for a full example,
 </amp-list>
 ```
 
+### Using amp-script as a data source
+
+You may use an exported `<amp-script>` function as the data source for `<amp-list>`. This enables you to flexibly combine and transform server responses before handoff to `<amp-list>`. The required format is the `<amp-script>` ID and the function name separated by a period, e.g. `amp-script:id.functionName`.
+
+See below for an example:
+
+```html
+<!--
+  See the [amp-script](https://amp.dev/documentation/components/amp-script/) documentation to setup the component and export your function>
+-->
+<amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+<script id="local-script" type="text/plain" target="amp-script">
+  function getRemoteData() {
+    return fetch('https://example.com')
+      .then(resp => resp.json())
+      .then(transformData)
+  }
+  exportFunction('getRemoteData', getRemoteData);
+</script>
+
+<!-- "exported-functions" is the <amp-script> id, and "getRemoteData" corresponds to the exported function. -->
+<amp-list
+  id="amp-list"
+  width="auto"
+  height="100"
+  layout="fixed-height"
+  src="amp-script:dataFunctions.getRemoteData"
+>
+  <template type="amp-mustache">
+    <div>{{.}}</div>
+  </template>
+</amp-list>
+```
+
+[tip type="important"]
+When using `<amp-script>` as merely a data-layer with no DOM manipulation, you may benefit from the [nodom](https://amp.dev/documentation/components/amp-script/#attributes) attribute. It improves the performance of the `<amp-script>`.
+[/tip]
+
 ### Load more and infinite scroll
 
-We've introduced the `load-more` attributes with options `manual` and `auto` to allow pagination and infinite scroll.
+The `load-more` attribute has options `manual` and `auto` to allow pagination and infinite scroll.
 
 ```html
 <amp-list
@@ -301,6 +345,8 @@ For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.htm
 
 [tip type="important"]
 
+When using `<amp-list>` infinite scroll, content placed below the component may not be accessible, and it is recommended to place the infinite scroll content at the bottom of the document.
+
 When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll position that ignores the height changes caused by `<amp-list>`.
 
 Without `useInitialPageSize`, the `100%` scroll trigger point might never fire as more documents get loaded. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
@@ -313,6 +359,10 @@ Without `useInitialPageSize`, the `100%` scroll trigger point might never fire a
 #### load-more-button
 
 An `<amp-list-load-more>` element with the `load-more-button` attribute, which shows up at the end of the list (for the manual load-more) if there are more elements to be loaded. Clicking on this element will trigger a fetch to load more elements from the url contained in the `load-more-src` field or the field of the data returned corresponding to the `load-more-bookmark` attribute. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-button`.
+
+### Accessibility considerations for infinite scroll lists
+
+Be careful when using infinite scroll lists - if there is any content after the list (including a standard footer or similar), users won't be able to reach it until all list items have been loaded/displayed. This can make the experience frustrating or even impossible to overcome for users. See [Adrian Roselli: So you think you've built a good infinite scroll](https://adrianroselli.com/2014/05/so-you-think-you-built-good-infinite.html).
 
 ##### Example:
 
@@ -448,7 +498,11 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 ### `src` (required)
 
 The URL of the remote endpoint that returns the JSON that will be rendered
-within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
+within this `<amp-list>`. There are three valid protocols for the `src` attribute.
+
+1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
+2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](#initialization-from-amp-state) for more details.
+3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](#using-amp-script-as-a-data-source) for more details.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.

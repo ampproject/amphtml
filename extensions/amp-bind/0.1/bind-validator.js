@@ -16,7 +16,6 @@
 
 import {hasOwn, ownProperty} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
-import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
@@ -139,7 +138,7 @@ export class BindValidator {
         }
       }
     }
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
+    // @see validator/js/engine/validator.ParsedTagSpec.validateAttributes()
     const {denylistedValueRegex} = rules;
     if (value && denylistedValueRegex) {
       const re = new RegExp(denylistedValueRegex, 'i');
@@ -159,7 +158,7 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.js#validateUrlAndProtocol()
+    // @see validator/js/engine/validator.js#validateUrlAndProtocol()
     if (url) {
       if (/__amp_source_origin/.test(url)) {
         return false;
@@ -191,7 +190,7 @@ export class BindValidator {
    */
   rulesForTagAndProperty_(tag, property) {
     // Allow binding to all ARIA attributes.
-    if (startsWith(property, 'aria-')) {
+    if (property.startsWith('aria-')) {
       return null;
     }
     // Disallow URL property bindings if configured as such.
@@ -203,7 +202,7 @@ export class BindValidator {
       return /** @type {PropertyRulesDef} */ (globalRules);
     }
     const ampPropertyRules = ownProperty(AMP_PROPERTY_RULES, property);
-    if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
+    if (tag.startsWith('AMP-') && ampPropertyRules !== undefined) {
       return /** @type {PropertyRulesDef} */ (ampPropertyRules);
     }
     const tagRules = ownProperty(ELEMENT_RULES, tag);

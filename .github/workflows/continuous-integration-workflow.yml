@@ -8,31 +8,21 @@ on:
       - master
 
 jobs:
-  ubuntu_tests:
-    name: Linux
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [12.x]
+    runs-on: ${{ matrix.platform }}
     steps:
-      - name: Check out repository
+      - name: Checkout Repo
         uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: yarn
-      - name: Build and Test
-        run: node build-system/pr-check/cross-browser-tests.js
-  macos_tests:
-    name: Mac OS
-    runs-on: macos-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: yarn
-      - run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-      - run: yarn global add gulp-cli
+      - name: Set Up Environment
+        if: ${{ matrix.platform == 'macos-latest' || matrix.platform == 'ubuntu-latest'}}
+        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
+      - name: Install Gulp CLI
+        run: npm install --global --force gulp-cli
+      - name: Install Dependencies
+        run: npm install
       - name: Build and Test
         run: node build-system/pr-check/cross-browser-tests.js

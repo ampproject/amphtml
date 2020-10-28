@@ -61,6 +61,24 @@ export function useRef(initialValue = undefined) {
 }
 
 /**
+ * Returns a callback with the component passed as the first argument. The
+ * returned function has a stable identity, i.e. it doesn't change in the
+ * lifetime of the component.
+ *
+ * @param {function(!./component.Component, ...?):?} callback
+ * @return {function(...?):?}
+ * @package
+ */
+export function useInternalCallbackWithComponent(callback) {
+  const ref = useRef();
+  if (!ref.current) {
+    const component = getComponent();
+    ref.current = callback.bind(null, component);
+  }
+  return ref.current;
+}
+
+/**
  * A hook to compute a persistent value. Mostly the same as the React's
  * `useMemo` API.
  *
@@ -148,6 +166,53 @@ export function useSyncEffect(callback, deps = undefined) {
     cleanupRef.current = newCleanup;
     component.pushCleanup(newCleanup);
   }
+}
+
+/**
+ * This hook returns a function that can be used to set a managed property. A
+ * managed property can be set on the component's node or any other in the same
+ * tree. When this component is removed, all managed properties are also
+ * removed.
+ *
+ * See `setProp` for more info.
+ *
+ * @return {function(!ContextProp<T>, T, !Node=)}
+ * @template T
+ */
+export function useSetProp() {
+  return useInternalCallbackWithComponent(setManagedProp);
+}
+
+/**
+ * This hook returns a function that can be used to remove a managed property,
+ * that was previously set by the `useSetProp`.
+ *
+ * See `removeProp` for more info.
+ *
+ * @return {function(!ContextProp, !Node=)}
+ */
+export function useRemoveProp() {
+  return useInternalCallbackWithComponent(removeManagedProp);
+}
+
+/**
+ * @param {!./component.Component} component
+ * @param {!ContextProp<T>} prop
+ * @param {T} value
+ * @param {!Node|undefined} node
+ * @template T
+ */
+function setManagedProp(component, prop, value, node) {
+  component.setProp(prop, value, node);
+}
+
+/**
+ * @param {!./component.Component} component
+ * @param {!ContextProp} prop
+ * @param {!Node|undefined} node
+ */
+function removeManagedProp(component, prop, node) {
+  component.removeProp(prop, node);
 }
 
 /**
