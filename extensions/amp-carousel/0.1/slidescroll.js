@@ -29,6 +29,10 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -309,6 +313,10 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
     const isScaled = closestAncestorElementBySelector(
@@ -345,6 +353,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.slideIndex_ = null;
     return super.unlayoutCallback();
   }
