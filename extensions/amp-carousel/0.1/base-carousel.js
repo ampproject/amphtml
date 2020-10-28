@@ -70,7 +70,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.setControlsState();
   }
 
-  // TODO(samouri): rename to viewportCallback once 
+  // TODO(samouri): rename to viewportCallback once
   // BaseElement.viewportCallback is deleted
 
   /**
