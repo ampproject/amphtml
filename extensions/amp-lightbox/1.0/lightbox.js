@@ -19,9 +19,10 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {
+  useEffect,
   useImperativeHandle,
-  useLayoutEffect,
   useRef,
+  useState,
 } from '../../../src/preact';
 
 const ANIMATION_PRESETS = {
@@ -38,43 +39,57 @@ const ANIMATION_PRESETS = {
 
 /**
  * @param {!LightboxProps} props
+ * @param ref
  * @return {PreactDef.Renderable}
  */
-function LightboxWithRef({
-  id,
-  layout = 'nodisplay',
-  animateIn = 'fade-in',
-  closeButtonAriaLabel,
-  // eslint-disable-next-line no-unused-vars
-  scrollable, // (TODO: discussion)
-  children,
-  onOpen,
-  open,
-  ...rest
-}) {
-  const lightboxRef = useRef();
+function LightboxWithRef(
+  {
+    id,
+    layout = 'nodisplay',
+    animateIn = 'fade-in',
+    closeButtonAriaLabel,
+    // eslint-disable-next-line no-unused-vars
+    scrollable, // (TODO: discussion)
+    children,
+    onOpen,
+    open,
+    ...rest
+  },
+  ref
+) {
+  const lightboxRef = useRef(null);
+  const [show, setShow] = useState(open);
 
-  useImperativeHandle(lightboxRef, () => ({
-    open: () => {
-      open = true;
-    },
-    close: () => {
-      open = false;
-    },
-  }));
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: () => {
+        setShow(true);
+      },
+      close: () => {
+        setShow(false);
+      },
+    }),
+    [setShow]
+  );
 
-  useLayoutEffect(() => {
-    if (open) {
-      const element = lightboxRef.current;
-      element.hidden = false;
-      setStyle(element, 'opacity', 1);
+  useEffect(() => {
+    console.log('hit show', show);
+    const element = lightboxRef.current;
+    if (show) {
       setStyle(element, 'visibility', 'visible');
       element.animate(ANIMATION_PRESETS[animateIn], {duration: 200});
+      setStyle(element, 'opacity', 1);
       if (onOpen) {
         onOpen();
       }
+    } else {
+      setStyle(element, 'visibility', 'hidden');
+      element.animate(ANIMATION_PRESETS[animateIn].reverse(), {duration: 200});
+      setStyle(element, 'opacity', 0);
     }
-  });
+  }, [show, animateIn, onOpen]);
+
   return (
     <ContainWrapper
       {...rest}
@@ -96,7 +111,6 @@ function LightboxWithRef({
         alignItems: 'center',
         justifyContent: 'right',
       }}
-      hidden
     >
       <button
         textContent={closeButtonAriaLabel}

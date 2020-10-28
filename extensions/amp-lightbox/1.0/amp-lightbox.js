@@ -40,6 +40,7 @@ AmpLightbox['props'] = {
   'scrollable': {attr: 'scrollable'},
   'id': {attr: 'id'},
   'layout': {attr: 'layout'},
+  'open': {attr: 'open'},
   'closeButtonAriaLabel': {attr: 'data-close-button-aria-label'},
 };
 

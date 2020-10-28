@@ -17,6 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {Lightbox} from '../lightbox';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
+import {useRef} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -25,14 +26,32 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function LightboxWithActions(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <Lightbox ref={ref} {...props} />
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current.open()}>open</button>
+        <button onClick={() => ref.current.close()}>close</button>
+      </div>
+    </section>
+  );
+}
+
 export const _default = () => {
-  const id = text('id', 'lightbox');
   const open = boolean('open', false);
   const animateIn = text('animateIn', 'fade-in');
   return (
     <div>
-      <Lightbox
-        id={id}
+      <LightboxWithActions
+        id="lightbox"
         layout="nodisplay"
         open={open}
         animateIn={animateIn}
@@ -40,7 +59,7 @@ export const _default = () => {
       >
         Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
         aeque inermis reprehendunt.
-      </Lightbox>
+      </LightboxWithActions>
     </div>
   );
 };
