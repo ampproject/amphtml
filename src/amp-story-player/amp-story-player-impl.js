@@ -85,6 +85,7 @@ const MAX_IFRAMES = 3;
 const BUTTON_TYPES = {
   BACK: 'back-button',
   CLOSE: 'close-button',
+  SKIP_NEXT: 'skip-next-button',
 };
 
 /** @enum {string} */
@@ -96,9 +97,10 @@ const BUTTON_CLASSES = {
 };
 
 /** @enum {string} */
-const BUTTON_EVENTS = {
+export const VIEWER_CONTROL_EVENTS = {
   [BUTTON_TYPES.BACK]: 'amp-story-player-back',
   [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
+  [BUTTON_TYPES.SKIP_NEXT]: 'amp-story-player-skip-next',
 };
 
 /** @enum {string} */
@@ -114,12 +116,16 @@ const STORY_MESSAGE_STATE_TYPE = {
   STORY_PROGRESS: 'STORY_PROGRESS',
 };
 
+/** @const {string} */
+export const AMP_STORY_PLAYER_EVENT = 'AMP_STORY_PLAYER_EVENT';
+
 /** @typedef {{ state:string, value:(boolean|string) }} */
 let DocumentStateTypeDef;
 
 /**
  * @typedef {{
  *   href: string,
+ *   idx: number,
  *   iframeIdx: number,
  *   title: (?string),
  *   poster: (?string)
@@ -138,11 +144,23 @@ let BehaviorDef;
 
 /**
  * @typedef {{
- *   controls: (!Array),
+ *   controls: (!Array<!ViewerControlDef>),
  *   behavior: !BehaviorDef,
  * }}
  */
 let ConfigDef;
+
+/**
+ * @typedef {{
+ *   name: string,
+ *   state: (?string),
+ *   event: (?string),
+ *   visibility: (?string),
+ *   position: (?string),
+ *   backgroundImageUrl: (?string)
+ * }}
+ */
+export let ViewerControlDef;
 
 /** @type {string} */
 const TAG = 'amp-story-player';
@@ -207,6 +225,9 @@ export class AmpStoryPlayer {
     /** @private {?boolean} */
     this.isFetchingStoriesEnabled_ = null;
 
+    /** @private {?boolean} */
+    this.isCircularWrappingEnabled_ = null;
+
     /** @private {!Object} */
     this.touchEventState_ = {
       startX: 0,
@@ -267,7 +288,7 @@ export class AmpStoryPlayer {
       const story = stories[i];
       story.iframeIdx = -1;
 
-      this.stories_.push(story);
+      story.idx = this.stories_.push(story) - 1;
 
       if (this.iframes_.length < MAX_IFRAMES) {
         this.createIframeForStory_(this.stories_.length - 1);
@@ -342,6 +363,7 @@ export class AmpStoryPlayer {
     this.initializeButton_();
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
+    this.initializeCircularWrapping_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -351,12 +373,13 @@ export class AmpStoryPlayer {
     const anchorEls = toArray(this.element_.querySelectorAll('a'));
 
     this.stories_ = anchorEls.map(
-      (anchorEl) =>
+      (anchorEl, idx) =>
         /** @type {!StoryDef} */ ({
           href: anchorEl.href,
           title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
           poster: anchorEl.getAttribute('data-poster-portrait-src'),
           iframeIdx: -1,
+          idx,
         })
     );
   }
@@ -452,7 +475,7 @@ export class AmpStoryPlayer {
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
+        createCustomEvent(this.win_, VIEWER_CONTROL_EVENTS[option], dict({}))
       );
     });
   }
@@ -580,6 +603,8 @@ export class AmpStoryPlayer {
           });
 
           if (this.playerConfig_ && this.playerConfig_.controls) {
+            this.updateControlsStateForAllStories_(story.idx);
+
             messaging.sendRequest(
               'customDocumentUI',
               dict({'controls': this.playerConfig_.controls}),
@@ -595,6 +620,25 @@ export class AmpStoryPlayer {
         }
       );
     });
+  }
+
+  /**
+   * Updates the controls config for a given story.
+   * @param {number} storyIdx
+   * @private
+   */
+  updateControlsStateForAllStories_(storyIdx) {
+    // Disables skip-next-button when story is the last one in the player.
+    if (storyIdx === this.stories_.length - 1) {
+      const skipButtonIdx = findIndex(
+        this.playerConfig_.controls,
+        (control) => control.name === 'skip-next-button'
+      );
+
+      if (skipButtonIdx >= 0) {
+        this.playerConfig_.controls[skipButtonIdx].state = 'disabled';
+      }
+    }
   }
 
   /**
@@ -838,6 +882,15 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * @param {!Object} behavior
+   * @return {boolean}
+   * @private
+   */
+  validateBehaviorDef_(behavior) {
+    return behavior && behavior.on && behavior.action;
+  }
+
+  /**
    * Checks if fetching more stories is enabled and validates the configuration.
    * @return {boolean}
    * @private
@@ -849,14 +902,11 @@ export class AmpStoryPlayer {
 
     const {behavior} = this.playerConfig_;
 
-    const isBehaviorDef = (behavior) =>
-      behavior && behavior.on && behavior.action;
-
     const hasEndFetchBehavior = (behavior) =>
       behavior.on === 'end' && behavior.action === 'fetch' && behavior.endpoint;
 
     this.isFetchingStoriesEnabled_ =
-      isBehaviorDef(behavior) && hasEndFetchBehavior(behavior);
+      this.validateBehaviorDef_(behavior) && hasEndFetchBehavior(behavior);
 
     return this.isFetchingStoriesEnabled_;
   }
@@ -867,14 +917,14 @@ export class AmpStoryPlayer {
    */
   next_() {
     if (
-      !this.isCircularWrappingEnabled_() &&
+      !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
       return;
     }
 
     if (
-      this.isCircularWrappingEnabled_() &&
+      this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
       this.go(1);
@@ -905,14 +955,14 @@ export class AmpStoryPlayer {
    */
   previous_() {
     if (
-      !this.isCircularWrappingEnabled_() &&
+      !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
       return;
     }
 
     if (
-      this.isCircularWrappingEnabled_() &&
+      this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
       this.go(-1);
@@ -943,7 +993,7 @@ export class AmpStoryPlayer {
       return;
     }
     if (
-      !this.isCircularWrappingEnabled_() &&
+      !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + storyDelta)
     ) {
       throw new Error('Out of Story range.');
@@ -1239,7 +1289,28 @@ export class AmpStoryPlayer {
           messaging
         );
         break;
+      case AMP_STORY_PLAYER_EVENT:
+        this.onPlayerEvent_(/** @type {string} */ (data.value));
+        break;
       default:
+        break;
+    }
+  }
+
+  /**
+   * Reacts to events coming from the story.
+   * @private
+   * @param {string} value
+   */
+  onPlayerEvent_(value) {
+    switch (value) {
+      case VIEWER_CONTROL_EVENTS[BUTTON_TYPES.SKIP_NEXT]:
+        this.next_();
+        break;
+      default:
+        this.element_.dispatchEvent(
+          createCustomEvent(this.win_, value, dict({}))
+        );
         break;
     }
   }
@@ -1335,7 +1406,7 @@ export class AmpStoryPlayer {
    * @private
    */
   dispatchEndOfStoriesEvent_(data) {
-    if (this.isCircularWrappingEnabled_() || (!data.next && !data.previous)) {
+    if (this.isCircularWrappingEnabled_ || (!data.next && !data.previous)) {
       return;
     }
 
@@ -1436,14 +1507,14 @@ export class AmpStoryPlayer {
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_LEFT) {
         delta > TOGGLE_THRESHOLD_PX &&
-        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_())
+        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
           ? this.next_()
           : this.resetIframeStyles_();
       }
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_RIGHT) {
         delta > TOGGLE_THRESHOLD_PX &&
-        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_())
+        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
           ? this.previous_()
           : this.resetIframeStyles_();
       }
@@ -1510,12 +1581,29 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Checks if circular wrapping attribute is present.
    * @private
    * @return {boolean}
    */
-  isCircularWrappingEnabled_() {
-    return this.element_.hasAttribute('enable-circular-wrapping');
+  initializeCircularWrapping_() {
+    if (this.isCircularWrappingEnabled_ !== null) {
+      return this.isCircularWrappingEnabled_;
+    }
+
+    if (!this.playerConfig_) {
+      this.isCircularWrappingEnabled_ = false;
+      return false;
+    }
+
+    const {behavior} = this.playerConfig_;
+
+    const hasCircularWrappingEnabled = (behavior) =>
+      behavior.on === 'end' && behavior.action === 'circular-wrapping';
+
+    this.isCircularWrappingEnabled_ =
+      this.validateBehaviorDef_(behavior) &&
+      hasCircularWrappingEnabled(behavior);
+
+    return this.isCircularWrappingEnabled_;
   }
 
   /**
