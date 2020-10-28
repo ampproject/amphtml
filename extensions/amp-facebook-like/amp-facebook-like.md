@@ -101,7 +101,7 @@ For details, see the
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `Facebook like button`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook like button"`.
 
 ### Common attributes
 

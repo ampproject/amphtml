@@ -239,7 +239,7 @@ can be useful when an ad indicator is in presence.
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `Advertisement`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Advertisement"`.
 
 ### common attributes
 

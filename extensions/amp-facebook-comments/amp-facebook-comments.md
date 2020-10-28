@@ -67,7 +67,7 @@ The order to use when displaying comments. For details, see the
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `Facebook comments`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook comments"`.
 
 ### Common attributes
 

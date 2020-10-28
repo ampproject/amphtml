@@ -102,7 +102,7 @@ disable zoom, set the value to `false`. `autororate` defaults to `true`.
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `GLTF 3D model`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"GLTF 3D model"`.
 
 ## Actions
 

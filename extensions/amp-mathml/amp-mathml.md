@@ -74,7 +74,7 @@ If specified, the component renders inline (`inline-block` in CSS).
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `MathML formula`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"MathML formula"`.
 
 ## Validation
 

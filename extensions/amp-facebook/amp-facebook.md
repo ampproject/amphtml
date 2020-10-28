@@ -116,7 +116,7 @@ For details on strings accepted here please visit the
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `Facebook`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook"`.
 
 ### Common attributes
 

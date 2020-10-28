@@ -97,7 +97,7 @@ serving of ads outside of an `amp-ad` element.
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `BeOpinion content`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"BeOpinion content"`.
 
 ## Styling
 

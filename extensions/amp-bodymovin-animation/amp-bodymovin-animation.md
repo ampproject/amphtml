@@ -70,7 +70,7 @@ This attribute only accepts the values `html` and `svg`.
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `Airbnb BodyMovin animation`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Airbnb BodyMovin animation"`.
 
 ### Common attributes
 

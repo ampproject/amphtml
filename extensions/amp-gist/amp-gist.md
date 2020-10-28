@@ -80,7 +80,7 @@ If specified, display only one file in a gist.
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `Github gist`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Github gist"`.
 
 ## Validation
 

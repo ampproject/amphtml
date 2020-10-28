@@ -97,7 +97,7 @@ For more details, see [documentation on the docking extension itself](https://am
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `IMA video`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"IMA video"`.
 
 ### Common attributes
 

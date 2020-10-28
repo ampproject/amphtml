@@ -120,7 +120,7 @@ main card container.
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `Embedly card`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Embedly card"`.
 
 ### Common attributes
 

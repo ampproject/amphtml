@@ -120,7 +120,7 @@ Usually YouTube sets its cookies when the player is loaded. In privacy-enhanced 
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `YouTube video`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"YouTube video"`.
 
 ### common attributes
 

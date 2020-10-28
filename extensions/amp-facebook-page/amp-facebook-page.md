@@ -78,7 +78,7 @@ Uses the small header instead. Default value is `false`.
 
 ### title (optional)
 
-Define a `title` attribute for the component. The default is `Facebook page`.
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook page"`.
 
 ### Common attributes
 
