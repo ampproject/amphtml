@@ -16,6 +16,8 @@
 
 /** @externs */
 
+var LightboxDef = {};
+
 /**
  * @typedef {{
  *   id: (string),
@@ -24,6 +26,16 @@
  *   closeButtonAriaLabel: (string|undefined),
  *   scrollable: (boolean),
  *   onOpen: (function|undefined),
+ *   openOnLoad: (boolean)
  * }}
  */
-var LightboxProps;
+LightboxDef.Props;
+
+/** @interface */
+Lightbox.LightboxApi = class {
+  /** Open the lightbox */
+  open() {}
+
+  /** Close the lightbox */
+  close() {}
+};

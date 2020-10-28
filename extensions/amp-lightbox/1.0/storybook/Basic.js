@@ -33,7 +33,7 @@ export default {
 function LightboxWithActions(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
-  const ref = Preact.useRef();
+  const ref = useRef();
   return (
     <section>
       <Lightbox ref={ref} {...props} />
@@ -53,9 +53,8 @@ export const _default = () => {
       <LightboxWithActions
         id="lightbox"
         layout="nodisplay"
-        open={open}
+        openOnLoad={open}
         animateIn={animateIn}
-        style={{display: 'block'}}
       >
         Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
         aeque inermis reprehendunt.

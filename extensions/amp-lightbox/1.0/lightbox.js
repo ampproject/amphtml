@@ -38,8 +38,8 @@ const ANIMATION_PRESETS = {
 };
 
 /**
- * @param {!LightboxProps} props
- * @param ref
+ * @param {!LightboxDef.Props} props
+ * @param {{current: (!LightboxDef.LightboxApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
@@ -52,13 +52,13 @@ function LightboxWithRef(
     scrollable, // (TODO: discussion)
     children,
     onOpen,
-    open,
+    openOnLoad,
     ...rest
   },
   ref
 ) {
   const lightboxRef = useRef(null);
-  const [show, setShow] = useState(open);
+  const [show, setShow] = useState(openOnLoad);
 
   useImperativeHandle(
     ref,
@@ -78,6 +78,7 @@ function LightboxWithRef(
     if (show) {
       setStyle(element, 'visibility', 'visible');
       element.animate(ANIMATION_PRESETS[animateIn], {duration: 200});
+      // setStyle(element, 'display', 'flex');
       setStyle(element, 'opacity', 1);
       if (onOpen) {
         onOpen();
@@ -85,6 +86,7 @@ function LightboxWithRef(
     } else {
       setStyle(element, 'visibility', 'hidden');
       element.animate(ANIMATION_PRESETS[animateIn].reverse(), {duration: 200});
+      // setStyle(element, 'display', 'none');
       setStyle(element, 'opacity', 0);
     }
   }, [show, animateIn, onOpen]);
@@ -102,8 +104,8 @@ function LightboxWithRef(
         zIndex: 1000,
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
         color: '#fff',
-        width: '100%',
-        height: '100%',
+        width: window.innerWidth,
+        height: window.innerHeight,
         opacity: 0,
         visibility: 'hidden',
         display: 'flex',
