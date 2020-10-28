@@ -102,8 +102,8 @@ function LightboxWithRef(
         zIndex: 1000,
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
         color: '#fff',
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: '100%',
+        height: '100%',
         opacity: 0,
         visibility: 'hidden',
         display: 'flex',
@@ -135,7 +135,7 @@ function LightboxWithRef(
           visibility: 'visible',
         }}
         onClick={() => {
-          open = false;
+          setShow(false);
         }}
       />
       {children}
