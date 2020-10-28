@@ -35,6 +35,7 @@ const AllowedAdTypes = {
   'custom': true,
   'doubleclick': true,
   'fake': true,
+  'nws': true,
 };
 
 export class StoryAdConfig {
