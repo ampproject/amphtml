@@ -21,7 +21,9 @@ import {htmlFor} from '../../../src/static-template';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
 
-describes.realWin('PreactBaseElement', {amp: true}, (env) => {
+const spec = {amp: true, frameStyle: {width: '300px'}};
+
+describes.realWin('PreactBaseElement', spec, (env) => {
   let win, doc, html;
   let Impl, component, lastProps;
 
@@ -177,6 +179,51 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       expect(component).to.be.calledTwice;
       expect(lastProps).to.have.property('propA', 'B');
       expect(lastProps).to.not.have.property('unknown2');
+    });
+  });
+
+  describe('media-query attribute mapping', () => {
+    let element;
+
+    beforeEach(async () => {
+      Impl['props'] = {
+        'propA': {attr: 'prop-a', media: true},
+        'propB': {attr: 'prop-b', media: true},
+        'minFontSize': {attr: 'min-font-size', type: 'number', media: true},
+      };
+      element = html`
+        <amp-preact
+          layout="fixed"
+          width="100"
+          height="100"
+          prop-a="(max-width: 301px) A, B"
+          min-font-size="(max-width: 301px) 72, 84"
+        >
+        </amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(win.innerWidth).to.equal(300);
+    });
+
+    it('should parse attributes on first render', async () => {
+      expect(component).to.be.calledOnce;
+      expect(lastProps.propA).to.equal('A');
+      expect(lastProps.minFontSize).to.equal(72);
+      // No attribute.
+      expect(lastProps.propB).to.be.undefined;
+    });
+
+    it('should rerender on media change', async () => {
+      env.iframe.style.width = '310px';
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+
+      expect(component).to.be.calledTwice;
+      expect(lastProps.propA).to.equal('B');
+      expect(lastProps.minFontSize).to.equal(84);
+      // No attribute.
+      expect(lastProps.propB).to.be.undefined;
     });
   });
 
