@@ -1367,14 +1367,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Called every time an owned AmpElement expands itself.
-     * @param {!AmpElement} element
-     */
-    expandedCallback(element) {
-      this.implementation_.expandedCallback(element);
-    }
-
-    /**
      * Called when one or more attributes are mutated.
      * Note: Must be called inside a mutate context.
      * Note: Boolean attributes have a value of `true` and `false` when
