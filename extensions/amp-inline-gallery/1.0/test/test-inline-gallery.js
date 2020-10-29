@@ -36,6 +36,8 @@ describes.sandboxed('InlineGallery preact component', {}, () => {
     const wrapper = mount(jsx);
     const carousel = wrapper.find('BaseCarousel');
     expect(carousel).to.have.lengthOf(1);
+    const slides = carousel.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
 
     const pagination = wrapper.find('Pagination');
     expect(pagination).to.have.lengthOf(1);
@@ -54,11 +56,17 @@ describes.sandboxed('InlineGallery preact component', {}, () => {
     );
     const wrapper = mount(jsx);
 
-    // First is user provided, second is created by Thumbnails
-    const carousel = wrapper.find('BaseCarousel');
-    expect(carousel).to.have.lengthOf(2);
+    const carousels = wrapper.find('BaseCarousel');
+    expect(carousels).to.have.lengthOf(2);
+    const slides = carousels.first().find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
 
-    const pagination = wrapper.find('Thumbnails');
-    expect(pagination).to.have.lengthOf(1);
+    const thumbnails = wrapper.find('Thumbnails');
+    expect(thumbnails).to.have.lengthOf(1);
+    const generatedCarousel = thumbnails.find('BaseCarousel');
+    expect(generatedCarousel).to.have.lengthOf(1);
+
+    const generatedSlides = generatedCarousel.find('[data-slide]');
+    expect(generatedSlides).to.have.lengthOf(3);
   });
 });
