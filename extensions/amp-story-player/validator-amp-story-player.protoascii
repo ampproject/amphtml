@@ -84,6 +84,7 @@ tags: {
   tag_name: "IMG"
   spec_name: "AMP-STORY-PLAYER IMG"
   spec_url: "https://amp.dev/documentation/components/amp-story-player/"
+  mandatory_parent: "A"
   mandatory_ancestor: "AMP-STORY-PLAYER"
   attrs: {
     name: "loading"
@@ -94,6 +95,7 @@ tags: {
     name: "data-amp-story-player-poster-img"
     mandatory: true
     value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
