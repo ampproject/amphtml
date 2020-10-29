@@ -388,6 +388,20 @@ function runSanitizerTests() {
         expect(sanitize('<input type="image">')).to.equal('<input>');
       });
     });
+
+    it('should allow <template type> tag', () => {
+      expect(sanitize('<template type="A"><div>A</div></template>')).to.equal(
+        '<template type="A"><div>A</div></template>'
+      );
+    });
+
+    it('should disallow <template shadowroot>', () => {
+      allowConsoleError(() => {
+        expect(
+          sanitize('<template shadowroot><div>A</div></template>')
+        ).to.equal('<template><div>A</div></template>');
+      });
+    });
   });
 
   describe('should sanitize based on AMP doc format type', () => {

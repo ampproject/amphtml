@@ -575,6 +575,28 @@ describe
       });
     });
 
+    describe('<template>', () => {
+      it('should allow <template> tag', () => {
+        expect(purify('<template><div>A</div></template>')).to.equal(
+          '<template><div>A</div></template>'
+        );
+      });
+
+      it('should allow <template type> tag', () => {
+        expect(purify('<template type="A"><div>A</div></template>')).to.equal(
+          '<template type="A"><div>A</div></template>'
+        );
+      });
+
+      it('should not allow <template shadowroot>', () => {
+        allowConsoleError(() => {
+          expect(
+            purify('<template shadowroot><div>A</div></template>')
+          ).to.equal('<template><div>A</div></template>');
+        });
+      });
+    });
+
     describe('<script>', () => {
       it('should not allow plain <script> tags', () => {
         expect(purify('<script>alert(1)</script>')).to.equal('');

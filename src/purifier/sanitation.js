@@ -264,6 +264,7 @@ const DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
     'input': DENYLISTED_FIELDS_ATTR,
     'textarea': DENYLISTED_FIELDS_ATTR,
     'select': DENYLISTED_FIELDS_ATTR,
+    'template': ['shadowroot'],
   })
 );
 
