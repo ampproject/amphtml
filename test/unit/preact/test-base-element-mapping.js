@@ -82,6 +82,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         'aDate': {attr: 'a-date', type: 'date'},
         'disabled': {attr: 'disabled', type: 'boolean'},
         'enabled': {attr: 'enabled', type: 'boolean'},
+        'boolDefTrue': {attr: 'bool-def-true', type: 'boolean', default: true},
         'combined': {
           attrs: ['part-a', 'part-b'],
           parseAttrs: (e) =>
@@ -127,9 +128,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         minFontSize: 72,
         aDate: DATE,
         disabled: true,
-        enabled: false,
+        boolDefTrue: true,
         combined: 'A+B',
       });
+      expect(lastProps.enabled).to.not.exist;
       expect(lastProps.params.test).to.equal('helloworld');
       expect(lastProps.params.testTwo).to.equal('confirm');
       expect(lastProps).to.not.haveOwnProperty('prefix');
@@ -141,6 +143,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       element.setAttribute('a-date', '2018-01-01T08:00:01Z');
       element.setAttribute('enabled', '');
       element.removeAttribute('disabled');
+      element.setAttribute('bool-def-true', 'false');
       element.setAttribute('part-b', 'C');
       element.setAttribute('data-param-test', 'worldhello');
       element.setAttribute('data-param-test-two', 'confirmAgain');
@@ -154,13 +157,34 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         propA: 'B',
         minFontSize: 72.5,
         aDate: DATE + 1000,
-        disabled: false,
         enabled: true,
+        boolDefTrue: false,
         combined: 'A+C',
       });
+      expect(lastProps.disabled).to.not.exist;
       expect(lastProps.params.test).to.equal('worldhello');
       expect(lastProps.params.testTwo).to.equal('confirmAgain');
       expect(lastProps).to.not.haveOwnProperty('prefix');
+    });
+
+    it('should accept boolean string values', async () => {
+      element.setAttribute('enabled', 'true');
+      element.setAttribute('bool-def-true', 'true');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+      expect(lastProps).to.contain({
+        enabled: true,
+        boolDefTrue: true,
+      });
+
+      element.setAttribute('enabled', 'false');
+      element.setAttribute('bool-def-true', 'false');
+      await waitFor(() => component.callCount > 2, 'component re-rendered');
+      expect(component).to.be.calledThrice;
+      expect(lastProps).to.contain({
+        enabled: false,
+        boolDefTrue: false,
+      });
     });
 
     it('should ignore non-declared attributes', async () => {
