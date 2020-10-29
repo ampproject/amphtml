@@ -16,3 +16,4 @@ Local Modifications:
 - Removed String.raw calls (breaks the build)
 - Swapped X-axis projection (original code was horizontally mirroring the source image)
 - Added setImageOrientation(heading, pitch, roll) method to correct the orientation of the texture (credits: Nicolas Barradeau - https://github.com/nicoptere).
+- Added init function for setting up resources.
