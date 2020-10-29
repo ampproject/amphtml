@@ -1006,7 +1006,9 @@ export class SystemLayer {
 
       if (!control.visibility || control.visibility === 'visible') {
         this.vsync_.mutate(() => {
-          element.classList.remove('i-amphtml-story-ui-hide-button');
+          dev()
+            .assertElement(element)
+            .classList.remove('i-amphtml-story-ui-hide-button');
         });
       }
 
