@@ -215,7 +215,9 @@ function ScrollerWithRef(
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
     const container = containerRef.current;
-
+    if (!container) {
+      return;
+    }
     if (mixedLength) {
       const acc = {index: 0, width: 0};
       for (let i = 0; i < container.children.length; i++) {
