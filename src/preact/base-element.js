@@ -72,11 +72,6 @@ let AmpElementPropDef;
  */
 let ChildDef;
 
-/** @type {!Object<string, *>} */
-const TYPE_DEFAULTS = {
-  'boolean': false,
-};
-
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
   childList: true,
@@ -787,9 +782,8 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
       }
     }
     if (value == null) {
-      const defValue = def.default ?? (def.type && TYPE_DEFAULTS[def.type]);
-      if (defValue != null) {
-        props[name] = defValue;
+      if (def.default != null) {
+        props[name] = def.default;
       }
     } else {
       const v =

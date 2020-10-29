@@ -128,10 +128,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         minFontSize: 72,
         aDate: DATE,
         disabled: true,
-        enabled: false,
         boolDefTrue: true,
         combined: 'A+B',
       });
+      expect(lastProps.enabled).to.not.exist;
       expect(lastProps.params.test).to.equal('helloworld');
       expect(lastProps.params.testTwo).to.equal('confirm');
       expect(lastProps).to.not.haveOwnProperty('prefix');
@@ -143,6 +143,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       element.setAttribute('a-date', '2018-01-01T08:00:01Z');
       element.setAttribute('enabled', '');
       element.removeAttribute('disabled');
+      element.setAttribute('bool-def-true', 'false');
       element.setAttribute('part-b', 'C');
       element.setAttribute('data-param-test', 'worldhello');
       element.setAttribute('data-param-test-two', 'confirmAgain');
@@ -156,10 +157,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         propA: 'B',
         minFontSize: 72.5,
         aDate: DATE + 1000,
-        disabled: false,
         enabled: true,
+        boolDefTrue: false,
         combined: 'A+C',
       });
+      expect(lastProps.disabled).to.not.exist;
       expect(lastProps.params.test).to.equal('worldhello');
       expect(lastProps.params.testTwo).to.equal('confirmAgain');
       expect(lastProps).to.not.haveOwnProperty('prefix');
