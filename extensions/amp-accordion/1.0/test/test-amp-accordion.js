@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import '../../../amp-bind/0.1/amp-bind';
 import '../amp-accordion';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
@@ -24,7 +25,7 @@ describes.realWin(
   'amp-accordion:1.0',
   {
     amp: {
-      extensions: ['amp-accordion:1.0'],
+      extensions: ['amp-accordion:1.0', 'amp-bind:0.1'],
     },
   },
   (env) => {
@@ -213,6 +214,34 @@ describes.realWin(
 
       expect(sections[2]).to.not.have.attribute('expanded');
       expect(sections[2].lastElementChild).to.have.display('none');
+    });
+
+    it('should expand and collapse with amp-bind attribute', async () => {
+      const sections = element.children;
+      sections[1].setAttribute('data-amp-bind-expanded', 'section1');
+
+      const buttons = html`
+        <div>
+          <button on="tap:AMP.setState({section1: true})"></button>
+          <button on="tap:AMP.setState({section1: false})"></button>
+        </div>
+      `;
+      win.document.body.appendChild(buttons);
+      const {firstElementChild: button1, lastElementChild: button2} = buttons;
+
+      async function waitForBindExpanded(el, expanded) {
+        const isExpandedOrNot = () => el.lastElementChild.hidden === !expanded;
+        await waitFor(isExpandedOrNot, 'element expanded updated');
+      }
+
+      expect(sections[1].lastElementChild).to.have.attribute('hidden');
+      button1.click();
+      await waitForBindExpanded(sections[1], true);
+      expect(sections[1].lastElementChild).to.not.have.attribute('hidden');
+
+      button2.click();
+      await waitForBindExpanded(sections[1], false);
+      expect(sections[1].lastElementChild).to.have.attribute('hidden');
     });
 
     it('should include a11y related attributes', async () => {
