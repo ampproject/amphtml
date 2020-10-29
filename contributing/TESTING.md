@@ -253,7 +253,7 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 ### How Are Tests Executed
 
-Visual diff tests are defined in the [../test/visual-diff/visual-tests](`visual-tests`), see file for the configurations of each test. When running, the visual diff test runner does the following for each test case:
+Visual diff tests are defined in the [`visual-tests`](../test/visual-diff/visual-tests), see file for the configurations of each test. When running, the visual diff test runner does the following for each test case:
 
 - Navgates to the defined page using a headless Chrome browser
 - Waits for the page to finish loading, both by verifying idle network connections and lack of loader animations
@@ -283,7 +283,7 @@ Once the environment variable is set up, you can run the AMP visual diff tests. 
 To start, create the page and register it in the configuration file for visual diff tests:
 
 - Create an AMPHTML page that will be tested under `examples/visual-tests`.
-- Add an entry in the [../test/visual-diff/visual-tests](`test/visual-diff/visual-tests`) JSON5 file. Documentation for the various settings are in that file.
+- Add an entry in the [`test/visual-diff/visual-tests`](../test/visual-diff/visual-tests) JSON5 file. Documentation for the various settings are in that file.
 - - Must set fields: `url`, `name`
 - - You will also likely want to set `loading_complete_css` and maybe also `loading_incomplete_css`
 - - Only set `viewport` if your page looks different on mobile vs. desktop, and you intend to create a separate config for each
