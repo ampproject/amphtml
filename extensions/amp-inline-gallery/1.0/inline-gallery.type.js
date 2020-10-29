@@ -42,6 +42,7 @@ InlineGalleryDef.Props;
 InlineGalleryDef.PaginationProps;
 
 /**
+ * Note that aspectRatio is expressed in terms of width/height.
  * @typedef {{
  *   aspectRatio: number,
  *   loop: (boolean|undefined),
