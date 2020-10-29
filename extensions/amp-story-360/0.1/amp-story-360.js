@@ -300,6 +300,7 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {number} */
     this.headingOffset_ = 0;
 
+    /** @private WebGL extension for lost context. */
     this.lostGlContext_ = null;
   }
 
