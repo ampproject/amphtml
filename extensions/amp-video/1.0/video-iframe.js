@@ -87,7 +87,14 @@ function VideoIframeWithRef(
     [postMethodMessage]
   );
 
+  const handleMessageRef = useRef(null);
+
   useLayoutEffect(() => {
+    if (handleMessageRef.current) {
+      defaultView.removeEventListener('message', handleMessageRef.current);
+      handleMessageRef.current = null;
+    }
+
     if (!onMessage) {
       return;
     }
@@ -115,10 +122,8 @@ function VideoIframeWithRef(
     }
 
     const {defaultView} = iframeRef.current.ownerDocument;
-
     defaultView.addEventListener('message', handleMessage);
-
-    return () => defaultView.removeEventListener('message', handleMessage);
+    handleMessageRef.current = handleMessage;
   }, [onMessage, origin]);
 
   useLayoutEffect(() => {
