@@ -95,7 +95,7 @@ tags: {
     name: "data-amp-story-player-poster-img"
     mandatory: true
     value: ""
-    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
