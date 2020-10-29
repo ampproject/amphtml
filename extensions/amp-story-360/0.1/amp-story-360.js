@@ -51,10 +51,10 @@ const HAVE_CURRENT_DATA = 2;
 const CENTER_OFFSET = 90;
 
 /**
- * Min value for WebGL context to be active.
+ * Minimum distance from active page to activate WebGL context.
  * @const {number}
  */
-const MIN_WEBGL_DISTANCE = 3;
+const MIN_WEBGL_DISTANCE = 2;
 
 /**
  * Generates the template for the permission button.
@@ -356,7 +356,7 @@ export class AmpStory360 extends AMP.BaseElement {
       this.distance_ = parseInt(
         mutationsList[0].target.getAttribute('distance')
       );
-      this.maybeActivateGlContext_();
+      this.restoreOrLoseGlContext_();
     };
     const observer = new MutationObserver(callback);
     observer.observe(this.getPage_(), config);
@@ -431,8 +431,8 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /** @private */
-  maybeActivateGlContext_() {
-    if (this.distance_ && this.isReady_) {
+  restoreOrLoseGlContext_() {
+    if (this.renderer_) {
       if (this.distance_ < MIN_WEBGL_DISTANCE) {
         if (this.renderer_.gl.isContextLost()) {
           this.lostGlContext_.restoreContext();
@@ -689,7 +689,7 @@ export class AmpStory360 extends AMP.BaseElement {
         () => {
           this.renderer_ = new Renderer(this.canvas_);
           this.renderer_.init();
-          this.setUpCanvasGlListeners_();
+          this.setupGlContextListeners_();
           this.image_ = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
@@ -739,8 +739,7 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.setUpCanvasGlListeners_();
-
+          this.setupGlContextListeners_();
           this.renderer_.init();
           this.renderer_.setImageOrientation(
             this.sceneHeading_,
@@ -770,23 +769,37 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /** @private */
-  setUpCanvasGlListeners_() {
+  setupGlContextListeners_() {
     this.lostGlContext_ = this.renderer_.gl.getExtension('WEBGL_lose_context');
     this.renderer_.canvas.addEventListener('webglcontextlost', (e) => {
-      console.log('context lost');
+      // Calling preventDefault is necessary for restoring context.
       e.preventDefault();
+      this.isReady_ = false;
     });
-    this.renderer_.canvas.addEventListener('webglcontextrestored', () => {
-      console.log('context restored');
-      this.renderer_.init();
-      if (this.ampVideoEl_) {
-        this.renderer_.setImage(
-          dev().assertElement(this.ampVideoEl_.querySelector('video'))
-        );
-      } else {
-        this.renderer_.setImage(this.image_);
-      }
-    });
+    this.renderer_.canvas.addEventListener('webglcontextrestored', () =>
+      this.onGlContextRestored_()
+    );
+  }
+
+  /** @private */
+  onGlContextRestored_() {
+    this.renderer_.init();
+    this.renderer_.setImageOrientation(
+      this.sceneHeading_,
+      this.scenePitch_,
+      this.sceneRoll_
+    );
+    this.renderer_.setImage(
+      this.image_
+        ? this.image_
+        : dev().assertElement(this.ampVideoEl_.querySelector('video'))
+    );
+    this.renderer_.resize();
+    if (this.orientations_.length < 1) {
+      return;
+    }
+    this.renderInitialPosition_();
+    this.isReady_ = true;
   }
 
   /** @private */
