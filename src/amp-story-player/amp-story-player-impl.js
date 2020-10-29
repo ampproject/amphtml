@@ -82,25 +82,23 @@ const FETCH_STORIES_THRESHOLD = 2;
 const MAX_IFRAMES = 3;
 
 /** @enum {string} */
-const BUTTON_TYPES = {
-  BACK: 'back',
-  CLOSE: 'close',
-  SKIP_NEXT: 'skip-next',
+const DEPRECATED_BUTTON_TYPES = {
+  BACK: 'back-button',
+  CLOSE: 'close-button',
 };
 
 /** @enum {string} */
-const BUTTON_CLASSES = {
+const DEPRECATED_BUTTON_CLASSES = {
   BASE: 'amp-story-player-exit-control-button',
   HIDDEN: 'amp-story-player-hide-button',
-  [BUTTON_TYPES.BACK]: 'amp-story-player-back-button',
-  [BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
+  [DEPRECATED_BUTTON_TYPES.BACK]: 'amp-story-player-back-button',
+  [DEPRECATED_BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
 };
 
 /** @enum {string} */
-export const VIEWER_CONTROL_EVENTS = {
-  [BUTTON_TYPES.BACK]: 'amp-story-player-back',
-  [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
-  [BUTTON_TYPES.SKIP_NEXT]: 'amp-story-player-skip-next',
+const DEPRECATED_EVENT_NAMES = {
+  [DEPRECATED_BUTTON_TYPES.BACK]: 'amp-story-player-back',
+  [DEPRECATED_BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
 };
 
 /** @enum {string} */
@@ -462,26 +460,20 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeButton_() {
-    const deprecatedName = this.element_.getAttribute('exit-control');
-    if (!deprecatedName) {
-      return;
-    }
-
-    const name = deprecatedName.split('-button')[0];
-
-    if (!Object.values(BUTTON_TYPES).includes(name)) {
+    const option = this.element_.getAttribute('exit-control');
+    if (!Object.values(DEPRECATED_BUTTON_TYPES).includes(option)) {
       return;
     }
 
     const button = this.doc_.createElement('button');
     this.rootEl_.appendChild(button);
 
-    button.classList.add(BUTTON_CLASSES[name]);
-    button.classList.add(BUTTON_CLASSES.BASE);
+    button.classList.add(DEPRECATED_BUTTON_CLASSES[option]);
+    button.classList.add(DEPRECATED_BUTTON_CLASSES.BASE);
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, VIEWER_CONTROL_EVENTS[name], dict({}))
+        createCustomEvent(this.win_, DEPRECATED_EVENT_NAMES[option], dict({}))
       );
     });
   }
@@ -638,7 +630,7 @@ export class AmpStoryPlayer {
     if (storyIdx === this.stories_.length - 1) {
       const skipButtonIdx = findIndex(
         this.playerConfig_.controls,
-        (control) => control.name === BUTTON_TYPES.SKIP_NEXT
+        (control) => control.name === 'skip-next'
       );
 
       if (skipButtonIdx >= 0) {
@@ -1310,7 +1302,7 @@ export class AmpStoryPlayer {
    */
   onPlayerEvent_(value) {
     switch (value) {
-      case VIEWER_CONTROL_EVENTS[BUTTON_TYPES.SKIP_NEXT]:
+      case 'amp-story-player-skip-next':
         this.next_();
         break;
       default:
@@ -1373,8 +1365,8 @@ export class AmpStoryPlayer {
     }
 
     isVisible
-      ? button.classList.remove(BUTTON_CLASSES.HIDDEN)
-      : button.classList.add(BUTTON_CLASSES.HIDDEN);
+      ? button.classList.remove(DEPRECATED_BUTTON_CLASSES.HIDDEN)
+      : button.classList.add(DEPRECATED_BUTTON_CLASSES.HIDDEN);
   }
 
   /**

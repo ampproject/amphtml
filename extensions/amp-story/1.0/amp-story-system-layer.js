@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  AMP_STORY_PLAYER_EVENT,
-  VIEWER_CONTROL_EVENTS,
-} from '../../../src/amp-story-player/amp-story-player-impl';
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
   StateProperty,
