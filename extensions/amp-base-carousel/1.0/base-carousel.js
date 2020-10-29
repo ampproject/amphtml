@@ -58,6 +58,7 @@ function BaseCarouselWithRef(
     outsetArrows,
     snap = true,
     visibleCount = 1,
+    _thumbnails = false,
     ...rest
   },
   ref
@@ -66,9 +67,12 @@ function BaseCarouselWithRef(
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(0);
-  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
-  const setCurrentSlide =
-    carouselContext.setCurrentSlide ?? setCurrentSlideState;
+  const currentSlide = _thumbnails
+    ? currentSlideState
+    : carouselContext.currentSlide ?? currentSlideState;
+  const setCurrentSlide = _thumbnails
+    ? setCurrentSlideState
+    : carouselContext.setCurrentSlide ?? setCurrentSlideState;
   const {setSlideCount} = carouselContext;
   const scrollRef = useRef(null);
 
@@ -146,6 +150,7 @@ function BaseCarouselWithRef(
         ref={scrollRef}
         onTouchStart={() => setHadTouch(true)}
         visibleCount={mixedLength ? 1 : visibleCount}
+        _thumbnails={_thumbnails}
       >
         {/*
           TODO(#30283): TBD: this is an interesting concept. We could decide

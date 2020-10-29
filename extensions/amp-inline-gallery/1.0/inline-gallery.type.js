@@ -49,3 +49,11 @@ InlineGalleryDef.PaginationProps;
  * }}
  */
 InlineGalleryDef.ThumbnailProps;
+
+/**
+ * @typedef {{
+ *   children: !Array<PreactDef.Renderable>,
+ *   style: (!Object|undefined),
+ * }}
+ */
+InlineGalleryDef.SlideProps;

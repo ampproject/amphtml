@@ -53,6 +53,7 @@ function ScrollerWithRef(
     setRestingIndex,
     snap,
     visibleCount,
+    _thumbnails,
   },
   ref
 ) {
@@ -135,6 +136,7 @@ function ScrollerWithRef(
       restingIndex,
       snap,
       visibleCount,
+      _thumbnails,
     },
     classes
   );
@@ -249,7 +251,7 @@ function ScrollerWithRef(
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
+      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll} `}
       tabindex={0}
     >
       {slides}
@@ -324,6 +326,7 @@ function renderSlides(
     pivotIndex,
     snap,
     visibleCount,
+    _thumbnails,
   },
   classes
 ) {
@@ -336,7 +339,7 @@ function renderSlides(
         data-slide={index}
         class={`${classes.slideSizing} ${classes.slideElement} ${
           snap ? classes.enableSnap : classes.disableSnap
-        } `}
+        } ${_thumbnails ? classes.thumbnails : ''}`}
         style={{flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`}}
       >
         {child}

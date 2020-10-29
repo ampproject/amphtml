@@ -18,15 +18,23 @@ import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {cloneElement, toChildArray, useContext} from '../../../src/preact';
+import {px} from '../../../src/style';
 
 /**
- * @param {!JsonObject} props
+ * @param {!InlineGalleryDef.ThumbnailProps} props
  * @return {PreactDef.Renderable}
  */
-export function Thumbnails({loop = true, children, ...rest}) {
+export function Thumbnails({
+  aspectRatio,
+  loop = false,
+  children,
+  style,
+  ...rest
+}) {
   const childrenArray = toChildArray(children);
   const {setCurrentSlide} = useContext(CarouselContext);
   const pointerFine = window.matchMedia('(pointer: fine)');
+  const slideHeight = style.height;
   // Note: The carousel is aria-hidden since it just duplicates the
   // information of the original carousel.
   return (
@@ -36,14 +44,31 @@ export function Thumbnails({loop = true, children, ...rest}) {
       snap={false}
       controls={pointerFine ? 'always' : 'never'}
       loop={loop}
-      style={{width: '100%', height: '100%'}}
+      style={style}
+      _thumbnails={true}
       {...rest}
     >
-      {childrenArray.map((slide, i) =>
-        cloneElement(slide, {
-          onClick: () => setCurrentSlide(i),
-        })
-      )}
+      {childrenArray.map((slide, i) => {
+        const {
+          style,
+          children,
+        } = /** @type {InlineGalleryDef.SlideProps} */ (slide.props);
+        const slideWidth = aspectRatio
+          ? slideHeight * aspectRatio
+          : (style.width / style.height) * slideHeight;
+        return cloneElement(
+          /** @type {!PreactDef.VNode} */ (slide),
+          {
+            style: {
+              ...style,
+              width: px(slideWidth),
+              height: px(slideHeight),
+            },
+            onClick: () => setCurrentSlide(i),
+          },
+          children
+        );
+      })}
     </BaseCarousel>
   );
 }

@@ -34,11 +34,11 @@ export const _default = () => {
   const paginationHeight = number('top indicator height', 20);
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
-  const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const slideCount = number('slide count', 12, {min: 3, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const thumbnailHeight = number('thumbnail height', 50);
-  const loop = boolean('thumbnail loop', true);
-  const aspectRatio = number('thumbnail aspect ratio', 2);
+  const loop = boolean('thumbnail loop', false);
+  const aspectRatio = number('thumbnail aspect ratio (w/h)', 3);
 
   return (
     <>
