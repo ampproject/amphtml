@@ -355,7 +355,8 @@ export class AmpStory360 extends AMP.BaseElement {
     const config = {attributes: true, attributeFilter: ['distance']};
     const callback = (mutationsList) => {
       this.distance_ = parseInt(
-        mutationsList[0].target.getAttribute('distance')
+        mutationsList[0].target.getAttribute('distance'),
+        10
       );
       this.restoreOrLoseGlContext_();
     };
