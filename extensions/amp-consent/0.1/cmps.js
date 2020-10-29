@@ -91,6 +91,12 @@ CMP_CONFIG['opencmp'] = {
   'promptUISrc': 'https://cdn.opencmp.net/tcf-v2/amp/cmp.html',
 };
 
+CMP_CONFIG['quantcast'] = {
+  'consentInstanceId': 'quantcast',
+  'checkConsentHref': 'https://apis.quantcast.mgr.consensu.org/amp/check-consent',
+  'promptUISrc': 'https://quantcast.mgr.consensu.org/tcfv2/amp.html',
+};
+
 CMP_CONFIG['SourcePoint'] = {
   'consentInstanceId': 'SourcePoint',
   'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',

@@ -103,6 +103,7 @@
           <option>Marfeel</option>
           <option>Ogury</option>
           <option>opencmp</option>
+          <option>quantcast</option>
           <option>sirdata</option>
           <option>SourcePoint</option>
           <option>Usercentrics</option>
@@ -317,6 +318,24 @@
         </div>
       </amp-consent>
       <!-- End opencmp example -->
+
+      <!-- Quantcast Example -->
+      <amp-consent id="quantcast" layout="nodisplay" type="quantcast">
+        <script type="application/json">
+            {
+              "postPromptUI": "quantcast-post-prompt",
+              "clientConfig": {
+                "coreConfig": {
+                  "googleEnabled": false
+                }
+              }
+            }
+          </script>
+          <div id="quantcast-post-prompt">
+            <button on="tap:quantcast.prompt()" role="button">Privacy settings</button>
+          </div>
+      </amp-consent>
+      <!-- End Quantcast example -->
 
       <!-- sirdata example -->
       <amp-consent id="consent" layout="nodisplay" type="sirdata">
