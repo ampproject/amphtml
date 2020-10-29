@@ -687,6 +687,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-instagram',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-install-serviceworker',
     version: '0.1',
     latestVersion: '0.1',
