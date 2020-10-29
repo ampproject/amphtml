@@ -68,6 +68,18 @@ jobs:
       name: 'Module Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/module-dist-bundle-size.js
+    - stage: build
+      name: 'Dist nomodule Testing speed'
+      script:
+        - unbuffer node build-system/pr-check/dist-nomodule-testing.js
+    - stage: build
+      name: 'Dist module Testing speed'
+      script:
+        - unbuffer node build-system/pr-check/dist-module-testing.js
+    - stage: build
+      name: 'Dist module/nomoduleTesting speed'
+      script:
+        - unbuffer node build-system/pr-check/dist-module-nomodule-testing.js
     - stage: test
       name: 'Visual Diff Tests'
       script:
