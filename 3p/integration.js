@@ -41,7 +41,6 @@ import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
 import {parseJson} from '../src/json';
 import {register, run, setExperimentToggles} from './3p';
-import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
 
 // 3P - please keep in alphabetic order
@@ -239,6 +238,7 @@ import {recomad} from '../ads/recomad';
 import {recreativ} from '../ads/recreativ';
 import {relap} from '../ads/relap';
 import {relappro} from '../ads/relappro';
+import {remixd} from '../ads/remixd';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
@@ -562,6 +562,7 @@ register('recomad', recomad);
 register('recreativ', recreativ);
 register('relap', relap);
 register('relappro', relappro);
+register('remixd', remixd);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
@@ -868,7 +869,7 @@ export function parseFragment(fragment) {
     // Some browser, notably Firefox produce an encoded version of the fragment
     // while most don't. Since we know how the string should start, this is easy
     // to detect.
-    if (startsWith(json, '{%22')) {
+    if (json.startsWith('{%22')) {
       json = decodeURIComponent(json);
     }
     return /** @type {!JsonObject} */ (json ? parseJson(json) : dict());

@@ -123,6 +123,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 
 #### Currently Supported Vendors
 
+- Admax
 - Adpushup
 - AppNexus
 - AppNexus PSP
@@ -139,6 +140,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - Kargo
 - Lotame
 - Media.net
+- Nexx360.io
 - PubMatic OpenWrap
 - Purch
 - Rubicon

@@ -18,6 +18,8 @@ import {Services} from '../../../src/services';
 import {isAmp4Email} from '../../../src/format';
 import {toggleAttribute} from '../../../src/dom';
 
+const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
+const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
 /**
  * @abstract
  */
@@ -40,14 +42,24 @@ export class BaseCarousel extends AMP.BaseElement {
   buildCallback() {
     const input = Services.inputFor(this.win);
     const doc = /** @type {!Document} */ (this.element.ownerDocument);
-    this.showControls_ =
-      isAmp4Email(doc) ||
-      input.isMouseDetected() ||
-      this.element.hasAttribute('controls');
 
-    if (this.showControls_) {
-      this.element.classList.add('i-amphtml-carousel-has-controls');
+    if (isAmp4Email(doc) || this.element.hasAttribute('controls')) {
+      this.showControls_ = true;
+      this.element.classList.add(_HAS_CONTROL_CLASS);
+    } else {
+      input.onMouseDetected((mouseDetected) => {
+        if (mouseDetected) {
+          this.showControls_ = true;
+          toggleAttribute(
+            this.element,
+            _CONTROL_HIDE_ATTRIBUTE,
+            !this.showControls_
+          );
+          this.element.classList.add(_HAS_CONTROL_CLASS);
+        }
+      }, true);
     }
+
     this.buildCarousel();
     this.buildButtons();
     this.setupGestures();
@@ -56,18 +68,10 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    this.onViewportCallback(inViewport);
     if (inViewport) {
       this.hintControls();
     }
   }
-
-  /**
-   * Handles element specific viewport based events.
-   * @param {boolean} unusedInViewport
-   * @protected
-   */
-  onViewportCallback(unusedInViewport) {}
 
   /**
    * Builds a carousel button for next/prev.

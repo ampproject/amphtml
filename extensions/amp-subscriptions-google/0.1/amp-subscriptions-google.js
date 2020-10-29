@@ -49,7 +49,6 @@ import {getValueForExpr} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 import {devAssert, user, userAssert} from '../../../src/log';
-import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -149,7 +148,7 @@ export class GoogleSubscriptionsPlatform {
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
       .filter(
         (exp) =>
-          startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
+          exp.startsWith('swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
       .map((exp) => exp.substring(4));
 

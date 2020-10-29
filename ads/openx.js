@@ -16,7 +16,6 @@
 
 import {doubleclick} from '../ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '../3p/3p';
-import {startsWith} from '../src/string';
 
 const {hasOwnProperty} = Object.prototype;
 
@@ -54,7 +53,7 @@ export function openx(global, data) {
     // Anything starting with 'dfp' gets promoted.
     openxData.forEach((openxKey) => {
       if (openxKey in dfpData && openxKey !== 'dfp') {
-        if (startsWith(openxKey, 'dfp')) {
+        if (openxKey.startsWith('dfp')) {
           // Remove 'dfp' prefix, lowercase the first letter.
           let fixKey = openxKey.substring(3);
           fixKey = fixKey.substring(0, 1).toLowerCase() + fixKey.substring(1);

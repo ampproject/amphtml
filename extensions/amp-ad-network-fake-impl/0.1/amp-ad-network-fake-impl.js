@@ -18,7 +18,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
 import {forceExperimentBranch} from '../../../src/experiments';
-import {includes, startsWith} from '../../../src/string';
+import {includes} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
@@ -67,7 +67,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     // value start with `i-amphtml-demo-`. So that fake ad can only be used in
     // invalid AMP pages.
     const id = this.element.getAttribute('id');
-    if (!id || !startsWith(id, 'i-amphtml-demo-')) {
+    if (!id || !id.startsWith('i-amphtml-demo-')) {
       user().warn(TAG, 'Only works with id starts with i-amphtml-demo-');
       return false;
     }

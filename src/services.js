@@ -16,10 +16,10 @@
 
 import {
   getAmpdoc,
-  getExistingServiceForDocInEmbedScope,
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
+  getServiceForDocOrNull,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -96,7 +96,7 @@ export class Services {
    * @return {!./service/action-impl.ActionService}
    */
   static actionServiceForDoc(element) {
-    return /** @type {!./service/action-impl.ActionService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/action-impl.ActionService} */ (getServiceForDocOrNull(
       element,
       'action'
     ));
@@ -107,7 +107,7 @@ export class Services {
    * @return {!./service/standard-actions-impl.StandardActions}
    */
   static standardActionsForDoc(element) {
-    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getServiceForDocOrNull(
       element,
       'standard-actions'
     ));
@@ -314,7 +314,7 @@ export class Services {
    * @return {!./service/hidden-observer-impl.HiddenObserver}
    */
   static hiddenObserverForDoc(element) {
-    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getServiceForDocOrNull(
       element,
       'hidden-observer'
     ));
@@ -350,6 +350,17 @@ export class Services {
       element,
       'inputmask',
       'amp-inputmask'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {?./service/loading-indicator.LoadingIndicatorImpl}
+   */
+  static loadingIndicatorOrNull(elementOrAmpDoc) {
+    return /** @type {?./service/loading-indicator.LoadingIndicatorImpl} */ (getServiceForDocOrNull(
+      elementOrAmpDoc,
+      'loadingIndicator'
     ));
   }
 
@@ -569,7 +580,7 @@ export class Services {
    * @return {?./service/localization.LocalizationService}
    */
   static localizationForDoc(element) {
-    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {?./service/localization.LocalizationService} */ (getServiceForDocOrNull(
       element,
       'localization'
     ));
@@ -648,7 +659,7 @@ export class Services {
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
   static urlReplacementsForDoc(element) {
-    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getServiceForDocOrNull(
       element,
       'url-replace'
     ));
@@ -708,7 +719,7 @@ export class Services {
    * @return {!./service/url-impl.Url}
    */
   static urlForDoc(element) {
-    return /** @type {!./service/url-impl.Url} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-impl.Url} */ (getServiceForDocOrNull(
       element,
       'url'
     ));

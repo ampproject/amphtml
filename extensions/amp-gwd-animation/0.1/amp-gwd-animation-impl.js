@@ -19,7 +19,6 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {scopedQuerySelector, waitForChild} from '../../../src/dom';
 import {toArray} from '../../../src/types';
-import {whenDocumentReady} from '../../../src/document-ready';
 
 /**
  * CSS class used to deactivate animations.
@@ -137,12 +136,8 @@ export class AmpGwdRuntimeService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc An AMP document
    *     with GWD content in which to install the animation runtime controller.
-   * @param {!Window=} opt_win If in a FIE, the FIE window in which to install
-   *     the service.
    */
-  constructor(ampdoc, opt_win) {
-    // TODO(#22733): remove opt_win subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -151,7 +146,7 @@ export class AmpGwdRuntimeService {
      * provided AmpDoc's window when in FIE.
      * @const @private {!Window}
      */
-    this.win_ = opt_win || ampdoc.win;
+    this.win_ = ampdoc.win;
 
     /**
      * The GWD ad document root. This will differ from the top-level AmpDoc's
@@ -164,10 +159,7 @@ export class AmpGwdRuntimeService {
     this.boundOnAnimationEndEvent_ = this.onAnimationEndEvent_.bind(this);
 
     // Initialize once the body and DOM is ready.
-    const docReadyPromise = opt_win
-      ? whenDocumentReady(this.doc_)
-      : ampdoc.whenReady();
-    docReadyPromise.then(() => {
+    ampdoc.whenReady().then(() => {
       // If the page deck is not yet in the DOM, wait until it is. The page deck
       // must be present in the body before the runtime can be initialized, as
       // it must activate animations on the first page. It's not clear whether

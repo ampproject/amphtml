@@ -23,6 +23,7 @@ var AccordionDef = {};
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   expandSingleSection: (boolean|undefined),
+ *   animate: (boolean|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
@@ -34,6 +35,9 @@ AccordionDef.Props;
  *   headerAs: (string|PreactDef.FunctionalComponent|undefined),
  *   contentAs: (string|PreactDef.FunctionalComponent|undefined),
  *   expanded: (boolean|undefined),
+ *   animate: (boolean|undefined),
+ *   headerClassName: (string|undefined),
+ *   contentClassName: (string|undefined),
  *   header: (!PreactDef.Renderable),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
@@ -51,9 +55,18 @@ AccordionDef.HeaderProps;
 
 /**
  * @typedef {{
+ *   hidden: (boolean),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+AccordionDef.ContentProps;
+
+/**
+ * @typedef {{
  *   registerSection: (function(string)|undefined),
  *   isExpanded: (function(string, boolean):boolean),
  *   toggleExpanded: (function(string)|undefined),
+ *   animate: (boolean|undefined),
  * }}
  */
 AccordionDef.ContextProps;

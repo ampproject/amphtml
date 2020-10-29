@@ -36,7 +36,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 const FILENAME = 'e2e-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExecOrThrow = (cmd) => timedExecOrThrowBase(cmd, FILENAME);
+const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -46,7 +46,10 @@ async function main() {
     timedExecOrDie('gulp update-packages');
 
     try {
-      timedExecOrThrow('gulp e2e --nobuild --headless --compiled --report');
+      timedExecOrThrow(
+        'gulp e2e --nobuild --headless --compiled --report',
+        'End-to-end tests failed!'
+      );
     } catch (e) {
       if (e.status) {
         process.exitCode = e.status;

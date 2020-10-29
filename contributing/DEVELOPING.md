@@ -35,7 +35,6 @@ Before you start writing code, consult these resources for guidance and guidelin
 - **CSS**: [Writing CSS For AMP Runtime](writing-css.md)
 - **Creating new components**:
   - [Instructions and Guidelines for building an AMP component](building-an-amp-extension.md)
-  - Learn to create your first component in this [codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0)
   - Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
 - **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
 
@@ -91,7 +90,7 @@ We also recommend scanning the [spec](../spec/). The non-element part should hel
 
 ## Builds and releases
 
-- The [AMP buildcop](buildcop.md) helps ensure that AMP's builds remain green (i.e. everything builds and all of the tests pass). If you run into issues with builds that seem unrelated to your changes see if the issue is present on [Travis](https://travis-ci.org/ampproject/amphtml/builds) and send a message to the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+- The [AMP buildcop](buildcop.md) helps ensure that AMP's builds remain green (i.e. everything builds and all of the tests pass). If you run into issues with builds that seem unrelated to your changes see if the issue is present on [Travis](https://travis-ci.com/ampproject/amphtml/builds) and send a message to the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 - Understanding the [AMP release process](release-schedule.md) is useful for understanding when a change in AMP will make it into production and what to do if things go wrong during the rollout of a change.
 
 ### Opting in to pre-release channels

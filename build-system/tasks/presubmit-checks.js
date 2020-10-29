@@ -125,11 +125,11 @@ const forbiddenTerms = {
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/npm-checks.js',
       'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
-      'build-system/pr-check/yarn-checks.js',
       'build-system/server/app.js',
       'build-system/server/amp4test.js',
       'build-system/tasks/build.js',
@@ -332,7 +332,9 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
+      'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
+      'src/element-service.js',
       'src/service.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
@@ -687,16 +689,6 @@ const forbiddenTerms = {
       'formDataWrapper.getFormData() to get the native FormData object.',
     allowlist: ['src/form-data-wrapper.js'],
   },
-  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
-    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
-    allowlist: [
-      'ads/google/imaVideo.js',
-      'dist.3p/current/integration.js',
-      'src/video-iframe-integration.js',
-      'extensions/amp-consent/0.1/amp-consent.js',
-      'extensions/amp-consent/0.1/consent-ui.js',
-    ],
-  },
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
@@ -909,18 +901,6 @@ const forbiddenTerms = {
     ],
     checkInTestFolder: true,
   },
-};
-
-const ThreePTermsMessage =
-  'The 3p bootstrap iframe has no polyfills loaded' +
-  ' and can thus not use most modern web APIs.';
-
-const forbidden3pTerms = {
-  // We need to forbid promise usage because we don't have our own polyfill
-  // available. This allowlisting of callNext is a major hack to allow one
-  // usage in babel's external helpers that is in a code path that we do
-  // not use.
-  '\\.then\\((?!callNext)': ThreePTermsMessage,
 };
 
 const bannedTermsHelpString =
@@ -1141,6 +1121,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.setNonBoolean\\(': {
     message: requiresReviewPrivacy,
     allowlist: [
+      'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
@@ -1356,7 +1337,6 @@ function hasAnyTerms(file) {
   const basename = path.basename(pathname);
   let hasTerms = false;
   let hasSrcInclusiveTerms = false;
-  let has3pTerms = false;
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
@@ -1368,18 +1348,7 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  const is3pFile =
-    /\/(3p|ads)\//.test(pathname) ||
-    basename == '3p.js' ||
-    basename == 'style.js';
-  // Yet another reason to move ads/google/a4a somewhere else
-  const isA4A = /\/a4a\//.test(pathname);
-  const isRecaptcha = basename == 'recaptcha.js';
-  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
-    has3pTerms = matchTerms(file, forbidden3pTerms);
-  }
-
-  return hasTerms || hasSrcInclusiveTerms || has3pTerms;
+  return hasTerms || hasSrcInclusiveTerms;
 }
 
 /**
