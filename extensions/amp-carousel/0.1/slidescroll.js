@@ -138,9 +138,6 @@ export class AmpSlideScroll extends BaseSlides {
       : this.isIos_
       ? false
       : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
-
-    /** @private {function(boolean)} */
-    this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
   }
 
   /** @override */
@@ -316,7 +313,9 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, this.boundViewportCallback_);
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
 
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
