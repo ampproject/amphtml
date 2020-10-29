@@ -127,7 +127,31 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
     expect(onMessage).to.not.have.been.called;
   });
 
-  describe('posts imperative handle methods to makeMethodMessage', () => {
+  it('unlistens only when unmounted', async () => {
+    const addEventListener = env.sandbox.stub(window, 'addEventListener');
+    const removeEventListener = env.sandbox.stub(window, 'removeEventListener');
+
+    const videoIframe = mount(
+      <VideoIframe src="about:blank" onMessage={() => {}} />,
+      {attachTo: document.body}
+    );
+
+    expect(addEventListener.withArgs('message')).to.have.been.calledOnce;
+    expect(removeEventListener.withArgs('message')).to.not.have.been.called;
+
+    videoIframe.setProps({
+      onMessage: () => {
+        // An unstable onMessage prop should not cause unlisten
+      },
+    });
+    videoIframe.update();
+    expect(removeEventListener.withArgs('message')).to.not.have.been.called;
+
+    videoIframe.unmount();
+    expect(removeEventListener.withArgs('message')).to.have.been.calledOnce;
+  });
+
+  describe('uses makeMethodMessage to posts imperative handle methods', () => {
     ['play', 'pause'].forEach((method) => {
       it(`with \`${method}\``, async () => {
         let videoIframeRef;

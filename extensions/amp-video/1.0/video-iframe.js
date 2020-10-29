@@ -19,6 +19,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -32,6 +33,19 @@ const DEFAULT_SANDBOX = [
   'allow-popups-to-escape-sandbox',
   'allow-top-navigation-by-user-activation',
 ].join(' ');
+
+/**
+ * @param {T} prop
+ * @return {current: ?T}
+ * @template T
+ */
+function usePropRef(prop) {
+  const ref = useRef(null);
+  useEffect(() => {
+    ref.current = prop;
+  }, [prop]);
+  return ref;
+}
 
 /**
  * Goes inside a VideoWrapper.
@@ -87,20 +101,17 @@ function VideoIframeWithRef(
     [postMethodMessage]
   );
 
-  const handleMessageRef = useRef(null);
+  // Keep `onMessage` in a ref to prevent re-listening on every render.
+  // This could otherwise occur when the passed `onMessage` is not memoized.
+  const onMessageRef = usePropRef(onMessage);
 
   useLayoutEffect(() => {
-    if (handleMessageRef.current) {
-      defaultView.removeEventListener('message', handleMessageRef.current);
-      handleMessageRef.current = null;
-    }
-
-    if (!onMessage) {
-      return;
-    }
-
     /** @param {Event} event */
     function handleMessage(event) {
+      if (!onMessageRef.current) {
+        return;
+      }
+
       if (
         (origin && !origin.test(event.origin)) ||
         event.source != iframeRef.current.contentWindow
@@ -111,7 +122,7 @@ function VideoIframeWithRef(
       // Triggers like an HTMLMediaElement, so we give it an iframe handle
       // to dispatch events from. They're caught from being set on {...rest} so
       // setting onPlay, etc. props should just work.
-      onMessage({
+      onMessageRef.current({
         // Event
         currentTarget: iframeRef.current,
         target: iframeRef.current,
@@ -123,8 +134,8 @@ function VideoIframeWithRef(
 
     const {defaultView} = iframeRef.current.ownerDocument;
     defaultView.addEventListener('message', handleMessage);
-    handleMessageRef.current = handleMessage;
-  }, [onMessage, origin]);
+    return () => defaultView.removeEventListener('message', handleMessage);
+  }, [origin, onMessageRef]);
 
   useLayoutEffect(() => {
     postMethodMessage(muted ? 'mute' : 'unmute');
