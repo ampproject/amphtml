@@ -982,9 +982,6 @@ export class SystemLayer {
       }
 
       const defaultConfig = VIEWER_CONTROL_DEFAULTS[control.name];
-      const buttonsContainer = this.systemLayerEl_.querySelector(
-        '.i-amphtml-story-system-layer-buttons'
-      );
 
       let element;
       if (defaultConfig && defaultConfig.selector) {
@@ -996,7 +993,7 @@ export class SystemLayer {
         element = this.win_.document.createElement('button');
         this.vsync_.mutate(() => {
           element.classList.add('i-amphtml-story-button');
-          buttonsContainer.appendChild(element);
+          this.buttonsContainer_.appendChild(element);
         });
       }
 
@@ -1028,7 +1025,7 @@ export class SystemLayer {
         );
 
         this.vsync_.mutate(() => {
-          element.parentElement.removeChild(element);
+          this.buttonsContainer_.removeChild(element);
           startButtonContainer.appendChild(element);
         });
       }

@@ -463,6 +463,10 @@ export class AmpStoryPlayer {
    */
   initializeButton_() {
     const deprecatedName = this.element_.getAttribute('exit-control');
+    if (!deprecatedName) {
+      return;
+    }
+
     const name = deprecatedName.split('-button')[0];
 
     if (!Object.values(BUTTON_TYPES).includes(name)) {
