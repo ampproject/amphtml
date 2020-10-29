@@ -931,14 +931,14 @@ export function toggleAttribute(element, name, forced) {
  * attributes:
  * - a `null` or `undefined` returns `null`;
  * - an empty string returns `true`;
- * - a "true" string returns `true`;
- * - otherwise, `false` is returned.
+ * - a "false" string returns `false`;
+ * - otherwise, `true` is returned.
  *
  * @param {?string|undefined} s
- * @return {?boolean}
+ * @return {boolean|undefined}
  */
 export function parseBooleanAttribute(s) {
-  return s == null ? null : s === '' || s === 'true';
+  return s == null ? undefined : s !== 'false';
 }
 
 /**

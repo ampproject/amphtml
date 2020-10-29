@@ -1336,8 +1336,8 @@ describes.realWin(
 
     describe('parseBooleanAttribute', () => {
       it('should return null for null/undefined', () => {
-        expect(dom.parseBooleanAttribute(null)).to.be.null;
-        expect(dom.parseBooleanAttribute(undefined)).to.be.null;
+        expect(dom.parseBooleanAttribute(null)).to.be.undefined;
+        expect(dom.parseBooleanAttribute(undefined)).to.be.undefined;
       });
 
       it('should return true for empty string', () => {
@@ -1348,16 +1348,12 @@ describes.realWin(
         expect(dom.parseBooleanAttribute('true')).to.be.true;
       });
 
-      it('should return false for wrong capitalization', () => {
-        expect(dom.parseBooleanAttribute('TRUE')).to.be.false;
-      });
-
       it('should return false for "false" string', () => {
         expect(dom.parseBooleanAttribute('false')).to.be.false;
       });
 
-      it('should return false for a random string', () => {
-        expect(dom.parseBooleanAttribute('a')).to.be.false;
+      it('should return true for a random string', () => {
+        expect(dom.parseBooleanAttribute('a')).to.be.true;
       });
     });
   }
