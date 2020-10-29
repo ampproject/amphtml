@@ -83,9 +83,9 @@ const MAX_IFRAMES = 3;
 
 /** @enum {string} */
 const BUTTON_TYPES = {
-  BACK: 'back-button',
-  CLOSE: 'close-button',
-  SKIP_NEXT: 'skip-next-button',
+  BACK: 'back',
+  CLOSE: 'close',
+  SKIP_NEXT: 'skip-next',
 };
 
 /** @enum {string} */
@@ -462,20 +462,22 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeButton_() {
-    const option = this.element_.getAttribute('exit-control');
-    if (!Object.values(BUTTON_TYPES).includes(option)) {
+    const deprecatedName = this.element_.getAttribute('exit-control');
+    const name = deprecatedName.split('-button')[0];
+
+    if (!Object.values(BUTTON_TYPES).includes(name)) {
       return;
     }
 
     const button = this.doc_.createElement('button');
     this.rootEl_.appendChild(button);
 
-    button.classList.add(BUTTON_CLASSES[option]);
+    button.classList.add(BUTTON_CLASSES[name]);
     button.classList.add(BUTTON_CLASSES.BASE);
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, VIEWER_CONTROL_EVENTS[option], dict({}))
+        createCustomEvent(this.win_, VIEWER_CONTROL_EVENTS[name], dict({}))
       );
     });
   }
@@ -632,7 +634,7 @@ export class AmpStoryPlayer {
     if (storyIdx === this.stories_.length - 1) {
       const skipButtonIdx = findIndex(
         this.playerConfig_.controls,
-        (control) => control.name === 'skip-next-button'
+        (control) => control.name === BUTTON_TYPES.SKIP_NEXT
       );
 
       if (skipButtonIdx >= 0) {
