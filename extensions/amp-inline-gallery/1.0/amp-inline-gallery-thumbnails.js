@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
 import {CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {Layout} from '../../../src/layout';
