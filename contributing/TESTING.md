@@ -282,21 +282,27 @@ Once the environment variable is set up, you can run the AMP visual diff tests. 
 
 To start, create the page and register it in the configuration file for visual diff tests:
 
-- Create an AMPHTML page that will be tested under `examples/visual-tests`.
+- Create an AMP document that will be tested under `examples/visual-tests`.
 - Add an entry in the [`test/visual-diff/visual-tests`](../test/visual-diff/visual-tests) JSON5 file. Documentation for the various settings are in that file.
   - Must set fields: `url`, `name`
   - You will also likely want to set `loading_complete_css` and maybe also `loading_incomplete_css`
   - Only set `viewport` if your page looks different on mobile vs. desktop, and you intend to create a separate config for each
     - The `viewport` setting wraps the entire DOM snapshot inside an `<iframe>` before uploading to Percy. Beware of weird iframe behaviors! 🐉
   - Do not set `enable_percy_javascript` without consulting `@ampproject/wg-infra`
-  - Point `interactive_tests` to a JavaScript if you would like to add interactions to the page. See examples of existing interactive tests to learn how to write those
+  - Point `interactive_tests` to a JavaScript file if you would like to add interactions to the page. See examples of existing interactive tests to learn how to write those
 - (For past examples of pull requests that add visual diff tests, see [#17047](https://github.com/ampproject/amphtml/pull/17047), [#17110](https://github.com/ampproject/amphtml/pull/17110))
 
 Now, verify your test by executing it:
 
-- Run `gulp dist --fortesting` to build the AMP runtime in minified mode
+- Build the AMP runtime in minified mode:
+  ```sh
+  gulp dist --fortesting
+  ```
   - You can verify that your page looks as intented by running `gulp serve --compiled` and opening it in a browser
-- Run `gulp visual-diff --nobuild`
+- Execute the visual diff tests:
+  ```sh
+  gulp visual-diff --nobuild
+  ```
   - Add `--grep="<regular expression>"` to the command to execute a subset of the tests. e.g., `gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
   - Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp dist --fortesting` on each execution. This is time consuming, so only drop it if you are changing the runtime/extension code and not just the test files
   - To see debugging info during Percy runs, you can add `--chrome_debug`, `--webserver_debug`, or `--debug` for both.
