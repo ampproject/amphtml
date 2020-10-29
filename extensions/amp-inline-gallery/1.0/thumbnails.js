@@ -17,58 +17,60 @@
 import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {cloneElement, toChildArray, useContext} from '../../../src/preact';
+import {cloneElement} from '../../../src/preact';
 import {px} from '../../../src/style';
+
+const DEFAULT_HEIGHT = 100;
 
 /**
  * @param {!InlineGalleryDef.ThumbnailProps} props
  * @return {PreactDef.Renderable}
  */
-export function Thumbnails({
-  aspectRatio,
-  loop = false,
-  children,
-  style,
-  ...rest
-}) {
-  const childrenArray = toChildArray(children);
-  const {setCurrentSlide} = useContext(CarouselContext);
+export function Thumbnails({aspectRatio, loop = false, style, ...rest}) {
   const pointerFine = window.matchMedia('(pointer: fine)');
-  const slideHeight = style.height;
+  const slideHeight = (style && style.height) || DEFAULT_HEIGHT;
   // Note: The carousel is aria-hidden since it just duplicates the
   // information of the original carousel.
   return (
-    <BaseCarousel
-      aria-hidden={true}
-      mixedLength={true}
-      snap={false}
-      controls={pointerFine ? 'always' : 'never'}
-      loop={loop}
-      style={style}
-      _thumbnails={true}
-      {...rest}
-    >
-      {childrenArray.map((slide, i) => {
-        const {
-          style,
-          children,
-        } = /** @type {InlineGalleryDef.SlideProps} */ (slide.props);
-        const slideWidth = aspectRatio
-          ? slideHeight * aspectRatio
-          : (style.width / style.height) * slideHeight;
-        return cloneElement(
-          /** @type {!PreactDef.VNode} */ (slide),
-          {
-            style: {
-              ...style,
-              width: px(slideWidth),
+    <CarouselContext.Consumer>
+      {({slides, setCurrentSlide}) => (
+        <BaseCarousel
+          aria-hidden={true}
+          mixedLength={true}
+          snap={false}
+          controls={pointerFine ? 'always' : 'never'}
+          loop={loop}
+          style={{height: slideHeight, ...style}}
+          _thumbnails={true}
+          {...rest}
+        >
+          {slides.map((slide, i) => {
+            const {
+              style = {},
+              children,
+            } = /** @type {InlineGalleryDef.SlideProps} */ (slide.props);
+            const size = {
               height: px(slideHeight),
-            },
-            onClick: () => setCurrentSlide(i),
-          },
-          children
-        );
-      })}
-    </BaseCarousel>
+              width: aspectRatio
+                ? px(slideHeight * aspectRatio)
+                : style.width && style.height
+                ? px((style.width / style.height) * slideHeight)
+                : '',
+            };
+            return cloneElement(
+              /** @type {!PreactDef.VNode} */ (slide),
+              {
+                style: {
+                  ...style,
+                  ...size,
+                },
+                onClick: () => setCurrentSlide(i),
+              },
+              children
+            );
+          })}
+        </BaseCarousel>
+      )}
+    </CarouselContext.Consumer>
   );
 }

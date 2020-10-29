@@ -148,6 +148,9 @@ function ScrollerWithRef(
       return;
     }
     const container = containerRef.current;
+    if (!container.children.length) {
+      return;
+    }
     setStyle(container, 'scrollBehavior', 'auto');
     let position;
     const slideWidth = container./* OK */ offsetWidth / visibleCount;

@@ -63,20 +63,9 @@ export const _default = () => {
           aspectRatio={aspectRatio}
           loop={loop}
           style={{height: thumbnailHeight}}
-        >
-          {Array.from({length: slideCount}, (_, i) => {
-            const v = colorIncrement * (i + 1);
-            return (
-              <div
-                style={{
-                  backgroundColor: `rgb(${v}, 100, 100)`,
-                  width,
-                  height,
-                }}
-              ></div>
-            );
-          })}
-        </Thumbnails>
+        />
+        <br />
+        <Thumbnails />
       </InlineGallery>
       Content below carousel
     </>

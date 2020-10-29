@@ -24,6 +24,7 @@ import {
   toChildArray,
   useCallback,
   useContext,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -63,7 +64,7 @@ function BaseCarouselWithRef(
   },
   ref
 ) {
-  const childrenArray = toChildArray(children);
+  const childrenArray = useMemo(() => toChildArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(0);
@@ -73,7 +74,7 @@ function BaseCarouselWithRef(
   const setCurrentSlide = _thumbnails
     ? setCurrentSlideState
     : carouselContext.setCurrentSlide ?? setCurrentSlideState;
-  const {setSlideCount} = carouselContext;
+  const {setSlides} = carouselContext;
   const scrollRef = useRef(null);
 
   const next = useCallback(() => scrollRef.current.next(), []);
@@ -103,9 +104,11 @@ function BaseCarouselWithRef(
     [next, prev, setRestingIndex]
   );
 
-  useLayoutEffect(() => {
-    setSlideCount(length);
-  }, [setSlideCount, length]);
+  useEffect(() => {
+    if (!_thumbnails) {
+      setSlides(childrenArray);
+    }
+  }, [_thumbnails, childrenArray, setSlides]);
 
   const disableForDir = (dir) =>
     !loop &&
