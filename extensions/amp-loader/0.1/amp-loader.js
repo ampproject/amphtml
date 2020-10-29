@@ -321,9 +321,7 @@ class LoaderBuilder {
     const html = htmlFor(this.element_);
     return html`
       <div class="i-amphtml-new-loader-ad-logo">
-        <span class="i-amphtml-new-loader-ad-label">
-          Ad
-        </span>
+        <span class="i-amphtml-new-loader-ad-label"> Ad </span>
       </div>
     `;
   }

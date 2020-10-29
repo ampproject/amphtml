@@ -937,6 +937,8 @@ exports.extensionBundles = [
       cssBinaries: [
         'amp-story-auto-ads-ad-badge',
         'amp-story-auto-ads-attribution',
+        'amp-story-auto-ads-inabox',
+        'amp-story-auto-ads-shared',
       ],
     },
     type: TYPES.MISC,
@@ -975,6 +977,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-stream-gallery',
+    version: '1.0',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
@@ -1151,6 +1159,12 @@ exports.extensionBundles = [
   {
     name: 'amp-video',
     version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-video',
+    version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },

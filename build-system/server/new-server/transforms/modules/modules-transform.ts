@@ -14,61 +14,60 @@
  * limitations under the License.
  */
 
-import {PostHTML} from 'posthtml';
-import {URL} from 'url';
-import {isValidScript, ScriptNode} from '../utilities/script';
-import {CDNURLToLocalDistURL} from '../utilities/cdn';
+import posthtml from 'posthtml';
+import {isJsonScript, isValidScript, toExtension, ScriptNode, tryGetUrl} from '../utilities/script';
 import {OptionSet} from '../utilities/option-set';
-import minimist from 'minimist';
-const argv = minimist(process.argv.slice(2));
 
 /**
  * @param head
  * @param script
- * @param compiled 
  */
-function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: boolean): void {
-  let modulePath;
-  if (argv.compiled || compiled) {
-    modulePath = CDNURLToLocalDistURL(
-      new URL(script.attrs.src || ''),
-      undefined,
-      '.mjs'
-    ).toString();
-    script.attrs.src = modulePath.replace('.mjs', '.js');
-  }
-  else {
-    const urlName = script.attrs.src.toString();
-    modulePath = urlName.replace('.js', '.mjs');
-  }
-
-  const insert: ScriptNode = {
-    ...script,
+function appendModuleScript(head: posthtml.Node, nomoduleScript: ScriptNode, options: OptionSet): void {
+  const modulePath = toExtension(tryGetUrl(nomoduleScript.attrs.src), '.mjs').toString();
+  const moduleScript : ScriptNode = {
+    ...nomoduleScript,
     attrs: {
-      ...script.attrs,
+      ...nomoduleScript.attrs,
       src: modulePath,
       type: 'module',
     },
   };
-  delete insert.attrs.nomodule;
+  delete moduleScript.attrs.nomodule;
 
-  (head.content || []).push(insert);
+  const content = head.content || [];
+  const nomoduleIdx = content.indexOf(nomoduleScript);
+  // If we are testing and in esm mode, outright replace the nomodule script
+  // with the module script. This is so that we testing the module script in
+  // isolation without a fallback.
+  if (options.fortesting && options.esm) {
+    content.splice(nomoduleIdx, 1, moduleScript);
+  } else {
+    // Add the module script after the nomodule script.
+    content.splice(nomoduleIdx + 1, 0, '\n', moduleScript);
+  }
 }
 
 /**
  * Returns a function that will transform script node sources into module/nomodule pair.
  * @param options
  */
-export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
-  return function(tree: PostHTML.Node): void {
-    let head: PostHTML.Node | undefined = undefined;
-    let compiled: boolean = options.compiled || false;
+export default function(options: OptionSet = {}): (tree: posthtml.Node) => void {
+  return function(tree: posthtml.Node): void {
+    let head: posthtml.Node | undefined = undefined;
     const scripts: Array<ScriptNode> = [];
     tree.walk(node => {
       if (node.tag === 'head') {
         head = node;
       }
-      if (!isValidScript(node)) {
+
+      // Make sure that isJsonScript is used before `isValidScript`. We bail out
+      // early if the ScriptNofe is of type="application/json" since it wouldn't
+      // have any src url to modify.
+      if (isJsonScript(node)) {
+        return node;
+      }
+
+      if (!isValidScript(node, options.looseScriptSrcCheck)) {
         return node;
       }
 
@@ -84,7 +83,7 @@ export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void 
     }
 
     for (const script of scripts) {
-      appendModuleScript(head, script, compiled);
+      appendModuleScript(head, script, options);
     }
   }
 }

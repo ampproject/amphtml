@@ -125,11 +125,11 @@ const forbiddenTerms = {
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/npm-checks.js',
       'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
-      'build-system/pr-check/yarn-checks.js',
       'build-system/server/app.js',
       'build-system/server/amp4test.js',
       'build-system/tasks/build.js',
@@ -332,7 +332,9 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
+      'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
+      'src/element-service.js',
       'src/service.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
@@ -686,16 +688,6 @@ const forbiddenTerms = {
       'Use createFormDataWrapper() instead and call ' +
       'formDataWrapper.getFormData() to get the native FormData object.',
     allowlist: ['src/form-data-wrapper.js'],
-  },
-  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
-    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
-    allowlist: [
-      'ads/google/imaVideo.js',
-      'dist.3p/current/integration.js',
-      'src/video-iframe-integration.js',
-      'extensions/amp-consent/0.1/amp-consent.js',
-      'extensions/amp-consent/0.1/consent-ui.js',
-    ],
   },
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
@@ -1129,6 +1121,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.setNonBoolean\\(': {
     message: requiresReviewPrivacy,
     allowlist: [
+      'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],

@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {includes, startsWith} from './string';
+import {includes} from './string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -757,7 +757,7 @@ export function isAmpElement(element) {
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
   return (
-    startsWith(tag, 'AMP-') &&
+    tag.startsWith('AMP-') &&
     // Some "amp-*" elements are not really AMP elements. :smh:
     !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
   );
@@ -924,6 +924,21 @@ export function toggleAttribute(element, name, forced) {
   }
 
   return enabled;
+}
+
+/**
+ * Parses a string as a boolean value using the expanded rules for DOM boolean
+ * attributes:
+ * - a `null` or `undefined` returns `null`;
+ * - an empty string returns `true`;
+ * - a "false" string returns `false`;
+ * - otherwise, `true` is returned.
+ *
+ * @param {?string|undefined} s
+ * @return {boolean|undefined}
+ */
+export function parseBooleanAttribute(s) {
+  return s == null ? undefined : s !== 'false';
 }
 
 /**
