@@ -26,7 +26,13 @@ const DEFAULT_HEIGHT = 100;
  * @param {!InlineGalleryDef.ThumbnailProps} props
  * @return {PreactDef.Renderable}
  */
-export function Thumbnails({aspectRatio, loop = false, style, ...rest}) {
+export function Thumbnails({
+  aspectRatio,
+  children,
+  loop = false,
+  style,
+  ...rest
+}) {
   const pointerFine = window.matchMedia('(pointer: fine)');
   const slideHeight = (style && style.height) || DEFAULT_HEIGHT;
   // Note: The carousel is aria-hidden since it just duplicates the
@@ -44,7 +50,7 @@ export function Thumbnails({aspectRatio, loop = false, style, ...rest}) {
           _thumbnails={true}
           {...rest}
         >
-          {slides.map((slide, i) => {
+          {(children || slides).map((slide, i) => {
             const {
               style = {},
               children,

@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -36,6 +36,8 @@ export default {
 export const Default = () => {
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
+  const loop = boolean('loop thumbnails', false);
+  const aspectRatio = number('thumbnails aspect ratio', undefined);
   return (
     <amp-inline-gallery layout="container">
       <amp-inline-gallery-pagination
@@ -57,6 +59,12 @@ export const Default = () => {
         inset={bottomInset}
         layout="fixed-height"
         height="24"
+      />
+      <amp-inline-gallery-thumbnails
+        aspectRatio={aspectRatio}
+        loop={loop}
+        layout="fixed-height"
+        height="50"
       />
     </amp-inline-gallery>
   );
