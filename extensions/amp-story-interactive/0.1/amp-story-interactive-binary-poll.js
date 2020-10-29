@@ -65,11 +65,16 @@ const buildBinaryPollTemplate = (element) => {
 const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-dev-tools-device">
-      <div class="i-amphtml-dev-tools-device-name"></div>
-      <amp-story-player>
-        <a>
-      </amp-story-player>
+    <div class="i-amphtml-story-interactive-option">
+      <span class="i-amphtml-story-interactive-option-percent-bar"></span>
+      <span class="i-amphtml-story-interactive-option-text-container">
+        <span class="i-amphtml-story-interactive-option-title"
+          ><span class="i-amphtml-story-interactive-option-title-text"></span
+        ></span>
+        <span class="i-amphtml-story-interactive-option-percentage-text"
+          >0%</span
+        >
+      </span>
     </div>
   `;
 };
