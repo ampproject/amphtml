@@ -288,9 +288,9 @@ To start, create the page and register it in the configuration file for visual d
   - You will also likely want to set `loading_complete_css` and maybe also `loading_incomplete_css`
   - Only set `viewport` if your page looks different on mobile vs. desktop, and you intend to create a separate config for each
     - The `viewport` setting wraps the entire DOM snapshot inside an `<iframe>` before uploading to Percy. Beware of weird iframe behaviors! 🐉
-  - Do not set `enable_percy_javascript` without consulting @ampproject/wg-infra
+  - Do not set `enable_percy_javascript` without consulting `@ampproject/wg-infra`
   - Point `interactive_tests` to a JavaScript if you would like to add interactions to the page. See examples of existing interactive tests to learn how to write those
-- (For past examples of pull requests that add visual diff tests, see #17047, #17110)
+- (For past examples of pull requests that add visual diff tests, see [#17047](https://github.com/ampproject/amphtml/pull/17047), [#17110](https://github.com/ampproject/amphtml/pull/17110))
 
 Now, verify your test by executing it:
 
