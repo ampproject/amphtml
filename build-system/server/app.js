@@ -1205,6 +1205,12 @@ app.get('/adzerk/*', (req, res) => {
     });
 });
 
+app.get('/dist/*.mjs', (req, res, next) => {
+  // Allow CORS access control explicitly for mjs files
+  cors.enableCors(req, res);
+  next();
+});
+
 /*
  * Serve extension scripts and their source maps.
  */
