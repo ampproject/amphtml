@@ -125,6 +125,13 @@ export class Renderer {
     this.scale = 1;
     this.orientation = null;
 
+    this.vertShader;
+    this.fragShaderFast;
+    this.fragShaderSlow;
+    this.progFast;
+    this.progSlow;
+    this.vbo;
+    this.tex;
   }
 
   init() {
