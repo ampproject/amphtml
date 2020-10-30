@@ -17,7 +17,6 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
 import {
   useEffect,
   useImperativeHandle,
@@ -28,14 +27,17 @@ import {
 import {useStyles} from './lightbox.jss';
 
 const ANIMATION_PRESETS = {
-  'fade-in': [{opacity: 0}, {opacity: 1}],
+  'fade-in': [
+    {opacity: 0, visibility: 'visible'},
+    {opacity: 1, visibility: 'visible'},
+  ],
   'fly-in-top': [
-    {opacity: 0, transform: 'translate(0,-100%)'},
-    {opacity: 1, transform: 'translate(0, 0)'},
+    {opacity: 0, transform: 'translate(0,-100%)', visibility: 'visible'},
+    {opacity: 1, transform: 'translate(0, 0)', visibility: 'visible'},
   ],
   'fly-in-bottom': [
-    {opacity: 0, transform: 'translate(0, 100%)'},
-    {opacity: 1, transform: 'translate(0, 0)'},
+    {opacity: 0, transform: 'translate(0, 100%)', visibility: 'visible'},
+    {opacity: 1, transform: 'translate(0, 0)', visibility: 'visible'},
   ],
 };
 
@@ -76,7 +78,6 @@ function LightboxWithRef(
   },
   ref
 ) {
-  const lightboxRef = useRef(null);
   const [show, setShow] = useState(initialOpen);
   const [visible, setVisible] = useState(false);
   const styleClasses = useStyles();
@@ -104,25 +105,24 @@ function LightboxWithRef(
     if (show) {
       setVisible(true);
     } else {
-      getElement(lightboxContainWrapperRef.current, 5)
+      getElement(lightboxContainWrapperRef.current)
         .then((element) => {
           element = element[0];
           element
             .animate(ANIMATION_PRESETS[animateInRef.current], {
-              duration: 200,
+              duration: 300,
               direction: 'reverse',
+              fill: 'both',
             })
-            .finished.then((opt_res) => {
-              setStyle(element, 'visibility', 'hidden');
-              setStyle(element, 'opacity', 0);
+            .finished.then((opt_el) => {
               setVisible(false);
             })
-            .catch((error) => {
-              throw Error('Closing lightbox animation failed:', error);
+            .catch((err) => {
+              throw Error('Lightbox closing animation failed', err);
             });
         })
-        .catch((e) => {
-          throw Error('Element not found:', e);
+        .catch((err) => {
+          throw Error(err);
         });
     }
   }, [show]);
@@ -131,29 +131,18 @@ function LightboxWithRef(
     if (!show && !visible) {
       return;
     }
-    if (show && visible) {
-      getElement(lightboxContainWrapperRef.current, 5)
+    if (visible) {
+      getElement(lightboxContainWrapperRef.current)
         .then((element) => {
           element = element[0];
-          element
-            .animate(ANIMATION_PRESETS[animateInRef.current], {
-              duration: 200,
-            })
-            .finished.then((opt_res) => {
-              setStyle(element, 'visibility', 'visible');
-              setStyle(element, 'opacity', 1);
-              if (onOpenFnRef.current) {
-                onOpenFnRef.current();
-              }
-            })
-            .catch((error) => {
-              throw Error('Opening lightbox animation failed:', error);
-            });
+          element.animate(ANIMATION_PRESETS[animateInRef.current], {
+            duration: 300,
+            fill: 'both',
+          });
         })
         .catch((error) => {
           throw Error('Element not found:', error);
         });
-      // return () => setShow(false);
     }
   }, [visible]);
 
@@ -174,7 +163,6 @@ function LightboxWithRef(
     visible && (
       <ContainWrapper
         {...rest}
-        ref={lightboxRef}
         id={id}
         size={true}
         layout={true}

@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Lightbox} from '../lightbox';
-import {boolean, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 import {useRef} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -47,7 +47,11 @@ function LightboxWithActions(props) {
 
 export const _default = () => {
   const open = boolean('open', false);
-  const animateIn = text('animateIn', 'fade-in');
+  const animateIn = select('animateIn', [
+    'fade-in',
+    'fly-in-top',
+    'fly-in-bottom',
+  ]);
   return (
     <div>
       <LightboxWithActions
