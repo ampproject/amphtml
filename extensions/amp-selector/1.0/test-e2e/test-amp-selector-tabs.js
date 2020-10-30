@@ -54,17 +54,17 @@ describes.endtoend(
       await expect(controller.getElementAttribute(secondTab, 'selected')).to.not
         .exist;
 
-      // await controller.click(secondTab);
-      // await expect(controller.getElementAttribute(secondTab, 'selected')).to
-      //   .exist;
+      await controller.click(secondTab);
+      await expect(controller.getElementAttribute(secondTab, 'selected')).to
+        .exist;
 
-      // const image = await controller.findElement('#secondImage');
-      // await expect(
-      //   controller.getElementProperty(image, 'clientWidth')
-      // ).to.be.greaterThan(0);
+      const image = await controller.findElement('#secondImage');
+      await expect(
+        controller.getElementProperty(image, 'clientWidth')
+      ).to.be.greaterThan(0);
 
-      // const internalImg = await controller.findElement('#secondImage img');
-      // await expect(internalImg).to.exist;
+      const internalImg = await controller.findElement('#secondImage img');
+      await expect(internalImg).to.exist;
     });
 
     it('should switch tabs on toggle ', async () => {
@@ -73,17 +73,17 @@ describes.endtoend(
       await expect(controller.getElementAttribute(thirdTab, 'selected')).to.not
         .exist;
 
-      //   await controller.click(thirdTabToggle);
-      //   await expect(controller.getElementAttribute(thirdTab, 'selected')).to
-      //     .exist;
+      await controller.click(thirdTabToggle);
+      await expect(controller.getElementAttribute(thirdTab, 'selected')).to
+        .exist;
 
-      //   const image = await controller.findElement('#thirdImage');
-      //   await expect(
-      //     controller.getElementProperty(image, 'clientWidth')
-      //   ).to.be.greaterThan(0);
+      const image = await controller.findElement('#thirdImage');
+      await expect(
+        controller.getElementProperty(image, 'clientWidth')
+      ).to.be.greaterThan(0);
 
-      //   const internalImg = await controller.findElement('#thirdImage img');
-      //   await expect(internalImg).to.exist;
+      const internalImg = await controller.findElement('#thirdImage img');
+      await expect(internalImg).to.exist;
     });
   }
 );
