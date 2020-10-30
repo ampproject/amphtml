@@ -264,6 +264,10 @@ export class ResourcesImpl {
       }
       // With IntersectionObserver, we only need to handle viewport resize.
       if (this.relayoutAll_ || !this.intersectionObserver_) {
+        // Unfortunately, a viewport size change invalidates all premeasurements.
+        if (this.intersectionObserver_) {
+          this.resources_.forEach((r) => r.invalidatePremeasurement());
+        }
         this.schedulePass();
       }
     });
