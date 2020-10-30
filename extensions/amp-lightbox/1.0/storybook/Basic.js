@@ -46,7 +46,7 @@ function LightboxWithActions(props) {
 }
 
 export const _default = () => {
-  const open = boolean('open', false);
+  const open = boolean('initialOpen', false);
   const animateIn = select('animateIn', [
     'fade-in',
     'fly-in-top',
@@ -57,7 +57,7 @@ export const _default = () => {
       <LightboxWithActions
         id="lightbox"
         layout="nodisplay"
-        openOnLoad={open}
+        initialOpen={open}
         animateIn={animateIn}
       >
         Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at

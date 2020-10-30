@@ -26,6 +26,7 @@ import {
 } from '../../../src/preact';
 import {useStyles} from './lightbox.jss';
 
+const ANIMATION_DURATION = 300;
 const ANIMATION_PRESETS = {
   'fade-in': [
     {opacity: 0, visibility: 'visible'},
@@ -110,7 +111,7 @@ function LightboxWithRef(
           element = element[0];
           element
             .animate(ANIMATION_PRESETS[animateInRef.current], {
-              duration: 300,
+              duration: ANIMATION_DURATION,
               direction: 'reverse',
               fill: 'both',
             })
@@ -136,7 +137,7 @@ function LightboxWithRef(
         .then((element) => {
           element = element[0];
           element.animate(ANIMATION_PRESETS[animateInRef.current], {
-            duration: 300,
+            duration: ANIMATION_DURATION,
             fill: 'both',
           });
         })
@@ -144,6 +145,7 @@ function LightboxWithRef(
           throw Error('Element not found:', error);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   useLayoutEffect(() => {

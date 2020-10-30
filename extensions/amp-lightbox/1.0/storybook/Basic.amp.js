@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {text, withKnobs} from '@storybook/addon-knobs';
+import {select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -29,7 +29,11 @@ export default {
 };
 
 export const Default = () => {
-  const animateIn = text('animate-in', 'fade-in');
+  const animateIn = select('animate-in', [
+    'fade-in',
+    'fly-in-top',
+    'fly-in-bottom',
+  ]);
   return (
     <main>
       <amp-lightbox id="lightbox" layout="nodisplay" animate-in={animateIn}>
