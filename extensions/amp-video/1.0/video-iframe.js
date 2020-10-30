@@ -36,7 +36,7 @@ const DEFAULT_SANDBOX = [
 
 /**
  * @param {T} prop
- * @return {current: ?T}
+ * @return {{current: ?T}}
  * @template T
  */
 function usePropRef(prop) {
