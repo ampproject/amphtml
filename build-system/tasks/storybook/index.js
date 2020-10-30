@@ -85,11 +85,10 @@ async function storybook() {
   }
   installPackages(__dirname);
   const ctrlcHandler = createCtrlcHandler('storybook');
-  return Promise.all(envs.map(build ? buildEnv : launchEnv)).then(() => {
-    if (build) {
-      exitCtrlcHandler(ctrlcHandler);
-    }
-  });
+  await Promise.all(envs.map(build ? buildEnv : launchEnv));
+  if (build) {
+    exitCtrlcHandler(ctrlcHandler);
+  }
 }
 
 module.exports = {
