@@ -298,9 +298,12 @@ function OptionShim({
     if (!onClick) {
       return;
     }
-    shimDomElement.addEventListener('click', onClick);
+    shimDomElement.addEventListener('click', (e) => onClick(e));
     return () => {
-      shimDomElement.removeEventListener('click', devAssert(onClick));
+      shimDomElement.removeEventListener(
+        'click',
+        devAssert((e) => onClick(e))
+      );
     };
   }, [shimDomElement, onClick]);
 
