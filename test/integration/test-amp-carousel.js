@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../src/common-signals';
 import {waitFor} from '../../testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
@@ -87,6 +88,13 @@ t.run('amp-carousel', function () {
           const prevBtn = amp.querySelector('.amp-carousel-button-prev');
           const nextBtn = amp.querySelector('.amp-carousel-button-next');
 
+          async function waitForLayout(el) {
+            const isButtonHidden = () =>
+              el.signals().get(CommonSignals.LOAD_END);
+            await waitFor(isButtonHidden, 'button hidden');
+          }
+
+          waitForLayout(amp);
           waitForClass(prevBtn, 'amp-disable');
           waitForClass(nextBtn, 'amp-disable');
 
