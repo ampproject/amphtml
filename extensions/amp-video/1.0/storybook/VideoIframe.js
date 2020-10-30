@@ -17,6 +17,7 @@ import * as Preact from '../../../../src/preact';
 import {VideoIframe} from '../video-iframe';
 import {VideoWrapper} from '../video-wrapper';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
+import {createCustomEvent} from '../../../../src/event-helper';
 import {useCallback} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -34,7 +35,10 @@ const AmpVideoIframeLike = (props) => {
     // so amp-video-iframe samples already mostly work).
     if (e.data?.event) {
       e.currentTarget.dispatchEvent(
-        new CustomEvent(e.data.event, {bubbles: true, cancelable: true})
+        createCustomEvent(window, e.data.event, /* detail */ null, {
+          bubbles: true,
+          cancelable: true,
+        })
       );
     }
   }, []);
