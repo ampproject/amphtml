@@ -18,6 +18,8 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -28,6 +30,15 @@ class AmpLightbox extends PreactBaseElement {
     this.registerApiAction('open', (api) => api.open(), ActionTrust.DEFAULT);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.DEFAULT);
     return dict({'initialOpen': false});
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'amp-lightbox-bento'),
+      'expected amp-lightbox-bento experiment to be enabled'
+    );
+    return super.isLayoutSupported(layout);
   }
 }
 

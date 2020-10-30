@@ -54,6 +54,11 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
+    id: 'amp-lightbox',
+    name: 'AMP extension for a full-viewport lightbox modal',
+    spec: 'https://github.com/ampproject/amphtml/issues/30928',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec:

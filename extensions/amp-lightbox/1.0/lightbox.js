@@ -109,7 +109,7 @@ function LightboxWithRef(
       getElement(lightboxContainWrapperRef.current)
         .then((element) => {
           element = element[0];
-          element
+          const animation = element
             .animate(ANIMATION_PRESETS[animateInRef.current], {
               duration: ANIMATION_DURATION,
               direction: 'reverse',
@@ -121,6 +121,7 @@ function LightboxWithRef(
             .catch((err) => {
               throw Error('Lightbox closing animation failed', err);
             });
+          return () => animation.cancel();
         })
         .catch((err) => {
           throw Error(err);
@@ -136,10 +137,14 @@ function LightboxWithRef(
       getElement(lightboxContainWrapperRef.current)
         .then((element) => {
           element = element[0];
-          element.animate(ANIMATION_PRESETS[animateInRef.current], {
-            duration: ANIMATION_DURATION,
-            fill: 'both',
-          });
+          const animation = element.animate(
+            ANIMATION_PRESETS[animateInRef.current],
+            {
+              duration: ANIMATION_DURATION,
+              fill: 'both',
+            }
+          );
+          return () => animation.cancel();
         })
         .catch((error) => {
           throw Error('Element not found:', error);
