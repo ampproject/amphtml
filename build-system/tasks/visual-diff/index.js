@@ -755,8 +755,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
-    argv.compiled = true;
-    await buildRuntime();
+    await buildRuntime(/* opt_compiled */ true);
   }
 }
 
