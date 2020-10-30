@@ -1,0 +1,25 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+      console.log('in bs iframe aaaaaaa');
+      const code = window.name;
+      const worker = new Worker(URL.createObjectURL(new Blob([code])));
+      const listener = function(event) {
+        console.log('received message', event);
+        worker.postMessage(event.data.message, []);
+      }
+      console.log('add event lsitener');
+      window.addEventListener('message', listener);
+
+      worker.onmessage = function(event) {
+        console.log('received message from worker', event);
+        window.parent.postMessage({
+          'type': 'worker-response',
+          'event': event.data,
+        }, '*');
+      }
+    </script>
+  </body>
+</html>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
+import * as WorkerDOM from './main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
@@ -288,6 +288,7 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
+    console.log('worker dom is ', WorkerDOM);
     return WorkerDOM.upgrade(
       container || this.element,
       workerAndAuthorScripts,
@@ -319,12 +320,13 @@ export class AmpScript extends AMP.BaseElement {
         ? this.win.testLocation
         : this.win.location;
     const useLocal = getMode().localDev || getMode().test;
-    const workerUrl = calculateExtensionScriptUrl(
+    let workerUrl = calculateExtensionScriptUrl(
       location,
       this.nodom_ ? 'amp-script-worker-nodom' : 'amp-script-worker',
       '0.1',
       useLocal
     );
+    workerUrl = 'http://localhost:8000/examples/myworker.js'
     const xhr = Services.xhrFor(this.win);
     return xhr.fetchText(workerUrl, {ampCors: false}).then((r) => r.text());
   }
