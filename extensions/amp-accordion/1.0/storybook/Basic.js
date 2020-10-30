@@ -25,20 +25,56 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function AccordionWithActions(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <Accordion ref={ref} {...props} />
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current./*OK*/ toggle('section1')}>
+          toggle(section1)
+        </button>
+        <button onClick={() => ref.current./*OK*/ toggle()}>toggle all</button>
+        <button onClick={() => ref.current./*OK*/ expand('section1')}>
+          expand(section1)
+        </button>
+        <button onClick={() => ref.current./*OK*/ expand()}>expand all</button>
+        <button onClick={() => ref.current./*OK*/ collapse('section1')}>
+          collapse(section1)
+        </button>
+        <button onClick={() => ref.current./*OK*/ collapse()}>
+          collapse all
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
   return (
-    <Accordion expandSingleSection={expandSingleSection} animate={animate}>
-      <AccordionSection key={1} header={<h2>Section 1</h2>}>
-        <p>Content in section 1.</p>
-      </AccordionSection>
-      <AccordionSection key={2} header={<h2>Section 2</h2>}>
-        <div>Content in section 2.</div>
-      </AccordionSection>
-      <AccordionSection key={3} expanded header={<h2>Section 3</h2>}>
-        <div>Content in section 2.</div>
-      </AccordionSection>
-    </Accordion>
+    <main>
+      <AccordionWithActions
+        expandSingleSection={expandSingleSection}
+        animate={animate}
+      >
+        <AccordionSection id="section1" key={1} header={<h2>Section 1</h2>}>
+          <p>Content in section 1.</p>
+        </AccordionSection>
+        <AccordionSection key={2} header={<h2>Section 2</h2>}>
+          <div>Content in section 2.</div>
+        </AccordionSection>
+        <AccordionSection key={3} expanded header={<h2>Section 3</h2>}>
+          <div>Content in section 2.</div>
+        </AccordionSection>
+      </AccordionWithActions>
+    </main>
   );
 };
