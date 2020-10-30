@@ -32,11 +32,10 @@ const AmpVideoIframeLike = (props) => {
     // `{event: 'playing'}`
     // (video-iframe-integration-v0.js talks similarly to HTMLMediaElement,
     // so amp-video-iframe samples already mostly work).
-    const {data, currentTarget} = e;
-    if (data.event) {
-      const event = currentTarget.ownerDocument.createEvent('Event');
-      event.initEvent(data.event, /* bubbles */ true, /* cancelable */ true);
-      currentTarget.dispatchEvent(event);
+    if (e.data?.event) {
+      e.currentTarget.dispatchEvent(
+        new CustomEvent(e.data.event, {bubbles: true, cancelable: true})
+      );
     }
   }, []);
 
