@@ -203,6 +203,7 @@ function VideoWrapperWithRef(
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         style={fillStretch}
+        data-test-change
       >
         {sources}
       </Component>
