@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {waitFor} from '../../testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
 const t = describe.configure().ifChrome();
@@ -44,6 +45,11 @@ t.run('amp-carousel', function () {
       extensions,
     },
     (env) => {
+      async function waitForClass(el, className) {
+        const isButtonHidden = () => el.classList.contains(className);
+        await waitFor(isButtonHidden, 'button hidden');
+      }
+
       beforeEach(() => {
         document = env.win.document;
         return waitForCarouselLayout();
@@ -72,19 +78,26 @@ t.run('amp-carousel', function () {
         }
       );
 
-      // TODO(#29783): De-flake and un-skip this test.
-      it.skip(
+      it(
         'should not have any buttons visible when theres only a single ' +
           'item',
-        () => {
+        async () => {
           document.body.classList.add('amp-mode-mouse');
           const amp = document.querySelector('#carousel-1');
           const prevBtn = amp.querySelector('.amp-carousel-button-prev');
           const nextBtn = amp.querySelector('.amp-carousel-button-next');
+
+          waitForClass(prevBtn, 'amp-disable');
+          waitForClass(nextBtn, 'amp-disable');
+
           expect(prevBtn).to.not.be.null;
           expect(nextBtn).to.not.be.null;
-          expect(prevBtn).to.be.hidden;
-          expect(nextBtn).to.be.hidden;
+          expect(
+            document.defaultView.getComputedStyle(prevBtn)['visibility']
+          ).to.equal('hidden');
+          expect(
+            document.defaultView.getComputedStyle(nextBtn)['visibility']
+          ).to.equal('hidden');
         }
       );
     }
