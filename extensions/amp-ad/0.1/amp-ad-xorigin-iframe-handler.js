@@ -82,6 +82,9 @@ export class AmpAdXOriginIframeHandler {
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {boolean} */
+    this.inViewport_ = false;
+
+    /** @private {boolean} */
     this.sendPositionPending_ = false;
   }
 
@@ -111,7 +114,7 @@ export class AmpAdXOriginIframeHandler {
       this.iframe,
       'send-embed-state',
       true,
-      () => this.sendEmbedInfo_(this.baseInstance_.isInViewport())
+      () => this.sendEmbedInfo_(this.inViewport_)
     );
 
     // Enable creative position observer if inabox experiment enabled OR
@@ -197,7 +200,7 @@ export class AmpAdXOriginIframeHandler {
 
     this.unlisteners_.push(
       this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
-        this.sendEmbedInfo_(this.baseInstance_.isInViewport());
+        this.sendEmbedInfo_(this.inViewport_);
       })
     );
 
@@ -593,6 +596,7 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
+    this.inViewport_ = inViewport;
     this.sendEmbedInfo_(inViewport);
   }
 

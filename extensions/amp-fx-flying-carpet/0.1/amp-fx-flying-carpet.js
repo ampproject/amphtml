@@ -101,15 +101,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     );
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
-    Services.ownersForDoc(this.element).updateInViewport(
-      this.element,
-      this.children_,
-      inViewport
-    );
-  }
-
   /**
    * Asserts that the flying carpet does not appear in the first or last
    * viewport.
