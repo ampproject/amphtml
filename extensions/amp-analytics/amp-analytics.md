@@ -240,7 +240,7 @@ configuration in order of highest to lowest precedence:
 1. Inlined Configuration
 1. Vendor defined configuration
 
-### Enable Predfined Variable Groups
+### Enable Predefined Variable Groups
 
 Variable Groups is a feature that allows analytics providers to group a
 predefined set of variables that can easily be enabled. These
