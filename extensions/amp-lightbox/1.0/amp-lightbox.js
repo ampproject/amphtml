@@ -27,7 +27,7 @@ class AmpLightbox extends PreactBaseElement {
   init() {
     this.registerApiAction('open', (api) => api.open(), ActionTrust.DEFAULT);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.DEFAULT);
-    return dict({'openOnLoad': false});
+    return dict({'initialOpen': false});
   }
 }
 
@@ -37,10 +37,9 @@ AmpLightbox['Component'] = Lightbox;
 /** @override */
 AmpLightbox['props'] = {
   'animateIn': {attr: 'animate-in'},
-  'scrollable': {attr: 'scrollable'},
+  'scrollable': {attr: 'scrollable', type: 'boolean'},
   'id': {attr: 'id'},
-  'layout': {attr: 'layout'},
-  'openOnLoad': {attr: 'openOnLoad'},
+  'initialOpen': {attr: 'initial-open', type: 'boolean'},
   'closeButtonAriaLabel': {attr: 'data-close-button-aria-label'},
 };
 
@@ -49,15 +48,6 @@ AmpLightbox['passthrough'] = true;
 
 /** @override */
 AmpLightbox['layoutSizeDefined'] = true;
-
-/** @override */
-AmpLightbox['children'] = {
-  'children': {
-    name: 'children',
-    selector: '*',
-    single: false,
-  },
-};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpLightbox);
