@@ -17,9 +17,8 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
-import {setStyle, toggle} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {
-  useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -47,7 +46,7 @@ const ANIMATION_PRESETS = {
  */
 function getElement(selector, time = 5) {
   return new Promise(async (resolve, reject) => {
-    if (i <= 0) {
+    if (time <= 0) {
       return reject(`${selector} not found`);
     }
     const elements = document.querySelectorAll(selector);
@@ -110,7 +109,7 @@ function LightboxWithRef(
           element = element[0];
           element
             .animate(ANIMATION_PRESETS[animateInRef.current], {
-              duration: 1000,
+              duration: 200,
               direction: 'reverse',
             })
             .finished.then((opt_res) => {
@@ -138,7 +137,7 @@ function LightboxWithRef(
           element = element[0];
           element
             .animate(ANIMATION_PRESETS[animateInRef.current], {
-              duration: 1000,
+              duration: 200,
             })
             .finished.then((opt_res) => {
               setStyle(element, 'visibility', 'visible');
@@ -154,9 +153,7 @@ function LightboxWithRef(
         .catch((error) => {
           throw Error('Element not found:', error);
         });
-      // return () => setVisible(true);
-    } else {
-      return () => setVisible(false);
+      // return () => setShow(false);
     }
   }, [visible]);
 
@@ -177,7 +174,7 @@ function LightboxWithRef(
     visible && (
       <ContainWrapper
         {...rest}
-        ref={lightboxRef.current}
+        ref={lightboxRef}
         id={id}
         size={true}
         layout={true}
