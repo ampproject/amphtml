@@ -989,24 +989,16 @@ export class AmpStoryPlayer {
    * @param {number=} pageDelta
    */
   go(storyDelta, pageDelta = 0) {
-    if (storyDelta === 0) {
-      if (pageDelta > 0) {
-        this.getPageIdsForStory_().then((pageIds) => {
-          this.getCurrentPageIdForStory_().then((pageId) => {
-            const currentIdx = pageIds.value.indexOf(pageId.value);
-            this.setCurrentPageIdForStory_({
-              'id': pageIds.value[currentIdx + pageDelta],
-              'index': currentIdx + pageDelta,
-            });
-
-            // const next = {'next': true};
-            // const prev = {'previous': true};
-            // this.selectPage_(next, pageDelta);
-          });
-        });
-      }
+    if (storyDelta === 0 && pageDelta === 0) {
       return;
     }
+
+    if (storyDelta === 0 && pageDelta !== 0) {
+      const navigation = pageDelta > 0 ? {'next': true} : {'previous': true};
+      this.selectPage_(navigation, pageDelta);
+      return;
+    }
+
     if (
       !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + storyDelta)
@@ -1024,6 +1016,10 @@ export class AmpStoryPlayer {
           ];
 
     this.show(currentStory.href);
+    if (pageDelta !== 0) {
+      const navigation = pageDelta > 0 ? {'next': true} : {'previous': true};
+      this.selectPage_(navigation, pageDelta);
+    }
   }
 
   /**
@@ -1288,59 +1284,19 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Sends a message to the story to navigate numPages of the story.
+   * @param {!Object} navigation
+   * @param {number} numPages
    * @private
    */
-  getPageIdsForStory_() {
+  selectPage_(navigation, numPages) {
     const {iframeIdx} = this.stories_[this.currentIdx_];
-    return this.messagingPromises_[iframeIdx].then((messaging) =>
-      messaging.sendRequest(
-        'getDocumentState',
-        {state: STORY_MESSAGE_STATE_TYPE.PAGE_IDS},
-        true
-      )
-    );
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      for (let i = 0; i < Math.abs(numPages); i++) {
+        messaging.sendRequest('selectPage', navigation);
+      }
+    });
   }
-
-  /**
-   * @private
-   */
-  getCurrentPageIdForStory_() {
-    const {iframeIdx} = this.stories_[this.currentIdx_];
-    return this.messagingPromises_[iframeIdx].then((messaging) =>
-      messaging.sendRequest(
-        'getDocumentState',
-        {state: STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID},
-        true
-      )
-    );
-  }
-
-  /**
-   * @param pageData
-   * @private
-   */
-  setCurrentPageIdForStory_(pageData) {
-    const {iframeIdx} = this.stories_[this.currentIdx_];
-    this.messagingPromises_[iframeIdx].then((messaging) =>
-      messaging.sendRequest('setDocumentState', {
-        state: STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID,
-        value: pageData,
-      })
-    );
-  }
-
-  // /**
-  //  * @param {*} navigation
-  //  * @param numPages
-  //  */
-  // selectPage_(navigation, numPages) {
-  //   const {iframeIdx} = this.stories_[this.currentIdx_];
-  //   this.messagingPromises_[iframeIdx].then((messaging) => {
-  //     for (let i = 0; i < numPages; i++) {
-  //       messaging.sendRequest('selectPage', navigation);
-  //     }
-  //   });
-  // }
 
   /**
    * React to documentStateUpdate events.
