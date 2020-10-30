@@ -16,10 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {
-  createCtrlcHandler,
-  exitCtrlcHandler,
-} = require('../../common/ctrlcHandler');
+const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
@@ -84,11 +81,10 @@ async function storybook() {
     await runAmpDevBuildServer();
   }
   installPackages(__dirname);
-  const ctrlcHandler = createCtrlcHandler('storybook');
-  await Promise.all(envs.map(build ? buildEnv : launchEnv));
-  if (build) {
-    exitCtrlcHandler(ctrlcHandler);
+  if (!build) {
+    createCtrlcHandler('storybook');
   }
+  return Promise.all(envs.map(build ? buildEnv : launchEnv));
 }
 
 module.exports = {
