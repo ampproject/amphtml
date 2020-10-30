@@ -22,6 +22,10 @@ import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-3d-gltf';
@@ -80,6 +84,8 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -145,6 +151,9 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
     if (!isWebGLSupported()) {
       this.toggleFallback(true);
       return Promise.resolve();
@@ -215,10 +224,10 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /**
    * @param {boolean} inViewport
-   * @override
+   * @private
    */
-  viewportCallback(inViewport) {
-    return this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
+  viewportCallback_(inViewport) {
+    this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
   }
 
   /** @override */
