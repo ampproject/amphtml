@@ -109,6 +109,7 @@ const STORY_STATE_TYPE = {
 /** @enum {string} */
 const STORY_MESSAGE_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
+  PAGE_IDS: 'PAGE_IDS',
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
@@ -985,9 +986,25 @@ export class AmpStoryPlayer {
   /**
    * Navigates stories given a number.
    * @param {number} storyDelta
+   * @param {number=} pageDelta
    */
-  go(storyDelta) {
+  go(storyDelta, pageDelta = 0) {
     if (storyDelta === 0) {
+      if (pageDelta > 0) {
+        this.getPageIdsForStory_().then((pageIds) => {
+          this.getCurrentPageIdForStory_().then((pageId) => {
+            const currentIdx = pageIds.value.indexOf(pageId.value);
+            this.setCurrentPageIdForStory_({
+              'id': pageIds.value[currentIdx + pageDelta],
+              'index': currentIdx + pageDelta,
+            });
+
+            // const next = {'next': true};
+            // const prev = {'previous': true};
+            // this.selectPage_(next, pageDelta);
+          });
+        });
+      }
       return;
     }
     if (
@@ -1269,6 +1286,61 @@ export class AmpStoryPlayer {
         .then((event) => this.dispatchPageAttachmentEvent_(event.value));
     });
   }
+
+  /**
+   * @private
+   */
+  getPageIdsForStory_() {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    return this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest(
+        'getDocumentState',
+        {state: STORY_MESSAGE_STATE_TYPE.PAGE_IDS},
+        true
+      )
+    );
+  }
+
+  /**
+   * @private
+   */
+  getCurrentPageIdForStory_() {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    return this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest(
+        'getDocumentState',
+        {state: STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID},
+        true
+      )
+    );
+  }
+
+  /**
+   * @param pageData
+   * @private
+   */
+  setCurrentPageIdForStory_(pageData) {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest('setDocumentState', {
+        state: STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID,
+        value: pageData,
+      })
+    );
+  }
+
+  // /**
+  //  * @param {*} navigation
+  //  * @param numPages
+  //  */
+  // selectPage_(navigation, numPages) {
+  //   const {iframeIdx} = this.stories_[this.currentIdx_];
+  //   this.messagingPromises_[iframeIdx].then((messaging) => {
+  //     for (let i = 0; i < numPages; i++) {
+  //       messaging.sendRequest('selectPage', navigation);
+  //     }
+  //   });
+  // }
 
   /**
    * React to documentStateUpdate events.
