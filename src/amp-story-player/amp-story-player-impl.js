@@ -993,8 +993,7 @@ export class AmpStoryPlayer {
     }
 
     if (storyDelta === 0 && pageDelta !== 0) {
-      const navigation = pageDelta > 0 ? {'next': true} : {'previous': true};
-      this.selectPage_(navigation, pageDelta);
+      this.selectPage_(pageDelta);
       return;
     }
 
@@ -1016,8 +1015,7 @@ export class AmpStoryPlayer {
 
     this.show(currentStory.href);
     if (pageDelta !== 0) {
-      const navigation = pageDelta > 0 ? {'next': true} : {'previous': true};
-      this.selectPage_(navigation, pageDelta);
+      this.selectPage_(pageDelta);
     }
   }
 
@@ -1283,15 +1281,15 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Sends a message to the story to navigate numPages of the story.
-   * @param {!Object} navigation
-   * @param {number} numPages
+   * Sends a message to the story to navigate delta pages.
+   * @param {number} delta
    * @private
    */
-  selectPage_(navigation, numPages) {
+  selectPage_(delta) {
+    const navigation = delta > 0 ? {'next': true} : {'previous': true};
     const {iframeIdx} = this.stories_[this.currentIdx_];
     this.messagingPromises_[iframeIdx].then((messaging) => {
-      for (let i = 0; i < Math.abs(numPages); i++) {
+      for (let i = 0; i < Math.abs(delta); i++) {
         messaging.sendRequest('selectPage', navigation);
       }
     });
