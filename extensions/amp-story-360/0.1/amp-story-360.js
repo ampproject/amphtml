@@ -367,7 +367,7 @@ export class AmpStory360 extends AMP.BaseElement {
       this.restoreOrLoseGlContext_();
     };
     const observer = new MutationObserver(callback);
-    observer.observe(this.getPage_(), config);
+    this.getPage_() && observer.observe(this.getPage_(), config);
 
     // Initialize all services before proceeding
     return Promise.all([
