@@ -68,7 +68,7 @@ describes.fakeWin('BaseSlides', {amp: true}, (env) => {
     clearAutoplaySpy = env.sandbox.spy(BaseSlides.prototype, 'clearAutoplay');
     viewportCallbackSpy = env.sandbox.spy(
       BaseSlides.prototype,
-      'viewportCallback'
+      'viewportCallbackTemp'
     );
   });
 
@@ -174,7 +174,7 @@ describes.fakeWin('BaseSlides', {amp: true}, (env) => {
       })
     );
 
-    carousel.viewportCallback(true);
+    carousel.viewportCallbackTemp(true);
     expect(viewportCallbackSpy).to.have.been.calledWith(true);
     expect(hintControlsSpy).to.have.been.called;
     expect(autoplaySpy).to.have.been.called;
@@ -189,7 +189,7 @@ describes.fakeWin('BaseSlides', {amp: true}, (env) => {
       })
     );
 
-    carousel.viewportCallback(false);
+    carousel.viewportCallbackTemp(false);
     expect(viewportCallbackSpy).to.have.been.calledWith(false);
     expect(hintControlsSpy).to.not.have.been.called;
     expect(autoplaySpy).to.not.have.been.called;

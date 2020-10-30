@@ -695,16 +695,19 @@ describes.realWin(
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(200);
 
       // Make sure the scroll position is correct after layoutCallback.
+      await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
       await impl.layoutCallback();
+      impl.showSlide_(1);
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(400);
     });
 
     it('should relayout the current slide on layoutCallback', () => {
-      return getAmpSlideScroll().then((ampSlideScroll) => {
+      return getAmpSlideScroll().then(async (ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
         const scheduleLayoutSpy_ = env.sandbox.spy(owners, 'scheduleLayout');
         impl.slideIndex_ = null;
+        await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
         impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
           impl.element,
@@ -712,6 +715,7 @@ describes.realWin(
         );
 
         impl.showSlide_(1);
+        await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
         impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
           impl.element,

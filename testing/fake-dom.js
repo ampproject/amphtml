@@ -68,6 +68,9 @@ export class FakeWindow {
     this./*OK*/ pageYOffset = window./*OK*/ pageYOffset;
 
     /** @const */
+    this.IntersectionObserver = window.IntersectionObserver;
+
+    /** @const */
     this.crypto = window.crypto || window.msCrypto;
 
     // Parent Window points to itself if spec.parent was not passed.
