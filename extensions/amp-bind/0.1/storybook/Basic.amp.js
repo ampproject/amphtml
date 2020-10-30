@@ -20,11 +20,14 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-accordion-1_0',
+  title: 'amp-bind',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
-    extensions: [{name: 'amp-accordion', version: '1.0'}],
+    extensions: [
+      {name: 'amp-bind', version: '0.1'},
+      {name: 'amp-accordion', version: '1.0'},
+    ],
     experiments: ['amp-accordion-bento'],
   },
 };
@@ -32,42 +35,45 @@ export default {
 export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
-  const createApiString = (action, section) =>
-    `tap:accordion.${action}(${section ? `section='${section}'` : ''})`;
   return (
     <main>
       <amp-accordion
-        id="accordion"
         expand-single-section={expandSingleSection}
         animate={animate}
       >
-        <section id="section1">
+        <section data-amp-bind-expanded="section1">
           <h2>Section 1</h2>
           <p>Content in section 1.</p>
         </section>
-        <section>
+        <section data-amp-bind-expanded="section2">
           <h2>Section 2</h2>
           <div>Content in section 2.</div>
         </section>
-        <section expanded>
+        <section expanded data-amp-bind-expanded="section3">
           <h2>Section 3</h2>
           <div>Content in section 3.</div>
         </section>
       </amp-accordion>
 
       <div class="buttons" style={{marginTop: 8}}>
-        <button on={createApiString('toggle', 'section1')}>
-          toggle(section1)
+        <button on="tap:AMP.setState({section1: true})">
+          Expand Section 1
         </button>
-        <button on={createApiString('toggle')}>toggle all</button>
-        <button on={createApiString('expand', 'section1')}>
-          expand(section1)
+        <button on="tap:AMP.setState({section1: false})">
+          Collapse Section 1
         </button>
-        <button on={createApiString('expand')}>expand all</button>
-        <button on={createApiString('collapse', 'section1')}>
-          collapse(section1)
+        <button on="tap:AMP.setState({section2: true})">
+          Expand Section 2
         </button>
-        <button on={createApiString('collapse')}>collapse all</button>
+        <button on="tap:AMP.setState({section2: false})">
+          Collapse Section 2
+        </button>
+        <button on="tap:AMP.setState({section3: true})">
+          Expand Section 3
+        </button>
+        <button on="tap:AMP.setState({section3: false})">
+          Collapse Section 3
+        </button>
       </div>
     </main>
   );
