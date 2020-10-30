@@ -58,10 +58,6 @@ const GET_STATE_CONFIGURATIONS = {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.PAGE_ATTACHMENT_STATE,
   },
-  'PAGE_IDS': {
-    dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.PAGE_IDS,
-  },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,
     property: AnalyticsVariable.STORY_PROGRESS,
@@ -76,11 +72,6 @@ const SET_STATE_CONFIGURATIONS = {
   'MUTED_STATE': {
     action: Action.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',
-  },
-  'CURRENT_PAGE_ID': {
-    action: Action.CHANGE_PAGE,
-    isValueValid: ({id, index}) =>
-      typeof id === 'string' && typeof index === 'number',
   },
 };
 
