@@ -31,7 +31,7 @@ limitations under the License.
           }
         </script>
         <div id="quantcast-post-prompt">
-          <button on="tap:quantcast.prompt(consent=quantcast)" role="button">Privacy settings</button>
+          <button on="tap:consent.prompt(consent=quantcast)" role="button">Privacy settings</button>
         </div>
     </amp-consent>
 ```
