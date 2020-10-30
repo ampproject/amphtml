@@ -34,9 +34,20 @@ const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
 
+/** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
   /** @override */
   init() {
+    this.registerApiAction('toggle', (api, invocation) =>
+      api./*OK*/ toggle(invocation.args && invocation.args['section'])
+    );
+    this.registerApiAction('expand', (api, invocation) =>
+      api./*OK*/ expand(invocation.args && invocation.args['section'])
+    );
+    this.registerApiAction('collapse', (api, invocation) =>
+      api./*OK*/ collapse(invocation.args && invocation.args['section'])
+    );
+
     const {element} = this;
 
     const mu = new MutationObserver(() => {
@@ -94,6 +105,7 @@ function getState(element, mu) {
       'headerAs': headerShim,
       'contentAs': contentShim,
       'expanded': expanded,
+      'id': section.getAttribute('id'),
     });
     return <AccordionSection {...props} />;
   });
