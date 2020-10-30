@@ -16,9 +16,12 @@
 
 import * as Preact from '../../../src/preact';
 import {Accordion, AccordionSection} from './accordion';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {Services} from '../../../src/services';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
@@ -48,17 +51,28 @@ class AmpAccordion extends PreactBaseElement {
       api./*OK*/ collapse(invocation.args && invocation.args['section'])
     );
 
+    const action = Services.actionServiceForDoc(this.element);
+    const triggerEvent = (name, section, trust) => {
+      const event = createCustomEvent(
+        this.win,
+        `accordionSection.${name}`,
+        dict({})
+      );
+      action.trigger(section, name, event, trust);
+      this.element.dispatchCustomEvent(name);
+    };
+
     const {element} = this;
 
     const mu = new MutationObserver(() => {
-      this.mutateProps(getState(element, mu));
+      this.mutateProps(getState(element, mu, triggerEvent));
     });
     mu.observe(element, {
       attributeFilter: ['expanded'],
       subtree: true,
     });
 
-    const {'children': children} = getState(element, mu);
+    const {'children': children} = getState(element, mu, triggerEvent);
     return dict({'children': children});
   }
 
@@ -75,9 +89,10 @@ class AmpAccordion extends PreactBaseElement {
 /**
  * @param {!Element} element
  * @param {MutationObserver} mu
+ * @param triggerEvent
  * @return {!JsonObject}
  */
-function getState(element, mu) {
+function getState(element, mu, triggerEvent) {
   const sections = toArray(childElementsByTag(element, 'section'));
 
   const children = sections.map((section) => {
@@ -90,7 +105,7 @@ function getState(element, mu) {
     const sectionShim = memo(
       section,
       SECTION_SHIM_PROP,
-      bindSectionShimToElement
+      bindSectionShimToElement.bind(null, triggerEvent)
     );
     const headerShim = memo(section, HEADER_SHIM_PROP, bindHeaderShimToElement);
     const contentShim = memo(
@@ -113,25 +128,54 @@ function getState(element, mu) {
 }
 
 /**
+ * @param triggerEvent
+ * @param triggerEvent
+ * @param triggerEvent
+ * @param triggerEvent
  * @param {!Element} sectionElement
  * @param {!AccordionDef.SectionProps} props
+ * @param root0
+ * @param root0.expanded
+ * @param root0.children
+ * @param root0
+ * @param root0.expanded
+ * @param root0.children
+ * @param root0
+ * @param root0.expanded
+ * @param root0.children
+ * @param root0
+ * @param root0.expanded
+ * @param root0.children
+ * @param triggerEvent.expanded
+ * @param triggerEvent.children
  * @return {PreactDef.Renderable}
  */
-function SectionShim(sectionElement, {expanded, children}) {
+function SectionShim(triggerEvent, sectionElement, {expanded, children}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
+
+    if (triggerEvent) {
+      console.log(expanded, sectionElement, this);
+      triggerEvent(
+        expanded ? 'expand' : 'collapse',
+        sectionElement,
+        ActionTrust.HIGH
+      );
+    }
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, expanded]);
+  }, [sectionElement, expanded, triggerEvent]);
   return children;
 }
 
 /**
+ * @param triggerEvent
  * @param {!Element} element
  * @return {function(!AccordionDef.SectionProps):PreactDef.Renderable}
  */
-const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
+const bindSectionShimToElement = (triggerEvent, element) =>
+  SectionShim.bind(null, triggerEvent, element);
 
 /**
  * @param {!Element} sectionElement
