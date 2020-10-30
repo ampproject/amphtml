@@ -41,9 +41,7 @@ const DEFAULT_SANDBOX = [
  */
 function usePropRef(prop) {
   const ref = useRef(null);
-  useEffect(() => {
-    ref.current = prop;
-  }, [prop]);
+  ref.current = prop;
   return ref;
 }
 
