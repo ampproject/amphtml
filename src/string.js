@@ -197,7 +197,7 @@ export function asyncStringReplace(str, regex, replacer) {
  * @param {string} s
  * @param {number} targetLength
  * @param {string} padString
- * @return {*} TODO(#23582): Specify return type
+ * @return {string}
  */
 export function padStart(s, targetLength, padString) {
   if (s.length >= targetLength) {

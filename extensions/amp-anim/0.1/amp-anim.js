@@ -18,6 +18,10 @@ import * as st from '../../../src/style';
 import {dev} from '../../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {propagateObjectFitStyles} from '../../../src/style';
 
 const TAG = 'amp-anim';
@@ -40,9 +44,6 @@ export class AmpAnim extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.img_ = null;
-
-    /** @private {boolean} */
-    this.hasLoaded_ = false;
   }
 
   /** @override */
@@ -93,37 +94,33 @@ export class AmpAnim extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
     guaranteeSrcForSrcsetUnsupportedBrowsers(img);
-    return this.loadPromise(img);
+    return this.loadPromise(img).then(() => {
+      observeWithSharedInOb(this.element, (inViewport) =>
+        this.viewportCallback_(inViewport)
+      );
+    });
   }
 
   /** @override */
   firstLayoutCompleted() {
     // Keep the placeholder: amp-anim is using it to start/stop playing.
-    this.hasLoaded_ = true;
-    this.updateInViewport_();
-  }
-
-  /** @override */
-  viewportCallback(unusedInViewport) {
-    if (!this.hasLoaded_) {
-      // do nothing if element has not laid out.
-      return;
-    }
-    this.updateInViewport_();
   }
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    this.viewportCallback_(false);
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;
     this.img_.srcset = SRC_PLACEHOLDER;
-    this.hasLoaded_ = false;
     return true;
   }
 
-  /** @private */
-  updateInViewport_() {
-    const inViewport = this.isInViewport();
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  viewportCallback_(inViewport) {
     this.togglePlaceholder(!inViewport);
     st.toggle(dev().assertElement(this.img_), inViewport);
   }

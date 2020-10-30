@@ -12,11 +12,11 @@
     },
     {
       pattern: '{cid-*,*-cid-*,*-cid,extension-analytics,analytics}.js',
-      owners: [{name: 'ampproject/wg-analytics'}],
+      owners: [{name: 'ampproject/wg-components'}],
     },
     {
       pattern: '{consent,consent-state}.js',
-      owners: [{name: 'ampproject/wg-analytics'}],
+      owners: [{name: 'ampproject/wg-components'}],
     },
     {
       pattern: 'amp-story-*.js',

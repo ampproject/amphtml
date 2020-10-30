@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {Accordion, AccordionSection} from './accordion';
+import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
 import {devAssert, userAssert} from '../../../src/log';
@@ -33,9 +34,20 @@ const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
 
+/** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
   /** @override */
   init() {
+    this.registerApiAction('toggle', (api, invocation) =>
+      api./*OK*/ toggle(invocation.args && invocation.args['section'])
+    );
+    this.registerApiAction('expand', (api, invocation) =>
+      api./*OK*/ expand(invocation.args && invocation.args['section'])
+    );
+    this.registerApiAction('collapse', (api, invocation) =>
+      api./*OK*/ collapse(invocation.args && invocation.args['section'])
+    );
+
     const {element} = this;
 
     const mu = new MutationObserver(() => {
@@ -93,6 +105,7 @@ function getState(element, mu) {
       'headerAs': headerShim,
       'contentAs': contentShim,
       'expanded': expanded,
+      'id': section.getAttribute('id'),
     });
     return <AccordionSection {...props} />;
   });
@@ -107,7 +120,6 @@ function getState(element, mu) {
 function SectionShim(sectionElement, {expanded, children}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
-    sectionElement.setAttribute('aria-expanded', String(expanded));
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
@@ -126,20 +138,30 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
  * @param {!AccordionDef.HeaderProps} props
  * @return {PreactDef.Renderable}
  */
-function HeaderShim(sectionElement, {onClick}) {
+function HeaderShim(
+  sectionElement,
+  {onClick, 'aria-controls': ariaControls, 'aria-expanded': ariaExpanded}
+) {
   const headerElement = sectionElement.firstElementChild;
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
       return;
     }
+    headerElement.classList.add('i-amphtml-accordion-header');
     headerElement.addEventListener('click', onClick);
+    if (!headerElement.hasAttribute('tabindex')) {
+      headerElement.setAttribute('tabindex', 0);
+    }
+    headerElement.setAttribute('aria-expanded', ariaExpanded);
+    headerElement.setAttribute('aria-controls', ariaControls);
+    headerElement.setAttribute('role', 'button');
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
     };
-  }, [sectionElement, headerElement, onClick]);
+  }, [sectionElement, headerElement, onClick, ariaControls, ariaExpanded]);
   return <header />;
 }
 
@@ -155,18 +177,20 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
  * @param {{current: ?}} ref
  * @return {PreactDef.Renderable}
  */
-function ContentShimWithRef(sectionElement, {hidden}, ref) {
+function ContentShimWithRef(sectionElement, {hidden, id}, ref) {
   const contentElement = sectionElement.lastElementChild;
   useImperativeHandle(ref, () => contentElement, [contentElement]);
   useLayoutEffect(() => {
     if (!contentElement) {
       return;
     }
+    contentElement.classList.add('i-amphtml-accordion-content');
+    contentElement.setAttribute('id', id);
     toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, contentElement, hidden]);
+  }, [sectionElement, contentElement, hidden, id]);
   return <div />;
 }
 
@@ -195,5 +219,5 @@ AmpAccordion['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpAccordion);
+  AMP.registerElement(TAG, AmpAccordion, CSS);
 });
