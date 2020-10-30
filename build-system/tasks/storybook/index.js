@@ -16,10 +16,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const log = require('fancy-log');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
+const {yellow} = require('ansi-colors');
 
 const ENV_PORTS = {
   amp: 9001,
@@ -64,9 +66,14 @@ function launchEnv(env) {
  */
 function buildEnv(env) {
   if (env === 'amp') {
-    // TODO: This environment needs access to binaries from `gulp build`.
+    log(
+      yellow(
+        'WARNING: --build does not work with the `storybook/amp` environment.'
+      )
+    );
     return null;
   }
+  log(yellow('Building `storybook/preact` only.'));
   return execStorybookScriptAsync(
     'build-storybook',
     env,
