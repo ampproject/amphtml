@@ -19,7 +19,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,
-  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
