@@ -17,25 +17,46 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/style';
 import {
+  useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
+import {useStyles} from './lightbox.jss';
 
 const ANIMATION_PRESETS = {
   'fade-in': [{opacity: 0}, {opacity: 1}],
   'fly-in-top': [
     {opacity: 0, transform: 'translate(0,-100%)'},
-    {opacity: 1, transform: 'translate: (0, 0)'},
+    {opacity: 1, transform: 'translate(0, 0)'},
   ],
   'fly-in-bottom': [
     {opacity: 0, transform: 'translate(0, 100%)'},
-    {opacity: 1, transform: 'translate: (0, 0)'},
+    {opacity: 1, transform: 'translate(0, 0)'},
   ],
 };
+
+/**
+ * @param {string} selector
+ * @param {number} time
+ * @return {number}
+ */
+function getElement(selector, time = 5) {
+  return new Promise(async (resolve, reject) => {
+    if (i <= 0) {
+      return reject(`${selector} not found`);
+    }
+    const elements = document.querySelectorAll(selector);
+    if (elements.length) {
+      return resolve(elements);
+    }
+    return setTimeout(async () => await getElement(selector, time - 1), 1000);
+  });
+}
 
 /**
  * @param {!LightboxDef.Props} props
@@ -45,20 +66,27 @@ const ANIMATION_PRESETS = {
 function LightboxWithRef(
   {
     id,
-    layout = 'nodisplay',
     animateIn = 'fade-in',
     closeButtonAriaLabel,
     // eslint-disable-next-line no-unused-vars
     scrollable, // (TODO: discussion)
     children,
     onOpen,
-    openOnLoad,
+    initialOpen,
     ...rest
   },
   ref
 ) {
   const lightboxRef = useRef(null);
-  const [show, setShow] = useState(openOnLoad);
+  const [show, setShow] = useState(initialOpen);
+  const [visible, setVisible] = useState(false);
+  const styleClasses = useStyles();
+  const onOpenFnRef = useRef();
+  onOpenFnRef.current = onOpen;
+  const animateInRef = useRef();
+  animateInRef.current = animateIn;
+  const lightboxContainWrapperRef = useRef();
+  lightboxContainWrapperRef.current = `.${styleClasses.lightboxContainWrapper}`;
 
   useImperativeHandle(
     ref,
@@ -70,78 +98,104 @@ function LightboxWithRef(
         setShow(false);
       },
     }),
-    [setShow]
+    []
   );
 
   useEffect(() => {
-    const element = lightboxRef.current;
     if (show) {
-      setStyle(element, 'visibility', 'visible');
-      element.animate(ANIMATION_PRESETS[animateIn], {duration: 200});
-      // setStyle(element, 'display', 'flex');
-      setStyle(element, 'opacity', 1);
-      if (onOpen) {
-        onOpen();
-      }
+      setVisible(true);
     } else {
-      setStyle(element, 'visibility', 'hidden');
-      element.animate(ANIMATION_PRESETS[animateIn].reverse(), {duration: 200});
-      // setStyle(element, 'display', 'none');
-      setStyle(element, 'opacity', 0);
+      getElement(lightboxContainWrapperRef.current, 5)
+        .then((element) => {
+          element = element[0];
+          element
+            .animate(ANIMATION_PRESETS['fly-in-bottom'], {
+              duration: 1000,
+              direction: 'reverse',
+            })
+            .finished.then((opt_res) => {
+              setStyle(element, 'visibility', 'hidden');
+              setStyle(element, 'opacity', 0);
+              setVisible(false);
+            })
+            .catch((error) => {
+              throw Error('Closing lightbox animation failed:', error);
+            });
+        })
+        .catch((e) => {
+          throw Error('Element not found:', e);
+        });
     }
-  }, [show, animateIn, onOpen]);
+  }, [show]);
+
+  useEffect(() => {
+    if (!show && !visible) {
+      return;
+    }
+    if (show && visible) {
+      getElement(lightboxContainWrapperRef.current, 5)
+        .then((element) => {
+          element = element[0];
+          element
+            .animate(ANIMATION_PRESETS[animateInRef.current], {
+              duration: 1000,
+            })
+            .finished.then((opt_res) => {
+              setStyle(element, 'visibility', 'visible');
+              setStyle(element, 'opacity', 1);
+              if (onOpenFnRef.current) {
+                onOpenFnRef.current();
+              }
+            })
+            .catch((error) => {
+              throw Error('Opening lightbox animation failed:', error);
+            });
+        })
+        .catch((error) => {
+          throw Error('Element not found:', error);
+        });
+      // return () => setVisible(true);
+    } else {
+      return () => setVisible(false);
+    }
+  }, [visible]);
+
+  useLayoutEffect(() => {
+    const escFunction = (event) => {
+      if (event.keyCode === 27) {
+        setShow(false);
+      }
+    };
+    document.addEventListener('keydown', escFunction);
+
+    return () => {
+      document.removeEventListener('keydown', escFunction);
+    };
+  });
 
   return (
-    <ContainWrapper
-      {...rest}
-      ref={lightboxRef}
-      id={id}
-      layout={layout}
-      size={true}
-      layout={true}
-      paint={true}
-      style={{
-        zIndex: 1000,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        color: '#fff',
-        width: window.innerWidth,
-        height: window.innerHeight,
-        opacity: 0,
-        visibility: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'right',
-      }}
-    >
-      <button
-        textContent={closeButtonAriaLabel}
-        tabIndex={-1}
-        style={{
-          position: 'fixed',
-          /* keep it on viewport */
-          top: 0,
-          left: 0,
-          /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
-     before allowing buttons to be activated. */
-          width: '2px',
-          height: '2px',
-          /* visually hide it with overflow and opacity */
-          opacity: 0,
-          overflow: 'hidden',
-          /* remove any margin or padding */
-          border: 'none',
-          margin: 0,
-          padding: 0,
-          /* ensure no other style sets display to none */
-          display: 'block',
-          visibility: 'visible',
-        }}
-        onClick={() => {
-          setShow(false);
-        }}
-      />
-      {children}
-    </ContainWrapper>
+    visible && (
+      <ContainWrapper
+        {...rest}
+        ref={lightboxRef.current}
+        id={id}
+        size={true}
+        layout={true}
+        paint={true}
+        class={`${styleClasses.lightboxContainWrapper}`}
+        role="dialog"
+      >
+        <button
+          textContent={closeButtonAriaLabel}
+          tabIndex={-1}
+          class={`${styleClasses.ariaButton}`}
+          onClick={() => {
+            setShow(false);
+          }}
+        />
+        {children}
+      </ContainWrapper>
+    )
   );
 }
 
