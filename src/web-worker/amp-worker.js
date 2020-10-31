@@ -85,8 +85,6 @@ class AmpWorker {
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
 
-    // TODO: remove when done testing.
-    // to test, locally switch the url to: "http://localhost:8000/dist/ww.max.js"
     const url = calculateEntryPointScriptUrl(
       loc,
       'ww',
