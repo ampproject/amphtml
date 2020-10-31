@@ -94,15 +94,8 @@ async function storybook() {
   return Promise.all(envs.map(build ? buildEnv : launchEnv));
 }
 
-function buildStorybook(env = 'amp,preact') {
-  const envs = env.split(',');
-  installPackages(__dirname);
-  return Promise.all(envs.map(buildEnv));
-}
-
 module.exports = {
   storybook,
-  buildStorybook,
 };
 
 storybook.description = 'Isolated testing and development for AMP components.';
