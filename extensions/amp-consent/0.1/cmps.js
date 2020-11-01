@@ -93,7 +93,8 @@ CMP_CONFIG['opencmp'] = {
 
 CMP_CONFIG['quantcast'] = {
   'consentInstanceId': 'quantcast',
-  'checkConsentHref': 'https://apis.quantcast.mgr.consensu.org/amp/check-consent',
+  'checkConsentHref':
+    'https://apis.quantcast.mgr.consensu.org/amp/check-consent',
   'promptUISrc': 'https://quantcast.mgr.consensu.org/tcfv2/amp.html',
 };
 
