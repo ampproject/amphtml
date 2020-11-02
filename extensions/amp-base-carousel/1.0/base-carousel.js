@@ -164,15 +164,15 @@ function BaseCarouselWithRef(
     return interaction === Interaction.TOUCH;
   }, [interaction, controls, outsetArrows]);
 
-  const debouncedAdvance = useCallback(
-    (currentSlide) =>
+  const debouncedAdvance = useMemo(
+    () =>
       debounce(
         window,
-        () => {
+        (currentSlide) => {
           advance(autoAdvanceCount, currentSlide);
         },
         autoAdvanceInterval
-      )(),
+      ),
     [autoAdvanceCount, autoAdvanceInterval, advance]
   );
   useEffect(() => {
