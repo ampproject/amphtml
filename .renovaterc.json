@@ -1,7 +1,7 @@
 {
   "extends": ["config:base"],
   "node": {
-    "supportPolicy": ["lts_active"]
+    "supportPolicy": ["lts_latest"]
   },
   "ignorePaths": [],
 
