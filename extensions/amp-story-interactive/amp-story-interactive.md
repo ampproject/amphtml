@@ -165,13 +165,7 @@ POST_BODY = {'option_selected': 1}
 Response: No response necessary
 [/sourcecode]
 
-Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others. Available free-to-use backends are:
-
-- Google hosted: `https://webstoriesinteractivity.googleapis.com/v1/interactives`
-
-[tip type="note"]
-Before setting up a backend, consider if the already existing backends satisfy your requirements.
-[/tip]
+Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others.
 
 ## Attributes
 
@@ -225,7 +219,7 @@ Example:
 [sourcecode:html]
 <amp-story-interactive-poll
     prompt-text="What's your favorite food"
-    endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+    endpoint="https://backend.com/v1/interactives"
     option-1-results-category="Bunny" option-1-text="Carrots"
     option-2-results-category="Dog" option-2-text="Bones"
     option-3-results-category="Cat" option-3-text="Fish">
