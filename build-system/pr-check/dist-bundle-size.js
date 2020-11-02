@@ -76,6 +76,7 @@ async function main() {
       }
 
       timedExecOrDie('gulp bundle-size --on_pr_build');
+      timedExecOrDie('gulp storybook --build');
       await processAndUploadDistOutput(FILENAME);
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
