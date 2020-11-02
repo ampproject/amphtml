@@ -63,6 +63,7 @@ const defaultConfig = jsonConfiguration({
     'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
     'pageLoadTime': 'PAGE_LOAD_TIME',
     'pageViewId': 'PAGE_VIEW_ID',
+    'pageViewId64': 'PAGE_VIEW_ID_64',
     'queryParam': 'QUERY_PARAM',
     'random': 'RANDOM',
     'redirectTime': 'REDIRECT_TIME',
