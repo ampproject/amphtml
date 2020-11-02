@@ -99,6 +99,10 @@ default is `small`.
 For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/like-button#settings).
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook like button"`.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
