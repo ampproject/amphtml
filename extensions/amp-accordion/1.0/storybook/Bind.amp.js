@@ -20,7 +20,7 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-accordion with amp-bind',
+  title: 'amp-accordion-1_0',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
@@ -32,7 +32,7 @@ export default {
   },
 };
 
-export const _default = () => {
+export const withAmpBind = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
   return (
