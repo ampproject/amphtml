@@ -17,13 +17,14 @@
 import {
   ALL_SCREEN_SIZES,
   DEFAULT_SCREEN_SIZES,
+  DevToolsDevicesTab,
 } from './amp-story-dev-tools-devices';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {DevToolsLogTab} from './amp-story-dev-tools-logs';
 import {Services} from '../../../src/services';
+import {debounce} from '../../../src/utils/rate-limit';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
-import {setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
@@ -42,26 +43,8 @@ const fontsToLoad = [
   },
 ];
 
-/**
- * Generates the template for a device.
- * @param {!Element} element
- * @return {!Element}
- */
-const buildDeviceTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <div class="i-amphtml-dev-tools-device">
-      <div class="i-amphtml-dev-tools-device-specs"></div>
-      <div class="i-amphtml-dev-tools-device-name"></div>
-      <amp-story-player width="1" height="1" layout="fixed">
-        <a></a>
-      </amp-story-player>
-      <div class="i-amphtml-dev-tools-device-footer">
-        <div></div>
-      </div>
-    </div>
-  `;
-};
+/** @private @const {number} */
+const RESIZE_TIMEOUT_MS = 1000;
 
 /**
  * Generates the template for the root layout.
@@ -99,6 +82,9 @@ const buildContainerTemplate = (element) => {
             d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
           />
         </svg>
+      </div>
+      <div class="i-amphtml-dev-tools-tab">
+        <div class="lds-dual-ring"></div>
       </div>
     </div>
   `;
@@ -150,21 +136,29 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     /** @private {DevToolsTab} */
     this.tab_ = null;
 
-    Services.extensionsFor(this.win).installExtensionForDoc(
-      this.getAmpDoc(),
-      'amp-story-player'
-    );
+    // Services.extensionsFor(this.win).installExtensionForDoc(
+    //   this.getAmpDoc(),
+    //   'amp-story-player'
+    // );
 
     this.loadFonts_();
 
     /** @private {!DevToolsLogTab} */
     this.logs_ = new DevToolsLogTab(buildLogsTabTemplate(this.element));
 
+    /** @private {!DevToolsDevicesTab} */
+    this.devices_ = new DevToolsDevicesTab(
+      buildDevicesTabTemplate(this.element),
+      this,
+      this.storyUrl_
+    );
+
     this.screenSizes_ = DEFAULT_SCREEN_SIZES;
   }
 
   /** @override */
   buildCallback() {
+    // Create tabs on navbar.
     const tabsContainer = this.containerEl_.querySelector(
       '.i-amphtml-dev-tools-tabs'
     );
@@ -174,6 +168,13 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       tab.addEventListener('click', () => {
         if (this.tab_ != e) {
           this.switchTab_(e);
+          // Update hashString with tab selected or null if tab = devices (default)
+          this.updateHash({
+            'tab':
+              e == DevToolsTab.DEVICES
+                ? null
+                : e.toLowerCase().replace(' ', '-'),
+          });
         }
       });
       tabsContainer.appendChild(tab);
@@ -181,11 +182,12 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
     const queryHash = parseQueryString(this.win.location.hash);
 
+    // Parse devices from hashString
     if (queryHash['devices']) {
       this.screenSizes_ = [];
       queryHash['devices'].split(';').forEach((device) => {
         const deviceSpecs = device.split(':');
-        let currSpecs = {};
+        let currSpecs = null;
         if (deviceSpecs.length == 1) {
           currSpecs = ALL_SCREEN_SIZES.find((el) => {
             // Find first device that has prefix of the device name passed in.
@@ -204,18 +206,22 @@ export class AmpStoryDevTools extends AMP.BaseElement {
           currSpecs = {
             'width': parseInt(deviceSpecs[0], 10),
             'height': parseInt(deviceSpecs[1], 10),
+            'custom': true,
           };
           if (deviceSpecs.length >= 3) {
             currSpecs.name = deviceSpecs[2];
           }
         }
-        this.screenSizes_.push(currSpecs);
+        if (currSpecs) {
+          this.screenSizes_.push(currSpecs);
+        }
       });
-      console.log(this.screenSizes_);
+      this.devices_.setDevices(this.screenSizes_);
     }
 
-    this.logs_.setStoryUrl(this.storyUrl_);
+    this.updateStoryUrl_(this.storyUrl_);
 
+    // Go to tab in hashString
     const tabFromHash = queryHash['tab'];
     this.switchTab_(
       Object.values(DevToolsTab).find(
@@ -261,6 +267,8 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       this.setUpPageSpeedTab_(this.containerEl_);
     } else if (tab === DevToolsTab.LOGS) {
       this.setUpLogsTab_(this.containerEl_);
+    } else {
+      return;
     }
     toArray(
       this.element.querySelector('.i-amphtml-dev-tools-tabs').children
@@ -274,44 +282,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @param {!Element} container
    */
   setUpDevicesTab_(container) {
-    const devicesContainer = buildDevicesTabTemplate(this.element);
+    const devicesContainer = this.devices_.getElement();
     container.appendChild(devicesContainer);
-    devicesContainer.textContent = '';
-    this.screenSizes_.forEach((device) => {
-      devicesContainer.appendChild(this.createDeviceLayout_(device));
-    });
-  }
-
-  /**
-   * Creates a device layout for preview
-   * @private
-   * @param {*} device
-   * @return {!Element}
-   */
-  createDeviceLayout_(device) {
-    const deviceLayout = buildDeviceTemplate(this.element);
-    deviceLayout.querySelector('.i-amphtml-dev-tools-device-name').textContent =
-      device.name;
-    deviceLayout.querySelector(
-      '.i-amphtml-dev-tools-device-specs'
-    ).textContent = `${device.width} : ${device.height}`;
-    const devicePlayer = deviceLayout.querySelector('amp-story-player');
-    devicePlayer.setAttribute('width', device.width);
-    devicePlayer.setAttribute('height', device.height);
-    devicePlayer.addEventListener('storyNavigation', (res) => {
-      console.log(res.detail.pageId);
-    });
-    const storyA = devicePlayer.querySelector('a');
-    storyA.textContent = 'Story 1';
-    storyA.href = this.storyUrl_;
-    setStyles(devicePlayer, {
-      width: device.width + 'px',
-      height: device.height + 'px',
-    });
-    setStyles(deviceLayout, {
-      height: device.deviceHeight + 'px',
-    });
-    return deviceLayout;
+    this.devices_.recalculateLayout();
   }
 
   /**
@@ -321,6 +294,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   updateStoryUrl_(storyUrl) {
     this.storyUrl_ = storyUrl;
     this.logs_.setStoryUrl(storyUrl);
+    this.devices_.setStoryUrl(storyUrl);
     this.switchTab_(this.tab_);
   }
 
@@ -352,6 +326,19 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   }
 
   /**
+   * @public
+   * @param {any} updates
+   */
+  updateHash(updates) {
+    let queryHash = parseQueryString(this.win.location.hash);
+    queryHash = Object.assign(queryHash, updates);
+    this.win.location.hash = Object.entries(queryHash)
+      .filter((e) => e[1])
+      .map((e) => e[0] + '=' + e[1])
+      .join('&');
+  }
+
+  /**
    * @private
    */
   loadFonts_() {
@@ -366,6 +353,11 @@ export class AmpStoryDevTools extends AMP.BaseElement {
         });
       });
     }
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    this.getViewport().onResize(() => this.devices_.recalculateLayout());
   }
 }
 

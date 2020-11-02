@@ -70,7 +70,6 @@ export class DevToolsLogTab {
    * @param {string} content
    */
   addLog_(content) {
-    console.log(content);
     const {code, line, col, specUrl, lineContent, message} = content;
     const logEl = buildLogMessageTemplate(this.element);
     logEl.querySelector('.i-amphtml-dev-tools-log-type').textContent = code;
@@ -80,7 +79,6 @@ export class DevToolsLogTab {
       lineEl.textContent = (i + line - 1).toString() + '|' + l;
       codeEl.appendChild(lineEl);
     });
-    console.log(content);
     logEl.querySelector(
       '.i-amphtml-dev-tools-log-position'
     ).textContent = `${line}:${col}`;

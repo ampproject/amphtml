@@ -985,11 +985,18 @@ export class AmpStoryPlayer {
   /**
    * Navigates stories given a number.
    * @param {number} storyDelta
+   * @param {number=} pageDelta
    */
-  go(storyDelta) {
-    if (storyDelta === 0) {
+  go(storyDelta, pageDelta = 0) {
+    if (storyDelta === 0 && pageDelta === 0) {
       return;
     }
+
+    if (storyDelta === 0 && pageDelta !== 0) {
+      this.selectPage_(pageDelta);
+      return;
+    }
+
     if (
       !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + storyDelta)
@@ -1007,6 +1014,9 @@ export class AmpStoryPlayer {
           ];
 
     this.show(currentStory.href);
+    if (pageDelta !== 0) {
+      this.selectPage_(pageDelta);
+    }
   }
 
   /**
@@ -1267,6 +1277,21 @@ export class AmpStoryPlayer {
           true
         )
         .then((event) => this.dispatchPageAttachmentEvent_(event.value));
+    });
+  }
+
+  /**
+   * Sends a message to the story to navigate delta pages.
+   * @param {number} delta
+   * @private
+   */
+  selectPage_(delta) {
+    const navigation = delta > 0 ? {'next': true} : {'previous': true};
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      for (let i = 0; i < Math.abs(delta); i++) {
+        messaging.sendRequest('selectPage', navigation);
+      }
     });
   }
 
