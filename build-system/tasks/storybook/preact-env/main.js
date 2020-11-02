@@ -24,4 +24,9 @@ module.exports = {
     '@storybook/addon-viewport/register',
     '@storybook/addon-knobs/register',
   ],
+  webpackFinal: async (config) => {
+    // Disable entry point size warnings.
+    config.performance.hints = false;
+    return config;
+  },
 };
