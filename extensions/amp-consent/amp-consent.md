@@ -629,6 +629,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
 - OneTrust: [Website](https://www.onetrust.com/) - [Documentation](./cmps/onetrust.md)
 - opencmp : [Documentation](./cmps/opencmp.md)
+- Quantcast : [Website](https://www.quantcast.com) - [Documentation](https://help.quantcast.com/hc/en-us/categories/360002940873-Quantcast-Choice)
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 - Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
