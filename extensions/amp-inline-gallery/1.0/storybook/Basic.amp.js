@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -36,6 +36,10 @@ export default {
 export const Default = () => {
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
+  const autoAdvance = boolean('auto advance', true);
+  const autoAdvanceCount = number('auto advance count', 1);
+  const autoAdvanceInterval = number('auto advance interval', 1000);
+  const autoAdvanceLoops = number('auto advance loops', 3);
   return (
     <amp-inline-gallery layout="container">
       <amp-inline-gallery-pagination
@@ -43,7 +47,14 @@ export const Default = () => {
         layout="fixed-height"
         height="24"
       />
-      <amp-base-carousel width="440" height="225">
+      <amp-base-carousel
+        auto-advance={autoAdvance}
+        auto-advance-count={autoAdvanceCount}
+        auto-advance-interval={autoAdvanceInterval}
+        auto-advance-loops={autoAdvanceLoops}
+        width="440"
+        height="225"
+      >
         {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
           <amp-layout width="440" height="225">
             <svg viewBox="0 0 440 225">
