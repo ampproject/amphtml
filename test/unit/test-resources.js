@@ -775,7 +775,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       expect(resource2.applySizesAndMediaQuery).to.not.be.called;
     });
 
-    it.only('should invalidate premeasurements after resize event', () => {
+    it('should invalidate premeasurements after resize event', () => {
       resource1.premeasure({});
       expect(resource1.hasBeenPremeasured()).true;
       resources.viewport_.changeObservable_.fire({relayoutAll_: true});

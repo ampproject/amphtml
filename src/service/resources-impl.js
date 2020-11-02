@@ -256,7 +256,6 @@ export class ResourcesImpl {
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.
     this.viewport_.onChanged((event) => {
-      console.error('EVNET FIRED')
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
       if (event.relayoutAll) {
