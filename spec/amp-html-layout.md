@@ -252,7 +252,7 @@ The `fallback` attribute can be set on any HTML element, not just AMP elements. 
 
 ### `noloading`
 
-The `noloading` attribute indicates whether the "loading indicator" should be turned off for this element. Many AMP elements are white-listed to show a "loading indicator", which is a basic animation that shows that the element has not yet fully loaded. The elements can opt out of this behavior by adding
+The `noloading` attribute indicates whether the "loading indicator" should be turned off for this element. Many AMP elements are allow-listed to show a "loading indicator", which is a basic animation that shows that the element has not yet fully loaded. The elements can opt out of this behavior by adding
 this attribute.
 
 ## (tl;dr) Summary of Layout Requirements & Behaviors

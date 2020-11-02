@@ -147,7 +147,6 @@ const readMetrics = (page) =>
       return entry ? entry.startTime : 0;
     }
 
-    const firstPaint = getMetric('first-paint');
     const firstContentfulPaint = getMetric('first-contentful-paint');
 
     function getMaxFirstInputDelay() {
@@ -165,16 +164,8 @@ const readMetrics = (page) =>
       return longest;
     }
 
-    function getTimeToInteractive() {
-      return Date.now() - window.measureStarted;
-    }
-
     return {
-      visible: getMetric('visible'),
-      firstPaint,
-      firstContentfulPaint,
       largestContentfulPaint: window.largestContentfulPaint,
-      timeToInteractive: getTimeToInteractive(),
       maxFirstInputDelay: getMaxFirstInputDelay(),
       cumulativeLayoutShift: window.cumulativeLayoutShift * 100,
     };
@@ -220,6 +211,7 @@ async function setupAdditionalHandlers(
       setupAnalyticsHandler(handlersList, handlerOptions, resolve);
       break;
     case 'defaultHandler':
+    default:
       await setupMeasurement(page);
       break;
   }
@@ -259,7 +251,8 @@ async function addHandlerMetric(handlerOptions, page) {
     case 'analyticsHandler':
       return getAnalyticsMetrics(handlerOptions);
     case 'defaultHandler':
-      return await readMetrics(page);
+    default:
+      return readMetrics(page);
   }
 }
 
@@ -298,6 +291,7 @@ function writeMetrics(url, version, metrics) {
 async function measureDocument(url, version, config) {
   const browser = await puppeteer.launch({
     headless: config.headless,
+    devtools: config.devtools,
     args: [
       '--allow-file-access-from-files',
       '--enable-blink-features=LayoutInstabilityAPI',

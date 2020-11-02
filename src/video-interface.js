@@ -282,6 +282,27 @@ export const VideoEvents = {
   LOADEDMETADATA: 'loadedmetadata',
 
   /**
+   * loadeddata
+   *
+   * Fired when the user agent can render the media for the first time.
+   *
+   * @event loadeddata
+   */
+  LOADEDDATA: 'loadeddata',
+
+  /**
+   * play
+   *
+   * Fired when the video plays (either because of autoplay or the play method).
+   *
+   * Note: Because this event was not originally present in this interface, we
+   * cannot rely on all all implementations to emit it.
+   *
+   * @event play
+   */
+  PLAY: 'play',
+
+  /**
    * playing
    *
    * Fired when the video begins playing.
@@ -546,13 +567,13 @@ export function isDockable(element) {
 /** @enum {string} */
 export const VideoServiceSignals = {
   USER_INTERACTED: 'user-interacted',
-  AUTOPLAY_DELEGATED: 'autoplay-delegated',
+  PLAYBACK_DELEGATED: 'playback-delegated',
 };
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
   whenUpgradedToCustomElement(dev().assertElement(video)).then((el) => {
-    el.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
+    el.signals().signal(VideoServiceSignals.PLAYBACK_DELEGATED);
   });
 }
 

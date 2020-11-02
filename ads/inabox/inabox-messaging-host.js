@@ -143,7 +143,7 @@ export class InaboxMessagingHost {
       ? allowedTypes.split(/\s*,\s*/)
       : READ_ONLY_MESSAGES;
     if (allowedTypesList.indexOf(request['type']) === -1) {
-      dev().info(TAG, 'Ignored non-whitelisted message type:', message);
+      dev().info(TAG, 'Message type ignored:', message);
       return false;
     }
 
@@ -201,10 +201,10 @@ export class InaboxMessagingHost {
     source./*OK*/ postMessage(
       serializeMessage(MessageType.POSITION, request.sentinel, data),
       // We don't need to restrict what origin we send the data to because (a)
-      // we've already verified that this iframe is whitelisted and allowed to
-      // learn its position, and (b) we're post messaging back directly to the
-      // requesting frame.  If we did restrict the origin this would not work
-      // with implementations that use a null origin to render ads.
+      // we've already verified that this iframe is allowed to learn its position,
+      // and (b) we're post messaging back directly to the requesting frame.
+      // If we did restrict the origin this would not work with implementations
+      // that use a null origin to render ads.
       '*'
     );
   }

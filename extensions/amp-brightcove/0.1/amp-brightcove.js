@@ -101,13 +101,6 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {
-      visible,
-    });
-  }
-
-  /** @override */
   buildCallback() {
     this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
 
@@ -127,8 +120,6 @@ class AmpBrightcove extends AMP.BaseElement {
       },
       3000
     ));
-
-    this.playerReadyResolver_(this.iframe_);
   }
 
   /** @override */
@@ -253,6 +244,8 @@ class AmpBrightcove extends AMP.BaseElement {
 
     installVideoManagerForDoc(element);
     Services.videoManagerForDoc(element).register(this);
+
+    this.playerReadyResolver_(this.iframe_);
 
     dev().info(
       TAG,

@@ -22,7 +22,13 @@
 import {install as installMathSign} from '../src/polyfills/math-sign';
 import {install as installObjectAssign} from '../src/polyfills/object-assign';
 import {install as installObjectValues} from '../src/polyfills/object-values';
+import {install as installPromise} from '../src/polyfills/promise';
+import {install as installStringStartsWith} from '../src/polyfills/string-starts-with';
 
-installMathSign(self);
-installObjectAssign(self);
-installObjectValues(self);
+if (!IS_ESM) {
+  installMathSign(self);
+  installObjectAssign(self);
+  installObjectValues(self);
+  installPromise(self);
+  installStringStartsWith(self);
+}

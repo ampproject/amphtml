@@ -402,136 +402,308 @@ describes.realWin(
         });
       });
 
-      it('should deny srcdoc with allow-same-origin', async () => {
-        const asserts = stubUserAsserts();
-        const ampIframe = createAmpIframe(env, {
-          width: 100,
-          height: 100,
-          sandbox: 'allow-same-origin',
-          srcdoc: 'test',
+      describe('allow-same-origin w/o same-origin-iframe', () => {
+        // TODO(#30824): remove when same-origin-url is launched.
+
+        it('should deny srcdoc with allow-same-origin', async () => {
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            srcdoc: 'test',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/allow-same-origin.*srcdoc/);
         });
-        await waitForAmpIframeLayoutPromise(doc, ampIframe);
-        expect(asserts).to.throw(/allow-same-origin.*srcdoc/);
+
+        it('should deny data uri with allow-same-origin', async () => {
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            src:
+              'data:text/html;charset=utf-8;base64,' +
+              'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+              'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
+        });
+
+        it('should deny DATA uri with allow-same-origin', async () => {
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            src:
+              'DATA:text/html;charset=utf-8;base64,' +
+              'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+              'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
+        });
+
+        it('should deny same origin', () => {
+          const ampIframe = createAmpIframe(env);
+          const impl = ampIframe.implementation_;
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://google.com/fpp',
+                'https://google.com/abc',
+                'allow-same-origin'
+              );
+            }).to.throw(/must not be equal to container/);
+          });
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://google.com/fpp',
+                'https://google.com/abc',
+                'Allow-same-origin'
+              );
+            }).to.throw(/must not be equal to container/);
+          });
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://google.com/fpp',
+                'https://google.com/abc',
+                'allow-same-origin allow-scripts'
+              );
+            }).to.throw(/must not be equal to container/);
+          });
+          // Same origin, but sandboxed.
+          impl.assertSource_(
+            'https://google.com/fpp',
+            'https://google.com/abc',
+            ''
+          );
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_('http://google.com/', 'https://foo.com', '');
+            }).to.throw(/Must start with https/);
+          });
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_('./foo', location.href, 'allow-same-origin');
+            }).to.throw(/must not be equal to container/);
+          });
+
+          impl.assertSource_(
+            'http://iframe.localhost:123/foo',
+            'https://foo.com',
+            ''
+          );
+          impl.assertSource_('https://container.com', 'https://foo.com', '');
+          ampIframe.setAttribute('srcdoc', 'abc');
+          ampIframe.setAttribute('sandbox', 'allow-same-origin');
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.transformSrcDoc_(
+                '<script>try{parent.location.href}catch(e){' +
+                  "parent.parent./*OK*/postMessage('loaded-iframe', '*');}" +
+                  '</script>',
+                'Allow-Same-Origin'
+              );
+            }).to.throw(
+              /allow-same-origin is not allowed with the srcdoc attribute/
+            );
+          });
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://3p.ampproject.net:999/t',
+                'https://google.com/abc'
+              );
+            }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+          });
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://3p.ampproject.net:999/t',
+                'https://google.com/abc'
+              );
+            }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+          });
+        });
       });
 
-      it('should deny data uri with allow-same-origin', async () => {
-        const asserts = stubUserAsserts();
-        const ampIframe = createAmpIframe(env, {
-          width: 100,
-          height: 100,
-          sandbox: 'allow-same-origin',
-          src:
-            'data:text/html;charset=utf-8;base64,' +
-            'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
-            'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
-        });
-        await waitForAmpIframeLayoutPromise(doc, ampIframe);
-        expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
-      });
+      describe('allow-same-origin with same-origin-iframe', () => {
+        // TODO(#30824): make these main tests when same-origin-iframe is
+        // launched.
 
-      it('should deny DATA uri with allow-same-origin', async () => {
-        const asserts = stubUserAsserts();
-        const ampIframe = createAmpIframe(env, {
-          width: 100,
-          height: 100,
-          sandbox: 'allow-same-origin',
-          src:
-            'DATA:text/html;charset=utf-8;base64,' +
-            'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
-            'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
+        beforeEach(() => {
+          toggleExperiment(win, 'same-origin-iframe', true, true);
         });
-        await waitForAmpIframeLayoutPromise(doc, ampIframe);
-        expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
-      });
 
-      it('should deny same origin', () => {
-        const ampIframe = createAmpIframe(env);
-        const impl = ampIframe.implementation_;
-        allowConsoleError(() => {
+        it('should deny srcdoc with allow-same-origin', async () => {
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            srcdoc: 'test',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/allow-same-origin.*srcdoc/);
+        });
+
+        it('should deny data uri with allow-same-origin', async () => {
+          toggleExperiment(win, 'same-origin-iframe', true, true);
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            src:
+              'data:text/html;charset=utf-8;base64,' +
+              'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+              'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/allow-same-origin .* data URLs/);
+        });
+
+        it('should deny DATA uri with allow-same-origin', async () => {
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            src:
+              'DATA:text/html;charset=utf-8;base64,' +
+              'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+              'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/allow-same-origin .* data URLs/);
+        });
+
+        it('should specify disallowdocumentaccess on the iframe', async () => {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            width: 100,
+            height: 100,
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const iframe = ampIframe.querySelector('iframe');
+          expect(iframe).to.have.attribute('disallowdocumentaccess');
+        });
+
+        it('should allow same origin', () => {
+          const ampIframe = createAmpIframe(env);
+          const impl = ampIframe.implementation_;
+
           expect(() => {
             impl.assertSource_(
               'https://google.com/fpp',
               'https://google.com/abc',
               'allow-same-origin'
             );
-          }).to.throw(/must not be equal to container/);
-        });
+          }).to.not.throw();
 
-        allowConsoleError(() => {
           expect(() => {
             impl.assertSource_(
               'https://google.com/fpp',
               'https://google.com/abc',
               'Allow-same-origin'
             );
-          }).to.throw(/must not be equal to container/);
-        });
+          }).to.not.throw();
 
-        allowConsoleError(() => {
           expect(() => {
             impl.assertSource_(
               'https://google.com/fpp',
               'https://google.com/abc',
               'allow-same-origin allow-scripts'
             );
-          }).to.throw(/must not be equal to container/);
-        });
-        // Same origin, but sandboxed.
-        impl.assertSource_(
-          'https://google.com/fpp',
-          'https://google.com/abc',
-          ''
-        );
+          }).to.not.throw();
 
-        allowConsoleError(() => {
-          expect(() => {
-            impl.assertSource_('http://google.com/', 'https://foo.com', '');
-          }).to.throw(/Must start with https/);
-        });
-
-        allowConsoleError(() => {
           expect(() => {
             impl.assertSource_('./foo', location.href, 'allow-same-origin');
-          }).to.throw(/must not be equal to container/);
-        });
+          }).to.not.throw();
 
-        impl.assertSource_(
-          'http://iframe.localhost:123/foo',
-          'https://foo.com',
-          ''
-        );
-        impl.assertSource_('https://container.com', 'https://foo.com', '');
-        ampIframe.setAttribute('srcdoc', 'abc');
-        ampIframe.setAttribute('sandbox', 'allow-same-origin');
-
-        allowConsoleError(() => {
-          expect(() => {
-            impl.transformSrcDoc_(
-              '<script>try{parent.location.href}catch(e){' +
-                "parent.parent./*OK*/postMessage('loaded-iframe', '*');}" +
-                '</script>',
-              'Allow-Same-Origin'
-            );
-          }).to.throw(
-            /allow-same-origin is not allowed with the srcdoc attribute/
-          );
-        });
-
-        allowConsoleError(() => {
+          // Same origin, but sandboxed.
           expect(() => {
             impl.assertSource_(
-              'https://3p.ampproject.net:999/t',
-              'https://google.com/abc'
+              'https://google.com/fpp',
+              'https://google.com/abc',
+              ''
             );
-          }).to.throw(/not allow embedding of frames from ampproject\.\*/);
-        });
-        allowConsoleError(() => {
+          }).to.not.throw();
+
           expect(() => {
             impl.assertSource_(
-              'https://3p.ampproject.net:999/t',
-              'https://google.com/abc'
+              'http://iframe.localhost:123/foo',
+              'https://foo.com',
+              ''
             );
-          }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+          }).to.not.throw();
+        });
+
+        it('should disallow ampproject iframes', () => {
+          const ampIframe = createAmpIframe(env);
+          const impl = ampIframe.implementation_;
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://3p.ampproject.net:999/t',
+                'https://google.com/abc'
+              );
+            }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+          });
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://3p.ampproject.net:999/t',
+                'https://google.com/abc'
+              );
+            }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+          });
+        });
+
+        it('should disallow allow-same-origin on srcdoc', () => {
+          const ampIframe = createAmpIframe(env);
+          const impl = ampIframe.implementation_;
+
+          impl.assertSource_('https://container.com', 'https://foo.com', '');
+          ampIframe.setAttribute('srcdoc', 'abc');
+          ampIframe.setAttribute('sandbox', 'allow-same-origin');
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.transformSrcDoc_(
+                '<script>try{parent.location.href}catch(e){' +
+                  "parent.parent./*OK*/postMessage('loaded-iframe', '*');}" +
+                  '</script>',
+                'Allow-Same-Origin'
+              );
+            }).to.throw(
+              /allow-same-origin is not allowed with the srcdoc attribute/
+            );
+          });
+        });
+
+        it('should disallow non-https', () => {
+          const ampIframe = createAmpIframe(env);
+          const impl = ampIframe.implementation_;
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_('http://google.com/', 'https://foo.com', '');
+            }).to.throw(/Must start with https/);
+          });
         });
       });
 
@@ -691,6 +863,23 @@ describes.realWin(
         const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
         impl.updateSize_(217, '114' /* be tolerant to string number */);
         expect(attemptChangeSize).to.be.calledWith(217, 114);
+      });
+
+      it('should hide overflow element after resize', async function () {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts',
+          width: 100,
+          height: 100,
+          resizable: '',
+        });
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = await ampIframe.getImpl();
+        const overflowElement = impl.getOverflowElement();
+        overflowElement.classList.toggle('amp-visible', true);
+        impl.updateSize_(217, '114' /* be tolerant to string number */);
+        await timer.promise(IFRAME_MESSAGE_TIMEOUT);
+        expect(overflowElement.classList.contains('amp-visible')).to.be.false;
       });
 
       it('should resize amp-iframe when only height is provided', function* () {
@@ -933,6 +1122,48 @@ describes.realWin(
         expect(iframe.getAttribute('src')).to.contain(newSrc);
       });
 
+      it('sends a consent-data message to the iframe', function* () {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin',
+          width: 100,
+          height: 100,
+        });
+
+        const impl = ampIframe.implementation_;
+        impl.getConsentString_ = () => Promise.resolve({consentString: true});
+        impl.getConsentMetadata_ = () =>
+          Promise.resolve({consentMetadata: true});
+        impl.getConsentPolicyState_ = () =>
+          Promise.resolve({
+            consentPolicyState: true,
+          });
+
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const iframe = ampIframe.querySelector('iframe');
+
+        return new Promise((resolve, unusedReject) => {
+          impl.sendConsentDataToIframe_ = (source, origin, message) => {
+            resolve(message);
+          };
+          iframe.contentWindow.postMessage(
+            {
+              sentinel: 'amp',
+              type: 'requestSendConsentState',
+            },
+            '*'
+          );
+        }).then((message) => {
+          expect(message).to.deep.equal({
+            sentinel: 'amp',
+            type: 'consent-data',
+            consentString: {consentString: true},
+            consentMetadata: {consentMetadata: true},
+            consentPolicyState: {consentPolicyState: true},
+          });
+        });
+      });
+
       it('should propagate `title` when container attribute is mutated', function* () {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
@@ -948,6 +1179,26 @@ describes.realWin(
         impl.mutatedAttributesCallback({title: newTitle});
         expect(impl.iframe_.title).to.equal(newTitle);
         expect(iframe.getAttribute('title')).to.equal(newTitle);
+      });
+
+      it('should unlayout on pause', function* () {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          width: 100,
+          height: 100,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(ampIframe.unlayoutOnPause()).to.be.true;
+      });
+
+      it('should not allow pausing before loaded', function* () {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          width: 100,
+          height: 100,
+        });
+        expect(ampIframe.querySelector('iframe')).to.not.exist;
+        expect(ampIframe.unlayoutOnPause()).to.be.true;
       });
 
       describe('throwIfCannotNavigate()', () => {
@@ -1155,108 +1406,6 @@ describes.realWin(
             expect(res.width).to.equal(345);
             expect(res.height).to.be.an('undefined');
           });
-        });
-      });
-
-      describe('pause/resume', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'pausable-iframe', true, true);
-        });
-
-        function setPolicyAllowed(iframe, allowed) {
-          env.sandbox.defineProperty(iframe, 'featurePolicy', {
-            value: {
-              features() {
-                return ['execution-while-not-rendered'];
-              },
-              allowsFeature() {
-                return allowed;
-              },
-            },
-          });
-        }
-
-        it('should not be pausable without an experiment', function* () {
-          toggleExperiment(win, 'pausable-iframe', false, false);
-          const ampIframe = createAmpIframe(env, {
-            src: iframeSrc,
-            width: 100,
-            height: 100,
-          });
-          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-          const iframe = ampIframe.querySelector('iframe');
-          expect(iframe.getAttribute('allow') || '').to.not.have.string(
-            "execution-while-not-rendered 'none'"
-          );
-          expect(ampIframe.unlayoutOnPause()).to.be.true;
-        });
-
-        it('should be configureed pausable with an experiment', function* () {
-          const ampIframe = createAmpIframe(env, {
-            src: iframeSrc,
-            width: 100,
-            height: 100,
-          });
-          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-          const iframe = ampIframe.querySelector('iframe');
-          expect(iframe.getAttribute('allow') || '').to.have.string(
-            "execution-while-not-rendered 'none'"
-          );
-        });
-
-        it('should allow pausing when configured and supported', function* () {
-          const ampIframe = createAmpIframe(env, {
-            src: iframeSrc,
-            width: 100,
-            height: 100,
-          });
-          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-          const iframe = ampIframe.querySelector('iframe');
-          setPolicyAllowed(iframe, false);
-          expect(ampIframe.unlayoutOnPause()).to.be.false;
-          ampIframe.pauseCallback();
-          expect(iframe).to.have.attribute('hidden');
-          ampIframe.resumeCallback();
-          expect(iframe).to.not.have.attribute('hidden');
-        });
-
-        it('should not allow pausing before loaded', function* () {
-          const ampIframe = createAmpIframe(env, {
-            src: iframeSrc,
-            width: 100,
-            height: 100,
-          });
-          expect(ampIframe.querySelector('iframe')).to.not.exist;
-          expect(ampIframe.unlayoutOnPause()).to.be.true;
-        });
-
-        it('should not pause/resume when not allowed', function* () {
-          const ampIframe = createAmpIframe(env, {
-            src: iframeSrc,
-            width: 100,
-            height: 100,
-          });
-          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-          const iframe = ampIframe.querySelector('iframe');
-          setPolicyAllowed(iframe, true);
-          expect(ampIframe.unlayoutOnPause()).to.be.true;
-          ampIframe.pauseCallback();
-          expect(iframe).to.not.have.attribute('hidden');
-        });
-
-        it('should not pause/resume w/o experiment', function* () {
-          const ampIframe = createAmpIframe(env, {
-            src: iframeSrc,
-            width: 100,
-            height: 100,
-          });
-          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-          const iframe = ampIframe.querySelector('iframe');
-          setPolicyAllowed(iframe, false);
-          toggleExperiment(win, 'pausable-iframe', false, false);
-          expect(ampIframe.unlayoutOnPause()).to.be.true;
-          ampIframe.pauseCallback();
-          expect(iframe).to.not.have.attribute('hidden');
         });
       });
     });

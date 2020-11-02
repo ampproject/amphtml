@@ -28,6 +28,7 @@ const EXPERIMENT = 'experiment';
 const CACHE_PATH = path.join(__dirname, './cache');
 const CONTROL_CACHE_PATH = path.join(CACHE_PATH, `./${CONTROL}`);
 const EXPERIMENT_CACHE_PATH = path.join(CACHE_PATH, `./${EXPERIMENT}`);
+const IMG_CACHE_PATH = path.join(CACHE_PATH, './img');
 const RESULTS_PATH = path.join(__dirname, './results.json');
 const DEFAULT_EXTENSIONS = ['amp-auto-lightbox-0.1.js', 'amp-loader-0.1.js'];
 
@@ -37,6 +38,7 @@ const DEFAULT_EXTENSIONS = ['amp-auto-lightbox-0.1.js', 'amp-loader-0.1.js'];
 function touchDirs() {
   [
     CACHE_PATH,
+    IMG_CACHE_PATH,
     CONTROL_CACHE_PATH,
     path.join(CONTROL_CACHE_PATH, 'v0'),
     EXPERIMENT_CACHE_PATH,
@@ -91,16 +93,15 @@ function getLocalPathFromExtension(extension) {
  * @param {string} version
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function downloadToDisk(url, version = CONTROL) {
+async function downloadToDisk(url, version = CONTROL) {
   touchDirs();
 
-  return fetch(url)
-    .then((response) => response.text())
-    .then((document) => {
-      const filepath = urlToCachePath(url, version);
-      fs.writeFileSync(filepath, document);
-      return filepath.split(`performance/cache/${version}/`)[1];
-    });
+  const response = await fetch(url);
+  const document = await response.text();
+  const filepath = urlToCachePath(url, version);
+  fs.writeFileSync(filepath, document);
+
+  return filepath.split(`performance/cache/${version}/`)[1];
 }
 
 /**
@@ -110,7 +111,7 @@ function downloadToDisk(url, version = CONTROL) {
  * @param {string} version
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function copyToCache(filePath, version = EXPERIMENT) {
+async function copyToCache(filePath, version = EXPERIMENT) {
   touchDirs();
 
   const fromPath = path.join(__dirname, '../../../dist/', filePath);
@@ -120,7 +121,33 @@ function copyToCache(filePath, version = EXPERIMENT) {
 
   fs.copyFileSync(fromPath, destPath);
 
-  return Promise.resolve(filePath);
+  return filePath;
+}
+
+/**
+ * Copy an image from absoluteImgPath to cache/img if not present.
+ * To be used by both control and experiment
+ *
+ * @param {string} configUrl
+ * @param {string} src
+ */
+function maybeCopyImageToCache(configUrl, src) {
+  // Remove `?...` that may be used at the end of the src for uniqueness
+  src = src.split('?')[0];
+  const absoluteFromImgPath = getAbsolutePathFromRelativePath(configUrl, src);
+
+  if (src.startsWith('http') || !fs.existsSync(absoluteFromImgPath)) {
+    return;
+  }
+
+  touchDirs();
+
+  const filename = src.split('/').pop();
+  const destPath = path.join(IMG_CACHE_PATH, filename);
+
+  if (!fs.existsSync(destPath)) {
+    fs.copyFileSync(absoluteFromImgPath, destPath);
+  }
 }
 
 /**
@@ -144,8 +171,33 @@ function getLocalVendorConfig(vendor) {
  * @param {string} filePath
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function getFileFromAbsolutePath(filePath) {
-  return Promise.resolve(fs.readFileSync(filePath));
+async function getFileFromAbsolutePath(filePath) {
+  return fs.readFileSync(filePath);
+}
+
+/**
+ * Strip localhost:8000 from url and remove the filename
+ *
+ * @param {string} testPageUrl
+ * @return {string}
+ */
+function getFolderLocation(testPageUrl) {
+  const removedLocalHost = testPageUrl
+    .split('http://localhost:8000')[1]
+    .split('/');
+  removedLocalHost.pop();
+  return removedLocalHost.join('/');
+}
+
+/**
+ * Get the absolute path of the relative src
+ *
+ * @param {string} testPageUrl
+ * @param {string} src
+ * @return {string}
+ */
+function getAbsolutePathFromRelativePath(testPageUrl, src) {
+  return path.join(__dirname, '../../..', getFolderLocation(testPageUrl), src);
 }
 
 module.exports = {
@@ -158,10 +210,12 @@ module.exports = {
   RESULTS_PATH,
   V0_PATH,
   copyToCache,
+  maybeCopyImageToCache,
   downloadToDisk,
   getFileFromAbsolutePath,
   getLocalPathFromExtension,
   getLocalVendorConfig,
+  getAbsolutePathFromRelativePath,
   localFileToCachePath,
   urlToCachePath,
 };

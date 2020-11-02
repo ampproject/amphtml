@@ -111,6 +111,10 @@
   transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
+.i-amphtml-story-tooltip-theme-dark {
+  background: rgba(32, 33, 37, 1) !important;
+}
+
 .i-amphtml-story-tooltip.i-amphtml-tooltip-arrow-on-top {
   transform: translate3d(0, 16px, 0) !important;
 }
@@ -119,13 +123,16 @@
   text-overflow: ellipsis !important;
   overflow: hidden !important;
   white-space: nowrap !important;
-  max-width: 172px !important;
   margin: 0px 5px !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 14px !important;
   color: #3C4043 !important;
   letter-spacing: 0 !important;
   line-height: 20px !important;
+}
+
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-tooltip-text {
+  color: #9AA0A6 !important;
 }
 
 .i-amphtml-story-tooltip-custom-icon {
@@ -136,6 +143,7 @@
   background-position: center !important;
   background-repeat: no-repeat !important;
   filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.08)) !important;
+  flex-shrink: 0;
 }
 
 .i-amphtml-story-tooltip-custom-icon.i-amphtml-hidden {
@@ -147,6 +155,7 @@
   height: 16px !important;
   margin: 0px 5px !important;
   padding-bottom: 2px !important;
+  flex-shrink: 0;
 }
 
 .i-amphtml-tooltip-action-icon-launch {
@@ -157,6 +166,14 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" fill="#757575"><path d="M17.17 32.92l9.17-9.17-9.17-9.17L20 11.75l12 12-12 12z"/><path d="M0-.25h48v48H0z" fill="none"/></svg>') !important;
 }
 
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-tooltip-action-icon-launch {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" fill="rgba(255, 255, 255, 0.54)"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>') !important;
+}
+
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-tooltip-action-icon-expand {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" fill="rgba(255, 255, 255, 0.54)"><path d="M17.17 32.92l9.17-9.17-9.17-9.17L20 11.75l12 12-12 12z"/><path d="M0-.25h48v48H0z" fill="none"/></svg>') !important;
+}
+
 .i-amphtml-story-tooltip-arrow {
   border-right: 8px solid transparent !important;
   border-left: 8px solid transparent !important;
@@ -165,11 +182,19 @@
   bottom: -8px !important;
 }
 
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-story-tooltip-arrow {
+  border-top: 10px solid rgba(32, 33, 37, 1) !important;
+}
+
 .i-amphtml-tooltip-arrow-on-top .i-amphtml-story-tooltip-arrow {
   bottom: auto !important;
   top: -8px !important;
   border-top: 0px !important;
   border-bottom: 10px solid white !important;
+}
+
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-tooltip-arrow-on-top .i-amphtml-story-tooltip-arrow {
+  border-bottom: 10px solid rgba(32, 33, 37, 1) !important;
 }
 
 .amp-social-share-twitter-no-background {

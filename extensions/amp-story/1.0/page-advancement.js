@@ -29,11 +29,9 @@ import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
-import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
+import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
-import {listen, listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
-import {toArray} from '../../../src/types';
+import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -262,6 +260,12 @@ export class ManualAdvancement extends AdvancementConfig {
     /** @private {?number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
+    /** @private {boolean} Saving the paused state before pressing */
+    this.pausedState_ = false;
+
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = getAmpdoc(win.document);
+
     this.startListening_();
 
     if (element.ownerDocument.defaultView) {
@@ -317,6 +321,9 @@ export class ManualAdvancement extends AdvancementConfig {
       this.maybePerformNavigation_.bind(this),
       true
     );
+    this.ampdoc_.onVisibilityChanged(() => {
+      this.ampdoc_.isVisible() ? this.processTouchend_() : null;
+    });
   }
 
   /**
@@ -339,8 +346,10 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.touchstartTimestamp_ || !this.shouldHandleEvent_(event)) {
       return;
     }
-
     this.touchstartTimestamp_ = Date.now();
+    this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
+      StateProperty.PAUSED_STATE
+    ));
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
@@ -366,9 +375,21 @@ export class ManualAdvancement extends AdvancementConfig {
       event.preventDefault();
     }
 
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.processTouchend_();
+  }
+
+  /**
+   * Logic triggered by touchend events.
+   * @private
+   */
+  processTouchend_() {
+    if (!this.touchstartTimestamp_) {
+      return;
+    }
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, this.pausedState_);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
+    this.timeoutId_ = null;
     if (
       !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
       /** @type {InteractiveComponentDef} */ (this.storeService_.get(
@@ -441,7 +462,7 @@ export class ManualAdvancement extends AdvancementConfig {
         }
 
         if (
-          startsWith(tagName, 'amp-story-reaction-') &&
+          tagName.startsWith('amp-story-interactive-') &&
           !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
@@ -833,22 +854,16 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 export class MediaBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win
-   * @param {!Array<!Element>} elements
+   * @param {!Element} element
    */
-  constructor(win, elements) {
+  constructor(win, element) {
     super();
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(getAmpdoc(win.document));
-
-    /** @private @const {!Array<!Element>} */
-    this.elements_ = elements;
-
-    /** @private {?Element} */
-    this.element_ = this.getFirstPlayableElement_();
+    /** @private {!Element} */
+    this.element_ = element;
 
     /** @private {?Element} */
     this.mediaElement_ = null;
@@ -867,54 +882,6 @@ export class MediaBasedAdvancement extends AdvancementConfig {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
-
-    this.elements_.forEach((el) => {
-      listen(el, VideoEvents.VISIBILITY, () => this.onVideoVisibilityChange_());
-    });
-  }
-
-  /**
-   * Returns the first playable element, or null. An element is considered
-   * playable if it's either visible, or a hidden AMP-AUDIO.
-   * @return {?Element}
-   * @private
-   */
-  getFirstPlayableElement_() {
-    if (this.elements_.length === 1) {
-      return this.elements_[0];
-    }
-
-    for (let i = 0; i < this.elements_.length; i++) {
-      const element = this.elements_[i];
-      const resource = this.resources_.getResourceForElement(element);
-      if (isMediaDisplayed(element, resource)) {
-        return element;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * On video visibility change, resets the media based advancement to rely on
-   * the newly visible video, if needed.
-   * @private
-   */
-  onVideoVisibilityChange_() {
-    const element = this.getFirstPlayableElement_();
-    if (element === this.element_) {
-      return;
-    }
-    this.element_ = element;
-    this.mediaElement_ = null;
-    this.video_ = null;
-    // If the page-advancement is running, reset the event listeners so the
-    // progress bar reflects the advancement of the new video. If not running,
-    // the next call to `start()` will set the listeners on the new element.
-    if (this.isRunning()) {
-      this.stop();
-      this.start();
-    }
   }
 
   /**
@@ -954,13 +921,6 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
-    // If no element is visible yet, keep isRunning true by stepping out after
-    // `super.start()`. When an element becomes visible, it will call `start()`
-    // again if isRunning is still true.
-    if (!this.element_) {
-      return;
-    }
-
     // Prevents race condition when checking for video interface classname.
     (this.element_.whenBuilt
       ? this.element_.whenBuilt()
@@ -998,6 +958,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       'Media element was unspecified.'
     );
 
+    // Removes [loop] attribute if specified, so the 'ended' event can trigger.
+    this.mediaElement_.removeAttribute('loop');
+
     this.unlistenFns_.push(
       listenOnce(mediaElement, 'ended', () => this.onAdvance())
     );
@@ -1015,6 +978,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     this.element_.getImpl().then((video) => {
       this.video_ = video;
     });
+
+    // Removes [loop] attribute if specified, so the 'ended' event can trigger.
+    this.element_.querySelector('video').removeAttribute('loop');
 
     this.unlistenFns_.push(
       listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
@@ -1075,45 +1041,43 @@ export class MediaBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
-   * @param {!Element} element
+   * @param {!Element} pageEl
    * @return {?AdvancementConfig} An AdvancementConfig, if media-element-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, element) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, pageEl) {
     try {
       // amp-video, amp-audio, as well as amp-story-page with a background audio
       // are eligible for media based auto advance.
-      const elements = toArray(
-        element.querySelectorAll(
-          `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+      let element = pageEl.querySelector(
+        `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
           amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
           amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
           amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
-        )
       );
       if (
         matches(
-          element,
+          pageEl,
           `amp-story-page[background-audio]#${escapeCssSelectorIdent(
             autoAdvanceStr
           )}`
         )
       ) {
-        elements.push(element);
+        element = pageEl;
       }
-      if (!elements.length) {
+      if (!element) {
         if (autoAdvanceStr) {
           user().warn(
             'AMP-STORY-PAGE',
-            `Element with ID ${element.id} has no media element ` +
+            `Element with ID ${pageEl.id} has no media element ` +
               'supported for automatic advancement.'
           );
         }
         return null;
       }
 
-      return new MediaBasedAdvancement(win, elements);
+      return new MediaBasedAdvancement(win, element);
     } catch (e) {
       return null;
     }

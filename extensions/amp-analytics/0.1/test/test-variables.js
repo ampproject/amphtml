@@ -23,17 +23,18 @@ import {
   variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
 
-const fakeElement = document.documentElement;
-
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
+  let fakeElement;
   let variables;
 
   beforeEach(() => {
+    fakeElement = env.win.document.documentElement;
     installLinkerReaderService(env.win);
     variables = new VariableService(env.ampdoc);
   });
@@ -443,6 +444,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       );
     });
 
+    it('replaces CONSENT_METADATA', () => {
+      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        Promise.resolve({
+          getConsentMetadataInfo: () => {
+            return {
+              'gdprApplies': true,
+              'additionalConsent': 'abc123',
+              'consentStringType': 1,
+            };
+          },
+        })
+      );
+
+      return check(
+        'CONSENT_METADATA(gdprApplies)&CONSENT_METADATA(additionalConsent)&CONSENT_METADATA(consentStringType)&CONSENT_METADATA(invalid_key)',
+        'true&abc123&1&'
+      );
+    });
+
     it('"COOKIE" resolves cookie value', async () => {
       doc.cookie = 'test=123';
       await check('COOKIE(test)', '123');
@@ -495,6 +515,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
 
     it('should replace CUMULATIVE_LAYOUT_SHIFT', () => {
       return check('CUMULATIVE_LAYOUT_SHIFT', '1');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES to name:value comma separated list', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      forceExperimentBranch(env.win, 'exp2', '5678');
+      return check('EXPERIMENT_BRANCHES', 'exp1%3A1234%2Cexp2%3A5678');
+    });
+
+    it('EXPERIMENT_BRANCHES should be empty string if no branches', () => {
+      return check('EXPERIMENT_BRANCHES', '');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES(expName) to experiment value', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      return check('EXPERIMENT_BRANCHES(exp1)', '1234');
+    });
+
+    it('EXPERIMENT_BRANCHES(expName) should be empty string if not set', () => {
+      return check('EXPERIMENT_BRANCHES(exp1)', '');
     });
 
     describe('$MATCH', () => {
@@ -550,6 +589,46 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
           /Third argument in MATCH macro must be a number >= 0/
         );
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
+      });
+    });
+
+    it('SCROLL_TOP round to integer', async () => {
+      let scrollTopValue = 100;
+      env.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getScrollTop: () => scrollTopValue,
+        };
+      });
+      await check('SCROLL_TOP', '100');
+      scrollTopValue = 99.4;
+      await check('SCROLL_TOP', '99');
+      scrollTopValue = 99.5;
+      await check('SCROLL_TOP', '100');
+    });
+
+    describe('AMPDOC_META', () => {
+      it('should replace with meta tag content', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'foo': 'bar',
+        });
+        return check('AMPDOC_META(foo)', 'bar');
+      });
+
+      it('should replace with "" when no meta tag', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({});
+        return check('AMPDOC_META(foo)', '');
+      });
+
+      it('should replace with default_value when no meta tag', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({});
+        return check('AMPDOC_META(foo, default_value)', 'default_value');
+      });
+
+      it('should prefer empty meta tag over default_value', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'foo': '',
+        });
+        return check('AMPDOC_META(foo, default_value)', '');
       });
     });
   });

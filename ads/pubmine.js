@@ -46,6 +46,7 @@ function initMasterFrame(data, global) {
     tn: 'amp',
     amp: true,
     consent: consent ? 1 : 0,
+    siteid: Number(data['siteid']) || undefined,
   };
   global['__ATA'] = global['__ATA'] || {};
   global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];

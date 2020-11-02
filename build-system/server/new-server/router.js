@@ -18,9 +18,18 @@ const router = require('express').Router();
 const {transform} = require('./transforms/dist/transform');
 
 router.get('/examples/*.html', async (req, res) => {
-  const transformed = await transform(process.cwd() + req.path);
+  let transformedHTML;
+  const filePath = `${process.cwd()}${req.path}`;
+  try {
+    transformedHTML = await transform(filePath);
+  } catch (e) {
+    console./*OK*/ log(
+      `${req.path} could not be transformed by the postHTML ` +
+        `pipeline.\n${e.message}`
+    );
+  }
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.end(transformed);
+  res.end(transformedHTML);
 });
 
 module.exports = router;

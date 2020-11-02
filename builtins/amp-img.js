@@ -19,11 +19,10 @@ import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
-import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
-import {removeElement} from '../src/dom';
+import {removeElement, scopedQuerySelector} from '../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -37,6 +36,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'aria-describedby',
   'aria-label',
   'aria-labelledby',
+  'crossorigin',
   'referrerpolicy',
   'sizes',
   'src',
@@ -52,8 +52,8 @@ export class AmpImg extends BaseElement {
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = true;
+    /** @private {?boolean} */
+    this.prerenderAllowed_ = null;
 
     /** @private {?Element} */
     this.img_ = null;
@@ -100,7 +100,10 @@ export class AmpImg extends BaseElement {
         /* opt_removeMissingAttrs */ true
       );
       this.propagateDataset(this.img_);
-      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+
+      if (!IS_ESM) {
+        guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+      }
     }
   }
 
@@ -136,13 +139,6 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  firstAttachedCallback() {
-    if (this.element.hasAttribute('noprerender')) {
-      this.prerenderAllowed_ = false;
-    }
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
@@ -162,7 +158,7 @@ export class AmpImg extends BaseElement {
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
     if (this.element.hasAttribute('i-amphtml-ssr')) {
-      this.img_ = this.element.querySelector('img');
+      this.img_ = scopedQuerySelector(this.element, '> img:not([placeholder])');
     }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
@@ -186,7 +182,9 @@ export class AmpImg extends BaseElement {
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.propagateDataset(this.img_);
-    guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    if (!IS_ESM) {
+      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    }
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
@@ -257,6 +255,9 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
+    if (this.prerenderAllowed_ == null) {
+      this.prerenderAllowed_ = !this.element.hasAttribute('noprerender');
+    }
     return this.prerenderAllowed_;
   }
 
@@ -307,8 +308,7 @@ export class AmpImg extends BaseElement {
     const placeholder = this.getPlaceholder();
     if (
       placeholder &&
-      placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-      isExperimentOn(this.win, 'blurry-placeholder')
+      placeholder.classList.contains('i-amphtml-blurry-placeholder')
     ) {
       setImportantStyles(placeholder, {'opacity': 0});
     } else {
@@ -345,6 +345,32 @@ export class AmpImg extends BaseElement {
         this.togglePlaceholder(false);
       });
       this.allowImgLoadFallback_ = false;
+    }
+  }
+
+  /**
+   * Utility method to propagate data attributes from this element
+   * to the target element. (For use with arbitrary data attributes.)
+   * Removes any data attributes that are missing on this element from
+   * the target element.
+   * AMP Bind attributes are excluded.
+   *
+   * @param {!Element} targetElement
+   */
+  propagateDataset(targetElement) {
+    for (const key in targetElement.dataset) {
+      if (!(key in this.element.dataset)) {
+        delete targetElement.dataset[key];
+      }
+    }
+
+    for (const key in this.element.dataset) {
+      if (key.startsWith('ampBind') && key !== 'ampBind') {
+        continue;
+      }
+      if (targetElement.dataset[key] !== this.element.dataset[key]) {
+        targetElement.dataset[key] = this.element.dataset[key];
+      }
     }
   }
 }

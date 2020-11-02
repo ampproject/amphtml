@@ -36,18 +36,9 @@ import {isArray, toWin} from './types';
  *
  * The complete lifecycle of a custom DOM element is:
  *
- *           ||
- *           || createdCallback
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT UPGRADED> <NOT ATTACHED>
+ *    State: <NOT BUILT> <NOT UPGRADED>
  *           ||
  *           || upgrade
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT ATTACHED>
- *           ||
- *           || firstAttachedCallback
  *           ||
  *           \/
  *    State: <NOT BUILT>
@@ -313,23 +304,6 @@ export class BaseElement {
   upgradeCallback() {
     // Subclasses may override.
     return null;
-  }
-
-  /**
-   * Called when the element is first created. Note that for element created
-   * using createElement this may be before any children are added.
-   */
-  createdCallback() {
-    // Subclasses may override.
-  }
-
-  /**
-   * Override in subclass to adjust the element when it is being added to the
-   * DOM. Could e.g. be used to insert a fallback. Should not typically start
-   * loading a resource.
-   */
-  firstAttachedCallback() {
-    // Subclasses may override.
   }
 
   /**
@@ -646,27 +620,6 @@ export class BaseElement {
   }
 
   /**
-   * Utility method to propagate all data attributes from this element
-   * to the target element. (For use with arbitrary data attributes.)
-   * Removes any data attributes that are missing on this element from
-   * the target element.
-   * @param {!Element} targetElement
-   */
-  propagateDataset(targetElement) {
-    for (const key in targetElement.dataset) {
-      if (!(key in this.element.dataset)) {
-        delete targetElement.dataset[key];
-      }
-    }
-
-    for (const key in this.element.dataset) {
-      if (targetElement.dataset[key] !== this.element.dataset[key]) {
-        targetElement.dataset[key] = this.element.dataset[key];
-      }
-    }
-  }
-
-  /**
    * Utility method that forwards the given list of non-bubbling events
    * from the given element to this element as custom events with the same name.
    * @param  {string|!Array<string>} events
@@ -724,20 +677,11 @@ export class BaseElement {
   /**
    * Hides or shows the loading indicator.
    * @param {boolean} state
+   * @param {boolean=} force
    * @public @final
    */
-  toggleLoading(state) {
-    this.element.toggleLoading(state);
-  }
-
-  /**
-   * Returns whether the loading indicator is reused again after the first
-   * render.
-   * @return {boolean}
-   * @public
-   */
-  isLoadingReused() {
-    return false;
+  toggleLoading(state, force = false) {
+    this.element.toggleLoading(state, force);
   }
 
   /**
@@ -980,15 +924,6 @@ export class BaseElement {
    */
   expand() {
     Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
-  }
-
-  /**
-   * Called every time an owned AmpElement expands itself.
-   * See {@link expand}.
-   * @param {!AmpElement} unusedElement Child element that was expanded.
-   */
-  expandedCallback(unusedElement) {
-    // Subclasses may override.
   }
 
   /**

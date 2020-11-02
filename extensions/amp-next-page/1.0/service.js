@@ -233,11 +233,31 @@ export class NextPageService {
       // Mark the page as ready
       this.readyResolver_();
     };
-    this.initializePageQueue_().then(fin, fin);
+    this.whenFirstScroll_()
+      .then(() => this.initializePageQueue_())
+      .then(fin, fin);
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
 
     return this.readyPromise_;
+  }
+
+  /**
+   * Resolve when the document scrolls for the first time or loads in
+   * scrolled position.
+   * @return {!Promise}
+   * @private
+   */
+  whenFirstScroll_() {
+    return new Promise((resolve) => {
+      if (this.viewport_.getScrollTop() != 0) {
+        return resolve();
+      }
+      const unlisten = this.viewport_.onScroll(() => {
+        resolve();
+        unlisten();
+      });
+    });
   }
 
   /**
@@ -457,7 +477,8 @@ export class NextPageService {
       /** @type {!JsonObject} */ ({
         'title': title,
         'url': url,
-      })
+      }),
+      /** enableDataVars */ false
     );
   }
 
@@ -650,7 +671,7 @@ export class NextPageService {
     toArray(doc.querySelectorAll('amp-next-page')).forEach((el) => {
       if (this.hasDeepParsing_) {
         const pages = this.getInlinePages_(el);
-        this.queuePages_(pages);
+        this.fetchAndQueuePages_(pages);
       }
       removeElement(el);
     });
@@ -761,7 +782,7 @@ export class NextPageService {
   initializePageQueue_() {
     const inlinePages = this.getInlinePages_(this.getHost_());
     if (inlinePages.length) {
-      return this.queuePages_(inlinePages);
+      return this.fetchAndQueuePages_(inlinePages);
     }
 
     userAssert(
@@ -775,7 +796,7 @@ export class NextPageService {
         user().warn(TAG, 'Could not find recommendations');
         return Promise.resolve();
       }
-      return this.queuePages_(remotePages);
+      return this.fetchAndQueuePages_(remotePages);
     });
   }
 
@@ -806,9 +827,19 @@ export class NextPageService {
       }
     });
 
+    return Promise.resolve();
+  }
+
+  /**
+   * Add the provided page metadata into the queue of
+   * pages to fetch then fetches again
+   * @param {!Array<!./page.PageMeta>} pages
+   * @return {!Promise}
+   */
+  fetchAndQueuePages_(pages) {
     // To be safe, if the pages were parsed after the user
-    // finished scrolling
-    return this.maybeFetchNext();
+    // finished scrolling, we fetch again
+    return this.queuePages_(pages).then(() => this.maybeFetchNext());
   }
 
   /**
@@ -1052,7 +1083,8 @@ export class NextPageService {
           /** @type {!JsonObject} */ ({
             'title': page.title,
             'url': page.url,
-          })
+          }),
+          /** enableDataVars */ false
         );
         const a2a = this.navigation_.navigateToAmpUrl(
           page.url,

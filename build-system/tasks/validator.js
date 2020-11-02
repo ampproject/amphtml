@@ -34,28 +34,17 @@ async function validator() {
 }
 
 /**
- * Simple wrapper around the Java validator test suite.
- */
-async function validatorJava() {
-  execOrDie('./install_bazel.sh && ./build_and_test.sh', {
-    cwd: 'validator/java',
-    stdio: 'inherit',
-  });
-}
-
-/**
  * Simple wrapper around the python based validator webui build.
  */
 async function validatorWebui() {
   execOrDie('python build.py' + validatorArgs, {
-    cwd: 'validator/webui',
+    cwd: 'validator/js/webui',
     stdio: 'inherit',
   });
 }
 
 module.exports = {
   validator,
-  validatorJava,
   validatorWebui,
 };
 
@@ -63,9 +52,6 @@ validator.description = 'Builds and tests the AMP validator.';
 validator.flags = {
   'update_tests': '  Updates validation test output files',
 };
-
-validatorJava.description =
-  'Builds and tests the AMP validator Java implementation.';
 
 validatorWebui.description = 'Builds and tests the AMP validator web UI.';
 validatorWebui.flags = {

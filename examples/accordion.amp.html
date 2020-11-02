@@ -52,7 +52,7 @@
             <section id="item1" on="expand:ac2.collapse(section='item2'),AMP.setState({expandAc1: true});collapse:AMP.setState({expandAc1: false})" [data-expand]="expandAc1">
               <h1>Item 1 (Expanding it closes Item 2)</h1>
               <div>
-                <p id="initClosed">1A</p>
+                <p>1A</p>
                 <p>1B</p>
               </div>
             </section>
@@ -89,15 +89,16 @@
         controls>
     </amp-video>
     </section>
-    <section expanded>
+    <section>
       <h2>Section 2</h2>
-      <div>Bunch of awesome content</div>
+      <div id="initClosed">Bunch of awesome content</div>
     </section>
     <section>
       <h2>Section 3</h2>
       <div>
           <amp-img src="./img/sea@1x.jpg" width="300" height="300"></amp-img>
           Check out the sea!
+          <input>
       </div>
     </section>
     <section>
@@ -111,7 +112,7 @@
     </section>
     <section>
       <header>The header tag is supported as well.</header>
-      <p>Even more awesome.</p>
+      <p>Even more awesome. <input> </p>
     </section>
   </amp-accordion>
 </body>

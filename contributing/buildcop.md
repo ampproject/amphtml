@@ -1,6 +1,6 @@
 # AMP Buildcop
 
-The AMP buildcop is responsible for ensuring that the [master build](https://travis-ci.org/ampproject/amphtml/branches) remains green. The AMP buildcop responsibility rotates between members of the community.
+The AMP buildcop is responsible for ensuring that the [master build](https://travis-ci.com/ampproject/amphtml/branches) remains green. The AMP buildcop responsibility rotates between members of the community.
 
 Make sure you are a member of the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack while you are buildcop.
 
@@ -9,7 +9,7 @@ Make sure you are a member of the [#contributing](https://amphtml.slack.com/mess
 
 ## Buildcop Tasks
 
-1. Ensure the [master build](https://travis-ci.org/ampproject/amphtml/branches) remains green. Your goal is to keep the build from being red for more than an hour.
+1. Ensure the [master build](https://travis-ci.com/ampproject/amphtml/branches) remains green. Your goal is to keep the build from being red for more than an hour.
    1. Note that yellow builds are in the process of being created/tested so you do not need to do anything special with them.
    2. Keep an eye out for emails sent to an address starting with amp-build-cop. **You are encouraged to set up a filter so that these emails will stand out to you.**
    3. You will need to investigate whether a red build is due to a flake or due to a real issue.
@@ -21,7 +21,7 @@ Make sure you are a member of the [#contributing](https://amphtml.slack.com/mess
         - Restart the build on Travis by clicking the "Restart build" button on the build page (you must be signed into GitHub).
       - If the issue is due to a real breakage, work with the appropriate owner to rollback the offending PR. Rollbacks are preferable to fixes because fixes can often cause their own breakages.
 2. Keep an eye on incoming [Renovate PRs](https://github.com/ampproject/amphtml/pulls/renovate-bot), which result from an automated process to update our dependencies.
-   1. Make sure that the PR updates both package.json and yarn.lock
+   1. Make sure that the PR updates both package.json and package-lock.json
    2. Check the Travis logs for the PR for any new failures or unexpected results
       - If there’s a failure due to a flaky test, try restarting the shard that failed
       - If that doesn’t work, try syncing the branch to HEAD (tests will automatically be re-run)
@@ -29,5 +29,3 @@ Make sure you are a member of the [#contributing](https://amphtml.slack.com/mess
    3. Assuming Travis was green, make sure there are no diffs in the Percy build.
       - If there are diffs that look like flakes, click “Approve” on the Percy build to unblock the PR (and ping @danielrozenberg as an FYI).
    4. Approve and merge the PR.
-3. Report and triage any failing tests on _beta_ browsers:
-   1. Check recent [master builds](https://travis-ci.org/ampproject/amphtml/branches) on Travis, even the green ones. Look for the `gulp [unit|integration] ... --saucelabs` task in the logs and check for any failing tests under the _beta_ test batch(es). Create issues for those tests.

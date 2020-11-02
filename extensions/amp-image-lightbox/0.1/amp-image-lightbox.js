@@ -41,7 +41,6 @@ import {
 } from '../../../src/layout-rect';
 import {setStyles, toggle} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
-import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-image-lightbox';
 
@@ -784,6 +783,14 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.registerDefaultAction((invocation) => this.open_(invocation), 'open');
   }
 
+  /** @override */
+  buildCallback() {
+    /** If the element is in an email document, allow its `open` action. */
+    Services.actionServiceForDoc(
+      this.element
+    ).addToAllowlist('AMP-IMAGE-LIGHTBOX', 'open', ['email']);
+  }
+
   /**
    * Lazily builds the image-lightbox DOM on the first open.
    * @private
@@ -792,10 +799,6 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.container_) {
       return;
     }
-    /** If the element is in an email document, allow its `open` action. */
-    Services.actionServiceForDoc(
-      this.element
-    ).addToWhitelist('AMP-IMAGE-LIGHTBOX', 'open', ['email']);
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-image-lightbox-container');
@@ -895,10 +898,9 @@ class AmpImageLightbox extends AMP.BaseElement {
         // happens in window.resize event. Adding a timeout for correct
         // measurement. See https://github.com/ampproject/amphtml/issues/8479
         if (
-          startsWith(
-            Services.platformFor(this.win).getIosVersionString(),
-            '10.3'
-          )
+          Services.platformFor(this.win)
+            .getIosVersionString()
+            .startsWith('10.3')
         ) {
           Services.timerFor(this.win).delay(() => {
             this.imageViewer_.measure();

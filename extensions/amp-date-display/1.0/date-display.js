@@ -14,13 +14,38 @@
  * limitations under the License.
  */
 
+import * as Preact from '../../../src/preact';
+import {Wrapper, useRenderer} from '../../../src/preact/component';
+import {getDate} from '../../../src/utils/date';
+import {useMemo} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
+
+/** @const {string} */
+const DEFAULT_DISPLAY_IN = 'local';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';
 
-/** @const {number} */
-const DEFAULT_OFFSET_SECONDS = 0;
+/** @const {!Object<string, *>} */
+const DEFAULT_DATETIME_OPTIONS = {
+  'year': 'numeric',
+  'month': 'short',
+  'day': 'numeric',
+  'hour': 'numeric',
+  'minute': 'numeric',
+};
+
+/** @const {!Object<string, *>} */
+const DEFAULT_DATETIME_OPTIONS_UTC = {
+  ...DEFAULT_DATETIME_OPTIONS,
+  timeZone: 'UTC',
+};
+
+/**
+ * @param {!JsonObject} data
+ * @return {string}
+ */
+const DEFAULT_RENDER = (data) => /** @type {string} */ (data['localeString']);
 
 /** @typedef {{
   year: number,
@@ -34,6 +59,7 @@ const DEFAULT_OFFSET_SECONDS = 0;
   minute: number,
   second: number,
   iso: string,
+  localeString: string,
 }} */
 let VariablesV2Def;
 
@@ -62,72 +88,53 @@ let VariablesV2Def;
 let EnhancedVariablesV2Def;
 
 /**
- * @param {!JsonObject} props
+ * @param {!DateDisplayDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function DateDisplay(props) {
-  const render = props['render'];
-  const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
+export function DateDisplay({
+  datetime,
+  displayIn = DEFAULT_DISPLAY_IN,
+  locale = DEFAULT_LOCALE,
+  render = DEFAULT_RENDER,
+  ...rest
+}) {
+  const date = getDate(datetime);
+  const data = useMemo(
+    () => getDataForTemplate(new Date(date), displayIn, locale),
+    [date, displayIn, locale]
+  );
+
+  const rendered = useRenderer(render, data);
+  const isHtml =
+    rendered && typeof rendered == 'object' && '__html' in rendered;
+
   useResourcesNotify();
 
-  return render(data, props['children']);
+  return (
+    <Wrapper
+      {...rest}
+      as="div"
+      datetime={data['iso']}
+      dangerouslySetInnerHTML={isHtml ? rendered : null}
+    >
+      {isHtml ? null : rendered}
+    </Wrapper>
+  );
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!Date} date
+ * @param {string} displayIn
+ * @param {string} locale
  * @return {!EnhancedVariablesV2Def}
  */
-function getDataForTemplate(props) {
-  const {
-    'displayIn': displayIn = '',
-    'locale': locale = DEFAULT_LOCALE,
-    'offsetSeconds': offsetSeconds = DEFAULT_OFFSET_SECONDS,
-  } = props;
-
-  const epoch = getEpoch(props);
-  const offset = offsetSeconds * 1000;
-  const date = new Date(epoch + offset);
-
+function getDataForTemplate(date, displayIn, locale) {
   const basicData =
     displayIn.toLowerCase() === 'utc'
       ? getVariablesInUTC(date, locale)
       : getVariablesInLocal(date, locale);
 
   return enhanceBasicVariables(basicData);
-}
-
-/**
- * @param {!JsonObject} props
- * @return {number|undefined}
- */
-function getEpoch(props) {
-  const {
-    'datetime': datetime = '',
-    'timestampMs': timestampMs = 0,
-    'timestampSeconds': timestampSeconds = 0,
-  } = props;
-
-  let epoch;
-  if (datetime.toLowerCase() === 'now') {
-    epoch = Date.now();
-  } else if (datetime) {
-    epoch = Date.parse(datetime);
-    if (isNaN(epoch)) {
-      console /*OK*/
-        .error(`Invalid date: ${datetime}`);
-    }
-  } else if (timestampMs) {
-    epoch = timestampMs;
-  } else if (timestampSeconds) {
-    epoch = timestampSeconds * 1000;
-  }
-
-  if (epoch === undefined) {
-    console /*OK*/
-      .error('One of datetime, timestamp-ms, or timestamp-seconds is required');
-  }
-
-  return epoch;
 }
 
 /**
@@ -186,6 +193,7 @@ function getVariablesInLocal(date, locale) {
     'minute': date.getMinutes(),
     'second': date.getSeconds(),
     'iso': date.toISOString(),
+    'localeString': date.toLocaleString(locale, DEFAULT_DATETIME_OPTIONS),
   };
 }
 
@@ -219,5 +227,6 @@ function getVariablesInUTC(date, locale) {
     'minute': date.getUTCMinutes(),
     'second': date.getUTCSeconds(),
     'iso': date.toISOString(),
+    'localeString': date.toLocaleString(locale, DEFAULT_DATETIME_OPTIONS_UTC),
   };
 }

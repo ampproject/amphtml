@@ -69,15 +69,18 @@
       <option>euleriananalytics</option>
       <option>facebook-pixel</option>
       <option>gemius</option>
+      <option>gfksensic</option>
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
+      <option>infonline_anonymous</option>
       <option>iplabel</option>
       <option>keen</option>
       <option>kenshoo</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
+      <option>mapp_intelligence</option>
       <option>marinsoftware</option>
       <option>mediametrie</option>
       <option>mediarithmics</option>
@@ -103,11 +106,13 @@
       <option>rakam</option>
       <option>reppublika</option>
       <option>retargetly</option>
+      <option>rudderstack</option>
       <option>segment</option>
       <option>shinystat</option>
       <option>simplereach</option>
       <option>snowplow</option>
       <option>snowplow_v2</option>
+      <option>tail</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
@@ -691,6 +696,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Gemius  example -->
 
+<!-- GfK Sensic tracking -->
+<amp-analytics type="gfksensic" id="gfk">
+<script type="application/json">
+{
+  "vars": {
+    "regionID": "demo",
+    "mediaID": "demomedia"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Sensic  example -->
+
 <amp-analytics type="googleanalytics" id="googleanalytics">
 <script type="application/json">
 {
@@ -755,6 +773,30 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End INFOnline example -->
+
+<!--
+  INFOnline anonymous example
+  Important: url needs to point to a copy of
+  amp-analytics-infonline-anonymous.html on a different subdomain
+  than your AMP files.
+-->
+<amp-analytics type="infonline_anonymous" id="infonline_anonymous">
+  <script type="application/json">
+    {
+      "vars": {
+        "st":  "site",
+        "co":  "comment",
+        "cp":  "code",
+        "cn": "de",
+        "dn": "relay domain name"
+      },
+      "requests": {
+        "url":  "https://3p.ampproject.net/custom/amp-analytics-infonline-anonymous.html"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End INFOnline anonymous example -->
 
 <!-- iplabel rumbi. Ensure you replace "ampTrackerId" with your tracker id . -->
 <amp-analytics type="iplabel" id="iplabel" >
@@ -879,6 +921,25 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Lotame example -->
+
+<!-- Mapp Intelligence tracking -->
+<amp-analytics type="mapp_intelligence" id="mapp_intelligence">
+  <script type="application/json">
+    {
+      "vars": {
+        "trackDomain": "analytics.webtrekk.net",
+        "trackId": "111111111111111"
+      },
+      "triggers": {
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Mapp Intelligence example -->
 
 <!-- Marin Software tracking.
   Configure tracker id (required)
@@ -1346,6 +1407,33 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Retargetly example -->
 
+<!-- RudderStack example -->
+<amp-analytics type="rudderstack" id="rudderstack">
+<script type="application/json">
+{
+  "vars": {
+    "writeKey": "1XI9Niof0vuKt5XTLurbWh9KkXn",
+    "dataPlaneUrl": "https://hosted.rudderlabs.com",
+    "pageName": "My Page name"
+  },
+  "extraUrlParams": {
+    "properties.source": "RudderStack AMP"
+  },
+  "triggers": {
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "track",
+      "vars": {
+        "eventName": "click"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End RudderStack example -->
+
 <!-- Segment analytics tracking -->
 <amp-analytics type="segment" id="segment">
 <script type="application/json">
@@ -1528,6 +1616,33 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
+
+<!-- Tail Analytics Example
+    Ensure you replace account with your account id.
+ -->
+<amp-analytics type="tail" id="tail">
+  <script type="application/json">
+    {
+      "vars": {
+        "account": "TT-0000-0"
+      },
+      "triggers": {
+        "click": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventValue": "value1",
+            "eventCategory": "category1",
+            "eventAction": "action1",
+            "eventLabel": "label1"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Tail Analytics example -->
 
 <!-- TEA Analytics Example
     Ensure you replace app_id with your appId.
@@ -1766,7 +1881,12 @@ For complete documentation and additional examples please see: https://marketing
     "au": "author1,author2",
     "pt": "publishTime",
     "ct": "1",
-    "d":"m.ibeatdev.com"
+    "hid": "153",
+    "d":"m.ibeatdev.com",
+    "id":"123456",
+    "sec":"news",
+    "tgs":"modi,parliament",
+    "pc":"loggedin"
   }
 }
 </script>

@@ -266,7 +266,6 @@ describes.realWin(
       await dom.whenUpgradedToCustomElement(element);
 
       const impl = await element.getImpl();
-      impl.buildLightbox_();
       env.sandbox.stub(impl, 'open_');
       action.execute(
         element,

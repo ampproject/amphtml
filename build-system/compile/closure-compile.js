@@ -15,8 +15,7 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const closureCompiler = require('google-closure-compiler');
+const closureCompiler = require('@ampproject/google-closure-compiler');
 const log = require('fancy-log');
 const path = require('path');
 const pumpify = require('pumpify');
@@ -76,16 +75,6 @@ function handleTypeCheckError(err) {
 }
 
 /**
- * Handles a closure error during single-pass compilation
- *
- * @param {Error} err
- */
-function handleSinglePassCompilerError(err) {
-  logError(red('Single pass compilation failed:'));
-  emitError(err);
-}
-
-/**
  * Emits an error to the caller
  *
  * @param {Error} err
@@ -125,56 +114,20 @@ function makeSourcemapsRelative(closureStream) {
 
 /**
  * @param {Array<string>} compilerOptions
- * @param {?string} nailgunPort
  * @return {stream.Writable}
  */
-function gulpClosureCompile(compilerOptions, nailgunPort) {
-  const initOptions = {
-    extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
-  };
+function gulpClosureCompile(compilerOptions) {
   const pluginOptions = {
-    platform: ['java'], // Override the binary used by closure compiler
     logger: (errors) => (compilerErrors = errors), // Capture compiler errors
   };
 
-  if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
-    // For single-pass compilation, use the default compiler.jar
-    closureCompiler.compiler.JAR_PATH = require.resolve(
-      '../../node_modules/google-closure-compiler-java/compiler.jar'
-    );
-  } else {
-    // On Mac OS and Linux, speed up compilation using nailgun (unless the
-    // --disable_nailgun flag was passed in)
-    // See https://github.com/facebook/nailgun.
-    if (
-      !argv.disable_nailgun &&
-      (process.platform == 'darwin' || process.platform == 'linux')
-    ) {
-      compilerOptions = [
-        '--nailgun-port',
-        nailgunPort,
-        'org.ampproject.AmpCommandLineRunner',
-        '--',
-      ].concat(compilerOptions);
-      pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
-      initOptions.extraArguments = null; // Already part of nailgun-server
-    } else {
-      // For other platforms, or if nailgun is explicitly disabled, use AMP's
-      // custom runner.jar
-      closureCompiler.compiler.JAR_PATH = require.resolve(
-        `../runner/dist/${nailgunPort}/runner.jar`
-      );
-    }
-  }
-
   return makeSourcemapsRelative(
-    closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions)
+    closureCompiler.gulp()(compilerOptions, pluginOptions)
   );
 }
 
 module.exports = {
   gulpClosureCompile,
   handleCompilerError,
-  handleSinglePassCompilerError,
   handleTypeCheckError,
 };

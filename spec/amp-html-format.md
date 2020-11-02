@@ -359,8 +359,6 @@ In the following examples `<property>` needs to be in the white list above.
 - `transition <property>` (also -vendorPrefix-transition)
 - `@keyframes name { from: {<property>: value} to {<property: value>} }` (also `@-vendorPrefix-keyframes`)
 
-`overflow` (and `overflow-y`, `overflow-x`) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
-
 #### Maximum size
 
 It is a validation error if the author stylesheet or inline styles together are larger than 75,000 bytes.
@@ -407,7 +405,7 @@ Font providers can be white listed if they support CSS-only integrations and ser
 
 - Fonts.com: `https://fast.fonts.net`
 - Google Fonts: `https://fonts.googleapis.com`
-- Font Awesome: `https://maxcdn.bootstrapcdn.com`
+- Font Awesome: `https://maxcdn.bootstrapcdn.com, https://use.fontawesome.com`
 - [Typekit](https://helpx.adobe.com/typekit/using/google-amp.html): `https://use.typekit.net/kitId.css` (replace `kitId` accordingly)
 
 IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP Cache CSP rule.

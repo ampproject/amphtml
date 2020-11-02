@@ -447,6 +447,31 @@ describes.realWin(
       });
     });
 
+    it('should show focus outline and border on next and prev buttons', () => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
+        const impl = ampSlideScroll.implementation_;
+        impl.showSlide_(1);
+
+        impl.prevButton_.focus();
+        expect(doc.activeElement).to.equal(impl.prevButton_);
+        expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
+          'rgb(255, 255, 255) solid 1px'
+        );
+        expect(win.getComputedStyle(impl.prevButton_).border).to.equal(
+          '1px solid rgb(0, 0, 0)'
+        );
+
+        impl.nextButton_.focus();
+        expect(doc.activeElement).to.equal(impl.nextButton_);
+        expect(win.getComputedStyle(impl.nextButton_).outline).to.equal(
+          'rgb(255, 255, 255) solid 1px'
+        );
+        expect(win.getComputedStyle(impl.nextButton_).border).to.equal(
+          '1px solid rgb(0, 0, 0)'
+        );
+      });
+    });
+
     it('should set the correct scrollLeft when there is only one slide', () => {
       return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
@@ -670,16 +695,19 @@ describes.realWin(
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(200);
 
       // Make sure the scroll position is correct after layoutCallback.
+      await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
       await impl.layoutCallback();
+      impl.showSlide_(1);
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(400);
     });
 
     it('should relayout the current slide on layoutCallback', () => {
-      return getAmpSlideScroll().then((ampSlideScroll) => {
+      return getAmpSlideScroll().then(async (ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
         const scheduleLayoutSpy_ = env.sandbox.spy(owners, 'scheduleLayout');
         impl.slideIndex_ = null;
+        await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
         impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
           impl.element,
@@ -687,6 +715,7 @@ describes.realWin(
         );
 
         impl.showSlide_(1);
+        await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
         impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
           impl.element,
@@ -1530,7 +1559,7 @@ describes.realWin(
       );
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.match(
-        /"AMP-CAROUSEL.toggleAutoplay" is not whitelisted/
+        /"AMP-CAROUSEL.toggleAutoplay" is not allowlisted/
       );
     });
   }

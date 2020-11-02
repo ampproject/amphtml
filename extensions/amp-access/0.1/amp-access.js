@@ -32,7 +32,6 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
@@ -298,7 +297,12 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      /** vars */ undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**
@@ -698,7 +702,7 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_('');
-    } else if (startsWith(invocation.method, 'login-')) {
+    } else if (invocation.method.startsWith('login-')) {
       if (invocation.event) {
         invocation.event.preventDefault();
       }
@@ -780,7 +784,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
 
 /**
  * @package Visible for testing only.
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof AccessVars}
  */
 export function getAccessVarsClassForTesting() {
   return AccessVars;

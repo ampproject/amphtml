@@ -23,7 +23,7 @@ const argv = require('minimist')(process.argv.slice(2));
  * @return {!Object}
  */
 function getPostClosureConfig() {
-  if (!argv.esm) {
+  if (!argv.esm && !argv.sxg) {
     return {};
   }
 
@@ -32,6 +32,7 @@ function getPostClosureConfig() {
     './build-system/babel-plugins/babel-plugin-const-transformer',
     './build-system/babel-plugins/babel-plugin-transform-remove-directives',
     './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
+    './build-system/babel-plugins/babel-plugin-transform-block-scoping',
   ];
   return {
     compact: false,

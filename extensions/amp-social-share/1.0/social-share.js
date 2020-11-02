@@ -17,175 +17,207 @@
 import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
-import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
+import {SocialShareIcon} from './social-share-svgs';
+import {Wrapper} from '../../../src/preact/component';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
-import {getSocialConfig} from './amp-social-share-config';
-import {isObject} from '../../../src/types';
+import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
+const NAME = 'SocialShare';
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
-const NAME = 'SocialShare';
+const DEFAULT_TARGET = '_blank';
+const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
+
 /**
- * @param {!JsonObject} props
+ * @param {!SocialSharePropsDef} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShare(props) {
+export function SocialShare({
+  type,
+  endpoint,
+  params,
+  target,
+  width,
+  height,
+  color,
+  background,
+  tabIndex = 0,
+  style,
+  children,
+  ...rest
+}) {
   useResourcesNotify();
-  const {typeConfig, baseEndpoint, checkedWidth, checkedHeight} = checkProps(
-    props
+  const checkPropsReturnValue = checkProps(
+    type,
+    endpoint,
+    target,
+    width,
+    height,
+    params
   );
-  const finalEndpoint = createEndpoint(typeConfig, baseEndpoint, props);
 
-  const type = props['type'].toUpperCase();
-  const baseStyle = CSS.BASE_STYLE;
-  const backgroundStyle = CSS[type] || CSS.DEFAULT;
-  const size = {
-    width: checkedWidth,
-    height: checkedHeight,
-  };
+  // Early exit if checkProps did not pass
+  if (!checkPropsReturnValue) {
+    return null;
+  }
+
+  const {
+    finalEndpoint,
+    checkedWidth,
+    checkedHeight,
+    checkedTarget,
+  } = checkPropsReturnValue;
+
   return (
-    <div
+    <Wrapper
+      {...rest}
       role="button"
-      tabindex={props['tabIndex'] || '0'}
-      onKeyDown={(e) => handleKeyPress(e, finalEndpoint)}
-      onClick={() => handleActivation(finalEndpoint)}
-      style={{...size, ...props['style']}}
-      {...props}
+      tabindex={tabIndex}
+      onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
+      onClick={() => handleActivation(finalEndpoint, checkedTarget)}
+      wrapperStyle={{
+        width: checkedWidth,
+        height: checkedHeight,
+        ...style,
+      }}
     >
-      <SocialShareIcon
-        style={{...backgroundStyle, ...baseStyle, ...size}}
-        type={type}
-      />
-    </div>
+      {processChildren(
+        /** @type {string} */ (type),
+        children,
+        color,
+        background
+      )}
+    </Wrapper>
   );
 }
 
 /**
- * @param {!JsonObject} props
- * @return {{
- *   typeConfig: !JsonObject,
- *   baseEndpoint: ?string,
- *   checkedWidth: ?number,
- *   checkedHeight: ?number,
- * }}
+ * If children exist, render the children instead of the icon.  Otherwise,
+ * render the icon associated with the specified type with specified color
+ * and background (or defaults if not specified).
+ * @param {string} type
+ * @param {?PreactDef.Renderable|undefined} children
+ * @param {string|undefined} color
+ * @param {string|undefined} background
+ * @return {PreactDef.Renderable}
  */
-function checkProps(props) {
-  const {
-    'type': type,
-    'shareEndpoint': shareEndpoint,
-    'params': params,
-    'bindings': bindings,
-    'width': width,
-    'height': height,
-  } = props;
-
-  // Verify type is provided
-  if (type === undefined) {
-    throw new Error(`The type attribute is required. ${NAME}`);
-  }
-
-  // bindings and params props must be objects
-  if (params && !isObject(params)) {
-    throw new Error(`The params property should be an object. ${NAME}`);
-  }
-  if (bindings && !isObject(bindings)) {
-    throw new Error(`The bindings property should be an object. ${NAME}`);
-  }
-
-  // User must provide shareEndpoint if they choose a type that is not
-  // pre-configured
-  const typeConfig = getSocialConfig(type) || dict();
-  const baseEndpoint = typeConfig['shareEndpoint'] || shareEndpoint;
-  if (baseEndpoint === undefined) {
-    throw new Error(
-      `A shareEndpoint is required if not using a pre-configured type. ${NAME}`
+function processChildren(type, children, color, background) {
+  if (children) {
+    return children;
+  } else {
+    const typeConfig = getSocialConfig(type) || {};
+    const baseStyle = CSS.BASE_STYLE;
+    const iconStyle = dict({
+      'color': color || typeConfig.defaultColor,
+      'backgroundColor': background || typeConfig.defaultBackgroundColor,
+    });
+    return (
+      <SocialShareIcon
+        style={{
+          ...iconStyle,
+          ...baseStyle,
+          width: '100%',
+          height: '100%',
+        }}
+        type={type.toUpperCase()}
+      />
     );
   }
+}
 
+/**
+ * Verify required props and throw error if necessary.  Set default values
+ * for optional props if no value specified.
+ * @param {string|undefined} type
+ * @param {string|undefined} endpoint
+ * @param {string|undefined} target
+ * @param {number|string|undefined} width
+ * @param {number|string|undefined} height
+ * @param {JsonObject|Object|undefined} params
+ * @return {?{
+ *   finalEndpoint: string,
+ *   checkedWidth: (number|string),
+ *   checkedHeight: (number|string),
+ *   checkedTarget: string,
+ * }}
+ */
+function checkProps(type, endpoint, target, width, height, params) {
+  // User must provide endpoint if they choose a type that is not
+  // pre-configured, early exit if not provided
+  const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
+  let baseEndpoint = endpoint || typeConfig.shareEndpoint;
+  if (baseEndpoint === undefined) {
+    displayWarning(
+      `An endpoint is required if not using a pre-configured type. ${NAME}`
+    );
+    return null;
+  }
+
+  // Special case when type is 'email'
+  if (type === 'email' && !endpoint) {
+    baseEndpoint = `mailto:${(params && params['recipient']) || ''}`;
+  }
+
+  // Add params to baseEndpoint
+  const finalEndpoint = addParamsToUrl(
+    /** @type {string} */ (baseEndpoint),
+    /** @type {!JsonObject} */ (params)
+  );
+
+  // Defaults
   const checkedWidth = width || DEFAULT_WIDTH;
   const checkedHeight = height || DEFAULT_HEIGHT;
+  const checkedTarget = target || DEFAULT_TARGET;
+
   return {
-    typeConfig,
-    baseEndpoint,
+    finalEndpoint,
     checkedWidth,
     checkedHeight,
+    checkedTarget,
   };
 }
 
 /**
  * @param {?string} message
  */
-function throwWarning(message) {
+function displayWarning(message) {
   console /*OK*/
     .warn(message);
 }
 
 /**
- * @param {!JsonObject} typeConfig
- * @param {?string} baseEndpoint
- * @param {!JsonObject} props
- * @return {?string}
- */
-function createEndpoint(typeConfig, baseEndpoint, props) {
-  const {'params': params, 'bindings': bindings} = props;
-  const combinedParams = {...typeConfig['defaultParams'], ...params};
-  const endpointWithParams = addParamsToUrl(
-    /** @type {string} */ (baseEndpoint),
-    /** @type {!JsonObject} */ (combinedParams)
-  );
-
-  const combinedBindings = dict();
-  const bindingVars = typeConfig['bindings'];
-  if (bindingVars) {
-    /** @type {Array<string>} */ (bindingVars).forEach((name) => {
-      combinedBindings[name.toUpperCase()] = combinedParams[name] || '';
-    });
-  }
-  if (bindings) {
-    Object.keys(bindings).forEach((name) => {
-      combinedBindings[name.toUpperCase()] = bindings[name] || '';
-    });
-  }
-  const finalEndpoint = Object.keys(combinedBindings).reduce(
-    (endpoint, binding) =>
-      endpoint.replace(new RegExp(binding, 'g'), combinedBindings[binding]),
-    endpointWithParams
-  );
-  return finalEndpoint;
-}
-
-/**
  * Opens a new window with the fully processed endpoint
  * @param {?string} finalEndpoint
+ * @param {string} target
  */
-function handleActivation(finalEndpoint) {
+function handleActivation(finalEndpoint, target) {
   const protocol = finalEndpoint.split(':', 1)[0];
-  const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+
   if (protocol === 'navigator-share') {
     if (window && window.navigator && window.navigator.share) {
       const data = parseQueryString(
         /** @type {string} */ (getQueryString(finalEndpoint))
       );
       window.navigator.share(data).catch((e) => {
-        throwWarning(`${e.message}. ${NAME}`);
+        displayWarning(`${e.message}. ${NAME}`);
       });
     } else {
-      throwWarning(
+      displayWarning(
         `Could not complete system share.  Navigator unavailable. ${NAME}`
       );
     }
-  } else if (protocol === 'sms') {
+  } else if (protocol === 'sms' || protocol === 'mailto') {
     openWindowDialog(
       window,
-      finalEndpoint.replace('?', '?&'),
-      '_blank',
-      windowFeatures
+      protocol === 'sms' ? finalEndpoint.replace('?', '?&') : finalEndpoint,
+      isIos() ? '_top' : target,
+      WINDOW_FEATURES
     );
   } else {
-    openWindowDialog(window, finalEndpoint, '_blank', windowFeatures);
+    openWindowDialog(window, finalEndpoint, target, WINDOW_FEATURES);
   }
 }
 
@@ -203,13 +235,27 @@ function getQueryString(endpoint) {
 }
 
 /**
+ * Checks whether or not the userAgent of the current device indicates that
+ * this is an Ios device.  Checked for 'mailto:' and 'sms:' protocols which
+ * break when opened in _blank on iOS Safari.
+ * @return {boolean}
+ */
+function isIos() {
+  return /** @type {boolean} */ (window &&
+    window.navigator &&
+    window.navigator.userAgent &&
+    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0);
+}
+
+/**
  * @param {!Event} event
  * @param {?string} finalEndpoint
+ * @param {string} target
  */
-function handleKeyPress(event, finalEndpoint) {
+function handleKeyPress(event, finalEndpoint, target) {
   const {key} = event;
   if (key == Keys.SPACE || key == Keys.ENTER) {
     event.preventDefault();
-    handleActivation(finalEndpoint);
+    handleActivation(finalEndpoint, target);
   }
 }

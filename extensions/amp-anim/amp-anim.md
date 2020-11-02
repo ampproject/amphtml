@@ -26,9 +26,15 @@ limitations under the License.
 
 # amp-anim
 
-## Behavior
+## Usage
 
-The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:
+The `amp-anim` component displays a GIF animation with optimized CPU management.
+
+The `amp-anim` component lets the AMP framework reduce the resources it spends
+on the animation when it's off-screen. Otherwise, the behavior of `amp-anim` is
+identical to [`amp-img`](https://amp.dev/documentation/components/amp-img/). You
+can implement a [placeholder](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders/)
+element to further optimize `amp-anim`.
 
 ```html
 <amp-anim width="400" height="300" src="my-gif.gif">
@@ -37,69 +43,66 @@ The `amp-anim` component is almost identical to the `amp-img` element, but allow
 </amp-anim>
 ```
 
-In the future, additional functionality, such as animation playback control, could be added.
-
 ## Attributes
 
-### src
+### `src`
 
-Similar to the `src` attribute on the `img` tag. The value must be a URL that
-points to a publicly-cacheable image file. Cache providers and email clients may rewrite these
-URLs when ingesting AMP files to point to a cached version of the image.
+Specifies the URL for a GIF image.
 
 [filter formats="email"]
-
-In AMP email, this <strong>must</strong> be an absolute URL.
-
-[/filter] <!-- formats="email" -->
-
-[filter formats="websites, ads, stories"]
-
-### srcset
-
-Same as `srcset` attribute on the `img` tag.
-
-[/filter] <!-- formats="websites, ads, stories" -->
-
-### alt
-
-A string of alternate text, similar to the `alt` attribute on `img`.
-
-### attribution
-
-A string that indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.
-
-### height and width
-
-An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image.
-
-### Common attributes
-
-This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
-
-[filter formats="email"]
-
-### Invalid AMP email attributes
-
-The AMP for Email spec disallows the use of the following attributes on the AMP email format.
+In an AMP email, the `src`must point to an absolute URL. Use of `amp-anim` in
+email doesn't allow the following attributes:
 
 - `srcset`
 - `object-fit`
 - `object-position`
 
-[/filter] <!-- formats="email" -->
+[/filter]
+
+[filter formats="websites, ads"]
+
+### `srcset`
+
+Specifies the image URL to use in different circumstances. Operates the same as
+the [`srcset` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset)
+on the `img` tag.
+
+[/filter]
+
+### `alt`
+
+Provides a string of alternate text for accessibility purposes. Operates the
+same as the [`alt` attribute](https://www.w3schools.com/tags/att_img_alt.asp) on
+the `img` tag.
+
+### `attribution`
+
+Indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.
+
+### `width` and `height`
+
+Provides the explicit size of the image.
+
+### Common attributes
+
+`amp-anim` includes the
+[common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Styling
 
-`amp-img` can be styled directly via CSS properties. Setting a grey background
-placeholder for example could be achieved via:
+You can directly style `amp-img` with CSS properties. The following example sets
+a grey background placeholder:
 
-```css
-amp-anim {
-  background-color: grey;
-}
+```html
+<style amp-custom>
+      .amp-anim {
+          background-color: grey;
+       }
+</amp style-custom>
 ```
 
 ## Validation
 
-See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii) in the AMP validator specification.
+See [`amp-anim` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii)
+in the AMP validator specification.

@@ -57,6 +57,7 @@ class AmpStickyAd extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
+
     const children = this.getRealChildren();
     userAssert(
       children.length == 1 && children[0].tagName == 'AMP-AD',
@@ -125,7 +126,12 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /** @override */
-  collapsedCallback() {
+  collapsedCallback(element) {
+    // We will only collapse the stick-ad when the ad collapses. The analytics
+    // element will collapse after it's done initializing, which is normal.
+    if (element !== this.ad_) {
+      return;
+    }
     this.collapsed_ = true;
     this.visible_ = false;
     toggle(this.element, false);

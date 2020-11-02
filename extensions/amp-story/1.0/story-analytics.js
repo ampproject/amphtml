@@ -21,7 +21,7 @@ import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-/** @package @const {string} */
+/** @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
 
 /** @enum {string} */
@@ -37,12 +37,15 @@ export const StoryAnalyticsEvent = {
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
-  REACTION: 'story-reaction',
+  INTERACTIVE: 'story-interactive',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
 
-/** @enum {string} */
+/**
+ * @enum {string}
+ * Note: auto advance advancements should always be prefixed with "autoAdvance".
+ */
 export const AdvancementMode = {
   GO_TO_PAGE: 'goToPageAction',
   AUTO_ADVANCE_TIME: 'autoAdvanceTime',

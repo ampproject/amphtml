@@ -44,15 +44,16 @@ import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
-import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
-const WHITELIST_EVENT_IN_SANDBOX = [
+const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.HIDDEN,
+  AnalyticsEventType.INI_LOAD,
+  AnalyticsEventType.RENDER_START,
 ];
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -208,7 +209,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iniPromise_) {
       return this.iniPromise_;
     }
-    toggle(this.element, false);
 
     this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
@@ -251,6 +251,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
+    this.iniPromise_.then(() => {
+      this./*OK*/ collapse();
+    });
     return this.iniPromise_;
   }
 
@@ -288,7 +291,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
-      this.user().error(
+      this.user().warn(
         TAG,
         'No triggers were found in the ' +
           'config. No analytics data will be sent.'
@@ -343,7 +346,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const eventType = trigger['on'];
           if (
             isEnumValue(AnalyticsEventType, eventType) &&
-            !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)
+            !ALLOWLIST_EVENT_IN_SANDBOX.includes(eventType)
           ) {
             this.user().error(
               TAG,
@@ -372,7 +375,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
               return this.addTrigger_(trigger);
-            } else if (trigger['selector']) {
+            } else if (trigger['selector'] && !isArray(trigger['selector'])) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(
@@ -516,7 +519,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!this.config_['requests']) {
       if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
-        this.user().error(
+        this.user().warn(
           TAG,
           'No request strings defined. Analytics ' +
             'data will not be sent from this page.'
@@ -638,7 +641,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     this.checkTriggerEnabled_(trigger, event).then((enabled) => {
-      if (!enabled) {
+      const isConnected =
+        this.element.ownerDocument && this.element.ownerDocument.defaultView;
+      if (!enabled || !isConnected) {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);

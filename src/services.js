@@ -16,10 +16,10 @@
 
 import {
   getAmpdoc,
-  getExistingServiceForDocInEmbedScope,
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
+  getServiceForDocOrNull,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -96,7 +96,7 @@ export class Services {
    * @return {!./service/action-impl.ActionService}
    */
   static actionServiceForDoc(element) {
-    return /** @type {!./service/action-impl.ActionService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/action-impl.ActionService} */ (getServiceForDocOrNull(
       element,
       'action'
     ));
@@ -107,7 +107,7 @@ export class Services {
    * @return {!./service/standard-actions-impl.StandardActions}
    */
   static standardActionsForDoc(element) {
-    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getServiceForDocOrNull(
       element,
       'standard-actions'
     ));
@@ -205,7 +205,19 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>}
+   */
+  static scriptForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>} */ (getElementServiceIfAvailableForDocInEmbedScope(
+      element,
+      'amp-script',
+      'amp-script'
+    ));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
@@ -302,7 +314,7 @@ export class Services {
    * @return {!./service/hidden-observer-impl.HiddenObserver}
    */
   static hiddenObserverForDoc(element) {
-    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getServiceForDocOrNull(
       element,
       'hidden-observer'
     ));
@@ -338,6 +350,17 @@ export class Services {
       element,
       'inputmask',
       'amp-inputmask'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {?./service/loading-indicator.LoadingIndicatorImpl}
+   */
+  static loadingIndicatorOrNull(elementOrAmpDoc) {
+    return /** @type {?./service/loading-indicator.LoadingIndicatorImpl} */ (getServiceForDocOrNull(
+      elementOrAmpDoc,
+      'loadingIndicator'
     ));
   }
 
@@ -452,26 +475,12 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
-   */
-  static shareTrackingForOrNull(win) {
-    return /** @type {!Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (getElementServiceIfAvailable(
-      win,
-      'share-tracking',
-      'amp-share-tracking',
-      true
-    ));
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
-      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story'))
     );
   }
 
@@ -490,11 +499,11 @@ export class Services {
    * Version of the story store service depends on which version of amp-story
    * the publisher is loading. They all have the same implementation.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story'))
     );
   }
@@ -522,6 +531,18 @@ export class Services {
   }
 
   /**
+   * Get promise with story request service
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>}
+   */
+  static storyRequestServiceForOrNull(win) {
+    return (
+      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
+      (getElementServiceIfAvailable(win, 'story-request', 'amp-story'))
+    );
+  }
+
+  /**
    * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */
@@ -544,11 +565,22 @@ export class Services {
   }
 
   /**
+   * @param {!Element} el
+   * @return {!Promise<./service/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNull(el) {
+    return /** @type {!Promise<?./service/localization.LocalizationService>} */ (getServicePromiseForDoc(
+      el,
+      'localization'
+    ));
+  }
+
+  /**
    * @param {!Element} element
    * @return {?./service/localization.LocalizationService}
    */
   static localizationForDoc(element) {
-    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {?./service/localization.LocalizationService} */ (getServiceForDocOrNull(
       element,
       'localization'
     ));
@@ -575,24 +607,6 @@ export class Services {
       /** @type {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService} */
       (getExistingServiceOrNull(win, 'story-analytics'))
     );
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
-   */
-  static storyStoreServiceV01(win) {
-    return getService(win, 'story-store');
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
-   */
-  static storyRequestServiceV01(win) {
-    return getService(win, 'story-request-v01');
   }
 
   /**
@@ -645,7 +659,7 @@ export class Services {
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
   static urlReplacementsForDoc(element) {
-    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getServiceForDocOrNull(
       element,
       'url-replace'
     ));
@@ -705,7 +719,7 @@ export class Services {
    * @return {!./service/url-impl.Url}
    */
   static urlForDoc(element) {
-    return /** @type {!./service/url-impl.Url} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-impl.Url} */ (getServiceForDocOrNull(
       element,
       'url'
     ));
@@ -735,21 +749,6 @@ export class Services {
       elementOrAmpDoc,
       'video-manager'
     ));
-  }
-
-  /**
-   * @param {!Element|!ShadowRoot} element
-   * @return {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>}
-   */
-  static viewerAssistanceForDocOrNull(element) {
-    return (
-      /** @type {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>} */
-      (getElementServiceIfAvailableForDoc(
-        element,
-        'amp-viewer-assistance',
-        'amp-viewer-assistance'
-      ))
-    );
   }
 
   /**

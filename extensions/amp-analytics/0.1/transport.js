@@ -188,7 +188,7 @@ export class Transport {
    * Sends a ping request using an iframe, that is removed 5 seconds after
    * it is loaded.
    * This is not available as a standard transport, but rather used for
-   * specific, whitelisted requests.
+   * specific, allowlisted requests.
    * Note that this is unrelated to the iframeTransport
    *
    * @param {string} url

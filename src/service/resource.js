@@ -17,16 +17,15 @@
 import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
+import {cancellation, isBlockedByConsent, reportError} from '../error';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
-import {startsWith} from '../string';
 import {toWin} from '../types';
 
 const TAG = 'Resource';
@@ -175,6 +174,13 @@ export class Resource {
 
     /** @private {number} */
     this.layoutCount_ = 0;
+
+    /**
+     * Used to signal that the current layoutCallback has been aborted by an
+     * unlayoutCallback.
+     * @private {?AbortController}
+     */
+    this.abortController_ = null;
 
     /** @private {*} */
     this.lastLayoutError_ = null;
@@ -340,6 +346,12 @@ export class Resource {
         // so check if we're "ready for layout" (measured and built) here.
         if (this.intersect_ && this.hasBeenMeasured()) {
           this.state_ = ResourceState.READY_FOR_LAYOUT;
+          // The InOb premeasurement couldn't account for fixed position since
+          // implementation wasn't loaded yet. Perform a remeasure now that we know it
+          // is fixed.
+          if (this.element.isAlwaysFixed() && !this.isFixed_) {
+            this.requestMeasure();
+          }
           this.element.onMeasure(/* sizeChanged */ true);
         } else {
           this.state_ = ResourceState.NOT_LAID_OUT;
@@ -464,7 +476,7 @@ export class Resource {
       this.element.parentElement &&
       // Use prefix to recognize AMP element. This is necessary because stub
       // may not be attached yet.
-      startsWith(this.element.parentElement.tagName, 'AMP-') &&
+      this.element.parentElement.tagName.startsWith('AMP-') &&
       !(RESOURCE_PROP_ in this.element.parentElement)
     ) {
       return;
@@ -485,10 +497,10 @@ export class Resource {
     const oldBox = this.layoutBox_;
     if (usePremeasuredRect) {
       this.computeMeasurements_(devAssert(this.premeasuredRect_));
-      this.premeasuredRect_ = null;
     } else {
       this.computeMeasurements_();
     }
+    this.premeasuredRect_ = null;
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -498,13 +510,19 @@ export class Resource {
       oldBox.top != newBox.top ||
       sizeChanges
     ) {
-      if (
-        this.element.isUpgraded() &&
-        this.state_ != ResourceState.NOT_BUILT &&
-        (this.state_ == ResourceState.NOT_LAID_OUT ||
-          this.element.isRelayoutNeeded())
-      ) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
+      if (this.element.isUpgraded()) {
+        if (this.state_ == ResourceState.NOT_LAID_OUT) {
+          // If the element isn't laid out yet, then we're now ready for layout.
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+        } else if (
+          (this.state_ == ResourceState.LAYOUT_COMPLETE ||
+            this.state_ == ResourceState.LAYOUT_FAILED) &&
+          this.element.isRelayoutNeeded()
+        ) {
+          // If the element was already laid out and we need to relayout, then
+          // go back to ready for layout.
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+        }
       }
     }
 
@@ -620,6 +638,10 @@ export class Resource {
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
+   * The returned layoutBox is:
+   * - relative to the top of the document for non fixed element,
+   * - relative to the top of the document at current scroll position
+   *   for fixed element.
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
@@ -677,17 +699,18 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed(usePremeasuredRect = false) {
+    const isConnected =
+      this.element.ownerDocument && this.element.ownerDocument.defaultView;
+    if (!isConnected) {
+      return false;
+    }
     devAssert(!usePremeasuredRect || this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
       ? devAssert(this.premeasuredRect_)
       : this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
-    return (
-      (isFluid || hasNonZeroSize) &&
-      !!this.element.ownerDocument &&
-      !!this.element.ownerDocument.defaultView
-    );
+    return isFluid || hasNonZeroSize;
   }
 
   /**
@@ -895,6 +918,17 @@ export class Resource {
     );
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
+    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
+      const err = dev().createError(
+        'startLayout called but not LAYOUT_SCHEDULED',
+        'currently: ',
+        this.state_
+      );
+      err.associatedElement = this.element;
+      reportError(err);
+      return Promise.reject(err);
+    }
+
     // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
       dev().fine(
@@ -910,30 +944,42 @@ export class Resource {
     dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.abortController_ = new AbortController();
+    const {signal} = this.abortController_;
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
         try {
-          resolve(this.element.layoutCallback());
+          resolve(this.element.layoutCallback(signal));
         } catch (e) {
           reject(e);
         }
       });
-    });
-
-    this.layoutPromise_ = promise.then(
-      () => this.layoutComplete_(true),
-      (reason) => this.layoutComplete_(false, reason)
+    }).then(
+      () => this.layoutComplete_(true, signal),
+      (reason) => this.layoutComplete_(false, signal, reason)
     );
-    return this.layoutPromise_;
+
+    return (this.layoutPromise_ = promise);
   }
 
   /**
    * @param {boolean} success
+   * @param {!AbortSignal} signal
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
    */
-  layoutComplete_(success, opt_reason) {
+  layoutComplete_(success, signal, opt_reason) {
+    this.abortController_ = null;
+    if (signal.aborted) {
+      // We hit a race condition, where `layoutCallback` -> `unlayoutCallback`
+      // was called in quick succession. Since the unlayout was called before
+      // the layout completed, we want to remain in the unlayout state.
+      const err = dev().createError('layoutComplete race');
+      err.associatedElement = this.element;
+      dev().expectedError(TAG, err);
+      throw cancellation();
+    }
     if (this.loadPromiseResolve_) {
       this.loadPromiseResolve_();
       this.loadPromiseResolve_ = null;
@@ -1008,14 +1054,25 @@ export class Resource {
   unlayout() {
     if (
       this.state_ == ResourceState.NOT_BUILT ||
-      this.state_ == ResourceState.NOT_LAID_OUT
+      this.state_ == ResourceState.NOT_LAID_OUT ||
+      this.state_ == ResourceState.READY_FOR_LAYOUT
     ) {
       return;
+    }
+    if (this.abortController_) {
+      this.abortController_.abort();
+      this.abortController_ = null;
     }
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
       this.element.togglePlaceholder(true);
-      this.state_ = ResourceState.NOT_LAID_OUT;
+      // With IntersectionObserver, the element won't receive another
+      // measurement if/when the document becomes active again.
+      // Therefore, its post-unlayout state must be READY_FOR_LAYOUT
+      // (built and measured) to become eligible for relayout later.
+      this.state_ = this.intersect_
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;
     }

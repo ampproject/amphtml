@@ -30,7 +30,7 @@ limitations under the License.
 
 | Version | Description                                                                                                                                                                                                                                                                                                                                                                                              |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0.2     | Support for SVG elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
+| 0.2     | Support for SVG elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute allowlisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
 | 0.1     | Initial implementation.                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Syntax
@@ -178,8 +178,6 @@ When using `amp-mustache` to calculate attribute values, quote escaping can be a
 ```
 
 Using HTML character codes in the `{{foo}}` or `{{bar}}` variables won't work since Mustache will HTML escape `&` characters (e.g. `&quot;` -> `&amp;quot;`). One workaround is to use facsimile characters e.g. &prime; (`&prime;`) and &Prime; (`&Prime;`).
-
-There's an [open proposal](https://github.com/ampproject/amphtml/issues/8395) to perform this substitution in `amp-mustache` instead. Please comment on the issue if you'd like to support it.
 
 ### HTML entities
 

@@ -26,11 +26,8 @@ import {dict} from '../utils/object';
 import {escapeCssSelectorIdent} from '../css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
 import {isLocalhostOrigin} from '../url';
+import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -91,22 +88,18 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
 export class Navigation {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const {!Document|!ShadowRoot} */
-    this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getRootNode();
 
     /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
@@ -201,19 +194,6 @@ export class Navigation {
   }
 
   /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      TAG,
-      new Navigation(ampdoc, embedWin.document)
-    );
-  }
-
-  /**
    * Removes all event listeners.
    */
   cleanup() {
@@ -265,14 +245,10 @@ export class Navigation {
    * @param {!{
    *   target: (string|undefined),
    *   opener: (boolean|undefined),
-   * }=} opt_options
+   * }=} options
    */
-  navigateTo(
-    win,
-    url,
-    opt_requestedBy,
-    {target = '_top', opener = false} = {}
-  ) {
+  navigateTo(win, url, opt_requestedBy, options = {}) {
+    const {target = '_top', opener = false} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
@@ -285,8 +261,9 @@ export class Navigation {
       `Target '${target}' not supported.`
     );
 
-    // Resolve navigateTos relative to the source URL, not the proxy URL.
-    url = urlService.getSourceUrl(url);
+    // If we're on cache, resolve relative URLs to the publisher (non-cache) origin.
+    const sourceUrl = urlService.getSourceUrl(win.location);
+    url = urlService.resolveRelativeUrl(url, sourceUrl);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
@@ -423,7 +400,7 @@ export class Navigation {
    * @private
    */
   handleContextMenuClick_(element, e) {
-    // TODO(wg-runtime): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
+    // TODO(wg-performance): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
     this.expandVarsForAnchor_(element);
     this.applyAnchorMutators_(element, e);
   }
@@ -830,10 +807,10 @@ function maybeExpandUrlParams(ampdoc, e) {
   const newHref = Services.urlReplacementsForDoc(target).expandUrlSync(
     hrefToExpand,
     vars,
-    /* opt_whitelist */ {
+    /* opt_allowlist */ {
       // For now we only allow to replace the click location vars
       // and nothing else.
-      // NOTE: Addition to this whitelist requires additional review.
+      // NOTE: Addition to this allowlist requires additional review.
       'CLICK_X': true,
       'CLICK_Y': true,
     }

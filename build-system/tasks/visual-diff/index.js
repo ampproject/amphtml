@@ -28,7 +28,7 @@ const {
 const {
   escapeHtml,
   log,
-  waitForLoaderDots,
+  waitForPageLoad,
   verifySelectorsInvisible,
   verifySelectorsVisible,
 } = require('./helpers');
@@ -48,7 +48,9 @@ const {waitUntilUsed} = require('tcp-port-used');
 let puppeteer;
 let percySnapshot;
 
-const SNAPSHOT_SINGLE_BUILD_OPTIONS = {widths: [375]};
+const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
+  widths: [375],
+};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
@@ -157,7 +159,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: argv.compiled}
+    {compiled: true}
   );
 }
 
@@ -181,12 +183,6 @@ async function launchBrowser() {
   } catch (error) {
     log('fatal', error);
   }
-
-  // Every action on the browser or its pages adds a listener to the
-  // Puppeteer.Connection.Events.Disconnected event. This is a temporary
-  // workaround for the Node runtime warning that is emitted once 11 listeners
-  // are added to the same object.
-  browser_._connection.setMaxListeners(9999);
 
   return browser_;
 }
@@ -475,45 +471,44 @@ async function snapshotWebpages(browser, webpages) {
       // since Puppeteer doesn't always understand Chrome's network activity, so
       // ignore timeouts again.
       const pagePromise = (async () => {
-        const responseWatcher = new Promise((resolve, reject) => {
-          const responseTimeout = setTimeout(() => {
-            reject(
-              new puppeteer.TimeoutError(
-                `Response was not received in test ${testName} for page ` +
-                  `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
-              )
-            );
-          }, NAVIGATE_TIMEOUT_MS);
+        try {
+          const responseWatcher = new Promise((resolve, reject) => {
+            const responseTimeout = setTimeout(() => {
+              reject(
+                new puppeteer.TimeoutError(
+                  `Response was not received in test ${testName} for page ` +
+                    `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
+                )
+              );
+            }, NAVIGATE_TIMEOUT_MS);
 
-          page.once('response', async (response) => {
-            log(
-              'verbose',
-              'Response for url',
-              colors.yellow(response.url()),
-              'with status',
-              colors.cyan(response.status()),
-              colors.cyan(response.statusText())
-            );
-            clearTimeout(responseTimeout);
-            resolve();
+            page.once('response', (response) => {
+              log(
+                'verbose',
+                'Response for url',
+                colors.yellow(response.url()),
+                'with status',
+                colors.cyan(response.status()),
+                colors.cyan(response.statusText())
+              );
+              clearTimeout(responseTimeout);
+              resolve();
+            });
           });
-        });
 
-        log('verbose', 'Navigating to page', colors.yellow(webpage.url));
-        await Promise.all([
-          responseWatcher,
-          page.goto(fullUrl, {waitUntil: 'networkidle2'}),
-        ]);
-      })()
-        .then(() => {
+          log('verbose', 'Navigating to page', colors.yellow(webpage.url));
+          await Promise.all([
+            responseWatcher,
+            page.goto(fullUrl, {waitUntil: 'networkidle2'}),
+          ]);
+
           log(
             'verbose',
             'Page navigation of test',
             colors.yellow(name),
             'is done, verifying page'
           );
-        })
-        .catch((navigationError) => {
+        } catch (navigationError) {
           hasWarnings = true;
           addTestError(
             testErrors,
@@ -523,77 +518,75 @@ async function snapshotWebpages(browser, webpages) {
             navigationError,
             consoleMessages
           );
-          if (!isTravisBuild()) {
-            log('warning', 'Continuing to verify page regardless...');
-          }
-        })
-        .then(async () => {
-          // Perform visibility checks: wait for all AMP built-in loader dots
-          // to disappear (i.e., all visible components are finished being
-          // layed out and external resources such as images are loaded and
-          // displayed), then, depending on the test configurations, wait for
-          // invisibility/visibility of specific elements that match the
-          // configured CSS selectors.
-          await waitForLoaderDots(page, name);
-          if (webpage.loading_incomplete_selectors) {
-            await verifySelectorsInvisible(
-              page,
-              name,
-              webpage.loading_incomplete_selectors
-            );
-          }
-          if (webpage.loading_complete_selectors) {
-            await verifySelectorsVisible(
-              page,
-              name,
-              webpage.loading_complete_selectors
-            );
-          }
+          log('warning', 'Continuing to verify page regardless...');
+        }
 
-          // Based on test configuration, wait for a specific amount of time.
-          if (webpage.loading_complete_delay_ms) {
-            log(
-              'verbose',
-              'Waiting',
-              colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
-              'for loading to complete'
-            );
-            await sleep(webpage.loading_complete_delay_ms);
-          }
+        // Perform visibility checks: wait for all AMP built-in loader dots
+        // to disappear (i.e., all visible components are finished being
+        // layed out and external resources such as images are loaded and
+        // displayed), then, depending on the test configurations, wait for
+        // invisibility/visibility of specific elements that match the
+        // configured CSS selectors.
+        await waitForPageLoad(page, name);
+        if (webpage.loading_incomplete_selectors) {
+          await verifySelectorsInvisible(
+            page,
+            name,
+            webpage.loading_incomplete_selectors
+          );
+        }
+        if (webpage.loading_complete_selectors) {
+          await verifySelectorsVisible(
+            page,
+            name,
+            webpage.loading_complete_selectors
+          );
+        }
 
-          // Run any other custom code located in the test's interactive_tests
-          // file. If there is no interactive test, this defaults to an empty
-          // function.
-          await testFunction(page, name);
+        // Based on test configuration, wait for a specific amount of time.
+        if (webpage.loading_complete_delay_ms) {
+          log(
+            'verbose',
+            'Waiting',
+            colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
+            'for loading to complete'
+          );
+          await sleep(webpage.loading_complete_delay_ms);
+        }
 
-          // Execute post-scripts that clean up the page's HTML and send
-          // prepare it for snapshotting on Percy. See comments inside the
-          // snippet files for description of each.
-          await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
-          await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
+        // Run any other custom code located in the test's interactive_tests
+        // file. If there is no interactive test, this defaults to an empty
+        // function.
+        await testFunction(page, name);
 
-          // Create a default set of snapshot options for Percy and modify
-          // them based on the test's configuration.
-          const snapshotOptions = {};
-          if (webpage.enable_percy_javascript) {
-            snapshotOptions.enableJavaScript = true;
-          }
+        // Execute post-scripts that clean up the page's HTML and send
+        // prepare it for snapshotting on Percy. See comments inside the
+        // snippet files for description of each.
+        await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
+        await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
 
-          if (viewport) {
-            snapshotOptions.widths = [viewport.width];
-            log('verbose', 'Wrapping viewport-constrained page in an iframe');
-            await page.evaluate(
-              WRAP_IN_IFRAME_SNIPPET.replace(
-                /__WIDTH__/g,
-                viewport.width
-              ).replace(/__HEIGHT__/g, viewport.height)
-            );
-          }
+        // Create a default set of snapshot options for Percy and modify
+        // them based on the test's configuration.
+        const snapshotOptions = {};
+        if (webpage.enable_percy_javascript) {
+          snapshotOptions.enableJavaScript = true;
+        }
 
+        if (viewport) {
+          snapshotOptions.widths = [viewport.width];
+          log('verbose', 'Wrapping viewport-constrained page in an iframe');
+          await page.evaluate(
+            WRAP_IN_IFRAME_SNIPPET.replace(
+              /__WIDTH__/g,
+              viewport.width
+            ).replace(/__HEIGHT__/g, viewport.height)
+          );
+        }
+
+        try {
           // Finally, send the snapshot to percy.
           await percySnapshot(page, name, snapshotOptions);
-        })
-        .catch(async (testError) => {
+        } catch (testError) {
           addTestError(
             testErrors,
             name,
@@ -614,17 +607,17 @@ async function snapshotWebpages(browser, webpages) {
               .replace('__HTML_SNAPSHOT__', escapeHtml(htmlSnapshot))
           );
           await percySnapshot(page, name, SNAPSHOT_SINGLE_BUILD_OPTIONS);
-        })
-        .finally(async () => {
-          log(
-            hasWarnings ? 'warning' : 'info',
-            'Finished test',
-            colors.yellow(name),
-            hasWarnings ? 'with warnings' : ''
-          );
-          page.removeListener('console', consoleLogger);
-          availablePages.push(page);
-        });
+        }
+
+        log(
+          hasWarnings ? 'warning' : 'info',
+          'Finished test',
+          colors.yellow(name),
+          hasWarnings ? 'with warnings' : ''
+        );
+        page.removeListener('console', consoleLogger);
+        availablePages.push(page);
+      })();
       pagePromises.push(pagePromise);
     }
   }
@@ -668,12 +661,14 @@ async function createEmptyBuild() {
   const browser = await launchBrowser();
   const page = await newPage(browser);
 
-  await page
-    .goto(`http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`)
-    .then(
-      () => {},
-      () => {}
+  try {
+    await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
     );
+  } catch {
+    // Ignore failures
+  }
+
   await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
 }
 
@@ -753,19 +748,19 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp build|dist --fortesting'),
+        colors.cyan('gulp dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    await buildRuntime();
+    await buildRuntime(/* opt_compiled */ true);
   }
 }
 
 function installPercy_() {
-  if (!argv.noyarn) {
+  if (!argv.noinstall) {
     installPackages(__dirname);
   }
 
@@ -824,6 +819,5 @@ visualDiff.flags = {
   'percy_disabled':
     '  Disables Percy integration (for testing local changes only)',
   'nobuild': '  Skip build',
-  'noyarn': '  Skip calling yarn to install dependencies',
-  'compiled': '  Runs tests against minified JS',
+  'noinstall': '  Skip installing npm dependencies',
 };

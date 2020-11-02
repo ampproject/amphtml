@@ -339,8 +339,8 @@ CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.AtRuleSpec.type',
     'amp.validator.AttrSpec.name',
     'amp.validator.AttrTriggerSpec.also_requires_attr',
-    'amp.validator.BlackListedCDataRegex.error_message',
-    'amp.validator.BlackListedCDataRegex.regex',
+    'amp.validator.DenyListedCDataRegex.error_message',
+    'amp.validator.DenyListedCDataRegex.regex',
     'amp.validator.ErrorFormat.code',
     'amp.validator.ErrorFormat.format',
     'amp.validator.PropertySpec.name',
@@ -366,17 +366,17 @@ TAG_SPEC_NAME_REFERENCE_FIELD = [
 ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 
 # These fields contain messages in the .protoascii, but we replace
-# them with message ids, which are numbers. Thus far we do this for
-# the AttrSpecs.
+# them with message ids, which are numbers.
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
-    'amp.validator.AttrSpec.blacklisted_value_regex',
+    'amp.validator.AttrSpec.disallowed_value_regex',
     'amp.validator.AttrSpec.mandatory_anyof',
     'amp.validator.AttrSpec.mandatory_oneof',
     'amp.validator.AttrSpec.value_regex',
     'amp.validator.AttrSpec.value_regex_casei',
     'amp.validator.AttrTriggerSpec.if_value_regex',
     'amp.validator.CdataSpec.cdata_regex',
+    'amp.validator.CssDeclaration.value_regex_casei',
     'amp.validator.TagSpec.attrs',
     'amp.validator.TagSpec.mandatory_alternatives',
     'amp.validator.TagSpec.requires',
@@ -448,7 +448,7 @@ def PrintClassFor(descriptor, msg_desc, out):
         'this.%s = %s;' % (UnderscoreToCamelCase(field.name), assigned_value))
   if msg_desc.full_name == 'amp.validator.CdataSpec':
     out.Line('/** @type {?number} */')
-    out.Line('this.combinedBlacklistedCdataRegex = null;')
+    out.Line('this.combinedDenyListedCdataRegex = null;')
   if msg_desc.full_name == 'amp.validator.ValidatorRules':
     out.Line('/** @type {!Array<!string>} */')
     out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
@@ -667,13 +667,12 @@ def PrintObject(descriptor, msg, registry, out):
                  msg.DESCRIPTOR.full_name), ','.join(constructor_arg_values)))
 
   if (msg.DESCRIPTOR.full_name == 'amp.validator.CdataSpec' and
-      msg.blacklisted_cdata_regex):
-    combined_blacklisted_cdata_regex = '(%s)' % '|'.join([
-        r.regex for r in msg.blacklisted_cdata_regex])
-    out.Line('%s.%s = %d;' % (
-        this_message_reference,
-        'combinedBlacklistedCdataRegex',
-        registry.InternString(combined_blacklisted_cdata_regex)))
+      msg.disallowed_cdata_regex):
+    combined_disallowed_cdata_regex = '(%s)' % '|'.join(
+        [r.regex for r in msg.disallowed_cdata_regex])
+    out.Line('%s.%s = %d;' %
+             (this_message_reference, 'combinedDenyListedCdataRegex',
+              registry.InternString(combined_disallowed_cdata_regex)))
 
 
 def DispatchKeyForTagSpecOrNone(tag_spec):

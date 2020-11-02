@@ -23,10 +23,8 @@ const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpIf = require('gulp-if');
-const gulpWatch = require('gulp-watch');
-const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
+const open = require('open');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
@@ -37,14 +35,15 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {EventEmitter} = require('events');
 const {green, red, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
+const {jsBundles} = require('../compile/bundles.config');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
+const {watch: gulpWatch} = require('gulp');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -76,8 +75,6 @@ const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
 
 /**
  * List of minified targets to which AMP_CONFIG should be written
- * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
- * for details.
  */
 const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
 
@@ -130,7 +127,10 @@ async function bootstrapThirdPartyFrames(options) {
       const watchFunc = () => {
         thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
-      gulpWatch(frameObject.max, debounce(watchFunc, watchDebounceDelay));
+      gulpWatch(frameObject.max).on(
+        'change',
+        debounce(watchFunc, watchDebounceDelay)
+      );
     });
   }
   await Promise.all(promises);
@@ -176,6 +176,7 @@ async function compileAllJs(options) {
     doBuildJs(jsBundles, 'recaptcha.js', options),
     doBuildJs(jsBundles, 'amp-viewer-host.max.js', options),
     doBuildJs(jsBundles, 'video-iframe-integration.js', options),
+    doBuildJs(jsBundles, 'amp-story-entry-point.js', options),
     doBuildJs(jsBundles, 'amp-story-player.js', options),
     doBuildJs(jsBundles, 'amp-inabox-host.js', options),
     doBuildJs(jsBundles, 'amp-shadow.js', options),
@@ -250,7 +251,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         options.onWatchBuild(compileComplete);
       }
     };
-    gulpWatch(entryPoint, debounce(watchFunc, watchDebounceDelay));
+    gulpWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   async function doCompileMinifiedJs(continueOnError) {
@@ -277,12 +278,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     if (options.latestName) {
       name += ` → ${maybeToEsmName(options.latestName)}`;
     }
-    if (options.singlePassCompilation) {
-      altMainBundles.forEach((bundle) => {
-        name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
-      });
-      name += ', and all extensions';
-    }
     endBuildStep('Minified', name, timeInfo.startTime);
 
     const target = path.basename(minifiedName, path.extname(minifiedName));
@@ -293,21 +288,9 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         /* fortesting */ options.fortesting
       );
     }
-
-    if (argv.noconfig || !options.singlePassCompilation) {
-      return;
-    }
-    return await Promise.all(
-      altMainBundles.map(({name}) =>
-        applyAmpConfig(
-          maybeToEsmName(`dist/${name}.js`),
-          /* localDev */ options.fortesting,
-          /* fortesting */ options.fortesting
-        )
-      )
-    );
   }
-  await doCompileMinifiedJs(options.continueOnError);
+
+  return doCompileMinifiedJs(options.continueOnError);
 }
 
 /**
@@ -408,7 +391,6 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
-        .pipe(gulpIf(argv.coverage, istanbul()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(
           regexpSourcemaps(
@@ -477,9 +459,9 @@ async function compileTs(srcDir, srcFilename, destDir, options) {
 async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
-    return await compileMinifiedJs(srcDir, srcFilename, destDir, options);
+    return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -535,7 +517,6 @@ function printConfigHelp(command) {
  */
 function printNobuildHelp() {
   for (const task of NOBUILD_HELP_TASKS) {
-    // eslint-disable-line local/no-for-of-statement
     if (argv._.includes(task)) {
       log(
         green('To skip building during future'),
@@ -549,6 +530,20 @@ function printNobuildHelp() {
       return;
     }
   }
+}
+
+/**
+ * @param {string=} covPath
+ * @return {!Promise}
+ */
+async function maybePrintCoverageMessage(covPath) {
+  if (!argv.coverage || isTravisBuild()) {
+    return;
+  }
+
+  const url = 'file://' + path.resolve(covPath);
+  log(green('INFO:'), 'Generated code coverage report at', cyan(url));
+  await open(url, {wait: false});
 }
 
 /**
@@ -664,6 +659,7 @@ function toPromise(readable) {
 }
 
 module.exports = {
+  MINIFIED_TARGETS,
   applyAmpConfig,
   bootstrapThirdPartyFrames,
   compileAllJs,
@@ -672,6 +668,7 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
+  maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,

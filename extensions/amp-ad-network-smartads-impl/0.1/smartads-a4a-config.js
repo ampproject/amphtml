@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {startsWith} from '../../../src/string';
-
 /** @const @private {string} */
 const SRC_PREFIX_ = 'https://smart-ads.biz/_amp';
 
@@ -34,6 +32,6 @@ export function smartAdsIsA4AEnabled(win, element, useRemoteHtml) {
     !useRemoteHtml &&
     !!src &&
     !!element.getAttribute('data-use-a4a') &&
-    (startsWith(src, SRC_PREFIX_) || startsWith(src, SRC_A4A_PREFIX_))
+    (src.startsWith(SRC_PREFIX_) || src.startsWith(SRC_A4A_PREFIX_))
   );
 }

@@ -15,12 +15,18 @@
  */
 
 import '../amp-accordion';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
+import {Services} from '../../../../src/services';
 import {computedStyle} from '../../../../src/style';
+import {
+  createElementWithAttributes,
+  tryFocus,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
-import {tryFocus} from '../../../../src/dom';
 
 describes.realWin(
   'amp-accordion',
@@ -244,7 +250,7 @@ describes.realWin(
         const content = section.children[1];
         expect(section.hasAttribute('expanded')).to.be.false;
         expect(header.getAttribute('aria-expanded')).to.equal('false');
-        content.dispatchEvent(new Event('rendersubtreeactivation'));
+        content.dispatchEvent(new Event('beforematch'));
         expect(section.hasAttribute('expanded')).to.be.true;
         expect(header.getAttribute('aria-expanded')).to.equal('true');
         toggleExperiment(win, 'amp-accordion-display-locking', false);
@@ -851,6 +857,127 @@ describes.realWin(
           'expand',
           /* event */ env.sandbox.match.has('detail'),
           /* trust */ 456
+        );
+      });
+    });
+
+    it('should include a11y related attributes', () => {
+      return getAmpAccordion().then(() => {
+        const sectionElements = doc.querySelectorAll('section');
+        expect(sectionElements.length).to.equal(3);
+
+        const section0 = sectionElements[0];
+        const section1 = sectionElements[1];
+        const section2 = sectionElements[2];
+        const {
+          firstElementChild: header0,
+          lastElementChild: content0,
+        } = section0;
+        const {
+          firstElementChild: header1,
+          lastElementChild: content1,
+        } = section1;
+        const {
+          firstElementChild: header2,
+          lastElementChild: content2,
+        } = section2;
+
+        expect(header0).to.have.attribute('id');
+        expect(header0.getAttribute('aria-controls')).to.equal('test0');
+        expect(header0.getAttribute('tabindex')).to.equal('0');
+        expect(header0.getAttribute('role')).to.equal('button');
+        expect(content0).to.have.attribute('aria-labelledby');
+        expect(content0.getAttribute('id')).to.equal('test0');
+        expect(content0.getAttribute('role')).to.equal('region');
+        expect(header0.getAttribute('aria-controls')).to.equal(
+          content0.getAttribute('id')
+        );
+        expect(header0.getAttribute('id')).to.equal(
+          content0.getAttribute('aria-labelledby')
+        );
+
+        expect(header1).to.have.attribute('id');
+        expect(header1.getAttribute('aria-controls')).to.equal('test1');
+        expect(header1.getAttribute('tabindex')).to.equal('0');
+        expect(header1.getAttribute('role')).to.equal('button');
+        expect(content1).to.have.attribute('aria-labelledby');
+        expect(content1.getAttribute('id')).to.equal('test1');
+        expect(content1.getAttribute('role')).to.equal('region');
+        expect(header1.getAttribute('aria-controls')).to.equal(
+          content1.getAttribute('id')
+        );
+        expect(header1.getAttribute('id')).to.equal(
+          content1.getAttribute('aria-labelledby')
+        );
+
+        expect(header2).to.have.attribute('id');
+        expect(header2.getAttribute('aria-controls')).to.equal('test2');
+        expect(header2.getAttribute('tabindex')).to.equal('0');
+        expect(header2.getAttribute('role')).to.equal('button');
+        expect(content2).to.have.attribute('aria-labelledby');
+        expect(content2.getAttribute('id')).to.equal('test2');
+        expect(content2.getAttribute('role')).to.equal('region');
+        expect(header2.getAttribute('aria-controls')).to.equal(
+          content2.getAttribute('id')
+        );
+        expect(header2.getAttribute('id')).to.equal(
+          content2.getAttribute('aria-labelledby')
+        );
+      });
+    });
+  }
+);
+
+describes.realWin(
+  'amp-accordion component with runtime on',
+  {
+    amp: {
+      extensions: ['amp-accordion:0.1'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-accordion',
+        {'layout': 'container'}
+      );
+      const section = env.win.document.createElement('section');
+      section.appendChild(env.win.document.createElement('h1'));
+      section.appendChild(env.win.document.createElement('p'));
+      element.appendChild(section);
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      ['toggle', 'expand', 'collapse'].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(element.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
         );
       });
     });

@@ -28,11 +28,11 @@ It is possible to opt into the **nightly** channel, to test pull requests that w
 
 ### Weekly
 
-The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [detailed schedule](#detailed-schedule)).
+The _weekly_ release channels are considered to be the primary "evergreen" release channels. Each week the **beta** release from the previous week is promoted to the **stable** release channel, and the last **nightly** release from the previous week is promoted to the **experimental** and **beta** release channels (see the [detailed schedule](#detailed-schedule)).
 
 There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit. However, the **experimental** channel uses the _canary_ configuration while the **beta** channel uses the _production_ configuration. The _canary_ configuration enables experimental components and features that may be turned off in _production_. It is possible to opt into the **experimental** or **beta** channels via the [experiments page](https://cdn.ampproject.org/experiments.html).
 
-The **stable** release channel is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release channel is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (modulo the possibility of cherry-picks; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)).
+The **stable** release channel is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release channel is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (with the possibility of cherry-picks to fix last-minute issues; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)).
 
 #### Beta and Experimental channels
 
@@ -85,7 +85,7 @@ After considering all of these factors, we have arrived at the 1-2 week push cyc
 
 We try to stick to this schedule as closely as possible, though complications may cause delays. You can track the latest status about any release in the [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 
-- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
+- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.com/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
 - Wednesday: we check bug reports for _Experimental Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
 - Thursday-Monday: we continue to monitor error rates and bug reports for _Experimental Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
 - Tuesday the following week: the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)
@@ -100,6 +100,7 @@ If a one week release freeze is announced for Week N:
 - A new release build is _not_ made in the freeze week (Week N).
 - The normal schedule will resume in Week N+1, i.e. **experimental**/**beta** are cut in Week N+1 and promoted to **stable** in Week N+2.
 - If the **stable** release promoted during Week N-1 was originally scheduled to be promoted to **lts** during Week N, it will now be promoted to **lts** on the Monday of Week N+1.
+- **nightly** releases are still generated and promoted, as they are fully automated.
 
 A release freeze may happen due to:
 

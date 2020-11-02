@@ -3,87 +3,127 @@
   "node": {
     "supportPolicy": ["lts_active"]
   },
-  "statusCheckVerify": true,
   "ignorePaths": [],
 
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",
-  "schedule": "at any time",
+  "schedule": "after 12am every weekday",
 
-  "masterIssue": true,
-  "masterIssueApproval": true,
-
+  "dependencyDashboard": true,
+  "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
   "separateMinorPatch": true,
+  "prBodyNotes": [
+    "<details>",
+    "<summary>How to resolve breaking changes</summary>",
+    "This PR may introduce breaking changes that require manual intervention. In such cases, you will need to check out this branch, fix the cause of the breakage, and commit the fix to ensure a green Travis build. To check out and update this PR, follow the steps below:",
+    "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} master\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\ngulp lint --fix # For lint errors in JS files\ngulp prettify --fix # For prettier errors in non-JS files\n# Edit source code in case of new compiler warnings / errors\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
+    "</details>"
+  ],
+
   "packageRules": [
     {
-      "updateTypes": ["minor"],
-      "groupName": "subpackage dependencies"
+      "paths": ["**/*"],
+      "groupName": "subpackage devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "subpackage-"
+      }
     },
     {
-      "updateTypes": ["patch", "pin"],
-      "groupName": "subpackage dependencies"
-    },
+      "paths": ["src/**"],
+      "labels": ["WG: runtime"],
 
-    {
-      "paths": ["src/**"],
-      "updateTypes": ["minor"],
-      "groupName": "runtime dependencies",
-      "labels": ["WG: runtime"]
-    },
-    {
-      "paths": ["src/**"],
-      "updateTypes": ["patch", "pin"],
-      "groupName": "runtime dependencies",
-      "labels": ["WG: runtime"]
+      "groupName": "runtime devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "runtime-"
+      }
     },
 
     {
       "paths": ["build-system/**"],
-      "updateTypes": ["minor"],
-      "groupName": "build system dependencies",
-      "labels": ["WG: infra"]
-    },
-    {
-      "paths": ["build-system/**"],
-      "updateTypes": ["patch", "pin"],
-      "groupName": "build system dependencies",
-      "labels": ["WG: infra"]
+      "labels": ["WG: infra"],
+
+      "groupName": "build system devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "build-system-"
+      }
     },
 
     {
       "paths": ["validator/**"],
-      "updateTypes": ["minor"],
-      "groupName": "validator dependencies",
-      "labels": ["WG: caching"]
-    },
-    {
-      "paths": ["validator/**"],
-      "updateTypes": ["patch", "pin"],
-      "groupName": "validator dependencies",
-      "labels": ["WG: caching"]
+      "labels": ["WG: caching"],
+
+      "groupName": "validator devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "validator-"
+      }
     },
 
     {
       "paths": ["+(package.json)"],
-      "updateTypes": ["minor"],
-      "groupName": "core dependencies"
-    },
-    {
-      "paths": ["+(package.json)"],
-      "updateTypes": ["patch", "pin"],
-      "groupName": "core dependencies"
+
+      "groupName": "core devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "core-"
+      }
     },
 
     {
+      "packagePatterns": ["\\b(prettier|eslint)\\b"],
+
+      "groupName": "linting devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "linting-"
+      }
+    },
+
+    {
+      "packagePatterns": ["\\bbabel"],
+
+      "groupName": "babel devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "babel-"
+      }
+    },
+
+    {
+      "packagePatterns": ["renovate"],
+      "depTypeList": ["devDependencies"],
+      "groupName": "Renovate Bot"
+    },
+
+    {
+      "excludePackagePatterns": ["^@ampproject/"],
       "depTypeList": ["dependencies"],
       "enabled": false
     },
 
     {
-      "updateTypes": ["minor", "patch", "pin"],
       "packagePatterns": ["^@ampproject/"],
+      "depTypeList": ["devDependencies"],
+
+      "groupName": "ampproject devDependencies",
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "ampproject-"
+      }
+    },
+
+    {
+      "packagePatterns": ["^@ampproject/"],
+      "depTypeList": ["dependencies"],
+
       "groupName": "ampproject dependencies",
-      "depTypeList": ["dependencies", "devDependencies"]
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "ampproject-"
+      }
     }
   ]
 }

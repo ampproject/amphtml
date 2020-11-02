@@ -30,10 +30,10 @@ import {
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
@@ -86,8 +86,8 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.muted_ = false;
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = false;
+    /** @private {?boolean} */
+    this.prerenderAllowed_ = null;
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
@@ -111,18 +111,6 @@ class AmpVideo extends AMP.BaseElement {
         opt_onLayout
       );
     });
-  }
-
-  /**
-   * @override
-   */
-  firstAttachedCallback() {
-    // Only allow prerender if video sources are cached on CDN, or if video has
-    // a poster image. Set this value in `firstAttachedCallback` since
-    // `buildCallback` is too late and the element children may not be available
-    // in the constructor.
-    const posterAttr = this.element.getAttribute('poster');
-    this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
   }
 
   /**
@@ -161,6 +149,12 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   prerenderAllowed() {
+    // Only allow prerender if video sources are cached on CDN, or if video has
+    // a poster image.
+    if (this.prerenderAllowed_ == null) {
+      const posterAttr = this.element.getAttribute('poster');
+      this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
+    }
     return this.prerenderAllowed_;
   }
 
@@ -200,6 +194,9 @@ class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
+    if (this.element.querySelector('source[data-bitrate]')) {
+      getBitrateManager(this.win).manage(this.video_);
+    }
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -298,11 +295,6 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   layoutCallback() {
     this.video_ = dev().assertElement(this.video_);
 
@@ -339,7 +331,13 @@ class AmpVideo extends AMP.BaseElement {
           // load.
           return Services.timerFor(this.win)
             .promise(1)
-            .then(() => this.loadPromise(this.video_));
+            .then(() => {
+              // Don't wait for the source to load if media pool is taking over.
+              if (this.isManagedByPool_()) {
+                return;
+              }
+              return this.loadPromise(this.video_);
+            });
         });
     } else {
       this.propagateLayoutChildren_();
@@ -353,13 +351,17 @@ class AmpVideo extends AMP.BaseElement {
         }
         throw reason;
       })
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      });
+      .then(() => this.onVideoLoaded_());
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
       return;
+    }
+
+    // Resolve layoutCallback as soon as all sources are appended when within a
+    // story, so it can be handled by the media pool as soon as possible.
+    if (this.isManagedByPool_()) {
+      return pendingOriginPromise;
     }
 
     return promise;
@@ -444,6 +446,10 @@ class AmpVideo extends AMP.BaseElement {
         this.video_.appendChild(source);
       }
     });
+
+    if (this.video_.changedSources) {
+      this.video_.changedSources();
+    }
   }
 
   /**
@@ -478,6 +484,10 @@ class AmpVideo extends AMP.BaseElement {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
+      const bitrate = cachedSource.getAttribute('data-bitrate');
+      if (bitrate) {
+        origSource.setAttribute('data-bitrate', bitrate);
+      }
       insertAfterOrAtStart(
         dev().assertElement(this.video_),
         origSource,
@@ -489,6 +499,10 @@ class AmpVideo extends AMP.BaseElement {
     tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
+
+    if (this.video_.changedSources) {
+      this.video_.changedSources();
+    }
   }
 
   /**
@@ -554,8 +568,10 @@ class AmpVideo extends AMP.BaseElement {
       [
         VideoEvents.ENDED,
         VideoEvents.LOADEDMETADATA,
+        VideoEvents.LOADEDDATA,
         VideoEvents.PAUSE,
         VideoEvents.PLAYING,
+        VideoEvents.PLAY,
       ],
       video
     );
@@ -592,6 +608,13 @@ class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    // When source changes, video needs to trigger loaded again.
+    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
+  }
+
+  /** @private */
+  onVideoLoaded_() {
+    this.element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
   /** @override */
@@ -660,6 +683,7 @@ class AmpVideo extends AMP.BaseElement {
     setStyles(poster, {
       'background-image': `url(${src})`,
       'background-size': 'cover',
+      'background-position': 'center',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
     this.applyFillContent(poster);
@@ -810,10 +834,7 @@ class AmpVideo extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
     if (placeholder) {
-      if (
-        placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-        isExperimentOn(this.win, 'blurry-placeholder')
-      ) {
+      if (placeholder.classList.contains('i-amphtml-blurry-placeholder')) {
         setImportantStyles(placeholder, {'opacity': 0.0});
         return true;
       }

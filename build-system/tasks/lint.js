@@ -160,7 +160,7 @@ function eslintRulesChanged() {
   return (
     gitDiffNameOnlyMaster().filter(function (file) {
       return (
-        path.basename(file).includes('.eslintrc') ||
+        path.basename(file).includes('.eslintrc.js') ||
         path.dirname(file) === 'build-system/eslint-rules'
       );
     }).length > 0
@@ -191,7 +191,7 @@ function getFilesToLint(files) {
  */
 function lint() {
   maybeUpdatePackages();
-  let filesToLint = config.lintGlobs;
+  let filesToLint = globby.sync(config.lintGlobs, {gitignore: true});
   if (argv.files) {
     filesToLint = getFilesToLint(getFilesFromArgv());
   } else if (!eslintRulesChanged() && argv.local_changes) {

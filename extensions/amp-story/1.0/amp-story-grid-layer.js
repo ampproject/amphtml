@@ -83,20 +83,25 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   constructor(element) {
     super(element);
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = false;
+    /** @private {?boolean} */
+    this.isFirstPage_ = null;
 
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
   }
 
-  /** @override */
-  firstAttachedCallback() {
-    // Only prerender if child of the first page.
-    this.prerenderAllowed_ = matches(
-      this.element,
-      'amp-story-page:first-of-type amp-story-grid-layer'
-    );
+  /**
+   * Returns true if a child of the first page.
+   * @return {boolean}
+   */
+  isFirstPage() {
+    if (this.isFirstPage_ === null) {
+      this.isFirstPage_ = matches(
+        this.element,
+        'amp-story-page:first-of-type amp-story-grid-layer'
+      );
+    }
+    return this.isFirstPage_;
   }
 
   /** @override */
@@ -110,7 +115,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
-    return this.prerenderAllowed_;
+    return this.isFirstPage();
   }
 
   /** @private */
@@ -171,7 +176,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Copies the whitelisted CSS grid styles for descendants of the
+   * Copies the allowlisted CSS grid styles for descendants of the
    * <amp-story-grid-layer> element.
    * @private
    */
@@ -187,7 +192,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Copies the whitelisted CSS grid styles for the <amp-story-grid-layer>
+   * Copies the allowlisted CSS grid styles for the <amp-story-grid-layer>
    * element itself.
    * @private
    */
@@ -197,7 +202,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /**
    * Copies the values of an element's attributes to its styles, if the
-   * attributes/properties are in the whitelist.
+   * attributes/properties are in the allowlist.
    *
    * @param {!Element} element The element whose styles should be copied from
    *     its attributes.

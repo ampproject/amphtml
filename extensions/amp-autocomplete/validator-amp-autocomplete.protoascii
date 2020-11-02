@@ -63,6 +63,7 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "inline" }
   attrs: { name: "items" }
   attrs: { name: "max-entries" }
+  attrs: { name: "max-items" }
   attrs: { name: "min-characters" }
   attrs: {
     name: "query"
@@ -87,7 +88,7 @@ tags: {  # <amp-autocomplete>
     name: "[src]"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-autocomplete"
+  spec_url: "https://amp.dev/documentation/components/amp-autocomplete/"
   amp_layout: {
     supported_layouts: CONTAINER
   }
@@ -104,7 +105,7 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "highlight-user-entry" }
   attrs: { name: "inline" }
   attrs: { name: "items" }
-  attrs: { name: "max-entries" }
+  attrs: { name: "max-items" }
   attrs: { name: "min-characters" }
   attrs: {
     name: "query"
@@ -123,7 +124,7 @@ tags: {  # <amp-autocomplete>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in src.
   }
   attrs: {
@@ -163,7 +164,7 @@ tags: {  # amp-autocomplete JSON
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

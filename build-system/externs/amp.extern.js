@@ -181,13 +181,13 @@ window.context.tagName;
 
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
-/* @type {?Object} */
+/** @type {?Object} */
 window.sf_ = {};
-/* @type {?Object} */
+/** @type {?Object} */
 window.sf_.cfg;
 
 // Exposed to custom ad iframes.
-/* @type {!Function} */
+/** @type {function(function(!Object, function(!Object)), !Array<string>=, !Array<string>=)} */
 window.draw3p;
 
 // AMP's globals
@@ -207,7 +207,6 @@ window.AMP.ampdoc;
 window.AMP.config;
 window.AMP.config.urls;
 window.AMP.BaseElement;
-window.AMP.BaseTemplate;
 window.AMP.registerElement;
 window.AMP.registerTemplate;
 window.AMP.registerServiceForDoc;
@@ -314,7 +313,7 @@ let VegaParser;
  * @typedef {{parse: VegaParser}}
  */
 let VegaObject;
-/* @type {!VegaObject} */
+/** @type {!VegaObject} */
 window.vg;
 
 // amp-date-picker externs
@@ -322,6 +321,21 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function () {};
+
+/** @constructor */
+let RRule;
+/**
+ * @param {Date} unusedDt
+ * @param {boolean=} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function (unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean=} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function (unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -629,8 +643,6 @@ AMP.AmpAdUIHandler = class {
   constructor(baseInstance) {}
 };
 
-AMP.BaseTemplate;
-
 AMP.RealTimeConfigManager;
 
 /**
@@ -890,3 +902,12 @@ class FeaturePolicy {
  * @type {?FeaturePolicy}
  */
 HTMLIFrameElement.prototype.featurePolicy;
+
+/**
+ * Going through the standardization process now.
+ *
+ * See https://developers.google.com/web/updates/2019/02/constructable-stylesheets.
+ *
+ * @param {string} cssText
+ */
+CSSStyleSheet.prototype.replaceSync = function (cssText) {};

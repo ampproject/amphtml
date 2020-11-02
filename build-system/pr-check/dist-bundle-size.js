@@ -34,7 +34,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
-const {runYarnChecks} = require('./yarn-checks');
+const {runNpmChecks} = require('./npm-checks');
 const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const FILENAME = 'dist-bundle-size.js';
@@ -43,7 +43,7 @@ const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
+  if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
     return;
   }
@@ -67,8 +67,9 @@ async function main() {
       timedExecOrDie('gulp update-packages');
 
       const process = timedExecWithError('gulp dist --fortesting', FILENAME);
-      if (process.error) {
-        console.log(colors.red('ERROR'), colors.yellow(process.error.message));
+      if (process.status !== 0) {
+        const error = process.error || new Error('unknown error, check logs');
+        console.log(colors.red('ERROR'), colors.yellow(error.message));
         await signalDistUpload('errored');
         stopTimedJob(FILENAME, startTime);
         return;

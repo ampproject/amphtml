@@ -1,12 +1,17 @@
 {
   "experimentA": {
-    "name": "IntersectionObserverPolyfillInabox",
-    "environment": "INABOX",
-    "command": "gulp dist --define_experiment_constant=INTERSECTION_OBSERVER_POLYFILL_INABOX",
-    "issue": "https://github.com/ampproject/amphtml/issues/27807",
-    "expiration_date_utc": "2020-06-30",
-    "define_experiment_constant": "INTERSECTION_OBSERVER_POLYFILL_INABOX"
+    "name": "A4A No Signing RTV Experiment",
+    "environment": "AMP",
+    "issue": "https://github.com/ampproject/amphtml/issues/27189",
+    "expiration_date_utc": "2020-12-30",
+    "define_experiment_constant": "NO_SIGNING_RTV"
   },
-  "experimentB": {},
+  "experimentB": {
+    "name": "Inabox Story Ads",
+    "environment": "INABOX",
+    "issue": "https://github.com/ampproject/amphtml/issues/30781",
+    "expiration_date_utc": "2020-12-30",
+    "define_experiment_constant": "STORY_AD_INABOX"
+  },
   "experimentC": {}
 }

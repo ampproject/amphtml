@@ -15,7 +15,12 @@
  */
 
 import '../amp-brightcove';
+import {CommonSignals} from '../../../../src/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../../src/url';
 
@@ -24,6 +29,7 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-brightcove'],
+      runtimeOn: true,
     },
   },
   (env) => {
@@ -34,21 +40,29 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getBrightcove(attributes, opt_responsive) {
-      const bc = doc.createElement('amp-brightcove');
-      for (const key in attributes) {
-        bc.setAttribute(key, attributes[key]);
+    async function getBrightcove(attributes) {
+      const element = createElementWithAttributes(doc, 'amp-brightcove', {
+        width: '111',
+        height: '222',
+        ...attributes,
+      });
+
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+
+      await element.signals().whenSignal(CommonSignals.LOAD_START);
+
+      try {
+        fakePostMessage(element, {event: 'ready'});
+      } catch (_) {
+        // This fails when the iframe is not available (after layoutCallback
+        // fails) in which case awaiting the LOAD_END sigal below will throw.
       }
-      bc.setAttribute('width', '111');
-      bc.setAttribute('height', '222');
-      if (opt_responsive) {
-        bc.setAttribute('layout', 'responsive');
-      }
-      doc.body.appendChild(bc);
-      return bc
-        .build()
-        .then(() => bc.layoutCallback())
-        .then(() => bc);
+
+      await element.signals().whenSignal(CommonSignals.LOAD_END);
+
+      return element;
     }
 
     function fakePostMessage(bc, info) {
@@ -74,20 +88,6 @@ describes.realWin(
       });
     });
 
-    it('renders responsively', () => {
-      return getBrightcove(
-        {
-          'data-account': '1290862519001',
-          'data-video-id': 'ref:amp-test-video',
-        },
-        true
-      ).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
-    });
-
     it('requires data-account', () => {
       expectAsyncConsoleError(/The data-account attribute is required for/, 1);
       return getBrightcove({}).should.eventually.be.rejectedWith(
@@ -96,13 +96,10 @@ describes.realWin(
     });
 
     it('removes iframe after unlayoutCallback', () => {
-      return getBrightcove(
-        {
-          'data-account': '1290862519001',
-          'data-video-id': 'ref:amp-test-video',
-        },
-        true
-      ).then((bc) => {
+      return getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         const obj = bc.implementation_;

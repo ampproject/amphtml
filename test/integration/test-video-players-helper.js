@@ -382,7 +382,7 @@ export function runVideoPlayerIntegrationTests(
         );
       });
 
-      it('should not play when not in view port initially', () => {
+      it('should not play when initially outside viewport', () => {
         return getVideoPlayer({outsideView: true, autoplay: true}).then((r) => {
           const timer = Services.timerFor(r.video.implementation_.win);
           const p = listenOncePromise(r.video, VideoEvents.PLAYING).then(() => {
@@ -551,7 +551,7 @@ export function runVideoPlayerIntegrationTests(
 
   function getVideoPlayer(options) {
     options = options || {};
-    const top = options.outsideView ? '100vh' : '0';
+    const top = options.outsideView ? '126vh' : '0';
     let fixture;
     return createFixtureIframe('test/fixtures/video-players.html', FRAME_HEIGHT)
       .then((f) => {
@@ -581,7 +581,6 @@ export function runVideoPlayerIntegrationTests(
         video.setAttribute('layout', 'fixed');
         video.setAttribute('width', '300px');
         video.setAttribute('height', '50vh');
-        video.setAttribute('i-amphtml-integration-test', '');
 
         video.style.position = 'absolute';
         video.style.top = top;

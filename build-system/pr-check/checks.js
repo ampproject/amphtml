@@ -32,14 +32,14 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
-const {runYarnChecks} = require('./yarn-checks');
+const {runNpmChecks} = require('./npm-checks');
 
 const FILENAME = 'checks.js';
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
+  if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
     return;
   }
@@ -54,6 +54,7 @@ async function main() {
     timedExecOrDie('gulp babel-plugin-tests');
     timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp dev-dashboard-tests');
+    timedExecOrDie('gulp check-renovate-config');
     timedExecOrDie('gulp server-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
@@ -95,6 +96,10 @@ async function main() {
     // Validate owners syntax only for PR builds.
     if (buildTargets.has('OWNERS')) {
       timedExecOrDie('gulp check-owners --local_changes');
+    }
+
+    if (buildTargets.has('RENOVATE_CONFIG')) {
+      timedExecOrDie('gulp check-renovate-config');
     }
 
     if (buildTargets.has('SERVER')) {

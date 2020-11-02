@@ -18,16 +18,16 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
-// TODO(torch2424, #20541): These tests fail on firefox and Edge.
+// TODO(wg-components): These tests are broken on Firefox (as of v77). They
+// also fail on Safari.
 describe
   .configure()
   .skipFirefox()
-  .skipEdge()
+  .skipSafari()
   .run('amp-recaptcha-input', function () {
     describes.integration(
       'with form and amp-mustache',
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="POST"
@@ -112,7 +112,6 @@ describe
         display: block;
       }
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -183,7 +182,6 @@ describe
     describes.integration(
       recaptchaRequestId.GET,
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="GET"
@@ -205,7 +203,6 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -217,6 +214,10 @@ describe
 
           const browserController = new BrowserController(env.win);
           return browserController.waitForElementLayout('amp-recaptcha-input');
+        });
+
+        afterEach(() => {
+          return RequestBank.tearDown();
         });
 
         it('should make a request with correct parameters', function () {
@@ -234,7 +235,6 @@ describe
     describes.integration(
       recaptchaRequestId.POST,
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="POST"
@@ -256,7 +256,6 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -268,6 +267,10 @@ describe
 
           const browserController = new BrowserController(env.win);
           return browserController.waitForElementLayout('amp-recaptcha-input');
+        });
+
+        afterEach(() => {
+          return RequestBank.tearDown();
         });
 
         it('should make a request with correct parameters', function () {

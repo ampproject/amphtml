@@ -17,6 +17,7 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
+  ConsentMetadataDef,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
@@ -30,12 +31,13 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';
-const CID_SCOPE = 'AMP-CONSENT';
 
 /** @visibleForTesting */
-export const CONSENT_STRING_MAX_LENGTH = 1024;
+export const CONSENT_STORAGE_MAX = 1200;
 
 export class ConsentStateManager {
   /**
@@ -93,7 +95,7 @@ export class ConsentStateManager {
    * Update consent instance state
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
-   * @param {Object=} opt_consentMetadata
+   * @param {ConsentMetadataDef=} opt_consentMetadata
    */
   updateConsentInstanceState(state, consentStr, opt_consentMetadata) {
     if (!this.instance_) {
@@ -165,17 +167,6 @@ export class ConsentStateManager {
   }
 
   /**
-   * Sets a promise which resolves to a boolean that is to be returned
-   * from the remote endpoint.
-   *
-   * @param {!Promise<?boolean>} gdprAppliesPromise
-   */
-  setConsentInstanceGdprApplies(gdprAppliesPromise) {
-    devAssert(this.instance_, '%s: cannot find the instance', TAG);
-    this.instance_.gdprAppliesPromise = gdprAppliesPromise;
-  }
-
-  /**
    * Sets the dirty bit so current consent info won't be used for
    * decision making on next visit
    */
@@ -192,16 +183,6 @@ export class ConsentStateManager {
   getConsentInstanceSharedData() {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);
     return this.instance_.sharedDataPromise;
-  }
-
-  /**
-   * Returns a promise that resolves to a gdprApplies value
-   *
-   * @return {?Promise<?boolean>}
-   */
-  getConsentInstanceGdprApplies() {
-    devAssert(this.instance_, '%s: cannot find the instance', TAG);
-    return this.instance_.gdprAppliesPromise;
   }
 
   /**
@@ -249,11 +230,6 @@ export class ConsentInstance {
 
     /** @public {?Promise<Object>} */
     this.sharedDataPromise = null;
-
-    // TODO(micajuineho) remove this in favor
-    // of consolidation with consentString
-    /** @public {?Promise<?boolean>} */
-    this.gdprAppliesPromise = null;
 
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
@@ -305,7 +281,7 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
-   * @param {Object=} opt_consentMetadata
+   * @param {ConsentMetadataDef=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */
   update(state, consentString, opt_consentMetadata, opt_systemUpdate) {
@@ -389,30 +365,45 @@ export class ConsentInstance {
         return;
       }
 
-      const consentStr = consentInfo['consentString'];
-      if (consentStr && consentStr.length > CONSENT_STRING_MAX_LENGTH) {
-        // Verify the length of consentString.
-        // 1024 * 4/3 (base64) = 1336 bytes.
-        user().error(
-          TAG,
-          'Cannot store consentString which length exceeds %s. ' +
-            'Previous stored consentInfo will be cleared',
-          CONSENT_STRING_MAX_LENGTH
-        );
-        // If new consentInfo value cannot be stored, need to remove previous
-        // value
-        storage.remove(this.storageKey_);
-        // TODO: Good to have a way to inform CMP service in this case
-        return;
-      }
-
-      // TODO: enforce metadata limits here (if any)
-
       const value = composeStoreValue(consentInfo);
       if (value == null) {
         // Value can be false, do not use !value check
         // Nothing to store to localStorage
         return;
+      }
+
+      // Check size
+      const size = JSON.stringify(
+        dict({
+          [this.storageKey_]: value,
+        })
+      ).length;
+
+      if (size > CONSENT_STORAGE_MAX) {
+        // Size restriction only applies to documents servered from a viewer
+        // that implements the storage API.
+        const usesViewerStorage = storage.isViewerStorage();
+        if (usesViewerStorage) {
+          // 1200 * 4/3 (base64) = 1600 bytes
+          user().error(
+            TAG,
+            'Cannot store consent information which length exceeds %s. ' +
+              'Previous stored consentInfo will be cleared',
+            CONSENT_STORAGE_MAX
+          );
+          // If new consentInfo value cannot be stored, need to remove previous
+          // value
+          storage.remove(this.storageKey_);
+          // TODO: Good to have a way to inform CMP service in this case
+          return;
+        }
+        user().info(
+          TAG,
+          'Current consent information length exceeds %s ' +
+            'and will not be stored when the page is served ' +
+            'from a viewer that supports the Local Storage API.',
+          CONSENT_STORAGE_MAX
+        );
       }
       this.savedConsentInfo_ = consentInfo;
       storage.setNonBoolean(this.storageKey_, value);
@@ -481,13 +472,7 @@ export class ConsentInstance {
     const legacyConsentState = calculateLegacyStateValue(
       consentInfo['consentState']
     );
-    const cidPromise = Services.cidForDoc(this.ampdoc_).then((cid) => {
-      return cid.get(
-        {scope: CID_SCOPE, createCookieIfNotPresent: true},
-        Promise.resolve()
-      );
-    });
-    cidPromise.then((userId) => {
+    getConsentCID(this.ampdoc_).then((userId) => {
       const request = /** @type {!JsonObject} */ ({
         // Unfortunately we need to keep the name to be backward compatible
         'consentInstanceId': this.id_,
@@ -512,10 +497,12 @@ export class ConsentInstance {
         ampCors: false,
       };
       this.ampdoc_.whenFirstVisible().then(() => {
-        Services.xhrFor(this.ampdoc_.win).fetchJson(
-          /** @type {string} */ (this.onUpdateHref_),
-          init
-        );
+        expandConsentEndpointUrl(
+          this.ampdoc_.getHeadNode(),
+          /** @type {string} */ (this.onUpdateHref_)
+        ).then((expandedUpdateHref) => {
+          Services.xhrFor(this.ampdoc_.win).fetchJson(expandedUpdateHref, init);
+        });
       });
     });
   }

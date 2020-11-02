@@ -60,12 +60,13 @@ tags: {  # <amp-ad>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "template" }
   attrs: { name: "type" mandatory: true }
+  attrs: { name: "sticky" value: "" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -143,11 +144,11 @@ tags: {  # <amp-ad data-multi-size>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -187,11 +188,11 @@ tags: {  # <amp-ad data-enable-refresh>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -219,11 +220,11 @@ tags: {  # <amp-embed>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -263,11 +264,11 @@ tags: {  # <amp-embed data-multi-size>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

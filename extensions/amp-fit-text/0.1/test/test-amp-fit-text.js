@@ -59,7 +59,18 @@ describes.realWin(
         const content = ft.querySelector('.i-amphtml-fit-text-content');
         expect(content).to.not.equal(null);
         expect(content.textContent).to.equal(text);
+        expect(ft.textContent).to.equal(text);
       });
+    });
+
+    it('supports update of textContent', async () => {
+      const ft = await getFitText('Lorem ipsum');
+      const newText = 'updated';
+      ft.textContent = newText;
+      expect(ft.textContent).to.equal(newText);
+      await ft.implementation_.mutateElement(() => {});
+      const content = ft.querySelector('.i-amphtml-fit-text-content');
+      expect(content.textContent).to.equal(newText);
     });
   }
 );

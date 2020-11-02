@@ -16,15 +16,27 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {
-  maybePrintArgvMessages,
-  shouldNotRun,
-} = require('./runtime-test/helpers');
+const fs = require('fs-extra');
+const globby = require('globby');
+const log = require('fancy-log');
+const pathModule = require('path');
 const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
+const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
+const {cyan, yellow} = require('ansi-colors');
+const {maybePrintArgvMessages} = require('./runtime-test/helpers');
+
+const INTEGRATION_FIXTURES = [
+  './test/fixtures/**/*.html',
+  '!./test/fixtures/e2e',
+  '!./test/fixtures/served',
+  '!./test/fixtures/performance',
+];
+
+let htmlTransform;
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -40,10 +52,40 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
-async function integration() {
-  if (shouldNotRun()) {
-    return;
+async function buildTransformedHtml() {
+  const filePaths = await globby(INTEGRATION_FIXTURES);
+  fs.ensureDirSync('./test-bin/');
+  for (const filePath of filePaths) {
+    const normalizedFilePath = pathModule.normalize(filePath);
+    await transformAndWriteToTestFolder(normalizedFilePath);
   }
+}
+
+async function transformAndWriteToTestFolder(filePath) {
+  try {
+    const html = await htmlTransform(filePath);
+    const fullFilePath = `./test-bin/${filePath}`;
+    const targetDir = pathModule.dirname(fullFilePath);
+    fs.ensureDirSync(targetDir);
+    fs.writeFileSync(fullFilePath, html);
+  } catch (e) {
+    log(
+      yellow('WARNING:'),
+      cyan(
+        `${filePath} could not be transformed by the postHTML ` +
+          'pipeline. Falling back to copying.'
+      ),
+      yellow(`Reason: ${e.message}`)
+    );
+    fs.copySync(filePath, `./test-bin/${filePath}`);
+  }
+}
+
+async function integration() {
+  buildNewServer();
+  htmlTransform = require('../server/new-server/transforms/dist/transform')
+    .transform;
+  await buildTransformedHtml();
 
   maybePrintArgvMessages();
 
@@ -64,10 +106,14 @@ integration.flags = {
   'chrome_canary': '  Runs tests on Chrome Canary',
   'chrome_flags': '  Uses the given flags to launch Chrome',
   'compiled': '  Runs tests against minified JS',
-  'single_pass': '  Run tests in Single Pass mode',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
+  'debug':
+    '  Allow debug statements by auto opening devtools. NOTE: This only ' +
+    'works in non headless mode.',
+  'edge': '  Runs tests on Edge',
+  'esm': '  Runs against module/nomodule build',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',
@@ -75,10 +121,8 @@ integration.flags = {
   'ie': '  Runs tests on IE',
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
+  'report': '  Write test result report to a local file',
   'safari': '  Runs tests on Safari',
-  'saucelabs': '  Runs tests on Sauce Labs (requires setup)',
-  'stable': '  Runs Sauce Labs tests on stable browsers',
-  'beta': '  Runs Sauce Labs tests on beta browsers',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

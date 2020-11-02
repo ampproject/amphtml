@@ -16,7 +16,6 @@
 tags: {  # amp-accordion
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-accordion"
@@ -44,7 +43,6 @@ tags: {  # <amp-accordion>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-ACCORDION"
   requires_extension: "amp-accordion"
   attrs: { name: "animate" value: "" }
@@ -59,7 +57,7 @@ tags: {  # <amp-accordion>
   child_tags: {
     child_tag_name_oneof: "SECTION"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-accordion"
+  spec_url: "https://amp.dev/documentation/components/amp-accordion/"
   amp_layout: {
     supported_layouts: CONTAINER
   }
@@ -68,9 +66,9 @@ tags: {  # <amp-accordion> > <section>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SECTION"
   spec_name: "amp-accordion > section"
+  descriptive_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"
   attrs: { name: "expanded" value: "" }
   # amp-bind

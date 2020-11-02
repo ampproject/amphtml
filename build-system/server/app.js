@@ -65,6 +65,9 @@ app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
 app.use('/test', require('./routes/test'));
+if (argv.coverage) {
+  app.use('/coverage', require('istanbul-middleware').createHandler());
+}
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -479,12 +482,6 @@ app.use('/form/verify-search-json/post', (req, res) => {
   });
 });
 
-app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
-  res.json({
-    fragment: '54321',
-  });
-});
-
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, mode) {
@@ -824,11 +821,18 @@ app.post('/get-consent-no-prompt/', (req, res) => {
 
 app.post('/check-consent', (req, res) => {
   cors.assertCors(req, res, ['POST']);
-  res.json({
+  const response = {
     'consentRequired': req.query.consentRequired === 'true',
     'consentStateValue': req.query.consentStateValue,
+    'consentString': req.query.consentString,
     'expireCache': req.query.expireCache === 'true',
-  });
+  };
+  if (req.query.consentMetadata) {
+    response['consentMetadata'] = JSON.parse(
+      req.query.consentMetadata.replace(/'/g, '"')
+    );
+  }
+  res.json(response);
 });
 
 // Proxy with local JS.
@@ -914,7 +918,7 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
+app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
@@ -922,7 +926,7 @@ app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
  */
-app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
+app.get(['/dist/v0/amp-*.(m?js)'], (req, res, next) => {
   if (argv.no_caching_extensions) {
     res.header('Cache-Control', 'no-store');
   }
@@ -1144,12 +1148,28 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
     source: 'local' + req.params.id,
-    granted: true,
+    granted: req.params.id > 0 ? true : false,
     grantedReason: 'NOT_SUBSCRIBED',
     data: {
       login: true,
     },
     decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
+  });
+});
+
+app.use('/subscriptions/skumap', (req, res) => {
+  cors.assertCors(req, res, ['GET']);
+  res.json({
+    'subscribe.google.com': {
+      'subscribeButtonSimple': {
+        'sku': 'basic',
+      },
+      'subscribeButtonCarousel': {
+        'carouselOptions': {
+          'skus': ['basic', 'premium_monthly'],
+        },
+      },
+    },
   });
 });
 
@@ -1189,7 +1209,7 @@ app.get('/adzerk/*', (req, res) => {
  * Serve extension scripts and their source maps.
  */
 app.get(
-  ['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
+  ['/dist/rtv/*/v0/*.(m?js)', '/dist/rtv/*/v0/*.(m?js).map'],
   (req, res, next) => {
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
@@ -1209,7 +1229,7 @@ app.get(
     }
     const isJsMap = filePath.endsWith('.map');
     if (isJsMap) {
-      filePath = filePath.replace(/\.js\.map$/, '.js');
+      filePath = filePath.replace(/\.(m?js)\.map$/, '.$1');
     }
     filePath = replaceUrls(mode, filePath);
     req.url = filePath + (isJsMap ? '.map' : '');
@@ -1217,11 +1237,35 @@ app.get(
   }
 );
 
+if (argv.coverage === 'live') {
+  app.get('/dist/amp.js', async (req, res) => {
+    const ampJs = await fs.promises.readFile(`${pc.cwd()}${req.path}`);
+    res.setHeader('Content-Type', 'text/javascript');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Append an unload handler that reports coverage information each time you
+    // leave a page.
+    res.end(`${ampJs};
+window.addEventListener('beforeunload', (evt) => {
+  const COV_REPORT_URL = 'http://localhost:${TEST_SERVER_PORT}/coverage/client';
+  console.info('POSTing code coverage to', COV_REPORT_URL);
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', COV_REPORT_URL, true);
+  xhr.setRequestHeader('Content-type', 'application/json');
+  xhr.send(JSON.stringify(window.__coverage__));
+
+  // Required by Chrome
+  evt.returnValue = '';
+  return null;
+});`);
+  });
+}
+
 /**
  * Serve entry point script url
  */
 app.get(
-  ['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
+  ['/dist/sw.(m?js)', '/dist/sw-kill.(m?js)', '/dist/ww.(m?js)'],
   (req, res, next) => {
     // Special case for entry point script url. Use compiled for testing
     const mode = SERVE_MODE;
@@ -1241,18 +1285,18 @@ app.get(
       return;
     }
     if (mode == 'default') {
-      req.url = req.url.replace(/\.js$/, '.max.js');
+      req.url = req.url.replace(/\.(m?js)$/, '.max.$1');
     }
     next();
   }
 );
 
-app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
+app.get('/dist/iframe-transport-client-lib.(m?js)', (req, res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
   next();
 });
 
-app.get('/dist/amp-inabox-host.js', (req, res, next) => {
+app.get('/dist/amp-inabox-host.(m?js)', (req, res, next) => {
   const mode = SERVE_MODE;
   if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
@@ -1263,7 +1307,7 @@ app.get('/dist/amp-inabox-host.js', (req, res, next) => {
 /*
  * Start Cache SW LOCALDEV section
  */
-app.get('/dist/sw(.max)?.js', (req, res, next) => {
+app.get('/dist/sw(.max)?.(m?js)', (req, res, next) => {
   const filePath = req.path;
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
@@ -1288,7 +1332,7 @@ app.get('/dist/sw(.max)?.js', (req, res, next) => {
     .catch(next);
 });
 
-app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
+app.get('/dist/rtv/9[89]*/*.(m?js)', (req, res, next) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.setHeader('Date', new Date().toUTCString());
   res.setHeader('Cache-Control', 'no-cache;max-age=31536000');
@@ -1360,7 +1404,7 @@ app.get('/dist/diversions', (req, res) => {
 /**
  * Web worker binary.
  */
-app.get('/dist/ww(.max)?.js', (req, res) => {
+app.get('/dist/ww(.max)?.(m?js)', (req, res) => {
   fs.promises.readFile(pc.cwd() + req.path).then((file) => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');

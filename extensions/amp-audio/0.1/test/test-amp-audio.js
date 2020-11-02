@@ -219,21 +219,22 @@ describes.realWin(
     });
 
     it('should fallback when not available', () => {
-      const savedCreateElement = doc.createElement;
+      // For this single test, cause audio elements that are
+      // created to lack the necessary feature set, which should trigger
+      // fallback behavior.
+      const {createElement} = doc;
       doc.createElement = (name) => {
-        if (name == 'audio') {
-          return savedCreateElement.call(doc, 'audio2');
+        if (name === 'audio') {
+          name = 'busted-audio';
         }
-        return savedCreateElement.call(doc, name);
+        return createElement.call(doc, name);
       };
+
       const element = doc.createElement('div');
       element.toggleFallback = env.sandbox.spy();
       const audio = new AmpAudio(element);
-      const promise = audio.buildAudioElement();
-      doc.createElement = savedCreateElement;
-      return promise.then(() => {
-        expect(element.toggleFallback).to.be.calledOnce;
-      });
+      audio.buildAudioElement();
+      expect(element.toggleFallback).to.be.calledOnce;
     });
 
     it('should propagate ARIA attributes', () => {

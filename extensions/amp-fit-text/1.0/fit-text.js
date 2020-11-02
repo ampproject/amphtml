@@ -16,31 +16,30 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
+import {ContainWrapper} from '../../../src/preact/component';
 import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
 const {LINE_HEIGHT_EM_} = styles;
 
 /**
- * @param {!JsonObject} props
+ * @param {!FitTextProps} props
  * @return {PreactDef.Renderable}
  */
-export function FitText(props) {
-  const {
-    'children': children,
-    'minFontSize': minFontSize = 6,
-    'maxFontSize': maxFontSize = 72,
-    ...rest
-  } = props;
-  const containerRef = useRef(null);
-  const measurerRef = useRef(null);
+export function FitText({
+  children,
+  minFontSize = 6,
+  maxFontSize = 72,
+  ...rest
+}) {
   const contentRef = useRef(null);
+  const measurerRef = useRef(null);
 
   const resize = useCallback(() => {
-    if (!measurerRef.current || !containerRef.current) {
+    if (!measurerRef.current || !contentRef.current) {
       return;
     }
-    const {clientHeight, clientWidth} = containerRef.current;
+    const {clientHeight, clientWidth} = contentRef.current;
     const fontSize = calculateFontSize(
       measurerRef.current,
       clientHeight,
@@ -54,34 +53,30 @@ export function FitText(props) {
   // useLayoutEffect is used so intermediary font sizes during calculation
   // are resolved before the component visually updates.
   useLayoutEffect(() => {
-    const container = containerRef.current;
-    const content = contentRef.current;
-    if (!container || !content) {
+    const wrapper = contentRef.current;
+    const content = measurerRef.current;
+    if (!wrapper || !content) {
       return;
     }
     const observer = new ResizeObserver(() => resize());
-    observer.observe(container);
+    observer.observe(wrapper);
     observer.observe(content);
     return () => observer.disconnect();
   }, [resize]);
 
   return (
-    <div {...rest}>
-      <div
-        ref={containerRef}
-        style={{
-          ...styles.fitTextContent,
-          'width': '100%',
-          'height': '100%',
-        }}
-      >
-        <div ref={measurerRef} style={styles.fitTextContentWrapper}>
-          <div ref={contentRef} style={{height: 'min-content'}}>
-            {children}
-          </div>
-        </div>
+    <ContainWrapper
+      size={true}
+      layout={true}
+      paint={true}
+      contentRef={contentRef}
+      contentStyle={styles.fitTextContent}
+      {...rest}
+    >
+      <div ref={measurerRef} style={styles.fitTextContentWrapper}>
+        {children}
       </div>
-    </div>
+    </ContainWrapper>
   );
 }
 

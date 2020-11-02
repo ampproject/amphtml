@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {includes, startsWith} from './string';
+import {includes} from './string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -118,7 +118,7 @@ export function removeElement(element) {
 
 /**
  * Removes all child nodes of the specified element.
- * @param {!Element} parent
+ * @param {!Element|!DocumentFragment} parent
  */
 export function removeChildren(parent) {
   while (parent.firstChild) {
@@ -239,7 +239,6 @@ export function rootNodeFor(node) {
  * @return {boolean}
  */
 export function isShadowRoot(value) {
-  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
   if (!value) {
     return false;
   }
@@ -415,7 +414,7 @@ export function childNodes(parent, callback) {
 
 /**
  * Finds the first child element that has the specified attribute.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} attr
  * @return {?Element}
  */
@@ -439,7 +438,7 @@ export function lastChildElementByAttr(parent, attr) {
 
 /**
  * Finds all child elements that has the specified attribute.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} attr
  * @return {!NodeList<!Element>}
  */
@@ -450,7 +449,7 @@ export function childElementsByAttr(parent, attr) {
 
 /**
  * Finds the first child element that has the specified tag name.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} tagName
  * @return {?Element}
  */
@@ -461,7 +460,7 @@ export function childElementByTag(parent, tagName) {
 
 /**
  * Finds all child elements with the specified tag name.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} tagName
  * @return {!NodeList<!Element>}
  */
@@ -506,7 +505,7 @@ export function elementByTag(element, tagName) {
  *
  * This method isn't required for modern builds, can be removed.
  *
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
  */
@@ -522,7 +521,7 @@ function scopedQuerySelectionFallback(root, selector) {
 /**
  * Finds the first element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {?Element}
  */
@@ -539,7 +538,7 @@ export function scopedQuerySelector(root, selector) {
 /**
  * Finds every element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
  */
@@ -758,7 +757,7 @@ export function isAmpElement(element) {
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
   return (
-    startsWith(tag, 'AMP-') &&
+    tag.startsWith('AMP-') &&
     // Some "amp-*" elements are not really AMP elements. :smh:
     !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
   );
@@ -925,6 +924,21 @@ export function toggleAttribute(element, name, forced) {
   }
 
   return enabled;
+}
+
+/**
+ * Parses a string as a boolean value using the expanded rules for DOM boolean
+ * attributes:
+ * - a `null` or `undefined` returns `null`;
+ * - an empty string returns `true`;
+ * - a "false" string returns `false`;
+ * - otherwise, `true` is returned.
+ *
+ * @param {?string|undefined} s
+ * @return {boolean|undefined}
+ */
+export function parseBooleanAttribute(s) {
+  return s == null ? undefined : s !== 'false';
 }
 
 /**

@@ -51,10 +51,11 @@ describes.realWin(
       elementMacros = {
         'COOKIE': null,
         'CONSENT_STATE': null,
+        'CONSENT_METADATA': null,
       };
     });
 
-    describe('Should not contain iframe transport if not whitelisted', () => {
+    describe('Should not contain iframe transport if not allowlisted', () => {
       for (const vendor in VENDOR_REQUESTS) {
         it('test vendor: ' + vendor, () => {
           const el = doc.createElement('amp-analytics');
@@ -218,7 +219,6 @@ function getAnalyticsTag(doc, vendor) {
   doc.body.appendChild(el);
   el.connectedCallback();
   const analytics = new AmpAnalytics(el);
-  analytics.createdCallback();
   analytics.buildCallback();
   return analytics;
 }

@@ -20,7 +20,6 @@ import {addParamToUrl} from '../../../src/url';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
@@ -299,7 +298,7 @@ export class LiveListManager {
   setupVisibilityHandler_() {
     // Polling should always be stopped when document is no longer visible.
     this.ampdoc.onVisibilityChanged(() => {
-      if (this.ampdoc.isVisible()) {
+      if (this.ampdoc.isVisible() && this.hasActiveLiveLists_()) {
         // We use immediate so that the user starts getting updates
         // right away when they've switched back to the page.
         this.poller_.start(/** immediate */ true);
@@ -358,5 +357,5 @@ function isDocTransformed(root) {
   }
   const {documentElement} = root.ownerDocument;
   const transformed = documentElement.getAttribute('transformed');
-  return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
+  return Boolean(transformed) && transformed.startsWith(TRANSFORMED_PREFIX);
 }

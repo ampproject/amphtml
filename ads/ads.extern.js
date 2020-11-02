@@ -221,6 +221,10 @@ var google;
 google.ima;
 google.ima.Ad;
 google.ima.Ad.getSkipTimeOffset;
+google.ima.Ad.getAdPodInfo;
+google.ima.AdPodInfo;
+google.ima.AdPodInfo.getAdPosition;
+google.ima.AdPodInfo.getTotalAds;
 google.ima.AdDisplayContainer;
 google.ima.AdDisplayContainer.initialize;
 google.ima.ImaSdkSettings;
@@ -338,7 +342,15 @@ data.siteId;
 // aduptech.js
 window.uAd = {};
 window.uAd.embed;
+data.amp;
 data.responsive;
+data.placementkey;
+data.mincpc;
+data.query;
+data.pageurl;
+data.gdpr;
+data.gdpr_consent;
+data.adtest;
 data.onAds;
 data.onNoAds;
 
@@ -474,6 +486,10 @@ data.adslot;
 window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
 data.adrequest;
+
+// marfeel.js
+data.tenant;
+data.version;
 
 // medianet.js
 data.crid;

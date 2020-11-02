@@ -16,7 +16,6 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const requestPromise = require('request-promise');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -31,7 +30,7 @@ const {
   travisBuildNumber,
   travisPullRequestSha,
 } = require('../common/travis');
-const {execOrDie, execWithError, exec} = require('../common/exec');
+const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
@@ -115,41 +114,6 @@ function printChangeSummary(fileName) {
 }
 
 /**
- * Starts connection to Sauce Labs after getting account credentials
- * @param {string} functionName
- */
-async function startSauceConnect(functionName) {
-  process.env['SAUCE_USERNAME'] = 'amphtml';
-  const response = await requestPromise(
-    'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken'
-  );
-  process.env['SAUCE_ACCESS_KEY'] = response.trim();
-  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Starting Sauce Connect Proxy:',
-    colors.cyan(startScCmd)
-  );
-  execOrDie(startScCmd);
-}
-
-/**
- * Stops connection to Sauce Labs
- * @param {string} functionName
- */
-function stopSauceConnect(functionName) {
-  const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Stopping Sauce Connect Proxy:',
-    colors.cyan(stopScCmd)
-  );
-  execOrDie(stopScCmd);
-}
-
-/**
  * Starts a timer to measure the execution time of the given function.
  * @param {string} functionName
  * @param {string} fileName
@@ -199,42 +163,54 @@ function stopTimedJob(fileName, startTime) {
 }
 
 /**
- * Executes the provided command and times it. Errors, if any, are printed.
- * @param {string} cmd
- * @param {string} fileName
- * @return {!Object} Node process
+ * Wraps an exec helper in a timer. Returns the result of the helper.
+ * @param {!Function(string, string=): ?} execFn
+ * @return {!Function(string, string=): ?}
  */
-function timedExec(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  const p = exec(cmd);
-  stopTimer(cmd, fileName, startTime);
-  return p;
+function timedExecFn(execFn) {
+  return (cmd, fileName, ...rest) => {
+    const startTime = startTimer(cmd, fileName);
+    const p = execFn(cmd, ...rest);
+    stopTimer(cmd, fileName, startTime);
+    return p;
+  };
 }
 
 /**
- * Executes the provided command and times it. Errors, if any, are returned.
+ * Executes the provided command and times it. Errors, if any, are printed.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  * @return {!Object} Node process
  */
-function timedExecWithError(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  const p = execWithError(cmd);
-  stopTimer(cmd, fileName, startTime);
-  return p;
-}
+const timedExec = timedExecFn(exec);
+
+/**
+ * Executes the provided command and times it. Errors, if any, are returned.
+ * @function
+ * @param {string} cmd
+ * @param {string} fileName
+ * @return {!Object} Node process
+ */
+const timedExecWithError = timedExecFn(execWithError);
 
 /**
  * Executes the provided command and times it. The program terminates in case of
  * failure.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  */
-function timedExecOrDie(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  execOrDie(cmd);
-  stopTimer(cmd, fileName, startTime);
-}
+const timedExecOrDie = timedExecFn(execOrDie);
+
+/**
+ * Executes the provided command and times it. The program throws on error in
+ * case of failure.
+ * @function
+ * @param {string} cmd
+ * @param {string} fileName
+ */
+const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
  * Download output helper
@@ -403,12 +379,11 @@ module.exports = {
   processAndUploadDistOutput,
   startTimer,
   stopTimer,
-  startSauceConnect,
-  stopSauceConnect,
   stopTimedJob,
   timedExec,
   timedExecOrDie,
   timedExecWithError,
+  timedExecOrThrow,
   uploadBuildOutput,
   uploadDistOutput,
   uploadEsmDistOutput,

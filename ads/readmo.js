@@ -21,14 +21,16 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function readmo(global, data) {
-  validateData(data, ['section', 'url']);
+  validateData(data, ['section']);
 
   const config = {
     container: '#c',
     amp: true,
   };
 
-  global.publisherUrl = data.url;
+  if (data.url) {
+    global.publisherUrl = data.url;
+  }
 
   Object.keys(data).forEach((property) => {
     config[property] = data[property];

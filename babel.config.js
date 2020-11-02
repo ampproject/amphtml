@@ -30,8 +30,6 @@ const {
   getDepCheckConfig,
   getPostClosureConfig,
   getPreClosureConfig,
-  getSinglePassDepsConfig,
-  getSinglePassPostConfig,
   getTestConfig,
   getUnminifiedConfig,
 } = require('./build-system/babel-config');
@@ -45,8 +43,6 @@ const babelTransforms = new Map([
   ['dep-check', getDepCheckConfig()],
   ['post-closure', getPostClosureConfig()],
   ['pre-closure', getPreClosureConfig()],
-  ['single-pass-deps', getSinglePassDepsConfig()],
-  ['single-pass-post', getSinglePassPostConfig()],
   ['test', getTestConfig()],
   ['unminified', getUnminifiedConfig()],
 ]);
