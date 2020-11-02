@@ -32,14 +32,15 @@ export function FitText({
   maxFontSize = 72,
   ...rest
 }) {
-  const contentRef = useRef(null);
+  const containerRef = useRef(null);
   const measurerRef = useRef(null);
+  const heightRef = useRef(null);
 
   const resize = useCallback(() => {
-    if (!measurerRef.current || !contentRef.current) {
+    if (!measurerRef.current || !containerRef.current) {
       return;
     }
-    const {clientHeight, clientWidth} = contentRef.current;
+    const {clientHeight, clientWidth} = containerRef.current;
     const fontSize = calculateFontSize(
       measurerRef.current,
       clientHeight,
@@ -53,13 +54,13 @@ export function FitText({
   // useLayoutEffect is used so intermediary font sizes during calculation
   // are resolved before the component visually updates.
   useLayoutEffect(() => {
-    const wrapper = contentRef.current;
-    const content = measurerRef.current;
-    if (!wrapper || !content) {
+    const container = containerRef.current;
+    const content = heightRef.current;
+    if (!container || !content) {
       return;
     }
     const observer = new ResizeObserver(() => resize());
-    observer.observe(wrapper);
+    observer.observe(container);
     observer.observe(content);
     return () => observer.disconnect();
   }, [resize]);
@@ -69,11 +70,13 @@ export function FitText({
       size={true}
       layout={true}
       paint={true}
-      contentRef={contentRef}
+      ref={containerRef}
+      wrapperStyle={styles.fitTextContentWrapper}
+      contentRef={measurerRef}
       contentStyle={styles.fitTextContent}
       {...rest}
     >
-      <div ref={measurerRef} style={styles.fitTextContentWrapper}>
+      <div ref={heightRef} style={{height: 'min-content'}}>
         {children}
       </div>
     </ContainWrapper>
