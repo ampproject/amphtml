@@ -94,6 +94,10 @@ export const mixedLength = () => {
   const height = number('height', 225);
   const slideCount = 15;
   const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const autoAdvance = boolean('auto advance', true);
+  const autoAdvanceCount = number('auto advance count', 1);
+  const autoAdvanceInterval = number('auto advance interval', 1000);
+  const autoAdvanceLoops = number('auto advance loops', 3);
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
   const mixedLength = boolean('mixed length', true);
@@ -106,6 +110,10 @@ export const mixedLength = () => {
   const preset = select('random preset', [1, 2, 3]);
   return (
     <BaseCarousel
+      autoAdvance={autoAdvance}
+      autoAdvanceCount={autoAdvanceCount}
+      autoAdvanceInterval={autoAdvanceInterval}
+      autoAdvanceLoops={autoAdvanceLoops}
       controls={controls}
       mixedLength={mixedLength}
       loop={loop}
