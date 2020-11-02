@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-module.exports = {
-  stories: [
-    '../../../../builtins/storybook/*.amp.js',
-    '../../../../extensions/**/*.*/storybook/*.amp.js',
-  ],
-  addons: [
-    '@storybook/addon-a11y',
-    '@storybook/addon-viewport',
-    '@storybook/addon-knobs',
-    '@ampproject/storybook-addon',
-  ],
-  webpackFinal: async (config) => {
-    // Disable entry point size warnings.
-    config.performance.hints = false;
-    return config;
-  },
-};
+/** @externs */
+
+/** @typedef {{
+ *   shortcode: string,
+ *   captioned: (boolean|undefined),
+ *   title: (string|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   loading: (string)
+ * }}
+ */
+var InstagramPropsDef;
