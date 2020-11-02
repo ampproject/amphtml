@@ -180,7 +180,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       await waitFor(() => getSlot() === null, 'content unrendered');
     });
 
-    it.only('should rerender component on reconnect', async () => {
+    it('should rerender component on reconnect', async () => {
       await element.build();
       await waitFor(() => getSlot(), 'content rendered');
       removeElement(element);
