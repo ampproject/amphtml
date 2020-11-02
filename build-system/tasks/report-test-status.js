@@ -30,6 +30,7 @@ const IS_GULP_E2E = argv._[0] === 'e2e';
 
 const IS_LOCAL_CHANGES = !!argv.local_changes;
 const IS_DIST = !!argv.compiled;
+const IS_ESM = !!argv.esm;
 
 const TEST_TYPE_SUBTYPES = new Map([
   ['integration', ['local', 'minified', 'esm']],
@@ -59,6 +60,9 @@ function inferTestType() {
   if (IS_LOCAL_CHANGES) {
     return `${type}/local-changes`;
   } else if (IS_DIST) {
+    if (IS_ESM) {
+      return `${type}/esm`;
+    }
     return `${type}/minified`;
   } else {
     return `${type}/local`;
