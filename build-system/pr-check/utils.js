@@ -239,7 +239,7 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
   );
   exec('echo travis_fold:start:unzip_results && echo');
   dirsToUnzip.forEach((dir) => {
-    execOrDie(`unzip ${outputFileName} '${dir.replace('/', '/*')}'`);
+    execOrDie(`unzip -o ${outputFileName} '${dir.replace('/', '/*')}'`);
   });
   exec('echo travis_fold:end:unzip_results');
 
