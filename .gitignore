@@ -35,3 +35,6 @@ build-system/global-configs/custom-config.json
 export
 validator/export
 result-reports/**
+
+# This is generated with `gulp storybook --build`
+examples/storybook
