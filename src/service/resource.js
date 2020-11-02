@@ -1033,26 +1033,6 @@ export class Resource {
   }
 
   /**
-   * Whether the resource is currently visible in the viewport.
-   * @return {boolean}
-   */
-  isInViewport() {
-    const isInViewport = this.element.isInViewport();
-    if (isInViewport) {
-      this.resolveDeferredsWhenWithinViewports_();
-    }
-    return isInViewport;
-  }
-
-  /**
-   * Updates the inViewport state of the element.
-   * @param {boolean} inViewport
-   */
-  setInViewport(inViewport) {
-    this.element.viewportCallback(inViewport);
-  }
-
-  /**
    * Calls element's unlayoutCallback callback and resets state for
    * relayout in case document becomes active again.
    */
@@ -1068,7 +1048,6 @@ export class Resource {
       this.abortController_.abort();
       this.abortController_ = null;
     }
-    this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
       this.element.togglePlaceholder(true);
       // With IntersectionObserver, the element won't receive another

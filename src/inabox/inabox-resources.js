@@ -27,22 +27,6 @@ const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;
 
 /**
- * Only a few components require viewportCallback.
- * Allow them to observe intersections explicitly.
- * @private @const {!Array<string>}
- */
-const receivesViewportCallback = ['AMP-CAROUSEL'];
-
-/** @param {!IntersectionObserverEntry} entry */
-function triggerViewportCallbackFromIntersection(entry) {
-  const {target, isIntersecting} = entry;
-  if (!target.viewportCallback) {
-    return;
-  }
-  target.viewportCallback(isIntersecting);
-}
-
-/**
  * @implements {../service/resources-interface.ResourcesInterface}
  * @implements {../service.Disposable}
  * @visibleForTesting
@@ -117,7 +101,6 @@ export class InaboxResources {
   add(element) {
     const resource = new Resource(++this.resourceIdCounter_, element, this);
     this.resources_.push(resource);
-    this.maybeObserveInViewport_(element);
     dev().fine(TAG, 'resource added:', resource.debugid);
   }
 
@@ -221,41 +204,7 @@ export class InaboxResources {
     this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
-  }
-
-  /**
-   * Instantiates an IntersectionObserver (if available) that triggers
-   * viewportCallbacks.
-   * @return {?IntersectionObserver}
-   * @private
-   */
-  maybeInitInViewportObserver_() {
-    const {IntersectionObserver} = this.win;
-    if (!IntersectionObserver) {
-      return null;
-    }
-    if (this.inViewportObserver_ === null) {
-      this.inViewportObserver_ = new IntersectionObserver((entries) =>
-        entries.forEach(triggerViewportCallbackFromIntersection)
-      );
-    }
-    return this.inViewportObserver_;
-  }
-
-  /**
-   * Observes an element so it will receive viewportCallbacks when allowed.
-   * @param {!Element} element
-   * @private
-   */
-  maybeObserveInViewport_(element) {
-    if (!receivesViewportCallback.includes(element.tagName)) {
-      return;
-    }
-    const observer = this.maybeInitInViewportObserver_();
-    if (observer) {
-      observer.observe(element);
-    }
-  }
+  } 
 }
 
 /**

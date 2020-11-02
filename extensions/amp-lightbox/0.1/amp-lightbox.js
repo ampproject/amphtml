@@ -100,9 +100,6 @@ class AmpLightbox extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?{width: number, height: number}} */
-    this.size_ = null;
-
     /** @private {?Element} */
     this.container_ = null;
 
@@ -138,9 +135,6 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {number} */
     this.pos_ = 0;
-
-    /** @private {number} */
-    this.oldPos_ = 0;
 
     /** @private {number} */
     this.eventCounter_ = 0;
@@ -255,7 +249,6 @@ class AmpLightbox extends AMP.BaseElement {
 
       element.addEventListener(AmpEvents.DOM_UPDATE, () => {
         this.takeOwnershipOfDescendants_();
-        this.updateChildrenInViewport_(this.pos_, this.pos_);
       });
 
       element.addEventListener('scroll', this.scrollHandler_.bind(this));
@@ -382,15 +375,8 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     const container = dev().assertElement(this.container_);
-    if (!this.isScrollable_) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        container,
-        true
-      );
-    } else {
+    if (this.isScrollable_) {
       this.scrollHandler_();
-      this.updateChildrenInViewport_(this.pos_, this.pos_);
     }
 
     const onAnimationEnd = () => {
@@ -812,83 +798,8 @@ class AmpLightbox extends AMP.BaseElement {
    */
   update_(pos) {
     dev().fine(TAG, 'update_');
-    this.updateChildrenInViewport_(pos, this.oldPos_);
     this.oldPos_ = pos;
     this.pos_ = pos;
-  }
-
-  /**
-   * Update the inViewport status of children when scroll position changed.
-   * @param {number} newPos
-   * @param {number} oldPos
-   * @private
-   */
-  updateChildrenInViewport_(newPos, oldPos) {
-    const seen = [];
-    this.forEachVisibleChild_(newPos, (cell) => {
-      seen.push(cell);
-      const owners = Services.ownersForDoc(this.element);
-      owners.updateInViewport(this.element, cell, true);
-      owners.scheduleLayout(this.element, cell);
-    });
-    if (oldPos != newPos) {
-      this.forEachVisibleChild_(oldPos, (cell) => {
-        if (!seen.includes(cell)) {
-          Services.ownersForDoc(this.element).updateInViewport(
-            this.element,
-            cell,
-            false
-          );
-        }
-      });
-    }
-  }
-
-  /**
-   * Call the callback function for each child element that is visible in the
-   * lightbox given current scroll position.
-   * @param {number} pos
-   * @param {function(!Element)} callback
-   * @private
-   */
-  forEachVisibleChild_(pos, callback) {
-    const containerHeight = this.getSize_().height;
-    const descendants = this.getComponentDescendants_();
-    for (let i = 0; i < descendants.length; i++) {
-      const descendant = descendants[i];
-      let offsetTop = 0;
-      for (
-        let n = descendant;
-        n && this.element.contains(n);
-        n = n./*OK*/ offsetParent
-      ) {
-        offsetTop += n./*OK*/ offsetTop;
-      }
-      // Check whether child element is almost visible in the lightbox given
-      // current scrollTop position of lightbox
-      // We consider element visible if within 2x containerHeight distance.
-      const visibilityMargin = 2 * containerHeight;
-      if (
-        offsetTop + descendant./*OK*/ offsetHeight >= pos - visibilityMargin &&
-        offsetTop <= pos + visibilityMargin
-      ) {
-        callback(descendant);
-      }
-    }
-  }
-
-  /**
-   * Returns the size of the lightbox.
-   * @return {!{width: number, height: number}}
-   */
-  getSize_() {
-    if (!this.size_) {
-      this.size_ = {
-        width: this.element./*OK*/ clientWidth,
-        height: this.element./*OK*/ clientHeight,
-      };
-    }
-    return this.size_;
   }
 
   /**

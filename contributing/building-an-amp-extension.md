@@ -377,8 +377,6 @@ current slide when the user moves to it.
 
 ```javascript
 const owners = Services.ownersForDoc(this.element);
-owners.updateInViewport(this.element, oldSlide, false);
-owners.updateInViewport(this.element, newSlide, true);
 owners.scheduleLayout(this.element, newSlide);
 this.setControlsState();
 owners.schedulePause(this.element, oldSlide);
