@@ -31,4 +31,5 @@ export const fitTextContentWrapper = {
   '-webkit-box-orient': 'vertical',
   'overflow': 'hidden',
   'textOverflow': 'ellipsis',
+  'height': 'min-content',
 };
