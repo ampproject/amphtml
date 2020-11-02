@@ -19,11 +19,13 @@ import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
+import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   toChildArray,
   useCallback,
   useContext,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -40,6 +42,8 @@ const Controls = {
   AUTO: 'auto',
 };
 
+const MIN_AUTO_ADVANCE_INTERVAL = 1000;
+
 /**
  * @param {!BaseCarouselDef.Props} props
  * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
@@ -50,6 +54,10 @@ function BaseCarouselWithRef(
     advanceCount = 1,
     arrowPrev,
     arrowNext,
+    autoAdvance = false,
+    autoAdvanceCount = 1,
+    autoAdvanceInterval: customInterval = MIN_AUTO_ADVANCE_INTERVAL,
+    autoAdvanceLoops = Number.POSITIVE_INFINITY,
     children,
     controls = Controls.AUTO,
     loop,
@@ -73,7 +81,32 @@ function BaseCarouselWithRef(
   const scrollRef = useRef(null);
   const containRef = useRef(null);
   const contentRef = useRef(null);
+  const autoAdvanceCountRef = useRef(0);
+  const autoAdvanceForwardRef = useRef(true);
+  const autoAdvanceInterval = useMemo(
+    () => Math.max(customInterval, MIN_AUTO_ADVANCE_INTERVAL),
+    [customInterval]
+  );
 
+  const advance = useCallback(
+    (by, currentSlide) => {
+      if (autoAdvanceCountRef.current >= autoAdvanceLoops) {
+        return;
+      }
+      const canAdvanceForward = currentSlide + visibleCount < length;
+      const canAdvanceBackward = currentSlide > 0;
+      const goingForward = autoAdvanceForwardRef.current;
+      if (goingForward && !canAdvanceForward) {
+        autoAdvanceForwardRef.current = false;
+      } else if (!goingForward && !canAdvanceBackward) {
+        autoAdvanceForwardRef.current = true;
+      }
+      const shouldGoForward = autoAdvanceForwardRef.current;
+      scrollRef.current.advance(loop || shouldGoForward ? by : -by);
+      autoAdvanceCountRef.current += 1;
+    },
+    [autoAdvanceLoops, length, loop, visibleCount]
+  );
   const next = useCallback(() => scrollRef.current.next(), []);
   const prev = useCallback(() => scrollRef.current.prev(), []);
   const setRestingIndex = useCallback(
@@ -123,6 +156,23 @@ function BaseCarouselWithRef(
     return hadTouch;
   }, [hadTouch, controls, outsetArrows]);
 
+  const debouncedAdvance = useCallback(
+    (currentSlide) =>
+      debounce(
+        window,
+        () => {
+          advance(autoAdvanceCount, currentSlide);
+        },
+        autoAdvanceInterval
+      )(),
+    [autoAdvanceCount, autoAdvanceInterval, advance]
+  );
+  useEffect(() => {
+    if (autoAdvance) {
+      debouncedAdvance(currentSlide);
+    }
+  });
+
   return (
     <ContainWrapper
       size={true}
@@ -144,6 +194,7 @@ function BaseCarouselWithRef(
       )}
       <Scroller
         advanceCount={advanceCount}
+        autoAdvanceCount={autoAdvanceCount}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}
