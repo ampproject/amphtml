@@ -76,7 +76,7 @@ export function FitText({
       contentStyle={styles.fitTextContent}
       {...rest}
     >
-      <div ref={heightRef} style={{height: 'min-content'}}>
+      <div ref={heightRef} style={styles.minContentHeight}>
         {children}
       </div>
     </ContainWrapper>

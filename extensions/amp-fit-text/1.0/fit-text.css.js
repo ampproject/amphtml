@@ -32,3 +32,7 @@ export const fitTextContent = {
   'overflow': 'hidden',
   'textOverflow': 'ellipsis',
 };
+
+export const minContentHeight = {
+  'height': 'min-content',
+};
