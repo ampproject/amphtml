@@ -84,7 +84,6 @@ class AmpWorker {
     // Use RTV to make sure we fetch prod/canary/experiment correctly.
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
-
     const url = calculateEntryPointScriptUrl(
       loc,
       'ww',

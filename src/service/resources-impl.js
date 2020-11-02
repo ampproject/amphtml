@@ -266,7 +266,9 @@ export class ResourcesImpl {
       if (this.relayoutAll_ || !this.intersectionObserver_) {
         // Unfortunately, a viewport size change invalidates all premeasurements.
         if (this.intersectionObserver_) {
-          this.resources_.forEach((r) => r.invalidatePremeasurement());
+          this.resources_.forEach((resource) =>
+            resource.invalidatePremeasurement()
+          );
         }
         this.schedulePass();
       }
