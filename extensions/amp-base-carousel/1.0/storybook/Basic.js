@@ -198,3 +198,47 @@ export const WithCaptions = () => {
     </BaseCarousel>
   );
 };
+
+export const AutoAdvance = () => {
+  const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const snap = boolean('snap', true);
+  const loop = boolean('loop', true);
+  const autoAdvance = boolean('auto advance', true);
+  const autoAdvanceCount = number('auto advance count', 1);
+  const autoAdvanceInterval = number('auto advance interval', 1000);
+  const autoAdvanceLoops = number('auto advance loops', 3);
+  const advanceCount = number('advance count', 1, {min: 1});
+  const visibleCount = number('visible count', 2, {min: 1});
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
+  return (
+    <CarouselWithActions
+      advanceCount={advanceCount}
+      autoAdvanceCount={autoAdvanceCount}
+      autoAdvanceInterval={autoAdvanceInterval}
+      autoAdvanceLoops={autoAdvanceLoops}
+      autoAdvance={autoAdvance}
+      loop={loop}
+      snap={snap}
+      style={{width: '600px', height: '300px'}}
+      visibleCount={visibleCount}
+    >
+      {Array.from({length: slideCount}, (x, i) => {
+        const v = colorIncrement * (i + 1);
+        return (
+          <div
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              width: '900px',
+              height: '300px',
+              textAlign: 'center',
+              fontSize: '48pt',
+              lineHeight: '300px',
+            }}
+          >
+            {i}
+          </div>
+        );
+      })}
+    </CarouselWithActions>
+  );
+};

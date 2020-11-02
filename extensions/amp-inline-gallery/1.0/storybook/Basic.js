@@ -35,11 +35,21 @@ export const _default = () => {
   const bottomInset = boolean('bottom indicator inset?', false);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const autoAdvance = boolean('auto advance', true);
+  const autoAdvanceCount = number('auto advance count', 1);
+  const autoAdvanceInterval = number('auto advance interval', 1000);
+  const autoAdvanceLoops = number('auto advance loops', 3);
   return (
     <>
       <InlineGallery style={{width}}>
         <Pagination inset={topInset} style={{height: paginationHeight}} />
-        <BaseCarousel style={{height}}>
+        <BaseCarousel
+          style={{height}}
+          autoAdvanceCount={autoAdvanceCount}
+          autoAdvanceInterval={autoAdvanceInterval}
+          autoAdvanceLoops={autoAdvanceLoops}
+          autoAdvance={autoAdvance}
+        >
           {Array.from({length: slideCount}, (_, i) => {
             const v = colorIncrement * (i + 1);
             return (
