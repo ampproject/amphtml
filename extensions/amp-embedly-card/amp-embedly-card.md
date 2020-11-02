@@ -118,6 +118,10 @@ card container. Use `dark` to set this theme. For dark backgrounds it's better
 to specify this. The default is `light`, which sets no background color of the
 main card container.
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Embedly card"`.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)

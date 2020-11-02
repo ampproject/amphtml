@@ -86,6 +86,10 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
     <td>Indicates whether the embedded comment should update if the original comment is updated. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>title</strong></td>
+    <td>Define a <code>title</code> attribute for the component. The default is <code>Reddit</code>.</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>

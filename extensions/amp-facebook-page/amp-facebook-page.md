@@ -76,6 +76,10 @@ Hides the custom call to action button (if available). Default value is `false`.
 
 Uses the small header instead. Default value is `false`.
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook page"`.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)

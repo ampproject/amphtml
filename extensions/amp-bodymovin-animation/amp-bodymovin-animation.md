@@ -68,6 +68,10 @@ full player and want to use an HTML renderer they may do so by specifying the
 
 This attribute only accepts the values `html` and `svg`.
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Airbnb BodyMovin animation"`.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
