@@ -118,6 +118,10 @@ If you want to use the [YouTube player in privacy-enhanced mode](http://www.goog
 
 Usually YouTube sets its cookies when the player is loaded. In privacy-enhanced mode cookies are set when the user has clicked on the player.
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"YouTube video"`.
+
 ### common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
