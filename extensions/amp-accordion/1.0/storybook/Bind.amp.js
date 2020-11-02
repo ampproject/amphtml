@@ -20,7 +20,7 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-bind',
+  title: 'amp-accordion with amp-bind',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
