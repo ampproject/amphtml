@@ -42,6 +42,14 @@ const Controls = {
   AUTO: 'auto',
 };
 
+/**
+ * @enum {string}
+ */
+const Interaction = {
+  MOUSE: 'mouse',
+  TOUCH: 'touch',
+};
+
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
@@ -145,7 +153,7 @@ function BaseCarouselWithRef(
     (currentSlide + dir < 0 ||
       (!mixedLength && currentSlide + visibleCount + dir > length));
 
-  const [hadTouch, setHadTouch] = useState(false);
+  const [interaction, setInteraction] = useState(null);
   const hideControls = useMemo(() => {
     if (controls === Controls.ALWAYS || outsetArrows) {
       return false;
@@ -153,8 +161,8 @@ function BaseCarouselWithRef(
     if (controls === Controls.NEVER) {
       return true;
     }
-    return hadTouch;
-  }, [hadTouch, controls, outsetArrows]);
+    return interaction === Interaction.TOUCH;
+  }, [interaction, controls, outsetArrows]);
 
   const debouncedAdvance = useCallback(
     (currentSlide) =>
@@ -168,9 +176,10 @@ function BaseCarouselWithRef(
     [autoAdvanceCount, autoAdvanceInterval, advance]
   );
   useEffect(() => {
-    if (autoAdvance) {
-      debouncedAdvance(currentSlide);
+    if (interaction || !autoAdvance) {
+      return;
     }
+    debouncedAdvance(currentSlide);
   });
 
   return (
@@ -201,7 +210,8 @@ function BaseCarouselWithRef(
         setRestingIndex={setRestingIndex}
         snap={snap}
         ref={scrollRef}
-        onTouchStart={() => setHadTouch(true)}
+        onTouchStart={() => setInteraction(Interaction.TOUCH)}
+        onMouseEnter={() => setInteraction(Interaction.MOUSE)}
         visibleCount={mixedLength ? 1 : visibleCount}
       >
         {/*

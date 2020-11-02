@@ -54,6 +54,7 @@ function ScrollerWithRef(
     setRestingIndex,
     snap,
     visibleCount,
+    ...rest
   },
   ref
 ) {
@@ -259,6 +260,7 @@ function ScrollerWithRef(
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
       tabindex={0}
+      {...rest}
     >
       {slides}
       {needMoreSlidesToScroll && slides}
