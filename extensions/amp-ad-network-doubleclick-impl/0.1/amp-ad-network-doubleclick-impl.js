@@ -20,7 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../amp-a4a/0.1/real-time-config-manager';
+import '../../../src/service/real-time-config/real-time-config-impl';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -56,7 +56,7 @@ import {
 } from './flexible-ad-slot-utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
