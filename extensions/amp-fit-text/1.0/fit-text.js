@@ -18,6 +18,7 @@ import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
 import {ContainWrapper} from '../../../src/preact/component';
 import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
 const {LINE_HEIGHT_EM_} = styles;
@@ -59,7 +60,10 @@ export function FitText({
     if (!container || !content) {
       return;
     }
-    const win = container.ownerDocument.defaultView;
+    const win = toWin(container.ownerDocument.defaultView);
+    if (!win) {
+      return undefined;
+    }
     const observer = new win.ResizeObserver(() => resize());
     observer.observe(container);
     observer.observe(content);
