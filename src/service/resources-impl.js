@@ -23,7 +23,6 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
@@ -217,17 +216,6 @@ export class ResourcesImpl {
      * @private {boolean}
      */
     this.intersectionObserverCallbackFired_ = false;
-
-    /** @private {WeakMap<!Element, boolean>} */
-    this.inViewportMap_ = new WeakMap();
-
-    /** @private {!IntersectionObserver} */
-    this.viewportObserver_ = createViewportObserver((entries) => {
-      for (let i = 0; i < entries.length; i++) {
-        const {isIntersecting, target} = entries[i];
-        this.inViewportMap_.set(target, isIntersecting);
-      }
-    }, this.win);
 
     if (isExperimentOn(this.win, 'intersect-resources')) {
       const iframed = isIframed(this.win);
@@ -450,7 +438,6 @@ export class ResourcesImpl {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
-    this.viewportObserver_.observe(element);
 
     if (this.intersectionObserver_) {
       // The observer callback will schedule a pass to process this element.
@@ -627,7 +614,6 @@ export class ResourcesImpl {
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
     }
-    this.viewportObserver_.unobserve(resource.element);
     if (this.intersectionObserver_) {
       // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
@@ -1333,7 +1319,30 @@ export class ResourcesImpl {
       loadRect = viewportRect;
     }
 
-    // Phase 3: Schedule elements for layout within a reasonable distance from
+    const visibleRect = this.visible_
+      ? // When the doc is visible, consider the viewport to be 25% larger,
+        // to minimize effect from small scrolling and notify things that
+        // they are in viewport just before they are actually visible.
+        expandLayoutRect(viewportRect, 0.25, 0.25)
+      : viewportRect;
+
+    // Phase 3: Set inViewport status for resources.
+    for (let i = 0; i < this.resources_.length; i++) {
+      const r = this.resources_[i];
+      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+        continue;
+      }
+      // Note that when the document is not visible, neither are any of its
+      // elements to reduce CPU cycles.
+      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+      // layers. This is currently a short-term fix to the problem that
+      // the fixed elements get incorrect top coord.
+      const shouldBeInViewport =
+        this.visible_ && r.isDisplayed() && r.overlaps(visibleRect);
+      r.setInViewport(shouldBeInViewport);
+    }
+
+    // Phase 4: Schedule elements for layout within a reasonable distance from
     // current viewport.
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -1368,7 +1377,7 @@ export class ResourcesImpl {
     }
 
     if (this.visible_ && this.isIdle_(now)) {
-      // Phase 4: Idle Render Outside Viewport layout: layout up to 4 items
+      // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
       // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
       for (
@@ -1641,7 +1650,7 @@ export class ResourcesImpl {
    * @return {!Promise|undefined}
    * @private
    */
-  taskComplete_(task, success, opt_reason) { 
+  taskComplete_(task, success, opt_reason) {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
@@ -1687,7 +1696,7 @@ export class ResourcesImpl {
     // The element has to be in its rendering corridor.
     if (
       !forceOutsideViewport &&
-      !this.inViewportMap_.get(resource.element) &&
+      !resource.isInViewport() &&
       !resource.renderOutsideViewport() &&
       !resource.idleRenderOutsideViewport()
     ) {

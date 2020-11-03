@@ -464,13 +464,6 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the resource that it has either entered or exited the visible
-   * viewport. Intended to be implemented by actual components.
-   * @param {boolean} unusedInViewport
-   */
-  viewportCallback(unusedInViewport) {}
-
-  /**
    * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.

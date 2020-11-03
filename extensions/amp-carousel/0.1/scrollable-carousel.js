@@ -132,6 +132,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
+    this.updateInViewport_(this.pos_, this.pos_);
+  }
+
+  /** @override */
   goCallback(dir, animate) {
     const newPos = this.nextPos_(this.pos_, dir);
     const oldPos = this.pos_;
@@ -281,6 +287,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
+    this.updateInViewport_(pos, this.oldPos_);
     this.doLayout_(pos);
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
     this.oldPos_ = pos;
@@ -346,6 +353,26 @@ export class AmpScrollableCarousel extends BaseCarousel {
     if (nextPos != pos) {
       this.withinWindow_(nextPos, (cell) => {
         Services.ownersForDoc(this.element).schedulePreload(this.element, cell);
+      });
+    }
+  }
+
+  /**
+   * @param {number} newPos
+   * @param {number} oldPos
+   * @private
+   */
+  updateInViewport_(newPos, oldPos) {
+    const seen = [];
+    this.withinWindow_(newPos, (cell) => {
+      seen.push(cell);
+    });
+    if (oldPos != newPos) {
+      this.withinWindow_(oldPos, (cell) => {
+        if (!seen.includes(cell)) {
+          const owners = Services.ownersForDoc(this.element);
+          owners.schedulePause(this.element, cell);
+        }
       });
     }
   }

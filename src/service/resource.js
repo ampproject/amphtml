@@ -227,6 +227,9 @@ export class Resource {
     /** @const @private {boolean} */
     this.intersect_ = resources.isIntersectionExperimentOn();
 
+    /** @const @private {boolean} */
+    this.isInViewport_ = false;
+
     /**
      * A client rect that was "premeasured" by an IntersectionObserver.
      * @private {?ClientRect}
@@ -1033,6 +1036,25 @@ export class Resource {
   }
 
   /**
+   * Whether the resource is currently visible in the viewport.
+   * @return {boolean}
+   */
+  isInViewport() {
+    if (this.isInViewport_) {
+      this.resolveDeferredsWhenWithinViewports_();
+    }
+    return this.isInViewport_;
+  }
+
+  /**
+   * Updates the inViewport state of the element.
+   * @param {boolean} inViewport
+   */
+  setInViewport(inViewport) {
+    this.inViewport = inViewport;
+  }
+
+  /**
    * Calls element's unlayoutCallback callback and resets state for
    * relayout in case document becomes active again.
    */
@@ -1048,6 +1070,7 @@ export class Resource {
       this.abortController_.abort();
       this.abortController_ = null;
     }
+    this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
       this.element.togglePlaceholder(true);
       // With IntersectionObserver, the element won't receive another
