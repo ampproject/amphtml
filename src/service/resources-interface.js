@@ -183,11 +183,5 @@ export class ResourcesInterface {
    * @return {boolean}
    */
   isIntersectionExperimentOn() {}
-
-  /**
-   * Returns the percent of resources that were laid out after entering viewport.
-   * @return {number}
-   */
-  getSlowElementRatio() {}
 }
 /* eslint-enable no-unused-vars */
