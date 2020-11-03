@@ -262,9 +262,16 @@ export class ResourcesImpl {
         this.relayoutAll_ = true;
         this.maybeChangeHeight_ = true;
       }
+
       // With IntersectionObserver, we only need to handle viewport resize.
       if (this.relayoutAll_ || !this.intersectionObserver_) {
         this.schedulePass();
+      }
+      // Unfortunately, a viewport size change invalidates all premeasurements.
+      if (this.relayoutAll_ && this.intersectionObserver_) {
+        this.resources_.forEach((resource) =>
+          resource.invalidatePremeasurement()
+        );
       }
     });
     this.viewport_.onScroll(() => {
@@ -1928,7 +1935,10 @@ export class ResourcesImpl {
    * @private
    */
   cleanupTasks_(resource, opt_removePending) {
-    if (resource.getState() == ResourceState.NOT_LAID_OUT) {
+    if (
+      resource.getState() == ResourceState.NOT_LAID_OUT ||
+      resource.getState() == ResourceState.READY_FOR_LAYOUT
+    ) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
       // for layout again later on.

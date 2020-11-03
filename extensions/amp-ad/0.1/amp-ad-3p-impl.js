@@ -43,6 +43,7 @@ import {
   is3pThrottled,
 } from './concurrent-load';
 import {
+  getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
@@ -399,6 +400,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const consentStringPromise = consentPolicyId
       ? getConsentPolicyInfo(this.element, consentPolicyId)
       : Promise.resolve(null);
+    const consentMetadataPromise = consentPolicyId
+      ? getConsentMetadata(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
@@ -418,6 +422,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
+      consentMetadataPromise,
       scrollPromise,
     ]).then((consents) => {
       // Use JsonObject to preserve field names so that ampContext can access
@@ -433,8 +438,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'container': this.container_,
         'initialConsentState': consents[1],
         'consentSharedData': consents[2],
+        'initialConsentValue': consents[3],
+        'initialConsentMetadata': consents[4],
       });
-      opt_context['initialConsentValue'] = consents[3];
 
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them
@@ -447,6 +453,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         opt_context,
         {disallowCustom: this.config.remoteHTMLDisabled}
       );
+      iframe.title = this.element.title || 'Advertisement';
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
       return this.xOriginIframeHandler_.init(iframe);
     });

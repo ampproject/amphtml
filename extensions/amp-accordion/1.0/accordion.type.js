@@ -36,6 +36,8 @@ AccordionDef.Props;
  *   contentAs: (string|PreactDef.FunctionalComponent|undefined),
  *   expanded: (boolean|undefined),
  *   animate: (boolean|undefined),
+ *   headerClassName: (string|undefined),
+ *   contentClassName: (string|undefined),
  *   header: (!PreactDef.Renderable),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
@@ -68,3 +70,21 @@ AccordionDef.ContentProps;
  * }}
  */
 AccordionDef.ContextProps;
+
+/** @interface */
+AccordionDef.AccordionApi = class {
+  /**
+   * @param {string|undefined} section
+   */
+  toggle(section) {}
+
+  /**
+   * @param {string|undefined} section
+   */
+  expand(section) {}
+
+  /**
+   * @param {string|undefined} section
+   */
+  collapse(section) {}
+};

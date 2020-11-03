@@ -159,7 +159,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: argv.compiled}
+    {compiled: true}
   );
 }
 
@@ -748,19 +748,19 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp build|dist --fortesting'),
+        colors.cyan('gulp dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    await buildRuntime();
+    await buildRuntime(/* opt_compiled */ true);
   }
 }
 
 function installPercy_() {
-  if (!argv.noyarn) {
+  if (!argv.noinstall) {
     installPackages(__dirname);
   }
 
@@ -819,6 +819,5 @@ visualDiff.flags = {
   'percy_disabled':
     '  Disables Percy integration (for testing local changes only)',
   'nobuild': '  Skip build',
-  'noyarn': '  Skip calling yarn to install dependencies',
-  'compiled': '  Runs tests against minified JS',
+  'noinstall': '  Skip installing npm dependencies',
 };

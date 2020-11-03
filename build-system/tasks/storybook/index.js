@@ -16,10 +16,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const log = require('fancy-log');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
+const {yellow} = require('ansi-colors');
 
 const ENV_PORTS = {
   amp: 9001,
@@ -27,36 +29,69 @@ const ENV_PORTS = {
 };
 
 /**
+ * @param {string} bin
  * @param {string} env 'amp' or 'preact'
+ * @param {...string} args
  * @return {!ChildProcess}
  */
-function launchEnv(env) {
-  const {ci, 'storybook_port': storybookPort = ENV_PORTS[env]} = argv;
-  return execScriptAsync(
-    [
-      './node_modules/.bin/start-storybook',
-      '--quiet',
-      `-c ./${env}-env`,
-      `-p ${storybookPort}`,
-      ci ? '--ci' : '',
-    ].join(' '),
+const execStorybookScriptAsync = (bin, env, ...args) =>
+  execScriptAsync(
+    `./node_modules/.bin/${bin} --config-dir ./${env}-env ${args.join(' ')}`,
     {
       stdio: [null, process.stdout, process.stderr],
       cwd: __dirname,
       env: process.env,
     }
   );
+
+/**
+ * @param {string} env 'amp' or 'preact'
+ * @return {!ChildProcess}
+ */
+function launchEnv(env) {
+  const {ci, 'storybook_port': storybookPort = ENV_PORTS[env]} = argv;
+  return execStorybookScriptAsync(
+    'start-storybook',
+    env,
+    '--quiet',
+    '--static-dir ../../../',
+    `--port ${storybookPort}`,
+    ci ? '--ci' : ''
+  );
+}
+
+/**
+ * @param {string} env 'amp' or 'preact'
+ * @return {?ChildProcess}
+ */
+function buildEnv(env) {
+  if (env === 'amp') {
+    log(
+      yellow(
+        'WARNING: --build does not work with the `storybook/amp` environment.'
+      )
+    );
+    return null;
+  }
+  log(yellow('Building `storybook/preact` only.'));
+  return execStorybookScriptAsync(
+    'build-storybook',
+    env,
+    `--output-dir ../../../examples/storybook/${env}`
+  );
 }
 
 async function storybook() {
-  const {'storybook_env': env = 'amp,preact'} = argv;
+  const {'storybook_env': env = 'amp,preact', build = false} = argv;
   const envs = env.split(',');
-  if (envs.includes('amp')) {
+  if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
   installPackages(__dirname);
-  createCtrlcHandler('storybook');
-  return Promise.all(envs.map(launchEnv));
+  if (!build) {
+    createCtrlcHandler('storybook');
+  }
+  return Promise.all(envs.map(build ? buildEnv : launchEnv));
 }
 
 module.exports = {
@@ -66,6 +101,8 @@ module.exports = {
 storybook.description = 'Isolated testing and development for AMP components.';
 
 storybook.flags = {
+  'build':
+    '  Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
   'storybook_env':
     "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
   'storybook_port': '  Set port from which to run the Storybook dashboard.',
