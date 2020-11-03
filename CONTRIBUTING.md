@@ -1,4 +1,4 @@
-# Contributing to AMP HTML
+# Contributing to AMP HTML 😍😍😍
 
 The AMP HTML project strongly encourages your participation and [contributions](https://www.ampproject.org/contribute/)!
 
