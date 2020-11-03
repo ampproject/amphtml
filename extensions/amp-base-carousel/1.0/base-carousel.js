@@ -67,12 +67,9 @@ function BaseCarouselWithRef(
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(0);
-  const currentSlide = _thumbnails
-    ? currentSlideState
-    : carouselContext.currentSlide ?? currentSlideState;
-  const setCurrentSlide = _thumbnails
-    ? setCurrentSlideState
-    : carouselContext.setCurrentSlide ?? setCurrentSlideState;
+  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
+  const setCurrentSlide =
+    carouselContext.setCurrentSlide ?? setCurrentSlideState;
   const {setSlides} = carouselContext;
   const scrollRef = useRef(null);
   const containRef = useRef(null);
