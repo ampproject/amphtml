@@ -10,7 +10,7 @@
 
 ## Summary
 
-The player is fully available and the functionality here (unless otherwise specified) is ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionality. To learn how to try out the new features, refer to the (FAQs)[#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)].
+The player is fully available and the functionality here (unless otherwise specified) is ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionality. To learn how to try out the new features, refer to the [FAQs](#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)).
 
 This update contains guidance on using the Web Story Player to support:
 
