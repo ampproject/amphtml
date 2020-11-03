@@ -40,7 +40,7 @@ To navigate between stories on desktop, there are a couple of options:
 
 <table>
   <tr>
-    <td>1. Opt-in to the “skip-next-button” using the “controls” API (more on that below on the “Customize position & visibility of story UI elements” section).</td>
+    <td>1. Opt-in to the “skip-next-button” using the “controls” API (more on that below on the “Customizing position & visibility of story UI controls” section).</td>
     <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
   </tr>
   <tr>
@@ -444,3 +444,7 @@ Yes! These features have been merged to the main repository, but since there is 
 ### I want the bleeding-edge and latest features, how can I get them?
 
 AMP provides some channels that you can opt-in to get the latest changes. To opt-in, visit the [AMP Project Experiments page](https://cdn.ampproject.org/experiments.html) and select a channel. More information about the [AMP Release Channels](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels).
+
+### I have questions / comments, how do I contact you?
+
+Join the [amp-story slack channel](https://amphtml.slack.com/archives/C9ARUE6Q6) and ping us!.
