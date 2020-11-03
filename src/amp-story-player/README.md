@@ -46,7 +46,9 @@ To navigate between stories on desktop, there are a couple of options:
   <tr>
     <td>2. Use the Javascript APIs to implement your own navigational buttons.  If you want to use the Javascript APIs, you can use the <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-story-player.md#go">go() method</a> (see documentation for more details) as shown in the following example:</td>
     <td>
-      <pre lang="jscript">
+
+
+```javascript
 const player = document.querySelector("amp-story-player");
 let init = false;
 
@@ -72,7 +74,8 @@ function initializeNavigationalButtons() {
   });
 }
 
-</pre>
+```
+
 </td>
 
   </tr>
