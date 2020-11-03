@@ -55,7 +55,7 @@ Does not support pairing with `amp-story-interactive-results`, and can optionall
 ```html
 <amp-story-interactive-binary-poll
   id="pizza-binary-poll"
-  endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+  endpoint="https://backend.com/v1/interactives"
   prompt-text="Like Pizza?"
   option-1-text="Yes"
   option-1-confetti="🍕"
@@ -77,7 +77,7 @@ Display different categories based on user poll answers by pairing `amp-story-in
 <amp-story-interactive-poll
     id="season-poll"
     theme="dark"
-    endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+    endpoint="https://backend.com/v1/interactives"
     prompt-text="Pick a season"
     option-1-text="Spring" option-1-confetti="🌼"
     option-2-text="Summer" option-2-confetti="☀️"
@@ -97,7 +97,7 @@ Display different categories based on percentage of correct user answers by pair
 [sourcecode:html]
 <amp-story-interactive-quiz
     id="arts-quiz"
-    endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+    endpoint="https://backend.com/v1/interactives"
     prompt-text='Who was the artist that created the famous painting "The Last Supper"?'
     option-1-text="Michelangelo"
     option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
