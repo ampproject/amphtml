@@ -5,6 +5,7 @@
     "analytics-chunks-inabox"
   ],
   "allow-url-opt-in": ["pump-early-frame"],
+  "amp-accordion-display-locking": 0.1,
   "canary": 1,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 0.1,
