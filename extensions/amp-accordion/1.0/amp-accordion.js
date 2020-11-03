@@ -16,14 +16,17 @@
 
 import * as Preact from '../../../src/preact';
 import {Accordion, AccordionSection} from './accordion';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {Services} from '../../../src/services';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {toArray, toWin} from '../../../src/types';
 import {useImperativeHandle, useLayoutEffect} from '../../../src/preact';
 
 /** @const {string} */
@@ -74,6 +77,27 @@ class AmpAccordion extends PreactBaseElement {
 
 /**
  * @param {!Element} element
+ * @param {string} name
+ * @param {!Element} section
+ * @param {!ActionTrust} trust
+ * @return {Function}
+ */
+function getTrigger(element, name, section, trust) {
+  const action = Services.actionServiceForDoc(element);
+  const triggerEvent = () => {
+    const event = createCustomEvent(
+      toWin(element.ownerDocument.defaultView),
+      `accordionSection.${name}`,
+      dict({})
+    );
+    action.trigger(section, name, event, trust);
+    element.dispatchCustomEvent(name);
+  };
+  return triggerEvent;
+}
+
+/**
+ * @param {!Element} element
  * @param {MutationObserver} mu
  * @return {!JsonObject}
  */
@@ -106,6 +130,8 @@ function getState(element, mu) {
       'contentAs': contentShim,
       'expanded': expanded,
       'id': section.getAttribute('id'),
+      'onExpand': getTrigger(element, 'expand', section, ActionTrust.HIGH),
+      'onCollapse': getTrigger(element, 'collpase', section, ActionTrust.HIGH),
     });
     return <AccordionSection {...props} />;
   });
