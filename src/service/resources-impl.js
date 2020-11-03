@@ -1718,16 +1718,6 @@ export class ResourcesImpl {
       }
     }
 
-    // The element has to be in its rendering corridor.
-    if (
-      !forceOutsideViewport &&
-      !resource.isInViewport() &&
-      !resource.renderOutsideViewport() &&
-      !resource.idleRenderOutsideViewport()
-    ) {
-      return false;
-    }
-
     return true;
   }
 
