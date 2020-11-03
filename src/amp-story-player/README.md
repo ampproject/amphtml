@@ -245,7 +245,7 @@ The “close” control supports the following customizable properties:
   - Places the icon either on the left or right on LTR languages.
 - `visibility`: “hidden” or “visible” (default).
   - Toggles the control’s visibility. If omitted, the default is visible.
-  - See Example #2 - Hiding share button.
+  - See [Example #2 - Showing skip-to-next story on desktop.](#Example-#2---Showing-skip-to-next-story-on-desktop)
 - `backgroundImageUrl`: string with url or data string (escaped).
   - Changes the icon image to the provided url or data string (for inline svgs).
 
@@ -370,7 +370,7 @@ We’ve recently introduced some new events that the player will dispatch and th
 
 ### noNextStory
 
-Dispatched when there is no next story. Note that this will not be dispatched when using circular wrapping.
+Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](#(Beta)-Circular-wrapping).
 
 ```javascript
 player.addEventListener('noNextStory', (event) => {
@@ -380,7 +380,7 @@ player.addEventListener('noNextStory', (event) => {
 
 ### noPreviousStory
 
-Dispatched when there is no next story. Note that this will not be dispatched when using circular wrapping.
+Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](#(Beta)-Circular-wrapping).
 
 ```javascript
 player.addEventListener('noPreviousStory', (event) => {
@@ -400,7 +400,7 @@ player.addEventListener('amp-story-close', (event) => {
 
 ## Upcoming API Change: Poster Image
 
-In the interest of performance and specifically metrics like Largest Contentful Paint (LPS) & Cumulative Layout Shift (CLS), the player provides the option to specify a poster image while the player loads.
+In the interest of performance and specifically metrics like [Largest Contentful Paint (LPS) & Cumulative Layout Shift (CLS)](https://web.dev/vitals/), the player provides the option to specify a poster image while the player loads.
 
 Before, we recommended using a CSS variable style="--story-player-poster: url('’);” as an inline style of the `<a>` tag to specify the poster image.
 
@@ -422,25 +422,25 @@ https://codepen.io/maenrique/pen/WNxpPqJ
 
 ## Additional explorations and roadmap
 
-Follow feature requests & bugs in the Github project.
+Follow feature requests & bugs in the [Github project](https://github.com/ampproject/amphtml/projects/109).
 
 ## FAQs (please feel free to reach out with other questions & thoughts)
 
 ### The Web Player supports more features on non-AMP pages than on AMP pages currently. What features are missing for AMP-pages?
 
-Good question. While the basic functionality of the player is in the AMP version, including embedding multiple stories and swiping through them, we are still working on porting over some of the features from the non-AMP version to the AMP version. These include:
+Good question. While the basic functionality of the player is in the [AMP version](https://amp.dev/documentation/components/amp-story-player/), including embedding multiple stories and swiping through them, we are still working on porting over some of the features from the non-AMP version to the AMP version. These include:
 
 - Circular wrapping
 - Programmatically fetching more stories from an endpoint
 - Customizable UI controls
 - Custom events
 
-Follow our roadmap on Github and the wg-stories updates for the latest status updates.
+Follow our [roadmap on Github](https://github.com/ampproject/amphtml/projects/109) and the wg-stories updates for the [latest status updates](https://github.com/ampproject/wg-stories/issues).
 
 ### Is the player ready to use? When will these features be ready?
 
-Yes! These features have been merged to the main repository, but since there is currently a release freeze for AMP (October 26 - November 8, 2020), we recommend you to opt-in to the nightly release to try out the latest features. More information on that below.
+Yes! These features have been merged to the main repository, but since there is currently a [release freeze](https://github.com/ampproject/meta-tsc/issues/51) for AMP (October 26 - November 8, 2020), we recommend you to opt-in to the nightly release to try out the latest features. More information on that below.
 
 ### I want the bleeding-edge and latest features, how can I get them?
 
-AMP provides some channels that you can opt-in to get the latest changes. To opt-in, visit the AMP Project Experiments page and select a channel. More information about the AMP Release Channels.
+AMP provides some channels that you can opt-in to get the latest changes. To opt-in, visit the [AMP Project Experiments page](https://cdn.ampproject.org/experiments.html) and select a channel. More information about the [AMP Release Channels](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels).
