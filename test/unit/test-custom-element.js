@@ -48,6 +48,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       let testElementUnlayoutCallback;
       let testElementPauseCallback;
       let testElementResumeCallback;
+      let testElementAttachedCallback;
+      let testElementDetachedCallback;
 
       class TestElement extends BaseElement {
         isLayoutSupported(unusedLayout) {
@@ -85,6 +87,12 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         }
         resumeCallback() {
           testElementResumeCallback();
+        }
+        attachedCallback() {
+          testElementAttachedCallback();
+        }
+        detachedCallback() {
+          testElementDetachedCallback();
         }
       }
 
@@ -129,6 +137,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         testElementUnlayoutCallback = env.sandbox.spy();
         testElementPauseCallback = env.sandbox.spy();
         testElementResumeCallback = env.sandbox.spy();
+        testElementAttachedCallback = env.sandbox.spy();
+        testElementDetachedCallback = env.sandbox.spy();
       });
 
       afterEach(() => {
@@ -557,6 +567,26 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(element.signals().get(CommonSignals.BUILT)).to.be.ok;
           return element.whenBuilt(); // Should eventually resolve.
         });
+      });
+
+      it('Element - attachedCallback is called post build and on reconnect', async () => {
+        const element = new ElementClass();
+
+        // First build.
+        clock.tick(1);
+        container.appendChild(element);
+        await element.buildingPromise_;
+        expect(testElementAttachedCallback).to.be.calledOnce;
+
+        // Detach.
+        container.removeChild(element);
+        clock.tick(1);
+        expect(testElementDetachedCallback).to.be.calledOnce;
+
+        // Reconnect.
+        container.appendChild(element);
+        clock.tick(1);
+        expect(testElementAttachedCallback).to.be.calledTwice;
       });
 
       it('should build on consent sufficient', () => {
