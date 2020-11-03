@@ -63,6 +63,7 @@ function AccordionWithRef(
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
   const [randomPrefix] = useState(generateRandomId);
   const prefix = id || `a${randomPrefix}`;
+  console.log('render!', expandedMap);
 
   useEffect(() => {
     if (!expandSingleSection) {
@@ -72,39 +73,54 @@ function AccordionWithRef(
       const newExpandedMap = {};
       let expanded = 0;
       for (const k in expandedMap) {
-        newExpandedMap[k] = expandedMap[k] && expanded++ == 0;
+        newExpandedMap[k].value = expandedMap[k].value && expanded++ == 0;
       }
       return newExpandedMap;
     });
   }, [expandSingleSection]);
 
   const registerSection = useCallback(
-    (id, defaultExpanded) => {
+    (id, defaultExpanded, onExpand, onCollapse) => {
       setExpandedMap((expandedMap) => {
         return setExpanded(
           id,
           defaultExpanded,
           expandedMap,
-          expandSingleSection
+          expandSingleSection,
+          onExpand,
+          onCollapse
         );
       });
       return () => setExpandedMap((expandedMap) => omit(expandedMap, id));
     },
     [expandSingleSection]
   );
+  console.log(expandedMap);
 
   const toggleExpanded = useCallback(
     (id) => {
+      console.log('toggle', id);
       setExpandedMap((expandedMap) => {
-        const newValue = !expandedMap[id];
-        return setExpanded(id, newValue, expandedMap, expandSingleSection);
+        const newValue = !expandedMap[id].value;
+        return setExpanded(
+          id,
+          newValue,
+          expandedMap,
+          expandSingleSection,
+          expandedMap[id].onExpand,
+          expandedMap[id].onCollapse
+        );
       });
     },
     [expandSingleSection]
   );
 
   const isExpanded = useCallback(
-    (id, defaultExpanded) => expandedMap[id] ?? defaultExpanded,
+    (id, defaultExpanded) => {
+      const r = expandedMap[id] ? expandedMap[id].value : defaultExpanded;
+      console.log('isexpanded', id, r);
+      return r;
+    },
     [expandedMap]
   );
 
@@ -204,21 +220,36 @@ export {Accordion};
  * @param {boolean} value
  * @param {!Object<string, boolean>} expandedMap
  * @param {boolean} expandSingleSection
+ * @param onExpand
+ * @param onCollapse
+ * @param onExpand
+ * @param onCollapse
  * @return {!Object<string, boolean>}
  */
-function setExpanded(id, value, expandedMap, expandSingleSection) {
+function setExpanded(
+  id,
+  value,
+  expandedMap,
+  expandSingleSection,
+  onExpand,
+  onCollapse
+) {
+  console.log('setExpand', id, value, expandedMap);
   let newExpandedMap;
+  const newEntry = {value, onExpand, onCollapse};
   if (expandSingleSection && value) {
-    newExpandedMap = {[id]: value};
+    newExpandedMap = {[id]: newEntry};
     for (const k in expandedMap) {
       if (k != id) {
-        newExpandedMap[k] = false;
+        newExpandedMap[k] = {...expandedMap[k], value: false};
       }
     }
   } else {
-    newExpandedMap = {...expandedMap, [id]: value};
+    newExpandedMap = {...expandedMap, [id]: newEntry};
   }
-  return newExpandedMap;
+  console.log('setExpand', newExpandedMap);
+  //return newExpandedMap;
+  return {...newExpandedMap};
 }
 
 /**
@@ -236,6 +267,8 @@ export function AccordionSection({
   id: propId,
   header,
   children,
+  onExpand,
+  onCollapse,
   ...rest
 }) {
   const [genId] = useState(generateSectionId);
@@ -260,9 +293,16 @@ export function AccordionSection({
 
   useLayoutEffect(() => {
     if (registerSection) {
-      return registerSection(id, defaultExpanded);
+      return registerSection(id, defaultExpanded, onExpand, onCollapse);
     }
-  }, [registerSection, id, defaultExpanded]);
+  }, [registerSection, id, defaultExpanded, onExpand, onCollapse]);
+
+  const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
+  console.log('after expanded', id, expanded);
+  const animate = contextAnimate ?? defaultAnimate;
+  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
+  const classes = useStyles();
+  console.log('ex', expanded);
 
   const expandHandler = useCallback(() => {
     if (toggleExpanded) {
@@ -270,12 +310,13 @@ export function AccordionSection({
     } else {
       setExpandedState((prev) => !prev);
     }
-  }, [id, toggleExpanded]);
 
-  const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
-  const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
-  const classes = useStyles();
+    if (expanded && onCollapse) {
+      onCollapse();
+    } else if (onExpand) {
+      onExpand();
+    }
+  }, [id, toggleExpanded, expanded, onCollapse, onExpand]);
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;

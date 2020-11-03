@@ -51,28 +51,17 @@ class AmpAccordion extends PreactBaseElement {
       api./*OK*/ collapse(invocation.args && invocation.args['section'])
     );
 
-    const action = Services.actionServiceForDoc(this.element);
-    const triggerEvent = (name, section, trust) => {
-      const event = createCustomEvent(
-        this.win,
-        `accordionSection.${name}`,
-        dict({})
-      );
-      action.trigger(section, name, event, trust);
-      this.element.dispatchCustomEvent(name);
-    };
-
     const {element} = this;
 
     const mu = new MutationObserver(() => {
-      this.mutateProps(getState(element, mu, triggerEvent));
+      this.mutateProps(getState(element, mu));
     });
     mu.observe(element, {
       attributeFilter: ['expanded'],
       subtree: true,
     });
 
-    const {'children': children} = getState(element, mu, triggerEvent);
+    const {'children': children} = getState(element, mu);
     return dict({'children': children});
   }
 
@@ -87,12 +76,33 @@ class AmpAccordion extends PreactBaseElement {
 }
 
 /**
+ * @param {*} element
+ * @param name
+ * @param section
+ * @param trust
+ */
+function getTrigger(element, name, section, trust) {
+  const action = Services.actionServiceForDoc(element);
+  const triggerEvent = () => {
+    const event = createCustomEvent(
+      element.ownerDocument.defaultView,
+      `accordionSection.${name}`,
+      dict({})
+    );
+    action.trigger(section, name, event, trust);
+    element.dispatchCustomEvent(name);
+    console.log('TRIGGER', name, section);
+  };
+  return triggerEvent;
+}
+
+/**
  * @param {!Element} element
  * @param {MutationObserver} mu
  * @param triggerEvent
  * @return {!JsonObject}
  */
-function getState(element, mu, triggerEvent) {
+function getState(element, mu) {
   const sections = toArray(childElementsByTag(element, 'section'));
 
   const children = sections.map((section) => {
@@ -105,7 +115,7 @@ function getState(element, mu, triggerEvent) {
     const sectionShim = memo(
       section,
       SECTION_SHIM_PROP,
-      bindSectionShimToElement.bind(null, triggerEvent)
+      bindSectionShimToElement
     );
     const headerShim = memo(section, HEADER_SHIM_PROP, bindHeaderShimToElement);
     const contentShim = memo(
@@ -121,6 +131,8 @@ function getState(element, mu, triggerEvent) {
       'contentAs': contentShim,
       'expanded': expanded,
       'id': section.getAttribute('id'),
+      'onExpand': getTrigger(element, 'expand', section, ActionTrust.HIGH),
+      'onCollapse': getTrigger(element, 'collpase', section, ActionTrust.HIGH),
     });
     return <AccordionSection {...props} />;
   });
@@ -150,22 +162,13 @@ function getState(element, mu, triggerEvent) {
  * @param triggerEvent.children
  * @return {PreactDef.Renderable}
  */
-function SectionShim(triggerEvent, sectionElement, {expanded, children}) {
+function SectionShim(sectionElement, {expanded, children}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
-
-    if (triggerEvent) {
-      console.log(expanded, sectionElement, this);
-      triggerEvent(
-        expanded ? 'expand' : 'collapse',
-        sectionElement,
-        ActionTrust.HIGH
-      );
-    }
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, expanded, triggerEvent]);
+  }, [sectionElement, expanded]);
   return children;
 }
 
@@ -174,8 +177,7 @@ function SectionShim(triggerEvent, sectionElement, {expanded, children}) {
  * @param {!Element} element
  * @return {function(!AccordionDef.SectionProps):PreactDef.Renderable}
  */
-const bindSectionShimToElement = (triggerEvent, element) =>
-  SectionShim.bind(null, triggerEvent, element);
+const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
