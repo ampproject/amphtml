@@ -391,7 +391,7 @@ class PlayersManager {
       const currPlayer = this.players_.find((p) => p.player == player);
       currPlayer.progress = progress;
       const time = new Date().getTime();
-      if (true) {
+      if (time - currPlayer.lastInteraction > 50) {
         setTimeout(() => {
           this.players_.forEach((p) => {
             if (p.player != player) {
@@ -404,13 +404,14 @@ class PlayersManager {
               }
             }
             p.progress = progress;
+            p.lastInteraction = time;
           });
         }, 0);
       } else {
-        console.log('supressed event');
+        console.log('supressed event', time - currPlayer.lastInteraction);
       }
-      this.lastInteraction_ = time;
     });
+    console.log(this.players_);
   }
 
   /**
