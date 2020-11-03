@@ -15,6 +15,7 @@
  */
 
 import * as Preact from './index';
+import {ActionTrust} from '../action-constants';
 import {AmpEvents} from '../amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../contextprops';
 import {Deferred} from '../utils/promise';
@@ -24,7 +25,12 @@ import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {addGroup, setGroupProp, setParent, subscribe} from '../context';
 import {cancellation} from '../error';
-import {childElementByTag, createElementWithAttributes, matches} from '../dom';
+import {
+  childElementByTag,
+  createElementWithAttributes,
+  matches,
+  parseBooleanAttribute,
+} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
 import {dashToCamelCase} from '../string';
@@ -320,7 +326,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @param {../action-constants.ActionTrust} minTrust
    * @protected
    */
-  registerApiAction(alias, handler, minTrust) {
+  registerApiAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.registerAction(
       alias,
       (invocation) => handler(this.api(), invocation),
@@ -753,10 +759,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
     const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
     let value;
     if (def.attr) {
-      value =
-        def.type == 'boolean'
-          ? element.hasAttribute(def.attr)
-          : element.getAttribute(def.attr);
+      value = element.getAttribute(def.attr);
       if (def.media && value != null) {
         value = mediaQueryProps.resolve(String(value));
       }
@@ -780,13 +783,15 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
       }
     }
     if (value == null) {
-      if (def.default !== undefined) {
+      if (def.default != null) {
         props[name] = def.default;
       }
     } else {
       const v =
         def.type == 'number'
           ? parseFloat(value)
+          : def.type == 'boolean'
+          ? parseBooleanAttribute(/** @type {string} */ (value))
           : def.type == 'date'
           ? getDate(value)
           : value;
