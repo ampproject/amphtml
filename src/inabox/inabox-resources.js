@@ -204,7 +204,7 @@ export class InaboxResources {
     this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
-  } 
+  }
 }
 
 /**

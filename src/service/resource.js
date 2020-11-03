@@ -1051,7 +1051,7 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    this.inViewport = inViewport;
+    this.inViewport_ = inViewport;
   }
 
   /**
