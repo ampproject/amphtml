@@ -5,7 +5,7 @@ formats:
 teaser:
   text: A rich set of interactive experiences for stories, including quizzes, polls and results.
 draft:
-  - true
+  - false
 tags:
   - dynamic-content
   - social
@@ -28,14 +28,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-[tip type="important"]Change image sources to ampproject/amphtml/master!!![/tip]
-
 The `amp-story-interactive` component provides a set of experiences, such as quizzes or polls, in [Web Stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories).
 
 <div layout="container" width="3" height="2">
-<div style="width:32%;display:inline-block"><amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
-<div style="width:32%;display:inline-block"><amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/animal-poll.png" layout="responsive" width="200" height="350"/></div>
-<div style="width:32%;display:inline-block"><amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/results-art.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/animal-poll.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/results-art.png" layout="responsive" width="200" height="350"/></div>
 </div>
 
 ## Usage
@@ -52,12 +50,12 @@ The `amp-story-interactive-binary-poll` element provides a two option voting use
 
 Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
-<amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="intrinsic" width="400" height="230">
+<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="intrinsic" width="400" height="230">
 
 ```html
 <amp-story-interactive-binary-poll
   id="pizza-binary-poll"
-  endpoint="https://endpoint.com/v1/interactives"
+  endpoint="https://backend.com/v1/interactives"
   prompt-text="Like Pizza?"
   option-1-text="Yes"
   option-1-confetti="🍕"
@@ -73,13 +71,13 @@ The `amp-story-interactive-poll` element provides a voting experience with 2-4 o
 
 Display different categories based on user poll answers by pairing `amp-story-interactive-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
 
-<amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
 
 [sourcecode:html]
 <amp-story-interactive-poll
     id="season-poll"
     theme="dark"
-    endpoint="https://endpoint.com/v1/interactives"
+    endpoint="https://backend.com/v1/interactives"
     prompt-text="Pick a season"
     option-1-text="Spring" option-1-confetti="🌼"
     option-2-text="Summer" option-2-confetti="☀️"
@@ -94,12 +92,12 @@ The `amp-story-interactive-quiz` element provides a guessing experience with 2-4
 
 Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
 
-<amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
 
 [sourcecode:html]
 <amp-story-interactive-quiz
     id="arts-quiz"
-    endpoint="https://endpoint.com/v1/interactives"
+    endpoint="https://backend.com/v1/interactives"
     prompt-text='Who was the artist that created the famous painting "The Last Supper"?'
     option-1-text="Michelangelo"
     option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
@@ -116,7 +114,7 @@ Each category specifies its content `option-{1/2/3/4}-{text/image/results-catego
 
 Results can feed its state from quizzes if all categories also specify `option-{1/2/3/4}-results-threshold`. If no categories have thresholds, the state will count the `option-{1/2/3/4}-results-category` from options selected in polls.
 
-<amp-img src="https://github.com/mszylkowski/amphtml/raw/interactive_docs/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
+<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
 
 [sourcecode:html]
 <amp-story-interactive-results
@@ -167,13 +165,7 @@ POST_BODY = {'option_selected': 1}
 Response: No response necessary
 [/sourcecode]
 
-Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others. Available free-to-use backends are:
-
-- Google hosted: _coming soon_
-
-[tip type="note"]
-Before setting up a backend, consider if the already existing backends satisfy your requirements.
-[/tip]
+Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others.
 
 ## Attributes
 
