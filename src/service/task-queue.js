@@ -22,7 +22,6 @@ import {devAssert} from '../log';
  *   id: string,
  *   resource: !./resource.Resource,
  *   priority: number,
- *   forceOutsideViewport: boolean,
  *   callback: function(),
  *   scheduleTime: time,
  *   startTime: time,

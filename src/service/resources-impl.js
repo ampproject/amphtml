@@ -1522,10 +1522,7 @@ export class ResourcesImpl {
         }
         // Check if the element has exited the viewport or the page has changed
         // visibility since the layout was scheduled.
-        if (
-          stillDisplayed &&
-          this.isLayoutAllowed_(resource, task.forceOutsideViewport)
-        ) {
+        if (stillDisplayed && this.isLayoutAllowed_(resource)) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
@@ -1694,11 +1691,10 @@ export class ResourcesImpl {
    * Returns whether the resource should be preloaded at this time.
    * The element must be measured by this time.
    * @param {!Resource} resource
-   * @param {boolean} forceOutsideViewport
    * @return {boolean}
    * @private
    */
-  isLayoutAllowed_(resource, forceOutsideViewport) {
+  isLayoutAllowed_(resource) {
     // Only built and displayed elements can be loaded.
     if (
       resource.getState() == ResourceState.NOT_BUILT ||
@@ -1722,12 +1718,7 @@ export class ResourcesImpl {
   }
 
   /** @override */
-  scheduleLayoutOrPreload(
-    resource,
-    layout,
-    opt_parentPriority,
-    opt_forceOutsideViewport
-  ) {
+  scheduleLayoutOrPreload(resource, layout, opt_parentPriority) {
     const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
     const isDisplayed = resource.isDisplayed();
     if (!isBuilt || !isDisplayed) {
@@ -1738,8 +1729,7 @@ export class ResourcesImpl {
         resource.getState()
       );
     }
-    const forceOutsideViewport = opt_forceOutsideViewport || false;
-    if (!this.isLayoutAllowed_(resource, forceOutsideViewport)) {
+    if (!this.isLayoutAllowed_(resource)) {
       return;
     }
 
@@ -1749,7 +1739,6 @@ export class ResourcesImpl {
         LAYOUT_TASK_ID_,
         LAYOUT_TASK_OFFSET_,
         opt_parentPriority || 0,
-        forceOutsideViewport,
         resource.startLayout.bind(resource)
       );
     } else {
@@ -1758,7 +1747,6 @@ export class ResourcesImpl {
         PRELOAD_TASK_ID_,
         PRELOAD_TASK_OFFSET_,
         opt_parentPriority || 0,
-        forceOutsideViewport,
         resource.startLayout.bind(resource)
       );
     }
@@ -1770,18 +1758,10 @@ export class ResourcesImpl {
    * @param {string} localId
    * @param {number} priorityOffset
    * @param {number} parentPriority
-   * @param {boolean} forceOutsideViewport
    * @param {function():!Promise} callback
    * @private
    */
-  schedule_(
-    resource,
-    localId,
-    priorityOffset,
-    parentPriority,
-    forceOutsideViewport,
-    callback
-  ) {
+  schedule_(resource, localId, priorityOffset, parentPriority, callback) {
     const taskId = resource.getTaskId(localId);
 
     const task = {
@@ -1789,7 +1769,6 @@ export class ResourcesImpl {
       resource,
       priority:
         Math.max(resource.getLayoutPriority(), parentPriority) + priorityOffset,
-      forceOutsideViewport,
       callback,
       scheduleTime: Date.now(),
       startTime: 0,

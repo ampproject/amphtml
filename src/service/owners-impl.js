@@ -126,8 +126,7 @@ export class OwnersImpl {
             this.resources_.scheduleLayoutOrPreload(
               resource,
               /* layout */ true,
-              opt_parentPriority,
-              /* forceOutsideViewport */ true
+              opt_parentPriority
             );
             return resource.loadedOnce();
           })

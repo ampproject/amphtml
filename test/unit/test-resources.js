@@ -265,7 +265,6 @@ describe('Resources', () => {
         getState: () => ResourceState.READY_FOR_LAYOUT,
         isDisplayed: () => true,
         isFixed: () => false,
-        isInViewport: () => true,
         prerenderAllowed: () => false,
         renderOutsideViewport: () => false,
         startLayout: () => {},
@@ -285,7 +284,6 @@ describe('Resources', () => {
       getState: () => ResourceState.READY_FOR_LAYOUT,
       isDisplayed: () => true,
       isFixed: () => false,
-      isInViewport: () => true,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
       getLayoutPriority: () => LayoutPriority.METADATA,
@@ -300,7 +298,6 @@ describe('Resources', () => {
       .returns(VisibilityState.PRERENDER);
     resources.scheduleLayoutOrPreload(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
-    expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
   });
 
   it('should not schedule prerenderable resource when document is hidden', () => {
@@ -308,7 +305,6 @@ describe('Resources', () => {
       getState: () => ResourceState.READY_FOR_LAYOUT,
       isDisplayed: () => true,
       isFixed: () => false,
-      isInViewport: () => true,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
       getLayoutPriority: () => LayoutPriority.METADATA,
@@ -326,26 +322,6 @@ describe('Resources', () => {
   });
 
   it(
-    'should not schedule non-renderOutsideViewport resource when' +
-      ' resource is not visible',
-    () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => false,
-        idleRenderOutsideViewport: () => false,
-        startLayout: () => {},
-        applySizesAndMediaQuery: () => {},
-      };
-      resources.scheduleLayoutOrPreload(resource, true);
-      expect(resources.queue_.getSize()).to.equal(0);
-    }
-  );
-
-  it(
     'should force schedule non-renderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
@@ -353,7 +329,6 @@ describe('Resources', () => {
         getState: () => ResourceState.READY_FOR_LAYOUT,
         isDisplayed: () => true,
         isFixed: () => false,
-        isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => false,
         idleRenderOutsideViewport: () => false,
@@ -370,7 +345,6 @@ describe('Resources', () => {
         /* ignoreQuota */ true
       );
       expect(resources.queue_.getSize()).to.equal(1);
-      expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.true;
     }
   );
 
@@ -382,7 +356,6 @@ describe('Resources', () => {
         getState: () => ResourceState.READY_FOR_LAYOUT,
         isDisplayed: () => true,
         isFixed: () => false,
-        isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => true,
         idleRenderOutsideViewport: () => false,
@@ -394,7 +367,6 @@ describe('Resources', () => {
       };
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
-      expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
     }
   );
 
@@ -406,7 +378,6 @@ describe('Resources', () => {
         getState: () => ResourceState.READY_FOR_LAYOUT,
         isDisplayed: () => true,
         isFixed: () => false,
-        isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => false,
         idleRenderOutsideViewport: () => true,
@@ -418,7 +389,6 @@ describe('Resources', () => {
       };
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
-      expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
     }
   );
 
@@ -651,7 +621,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.getLayout = () => 'fixed';
 
     element.idleRenderOutsideViewport = () => true;
-    element.isInViewport = () => false;
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
     element.getBoundingClientRect = () => rect;
@@ -1023,23 +992,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     });
   });
 
-  it('should not schedule resource execution outside viewport', () => {
-    resources.scheduleLayoutOrPreload(resource1, true);
-    expect(resources.queue_.getSize()).to.equal(1);
-    expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
-
-    const measureSpy = sandbox.spy(resource1, 'measure');
-    const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
-    sandbox.stub(resource1, 'isInViewport').returns(false);
-    sandbox.stub(resource1, 'renderOutsideViewport').returns(false);
-    sandbox.stub(resource1, 'idleRenderOutsideViewport').returns(false);
-    resources.work_();
-    expect(resources.exec_.getSize()).to.equal(0);
-    expect(measureSpy).to.be.calledOnce;
-    expect(layoutCanceledSpy).to.be.calledOnce;
-    expect(resource1.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-  });
-
   it('should force schedule resource execution outside viewport', () => {
     resources.scheduleLayoutOrPreload(
       resource1,
@@ -1051,7 +1003,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
 
     const measureSpy = sandbox.spy(resource1, 'measure');
-    sandbox.stub(resource1, 'isInViewport').returns(false);
     sandbox.stub(resource1, 'renderOutsideViewport').returns(false);
     sandbox.stub(resource1, 'idleRenderOutsideViewport').returns(false);
     resources.work_();
@@ -1067,7 +1018,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
 
     resources.visible_ = false;
     sandbox.stub(resources.ampdoc, 'getVisibilityState').returns('prerender');
-    sandbox.stub(resource1, 'isInViewport').returns(true);
     sandbox.stub(resource1, 'prerenderAllowed').returns(true);
 
     const measureSpy = sandbox.spy(resource1, 'measure');
@@ -1086,7 +1036,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
 
     resources.visible_ = false;
     sandbox.stub(resources.ampdoc, 'getVisibilityState').returns('prerender');
-    sandbox.stub(resource1, 'isInViewport').returns(true);
     sandbox.stub(resource1, 'prerenderAllowed').returns(false);
 
     const measureSpy = sandbox.spy(resource1, 'measure');
@@ -1105,7 +1054,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
 
     resources.visible_ = false;
     sandbox.stub(resources.ampdoc, 'getVisibilityState').returns('hidden');
-    sandbox.stub(resource1, 'isInViewport').returns(true);
     sandbox.stub(resource1, 'prerenderAllowed').returns(true);
 
     const measureSpy = sandbox.spy(resource1, 'measure');

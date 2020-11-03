@@ -109,15 +109,9 @@ export class ResourcesInterface {
    * @param {!./resource.Resource} resource
    * @param {boolean} layout
    * @param {number=} opt_parentPriority
-   * @param {boolean=} opt_forceOutsideViewport
    * @package
    */
-  scheduleLayoutOrPreload(
-    resource,
-    layout,
-    opt_parentPriority,
-    opt_forceOutsideViewport
-  ) {}
+  scheduleLayoutOrPreload(resource, layout, opt_parentPriority) {}
 
   /**
    * Schedules the work pass at the latest with the specified delay.
