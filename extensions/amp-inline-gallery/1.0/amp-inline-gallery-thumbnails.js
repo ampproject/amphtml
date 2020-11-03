@@ -68,10 +68,7 @@ AmpInlineGalleryThumbnails['Component'] = Thumbnails;
 
 /** @override */
 AmpInlineGalleryThumbnails['props'] = {
-  'aspectRatio': {
-    attrs: ['aspect-ratio-width', 'aspect-ratio-height'],
-    parseAspectRatioAttrs,
-  },
+  'aspectRatio': {attr: 'aspect-ratio', type: 'number'},
   'loop': {attr: 'loop', type: 'boolean'},
 };
 
@@ -92,20 +89,6 @@ AmpInlineGalleryThumbnails['shadowCss'] = CSS;
 
 /** @override */
 AmpInlineGalleryThumbnails['useContexts'] = [CarouselContextProp];
-
-/**
- * @param {!Element} element
- * @return {?number}
- */
-function parseAspectRatioAttrs(element) {
-  const aspectRatioWidth =
-    Number(element.getAttribute('aspect-ratio-width')) || 0;
-  const aspectRatioHeight =
-    Number(element.getAttribute('aspect-ratio-height')) || 0;
-  if (aspectRatioWidth && aspectRatioHeight) {
-    return aspectRatioWidth / aspectRatioHeight;
-  }
-}
 
 /**
  * Creates a thumbnail element for a given slide. If the slide is an image
