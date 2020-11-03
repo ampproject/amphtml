@@ -254,7 +254,7 @@ function ScrollerWithRef(
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll} `}
+      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
       tabindex={0}
     >
       {slides}
