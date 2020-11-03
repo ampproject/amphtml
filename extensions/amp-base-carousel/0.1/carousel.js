@@ -1180,10 +1180,11 @@ export class Carousel {
     }
 
     // We are updating during a programmatic scroll, so go to the correct
-    // index.
+    // index (and update offset accordingly).
     if (this.requestedIndex_ !== null) {
       this.currentIndex_ = this.requestedIndex_;
       this.requestedIndex_ = null;
+      this.currentElementOffset_ = 0;
     }
 
     const totalLength = sum(this.getSlideLengths_());
