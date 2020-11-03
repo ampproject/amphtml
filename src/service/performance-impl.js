@@ -114,12 +114,6 @@ export class Performance {
      */
     this.aggregateShiftScore_ = 0;
 
-    /**
-     * True if the ratios have already been ticked.
-     * @private {boolean}
-     */
-    this.slowElementRatioTicked_ = false;
-
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
@@ -503,7 +497,6 @@ export class Performance {
     if (this.supportsLargestContentfulPaint_) {
       this.tickLargestContentfulPaint_();
     }
-    this.tickSlowElementRatio_();
   }
 
   /**
@@ -541,26 +534,6 @@ export class Performance {
         {capture: true}
       );
     }
-  }
-
-  /**
-   * Tick the slow element ratio.
-   */
-  tickSlowElementRatio_() {
-    if (this.slowElementRatioTicked_) {
-      return;
-    }
-    if (!this.resources_) {
-      dev().error(TAG, 'Failed to tick ser due to null resources');
-      return;
-    }
-
-    this.slowElementRatioTicked_ = true;
-    this.tickDelta(
-      TickLabel.SLOW_ELEMENT_RATIO,
-      this.resources_.getSlowElementRatio()
-    );
-    this.flush();
   }
 
   /**
