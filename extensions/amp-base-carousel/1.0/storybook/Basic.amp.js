@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -33,8 +33,8 @@ export const Default = () => {
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
   const advanceCount = number('advance count', 1, {min: 1});
-  const visibleCount = number('visible count', 1, {min: 1});
-  const outsetArrows = boolean('outset arrows', false);
+  const visibleCount = text('visible count', '(min-width: 400px) 2, 1');
+  const outsetArrows = text('outset arrows', '(min-width: 400px) true, false');
   const controls = select('show controls', ['auto', 'always', 'never']);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));

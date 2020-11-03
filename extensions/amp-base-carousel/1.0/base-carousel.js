@@ -75,6 +75,8 @@ function BaseCarouselWithRef(
     : carouselContext.setCurrentSlide ?? setCurrentSlideState;
   const {setSlides} = carouselContext;
   const scrollRef = useRef(null);
+  const containRef = useRef(null);
+  const contentRef = useRef(null);
 
   const next = useCallback(() => scrollRef.current.next(), []);
   const prev = useCallback(() => scrollRef.current.prev(), []);
@@ -99,6 +101,8 @@ function BaseCarouselWithRef(
         goToSlide: (index) => setRestingIndex(index),
         next,
         prev,
+        root: containRef.current,
+        node: contentRef.current,
       }),
     [next, prev, setRestingIndex]
   );
@@ -131,6 +135,8 @@ function BaseCarouselWithRef(
       layout={true}
       paint={true}
       contentStyle={{display: 'flex'}}
+      ref={containRef}
+      contentRef={contentRef}
       {...rest}
     >
       {!hideControls && (

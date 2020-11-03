@@ -15,15 +15,22 @@
  */
 
 import * as Preact from './index';
+import {ActionTrust} from '../action-constants';
 import {AmpEvents} from '../amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../contextprops';
 import {Deferred} from '../utils/promise';
 import {Loading} from '../loading';
+import {MediaQueryProps} from './media-query-props';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {addGroup, setGroupProp, setParent, subscribe} from '../context';
 import {cancellation} from '../error';
-import {childElementByTag, createElementWithAttributes, matches} from '../dom';
+import {
+  childElementByTag,
+  createElementWithAttributes,
+  matches,
+  parseBooleanAttribute,
+} from '../dom';
 import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
 import {dashToCamelCase} from '../string';
@@ -49,6 +56,7 @@ import {isLayoutSizeDefined} from '../layout';
  *   attrPrefix: (string|undefined),
  *   attrs: (!Array<string>|undefined),
  *   parseAttrs: ((function(!Element):*)|undefined),
+ *   media: (boolean|undefined),
  *   default: *,
  * }}
  */
@@ -171,6 +179,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     /** @protected {?MutationObserver} */
     this.observer = null;
+
+    /** @protected {?MediaQueryProps} */
+    this.mediaQueryProps_ = null;
   }
 
   /**
@@ -206,6 +217,10 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...passthroughInit,
       ...templatesInit,
     });
+
+    this.mediaQueryProps_ = hasMediaQueryProps(Ctor)
+      ? new MediaQueryProps(this.win, () => this.scheduleRender_())
+      : null;
 
     const staticProps = Ctor['staticProps'];
     const initProps = this.init();
@@ -269,6 +284,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    if (this.mediaQueryProps_) {
+      this.mediaQueryProps_.dispose();
+    }
     const Ctor = this.constructor;
     if (!Ctor['loadable']) {
       return super.unlayoutCallback();
@@ -308,7 +326,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @param {../action-constants.ActionTrust} minTrust
    * @protected
    */
-  registerApiAction(alias, handler, minTrust) {
+  registerApiAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.registerAction(
       alias,
       (invocation) => handler(this.api(), invocation),
@@ -484,7 +502,8 @@ export class PreactBaseElement extends AMP.BaseElement {
       Ctor,
       this.element,
       this.ref_,
-      this.defaultProps_
+      this.defaultProps_,
+      this.mediaQueryProps_
     );
     this.updatePropsForRendering(props);
 
@@ -694,9 +713,10 @@ function matchesAttrPrefix(attributeName, attributePrefix) {
  * @param {!AmpElement} element
  * @param {{current: ?}} ref
  * @param {!JsonObject|null|undefined} defaultProps
+ * @param {?MediaQueryProps} mediaQueryProps
  * @return {!JsonObject}
  */
-function collectProps(Ctor, element, ref, defaultProps) {
+function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
   const {
     'children': childrenDefs,
     'className': className,
@@ -706,6 +726,10 @@ function collectProps(Ctor, element, ref, defaultProps) {
     'passthroughNonEmpty': passthroughNonEmpty,
     'props': propDefs,
   } = Ctor;
+
+  if (mediaQueryProps) {
+    mediaQueryProps.start();
+  }
 
   const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
 
@@ -735,15 +759,14 @@ function collectProps(Ctor, element, ref, defaultProps) {
     const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
     let value;
     if (def.attr) {
-      value =
-        def.type == 'boolean'
-          ? element.hasAttribute(def.attr)
-          : element.getAttribute(def.attr);
+      value = element.getAttribute(def.attr);
+      if (def.media && value != null) {
+        value = mediaQueryProps.resolve(String(value));
+      }
     } else if (def.parseAttrs) {
       devAssert(def.attrs);
       value = def.parseAttrs(element);
-    }
-    if (def.attrPrefix) {
+    } else if (def.attrPrefix) {
       const currObj = {};
       let objContains = false;
       const attrs = element.attributes;
@@ -756,23 +779,21 @@ function collectProps(Ctor, element, ref, defaultProps) {
         }
       }
       if (objContains) {
-        props[name] = currObj;
+        value = currObj;
       }
     }
     if (value == null) {
-      if (def.default !== undefined) {
+      if (def.default != null) {
         props[name] = def.default;
       }
     } else {
       const v =
         def.type == 'number'
           ? parseFloat(value)
+          : def.type == 'boolean'
+          ? parseBooleanAttribute(/** @type {string} */ (value))
           : def.type == 'date'
           ? getDate(value)
-          : def.type == 'Element'
-          ? // TBD: what's the best way for element referencing compat between
-            // React and AMP? Currently modeled as a Ref.
-            {current: element.getRootNode().getElementById(value)}
           : value;
       props[name] = v;
     }
@@ -838,6 +859,10 @@ function collectProps(Ctor, element, ref, defaultProps) {
         );
       }
     }
+  }
+
+  if (mediaQueryProps) {
+    mediaQueryProps.complete();
   }
 
   return props;
@@ -939,6 +964,23 @@ function shouldMutationBeRerendered(Ctor, m) {
       shouldMutationForNodeListBeRerendered(m.addedNodes) ||
       shouldMutationForNodeListBeRerendered(m.removedNodes)
     );
+  }
+  return false;
+}
+
+/**
+ * @param {typeof PreactBaseElement} Ctor
+ * @return {boolean}
+ */
+function hasMediaQueryProps(Ctor) {
+  const props = Ctor['props'];
+  if (props) {
+    for (const name in props) {
+      const def = /** @type {!AmpElementPropDef} */ (props[name]);
+      if (def.media) {
+        return true;
+      }
+    }
   }
   return false;
 }
