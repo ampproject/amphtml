@@ -56,7 +56,7 @@ export function Timeago({
   useEffect(() => {
     const node = ref.current;
     const win = node && toWin(node.ownerDocument.defaultView);
-    if (!node || !win) {
+    if (!win) {
       return undefined;
     }
     const observer = new win.IntersectionObserver((entries) => {
