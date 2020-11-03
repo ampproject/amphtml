@@ -16,11 +16,16 @@
 
 import {Services} from './services';
 import {TickLabel} from './enums';
+import {createViewportObserver} from './viewport-observer';
+import {toWin} from './types';
 
 const LABEL_MAP = {
   0: TickLabel.CONTENT_LAYOUT_DELAY,
   2: TickLabel.ADS_LAYOUT_DELAY,
 };
+
+/** @type {WeakMap<!Window, IntersectionObserver>} */
+const viewportObservers = new WeakMap();
 
 /**
  * Measures the time latency between "first time in viewport" and
@@ -28,14 +33,16 @@ const LABEL_MAP = {
  */
 export class LayoutDelayMeter {
   /**
-   * @param {!Window} win
+   * @param {!Element} element
    * @param {number} priority
    */
-  constructor(win, priority) {
+  constructor(element, priority) {
+    /** @private {!Element} */
+    this.element_ = element;
     /** @private {!Window} */
-    this.win_ = win;
+    this.win_ = toWin(element.ownerDocument.defaultView);
     /** @private {?./service/performance-impl.Performance} */
-    this.performance_ = Services.performanceForOrNull(win);
+    this.performance_ = Services.performanceForOrNull(this.win_);
     /** @private {?number} */
     this.firstInViewportTime_ = null;
     /** @private {?number} */
@@ -44,6 +51,29 @@ export class LayoutDelayMeter {
     this.done_ = false;
     /** @private {?TickLabel} */
     this.label_ = LABEL_MAP[priority];
+
+    this.initViewportObserver_();
+  }
+
+  /**
+   * Initializes viewport observer for calling `enterViewport`.
+   * @private
+   */
+  initViewportObserver_() {
+    if (!viewportObservers.has(this.win_)) {
+      viewportObservers.set(
+        this.win_,
+        createViewportObserver((entries) => {
+          for (let i = 0; i < entries.length; i++) {
+            const {target, isIntersecting} = entries[i];
+            if (isIntersecting) {
+              target.getLayoutDelayMeter().enterViewport();
+            }
+          }
+        }, this.win_)
+      );
+    }
+    viewportObservers.get(this.win_).observe(this.element_);
   }
 
   /**
@@ -79,7 +109,7 @@ export class LayoutDelayMeter {
       // Already measured.
       return;
     }
-    if (!this.firstInViewportTime_ || !this.firstLayoutTime_) {
+    if (this.firstInViewportTime_ == null || this.firstLayoutTime_ == null) {
       // Not ready yet.
       return;
     }
@@ -91,6 +121,7 @@ export class LayoutDelayMeter {
       this.performance_.tickDelta(this.label_, delay);
     }
     this.performance_.throttledFlush();
+    viewportObservers.get(this.win_).unobserve(this.element_);
     this.done_ = true;
   }
 }

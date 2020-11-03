@@ -1145,7 +1145,7 @@ function createBaseCustomElementClass(win) {
         this.signals_.signal(CommonSignals.LOAD_START);
       }
       if (this.perfOn_) {
-        this.getLayoutDelayMeter_().startLayout();
+        this.getLayoutDelayMeter().startLayout();
       }
 
       // Potentially start the loading indicator.
@@ -1233,9 +1233,6 @@ function createBaseCustomElementClass(win) {
     updateInViewport_(inViewport) {
       this.implementation_.inViewport_ = inViewport;
       this.implementation_.viewportCallback(inViewport);
-      if (inViewport && this.perfOn_) {
-        this.getLayoutDelayMeter_().enterViewport();
-      }
     }
 
     /**
@@ -1641,13 +1638,13 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Returns an optional overflow element for this custom element.
+     * Returns the LayoutDelayMeter for this element.
      * @return {!./layout-delay-meter.LayoutDelayMeter}
      */
-    getLayoutDelayMeter_() {
+    getLayoutDelayMeter() {
       if (!this.layoutDelayMeter_) {
         this.layoutDelayMeter_ = new LayoutDelayMeter(
-          toWin(this.ownerDocument.defaultView),
+          this,
           this.getLayoutPriority()
         );
       }

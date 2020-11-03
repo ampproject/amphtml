@@ -28,13 +28,23 @@ describes.realWin(
     },
   },
   (env) => {
+    let el;
     let win;
     let meter;
     let tickSpy;
     let clock;
+    let observeSpy;
+    let unobserveSpy;
 
     beforeEach(() => {
       win = env.win;
+      el = {ownerDocument: {defaultView: win}};
+      observeSpy = env.sandbox.spy();
+      unobserveSpy = env.sandbox.spy();
+      win.IntersectionObserver = () => ({
+        observe: observeSpy,
+        unobserve: unobserveSpy,
+      });
       installPlatformService(win);
       installPerformanceService(win);
       const perf = Services.performanceFor(win);
@@ -45,11 +55,24 @@ describes.realWin(
       });
       tickSpy = env.sandbox.spy(perf, 'tickDelta');
 
-      meter = new LayoutDelayMeter(win, 2);
+      meter = new LayoutDelayMeter(el, 2);
     });
 
     afterEach(() => {
       clock.uninstall();
+    });
+
+    it('should begin observing when constructed and unobserve when done', () => {
+      expect(observeSpy).calledOnce;
+      expect(unobserveSpy).not.called;
+
+      meter.enterViewport();
+      meter.startLayout();
+
+      expect(observeSpy).calledOnce;
+      expect(unobserveSpy).calledOnce;
+      expect(observeSpy.getCall(0).firstArg).eql(el);
+      expect(unobserveSpy.getCall(0).firstArg).eql(el);
     });
 
     it('should tick when there is a delay', () => {
