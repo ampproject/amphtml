@@ -17,7 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {cloneElement} from '../../../src/preact';
+import {cloneElement, useContext} from '../../../src/preact';
 import {px} from '../../../src/style';
 
 const DEFAULT_HEIGHT = 100;
@@ -35,48 +35,45 @@ export function Thumbnails({
 }) {
   const pointerFine = window.matchMedia('(pointer: fine)');
   const slideHeight = (style && style.height) || DEFAULT_HEIGHT;
+  const {slides, setCurrentSlide} = useContext(CarouselContext);
   // Note: The carousel is aria-hidden since it just duplicates the
   // information of the original carousel.
   return (
-    <CarouselContext.Consumer>
-      {({slides, setCurrentSlide}) => (
-        <BaseCarousel
-          aria-hidden={true}
-          mixedLength={true}
-          snap={false}
-          controls={pointerFine ? 'always' : 'never'}
-          loop={loop}
-          style={{height: slideHeight, ...style}}
-          _thumbnails={true}
-          {...rest}
-        >
-          {(children || slides).map((slide, i) => {
-            const {
-              style = {},
-              children,
-            } = /** @type {InlineGalleryDef.SlideProps} */ (slide.props);
-            const size = {
-              height: px(slideHeight),
-              width: aspectRatio
-                ? px(slideHeight * aspectRatio)
-                : style.width && style.height
-                ? px((style.width / style.height) * slideHeight)
-                : '',
-            };
-            return cloneElement(
-              /** @type {!PreactDef.VNode} */ (slide),
-              {
-                style: {
-                  ...style,
-                  ...size,
-                },
-                onClick: () => setCurrentSlide(i),
-              },
-              children
-            );
-          })}
-        </BaseCarousel>
-      )}
-    </CarouselContext.Consumer>
+    <BaseCarousel
+      aria-hidden={true}
+      mixedLength={true}
+      snap={false}
+      controls={pointerFine ? 'always' : 'never'}
+      loop={loop}
+      style={{height: slideHeight, ...style}}
+      _thumbnails={true}
+      {...rest}
+    >
+      {(children || slides).map((slide, i) => {
+        const {
+          style = {},
+          children,
+        } = /** @type {InlineGalleryDef.SlideProps} */ (slide.props);
+        const size = {
+          height: px(slideHeight),
+          width: aspectRatio
+            ? px(slideHeight * aspectRatio)
+            : style.width && style.height
+            ? px((style.width / style.height) * slideHeight)
+            : '',
+        };
+        return cloneElement(
+          /** @type {!PreactDef.VNode} */ (slide),
+          {
+            style: {
+              ...style,
+              ...size,
+            },
+            onClick: () => setCurrentSlide(i),
+          },
+          children
+        );
+      })}
+    </BaseCarousel>
   );
 }
