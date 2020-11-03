@@ -89,8 +89,8 @@ function BaseCarouselWithRef(
   const scrollRef = useRef(null);
   const containRef = useRef(null);
   const contentRef = useRef(null);
-  const autoAdvanceCountRef = useRef(0);
-  const autoAdvanceForwardRef = useRef(true);
+  const shouldAutoAdvance = useRef(autoAdvance);
+  const autoAdvanceTimesRef = useRef(0);
   const autoAdvanceInterval = useMemo(
     () => Math.max(customInterval, MIN_AUTO_ADVANCE_INTERVAL),
     [customInterval]
@@ -98,19 +98,19 @@ function BaseCarouselWithRef(
 
   const advance = useCallback(
     (by, currentSlide) => {
-      if (autoAdvanceCountRef.current >= autoAdvanceLoops) {
+      if (
+        autoAdvanceTimesRef.current >=
+        length * autoAdvanceLoops - visibleCount
+      ) {
+        shouldAutoAdvance.current = false;
         return;
       }
-      let goingForward = autoAdvanceForwardRef.current;
-      if (goingForward && currentSlide + visibleCount >= length) {
-        // Reached end of slides, start going backward
-        autoAdvanceForwardRef.current = goingForward = false;
-      } else if (!goingForward && currentSlide <= 0) {
-        // Reached start of slides, start going forward
-        autoAdvanceForwardRef.current = goingForward = true;
+      if (loop || currentSlide + visibleCount < length) {
+        scrollRef.current.advance(by); // Advance forward by specified count
+      } else {
+        scrollRef.current.advance(-(length - 1)); // Advance in reverse to first slide
       }
-      scrollRef.current.advance(loop || goingForward ? by : -by);
-      autoAdvanceCountRef.current += 1;
+      autoAdvanceTimesRef.current += by;
     },
     [autoAdvanceLoops, length, loop, visibleCount]
   );
@@ -175,7 +175,7 @@ function BaseCarouselWithRef(
     [autoAdvanceCount, autoAdvanceInterval, advance]
   );
   useEffect(() => {
-    if (interaction || !autoAdvance) {
+    if (interaction || !shouldAutoAdvance.current) {
       return;
     }
     debouncedAdvance(currentSlide);
