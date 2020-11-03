@@ -1009,7 +1009,7 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = shouldShowStoryUrlInfo(this.viewer_)
+        const infoDialog = this.viewer_ && shouldShowStoryUrlInfo(this.viewer_)
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
@@ -2029,7 +2029,7 @@ export class AmpStory extends AMP.BaseElement {
           );
         }
       });
-      thizs.maskElement_ = maskEl;
+      this.maskElement_ = maskEl;
       this.mutateElement(() => {
         this.element.appendChild(this.maskElement_);
         toggle(dev().assertElement(this.maskElement_), /* display */ false);
