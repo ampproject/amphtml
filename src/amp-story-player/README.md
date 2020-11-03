@@ -86,11 +86,11 @@ There are many ways in which you can use the player on your own surfaces. Below 
 <tbody>
   <tr>
     <td><strong>Carousel with circle avatars</strong> <br>In this codepen, we provide an example of how to create a carousel entry point and how to link it to your player. <br> <a href="https://codepen.io/maenrique/pen/wvWjNYr" target="_blank" rel="noopener noreferrer">https://codepen.io/maenrique/pen/wvWjNYr</a><br><br><strong>Demo</strong>  <br>This demo showcases a more complex implementation with a horizontally scrollable carousel and the player being opened in a lightbox. <br><a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-circular.html" target="_blank" rel="noopener noreferrer">https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-circular.html</a><br></td>
-    <td><img width="360" height="600" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-circuclar-entry-point.png?raw=true"></td>
+    <td><img width="360" height="642" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-circuclar-entry-point.png?raw=true"></td>
   </tr>
   <tr>
     <td><strong>Carousel with cards</strong><br>In this codepen, we provide an example of how to create a simple card carousel entry point and how to link it to your player.<br><a href="https://codepen.io/maenrique/pen/MWeGxqY" target="_blank" rel="noopener noreferrer">https://codepen.io/maenrique/pen/MWeGxqY</a><br><br><strong>Demo</strong> <br>This demo showcases a more complex implementation with a horizontally scrollable carousel and the player being opened in a lightbox. <br> <a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-cards.html" target="_blank" rel="noopener noreferrer">https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-cards.html</a><br><br></td>
-    <td><img width="360" height="600" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
+    <td><img width="360" height="642" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
   </tr>
   <tr>
     <td>Embedding directly into some text<br>The simplest way to use the player is to directly embed the player in your platform.<br><a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-blog.html" target="_blank" rel="noopener noreferrer">Demo</a><br></td>
@@ -305,7 +305,7 @@ Since by default the close button will be placed to the end, all we have to do i
 </amp-story-player>
       </pre>
     </td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
+    <td><img width="360" height="600" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
   </tr>
 </table>
 
@@ -407,7 +407,7 @@ We will now recommend developers to use an `<img loading=”lazy”>` tag under 
 
 Using the `<img>` tag also ensures that we're just using HTML so it should be interpreted correctly by browsers when it comes to computing LCP. Plus it's AMP/non-AMP consistent.
 
-This new API is still a work in progress, and will send more information when it becomes available. Please follow this Github issue for more information.
+This new API is still a work in progress, and will send more information when it becomes available. Please follow this [Github issue](https://github.com/ampproject/amphtml/issues/30512) for more information.
 
 ## Additional use case demos
 
