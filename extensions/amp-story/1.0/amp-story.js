@@ -327,13 +327,13 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
-    /** @private @const {?../../../src/service/viewer-interface.ViewerInterface} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null
 
-    /** @private @const {?AmpStoryViewerMessagingHandler} */
+    /** @private {?AmpStoryViewerMessagingHandler} */
     this.viewerMessagingHandler_ = null
 
-    /** @private @const {?../../../src/service/localization.LocalizationService} */
+    /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
     /**
