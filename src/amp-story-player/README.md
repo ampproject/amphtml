@@ -10,7 +10,7 @@
 
 ## Summary
 
-The player is fully available and the functionality here (unless otherwise specified) is ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionality. To learn how to try out the new features, refer to the [FAQs](#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)).
+The player is fully available and the functionality here (unless otherwise specified) is ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionality. To learn how to try out the new features (marked in (**Beta**)), refer to the [FAQs](#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)).
 
 This update contains guidance on using the Web Story Player to support:
 
@@ -52,24 +52,24 @@ let init = false;
 
 // Waits for when player API is ready to be used.
 player.addEventListener("ready", () => {
-initializeNavigationalButtons();
+  initializeNavigationalButtons();
 });
 
 // Synchronous check to avoid race conditions where event was dispatched before // we started listening.
 if (player.isReady) {
-initializeNavigationalButtons();
+    initializeNavigationalButtons();
 }
 
 function initializeNavigationalButtons() {
-if (init) return;
-init = true;
+  if (init) return;
+  init = true;
 
-const nextButton = document.body.querySelector(".my-next-button");
+  const nextButton = document.body.querySelector(".my-next-button");
 
-nextButton.addEventListener('click', () => {
-// Advances one story when ".my-next-button" is clicked.
-player.go(1);
-});
+  nextButton.addEventListener('click', () => {
+    // Advances one story when ".my-next-button" is clicked.
+    player.go(1);
+  });
 }
 
 </pre>
