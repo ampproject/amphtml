@@ -17,10 +17,15 @@
 import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {cloneElement, useContext} from '../../../src/preact';
+import {
+  cloneElement,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from '../../../src/preact';
 import {px} from '../../../src/style';
-
-const DEFAULT_HEIGHT = 100;
+import {useStyles} from './thumbnails.jss';
 
 /**
  * @param {!InlineGalleryDef.ThumbnailProps} props
@@ -29,23 +34,46 @@ const DEFAULT_HEIGHT = 100;
 export function Thumbnails({
   aspectRatio,
   children,
+  className = '',
   loop = false,
-  style,
   ...rest
 }) {
+  const classes = useStyles();
   const pointerFine = window.matchMedia('(pointer: fine)');
-  const slideHeight = (style && style.height) || DEFAULT_HEIGHT;
+  const ref = useRef(null);
+  const [height, setHeight] = useState(0);
   const {slides, setCurrentSlide} = useContext(CarouselContext);
+
+  // Adjust slides when container size or aspectRatio changes.
+  useLayoutEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+    const node = ref.current.root;
+    if (!node) {
+      return;
+    }
+    // Use local window.
+    const win = node.ownerDocument.defaultView;
+    const observer = new win.ResizeObserver((entries) => {
+      const last = entries[entries.length - 1];
+      setHeight(last.contentRect.height);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [aspectRatio]);
+
   // Note: The carousel is aria-hidden since it just duplicates the
   // information of the original carousel.
   return (
     <BaseCarousel
       aria-hidden={true}
+      className={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
       controls={pointerFine ? 'always' : 'never'}
       loop={loop}
-      style={{height: slideHeight, ...style}}
+      ref={ref}
       _thumbnails={true}
       {...rest}
     >
@@ -55,11 +83,11 @@ export function Thumbnails({
           children,
         } = /** @type {InlineGalleryDef.SlideProps} */ (slide.props);
         const size = {
-          height: px(slideHeight),
+          height: px(height),
           width: aspectRatio
-            ? px(slideHeight * aspectRatio)
+            ? px(height * aspectRatio)
             : style.width && style.height
-            ? px((style.width / style.height) * slideHeight)
+            ? px((style.width / style.height) * height)
             : '',
         };
         return cloneElement(
