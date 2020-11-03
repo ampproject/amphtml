@@ -23,7 +23,13 @@ import {Loading} from '../loading';
 import {MediaQueryProps} from './media-query-props';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
-import {addGroup, setGroupProp, setParent, subscribe} from '../context';
+import {
+  addGroup,
+  discover,
+  setGroupProp,
+  setParent,
+  subscribe,
+} from '../context';
 import {cancellation} from '../error';
 import {
   childElementByTag,
@@ -232,6 +238,21 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     this.checkPropsPostMutations();
 
+    // Unmount callback.
+    subscribe(this.element, [], () => {
+      return () => {
+        this.mounted_ = false;
+        if (this.container_) {
+          // We have to unmount the component to run all cleanup functions and
+          // release handlers. The only way to unmount right now is by
+          // unrendering the DOM. If the new `unmount` API becomes available, this
+          // code can be changed to `unmount` and the follow up render would
+          // have to execute the fast `hydrate` API.
+          render(null, this.container_);
+        }
+      };
+    });
+
     // Unblock rendering on first `CanRender` response. And keep the context
     // in-sync.
     subscribe(
@@ -294,6 +315,16 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.mutateProps(dict({'loading': Loading.UNLOAD}));
     this.onLoadError_(cancellation());
     return true;
+  }
+
+  /** @override */
+  attachedCallback() {
+    discover(this.element);
+  }
+
+  /** @override */
+  detachedCallback() {
+    discover(this.element);
   }
 
   /** @override */
