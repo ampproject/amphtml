@@ -48,6 +48,7 @@ const Controls = {
 const Interaction = {
   MOUSE: 'mouse',
   TOUCH: 'touch',
+  NONE: 'none',
 };
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
@@ -152,7 +153,7 @@ function BaseCarouselWithRef(
     (currentSlide + dir < 0 ||
       (!mixedLength && currentSlide + visibleCount + dir > length));
 
-  const [interaction, setInteraction] = useState(null);
+  const [interaction, setInteraction] = useState(Interaction.NONE);
   const hideControls = useMemo(() => {
     if (controls === Controls.ALWAYS || outsetArrows) {
       return false;
@@ -175,7 +176,7 @@ function BaseCarouselWithRef(
     [autoAdvanceCount, autoAdvanceInterval, advance]
   );
   useEffect(() => {
-    if (interaction || !shouldAutoAdvance.current) {
+    if (interaction !== Interaction.NONE || !shouldAutoAdvance.current) {
       return;
     }
     debouncedAdvance(currentSlide);
