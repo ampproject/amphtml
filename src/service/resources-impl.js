@@ -50,7 +50,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const MAX_BUILD_CHUNK_SIZE = 10;
 
 /**
  * @implements {ResourcesInterface}
@@ -89,9 +88,6 @@ export class ResourcesImpl {
 
     /** @private {number} */
     this.buildAttemptsCount_ = 0;
-
-    /** @private {number} */
-    this.buildsThisPass_ = 0;
 
     /** @private {boolean} */
     this.visible_ = this.ampdoc.isVisible();
@@ -193,9 +189,6 @@ export class ResourcesImpl {
       this.win,
       'build-close-to-viewport'
     );
-
-    /** @const @private {boolean} */
-    this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
 
     /** @const @private {boolean} */
     this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
@@ -458,9 +451,6 @@ export class ResourcesImpl {
    * @return {boolean}
    */
   isUnderBuildQuota_() {
-    if (this.buildInChunks_ && this.buildsThisPass_ >= MAX_BUILD_CHUNK_SIZE) {
-      return false;
-    }
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -584,7 +574,6 @@ export class ResourcesImpl {
     }
     dev().fine(TAG_, 'build resource:', resource.debugid);
     this.buildAttemptsCount_++;
-    this.buildsThisPass_++;
     return promise.then(
       () => this.schedulePass(),
       (error) => {
@@ -723,7 +712,6 @@ export class ResourcesImpl {
     }
 
     this.visible_ = this.ampdoc.isVisible();
-    this.buildsThisPass_ = 0;
 
     const firstPassAfterDocumentReady =
       this.documentReady_ &&
