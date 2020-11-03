@@ -101,16 +101,15 @@ function BaseCarouselWithRef(
       if (autoAdvanceCountRef.current >= autoAdvanceLoops) {
         return;
       }
-      const canAdvanceForward = currentSlide + visibleCount < length;
-      const canAdvanceBackward = currentSlide > 0;
-      const goingForward = autoAdvanceForwardRef.current;
-      if (goingForward && !canAdvanceForward) {
-        autoAdvanceForwardRef.current = false;
-      } else if (!goingForward && !canAdvanceBackward) {
-        autoAdvanceForwardRef.current = true;
+      let goingForward = autoAdvanceForwardRef.current;
+      if (goingForward && currentSlide + visibleCount >= length) {
+        // Reached end of slides, start going backward
+        autoAdvanceForwardRef.current = goingForward = false;
+      } else if (!goingForward && currentSlide <= 0) {
+        // Reached start of slides, start going forward
+        autoAdvanceForwardRef.current = goingForward = true;
       }
-      const shouldGoForward = autoAdvanceForwardRef.current;
-      scrollRef.current.advance(loop || shouldGoForward ? by : -by);
+      scrollRef.current.advance(loop || goingForward ? by : -by);
       autoAdvanceCountRef.current += 1;
     },
     [autoAdvanceLoops, length, loop, visibleCount]
