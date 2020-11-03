@@ -327,13 +327,13 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
-    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(this.element);
+    // /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
+    // this.viewer_ = Services.viewerForDoc(this.element);
 
-    /** @private @const {?AmpStoryViewerMessagingHandler} */
-    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
-      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
-      : null;
+    // /** @private @const {?AmpStoryViewerMessagingHandler} */
+    // this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+    //   ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
+    //   : null;
 
     /**
      * Store the current paused state, to make sure the story does not play on
@@ -353,6 +353,17 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+  }
+
+  /** @override */
+  buildCallback() {
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(this.element);
+
+    /** @private @const {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
+      : null;
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
     this.localizationService_ = getLocalizationService(this.element);
@@ -389,10 +400,7 @@ export class AmpStory extends AMP.BaseElement {
       'en-xa',
       enXaPseudoLocaleBundle
     );
-  }
 
-  /** @override */
-  buildCallback() {
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
     }
@@ -2023,7 +2031,7 @@ export class AmpStory extends AMP.BaseElement {
           );
         }
       });
-      this.maskElement_ = maskEl;
+      thizs.maskElement_ = maskEl;
       this.mutateElement(() => {
         this.element.appendChild(this.maskElement_);
         toggle(dev().assertElement(this.maskElement_), /* display */ false);
