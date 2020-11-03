@@ -59,7 +59,8 @@ export function FitText({
     if (!container || !content) {
       return;
     }
-    const observer = new ResizeObserver(() => resize());
+    const win = container.ownerDocument.defaultView;
+    const observer = new win.ResizeObserver(() => resize());
     observer.observe(container);
     observer.observe(content);
     return () => observer.disconnect();
