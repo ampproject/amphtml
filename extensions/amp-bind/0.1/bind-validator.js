@@ -443,6 +443,7 @@ function createElementRules_() {
     },
     'SECTION': {
       'data-expand': null,
+      'expanded': null,
     },
     'SELECT': {
       'autofocus': null,
