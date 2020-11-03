@@ -238,28 +238,29 @@ describes.realWin('carousel implementation', {}, (env) => {
   });
 
   describe('resetScrollReferencePoint_', () => {
-    it('currentElementOffset_ & currentIndex_ should be set when it is a' + 
-    ' programmatic scroll', async () => {
-      setStyle(element, 'width', '299.2px');
+    it(
+      'currentElementOffset_ & currentIndex_ should be set when it is a' +
+        ' programmatic scroll',
+      async () => {
+        const carousel = await createCarousel({
+          slideCount: 12,
+          loop: false,
+        });
 
-      const carousel = await createCarousel({
-        slideCount: 12,
-        loop: false,
-      });
+        // Fake the scroll that ends short of the correct index.
+        // This is handled by scroll event listener.
+        carousel.touching_ = false;
+        carousel.requestedIndex_ = 1;
+        carousel.currentIndex_ = 0;
+        carousel.restingIndex_ = 0;
+        carousel.currentElementOffset_ = -0.99382;
 
-      // Fake the scroll that ends short of the correct index.
-      // This is handled by scroll event listener.
-      carousel.touching_ = false;
-      carousel.requestedIndex_ = 1;
-      carousel.currentIndex_ = 0;
-      carousel.restingIndex_ = 0;
-      carousel.currentElementOffset_ = -0.99382;
+        carousel.resetScrollReferencePoint_();
 
-      carousel.resetScrollReferencePoint_();
-
-      expect(carousel.currentElementOffset_).to.equal(0);
-      expect(carousel.currentIndex_).to.equal(1);
-      expect(carousel.requestedIndex_).to.be.null;
-    });
+        expect(carousel.currentElementOffset_).to.equal(0);
+        expect(carousel.currentIndex_).to.equal(1);
+        expect(carousel.requestedIndex_).to.be.null;
+      }
+    );
   });
 });
