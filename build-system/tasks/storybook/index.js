@@ -71,7 +71,7 @@ function buildEnv(env) {
     writeFileSync(
       `${__dirname}/${env}-env/preview.js`,
       // If you change this JS template, make sure to JSON.stringify every
-      // dynamic value so it's safe from XSS and other types of garbling.
+      // dynamic value. This prevents XSS and other types of garbling.
       `// DO NOT${' '}SUBMIT.
        // This preview.js file was generated for a specific PR build.
        import {addParameters} from '@storybook/preact';
