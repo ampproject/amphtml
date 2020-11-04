@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
+import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
 import {Thumbnails} from './thumbnails';
 import {
   closestAncestorElementBySelector,
@@ -85,7 +86,7 @@ AmpInlineGalleryThumbnails['children'] = {
 AmpInlineGalleryThumbnails['layoutSizeDefined'] = true;
 
 /** @override */
-AmpInlineGalleryThumbnails['shadowCss'] = CSS;
+AmpInlineGalleryThumbnails['shadowCss'] = CAROUSEL_CSS + THUMBNAIL_CSS;
 
 /** @override */
 AmpInlineGalleryThumbnails['useContexts'] = [CarouselContextProp];
