@@ -440,14 +440,15 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   restoreOrLoseGlContext_() {
-    if (this.renderer_) {
-      if (this.distance_ < MIN_WEBGL_DISTANCE) {
-        if (this.renderer_.gl.isContextLost()) {
-          this.lostGlContext_.restoreContext();
-        }
-      } else if (!this.renderer_.gl.isContextLost()) {
-        this.lostGlContext_.loseContext();
+    if (!this.renderer_) {
+      return;
+    }
+    if (this.distance_ < MIN_WEBGL_DISTANCE) {
+      if (this.renderer_.gl.isContextLost()) {
+        this.lostGlContext_.restoreContext();
       }
+    } else if (!this.renderer_.gl.isContextLost()) {
+      this.lostGlContext_.loseContext();
     }
   }
 
