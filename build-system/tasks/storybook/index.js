@@ -71,7 +71,7 @@ function buildEnv(env) {
     writeFileSync(
       `${__dirname}/${env}-env/preview.js`,
       `// DO NOT SUBMIT.  
-       // This file was generated with gulp storybook --build.
+       // This preview.js file was generated with for a specific PR build.
        import {addParameters} from '@storybook/preact';
        addParameters(${JSON.stringify({
          ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
