@@ -16,12 +16,19 @@
 
 import {createUseStyles} from 'react-jss';
 
+// Default height. Can be overridden by user style.
 const thumbnails = {
-  height: '100px', // Default height. Can be overriden by user style.
+  height: '100px',
+};
+
+// Default background color. Can be overridden by user style.
+const slide = {
+  backgroundColor: '#999',
 };
 
 const JSS = {
   thumbnails,
+  slide,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

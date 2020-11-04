@@ -80,6 +80,7 @@ AmpBaseCarousel['children'] = {
   },
   'children': {
     name: 'children',
+    props: {'thumbnailSrc': {attr: 'data-thumbnail-src'}, 'src': {attr: 'src'}},
     selector: '*', // This should be last as catch-all.
     single: false,
   },

@@ -18,6 +18,7 @@ import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {px} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {
   useContext,
   useLayoutEffect,
@@ -53,14 +54,17 @@ export function Thumbnails({
       return;
     }
     // Use local window.
-    const win = node.ownerDocument.defaultView;
+    const win = toWin(node.ownerDocument.defaultView);
+    if (!win) {
+      return undefined;
+    }
     const observer = new win.ResizeObserver((entries) => {
       const last = entries[entries.length - 1];
       setHeight(last.contentRect.height);
     });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [aspectRatio]);
+  }, [aspectRatio, height]);
 
   return (
     <BaseCarousel
@@ -78,14 +82,15 @@ export function Thumbnails({
         return (
           <img
             alt={alt}
-            src={thumbnailSrc || src}
-            tabindex="0"
+            className={classes.slide}
+            onClick={() => setCurrentSlide(i)}
             role="button"
+            src={thumbnailSrc || src}
             style={{
               height: px(height),
-              width: aspectRatio ? px(height * aspectRatio) : '',
+              width: px(aspectRatio ? aspectRatio * height : height),
             }}
-            onClick={() => setCurrentSlide(i)}
+            tabindex="0"
           />
         );
       })}
