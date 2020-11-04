@@ -70,7 +70,9 @@ function buildEnv(env) {
     // Allows PR deploys to reference built binaries.
     writeFileSync(
       `${__dirname}/${env}-env/preview.js`,
-      `// DO NOT${' '}SUBMIT.  
+      // If you change this JS template, make sure to JSON.stringify every
+      // dynamic value so it's safe from XSS and other types of garbling.
+      `// DO NOT${' '}SUBMIT.
        // This preview.js file was generated for a specific PR build.
        import {addParameters} from '@storybook/preact';
        addParameters(${JSON.stringify({
