@@ -354,13 +354,13 @@ function SelectorShim({
 }
 
 /** @override */
-AmpSelector.Component = SelectorShim;
+AmpSelector['Component'] = SelectorShim;
 
 /** @override */
-AmpSelector.detached = true;
+AmpSelector['detached'] = true;
 
 /** @override */
-AmpSelector.props = {
+AmpSelector['props'] = {
   'disabled': {attr: 'disabled', type: 'boolean'},
   'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
