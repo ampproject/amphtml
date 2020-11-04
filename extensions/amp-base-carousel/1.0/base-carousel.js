@@ -65,7 +65,7 @@ function BaseCarouselWithRef(
     arrowNext,
     autoAdvance = false,
     autoAdvanceCount = 1,
-    autoAdvanceInterval: customInterval = MIN_AUTO_ADVANCE_INTERVAL,
+    autoAdvanceInterval: customAutoAdvanceInterval = MIN_AUTO_ADVANCE_INTERVAL,
     autoAdvanceLoops = Number.POSITIVE_INFINITY,
     children,
     controls = Controls.AUTO,
@@ -93,8 +93,8 @@ function BaseCarouselWithRef(
   const shouldAutoAdvance = useRef(autoAdvance);
   const autoAdvanceTimesRef = useRef(0);
   const autoAdvanceInterval = useMemo(
-    () => Math.max(customInterval, MIN_AUTO_ADVANCE_INTERVAL),
-    [customInterval]
+    () => Math.max(customAutoAdvanceInterval, MIN_AUTO_ADVANCE_INTERVAL),
+    [customAutoAdvanceInterval]
   );
 
   // Strictly used for autoadvancing.
