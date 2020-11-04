@@ -51,7 +51,7 @@ export function Selector({
           newValue = selected.includes(option)
             ? selected.filter((v) => v != option)
             : selected.concat(option);
-        } else if (!selected.includes(option)) {
+        } else {
           newValue = [option];
         }
         if (newValue) {
