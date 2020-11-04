@@ -18,14 +18,14 @@ const path = require('path');
 module.exports = {
   resolveLoader: {
     modules: [
-      path.join(__dirname, '../node_modules'),
-      path.join(__dirname, '../../../../node_modules'),
+      path.join(__dirname, './node_modules'),
+      path.join(__dirname, '../../../node_modules'),
     ],
   },
   resolve: {
     modules: [
-      path.join(__dirname, '../node_modules'),
-      path.join(__dirname, '../../../../node_modules'),
+      path.join(__dirname, './node_modules'),
+      path.join(__dirname, '../../../node_modules'),
     ],
   },
   module: {
