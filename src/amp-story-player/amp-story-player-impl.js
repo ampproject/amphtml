@@ -743,8 +743,9 @@ export class AmpStoryPlayer {
   /**
    * Shows the story provided by the URL in the player.
    * @param {string} storyUrl
+   * @param {string=} pageId
    */
-  show(storyUrl) {
+  show(storyUrl, pageId = null) {
     // TODO(enriqe): sanitize URLs for matching.
     const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
 
@@ -754,6 +755,9 @@ export class AmpStoryPlayer {
     }
 
     if (storyIdx === this.currentIdx_) {
+      if (pageId != null) {
+        this.selectPageById_(pageId);
+      }
       return;
     }
 
@@ -793,6 +797,9 @@ export class AmpStoryPlayer {
     });
 
     this.currentIdx_ = storyIdx;
+    if (pageId != null) {
+      this.selectPageById_(pageId);
+    }
     this.onNavigation_();
   }
 
@@ -1292,6 +1299,18 @@ export class AmpStoryPlayer {
       for (let i = 0; i < Math.abs(delta); i++) {
         messaging.sendRequest('selectPage', navigation);
       }
+    });
+  }
+
+  /**
+   * Sends a message to the story to navigate delta pages.
+   * @param {string} pageId
+   * @private
+   */
+  selectPageById_(pageId) {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging.sendRequest('selectPage', {'page': pageId});
     });
   }
 

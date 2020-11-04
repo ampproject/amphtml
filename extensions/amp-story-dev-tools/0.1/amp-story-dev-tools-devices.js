@@ -165,7 +165,7 @@ export class DevToolsDevicesTab {
 
     this.parent = parent;
 
-    this.playersManager_ = new PlayersManager(this.parent.win);
+    this.playersManager_ = null;
   }
 
   /**
@@ -184,11 +184,9 @@ export class DevToolsDevicesTab {
     this.storyUrl_ = url;
     this.element.textContent = '';
     this.element.appendChild(this.buildAddDeviceButton());
+    this.playersManager_ = new PlayersManager(this.parent.win, this.storyUrl_);
     this.devices_.forEach((device) => {
-      const deviceLayout = this.createDeviceLayout_(
-        device,
-        url + '#ignoreLocalStorageHistory=true'
-      );
+      const deviceLayout = this.createDeviceLayout_(device, url);
       this.element.appendChild(deviceLayout);
       device.element = deviceLayout;
     });
@@ -271,6 +269,7 @@ export class DevToolsDevicesTab {
         deviceLayout.remove();
         this.updateDevicesInHash_();
         this.recalculateLayout();
+        this.playersManager_.removePlayer(devicePlayer);
       });
     return deviceLayout;
   }
@@ -298,7 +297,7 @@ export class DevToolsDevicesTab {
         return device.name.toLowerCase().replace(/[^a-z0-9]/gi, '');
       })
       .join(';');
-    this.parent.updateHash({'devices': hashValue});
+    this.parent.updateHash({'devices': hashValue || ''});
   }
 
   /**
@@ -354,12 +353,16 @@ export class DevToolsDevicesTab {
 class PlayersManager {
   /**
    * Makes a players manager
-   * @param win
+   * @param {!Element} win
+   * @param {string} storyUrl
    */
-  constructor(win) {
+  constructor(win, storyUrl) {
+    /** @private {!AmpStoryPlayer[]} list of players being synced */
     this.players_ = [];
 
     this.win_ = win;
+
+    this.storyUrl_ = storyUrl;
   }
 
   /**
@@ -370,11 +373,7 @@ class PlayersManager {
     player.classList.add('i-amphtml-element');
     const playerImpl = new AmpStoryPlayer(this.win_, player);
     playerImpl.load();
-    this.players_.push({
-      'player': playerImpl,
-      'progress': 0,
-      'lastInteraction': new Date().getTime(),
-    });
+    this.players_.push(playerImpl);
     this.registerPlayerListeners_(playerImpl);
   }
 
@@ -384,34 +383,11 @@ class PlayersManager {
    * @param {AmpStoryPlayer} player
    */
   registerPlayerListeners_(player) {
-    console.log('registering player', player);
     player.element_.addEventListener('storyNavigation', (event) => {
-      console.log(event, player);
-      const {progress} = event.detail;
-      const currPlayer = this.players_.find((p) => p.player == player);
-      currPlayer.progress = progress;
-      const time = new Date().getTime();
-      if (time - currPlayer.lastInteraction > 50) {
-        setTimeout(() => {
-          this.players_.forEach((p) => {
-            if (p.player != player) {
-              if (p.progress < progress) {
-                p.player.go(0, 1);
-                console.log(p);
-              } else if (p.progress > progress) {
-                p.player.go(0, -1);
-                console.log(p);
-              }
-            }
-            p.progress = progress;
-            p.lastInteraction = time;
-          });
-        }, 0);
-      } else {
-        console.log('supressed event', time - currPlayer.lastInteraction);
-      }
+      this.players_.forEach((p) => {
+        p.show(this.storyUrl_, event.detail.pageId);
+      });
     });
-    console.log(this.players_);
   }
 
   /**
@@ -419,6 +395,6 @@ class PlayersManager {
    * @param {AmpStoryPlayer} player
    */
   removePlayer(player) {
-    this.players_ = this.players_.filter((p) => p.player != player);
+    this.players_ = this.players_.filter((p) => p != player);
   }
 }

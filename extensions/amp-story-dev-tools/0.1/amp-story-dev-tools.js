@@ -21,8 +21,6 @@ import {
 } from './amp-story-dev-tools-devices';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {DevToolsLogTab} from './amp-story-dev-tools-logs';
-import {Services} from '../../../src/services';
-import {debounce} from '../../../src/utils/rate-limit';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
 import {toArray} from '../../../src/types';
@@ -42,9 +40,6 @@ const fontsToLoad = [
       "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
-
-/** @private @const {number} */
-const RESIZE_TIMEOUT_MS = 1000;
 
 /**
  * Generates the template for the root layout.
@@ -333,7 +328,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     let queryHash = parseQueryString(this.win.location.hash);
     queryHash = Object.assign(queryHash, updates);
     this.win.location.hash = Object.entries(queryHash)
-      .filter((e) => e[1])
+      .filter((e) => e[1] != undefined)
       .map((e) => e[0] + '=' + e[1])
       .join('&');
   }

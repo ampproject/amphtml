@@ -2661,6 +2661,14 @@ export class AmpStory extends AMP.BaseElement {
       this.next_();
     } else if (data['previous']) {
       this.previous_();
+    } else if (data['page']) {
+      this.switchTo_(
+        data['page'],
+        this.getPageIndexById(data['page']) >
+          this.getPageIndex(this.activePage_)
+          ? NavigationDirection.NEXT
+          : NavigationDirection.PREVIOUS
+      );
     }
   }
 
