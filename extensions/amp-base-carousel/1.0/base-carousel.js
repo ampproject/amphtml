@@ -91,7 +91,6 @@ function BaseCarouselWithRef(
   const scrollRef = useRef(null);
   const containRef = useRef(null);
   const contentRef = useRef(null);
-  const shouldAutoAdvance = useRef(autoAdvance);
   const autoAdvanceTimesRef = useRef(0);
   const autoAdvanceInterval = useMemo(
     () => Math.max(customAutoAdvanceInterval, MIN_AUTO_ADVANCE_INTERVAL),
@@ -111,7 +110,6 @@ function BaseCarouselWithRef(
         autoAdvanceTimesRef.current >=
         length * autoAdvanceLoops - visibleCount
       ) {
-        shouldAutoAdvance.current = false;
         return;
       }
       if (loop || currentSlide + visibleCount < length) {
@@ -125,6 +123,22 @@ function BaseCarouselWithRef(
   );
   const next = useCallback(() => scrollRef.current.next(), []);
   const prev = useCallback(() => scrollRef.current.prev(), []);
+
+  const debouncedAdvance = useMemo(
+    () =>
+      debounce(
+        window,
+        (currentSlide) => {
+          advance(autoAdvanceCount, currentSlide);
+        },
+        autoAdvanceInterval
+      ),
+    [autoAdvanceCount, autoAdvanceInterval, advance]
+  );
+  // Want to call only on first render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => debouncedAdvance(currentSlide), []);
+
   const setRestingIndex = useCallback(
     (index) => {
       index = length > 0 ? Math.min(Math.max(index, 0), length - 1) : -1;
@@ -135,8 +149,13 @@ function BaseCarouselWithRef(
       if (onSlideChange) {
         onSlideChange(index);
       }
+
+      // Schedule next autoadvance
+      if (autoAdvance && interaction.current === Interaction.NONE) {
+        debouncedAdvance(index);
+      }
     },
-    [length, setCurrentSlide, onSlideChange]
+    [autoAdvance, debouncedAdvance, length, setCurrentSlide, onSlideChange]
   );
 
   useImperativeHandle(
@@ -171,24 +190,6 @@ function BaseCarouselWithRef(
     }
     return interaction.current === Interaction.TOUCH;
   }, [controls, outsetArrows]);
-
-  const debouncedAdvance = useMemo(
-    () =>
-      debounce(
-        window,
-        (currentSlide) => {
-          advance(autoAdvanceCount, currentSlide);
-        },
-        autoAdvanceInterval
-      ),
-    [autoAdvanceCount, autoAdvanceInterval, advance]
-  );
-  useEffect(() => {
-    if (interaction !== Interaction.NONE || !shouldAutoAdvance.current) {
-      return;
-    }
-    debouncedAdvance(currentSlide);
-  });
 
   return (
     <ContainWrapper
