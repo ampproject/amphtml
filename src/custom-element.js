@@ -24,7 +24,6 @@ import {
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
-import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
@@ -259,9 +258,6 @@ function createBaseCustomElementClass(win) {
       /** @private {boolean} */
       this.perfOn_ = perf && perf.isPerformanceTrackingOn();
 
-      /** @private {?./layout-delay-meter.LayoutDelayMeter} */
-      this.layoutDelayMeter_ = null;
-
       if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
         delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
@@ -488,6 +484,9 @@ function createBaseCustomElementClass(win) {
           this.classList.remove('i-amphtml-notbuilt');
           this.classList.remove('amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
+          if (this.isConnected_) {
+            this.connected_();
+          }
           if (this.isInViewport_) {
             this.updateInViewport_(true);
           }
@@ -805,6 +804,7 @@ function createBaseCustomElementClass(win) {
           if (reconstruct) {
             this.getResources().upgraded(this);
           }
+          this.connected_();
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
       } else {
@@ -900,6 +900,13 @@ function createBaseCustomElementClass(win) {
      */
     disconnectedCallback() {
       this.disconnect(/* pretendDisconnected */ false);
+    }
+
+    /** @private */
+    connected_() {
+      if (this.built_) {
+        this.implementation_.attachedCallback();
+      }
     }
 
     /**
@@ -1144,9 +1151,6 @@ function createBaseCustomElementClass(win) {
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
       }
-      if (this.perfOn_) {
-        this.getLayoutDelayMeter_().startLayout();
-      }
 
       // Potentially start the loading indicator.
       this.toggleLoading(true);
@@ -1233,9 +1237,6 @@ function createBaseCustomElementClass(win) {
     updateInViewport_(inViewport) {
       this.implementation_.inViewport_ = inViewport;
       this.implementation_.viewportCallback(inViewport);
-      if (inViewport && this.perfOn_) {
-        this.getLayoutDelayMeter_().enterViewport();
-      }
     }
 
     /**
@@ -1638,20 +1639,6 @@ function createBaseCustomElementClass(win) {
           loadingIndicator.untrack(this);
         }
       }
-    }
-
-    /**
-     * Returns an optional overflow element for this custom element.
-     * @return {!./layout-delay-meter.LayoutDelayMeter}
-     */
-    getLayoutDelayMeter_() {
-      if (!this.layoutDelayMeter_) {
-        this.layoutDelayMeter_ = new LayoutDelayMeter(
-          toWin(this.ownerDocument.defaultView),
-          this.getLayoutPriority()
-        );
-      }
-      return this.layoutDelayMeter_;
     }
 
     /**
