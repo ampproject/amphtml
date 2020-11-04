@@ -13,20 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const path = require('path');
+const baseWebpackConfig = require('../base-webpack-config');
 
 module.exports = {
-  resolveLoader: {
-    modules: [
-      path.join(__dirname, '../node_modules'),
-      path.join(__dirname, '../../../../node_modules'),
-    ],
-  },
+  ...baseWebpackConfig,
   resolve: {
-    modules: [
-      path.join(__dirname, '../node_modules'),
-      path.join(__dirname, '../../../../node_modules'),
-    ],
+    ...baseWebpackConfig.resolve,
     alias: {
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
@@ -34,30 +26,7 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.jsx?$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/,
-        query: {
-          presets: [
-            [
-              '@babel/preset-env',
-              {
-                bugfixes: true,
-                targets: {'browsers': ['Last 2 versions']},
-              },
-            ],
-            [
-              '@babel/preset-react',
-              {
-                pragma: 'Preact.createElement',
-                pragmaFrag: 'Preact.Fragment',
-                useSpread: true,
-              },
-            ],
-          ],
-        },
-      },
+      ...baseWebpackConfig.module.rules,
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],

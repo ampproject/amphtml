@@ -13,47 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const path = require('path');
 
-module.exports = {
-  resolveLoader: {
-    modules: [
-      path.join(__dirname, '../node_modules'),
-      path.join(__dirname, '../../../../node_modules'),
-    ],
-  },
-  resolve: {
-    modules: [
-      path.join(__dirname, '../node_modules'),
-      path.join(__dirname, '../../../../node_modules'),
-    ],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.jsx?$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/,
-        query: {
-          presets: [
-            [
-              '@babel/preset-env',
-              {
-                bugfixes: true,
-                targets: {'browsers': ['Last 2 versions']},
-              },
-            ],
-            [
-              '@babel/preset-react',
-              {
-                pragma: 'Preact.createElement',
-                pragmaFrag: 'Preact.Fragment',
-                useSpread: true,
-              },
-            ],
-          ],
-        },
-      },
-    ],
-  },
-};
+module.exports = require('../base-webpack-config');

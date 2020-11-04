@@ -25,9 +25,4 @@ module.exports = {
     '@storybook/addon-knobs',
     '@ampproject/storybook-addon',
   ],
-  webpackFinal: async (config) => {
-    // Disable entry point size warnings.
-    config.performance.hints = false;
-    return config;
-  },
 };
