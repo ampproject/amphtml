@@ -328,10 +328,10 @@ export class AmpStory extends AMP.BaseElement {
     this.platform_ = Services.platformFor(this.win);
 
     /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = null
+    this.viewer_ = null;
 
     /** @private {?AmpStoryViewerMessagingHandler} */
-    this.viewerMessagingHandler_ = null
+    this.viewerMessagingHandler_ = null;
 
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
@@ -1009,7 +1009,7 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = this.viewer_ && shouldShowStoryUrlInfo(this.viewer_)
+        const infoDialog = shouldShowStoryUrlInfo(devAssert(this.viewer_))
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
