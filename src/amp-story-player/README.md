@@ -10,23 +10,23 @@
 
 ## Summary
 
-The player is fully available and the functionality here (unless otherwise specified) is ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionality. To learn how to try out the new features (marked in (**Beta**)), refer to the [FAQs](#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)).
+The player is fully available and the functionality here (unless otherwise specified) is ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionality. To learn how to try out the new features (marked in (**Beta**)), refer to the [FAQs](<#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)>).
 
 This update contains guidance on using the Web Story Player to support:
 
 - [Navigating between stories](#Navigating-between-stories)
-- [Integrating Web Stories into your website (entrypoints)](#Integrating-web-stories-into-your-website-(entrypoints))
-- [(Beta) Programmatically fetching more stories](#(Beta)-Programmatically-fetching-more-stories)
-- [(Beta) Circular wrapping](#(Beta)-Circular-wrapping)
-- [(Beta) Customizing position & visibility of story UI controls](#(Beta)-Customizing-position-&-visibility-of-story-UI-controls)
-- [(Beta) Custom Events](#(Beta)-Custom-Events)
+- [Integrating Web Stories into your website (entrypoints)](<#Integrating-web-stories-into-your-website-(entrypoints)>)
+- [(Beta) Programmatically fetching more stories](<#(Beta)-Programmatically-fetching-more-stories>)
+- [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>)
+- [(Beta) Customizing position & visibility of story UI controls](<#(Beta)-Customizing-position-&-visibility-of-story-UI-controls>)
+- [(Beta) Custom Events](<#(Beta)-Custom-Events>)
 - [Upcoming API Change: Poster Image](#Upcoming-API-Change:-Poster-Image)
 
 Beyond this, you’ll also find:
 
 - [Additional use case demos](#Additional-use-case-demos)
 - [Additional explorations and roadmap](#Additional-explorations-and-roadmap)
-- [FAQs](#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts))
+- [FAQs](<#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)>)
 
 ## Player setup
 
@@ -46,7 +46,6 @@ To navigate between stories on desktop, there are a couple of options:
   <tr>
     <td>2. Use the Javascript APIs to implement your own navigational buttons.  If you want to use the Javascript APIs, you can use the <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-story-player.md#go">go() method</a> (see documentation for more details) as shown in the following example:</td>
     <td>
-
 
 ```javascript
 const player = document.querySelector("amp-story-player");
@@ -130,7 +129,7 @@ Here’s an example of how the configuration looks:
 
 The configuration must be a direct child of the <amp-story-player> element, with the `type=”application/json”` attribute.
 
-The `endpoint` property of the url takes in an optional variable `\${offset}` that you can add as a parameter, which you can use for pagination.
+The `endpoint` property of the url takes in an optional variable `${offset}` that you can add as a parameter, which you can use for pagination.
 
 ### Response
 
@@ -370,7 +369,7 @@ We’ve recently introduced some new events that the player will dispatch and th
 
 ### noNextStory
 
-Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](#(Beta)-Circular-wrapping).
+Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>).
 
 ```javascript
 player.addEventListener('noNextStory', (event) => {
@@ -380,7 +379,7 @@ player.addEventListener('noNextStory', (event) => {
 
 ### noPreviousStory
 
-Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](#(Beta)-Circular-wrapping).
+Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>).
 
 ```javascript
 player.addEventListener('noPreviousStory', (event) => {
