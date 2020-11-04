@@ -24,6 +24,6 @@
     "promise": "8.0.1"
   },
   "devDependencies": {
-    "jasmine": "3.6.2"
+    "jasmine": "3.6.3"
   }
 }

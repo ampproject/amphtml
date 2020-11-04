@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import '../amp-accordion';
+import {ActionInvocation} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -43,7 +45,7 @@ describes.realWin(
       toggleExperiment(win, 'amp-accordion-bento', true, true);
       element = html`
         <amp-accordion layout="fixed" width="300" height="200">
-          <section expanded>
+          <section expanded id="section1">
             <h1>header1</h1>
             <div>content1</div>
           </section>
@@ -318,6 +320,211 @@ describes.realWin(
         animation.onfinish();
         await waitForExpanded(sections[0], false);
         expect(section.lastElementChild).to.have.display('none');
+      });
+    });
+
+    describe('imperative api', () => {
+      let section1;
+      let section2;
+      let section3;
+
+      beforeEach(() => {
+        section1 = element.children[0];
+        section2 = element.children[1];
+        section3 = element.children[2];
+      });
+
+      function invocation(method, args = {}) {
+        const source = null;
+        const caller = null;
+        const event = null;
+        const trust = ActionTrust.DEFAULT;
+        return new ActionInvocation(
+          element,
+          method,
+          args,
+          source,
+          caller,
+          event,
+          trust
+        );
+      }
+
+      describe('multi-expand accordion', () => {
+        it('toggle all', async () => {
+          element.enqueAction(invocation('toggle'));
+          await waitForExpanded(section1, false);
+
+          // All sections are toggled
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.have.attribute('expanded');
+          expect(section3).to.have.attribute('expanded');
+        });
+
+        it('toggle one section', async () => {
+          element.enqueAction(invocation('toggle', {section: 'section1'}));
+          await waitForExpanded(section1, false);
+
+          // Only section 1 is toggled
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+
+        it('expand all', async () => {
+          element.enqueAction(invocation('expand'));
+          await waitForExpanded(section2, true);
+
+          // All sections are expanded
+          expect(section1).to.have.attribute('expanded');
+          expect(section2).to.have.attribute('expanded');
+          expect(section3).to.have.attribute('expanded');
+        });
+
+        it('expand one section', async () => {
+          // Collapse first section to setup the test
+          element.enqueAction(invocation('collapse'));
+          await waitForExpanded(section1, false);
+
+          // Expand the first section
+          element.enqueAction(invocation('expand', {section: 'section1'}));
+          await waitForExpanded(section1, true);
+
+          // Only the first section is expanded
+          expect(section1).to.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+
+        it('collapse all', async () => {
+          element.enqueAction(invocation('collapse'));
+          await waitForExpanded(section1, false);
+
+          // All sections are collapsed
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+
+        it('collapse one section', async () => {
+          element.enqueAction(invocation('collapse', {section: 'section1'}));
+          await waitForExpanded(section1, false);
+
+          // Only the first section is collapsed
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+      });
+
+      describe('single-expand accordion', () => {
+        beforeEach(async () => {
+          element = html`
+            <amp-accordion
+              expand-single-section
+              layout="fixed"
+              width="300"
+              height="200"
+            >
+              <section expanded id="section1">
+                <h1>header1</h1>
+                <div>content1</div>
+              </section>
+              <section id="section2">
+                <h1>header2</h1>
+                <div>content2</div>
+              </section>
+              <section>
+                <h1>header3</h1>
+                <div>content3</div>
+              </section>
+            </amp-accordion>
+          `;
+          win.document.body.appendChild(element);
+          await element.build();
+
+          section1 = element.children[0];
+          section2 = element.children[1];
+          section3 = element.children[2];
+        });
+
+        it('toggle all', async () => {
+          // First action should do nothing
+          element.enqueAction(invocation('toggle'));
+
+          // Use a second action as we need something to waitFor
+          element.enqueAction(invocation('toggle', {section: 'section1'}));
+          await waitForExpanded(section1, false);
+
+          // Verify state after both actions (should reflect only 2nd action)
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+
+        it('toggle one section', async () => {
+          element.enqueAction(invocation('toggle', {section: 'section2'}));
+          await waitForExpanded(section1, false);
+
+          // Verify that the second section is expanded and the first
+          // section is un-expanded
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+
+          element.enqueAction(invocation('toggle', {section: 'section2'}));
+          await waitForExpanded(section2, false);
+
+          // Verify that the second section is collapsed
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+
+        it('expand all', async () => {
+          // First action should do nothing
+          element.enqueAction(invocation('expand'));
+
+          // Use a second action as we need something to waitFor
+          element.enqueAction(invocation('toggle', {section: 'section1'}));
+          await waitForExpanded(section1, false);
+
+          // Verify state after both actions (should reflect only 2nd action)
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+
+        it('expand one section', async () => {
+          element.enqueAction(invocation('expand', {section: 'section2'}));
+          await waitForExpanded(section1, false);
+
+          // Verify that the second section is expanded and the first
+          // section is un-expanded
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+
+        it('collapse all', async () => {
+          element.enqueAction(invocation('collapse'));
+          await waitForExpanded(section1, false);
+
+          // All sections are collapsed
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
+
+        it('collapse one section', async () => {
+          element.enqueAction(invocation('collapse', {section: 'section1'}));
+          await waitForExpanded(section1, false);
+
+          // Section 1 is collapsed
+          expect(section1).to.not.have.attribute('expanded');
+          expect(section2).to.not.have.attribute('expanded');
+          expect(section3).to.not.have.attribute('expanded');
+        });
       });
     });
   }

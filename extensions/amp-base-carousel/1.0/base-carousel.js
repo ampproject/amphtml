@@ -53,6 +53,7 @@ function BaseCarouselWithRef(
     children,
     controls = Controls.AUTO,
     loop,
+    mixedLength = false,
     onSlideChange,
     outsetArrows,
     snap = true,
@@ -70,6 +71,8 @@ function BaseCarouselWithRef(
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
   const {setSlideCount} = carouselContext;
   const scrollRef = useRef(null);
+  const containRef = useRef(null);
+  const contentRef = useRef(null);
 
   const next = useCallback(() => scrollRef.current.next(), []);
   const prev = useCallback(() => scrollRef.current.prev(), []);
@@ -94,6 +97,8 @@ function BaseCarouselWithRef(
         goToSlide: (index) => setRestingIndex(index),
         next,
         prev,
+        root: containRef.current,
+        node: contentRef.current,
       }),
     [next, prev, setRestingIndex]
   );
@@ -104,7 +109,8 @@ function BaseCarouselWithRef(
 
   const disableForDir = (dir) =>
     !loop &&
-    (currentSlide + dir < 0 || currentSlide + visibleCount + dir > length);
+    (currentSlide + dir < 0 ||
+      (!mixedLength && currentSlide + visibleCount + dir > length));
 
   const [hadTouch, setHadTouch] = useState(false);
   const hideControls = useMemo(() => {
@@ -123,6 +129,8 @@ function BaseCarouselWithRef(
       layout={true}
       paint={true}
       contentStyle={{display: 'flex'}}
+      ref={containRef}
+      contentRef={contentRef}
       {...rest}
     >
       {!hideControls && (
@@ -137,12 +145,13 @@ function BaseCarouselWithRef(
       <Scroller
         advanceCount={advanceCount}
         loop={loop}
+        mixedLength={mixedLength}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         snap={snap}
         ref={scrollRef}
         onTouchStart={() => setHadTouch(true)}
-        visibleCount={visibleCount}
+        visibleCount={mixedLength ? 1 : visibleCount}
       >
         {/*
           TODO(#30283): TBD: this is an interesting concept. We could decide
@@ -150,9 +159,14 @@ function BaseCarouselWithRef(
           placeholder. When a slide's slot is unrendered, the slide
           automatically gets unslotted and gets CanRender=false w/o any extra
           state management code.
+
+          Note: We naively display all slides for mixedLength as multiple
+          can be visible within the carousel viewport - eventually these can also
+          be optimized to only display the minimum necessary for the current 
+          and next viewport.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < visibleCount * 3 ? (
+          Math.abs(index - currentSlide) < visibleCount * 3 || mixedLength ? (
             <WithAmpContext
               key={index}
               renderable={index == currentSlide}

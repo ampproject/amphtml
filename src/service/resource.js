@@ -458,6 +458,11 @@ export class Resource {
     this.premeasuredRect_ = clientRect;
   }
 
+  /** Removes the premeasured rect, likely forcing a manual measure. */
+  invalidatePremeasurement() {
+    this.premeasuredRect_ = null;
+  }
+
   /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
