@@ -161,7 +161,7 @@ export class DevToolsDevicesTab {
 
     this.devices_ = DEFAULT_SCREEN_SIZES;
 
-    this.storyUrl_ = url;
+    this.storyUrl_ = url + '#ignoreLocalStorageHistory=true';
 
     this.parent = parent;
 
