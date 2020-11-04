@@ -16,13 +16,13 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs-extra');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
 const {installPackages} = require('../../common/utils');
 const {isTravisPullRequestBuild} = require('../../common/travis');
+const {writeFileSync} = require('fs-extra');
 
 const ENV_PORTS = {
   amp: 9001,
@@ -68,7 +68,7 @@ function launchEnv(env) {
 function buildEnv(env) {
   if (env === 'amp' && isTravisPullRequestBuild()) {
     // Allows PR deploys to reference built binaries.
-    fs.writeFileSync(
+    writeFileSync(
       `${__dirname}/${env}-env/preview.js`,
       `// DO NOT SUBMIT.  
        // This file was generated with gulp storybook --build.
