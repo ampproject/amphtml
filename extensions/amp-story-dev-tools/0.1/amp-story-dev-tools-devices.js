@@ -173,7 +173,7 @@ export class DevToolsDevicesTab {
    * @param {string} url
    */
   setStoryUrl(url) {
-    this.setUpTab_(url);
+    this.setUpTab_(url + '#ignoreLocalStorageHistory=true');
   }
 
   /**
