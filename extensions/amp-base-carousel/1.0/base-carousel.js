@@ -161,7 +161,7 @@ function BaseCarouselWithRef(
     (currentSlide + dir < 0 ||
       (!mixedLength && currentSlide + visibleCount + dir > length));
 
-  const [interaction, setInteraction] = useState(Interaction.NONE);
+  const interaction = useRef(Interaction.NONE);
   const hideControls = useMemo(() => {
     if (controls === Controls.ALWAYS || outsetArrows) {
       return false;
@@ -169,8 +169,8 @@ function BaseCarouselWithRef(
     if (controls === Controls.NEVER) {
       return true;
     }
-    return interaction === Interaction.TOUCH;
-  }, [interaction, controls, outsetArrows]);
+    return interaction.current === Interaction.TOUCH;
+  }, [controls, outsetArrows]);
 
   const debouncedAdvance = useMemo(
     () =>
@@ -218,9 +218,9 @@ function BaseCarouselWithRef(
         setRestingIndex={setRestingIndex}
         snap={snap}
         ref={scrollRef}
-        onTouchStart={() => setInteraction(Interaction.TOUCH)}
-        onMouseEnter={() => setInteraction(Interaction.MOUSE)}
-        onFocus={() => setInteraction(Interaction.FOCUS)}
+        onTouchStart={() => (interaction.current = Interaction.TOUCH)}
+        onMouseEnter={() => (interaction.current = Interaction.MOUSE)}
+        onFocus={() => (interaction.current = Interaction.FOCUS)}
         visibleCount={mixedLength ? 1 : visibleCount}
       >
         {/*
