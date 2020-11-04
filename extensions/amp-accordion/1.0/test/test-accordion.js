@@ -457,6 +457,90 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     });
   });
 
+  describe('fire events on expand and collapse', () => {
+    let wrapper;
+    let ref;
+    let onExpand;
+    let onCollapse;
+
+    beforeEach(() => {
+      onExpand = env.sandbox.spy();
+      onCollapse = env.sandbox.spy();
+      ref = Preact.useRef();
+
+      wrapper = mount(
+        <Accordion ref={ref}>
+          <AccordionSection key={1} expanded header="header1">
+            content1
+          </AccordionSection>
+          <AccordionSection
+            key={2}
+            id="section2"
+            header="header2"
+            onExpand={onExpand}
+            onCollapse={onCollapse}
+          >
+            content2
+          </AccordionSection>
+          <AccordionSection key={3} header="header3">
+            content3
+          </AccordionSection>
+        </Accordion>
+      );
+      document.body.appendChild(wrapper.getDOMNode());
+    });
+
+    it('should fire events on click', async () => {
+      const sections = wrapper.find(AccordionSection);
+
+      // Expand
+      sections.at(1).find('header').simulate('click');
+      expect(onExpand).to.be.calledOnce;
+      expect(onCollapse).not.to.be.called;
+
+      // Collapse
+      sections.at(1).find('header').simulate('click');
+      expect(onExpand).to.be.calledOnce;
+      expect(onCollapse).to.be.calledOnce;
+
+      // Expand
+      sections.at(1).find('header').simulate('click');
+      expect(onExpand).to.be.calledTwice;
+      expect(onCollapse).to.be.calledOnce;
+
+      // Collapse
+      sections.at(1).find('header').simulate('click');
+      expect(onExpand).to.be.calledTwice;
+      expect(onCollapse).to.be.calledTwice;
+    });
+
+    it('should fire events on API toggle', async () => {
+      // Expand All
+      ref.current.toggle();
+      wrapper.update();
+      expect(onExpand).to.be.calledOnce;
+      expect(onCollapse).not.to.be.called;
+
+      // Collapse All
+      ref.current.collapse();
+      wrapper.update();
+      expect(onExpand).to.be.calledOnce;
+      expect(onCollapse).to.be.calledOnce;
+
+      // Collapsing an already collapsed section should do nothing
+      ref.current.collapse('section2');
+      wrapper.update();
+      expect(onExpand).to.be.calledOnce;
+      expect(onCollapse).to.be.calledOnce;
+
+      // Expand All
+      ref.current.expand();
+      wrapper.update();
+      expect(onExpand).to.be.calledTwice;
+      expect(onCollapse).to.be.calledOnce;
+    });
+  });
+
   describe('imperative api', () => {
     let wrapper;
     let ref;

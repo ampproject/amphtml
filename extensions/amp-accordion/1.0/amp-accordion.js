@@ -131,7 +131,7 @@ function getState(element, mu) {
       'expanded': expanded,
       'id': section.getAttribute('id'),
       'onExpand': getTrigger(element, 'expand', section, ActionTrust.HIGH),
-      'onCollapse': getTrigger(element, 'collpase', section, ActionTrust.HIGH),
+      'onCollapse': getTrigger(element, 'collapse', section, ActionTrust.HIGH),
     });
     return <AccordionSection {...props} />;
   });

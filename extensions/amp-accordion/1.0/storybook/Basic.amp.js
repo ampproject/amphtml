@@ -72,3 +72,44 @@ export const _default = () => {
     </main>
   );
 };
+
+export const events = () => {
+  const expandSingleSection = boolean('expandSingleSection', false);
+  const animate = boolean('animate', false);
+  const createApiString = (action, section) =>
+    `tap:accordion.${action}(${section ? `section='${section}'` : ''})`;
+  return (
+    <main>
+      <amp-accordion
+        id="accordion"
+        expand-single-section={expandSingleSection}
+        animate={animate}
+      >
+        <section id="section1">
+          <h2>Section 1</h2>
+          <p>Content in section 1.</p>
+        </section>
+        <section id="section2" on="expand:accordion.expand(section='section3')">
+          <h2>Section 2</h2>
+          <div>Content in section 2.</div>
+        </section>
+        <section
+          id="section3"
+          on="collapse:accordion.collapse(section='section2')"
+        >
+          <h2>Section 3</h2>
+          <div>Content in section 3.</div>
+        </section>
+      </amp-accordion>
+
+      <div class="buttons" style={{marginTop: 8}}>
+        <button on={createApiString('expand', 'section2')}>
+          expand(section2)
+        </button>
+        <button on={createApiString('collapse', 'section3')}>
+          collapse(section3)
+        </button>
+      </div>
+    </main>
+  );
+};

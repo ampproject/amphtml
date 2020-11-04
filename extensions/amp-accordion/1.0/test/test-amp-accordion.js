@@ -262,6 +262,122 @@ describes.realWin(
       );
     });
 
+    describe('fire events on expand and collapse', () => {
+      beforeEach(async () => {
+        element = html`
+          <amp-accordion id="testAccordion">
+            <section>
+              <h2>Section 1</h2>
+              <div>Content 1</div>
+            </section>
+            <section
+              id="section2"
+              on="expand:testAccordion.expand(section='section3')"
+            >
+              <h2>Section 2</h2>
+              <div>Bunch of awesome content</div>
+            </section>
+            <section
+              id="section3"
+              on="collapse:testAccordion.collapse(section='section2')"
+            >
+              <h2>Section 3</h2>
+              <div>Content 3</div>
+            </section>
+          </amp-accordion>
+        `;
+        win.document.body.appendChild(element);
+        await element.build();
+      });
+
+      function invocation(method, args = {}) {
+        const source = null;
+        const caller = null;
+        const event = null;
+        const trust = ActionTrust.DEFAULT;
+        return new ActionInvocation(
+          element,
+          method,
+          args,
+          source,
+          caller,
+          event,
+          trust
+        );
+      }
+
+      it('should fire events on click', async () => {
+        //const sections = element.children;
+        const section1 = element.children[0];
+        const section2 = element.children[1];
+        const section3 = element.children[2];
+
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+
+        section2.firstElementChild.click();
+        await waitForExpanded(section2, true);
+
+        // Expanding section2 also expands section3
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+
+        section3.firstElementChild.click();
+        await waitForExpanded(section3, false);
+
+        // Collapsing section3 also collapses section2
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('should fire events on API toggle', async () => {
+        //const sections = element.children;
+        const section1 = element.children[0];
+        const section2 = element.children[1];
+        const section3 = element.children[2];
+
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+
+        element.enqueAction(invocation('expand', {section: 'section2'}));
+        await waitForExpanded(section2, true);
+
+        // Expanding section2 also expands section3
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+
+        element.enqueAction(invocation('collapse', {section: 'section3'}));
+        await waitForExpanded(section3, false);
+
+        // Collapsing section3 also collapses section2
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+
+        element.enqueAction(invocation('expand', {section: 'section3'}));
+        await waitForExpanded(section3, true);
+
+        // Expanding section3 does not expand section2
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+
+        element.enqueAction(invocation('toggle'));
+        await waitForExpanded(section1, true);
+
+        // Toggle all toggles all sections
+        // TODO: Confirm this behavior
+        expect(section1).to.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+    });
+
     describe('animate', () => {
       let animateStub;
 
