@@ -248,7 +248,7 @@ function compile(
       dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
-      warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
+      warning_level: options.verboseLogging ? 'VERBOSE' : 'QUIET',
       // These arrays are filled in below.
       jscomp_error: [],
       jscomp_warning: [],
