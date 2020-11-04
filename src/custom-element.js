@@ -24,7 +24,6 @@ import {
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
-import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
@@ -258,9 +257,6 @@ function createBaseCustomElementClass(win) {
       const perf = Services.performanceForOrNull(win);
       /** @private {boolean} */
       this.perfOn_ = perf && perf.isPerformanceTrackingOn();
-
-      /** @private {?./layout-delay-meter.LayoutDelayMeter} */
-      this.layoutDelayMeter_ = null;
 
       if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
@@ -1155,9 +1151,6 @@ function createBaseCustomElementClass(win) {
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
       }
-      if (this.perfOn_) {
-        this.getLayoutDelayMeter_().startLayout();
-      }
 
       // Potentially start the loading indicator.
       this.toggleLoading(true);
@@ -1244,9 +1237,6 @@ function createBaseCustomElementClass(win) {
     updateInViewport_(inViewport) {
       this.implementation_.inViewport_ = inViewport;
       this.implementation_.viewportCallback(inViewport);
-      if (inViewport && this.perfOn_) {
-        this.getLayoutDelayMeter_().enterViewport();
-      }
     }
 
     /**
@@ -1649,20 +1639,6 @@ function createBaseCustomElementClass(win) {
           loadingIndicator.untrack(this);
         }
       }
-    }
-
-    /**
-     * Returns an optional overflow element for this custom element.
-     * @return {!./layout-delay-meter.LayoutDelayMeter}
-     */
-    getLayoutDelayMeter_() {
-      if (!this.layoutDelayMeter_) {
-        this.layoutDelayMeter_ = new LayoutDelayMeter(
-          toWin(this.ownerDocument.defaultView),
-          this.getLayoutPriority()
-        );
-      }
-      return this.layoutDelayMeter_;
     }
 
     /**
