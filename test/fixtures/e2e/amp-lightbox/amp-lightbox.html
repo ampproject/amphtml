@@ -8,6 +8,7 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+    <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
     <style amp-custom>
     amp-lightbox {
       background-color: rgba(0, 0, 0, 0.9);
@@ -16,16 +17,31 @@
 </head>
 
 <body>
-  <amp-lightbox id="lightbox" layout="nodisplay">
+  <amp-lightbox id="lightbox" layout="nodisplay" on="lightboxOpen:autocomplete-input.focus">
 
     <button id="close" on="tap:lightbox.close">
       Close Lightbox
     </button>
-    <amp-img
-        id="image"
-        src="/examples/img/sample.jpg"
-        width="641" height="481"
-    ></amp-img>
+    <!-- div to visually separate components and avoid ElementClickInterceptedErrors in e2e tests -->
+    <div>
+      <amp-img
+          id="image"
+          src="/examples/img/sample.jpg"
+          width="641" height="481"
+      ></amp-img>
+    </div>
+
+    <div>
+      <amp-autocomplete min-characters="0" filter="substring">
+        <input id="autocomplete-input">
+        <script type="application/json">
+          {
+            "items": ["apple", "orange", "banana"]
+          }
+        </script>
+      </amp-autocomplete>
+    </div>
+
   </amp-lightbox>
 
   <button id="open" on="tap:lightbox.open">
