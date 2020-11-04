@@ -46,6 +46,7 @@ const Controls = {
  * @enum {string}
  */
 const Interaction = {
+  FOCUS: 'focus',
   MOUSE: 'mouse',
   TOUCH: 'touch',
   NONE: 'none',
@@ -219,6 +220,7 @@ function BaseCarouselWithRef(
         ref={scrollRef}
         onTouchStart={() => setInteraction(Interaction.TOUCH)}
         onMouseEnter={() => setInteraction(Interaction.MOUSE)}
+        onFocus={() => setInteraction(Interaction.FOCUS)}
         visibleCount={mixedLength ? 1 : visibleCount}
       >
         {/*
