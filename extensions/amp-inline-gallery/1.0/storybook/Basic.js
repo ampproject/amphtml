@@ -29,34 +29,44 @@ export default {
 };
 
 export const _default = () => {
-  const width = number('width', 440);
-  const height = number('height', 225);
+  const width = 360;
+  const height = 240;
   const paginationHeight = number('top indicator height', 20);
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
-  const slideCount = number('slide count', 12, {min: 3, max: 99});
-  const colorIncrement = Math.floor(255 / (slideCount + 1));
   const thumbnailHeight = number('thumbnail height', 50);
   const loop = boolean('thumbnail loop', false);
-  const aspectRatio = number('thumbnail aspect ratio (w/h)', 3);
+  const aspectRatio = number('thumbnail aspect ratio (w/h)', 3 / 2);
 
   return (
     <>
       <InlineGallery style={{width}}>
         <Pagination inset={topInset} style={{height: paginationHeight}} />
         <BaseCarousel style={{height}}>
-          {Array.from({length: slideCount}, (_, i) => {
-            const v = colorIncrement * (i + 1);
-            return (
-              <div
-                style={{
-                  backgroundColor: `rgb(${v}, 100, 100)`,
-                  width,
-                  height,
-                }}
-              ></div>
-            );
-          })}
+          <img
+            src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+            thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+          />
         </BaseCarousel>
         <Pagination inset={bottomInset} />
         <Thumbnails

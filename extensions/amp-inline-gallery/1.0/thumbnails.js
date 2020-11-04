@@ -62,11 +62,8 @@ export function Thumbnails({
     return () => observer.disconnect();
   }, [aspectRatio]);
 
-  // Note: The carousel is aria-hidden since it just duplicates the
-  // information of the original carousel.
   return (
     <BaseCarousel
-      aria-hidden={true}
       className={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
@@ -77,19 +74,19 @@ export function Thumbnails({
       {...rest}
     >
       {(children || slides).map((slide, i) => {
-        const size = {
-          height: px(height),
-          width: aspectRatio ? px(height * aspectRatio) : '',
-        };
+        const {thumbnailSrc, src, alt} = slide.props;
         return (
-          <div
+          <img
+            alt={alt}
+            src={thumbnailSrc || src}
             tabindex="0"
             role="button"
-            style={size}
+            style={{
+              height: px(height),
+              width: aspectRatio ? px(height * aspectRatio) : '',
+            }}
             onClick={() => setCurrentSlide(i)}
-          >
-            {slide}
-          </div>
+          />
         );
       })}
     </BaseCarousel>
