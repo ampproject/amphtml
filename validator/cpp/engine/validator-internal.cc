@@ -1275,6 +1275,9 @@ class ParsedValidatorRules {
   bool BetterValidationResultThan(const ValidationResult& resultA,
                                   const ValidationResult& resultB) const;
 
+  bool HasValidatedAlternativeTagSpec(Context* context,
+                                      const string& ext_name) const;
+
   void MaybeEmitMandatoryTagValidationErrors(Context* context,
                                              ValidationResult* result) const;
 
@@ -1337,6 +1340,7 @@ class ParsedValidatorRules {
   HtmlFormat::Code html_format_;
   vector<ParsedTagSpec> tagspec_by_id_;
   unordered_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
+  unordered_map<std::string, vector<int32_t>> ext_tag_spec_ids_by_ext_name_;
   TagSpecDispatch empty_dispatch_;
   vector<int32_t> mandatory_tagspecs_;
   vector<ErrorCodeMetaData> error_codes_;
@@ -4453,9 +4457,13 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
   if (!status_.ok()) return;
   FilterRules(all_rules, &rules_);
   ExpandExtensionSpec(&rules_);
-  for (const TagSpec& spec : rules_.tags()) {
-    if (spec.has_cdata()) {
-      tags_with_cdata_.insert(spec.tag_name());
+  for (int ii = 0; ii < rules_.tags_size(); ++ii) {
+    const TagSpec& tag = rules_.tags(ii);
+    if (tag.has_cdata()) {
+      tags_with_cdata_.insert(tag.tag_name());
+    }
+    if (tag.has_extension_spec()) {
+      ext_tag_spec_ids_by_ext_name_[tag.extension_spec().name()].push_back(ii);
     }
   }
   status_ = CheckIntertags();
@@ -4594,7 +4602,7 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
     if (!tagspec->has_extension_spec()) continue;
     const ExtensionSpec& extension_spec = tagspec->extension_spec();
     if (!tagspec->has_spec_name())
-      tagspec->set_spec_name(extension_spec.name() + " extension .js script");
+      tagspec->set_spec_name(extension_spec.name() + " extension script");
     if (!tagspec->has_descriptive_name())
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
@@ -4874,6 +4882,19 @@ void ParsedValidatorRules::MaybeEmitMandatoryTagValidationErrors(
   }
 }
 
+// Returns true if one of the alternative_tag_spec_ids has been validated.
+bool ParsedValidatorRules::HasValidatedAlternativeTagSpec(
+    Context* context, const string& ext_name) const {
+  auto it = ext_tag_spec_ids_by_ext_name_.find(ext_name);
+  if (it != ext_tag_spec_ids_by_ext_name_.end()) {
+    for (int32_t alternative_tag_spec_id : it->second) {
+      if (context->TagspecsValidated().count(alternative_tag_spec_id) > 0)
+        return true;
+    }
+  }
+  return false;
+}
+
 // Emits errors for tags that specify that another tag is also required or
 // a condition is required to be satisfied.
 void ParsedValidatorRules::MaybeEmitRequiresOrExcludesValidationErrors(
@@ -4904,6 +4925,13 @@ void ParsedValidatorRules::MaybeEmitRequiresOrExcludesValidationErrors(
     for (int32_t tag_spec_id : parsed_tag_spec->AlsoRequiresTagWarnings()) {
       if (context->TagspecsValidated().count(tag_spec_id) == 0) {
         const ParsedTagSpec* also_requires_tagspec = GetTagSpec(tag_spec_id);
+        // If there is an alternative tagspec for extension script tagspecs
+        // that has been validated, then move on to the next
+        // also_requires_tag_warning.
+        if (also_requires_tagspec->spec().has_extension_spec() &&
+            HasValidatedAlternativeTagSpec(
+                context, also_requires_tagspec->spec().extension_spec().name()))
+          continue;
         context->AddWarning(ValidationError::WARNING_TAG_REQUIRED_BY_MISSING,
                             context->line_col(),
                             /*params=*/
