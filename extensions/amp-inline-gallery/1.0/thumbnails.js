@@ -17,14 +17,13 @@
 import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
+import {px} from '../../../src/style';
 import {
-  cloneElement,
   useContext,
   useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
-import {px} from '../../../src/style';
 import {useStyles} from './thumbnails.jss';
 
 /**
@@ -78,28 +77,19 @@ export function Thumbnails({
       {...rest}
     >
       {(children || slides).map((slide, i) => {
-        const {
-          style = {},
-          children,
-        } = /** @type {InlineGalleryDef.SlideProps} */ (slide.props);
         const size = {
           height: px(height),
-          width: aspectRatio
-            ? px(height * aspectRatio)
-            : style.width && style.height
-            ? px((style.width / style.height) * height)
-            : '',
+          width: aspectRatio ? px(height * aspectRatio) : '',
         };
-        return cloneElement(
-          /** @type {!PreactDef.VNode} */ (slide),
-          {
-            style: {
-              ...style,
-              ...size,
-            },
-            onClick: () => setCurrentSlide(i),
-          },
-          children
+        return (
+          <div
+            tabindex="0"
+            role="button"
+            style={size}
+            onClick={() => setCurrentSlide(i)}
+          >
+            {slide}
+          </div>
         );
       })}
     </BaseCarousel>
