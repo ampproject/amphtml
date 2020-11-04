@@ -283,7 +283,7 @@ describes.realWin(
       );
     });
 
-    it('loads only sddefault when it exists if source is videoid', async () => {
+    it('loads only default when it exists if source is videoid', async () => {
       const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (
         yt
       ) {

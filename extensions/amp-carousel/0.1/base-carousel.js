@@ -16,6 +16,10 @@
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {isAmp4Email} from '../../../src/format';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {toggleAttribute} from '../../../src/dom';
 
 const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
@@ -66,8 +70,14 @@ export class BaseCarousel extends AMP.BaseElement {
     this.setControlsState();
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
+  // TODO(samouri): rename to viewportCallback once
+  // BaseElement.viewportCallback is deleted
+
+  /**
+   * @param {boolean} inViewport
+   * @protected
+   */
+  viewportCallbackTemp(inViewport) {
     if (inViewport) {
       this.hintControls();
     }
@@ -185,7 +195,7 @@ export class BaseCarousel extends AMP.BaseElement {
    * Shows the controls and then fades them away.
    */
   hintControls() {
-    if (this.showControls_ || !this.isInViewport()) {
+    if (this.showControls_) {
       return;
     }
     this.getVsync().mutate(() => {
@@ -236,7 +246,15 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+    return Promise.resolve();
+  }
+  /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     return true;
   }
 

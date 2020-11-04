@@ -28,21 +28,6 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
-/**
- * The boolean attribute value as resolved by string equality with "true" or "false".
- * If the attribute is not present, default as given.
- *
- * @param {!Element} element
- * @param {string} attr
- * @param {boolean} defaultValue
- * @return {boolean}
- */
-function parseStrBoolAttr(element, attr, defaultValue) {
-  return element.hasAttribute(attr)
-    ? element.getAttribute(attr) !== 'false'
-    : defaultValue;
-}
-
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
@@ -102,15 +87,13 @@ AmpBaseCarousel['children'] = {
 
 /** @override */
 AmpBaseCarousel['props'] = {
-  'advanceCount': {attr: 'advance-count', type: 'number'},
-  'controls': {attr: 'controls', type: 'string'},
-  'loop': {attr: 'loop', type: 'boolean'},
-  'outsetArrows': {attr: 'outset-arrows', type: 'boolean'},
-  'snap': {
-    attrs: ['snap'],
-    parseAttrs: (element) => parseStrBoolAttr(element, 'snap', true),
-  },
-  'visibleCount': {attr: 'visible-count', type: 'number'},
+  'advanceCount': {attr: 'advance-count', type: 'number', media: true},
+  'controls': {attr: 'controls', type: 'string', media: true},
+  'loop': {attr: 'loop', type: 'boolean', media: true},
+  'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
+  'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
+  'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
+  'visibleCount': {attr: 'visible-count', type: 'number', media: true},
 };
 
 /** @override */

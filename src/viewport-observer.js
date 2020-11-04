@@ -16,6 +16,7 @@
 import {devAssert} from '../src/log';
 import {getMode} from './mode';
 import {isIframed} from './dom';
+import {toWin} from './types';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.
@@ -39,18 +40,20 @@ export function createViewportObserver(ioCallback, win, threshold) {
 
   // TODO(#30794): See if we can safely remove rootMargin without adversely
   // affecting metrics.
-  const rootMargin = '25%';
 
   // Chrome 81+ supports rootMargin in x-origin iframes via {root: document}
   // but this throws in other browsers.
   try {
     return new win.IntersectionObserver(ioCallback, {
       root,
-      rootMargin,
+      rootMargin: '25%',
       threshold,
     });
   } catch (e) {
-    return new win.IntersectionObserver(ioCallback, {rootMargin, threshold});
+    return new win.IntersectionObserver(ioCallback, {
+      rootMargin: '150px',
+      threshold,
+    });
   }
 }
 
@@ -76,7 +79,7 @@ export function observeWithSharedInOb(element, viewportCallback) {
     );
   }
 
-  const win = element.ownerDocument.defaultView;
+  const win = toWin(element.ownerDocument.defaultView);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
@@ -93,7 +96,7 @@ export function observeWithSharedInOb(element, viewportCallback) {
  * @param {!Element} element
  */
 export function unobserveWithSharedInOb(element) {
-  const win = element.ownerDocument.defaultView;
+  const win = toWin(element.ownerDocument.defaultView);
   const viewportObserver = viewportObservers.get(win);
   if (viewportObserver) {
     viewportObserver.unobserve(element);
