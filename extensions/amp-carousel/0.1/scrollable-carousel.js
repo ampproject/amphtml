@@ -23,6 +23,10 @@ import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -111,6 +115,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
     this.setControlsState();
@@ -118,8 +126,14 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
+  unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    return super.unlayoutCallback();
+  }
+
+  /** @override */
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     this.updateInViewport_(this.pos_, this.pos_);
   }
 

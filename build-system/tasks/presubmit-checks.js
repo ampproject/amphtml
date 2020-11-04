@@ -122,6 +122,7 @@ const forbiddenTerms = {
       'build-system/pr-check/dist-bundle-size.js',
       'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/module-dist-bundle-size.js',
+      'build-system/pr-check/esm-tests.js',
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
@@ -1121,6 +1122,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.setNonBoolean\\(': {
     message: requiresReviewPrivacy,
     allowlist: [
+      'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
