@@ -25,6 +25,7 @@ module.exports = {
     },
   },
   module: {
+    ...baseWebpackConfig.module,
     rules: [
       ...baseWebpackConfig.module.rules,
       {
