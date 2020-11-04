@@ -10,7 +10,7 @@
 
 ## Summary
 
-The player is fully available and the functionality here (unless otherwise specified) is ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionality. To learn how to try out the new features (marked in (**Beta**)), refer to the [FAQs](<#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)>).
+The player is fully available and the functionalities here (unless otherwise specified) are ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionalities. To learn how to try out the new features (marked in (**Beta**)), refer to the [FAQs](<#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)>).
 
 This update contains guidance on using the Web Story Player to support:
 
@@ -49,7 +49,6 @@ To navigate between stories on desktop, there are a couple of options:
 
 ```javascript
 const player = document.querySelector("amp-story-player");
-let init = false;
 
 // Waits for when player API is ready to be used.
 player.addEventListener("ready", () => {
@@ -62,9 +61,6 @@ if (player.isReady) {
 }
 
 function initializeNavigationalButtons() {
-  if (init) return;
-  init = true;
-
   const nextButton = document.body.querySelector(".my-next-button");
 
   nextButton.addEventListener('click', () => {
@@ -349,7 +345,7 @@ On desktop, you can now display a button that navigates from the current story t
      "controls": [
        {
          "name": "close",
-         "backgroundImageUrl": "https://example.com/assets/red-x.png",
+         "backgroundImageUrl": "data:image\/svg+xml;charset=utf-8,<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M5.77778 9.33333H4V4H9.33333V5.77778H5.77778V9.33333ZM4 14.6667H5.77778V18.2222H9.33333V20H4V14.6667ZM18.2222 18.2222H14.6667V20H20V14.6667H18.2222V18.2222ZM14.6667 5.77778V4H20V9.33333H18.2222V5.77778H14.6667Z\" fill=\"white\"\/><\/svg>",
          "position": "start"
        }
      ]
@@ -444,6 +440,8 @@ Yes! These features have been merged to the main repository, but since there is 
 
 AMP provides some channels that you can opt-in to get the latest changes. To opt-in, visit the [AMP Project Experiments page](https://cdn.ampproject.org/experiments.html) and select a channel. More information about the [AMP Release Channels](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels).
 
-### I have questions / comments, how do I contact you?
+### I have found a bug or have questions / comments / issues, how do I contact you?
 
-Join the [amp-story slack channel](https://amphtml.slack.com/archives/C9ARUE6Q6) and ping us!.
+If you have found a bug or have an issue request, file a [Github issue](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aopen+label%3A%22WG%3A+stories%22+) and tag the @ampproject/wg-stories working group.
+
+For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) and ping us!.
