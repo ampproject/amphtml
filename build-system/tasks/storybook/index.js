@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
@@ -29,21 +30,25 @@ const ENV_PORTS = {
   preact: 9002,
 };
 
+const repoDir = path.join(__dirname, '../../..');
+
+/**
+ * @param {string} env 'amp' or 'preact'
+ * @return {string}
+ */
+const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
+
 /**
  * @param {string} bin
- * @param {string} env 'amp' or 'preact'
  * @param {...string} args
  * @return {!ChildProcess}
  */
-const execStorybookScriptAsync = (bin, env, ...args) =>
-  execScriptAsync(
-    `./node_modules/.bin/${bin} --config-dir ./${env}-env ${args.join(' ')}`,
-    {
-      stdio: [null, process.stdout, process.stderr],
-      cwd: __dirname,
-      env: process.env,
-    }
-  );
+const execLocalNodeBinAsync = (bin, ...args) =>
+  execScriptAsync(`./node_modules/.bin/${bin} ${args.join(' ')}`, {
+    stdio: [null, process.stdout, process.stderr],
+    cwd: __dirname,
+    env: process.env,
+  });
 
 /**
  * @param {string} env 'amp' or 'preact'
@@ -51,11 +56,11 @@ const execStorybookScriptAsync = (bin, env, ...args) =>
  */
 function launchEnv(env) {
   const {ci, 'storybook_port': storybookPort = ENV_PORTS[env]} = argv;
-  return execStorybookScriptAsync(
+  return execLocalNodeBinAsync(
     'start-storybook',
-    env,
+    `--config-dir ${envConfigDir(env)}`,
     '--quiet',
-    '--static-dir ../../../',
+    `--static-dir ${repoDir}/`,
     `--port ${storybookPort}`,
     ci ? '--ci' : ''
   );
@@ -66,10 +71,12 @@ function launchEnv(env) {
  * @return {?ChildProcess}
  */
 function buildEnv(env) {
+  const configDir = envConfigDir(env);
+
   if (env === 'amp' && isTravisPullRequestBuild()) {
     // Allows PR deploys to reference built binaries.
     writeFileSync(
-      `${__dirname}/${env}-env/preview.js`,
+      `${configDir}/preview.js`,
       // If you change this JS template, make sure to JSON.stringify every
       // dynamic value. This prevents XSS and other types of garbling.
       `// DO NOT${' '}SUBMIT.
@@ -80,10 +87,11 @@ function buildEnv(env) {
        })});`
     );
   }
-  return execStorybookScriptAsync(
+
+  return execLocalNodeBinAsync(
     'build-storybook',
-    env,
-    `--output-dir ../../../examples/storybook/${env}`
+    `--config-dir ${configDir}`,
+    `--output-dir ${repoDir}/examples/storybook/${env}`
   );
 }
 
