@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, number, withKnobs} from '@storybook/addon-knobs';
+import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -37,9 +37,9 @@ export const Default = () => {
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
   const autoAdvance = boolean('auto advance', true);
-  const autoAdvanceCount = number('auto advance count', 1);
-  const autoAdvanceInterval = number('auto advance interval', 1000);
-  const autoAdvanceLoops = number('auto advance loops', 3);
+  const autoAdvanceCount = text('auto advance count', 1);
+  const autoAdvanceInterval = text('auto advance interval', 1000);
+  const autoAdvanceLoops = text('auto advance loops', 3);
   return (
     <amp-inline-gallery layout="container">
       <amp-inline-gallery-pagination
