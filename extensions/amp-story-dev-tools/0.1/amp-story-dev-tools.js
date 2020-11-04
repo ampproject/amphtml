@@ -131,11 +131,6 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     /** @private {DevToolsTab} */
     this.tab_ = null;
 
-    // Services.extensionsFor(this.win).installExtensionForDoc(
-    //   this.getAmpDoc(),
-    //   'amp-story-player'
-    // );
-
     this.loadFonts_();
 
     /** @private {!DevToolsLogTab} */
