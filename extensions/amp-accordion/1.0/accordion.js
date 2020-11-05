@@ -80,7 +80,7 @@ function AccordionWithRef(
   }, [expandSingleSection]);
 
   const registerSection = useCallback(
-    (id, defaultExpanded, {onExpandStateChange}) => {
+    (id, defaultExpanded, {current: onExpandStateChange}) => {
       setExpandedMap((expandedMap) => {
         return setExpanded(
           id,
@@ -89,7 +89,7 @@ function AccordionWithRef(
           expandSingleSection
         );
       });
-      eventMap.current[id] = onExpandStateChange;
+      eventMap.current = {...eventMap.current, [id]: onExpandStateChange};
       return () => {
         setExpandedMap((expandedMap) => omit(expandedMap, id));
         eventMap.current = omit(/** @type {!Object} */ (eventMap.current), id);
@@ -103,12 +103,14 @@ function AccordionWithRef(
       let newValue;
       setExpandedMap((expandedMap) => {
         newValue = !expandedMap[id];
+        Promise.resolve().then(() => {
+          const onExpandStateChange = eventMap.current[id];
+          if (onExpandStateChange) {
+            onExpandStateChange(newValue);
+          }
+        });
         return setExpanded(id, newValue, expandedMap, expandSingleSection);
       });
-      const onExpandStateChange = eventMap.current[id];
-      if (onExpandStateChange) {
-        onExpandStateChange(newValue);
-      }
     },
     [expandSingleSection]
   );
@@ -275,12 +277,12 @@ export function AccordionSection({
   }, []);
 
   const sectionPropsRef = useRef(
-    /** @type {?AccordionDef.SectionPropsRef} */ (null)
+    /** @type {?function(boolean):undefined|undefined} */ (null)
   );
-  sectionPropsRef.current = {onExpandStateChange};
+  sectionPropsRef.current = onExpandStateChange;
   useLayoutEffect(() => {
     if (registerSection) {
-      return registerSection(id, defaultExpanded, sectionPropsRef.current);
+      return registerSection(id, defaultExpanded, sectionPropsRef);
     }
   }, [registerSection, id, defaultExpanded]);
 

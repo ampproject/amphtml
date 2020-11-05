@@ -47,13 +47,6 @@ AccordionDef.SectionProps;
 
 /**
  * @typedef {{
- *   onExpandStateChange: (function(boolean):undefined|undefined),
- * }}
- */
-AccordionDef.SectionPropsRef;
-
-/**
- * @typedef {{
  *   role: (string|undefined),
  *   onClick: (function()|undefined),
  *   children: (?PreactDef.Renderable|undefined),

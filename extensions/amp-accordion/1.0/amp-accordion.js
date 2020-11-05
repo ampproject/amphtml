@@ -105,7 +105,7 @@ function getState(element, mu) {
     const expandStateShim = memo(
       section,
       EXPAND_STATE_SHIM_PROP,
-      getExpandStateTrigger.bind(null, element, ActionTrust.HIGH)
+      getExpandStateTrigger
     );
     const props = dict({
       'key': section,
@@ -122,13 +122,14 @@ function getState(element, mu) {
 }
 
 /**
- * @param {!Element} element
- * @param {!ActionTrust} trust
  * @param {!Element} section
  * @return {Function}
  */
-function getExpandStateTrigger(element, trust, section) {
-  const action = Services.actionServiceForDoc(element);
+function getExpandStateTrigger(section) {
+  const element = section.parentElement;
+  const action = Services.actionServiceForDoc(
+    /** @type {!Element|!ShadowRoot} */ (element)
+  );
   const triggerEvent = (expanded) => {
     const eventName = expanded ? 'expand' : 'collapse';
     const event = createCustomEvent(
@@ -136,7 +137,7 @@ function getExpandStateTrigger(element, trust, section) {
       `accordionSection.${eventName}`,
       dict({})
     );
-    action.trigger(section, eventName, event, trust);
+    action.trigger(section, eventName, event, ActionTrust.HIGH);
     element.dispatchCustomEvent(name);
   };
   return triggerEvent;
