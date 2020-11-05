@@ -823,7 +823,8 @@
       "name": "amp-story-360: 360 image rendering",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".amp-story-360-loaded",
+        ".amp-story-360-loaded", 
+        ".i-amphtml-story-loaded"
       ]
     },
     {
@@ -831,7 +832,8 @@
       "name": "amp-story-360: 360 video rendering",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".amp-story-360-loaded",
+        ".amp-story-360-loaded", 
+        ".i-amphtml-story-loaded"
       ]
     }
   ]
