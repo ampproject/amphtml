@@ -109,7 +109,6 @@ const STORY_STATE_TYPE = {
 /** @enum {string} */
 const STORY_MESSAGE_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
-  PAGE_IDS: 'PAGE_IDS',
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
@@ -1286,70 +1285,18 @@ export class AmpStoryPlayer {
     if (delta === 0) {
       return;
     }
-    const storyPagesData = {};
-    this.getPageIdsForStory_()
-      .then((pageIds) => {
-        storyPagesData.ids = pageIds.value;
-        return this.getCurrentPageIdForStory_();
-      })
-      .then((currentPageId) => {
-        storyPagesData.currentId = currentPageId.value;
-        const currentIdx = storyPagesData.ids.indexOf(storyPagesData.currentId);
-        const targetPageId = storyPagesData.ids[currentIdx + delta];
 
-        if (!targetPageId) {
-          throw new Error('Delta from current page is out of bounds.');
-        }
-        this.switchToStoryPageId_(targetPageId);
-      })
-      .catch((reason) => {
-        console /*OK*/
-          .error(`[${TAG}] `, reason);
-      });
+    this.sendSwitchToPageDelta_(delta);
   }
 
   /**
-   * Sends a message to get the array of pageIds of the currently displayed
-   * story.
-   * @private
-   * @return {!Promise<Array<string>>}
-   */
-  getPageIdsForStory_() {
-    const {iframeIdx} = this.stories_[this.currentIdx_];
-    return this.messagingPromises_[iframeIdx].then((messaging) =>
-      messaging.sendRequest(
-        'getDocumentState',
-        {state: STORY_MESSAGE_STATE_TYPE.PAGE_IDS},
-        true
-      )
-    );
-  }
-
-  /**
-   * Sends a message to retrieve the pageId of the currently displayed story.
-   * @private
-   * @return {!Promise<string>}
-   */
-  getCurrentPageIdForStory_() {
-    const {iframeIdx} = this.stories_[this.currentIdx_];
-    return this.messagingPromises_[iframeIdx].then((messaging) =>
-      messaging.sendRequest(
-        'getDocumentState',
-        {state: STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID},
-        true
-      )
-    );
-  }
-
-  /**
-   * Sends a message to the currently displayed story to change to a given page.
-   * @param {string} pageId
+   * @param {number} delta
    * @private
    */
-  switchToStoryPageId_(pageId) {
+  sendSwitchToPageDelta_(delta) {
     const {iframeIdx} = this.stories_[this.currentIdx_];
     this.messagingPromises_[iframeIdx].then((messaging) =>
-      messaging.sendRequest('selectPage', {pageId})
+      messaging.sendRequest('selectPage', {delta})
     );
   }
 

@@ -2634,18 +2634,55 @@ export class AmpStory extends AMP.BaseElement {
       this.next_();
     } else if (data['previous']) {
       this.previous_();
-    } else if (data['pageId']) {
-      const activePage = devAssert(
-        this.activePage_,
-        'No active page set when navigating to pageId.'
-      );
-      const direction =
-        this.getPageIndexById(data['pageId']) > this.getPageIndex(activePage)
-          ? NavigationDirection.NEXT
-          : NavigationDirection.PREVIOUS;
-
-      this.switchTo_(data['pageId'], direction);
+    } else if (data['delta']) {
+      this.switchDelta_(data['delta']);
     }
+  }
+
+  /**
+   * Switches to a page in the story given a delta. If new index is out of
+   * bounds, it will wrap around the pages array.
+   * @param {number} delta
+   * @private
+   */
+  switchDelta_(delta) {
+    const activePage = devAssert(
+      this.activePage_,
+      'No active page set when navigating to pageId.'
+    );
+
+    const currentPageIdx = findIndex(
+      this.pages_,
+      (page) => page.element.id === activePage.element.id
+    );
+
+    const newPageIdx = currentPageIdx + delta;
+    const targetPage =
+      delta > 0
+        ? this.pages_[newPageIdx % this.pages_.length]
+        : this.pages_[
+            ((newPageIdx % this.pages_.length) + this.pages_.length) %
+              this.pages_.length
+          ];
+
+    if (
+      !this.isActualPage_(targetPage && targetPage.element.id) ||
+      newPageIdx === currentPageIdx
+    ) {
+      return;
+    }
+
+    const targetPageIdx = findIndex(
+      this.pages_,
+      (page) => page.element.id === targetPage.element.id
+    );
+
+    const direction =
+      targetPageIdx > currentPageIdx
+        ? NavigationDirection.NEXT
+        : NavigationDirection.PREVIOUS;
+
+    this.switchTo_(targetPage.element.id, direction);
   }
 
   /**

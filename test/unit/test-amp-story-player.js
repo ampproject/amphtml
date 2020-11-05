@@ -22,7 +22,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
   let manager;
-  let fakeResponse = {};
+  let fakeResponse;
 
   const fireHandler = [];
   const DEFAULT_CACHE_URL =
@@ -100,10 +100,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     win = env.win;
     fakeMessaging = {
       setDefaultHandler: () => {},
-      sendRequest: (name, data) =>
-        Promise.resolve(
-          (fakeResponse[name] && fakeResponse[name][data.state]) || fakeResponse
-        ),
+      sendRequest: () => Promise.resolve(fakeResponse),
       unregisterHandler: () => {},
       registerHandler: (event, handler) => {
         fireHandler[event] = handler;
@@ -923,53 +920,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      fakeResponse = {
-        'getDocumentState': {
-          'PAGE_IDS': {
-            'value': ['page-1', 'page-2'],
-          },
-          'CURRENT_PAGE_ID': {'value': 'page-1'},
-        },
-      };
-
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
-      player.go(0, 1);
+      player.go(0, 4);
       await nextTick();
 
       expect(sendRequestSpy).to.have.been.calledWith('selectPage', {
-        'pageId': 'page-2',
+        'delta': 4,
       });
-    });
-
-    it('will not navigate if page delta is out of bounds', async () => {
-      const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 1);
-
-      const player = new AmpStoryPlayer(win, playerEl);
-
-      await player.load();
-      await nextTick();
-
-      fakeResponse = {
-        'getDocumentState': {
-          'PAGE_IDS': {
-            'value': ['page-1', 'page-2'],
-          },
-          'CURRENT_PAGE_ID': {'value': 'page-1'},
-        },
-      };
-
-      expectAsyncConsoleError(
-        '[amp-story-player]  Error: Delta from current page is out of bounds.',
-        1
-      );
-
-      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
-
-      player.go(0, 44);
-      await nextTick();
-
-      expect(sendRequestSpy).to.not.have.been.calledWith('selectPage');
     });
 
     it('takes to first story when swiping on the last one with circular wrapping', async () => {
