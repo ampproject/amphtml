@@ -77,23 +77,23 @@ export function Thumbnails({
       _thumbnails={true}
       {...rest}
     >
-      {(children || slides).map((slide, i) => {
-        const {thumbnailSrc, src, alt} = slide.props;
-        return (
-          <img
-            alt={alt}
-            className={classes.slide}
-            onClick={() => setCurrentSlide(i)}
-            role="button"
-            src={thumbnailSrc || src}
-            style={{
-              height: px(height),
-              width: px(aspectRatio ? aspectRatio * height : height),
-            }}
-            tabindex="0"
-          />
-        );
-      })}
+      {children ||
+        slides.map((slide, i) => {
+          const {thumbnailSrc} = slide.props;
+          return (
+            <img
+              className={classes.slide}
+              onClick={() => setCurrentSlide(i)}
+              role="button"
+              src={thumbnailSrc || ''}
+              style={{
+                height: px(height),
+                width: aspectRatio ? px(aspectRatio * height) : '',
+              }}
+              tabindex="0"
+            />
+          );
+        })}
     </BaseCarousel>
   );
 }

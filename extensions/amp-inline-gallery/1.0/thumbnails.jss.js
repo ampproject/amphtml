@@ -24,6 +24,7 @@ const thumbnails = {
 // Default background color. Can be overridden by user style.
 const slide = {
   backgroundColor: '#999',
+  objectFit: 'fill',
 };
 
 const JSS = {
