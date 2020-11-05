@@ -36,6 +36,7 @@ const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
+const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
 
 /** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
@@ -77,27 +78,6 @@ class AmpAccordion extends PreactBaseElement {
 
 /**
  * @param {!Element} element
- * @param {string} name
- * @param {!Element} section
- * @param {!ActionTrust} trust
- * @return {Function}
- */
-function getTrigger(element, name, section, trust) {
-  const action = Services.actionServiceForDoc(element);
-  const triggerEvent = () => {
-    const event = createCustomEvent(
-      toWin(element.ownerDocument.defaultView),
-      `accordionSection.${name}`,
-      dict({})
-    );
-    action.trigger(section, name, event, trust);
-    element.dispatchCustomEvent(name);
-  };
-  return triggerEvent;
-}
-
-/**
- * @param {!Element} element
  * @param {MutationObserver} mu
  * @return {!JsonObject}
  */
@@ -122,20 +102,44 @@ function getState(element, mu) {
       CONTENT_SHIM_PROP,
       bindContentShimToElement
     );
-    const expanded = section.hasAttribute('expanded');
+    const expandStateShim = memo(
+      section,
+      EXPAND_STATE_SHIM_PROP,
+      getExpandStateTrigger.bind(null, element, ActionTrust.HIGH)
+    );
     const props = dict({
       'key': section,
       'as': sectionShim,
       'headerAs': headerShim,
       'contentAs': contentShim,
-      'expanded': expanded,
+      'expanded': section.hasAttribute('expanded'),
       'id': section.getAttribute('id'),
-      'onExpand': getTrigger(element, 'expand', section, ActionTrust.HIGH),
-      'onCollapse': getTrigger(element, 'collapse', section, ActionTrust.HIGH),
+      'onExpandStateChange': expandStateShim,
     });
     return <AccordionSection {...props} />;
   });
   return dict({'children': children});
+}
+
+/**
+ * @param {!Element} element
+ * @param {!ActionTrust} trust
+ * @param {!Element} section
+ * @return {Function}
+ */
+function getExpandStateTrigger(element, trust, section) {
+  const action = Services.actionServiceForDoc(element);
+  const triggerEvent = (expanded) => {
+    const eventName = expanded ? 'expand' : 'collapse';
+    const event = createCustomEvent(
+      toWin(element.ownerDocument.defaultView),
+      `accordionSection.${eventName}`,
+      dict({})
+    );
+    action.trigger(section, eventName, event, trust);
+    element.dispatchCustomEvent(name);
+  };
+  return triggerEvent;
 }
 
 /**

@@ -102,7 +102,11 @@ function AccordionWithEvents(props) {
           id="section2"
           key={2}
           header={<h2>Section 2</h2>}
-          onExpand={() => ref.current./*OK*/ expand('section3')}
+          onExpandStateChange={(expanded) => {
+            if (expanded) {
+              ref.current./*OK*/ expand('section3');
+            }
+          }}
         >
           <div>Content in section 2.</div>
         </AccordionSection>
@@ -110,7 +114,11 @@ function AccordionWithEvents(props) {
           id="section3"
           key={3}
           header={<h2>Section 3</h2>}
-          onCollapse={() => ref.current./*OK*/ collapse('section2')}
+          onExpandStateChange={(expanded) => {
+            if (!expanded) {
+              ref.current./*OK*/ collapse('section2');
+            }
+          }}
         >
           <div>Content in section 3.</div>
         </AccordionSection>
