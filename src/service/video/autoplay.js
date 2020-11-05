@@ -29,22 +29,21 @@ function cloneDeep(node) {
 
 /**
  * @param {!Element|!Document} elOrDoc
+ * @param {?{title: string|undefined}=} metadata
  * @return {!Element}
  */
-export function renderInteractionOverlay(elOrDoc) {
+export function renderInteractionOverlay(elOrDoc, metadata) {
   const html = htmlFor(elOrDoc);
   const element = html`
-    <div
+    <button
+      aria-label="Unmute video"
       class="i-amphtml-video-mask i-amphtml-fill-content"
-      role="button"
       tabindex="0"
-    ></div>
+    ></button>
   `;
-  element.addEventListener('keypress', (e) => {
-    if (e.which === /* enter */ 13) {
-      e.target.click();
-    }
-  });
+  if (metadata?.title) {
+    element.setAttribute('aria-label', metadata.title);
+  }
   return element;
 }
 

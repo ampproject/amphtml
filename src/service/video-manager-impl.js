@@ -866,7 +866,7 @@ class VideoEntry {
       return;
     }
 
-    const mask = renderInteractionOverlay(element);
+    const mask = renderInteractionOverlay(element, this.metadata_);
 
     /** @param {boolean} display */
     const setMaskDisplay = (display) => {

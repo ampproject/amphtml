@@ -16,6 +16,9 @@
 .i-amphtml-video-mask {
   display: block;
   z-index: 1;
+  appearance: none;
+  background: transparent;
+  border: none;
 }
 
 
