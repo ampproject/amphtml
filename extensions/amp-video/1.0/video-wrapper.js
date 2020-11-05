@@ -269,8 +269,14 @@ function Autoplay({
       {displayOverlay && (
         <div
           role="button"
+          tabindex="0"
           style={fillContentOverlay}
           onClick={onOverlayClick}
+          onKeyPress={(e) => {
+            if (e.which === /* enter */ 13) {
+              e.target.click();
+            }
+          }}
         ></div>
       )}
     </>
