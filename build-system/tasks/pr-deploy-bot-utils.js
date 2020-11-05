@@ -41,9 +41,13 @@ async function walk(dest) {
   return filelist;
 }
 
+function getBaseUrl() {
+  return `${hostNamePrefix}/amp_dist_${travisBuildNumber()}`;
+}
+
 async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
-  const hostName = `${hostNamePrefix}/amp_dist_${travisBuildNumber()}`;
+  const hostName = getBaseUrl();
   const inabox = false;
   const storyV1 = true;
   const result = replaceUrlsAppUtil(
@@ -81,6 +85,7 @@ async function signalDistUpload(result) {
 }
 
 module.exports = {
+  getBaseUrl,
   replaceUrls,
   signalDistUpload,
 };
