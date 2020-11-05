@@ -853,7 +853,7 @@ class VideoEntry {
           unlistener();
         });
         const animation = element.querySelector('.amp-video-eq');
-        const mask = element.querySelector('i-amphtml-video-mask');
+        const mask = element.querySelector('.i-amphtml-video-mask');
         if (animation) {
           removeElement(animation);
         }

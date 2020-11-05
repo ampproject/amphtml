@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-i-amphtml-video-mask {
+.i-amphtml-video-mask {
   display: block;
   z-index: 1;
 }

@@ -33,10 +33,19 @@ function cloneDeep(node) {
  */
 export function renderInteractionOverlay(elOrDoc) {
   const html = htmlFor(elOrDoc);
-  return html`
-    <i-amphtml-video-mask class="i-amphtml-fill-content" role="button">
-    </i-amphtml-video-mask>
+  const element = html`
+    <div
+      class="i-amphtml-video-mask i-amphtml-fill-content"
+      role="button"
+      tabindex="0"
+    ></div>
   `;
+  element.addEventListener('keypress', (e) => {
+    if (e.which === /* enter */ 13) {
+      e.target.click();
+    }
+  });
+  return element;
 }
 
 /**
