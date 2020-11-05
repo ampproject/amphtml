@@ -8,7 +8,7 @@
         {name: 'aharoyairncohen'},
         {name: 'arielginsburg'},
         {name: 'lironka'},
-        {name: 'adir-kandel-vzm'}
+        {name: 'adir-kandel-vzm'},
         {name: 'ampproject/wg-components'}
       ],
     },
