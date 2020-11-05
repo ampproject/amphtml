@@ -747,6 +747,10 @@ HTML document and use your element in it by creating a file in the
 name. Browse that directory to see examples for other elements and
 extensions.
 
+Also consider contributing an example to
+[amp.dev](https://amp.dev/) on
+[GitHub](https://github.com/ampproject/amp.dev).
+
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
