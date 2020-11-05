@@ -2,6 +2,10 @@
 
 ⚡⚡⚡
 
+Do you build things with AMP? If you do, please fill out the new [AMP Developer Survey](https://go.amp.dev/devx-survey)! We run this survey quarterly, so please fill this out even if you've responded to earlier surveys!
+
+⚡⚡⚡
+
 [![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg?logo=Travis%20CI&logoColor=white&style=flat-square 'Build Status')](https://travis-ci.com/ampproject/amphtml/builds)
 [![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'GitHub Release')](https://github.com/ampproject/amphtml/releases/latest)
 [![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'Commits')](https://github.com/ampproject/amphtml/pulse/monthly)
