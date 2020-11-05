@@ -61,7 +61,7 @@ function AccordionWithRef(
   ref
 ) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
-  const eventMap = useRef({});
+  const eventMap = useRef(/** @type {!Object} */ ({}));
   const [randomPrefix] = useState(generateRandomId);
   const prefix = id || `a${randomPrefix}`;
 
@@ -274,7 +274,9 @@ export function AccordionSection({
     return () => (hasMountedRef.current = false);
   }, []);
 
-  const sectionPropsRef = useRef();
+  const sectionPropsRef = useRef(
+    /** @type {?AccordionDef.SectionPropsRef} */ (null)
+  );
   sectionPropsRef.current = {onExpandStateChange};
   useLayoutEffect(() => {
     if (registerSection) {

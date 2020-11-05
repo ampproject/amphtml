@@ -40,11 +40,17 @@ AccordionDef.Props;
  *   contentClassName: (string|undefined),
  *   header: (!PreactDef.Renderable),
  *   children: (?PreactDef.Renderable|undefined),
- *   onExpand: (function():undefined|undefined),
- *   onCollapse: (function():undefined|undefined),
+ *   onExpandStateChange: (function(boolean):undefined|undefined),
  * }}
  */
 AccordionDef.SectionProps;
+
+/**
+ * @typedef {{
+ *   onExpandStateChange: (function(boolean):undefined|undefined),
+ * }}
+ */
+AccordionDef.SectionPropsRef;
 
 /**
  * @typedef {{
