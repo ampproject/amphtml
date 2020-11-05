@@ -15,6 +15,7 @@
  */
 
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
+import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
@@ -41,6 +42,9 @@ export class AmpInlineGalleryThumbnails extends PreactBaseElement {
 AmpInlineGalleryThumbnails['Component'] = Thumbnails;
 
 /** @override */
+AmpInlineGalleryThumbnails['passthroughNonEmpty'] = true;
+
+/** @override */
 AmpInlineGalleryThumbnails['props'] = {
   'aspectRatio': {attr: 'aspect-ratio', type: 'number'},
   'loop': {attr: 'loop', type: 'boolean'},
@@ -51,3 +55,6 @@ AmpInlineGalleryThumbnails['layoutSizeDefined'] = true;
 
 /** @override */
 AmpInlineGalleryThumbnails['shadowCss'] = CAROUSEL_CSS + THUMBNAIL_CSS;
+
+/** @override */
+AmpInlineGalleryThumbnails['useContexts'] = [CarouselContextProp];

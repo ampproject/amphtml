@@ -70,7 +70,7 @@ function BaseCarouselWithRef(
   const currentSlide = carouselContext.currentSlide ?? currentSlideState;
   const setCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
-  const {setSlides} = carouselContext;
+  const {slides, setSlides} = carouselContext;
   const scrollRef = useRef(null);
   const containRef = useRef(null);
   const contentRef = useRef(null);
@@ -105,10 +105,12 @@ function BaseCarouselWithRef(
   );
 
   useEffect(() => {
-    if (!_thumbnails) {
+    // For now, do not update slides if they are the same length as before.
+    // Otherwise this causes an infinite loop when updating the AMP Context.
+    if (!_thumbnails && slides && slides.length !== childrenArray.length) {
       setSlides(childrenArray);
     }
-  }, [_thumbnails, childrenArray, setSlides]);
+  }, [_thumbnails, childrenArray, setSlides, slides]);
 
   const disableForDir = (dir) =>
     !loop &&
