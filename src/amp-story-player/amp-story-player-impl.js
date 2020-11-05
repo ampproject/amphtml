@@ -109,6 +109,7 @@ const STORY_STATE_TYPE = {
 /** @enum {string} */
 const STORY_MESSAGE_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
+  PAGE_IDS: 'PAGE_IDS',
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
@@ -992,11 +993,6 @@ export class AmpStoryPlayer {
       return;
     }
 
-    if (storyDelta === 0 && pageDelta !== 0) {
-      this.selectPage_(pageDelta);
-      return;
-    }
-
     if (
       !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + storyDelta)
@@ -1004,19 +1000,20 @@ export class AmpStoryPlayer {
       throw new Error('Out of Story range.');
     }
 
-    const newIdx = this.currentIdx_ + storyDelta;
-    const currentStory =
+    const newStoryIdx = this.currentIdx_ + storyDelta;
+    const newStory =
       storyDelta > 0
-        ? this.stories_[newIdx % this.stories_.length]
+        ? this.stories_[newStoryIdx % this.stories_.length]
         : this.stories_[
-            ((newIdx % this.stories_.length) + this.stories_.length) %
+            ((newStoryIdx % this.stories_.length) + this.stories_.length) %
               this.stories_.length
           ];
 
-    this.show(currentStory.href);
-    if (pageDelta !== 0) {
-      this.selectPage_(pageDelta);
+    if (this.currentIdx_ !== newStory.idx) {
+      this.show(newStory.href);
     }
+
+    this.selectPage_(pageDelta);
   }
 
   /**
@@ -1281,18 +1278,79 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Sends a message to the story to navigate delta pages.
+   * Sends a message to the current story to navigate delta pages.
    * @param {number} delta
    * @private
    */
   selectPage_(delta) {
-    const navigation = delta > 0 ? {'next': true} : {'previous': true};
+    if (delta === 0) {
+      return;
+    }
+    const storyPagesData = {};
+    this.getPageIdsForStory_()
+      .then((pageIds) => {
+        storyPagesData.ids = pageIds.value;
+        return this.getCurrentPageIdForStory_();
+      })
+      .then((currentPageId) => {
+        storyPagesData.currentId = currentPageId.value;
+        const currentIdx = storyPagesData.ids.indexOf(storyPagesData.currentId);
+        const targetPageId = storyPagesData.ids[currentIdx + delta];
+
+        if (!targetPageId) {
+          throw new Error('Delta from current page is out of bounds.');
+        }
+        this.switchToStoryPageId_(targetPageId);
+      })
+      .catch((reason) => {
+        console /*OK*/
+          .error(`[${TAG}] `, reason);
+      });
+  }
+
+  /**
+   * Sends a message to get the array of pageIds of the currently displayed
+   * story.
+   * @private
+   * @return {!Promise<Array<string>>}
+   */
+  getPageIdsForStory_() {
     const {iframeIdx} = this.stories_[this.currentIdx_];
-    this.messagingPromises_[iframeIdx].then((messaging) => {
-      for (let i = 0; i < Math.abs(delta); i++) {
-        messaging.sendRequest('selectPage', navigation);
-      }
-    });
+    return this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest(
+        'getDocumentState',
+        {state: STORY_MESSAGE_STATE_TYPE.PAGE_IDS},
+        true
+      )
+    );
+  }
+
+  /**
+   * Sends a message to retrieve the pageId of the currently displayed story.
+   * @private
+   * @return {!Promise<string>}
+   */
+  getCurrentPageIdForStory_() {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    return this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest(
+        'getDocumentState',
+        {state: STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID},
+        true
+      )
+    );
+  }
+
+  /**
+   * Sends a message to the currently displayed story to change to a given page.
+   * @param {string} pageId
+   * @private
+   */
+  switchToStoryPageId_(pageId) {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest('selectPage', {pageId})
+    );
   }
 
   /**

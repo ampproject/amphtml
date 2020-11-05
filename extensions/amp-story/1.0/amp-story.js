@@ -2634,6 +2634,17 @@ export class AmpStory extends AMP.BaseElement {
       this.next_();
     } else if (data['previous']) {
       this.previous_();
+    } else if (data['pageId']) {
+      const activePage = devAssert(
+        this.activePage_,
+        'No active page set when navigating to pageId.'
+      );
+      const direction =
+        this.getPageIndexById(data['pageId']) > this.getPageIndex(activePage)
+          ? NavigationDirection.NEXT
+          : NavigationDirection.PREVIOUS;
+
+      this.switchTo_(data['pageId'], direction);
     }
   }
 

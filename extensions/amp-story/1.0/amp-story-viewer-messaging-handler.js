@@ -58,6 +58,10 @@ const GET_STATE_CONFIGURATIONS = {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.PAGE_ATTACHMENT_STATE,
   },
+  'PAGE_IDS': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.PAGE_IDS,
+  },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,
     property: AnalyticsVariable.STORY_PROGRESS,
