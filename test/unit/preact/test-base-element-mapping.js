@@ -21,7 +21,9 @@ import {htmlFor} from '../../../src/static-template';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
 
-describes.realWin('PreactBaseElement', {amp: true}, (env) => {
+const spec = {amp: true, frameStyle: {width: '300px'}};
+
+describes.realWin('PreactBaseElement', spec, (env) => {
   let win, doc, html;
   let Impl, component, lastProps;
 
@@ -80,11 +82,14 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         'aDate': {attr: 'a-date', type: 'date'},
         'disabled': {attr: 'disabled', type: 'boolean'},
         'enabled': {attr: 'enabled', type: 'boolean'},
+        'boolDefTrue': {attr: 'bool-def-true', type: 'boolean', default: true},
         'combined': {
           attrs: ['part-a', 'part-b'],
           parseAttrs: (e) =>
             `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
         },
+        'params': {attrPrefix: 'data-param-'},
+        'prefix': {attrPrefix: 'prefix'},
       };
       element = html`
         <amp-preact
@@ -97,6 +102,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
           unknown="1"
           part-a="A"
           part-b="B"
+          data-param-test="helloworld"
+          data-param-test-two="confirm"
+          prefix="pref"
         >
         </amp-preact>
       `;
@@ -120,9 +128,13 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         minFontSize: 72,
         aDate: DATE,
         disabled: true,
-        enabled: false,
+        boolDefTrue: true,
         combined: 'A+B',
       });
+      expect(lastProps.enabled).to.not.exist;
+      expect(lastProps.params.test).to.equal('helloworld');
+      expect(lastProps.params.testTwo).to.equal('confirm');
+      expect(lastProps).to.not.haveOwnProperty('prefix');
     });
 
     it('should mutate attributes', async () => {
@@ -131,7 +143,11 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       element.setAttribute('a-date', '2018-01-01T08:00:01Z');
       element.setAttribute('enabled', '');
       element.removeAttribute('disabled');
+      element.setAttribute('bool-def-true', 'false');
       element.setAttribute('part-b', 'C');
+      element.setAttribute('data-param-test', 'worldhello');
+      element.setAttribute('data-param-test-two', 'confirmAgain');
+      element.setAttribute('prefix', 'prefTwo');
 
       await waitFor(() => component.callCount > 1, 'component re-rendered');
 
@@ -141,9 +157,33 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         propA: 'B',
         minFontSize: 72.5,
         aDate: DATE + 1000,
-        disabled: false,
         enabled: true,
+        boolDefTrue: false,
         combined: 'A+C',
+      });
+      expect(lastProps.disabled).to.not.exist;
+      expect(lastProps.params.test).to.equal('worldhello');
+      expect(lastProps.params.testTwo).to.equal('confirmAgain');
+      expect(lastProps).to.not.haveOwnProperty('prefix');
+    });
+
+    it('should accept boolean string values', async () => {
+      element.setAttribute('enabled', 'true');
+      element.setAttribute('bool-def-true', 'true');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+      expect(lastProps).to.contain({
+        enabled: true,
+        boolDefTrue: true,
+      });
+
+      element.setAttribute('enabled', 'false');
+      element.setAttribute('bool-def-true', 'false');
+      await waitFor(() => component.callCount > 2, 'component re-rendered');
+      expect(component).to.be.calledThrice;
+      expect(lastProps).to.contain({
+        enabled: false,
+        boolDefTrue: false,
       });
     });
 
@@ -163,6 +203,51 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       expect(component).to.be.calledTwice;
       expect(lastProps).to.have.property('propA', 'B');
       expect(lastProps).to.not.have.property('unknown2');
+    });
+  });
+
+  describe('media-query attribute mapping', () => {
+    let element;
+
+    beforeEach(async () => {
+      Impl['props'] = {
+        'propA': {attr: 'prop-a', media: true},
+        'propB': {attr: 'prop-b', media: true},
+        'minFontSize': {attr: 'min-font-size', type: 'number', media: true},
+      };
+      element = html`
+        <amp-preact
+          layout="fixed"
+          width="100"
+          height="100"
+          prop-a="(max-width: 301px) A, B"
+          min-font-size="(max-width: 301px) 72, 84"
+        >
+        </amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(win.innerWidth).to.equal(300);
+    });
+
+    it('should parse attributes on first render', async () => {
+      expect(component).to.be.calledOnce;
+      expect(lastProps.propA).to.equal('A');
+      expect(lastProps.minFontSize).to.equal(72);
+      // No attribute.
+      expect(lastProps.propB).to.be.undefined;
+    });
+
+    it('should rerender on media change', async () => {
+      env.iframe.style.width = '310px';
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+
+      expect(component).to.be.calledTwice;
+      expect(lastProps.propA).to.equal('B');
+      expect(lastProps.minFontSize).to.equal(84);
+      // No attribute.
+      expect(lastProps.propB).to.be.undefined;
     });
   });
 

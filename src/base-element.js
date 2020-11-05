@@ -335,6 +335,16 @@ export class BaseElement {
   }
 
   /**
+   * Override in subclass to adjust the element when it is being added to
+   * the DOM. Could e.g. be used to add a listener. Notice, that this
+   * callback is called immediately after `buildCallback()` if the element
+   * is attached to the DOM.
+   */
+  attachedCallback() {
+    // Subclasses may override.
+  }
+
+  /**
    * Override in subclass to adjust the element when it is being removed from
    * the DOM. Could e.g. be used to remove a listener.
    */
@@ -924,15 +934,6 @@ export class BaseElement {
    */
   expand() {
     Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
-  }
-
-  /**
-   * Called every time an owned AmpElement expands itself.
-   * See {@link expand}.
-   * @param {!AmpElement} unusedElement Child element that was expanded.
-   */
-  expandedCallback(unusedElement) {
-    // Subclasses may override.
   }
 
   /**

@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
@@ -56,6 +58,9 @@ const CLOSE_CLASS = 'i-amphtml-story-close-control';
 
 /** @private @const {string} */
 const SKIP_NEXT_CLASS = 'i-amphtml-story-skip-next';
+
+/** @private @const {string} */
+const VIEWER_CUSTOM_CONTROL_CLASS = 'i-amphtml-story-viewer-custom-control';
 
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
@@ -260,21 +265,27 @@ const TEMPLATE = {
   ],
 };
 
+/**
+ * Contains the event name belonging to the viewer control.
+ * @const {string}
+ */
+const VIEWER_CONTROL_EVENT_NAME = '__AMP_VIEWER_CONTROL_EVENT_NAME__';
+
 /** @enum {string} */
-const CONTROL_TYPES = {
-  CLOSE: 'close-button',
-  SHARE: 'share-button',
-  SKIP_NEXT: 'skip-next-button',
+const VIEWER_CONTROL_TYPES = {
+  CLOSE: 'close',
+  SHARE: 'share',
+  SKIP_NEXT: 'skip-next',
 };
 
-const CONTROL_DEFAULTS = {
-  [CONTROL_TYPES.SHARE]: {
+const VIEWER_CONTROL_DEFAULTS = {
+  [VIEWER_CONTROL_TYPES.SHARE]: {
     'selector': `.${SHARE_CLASS}`,
   },
-  [CONTROL_TYPES.CLOSE]: {
+  [VIEWER_CONTROL_TYPES.CLOSE]: {
     'selector': `.${CLOSE_CLASS}`,
   },
-  [CONTROL_TYPES.SKIP_NEXT]: {
+  [VIEWER_CONTROL_TYPES.SKIP_NEXT]: {
     'selector': `.${SKIP_NEXT_CLASS}`,
   },
 };
@@ -342,6 +353,12 @@ export class SystemLayer {
 
     /** @private {?number|?string} */
     this.timeoutId_ = null;
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
+
+    /** @private {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = null;
   }
 
   /**
@@ -395,9 +412,12 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    const viewer = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewer_ = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
+      : null;
 
-    if (shouldShowStoryUrlInfo(viewer)) {
+    if (shouldShowStoryUrlInfo(this.viewer_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
@@ -447,6 +467,13 @@ export class SystemLayer {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
+      } else if (
+        matches(
+          target,
+          `.${VIEWER_CUSTOM_CONTROL_CLASS}, .${VIEWER_CUSTOM_CONTROL_CLASS} *`
+        )
+      ) {
+        this.onViewerControlClick_(dev().assertElement(event.target));
       }
     });
 
@@ -566,8 +593,8 @@ export class SystemLayer {
     });
 
     this.storeService_.subscribe(
-      StateProperty.CUSTOM_CONTROLS,
-      (config) => this.onCustomControls_(config),
+      StateProperty.VIEWER_CUSTOM_CONTROLS,
+      (config) => this.onViewerCustomControls_(config),
       true /* callToInitialize */
     );
   }
@@ -880,8 +907,31 @@ export class SystemLayer {
    */
   onShareClick_(event) {
     event.preventDefault();
+    if (event.target[VIEWER_CONTROL_EVENT_NAME]) {
+      this.onViewerControlClick_(dev().assertElement(event.target));
+      return;
+    }
+
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+  }
+
+  /**
+   * Sends message back to the viewer with the corresponding event.
+   * @param {!Element} element
+   * @private
+   */
+  onViewerControlClick_(element) {
+    const eventName = element[VIEWER_CONTROL_EVENT_NAME];
+
+    this.viewerMessagingHandler_ &&
+      this.viewerMessagingHandler_.send(
+        'documentStateUpdate',
+        dict({
+          'state': AMP_STORY_PLAYER_EVENT,
+          'value': eventName,
+        })
+      );
   }
 
   /**
@@ -915,10 +965,10 @@ export class SystemLayer {
   /**
    * Reacts to a custom configuration change coming from the player level.
    * Updates UI to match configuration described by publisher.
-   * @param {!Array<!Object>} controls
+   * @param {!Array<!../../../src/amp-story-player/amp-story-player-impl.ViewerControlDef>} controls
    * @private
    */
-  onCustomControls_(controls) {
+  onViewerCustomControls_(controls) {
     if (controls.length <= 0) {
       return;
     }
@@ -928,16 +978,25 @@ export class SystemLayer {
         return;
       }
 
-      const defaultConfig = CONTROL_DEFAULTS[control.name];
+      const defaultConfig = VIEWER_CONTROL_DEFAULTS[control.name];
 
-      if (!defaultConfig) {
-        return;
+      let element;
+      if (defaultConfig && defaultConfig.selector) {
+        element = scopedQuerySelector(
+          this.getShadowRoot(),
+          defaultConfig.selector
+        );
+      } else {
+        element = this.win_.document.createElement('button');
+        this.vsync_.mutate(() => {
+          element.classList.add('i-amphtml-story-button');
+          this.buttonsContainer_.appendChild(element);
+        });
       }
 
-      const element = scopedQuerySelector(
-        this.getShadowRoot(),
-        defaultConfig.selector
-      );
+      this.vsync_.mutate(() => {
+        element.classList.add(VIEWER_CUSTOM_CONTROL_CLASS);
+      });
 
       if (control.visibility === 'hidden') {
         this.vsync_.mutate(() => {
@@ -947,7 +1006,15 @@ export class SystemLayer {
 
       if (!control.visibility || control.visibility === 'visible') {
         this.vsync_.mutate(() => {
-          element.classList.remove('i-amphtml-story-ui-hide-button');
+          dev()
+            .assertElement(element)
+            .classList.remove('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (control.state === 'disabled') {
+        this.vsync_.mutate(() => {
+          element.disabled = true;
         });
       }
 
@@ -957,16 +1024,18 @@ export class SystemLayer {
         );
 
         this.vsync_.mutate(() => {
-          element.parentElement.removeChild(element);
+          this.buttonsContainer_.removeChild(element);
           startButtonContainer.appendChild(element);
         });
       }
 
       if (control.backgroundImageUrl) {
         setImportantStyles(dev().assertElement(element), {
-          'background-image': `url(${control.backgroundImageUrl})`,
+          'background-image': `url('${control.backgroundImageUrl}')`,
         });
       }
+
+      element[VIEWER_CONTROL_EVENT_NAME] = `amp-story-player-${control.name}`;
     });
   }
 

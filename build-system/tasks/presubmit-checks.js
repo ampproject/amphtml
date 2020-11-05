@@ -122,6 +122,7 @@ const forbiddenTerms = {
       'build-system/pr-check/dist-bundle-size.js',
       'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/module-dist-bundle-size.js',
+      'build-system/pr-check/esm-tests.js',
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
@@ -332,7 +333,9 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
+      'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
+      'src/element-service.js',
       'src/service.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
@@ -1119,6 +1122,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.setNonBoolean\\(': {
     message: requiresReviewPrivacy,
     allowlist: [
+      'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],

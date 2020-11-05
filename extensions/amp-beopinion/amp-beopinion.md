@@ -95,6 +95,10 @@ serving of ads outside of an `amp-ad` element.
 
 [/filter]<!-- formats="ads" -->
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"BeOpinion content"`.
+
 ## Styling
 
 BeOpinion does not currently provide an API that yields fixed aspect ratio for embedded contents. Currently, AMP automatically proportionally scales the content to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
