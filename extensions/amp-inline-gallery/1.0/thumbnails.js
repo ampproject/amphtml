@@ -84,6 +84,7 @@ export function Thumbnails({
             <img
               className={classes.slide}
               onClick={() => setCurrentSlide(i)}
+              loading="lazy"
               role="button"
               src={thumbnailSrc || ''}
               style={{
