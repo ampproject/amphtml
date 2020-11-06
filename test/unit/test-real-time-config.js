@@ -18,20 +18,20 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
-import {AmpA4A} from '../amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import '../../extensions/amp-ad/0.1/amp-ad';
+import {AmpA4A} from '../../extensions/amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
-} from '../real-time-config-manager';
-import {Services} from '../../../../src/services';
-import {Xhr} from '../../../../src/service/xhr-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {dev, user} from '../../../../src/log';
-import {isFiniteNumber} from '../../../../src/types';
+} from '../../src/service/real-time-config/real-time-config-impl';
+import {Services} from '../../src/services';
+import {Xhr} from '../../src/service/xhr-impl';
+import {createElementWithAttributes} from '../../src/dom';
+import {dev, user} from '../../src/log';
+import {isFiniteNumber} from '../../src/types';
 
-describes.realWin('real-time-config-manager', {amp: true}, (env) => {
+describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;
   let a4aElement;
   let fetchJsonStub;
