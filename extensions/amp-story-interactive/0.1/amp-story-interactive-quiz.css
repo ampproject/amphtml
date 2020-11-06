@@ -38,7 +38,7 @@
   display: flex !important;
   justify-items: start !important;
   align-items: center !important;
-  border-radius: var(--i-amphtml-interactive-chip-radius) !important;
+  border-radius: var(1.649em) !important;
   padding: 0.5em 1em 0.5em 0.5em !important;
   background-color: var(
     --i-amphtml-interactive-option-background-color
