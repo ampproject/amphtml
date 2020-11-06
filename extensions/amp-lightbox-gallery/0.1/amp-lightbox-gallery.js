@@ -838,34 +838,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   shouldAnimateOut_() {
     const target = this.getCurrentElement_().sourceElement;
-    if (!this.transitionTargetIsInViewport_(target)) {
-      return false;
-    }
-    if (!this.elementTypeCanBeAnimated_(target)) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   *
-   * @param {!Element} target
-   * @return {boolean}
-   * @private
-   */
-  transitionTargetIsInViewport_(target) {
-    if (target == this.sourceElement_) {
-      return true;
-    }
-    if (target.isInViewport()) {
-      return true;
-    }
-    const parentCarousel = this.getSourceElementParentCarousel_(target);
-    if (parentCarousel && parentCarousel.isInViewport()) {
-      return true;
-    }
-    return false;
-  }
+    return this.elementTypeCanBeAnimated_(target);
+  } 
 
   /**
    * Transitions the sourceElement into the lightbox or the lightbox to the
