@@ -19,7 +19,6 @@ import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
-import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   toChildArray,
@@ -32,6 +31,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+import {toWin} from '../../../src/types';
 
 /**
  * @enum {string}
@@ -64,7 +64,7 @@ function BaseCarouselWithRef(
     advanceCount = 1,
     arrowPrev,
     arrowNext,
-    autoAdvance = false,
+    autoAdvance: shouldAutoAdvance = false,
     autoAdvanceCount = 1,
     autoAdvanceInterval: customAutoAdvanceInterval = MIN_AUTO_ADVANCE_INTERVAL,
     autoAdvanceLoops = Number.POSITIVE_INFINITY,
@@ -85,6 +85,7 @@ function BaseCarouselWithRef(
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(0);
   const currentSlide = carouselContext.currentSlide ?? currentSlideState;
+  const currentSlideRef = useRef(currentSlide);
   const setCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
   const {setSlideCount} = carouselContext;
@@ -97,47 +98,43 @@ function BaseCarouselWithRef(
     [customAutoAdvanceInterval]
   );
 
-  // Strictly used for autoadvancing.
-  const advance = useCallback(
-    (by, currentSlide) => {
-      // autoAdvanceTimesRef counts number of slide advances, whereas
-      // autoAdvanceLoops limits the number of advancements through the entire
-      // set of slides. Thus, we adjust the limit by the # of slides available.
-      // The visibleCount demarcates the "end" of the slides, i.e. when there
-      // are 5 slides with 3 visible at once, you need only advance twice
-      // ([1][2][3] -> [2][3][4] -> [3][4][5]) to reach the adjusted end.
-      if (
-        autoAdvanceTimesRef.current >=
-        length * autoAdvanceLoops - visibleCount
-      ) {
-        return;
-      }
-      if (loop || currentSlide + visibleCount < length) {
-        scrollRef.current.advance(by); // Advance forward by specified count
-      } else {
-        scrollRef.current.advance(-(length - 1)); // Advance in reverse to first slide
-      }
-      autoAdvanceTimesRef.current += by;
-    },
-    [autoAdvanceLoops, length, loop, visibleCount]
-  );
+  const autoAdvance = useCallback(() => {
+    // autoAdvanceTimesRef counts number of slide advances, whereas
+    // autoAdvanceLoops limits the number of advancements through the entire
+    // set of slides. Thus, we adjust the limit by the # of slides available.
+    // The visibleCount demarcates the "end" of the slides, i.e. when there
+    // are 5 slides with 3 visible at once, you need only advance twice
+    // ([1][2][3] -> [2][3][4] -> [3][4][5]) to reach the adjusted end.
+    if (
+      autoAdvanceTimesRef.current >= length * autoAdvanceLoops - visibleCount ||
+      interaction.current !== Interaction.NONE
+    ) {
+      return false;
+    }
+    if (loop || currentSlideRef.current + visibleCount < length) {
+      scrollRef.current.advance(autoAdvanceCount); // Advance forward by specified count
+    } else {
+      scrollRef.current.advance(-(length - 1)); // Advance in reverse to first slide
+    }
+    autoAdvanceTimesRef.current += autoAdvanceCount;
+    return true;
+  }, [autoAdvanceCount, autoAdvanceLoops, length, loop, visibleCount]);
   const next = useCallback(() => scrollRef.current.next(), []);
   const prev = useCallback(() => scrollRef.current.prev(), []);
 
-  const debouncedAdvance = useMemo(
-    () =>
-      debounce(
-        window,
-        (currentSlide) => {
-          advance(autoAdvanceCount, currentSlide);
-        },
-        autoAdvanceInterval
-      ),
-    [autoAdvanceCount, autoAdvanceInterval, advance]
-  );
-  // Want to call only on first render.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => debouncedAdvance(currentSlide), []);
+  useEffect(() => {
+    if (!shouldAutoAdvance || !containRef.current) {
+      return;
+    }
+    const win = toWin(containRef.current.ownerDocument.defaultView);
+    const interval = win.setInterval(() => {
+      const autoAdvanced = autoAdvance();
+      if (!autoAdvanced) {
+        win.clearInterval(interval);
+      }
+    }, autoAdvanceInterval);
+    return () => win.clearInterval(interval);
+  }, [autoAdvance, autoAdvanceInterval, shouldAutoAdvance]);
 
   const setRestingIndex = useCallback(
     (index) => {
@@ -146,16 +143,12 @@ function BaseCarouselWithRef(
         return;
       }
       setCurrentSlide(index);
+      currentSlideRef.current = index;
       if (onSlideChange) {
         onSlideChange(index);
       }
-
-      // Schedule next autoadvance
-      if (autoAdvance && interaction.current === Interaction.NONE) {
-        debouncedAdvance(index);
-      }
     },
-    [autoAdvance, debouncedAdvance, length, setCurrentSlide, onSlideChange]
+    [length, setCurrentSlide, onSlideChange]
   );
 
   useImperativeHandle(
