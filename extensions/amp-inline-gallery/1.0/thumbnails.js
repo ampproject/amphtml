@@ -18,9 +18,9 @@ import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {px} from '../../../src/style';
-import {toWin} from '../../../src/types';
 import {
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -39,30 +39,31 @@ export function Thumbnails({
   ...rest
 }) {
   const classes = useStyles();
-  const pointerFine = window.matchMedia('(pointer: fine)');
+  const [pointerFine, setPointerFine] = useState(false);
   const ref = useRef(null);
   const [height, setHeight] = useState(0);
   const {slides, setCurrentSlide} = useContext(CarouselContext);
 
+  useEffect(() => {
+    const win = getWin(ref);
+    if (!win) {
+      return;
+    }
+    const mediaQuery = win.matchMedia('(pointer: fine)');
+    setPointerFine(mediaQuery.matches);
+  }, []);
+
   // Adjust slides when container size or aspectRatio changes.
   useLayoutEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-    const node = ref.current.root;
-    if (!node) {
-      return;
-    }
-    // Use local window.
-    const win = toWin(node.ownerDocument.defaultView);
+    const win = getWin(ref);
     if (!win) {
-      return undefined;
+      return;
     }
     const observer = new win.ResizeObserver((entries) => {
       const last = entries[entries.length - 1];
       setHeight(last.contentRect.height);
     });
-    observer.observe(node);
+    observer.observe(ref.current.root);
     return () => observer.disconnect();
   }, [aspectRatio, height]);
 
@@ -97,4 +98,19 @@ export function Thumbnails({
         })}
     </BaseCarousel>
   );
+}
+
+/**
+ * @param {{current: (null|{root: Element})}} ref
+ * @return {Window|undefined}
+ */
+function getWin(ref) {
+  if (!ref.current) {
+    return;
+  }
+  const node = ref.current.root;
+  if (!node) {
+    return;
+  }
+  return node.ownerDocument.defaultView;
 }
