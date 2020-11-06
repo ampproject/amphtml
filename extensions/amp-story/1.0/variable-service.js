@@ -121,7 +121,7 @@ export class AmpStoryVariableService {
           .length;
         if (numberOfPages > 0) {
           this.variables_[AnalyticsVariable.STORY_PROGRESS] =
-            pageIndex / numberOfPages;
+            pageIndex / (numberOfPages - 1);
         }
       },
       true /* callToInitialize */
