@@ -45,6 +45,7 @@ stages:
   - name: build
   - name: test
   - name: experiment
+  - name: bundlesize
     if: type = push
 jobs:
   include:
@@ -61,13 +62,13 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: 'Dist, Bundle Size'
+      name: 'Nomodule Dist'
       script:
-        - unbuffer node build-system/pr-check/dist-bundle-size.js
+        - unbuffer node build-system/pr-check/nomodule-dist.js
     - stage: build
-      name: 'Module Dist, Bundle Size'
+      name: 'Module Dist'
       script:
-        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
+        - unbuffer node build-system/pr-check/module-dist.js
     - stage: test
       name: 'Visual Diff Tests'
       script:
@@ -104,6 +105,10 @@ jobs:
       name: 'Performance Tests'
       script:
         - unbuffer node build-system/pr-check/performance-tests.js
+    - stage: bundlesize
+      name: 'Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/bundle-size.js
   allow_failures:
     - script: unbuffer node build-system/pr-check/performance-tests.js # See #28148
   fast_finish: true

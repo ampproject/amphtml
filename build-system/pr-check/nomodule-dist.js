@@ -17,8 +17,8 @@
 
 /**
  * @fileoverview
- * This script builds the minified AMP runtime and runs the bundle size check.
- * This is run during the CI stage = build; job = dist, bundle size.
+ * This script builds the minified AMP runtime.
+ * This is run during the CI stage = build; job = Nomodule Dist.
  */
 
 const colors = require('ansi-colors');
@@ -37,7 +37,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 const {runNpmChecks} = require('./npm-checks');
 const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const FILENAME = 'dist-bundle-size.js';
+const FILENAME = 'nomodule-dist.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -51,7 +51,6 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting');
-    timedExecOrDie('gulp bundle-size --on_push_build');
     uploadDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
@@ -75,16 +74,14 @@ async function main() {
         return;
       }
 
-      timedExecOrDie('gulp bundle-size --on_pr_build');
       timedExecOrDie('gulp storybook --build');
       await processAndUploadDistOutput(FILENAME);
     } else {
-      timedExecOrDie('gulp bundle-size --on_skipped_build');
       await signalDistUpload('skipped');
 
       console.log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Dist, Bundle Size'),
+        colors.cyan('Nomodule Dist'),
         'because this commit does not affect the runtime, flag configs,',
         'integration tests, end-to-end tests, or visual diff tests.'
       );

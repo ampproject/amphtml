@@ -17,8 +17,8 @@
 
 /**
  * @fileoverview
- * This script builds the esm minified AMP runtime and runs the bundle size check.
- * This is run during the CI stage = build; job = module dist, bundle size.
+ * This script builds the esm minified AMP runtime.
+ * This is run during the CI stage = build; job = Module Dist.
  */
 
 const colors = require('ansi-colors');
@@ -34,7 +34,7 @@ const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {runNpmChecks} = require('./npm-checks');
 
-const FILENAME = 'module-dist-bundle-size.js';
+const FILENAME = 'module-dist.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -48,7 +48,6 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --esm --fortesting');
-    // TODO(#27703): Run bundle size check (--on_push_build)
     uploadEsmDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
@@ -56,12 +55,11 @@ function main() {
     if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --esm --fortesting');
-      // TODO(#27703): Run bundle size check (--on_pr_build)
       uploadEsmDistOutput(FILENAME);
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Dist, Bundle Size'),
+        colors.cyan('Module Dist'),
         'because this commit does not affect the runtime or flag configs.'
       );
     }
