@@ -370,7 +370,7 @@ describe
           });
         });
 
-        it.skip('should do simple JSON fetch', () => {
+        it('should do simple JSON fetch', () => {
           window.sandbox.stub(user(), 'assert');
           return xhr
             .fetchJson(`${baseUrl}/get?k=v1`)

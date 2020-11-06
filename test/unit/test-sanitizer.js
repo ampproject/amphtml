@@ -331,10 +331,7 @@ function runSanitizerTests() {
       );
     });
 
-    // TODO(choumx): HTTPS-only URI attributes are not enforced consistently
-    // in the sanitizer yet. E.g. amp-video requires HTTPS, amp-img does not.
-    // Unskip when this is fixed.
-    it.skip('should not allow source::src with invalid protocol', () => {
+    it('should not allow source::src with invalid protocol', () => {
       expect(sanitize('<source src="http://www.foo.com">')).to.equal(
         '<source src="">'
       );
