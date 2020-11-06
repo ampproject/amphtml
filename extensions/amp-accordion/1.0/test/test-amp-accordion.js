@@ -307,7 +307,6 @@ describes.realWin(
       }
 
       it('should fire events on click', async () => {
-        //const sections = element.children;
         const section1 = element.children[0];
         const section2 = element.children[1];
         const section3 = element.children[2];
@@ -334,7 +333,6 @@ describes.realWin(
       });
 
       it('should fire events on API toggle', async () => {
-        //const sections = element.children;
         const section1 = element.children[0];
         const section2 = element.children[1];
         const section3 = element.children[2];
@@ -370,11 +368,12 @@ describes.realWin(
         element.enqueAction(invocation('toggle'));
         await waitForExpanded(section1, true);
 
-        // Toggle all toggles all sections
-        // TODO: Confirm this behavior
+        // Section 3 closed on initial toggle
+        // Then section 3 opened based on section 2 opening
+        // Then section 2 closed based on section 3's initial close
         expect(section1).to.have.attribute('expanded');
-        expect(section2).to.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
       });
     });
 

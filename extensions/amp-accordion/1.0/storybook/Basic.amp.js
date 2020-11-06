@@ -109,6 +109,7 @@ export const events = () => {
         <button on={createApiString('collapse', 'section3')}>
           collapse(section3)
         </button>
+        <button on={createApiString('toggle')}>toggle all</button>
       </div>
     </main>
   );

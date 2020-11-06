@@ -130,6 +130,7 @@ function AccordionWithEvents(props) {
         <button onClick={() => ref.current./*OK*/ collapse('section3')}>
           collapse(section3)
         </button>
+        <button onClick={() => ref.current./*OK*/ toggle()}>toggle all</button>
       </div>
     </section>
   );

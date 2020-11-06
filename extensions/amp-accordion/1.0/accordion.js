@@ -100,16 +100,33 @@ function AccordionWithRef(
 
   const toggleExpanded = useCallback(
     (id) => {
-      let newValue;
       setExpandedMap((expandedMap) => {
-        newValue = !expandedMap[id];
+        const newExpandedMap = setExpanded(
+          id,
+          !expandedMap[id],
+          expandedMap,
+          expandSingleSection
+        );
+
+        // Create a map of all the changed sections
+        const changedValues = {};
+        for (const k in expandedMap) {
+          if (expandedMap[k] != newExpandedMap[k]) {
+            changedValues[k] = newExpandedMap[k];
+          }
+        }
+
+        // Schedule a single microtask to fire events for
+        // all changed sections (order not defined)
         Promise.resolve().then(() => {
-          const onExpandStateChange = eventMap.current[id];
-          if (onExpandStateChange) {
-            onExpandStateChange(newValue);
+          for (const k in changedValues) {
+            const onExpandStateChange = eventMap.current[k];
+            if (onExpandStateChange) {
+              onExpandStateChange(changedValues[k]);
+            }
           }
         });
-        return setExpanded(id, newValue, expandedMap, expandSingleSection);
+        return newExpandedMap;
       });
     },
     [expandSingleSection]
@@ -276,13 +293,16 @@ export function AccordionSection({
     return () => (hasMountedRef.current = false);
   }, []);
 
-  const sectionPropsRef = useRef(
+  // Storying this state change callback in a ref because this may change
+  // frequently and we do not want to trigger a re-register of the section
+  // each time  the callback is updated
+  const onExpandStateChangeRef = useRef(
     /** @type {?function(boolean):undefined|undefined} */ (null)
   );
-  sectionPropsRef.current = onExpandStateChange;
+  onExpandStateChangeRef.current = onExpandStateChange;
   useLayoutEffect(() => {
     if (registerSection) {
-      return registerSection(id, defaultExpanded, sectionPropsRef);
+      return registerSection(id, defaultExpanded, onExpandStateChangeRef);
     }
   }, [registerSection, id, defaultExpanded]);
 
@@ -290,7 +310,15 @@ export function AccordionSection({
     if (toggleExpanded) {
       toggleExpanded(id);
     } else {
-      setExpandedState((prev) => !prev);
+      setExpandedState((prev) => {
+        Promise.resolve().then(() => {
+          const onExpandStateChange = onExpandStateChangeRef.current;
+          if (onExpandStateChange) {
+            onExpandStateChange(!prev);
+          }
+        });
+        return !prev;
+      });
     }
   }, [id, toggleExpanded]);
 

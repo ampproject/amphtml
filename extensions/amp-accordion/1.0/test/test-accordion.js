@@ -17,6 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {Accordion, AccordionSection} from '../accordion';
 import {mount} from 'enzyme';
+import {waitFor} from '../../../../testing/test-helper';
 
 describes.sandboxed('Accordion preact component', {}, (env) => {
   describe('standalone accordion section', () => {
@@ -492,21 +493,37 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
       // Expand
       sections.at(1).find('header').simulate('click');
+      await waitFor(
+        () => onExpandStateChange.callCount == 1,
+        'event callback called'
+      );
       expect(onExpandStateChange.callCount).to.equal(1);
       expect(onExpandStateChange.args[0][0]).to.be.true;
 
       // Collapse
       sections.at(1).find('header').simulate('click');
+      await waitFor(
+        () => onExpandStateChange.callCount == 2,
+        'event callback called'
+      );
       expect(onExpandStateChange.callCount).to.equal(2);
       expect(onExpandStateChange.args[1][0]).to.be.false;
 
       // Expand
       sections.at(1).find('header').simulate('click');
+      await waitFor(
+        () => onExpandStateChange.callCount == 3,
+        'event callback called'
+      );
       expect(onExpandStateChange.callCount).to.equal(3);
       expect(onExpandStateChange.args[2][0]).to.be.true;
 
       // Collapse
       sections.at(1).find('header').simulate('click');
+      await waitFor(
+        () => onExpandStateChange.callCount == 4,
+        'event callback called'
+      );
       expect(onExpandStateChange.callCount).to.equal(4);
       expect(onExpandStateChange.args[3][0]).to.be.false;
     });
@@ -515,24 +532,40 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       // Expand All
       ref.current.toggle();
       wrapper.update();
+      await waitFor(
+        () => onExpandStateChange.callCount == 1,
+        'event callback called'
+      );
       expect(onExpandStateChange.callCount).to.equal(1);
       expect(onExpandStateChange.args[0][0]).to.be.true;
 
       // Collapse All
       ref.current.collapse();
       wrapper.update();
+      await waitFor(
+        () => onExpandStateChange.callCount == 2,
+        'event callback called'
+      );
       expect(onExpandStateChange.callCount).to.equal(2);
       expect(onExpandStateChange.args[1][0]).to.be.false;
 
       // Collapsing an already collapsed section should do nothing
       ref.current.collapse('section2');
       wrapper.update();
+      await waitFor(
+        () => onExpandStateChange.callCount == 2,
+        'event callback called'
+      );
       expect(onExpandStateChange.callCount).to.equal(2);
       expect(onExpandStateChange.args[1][0]).to.be.false;
 
       // Expand All
       ref.current.expand();
       wrapper.update();
+      await waitFor(
+        () => onExpandStateChange.callCount == 3,
+        'event callback called'
+      );
       expect(onExpandStateChange.callCount).to.equal(3);
       expect(onExpandStateChange.args[2][0]).to.be.true;
     });
