@@ -70,10 +70,5 @@ export function renderIcon(win, elOrDoc) {
   // Remove seed column.
   removeElement(firstCol);
 
-  if (Services.platformFor(win).isIos()) {
-    // iOS is unable to pause hardware accelerated animations.
-    icon.setAttribute('unpausable', '');
-  }
-
   return icon;
 }
