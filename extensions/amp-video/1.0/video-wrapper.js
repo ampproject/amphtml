@@ -208,6 +208,7 @@ function VideoWrapperWithRef(
       </Component>
       {autoplay && !hasUserInteracted && (
         <Autoplay
+          metadata={metadata}
           playing={playing}
           displayIcon={!noaudio && muted}
           wrapperRef={wrapperRef}
@@ -226,6 +227,7 @@ function VideoWrapperWithRef(
  * @return {PreactDef.Renderable}
  */
 function Autoplay({
+  metadata,
   displayIcon,
   playing,
   displayOverlay,
@@ -267,11 +269,13 @@ function Autoplay({
       )}
 
       {displayOverlay && (
-        <div
-          role="button"
+        <button
+          aria-label={(metadata && metadata.title) || 'Unmute video'}
+          tabindex="0"
+          className={classes.autoplayMaskButton}
           style={fillContentOverlay}
           onClick={onOverlayClick}
-        ></div>
+        ></button>
       )}
     </>
   );
