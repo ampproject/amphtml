@@ -41,7 +41,7 @@ export function renderInteractionOverlay(elOrDoc, metadata) {
       tabindex="0"
     ></button>
   `;
-  if (metadata?.title) {
+  if (metadata && metadata.title) {
     element.setAttribute('aria-label', metadata.title);
   }
   return element;
