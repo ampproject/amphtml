@@ -183,3 +183,5 @@ if (shouldMainBootstrapRun) {
     internalRuntimeVersion()
   );
 }
+
+console./*OK*/ log('trigger bundle size');
