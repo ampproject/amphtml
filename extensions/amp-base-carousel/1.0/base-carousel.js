@@ -99,14 +99,12 @@ function BaseCarouselWithRef(
   );
 
   const autoAdvance = useCallback(() => {
-    // autoAdvanceTimesRef counts number of slide advances, whereas
-    // autoAdvanceLoops limits the number of advancements through the entire
-    // set of slides. Thus, we adjust the limit by the # of slides available.
-    // The visibleCount demarcates the "end" of the slides, i.e. when there
-    // are 5 slides with 3 visible at once, you need only advance twice
-    // ([1][2][3] -> [2][3][4] -> [3][4][5]) to reach the adjusted end.
+    // Count autoadvance loops as times we have reached the last visible slide.
+    if (currentSlideRef.current >= length - visibleCount) {
+      autoAdvanceTimesRef.current += 1;
+    }
     if (
-      autoAdvanceTimesRef.current >= length * autoAdvanceLoops - visibleCount ||
+      autoAdvanceTimesRef.current == autoAdvanceLoops ||
       interaction.current !== Interaction.NONE
     ) {
       return false;
@@ -116,7 +114,6 @@ function BaseCarouselWithRef(
     } else {
       scrollRef.current.advance(-(length - 1)); // Advance in reverse to first slide
     }
-    autoAdvanceTimesRef.current += autoAdvanceCount;
     return true;
   }, [autoAdvanceCount, autoAdvanceLoops, length, loop, visibleCount]);
   const next = useCallback(() => scrollRef.current.next(), []);
