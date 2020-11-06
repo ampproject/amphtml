@@ -396,7 +396,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, (env) => {
   });
 
   // TODO(zhouyx, #12476): Make this test work with sinon 4.0.
-  it.skip('should center the fixed container properly', function* () {
+  it('should center the fixed container properly', function* () {
     const w = 120;
     const h = 90;
 
