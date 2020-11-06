@@ -45,8 +45,8 @@ stages:
   - name: build
   - name: test
   - name: experiment
-  - name: bundlesize
     if: type = push
+  - name: bundlesize
 jobs:
   include:
     - stage: build

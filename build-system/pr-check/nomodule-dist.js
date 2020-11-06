@@ -68,7 +68,7 @@ async function main() {
       const process = timedExecWithError('gulp dist --fortesting', FILENAME);
       if (process.status !== 0) {
         const error = process.error || new Error('unknown error, check logs');
-        console.log(colors.red('ERROR'), colors.yellow(error.message));
+        console./*OK*/ log(colors.red('ERROR'), colors.yellow(error.message));
         await signalDistUpload('errored');
         stopTimedJob(FILENAME, startTime);
         return;
@@ -79,7 +79,7 @@ async function main() {
     } else {
       await signalDistUpload('skipped');
 
-      console.log(
+      console./*OK*/ log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Nomodule Dist'),
         'because this commit does not affect the runtime, flag configs,',

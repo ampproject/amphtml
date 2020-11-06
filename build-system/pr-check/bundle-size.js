@@ -59,7 +59,7 @@ async function main() {
       downloadEsmDistOutput(FILENAME);
       timedExecOrDie('gulp bundle-size --on_skipped_build');
     } else {
-      console.log(
+      console./*OK*/ log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Bundle Size'),
         'because this commit does not affect the runtime or flag configs.'

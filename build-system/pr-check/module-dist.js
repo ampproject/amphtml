@@ -57,7 +57,7 @@ function main() {
       timedExecOrDie('gulp dist --esm --fortesting');
       uploadEsmDistOutput(FILENAME);
     } else {
-      console.log(
+      console./*OK*/ log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Module Dist'),
         'because this commit does not affect the runtime or flag configs.'
