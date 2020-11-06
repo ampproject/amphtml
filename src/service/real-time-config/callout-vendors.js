@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getMode} from '../../../src/mode';
-import {jsonConfiguration} from '../../../src/json';
+import {getMode} from '../../mode';
+import {jsonConfiguration} from '../../json';
 
 //////////////////////////////////////////////////////////////////
 //                                                              //
