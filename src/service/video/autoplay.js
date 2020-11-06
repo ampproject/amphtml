@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from '../../services';
 import {dev} from '../../log';
 import {htmlFor} from '../../static-template';
 import {removeElement} from '../../dom';
@@ -69,11 +68,6 @@ export function renderIcon(win, elOrDoc) {
 
   // Remove seed column.
   removeElement(firstCol);
-
-  if (Services.platformFor(win).isIos()) {
-    // iOS is unable to pause hardware accelerated animations.
-    icon.setAttribute('unpausable', '');
-  }
 
   return icon;
 }
