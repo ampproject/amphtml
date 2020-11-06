@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../consent-state';
 import {RTC_VENDORS} from './callout-vendors';
-import {Services} from '../../../src/services';
-import {dev, user, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
-import {isCancellation} from '../../../src/error';
-import {tryParseJson} from '../../../src/json';
+import {Services} from '../../services';
+import {dev, user, userAssert} from '../../log';
+import {getMode} from '../../mode';
+import {isArray, isObject} from '../../types';
+import {isCancellation} from '../../error';
+import {tryParseJson} from '../../json';
 
 /** @type {string} */
 const TAG = 'real-time-config';
@@ -30,10 +30,6 @@ const MAX_RTC_CALLOUTS = 5;
 
 /** @type {number} */
 const MAX_URL_LENGTH = 16384;
-
-/** @type {boolean} */
-const ERROR_REPORTING_ENABLED =
-  getMode(window).localDev || getMode(window).test || Math.random() < 0.01;
 
 /** @typedef {{
     urls: (undefined|Array<string>|
@@ -77,10 +73,10 @@ export const RTC_ERROR_ENUM = {
 
 export class RealTimeConfigManager {
   /**
-   * @param {!./amp-a4a.AmpA4A} a4aElement
+   * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4aElement
    */
   constructor(a4aElement) {
-    /** @private {!./amp-a4a.AmpA4A} */
+    /** @private {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} */
     this.a4aElement_ = a4aElement;
 
     /** @private {!Window} */
@@ -134,7 +130,11 @@ export class RealTimeConfigManager {
    * @param {string} errorReportingUrl
    */
   sendErrorMessage(errorType, errorReportingUrl) {
-    if (!ERROR_REPORTING_ENABLED) {
+    if (
+      !getMode(this.win_).localDev &&
+      !getMode(this.win_).test &&
+      Math.random() >= 0.01
+    ) {
       return;
     }
     const allowlist = {ERROR_TYPE: true, HREF: true};
