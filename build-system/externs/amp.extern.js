@@ -647,7 +647,7 @@ AMP.RealTimeConfigManager;
 
 /**
  * Actual filled values for this exists in
- * extensions/amp-a4a/0.1/real-time-config-manager.js
+ * src/service/real-time-config/real-time-config-impl.js
  * @enum {string}
  */
 const RTC_ERROR_ENUM = {};
