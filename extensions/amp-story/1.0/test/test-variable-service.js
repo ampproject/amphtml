@@ -47,4 +47,15 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
     const variables = variableService.get();
     expect(variables['storyAdvancementMode']).to.equal('manualAdvance');
   });
+
+  it('should calculate storyProgress correctly on change', () => {
+    storeService.dispatch(Action.SET_PAGE_IDS, ['a', 'b', 'c', 'd', 'e']);
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'd',
+      index: 3,
+    });
+
+    const variables = variableService.get();
+    expect(variables['storyProgress']).to.equal(0.75);
+  });
 });
