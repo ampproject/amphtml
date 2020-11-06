@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from '../../services';
 import {dev} from '../../log';
 import {htmlFor} from '../../static-template';
 import {removeElement} from '../../dom';
