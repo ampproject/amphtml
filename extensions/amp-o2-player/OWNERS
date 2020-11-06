@@ -5,10 +5,14 @@
   rules: [
     {
       owners: [
-        {name: 'aharoyairncohen'},
+        {name: 'adeolaawoyemi'},
         {name: 'arielginsburg'},
+        {name: 'aharoyairncohen'},
         {name: 'lironka'},
         {name: 'adir-kandel-vzm'},
+        {name: 'batsheva-evers'},
+        {name: 'sganti16'},
+        {name: 'akathuria'},
         {name: 'ampproject/wg-components'},
       ],
     },
