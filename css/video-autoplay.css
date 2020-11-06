@@ -77,12 +77,6 @@ amp-story .amp-video-eq {
 .amp-video-eq-col div {
   animation-play-state: paused;
 }
-[unpausable] .amp-video-eq-col div {
-  animation-name: none;
-}
-[unpausable].amp-video-eq-play .amp-video-eq-col div {
-  animation-name: amp-video-eq-animation;
-}
 .amp-video-eq-play .amp-video-eq-col div {
   animation-play-state: running;
 }
