@@ -60,6 +60,7 @@ VideoWrapperDef.Props;
 
 /**
  * @typedef {{
+ *   metadata: ?Object,
  *   displayIcon: boolean,
  *   playing: boolean,
  *   displayOverlay: boolean,
