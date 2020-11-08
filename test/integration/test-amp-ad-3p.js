@@ -211,7 +211,7 @@ describe('amp-ad 3P', () => {
         });
         lastIO = null;
 
-        // Ad is partially visible (around 50%)
+        // Ad is partially visible (around 50%) test
         fixture.win.scrollTo(0, 1125);
         fixture.win.dispatchEvent(
           createCustomEvent(fixture.win, 'scroll', null)
