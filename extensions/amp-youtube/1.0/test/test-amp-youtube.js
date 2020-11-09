@@ -19,7 +19,6 @@ import {
   createElementWithAttributes,
   waitForChildPromise,
 } from '../../../../src/dom';
-import {waitFor} from '../../../../testing/test-helper';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.realWin(
