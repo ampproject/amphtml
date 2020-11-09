@@ -109,6 +109,7 @@
   padding-left: 1em !important;
   margin-left: auto !important;
   visibility: hidden !important;
+  flex-shrink: 0 !important;
 }
 
 .i-amphtml-story-interactive-quiz-option:not(.i-amphtml-story-interactive-option-selected) .i-amphtml-story-interactive-quiz-percentage-text {
