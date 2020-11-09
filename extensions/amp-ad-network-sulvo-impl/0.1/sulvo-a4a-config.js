@@ -17,9 +17,9 @@
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {boolean} useRemoteHtml
+ * @param {boolean} unusedUseRemoteHtml
  * @return {boolean}
  */
-export function sulvoIsA4AEnabled(win, element, useRemoteHtml) {
+export function sulvoIsA4AEnabled(win, element, unusedUseRemoteHtml) {
   return !!element.getAttribute('data-ad');
 }

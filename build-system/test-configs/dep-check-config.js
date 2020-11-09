@@ -195,6 +195,7 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-sulvo-impl/0.1/amp-ad-network-sulvo-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-sulvo-impl/0.1/sra-utils.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // And a few mrore things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
@@ -205,6 +206,8 @@ exports.rules = [
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
+      'extensions/amp-ad-network-sulvo-impl/0.1/amp-ad-network-sulvo-impl.js->extensions/amp-a4a/0.1/callout-vendors.js',
+      'extensions/amp-ad-network-sulvo-impl/0.1/amp-ad-network-sulvo-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
 
       // AMP access depends on AMP access
       'extensions/amp-access-scroll/0.1/scroll-impl.js->extensions/amp-access/0.1/amp-access-client.js',
@@ -212,6 +215,7 @@ exports.rules = [
       // Ads needs concurrent loading
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
+      'extensions/amp-ad-network-sulvo-impl/0.1/amp-ad-network-sulvo-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-ad/0.1/concurrent-load.js',
 
       // Ads needs iframe transports
@@ -375,6 +379,8 @@ exports.rules = [
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->' +
         'src/service/navigation.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->' +
+        'src/service/navigation.js',
+      'extensions/amp-ad-network-sulvo-impl/0.1/amp-ad-network-sulvo-impl.js->' +
         'src/service/navigation.js',
       'extensions/amp-mowplayer/0.1/amp-mowplayer.js->' +
         'src/service/video-manager-impl.js',

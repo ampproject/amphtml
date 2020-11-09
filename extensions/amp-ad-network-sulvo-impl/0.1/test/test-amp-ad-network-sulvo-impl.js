@@ -21,9 +21,8 @@ import {AmpAdNetworkSulvoImpl} from '../../../amp-ad-network-sulvo-impl/0.1/amp-
 import {sulvoIsA4AEnabled} from '../../../amp-ad-network-sulvo-impl/0.1/sulvo-a4a-config';
 
 describes.realWin('sulvo-a4a-config', {amp: false}, (env) => {
-  
   let win, doc;
-  
+
   beforeEach(() => {
     win = env.win;
     doc = win.document;
@@ -31,7 +30,7 @@ describes.realWin('sulvo-a4a-config', {amp: false}, (env) => {
 
   it('should pass a4a config', () => {
     const element = createElementWithAttributes(doc, 'amp-ad', {
-      'data-ad': 'sulvo_test_unit' 
+      'data-ad': 'sulvo_test_unit',
     });
     expect(sulvoIsA4AEnabled(win, element)).to.be.true;
   });
@@ -69,14 +68,14 @@ describes.realWin(
           .returns(
             Promise.resolve({
               json() {
-                return Promise.resolve({ 'data-slot': 'abc/123/' });
+                return Promise.resolve({'data-slot': 'abc/123/'});
               },
             })
           );
 
         impl = new AmpAdNetworkSulvoImpl(element);
       });
-    
+
       it('returns the right URL', () => {
         const viewer = Services.viewerForDoc(element);
         env.sandbox
@@ -125,6 +124,5 @@ describes.realWin(
         });
       });
     });
-
   }
 );
