@@ -15,9 +15,9 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-selector',
@@ -148,4 +148,25 @@ export const Responsive = () => {
 
 Responsive.story = {
   name: 'responsive',
+};
+
+export const keyboardSelectMode = () => {
+  const keyboardSelectMode = select(
+    'keyboard select mode',
+    ['none', 'focus', 'select'],
+    'focus'
+  );
+  return (
+    <amp-selector
+      keyboard-select-mode={keyboardSelectMode}
+      aria-label="Option menu"
+    >
+      <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+        <li option="4">Option 4</li>
+      </ul>
+    </amp-selector>
+  );
 };
