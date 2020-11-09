@@ -32,8 +32,8 @@ export default {
 export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
-  const createApiString = (action, section) =>
-    `tap:accordion.${action}(${section ? `section='${section}'` : ''})`;
+  const createApiString = (on, action, section) =>
+    `${on}:accordion.${action}(${section ? `section='${section}'` : ''})`;
   return (
     <main>
       <amp-accordion
@@ -56,18 +56,18 @@ export const _default = () => {
       </amp-accordion>
 
       <div class="buttons" style={{marginTop: 8}}>
-        <button on={createApiString('toggle', 'section1')}>
+        <button on={createApiString('tap', 'toggle', 'section1')}>
           toggle(section1)
         </button>
-        <button on={createApiString('toggle')}>toggle all</button>
-        <button on={createApiString('expand', 'section1')}>
+        <button on={createApiString('tap', 'toggle')}>toggle all</button>
+        <button on={createApiString('tap', 'expand', 'section1')}>
           expand(section1)
         </button>
-        <button on={createApiString('expand')}>expand all</button>
-        <button on={createApiString('collapse', 'section1')}>
+        <button on={createApiString('tap', 'expand')}>expand all</button>
+        <button on={createApiString('tap', 'collapse', 'section1')}>
           collapse(section1)
         </button>
-        <button on={createApiString('collapse')}>collapse all</button>
+        <button on={createApiString('tap', 'collapse')}>collapse all</button>
       </div>
     </main>
   );
@@ -76,8 +76,8 @@ export const _default = () => {
 export const events = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
-  const createApiString = (action, section) =>
-    `tap:accordion.${action}(${section ? `section='${section}'` : ''})`;
+  const createApiString = (on, action, section) =>
+    `${on}:accordion.${action}(${section ? `section='${section}'` : ''})`;
   return (
     <main>
       <amp-accordion
@@ -89,13 +89,16 @@ export const events = () => {
           <h2>Section 1</h2>
           <p>Content in section 1.</p>
         </section>
-        <section id="section2" on="expand:accordion.expand(section='section3')">
+        <section
+          id="section2"
+          on={createApiString('expand', 'expand', 'section3')}
+        >
           <h2>Section 2</h2>
           <div>Content in section 2.</div>
         </section>
         <section
           id="section3"
-          on="collapse:accordion.collapse(section='section2')"
+          on={createApiString('collapse', 'collapse', 'section2')}
         >
           <h2>Section 3</h2>
           <div>Content in section 3.</div>
@@ -103,13 +106,13 @@ export const events = () => {
       </amp-accordion>
 
       <div class="buttons" style={{marginTop: 8}}>
-        <button on={createApiString('expand', 'section2')}>
+        <button on={createApiString('tap', 'expand', 'section2')}>
           expand(section2)
         </button>
-        <button on={createApiString('collapse', 'section3')}>
+        <button on={createApiString('tap', 'collapse', 'section3')}>
           collapse(section3)
         </button>
-        <button on={createApiString('toggle')}>toggle all</button>
+        <button on={createApiString('tap', 'toggle')}>toggle all</button>
       </div>
     </main>
   );
