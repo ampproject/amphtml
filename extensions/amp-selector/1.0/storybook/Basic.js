@@ -32,9 +32,39 @@ const imgStyle = {
   margin: '2px',
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function SelectorWithActions(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <Selector ref={ref} {...props} />
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current./*OK*/ toggle(1)}>
+          toggle(option at index 1)
+        </button>
+        <button onClick={() => ref.current./*OK*/ toggle(1, false)}>
+          deselect (option at index 1)
+        </button>
+        <button onClick={() => ref.current./*OK*/ clear()}>clear all</button>
+        <button onClick={() => ref.current./*OK*/ selectBy(-2)}>
+          select up by 2
+        </button>
+        <button onClick={() => ref.current./*OK*/ selectBy(1)}>
+          select down by 1
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export const listItems = () => {
   return (
-    <Selector aria-label="Image menu">
+    <SelectorWithActions aria-label="Image menu">
       <Option
         as="img"
         alt="Sea landscape"
@@ -65,7 +95,7 @@ export const listItems = () => {
         src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
         option="4"
       ></Option>
-    </Selector>
+    </SelectorWithActions>
   );
 };
 
