@@ -47,6 +47,9 @@ function SelectorWithActions(props) {
         <button onClick={() => ref.current./*OK*/ toggle(1)}>
           toggle(option at index 1)
         </button>
+        <button onClick={() => ref.current./*OK*/ toggle(1, true)}>
+          select (option at index 1)
+        </button>
         <button onClick={() => ref.current./*OK*/ toggle(1, false)}>
           deselect (option at index 1)
         </button>
@@ -64,7 +67,7 @@ function SelectorWithActions(props) {
 
 export const listItems = () => {
   return (
-    <SelectorWithActions aria-label="Image menu">
+    <SelectorWithActions multiple aria-label="Image menu">
       <Option
         as="img"
         alt="Sea landscape"

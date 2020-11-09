@@ -116,7 +116,11 @@ function SelectorWithRef(
   const toggle = useCallback(
     (index, select) => {
       const option = options[index];
-      const shouldSelect = select != false && !selected.includes(option);
+      const isSelected = selected.includes(option);
+      if (select && isSelected) {
+        return;
+      }
+      const shouldSelect = select ?? !isSelected;
       if (shouldSelect) {
         selectOption(option);
       } else {
