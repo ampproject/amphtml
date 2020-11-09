@@ -73,6 +73,7 @@ const autoplayMaskButton = {
   appearance: 'none',
   background: 'transparent',
   border: 'none',
+  width: '100%',
 };
 
 const JSS = {

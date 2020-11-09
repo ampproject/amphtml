@@ -1194,6 +1194,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-video-iframe',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-viqeo-player',
     version: '0.1',
     latestVersion: '0.1',

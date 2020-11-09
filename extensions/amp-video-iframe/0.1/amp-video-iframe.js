@@ -63,7 +63,7 @@ const SANDBOX = [
  * Events allowed to be dispatched from messages.
  * @private @const
  */
-const ALLOWED_EVENTS = [
+export const BUBBLE_MESSAGE_EVENTS = [
   VideoEvents.PLAYING,
   VideoEvents.PAUSE,
   VideoEvents.ENDED,
@@ -326,7 +326,7 @@ class AmpVideoIframe extends AMP.BaseElement {
       return;
     }
 
-    if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
+    if (BUBBLE_MESSAGE_EVENTS.indexOf(eventReceived) > -1) {
       this.element.dispatchCustomEvent(eventReceived);
       return;
     }
