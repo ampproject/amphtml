@@ -53,6 +53,10 @@ describes.sandboxed('Selector preact component', {}, () => {
       );
     });
 
+    afterEach(() => {
+      wrapper.unmount();
+    });
+
     it('should render all options', () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
@@ -219,6 +223,287 @@ describes.sandboxed('Selector preact component', {}, () => {
 
       // Expanded state.
       expect(options.at(0).getDOMNode()).to.have.attribute('selected');
+    });
+  });
+
+  describe('imperative api', () => {
+    let wrapper;
+    let ref;
+
+    let option0;
+    let option1;
+    let disabledOption;
+
+    describe('multi-select selector', () => {
+      beforeEach(() => {
+        ref = Preact.createRef();
+        wrapper = mount(
+          <Selector ref={ref} multiple defaultValue={['a']}>
+            <Option key={1} option="a">
+              option a
+            </Option>
+            <Option key={2} option="b">
+              option b
+            </Option>
+            <Option key={3} option="c" disabled>
+              option c
+            </Option>
+          </Selector>
+        );
+
+        const options = wrapper.find(Option);
+        option0 = options.at(0).getDOMNode();
+        option1 = options.at(1).getDOMNode();
+        disabledOption = options.at(2).getDOMNode();
+      });
+
+      afterEach(() => {
+        wrapper.unmount();
+      });
+
+      it('toggle one option', () => {
+        ref.current.toggle(/* index */ 1);
+        wrapper.update();
+
+        // Second option is toggled.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.toggle(/* index */ 0);
+        wrapper.update();
+
+        // First option is toggled.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('force toggle one option', () => {
+        ref.current.toggle(/* index */ 1, /* force */ true);
+        wrapper.update();
+
+        // Second option is selected.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.toggle(/* index */ 1, /* force */ true);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('force toggle disabled option does nothing', () => {
+        ref.current.toggle(/* index */ 2, /* force */ true);
+        wrapper.update();
+
+        // Disabled option cannot be selected.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.toggle(/* index */ 2, /* force */ true);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('clear all options', async () => {
+        // First option is selected by default.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.clear();
+        wrapper.update();
+
+        // No options are selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('select by delta', async () => {
+        // First option is selected by default.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Next option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Try to select next option (disabled).
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(-1);
+        wrapper.update();
+
+        // Previous option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(0);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+    });
+
+    describe('single-expand accordion', () => {
+      beforeEach(() => {
+        ref = Preact.useRef();
+        wrapper = mount(
+          <Selector ref={ref} defaultValue={['a']}>
+            <Option key={1} option="a">
+              option a
+            </Option>
+            <Option key={2} option="b">
+              option b
+            </Option>
+            <Option key={3} option="c" disabled>
+              option c
+            </Option>
+          </Selector>
+        );
+
+        const options = wrapper.find(Option);
+        option0 = options.at(0).getDOMNode();
+        option1 = options.at(1).getDOMNode();
+        disabledOption = options.at(2).getDOMNode();
+      });
+
+      afterEach(() => {
+        wrapper.unmount();
+      });
+
+      it('toggle one option', () => {
+        ref.current.toggle(/* index */ 1);
+        wrapper.update();
+
+        // Second option is toggled.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.toggle(/* index */ 0);
+        wrapper.update();
+
+        // First option is toggled.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('force toggle one option', () => {
+        ref.current.toggle(/* index */ 1, /* force */ true);
+        wrapper.update();
+
+        // Second option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.toggle(/* index */ 1, /* force */ true);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('force toggle disabled option does nothing', () => {
+        ref.current.toggle(/* index */ 2, /* force */ true);
+        wrapper.update();
+
+        // Disabled option cannot be selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.toggle(/* index */ 2, /* force */ true);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('clear all options', async () => {
+        // First option is selected by default.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.clear();
+        wrapper.update();
+
+        // No options are selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('select by delta', async () => {
+        // First option is selected by default.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Next option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Try to select next option (disabled).
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(-1);
+        wrapper.update();
+
+        // Previous option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(0);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
     });
   });
 });
