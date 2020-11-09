@@ -21,6 +21,29 @@ const TAG = 'amp-video';
 
 class AmpVideo extends VideoBaseElement {}
 
+/** @override */
+AmpVideo['props'] = {
+  'album': {attr: 'album'},
+  'alt': {attr: 'alt'},
+  'artist': {attr: 'artist'},
+  'artwork': {attr: 'artwork'},
+  'attribution': {attr: 'attribution'},
+  'autoplay': {attr: 'autoplay', type: 'boolean'},
+  'controls': {attr: 'controls', type: 'boolean'},
+  'controlslist': {attr: 'controlslist'},
+  'crossorigin': {attr: 'crossorigin'},
+  'disableremoteplayback': {attr: 'disableremoteplayback'},
+  'loop': {attr: 'loop', type: 'boolean'},
+  'noaudio': {attr: 'noaudio', type: 'boolean'},
+  'poster': {attr: 'poster'},
+  'src': {attr: 'src'},
+  'title': {attr: 'title'},
+
+  // TODO(alanorozco): These props have no internal implementation yet.
+  'dock': {attr: 'dock'},
+  'rotate-to-fullscreen': {attr: 'rotate-to-fullscreen', type: 'boolean'},
+};
+
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpVideo);
 });

@@ -75,6 +75,19 @@ AmpVideoIframe['staticProps'] = dict({
   'makeMethodMessage': makeMethodMessage,
 });
 
+/** @override */
+AmpVideoIframe['props'] = {
+  'autoplay': {attr: 'autoplay', type: 'boolean'},
+  'referrerpolicy': {attr: 'referrerpolicy'},
+  'implements-media-session': {attr: 'mediasession', type: 'boolean'},
+  'poster': {attr: 'poster'},
+  'src': {attr: 'src'},
+
+  // TODO(alanorozco): These props have no internal implementation yet.
+  'dock': {attr: 'dock'},
+  'rotate-to-fullscreen': {attr: 'rotate-to-fullscreen', type: 'boolean'},
+};
+
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpVideoIframe);
 });
