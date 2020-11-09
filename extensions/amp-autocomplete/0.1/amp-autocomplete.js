@@ -341,41 +341,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
 
-    this.initializeListeners_();
-
     return Promise.resolve();
-  }
-
-  /**
-   * Initializes listeners for keydown, mousedown, focus, etc. events.
-   * @private
-   */
-  initializeListeners_() {
-    this.inputElement_.addEventListener(
-      'touchstart',
-      () => {
-        this.checkFirstInteractionAndMaybeFetchData_();
-      },
-      {passive: true}
-    );
-    this.inputElement_.addEventListener('input', () => {
-      this.inputHandler_();
-    });
-    this.inputElement_.addEventListener('keydown', (e) => {
-      this.keyDownHandler_(e);
-    });
-    this.inputElement_.addEventListener('focus', () => {
-      this.checkFirstInteractionAndMaybeFetchData_().then(() => {
-        const display = this.binding_.shouldShowOnFocus();
-        this.toggleResultsHandler_(display);
-      });
-    });
-    this.inputElement_.addEventListener('blur', () => {
-      this.toggleResultsHandler_(false);
-    });
-    this.container_.addEventListener('mousedown', (e) => {
-      this.selectHandler_(e);
-    });
   }
 
   /**
@@ -532,9 +498,38 @@ export class AmpAutocomplete extends AMP.BaseElement {
   layoutCallback() {
     // Disable autofill in browsers.
     this.inputElement_.setAttribute('autocomplete', 'off');
+
     if (this.element.hasAttribute('prefetch')) {
       this.checkFirstInteractionAndMaybeFetchData_();
     }
+
+    // Register event handlers.
+    this.inputElement_.addEventListener(
+      'touchstart',
+      () => {
+        this.checkFirstInteractionAndMaybeFetchData_();
+      },
+      {passive: true}
+    );
+    this.inputElement_.addEventListener('input', () => {
+      this.inputHandler_();
+    });
+    this.inputElement_.addEventListener('keydown', (e) => {
+      this.keyDownHandler_(e);
+    });
+    this.inputElement_.addEventListener('focus', () => {
+      this.checkFirstInteractionAndMaybeFetchData_().then(() => {
+        const display = this.binding_.shouldShowOnFocus();
+        this.toggleResultsHandler_(display);
+      });
+    });
+    this.inputElement_.addEventListener('blur', () => {
+      this.toggleResultsHandler_(false);
+    });
+    this.container_.addEventListener('mousedown', (e) => {
+      this.selectHandler_(e);
+    });
+
     return this.autocomplete_(this.sourceData_, this.userInput_);
   }
 

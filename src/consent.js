@@ -59,10 +59,10 @@ export function getConsentPolicySharedData(element, policyId) {
 
 /**
  * @param {!Element|!ShadowRoot} element
- * @param {string} policyId
+ * @param {string=} policyId
  * @return {!Promise<string>}
  */
-export function getConsentPolicyInfo(element, policyId) {
+export function getConsentPolicyInfo(element, policyId = 'default') {
   // Return the stored consent string.
   return Services.consentPolicyServiceForDocOrNull(element).then(
     (consentPolicy) => {
