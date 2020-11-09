@@ -56,3 +56,24 @@ SelectorDef.OptionProps;
  * }}
  */
 SelectorDef.ContextProps;
+
+/** @interface */
+SelectorDef.SelectorApi = class {
+  clear() {}
+
+  /**
+   * @param {number} index
+   * @param {boolean|undefined} value
+   */
+  toggle(index, value) {}
+
+  /**
+   * @param {number|undefined} delta
+   */
+  selectUp(delta) {}
+
+  /**
+   * @param {number|undefined} delta
+   */
+  selectDown(delta) {}
+};
