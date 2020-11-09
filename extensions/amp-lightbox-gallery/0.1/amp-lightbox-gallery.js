@@ -177,9 +177,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {string} */
     this.currentLightboxGroupId_ = 'default';
 
-    /** @private {?Element} */
-    this.sourceElement_ = null;
-
     /**
      * @private {boolean}
      */
@@ -736,7 +733,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   openLightboxGallery_(element, expandDescription) {
-    this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox') || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
     this.hasVerticalScrollbarWidth_ = getVerticalScrollbarWidth(this.win) > 0;
@@ -839,7 +835,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   shouldAnimateOut_() {
     const target = this.getCurrentElement_().sourceElement;
     return this.elementTypeCanBeAnimated_(target);
-  } 
+  }
 
   /**
    * Transitions the sourceElement into the lightbox or the lightbox to the
