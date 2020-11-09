@@ -1482,6 +1482,7 @@ export class AmpStoryPlayer {
     const deltaY = touchEventY - this.touchEventState_.startY;
     this.win_.scroll(0, this.touchEventState_.startScrollY - deltaY);
   }
+
   /**
    * Reacts to touchend events. Resets cached touch event states.
    * @private
