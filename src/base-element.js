@@ -127,9 +127,6 @@ export class BaseElement {
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
-    /** @package {boolean} */
-    this.inViewport_ = false;
-
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
 
@@ -279,13 +276,6 @@ export class BaseElement {
    */
   isAlwaysFixed() {
     return false;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isInViewport() {
-    return this.inViewport_;
   }
 
   /**
