@@ -177,9 +177,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {string} */
     this.currentLightboxGroupId_ = 'default';
 
-    /** @private {?Element} */
-    this.sourceElement_ = null;
-
     /**
      * @private {boolean}
      */
@@ -736,7 +733,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   openLightboxGallery_(element, expandDescription) {
-    this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox') || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
     this.hasVerticalScrollbarWidth_ = getVerticalScrollbarWidth(this.win) > 0;
@@ -838,33 +834,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   shouldAnimateOut_() {
     const target = this.getCurrentElement_().sourceElement;
-    if (!this.transitionTargetIsInViewport_(target)) {
-      return false;
-    }
-    if (!this.elementTypeCanBeAnimated_(target)) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   *
-   * @param {!Element} target
-   * @return {boolean}
-   * @private
-   */
-  transitionTargetIsInViewport_(target) {
-    if (target == this.sourceElement_) {
-      return true;
-    }
-    if (target.isInViewport()) {
-      return true;
-    }
-    const parentCarousel = this.getSourceElementParentCarousel_(target);
-    if (parentCarousel && parentCarousel.isInViewport()) {
-      return true;
-    }
-    return false;
+    return this.elementTypeCanBeAnimated_(target);
   }
 
   /**
