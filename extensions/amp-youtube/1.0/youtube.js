@@ -21,7 +21,6 @@ import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
-import {useState} from '../../../src/preact';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status
