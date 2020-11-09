@@ -300,6 +300,12 @@ exports.extensionBundles = [
     type: TYPES.AD,
   },
   {
+    name: 'amp-ad-network-nws-impl',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.AD,
+  },
+  {
     name: 'amp-ad-network-fake-impl',
     version: '0.1',
     latestVersion: '0.1',
@@ -687,6 +693,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-instagram',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-install-serviceworker',
     version: '0.1',
     latestVersion: '0.1',
@@ -983,6 +995,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-stream-gallery',
+    version: '1.0',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {

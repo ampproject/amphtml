@@ -19,6 +19,7 @@ import {CanRender} from '../../../src/contextprops';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
 import {htmlFor} from '../../../src/static-template';
+import {removeElement} from '../../../src/dom';
 import {subscribe} from '../../../src/context';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {useAmpContext, useLoad} from '../../../src/preact/context';
@@ -147,6 +148,47 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       await expect(element.layoutCallback()).to.be.eventually.rejected;
       expect(lastLoad).to.be.true;
       expect(loader).to.be.calledWith(true);
+    });
+  });
+
+  describe('connect/disconnect', () => {
+    let element;
+
+    beforeEach(() => {
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100">
+          <div id="child1" slot="slot1"></div>
+          <div id="child2"></div>
+        </amp-preact>
+      `;
+      doc.body.appendChild(element);
+    });
+
+    function getSlot() {
+      return (
+        element.shadowRoot &&
+        element.shadowRoot.querySelector('slot[name="slot1"]')
+      );
+    }
+
+    it('should unrender component on disconnect', async () => {
+      await element.build();
+      await waitFor(() => getSlot(), 'content rendered');
+
+      // Disconnect.
+      removeElement(element);
+      await waitFor(() => getSlot() === null, 'content unrendered');
+    });
+
+    it('should rerender component on reconnect', async () => {
+      await element.build();
+      await waitFor(() => getSlot(), 'content rendered');
+      removeElement(element);
+      await waitFor(() => getSlot() === null, 'content unrendered');
+
+      // Reconnect.
+      doc.body.appendChild(element);
+      await waitFor(() => getSlot(), 'content rerendered');
     });
   });
 });

@@ -448,11 +448,11 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           getConsentMetadataInfo: () => {
-            return {
+            return Promise.resolve({
               'gdprApplies': true,
               'additionalConsent': 'abc123',
               'consentStringType': 1,
-            };
+            });
           },
         })
       );
@@ -461,6 +461,18 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
         'CONSENT_METADATA(gdprApplies)&CONSENT_METADATA(additionalConsent)&CONSENT_METADATA(consentStringType)&CONSENT_METADATA(invalid_key)',
         'true&abc123&1&'
       );
+    });
+
+    it('replaces CONSENT_STRING', () => {
+      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        Promise.resolve({
+          getConsentStringInfo: () => {
+            return Promise.resolve('userConsentString');
+          },
+        })
+      );
+
+      return check('a=CONSENT_STRING', 'a=userConsentString');
     });
 
     it('"COOKIE" resolves cookie value', async () => {

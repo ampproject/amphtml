@@ -70,3 +70,21 @@ AccordionDef.ContentProps;
  * }}
  */
 AccordionDef.ContextProps;
+
+/** @interface */
+AccordionDef.AccordionApi = class {
+  /**
+   * @param {string|undefined} section
+   */
+  toggle(section) {}
+
+  /**
+   * @param {string|undefined} section
+   */
+  expand(section) {}
+
+  /**
+   * @param {string|undefined} section
+   */
+  collapse(section) {}
+};

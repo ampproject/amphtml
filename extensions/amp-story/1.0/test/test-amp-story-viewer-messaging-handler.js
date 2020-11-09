@@ -108,7 +108,7 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
     });
 
     it('should return the STORY_PROGRESS', async () => {
-      storeService.dispatch(Action.SET_PAGE_IDS, [1, 2, 3, 4]);
+      storeService.dispatch(Action.SET_PAGE_IDS, [1, 2, 3, 4, 5]);
       storeService.dispatch(Action.CHANGE_PAGE, {id: 3, index: 2});
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',
