@@ -147,7 +147,6 @@ const readMetrics = (page) =>
       return entry ? entry.startTime : 0;
     }
 
-    const firstPaint = getMetric('first-paint');
     const firstContentfulPaint = getMetric('first-contentful-paint');
 
     function getMaxFirstInputDelay() {
@@ -165,16 +164,8 @@ const readMetrics = (page) =>
       return longest;
     }
 
-    function getTimeToInteractive() {
-      return Date.now() - window.measureStarted;
-    }
-
     return {
-      visible: getMetric('visible'),
-      firstPaint,
-      firstContentfulPaint,
       largestContentfulPaint: window.largestContentfulPaint,
-      timeToInteractive: getTimeToInteractive(),
       maxFirstInputDelay: getMaxFirstInputDelay(),
       cumulativeLayoutShift: window.cumulativeLayoutShift * 100,
     };

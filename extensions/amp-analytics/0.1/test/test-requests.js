@@ -610,6 +610,21 @@ describes.realWin('Requests', {amp: 1}, (env) => {
     expect(spy).to.be.calledWith('r1&test&test2');
   });
 
+  it('should replace dynamic bindings CONSENT_METADATA', async () => {
+    const spy = env.sandbox.spy();
+    const r = {
+      'baseUrl':
+        'r1&$CONSENT_METADATA(gdprApplies)test&${consentMetadata(additionalConsent)}test2',
+    };
+    const handler = createRequestHandler(r, spy);
+    const expansionOptions = new ExpansionOptions({
+      'consentMetadata': 'CONSENT_METADATA',
+    });
+    handler.send({}, {}, expansionOptions);
+    await macroTask();
+    expect(spy).to.be.calledWith('r1&test&test2');
+  });
+
   it('COOKIE read cookie value', function* () {
     const spy = env.sandbox.spy();
     const r = {'baseUrl': 'r1&c1=COOKIE(test)&c2=${cookie(test)}'};

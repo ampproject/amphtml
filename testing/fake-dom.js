@@ -63,7 +63,12 @@ export class FakeWindow {
     /** @const */
     this.Promise = window.Promise;
     /** @const */
+    this.IntersectionObserver = window.IntersectionObserver;
+    /** @const */
     this./*OK*/ pageYOffset = window./*OK*/ pageYOffset;
+
+    /** @const */
+    this.IntersectionObserver = window.IntersectionObserver;
 
     /** @const */
     this.crypto = window.crypto || window.msCrypto;

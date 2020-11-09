@@ -237,6 +237,10 @@ parent of the ad. When the `data-ad-container-id` is specified, and such a
 the container component instead of the ad component during no fill. This feature
 can be useful when an ad indicator is in presence.
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Advertisement"`.
+
 ### common attributes
 
 This element includes
@@ -421,6 +425,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
 - [RelapPro](../../ads/relappro.md)
+- [Remixd](../../ads/remixd.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [rnetplus](../../ads/rnetplus.md)

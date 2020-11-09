@@ -25,13 +25,24 @@ import {
   useRef,
 } from '../../../src/preact';
 
-const defaultSandbox = [
+const DEFAULT_SANDBOX = [
   'allow-scripts',
   'allow-same-origin',
   'allow-popups',
   'allow-popups-to-escape-sandbox',
   'allow-top-navigation-by-user-activation',
 ].join(' ');
+
+/**
+ * @param {T} prop
+ * @return {{current: ?T}}
+ * @template T
+ */
+function usePropRef(prop) {
+  const ref = useRef(null);
+  ref.current = prop;
+  return ref;
+}
 
 /**
  * Goes inside a VideoWrapper.
@@ -41,18 +52,22 @@ const defaultSandbox = [
  *    render(<VideoWrapper component={VideoIframe} ... />)
  *
  * Usable on the AMP layer through VideoBaseElement.
+ *
  * @param {!VideoIframeDef.Props} props
  * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
+ * @template T
  */
 function VideoIframeWithRef(
   {
-    sandbox = defaultSandbox,
+    loading = 'lazy',
+    sandbox = DEFAULT_SANDBOX,
     muted = false,
     controls = false,
+    origin,
     onCanPlay,
     onMessage,
-    sendMessage,
+    makeMethodMessage,
     ...rest
   },
   ref
@@ -61,45 +76,41 @@ function VideoIframeWithRef(
 
   const readyDeferred = useMemo(() => new Deferred(), []);
 
-  const postMessage = useCallback(
-    (message) => {
+  const postMethodMessage = useCallback(
+    (method) => {
       if (!iframeRef.current || !iframeRef.current.contentWindow) {
         return;
       }
       readyDeferred.promise.then(() => {
-        const transformed = sendMessage(message);
-        iframeRef.current.contentWindow./*OK*/ postMessage(
-          typeof transformed == 'string'
-            ? transformed
-            : JSON.stringify(transformed),
-          '*'
-        );
+        const message = makeMethodMessage(method);
+        iframeRef.current.contentWindow./*OK*/ postMessage(message, '*');
       });
     },
-    [readyDeferred.promise, sendMessage]
+    [readyDeferred.promise, makeMethodMessage]
   );
 
   useImperativeHandle(
     ref,
-    () => {
-      return {
-        play: () => postMessage('play'),
-        pause: () => postMessage('pause'),
-      };
-    },
-    [postMessage]
+    () => ({
+      play: () => postMethodMessage('play'),
+      pause: () => postMethodMessage('pause'),
+    }),
+    [postMethodMessage]
   );
 
-  useLayoutEffect(() => {
-    if (!onMessage) {
-      return;
-    }
+  // Keep `onMessage` in a ref to prevent re-listening on every render.
+  // This could otherwise occur when the passed `onMessage` is not memoized.
+  const onMessageRef = usePropRef(onMessage);
 
+  useLayoutEffect(() => {
     /** @param {Event} event */
     function handleMessage(event) {
+      if (!onMessageRef.current) {
+        return;
+      }
+
       if (
-        // handle origin?
-        // event.origin != 'https://www.instagram.com' ||
+        (origin && !origin.test(event.origin)) ||
         event.source != iframeRef.current.contentWindow
       ) {
         return;
@@ -108,34 +119,28 @@ function VideoIframeWithRef(
       // Triggers like an HTMLMediaElement, so we give it an iframe handle
       // to dispatch events from. They're caught from being set on {...rest} so
       // setting onPlay, etc. props should just work.
-      onMessage({
-        data: event.data,
+      onMessageRef.current({
+        // Event
         currentTarget: iframeRef.current,
+        target: iframeRef.current,
+
+        // MessageEvent
+        data: event.data,
       });
     }
 
     const {defaultView} = iframeRef.current.ownerDocument;
-
     defaultView.addEventListener('message', handleMessage);
-
     return () => defaultView.removeEventListener('message', handleMessage);
-  }, [onMessage]);
+  }, [origin, onMessageRef]);
 
   useLayoutEffect(() => {
-    if (muted) {
-      postMessage('mute');
-    } else {
-      postMessage('unmute');
-    }
-  }, [muted, postMessage]);
+    postMethodMessage(muted ? 'mute' : 'unmute');
+  }, [muted, postMethodMessage]);
 
   useLayoutEffect(() => {
-    if (controls) {
-      postMessage('showControls');
-    } else {
-      postMessage('hideControls');
-    }
-  }, [controls, postMessage]);
+    postMethodMessage(controls ? 'showControls' : 'hideControls');
+  }, [controls, postMethodMessage]);
 
   return (
     <iframe
@@ -144,6 +149,7 @@ function VideoIframeWithRef(
       allowfullscreen
       frameborder="0"
       sandbox={sandbox}
+      loading={loading}
       onCanPlay={() => {
         if (onCanPlay) {
           readyDeferred.promise.then(onCanPlay);

@@ -15,12 +15,8 @@
  */
 
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
-import {
-  AmpStoryPlayer,
-  IFRAME_IDX,
-} from '../../src/amp-story-player/amp-story-player-impl';
+import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
-import {toArray} from '../../src/types';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
@@ -86,6 +82,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   function closePageAttachment() {
     const closeEvent = {state: 'PAGE_ATTACHMENT_STATE', value: false};
     fireHandler['documentStateUpdate']('documentStateUpdate', closeEvent);
+  }
+
+  function buildCircularWrappingConfig() {
+    const configEl = document.createElement('script');
+    configEl.textContent = JSON.stringify({
+      'behavior': {
+        'on': 'end',
+        'action': 'circular-wrapping',
+      },
+    });
+    configEl.setAttribute('type', 'application/json');
+    return configEl;
   }
 
   beforeEach(() => {
@@ -201,15 +209,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
       await nextTick();
 
-      const stories = toArray(playerEl.querySelectorAll('a'));
+      const stories = playerEl.getStories();
 
       swipeLeft();
-      expect(stories[0][IFRAME_IDX]).to.eql(0);
-      expect(stories[3][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[0].iframeIdx).to.eql(0);
+      expect(stories[3].iframeIdx).to.eql(-1);
 
       swipeLeft();
-      expect(stories[0][IFRAME_IDX]).to.eql(undefined);
-      expect(stories[3][IFRAME_IDX]).to.eql(0);
+      expect(stories[0].iframeIdx).to.eql(-1);
+      expect(stories[3].iframeIdx).to.eql(0);
     }
   );
 
@@ -221,14 +229,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
       await nextTick();
 
-      const stories = toArray(playerEl.querySelectorAll('a'));
+      const stories = playerEl.getStories();
 
       swipeLeft();
       swipeLeft();
       swipeRight();
 
-      expect(stories[0][IFRAME_IDX]).to.eql(0);
-      expect(stories[3][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[0].iframeIdx).to.eql(0);
+      expect(stories[3].iframeIdx).to.eql(-1);
     }
   );
 
@@ -315,7 +323,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should not dispatch noNextStory when circular wrapping is enabled', async () => {
     buildStoryPlayer(1);
-    playerEl.setAttribute('enable-circular-wrapping', '');
+    playerEl.appendChild(buildCircularWrappingConfig());
 
     await manager.loadPlayers();
     await nextTick();
@@ -359,7 +367,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should not dispatch noPreviousStory when circular wrapping is enabled', async () => {
     buildStoryPlayer(2);
-    playerEl.setAttribute('enable-circular-wrapping', '');
+    playerEl.appendChild(buildCircularWrappingConfig());
 
     await manager.loadPlayers();
     await nextTick();
@@ -432,7 +440,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_ORIGIN_URL +
-          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+          '#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
@@ -455,8 +463,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       }
     }
 
+    // Creates an array of story objects with a unique random URL.
     function createStoryObjects(numberOfStories) {
-      return Array(numberOfStories).fill({href: DEFAULT_ORIGIN_URL});
+      const stories = [];
+      for (let i = 0; i < numberOfStories; i++) {
+        stories.push({
+          href: DEFAULT_ORIGIN_URL + Math.floor(Math.random() * 1000),
+        });
+      }
+      return stories;
     }
 
     it('signals when its ready to be interacted with', async () => {
@@ -508,13 +523,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.show('https://example.com/story3.html');
 
-      const stories = toArray(playerEl.querySelectorAll('a'));
+      const stories = playerEl.getStories();
 
-      expect(stories[0][IFRAME_IDX]).to.eql(undefined);
-      expect(stories[1][IFRAME_IDX]).to.eql(undefined);
-      expect(stories[2][IFRAME_IDX]).to.eql(2);
-      expect(stories[3][IFRAME_IDX]).to.eql(0);
-      expect(stories[4][IFRAME_IDX]).to.eql(1);
+      expect(stories[0].iframeIdx).to.eql(-1);
+      expect(stories[1].iframeIdx).to.eql(-1);
+      expect(stories[2].iframeIdx).to.eql(2);
+      expect(stories[3].iframeIdx).to.eql(0);
+      expect(stories[4].iframeIdx).to.eql(1);
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
@@ -589,9 +604,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[0][IFRAME_IDX]).to.exist;
-        expect(stories[1][IFRAME_IDX]).to.exist;
-        expect(stories[2][IFRAME_IDX]).to.exist;
+        expect(stories[0].iframeIdx).to.eql(0);
+        expect(stories[1].iframeIdx).to.eql(1);
+        expect(stories[2].iframeIdx).to.eql(2);
       }
     );
 
@@ -611,8 +626,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[3][IFRAME_IDX]).to.exist;
-        expect(stories[4][IFRAME_IDX]).to.not.exist;
+        expect(stories[3].iframeIdx).to.eql(0);
+        expect(stories[4].iframeIdx).to.eql(-1);
       }
     );
 
@@ -899,7 +914,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('takes to first story when swiping on the last one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+      playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -924,7 +939,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('takes to last story when swiping on the first one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+      playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -948,7 +963,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('navigate to first story when last story is finished', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+      playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -973,7 +988,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('navigate to last story when first story is requested to go back', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+      playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
 

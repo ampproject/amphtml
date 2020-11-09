@@ -9,9 +9,6 @@ notifications:
     on_success: change
     on_failure: change
 before_install:
-  # Install Yarn v1.22.5 (Xenial's built-in version v1.15.2 is outdated)
-  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.22.5
-  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
@@ -87,6 +84,10 @@ jobs:
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
+    - stage: test
+      name: 'ESM Tests'
+      script:
+        - unbuffer node build-system/pr-check/esm-tests.js
     - stage: experiment
       name: 'Experiment A Tests'
       script:

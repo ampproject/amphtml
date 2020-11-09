@@ -29,7 +29,10 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
-import {startsWith} from '../../../src/string';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -128,10 +131,9 @@ export class AmpSlideScroll extends BaseSlides {
     // - iOS devices on version 10.3
     // - Non iOS devices with the flag turned off.
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = startsWith(
-      Services.platformFor(this.win).getIosVersionString(),
-      '10.3'
-    )
+    this.shouldDisableCssSnap_ = Services.platformFor(this.win)
+      .getIosVersionString()
+      .startsWith('10.3')
       ? true
       : this.isIos_
       ? false
@@ -311,6 +313,10 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
     const isScaled = closestAncestorElementBySelector(
@@ -347,12 +353,14 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.slideIndex_ = null;
     return super.unlayoutCallback();
   }
 
   /** @override */
-  updateViewportState(inViewport) {
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     if (this.slideIndex_ !== null) {
       Services.ownersForDoc(this.element).updateInViewport(
         this.element,

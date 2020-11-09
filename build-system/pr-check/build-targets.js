@@ -145,7 +145,7 @@ const targetMatchers = {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
   'PACKAGE_UPGRADE': (file) => {
-    return file == 'package.json' || file == 'yarn.lock';
+    return file == 'package.json' || file == 'package-lock.json';
   },
   'RENOVATE_CONFIG': (file) => {
     return (

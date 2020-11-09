@@ -16,15 +16,39 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
+const {getBaseUrl} = require('../pr-deploy-bot-utils');
 const {installPackages} = require('../../common/utils');
+const {isTravisPullRequestBuild} = require('../../common/travis');
+const {writeFileSync} = require('fs-extra');
 
 const ENV_PORTS = {
   amp: 9001,
   preact: 9002,
 };
+
+const repoDir = path.join(__dirname, '../../..');
+
+/**
+ * @param {string} env 'amp' or 'preact'
+ * @return {string}
+ */
+const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
+
+/**
+ * @param {string} bin
+ * @param {...string} args
+ * @return {!ChildProcess}
+ */
+const execLocalNodeBinAsync = (bin, ...args) =>
+  execScriptAsync(`./node_modules/.bin/${bin} ${args.join(' ')}`, {
+    stdio: [null, process.stdout, process.stderr],
+    cwd: __dirname,
+    env: process.env,
+  });
 
 /**
  * @param {string} env 'amp' or 'preact'
@@ -32,31 +56,56 @@ const ENV_PORTS = {
  */
 function launchEnv(env) {
   const {ci, 'storybook_port': storybookPort = ENV_PORTS[env]} = argv;
-  return execScriptAsync(
-    [
-      './node_modules/.bin/start-storybook',
-      '--quiet',
-      `-c ./${env}-env`,
-      `-p ${storybookPort}`,
-      ci ? '--ci' : '',
-    ].join(' '),
-    {
-      stdio: [null, process.stdout, process.stderr],
-      cwd: __dirname,
-      env: process.env,
-    }
+  return execLocalNodeBinAsync(
+    'start-storybook',
+    `--config-dir ${envConfigDir(env)}`,
+    '--quiet',
+    `--static-dir ${repoDir}/`,
+    `--port ${storybookPort}`,
+    ci ? '--ci' : ''
+  );
+}
+
+/**
+ * @param {string} env 'amp' or 'preact'
+ * @return {?ChildProcess}
+ */
+function buildEnv(env) {
+  const configDir = envConfigDir(env);
+
+  if (env === 'amp' && isTravisPullRequestBuild()) {
+    // Allows PR deploys to reference built binaries.
+    writeFileSync(
+      `${configDir}/preview.js`,
+      // If you change this JS template, make sure to JSON.stringify every
+      // dynamic value. This prevents XSS and other types of garbling.
+      `// DO NOT${' '}SUBMIT.
+       // This preview.js file was generated for a specific PR build.
+       import {addParameters} from '@storybook/preact';
+       addParameters(${JSON.stringify({
+         ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
+       })});`
+    );
+  }
+
+  return execLocalNodeBinAsync(
+    'build-storybook',
+    `--config-dir ${configDir}`,
+    `--output-dir ${repoDir}/examples/storybook/${env}`
   );
 }
 
 async function storybook() {
-  const {'storybook_env': env = 'amp,preact'} = argv;
+  const {'storybook_env': env = 'amp,preact', build = false} = argv;
   const envs = env.split(',');
-  if (envs.includes('amp')) {
+  if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
   installPackages(__dirname);
-  createCtrlcHandler('storybook');
-  return Promise.all(envs.map(launchEnv));
+  if (!build) {
+    createCtrlcHandler('storybook');
+  }
+  return Promise.all(envs.map(build ? buildEnv : launchEnv));
 }
 
 module.exports = {
@@ -66,6 +115,8 @@ module.exports = {
 storybook.description = 'Isolated testing and development for AMP components.';
 
 storybook.flags = {
+  'build':
+    '  Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
   'storybook_env':
     "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
   'storybook_port': '  Set port from which to run the Storybook dashboard.',

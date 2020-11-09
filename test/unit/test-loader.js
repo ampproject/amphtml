@@ -16,7 +16,7 @@
 
 import * as lolex from 'lolex';
 import {Services} from '../../src/services';
-import {createLoaderElement} from '../../src/loader';
+import {createLoaderElement} from '../../src/service/loader-element';
 
 describes.fakeWin('Loader', {amp: true}, (env) => {
   let clock;

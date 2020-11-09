@@ -223,6 +223,22 @@ TEST(URLTest, PortNumbers) {
   URL url("https://www.google.com:/");
   EXPECT_TRUE(url.is_valid());
   EXPECT_EQ(url.port(), 443);
+
+  // Port number beginning with 0.
+  URL url2("https://www.google.com:01");
+  EXPECT_TRUE(url2.is_valid());
+  EXPECT_EQ(url2.port(), 1);
+
+  EXPECT_TRUE(
+      URL("https://www.google.com:000000000000000000000000000080").is_valid());
+  EXPECT_FALSE(
+      URL("https://www.google.com:123456789012345678901234567890").is_valid());
+  EXPECT_FALSE(URL("https://www.google.com:1234 5").is_valid());
+  EXPECT_FALSE(URL("https://www.google.com:1234a").is_valid());
+  EXPECT_FALSE(URL("https://www.google.com:a1234").is_valid());
+  EXPECT_FALSE(URL("https://www.google.com:123:45").is_valid());
+  EXPECT_FALSE(
+      URL("https://www.google.com:                      123").is_valid());
 }
 
 TEST(URLTest, UserInfoFields) {

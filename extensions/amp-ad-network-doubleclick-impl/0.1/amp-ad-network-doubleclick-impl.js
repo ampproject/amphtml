@@ -20,7 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../amp-a4a/0.1/real-time-config-manager';
+import '../../../src/service/real-time-config/real-time-config-impl';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -56,7 +56,7 @@ import {
 } from './flexible-ad-slot-utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
@@ -71,6 +71,11 @@ import {
 } from './sra-utils';
 import {WindowInterface} from '../../../src/window-interface';
 import {
+  addAmpExperimentIdToElement,
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {
   assertDoesNotContainDisplay,
   setImportantStyles,
   setStyles,
@@ -84,10 +89,6 @@ import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {
-  extractUrlExperimentId,
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -141,6 +142,15 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
+};
+
+/** @const {string} */
+const PTT_EXP = 'doubleclick-ptt-exp';
+
+/** @const @enum{string} */
+const PTT_EXP_BRANCHES = {
+  CONTROL: '21068093',
+  EXPERIMENT: '21068094',
 };
 
 /**
@@ -235,6 +245,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
+
+    /** @type {!Array<string>} */
+    this.ampExperimentIds = [];
 
     /** @protected {boolean} */
     this.useSra = false;
@@ -426,6 +439,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
+      {
+        experimentId: PTT_EXP,
+        isTrafficEligible: () => true,
+        branches: Object.values(PTT_EXP_BRANCHES),
+      },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
@@ -434,6 +452,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
+    }
+    const ssrExpIds = this.getSsrExpIds_();
+    for (let i = 0; i < ssrExpIds.length; i++) {
+      addAmpExperimentIdToElement(ssrExpIds[i], this.element);
     }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
@@ -551,6 +573,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {consentString, gdprApplies} = consentTuple;
 
     return {
+      'ptt': this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT)
+        ? 13
+        : null,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
         consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
@@ -605,7 +630,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
-      'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
       'msz': msz,
@@ -1126,8 +1150,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot

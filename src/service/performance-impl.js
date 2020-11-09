@@ -39,6 +39,8 @@ const QUEUE_LIMIT = 50;
 /** @const {string} */
 const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
 
+const TAG = 'Performance';
+
 /**
  * Fields:
  * {{
@@ -79,6 +81,9 @@ export class Performance {
     /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
+    /** @private {?./document-info-impl.DocumentInfoDef} */
+    this.documentInfo_ = null;
+
     /** @private {boolean} */
     this.isMessagingReady_ = false;
 
@@ -108,12 +113,6 @@ export class Performance {
      * @private {number}
      */
     this.aggregateShiftScore_ = 0;
-
-    /**
-     * True if the ratios have already been ticked.
-     * @private {boolean}
-     */
-    this.slowElementRatioTicked_ = false;
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -224,6 +223,7 @@ export class Performance {
     this.ampdoc_ = Services.ampdoc(documentElement);
     this.viewer_ = Services.viewerForDoc(documentElement);
     this.resources_ = Services.resourcesForDoc(documentElement);
+    this.documentInfo_ = Services.documentInfoForDoc(this.ampdoc_);
 
     this.isPerformanceTrackingOn_ =
       this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
@@ -395,63 +395,59 @@ export class Performance {
     }
 
     if (this.supportsEventTiming_) {
-      const firstInputObserver = this.createPerformanceObserver_(processEntry);
-      firstInputObserver.observe({type: 'first-input', buffered: true});
+      this.createPerformanceObserver_(processEntry, {
+        type: 'first-input',
+        buffered: true,
+      });
     }
 
     if (this.supportsLayoutShift_) {
-      const layoutInstabilityObserver = this.createPerformanceObserver_(
-        processEntry
-      );
-      layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
+      this.createPerformanceObserver_(processEntry, {
+        type: 'layout-shift',
+        buffered: true,
+      });
     }
 
     if (this.supportsLargestContentfulPaint_) {
-      const lcpObserver = this.createPerformanceObserver_(processEntry);
-      lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
+      // lcpObserver
+      this.createPerformanceObserver_(processEntry, {
+        type: 'largest-contentful-paint',
+        buffered: true,
+      });
     }
 
     if (this.supportsNavigation_) {
       // Wrap in a try statement as there are some browsers (ex. chrome 73)
       // that will say it supports navigation but throws.
-      try {
-        const navigationObserver = this.createPerformanceObserver_(
-          processEntry
-        );
-        navigationObserver.observe({type: 'navigation', buffered: true});
-      } catch (err) {
-        dev() /*OK*/
-          .error(err);
-      }
+      this.createPerformanceObserver_(processEntry, {
+        type: 'navigation',
+        buffered: true,
+      });
     }
 
-    if (entryTypesToObserve.length === 0) {
-      return;
-    }
-
-    const observer = this.createPerformanceObserver_(processEntry);
-
-    // Wrap observer.observe() in a try statement for testing, because
-    // Webkit throws an error if the entry types to observe are not natively
-    // supported.
-    try {
-      observer.observe({entryTypes: entryTypesToObserve});
-    } catch (err) {
-      dev() /*OK*/
-        .warn(err);
+    if (entryTypesToObserve.length > 0) {
+      this.createPerformanceObserver_(processEntry, {
+        entryTypes: entryTypesToObserve,
+      });
     }
   }
 
   /**
    * @param {function(!PerformanceEntry)} processEntry
+   * @param {!PerformanceObserverInit} init
    * @return {!PerformanceObserver}
    * @private
    */
-  createPerformanceObserver_(processEntry) {
-    return new this.win.PerformanceObserver((list) => {
-      list.getEntries().forEach(processEntry);
-      this.flush();
-    });
+  createPerformanceObserver_(processEntry, init) {
+    try {
+      const obs = new this.win.PerformanceObserver((list) => {
+        list.getEntries().forEach(processEntry);
+        this.flush();
+      });
+      obs.observe(init);
+    } catch (err) {
+      dev().warn(TAG, err);
+    }
   }
 
   /**
@@ -501,7 +497,6 @@ export class Performance {
     if (this.supportsLargestContentfulPaint_) {
       this.tickLargestContentfulPaint_();
     }
-    this.tickSlowElementRatio_();
   }
 
   /**
@@ -539,27 +534,6 @@ export class Performance {
         {capture: true}
       );
     }
-  }
-
-  /**
-   * Tick the slow element ratio.
-   */
-  tickSlowElementRatio_() {
-    if (this.slowElementRatioTicked_) {
-      return;
-    }
-    if (!this.resources_) {
-      const TAG = 'Performance';
-      dev().error(TAG, 'Failed to tick ser due to null resources');
-      return;
-    }
-
-    this.slowElementRatioTicked_ = true;
-    this.tickDelta(
-      TickLabel.SLOW_ELEMENT_RATIO,
-      this.resources_.getSlowElementRatio()
-    );
-    this.flush();
   }
 
   /**
@@ -782,6 +756,7 @@ export class Performance {
         'sendCsi',
         dict({
           'ampexp': this.ampexp_,
+          'canonicalUrl': this.documentInfo_.canonicalUrl,
         }),
         /* cancelUnsent */ true
       );

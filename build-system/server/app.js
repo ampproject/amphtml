@@ -821,11 +821,18 @@ app.post('/get-consent-no-prompt/', (req, res) => {
 
 app.post('/check-consent', (req, res) => {
   cors.assertCors(req, res, ['POST']);
-  res.json({
+  const response = {
     'consentRequired': req.query.consentRequired === 'true',
     'consentStateValue': req.query.consentStateValue,
+    'consentString': req.query.consentString,
     'expireCache': req.query.expireCache === 'true',
-  });
+  };
+  if (req.query.consentMetadata) {
+    response['consentMetadata'] = JSON.parse(
+      req.query.consentMetadata.replace(/'/g, '"')
+    );
+  }
+  res.json(response);
 });
 
 // Proxy with local JS.
@@ -1198,6 +1205,12 @@ app.get('/adzerk/*', (req, res) => {
     });
 });
 
+app.get('/dist/*.mjs', (req, res, next) => {
+  // Allow CORS access control explicitly for mjs files
+  cors.enableCors(req, res);
+  next();
+});
+
 /*
  * Serve extension scripts and their source maps.
  */
@@ -1332,7 +1345,7 @@ app.get('/dist/rtv/9[89]*/*.(m?js)', (req, res, next) => {
 
   setTimeout(() => {
     // Cause a delay, to show the "stale-while-revalidate"
-    if (req.path.includes('v0.js')) {
+    if (req.path.includes('v0.js') || req.path.includes('v0.mjs')) {
       const path = req.path.replace(/rtv\/\d+/, '');
       return fs.promises
         .readFile(pc.cwd() + path, 'utf8')

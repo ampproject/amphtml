@@ -70,36 +70,42 @@ const travisBuildEnv = (envKey) =>
 
 /**
  * Returns the build number of the ongoing Travis build.
+ * @function
  * @return {string}
  */
 const travisBuildNumber = travisBuildEnv('TRAVIS_BUILD_NUMBER');
 
 /**
  * Return the build URL of the ongoing Travis build.
+ * @function
  * @return {string}
  */
 const travisBuildUrl = travisBuildEnv('TRAVIS_BUILD_WEB_URL');
 
 /**
  * Returns the job number of the ongoing Travis job.
+ * @function
  * @return {string}
  */
 const travisJobNumber = travisBuildEnv('TRAVIS_JOB_NUMBER');
 
 /**
  * Return the job URL of the ongoing Travis job.
+ * @function
  * @return {string}
  */
 const travisJobUrl = travisBuildEnv('TRAVIS_JOB_WEB_URL');
 
 /**
  * Returns the repo slug associated with the ongoing Travis build.
+ * @function
  * @return {string}
  */
 const travisRepoSlug = travisBuildEnv('TRAVIS_REPO_SLUG');
 
 /**
  * Returns the commit SHA being tested by the ongoing Travis PR build.
+ * @function
  * @return {string}
  */
 const travisPullRequestSha = travisEnv(
@@ -110,6 +116,7 @@ const travisPullRequestSha = travisEnv(
 
 /**
  * Returns the name of the branch being tested by the ongoing Travis PR build.
+ * @function
  * @return {string}
  */
 const travisPullRequestBranch = travisEnv(
@@ -120,6 +127,7 @@ const travisPullRequestBranch = travisEnv(
 
 /**
  * Returns the Travis branch for push builds.
+ * @function
  * @return {string}
  */
 const travisPushBranch = travisEnv(
@@ -130,6 +138,7 @@ const travisPushBranch = travisEnv(
 
 /**
  * Returns the commit SHA being tested by the ongoing Travis build.
+ * @function
  * @return {string}
  */
 const travisCommitSha = travisBuildEnv('TRAVIS_COMMIT');

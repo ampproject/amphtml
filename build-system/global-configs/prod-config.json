@@ -9,7 +9,7 @@
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 0.1,
   "amp-access-iframe": 1,
-  "amp-accordion-display-locking": 0.01,
+  "amp-accordion-display-locking": 0.1,
   "amp-action-macro": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
@@ -33,5 +33,7 @@
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
   "amp-ad-no-center-css": 0,
-  "analytics-chunks": 1
+  "analytics-chunks": 1,
+  "adsense-ptt-exp": 0.1,
+  "doubleclick-ptt-exp": 0.1
 }

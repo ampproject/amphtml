@@ -5880,6 +5880,12 @@ class ParsedValidatorRules {
      */
     this.tagSpecByTagName_ = Object.create(null);
     /**
+     * Extension tagspec ids keyed by extension name
+     * @type {?Object<string, !Array<number>>}
+     * @private
+     */
+    this.extTagSpecIdsByExtName_ = Object.create(null);
+    /**
      * Tag ids that are mandatory for a document to legally validate.
      * @type {!Array<number>}
      * @private
@@ -6054,6 +6060,13 @@ class ParsedValidatorRules {
       }
       if (tag.mandatory) {
         this.mandatoryTagSpecs_.push(tagSpecId);
+      }
+      if (tag.extensionSpec !== null) {
+        if (!(tag.extensionSpec.name in this.extTagSpecIdsByExtName_)) {
+          this.extTagSpecIdsByExtName_[tag.extensionSpec.name] = [tagSpecId];
+        } else {
+          this.extTagSpecIdsByExtName_[tag.extensionSpec.name].push(tagSpecId);
+        }
       }
     }
 
@@ -6424,13 +6437,29 @@ class ParsedValidatorRules {
   }
 
   /**
+   * Returns true if one of the alternative tagspec ids has been validated.
+   * @param {!Context} context
+   * @param {?string} extName
+   * @return {boolean}
+   */
+  hasValidatedAlternativeTagSpec(context, extName) {
+    if (extName === null) return false;
+    for (const alternativeTagSpecId of this.extTagSpecIdsByExtName_[extName]) {
+      if (context.getTagspecsValidated().hasOwnProperty(alternativeTagSpecId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Emits errors for tags that specify that another tag is also required or
    * a condition is required to be satisfied.
    * Returns false iff context.Progress(result).complete.
    * @param {!Context} context
    * @param {!generated.ValidationResult} validationResult
    */
-  maybeEmitAlsoRequiresTagValidationErrors(context, validationResult) {
+  maybeEmitRequiresOrExcludesValidationErrors(context, validationResult) {
     /** @type {!Array<number>} */
     const tagspecsValidated =
         Object.keys(context.getTagspecsValidated()).map(Number);
@@ -6471,6 +6500,14 @@ class ParsedValidatorRules {
       for (const tagspecId of parsedTagSpec.getAlsoRequiresTagWarning()) {
         if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           const alsoRequiresTagspec = this.getByTagSpecId(tagspecId);
+          // If there is an alternative tagspec for extension script tagspecs
+          // that has been validated, then move on to the next
+          // alsoRequiresTagWarning.
+          if (alsoRequiresTagspec.getSpec().extensionSpec !== null &&
+              this.hasValidatedAlternativeTagSpec(
+                  context, alsoRequiresTagspec.getSpec().extensionSpec.name)) {
+            continue;
+          }
           context.addWarning(
               generated.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING,
               context.getLineCol(),
@@ -6606,7 +6643,7 @@ class ParsedValidatorRules {
    */
   maybeEmitGlobalTagValidationErrors(context, validationResult) {
     this.maybeEmitMandatoryTagValidationErrors(context, validationResult);
-    this.maybeEmitAlsoRequiresTagValidationErrors(context, validationResult);
+    this.maybeEmitRequiresOrExcludesValidationErrors(context, validationResult);
     this.maybeEmitMandatoryAlternativesSatisfiedErrors(
         context, validationResult);
     this.maybeEmitDocSizeErrors(context, validationResult);

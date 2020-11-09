@@ -444,6 +444,37 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       );
     });
 
+    it('replaces CONSENT_METADATA', () => {
+      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        Promise.resolve({
+          getConsentMetadataInfo: () => {
+            return Promise.resolve({
+              'gdprApplies': true,
+              'additionalConsent': 'abc123',
+              'consentStringType': 1,
+            });
+          },
+        })
+      );
+
+      return check(
+        'CONSENT_METADATA(gdprApplies)&CONSENT_METADATA(additionalConsent)&CONSENT_METADATA(consentStringType)&CONSENT_METADATA(invalid_key)',
+        'true&abc123&1&'
+      );
+    });
+
+    it('replaces CONSENT_STRING', () => {
+      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        Promise.resolve({
+          getConsentStringInfo: () => {
+            return Promise.resolve('userConsentString');
+          },
+        })
+      );
+
+      return check('a=CONSENT_STRING', 'a=userConsentString');
+    });
+
     it('"COOKIE" resolves cookie value', async () => {
       doc.cookie = 'test=123';
       await check('COOKIE(test)', '123');
@@ -585,6 +616,32 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       await check('SCROLL_TOP', '99');
       scrollTopValue = 99.5;
       await check('SCROLL_TOP', '100');
+    });
+
+    describe('AMPDOC_META', () => {
+      it('should replace with meta tag content', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'foo': 'bar',
+        });
+        return check('AMPDOC_META(foo)', 'bar');
+      });
+
+      it('should replace with "" when no meta tag', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({});
+        return check('AMPDOC_META(foo)', '');
+      });
+
+      it('should replace with default_value when no meta tag', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({});
+        return check('AMPDOC_META(foo, default_value)', 'default_value');
+      });
+
+      it('should prefer empty meta tag over default_value', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'foo': '',
+        });
+        return check('AMPDOC_META(foo, default_value)', '');
+      });
     });
   });
 

@@ -247,6 +247,16 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
     Provides additional user privacy related data retrieved from publishers.
     See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response">here</a> for details.
   </dd>
+  <dt><code>window.context.initialConsentState</code></dt>
+  <dd>
+    Provides the initial consent string when the ad is unblocked.
+    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-string">here</a> for details.
+  </dd>
+  <dt><code>window.context.initialConsentMetadata</code></dt>
+  <dd>
+    Provides initial consent metadata when the ad is unblocked.
+    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-metadata">here</a> for details.
+  </dd>
 </dl>
 
 After overriding the default consent handling behavior, don't forget to update your publisher facing
@@ -356,7 +366,7 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ### Other tips
 
-- Add **cc ampproject/wg-ads** in all pull request's descriptions.
+- Add **cc ampproject/wg-monetization** in all pull request's descriptions.
 - It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
 - [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
