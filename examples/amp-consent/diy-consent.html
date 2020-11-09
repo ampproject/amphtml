@@ -140,21 +140,6 @@ if (window && window.name) {
   }
 }
 
-
-window.addEventListener('message', (event) => {
-  const data = event.data;
-  if (data.reqestType === 'enter-fullscreen' && data.state === 'error') {
-    console.log('Could not complete fullscreen request:', data.message);
-  }
-  else if (data.reqestType === 'enter-fullscreen' && data.state === 'success') {
-    console.log('Fullscreen command successfuly sent:', data.message);
-  }
-  else {
-    console.log('Unknown request type:', data.reqestType);
-  }
-});
-
-
 // Add event listener for focus for a11y
 window.addEventListener('focus', () => {
   const headerElement = document.querySelector('h1');
@@ -205,18 +190,6 @@ setTimeout(() => {
 
   parent.postMessage(readyObject, '*');
 }, 2000);
-
-// Send fullscreen request every 2.5 seconds
-setInterval(() => {
-
-  // Our fullscreen object
-  const fullscreenObject = {
-    type: 'consent-ui',
-    action: 'enter-fullscreen'
-  };
-
-  parent.postMessage(fullscreenObject, '*');
-}, 2500);
 
 function registerClickConsentMessage(querySelector, type, action, info, consentMetadata, timeout) {
   document.querySelector(querySelector).onclick = function () {

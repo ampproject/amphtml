@@ -39,6 +39,7 @@ const defaultConfig = jsonConfiguration({
     'canonicalUrl': 'CANONICAL_URL',
     'clientId': 'CLIENT_ID',
     'consentState': 'CONSENT_STATE',
+    'consentString': 'CONSENT_STRING',
     'contentLoadTime': 'CONTENT_LOAD_TIME',
     'cookie': 'COOKIE',
     'counter': 'COUNTER',
