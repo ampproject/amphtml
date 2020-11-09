@@ -38,7 +38,7 @@
   display: flex !important;
   justify-items: start !important;
   align-items: center !important;
-  border-radius: var(1.649em) !important;
+  border-radius: 1.649em !important; /* On iOS inset shadows with border-radius require borders smaller than sides to render correctly */
   padding: 0.5em 1em 0.5em 0.5em !important;
   background-color: var(
     --i-amphtml-interactive-option-background-color
