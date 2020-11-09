@@ -224,7 +224,8 @@ export function Option({
     }
   }, [registerOption, option]);
 
-  const isSelected = /** @type {!Array} */ (selected).includes(option);
+  const isSelected =
+    /** @type {!Array} */ (selected).includes(option) && !disabled;
   const statusStyle =
     disabled || selectorDisabled
       ? CSS.DISABLED
