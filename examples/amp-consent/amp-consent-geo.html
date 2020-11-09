@@ -121,11 +121,11 @@
 <main role="main">
   <p>This example tests amp-consent with amp-geo using 'geoOverride' to prompt different UIs</p>
   <h3>Image that is blocked by '_till_responded' consent</h3>
-  <amp-analytics type="_ping_">
+  <amp-analytics>
     <script type="application/json">
       {
         "requests": {
-          "old": "https://fake.com/analytics?consent=CONSENT_STATE"
+          "old": "https://fake.com/analytics?consent=CONSENT_STATE&consentString=${consentString}"
         },
         "vars": {
           "abc": "${timestamp}.${requestCount}"
@@ -177,9 +177,8 @@
       {
         "ISOCountryGroups": {
           "na": ["ca", "mx", "us"],
-          "eea": ["preset-eea"],
-          "row": ["unknown"],
-          "useIframe": ["fake"]
+          "eea": ["preset-eea", "unknown"],
+          "usePromptUi": ["fake"]
         }
       }
     </script>
@@ -198,7 +197,8 @@
       "geoOverride": {
         "na": {
           "checkConsentHref": "/check-consent?consentRequired=true&consentStateValue=unknown&consentRequired=true",
-          "consentRequired": "remote"
+          "consentRequired": "remote",
+          "monetization-type": "npa"
         },
         "eea": {
           "promptUI": null,
@@ -214,7 +214,7 @@
           "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
           "consentRequired": true
         },
-        "useIframe": {
+        "usePromptUi": {
           "consentRequired": true,
           "promptUI": "ui2"
         }
