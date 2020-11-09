@@ -87,6 +87,7 @@ tags: {  # <amp-autocomplete>
   attrs: {
     name: "[src]"
   }
+  attrs: { name: "prefetch" }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-autocomplete/"
   amp_layout: {
@@ -131,6 +132,7 @@ tags: {  # <amp-autocomplete>
     name: "template"
     value_oneof_set: TEMPLATE_IDS
   }
+  attrs: { name: "prefetch" }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: CONTAINER
