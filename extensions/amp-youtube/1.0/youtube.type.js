@@ -23,7 +23,6 @@
  *   videoid: (string|undefined),
  *   liveChannelid: (string|undefined),
  *   params: Object,
- *   dock: boolean,
  *   credentials: (string|undefined),
  *   style: Object
  * }}

@@ -67,15 +67,10 @@ export function Youtube({
   videoid,
   liveChannelid,
   params = {},
-  // eslint-disable-next-line no-unused-vars
-  dock, // TODO: dock is unused... how is it meant to be used?
   credentials,
   style,
   ...rest
 }) {
-  // TODO: currentTime is unused... is it necessary?
-  // eslint-disable-next-line no-unused-vars
-  const [currentTime, setCurrentTime] = useState(null);
   const datasourceExists =
     !(videoid && liveChannelid) && (videoid || liveChannelid);
 
@@ -148,11 +143,6 @@ export function Youtube({
     }
     if (data.event == 'infoDelivery' && info['muted']) {
       dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
-      return;
-    }
-    // TODO: Check if this is needed... we currently don't do anything with currentTime.
-    if (data.event == 'infoDelivery' && info['currentTime']) {
-      setCurrentTime(info['currentTime']);
       return;
     }
   };
