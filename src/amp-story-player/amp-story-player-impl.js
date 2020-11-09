@@ -231,6 +231,7 @@ export class AmpStoryPlayer {
       startX: 0,
       startY: 0,
       lastX: 0,
+      startScrollY: 0,
       isSwipeX: null,
     };
 
@@ -1435,20 +1436,22 @@ export class AmpStoryPlayer {
 
     this.touchEventState_.startX = coordinates.x;
     this.touchEventState_.startY = coordinates.y;
+    this.touchEventState_.startScrollY = this.win_.scrollY;
   }
 
   /**
-   * Reacts to touchmove events and handles horizontal swipes.
+   * Reacts to touchmove events.
    * @param {!Event} event
    * @private
    */
   onTouchMove_(event) {
-    if (this.touchEventState_.isSwipeX === false) {
+    const coordinates = this.getClientTouchCoordinates_(event);
+    if (!coordinates) {
       return;
     }
 
-    const coordinates = this.getClientTouchCoordinates_(event);
-    if (!coordinates) {
+    if (this.touchEventState_.isSwipeX === false) {
+      this.forwardScrollingEvent_(coordinates.y);
       return;
     }
 
@@ -1470,6 +1473,15 @@ export class AmpStoryPlayer {
     });
   }
 
+  /**
+   * Forwards scrolling event from iframe to parent window.
+   * @param {number} touchEventY
+   * @private
+   */
+  forwardScrollingEvent_(touchEventY) {
+    const deltaY = touchEventY - this.touchEventState_.startY;
+    this.win_.scroll(0, this.touchEventState_.startScrollY - deltaY);
+  }
   /**
    * Reacts to touchend events. Resets cached touch event states.
    * @private
