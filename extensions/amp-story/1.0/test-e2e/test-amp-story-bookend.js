@@ -42,7 +42,7 @@ describes.endtoend(
       await expect(await story.getElement().getAttribute('desktop')).to.be.null;
     });
 
-    it.skip('should display bookend at the end of the story', async () => {
+    it('should display bookend at the end of the story', async () => {
       await goToBookend();
       await expect(
         controller.findElement(
