@@ -135,7 +135,7 @@ function getExpandStateTrigger(section) {
     const event = createCustomEvent(
       toWin(element.ownerDocument.defaultView),
       `accordionSection.${eventName}`,
-      dict({})
+      dict()
     );
     action.trigger(section, eventName, event, ActionTrust.HIGH);
     element.dispatchCustomEvent(name);
