@@ -463,7 +463,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
+          !this.isInStoryPageSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
           return true;
@@ -500,7 +500,7 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (this.isInScreenSideEdge_(event, pageRect)) {
+    if (this.isInStoryPageSideEdge_(event, pageRect)) {
       event.preventDefault();
       return false;
     }
@@ -552,7 +552,7 @@ export class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    * @private
    */
-  isInScreenSideEdge_(event, pageRect) {
+  isInStoryPageSideEdge_(event, pageRect) {
     return (
       event.clientX <= pageRect.left + PROTECTED_SCREEN_EDGE_PX ||
       event.clientX >= pageRect.right - PROTECTED_SCREEN_EDGE_PX
