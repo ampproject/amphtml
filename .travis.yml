@@ -49,9 +49,9 @@ stages:
 jobs:
   include:
     - stage: build
-      name: 'Build'
+      name: 'Unminified Build'
       script:
-        - unbuffer node build-system/pr-check/build.js
+        - unbuffer node build-system/pr-check/unminified-build.js
     - stage: build
       name: 'Checks'
       script:
@@ -61,13 +61,17 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: 'Dist, Bundle Size'
+      name: 'Nomodule Build'
       script:
-        - unbuffer node build-system/pr-check/dist-bundle-size.js
+        - unbuffer node build-system/pr-check/nomodule-build.js
     - stage: build
-      name: 'Module Dist, Bundle Size'
+      name: 'Module Build'
       script:
-        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
+        - unbuffer node build-system/pr-check/module-build.js
+    - stage: test
+      name: 'Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/bundle-size.js
     - stage: test
       name: 'Visual Diff Tests'
       script:
