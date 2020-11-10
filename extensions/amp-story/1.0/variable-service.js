@@ -120,8 +120,12 @@ export class AmpStoryVariableService {
         const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
           .length;
         if (numberOfPages > 0) {
-          this.variables_[AnalyticsVariable.STORY_PROGRESS] =
-            pageIndex / (numberOfPages - 1);
+          if (numberOfPages === 1) {
+            this.variables_[AnalyticsVariable.STORY_PROGRESS] = 0;
+          } else {
+            this.variables_[AnalyticsVariable.STORY_PROGRESS] =
+              pageIndex / (numberOfPages - 1);
+          }
         }
       },
       true /* callToInitialize */

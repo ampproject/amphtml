@@ -58,4 +58,15 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
     const variables = variableService.get();
     expect(variables['storyProgress']).to.equal(0.75);
   });
+
+  it('should calculate storyProgress when a story only has 1 page', () => {
+    storeService.dispatch(Action.SET_PAGE_IDS, ['a']);
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'a',
+      index: 0,
+    });
+
+    const variables = variableService.get();
+    expect(variables['storyProgress']).to.equal(0);
+  });
 });
