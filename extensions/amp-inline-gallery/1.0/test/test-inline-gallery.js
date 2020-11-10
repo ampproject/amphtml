@@ -18,6 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
 import {InlineGallery} from '../inline-gallery';
 import {Pagination} from '../pagination';
+import {Thumbnails} from '../thumbnails';
 import {mount} from 'enzyme';
 
 describes.sandboxed('InlineGallery preact component', {}, () => {
@@ -35,8 +36,37 @@ describes.sandboxed('InlineGallery preact component', {}, () => {
     const wrapper = mount(jsx);
     const carousel = wrapper.find('BaseCarousel');
     expect(carousel).to.have.lengthOf(1);
+    const slides = carousel.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
 
     const pagination = wrapper.find('Pagination');
     expect(pagination).to.have.lengthOf(1);
+  });
+
+  it('should render BaseCarousel and Thumbnails', () => {
+    const jsx = (
+      <InlineGallery>
+        <BaseCarousel>
+          <div>slide 1</div>
+          <div>slide 2</div>
+          <div>slide 3</div>
+        </BaseCarousel>
+        <Thumbnails />
+      </InlineGallery>
+    );
+    const wrapper = mount(jsx);
+
+    const carousels = wrapper.find('BaseCarousel');
+    expect(carousels).to.have.lengthOf(2);
+    const slides = carousels.first().find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
+
+    const thumbnails = wrapper.find('Thumbnails');
+    expect(thumbnails).to.have.lengthOf(1);
+    const generatedCarousel = thumbnails.find('BaseCarousel');
+    expect(generatedCarousel).to.have.lengthOf(1);
+
+    const generatedSlides = generatedCarousel.find('[data-slide]');
+    expect(generatedSlides).to.have.lengthOf(3);
   });
 });

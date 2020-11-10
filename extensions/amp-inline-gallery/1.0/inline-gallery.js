@@ -24,10 +24,15 @@ import {useMemo, useState} from '../../../src/preact';
  */
 export function InlineGallery({children, ...rest}) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [slideCount, setSlideCount] = useState(null);
+  const [slides, setSlides] = useState([]);
   const carouselContext = useMemo(
-    () => ({currentSlide, setCurrentSlide, slideCount, setSlideCount}),
-    [currentSlide, slideCount]
+    () => ({
+      currentSlide,
+      setCurrentSlide,
+      slides,
+      setSlides,
+    }),
+    [currentSlide, slides]
   );
   return (
     <ContainWrapper size={false} layout={true} {...rest}>
