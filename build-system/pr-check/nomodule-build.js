@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,31 @@
 
 /**
  * @fileoverview
- * This script builds the esm minified AMP runtime.
- * This is run during the CI stage = build; job = Module Dist.
+ * This script builds the minified AMP runtime.
+ * This is run during the CI stage = build; job = Nomodule Dist.
  */
 
 const colors = require('ansi-colors');
 const {
   printChangeSummary,
+  processAndUploadDistOutput,
   startTimer,
   stopTimer,
   stopTimedJob,
+  timedExecWithError,
   timedExecOrDie: timedExecOrDieBase,
-  uploadEsmDistOutput,
+  uploadDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {runNpmChecks} = require('./npm-checks');
+const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const FILENAME = 'module-dist.js';
+const FILENAME = 'nomodule-build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
@@ -47,20 +50,40 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --esm --fortesting');
-    uploadEsmDistOutput(FILENAME);
+    timedExecOrDie('gulp dist --fortesting');
+    uploadDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST') ||
+      buildTargets.has('E2E_TEST') ||
+      buildTargets.has('VISUAL_DIFF') ||
+      buildTargets.has('UNIT_TEST')
+    ) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --esm --fortesting');
-      uploadEsmDistOutput(FILENAME);
+
+      const process = timedExecWithError('gulp dist --fortesting', FILENAME);
+      if (process.status !== 0) {
+        const error = process.error || new Error('unknown error, check logs');
+        console./*OK*/ log(colors.red('ERROR'), colors.yellow(error.message));
+        await signalDistUpload('errored');
+        stopTimedJob(FILENAME, startTime);
+        return;
+      }
+
+      timedExecOrDie('gulp storybook --build');
+      await processAndUploadDistOutput(FILENAME);
     } else {
+      await signalDistUpload('skipped');
+
       console./*OK*/ log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Dist'),
-        'because this commit does not affect the runtime or flag configs.'
+        colors.cyan('Nomodule Build'),
+        'because this commit does not affect the runtime, flag configs,',
+        'integration tests, end-to-end tests, or visual diff tests.'
       );
     }
   }
