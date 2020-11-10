@@ -231,7 +231,6 @@ export class AmpStoryPlayer {
       startX: 0,
       startY: 0,
       lastX: 0,
-      startScrollY: 0,
       isSwipeX: null,
     };
 
@@ -239,6 +238,18 @@ export class AmpStoryPlayer {
     this.currentStoryLoadDeferred_ = null;
 
     this.attachCallbacksToElement_();
+
+    /** @private {!Object} */
+    this.scrollEventState_ = {
+      startY: 0,
+      endY: 0,
+      currentDistance: 0,
+      isRunning: false,
+      isDistanceAsc: false,
+      distance: 20,
+      acceleration: 2,
+      deceleration: 0.885,
+    };
   }
 
   /**
@@ -1436,7 +1447,7 @@ export class AmpStoryPlayer {
 
     this.touchEventState_.startX = coordinates.x;
     this.touchEventState_.startY = coordinates.y;
-    this.touchEventState_.startScrollY = this.win_.scrollY;
+    this.scrollEventState_.startY = this.win_.scrollY;
   }
 
   /**
@@ -1480,7 +1491,61 @@ export class AmpStoryPlayer {
    */
   forwardScrollingEvent_(touchEventY) {
     const deltaY = touchEventY - this.touchEventState_.startY;
-    this.win_.scroll(0, this.touchEventState_.startScrollY - deltaY);
+    this.applySmoothScroll_(deltaY);
+  }
+
+  /**
+   * Applies smooth scrolling to parent page when scrolling on the player.
+   * @param {number} deltaY
+   */
+  applySmoothScroll_(deltaY) {
+    if (!this.scrollEventState_.isRunning) {
+      this.scrollEventState_.endY = this.scrollEventState_.startY;
+      this.scrollEventState_.isRunning = true;
+      this.scrollEventState_.currentDistance = deltaY > 0 ? -0.1 : 0.1;
+      this.scrollEventState_.isDistanceAsc = true;
+      this.recursiveScroll_();
+      return;
+    }
+
+    this.scrollEventState_.isDistanceAsc = false;
+    this.scrollEventState_.currentDistance =
+      deltaY > 0
+        ? -this.scrollEventState_.distance
+        : this.scrollEventState_.distance;
+  }
+
+  /**
+   * @private
+   */
+  recursiveScroll_() {
+    if (!this.scrollEventState_.isRunning) {
+      return;
+    }
+
+    this.scrollEventState_.currentDistance *= this.scrollEventState_
+      .isDistanceAsc
+      ? this.scrollEventState_.acceleration
+      : this.scrollEventState_.deceleration;
+
+    if (
+      Math.abs(this.scrollEventState_.currentDistance) < 0.1 &&
+      !this.scrollEventState_.isDistanceAsc
+    ) {
+      this.scrollEventState_.isRunning = false;
+    }
+
+    if (
+      Math.abs(this.scrollEventState_.currentDistance) >=
+      Math.abs(this.scrollEventState_.distance)
+    ) {
+      this.scrollEventState_.isDistanceAsc = false;
+    }
+
+    this.scrollEventState_.endY += this.scrollEventState_.currentDistance;
+    this.win_.scroll(0, this.scrollEventState_.endY);
+
+    requestAnimationFrame(this.recursiveScroll_.bind(this));
   }
 
   /**

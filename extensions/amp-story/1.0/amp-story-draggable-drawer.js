@@ -290,6 +290,10 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
+    if (this.state_ === DrawerState.CLOSED && this.touchEventState_.swipingUp) {
+      event.stopPropagation();
+    }
+
     if (this.touchEventState_.isSwipeY === null) {
       this.touchEventState_.isSwipeY =
         Math.abs(this.touchEventState_.startY - y) >
