@@ -49,9 +49,9 @@ stages:
 jobs:
   include:
     - stage: build
-      name: 'Build'
+      name: 'Unminified Build'
       script:
-        - unbuffer node build-system/pr-check/build.js
+        - unbuffer node build-system/pr-check/unminified-build.js
     - stage: build
       name: 'Checks'
       script:

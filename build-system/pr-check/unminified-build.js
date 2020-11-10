@@ -34,7 +34,7 @@ const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {runNpmChecks} = require('./npm-checks');
 
-const FILENAME = 'build.js';
+const FILENAME = 'unminified-build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
