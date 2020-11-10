@@ -16,10 +16,10 @@
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
-import {useContext, useMemo, useState} from '../../../src/preact';
+import {useContext, useEffect, useMemo, useState} from '../../../src/preact';
 
 const SelectorContext = Preact.createContext(
-  /** @type {SelectorDef.ContextProps} */ ({})
+  /** @type {SelectorDef.ContextProps} */ ({selected: []})
 );
 
 /**
@@ -29,6 +29,7 @@ const SelectorContext = Preact.createContext(
 export function Selector({
   as: Comp = 'div',
   disabled,
+  defaultValue = [],
   value,
   multiple,
   onChange,
@@ -36,8 +37,9 @@ export function Selector({
   children,
   ...rest
 }) {
-  const [selectedState, setSelectedState] = useState(value ? value : []);
-  // TBD: controlled values require override of properties.
+  const [selectedState, setSelectedState] = useState(
+    value ? value : defaultValue
+  );
   const selected = value ? value : selectedState;
   const context = useMemo(
     () => ({
@@ -67,6 +69,12 @@ export function Selector({
     [selected, disabled, multiple, onChange]
   );
 
+  useEffect(() => {
+    if (!multiple && selected.length > 1) {
+      setSelectedState([selected[0]]);
+    }
+  }, [multiple, selected]);
+
   return (
     <Comp
       {...rest}
@@ -89,11 +97,12 @@ export function Selector({
  */
 export function Option({
   as: Comp = 'div',
-  disabled,
+  disabled = false,
   onClick,
   option,
   role = 'option',
   style,
+  tabIndex = '0',
   ...rest
 }) {
   const {
@@ -123,12 +132,14 @@ export function Option({
   const optionProps = {
     ...rest,
     disabled,
-    'aria-disabled': disabled,
+    'aria-disabled': String(disabled),
     onClick: clickHandler,
     option,
     role,
     selected: isSelected,
+    'aria-selected': String(isSelected),
     style: {...statusStyle, ...style},
+    tabIndex,
   };
   return <Comp {...optionProps}></Comp>;
 }
