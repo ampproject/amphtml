@@ -91,6 +91,14 @@ AmpBaseCarousel['children'] = {
 /** @override */
 AmpBaseCarousel['props'] = {
   'advanceCount': {attr: 'advance-count', type: 'number', media: true},
+  'autoAdvance': {attr: 'auto-advance', type: 'boolean', media: true},
+  'autoAdvanceCount': {attr: 'auto-advance-count', type: 'number', media: true},
+  'autoAdvanceInterval': {
+    attr: 'auto-advance-interval',
+    type: 'number',
+    media: true,
+  },
+  'autoAdvanceLoops': {attr: 'auto-advance-loops', type: 'number', media: true},
   'controls': {attr: 'controls', type: 'string', media: true},
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},

@@ -34,6 +34,10 @@ export const _default = () => {
   const paginationHeight = number('top indicator height', 20);
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
+  const autoAdvance = boolean('auto advance', true);
+  const autoAdvanceCount = number('auto advance count', 1);
+  const autoAdvanceInterval = number('auto advance interval', 1000);
+  const autoAdvanceLoops = number('auto advance loops', 3);
   const thumbnailHeight = number('thumbnail height', 50);
   const loop = boolean('thumbnail loop', false);
   const aspectRatio = number('thumbnail aspect ratio (w/h)', 3 / 2);
@@ -42,7 +46,13 @@ export const _default = () => {
     <>
       <InlineGallery style={{width}}>
         <Pagination inset={topInset} style={{height: paginationHeight}} />
-        <BaseCarousel style={{height}}>
+        <BaseCarousel
+          style={{height}}
+          autoAdvanceCount={autoAdvanceCount}
+          autoAdvanceInterval={autoAdvanceInterval}
+          autoAdvanceLoops={autoAdvanceLoops}
+          autoAdvance={autoAdvance}
+        >
           <img
             src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
             thumbnailSrc="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=120&q=80"

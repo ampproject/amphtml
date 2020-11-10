@@ -46,6 +46,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 function ScrollerWithRef(
   {
     advanceCount,
+    autoAdvanceCount,
     children,
     loop,
     mixedLength,
@@ -54,6 +55,7 @@ function ScrollerWithRef(
     snap,
     visibleCount,
     _thumbnails,
+    ...rest
   },
   ref
 ) {
@@ -69,6 +71,9 @@ function ScrollerWithRef(
   const advance = useCallback(
     (by) => {
       const container = containerRef.current;
+      if (!container) {
+        return;
+      }
       const slideWidth = container./* OK */ offsetWidth / visibleCount;
       // Modify scrollLeft is preferred to `setRestingIndex` when possible
       // to enable smooth scrolling between slides.
@@ -107,6 +112,7 @@ function ScrollerWithRef(
   useImperativeHandle(
     ref,
     () => ({
+      advance,
       next: () => advance(advanceCount),
       prev: () => advance(-advanceCount),
     }),
@@ -248,16 +254,18 @@ function ScrollerWithRef(
     debouncedResetScrollReferencePoint();
   };
 
+  const incrementCount = Math.max(advanceCount, autoAdvanceCount);
   const needMoreSlidesToScroll =
     loop &&
-    advanceCount > 1 &&
-    children.length - pivotIndex - visibleCount < advanceCount;
+    incrementCount > 1 &&
+    children.length - pivotIndex - visibleCount < incrementCount;
   return (
     <div
       ref={containerRef}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
       tabindex={0}
+      {...rest}
     >
       {slides}
       {needMoreSlidesToScroll && slides}

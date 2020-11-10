@@ -33,6 +33,10 @@ export const Default = () => {
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
   const advanceCount = number('advance count', 1, {min: 1});
+  const autoAdvance = boolean('auto advance', true);
+  const autoAdvanceCount = number('auto advance count', 1);
+  const autoAdvanceInterval = number('auto advance interval', 1000);
+  const autoAdvanceLoops = number('auto advance loops', 3);
   const visibleCount = text('visible count', '(min-width: 400px) 2, 1');
   const outsetArrows = text('outset arrows', '(min-width: 400px) true, false');
   const controls = select('show controls', ['auto', 'always', 'never']);
@@ -44,6 +48,10 @@ export const Default = () => {
       <amp-base-carousel
         id="carousel"
         advance-count={advanceCount}
+        auto-advance={autoAdvance}
+        auto-advance-count={autoAdvanceCount}
+        auto-advance-interval={autoAdvanceInterval}
+        auto-advance-loops={autoAdvanceLoops}
         controls={controls}
         outset-arrows={outsetArrows}
         width="880"
