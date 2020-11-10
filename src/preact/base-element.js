@@ -786,6 +786,86 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
   }
 
   // Props.
+  parsePropDefs(props, propDefs, element, mediaQueryProps);
+
+  // Children.
+  // There are plain "children" and there're slotted children assigned
+  // as separate properties. Thus in a carousel the plain "children" are
+  // slides, and the "arrowNext" children are passed via a "arrowNext"
+  // property.
+  const errorMessage =
+    'only one of "passthrough", "passthroughNonEmpty"' +
+    ' or "children" may be given';
+  if (passthrough) {
+    devAssert(!childrenDefs && !passthroughNonEmpty, errorMessage);
+    props['children'] = [<Slot />];
+  } else if (passthroughNonEmpty) {
+    devAssert(!childrenDefs, errorMessage);
+    // If all children are whitespace text nodes, consider the element as
+    // having no children
+    props['children'] = element
+      .getRealChildNodes()
+      .every(
+        (node) =>
+          node.nodeType === /* TEXT_NODE */ 3 &&
+          node.nodeValue.trim().length === 0
+      )
+      ? null
+      : [<Slot />];
+  } else if (childrenDefs) {
+    const children = [];
+    props['children'] = children;
+
+    const nodes = element.getRealChildNodes();
+    for (let i = 0; i < nodes.length; i++) {
+      const childElement = nodes[i];
+      const def = matchChild(childElement, childrenDefs);
+      if (!def) {
+        continue;
+      }
+
+      const {single, name, clone, props: slotProps = {}} = def;
+      const parsedSlotProps = {};
+      parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
+
+      // TBD: assign keys, reuse slots, etc.
+      if (single) {
+        props[name] = createSlot(
+          childElement,
+          childElement.getAttribute('slot') || `i-amphtml-${name}`,
+          parsedSlotProps
+        );
+      } else {
+        const list =
+          name == 'children' ? children : props[name] || (props[name] = []);
+        list.push(
+          clone
+            ? createShallowVNodeCopy(childElement)
+            : createSlot(
+                childElement,
+                childElement.getAttribute('slot') ||
+                  `i-amphtml-${name}-${list.length}`,
+                parsedSlotProps
+              )
+        );
+      }
+    }
+  }
+
+  if (mediaQueryProps) {
+    mediaQueryProps.complete();
+  }
+
+  return props;
+}
+
+/**
+ * @param {!Object} props
+ * @param {!Object} propDefs
+ * @param {!Element} element
+ * @param {?MediaQueryProps} mediaQueryProps
+ */
+function parsePropDefs(props, propDefs, element, mediaQueryProps) {
   for (const name in propDefs) {
     const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
     let value;
@@ -829,74 +909,6 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
       props[name] = v;
     }
   }
-
-  // Children.
-  // There are plain "children" and there're slotted children assigned
-  // as separate properties. Thus in a carousel the plain "children" are
-  // slides, and the "arrowNext" children are passed via a "arrowNext"
-  // property.
-  const errorMessage =
-    'only one of "passthrough", "passthroughNonEmpty"' +
-    ' or "children" may be given';
-  if (passthrough) {
-    devAssert(!childrenDefs && !passthroughNonEmpty, errorMessage);
-    props['children'] = [<Slot />];
-  } else if (passthroughNonEmpty) {
-    devAssert(!childrenDefs, errorMessage);
-    // If all children are whitespace text nodes, consider the element as
-    // having no children
-    props['children'] = element
-      .getRealChildNodes()
-      .every(
-        (node) =>
-          node.nodeType === /* TEXT_NODE */ 3 &&
-          node.nodeValue.trim().length === 0
-      )
-      ? null
-      : [<Slot />];
-  } else if (childrenDefs) {
-    const children = [];
-    props['children'] = children;
-
-    const nodes = element.getRealChildNodes();
-    for (let i = 0; i < nodes.length; i++) {
-      const childElement = nodes[i];
-      const def = matchChild(childElement, childrenDefs);
-      if (!def) {
-        continue;
-      }
-
-      const {single, name, clone, props: slotProps = {}} = def;
-
-      // TBD: assign keys, reuse slots, etc.
-      if (single) {
-        props[name] = createSlot(
-          childElement,
-          childElement.getAttribute('slot') || `i-amphtml-${name}`,
-          slotProps
-        );
-      } else {
-        const list =
-          name == 'children' ? children : props[name] || (props[name] = []);
-        list.push(
-          clone
-            ? createShallowVNodeCopy(childElement)
-            : createSlot(
-                childElement,
-                childElement.getAttribute('slot') ||
-                  `i-amphtml-${name}-${list.length}`,
-                slotProps
-              )
-        );
-      }
-    }
-  }
-
-  if (mediaQueryProps) {
-    mediaQueryProps.complete();
-  }
-
-  return props;
 }
 
 /**

@@ -104,7 +104,12 @@ const slideSizing = {
   '& > ::slotted(*)': {
     width: '100%',
   },
+  '&$thumbnails': {
+    padding: '0px 4px',
+  },
 };
+
+const thumbnails = {};
 
 const arrow = {
   zIndex: 1,
@@ -220,6 +225,7 @@ const JSS = {
   hideScrollbar,
   horizontalScroll,
   slideElement,
+  thumbnails,
   enableSnap,
   disableSnap,
   slideSizing,

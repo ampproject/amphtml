@@ -17,6 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
 import {setStyle} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {
   useCallback,
   useLayoutEffect,
@@ -99,7 +100,10 @@ export function StreamGallery(props) {
       return;
     }
     // Use local window.
-    const win = node.ownerDocument.defaultView;
+    const win = toWin(node.ownerDocument.defaultView);
+    if (!win) {
+      return undefined;
+    }
     const observer = new win.ResizeObserver((entries) => {
       const last = entries[entries.length - 1];
       setVisibleCount(measure(last.contentRect.width));
