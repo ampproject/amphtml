@@ -54,18 +54,18 @@ export const _default = () => {
       </amp-accordion>
 
       <div class="buttons" style={{marginTop: 8}}>
-        <button on={"tap:accordion.toggle(section='section1')"}>
+        <button on="tap:accordion.toggle(section='section1')">
           toggle(section1)
         </button>
-        <button on={'tap:accordion.toggle()'}>toggle all</button>
-        <button on={"tap:accordion.expand(section='section1')"}>
+        <button on="tap:accordion.toggle()">toggle all</button>
+        <button on="tap:accordion.expand(section='section1')">
           expand(section1)
         </button>
-        <button on={'tap:accordion.expand()'}>expand all</button>
-        <button on={"tap:accordion.collapse(section='section1')"}>
+        <button on="tap:accordion.expand()">expand all</button>
+        <button on="tap:accordion.collapse(section='section1')">
           collapse(section1)
         </button>
-        <button on={'tap:accordion.collapse()'}>collapse all</button>
+        <button on="tap:accordion.collapse()">collapse all</button>
       </div>
     </main>
   );
@@ -85,16 +85,13 @@ export const events = () => {
           <h2>Section 1</h2>
           <p>Content in section 1.</p>
         </section>
-        <section
-          id="section2"
-          on={"expand:accordion.expand(section='section3')"}
-        >
+        <section id="section2" on="expand:accordion.expand(section='section3')">
           <h2>Section 2</h2>
           <div>Content in section 2.</div>
         </section>
         <section
           id="section3"
-          on={"collapse:accordion.collapse(section='section2')"}
+          on="collapse:accordion.collapse(section='section2')"
         >
           <h2>Section 3</h2>
           <div>Content in section 3.</div>
@@ -102,13 +99,13 @@ export const events = () => {
       </amp-accordion>
 
       <div class="buttons" style={{marginTop: 8}}>
-        <button on={"tap:accordion.expand(section='section2')"}>
+        <button on="tap:accordion.expand(section='section2')">
           expand(section2)
         </button>
-        <button on={"tap:accordion.collapse(section='section3')"}>
+        <button on="tap:accordion.collapse(section='section3')">
           collapse(section3)
         </button>
-        <button on={'tap:accordion.toggle()'}>toggle all</button>
+        <button on="tap:accordion.toggle()">toggle all</button>
       </div>
     </main>
   );
