@@ -72,7 +72,10 @@ function BaseCarouselWithRef(
     controls = Controls.AUTO,
     loop,
     mixedLength = false,
+    onFocus,
+    onMouseEnter,
     onSlideChange,
+    onTouchStart,
     outsetArrows,
     snap = true,
     visibleCount = 1,
@@ -189,6 +192,25 @@ function BaseCarouselWithRef(
       contentStyle={{display: 'flex'}}
       ref={containRef}
       contentRef={contentRef}
+      onFocus={(e) => {
+        if (onFocus) {
+          onFocus(e);
+        }
+        interaction.current = Interaction.FOCUS;
+      }}
+      onMouseEnter={(e) => {
+        if (onMouseEnter) {
+          onMouseEnter(e);
+        }
+        interaction.current = Interaction.MOUSE;
+      }}
+      onTouchStart={(e) => {
+        if (onTouchStart) {
+          onTouchStart(e);
+        }
+        interaction.current = Interaction.TOUCH;
+      }}
+      tabIndex="0"
       {...rest}
     >
       {!hideControls && (
@@ -209,9 +231,6 @@ function BaseCarouselWithRef(
         setRestingIndex={setRestingIndex}
         snap={snap}
         ref={scrollRef}
-        onTouchStart={() => (interaction.current = Interaction.TOUCH)}
-        onMouseEnter={() => (interaction.current = Interaction.MOUSE)}
-        onFocus={() => (interaction.current = Interaction.FOCUS)}
         visibleCount={mixedLength ? 1 : visibleCount}
       >
         {/*
