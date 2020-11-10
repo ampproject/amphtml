@@ -318,6 +318,27 @@ describes.realWin(
       });
     });
 
+    it('should prefetch remote data if prefetch attribute is specified', () => {
+      let impl;
+      return getAutocomplete(
+        {
+          'prefetch': '', // boolean attribute, presence means prefetch is enabled.
+          'src': 'https://examples.com/json',
+          'filter': 'substring',
+        },
+        '{}',
+        false
+      )
+        .then((ampAutocomplete) => {
+          impl = ampAutocomplete.implementation_;
+          expect(impl.hasFetchedInitialData_).to.be.false;
+          return ampAutocomplete.layoutCallback();
+        })
+        .then(() => {
+          expect(impl.hasFetchedInitialData_).to.be.true;
+        });
+    });
+
     it('should not fetch remote data when specified in src and using nested items property before first user interactino', () => {
       const data = {
         deeply: {
