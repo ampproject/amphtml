@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.123 */
+/** Version: 0.1.22.131 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -945,38 +945,49 @@ class JsonLdParser {
    * @return {?PageConfig}
    */
   tryExtractConfig_(element) {
-    const json = tryParseJson(element.textContent);
-    if (!json) {
+    let possibleConfigs = tryParseJson(element.textContent);
+    if (!possibleConfigs) {
       return null;
     }
 
-    // Must be an ALLOWED_TYPE
-    if (!this.checkType_.checkValue(json['@type'], ALLOWED_TYPES)) {
-      return null;
+    // Support arrays of JSON objects.
+    if (!Array.isArray(possibleConfigs)) {
+      possibleConfigs = [possibleConfigs];
     }
 
-    // Must have a isPartOf[@type=Product].
-    let productId = null;
-    const partOfArray = this.valueArray_(json, 'isPartOf');
-    if (partOfArray) {
-      for (let i = 0; i < partOfArray.length; i++) {
-        productId = this.discoverProductId_(partOfArray[i]);
-        if (productId) {
-          break;
+    for (let i = 0; i < possibleConfigs.length; i++) {
+      const possibleConfig = possibleConfigs[i];
+
+      // Must be an ALLOWED_TYPE
+      if (!this.checkType_.checkValue(possibleConfig['@type'], ALLOWED_TYPES)) {
+        continue;
+      }
+
+      // Must have a isPartOf[@type=Product].
+      let productId = null;
+      const partOfArray = this.valueArray_(possibleConfig, 'isPartOf');
+      if (partOfArray) {
+        for (let i = 0; i < partOfArray.length; i++) {
+          productId = this.discoverProductId_(partOfArray[i]);
+          if (productId) {
+            break;
+          }
         }
       }
-    }
-    if (!productId) {
-      return null;
+      if (!productId) {
+        continue;
+      }
+
+      // Found product id, just check for the access flag.
+      const isAccessibleForFree = this.bool_(
+        this.singleValue_(possibleConfig, 'isAccessibleForFree'),
+        /* default */ true
+      );
+
+      return new PageConfig(productId, !isAccessibleForFree);
     }
 
-    // Found product id, just check for the access flag.
-    const isAccessibleForFree = this.bool_(
-      this.singleValue_(json, 'isAccessibleForFree'),
-      /* default */ true
-    );
-
-    return new PageConfig(productId, !isAccessibleForFree);
+    return null;
   }
 
   /**
