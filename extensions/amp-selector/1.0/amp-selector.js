@@ -50,7 +50,7 @@ class AmpSelector extends PreactBaseElement {
       this.mutateProps(dict({'value': value}));
     };
 
-    this.registerApiAction('clear', (api, unused) => api./*OK*/ clear());
+    this.registerApiAction('clear', (api) => api./*OK*/ clear());
     this.registerApiAction('selectUp', (api, invocation) => {
       const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
