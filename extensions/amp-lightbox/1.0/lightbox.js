@@ -101,6 +101,7 @@ function LightboxWithRef(
     ref,
     () => ({
       open: () => {
+        console.log('hit open');
         setShow(true);
       },
       close: () => {

@@ -24,11 +24,19 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
+/** @extends {PreactBaseElement<LightboxDef.Api>} */
 class AmpLightbox extends PreactBaseElement {
   /** @override */
   init() {
-    this.registerApiAction('open', (api) => api.open(), ActionTrust.DEFAULT);
-    this.registerApiAction('close', (api) => api.close(), ActionTrust.DEFAULT);
+    this.registerApiAction(
+      'open',
+      (api) => {
+        console.log('hit amp');
+        api.open();
+      },
+      ActionTrust.LOW
+    );
+    this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
     return dict({'initialOpen': false});
   }
 
