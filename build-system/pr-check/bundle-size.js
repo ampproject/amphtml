@@ -57,8 +57,11 @@ async function main() {
     if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
       downloadDistOutput(FILENAME);
       downloadEsmDistOutput(FILENAME);
-      timedExecOrDie('gulp bundle-size --on_skipped_build');
+
+      timedExecOrDie('gulp bundle-size --on_pr_build');
     } else {
+      timedExecOrDie('gulp bundle-size --on_skipped_build');
+      await signalDistUpload('skipped');
       console./*OK*/ log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Bundle Size'),
