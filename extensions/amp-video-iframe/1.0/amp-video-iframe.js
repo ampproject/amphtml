@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {BUBBLE_MESSAGE_EVENTS} from '../0.1/amp-video-iframe';
+import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -22,16 +23,58 @@ import {dict} from '../../../src/utils/object';
 /** @const {string} */
 const TAG = 'amp-video-iframe';
 
+/**
+ * @param {!Element} element
+ * @return {!Promise<IntersectionObserverEntry>}
+ */
+function getIntersectionObserverEntryAsync(element) {
+  return new Promise((resolve) => {
+    const observer = new IntersectionObserver((entries) => {
+      resolve(entries[entries.length - 1]);
+      observer.disconnect();
+    });
+    observer.observe(element);
+  });
+}
+
+/**
+ * @param {!Element} element
+ * @return {!Promise<number>}
+ */
+function getIntersectionRatioMinAutoplay(element) {
+  return getIntersectionObserverEntryAsync(element).then(
+    ({intersectionRatio}) =>
+      // Only post ratio > 0 when in autoplay range to prevent internal
+      // autoplay implementations that differ from ours.
+      intersectionRatio < MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
+        ? 0
+        : intersectionRatio
+  );
+}
+
 class AmpVideoIframe extends VideoBaseElement {}
 
 /**
  * @param {!MessageEvent} e
  */
 const onMessage = (e) => {
+  const {currentTarget} = e;
   const method = e.data?.method;
+  const messageId = e.data?.id;
   if (method) {
     if (method == 'getIntersection') {
-      // TODO
+      getIntersectionRatioMinAutoplay(currentTarget).then(
+        (intersectionRatio) => {
+          currentTarget.contentWindow./*OK*/ postMessage(
+            JSON.stringify(
+              dict({
+                'id': messageId,
+                'intersectionRatio': intersectionRatio,
+              })
+            )
+          );
+        }
+      );
       return;
     }
     throw new Error(`Unknown method ${method}`);
@@ -49,7 +92,7 @@ const onMessage = (e) => {
     return;
   }
   if (BUBBLE_MESSAGE_EVENTS.indexOf(event) > -1) {
-    e.currentTarget.dispatchEvent(
+    currentTarget.dispatchEvent(
       createCustomEvent(window, event, /* detail */ null, {
         bubbles: true,
         cancelable: true,
