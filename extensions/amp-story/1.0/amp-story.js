@@ -2648,7 +2648,7 @@ export class AmpStory extends AMP.BaseElement {
   switchDelta_(delta) {
     const activePage = devAssert(
       this.activePage_,
-      'No active page set when navigating to pageId.'
+      'No active page set when navigating by delta.'
     );
 
     const currentPageIdx = findIndex(
@@ -2656,14 +2656,11 @@ export class AmpStory extends AMP.BaseElement {
       (page) => page.element.id === activePage.element.id
     );
 
-    const newPageIdx = currentPageIdx + delta;
-    const targetPage =
+    const newPageIdx =
       delta > 0
-        ? this.pages_[newPageIdx % this.pages_.length]
-        : this.pages_[
-            ((newPageIdx % this.pages_.length) + this.pages_.length) %
-              this.pages_.length
-          ];
+        ? Math.min(this.pages_.length - 1, currentPageIdx + delta)
+        : Math.max(0, currentPageIdx + delta);
+    const targetPage = this.pages_[newPageIdx];
 
     if (
       !this.isActualPage_(targetPage && targetPage.element.id) ||

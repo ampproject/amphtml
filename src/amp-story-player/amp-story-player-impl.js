@@ -1286,14 +1286,14 @@ export class AmpStoryPlayer {
       return;
     }
 
-    this.sendSwitchToPageDelta_(delta);
+    this.sendSelectPageDelta_(delta);
   }
 
   /**
    * @param {number} delta
    * @private
    */
-  sendSwitchToPageDelta_(delta) {
+  sendSelectPageDelta_(delta) {
     const {iframeIdx} = this.stories_[this.currentIdx_];
     this.messagingPromises_[iframeIdx].then((messaging) =>
       messaging.sendRequest('selectPage', {delta})
