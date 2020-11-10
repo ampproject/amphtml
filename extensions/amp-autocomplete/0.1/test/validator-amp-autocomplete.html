@@ -588,5 +588,23 @@
     <amp-autocomplete filter="prefix" query="q">
       <input />
     </amp-autocomplete>
+
+    <!-- Valid: amp-component with remote data, filter=prefix and prefetch attribute -->
+    <amp-autocomplete
+      filter="prefix"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      prefetch
+    >
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: prefetch is mistyped -->
+    <amp-autocomplete
+      filter="prefix"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      prefecth
+    >
+      <input />
+    </amp-autocomplete>
   </body>
 </html>
