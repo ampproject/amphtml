@@ -609,5 +609,25 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:580:4 The attribute 'f
 amp-autocomplete/0.1/test/validator-amp-autocomplete.html:588:4 The attribute 'src' in tag 'amp-autocomplete' is missing or incorrect, but required by attribute 'query'. (see https://amp.dev/documentation/components/amp-autocomplete/)
 |        <input />
 |      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data, filter=prefix and prefetch attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        prefetch
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: prefetch is mistyped -->
+|      <amp-autocomplete
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:602:4 The attribute 'prefecth' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        prefecth
+|      >
+|        <input />
+|      </amp-autocomplete>
 |    </body>
 |  </html>
