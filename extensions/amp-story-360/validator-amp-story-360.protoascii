@@ -43,7 +43,7 @@ tags: {  # <amp-story-360>
     value_regex: "-?\\d+\\.?\\d*"
     trigger: {
       also_requires_attr: "duration"
-    }    
+    }
   }
   attrs: {
     name: "heading-start"
