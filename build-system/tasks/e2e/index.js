@@ -20,6 +20,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const ciReporter = require('./mocha-ci-reporter');
 const config = require('../../test-configs/config');
 const dotsReporter = require('./mocha-dots-reporter');
+const fetch = require('node-fetch');
 const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
@@ -33,6 +34,7 @@ const {
 } = require('../../common/utils');
 const {cyan} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
+const {getCoverageObject} = require('istanbul-middleware/lib/core');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isTravisBuild} = require('../../common/travis');
 const {maybePrintCoverageMessage} = require('../helpers');
@@ -42,6 +44,7 @@ const {watch} = require('gulp');
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
+const COV_REPORT_PATH = '/coverage/client';
 const COV_DOWNLOAD_PATH = '/coverage/download';
 const COV_OUTPUT_DIR = './test/coverage-e2e';
 const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
@@ -110,6 +113,19 @@ function addMochaFile_(mocha, file) {
 }
 
 /**
+ * Reports code coverage data to an aggregating endpoint.
+ * @return {Promise<void>}
+ */
+async function reportCoverage_() {
+  const coverage = getCoverageObject();
+  await fetch(`http://${HOST}:${PORT}${COV_REPORT_PATH}`, {
+    method: 'POST',
+    body: JSON.stringify(coverage),
+    headers: {'Content-type': 'application/json'},
+  });
+}
+
+/**
  * Fetch aggregated coverage data from server.
  * @param {string} outDir relative path to coverage files directory.
  */
@@ -170,6 +186,7 @@ async function runTests_() {
   return new Promise((resolve) => {
     mocha.run(async (failures) => {
       if (argv.coverage) {
+        await reportCoverage_();
         await fetchCoverage_(COV_OUTPUT_DIR);
         maybePrintCoverageMessage(COV_OUTPUT_HTML);
       }

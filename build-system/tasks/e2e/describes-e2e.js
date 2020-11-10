@@ -19,7 +19,6 @@ require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
-const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
@@ -28,17 +27,13 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
-  getCoverageObject,
-  mergeClientCoverage,
-} = require('istanbul-middleware/lib/core');
-const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
-const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isTravisBuild} = require('../../common/travis');
+const {mergeClientCoverage} = require('istanbul-middleware/lib/core');
 const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -47,7 +42,6 @@ const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
-const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
@@ -351,19 +345,6 @@ async function updateCoverage(env) {
 }
 
 /**
- * Reports code coverage data to an aggregating endpoint.
- * @return {Promise<void>}
- */
-async function reportCoverage() {
-  const coverage = getCoverageObject();
-  await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
-    method: 'POST',
-    body: JSON.stringify(coverage),
-    headers: {'Content-type': 'application/json'},
-  });
-}
-
-/**
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
@@ -484,12 +465,6 @@ function describeEnv(factory) {
 
         if (!isTravisBuild()) {
           uninstallRepl();
-        }
-      });
-
-      after(async () => {
-        if (argv.coverage) {
-          await reportCoverage();
         }
       });
 
