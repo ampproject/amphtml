@@ -22,6 +22,7 @@
  */
 
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 const {
   printChangeSummary,
   startTimer,
@@ -62,7 +63,7 @@ function main() {
       timedExecOrDie('gulp build --fortesting');
       uploadBuildOutput(FILENAME);
     } else {
-      console.log(
+      log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Unminified Build'),
         'because this commit does not affect the runtime, flag configs,',

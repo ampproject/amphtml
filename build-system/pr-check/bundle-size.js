@@ -36,7 +36,6 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {runNpmChecks} = require('./npm-checks');
-const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const FILENAME = 'bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -63,7 +62,6 @@ async function main() {
       timedExecOrDie('gulp bundle-size --on_pr_build');
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
-      await signalDistUpload('skipped');
 
       log(
         `${FILELOGPREFIX} Skipping`,
