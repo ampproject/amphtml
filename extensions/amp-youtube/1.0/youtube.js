@@ -156,16 +156,12 @@ export function Youtube({
   };
 
   return (
-    <VideoWrapper
-      component={VideoIframe}
+    <VideoIframe
       autoplay={autoplay}
       src={src}
       style={style}
-      size={true}
-      layout={true}
-      paint={true}
       onMessage={onMessage}
-      sendMessage={sendMessage}
+      makeMethodMessage={makeMethodMessage}
       onLoad={(event) => {
         const {currentTarget} = event;
         dispatchCustomEvent(currentTarget, 'canplay');
