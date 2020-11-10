@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1115
+spec_file_revision: 1119
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -1709,9 +1709,10 @@ tags: {
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
   tag_name: "IMG"
+  spec_name: "noscript > img"
+  descriptive_name: "img"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
-  spec_url: "https://amp.dev/documentation/components/amp-img/"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
@@ -1722,7 +1723,10 @@ tags: {
     value: "sync"
   }
   attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "importance" }  # Not yet part of the html spec
   attrs: { name: "ismap" }
+  attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
+  attrs: { name: "loading" }  # Not yet part of the html spec
   attrs: {
     name: "longdesc"
     value_url: {
@@ -1731,23 +1735,10 @@ tags: {
     }
     disallowed_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "importance" }  # Not yet part of the html spec
-  attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
-  attrs: { name: "loading" }  # Not yet part of the html spec
-  attrs: {
-    name: "src"
-    alternative_names: "srcset"
-    mandatory: true
-    value_url: {
-      protocol: "data"
-      protocol: "http" # For parity with amp-img's mandatory-src-or-srcset.
-      protocol: "https"
-      allow_relative: true
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
   attrs: { name: "sizes" }
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
+  attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
 }
 # 4.7.2 The iframe element
 tags: {
