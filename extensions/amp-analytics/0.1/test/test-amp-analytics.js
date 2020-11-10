@@ -397,7 +397,7 @@ describes.realWin(
         });
       });
 
-      it('fills internally provided trigger vars', function () {
+      it('fills internally provided trigger vars', async function* () {
         const analytics = getAnalyticsTag({
           'requests': {
             'timer':
@@ -413,7 +413,7 @@ describes.realWin(
             'visibility': {'on': 'visible', 'request': 'visible'},
           },
         });
-
+        await macroTask();
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
             /https:\/\/e.com\/start=[0-9]+&duration=[0-9]/
@@ -455,7 +455,7 @@ describes.realWin(
         });
       });
 
-      it('updates requestCount on each request', () => {
+      it('updates requestCount on each request', async function* () {
         const analytics = getAnalyticsTag({
           'host': 'example.test',
           'requests': {
@@ -467,6 +467,7 @@ describes.realWin(
             {'on': 'visible', 'request': 'pageview2'},
           ],
         });
+        await macroTask();
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('/test1=1');
           requestVerifier.verifyRequest('/test2=2');
@@ -1700,12 +1701,13 @@ describes.realWin(
         analytics.getAmpDoc = () => ampdoc;
       });
 
-      it('Initializes a new Linker.', () => {
+      it('Initializes a new Linker.', async function* () {
         env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({});
 
         const linkerStub = env.sandbox.stub(LinkerManager.prototype, 'init');
 
         analytics.buildCallback();
+        await macroTask();
         return analytics.layoutCallback().then(() => {
           expect(linkerStub.calledOnce).to.be.true;
         });

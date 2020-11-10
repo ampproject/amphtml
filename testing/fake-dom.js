@@ -246,6 +246,10 @@ export class FakeWindow {
       return window.clearInterval.apply(window, arguments);
     };
 
+    this.postMessage = function () {
+      return window.postMessage.apply(window, arguments);
+    }
+
     let raf =
       window.requestAnimationFrame || window.webkitRequestAnimationFrame;
     if (raf) {
@@ -300,6 +304,7 @@ class EventListeners {
     } = target;
     target.addEventListener = function (type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
+      window.addEventListener.apply(window, arguments);
       if (originalAdd) {
         originalAdd.apply(target, arguments);
       }
