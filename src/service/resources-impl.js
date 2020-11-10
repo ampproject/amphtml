@@ -1326,7 +1326,7 @@ export class ResourcesImpl {
         expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
-    // Phase 3: Trigger "viewport enter/exit" events.
+    // Phase 3: Set inViewport status for resources.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {

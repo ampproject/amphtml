@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.123 */
+/** Version: 0.1.22.131 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1471,6 +1471,59 @@ class Timestamp {
 /**
  * @implements {Message}
  */
+class ToastCloseRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?boolean} */
+    this.close_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getClose() {
+    return this.close_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setClose(value) {
+    this.close_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.close_, // field 1 - close
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'ToastCloseRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class ViewSubscriptionsResponse {
   /**
    * @param {!Array<*>=} data
@@ -1538,6 +1591,7 @@ const PROTO_MAP = {
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse,
   'Timestamp': Timestamp,
+  'ToastCloseRequest': ToastCloseRequest,
   'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
 };
 
@@ -5885,10 +5939,15 @@ function parseQueryString$1(query) {
     .split('&')
     .reduce((params, param) => {
       const item = param.split('=');
-      const key = decodeURIComponent(item[0] || '');
-      const value = decodeURIComponent(item[1] || '');
-      if (key) {
-        params[key] = value;
+      try {
+        const key = decodeURIComponent(item[0] || '');
+        const value = decodeURIComponent(item[1] || '');
+        if (key) {
+          params[key] = value;
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        log_4(`SwG could not parse a URL query param: ${item[0]}`);
       }
       return params;
     }, {});
@@ -6020,7 +6079,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.123',
+    '_client': 'SwG 0.1.22.131',
   });
 }
 
@@ -7139,7 +7198,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.123',
+        '_client': 'SwG 0.1.22.131',
         'supportsEventManager': true,
       },
       args || {}
@@ -7988,7 +8047,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.123');
+    context.setClientVersion('SwG 0.1.22.131');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10436,6 +10495,13 @@ class MeterToastApi {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
+    /** @private @const {!function()} */
+    this.sendCloseRequestFunction_ = () => {
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+    };
+
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
@@ -10446,7 +10512,7 @@ class MeterToastApi {
         productId: deps.pageConfig().getProductId(),
         hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
       }),
-      /* shouldFadeBody */ true
+      /* shouldFadeBody */ false
     );
   }
 
@@ -10458,6 +10524,7 @@ class MeterToastApi {
     this.deps_
       .callbacks()
       .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+    this.win_.addEventListener('click', this.sendCloseRequestFunction_);
     this.activityIframeView_.on(
       ViewSubscriptionsResponse,
       this.startNativeFlow_.bind(this)
@@ -10471,6 +10538,13 @@ class MeterToastApi {
    */
   setOnCancelCallback(onCancelCallback) {
     this.activityIframeView_.onCancel(onCancelCallback);
+  }
+
+  /**
+   * Removes the event listener that closes the iframe.
+   */
+  removeCloseEventListener() {
+    this.win_.removeEventListener('click', this.sendCloseRequestFunction_);
   }
 
   /**
@@ -11142,6 +11216,7 @@ class EntitlementsManager {
         if (onCloseDialog) {
           onCloseDialog();
         }
+        meterToastApi.removeCloseEventListener();
         this.sendPingback_(entitlements);
       });
       return meterToastApi.start();
@@ -11167,13 +11242,17 @@ class EntitlementsManager {
         }
 
         // Add metering params.
-        const productId = this.pageConfig_.getProductId();
-        if (productId && params && params.metering && params.metering.state) {
+        if (
+          this.publicationId_ &&
+          params &&
+          params.metering &&
+          params.metering.state
+        ) {
           /** @type {!GetEntitlementsParamsInternalDef} */
           const encodableParams = {
             metering: {
               clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
-              owner: productId,
+              owner: this.publicationId_,
               resource: {
                 hashedCanonicalUrl,
               },

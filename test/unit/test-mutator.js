@@ -48,7 +48,6 @@ describe('mutator changeSize', () => {
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: window.sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       unlayoutCallback: () => true,
@@ -1398,7 +1397,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.getBoundingClientRect = () => rect;
     element.applySizesAndMediaQuery = () => {};
     element.layoutCallback = () => Promise.resolve();
-    element.viewportCallback = env.sandbox.spy();
     element.prerenderAllowed = () => true;
     element.renderOutsideViewport = () => true;
     element.isRelayoutNeeded = () => true;
