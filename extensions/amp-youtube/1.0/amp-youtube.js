@@ -20,7 +20,7 @@ import {Youtube} from './youtube';
 /** @const {string} */
 const TAG = 'amp-youtube';
 
-class AmpYoutube extends PreactBaseElement {}
+class AmpYoutube extends VideoBaseElement {}
 
 /** @override */
 AmpYoutube['Component'] = Youtube;
