@@ -34,6 +34,7 @@ import {
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {macroTask} from '../../../../testing/yield';
 
 describes.realWin(
   'amp-analytics',

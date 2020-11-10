@@ -248,7 +248,7 @@ export class FakeWindow {
 
     this.postMessage = function () {
       return window.postMessage.apply(window, arguments);
-    }
+    };
 
     let raf =
       window.requestAnimationFrame || window.webkitRequestAnimationFrame;
