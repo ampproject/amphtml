@@ -610,7 +610,9 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
-    const pageRect = this.element_.querySelector('amp-story-page[active]').getLayoutBox();
+    const pageRect = this.element_
+      .querySelector('amp-story-page[active]')
+      .getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
