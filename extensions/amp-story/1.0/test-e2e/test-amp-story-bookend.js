@@ -42,7 +42,7 @@ describes.endtoend(
       await expect(await story.getElement().getAttribute('desktop')).to.be.null;
     });
 
-    it('should display bookend at the end of the story', async () => {
+    it.skip('should display bookend at the end of the story', async () => {
       await goToBookend();
       await expect(
         controller.findElement(
@@ -51,7 +51,7 @@ describes.endtoend(
       ).to.exist;
     });
 
-    it('should copy the link using the bookend share menu', async () => {
+    it.skip('should copy the link using the bookend share menu', async () => {
       await goToBookend();
 
       const shadowHost = await controller.findElement(
