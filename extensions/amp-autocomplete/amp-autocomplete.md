@@ -198,6 +198,10 @@ Specifies the key to the data array within the JSON response. Nested keys can be
 
 Whether the <code>amp-autocomplete</code> should autosuggest on the full user input or only a triggered substring of the user input. By default when the attribute is absent, suggestions will be based on the full user input. The attribute cannot have an empty value but must take a single character token, i.e. <code>@</code> which activates the autocomplete behavior. For example, if <code>inline="@"</code> then user input of <code>hello</code> will not retrieve suggestions but a user input of <code>hello @abc</code> might trigger options filtered on the substring <code>abc</code>. Currently triggered substrings are delimited on whitespace characters, however this is subject to change in the future.
 
+### `prefetch`
+
+Include the `prefetch` attribute to prefetch remote data to improve responsiveness for users. Requires `src` to be specified.
+
 ## Events
 
 ### `select`

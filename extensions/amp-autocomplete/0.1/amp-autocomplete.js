@@ -220,14 +220,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.viewport_ = null;
 
     /** @private {boolean} */
-    this.interacted_ = false;
+    this.hasFetchedInitialData_ = false;
 
     /**
      * To ensure that we provide an accessible experience,
     * the suggestion container must have a unique ID.
      * In case the autocomplete doesn't have an ID we use a
      * random number to ensure uniqueness.
-     @private {number|string} 
+     @private {number|string}
      */
     this.containerId_ = element.id
       ? element.id
@@ -499,6 +499,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Disable autofill in browsers.
     this.inputElement_.setAttribute('autocomplete', 'off');
 
+    if (this.element.hasAttribute('prefetch')) {
+      this.checkFirstInteractionAndMaybeFetchData_();
+    }
+
     // Register event handlers.
     this.inputElement_.addEventListener(
       'touchstart',
@@ -687,9 +691,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   autocomplete_(data, opt_input = '') {
     this.clearAllItems_();
-    if (opt_input.length < this.minChars_ || !data) {
+    if (!data || opt_input.length < this.minChars_) {
       return Promise.resolve();
-    } else if (this.isSsr_) {
+    }
+    if (this.isSsr_) {
       return hasOwn(data, 'html')
         ? this.renderResults_(
             data,
@@ -697,9 +702,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
             opt_input
           )
         : Promise.resolve();
-    } else {
-      return this.filterDataAndRenderResults_(data, opt_input);
     }
+    return this.filterDataAndRenderResults_(data, opt_input);
   }
 
   /**
@@ -990,10 +994,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   checkFirstInteractionAndMaybeFetchData_() {
-    if (this.interacted_ || !this.element.hasAttribute('src')) {
+    if (this.hasFetchedInitialData_ || !this.element.hasAttribute('src')) {
       return Promise.resolve();
     }
-    this.interacted_ = true;
+    this.hasFetchedInitialData_ = true;
     return this.getRemoteData_().then(
       (remoteData) => {
         this.sourceData_ = remoteData;
