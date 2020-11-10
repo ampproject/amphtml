@@ -42,6 +42,7 @@ const ANIMATION_PRESETS = {
   ],
 };
 
+// Note: Sometimes, the timing between render and lightboxRef update is delayed, so we have a quick function to wait for the ref element before acting on it.
 /**
  * @param {Object} ref
  * @param {number} time
