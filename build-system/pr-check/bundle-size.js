@@ -23,6 +23,7 @@
  */
 
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 const {
   downloadEsmDistOutput,
   downloadDistOutput,
@@ -35,6 +36,7 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {runNpmChecks} = require('./npm-checks');
+const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const FILENAME = 'bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -62,7 +64,8 @@ async function main() {
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
       await signalDistUpload('skipped');
-      console./*OK*/ log(
+
+      log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Bundle Size'),
         'because this commit does not affect the runtime or flag configs.'

@@ -22,6 +22,7 @@
  */
 
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 const {
   printChangeSummary,
   startTimer,
@@ -57,7 +58,7 @@ function main() {
       timedExecOrDie('gulp dist --esm --fortesting');
       uploadEsmDistOutput(FILENAME);
     } else {
-      console./*OK*/ log(
+      log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Module Build'),
         'because this commit does not affect the runtime or flag configs.'

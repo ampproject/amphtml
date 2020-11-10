@@ -22,6 +22,7 @@
  */
 
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 const {
   printChangeSummary,
   processAndUploadDistOutput,
@@ -68,7 +69,7 @@ async function main() {
       const process = timedExecWithError('gulp dist --fortesting', FILENAME);
       if (process.status !== 0) {
         const error = process.error || new Error('unknown error, check logs');
-        console./*OK*/ log(colors.red('ERROR'), colors.yellow(error.message));
+        log(colors.red('ERROR'), colors.yellow(error.message));
         await signalDistUpload('errored');
         stopTimedJob(FILENAME, startTime);
         return;
@@ -79,7 +80,7 @@ async function main() {
     } else {
       await signalDistUpload('skipped');
 
-      console./*OK*/ log(
+      log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Nomodule Build'),
         'because this commit does not affect the runtime, flag configs,',
