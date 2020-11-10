@@ -554,8 +554,8 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isInScreenSideEdge_(event, pageRect) {
     return (
-      event.clientX <= PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.width - PROTECTED_SCREEN_EDGE_PX
+      event.clientX <= pageRect.left + PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageRect.right - PROTECTED_SCREEN_EDGE_PX
     );
   }
 
