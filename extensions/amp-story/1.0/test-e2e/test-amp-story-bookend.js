@@ -51,7 +51,7 @@ describes.endtoend(
       ).to.exist;
     });
 
-    it('should copy the link using the bookend share menu', async () => {
+    it.skip('should copy the link using the bookend share menu', async () => {
       await goToBookend();
 
       const shadowHost = await controller.findElement(
