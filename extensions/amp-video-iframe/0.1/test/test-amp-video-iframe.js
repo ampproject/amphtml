@@ -369,7 +369,7 @@ describes.realWin(
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
             implementation_.onMessage_({data});
-            expect(eventSpy).to.be.calledOnce.calledWidth(expectedEventVars);
+            expect(eventSpy).to.be.calledOnce.calledWith(expectedEventVars);
           } else {
             allowConsoleError(() => {
               expect(() => implementation_.onMessage_({data})).to.throw();
