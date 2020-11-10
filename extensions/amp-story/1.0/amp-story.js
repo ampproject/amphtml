@@ -2641,7 +2641,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Switches to a page in the story given a delta. If new index is out of
-   * bounds, it will wrap around the pages array.
+   * bounds, it will go to the last or first page (depending on direction).
    * @param {number} delta
    * @private
    */
@@ -2669,13 +2669,8 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const targetPageIdx = findIndex(
-      this.pages_,
-      (page) => page.element.id === targetPage.element.id
-    );
-
     const direction =
-      targetPageIdx > currentPageIdx
+      newPageIdx > currentPageIdx
         ? NavigationDirection.NEXT
         : NavigationDirection.PREVIOUS;
 
