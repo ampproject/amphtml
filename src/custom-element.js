@@ -728,7 +728,7 @@ function createBaseCustomElementClass(win) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
-      this.dispatchCustomEvent(AmpEvents.SIZE_CHANGED);
+      dom.dispatchCustomEvent(this, AmpEvents.SIZE_CHANGED);
     }
 
     /**
@@ -939,22 +939,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Dispatches a custom event.
-     *
-     * @param {string} name
-     * @param {!Object=} opt_data Event data.
-     * @final
-     */
-    dispatchCustomEvent(name, opt_data) {
-      const data = opt_data || {};
-      // Constructors of events need to come from the correct window. Sigh.
-      const event = this.ownerDocument.createEvent('Event');
-      event.data = data;
-      event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
-      this.dispatchEvent(event);
-    }
-
-    /**
      * Dispatches a custom event only in testing environment.
      *
      * @param {string} name
@@ -965,7 +949,7 @@ function createBaseCustomElementClass(win) {
       if (!getMode().test) {
         return;
       }
-      this.dispatchCustomEvent(name, opt_data);
+      dom.dispatchCustomEvent(this, name, opt_data);
     }
 
     /**
