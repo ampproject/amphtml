@@ -38,7 +38,6 @@ describes.sandboxed('amp-img', {}, (env) => {
 
     screenWidth = 320;
     windowWidth = 320;
-    sandbox.stub(BaseElement.prototype, 'isInViewport').returns(true);
     sandbox.stub(BaseElement.prototype, 'getViewport').callsFake(() => {
       return {
         getWidth: () => windowWidth,

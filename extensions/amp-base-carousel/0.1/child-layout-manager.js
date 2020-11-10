@@ -198,11 +198,6 @@ export class ChildLayoutManager {
    * @param {boolean} isIntersecting
    */
   triggerVisibility_(target, isIntersecting) {
-    this.owners_.updateInViewport(
-      this.ampElement_.element,
-      target,
-      isIntersecting
-    );
     this.viewportIntersectionCallback_(target, isIntersecting);
   }
 

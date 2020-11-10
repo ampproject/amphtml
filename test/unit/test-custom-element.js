@@ -44,7 +44,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       let testElementCreatePlaceholderCallback;
       let testElementLayoutCallback;
       let testElementFirstLayoutCompleted;
-      let testElementViewportCallback;
       let testElementUnlayoutCallback;
       let testElementPauseCallback;
       let testElementResumeCallback;
@@ -70,9 +69,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         }
         firstLayoutCompleted() {
           testElementFirstLayoutCompleted();
-        }
-        viewportCallback(inViewport) {
-          testElementViewportCallback(inViewport);
         }
         getIntersectionElementLayoutBox() {
           testElementGetInsersectionElementLayoutBox();
@@ -132,7 +128,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         testElementCreatePlaceholderCallback = env.sandbox.spy();
         testElementLayoutCallback = env.sandbox.spy();
         testElementFirstLayoutCompleted = env.sandbox.spy();
-        testElementViewportCallback = env.sandbox.spy();
         testElementGetInsersectionElementLayoutBox = env.sandbox.spy();
         testElementUnlayoutCallback = env.sandbox.spy();
         testElementPauseCallback = env.sandbox.spy();
@@ -1474,17 +1469,11 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         it('should pause upgraded element', () => {
           const element = new ElementClass();
-          element.viewportCallback(true);
           container.appendChild(element);
           return element.buildingPromise_.then(() => {
-            expect(testElementViewportCallback).to.be.calledOnce;
-            expect(testElementViewportCallback).to.be.calledWith(true);
             element.pauseCallback();
             expect(testElementPauseCallback).to.be.calledOnce;
-            expect(testElementViewportCallback).to.be.calledTwice;
-            expect(testElementViewportCallback).to.be.calledWith(false);
             expect(element.isPaused()).to.be.true;
-            expect(element.isInViewport()).to.be.false;
           });
         });
 
@@ -1547,115 +1536,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element.pauseCallback();
           element.resumeCallback();
           expect(testElementResumeCallback).to.have.not.been.called;
-        });
-      });
-
-      describe('viewportCallback', () => {
-        it('Element should allow, but not delegate before build', () => {
-          const element = new ElementClass();
-          element.setAttribute('layout', 'fill');
-          expect(testElementViewportCallback).to.have.not.been.called;
-
-          expect(element.isBuilt()).to.equal(false);
-          element.viewportCallback(true);
-          expect(element.isInViewport()).to.equal(true);
-          expect(testElementViewportCallback).to.have.not.been.called;
-        });
-
-        it('StubElement - should not delegate before build or upgrade', () => {
-          const element = new StubElementClass();
-          element.setAttribute('layout', 'fill');
-          expect(testElementViewportCallback).to.have.not.been.called;
-
-          expect(element.isUpgraded()).to.equal(false);
-          expect(element.isBuilt()).to.equal(false);
-          element.viewportCallback(true);
-          expect(element.isInViewport()).to.equal(true);
-          expect(testElementViewportCallback).to.have.not.been.called;
-
-          resourcesMock.expects('upgraded').withExactArgs(element).never();
-          element.upgrade(TestElement);
-
-          expect(element.isUpgraded()).to.equal(false);
-          expect(element.isBuilt()).to.equal(false);
-          element.viewportCallback(false);
-          expect(element.isInViewport_).to.equal(false);
-          expect(testElementViewportCallback).to.have.not.been.called;
-        });
-
-        it('Element - should be called once built', () => {
-          const element = new ElementClass();
-          element.setAttribute('layout', 'fill');
-          container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            expect(element.isBuilt()).to.equal(true);
-            expect(testElementViewportCallback).to.have.not.been.called;
-
-            element.viewportCallback(true);
-            expect(element.implementation_.inViewport_).to.equal(true);
-            expect(testElementViewportCallback).to.be.calledOnce;
-          });
-        });
-
-        it('StubElement - should be called once upgraded', () => {
-          const element = new StubElementClass();
-          element.setAttribute('layout', 'fill');
-          container.appendChild(element);
-          expect(element.isUpgraded()).to.be.false;
-          expect(element.isBuilt()).to.be.false;
-
-          element.viewportCallback(true);
-          expect(element.implementation_.inViewport_).to.be.false;
-          expect(testElementViewportCallback).to.not.have.been.called;
-
-          element.upgrade(TestElement);
-          expect(element.implementation_.inViewport_).to.be.false;
-          return element.buildingPromise_.then(() => {
-            expect(element.implementation_.inViewport_).to.be.true;
-            expect(testElementViewportCallback).to.be.calledOnce;
-          });
-        });
-
-        it('StubElement - should not upgrade before attach', () => {
-          const element = new StubElementClass();
-          element.setAttribute('layout', 'fill');
-          resourcesMock.expects('upgraded').withExactArgs(element).never();
-          element.upgrade(TestElement);
-          expect(element.isUpgraded()).to.equal(false);
-          expect(element.isBuilt()).to.equal(false);
-          expect(element.implementation_).to.be.instanceOf(TestElement);
-          expect(testElementViewportCallback).to.have.not.been.called;
-        });
-
-        it('Element - should be called on built if in viewport', () => {
-          const element = new ElementClass();
-          element.setAttribute('layout', 'fill');
-          element.viewportCallback(true);
-          expect(element.isInViewport_).to.equal(true);
-          expect(testElementViewportCallback).to.have.not.been.called;
-
-          container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            expect(element.isInViewport_).to.equal(true);
-            expect(testElementViewportCallback).to.be.calledOnce;
-          });
-        });
-
-        it('Element - should NOT be called in template', () => {
-          const element = new ElementClass();
-          element.setAttribute('layout', 'fill');
-          container.appendChild(element);
-          return element.build().then(() => {
-            expect(element.isBuilt()).to.equal(true);
-            expect(testElementViewportCallback).to.have.not.been.called;
-
-            element.isInTemplate_ = true;
-            allowConsoleError(() => {
-              expect(() => {
-                element.viewportCallback(true);
-              }).to.throw(/Must never be called in template/);
-            });
-          });
         });
       });
     });

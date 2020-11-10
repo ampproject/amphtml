@@ -101,15 +101,6 @@ export class OwnersImpl {
   }
 
   /** @override */
-  updateInViewport(parentElement, subElements, inLocalViewport) {
-    this.updateInViewportForSubresources_(
-      this.resources_.getResourceForElement(parentElement),
-      elements(subElements),
-      inLocalViewport
-    );
-  }
-
-  /** @override */
   requireLayout(element, opt_parentPriority) {
     const promises = [];
     this.discoverResourcesForElement_(element, (resource) => {
@@ -232,24 +223,6 @@ export class OwnersImpl {
         opt_parentPriority
       );
     }
-  }
-
-  /**
-   * Updates inViewport state for the specified sub-resources of a resource.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   * @private
-   */
-  updateInViewportForSubresources_(
-    parentResource,
-    subElements,
-    inLocalViewport
-  ) {
-    const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.findResourcesInElements_(parentResource, subElements, (resource) => {
-      resource.setInViewport(inViewport);
-    });
   }
 }
 

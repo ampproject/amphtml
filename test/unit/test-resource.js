@@ -792,15 +792,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         ))
     );
 
-    it('should call viewportCallback when not built', () => {
-      resource.state_ = ResourceState.NOT_BUILT;
-      resource.setInViewport(true);
-      expect(resource.isInViewport()).to.equal(true);
-      expect(resolveWithinViewportSpy).to.be.calledOnce;
-    });
-
-    it('should call viewportCallback when built', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
+    it('should set inViewport to true', () => {
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
       expect(resolveWithinViewportSpy).to.be.calledOnce;
@@ -891,7 +883,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
   describe('unlayoutCallback', () => {
     it('should NOT call unlayoutCallback on unbuilt element', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('viewportCallback').never();
       elementMock.expects('unlayoutCallback').never();
       resource.unlayout();
       expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
@@ -929,18 +920,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('togglePlaceholder').withArgs(true).never();
       resource.unlayout();
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
-    });
-
-    it('should call viewportCallback when resource not in viewport', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('viewportCallback').withExactArgs(false).once();
-      resource.unlayout();
-    });
-
-    it('should call viewportCallback when resource in viewport', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('viewportCallback').withExactArgs(false).once();
-      resource.unlayout();
     });
 
     it('should delegate unload to unlayoutCallback', () => {
@@ -1079,7 +1058,6 @@ describe('Resource idleRenderOutsideViewport', () => {
       unlayoutCallback: () => true,
       pauseCallback: () => false,
       resumeCallback: () => false,
-      viewportCallback: () => {},
       getLayoutPriority: () => LayoutPriority.CONTENT,
     };
     resources = new ResourcesImpl(new AmpDocSingle(window));

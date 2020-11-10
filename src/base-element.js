@@ -61,7 +61,6 @@ import {isArray, toWin} from './types';
  *           ||                         ||
  *           ||                 =========
  *           ||
- *           || viewportCallback
  *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
@@ -126,9 +125,6 @@ export class BaseElement {
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {boolean} */
-    this.inViewport_ = false;
 
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
@@ -279,13 +275,6 @@ export class BaseElement {
    */
   isAlwaysFixed() {
     return false;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isInViewport() {
-    return this.inViewport_;
   }
 
   /**
@@ -462,13 +451,6 @@ export class BaseElement {
   firstLayoutCompleted() {
     this.togglePlaceholder(false);
   }
-
-  /**
-   * Instructs the resource that it has either entered or exited the visible
-   * viewport. Intended to be implemented by actual components.
-   * @param {boolean} unusedInViewport
-   */
-  viewportCallback(unusedInViewport) {}
 
   /**
    * Requests the element to stop its activity when the document goes into
