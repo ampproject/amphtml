@@ -100,3 +100,40 @@ The following lists validation errors specific to the `amp-o2-player` tag:
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
 </table>
+
+## Consent Data
+
+Iframe inside `amp-o2-player` can send a message to receive consent data if a CMP is present on `amp-o2-player` parents page.
+
+Example request for consent data from iframe:
+
+```javascript
+window.parent.postMessage(
+  {
+    sentinel: 'amp',
+    type: 'send-consent-data',
+  },
+  '*'
+);
+```
+
+Example receive response for consent data:
+
+```javascript
+function isAmpMessage(event, type) {
+  return (
+    event.source == window.parent &&
+    event.origin != window.location.origin &&
+    event.data &&
+    event.data.sentinel == 'amp' &&
+    event.data.type == type
+  );
+}
+
+window.addEventListener('message', function (event) {
+  if (!isAmpMessage(event, 'consent-data')) {
+    return;
+  }
+  console.log(event.data.consentData);
+});
+```

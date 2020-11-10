@@ -55,6 +55,7 @@ BaseCarouselDef.ScrollerProps;
 
 /**
  * @typedef {{
+ *   alt: (string|undefined),
  *   children: !Array<PreactDef.Renderable>,
  *   loop: (boolean|undefined),
  *   mixedLength: (boolean|undefined),
@@ -62,6 +63,8 @@ BaseCarouselDef.ScrollerProps;
  *   pivotIndex: number,
  *   restingIndex: number,
  *   snap: (boolean|undefined),
+ *   src: (string|undefined),
+ *   thumbnailSrc: (string|undefined),
  *   visibleCount: (number|undefined),
  * }}
  */
@@ -82,8 +85,8 @@ BaseCarouselDef.ArrowProps;
  * @typedef {{
  *   currentSlide: (number|undefined),
  *   setCurrentSlide: (function(number):undefined),
- *   slideCount: (number|undefined),
- *   setSlideCount: (function(number):undefined),
+ *   slides: !Array<BaseCarouselDef.SlideProps>,
+ *   setSlides: (function(Array):undefined),
  * }}
  */
 BaseCarouselDef.ContextProps;

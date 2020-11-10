@@ -366,17 +366,11 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const seen = [];
     this.withinWindow_(newPos, (cell) => {
       seen.push(cell);
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        cell,
-        true
-      );
     });
     if (oldPos != newPos) {
       this.withinWindow_(oldPos, (cell) => {
         if (!seen.includes(cell)) {
           const owners = Services.ownersForDoc(this.element);
-          owners.updateInViewport(this.element, cell, false);
           owners.schedulePause(this.element, cell);
         }
       });

@@ -24,7 +24,6 @@ import {
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
-import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
@@ -169,9 +168,6 @@ function createBaseCustomElementClass(win) {
       this.isFirstLayoutCompleted_ = false;
 
       /** @private {boolean} */
-      this.isInViewport_ = false;
-
-      /** @private {boolean} */
       this.paused_ = false;
 
       /** @private {string|null|undefined} */
@@ -258,9 +254,6 @@ function createBaseCustomElementClass(win) {
       const perf = Services.performanceForOrNull(win);
       /** @private {boolean} */
       this.perfOn_ = perf && perf.isPerformanceTrackingOn();
-
-      /** @private {?./layout-delay-meter.LayoutDelayMeter} */
-      this.layoutDelayMeter_ = null;
 
       if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
@@ -488,8 +481,8 @@ function createBaseCustomElementClass(win) {
           this.classList.remove('i-amphtml-notbuilt');
           this.classList.remove('amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
-          if (this.isInViewport_) {
-            this.updateInViewport_(true);
+          if (this.isConnected_) {
+            this.connected_();
           }
           if (this.actionQueue_) {
             // Only schedule when the queue is not empty, which should be
@@ -805,6 +798,7 @@ function createBaseCustomElementClass(win) {
           if (reconstruct) {
             this.getResources().upgraded(this);
           }
+          this.connected_();
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
       } else {
@@ -900,6 +894,13 @@ function createBaseCustomElementClass(win) {
      */
     disconnectedCallback() {
       this.disconnect(/* pretendDisconnected */ false);
+    }
+
+    /** @private */
+    connected_() {
+      if (this.built_) {
+        this.implementation_.attachedCallback();
+      }
     }
 
     /**
@@ -1144,9 +1145,6 @@ function createBaseCustomElementClass(win) {
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
       }
-      if (this.perfOn_) {
-        this.getLayoutDelayMeter_().startLayout();
-      }
 
       // Potentially start the loading indicator.
       this.toggleLoading(true);
@@ -1193,52 +1191,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Whether the resource is currently visible in the viewport.
-     * @return {boolean}
-     * @final @package
-     */
-    isInViewport() {
-      return this.isInViewport_;
-    }
-
-    /**
-     * Instructs the resource that it entered or exited the visible viewport.
-     *
-     * Can only be called on a upgraded and built element.
-     *
-     * @param {boolean} inViewport Whether the element has entered or exited
-     *   the visible viewport.
-     * @final @package
-     */
-    viewportCallback(inViewport) {
-      assertNotTemplate(this);
-      if (inViewport == this.isInViewport_) {
-        return;
-      }
-      // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
-      // elements in dead iframes.
-      if (!this.ownerDocument || !this.ownerDocument.defaultView) {
-        return;
-      }
-      this.isInViewport_ = inViewport;
-      if (this.isBuilt()) {
-        this.updateInViewport_(inViewport);
-      }
-    }
-
-    /**
-     * @param {boolean} inViewport
-     * @private
-     */
-    updateInViewport_(inViewport) {
-      this.implementation_.inViewport_ = inViewport;
-      this.implementation_.viewportCallback(inViewport);
-      if (inViewport && this.perfOn_) {
-        this.getLayoutDelayMeter_().enterViewport();
-      }
-    }
-
-    /**
      * Whether the resource is currently paused.
      * @return {boolean}
      * @final @package
@@ -1260,7 +1212,6 @@ function createBaseCustomElementClass(win) {
         return;
       }
       this.paused_ = true;
-      this.viewportCallback(false);
       if (this.isBuilt()) {
         this.implementation_.pauseCallback();
       }
@@ -1638,20 +1589,6 @@ function createBaseCustomElementClass(win) {
           loadingIndicator.untrack(this);
         }
       }
-    }
-
-    /**
-     * Returns an optional overflow element for this custom element.
-     * @return {!./layout-delay-meter.LayoutDelayMeter}
-     */
-    getLayoutDelayMeter_() {
-      if (!this.layoutDelayMeter_) {
-        this.layoutDelayMeter_ = new LayoutDelayMeter(
-          toWin(this.ownerDocument.defaultView),
-          this.getLayoutPriority()
-        );
-      }
-      return this.layoutDelayMeter_;
     }
 
     /**

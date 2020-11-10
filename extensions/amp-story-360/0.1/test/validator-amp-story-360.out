@@ -33,7 +33,7 @@ PASS
 |  <body>
 |
 |    <!-- Valid -->
-|      <amp-story        
+|      <amp-story
 |          standalone
 |          title="Demo Story"
 |          publisher="AMP Story"
@@ -50,11 +50,11 @@ PASS
 |        <amp-story-grid-layer template="fill">
 |          <amp-story-360 layout="fill" heading-start="95" pitch-start="-10" zoom-start="4" heading-end="-45" pitch-end="-20" zoom-end="1" duration="30s" scene-heading="8.5" scene-pitch="5" scene-roll="-1">
 |            <amp-video poster="img/nasa_training_poster.jpg" autoplay layout="fill" loop>
-|              <source src="img/NASA_VR_360_Astronaut_Training_Space_Walk.mp4" type="video/mp4" />
+|              <source src="img/NASA_VR_360_Astronaut_Training_Space_Walk_Clip.mp4" type="video/mp4" />
 |            </amp-video>
 |          </amp-story-360>
 |       </amp-story-grid-layer>
-|      </amp-story-page>    
+|      </amp-story-page>
 |    </amp-story>
 |  </body>
 |  </html>

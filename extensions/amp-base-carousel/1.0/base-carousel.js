@@ -26,7 +26,6 @@ import {
   useContext,
   useEffect,
   useImperativeHandle,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -79,11 +78,12 @@ function BaseCarouselWithRef(
     outsetArrows,
     snap = true,
     visibleCount = 1,
+    _thumbnails = false,
     ...rest
   },
   ref
 ) {
-  const childrenArray = toChildArray(children);
+  const childrenArray = useMemo(() => toChildArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(0);
@@ -91,7 +91,7 @@ function BaseCarouselWithRef(
   const currentSlideRef = useRef(currentSlide);
   const setCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
-  const {setSlideCount} = carouselContext;
+  const {slides, setSlides} = carouselContext;
   const scrollRef = useRef(null);
   const containRef = useRef(null);
   const contentRef = useRef(null);
@@ -164,9 +164,13 @@ function BaseCarouselWithRef(
     [next, prev, setRestingIndex]
   );
 
-  useLayoutEffect(() => {
-    setSlideCount(length);
-  }, [setSlideCount, length]);
+  useEffect(() => {
+    // For now, do not update slides if they are the same length as before.
+    // Otherwise this causes an infinite loop when updating the AMP Context.
+    if (!_thumbnails && slides && slides.length !== childrenArray.length) {
+      setSlides(childrenArray);
+    }
+  }, [_thumbnails, childrenArray, setSlides, slides]);
 
   const disableForDir = (dir) =>
     !loop &&
@@ -232,6 +236,7 @@ function BaseCarouselWithRef(
         snap={snap}
         ref={scrollRef}
         visibleCount={mixedLength ? 1 : visibleCount}
+        _thumbnails={_thumbnails}
       >
         {/*
           TODO(#30283): TBD: this is an interesting concept. We could decide
