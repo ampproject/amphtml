@@ -21,8 +21,19 @@
         line-height: 1.174;
         text-transform: uppercase;
       }
-      #link {
-        text-align: right;
+      #link1 {
+        position: absolute;
+        top: 300px;
+        right: 0;
+        width: 20px;
+        height: 0;
+      }
+      #link2 {
+        position: absolute;
+        top: 350px;
+        right: 50px;
+        width: 20px;
+        height: 0;
       }
     </style>
   </head>
@@ -38,8 +49,10 @@
       <amp-story-page id="1">
         <amp-story-grid-layer template="vertical">
           <h1>First Page</h1>
-          <p>Clicking the link on this page should result in navigating to the next page, and not actually open the link. This is because the link is within the margin reserved for navigation.</p>
-          <a href="http://www.google.com" id="link">This is a link</a>
+          <p>Clicking the first link on this page should result in navigating to the next page, and not actually open the link. This is because the link is within the margin reserved for navigation.</p>
+          <a href="http://www.google.com" id="link1">link1</a>
+          <p>Clicking the second link on this page should allow opening the link.</p>
+          <a href="http://www.google.com" id="link2">link2</a>
         </amp-story-grid-layer>
       </amp-story-page>
 
