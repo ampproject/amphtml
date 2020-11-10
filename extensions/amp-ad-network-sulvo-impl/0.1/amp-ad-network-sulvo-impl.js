@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import '../../../src/service/real-time-config/real-time-config-impl';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -20,15 +21,8 @@ import {
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
 import {
-  FlexibleAdSlotDataTypeDef,
-  getFlexibleAdSlotData,
-} from './flexible-ad-slot-utils';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Navigation} from '../../../src/service/navigation';
-import {
+  AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
@@ -47,7 +41,15 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Deferred} from '../../../src/utils/promise';
+import {
+  FlexibleAdSlotDataTypeDef,
+  getFlexibleAdSlotData,
+} from './flexible-ad-slot-utils';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Navigation} from '../../../src/service/navigation';
+import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
@@ -164,7 +166,7 @@ const TARGETING_MACRO_ALLOWLIST = {
  * Map of pageview tokens to the instances they belong to.
  * @private {!Object<string, !AmpAdNetworkSulvoImpl>}
  */
-const tokensToInstances = {};
+let tokensToInstances = {};
 
 /** @private {?Promise} */
 let sraRequests = null;
@@ -418,8 +420,8 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
           !forcedExperimentId &&
           !this.win.document./*OK*/ querySelector(
             'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'
+              'amp-ad[type=sulvo][data-enable-refresh], ' +
+              'meta[name=amp-ad-sulvo-sra]'
           ),
         branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
           (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
@@ -558,7 +560,7 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
    */
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
-    const tokens = this.getPageviewStateTokensForAdRequest(instances);
+    const tokens = getPageviewStateTokensForAdRequest(instances);
     const {consentString, gdprApplies} = consentTuple;
 
     return {
@@ -1161,8 +1163,8 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
@@ -1598,7 +1600,7 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
     return groupAmpAdsByType(
       this.getAmpDoc(),
       this.element.getAttribute('type'),
-      this.getNetworkId
+      getNetworkId
     );
   }
 
@@ -1719,7 +1721,7 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
                   } else if (
                     noFallbackExp ||
                     !!this.win.document.querySelector(
-                      'meta[name=amp-ad-doubleclick-sra]'
+                      'meta[name=amp-ad-sulvo-sra]'
                     )
                   ) {
                     // If publisher has explicitly enabled SRA mode (not
@@ -1932,36 +1934,33 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
   isFluidRequest() {
     return this.isFluidRequest_;
   }
+}
 
-  /**
-   * Returns the pageview tokens that should be included in the ad request. Tokens
-   * should come only from instances that are not being requested in this request.
-   * @param {!Array<!AmpAdNetworkSulvoImpl>} instancesInAdRequest
-   * @return {!Array<string>} Array of pageview tokens to include in the ad
-   * request.
-   */
-  getPageviewStateTokensForAdRequest(instancesInAdRequest) {
-    const pageviewStateTokensInAdRequest = [];
-    for (const token in tokensToInstances) {
-      if (!instancesInAdRequest.includes(tokensToInstances[token])) {
-        pageviewStateTokensInAdRequest.push(token);
-      }
-    }
-    return pageviewStateTokensInAdRequest;
-  }
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpAdNetworkSulvoImpl);
+});
 
-  /**
-   * @param {!Element} element
-   * @return {string} networkId from data-ad-slot attribute.
-   * @visibleForTesting
-   */
-  getNetworkId(element) {
-    const networkId = /^(?:\/)?(\d+)/.exec(
-      dev().assertString(element.getAttribute('data-slot'))
-    );
-    // TODO: guarantee data-ad-slot format as part of isValidElement?
-    return networkId ? networkId[1] : '';
-  }
+/** @visibleForTesting */
+export function resetSraStateForTesting() {
+  sraRequests = null;
+}
+
+/** @visibleForTesting */
+export function resetLocationQueryParametersForTesting() {
+  windowLocationQueryParameters = null;
+}
+
+/**
+ * @param {!Element} element
+ * @return {string} networkId from data-ad-slot attribute.
+ * @visibleForTesting
+ */
+export function getNetworkId(element) {
+  const networkId = /^(?:\/)?(\d+)/.exec(
+    dev().assertString(element.getAttribute('data-slot'))
+  );
+  // TODO: guarantee data-ad-slot format as part of isValidElement?
+  return networkId ? networkId[1] : '';
 }
 
 /**
@@ -1991,6 +1990,27 @@ function constructSRARequest_(a4a, instances) {
     });
 }
 
-AMP.extension(TAG, '0.1', (AMP) => {
-  AMP.registerElement(TAG, AmpAdNetworkSulvoImpl);
-});
+/**
+ * Returns the pageview tokens that should be included in the ad request. Tokens
+ * should come only from instances that are not being requested in this request.
+ * @param {!Array<!AmpAdNetworkSulvoImpl>} instancesInAdRequest
+ * @return {!Array<string>} Array of pageview tokens to include in the ad
+ * request.
+ */
+export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
+  const pageviewStateTokensInAdRequest = [];
+  for (const token in tokensToInstances) {
+    if (!instancesInAdRequest.includes(tokensToInstances[token])) {
+      pageviewStateTokensInAdRequest.push(token);
+    }
+  }
+  return pageviewStateTokensInAdRequest;
+}
+
+/**
+ * Resets the tokensToInstances mapping for testing purposes.
+ * @visibleForTesting
+ */
+export function resetTokensToInstancesMap() {
+  tokensToInstances = {};
+}
