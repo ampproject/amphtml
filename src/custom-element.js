@@ -168,9 +168,6 @@ function createBaseCustomElementClass(win) {
       this.isFirstLayoutCompleted_ = false;
 
       /** @private {boolean} */
-      this.isInViewport_ = false;
-
-      /** @private {boolean} */
       this.paused_ = false;
 
       /** @private {string|null|undefined} */
@@ -486,9 +483,6 @@ function createBaseCustomElementClass(win) {
           this.signals_.signal(CommonSignals.BUILT);
           if (this.isConnected_) {
             this.connected_();
-          }
-          if (this.isInViewport_) {
-            this.updateInViewport_(true);
           }
           if (this.actionQueue_) {
             // Only schedule when the queue is not empty, which should be
@@ -1197,49 +1191,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Whether the resource is currently visible in the viewport.
-     * @return {boolean}
-     * @final @package
-     */
-    isInViewport() {
-      return this.isInViewport_;
-    }
-
-    /**
-     * Instructs the resource that it entered or exited the visible viewport.
-     *
-     * Can only be called on a upgraded and built element.
-     *
-     * @param {boolean} inViewport Whether the element has entered or exited
-     *   the visible viewport.
-     * @final @package
-     */
-    viewportCallback(inViewport) {
-      assertNotTemplate(this);
-      if (inViewport == this.isInViewport_) {
-        return;
-      }
-      // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
-      // elements in dead iframes.
-      if (!this.ownerDocument || !this.ownerDocument.defaultView) {
-        return;
-      }
-      this.isInViewport_ = inViewport;
-      if (this.isBuilt()) {
-        this.updateInViewport_(inViewport);
-      }
-    }
-
-    /**
-     * @param {boolean} inViewport
-     * @private
-     */
-    updateInViewport_(inViewport) {
-      this.implementation_.inViewport_ = inViewport;
-      this.implementation_.viewportCallback(inViewport);
-    }
-
-    /**
      * Whether the resource is currently paused.
      * @return {boolean}
      * @final @package
@@ -1261,7 +1212,6 @@ function createBaseCustomElementClass(win) {
         return;
       }
       this.paused_ = true;
-      this.viewportCallback(false);
       if (this.isBuilt()) {
         this.implementation_.pauseCallback();
       }
