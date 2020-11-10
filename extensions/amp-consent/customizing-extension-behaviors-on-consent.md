@@ -63,7 +63,9 @@ AMP will always pass the local stored consent string if there's one. Update to t
 
 Use the `getConsentPolicyInfo` API. `getConsentPolicyInfo` returns a promise with the raw consent string value.
 
-Ways to get the consent string for ad/analytics vendors coming soon.
+#### If you integrate with AMP as an analytics vendor
+
+Get the value using `CONSENT_STRING` macro, or `${consentString}`. A request with the varaible will only be sent out after the consent policy has resolved and the stored consent string (if any) will be returned.
 
 ### On Related Information
 

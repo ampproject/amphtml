@@ -18,6 +18,7 @@ import * as Preact from '../../../src/preact';
 import {Wrapper} from '../../../src/preact/component';
 import {getDate} from '../../../src/utils/date';
 import {timeago} from '../../../third_party/timeagojs/timeago';
+import {toWin} from '../../../src/types';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
@@ -54,10 +55,11 @@ export function Timeago({
 
   useEffect(() => {
     const node = ref.current;
-    if (!node) {
+    const win = node && toWin(node.ownerDocument.defaultView);
+    if (!win) {
       return undefined;
     }
-    const observer = new IntersectionObserver((entries) => {
+    const observer = new win.IntersectionObserver((entries) => {
       const last = entries[entries.length - 1];
       if (last.isIntersecting) {
         setTimestamp(

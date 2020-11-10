@@ -175,7 +175,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(wrapper.exists(`.${classes.eq}`)).to.be.true;
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(wrapper.exists(`.${classes.eq}`)).to.be.false;
     });
 
@@ -188,14 +188,14 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
 
     it('should not render mask without controls', () => {
       const wrapper = mount(<VideoWrapper component={TestPlayer} autoplay />);
-      expect(wrapper.exists('[role="button"]')).to.be.false;
+      expect(wrapper.exists('button')).to.be.false;
     });
 
     it('should render mask with controls', () => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-      expect(wrapper.exists('[role="button"]')).to.be.true;
+      expect(wrapper.exists('button')).to.be.true;
     });
 
     it('should enable native controls on mask interaction', () => {
@@ -203,7 +203,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(wrapper.find(TestPlayer).props().controls).to.be.false;
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(wrapper.find(TestPlayer).props().controls).to.be.true;
     });
 
@@ -217,7 +217,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(wrapper.find(TestPlayer).props().muted).to.be.true;
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(wrapper.find(TestPlayer).props().muted).to.be.false;
     });
 
@@ -226,7 +226,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(wrapper.exists('Autoplay')).to.be.true;
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(wrapper.exists('Autoplay')).to.be.false;
     });
 
@@ -244,7 +244,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(intersectionObserverObserved).to.have.lengthOf(1);
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(intersectionObserverObserved).to.be.null;
     });
 
