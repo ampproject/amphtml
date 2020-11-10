@@ -18,9 +18,12 @@ import {AmpAdCustom} from './amp-ad-custom';
 import {CSS} from '../../../build/amp-ad-0.1.css';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
+import {dev, userAssert} from '../../../src/log';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+
+/** @type {string} */
+const TAG = 'amp-ad';
 
 /**
  * Construct ad network type-specific tag and script name.  Note that this
@@ -61,6 +64,11 @@ export class AmpAd extends AMP.BaseElement {
         isCustom || hasOwn(adConfig, type) || hasOwn(a4aRegistry, type),
         `Unknown ad type "${type}"`
       );
+
+      // TODO(powerivq, #30890): Remove after data collection finishes
+      if (!window.document.documentMode) {
+        dev().expectedError(TAG, 'ad type: ' + type);
+      }
 
       // Check for the custom ad type (no ad network, self-service)
       if (isCustom) {
