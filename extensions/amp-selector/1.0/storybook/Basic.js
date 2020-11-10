@@ -71,7 +71,7 @@ export const listItems = () => {
       <Option
         as="img"
         alt="Sea landscape"
-        style={{...imgStyle, width: '90px', height: '60px'}}
+        style={imgStyle}
         src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
         option="1"
         disabled
@@ -79,7 +79,7 @@ export const listItems = () => {
       <Option
         as="img"
         alt="Desert landscape"
-        style={{...imgStyle, width: '90px', height: '60px'}}
+        style={imgStyle}
         src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
         option="2"
       ></Option>
@@ -87,14 +87,14 @@ export const listItems = () => {
       <Option
         as="img"
         alt="Ship landscape"
-        style={{...imgStyle, width: '90px', height: '60px'}}
+        style={imgStyle}
         src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
         option="3"
       ></Option>
       <Option
         as="img"
         alt="Village landscape"
-        style={{...imgStyle, width: '90px', height: '60px'}}
+        style={imgStyle}
         src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
         option="4"
       ></Option>
