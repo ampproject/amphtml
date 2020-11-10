@@ -1753,8 +1753,7 @@ const VideoEvents = {
   /**
    * amp:video:visibility
    *
-   * Fired when the video's visibility changes. Normally fired
-   * from `viewportCallback`.
+   * Fired when the video's visibility changes.
    *
    * @event amp:video:visibility
    * @property {boolean} visible Whether the video player is visible or not.

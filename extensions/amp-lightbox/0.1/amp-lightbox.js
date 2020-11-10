@@ -140,9 +140,6 @@ class AmpLightbox extends AMP.BaseElement {
     this.pos_ = 0;
 
     /** @private {number} */
-    this.oldPos_ = 0;
-
-    /** @private {number} */
     this.eventCounter_ = 0;
 
     /** @private {?number} */
@@ -255,7 +252,7 @@ class AmpLightbox extends AMP.BaseElement {
 
       element.addEventListener(AmpEvents.DOM_UPDATE, () => {
         this.takeOwnershipOfDescendants_();
-        this.updateChildrenInViewport_(this.pos_, this.pos_);
+        this.updateChildrenInViewport_(this.pos_);
       });
 
       element.addEventListener('scroll', this.scrollHandler_.bind(this));
@@ -382,15 +379,9 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     const container = dev().assertElement(this.container_);
-    if (!this.isScrollable_) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        container,
-        true
-      );
-    } else {
+    if (this.isScrollable_) {
       this.scrollHandler_();
-      this.updateChildrenInViewport_(this.pos_, this.pos_);
+      this.updateChildrenInViewport_(this.pos_);
     }
 
     const onAnimationEnd = () => {
@@ -812,36 +803,22 @@ class AmpLightbox extends AMP.BaseElement {
    */
   update_(pos) {
     dev().fine(TAG, 'update_');
-    this.updateChildrenInViewport_(pos, this.oldPos_);
-    this.oldPos_ = pos;
+    this.updateChildrenInViewport_(pos);
     this.pos_ = pos;
   }
 
   /**
    * Update the inViewport status of children when scroll position changed.
    * @param {number} newPos
-   * @param {number} oldPos
    * @private
    */
-  updateChildrenInViewport_(newPos, oldPos) {
+  updateChildrenInViewport_(newPos) {
     const seen = [];
     this.forEachVisibleChild_(newPos, (cell) => {
       seen.push(cell);
       const owners = Services.ownersForDoc(this.element);
-      owners.updateInViewport(this.element, cell, true);
       owners.scheduleLayout(this.element, cell);
     });
-    if (oldPos != newPos) {
-      this.forEachVisibleChild_(oldPos, (cell) => {
-        if (!seen.includes(cell)) {
-          Services.ownersForDoc(this.element).updateInViewport(
-            this.element,
-            cell,
-            false
-          );
-        }
-      });
-    }
   }
 
   /**

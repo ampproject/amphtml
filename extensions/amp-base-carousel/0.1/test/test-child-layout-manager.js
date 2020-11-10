@@ -95,7 +95,6 @@ describes.realWin('child layout manager', {}, (env) => {
       scheduleUnlayout: env.sandbox.spy(),
       schedulePause: env.sandbox.spy(),
       scheduleResume: env.sandbox.spy(),
-      updateInViewport: env.sandbox.spy(),
     };
     env.sandbox.stub(Services, 'ownersForDoc').returns(ownersMock);
   });
@@ -229,14 +228,6 @@ describes.realWin('child layout manager', {}, (env) => {
       clm.updateChildren(el.children);
       clm.wasLaidOut();
       await afterRenderPromise();
-
-      expect(ownersMock.updateInViewport)
-        .to.have.callCount(5)
-        .to.have.been.calledWith(domElementMock, el.children[0], true)
-        .to.have.been.calledWith(domElementMock, el.children[1], false)
-        .to.have.been.calledWith(domElementMock, el.children[2], false)
-        .to.have.been.calledWith(domElementMock, el.children[3], false)
-        .to.have.been.calledWith(domElementMock, el.children[4], false);
     });
 
     it('should call the viewportIntersectionCallback', async () => {
@@ -326,27 +317,6 @@ describes.realWin('child layout manager', {}, (env) => {
         .to.have.been.calledWith(domElementMock, el.children[3])
         .to.have.been.calledWith(domElementMock, el.children[4]);
     });
-
-    it('should updateInViewport on scroll', async () => {
-      const el = createHorizontalScroller(5);
-      const clm = new ChildLayoutManager({
-        ampElement: ampElementMock,
-        intersectionElement: el,
-      });
-
-      clm.updateChildren(el.children);
-      clm.wasLaidOut();
-      await afterRenderPromise();
-
-      ownersMock.updateInViewport.resetHistory();
-      await afterScrollAndIntersectingPromise(el.children[1], el);
-      await afterRenderPromise();
-
-      expect(ownersMock.updateInViewport)
-        .to.have.callCount(2)
-        .to.have.been.calledWith(domElementMock, el.children[0], false)
-        .to.have.been.calledWith(domElementMock, el.children[1], true);
-    });
   });
 
   describe('queuing changes', () => {
@@ -419,34 +389,6 @@ describes.realWin('child layout manager', {}, (env) => {
       expect(ownersMock.scheduleUnlayout)
         .to.have.callCount(1)
         .to.have.been.calledWith(domElementMock, el.children[0]);
-    });
-
-    it('should queue updateInViewport on scroll', async () => {
-      const el = createHorizontalScroller(5);
-      const clm = new ChildLayoutManager({
-        ampElement: ampElementMock,
-        intersectionElement: el,
-      });
-
-      clm.setQueueChanges(true);
-      clm.updateChildren(el.children);
-      clm.wasLaidOut();
-      await afterRenderPromise();
-
-      clm.flushChanges();
-      ownersMock.updateInViewport.resetHistory();
-      await afterScrollAndIntersectingPromise(el.children[1], el);
-      await afterRenderPromise();
-
-      // Make sure changes are not applied yet.
-      expect(ownersMock.updateInViewport).to.have.not.been.called;
-      // Now flush the changes and check that they are applied.
-      clm.flushChanges();
-
-      expect(ownersMock.updateInViewport)
-        .to.have.callCount(2)
-        .to.have.been.calledWith(domElementMock, el.children[0], false)
-        .to.have.been.calledWith(domElementMock, el.children[1], true);
     });
   });
 });

@@ -253,14 +253,6 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
 - **Return**: **True** if your element need to re-layout.
 - **Usage Example**: amp-iframe
 
-#### viewportCallback
-
-- **Default**: Does nothing.
-- **Override**: Rarely.
-- **Usage**: Use if your element need to know when it comes into viewport
-  and when it goes out of it for finer control.
-- **Usage Example**: amp-carousel, amp-anim
-
 ## Element styling
 
 You can write a stylesheet to style your element to provide a minimal
@@ -377,8 +369,6 @@ current slide when the user moves to it.
 
 ```javascript
 const owners = Services.ownersForDoc(this.element);
-owners.updateInViewport(this.element, oldSlide, false);
-owners.updateInViewport(this.element, newSlide, true);
 owners.scheduleLayout(this.element, newSlide);
 this.setControlsState();
 owners.schedulePause(this.element, oldSlide);

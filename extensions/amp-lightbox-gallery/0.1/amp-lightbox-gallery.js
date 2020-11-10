@@ -751,11 +751,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.isActive_ = true;
 
         const owners = Services.ownersForDoc(this.element);
-        owners.updateInViewport(
-          this.element,
-          dev().assertElement(this.container_),
-          true
-        );
         owners.scheduleLayout(
           this.element,
           dev().assertElement(this.container_)

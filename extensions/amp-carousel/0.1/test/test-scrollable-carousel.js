@@ -35,7 +35,6 @@ describes.realWin(
     let win,
       doc,
       owners,
-      updateInViewportSpy,
       schedulePauseSpy,
       scheduleLayoutSpy,
       schedulePreloadSpy;
@@ -47,7 +46,6 @@ describes.realWin(
       env.iframe.height = '200';
 
       owners = Services.ownersForDoc(doc);
-      updateInViewportSpy = env.sandbox.spy(owners, 'updateInViewport');
       schedulePauseSpy = env.sandbox.spy(owners, 'schedulePause');
       scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
       schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
@@ -155,35 +153,6 @@ describes.realWin(
           // scroll to the correct position
           expect(impl.container_./*OK*/ scrollLeft).to.equal(300);
 
-          // load new slides in viewport
-          expect(updateInViewportSpy).to.have.callCount(5);
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4],
-            true
-          );
-
-          // unload and pause old slides in viewport
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[0],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[1],
-            false
-          );
           expect(schedulePauseSpy).to.have.been.calledWith(
             impl.element,
             impl.cells_[0]
@@ -252,35 +221,6 @@ describes.realWin(
           // note the correct scrollLeft is not 600 (300 * 2) but 588 (888 - 300)
           expect(impl.container_./*OK*/ scrollLeft).to.equal(588);
 
-          // load new slides in viewport
-          expect(updateInViewportSpy).to.have.callCount(5);
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[5],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[6],
-            true
-          );
-
-          // unload and pause old slides in viewport
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3],
-            false
-          );
           expect(schedulePauseSpy).to.have.been.calledWith(
             impl.element,
             impl.cells_[2]
@@ -338,35 +278,6 @@ describes.realWin(
           // scroll to the correct position
           expect(impl.container_./*OK*/ scrollLeft).to.equal(288);
 
-          // load new slides in viewport
-          expect(updateInViewportSpy).to.have.callCount(5);
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4],
-            true
-          );
-
-          // unload and pause old slides in viewport
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[5],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[6],
-            false
-          );
           expect(schedulePauseSpy).to.have.been.calledWith(
             impl.element,
             impl.cells_[5]
@@ -437,35 +348,6 @@ describes.realWin(
           // scroll to the correct position
           expect(impl.container_./*OK*/ scrollLeft).to.equal(0);
 
-          // load new slides in viewport
-          expect(updateInViewportSpy).to.have.callCount(5);
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[0],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[1],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2],
-            true
-          );
-
-          // unload and pause old slides in viewport
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4],
-            false
-          );
           expect(schedulePauseSpy).to.have.been.calledWith(
             impl.element,
             impl.cells_[3]

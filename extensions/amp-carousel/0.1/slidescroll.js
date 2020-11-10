@@ -359,20 +359,6 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
-    if (this.slideIndex_ !== null) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        this.slides_[
-          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
-        ],
-        inViewport
-      );
-    }
-  }
-
-  /** @override */
   hasPrev() {
     return this.shouldLoop || this.slideIndex_ > 0;
   }
@@ -697,15 +683,6 @@ export class AmpSlideScroll extends BaseSlides {
     if (nextIndex != null && nextIndex !== prevIndex) {
       showIndexArr.push(nextIndex);
     }
-    if (this.slideIndex_ !== null) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        this.slides_[
-          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
-        ],
-        false
-      );
-    }
     const newSlideInView = this.slides_[newIndex];
 
     if (newSlideInView === undefined) {
@@ -717,11 +694,6 @@ export class AmpSlideScroll extends BaseSlides {
       );
       return false;
     }
-    Services.ownersForDoc(this.element).updateInViewport(
-      this.element,
-      newSlideInView,
-      true
-    );
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
