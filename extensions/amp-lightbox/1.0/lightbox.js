@@ -26,7 +26,7 @@ import {
 } from '../../../src/preact';
 import {useStyles} from './lightbox.jss';
 
-const ANIMATION_DURATION = 300;
+const ANIMATION_DURATION = 200;
 const ANIMATION_PRESETS = {
   'fade-in': [
     {opacity: 0, visibility: 'visible'},
@@ -47,15 +47,15 @@ const ANIMATION_PRESETS = {
  * @param {number} time
  * @return {number}
  */
-function getRefElement(ref, time = 5) {
-  return new Promise(async (resolve, reject) => {
+function getRefElement(ref, time = 1) {
+  return new Promise((resolve, reject) => {
     if (time <= 0) {
       return reject(`${ref} not found`);
     }
     if (ref) {
       return resolve(ref);
     }
-    return setTimeout(async () => await getRefElement(ref, time - 1), 1000);
+    setTimeout(() => getRefElement(ref, time - 1).then(resolve), 100);
   });
 }
 
@@ -152,6 +152,7 @@ function LightboxWithRef(
       return;
     }
     if (visible) {
+      console.log('lightboxRef on effect', lightboxRef);
       getRefElement(lightboxRef).then((element) => {
         element = element.current;
         const animation = element.animate(
