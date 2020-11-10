@@ -227,6 +227,7 @@ export class Resource {
     /** @const @private {boolean} */
     this.intersect_ = resources.isIntersectionExperimentOn();
 
+    // TODO(#30620): remove isInViewport_ and whenWithinViewport.
     /** @const @private {boolean} */
     this.isInViewport_ = false;
 
