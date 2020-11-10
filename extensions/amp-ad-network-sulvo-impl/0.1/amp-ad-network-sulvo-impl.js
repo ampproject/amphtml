@@ -186,16 +186,16 @@ let safeFrameRandomSubdomain = null;
       slotId: string,
       slotIndex: string,
     }} */
-let TroubleshootDataDef;
+let SulvoTroubleshootDataDef;
 
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
 
 /** @typedef {{width: number, height: number}} */
-let SizeDef;
+let SulvoSizeDef;
 
-/** @typedef {(SizeDef|../../../src/layout-rect.LayoutRectDef)} */
-let LayoutRectOrDimsDef;
+/** @typedef {(SulvoSizeDef|../../../src/layout-rect.LayoutRectDef)} */
+let SulvoLayoutRectOrDimsDef;
 
 /** @final */
 export class AmpAdNetworkSulvoImpl extends AmpA4A {
@@ -218,7 +218,7 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
     /** @private {?string} */
     this.qqid_ = null;
 
-    /** @private {?LayoutRectOrDimsDef} */
+    /** @private {?SulvoLayoutRectOrDimsDef} */
     this.initialSize_ = null;
 
     /** @type {?string} */
@@ -275,8 +275,8 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
     /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
     this.identityToken = null;
 
-    /** @private {!TroubleshootDataDef} */
-    this.troubleshootData_ = /** @type {!TroubleshootDataDef} */ ({});
+    /** @private {!SulvoTroubleshootDataDef} */
+    this.troubleshootData_ = /** @type {!SulvoTroubleshootDataDef} */ ({});
 
     /**
      * @private {?boolean} whether preferential rendered AMP creative, null
@@ -1053,7 +1053,7 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
    * Returns the width and height of the slot as defined by the width and height
    * attributes, or the dimensions as computed by
    * getIntersectionElementLayoutBox.
-   * @return {!LayoutRectOrDimsDef}
+   * @return {!SulvoLayoutRectOrDimsDef}
    */
   getSlotSize() {
     const {width, height} = this.getDeclaredSlotSize_();
@@ -1066,7 +1066,7 @@ export class AmpAdNetworkSulvoImpl extends AmpA4A {
   /**
    * Returns the width and height, as defined by the slot element's width and
    * height attributes.
-   * @return {!SizeDef}
+   * @return {!SulvoSizeDef}
    */
   getDeclaredSlotSize_() {
     const width = Number(this.element.getAttribute('width'));
