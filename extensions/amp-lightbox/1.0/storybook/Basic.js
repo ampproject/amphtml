@@ -39,7 +39,6 @@ function LightboxWithActions(props) {
       <Lightbox ref={ref} {...props} />
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.open()}>open</button>
-        <button onClick={() => ref.current.close()}>close</button>
       </div>
     </section>
   );

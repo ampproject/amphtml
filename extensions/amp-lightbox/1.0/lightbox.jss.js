@@ -16,7 +16,7 @@
 
 import {createUseStyles} from 'react-jss';
 
-const ariaButton = {
+const closeButton = {
   position: 'fixed',
   /* keep it on viewport */
   top: 0,
@@ -49,14 +49,13 @@ const lightboxContainWrapper = {
   height: '100%',
   position: 'fixed',
   opacity: 0,
-  visibility: 'hidden',
   alignItems: 'center',
   justifyContent: 'right',
   display: 'block',
 };
 
 const JSS = {
-  ariaButton,
+  closeButton,
   lightboxContainWrapper,
 };
 
