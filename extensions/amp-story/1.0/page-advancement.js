@@ -463,7 +463,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInScreenSideEdge_(event)
+          !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
           return true;
@@ -500,7 +500,7 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (this.isInScreenSideEdge_(event)) {
+    if (this.isInScreenSideEdge_(event, pageRect)) {
       event.preventDefault();
       return false;
     }
@@ -546,16 +546,16 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Checks if click was inside of one of the side edges of the story page.
+   * Checks if click was inside of one of the side edges of the page.
    * @param {!Event} event
+   * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isInScreenSideEdge_(event) {
-    const storyRect = this.element_.getBoundingClientRect();
+  isInScreenSideEdge_(event, pageRect) {
     return (
-      event.clientX <= storyRect.left + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= storyRect.right - PROTECTED_SCREEN_EDGE_PX
+      event.clientX <= PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageRect.width - PROTECTED_SCREEN_EDGE_PX
     );
   }
 
@@ -610,7 +610,7 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
-    const pageRect = this.element_.getLayoutBox();
+    const pageRect = this.element_.querySelector('amp-story-page[active]').getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
