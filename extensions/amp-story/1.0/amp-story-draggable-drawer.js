@@ -290,8 +290,6 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
-    event.stopPropagation();
-
     if (this.touchEventState_.isSwipeY === null) {
       this.touchEventState_.isSwipeY =
         Math.abs(this.touchEventState_.startY - y) >
@@ -344,6 +342,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     const {data} = gesture;
 
     if (this.ignoreCurrentSwipeYGesture_ === true) {
+      gesture.event.stopPropagation();
       this.ignoreCurrentSwipeYGesture_ = !data.last;
       return;
     }
@@ -367,12 +366,11 @@ export class DraggableDrawer extends AMP.BaseElement {
         (isContentSwipe && deltaY < 0) ||
         (isContentSwipe && deltaY > 0 && this.containerEl_./*OK*/ scrollTop > 0)
       ) {
+        gesture.event.stopPropagation();
         this.ignoreCurrentSwipeYGesture_ = true;
         return;
       }
     }
-
-    gesture.event.preventDefault();
 
     if (data.last === true) {
       if (this.state_ === DrawerState.DRAGGING_TO_CLOSE) {
@@ -399,7 +397,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
-    this.drag_(deltaY);
+    this.drag_(deltaY, gesture);
   }
 
   /**
@@ -441,9 +439,10 @@ export class DraggableDrawer extends AMP.BaseElement {
   /**
    * Drags the drawer on the screen upon user interaction.
    * @param {number} deltaY
+   * @param {{event: !Event, data: !Object}} gesture
    * @private
    */
-  drag_(deltaY) {
+  drag_(deltaY, gesture) {
     let translate;
 
     switch (this.state_) {
@@ -451,6 +450,10 @@ export class DraggableDrawer extends AMP.BaseElement {
       case DrawerState.DRAGGING_TO_OPEN:
         if (deltaY > 0) {
           return;
+        }
+        if (this.state_ === DrawerState.DRAGGING_TO_OPEN) {
+          gesture.event.preventDefault();
+          gesture.event.stopPropagation();
         }
         this.state_ = DrawerState.DRAGGING_TO_OPEN;
         const drag = Math.max(deltaY, -this.dragCap_);
@@ -461,6 +464,8 @@ export class DraggableDrawer extends AMP.BaseElement {
         if (deltaY < 0) {
           return;
         }
+        gesture.event.preventDefault();
+        gesture.event.stopPropagation();
         this.state_ = DrawerState.DRAGGING_TO_CLOSE;
         translate = `translate3d(0, ${deltaY}px, 0)`;
         break;
