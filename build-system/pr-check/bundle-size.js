@@ -19,7 +19,7 @@
  * @fileoverview
  * This script downloads the module and nomodule builds then runs the bundle
  * size check.
- * This is run during the CI stage = bundle-size; job = Bundle Size.
+ * This is run during the CI stage = test; job = Bundle Size.
  */
 
 const colors = require('ansi-colors');

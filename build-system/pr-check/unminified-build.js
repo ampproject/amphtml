@@ -18,7 +18,7 @@
 /**
  * @fileoverview
  * This script builds the AMP runtime.
- * This is run during the CI stage = build; job = build.
+ * This is run during the CI stage = build; job = Unminified Build.
  */
 
 const colors = require('ansi-colors');
@@ -64,7 +64,7 @@ function main() {
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Build'),
+        colors.cyan('Unminified Build'),
         'because this commit does not affect the runtime, flag configs,',
         'or integration tests.'
       );

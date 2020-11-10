@@ -18,7 +18,7 @@
 /**
  * @fileoverview
  * This script builds the minified AMP runtime.
- * This is run during the CI stage = build; job = Nomodule Dist.
+ * This is run during the CI stage = build; job = Nomodule Build.
  */
 
 const colors = require('ansi-colors');

@@ -18,7 +18,7 @@
 /**
  * @fileoverview
  * This script builds the esm minified AMP runtime.
- * This is run during the CI stage = build; job = Module Dist.
+ * This is run during the CI stage = build; job = Module Build.
  */
 
 const colors = require('ansi-colors');
