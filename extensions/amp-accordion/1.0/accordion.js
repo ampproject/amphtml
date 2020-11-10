@@ -41,6 +41,9 @@ const AccordionContext = Preact.createContext(
 /** @type {!Object<string, boolean>} */
 const EMPTY_EXPANDED_MAP = {};
 
+/** @type {!Object<string, function(boolean):undefined|undefined>} */
+const EMPTY_EVENT_MAP = {};
+
 const generateSectionId = sequentialIdGenerator();
 const generateRandomId = randomIdGenerator(100000);
 
@@ -61,7 +64,7 @@ function AccordionWithRef(
   ref
 ) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
-  const eventMap = useRef(/** @type {!Object} */ ({}));
+  const eventMapRef = useRef(EMPTY_EVENT_MAP);
   const [randomPrefix] = useState(generateRandomId);
   const prefix = id || `a${randomPrefix}`;
 
@@ -89,10 +92,13 @@ function AccordionWithRef(
           expandSingleSection
         );
       });
-      eventMap.current = {...eventMap.current, [id]: onExpandStateChange};
+      eventMapRef.current = {...eventMapRef.current, [id]: onExpandStateChange};
       return () => {
         setExpandedMap((expandedMap) => omit(expandedMap, id));
-        eventMap.current = omit(/** @type {!Object} */ (eventMap.current), id);
+        eventMapRef.current = omit(
+          /** @type {!Object} */ (eventMapRef.current),
+          id
+        );
       };
     },
     [expandSingleSection]
@@ -108,21 +114,13 @@ function AccordionWithRef(
           expandSingleSection
         );
 
-        // Create a map of all the changed sections
-        const changedValues = {};
-        for (const k in expandedMap) {
-          if (expandedMap[k] != newExpandedMap[k]) {
-            changedValues[k] = newExpandedMap[k];
-          }
-        }
-
         // Schedule a single microtask to fire events for
         // all changed sections (order not defined)
         Promise.resolve().then(() => {
-          for (const k in changedValues) {
-            const onExpandStateChange = eventMap.current[k];
-            if (onExpandStateChange) {
-              onExpandStateChange(changedValues[k]);
+          for (const k in expandedMap) {
+            const onExpandStateChange = eventMapRef.current[k];
+            if (onExpandStateChange && expandedMap[k] != newExpandedMap[k]) {
+              onExpandStateChange(newExpandedMap[k]);
             }
           }
         });
@@ -311,13 +309,14 @@ export function AccordionSection({
       toggleExpanded(id);
     } else {
       setExpandedState((prev) => {
+        const newValue = !prev;
         Promise.resolve().then(() => {
           const onExpandStateChange = onExpandStateChangeRef.current;
           if (onExpandStateChange) {
-            onExpandStateChange(!prev);
+            onExpandStateChange(newValue);
           }
         });
-        return !prev;
+        return newValue;
       });
     }
   }, [id, toggleExpanded]);
