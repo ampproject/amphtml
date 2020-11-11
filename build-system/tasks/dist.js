@@ -142,8 +142,8 @@ async function doDist(extraArgs = {}) {
     await buildLoginDone('0.1');
     await buildWebPushPublisherFiles();
     await compileAllJs(options);
-    await buildExtensions(options);
   }
+  await buildExtensions(options);
 
   if (!argv.core_runtime_only) {
     await formatExtractedMessages();

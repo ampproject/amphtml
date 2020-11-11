@@ -99,8 +99,8 @@ async function doBuild(extraArgs = {}) {
     await compileCoreRuntime(options);
   } else {
     await compileAllJs(options);
-    await buildExtensions(options);
   }
+  await buildExtensions(options);
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
