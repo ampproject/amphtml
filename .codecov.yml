@@ -3,7 +3,7 @@
 codecov:
   bot: 'amp-coverage-bot'
   ci:
-    - 'travis.org'
+    - 'travis.com'
   max_report_age: 24
   require_ci_to_pass: no
   notify:
