@@ -613,7 +613,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
 
       it('should replace PAGE_VIEW_ID_64', () => {
         return expandUrlAsync('?pid=PAGE_VIEW_ID_64').then((res) => {
-          expect(res).to.match(/pid=([a-zA-Z0-9_-]+){10,}/);
+          expect(res).to.match(/pid=([a-zA-Z0-9_-]{10,})/);
         });
       });
 
@@ -626,7 +626,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           /*opt_bindings*/ undefined,
           {withCid: true}
         ).then((res) => {
-          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
+          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]{10,})/);
         });
       });
 
@@ -652,7 +652,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           /*opt_bindings*/ undefined,
           {withCid: true}
         ).then((res) => {
-          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
+          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]{10,})/);
         });
       });
 

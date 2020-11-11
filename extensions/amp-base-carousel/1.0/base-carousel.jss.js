@@ -104,7 +104,12 @@ const slideSizing = {
   '& > ::slotted(*)': {
     width: '100%',
   },
+  '&$thumbnails': {
+    padding: '0px 4px',
+  },
 };
+
+const thumbnails = {};
 
 const arrow = {
   zIndex: 1,
@@ -182,6 +187,11 @@ const defaultArrowButton = {
     backgroundColor: 'rgba(255, 255, 255, 1.0)',
     transitionDuration: '0ms',
   },
+  '&:focus': {
+    border: '1px black solid',
+    borderRadius: '50%',
+    boxShadow: '0 0 0 1pt white',
+  },
 };
 
 const arrowBaseStyle = {
@@ -220,6 +230,7 @@ const JSS = {
   hideScrollbar,
   horizontalScroll,
   slideElement,
+  thumbnails,
   enableSnap,
   disableSnap,
   slideSizing,
