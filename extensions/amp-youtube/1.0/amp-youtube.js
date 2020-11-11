@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {Youtube} from './youtube';
 
 /** @const {string} */

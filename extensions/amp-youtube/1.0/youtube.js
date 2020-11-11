@@ -17,8 +17,8 @@
 import * as Preact from '../../../src/preact';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 
@@ -146,7 +146,7 @@ export function Youtube({
     }
   };
 
-  const sendMessage = (method) => {
+  const makeMethodMessage = (method) => {
     return JSON.stringify(
       dict({
         'event': 'command',
@@ -177,7 +177,7 @@ export function Youtube({
       }}
       sandbox="allow-scripts allow-same-origin allow-presentation"
       {...rest}
-    ></VideoWrapper>
+    ></VideoIframe>
   );
 }
 
