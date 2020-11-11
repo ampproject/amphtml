@@ -275,9 +275,4 @@ export const EXPERIMENTS = [
     name: 'Responsive layouts implemented via aspect-ratio CSS',
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
-  {
-    id: 'same-origin-iframe',
-    name: 'Allow same-origin iframes with disallowDocumentAccess',
-    spec: 'https://github.com/ampproject/amphtml/issues/30824',
-  },
 ];
