@@ -242,8 +242,10 @@ describes.realWin(
       });
     });
 
-    it('should expand when rendersubtreeactivation event is triggered on a collapsed section', () => {
+    it('should expand when beforematch event is triggered on a collapsed section', () => {
+      // Enable display locking feature.
       toggleExperiment(win, 'amp-accordion-display-locking', true);
+      doc.body.onbeforematch = null;
       return getAmpAccordion().then(() => {
         const section = doc.querySelector('section:not([expanded])');
         const header = section.firstElementChild;
@@ -253,7 +255,10 @@ describes.realWin(
         content.dispatchEvent(new Event('beforematch'));
         expect(section.hasAttribute('expanded')).to.be.true;
         expect(header.getAttribute('aria-expanded')).to.equal('true');
+
+        // Reset display locking feature
         toggleExperiment(win, 'amp-accordion-display-locking', false);
+        doc.body.onbeforematch = undefined;
       });
     });
 
