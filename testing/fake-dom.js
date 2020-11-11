@@ -246,10 +246,6 @@ export class FakeWindow {
       return window.clearInterval.apply(window, arguments);
     };
 
-    this.postMessage = function () {
-      return window.postMessage.apply(window, arguments);
-    };
-
     let raf =
       window.requestAnimationFrame || window.webkitRequestAnimationFrame;
     if (raf) {
@@ -301,10 +297,10 @@ class EventListeners {
     const {
       addEventListener: originalAdd,
       removeEventListener: originalRemove,
+      postMessage: originalPostMessage,
     } = target;
     target.addEventListener = function (type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
-      window.addEventListener.apply(window, arguments);
       if (originalAdd) {
         originalAdd.apply(target, arguments);
       }
@@ -313,6 +309,14 @@ class EventListeners {
       target.eventListeners.remove(type, handler, captureOrOpts);
       if (originalRemove) {
         originalRemove.apply(target, arguments);
+      }
+    };
+    target.postMessage = function (type) {
+      const e = new Event('message');
+      e.data = type;
+      target.eventListeners.fire(e);
+      if (originalPostMessage) {
+        originalPostMessage.apply(target, arguments);
       }
     };
   }
