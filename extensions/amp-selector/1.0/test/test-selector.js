@@ -262,7 +262,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       });
 
       it('toggle one option', () => {
-        ref.current.toggle(/* index */ 1);
+        ref.current.toggle('b');
         wrapper.update();
 
         // Second option is toggled.
@@ -270,7 +270,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
 
-        ref.current.toggle(/* index */ 0);
+        ref.current.toggle('a');
         wrapper.update();
 
         // First option is toggled.
@@ -280,7 +280,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       });
 
       it('force toggle one option', () => {
-        ref.current.toggle(/* index */ 1, /* force */ true);
+        ref.current.toggle('b', /* force */ true);
         wrapper.update();
 
         // Second option is selected.
@@ -288,7 +288,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
 
-        ref.current.toggle(/* index */ 1, /* force */ true);
+        ref.current.toggle('b', /* force */ true);
         wrapper.update();
 
         // Nothing has changed.
@@ -298,7 +298,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       });
 
       it('force toggle disabled option does nothing', () => {
-        ref.current.toggle(/* index */ 2, /* force */ true);
+        ref.current.toggle('c', /* force */ true);
         wrapper.update();
 
         // Disabled option cannot be selected.
@@ -306,7 +306,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.not.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
 
-        ref.current.toggle(/* index */ 2, /* force */ true);
+        ref.current.toggle('c', /* force */ true);
         wrapper.update();
 
         // Nothing has changed.
@@ -327,45 +327,6 @@ describes.sandboxed('Selector preact component', {}, () => {
         // No options are selected.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-      });
-
-      it('select by delta', async () => {
-        // First option is selected by default.
-        expect(option0).to.have.attribute('selected');
-        expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-
-        ref.current.selectBy(1);
-        wrapper.update();
-
-        // Next option is selected.
-        expect(option0).to.not.have.attribute('selected');
-        expect(option1).to.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-
-        ref.current.selectBy(1);
-        wrapper.update();
-
-        // Try to select next option (disabled).
-        expect(option0).to.not.have.attribute('selected');
-        expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-
-        ref.current.selectBy(-1);
-        wrapper.update();
-
-        // Previous option is selected.
-        expect(option0).to.not.have.attribute('selected');
-        expect(option1).to.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-
-        ref.current.selectBy(0);
-        wrapper.update();
-
-        // Nothing has changed.
-        expect(option0).to.not.have.attribute('selected');
-        expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
       });
     });
@@ -398,7 +359,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       });
 
       it('toggle one option', () => {
-        ref.current.toggle(/* index */ 1);
+        ref.current.toggle('b');
         wrapper.update();
 
         // Second option is toggled.
@@ -406,7 +367,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
 
-        ref.current.toggle(/* index */ 0);
+        ref.current.toggle('a');
         wrapper.update();
 
         // First option is toggled.
@@ -416,7 +377,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       });
 
       it('force toggle one option', () => {
-        ref.current.toggle(/* index */ 1, /* force */ true);
+        ref.current.toggle('b', /* force */ true);
         wrapper.update();
 
         // Second option is selected.
@@ -424,7 +385,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
 
-        ref.current.toggle(/* index */ 1, /* force */ true);
+        ref.current.toggle('b', /* force */ true);
         wrapper.update();
 
         // Nothing has changed.
@@ -434,7 +395,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       });
 
       it('force toggle disabled option does nothing', () => {
-        ref.current.toggle(/* index */ 2, /* force */ true);
+        ref.current.toggle('c', /* force */ true);
         wrapper.update();
 
         // Disabled option cannot be selected.
@@ -442,7 +403,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.not.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
 
-        ref.current.toggle(/* index */ 2, /* force */ true);
+        ref.current.toggle('c', /* force */ true);
         wrapper.update();
 
         // Nothing has changed.
@@ -463,45 +424,6 @@ describes.sandboxed('Selector preact component', {}, () => {
         // No options are selected.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-      });
-
-      it('select by delta', async () => {
-        // First option is selected by default.
-        expect(option0).to.have.attribute('selected');
-        expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-
-        ref.current.selectBy(1);
-        wrapper.update();
-
-        // Next option is selected.
-        expect(option0).to.not.have.attribute('selected');
-        expect(option1).to.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-
-        ref.current.selectBy(1);
-        wrapper.update();
-
-        // Try to select next option (disabled).
-        expect(option0).to.not.have.attribute('selected');
-        expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-
-        ref.current.selectBy(-1);
-        wrapper.update();
-
-        // Previous option is selected.
-        expect(option0).to.not.have.attribute('selected');
-        expect(option1).to.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
-
-        ref.current.selectBy(0);
-        wrapper.update();
-
-        // Nothing has changed.
-        expect(option0).to.not.have.attribute('selected');
-        expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
       });
     });
