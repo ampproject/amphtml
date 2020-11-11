@@ -40,6 +40,7 @@ AccordionDef.Props;
  *   contentClassName: (string|undefined),
  *   header: (!PreactDef.Renderable),
  *   children: (?PreactDef.Renderable|undefined),
+ *   onExpandStateChange: (function(boolean):undefined|undefined),
  * }}
  */
 AccordionDef.SectionProps;

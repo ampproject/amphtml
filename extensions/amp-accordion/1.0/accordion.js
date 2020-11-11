@@ -41,6 +41,9 @@ const AccordionContext = Preact.createContext(
 /** @type {!Object<string, boolean>} */
 const EMPTY_EXPANDED_MAP = {};
 
+/** @type {!Object<string, function(boolean):undefined|undefined>} */
+const EMPTY_EVENT_MAP = {};
+
 const generateSectionId = sequentialIdGenerator();
 const generateRandomId = randomIdGenerator(100000);
 
@@ -61,6 +64,7 @@ function AccordionWithRef(
   ref
 ) {
   const [expandedMap, setExpandedMap] = useState(EMPTY_EXPANDED_MAP);
+  const eventMapRef = useRef(EMPTY_EVENT_MAP);
   const [randomPrefix] = useState(generateRandomId);
   const prefix = id || `a${randomPrefix}`;
 
@@ -79,7 +83,7 @@ function AccordionWithRef(
   }, [expandSingleSection]);
 
   const registerSection = useCallback(
-    (id, defaultExpanded) => {
+    (id, defaultExpanded, {current: onExpandStateChange}) => {
       setExpandedMap((expandedMap) => {
         return setExpanded(
           id,
@@ -88,7 +92,14 @@ function AccordionWithRef(
           expandSingleSection
         );
       });
-      return () => setExpandedMap((expandedMap) => omit(expandedMap, id));
+      eventMapRef.current = {...eventMapRef.current, [id]: onExpandStateChange};
+      return () => {
+        setExpandedMap((expandedMap) => omit(expandedMap, id));
+        eventMapRef.current = omit(
+          /** @type {!Object} */ (eventMapRef.current),
+          id
+        );
+      };
     },
     [expandSingleSection]
   );
@@ -96,8 +107,24 @@ function AccordionWithRef(
   const toggleExpanded = useCallback(
     (id) => {
       setExpandedMap((expandedMap) => {
-        const newValue = !expandedMap[id];
-        return setExpanded(id, newValue, expandedMap, expandSingleSection);
+        const newExpandedMap = setExpanded(
+          id,
+          !expandedMap[id],
+          expandedMap,
+          expandSingleSection
+        );
+
+        // Schedule a single microtask to fire events for
+        // all changed sections (order not defined)
+        Promise.resolve().then(() => {
+          for (const k in expandedMap) {
+            const onExpandStateChange = eventMapRef.current[k];
+            if (onExpandStateChange && expandedMap[k] != newExpandedMap[k]) {
+              onExpandStateChange(newExpandedMap[k]);
+            }
+          }
+        });
+        return newExpandedMap;
       });
     },
     [expandSingleSection]
@@ -236,6 +263,7 @@ export function AccordionSection({
   id: propId,
   header,
   children,
+  onExpandStateChange,
   ...rest
 }) {
   const [genId] = useState(generateSectionId);
@@ -244,6 +272,7 @@ export function AccordionSection({
   const [expandedState, setExpandedState] = useState(defaultExpanded);
   const contentRef = useRef(null);
   const hasMountedRef = useRef(false);
+  const classes = useStyles();
 
   const {
     registerSection,
@@ -253,14 +282,25 @@ export function AccordionSection({
     prefix,
   } = useContext(AccordionContext);
 
+  const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
+  const animate = contextAnimate ?? defaultAnimate;
+  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
+
   useEffect(() => {
     hasMountedRef.current = true;
     return () => (hasMountedRef.current = false);
   }, []);
 
+  // Storying this state change callback in a ref because this may change
+  // frequently and we do not want to trigger a re-register of the section
+  // each time  the callback is updated
+  const onExpandStateChangeRef = useRef(
+    /** @type {?function(boolean):undefined|undefined} */ (null)
+  );
+  onExpandStateChangeRef.current = onExpandStateChange;
   useLayoutEffect(() => {
     if (registerSection) {
-      return registerSection(id, defaultExpanded);
+      return registerSection(id, defaultExpanded, onExpandStateChangeRef);
     }
   }, [registerSection, id, defaultExpanded]);
 
@@ -268,14 +308,18 @@ export function AccordionSection({
     if (toggleExpanded) {
       toggleExpanded(id);
     } else {
-      setExpandedState((prev) => !prev);
+      setExpandedState((prev) => {
+        const newValue = !prev;
+        Promise.resolve().then(() => {
+          const onExpandStateChange = onExpandStateChangeRef.current;
+          if (onExpandStateChange) {
+            onExpandStateChange(newValue);
+          }
+        });
+        return newValue;
+      });
     }
   }, [id, toggleExpanded]);
-
-  const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
-  const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
-  const classes = useStyles();
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;

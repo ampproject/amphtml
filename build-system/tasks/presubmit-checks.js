@@ -1344,7 +1344,8 @@ function hasAnyTerms(file) {
   const isTestFile =
     /^test-/.test(basename) ||
     /^_init_tests/.test(basename) ||
-    /_test\.js$/.test(basename);
+    /_test\.js$/.test(basename) ||
+    /storybook\/[^/]+\.js$/.test(pathname);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
