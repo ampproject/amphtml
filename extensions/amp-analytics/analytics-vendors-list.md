@@ -163,6 +163,7 @@ Adds support for Google Ads conversion tracking and remarketing. See more detail
 Type attribute value: `googleanalytics`
 
 Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
+**NOTE: Google Analytics 4 does not currently support AMP.** 
 
 ### Google Tag Manager
 
