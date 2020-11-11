@@ -67,7 +67,7 @@ config.run('amp-date-picker', function () {
           .then(() => picker.implementation_.layoutCallback());
       });
 
-      after(() => {
+      after.skip(() => {
         clock.uninstall();
       });
 
