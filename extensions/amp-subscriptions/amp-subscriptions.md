@@ -71,6 +71,8 @@ The Reader ID is constructed on the user device and intended to be long-lived. H
 
 The Reader ID is constructed similarly to the mechanism used to build ExternalCID described [here](https://docs.google.com/document/d/1f7z3X2GM_ASb3ZCI_7tngglxwS6WoWi1EB3aKzdf6vo/edit#heading=h.hb9q0wpwwhuf). An example Reader ID is `amp-OFsqR4pPKynymPyMmplPNMvxSTsNQob3TnK-oE3nwVT0clORaZ1rkeEz8xej-vV6`.
 
+We strongly recommend the usage of Reader ID over cookies to identify Readers, as publisher cookies are considered third party cookies when AMP is loaded from CDN and might be blocked by browsers. If you however want to rely on the cookie in cases where it is available, make sure to mark the cookies correctly as [cross-origin cookies](https://web.dev/samesite-cookies-explained/).
+
 ### Configuration
 
 The `amp-subscriptions` component must be configured using JSON configuration:
