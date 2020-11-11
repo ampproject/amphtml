@@ -1,7 +1,7 @@
 language: node_js
 dist: xenial
 node_js:
-  - '12'
+  - '14'
 notifications:
   email:
     recipients:
