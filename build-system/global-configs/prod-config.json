@@ -1,9 +1,5 @@
 {
-  "allow-doc-opt-in": [
-    "amp-next-page",
-    "analytics-chunks",
-    "analytics-chunks-inabox"
-  ],
+  "allow-doc-opt-in": ["amp-next-page", "analytics-chunks-inabox"],
   "allow-url-opt-in": ["pump-early-frame"],
   "canary": 0,
   "a4aProfilingRate": 0.01,
@@ -33,7 +29,6 @@
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
   "amp-ad-no-center-css": 0,
-  "analytics-chunks": 1,
   "adsense-ptt-exp": 0.1,
   "doubleclick-ptt-exp": 0.1
 }
