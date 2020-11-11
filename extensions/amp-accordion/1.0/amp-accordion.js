@@ -16,14 +16,21 @@
 
 import * as Preact from '../../../src/preact';
 import {Accordion, AccordionSection} from './accordion';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {Services} from '../../../src/services';
+import {
+  childElementsByTag,
+  dispatchCustomEvent,
+  toggleAttribute,
+} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {toArray, toWin} from '../../../src/types';
 import {useImperativeHandle, useLayoutEffect} from '../../../src/preact';
 
 /** @const {string} */
@@ -33,6 +40,7 @@ const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
+const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
 
 /** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
@@ -98,18 +106,42 @@ function getState(element, mu) {
       CONTENT_SHIM_PROP,
       bindContentShimToElement
     );
-    const expanded = section.hasAttribute('expanded');
+    const expandStateShim = memo(
+      section,
+      EXPAND_STATE_SHIM_PROP,
+      getExpandStateTrigger
+    );
     const props = dict({
       'key': section,
       'as': sectionShim,
       'headerAs': headerShim,
       'contentAs': contentShim,
-      'expanded': expanded,
+      'expanded': section.hasAttribute('expanded'),
       'id': section.getAttribute('id'),
+      'onExpandStateChange': expandStateShim,
     });
     return <AccordionSection {...props} />;
   });
   return dict({'children': children});
+}
+
+/**
+ * @param {!Element} section
+ * @return {Function}
+ */
+function getExpandStateTrigger(section) {
+  const action = Services.actionServiceForDoc(section);
+  const triggerEvent = (expanded) => {
+    const eventName = expanded ? 'expand' : 'collapse';
+    const event = createCustomEvent(
+      toWin(section.ownerDocument.defaultView),
+      `accordionSection.${eventName}`,
+      dict()
+    );
+    action.trigger(section, eventName, event, ActionTrust.HIGH);
+    dispatchCustomEvent(section, name);
+  };
+  return triggerEvent;
 }
 
 /**

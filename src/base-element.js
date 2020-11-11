@@ -18,6 +18,7 @@ import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
+import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -622,7 +623,7 @@ export class BaseElement {
   forwardEvents(events, element) {
     const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
       listen(element, eventType, (event) => {
-        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+        dispatchCustomEvent(this.element, eventType, getData(event) || {});
       })
     );
 
