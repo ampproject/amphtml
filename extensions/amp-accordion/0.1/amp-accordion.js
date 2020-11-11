@@ -117,6 +117,8 @@ class AmpAccordion extends AMP.BaseElement {
       const {0: header, 1: content} = sectionComponents;
       content.classList.add('i-amphtml-accordion-content');
 
+      // QQQQQQ
+
       // Ensure each accordion has a unique id, helping screen readers
       // understand the relationship between the pieces of content.
       let contentId = content.getAttribute('id');
