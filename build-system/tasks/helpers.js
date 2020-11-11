@@ -442,7 +442,9 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
  */
 async function compileTs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+  const startTime = Date.now();
   await transpileTs(srcDir, srcFilename);
+  endBuildStep('Transpiled', srcFilename, startTime);
   await compileJs(srcDir, srcFilename, destDir, options);
   del.sync(path.join(srcDir, '**/*.js'));
 }
