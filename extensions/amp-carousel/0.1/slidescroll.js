@@ -20,7 +20,10 @@ import {BaseSlides} from './base-slides';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  dispatchCustomEvent,
+} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -748,7 +751,7 @@ export class AmpSlideScroll extends BaseSlides {
       );
       this.action_.trigger(this.element, name, event, opt_trust);
 
-      this.element.dispatchCustomEvent(name, {
+      dispatchCustomEvent(this.element, name, {
         index: newIndex,
         actionTrust: opt_trust,
       });

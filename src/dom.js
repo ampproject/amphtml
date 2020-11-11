@@ -951,3 +951,19 @@ export function getVerticalScrollbarWidth(win) {
   const documentWidth = documentElement./*OK*/ clientWidth;
   return windowWidth - documentWidth;
 }
+
+/**
+ * Dispatches a custom event.
+ *
+ * @param {!Node} node
+ * @param {string} name
+ * @param {!Object=} opt_data Event data.
+ */
+export function dispatchCustomEvent(node, name, opt_data) {
+  const data = opt_data || {};
+  // Constructors of events need to come from the correct window. Sigh.
+  const event = node.ownerDocument.createEvent('Event');
+  event.data = data;
+  event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
+  node.dispatchEvent(event);
+}

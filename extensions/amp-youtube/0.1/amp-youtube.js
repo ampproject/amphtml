@@ -30,6 +30,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   getDataParamsFromAttributes,
@@ -298,7 +299,7 @@ class AmpYoutube extends AMP.BaseElement {
       .then(() => {
         // Tell YT that we want to receive messages
         this.listenToFrame_();
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents.LOAD);
       });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -444,13 +445,13 @@ class AmpYoutube extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
-      element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(element, VideoEvents.LOADEDMETADATA);
       return;
     }
 
