@@ -507,7 +507,7 @@ export class AmpStory360 extends AMP.BaseElement {
     // Listen for one call before initiating.
     listenOncePromise(this.win, 'deviceorientation').then((e) => {
       this.gyroscopeControls_ = true;
-      // Renderes active page orientation correctly on load.
+      // Renders active page orientation correctly on load.
       // isOnActivePage_ is slightly async so unfortunately we do this for all pages.
       this.setGyroscopeDefaultHeading_(e.alpha);
       // Debounce onDeviceOrientation_ to rAF.
