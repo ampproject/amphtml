@@ -32,18 +32,25 @@ AccordionDef.Props;
 /**
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
- *   headerAs: (string|PreactDef.FunctionalComponent|undefined),
- *   contentAs: (string|PreactDef.FunctionalComponent|undefined),
  *   expanded: (boolean|undefined),
  *   animate: (boolean|undefined),
- *   headerClassName: (string|undefined),
- *   contentClassName: (string|undefined),
- *   header: (!PreactDef.Renderable),
+ *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  *   onExpandStateChange: (function(boolean):undefined|undefined),
  * }}
  */
 AccordionDef.SectionProps;
+
+/**
+ * @typedef {{
+ *   as: (string|PreactDef.FunctionalComponent|undefined),
+ *   role: (string|undefined),
+ *   headerClassName: (string|undefined),
+ *   tabIndex: (number|string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+AccordionDef.SectionHeaderProps;
 
 /**
  * @typedef {{
@@ -53,6 +60,15 @@ AccordionDef.SectionProps;
  * }}
  */
 AccordionDef.HeaderProps;
+
+/**
+ * @typedef {{
+ *   as: (string|PreactDef.FunctionalComponent|undefined),
+ *   contentClassName: (string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+AccordionDef.SectionContentProps;
 
 /**
  * @typedef {{

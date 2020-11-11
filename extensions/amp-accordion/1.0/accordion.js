@@ -37,6 +37,9 @@ import {useStyles} from './accordion.jss';
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.ContextProps} */ ({})
 );
+const SectionContext = Preact.createContext(
+  /** @type {AccordionDef.ContextProps} */ ({})
+);
 
 /** @type {!Object<string, boolean>} */
 const EMPTY_EXPANDED_MAP = {};
@@ -254,14 +257,9 @@ function setExpanded(id, value, expandedMap, expandSingleSection) {
  */
 export function AccordionSection({
   as: Comp = 'section',
-  headerAs: HeaderComp = 'header',
-  contentAs: ContentComp = 'div',
   expanded: defaultExpanded = false,
   animate: defaultAnimate = false,
-  headerClassName = '',
-  contentClassName = '',
   id: propId,
-  header,
   children,
   onExpandStateChange,
   ...rest
@@ -270,9 +268,6 @@ export function AccordionSection({
   const id = propId || genId;
   const [suffix] = useState(generateRandomId);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
-  const contentRef = useRef(null);
-  const hasMountedRef = useRef(false);
-  const classes = useStyles();
 
   const {
     registerSection,
@@ -285,11 +280,6 @@ export function AccordionSection({
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
   const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
-
-  useEffect(() => {
-    hasMountedRef.current = true;
-    return () => (hasMountedRef.current = false);
-  }, []);
 
   // Storying this state change callback in a ref because this may change
   // frequently and we do not want to trigger a re-register of the section
@@ -321,6 +311,75 @@ export function AccordionSection({
     }
   }, [id, toggleExpanded]);
 
+  const context = useMemo(
+    () => ({
+      animate,
+      contentId,
+      expanded,
+      expandHandler,
+    }),
+    [animate, contentId, expanded, expandHandler]
+  );
+
+  return (
+    <Comp {...rest} expanded={expanded}>
+      <SectionContext.Provider value={context}>
+        {children}
+      </SectionContext.Provider>
+    </Comp>
+  );
+}
+
+/**
+ * @param {!AccordionDef.SectionHeaderProps} props
+ * @return {PreactDef.Renderable}
+ */
+export function AccordionSectionHeader({
+  as: Comp = 'header',
+  role = 'button',
+  headerClassName = '',
+  tabIndex = 0,
+  children,
+  ...rest
+}) {
+  const {contentId, expanded, expandHandler} = useContext(SectionContext);
+  const classes = useStyles();
+
+  return (
+    <Comp
+      {...rest}
+      role={role}
+      className={`${headerClassName} ${classes.sectionChild} ${classes.header}`}
+      tabIndex={tabIndex}
+      aria-controls={contentId}
+      onClick={expandHandler}
+      aria-expanded={String(expanded)}
+    >
+      {children}
+    </Comp>
+  );
+}
+
+/**
+ * @param {!AccordionDef.SectionContentProps} props
+ * @return {PreactDef.Renderable}
+ */
+export function AccordionSectionContent({
+  as: Comp = 'div',
+  contentClassName = '',
+  children,
+  ...rest
+}) {
+  const hasMountedRef = useRef(false);
+  const contentRef = useRef(null);
+  const {contentId, expanded, animate} = useContext(SectionContext);
+  const classes = useStyles();
+
+  useEffect(() => {
+    hasMountedRef.current = true;
+    return () => (hasMountedRef.current = false);
+  }, []);
+
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
     const content = contentRef.current;
@@ -331,25 +390,14 @@ export function AccordionSection({
   }, [expanded, animate]);
 
   return (
-    <Comp {...rest} expanded={expanded}>
-      <HeaderComp
-        role="button"
-        className={`${headerClassName} ${classes.sectionChild} ${classes.header}`}
-        aria-controls={contentId}
-        tabIndex="0"
-        onClick={expandHandler}
-        aria-expanded={String(expanded)}
-      >
-        {header}
-      </HeaderComp>
-      <ContentComp
-        ref={contentRef}
-        className={`${contentClassName} ${classes.sectionChild} ${classes.content}`}
-        id={contentId}
-        hidden={!expanded}
-      >
-        {children}
-      </ContentComp>
+    <Comp
+      {...rest}
+      ref={contentRef}
+      className={`${contentClassName} ${classes.sectionChild} ${classes.content}`}
+      id={contentId}
+      hidden={!expanded}
+    >
+      {children}
     </Comp>
   );
 }
