@@ -67,8 +67,10 @@ config.run('amp-date-picker', function () {
           .then(() => picker.implementation_.layoutCallback());
       });
 
-      after.skip(() => {
-        clock.uninstall();
+      after(() => {
+        //TODO(31104)(31103): Uncomment when the test below is unskipped
+        //Required to skip the after function for now as it is erroring
+        //clock.uninstall();
       });
 
       function getCalendarButtonByDay(calendar, day) {
