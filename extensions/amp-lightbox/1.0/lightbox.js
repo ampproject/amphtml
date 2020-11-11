@@ -19,6 +19,7 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -73,6 +74,8 @@ function LightboxWithRef(
     children,
     onOpen,
     initialOpen,
+    opt_beforeOpen,
+    opt_afterClose,
     ...rest
   },
   ref
@@ -86,6 +89,14 @@ function LightboxWithRef(
   const [visible, setVisible] = useState(false);
   const styleClasses = useStyles();
   const lightboxRef = useRef();
+  const beforeOpen = useCallback(
+    () => (opt_beforeOpen ? opt_beforeOpen() : undefined),
+    [opt_beforeOpen]
+  );
+  const afterClose = useCallback(
+    () => (opt_afterClose ? opt_afterClose() : undefined),
+    [opt_afterClose]
+  );
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
@@ -101,14 +112,14 @@ function LightboxWithRef(
     ref,
     () => ({
       open: () => {
-        console.log('hit open');
+        beforeOpen();
         setShow(true);
       },
       close: () => {
         setShow(false);
       },
     }),
-    []
+    [beforeOpen]
   );
 
   useEffect(() => {
@@ -139,22 +150,23 @@ function LightboxWithRef(
               'visibility',
               ANIMATION_PRESETS[animateInRef.current][0].visibility
             );
+            afterClose();
           };
           return () => {
             animation.cancel();
             animation.onfinish();
+            afterClose();
           };
         }
       });
     }
-  }, [show]);
+  }, [show, afterClose]);
 
   useEffect(() => {
     if (!show && !visible) {
       return;
     }
     if (visible) {
-      console.log('lightboxRef on effect', lightboxRef);
       getRefElement(lightboxRef).then((element) => {
         element = element.current;
         const animation = element.animate(
@@ -208,6 +220,7 @@ function LightboxWithRef(
         }}
         {...rest}
       >
+        {children}
         <button
           ariaLabel={closeButtonAriaLabel}
           tabIndex={-1}
@@ -216,7 +229,6 @@ function LightboxWithRef(
             setShow(false);
           }}
         />
-        {children}
       </ContainWrapper>
     )
   );

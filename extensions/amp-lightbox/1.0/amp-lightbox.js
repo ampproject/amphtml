@@ -15,10 +15,12 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {CSS} from './lightbox.jss';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
+import {setStyles} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -28,16 +30,28 @@ const TAG = 'amp-lightbox';
 class AmpLightbox extends PreactBaseElement {
   /** @override */
   init() {
-    this.registerApiAction(
-      'open',
-      (api) => {
-        console.log('hit amp');
-        api.open();
-      },
-      ActionTrust.LOW
-    );
+    this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
-    return dict({'initialOpen': false});
+    setStyles(this.element, {width: '100%', height: '100%', position: 'fixed'});
+    return dict({
+      'initialOpen': false,
+      'opt_beforeOpen': this.beforeOpen.bind(this),
+      'opt_afterClose': this.afterClose.bind(this),
+    });
+  }
+
+  /**
+   * Setting hidden to false
+   */
+  beforeOpen() {
+    this.element.removeAttribute('hidden');
+  }
+
+  /**
+   * Setting hidden to true
+   */
+  afterClose() {
+    this.element.setAttribute('hidden', '');
   }
 
   /** @override */
@@ -67,6 +81,9 @@ AmpLightbox['passthrough'] = true;
 
 /** @override */
 AmpLightbox['layoutSizeDefined'] = true;
+
+/** @override */
+AmpLightbox['shadowCss'] = CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpLightbox);
