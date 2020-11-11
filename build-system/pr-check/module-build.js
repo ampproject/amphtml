@@ -53,7 +53,11 @@ function main() {
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST')
+    ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --esm --fortesting');
       uploadEsmDistOutput(FILENAME);
