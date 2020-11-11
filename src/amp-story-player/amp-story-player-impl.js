@@ -985,11 +985,13 @@ export class AmpStoryPlayer {
   /**
    * Navigates stories given a number.
    * @param {number} storyDelta
+   * @param {number=} pageDelta
    */
-  go(storyDelta) {
-    if (storyDelta === 0) {
+  go(storyDelta, pageDelta = 0) {
+    if (storyDelta === 0 && pageDelta === 0) {
       return;
     }
+
     if (
       !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + storyDelta)
@@ -997,16 +999,20 @@ export class AmpStoryPlayer {
       throw new Error('Out of Story range.');
     }
 
-    const newIdx = this.currentIdx_ + storyDelta;
-    const currentStory =
+    const newStoryIdx = this.currentIdx_ + storyDelta;
+    const newStory =
       storyDelta > 0
-        ? this.stories_[newIdx % this.stories_.length]
+        ? this.stories_[newStoryIdx % this.stories_.length]
         : this.stories_[
-            ((newIdx % this.stories_.length) + this.stories_.length) %
+            ((newStoryIdx % this.stories_.length) + this.stories_.length) %
               this.stories_.length
           ];
 
-    this.show(currentStory.href);
+    if (this.currentIdx_ !== newStory.idx) {
+      this.show(newStory.href);
+    }
+
+    this.selectPage_(pageDelta);
   }
 
   /**
@@ -1268,6 +1274,30 @@ export class AmpStoryPlayer {
         )
         .then((event) => this.dispatchPageAttachmentEvent_(event.value));
     });
+  }
+
+  /**
+   * Sends a message to the current story to navigate delta pages.
+   * @param {number} delta
+   * @private
+   */
+  selectPage_(delta) {
+    if (delta === 0) {
+      return;
+    }
+
+    this.sendSelectPageDelta_(delta);
+  }
+
+  /**
+   * @param {number} delta
+   * @private
+   */
+  sendSelectPageDelta_(delta) {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest('selectPage', {delta})
+    );
   }
 
   /**
