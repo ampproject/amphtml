@@ -19,8 +19,9 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
 
-const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';
-const EXAMPLE_VIDEOID_URL = 'https://mowplayer.com/watch/v-myfwarfx4tb';
+const EXAMPLE_VIDEOID = 'v-h-_ED0btjZs';
+const EXAMPLE_VIDEOID_URL =
+  'https://mowplayer.com/watch/v-h-_ED0btjZs?script=1';
 
 describes.realWin(
   'amp-mowplayer',
@@ -30,7 +31,7 @@ describes.realWin(
     },
   },
   function (env) {
-    this.timeout(5000);
+    this.timeout(20000);
     let win, doc;
     let timer;
 
@@ -40,7 +41,7 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getMowPlayer(
+    async function getMowPlayer(
       attributes,
       opt_responsive,
       opt_beforeLayoutCallback
@@ -55,23 +56,9 @@ describes.realWin(
         mp.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(mp);
-      return mp
-        .build()
-        .then(() => {
-          if (opt_beforeLayoutCallback) {
-            opt_beforeLayoutCallback(mp);
-          }
-          return mp.layoutCallback();
-        })
-        .then(() => {
-          const mpIframe = mp.querySelector('iframe');
-          mp.implementation_.handleMowMessage_({
-            origin: 'https://mowplayer.com',
-            source: mpIframe.contentWindow,
-            data: JSON.stringify({event: 'onReady'}),
-          });
-        })
-        .then(() => mp);
+      await mp.build();
+      await mp.layoutCallback();
+      return mp;
     }
 
     describe('with data-mediaid', function () {
@@ -88,7 +75,6 @@ describes.realWin(
         return getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID}, true).then(
           (mp) => {
             const iframe = mp.querySelector('iframe');
-            expect(iframe).to.not.be.null;
             expect(iframe.tagName).to.equal('IFRAME');
             expect(iframe.src).to.equal(EXAMPLE_VIDEOID_URL);
           }
@@ -152,8 +138,10 @@ describes.realWin(
         origin: 'https://mowplayer.com',
         source: iframe.contentWindow,
         data: JSON.stringify({
-          event: 'infoDelivery',
-          info,
+          mowplayer: {
+            type: 'infoDelivery',
+            data: info,
+          },
         }),
       });
     }
