@@ -301,9 +301,6 @@ export class AmpStory360 extends AMP.BaseElement {
     this.image_ = null;
 
     /** @private {number} */
-    this.orientationAlpha_ = 0;
-
-    /** @private {number} */
     this.headingOffset_ = 0;
 
     /** @private WebGL extension for lost context. */
@@ -390,7 +387,6 @@ export class AmpStory360 extends AMP.BaseElement {
           this.isOnActivePage_ = currPageId === this.getPageId_();
           this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
-          this.maybeSetGyroscopeDefaultHeading_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
@@ -511,18 +507,20 @@ export class AmpStory360 extends AMP.BaseElement {
     // Listen for one call before initiating.
     listenOncePromise(this.win, 'deviceorientation').then((e) => {
       this.gyroscopeControls_ = true;
-      this.orientationAlpha_ = e.alpha;
-      this.maybeSetGyroscopeDefaultHeading_();
+      // Renders active page orientation correctly on load.
+      // isOnActivePage_ is slightly async so unfortunately we do this for all pages.
+      this.setGyroscopeDefaultHeading_(e.alpha);
       // Debounce onDeviceOrientation_ to rAF.
       let rafTimeout;
       this.win.addEventListener('deviceorientation', (e) => {
-        // Used to set default heading when navigating to this page.
-        this.orientationAlpha_ = e.alpha;
-        if (this.isReady_ && this.isOnActivePage_) {
+        if (this.isReady_ && this.distance_ < MIN_WEBGL_DISTANCE) {
           rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
-          rafTimeout = this.win.requestAnimationFrame(() =>
-            this.onDeviceOrientation_(e)
-          );
+          rafTimeout = this.win.requestAnimationFrame(() => {
+            if (!this.isOnActivePage_) {
+              this.setGyroscopeDefaultHeading_(e.alpha);
+            }
+            this.onDeviceOrientation_(e);
+          });
         }
       });
       this.maybeShowDiscoveryAnimation_();
@@ -531,19 +529,18 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /**
    * Ensures user is facing a specified point of interest.
+   * @param {number} orientationAlpha
    * @private
    */
-  maybeSetGyroscopeDefaultHeading_() {
-    if (this.isOnActivePage_ && this.gyroscopeControls_ && this.isReady_) {
-      this.headingOffset_ =
-        parseFloat(
-          this.element.getAttribute('heading-end') ||
-            this.element.getAttribute('heading-start') ||
-            0
-        ) +
-        CENTER_OFFSET +
-        this.orientationAlpha_;
-    }
+  setGyroscopeDefaultHeading_(orientationAlpha) {
+    this.headingOffset_ =
+      parseFloat(
+        this.element.getAttribute('heading-end') ||
+          this.element.getAttribute('heading-start') ||
+          0
+      ) +
+      CENTER_OFFSET +
+      orientationAlpha;
   }
 
   /**
@@ -771,9 +768,6 @@ export class AmpStory360 extends AMP.BaseElement {
     }
     this.renderInitialPosition_();
     this.isReady_ = true;
-    if (this.gyroscopeControls_) {
-      this.maybeSetGyroscopeDefaultHeading_();
-    }
     if (this.isPlaying_) {
       this.animate_();
     }
