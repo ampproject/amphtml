@@ -147,7 +147,7 @@ export const events = () => {
       <AccordionWithEvents
         expandSingleSection={expandSingleSection}
         animate={animate}
-      ></AccordionWithEvents>{' '}
+      ></AccordionWithEvents>
     </main>
   );
 };
