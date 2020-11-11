@@ -33,7 +33,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should copy the link using the browser share menu', async () => {
+    it.skip('should copy the link using the browser share menu', async () => {
       // copy link
       const systemLayerHost = await controller.findElement(
         '.i-amphtml-system-layer-host'
