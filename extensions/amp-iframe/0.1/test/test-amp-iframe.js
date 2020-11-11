@@ -403,8 +403,6 @@ describes.realWin(
       });
 
       describe('allow-same-origin', () => {
-        // TODO(#30824): remove when same-origin-url is launched.
-
         it('should deny srcdoc with allow-same-origin', async () => {
           const asserts = stubUserAsserts();
           const ampIframe = createAmpIframe(env, {
