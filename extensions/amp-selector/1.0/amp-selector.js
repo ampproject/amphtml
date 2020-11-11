@@ -29,6 +29,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
+import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
 import {useLayoutEffect} from '../../../src/preact';
 
@@ -40,6 +41,7 @@ class AmpSelector extends PreactBaseElement {
   init() {
     const {element} = this;
     const action = Services.actionServiceForDoc(this.element);
+    this.optionState = [];
 
     // TODO(wg-bento): This hack is in place to prevent doubly rendering.
     // See https://github.com/ampproject/amp-react-prototype/issues/40.
@@ -54,18 +56,29 @@ class AmpSelector extends PreactBaseElement {
     this.registerApiAction('selectUp', (api, invocation) => {
       const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
-      api./*OK*/ selectBy(delta);
+      const initialValue = /** @type {!Array<string>} */ (this.getProp(
+        'value',
+        []
+      ));
+      selectByDelta(delta, initialValue, options, api);
     });
     this.registerApiAction('selectDown', (api, invocation) => {
       const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
-      api./*OK*/ selectBy(delta);
+      const initialValue = /** @type {!Array<string>} */ (this.getProp(
+        'value',
+        []
+      ));
+      selectByDelta(delta, initialValue, options, api);
     });
     this.registerApiAction('toggle', (api, invocation) => {
       const {args} = invocation;
       const {'index': index, 'value': opt_select} = args;
       userAssert(typeof index === 'number', "'index' must be specified");
-      api./*OK */ toggle(index, opt_select);
+      const option = this.optionState[index];
+      if (option) {
+        api./*OK */ toggle(option, opt_select);
+      }
     });
 
     const mu = new MutationObserver(() => {
@@ -73,7 +86,9 @@ class AmpSelector extends PreactBaseElement {
         isExpectedMutation = false;
         return;
       }
-      this.mutateProps(getOptions(element, mu));
+      const {children, options} = getOptions(element, mu);
+      this.optionState = options;
+      this.mutateProps({children});
     });
     mu.observe(element, {
       attributeFilter: ['option', 'selected', 'disabled'],
@@ -81,7 +96,8 @@ class AmpSelector extends PreactBaseElement {
       subtree: true,
     });
 
-    const {children, value} = getOptions(element, mu);
+    const {children, value, options} = getOptions(element, mu);
+    this.optionState = options;
     return dict({
       'shimDomElement': element,
       'children': children,
@@ -108,6 +124,7 @@ class AmpSelector extends PreactBaseElement {
  * @return {!JsonObject}
  */
 function getOptions(element, mu) {
+  const children = [];
   const options = [];
   const value = [];
   const optionChildren = toArray(element.querySelectorAll('[option]'));
@@ -138,13 +155,14 @@ function getOptions(element, mu) {
         },
         selected,
       };
-      if (selected && option) {
+      if (selected) {
         value.push(option);
       }
       const optionChild = <Option {...props} />;
-      options.push(optionChild);
+      options.push(option);
+      children.push(optionChild);
     });
-  return {'children': options, 'value': value};
+  return {value, children, options};
 }
 
 /**
@@ -168,6 +186,39 @@ function fireSelectEvent(win, action, el, option, value, trust) {
     dict({'targetOption': option, 'selectedOptions': value})
   );
   action.trigger(el, name, selectEvent, trust);
+}
+
+/**
+ * This method returns the new selected state by modifying
+ * at most one value of the current selected state by the given delta.
+ * The modification is done in FIFO order. When no values are selected,
+ * the new selected state becomes the option at the given delta.
+ *
+ * ex: (1, [0, 2], [0, 1, 2, 3]) => [2, 1]
+ * ex: (-1, [2, 1], [0, 1, 2, 3]) => [1]
+ * ex: (2, [2, 1], [0, 1, 2, 3]) => [1, 0]
+ * ex: (-1, [], [0, 1, 2, 3]) => [3]
+ * @param {number} delta
+ * @param {!Array<string>} value
+ * @param {Array<string>} options
+ * @param {!SelectorDef.SelectorApi} api
+ * @return {{value: Array<string>, option: string}|undefined}
+ */
+function selectByDelta(delta, value, options, api) {
+  const previous = options.indexOf(value.shift());
+  api./*OK */ toggle(previous, /* deselect */ false);
+
+  // If previousIndex === -1 is true, then a negative delta will be offset
+  // one more than is wanted when looping back around in the options.
+  // This occurs when no options are selected and "selectUp" is called.
+  const selectUpWhenNoneSelected = previous === -1 && delta < 0;
+  const index = selectUpWhenNoneSelected ? delta : previous + delta;
+  const option = options[mod(index, options.length)];
+
+  // Only add option if it is not already selected.
+  if (value.indexOf(option) === -1) {
+    api./*OK */ toggle(option, /* select */ true);
+  }
 }
 
 /**

@@ -62,18 +62,8 @@ SelectorDef.SelectorApi = class {
   clear() {}
 
   /**
-   * @param {number} index
+   * @param {*} option
    * @param {boolean|undefined} value
    */
-  toggle(index, value) {}
-
-  /**
-   * @param {number|undefined} delta
-   */
-  selectUp(delta) {}
-
-  /**
-   * @param {number|undefined} delta
-   */
-  selectDown(delta) {}
+  toggle(option, value) {}
 };

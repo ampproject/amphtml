@@ -17,8 +17,6 @@
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
 import {forwardRef} from '../../../src/preact/compat';
-import {mod} from '../../../src/utils/math';
-import {removeItem} from '../../../src/utils/array';
 import {
   useCallback,
   useContext,
@@ -31,9 +29,6 @@ import {
 const SelectorContext = Preact.createContext(
   /** @type {SelectorDef.ContextProps} */ ({selected: []})
 );
-
-/** @type {!Array} */
-const EMPTY_OPTIONS = [];
 
 /**
  * @param {!SelectorDef.Props} props
@@ -57,7 +52,6 @@ function SelectorWithRef(
   const [selectedState, setSelectedState] = useState(
     value ? value : defaultValue
   );
-  const [options, setOptions] = useState(EMPTY_OPTIONS);
   const selected = value ? value : selectedState;
   const selectOption = useCallback(
     (option) => {
@@ -82,27 +76,14 @@ function SelectorWithRef(
     [multiple, onChange, selected]
   );
 
-  const registerOption = useCallback((option) => {
-    setOptions((options) => {
-      options.push(option);
-      return options;
-    });
-    return () =>
-      setOptions((options) => {
-        removeItem(options, option);
-        return options;
-      });
-  }, []);
-
   const context = useMemo(
     () => ({
-      registerOption,
       selected,
       selectOption,
       disabled,
       multiple,
     }),
-    [disabled, multiple, registerOption, selected, selectOption]
+    [disabled, multiple, selected, selectOption]
   );
 
   useEffect(() => {
@@ -114,8 +95,7 @@ function SelectorWithRef(
   const clear = useCallback(() => setSelectedState([]), []);
 
   const toggle = useCallback(
-    (index, select) => {
-      const option = options[index];
+    (option, select) => {
       const isSelected = selected.includes(option);
       if (select && isSelected) {
         return;
@@ -127,33 +107,7 @@ function SelectorWithRef(
         setSelectedState((selected) => selected.filter((v) => v != option));
       }
     },
-    [options, setSelectedState, selectOption, selected]
-  );
-
-  /**
-   * This method updates the selected state by modifying at most one value of
-   * the current selected state by the given delta.
-   * The modification is done in FIFO order. When no values are selected,
-   * the new selected state becomes the option at the given delta.
-   *
-   * ex: (1, [0, 2], [0, 1, 2, 3]) => [2, 1]
-   * ex: (-1, [2, 1], [0, 1, 2, 3]) => [1]
-   * ex: (2, [2, 1], [0, 1, 2, 3]) => [1, 0]
-   * ex: (-1, [], [0, 1, 2, 3]) => [3]
-   */
-  const selectBy = useCallback(
-    (delta) => {
-      const previous = options.indexOf(selected.shift());
-
-      // If previousIndex === -1 is true, then a negative delta will be offset
-      // one more than is wanted when looping back around in the options.
-      // This occurs when no options are selected and "selectUp" is called.
-      const selectUpWhenNoneSelected = previous === -1 && delta < 0;
-      const index = selectUpWhenNoneSelected ? delta : previous + delta;
-      const option = options[mod(index, options.length)];
-      selectOption(option);
-    },
-    [selected, selectOption, options]
+    [setSelectedState, selectOption, selected]
   );
 
   useImperativeHandle(
@@ -162,9 +116,8 @@ function SelectorWithRef(
       /** @type {!SelectorDef.SelectorApi} */ ({
         clear,
         toggle,
-        selectBy,
       }),
-    [clear, toggle, selectBy]
+    [clear, toggle]
   );
 
   return (
@@ -206,7 +159,6 @@ export function Option({
     selectOption,
     disabled: selectorDisabled,
     multiple: selectorMultiple,
-    registerOption,
   } = useContext(SelectorContext);
   const clickHandler = (e) => {
     if (selectorDisabled || disabled) {
@@ -217,12 +169,6 @@ export function Option({
     }
     selectOption(option);
   };
-
-  useEffect(() => {
-    if (registerOption) {
-      return registerOption(option);
-    }
-  }, [registerOption, option]);
 
   const isSelected =
     /** @type {!Array} */ (selected).includes(option) && !disabled;
