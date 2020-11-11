@@ -1414,7 +1414,16 @@ describe('amp-a4a', () => {
       expect(a4a.isVerifiedAmpCreative()).to.be.true;
       expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
       expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
-      expect(maybeExecuteRealTimeConfigStub.calledWith({}, null)).to.be.true;
+      expect(
+        maybeExecuteRealTimeConfigStub.calledWith(
+          a4aElement,
+          {},
+          null,
+          null,
+          null,
+          window.sandbox.match.any
+        )
+      ).to.be.true;
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
       expect(
         getAdUrlSpy.calledWith(
