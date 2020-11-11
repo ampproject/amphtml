@@ -88,6 +88,9 @@ tags: {  # <amp-date-countdown>
     value_casei: "continue"
     value_casei: "stop"
   }
+  attrs: {
+    name: "count-up" value: ""
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
