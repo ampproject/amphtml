@@ -42,12 +42,12 @@ import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../utils/object';
+import {dispatchCustomEvent, removeElement} from '../dom';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
-import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {toggle} from '../style';
 
@@ -210,7 +210,7 @@ export class VideoManager {
     this.entries_.push(entry);
 
     const {element} = entry.video;
-    element.dispatchCustomEvent(VideoEvents.REGISTERED);
+    dispatchCustomEvent(element, VideoEvents.REGISTERED);
 
     setIsMediaComponent(element);
 
@@ -1587,7 +1587,7 @@ function analyticsEvent(entry, eventType, opt_vars) {
     if (opt_vars) {
       Object.assign(details, opt_vars);
     }
-    video.element.dispatchCustomEvent(eventType, details);
+    dispatchCustomEvent(video.element, eventType, details);
   });
 }
 

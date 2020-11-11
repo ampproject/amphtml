@@ -727,13 +727,11 @@ describes.realWin(
           <amp-img src="chabuddy.g" layout="flex-item"></amp-img>
         `;
 
-        element.dispatchCustomEvent = env.sandbox.spy();
+        const eventSpy = env.sandbox.spy();
+        element.addEventListener(AutoLightboxEvents.NEWLY_SET, eventSpy);
 
         await apply(env.ampdoc, element);
-
-        expect(
-          element.dispatchCustomEvent.withArgs(AutoLightboxEvents.NEWLY_SET)
-        ).to.have.been.calledOnce;
+        expect(eventSpy).to.be.calledOnce;
       });
     });
   }

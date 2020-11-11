@@ -22,7 +22,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
-import {closest, tryFocus} from '../../../src/dom';
+import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -298,7 +298,7 @@ class AmpAccordion extends AMP.BaseElement {
     );
     this.action_.trigger(section, name, event, trust);
 
-    this.element.dispatchCustomEvent(name);
+    dispatchCustomEvent(this.element, name);
   }
 
   /**

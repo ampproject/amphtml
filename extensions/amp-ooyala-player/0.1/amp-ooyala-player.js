@@ -24,6 +24,7 @@ import {
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -137,7 +138,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     });
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      el.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(el, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;

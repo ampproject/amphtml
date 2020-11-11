@@ -28,6 +28,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
+  dispatchCustomEvent,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
@@ -420,7 +421,7 @@ export function apply(ampdoc, element) {
       REQUIRED_EXTENSION
     );
 
-    element.dispatchCustomEvent(AutoLightboxEvents.NEWLY_SET);
+    dispatchCustomEvent(element, AutoLightboxEvents.NEWLY_SET);
 
     return element;
   });

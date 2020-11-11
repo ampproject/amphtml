@@ -17,6 +17,7 @@
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
 import {VideoUtils} from '../../src/utils/video';
+import {dispatchCustomEvent} from '../../src/dom';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {listenOncePromise} from '../../src/event-helper';
@@ -203,8 +204,8 @@ describe
               expect(videoManager.userInteracted(impl)).to.be.true;
             });
 
-            video.dispatchCustomEvent(VideoEvents.AD_START);
-            video.dispatchCustomEvent(VideoEvents.UNMUTED);
+            dispatchCustomEvent(video, VideoEvents.AD_START);
+            dispatchCustomEvent(video, VideoEvents.UNMUTED);
           });
         });
 
@@ -433,7 +434,7 @@ function createFakeVideoPlayerClass(win) {
       this.element.appendChild(iframe);
 
       return Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents.LOAD);
       });
     }
 
@@ -458,10 +459,10 @@ function createFakeVideoPlayerClass(win) {
      */
     play(unusedIsAutoplay) {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+        dispatchCustomEvent(this.element, VideoEvents.PLAYING);
         this.timeoutId_ = this.timer_.delay(() => {
           this.currentTime_ = this.duration_;
-          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+          dispatchCustomEvent(this.element, VideoEvents.PAUSE);
         }, this.length_);
       });
     }
@@ -471,7 +472,7 @@ function createFakeVideoPlayerClass(win) {
      */
     pause() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        dispatchCustomEvent(this.element, VideoEvents.PAUSE);
         this.timer_.cancel(this.timeoutId_);
       });
     }
@@ -481,7 +482,7 @@ function createFakeVideoPlayerClass(win) {
      */
     mute() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.MUTED);
+        dispatchCustomEvent(this.element, VideoEvents.MUTED);
       });
     }
 
@@ -490,7 +491,7 @@ function createFakeVideoPlayerClass(win) {
      */
     unmute() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+        dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
       });
     }
 

@@ -26,12 +26,12 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
-import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-vimeo';
@@ -199,7 +199,7 @@ class AmpVimeo extends AMP.BaseElement {
 
     Services.videoManagerForDoc(element).register(this);
 
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents.LOAD);
   }
 
   /**
@@ -249,7 +249,7 @@ class AmpVimeo extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(muted));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(muted));
       return;
     }
   }
