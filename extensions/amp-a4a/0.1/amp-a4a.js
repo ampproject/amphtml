@@ -2218,11 +2218,15 @@ export class AmpA4A extends AMP.BaseElement {
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
     if (!!AMP.RealTimeConfigManager) {
       try {
-        return new AMP.RealTimeConfigManager(this).maybeExecuteRealTimeConfig(
+        return new AMP.RealTimeConfigManager(
+          this.getAmpDoc()
+        ).maybeExecuteRealTimeConfig(
+          this.element,
           this.getCustomRealTimeConfigMacros_(),
           consentState,
           consentString,
-          consentMetadata
+          consentMetadata,
+          this.verifyStillCurrent()
         );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
