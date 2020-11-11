@@ -44,7 +44,9 @@ function SelectorWithActions(props) {
   const ref = Preact.useRef();
   return (
     <section>
-      <button onClick={() => setShow(!show)}>toggle hidden option</button>
+      <button onClick={() => setShow(!show)}>
+        toggle option 2.5 visibility
+      </button>
       <Selector ref={ref} {...props}>
         {props.children.slice(0, 2)}
         {show && (
@@ -56,23 +58,19 @@ function SelectorWithActions(props) {
         {props.children.slice(2)}
       </Selector>
       <div style={{marginTop: 8}}>
-        <button onClick={() => setShow(!show)}>toggle option 2.5</button>
-        <button onClick={() => ref.current./*OK*/ toggle(1)}>
-          toggle(option at index 1)
+        <button onClick={() => ref.current./*OK*/ toggle('2')}>
+          toggle(option "2")
         </button>
-        <button onClick={() => ref.current./*OK*/ toggle(1, true)}>
-          select (option at index 1)
+        <button onClick={() => ref.current./*OK*/ toggle('2.5')}>
+          toggle(option "2.5")
         </button>
-        <button onClick={() => ref.current./*OK*/ toggle(1, false)}>
-          deselect (option at index 1)
+        <button onClick={() => ref.current./*OK*/ toggle('2', true)}>
+          select (option "2")
+        </button>
+        <button onClick={() => ref.current./*OK*/ toggle('2', false)}>
+          deselect (option "2")
         </button>
         <button onClick={() => ref.current./*OK*/ clear()}>clear all</button>
-        <button onClick={() => ref.current./*OK*/ selectBy(-2)}>
-          select up by 2
-        </button>
-        <button onClick={() => ref.current./*OK*/ selectBy(1)}>
-          select down by 1
-        </button>
       </div>
     </section>
   );
