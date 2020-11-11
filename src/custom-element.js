@@ -168,9 +168,6 @@ function createBaseCustomElementClass(win) {
       this.isFirstLayoutCompleted_ = false;
 
       /** @private {boolean} */
-      this.isInViewport_ = false;
-
-      /** @private {boolean} */
       this.paused_ = false;
 
       /** @private {string|null|undefined} */
@@ -487,9 +484,6 @@ function createBaseCustomElementClass(win) {
           if (this.isConnected_) {
             this.connected_();
           }
-          if (this.isInViewport_) {
-            this.updateInViewport_(true);
-          }
           if (this.actionQueue_) {
             // Only schedule when the queue is not empty, which should be
             // the case 99% of the time.
@@ -734,7 +728,7 @@ function createBaseCustomElementClass(win) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
-      this.dispatchCustomEvent(AmpEvents.SIZE_CHANGED);
+      dom.dispatchCustomEvent(this, AmpEvents.SIZE_CHANGED);
     }
 
     /**
@@ -945,22 +939,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Dispatches a custom event.
-     *
-     * @param {string} name
-     * @param {!Object=} opt_data Event data.
-     * @final
-     */
-    dispatchCustomEvent(name, opt_data) {
-      const data = opt_data || {};
-      // Constructors of events need to come from the correct window. Sigh.
-      const event = this.ownerDocument.createEvent('Event');
-      event.data = data;
-      event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
-      this.dispatchEvent(event);
-    }
-
-    /**
      * Dispatches a custom event only in testing environment.
      *
      * @param {string} name
@@ -971,7 +949,7 @@ function createBaseCustomElementClass(win) {
       if (!getMode().test) {
         return;
       }
-      this.dispatchCustomEvent(name, opt_data);
+      dom.dispatchCustomEvent(this, name, opt_data);
     }
 
     /**
@@ -1197,49 +1175,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Whether the resource is currently visible in the viewport.
-     * @return {boolean}
-     * @final @package
-     */
-    isInViewport() {
-      return this.isInViewport_;
-    }
-
-    /**
-     * Instructs the resource that it entered or exited the visible viewport.
-     *
-     * Can only be called on a upgraded and built element.
-     *
-     * @param {boolean} inViewport Whether the element has entered or exited
-     *   the visible viewport.
-     * @final @package
-     */
-    viewportCallback(inViewport) {
-      assertNotTemplate(this);
-      if (inViewport == this.isInViewport_) {
-        return;
-      }
-      // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
-      // elements in dead iframes.
-      if (!this.ownerDocument || !this.ownerDocument.defaultView) {
-        return;
-      }
-      this.isInViewport_ = inViewport;
-      if (this.isBuilt()) {
-        this.updateInViewport_(inViewport);
-      }
-    }
-
-    /**
-     * @param {boolean} inViewport
-     * @private
-     */
-    updateInViewport_(inViewport) {
-      this.implementation_.inViewport_ = inViewport;
-      this.implementation_.viewportCallback(inViewport);
-    }
-
-    /**
      * Whether the resource is currently paused.
      * @return {boolean}
      * @final @package
@@ -1261,7 +1196,6 @@ function createBaseCustomElementClass(win) {
         return;
       }
       this.paused_ = true;
-      this.viewportCallback(false);
       if (this.isBuilt()) {
         this.implementation_.pauseCallback();
       }

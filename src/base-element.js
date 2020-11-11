@@ -18,6 +18,7 @@ import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
+import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -61,7 +62,6 @@ import {isArray, toWin} from './types';
  *           ||                         ||
  *           ||                 =========
  *           ||
- *           || viewportCallback
  *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
@@ -126,9 +126,6 @@ export class BaseElement {
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {boolean} */
-    this.inViewport_ = false;
 
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
@@ -279,13 +276,6 @@ export class BaseElement {
    */
   isAlwaysFixed() {
     return false;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isInViewport() {
-    return this.inViewport_;
   }
 
   /**
@@ -464,13 +454,6 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the resource that it has either entered or exited the visible
-   * viewport. Intended to be implemented by actual components.
-   * @param {boolean} unusedInViewport
-   */
-  viewportCallback(unusedInViewport) {}
-
-  /**
    * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
@@ -640,7 +623,7 @@ export class BaseElement {
   forwardEvents(events, element) {
     const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
       listen(element, eventType, (event) => {
-        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+        dispatchCustomEvent(this.element, eventType, getData(event) || {});
       })
     );
 

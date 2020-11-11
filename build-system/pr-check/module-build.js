@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,25 @@
 
 /**
  * @fileoverview
- * This script builds the AMP runtime.
- * This is run during the CI stage = build; job = build.
+ * This script builds the esm minified AMP runtime.
+ * This is run during the CI stage = build; job = Module Build.
  */
 
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 const {
   printChangeSummary,
   startTimer,
   stopTimer,
   stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
-  uploadBuildOutput,
+  uploadEsmDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {runNpmChecks} = require('./npm-checks');
 
-const FILENAME = 'build.js';
+const FILENAME = 'module-build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -47,26 +48,20 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp build --fortesting');
-    uploadBuildOutput(FILENAME);
+    timedExecOrDie('gulp dist --esm --fortesting');
+    uploadEsmDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('UNIT_TEST')
-    ) {
+    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp build --fortesting');
-      uploadBuildOutput(FILENAME);
+      timedExecOrDie('gulp dist --esm --fortesting');
+      uploadEsmDistOutput(FILENAME);
     } else {
-      console.log(
+      log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Build'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
+        colors.cyan('Module Build'),
+        'because this commit does not affect the runtime or flag configs.'
       );
     }
   }

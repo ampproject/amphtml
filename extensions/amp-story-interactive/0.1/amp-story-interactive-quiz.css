@@ -38,7 +38,7 @@
   display: flex !important;
   justify-items: start !important;
   align-items: center !important;
-  border-radius: var(--i-amphtml-interactive-chip-radius) !important;
+  border-radius: 1.649em !important; /* On iOS inset shadows with border-radius require borders smaller than sides to render correctly. Issue #31036 */
   padding: 0.5em 1em 0.5em 0.5em !important;
   background-color: var(
     --i-amphtml-interactive-option-background-color
@@ -109,6 +109,7 @@
   padding-left: 1em !important;
   margin-left: auto !important;
   visibility: hidden !important;
+  flex-shrink: 0 !important;
 }
 
 .i-amphtml-story-interactive-quiz-option:not(.i-amphtml-story-interactive-option-selected) .i-amphtml-story-interactive-quiz-percentage-text {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,27 @@
 
 /**
  * @fileoverview
- * This script builds the minified AMP runtime and runs the bundle size check.
- * This is run during the CI stage = build; job = dist, bundle size.
+ * This script downloads the module and nomodule builds then runs the bundle
+ * size check.
+ * This is run during the CI stage = test; job = Bundle Size.
  */
 
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 const {
+  downloadEsmDistOutput,
+  downloadDistOutput,
   printChangeSummary,
-  processAndUploadDistOutput,
   startTimer,
   stopTimer,
   stopTimedJob,
-  timedExecWithError,
   timedExecOrDie: timedExecOrDieBase,
-  uploadDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 const {runNpmChecks} = require('./npm-checks');
-const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const FILENAME = 'dist-bundle-size.js';
+const FILENAME = 'bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
@@ -49,44 +49,22 @@ async function main() {
   }
 
   if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting');
+    downloadDistOutput(FILENAME);
+    downloadEsmDistOutput(FILENAME);
     timedExecOrDie('gulp bundle-size --on_push_build');
-    uploadDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('E2E_TEST') ||
-      buildTargets.has('VISUAL_DIFF') ||
-      buildTargets.has('UNIT_TEST')
-    ) {
-      timedExecOrDie('gulp update-packages');
-
-      const process = timedExecWithError('gulp dist --fortesting', FILENAME);
-      if (process.status !== 0) {
-        const error = process.error || new Error('unknown error, check logs');
-        console.log(colors.red('ERROR'), colors.yellow(error.message));
-        await signalDistUpload('errored');
-        stopTimedJob(FILENAME, startTime);
-        return;
-      }
-
+    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
+      downloadDistOutput(FILENAME);
+      downloadEsmDistOutput(FILENAME);
       timedExecOrDie('gulp bundle-size --on_pr_build');
-      timedExecOrDie('gulp storybook --build');
-      await processAndUploadDistOutput(FILENAME);
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
-      await signalDistUpload('skipped');
-
-      console.log(
+      log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Dist, Bundle Size'),
-        'because this commit does not affect the runtime, flag configs,',
-        'integration tests, end-to-end tests, or visual diff tests.'
+        colors.cyan('Bundle Size'),
+        'because this commit does not affect the runtime or flag configs.'
       );
     }
   }
