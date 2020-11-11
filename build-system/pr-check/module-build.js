@@ -53,6 +53,9 @@ function main() {
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
+    // NOTE: This list must eventually match the same buildTargets check
+    // found in pr-check/nomodule-build.js as we turn on the systems that
+    // run against the module build. (ex. visual diffs, e2e, etc.)
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
