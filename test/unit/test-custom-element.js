@@ -1390,14 +1390,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should dispatch custom event size-changed when size changed', () => {
         const element = new ElementClass();
-        const spyDispatchEvent = env.sandbox.spy(
-          element,
-          'dispatchCustomEvent'
-        );
-
+        const spyDispatchEvent = env.sandbox.spy();
+        element.addEventListener(AmpEvents.SIZE_CHANGED, spyDispatchEvent);
         element.applySize();
-
-        expect(spyDispatchEvent).to.be.calledWith(AmpEvents.SIZE_CHANGED);
+        expect(spyDispatchEvent).to.be.calledOnce;
       });
 
       describe('unlayoutCallback', () => {

@@ -1388,7 +1388,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
 
     element.isInViewport = () => false;

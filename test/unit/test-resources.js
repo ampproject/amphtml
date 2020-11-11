@@ -610,7 +610,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
 
     element.idleRenderOutsideViewport = () => true;
@@ -1379,7 +1378,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       },
       pauseCallback() {},
       resumeCallback() {},
-      dispatchCustomEvent() {},
       applySizesAndMediaQuery() {},
       updateLayoutBox() {},
       getBoundingClientRect() {

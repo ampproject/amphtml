@@ -20,7 +20,11 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {
+  childElementsByTag,
+  dispatchCustomEvent,
+  toggleAttribute,
+} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/utils/object';
@@ -126,19 +130,16 @@ function getState(element, mu) {
  * @return {Function}
  */
 function getExpandStateTrigger(section) {
-  const element = section.parentElement;
-  const action = Services.actionServiceForDoc(
-    /** @type {!Element|!ShadowRoot} */ (element)
-  );
+  const action = Services.actionServiceForDoc(section);
   const triggerEvent = (expanded) => {
     const eventName = expanded ? 'expand' : 'collapse';
     const event = createCustomEvent(
-      toWin(element.ownerDocument.defaultView),
+      toWin(section.ownerDocument.defaultView),
       `accordionSection.${eventName}`,
       dict()
     );
     action.trigger(section, eventName, event, ActionTrust.HIGH);
-    element.dispatchCustomEvent(name);
+    dispatchCustomEvent(section, name);
   };
   return triggerEvent;
 }
