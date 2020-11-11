@@ -2646,14 +2646,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   switchDelta_(delta) {
-    const activePage = devAssert(
-      this.activePage_,
-      'No active page set when navigating by delta.'
-    );
-
-    const currentPageIdx = findIndex(
-      this.pages_,
-      (page) => page.element.id === activePage.element.id
+    const currentPageIdx = this.storeService_.get(
+      StateProperty.CURRENT_PAGE_INDEX
     );
 
     const newPageIdx =
