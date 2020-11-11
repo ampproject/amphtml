@@ -163,6 +163,12 @@ If no thumbnail is specified, `<amp-img>` elements will be cropped per
 `poster` attribute, and placeholder images will be used for lightboxed elements
 that have one.
 
+## Styling
+
+You can style the caption of a `amp-lightbox-gallery` component
+by targeting the `amp-lightbox-gallery-caption` class with standard CSS.
+Some of the properties that can be styled are `font-size` and `color`.
+
 ## Actions
 
 ### `open`

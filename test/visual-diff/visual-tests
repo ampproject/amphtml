@@ -812,5 +812,11 @@
       "name": "amp-carousel-slides",
       "loading_complete_delay_ms": 2000,
     },
+    {
+      "url": "examples/visual-tests/amp-story/basic-transformed.html",
+      "name": "amp-story: basic example transformed with toolbox-optimizer",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [".i-amphtml-story-loaded"]
+    },
   ]
 }

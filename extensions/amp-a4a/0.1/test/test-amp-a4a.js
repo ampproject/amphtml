@@ -44,7 +44,7 @@ import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {RealTimeConfigManager} from '../real-time-config-manager';
+import {RealTimeConfigManager} from '../../../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {cancellation} from '../../../../src/error';
@@ -1414,7 +1414,16 @@ describe('amp-a4a', () => {
       expect(a4a.isVerifiedAmpCreative()).to.be.true;
       expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
       expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
-      expect(maybeExecuteRealTimeConfigStub.calledWith({}, null)).to.be.true;
+      expect(
+        maybeExecuteRealTimeConfigStub.calledWith(
+          a4aElement,
+          {},
+          null,
+          null,
+          null,
+          window.sandbox.match.any
+        )
+      ).to.be.true;
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
       expect(
         getAdUrlSpy.calledWith(
