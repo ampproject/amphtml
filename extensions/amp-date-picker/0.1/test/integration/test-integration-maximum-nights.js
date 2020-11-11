@@ -39,11 +39,15 @@ config.run('amp-date-picker', function () {
     (env) => {
       let win;
       let doc;
+      //TODO(31104)(31103): Remove eslint exception when test unskipped
+      // eslint-disable-next-line
       let clock;
 
       beforeEach(() => {
         win = env.win;
         doc = env.win.document;
+        //TODO(31104)(31103): Remove eslint exception when test unskipped
+        // eslint-disable-next-line
         clock = lolex.install({
           target: win,
           now: new Date('2018-01-01T08:00:00Z'),
