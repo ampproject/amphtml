@@ -85,7 +85,7 @@ config.run('amp-date-picker', function () {
         return null;
       }
 
-      it.skip('should appear as blocked when a date is beyond the maximum', () => {
+      it('should appear as blocked when a date is beyond the maximum', () => {
         const picker = doc.getElementById('picker');
         const startButton = getCalendarButtonByDay(picker, '6');
         const beyondButton = getCalendarButtonByDay(picker, '10');
