@@ -82,6 +82,76 @@ export const _default = () => {
   );
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function AccordionWithEvents(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <Accordion ref={ref} {...props}>
+        <AccordionSection
+          id="section1"
+          key={1}
+          expanded
+          header={<h2>Section 1</h2>}
+        >
+          <p>Content in section 1.</p>
+        </AccordionSection>
+        <AccordionSection
+          id="section2"
+          key={2}
+          header={<h2>Section 2</h2>}
+          onExpandStateChange={(expanded) => {
+            if (expanded) {
+              ref.current.expand('section3');
+            }
+          }}
+        >
+          <div>Content in section 2.</div>
+        </AccordionSection>
+        <AccordionSection
+          id="section3"
+          key={3}
+          header={<h2>Section 3</h2>}
+          onExpandStateChange={(expanded) => {
+            if (!expanded) {
+              ref.current.collapse('section2');
+            }
+          }}
+        >
+          <div>Content in section 3.</div>
+        </AccordionSection>
+      </Accordion>
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current.expand('section2')}>
+          expand(section2)
+        </button>
+        <button onClick={() => ref.current.collapse('section3')}>
+          collapse(section3)
+        </button>
+        <button onClick={() => ref.current.toggle()}>toggle all</button>
+      </div>
+    </section>
+  );
+}
+
+export const events = () => {
+  const expandSingleSection = boolean('expandSingleSection', false);
+  const animate = boolean('animate', false);
+  return (
+    <main>
+      <AccordionWithEvents
+        expandSingleSection={expandSingleSection}
+        animate={animate}
+      ></AccordionWithEvents>{' '}
+    </main>
+  );
+};
+
 export const restructure = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
