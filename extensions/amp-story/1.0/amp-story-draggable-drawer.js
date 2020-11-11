@@ -290,7 +290,22 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
-    if (this.state_ === DrawerState.CLOSED && this.touchEventState_.swipingUp) {
+    const gesture = {
+      event,
+      data: {
+        swipingUp: this.touchEventState_.swipingUp,
+        deltaY: y - this.touchEventState_.startY,
+        last: false,
+      },
+    };
+
+    this.setIgnoreCurrentSwipeY_(gesture);
+
+    if (this.shouldPreventDefault_()) {
+      event.preventDefault();
+    }
+
+    if (this.shouldStopPropagation_()) {
       event.stopPropagation();
     }
 
@@ -303,14 +318,32 @@ export class DraggableDrawer extends AMP.BaseElement {
       }
     }
 
-    this.onSwipeY_({
-      event,
-      data: {
-        swipingUp: this.touchEventState_.swipingUp,
-        deltaY: y - this.touchEventState_.startY,
-        last: false,
-      },
-    });
+    this.onSwipeY_(gesture);
+  }
+
+  /**
+   * Checks for when the scroll event should be preventDefaulted.
+   * @return {boolean}
+   * @private
+   */
+  shouldPreventDefault_() {
+    return (
+      this.state_ === DrawerState.DRAGGING_TO_OPEN ||
+      this.state_ === DrawerState.DRAGGING_TO_CLOSE ||
+      (this.state_ === DrawerState.OPEN && !this.ignoreCurrentSwipeYGesture_)
+    );
+  }
+
+  /**
+   * Checks for when scroll event should be stopped from propagating.
+   * @return {boolean}
+   * @private
+   */
+  shouldStopPropagation_() {
+    return (
+      this.state_ !== DrawerState.CLOSED ||
+      (this.state_ === DrawerState.CLOSED && this.touchEventState_.swipingUp)
+    );
   }
 
   /**
@@ -345,36 +378,12 @@ export class DraggableDrawer extends AMP.BaseElement {
   onSwipeY_(gesture) {
     const {data} = gesture;
 
-    if (this.ignoreCurrentSwipeYGesture_ === true) {
-      gesture.event.stopPropagation();
+    if (this.ignoreCurrentSwipeYGesture_) {
       this.ignoreCurrentSwipeYGesture_ = !data.last;
       return;
     }
 
     const {deltaY, swipingUp} = data;
-
-    // If the drawer is open, figure out if the user is trying to scroll the
-    // content, or actually close the drawer.
-    if (this.state_ === DrawerState.OPEN) {
-      const isContentSwipe = this.isDrawerContentDescendant_(
-        dev().assertElement(gesture.event.target)
-      );
-
-      // If user is swiping up, exit so the event bubbles up and maybe scrolls
-      // the drawer content.
-      // If user is swiping down and scrollTop is above zero, exit and let the
-      // user scroll the content.
-      // If user is swiping down and scrollTop is zero, don't exit and start
-      // dragging/closing the drawer.
-      if (
-        (isContentSwipe && deltaY < 0) ||
-        (isContentSwipe && deltaY > 0 && this.containerEl_./*OK*/ scrollTop > 0)
-      ) {
-        gesture.event.stopPropagation();
-        this.ignoreCurrentSwipeYGesture_ = true;
-        return;
-      }
-    }
 
     if (data.last === true) {
       if (this.state_ === DrawerState.DRAGGING_TO_CLOSE) {
@@ -401,7 +410,37 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
-    this.drag_(deltaY, gesture);
+    this.drag_(deltaY);
+  }
+
+  /**
+   * Ignores current vertical swipe when user is scrolling content.
+   * @param {{event: !Event, data: !Object}} gesture
+   * @private
+   */
+  setIgnoreCurrentSwipeY_(gesture) {
+    const {data} = gesture;
+    const {deltaY} = data;
+    // If the drawer is open, figure out if the user is trying to scroll the
+    // content, or actually close the drawer.
+    if (this.state_ === DrawerState.OPEN) {
+      const isContentSwipe = this.isDrawerContentDescendant_(
+        dev().assertElement(gesture.event.target)
+      );
+
+      // If user is swiping up, exit so the event bubbles up and maybe scrolls
+      // the drawer content.
+      // If user is swiping down and scrollTop is above zero, exit and let the
+      // user scroll the content.
+      // If user is swiping down and scrollTop is zero, don't exit and start
+      // dragging/closing the drawer.
+      if (
+        (isContentSwipe && deltaY < 0) ||
+        (isContentSwipe && deltaY > 0 && this.containerEl_./*OK*/ scrollTop > 0)
+      ) {
+        this.ignoreCurrentSwipeYGesture_ = true;
+      }
+    }
   }
 
   /**
@@ -443,10 +482,9 @@ export class DraggableDrawer extends AMP.BaseElement {
   /**
    * Drags the drawer on the screen upon user interaction.
    * @param {number} deltaY
-   * @param {{event: !Event, data: !Object}} gesture
    * @private
    */
-  drag_(deltaY, gesture) {
+  drag_(deltaY) {
     let translate;
 
     switch (this.state_) {
@@ -454,10 +492,6 @@ export class DraggableDrawer extends AMP.BaseElement {
       case DrawerState.DRAGGING_TO_OPEN:
         if (deltaY > 0) {
           return;
-        }
-        if (this.state_ === DrawerState.DRAGGING_TO_OPEN) {
-          gesture.event.preventDefault();
-          gesture.event.stopPropagation();
         }
         this.state_ = DrawerState.DRAGGING_TO_OPEN;
         const drag = Math.max(deltaY, -this.dragCap_);
@@ -468,8 +502,6 @@ export class DraggableDrawer extends AMP.BaseElement {
         if (deltaY < 0) {
           return;
         }
-        gesture.event.preventDefault();
-        gesture.event.stopPropagation();
         this.state_ = DrawerState.DRAGGING_TO_CLOSE;
         translate = `translate3d(0, ${deltaY}px, 0)`;
         break;
