@@ -83,8 +83,9 @@ describes.realWin(
         lastContext = context;
       });
       await waitFor(
-        () => lastContext && lastContext.slideCount > 0,
-        'context and slideCount set'
+        () =>
+          lastContext && lastContext.slides && lastContext.slides.length > 0,
+        'context and slide set'
       );
       await waitFor(() => getScroller(), 'carousel rendered');
       await waitFor(() => getDots().length > 0, 'pagination rendered');
@@ -138,7 +139,7 @@ describes.realWin(
     }
 
     it('should render the right number of slides', () => {
-      expect(lastContext.slideCount).to.equal(3);
+      expect(lastContext.slides.length).to.equal(3);
       const dots = getDots();
       expect(dots).to.have.lengthOf(3);
     });
@@ -181,7 +182,7 @@ describes.realWin(
       carousel.appendChild(newSlide('new'));
 
       // Context updated.
-      await waitFor(() => lastContext.slideCount == 4, 'slideCount == 4');
+      await waitFor(() => lastContext.slides.length == 4, 'slide.length == 4');
 
       // Pagination updated.
       await waitFor(() => getDots().length == 4, 'pagination updated');
