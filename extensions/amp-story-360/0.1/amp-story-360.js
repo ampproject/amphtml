@@ -51,6 +51,12 @@ const HAVE_CURRENT_DATA = 2;
 const CENTER_OFFSET = 90;
 
 /**
+ * Minimum distance from active page to activate WebGL context.
+ * @const {number}
+ */
+const MIN_WEBGL_DISTANCE = 2;
+
+/**
  * Generates the template for the permission button.
  *
  * @param {!Element} element
@@ -276,6 +282,9 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {boolean} */
     this.isOnActivePage_ = false;
 
+    /** @private {?number} */
+    this.distance_ = null;
+
     /** @private {number} */
     this.sceneHeading_ = 0;
 
@@ -288,11 +297,14 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {?Element|?EventTarget} */
     this.ampVideoEl_ = null;
 
-    /** @private {number} */
-    this.orientationAlpha_ = 0;
+    /** @private {?Element} */
+    this.image_ = null;
 
     /** @private {number} */
     this.headingOffset_ = 0;
+
+    /** @private WebGL extension for lost context. */
+    this.lostGlContext_ = null;
   }
 
   /** @override */
@@ -342,6 +354,18 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
+    // Mutation observer for distance attribute
+    const config = {attributes: true, attributeFilter: ['distance']};
+    const callback = (mutationsList) => {
+      this.distance_ = parseInt(
+        mutationsList[0].target.getAttribute('distance'),
+        10
+      );
+      this.restoreOrLoseGlContext_();
+    };
+    const observer = new MutationObserver(callback);
+    this.getPage_() && observer.observe(this.getPage_(), config);
+
     // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
@@ -363,11 +387,12 @@ export class AmpStory360 extends AMP.BaseElement {
           this.isOnActivePage_ = currPageId === this.getPageId_();
           this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
-          this.maybeSetGyroscopeDefaultHeading_();
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-          isPaused ? this.pause_() : this.play_();
+          if (this.isOnActivePage_) {
+            isPaused ? this.pause_() : this.play_();
+          }
         });
       }),
 
@@ -408,6 +433,20 @@ export class AmpStory360 extends AMP.BaseElement {
     } else {
       this.pause_();
       this.rewind_();
+    }
+  }
+
+  /** @private */
+  restoreOrLoseGlContext_() {
+    if (!this.renderer_) {
+      return;
+    }
+    if (this.distance_ < MIN_WEBGL_DISTANCE) {
+      if (this.renderer_.gl.isContextLost()) {
+        this.lostGlContext_.restoreContext();
+      }
+    } else if (!this.renderer_.gl.isContextLost()) {
+      this.lostGlContext_.loseContext();
     }
   }
 
@@ -470,18 +509,20 @@ export class AmpStory360 extends AMP.BaseElement {
     // Listen for one call before initiating.
     listenOncePromise(this.win, 'deviceorientation').then((e) => {
       this.gyroscopeControls_ = true;
-      this.orientationAlpha_ = e.alpha;
-      this.maybeSetGyroscopeDefaultHeading_();
+      // Renders active page orientation correctly on load.
+      // isOnActivePage_ is slightly async so unfortunately we do this for all pages.
+      this.setGyroscopeDefaultHeading_(e.alpha);
       // Debounce onDeviceOrientation_ to rAF.
       let rafTimeout;
       this.win.addEventListener('deviceorientation', (e) => {
-        // Used to set default heading when navigating to this page.
-        this.orientationAlpha_ = e.alpha;
-        if (this.isReady_ && this.isOnActivePage_) {
+        if (this.isReady_ && this.distance_ < MIN_WEBGL_DISTANCE) {
           rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
-          rafTimeout = this.win.requestAnimationFrame(() =>
-            this.onDeviceOrientation_(e)
-          );
+          rafTimeout = this.win.requestAnimationFrame(() => {
+            if (!this.isOnActivePage_) {
+              this.setGyroscopeDefaultHeading_(e.alpha);
+            }
+            this.onDeviceOrientation_(e);
+          });
         }
       });
       this.maybeShowDiscoveryAnimation_();
@@ -490,19 +531,18 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /**
    * Ensures user is facing a specified point of interest.
+   * @param {number} orientationAlpha
    * @private
    */
-  maybeSetGyroscopeDefaultHeading_() {
-    if (this.isOnActivePage_ && this.gyroscopeControls_ && this.isReady_) {
-      this.headingOffset_ =
-        parseFloat(
-          this.element.getAttribute('heading-end') ||
-            this.element.getAttribute('heading-start') ||
-            0
-        ) +
-        CENTER_OFFSET +
-        this.orientationAlpha_;
-    }
+  setGyroscopeDefaultHeading_(orientationAlpha) {
+    this.headingOffset_ =
+      parseFloat(
+        this.element.getAttribute('heading-end') ||
+          this.element.getAttribute('heading-start') ||
+          0
+      ) +
+      CENTER_OFFSET +
+      orientationAlpha;
   }
 
   /**
@@ -602,9 +642,9 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   checkImageReSize_(imgEl) {
-    const canvasForGL = document.createElement('canvas');
-    const gl = canvasForGL.getContext('webgl');
-    const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const MAX_TEXTURE_SIZE = this.renderer_.gl.getParameter(
+      this.renderer_.gl.MAX_TEXTURE_SIZE
+    );
 
     if (
       imgEl.naturalWidth > MAX_TEXTURE_SIZE ||
@@ -656,27 +696,11 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          const img = this.checkImageReSize_(
+          this.setupGlContextListeners_();
+          this.image_ = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
-          this.renderer_.setImageOrientation(
-            this.sceneHeading_,
-            this.scenePitch_,
-            this.sceneRoll_
-          );
-          this.renderer_.setImage(img);
-          this.renderer_.resize();
-          if (this.orientations_.length < 1) {
-            return;
-          }
-          this.renderInitialPosition_();
-          this.isReady_ = true;
-          if (this.gyroscopeControls_) {
-            this.maybeSetGyroscopeDefaultHeading_();
-          }
-          if (this.isPlaying_) {
-            this.animate_();
-          }
+          this.initRenderer_();
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
@@ -705,31 +729,50 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.renderer_.setImageOrientation(
-            this.sceneHeading_,
-            this.scenePitch_,
-            this.sceneRoll_
-          );
-          this.renderer_.setImage(
-            dev().assertElement(this.ampVideoEl_.querySelector('video'))
-          );
-          this.renderer_.resize();
-          if (this.orientations_.length < 1) {
-            return;
-          }
-          this.renderInitialPosition_();
-          this.isReady_ = true;
-          if (this.gyroscopeControls_) {
-            this.maybeSetGyroscopeDefaultHeading_();
-          }
-          if (this.isPlaying_) {
-            this.animate_();
-          }
+          this.setupGlContextListeners_();
+          this.initRenderer_();
         },
         () => {
           user().error(TAG, 'Failed to load the amp-video.');
         }
       );
+  }
+
+  /** @private */
+  setupGlContextListeners_() {
+    this.lostGlContext_ = this.renderer_.gl.getExtension('WEBGL_lose_context');
+    this.renderer_.canvas.addEventListener('webglcontextlost', (e) => {
+      // Calling preventDefault is necessary for restoring context.
+      e.preventDefault();
+      this.isReady_ = false;
+    });
+    this.renderer_.canvas.addEventListener('webglcontextrestored', () =>
+      this.initRenderer_()
+    );
+  }
+
+  /** @private */
+  initRenderer_() {
+    this.renderer_.init();
+    this.renderer_.setImageOrientation(
+      this.sceneHeading_,
+      this.scenePitch_,
+      this.sceneRoll_
+    );
+    this.renderer_.setImage(
+      this.image_
+        ? this.image_
+        : dev().assertElement(this.ampVideoEl_.querySelector('video'))
+    );
+    this.renderer_.resize();
+    if (this.orientations_.length < 1) {
+      return;
+    }
+    this.renderInitialPosition_();
+    this.isReady_ = true;
+    if (this.isPlaying_) {
+      this.animate_();
+    }
   }
 
   /** @private */

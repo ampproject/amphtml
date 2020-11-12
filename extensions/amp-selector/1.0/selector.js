@@ -16,55 +16,108 @@
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
-import {useContext, useMemo, useState} from '../../../src/preact';
+import {forwardRef} from '../../../src/preact/compat';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from '../../../src/preact';
 
 const SelectorContext = Preact.createContext(
-  /** @type {SelectorDef.ContextProps} */ ({})
+  /** @type {SelectorDef.ContextProps} */ ({selected: []})
 );
 
 /**
  * @param {!SelectorDef.Props} props
+ * @param {{current: (!SelectorDef.SelectorApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function Selector({
-  as: Comp = 'div',
-  disabled,
-  value,
-  multiple,
-  onChange,
-  role = 'listbox',
-  children,
-  ...rest
-}) {
-  const [selectedState, setSelectedState] = useState(value ? value : []);
-  // TBD: controlled values require override of properties.
+function SelectorWithRef(
+  {
+    as: Comp = 'div',
+    disabled,
+    defaultValue = [],
+    value,
+    multiple,
+    onChange,
+    role = 'listbox',
+    children,
+    ...rest
+  },
+  ref
+) {
+  const [selectedState, setSelectedState] = useState(
+    value ? value : defaultValue
+  );
   const selected = value ? value : selectedState;
+  const selectOption = useCallback(
+    (option) => {
+      if (!option) {
+        return;
+      }
+      let newValue = null;
+      if (multiple) {
+        newValue = selected.includes(option)
+          ? selected.filter((v) => v != option)
+          : selected.concat(option);
+      } else {
+        newValue = [option];
+      }
+      if (newValue) {
+        setSelectedState(newValue);
+        if (onChange) {
+          onChange({value: newValue, option});
+        }
+      }
+    },
+    [multiple, onChange, selected]
+  );
+
   const context = useMemo(
     () => ({
       selected,
-      selectOption: (option) => {
-        if (!option) {
-          return;
-        }
-        let newValue = null;
-        if (multiple) {
-          newValue = selected.includes(option)
-            ? selected.filter((v) => v != option)
-            : selected.concat(option);
-        } else if (!selected.includes(option)) {
-          newValue = [option];
-        }
-        if (newValue) {
-          setSelectedState(newValue);
-          if (onChange) {
-            onChange({value: newValue, option});
-          }
-        }
-      },
+      selectOption,
       disabled,
       multiple,
     }),
-    [selected, disabled, multiple, onChange]
+    [disabled, multiple, selected, selectOption]
+  );
+
+  useEffect(() => {
+    if (!multiple && selected.length > 1) {
+      setSelectedState([selected[0]]);
+    }
+  }, [multiple, selected]);
+
+  const clear = useCallback(() => setSelectedState([]), []);
+
+  const toggle = useCallback(
+    (option, select) => {
+      const isSelected = selected.includes(option);
+      if (select && isSelected) {
+        return;
+      }
+      const shouldSelect = select ?? !isSelected;
+      if (shouldSelect) {
+        selectOption(option);
+      } else {
+        setSelectedState((selected) => selected.filter((v) => v != option));
+      }
+    },
+    [setSelectedState, selectOption, selected]
+  );
+
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!SelectorDef.SelectorApi} */ ({
+        clear,
+        toggle,
+      }),
+    [clear, toggle]
   );
 
   return (
@@ -83,17 +136,22 @@ export function Selector({
   );
 }
 
+const Selector = forwardRef(SelectorWithRef);
+Selector.displayName = 'Selector'; // Make findable for tests.
+export {Selector};
+
 /**
  * @param {!SelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
 export function Option({
   as: Comp = 'div',
-  disabled,
+  disabled = false,
   onClick,
   option,
   role = 'option',
   style,
+  tabIndex = '0',
   ...rest
 }) {
   const {
@@ -111,7 +169,9 @@ export function Option({
     }
     selectOption(option);
   };
-  const isSelected = /** @type {!Array} */ (selected).includes(option);
+
+  const isSelected =
+    /** @type {!Array} */ (selected).includes(option) && !disabled;
   const statusStyle =
     disabled || selectorDisabled
       ? CSS.DISABLED
@@ -123,12 +183,14 @@ export function Option({
   const optionProps = {
     ...rest,
     disabled,
-    'aria-disabled': disabled,
+    'aria-disabled': String(disabled),
     onClick: clickHandler,
     option,
     role,
     selected: isSelected,
+    'aria-selected': String(isSelected),
     style: {...statusStyle, ...style},
+    tabIndex,
   };
   return <Comp {...optionProps}></Comp>;
 }

@@ -244,12 +244,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
   {
-    id: 'analytics-chunks',
-    name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
-    spec: 'https://github.com/ampproject/amphtml/issues/28435',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
     id: 'analytics-chunks-inabox',
     name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
     spec: 'https://github.com/ampproject/amphtml/issues/28435',
@@ -280,10 +274,5 @@ export const EXPERIMENTS = [
     id: 'layout-aspect-ratio-css',
     name: 'Responsive layouts implemented via aspect-ratio CSS',
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
-  },
-  {
-    id: 'same-origin-iframe',
-    name: 'Allow same-origin iframes with disallowDocumentAccess',
-    spec: 'https://github.com/ampproject/amphtml/issues/30824',
   },
 ];

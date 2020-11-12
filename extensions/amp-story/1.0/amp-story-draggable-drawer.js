@@ -504,7 +504,6 @@ export class DraggableDrawer extends AMP.BaseElement {
       const owners = Services.ownersForDoc(this.element);
       owners.scheduleLayout(this.element, this.ampComponents_);
       owners.scheduleResume(this.element, this.ampComponents_);
-      owners.updateInViewport(this.element, this.ampComponents_, true);
     });
   }
 
@@ -546,7 +545,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     }).then(() => {
       const owners = Services.ownersForDoc(this.element);
       owners.schedulePause(this.element, this.ampComponents_);
-      owners.updateInViewport(this.element, this.ampComponents_, false);
     });
   }
 }

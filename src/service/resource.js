@@ -227,6 +227,10 @@ export class Resource {
     /** @const @private {boolean} */
     this.intersect_ = resources.isIntersectionExperimentOn();
 
+    // TODO(#30620): remove isInViewport_ and whenWithinViewport.
+    /** @const @private {boolean} */
+    this.isInViewport_ = false;
+
     /**
      * A client rect that was "premeasured" by an IntersectionObserver.
      * @private {?ClientRect}
@@ -1037,11 +1041,10 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    const isInViewport = this.element.isInViewport();
-    if (isInViewport) {
+    if (this.isInViewport_) {
       this.resolveDeferredsWhenWithinViewports_();
     }
-    return isInViewport;
+    return this.isInViewport_;
   }
 
   /**
@@ -1049,7 +1052,7 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    this.element.viewportCallback(inViewport);
+    this.isInViewport_ = inViewport;
   }
 
   /**
