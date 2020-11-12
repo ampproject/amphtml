@@ -30,5 +30,6 @@
   "swg-gpay-native": 1,
   "amp-ad-no-center-css": 0,
   "adsense-ptt-exp": 0.1,
-  "doubleclick-ptt-exp": 0.1
+  "doubleclick-ptt-exp": 0.1,
+  "visibility-trigger-improvements": 1
 }
