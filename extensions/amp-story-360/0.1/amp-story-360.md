@@ -153,6 +153,8 @@ Serve the story over `https` to use this feature.
 
 If the device requires user permission to access the device’s gyroscope sensor an “activate 360” button will display.
 
+<amp-img src="https://raw.githubusercontent.com/processprocess/amphtml/360-docs/extensions/amp-story-360/img/activate-360.png" layout="intrinsic" width="88.5" height="36">
+
 ##### Animation fallback
 
 If the device does not support gyroscope or the user declines permission, the component will fallback to animating.
