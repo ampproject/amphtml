@@ -156,6 +156,21 @@ describes.realWin(
       expect(slideWrappers[1].getAttribute('aria-hidden')).to.equal('true');
     });
 
+    it('should style snap for container and content correctly', async () => {
+      const carousel = await getCarousel({loop: true});
+      const slideWrappers = getSlideWrappers(carousel);
+      expect(slideWrappers.length).to.equal(5);
+
+      // Ensure that the content has the snap property not wrapper
+      // or else it will break scrolling animation.
+      for (let i = 0; i < slideWrappers.length; i++) {
+        expect(slideWrappers[i].style.scrollSnapAlign).to.equal('');
+        expect(slideWrappers[i].children[0].style.scrollSnapAlign).to.not.equal(
+          ''
+        );
+      }
+    });
+
     it('should show focus outline and border on next and prev buttons', async () => {
       const carousel = await getCarousel({loop: false});
 
