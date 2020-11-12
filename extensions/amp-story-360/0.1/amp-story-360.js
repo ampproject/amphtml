@@ -367,7 +367,9 @@ export class AmpStory360 extends AMP.BaseElement {
         });
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-          isPaused ? this.pause_() : this.play_();
+          if (this.isOnActivePage_) {
+            isPaused ? this.pause_() : this.play_();
+          }
         });
       }),
 
