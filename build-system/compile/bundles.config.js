@@ -733,6 +733,7 @@ exports.extensionBundles = [
     name: 'amp-lightbox',
     version: '1.0',
     latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {
