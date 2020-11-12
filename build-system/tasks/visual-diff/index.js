@@ -55,7 +55,7 @@ const percyCss = [
   // Loader animation may otherwise be captured in slightly different points,
   // causing the test to flake.
   '.i-amphtml-new-loader * { animation: none !important; }',
-];
+].join('\n');
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
