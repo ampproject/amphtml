@@ -42,22 +42,14 @@ const ANIMATION_PRESETS = {
   ],
 };
 
-// Note: Sometimes, the timing between render and lightboxRef update is delayed, so we have a quick function to wait for the ref element before acting on it.
 /**
- * @param {Object} ref
- * @param {number} time
- * @return {number}
+ * @param {} value
+ * @return {string}
  */
-function getRefElement(ref, time = 1) {
-  return new Promise((resolve, reject) => {
-    if (time <= 0) {
-      return reject(`${ref} not found`);
-    }
-    if (ref) {
-      return resolve(ref);
-    }
-    setTimeout(() => getRefElement(ref, time - 1).then(resolve), 100);
-  });
+function useValueRef(value) {
+  const ref = useRef();
+  ref.current = value;
+  return ref;
 }
 
 /**
@@ -72,8 +64,8 @@ function LightboxWithRef(
     closeButtonAriaLabel,
     children,
     initialOpen,
-    beforeOpen,
-    afterClose,
+    onBeforeOpen,
+    onAfterClose,
     ...rest
   },
   ref
@@ -89,16 +81,16 @@ function LightboxWithRef(
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
-  // This bypasses the exhaustive-deps eslint error
-  const animateInRef = useRef();
-  animateInRef.current = animateIn;
+  const animateInRef = useValueRef(animateIn);
+  const onBeforeOpenRef = useValueRef(onBeforeOpen);
+  const onAfterCloseRef = useValueRef(onAfterClose);
 
   useImperativeHandle(
     ref,
     () => ({
       open: () => {
-        if (beforeOpen) {
-          beforeOpen();
+        if (onBeforeOpenRef.current) {
+          onBeforeOpenRef.current();
         }
         setMounted(true);
         setVisible(true);
@@ -107,62 +99,52 @@ function LightboxWithRef(
         setVisible(false);
       },
     }),
-    [beforeOpen]
+    [onBeforeOpenRef]
   );
 
   useEffect(() => {
-    let animation;
     const element = lightboxRef.current;
     if (element == undefined) {
       return;
     }
+    let animation;
     if (visible) {
-      const animation = element.animate(
-        ANIMATION_PRESETS[animateInRef.current],
-        {
-          duration: ANIMATION_DURATION,
-          fill: 'both',
-          easing: 'ease-in',
-        }
-      );
-      animation.onfinish = (opt_anim) => {
-        setStyle(
-          opt_anim.currentTarget.effect.target,
-          'opacity',
-          ANIMATION_PRESETS[animateInRef.current][1].opacity
-        );
-        setStyle(
-          opt_anim.currentTarget.effect.target,
-          'visibility',
-          ANIMATION_PRESETS[animateInRef.current][1].visibility
-        );
-        opt_anim.currentTarget.effect.target.focus();
+      const postVisibleAnim = () => {
+        setStyle(element, 'opacity', 1);
+        setStyle(element, 'visibility', 1);
+        element.focus();
       };
+
+      if (!element.animate) {
+        postVisibleAnim();
+        return;
+      }
+      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+        duration: ANIMATION_DURATION,
+        fill: 'both',
+        easing: 'ease-in',
+      });
+      animation.onfinish = postVisibleAnim;
     } else {
+      const postInvisibleAnim = () => {
+        setStyle(element, 'opacity', 0);
+        setStyle(element, 'visibility', 0);
+        setMounted(false);
+        if (onAfterCloseRef.current) {
+          onAfterCloseRef.current();
+        }
+      };
+      if (!element.animate) {
+        postInvisibleAnim();
+        return;
+      }
       animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
         easing: 'ease-in',
       });
-      animation.onfinish = (opt_anim) => {
-        if (opt_anim) {
-          setStyle(
-            opt_anim.currentTarget.effect.target,
-            'opacity',
-            ANIMATION_PRESETS[animateInRef.current][0].opacity
-          );
-          setStyle(
-            opt_anim.currentTarget.effect.target,
-            'visibility',
-            ANIMATION_PRESETS[animateInRef.current][0].visibility
-          );
-        }
-        setMounted(false);
-        if (afterClose) {
-          afterClose();
-        }
-      };
+      animation.onfinish = postInvisibleAnim;
     }
     return () => {
       if (animation) {
@@ -170,7 +152,7 @@ function LightboxWithRef(
         animation.onfinish();
       }
     };
-  }, [visible, afterClose]);
+  }, [visible, animateInRef, onAfterCloseRef]);
 
   return (
     mounted && (

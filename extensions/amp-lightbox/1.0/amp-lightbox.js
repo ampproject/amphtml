@@ -15,12 +15,12 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
-import {CSS} from './lightbox.jss';
+import {COMPONENT_CSS} from './lightbox.jss';
+import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {lightboxCSS} from './amp-lightbox.css';
 import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
@@ -36,8 +36,8 @@ class AmpLightbox extends PreactBaseElement {
     this.element.setAttribute('class', 'amp-lightbox');
     return dict({
       'initialOpen': false,
-      'beforeOpen': this.beforeOpen_.bind(this),
-      'afterClose': this.afterClose_.bind(this),
+      'onBeforeOpen': this.beforeOpen_.bind(this),
+      'onAfterClose': this.afterClose_.bind(this),
     });
   }
 
@@ -86,8 +86,8 @@ AmpLightbox['passthrough'] = true;
 AmpLightbox['layoutSizeDefined'] = true;
 
 /** @override */
-AmpLightbox['shadowCss'] = CSS;
+AmpLightbox['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpLightbox, lightboxCSS);
+  AMP.registerElement(TAG, AmpLightbox, CSS);
 });

@@ -14,5 +14,8 @@
  * limitations under the License.
  */
 
-export const lightboxCSS =
-  "amp-lightbox{width: '100%', height: '100%', position: 'fixed'}";
+amp-lightbox {
+  width: '100%';
+  height: '100%';
+  position: 'fixed';
+}

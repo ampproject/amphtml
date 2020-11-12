@@ -25,8 +25,8 @@ var LightboxDef = {};
  *   closeButtonAriaLabel: (string|undefined),
  *   scrollable: (boolean),
  *   initialOpen: (boolean),
- *   beforeOpen: (function|undefined),
- *   afterClose: (function|undefined)
+ *   onBeforeOpen: (function|undefined),
+ *   onAfterClose: (function|undefined)
  * }}
  */
 LightboxDef.Props;
