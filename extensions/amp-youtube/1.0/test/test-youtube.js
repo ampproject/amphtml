@@ -40,7 +40,6 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
     );
     expect(wrapper.find('iframe').prop('style').width).to.equal(600);
     expect(wrapper.find('iframe').prop('style').height).to.equal(500);
-    expect(wrapper.find('div')).to.have.lengthOf(2);
   });
 
   it('Pass correct param attributes to the iframe src', () => {

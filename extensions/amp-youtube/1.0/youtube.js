@@ -18,7 +18,6 @@ import * as Preact from '../../../src/preact';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {addParamsToUrl} from '../../../src/url';
-import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 
@@ -214,10 +213,8 @@ function getEmbedUrl(credentials, videoid, liveChannelid) {
  * @final
  */
 function dispatchCustomEvent(currentTarget, name, opt_data) {
-  // Constructors of events need to come from the correct window. Sigh.
-  const event = createCustomEvent(currentTarget.ownerDocument, name, opt_data, {
-    bubbles: true,
-    cancelable: true,
-  });
+  const event = currentTarget.ownerDocument.createEvent('Event');
+  event.data = opt_data || {};
+  event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
   currentTarget.dispatchEvent(event);
 }
