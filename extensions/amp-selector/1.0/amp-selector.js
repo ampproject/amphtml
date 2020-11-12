@@ -27,6 +27,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
@@ -40,6 +41,7 @@ class AmpSelector extends PreactBaseElement {
   init() {
     const {element} = this;
     const action = Services.actionServiceForDoc(this.element);
+    this.optionState = [];
 
     // TODO(wg-bento): This hack is in place to prevent doubly rendering.
     // See https://github.com/ampproject/amp-react-prototype/issues/40.
@@ -50,79 +52,52 @@ class AmpSelector extends PreactBaseElement {
       this.mutateProps(dict({'value': value}));
     };
 
-    this.registerAction('clear', () => {
-      isExpectedMutation = true;
-      this.mutateProps(dict({'value': []}));
-    });
-
-    this.registerAction('selectUp', (invocation) => {
-      const {args, trust} = invocation;
+    this.registerApiAction('clear', (api) => api./*OK*/ clear());
+    this.registerApiAction('selectUp', (api, invocation) => {
+      const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
       const initialValue = /** @type {!Array<string>} */ (this.getProp(
         'value',
         []
       ));
-      const {value, option} = selectByDelta(delta, initialValue, options);
-      handleSelect(value, option, trust);
+      selectByDelta(delta, initialValue, options, api);
     });
-
-    this.registerAction('selectDown', (invocation) => {
-      const {args, trust} = invocation;
+    this.registerApiAction('selectDown', (api, invocation) => {
+      const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
       const initialValue = /** @type {!Array<string>} */ (this.getProp(
         'value',
         []
       ));
-      const {value, option} = selectByDelta(delta, initialValue, options);
-      handleSelect(value, option, trust);
+      selectByDelta(delta, initialValue, options, api);
     });
-
-    this.registerAction(
-      'toggle',
-      (invocation) => {
-        const {args, trust} = invocation;
-        const {'index': index, 'value': opt_select} = args;
-        const initialValue = /** @type {!Array<string>} */ (this.getProp(
-          'value',
-          []
-        ));
-        const isMultiple = /** @type {boolean} */ (this.getProp(
-          'multiple',
-          false
-        ));
-        const toggleValue = toggle(
-          index,
-          initialValue,
-          options,
-          isMultiple,
-          opt_select
-        );
-        if (!toggleValue) {
-          return;
-        }
-        const {'value': value, 'option': option} = toggleValue;
-        handleSelect(value, option, trust);
-      },
-      ActionTrust.LOW
-    );
+    this.registerApiAction('toggle', (api, invocation) => {
+      const {args} = invocation;
+      const {'index': index, 'value': opt_select} = args;
+      userAssert(typeof index === 'number', "'index' must be specified");
+      const option = this.optionState[index];
+      if (option) {
+        api./*OK */ toggle(option, opt_select);
+      }
+    });
 
     const mu = new MutationObserver(() => {
       if (isExpectedMutation) {
         isExpectedMutation = false;
         return;
       }
-      this.mutateProps(getOptionState(element, mu));
+      const {children, options} = getOptions(element, mu);
+      this.optionState = options;
+      this.mutateProps({children});
     });
     mu.observe(element, {
       attributeFilter: ['option', 'selected', 'disabled'],
+      childList: true,
       subtree: true,
     });
 
-    const {
-      'value': value,
-      'children': children,
-      'options': options,
-    } = getOptionState(element, mu);
+    const {children, value, options} = getOptions(element, mu);
+    this.optionState = options;
     return dict({
       'shimDomElement': element,
       'children': children,
@@ -148,12 +123,11 @@ class AmpSelector extends PreactBaseElement {
  * @param {MutationObserver} mu
  * @return {!JsonObject}
  */
-function getOptionState(element, mu) {
+function getOptions(element, mu) {
   const children = [];
   const options = [];
-  const optionChildren = toArray(element.querySelectorAll('[option]'));
-
   const value = [];
+  const optionChildren = toArray(element.querySelectorAll('[option]'));
   optionChildren
     // Skip options that are themselves within an option
     .filter(
@@ -181,14 +155,14 @@ function getOptionState(element, mu) {
         },
         selected,
       };
-      if (selected && option) {
+      if (selected) {
         value.push(option);
       }
       const optionChild = <Option {...props} />;
       options.push(option);
       children.push(optionChild);
     });
-  return dict({'value': value, 'children': children, 'options': options});
+  return {value, children, options};
 }
 
 /**
@@ -215,41 +189,6 @@ function fireSelectEvent(win, action, el, option, value, trust) {
 }
 
 /**
- * @param {number} index
- * @param {!Array<string>} value
- * @param {Array<string>} options
- * @param {boolean} isMultiple
- * @param {boolean=} opt_select
- * @return {JsonObject|undefined}
- */
-function toggle(index, value, options, isMultiple, opt_select) {
-  userAssert(typeof index === 'number', "'index' must be specified");
-  userAssert(index >= 0, "'index' must be greater than 0");
-  userAssert(
-    index < options.length,
-    "'index' must be less than the length of options in the <amp-selector>"
-  );
-  const option = options[index];
-  const target = value.indexOf(option);
-  if (target === -1) {
-    if (opt_select == false) {
-      return;
-    }
-    if (isMultiple) {
-      value.push(option);
-    } else {
-      value = [option];
-    }
-  } else {
-    if (opt_select == true) {
-      return;
-    }
-    value.splice(target, 1);
-  }
-  return dict({'value': value, 'option': option});
-}
-
-/**
  * This method returns the new selected state by modifying
  * at most one value of the current selected state by the given delta.
  * The modification is done in FIFO order. When no values are selected,
@@ -259,14 +198,15 @@ function toggle(index, value, options, isMultiple, opt_select) {
  * ex: (-1, [2, 1], [0, 1, 2, 3]) => [1]
  * ex: (2, [2, 1], [0, 1, 2, 3]) => [1, 0]
  * ex: (-1, [], [0, 1, 2, 3]) => [3]
- *
  * @param {number} delta
  * @param {!Array<string>} value
  * @param {Array<string>} options
+ * @param {!SelectorDef.SelectorApi} api
  * @return {{value: Array<string>, option: string}|undefined}
  */
-function selectByDelta(delta, value, options) {
+function selectByDelta(delta, value, options, api) {
   const previous = options.indexOf(value.shift());
+  api./*OK */ toggle(previous, /* deselect */ false);
 
   // If previousIndex === -1 is true, then a negative delta will be offset
   // one more than is wanted when looping back around in the options.
@@ -277,10 +217,8 @@ function selectByDelta(delta, value, options) {
 
   // Only add option if it is not already selected.
   if (value.indexOf(option) === -1) {
-    value.push(option);
+    api./*OK */ toggle(option, /* select */ true);
   }
-
-  return {value, option};
 }
 
 /**
@@ -325,15 +263,13 @@ function OptionShim({
 
 /**
  * @param {!SelectorDef.Props} props
+ * @param {{current: (!SelectorDef.SelectorApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function SelectorShim({
-  shimDomElement,
-  multiple,
-  disabled,
-  role = 'listbox',
-  ...rest
-}) {
+function SelectorShimWithRef(
+  {shimDomElement, multiple, disabled, role = 'listbox', ...rest},
+  ref
+) {
   useLayoutEffect(() => {
     toggleAttribute(shimDomElement, 'multiple', multiple);
     shimDomElement.setAttribute('aria-multiselectable', !!multiple);
@@ -349,9 +285,18 @@ function SelectorShim({
   }, [shimDomElement, role]);
 
   return (
-    <Selector role={role} multiple={multiple} disabled={disabled} {...rest} />
+    <Selector
+      role={role}
+      multiple={multiple}
+      disabled={disabled}
+      ref={ref}
+      {...rest}
+    />
   );
 }
+
+const SelectorShim = forwardRef(SelectorShimWithRef);
+Selector.displayName = 'SelectorShim'; // Make findable for tests.
 
 /** @override */
 AmpSelector['Component'] = SelectorShim;

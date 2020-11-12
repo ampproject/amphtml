@@ -16,7 +16,15 @@
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
-import {useContext, useEffect, useMemo, useState} from '../../../src/preact';
+import {forwardRef} from '../../../src/preact/compat';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from '../../../src/preact';
 
 const SelectorContext = Preact.createContext(
   /** @type {SelectorDef.ContextProps} */ ({selected: []})
@@ -24,49 +32,58 @@ const SelectorContext = Preact.createContext(
 
 /**
  * @param {!SelectorDef.Props} props
+ * @param {{current: (!SelectorDef.SelectorApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function Selector({
-  as: Comp = 'div',
-  disabled,
-  defaultValue = [],
-  value,
-  multiple,
-  onChange,
-  role = 'listbox',
-  children,
-  ...rest
-}) {
+function SelectorWithRef(
+  {
+    as: Comp = 'div',
+    disabled,
+    defaultValue = [],
+    value,
+    multiple,
+    onChange,
+    role = 'listbox',
+    children,
+    ...rest
+  },
+  ref
+) {
   const [selectedState, setSelectedState] = useState(
     value ? value : defaultValue
   );
   const selected = value ? value : selectedState;
+  const selectOption = useCallback(
+    (option) => {
+      if (!option) {
+        return;
+      }
+      let newValue = null;
+      if (multiple) {
+        newValue = selected.includes(option)
+          ? selected.filter((v) => v != option)
+          : selected.concat(option);
+      } else {
+        newValue = [option];
+      }
+      if (newValue) {
+        setSelectedState(newValue);
+        if (onChange) {
+          onChange({value: newValue, option});
+        }
+      }
+    },
+    [multiple, onChange, selected]
+  );
+
   const context = useMemo(
     () => ({
       selected,
-      selectOption: (option) => {
-        if (!option) {
-          return;
-        }
-        let newValue = null;
-        if (multiple) {
-          newValue = selected.includes(option)
-            ? selected.filter((v) => v != option)
-            : selected.concat(option);
-        } else {
-          newValue = [option];
-        }
-        if (newValue) {
-          setSelectedState(newValue);
-          if (onChange) {
-            onChange({value: newValue, option});
-          }
-        }
-      },
+      selectOption,
       disabled,
       multiple,
     }),
-    [selected, disabled, multiple, onChange]
+    [disabled, multiple, selected, selectOption]
   );
 
   useEffect(() => {
@@ -74,6 +91,34 @@ export function Selector({
       setSelectedState([selected[0]]);
     }
   }, [multiple, selected]);
+
+  const clear = useCallback(() => setSelectedState([]), []);
+
+  const toggle = useCallback(
+    (option, select) => {
+      const isSelected = selected.includes(option);
+      if (select && isSelected) {
+        return;
+      }
+      const shouldSelect = select ?? !isSelected;
+      if (shouldSelect) {
+        selectOption(option);
+      } else {
+        setSelectedState((selected) => selected.filter((v) => v != option));
+      }
+    },
+    [setSelectedState, selectOption, selected]
+  );
+
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!SelectorDef.SelectorApi} */ ({
+        clear,
+        toggle,
+      }),
+    [clear, toggle]
+  );
 
   return (
     <Comp
@@ -90,6 +135,10 @@ export function Selector({
     </Comp>
   );
 }
+
+const Selector = forwardRef(SelectorWithRef);
+Selector.displayName = 'Selector'; // Make findable for tests.
+export {Selector};
 
 /**
  * @param {!SelectorDef.OptionProps} props
@@ -120,7 +169,9 @@ export function Option({
     }
     selectOption(option);
   };
-  const isSelected = /** @type {!Array} */ (selected).includes(option);
+
+  const isSelected =
+    /** @type {!Array} */ (selected).includes(option) && !disabled;
   const statusStyle =
     disabled || selectorDisabled
       ? CSS.DISABLED
