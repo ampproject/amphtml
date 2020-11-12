@@ -229,7 +229,6 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
-  SET_PAGE_OFFSET: 'updatePageOffset',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
@@ -483,11 +482,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_SIZE]: data,
-      });
-    case Action.SET_PAGE_OFFSET:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.PAGE_OFFSET]: data,
       });
     case Action.SET_VIEWER_CUSTOM_CONTROLS:
       return /** @type {!State} */ ({

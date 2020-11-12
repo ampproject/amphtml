@@ -554,8 +554,8 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isInStoryPageSideEdge_(event, pageRect) {
     return (
-      event.clientX <= pageRect.left + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.right - PROTECTED_SCREEN_EDGE_PX
+      event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
     );
   }
 
@@ -612,7 +612,7 @@ export class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
     const pageRect = this.element_
       .querySelector('amp-story-page[active]')
-      .getBoundingClientRect();
+      .getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
