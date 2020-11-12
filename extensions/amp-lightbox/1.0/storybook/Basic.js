@@ -31,8 +31,6 @@ export default {
  * @return {*}
  */
 function LightboxWithActions(props) {
-  // TODO(#30447): replace imperative calls with "button" knobs when the
-  // Storybook 6.1 is released.
   const ref = useRef();
   return (
     <section>
@@ -51,6 +49,7 @@ export const _default = () => {
     'fly-in-top',
     'fly-in-bottom',
   ]);
+  const enableAnimation = boolean('enable animation', true);
   return (
     <div>
       <LightboxWithActions
@@ -58,6 +57,7 @@ export const _default = () => {
         layout="nodisplay"
         initialOpen={open}
         animateIn={animateIn}
+        enableAnimation={enableAnimation}
       >
         Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
         aeque inermis reprehendunt.

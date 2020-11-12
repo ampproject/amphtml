@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {select, withKnobs} from '@storybook/addon-knobs';
+import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -34,9 +34,15 @@ export const Default = () => {
     'fly-in-top',
     'fly-in-bottom',
   ]);
+  const enableAnimation = boolean('enable animation', true);
   return (
     <main>
-      <amp-lightbox id="lightbox" layout="nodisplay" animate-in={animateIn}>
+      <amp-lightbox
+        id="lightbox"
+        layout="nodisplay"
+        animate-in={animateIn}
+        enable-animation={enableAnimation}
+      >
         <p>Test</p>
         <button on="tap:lightbox.close">Close</button>
       </amp-lightbox>

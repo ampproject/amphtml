@@ -106,11 +106,10 @@ function LightboxWithRef(
     if (visible) {
       const postVisibleAnim = () => {
         setStyle(element, 'opacity', 1);
-        setStyle(element, 'visibility', 1);
+        setStyle(element, 'visibility', 'visible');
         element.focus();
       };
-
-      if (!element.animate || !enableAnimationRef) {
+      if (!element.animate || !enableAnimationRef.current) {
         postVisibleAnim();
         return;
       }
@@ -124,12 +123,12 @@ function LightboxWithRef(
       // "Make Invisible" Animation
       const postInvisibleAnim = () => {
         setStyle(element, 'opacity', 0);
-        setStyle(element, 'visibility', 0);
+        setStyle(element, 'visibility', 'hidden');
         if (onAfterCloseRef.current) {
           onAfterCloseRef.current();
         }
       };
-      if (!element.animate) {
+      if (!element.animate || !enableAnimationRef.current) {
         postInvisibleAnim();
         return;
       }

@@ -77,6 +77,7 @@ AmpLightbox['props'] = {
   'id': {attr: 'id'},
   'initialOpen': {attr: 'initial-open', type: 'boolean'},
   'closeButtonAriaLabel': {attr: 'data-close-button-aria-label'},
+  'enableAnimation': {attr: 'enable-animation', type: 'boolean'},
 };
 
 /** @override */
