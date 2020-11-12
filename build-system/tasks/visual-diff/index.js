@@ -777,12 +777,7 @@ function installPercy_() {
   }
 
   puppeteer = require('puppeteer');
-
-  const originalPercySnapshot = require('@percy/puppeteer').percySnapshot;
-  percySnapshot = (page, name, options = {}) =>
-    originalPercySnapshot(page, name, {
-      ...options,
-    });
+  percySnapshot = require('@percy/puppeteer').percySnapshot;
 }
 
 function setupCleanup_() {
