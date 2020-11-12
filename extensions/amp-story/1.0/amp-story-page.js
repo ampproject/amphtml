@@ -588,11 +588,13 @@ export class AmpStoryPage extends AMP.BaseElement {
           const uiState = this.storeService_.get(StateProperty.UI_STATE);
           // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
           // ensures we are getting the raw size, ignoring the scale.
-          const {width, height} =
+          const {width, height, x, y} =
             uiState === UIType.DESKTOP_PANELS
               ? {
                   height: this.element./*OK*/ clientHeight,
                   width: this.element./*OK*/ clientWidth,
+                  x: this.element.offsetLeft,
+                  y: this.element.offsetTop,
                 }
               : layoutBox;
           state.height = height;
@@ -602,6 +604,8 @@ export class AmpStoryPage extends AMP.BaseElement {
           state.fiftyVw = Math.round(width / 2);
           state.vmin = Math.min(state.vh, state.vw);
           state.vmax = Math.max(state.vh, state.vw);
+          state.x = x;
+          state.y = y;
         },
         mutate: (state) => {
           const {height, width} = state;
@@ -609,6 +613,7 @@ export class AmpStoryPage extends AMP.BaseElement {
             return;
           }
           this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
+          this.storeService_.dispatch(Action.SET_PAGE_OFFSET, {x, y});
           if (!this.cssVariablesStyleEl_) {
             const doc = this.win.document;
             this.cssVariablesStyleEl_ = doc.createElement('style');
