@@ -3,7 +3,7 @@
 // tests.
 
 // The following strings will be replaced at execution time:
-// *  __WIDTH__ and __HEIGHT__ with the viewport's size from the visual test's config.
+// * __WIDTH__ and __HEIGHT__ with the viewport's size from the visual test's config.
 // * __PERCY_CSS__ with Percy-specific CSS.
 
 if ('__PERCY_CSS__' !== '__' + 'PERCY_CSS' + '__') {
