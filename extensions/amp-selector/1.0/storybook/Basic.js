@@ -16,9 +16,9 @@
 
 import * as Preact from '../../../../src/preact';
 import {Option, Selector} from '../selector';
+import {useState} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
-
 export default {
   title: 'Selector',
   component: Selector,
@@ -32,40 +32,86 @@ const imgStyle = {
   margin: '2px',
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function SelectorWithActions(props) {
+  const [show, setShow] = useState(false);
+
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <button onClick={() => setShow(!show)}>
+        toggle option 2.5 visibility
+      </button>
+      <Selector ref={ref} {...props}>
+        {props.children.slice(0, 2)}
+        {show && (
+          <Option as="div" option="2.5">
+            Option 2.5
+          </Option>
+        )}
+        <br />
+        {props.children.slice(2)}
+      </Selector>
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current./*OK*/ toggle('2')}>
+          toggle(option "2")
+        </button>
+        <button onClick={() => ref.current./*OK*/ toggle('2.5')}>
+          toggle(option "2.5")
+        </button>
+        <button onClick={() => ref.current./*OK*/ toggle('2', true)}>
+          select (option "2")
+        </button>
+        <button onClick={() => ref.current./*OK*/ toggle('2', false)}>
+          deselect (option "2")
+        </button>
+        <button onClick={() => ref.current./*OK*/ clear()}>clear all</button>
+      </div>
+    </section>
+  );
+}
+
 export const listItems = () => {
   return (
-    <Selector aria-label="Image menu">
-      <Option
-        as="img"
-        alt="Sea landscape"
-        style={{...imgStyle, width: '90px', height: '60px'}}
-        src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
-        option="1"
-        disabled
-      ></Option>
-      <Option
-        as="img"
-        alt="Desert landscape"
-        style={{...imgStyle, width: '90px', height: '60px'}}
-        src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
-        option="2"
-      ></Option>
-      <br></br>
-      <Option
-        as="img"
-        alt="Ship landscape"
-        style={{...imgStyle, width: '90px', height: '60px'}}
-        src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
-        option="3"
-      ></Option>
-      <Option
-        as="img"
-        alt="Village landscape"
-        style={{...imgStyle, width: '90px', height: '60px'}}
-        src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
-        option="4"
-      ></Option>
-    </Selector>
+    <>
+      <SelectorWithActions multiple aria-label="Image menu">
+        <Option
+          as="img"
+          alt="Sea landscape"
+          style={imgStyle}
+          src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
+          option="1"
+          disabled
+        ></Option>
+        <Option
+          as="img"
+          alt="Desert landscape"
+          style={imgStyle}
+          src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
+          option="2"
+        ></Option>
+        <br />
+        <Option
+          as="img"
+          alt="Ship landscape"
+          style={imgStyle}
+          src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
+          option="3"
+        ></Option>
+        <Option
+          as="img"
+          alt="Village landscape"
+          style={imgStyle}
+          src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
+          option="4"
+        ></Option>
+      </SelectorWithActions>
+    </>
   );
 };
 

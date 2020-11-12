@@ -56,3 +56,14 @@ SelectorDef.OptionProps;
  * }}
  */
 SelectorDef.ContextProps;
+
+/** @interface */
+SelectorDef.SelectorApi = class {
+  clear() {}
+
+  /**
+   * @param {*} option
+   * @param {boolean|undefined} value
+   */
+  toggle(option, value) {}
+};
