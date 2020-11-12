@@ -575,11 +575,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       !this.isFirstPage() ||
       (this.layoutBox_ &&
         this.layoutBox_.width === layoutBox.width &&
-        this.layoutBox_.height === layoutBox.height &&
-        this.layoutBox_.x === layoutBox.x &&
-        this.layoutBox_.y === layoutBox.y &&
-        this.layoutBox_.offsetWidth === layoutBox.offsetWidth &&
-        this.layoutBox_.offsetHeight === layoutBox.offsetHeight)
+        this.layoutBox_.height === layoutBox.height)
     ) {
       return;
     }
@@ -592,15 +588,11 @@ export class AmpStoryPage extends AMP.BaseElement {
           const uiState = this.storeService_.get(StateProperty.UI_STATE);
           // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
           // ensures we are getting the raw size, ignoring the scale.
-          const {width, height, x, y, offsetWidth, offsetHeight} =
+          const {width, height} =
             uiState === UIType.DESKTOP_PANELS
               ? {
                   height: this.element./*OK*/ clientHeight,
                   width: this.element./*OK*/ clientWidth,
-                  x: this.element.offsetLeft,
-                  y: this.element.offsetTop,
-                  offsetWidth: this.element.offsetWidth,
-                  offsetHeight: this.element.offsetHeight,
                 }
               : layoutBox;
           state.height = height;
@@ -610,23 +602,15 @@ export class AmpStoryPage extends AMP.BaseElement {
           state.fiftyVw = Math.round(width / 2);
           state.vmin = Math.min(state.vh, state.vw);
           state.vmax = Math.max(state.vh, state.vw);
-          state.x = x;
-          state.y = y;
-          state.offsetWidth = offsetWidth;
-          state.offsetHeight = offsetHeight;
         },
         mutate: (state) => {
-          const {height, width, x, y, offsetHeight, offsetWidth} = state;
+          const {height, width} = state;
           if (state.vh === 0 && state.vw === 0) {
             return;
           }
           this.storeService_.dispatch(Action.SET_PAGE_SIZE, {
             height,
             width,
-            x,
-            y,
-            offsetWidth,
-            offsetHeight,
           });
           if (!this.cssVariablesStyleEl_) {
             const doc = this.win.document;

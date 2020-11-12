@@ -501,6 +501,7 @@ export class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.isInStoryPageSideEdge_(event, pageRect)) {
+      console.log("isInStoryPageSideEdge_");
       event.preventDefault();
       return false;
     }
@@ -552,21 +553,10 @@ export class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    * @private
    */
-  isInStoryPageSideEdge_(event, pageRect) {
-
-    const pageSize = /** @type {!State} */ (this.storeService_.get(StateProperty.PAGE_SIZE));
-
-    console.log(event.clientX);
-    console.log(pageSize.x + PROTECTED_SCREEN_EDGE_PX);
-    console.log(pageSize.x + pageSize.offsetWidth - PROTECTED_SCREEN_EDGE_PX);
-    console.log(
-      event.clientX <= pageSize.x + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageSize.x + pageSize.offsetWidth - PROTECTED_SCREEN_EDGE_PX
-    );
-    
+  isInStoryPageSideEdge_(event, pageRect) {    
     return (
-      event.clientX <= pageSize.x + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageSize.x + pageSize.offsetWidth - PROTECTED_SCREEN_EDGE_PX
+      event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
     );
   }
 
@@ -621,9 +611,17 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
-    const pageRect = this.element_
-      .getLayoutBox();
 
+    let pageRect;
+    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS) {
+      pageRect = this.element_.getLayoutBox();
+    } else {
+      pageRect = this.element_
+        .querySelector('amp-story-page[active]')
+        .getBoundingClientRect();
+    }
+
+    debugger;
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
       event.preventDefault();
