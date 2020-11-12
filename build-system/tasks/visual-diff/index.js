@@ -48,6 +48,15 @@ const {waitUntilUsed} = require('tcp-port-used');
 let puppeteer;
 let percySnapshot;
 
+// CSS injected in every page tested.
+// Normally, as in https://docs.percy.io/docs/percy-specific-css
+// Otherwise, as a <style> in an iframe, see snippets/iframe-wrapper.js
+const percyCss = [
+  // Loader animation may otherwise be captured in slightly different points,
+  // causing the test to flake.
+  '.i-amphtml-new-loader * { animation: none !important; }',
+];
+
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
 };
@@ -576,11 +585,12 @@ async function snapshotWebpages(browser, webpages) {
           snapshotOptions.widths = [viewport.width];
           log('verbose', 'Wrapping viewport-constrained page in an iframe');
           await page.evaluate(
-            WRAP_IN_IFRAME_SNIPPET.replace(
-              /__WIDTH__/g,
-              viewport.width
-            ).replace(/__HEIGHT__/g, viewport.height)
+            WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, viewport.width)
+              .replace(/__HEIGHT__/g, viewport.height)
+              .replace(/__PERCY_CSS__/g, percyCss)
           );
+        } else {
+          snapshotOptions.percyCss = percyCss;
         }
 
         try {
