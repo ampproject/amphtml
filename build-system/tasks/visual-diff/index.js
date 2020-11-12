@@ -48,9 +48,19 @@ const {waitUntilUsed} = require('tcp-port-used');
 let puppeteer;
 let percySnapshot;
 
+// CSS injected in every page tested.
+// https://docs.percy.io/docs/percy-specific-css
+const percyCss = [
+  // Loader animation may otherwise be captured in slightly different points,
+  // causing the test to flake.
+  '.i-amphtml-new-loader { display: none; }',
+].join('\n');
+
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
+  percyCss,
 };
+
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
@@ -567,7 +577,9 @@ async function snapshotWebpages(browser, webpages) {
 
         // Create a default set of snapshot options for Percy and modify
         // them based on the test's configuration.
-        const snapshotOptions = {};
+        const snapshotOptions = {
+          percyCss,
+        };
         if (webpage.enable_percy_javascript) {
           snapshotOptions.enableJavaScript = true;
         }
@@ -770,11 +782,6 @@ function installPercy_() {
   percySnapshot = (page, name, options = {}) =>
     originalPercySnapshot(page, name, {
       ...options,
-      percyCss: [
-        // Loader animation may otherwise be captured in slightly different
-        // points, thus causing the test to flake.
-        '.i-amphtml-new-loader { display: none }',
-      ].join('\n'),
     });
 }
 
