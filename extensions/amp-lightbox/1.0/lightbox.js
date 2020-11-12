@@ -107,7 +107,7 @@ function LightboxWithRef(
       const postVisibleAnim = () => {
         setStyle(element, 'opacity', 1);
         setStyle(element, 'visibility', 'visible');
-        element.focus();
+        element./*REVIEW*/ focus();
       };
       if (!element.animate || !enableAnimationRef.current) {
         postVisibleAnim();

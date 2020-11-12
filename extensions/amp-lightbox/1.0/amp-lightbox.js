@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
-import {COMPONENT_CSS} from './lightbox.jss';
+import {CSS as COMPONENT_CSS} from './lightbox.jss';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
