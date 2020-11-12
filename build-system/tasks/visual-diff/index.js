@@ -49,18 +49,17 @@ let puppeteer;
 let percySnapshot;
 
 // CSS injected in every page tested.
-// https://docs.percy.io/docs/percy-specific-css
+// Normally, as in https://docs.percy.io/docs/percy-specific-css
+// Otherwise, as a <style> in an iframe, see snippets/iframe-wrapper.js
 const percyCss = [
   // Loader animation may otherwise be captured in slightly different points,
   // causing the test to flake.
-  '.i-amphtml-new-loader { display: none; }',
-].join('\n');
+  '.i-amphtml-new-loader * { animation: none !important; }',
+];
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
-  percyCss,
 };
-
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
@@ -577,9 +576,7 @@ async function snapshotWebpages(browser, webpages) {
 
         // Create a default set of snapshot options for Percy and modify
         // them based on the test's configuration.
-        const snapshotOptions = {
-          percyCss,
-        };
+        const snapshotOptions = {};
         if (webpage.enable_percy_javascript) {
           snapshotOptions.enableJavaScript = true;
         }
@@ -588,11 +585,12 @@ async function snapshotWebpages(browser, webpages) {
           snapshotOptions.widths = [viewport.width];
           log('verbose', 'Wrapping viewport-constrained page in an iframe');
           await page.evaluate(
-            WRAP_IN_IFRAME_SNIPPET.replace(
-              /__WIDTH__/g,
-              viewport.width
-            ).replace(/__HEIGHT__/g, viewport.height)
+            WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, viewport.width)
+              .replace(/__HEIGHT__/g, viewport.height)
+              .replace(/__PERCY_CSS__/g, percyCss)
           );
+        } else {
+          snapshotOptions.percyCss = percyCss;
         }
 
         try {
