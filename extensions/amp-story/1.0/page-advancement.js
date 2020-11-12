@@ -553,11 +553,20 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInStoryPageSideEdge_(event, pageRect) {
-    const pageSize = /** @type {!State} */ storeService.get(StateProperty.PAGE_SIZE);
+
+    const pageSize = /** @type {!State} */ (this.storeService_.get(StateProperty.PAGE_SIZE));
+
+    console.log(event.clientX);
+    console.log(pageSize.x + PROTECTED_SCREEN_EDGE_PX);
+    console.log(pageSize.x + pageSize.offsetWidth - PROTECTED_SCREEN_EDGE_PX);
+    console.log(
+      event.clientX <= pageSize.x + PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageSize.x + pageSize.offsetWidth - PROTECTED_SCREEN_EDGE_PX
+    );
     
     return (
       event.clientX <= pageSize.x + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageSize.x + pageSize.width - PROTECTED_SCREEN_EDGE_PX
+      event.clientX >= pageSize.x + pageSize.offsetWidth - PROTECTED_SCREEN_EDGE_PX
     );
   }
 
@@ -613,7 +622,6 @@ export class ManualAdvancement extends AdvancementConfig {
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
     const pageRect = this.element_
-      .querySelector('amp-story-page[active]')
       .getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
