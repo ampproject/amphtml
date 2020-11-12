@@ -553,9 +553,11 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInStoryPageSideEdge_(event, pageRect) {
+    const pageSize = /** @type {!State} */ storeService.get(StateProperty.PAGE_SIZE);
+    
     return (
-      event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
+      event.clientX <= pageSize.x + PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageSize.x + pageSize.width - PROTECTED_SCREEN_EDGE_PX
     );
   }
 
