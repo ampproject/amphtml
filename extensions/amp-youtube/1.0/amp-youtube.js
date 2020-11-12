@@ -37,9 +37,6 @@ AmpYoutube['props'] = {
 };
 
 /** @override */
-AmpYoutube['passthrough'] = true;
-
-/** @override */
 AmpYoutube['layoutSizeDefined'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
