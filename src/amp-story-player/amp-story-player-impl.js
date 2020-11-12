@@ -232,6 +232,9 @@ export class AmpStoryPlayer {
       startY: 0,
       lastX: 0,
       isSwipeX: null,
+      touchStartTime: null,
+      touchEndTime: null,
+      touchMoveTime: null,
     };
 
     /** @private {?Deferred} */
@@ -240,15 +243,28 @@ export class AmpStoryPlayer {
     this.attachCallbacksToElement_();
 
     /** @private {!Object} */
-    this.scrollEventState_ = {
+    this.scrollState_ = {
       startY: 0,
       endY: 0,
       currentDistance: 0,
       isRunning: false,
       isDistanceAsc: false,
-      distance: 20,
-      acceleration: 2,
-      deceleration: 0.885,
+      distance: 1.5,
+      acceleration: 1,
+      deceleration: 0.95,
+      startTime: null,
+      endTime: null,
+      momentum: null,
+      maxTimeBetweenSwipes: 250, // ms
+      deltaYThreshold: 5, // px
+      meetsDeltaThreshold: false,
+      speedLimit: 1.2,
+      deltaY: null,
+      moveTimeThreshold: 100, // ms
+      offsetThreshold: 30,
+      duration: null,
+      offset: null,
+      multiplier: 1,
     };
   }
 
@@ -585,8 +601,8 @@ export class AmpStoryPlayer {
             this.onTouchMove_(/** @type {!Event} */ (data));
           });
 
-          messaging.registerHandler('touchend', () => {
-            this.onTouchEnd_();
+          messaging.registerHandler('touchend', (event, data) => {
+            this.onTouchEnd_(/** @type {!Event} */ (data));
           });
 
           messaging.registerHandler('selectDocument', (event, data) => {
@@ -1447,7 +1463,23 @@ export class AmpStoryPlayer {
 
     this.touchEventState_.startX = coordinates.x;
     this.touchEventState_.startY = coordinates.y;
-    this.scrollEventState_.startY = this.win_.scrollY;
+    this.touchEventState_.touchStartTime = event.timeStamp;
+
+    this.scrollState_.startY = this.win_.scrollY;
+
+    if (
+      this.scrollState_.isRunning &&
+      this.touchEventState_.touchEndTime -
+        this.touchEventState_.touchStartTime <
+        this.scrollState_.maxTimeBetweenSwipes
+    ) {
+      // User swiped while still scrolling, increase the multiplier for the offset.
+      this.scrollState_.multiplier += this.scrollState_.acceleration;
+    } else {
+      this.scrollState_.multiplier = 1;
+    }
+
+    this.scrollState_.isRunning = false;
   }
 
   /**
@@ -1461,13 +1493,28 @@ export class AmpStoryPlayer {
       return;
     }
 
-    if (this.touchEventState_.isSwipeX === false) {
-      this.forwardScrollingEvent_(coordinates.y);
-      return;
-    }
-
     const {x, y} = coordinates;
     this.touchEventState_.lastX = x;
+    // this.touchEventState_.lastY = y;
+    this.touchEventState_.touchMoveTime = event.timeStamp;
+    const deltaY = this.touchEventState_.startY - y;
+    this.scrollState_.deltaY = deltaY;
+    this.scrollState_.meetsDeltaThreshold =
+      Math.abs(deltaY) > this.scrollState_.deltaYThreshold;
+
+    if (
+      this.touchEventState_.isSwipeX === false &&
+      this.scrollState_.meetsDeltaThreshold
+    ) {
+      this.scrollState_.acceleration = Math.abs(
+        deltaY /
+          (this.touchEventState_.touchMoveTime -
+            this.touchEventState_.touchStartTime)
+      );
+      console.log('touchmove scroll', this.scrollState_.startY + deltaY);
+      this.win_.scroll(0, this.scrollState_.startY + deltaY);
+      return;
+    }
 
     if (this.touchEventState_.isSwipeX === null) {
       this.touchEventState_.isSwipeX =
@@ -1485,79 +1532,48 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Forwards scrolling event from iframe to parent window.
-   * @param {number} touchEventY
-   * @private
-   */
-  forwardScrollingEvent_(touchEventY) {
-    const deltaY = touchEventY - this.touchEventState_.startY;
-    this.applySmoothScroll_(deltaY);
-  }
-
-  /**
-   * Applies smooth scrolling to parent page when scrolling on the player.
-   * @param {number} deltaY
-   */
-  applySmoothScroll_(deltaY) {
-    if (!this.scrollEventState_.isRunning) {
-      this.scrollEventState_.endY = this.scrollEventState_.startY;
-      this.scrollEventState_.isRunning = true;
-      this.scrollEventState_.currentDistance = deltaY > 0 ? -0.1 : 0.1;
-      this.scrollEventState_.isDistanceAsc = true;
-      this.recursiveScroll_();
-      return;
-    }
-
-    this.scrollEventState_.isDistanceAsc = false;
-    this.scrollEventState_.currentDistance =
-      deltaY > 0
-        ? -this.scrollEventState_.distance
-        : this.scrollEventState_.distance;
-  }
-
-  /**
-   * @private
-   */
-  recursiveScroll_() {
-    if (!this.scrollEventState_.isRunning) {
-      return;
-    }
-
-    this.scrollEventState_.currentDistance *= this.scrollEventState_
-      .isDistanceAsc
-      ? this.scrollEventState_.acceleration
-      : this.scrollEventState_.deceleration;
-
-    if (
-      Math.abs(this.scrollEventState_.currentDistance) < 0.1 &&
-      !this.scrollEventState_.isDistanceAsc
-    ) {
-      this.scrollEventState_.isRunning = false;
-    }
-
-    if (
-      Math.abs(this.scrollEventState_.currentDistance) >=
-      Math.abs(this.scrollEventState_.distance)
-    ) {
-      this.scrollEventState_.isDistanceAsc = false;
-    }
-
-    this.scrollEventState_.endY += this.scrollEventState_.currentDistance;
-    this.win_.scroll(0, this.scrollEventState_.endY);
-
-    requestAnimationFrame(this.recursiveScroll_.bind(this));
-  }
-
-  /**
    * Reacts to touchend events. Resets cached touch event states.
+   * @param {!Event} event
    * @private
    */
-  onTouchEnd_() {
+  onTouchEnd_(event) {
+    this.touchEventState_.touchEndTime = event.timeStamp;
+
     if (this.touchEventState_.isSwipeX === true) {
       this.onSwipeX_({
         deltaX: this.touchEventState_.lastX - this.touchEventState_.startX,
         last: true,
       });
+    } else if (this.scrollState_.meetsDeltaThreshold) {
+      const timeFromLastTouchMove =
+        this.touchEventState_.touchEndTime -
+        this.touchEventState_.touchMoveTime;
+      const maxOffset = this.win_.innerHeight * this.scrollState_.speedLimit;
+      let offset =
+        Math.pow(this.scrollState_.acceleration, 2) * this.win_.innerHeight;
+      offset = Math.min(maxOffset, offset);
+      offset *=
+        this.scrollState_.deltaY < 0
+          ? -this.scrollState_.multiplier
+          : this.scrollState_.multiplier;
+      this.scrollState_.offset = offset;
+
+      if (
+        timeFromLastTouchMove < this.scrollState_.moveTimeThreshold &&
+        Math.abs(offset) > this.scrollState_.offsetThreshold
+      ) {
+        /**
+         * Scroll element for offset using desired easing for a pre-set duration
+          Reset multiplier
+         */
+        this.scrollState_.duration = this.win_.innerHeight * 1.5;
+        this.scrollState_.isRunning = true;
+        requestAnimationFrame((timestamp) => {
+          this.scrollState_.startTime = timestamp;
+          this.scrollState_.startY = this.win_.scrollY;
+          this.scrollOnNextTick_(timestamp);
+        });
+      }
     }
 
     this.touchEventState_.startX = 0;
@@ -1566,6 +1582,140 @@ export class AmpStoryPlayer {
     this.touchEventState_.isSwipeX = null;
     this.swipingState_ = SwipingState.NOT_SWIPING;
   }
+
+  /**
+   * @param timeStamp
+   */
+  scrollOnNextTick_(timeStamp) {
+    const runTime = timeStamp - this.scrollState_.startTime;
+    const percentageElapsed = runTime / this.scrollState_.duration;
+
+    const B1 = (t) => {
+      return Math.pow(t, 3);
+    };
+
+    const B2 = (t) => {
+      return 3 * t * t * (1 - t);
+    };
+
+    const B3 = (t) => {
+      return 3 * t * Math.pow(1 - t, 2);
+    };
+
+    const B4 = (t) => {
+      return Math.pow(1 - t, 3);
+    };
+
+    // the cubic bezier function
+    const getScrollTo = ({percentTimeElapsed, x1, y1, x2, y2}) => {
+      // P0: (0, 0)
+      // P1: (x1, y1)
+      // P2: (x2, y2)
+      // P3: (1, 1)
+      // return value between 0 and 1 which is the percentage progress
+      return (
+        1 -
+        (x1 * B1(percentTimeElapsed) +
+          y1 * B2(percentTimeElapsed) +
+          x2 * B3(percentTimeElapsed) +
+          y2 * B4(percentTimeElapsed))
+      );
+    };
+
+    // const progress = percentageElapsed * 0.95;
+
+    const progress = getScrollTo({
+      percentTimeElapsed: percentageElapsed,
+      x1: 0.25,
+      x2: 0.46,
+      y1: 0.1,
+      y2: 0.94,
+    });
+    const scrollAmt = progress * this.scrollState_.offset;
+
+    if (runTime < this.scrollState_.duration) {
+      const scrollForThisTick = this.scrollState_.startY + scrollAmt;
+
+      if (!this.scrollState_.isRunning) {
+        cancelAnimationFrame(
+          requestAnimationFrame(this.scrollOnNextTick_.bind(this))
+        );
+      } else {
+        console.log('scrollOnNextTick_', scrollForThisTick);
+        this.win_.scroll(0, scrollForThisTick);
+        requestAnimationFrame(this.scrollOnNextTick_.bind(this));
+      }
+    } else {
+      // Ensure 100% scroll completion
+      const scrollAmt = this.scrollState_.offset;
+      const scrollForThisTick = this.scrollState_.startY + scrollAmt;
+      console.log('scrollOnNextTick scroll completion', scrollForThisTick);
+      // this.win_.scroll(0, scrollForThisTick);
+    }
+  }
+
+  // /**
+  //  * Forwards scrolling event from iframe to parent window.
+  //  * @param {number} touchEventY
+  //  * @param deltaY
+  //  * @private
+  //  */
+  // forwardScrollingEvent_(deltaY) {
+  //   // console.log({deltaY}, {touchEventY}, {startY});
+  //   // this.applySmoothScroll_(deltaY);
+  //   this.win_.scroll(0, this.scrollState_.startY - deltaY);
+  // }
+
+  // /**
+  //  * Applies smooth scrolling to parent page when scrolling on the player.
+  //  * @param {number} deltaY
+  //  */
+  // applySmoothScroll_(deltaY) {
+  //   if (!this.scrollState_.isRunning) {
+  //     this.scrollState_.endY = this.scrollState_.startY;
+  //     this.scrollState_.isRunning = true;
+  //     this.scrollState_.currentDistance = deltaY > 0 ? -0.1 : 0.1;
+  //     this.scrollState_.isDistanceAsc = true;
+  //     this.recursiveScroll_();
+  //     return;
+  //   }
+
+  //   this.scrollState_.isDistanceAsc = false;
+  //   this.scrollState_.currentDistance =
+  //     deltaY > 0 ? -this.scrollState_.distance : this.scrollState_.distance;
+  // }
+
+  // /**
+  //  * @private
+  //  */
+  // recursiveScroll_() {
+  //   if (!this.scrollState_.isRunning) {
+  //     return;
+  //   }
+
+  //   this.scrollState_.currentDistance *= this.scrollState_.isDistanceAsc
+  //     ? this.scrollState_.acceleration
+  //     : this.scrollState_.deceleration;
+
+  //   if (
+  //     Math.abs(this.scrollState_.currentDistance) < 0.1 &&
+  //     !this.scrollState_.isDistanceAsc
+  //   ) {
+  //     this.scrollState_.isRunning = false;
+  //   }
+
+  //   if (
+  //     Math.abs(this.scrollState_.currentDistance) >=
+  //     Math.abs(this.scrollState_.distance)
+  //   ) {
+  //     this.scrollState_.isDistanceAsc = false;
+  //   }
+
+  //   this.scrollState_.endY += this.scrollState_.currentDistance;
+  //   this.win_.scroll(0, this.scrollState_.endY);
+
+  //   requestAnimationFrame(this.recursiveScroll_.bind(this));
+  // }
 
   /**
    * Reacts to horizontal swipe events.

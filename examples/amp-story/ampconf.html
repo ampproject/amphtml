@@ -11,6 +11,7 @@
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
   <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js"></script>
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
@@ -90,9 +91,6 @@
     .button p {
       width: 100%;
     }
-    amp-ad[template="image-template"] img {
-      object-fit: cover;
-    }
 
     ::cue {
       background-color: rgba(0, 0, 0, 0.75);
@@ -106,31 +104,6 @@
         title="Key Highlights of AMP Conf 2018" publisher="The AMP team"
         publisher-logo-src="./img/AMP-Brand-White-Icon.svg"
         poster-portrait-src="./img/overview.jpg">
-
-      <amp-story-auto-ads>
-        <script type="application/json">
-          {
-            "ad-attributes": {
-              "type": "custom",
-              "data-url": "https://ampbyexample.com/json/amp-story-auto-ads/"
-            }
-          }
-        </script>
-
-        <template type="amp-mustache" id="image-template">
-          <amp-img class="fill-img" layout="fill" src="{{imgSrc}}"></amp-img>
-        </template>
-
-        <template type="amp-mustache" id="video-template">
-          <amp-video autoplay loop
-            width="400"
-            height="750"
-            poster="{{poster}}"
-            layout="fill">
-            <source src="{{videoSource}}" type="video/mp4">
-          </amp-video>
-        </template>
-      </amp-story-auto-ads>
 
       <amp-story-page id="page-1" title="Lorem ipsum dolor sit amet">
         <amp-story-grid-layer template="fill">
