@@ -69,15 +69,21 @@ export const _default = () => {
         animate={animate}
       >
         <AccordionSection id="section1" key={1}>
-          <AccordionHeader as="h2">Section 1</AccordionHeader>
+          <AccordionHeader>
+            <h2>Section 1</h2>
+          </AccordionHeader>
           <AccordionContent>Content in section 1.</AccordionContent>
         </AccordionSection>
         <AccordionSection key={2}>
-          <AccordionHeader as="h2">Section 2</AccordionHeader>
+          <AccordionHeader>
+            <h2>Section 2</h2>
+          </AccordionHeader>
           <AccordionContent>Content in section 2.</AccordionContent>
         </AccordionSection>
         <AccordionSection key={3} expanded>
-          <AccordionHeader as="h2">Section 3</AccordionHeader>
+          <AccordionHeader>
+            <h2>Section 3</h2>
+          </AccordionHeader>
           <AccordionContent>Content in section 3.</AccordionContent>
         </AccordionSection>
       </AccordionWithActions>
@@ -97,7 +103,9 @@ function AccordionWithEvents(props) {
     <section>
       <Accordion ref={ref} {...props}>
         <AccordionSection id="section1" key={1} expanded>
-          <AccordionHeader as="h2">Section 1</AccordionHeader>
+          <AccordionHeader>
+            <h2>Section 1</h2>
+          </AccordionHeader>
           <AccordionContent>Content in section 1.</AccordionContent>
         </AccordionSection>
         <AccordionSection
@@ -109,7 +117,9 @@ function AccordionWithEvents(props) {
             }
           }}
         >
-          <AccordionHeader as="h2">Section 2</AccordionHeader>
+          <AccordionHeader>
+            <h2>Section 2</h2>
+          </AccordionHeader>
           <AccordionContent>Content in section 1.</AccordionContent>
         </AccordionSection>
         <AccordionSection
@@ -121,7 +131,9 @@ function AccordionWithEvents(props) {
             }
           }}
         >
-          <AccordionHeader as="h2">Section 3</AccordionHeader>
+          <AccordionHeader>
+            <h2>Section 3</h2>
+          </AccordionHeader>
           <AccordionContent>Content in section 3.</AccordionContent>
         </AccordionSection>
       </Accordion>
