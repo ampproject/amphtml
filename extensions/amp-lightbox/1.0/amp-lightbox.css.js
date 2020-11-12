@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,5 @@
  * limitations under the License.
  */
 
-/** @externs */
-
-var LightboxDef = {};
-
-/**
- * @typedef {{
- *   id: (string),
- *   animateIn: (string|undefined),
- *   closeButtonAriaLabel: (string|undefined),
- *   scrollable: (boolean),
- *   initialOpen: (boolean),
- *   beforeOpen: (function|undefined),
- *   afterClose: (function|undefined)
- * }}
- */
-LightboxDef.Props;
-
-/** @interface */
-Lightbox.LightboxApi = class {
-  /** Open the lightbox */
-  open() {}
-
-  /** Close the lightbox */
-  close() {}
-};
+export const lightboxCSS =
+  "amp-lightbox{width: '100%', height: '100%', position: 'fixed'}";

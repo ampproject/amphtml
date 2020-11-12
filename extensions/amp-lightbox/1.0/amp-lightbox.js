@@ -20,7 +20,8 @@ import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {setStyles} from '../../../src/style';
+import {lightboxCSS} from './amp-lightbox.css';
+import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -32,26 +33,28 @@ class AmpLightbox extends PreactBaseElement {
   init() {
     this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
-    setStyles(this.element, {width: '100%', height: '100%', position: 'fixed'});
+    this.element.setAttribute('class', 'amp-lightbox');
     return dict({
       'initialOpen': false,
-      'opt_beforeOpen': this.beforeOpen.bind(this),
-      'opt_afterClose': this.afterClose.bind(this),
+      'beforeOpen': this.beforeOpen_.bind(this),
+      'afterClose': this.afterClose_.bind(this),
     });
   }
 
   /**
    * Setting hidden to false
+   * @private
    */
-  beforeOpen() {
-    this.element.removeAttribute('hidden');
+  beforeOpen_() {
+    toggle(this.element, true);
   }
 
   /**
    * Setting hidden to true
+   * @private
    */
-  afterClose() {
-    this.element.setAttribute('hidden', '');
+  afterClose_() {
+    toggle(this.element, false);
   }
 
   /** @override */
@@ -86,5 +89,5 @@ AmpLightbox['layoutSizeDefined'] = true;
 AmpLightbox['shadowCss'] = CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpLightbox);
+  AMP.registerElement(TAG, AmpLightbox, lightboxCSS);
 });

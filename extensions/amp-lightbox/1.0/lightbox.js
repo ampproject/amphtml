@@ -19,7 +19,6 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {
-  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -72,135 +71,109 @@ function LightboxWithRef(
     animateIn = 'fade-in',
     closeButtonAriaLabel,
     children,
-    onOpen,
     initialOpen,
-    opt_beforeOpen,
-    opt_afterClose,
+    beforeOpen,
+    afterClose,
     ...rest
   },
   ref
 ) {
-  // `show` is a trigger variable for animations.
-  // When the user opens/closes the lightbox, `show` is changed, which then triggers the appropriate animation and changes `visible` to true/false
-  // `visible` controls the actual visibility of the lightbox element on the page.
-  // When `visible` is true, the element exists on the page, else, it doesn't.
-  // Two states are necessary here in order to control the timing of the animation properly, else rendering conflicts with animation timing.
-  const [show, setShow] = useState(initialOpen);
+  // There are two phases to open and close.
+  // To open, we mount and render the contents (invisible), then animate the display (visible).
+  // To close, it's the reverse.
+  // `mounted` mounts the component. `visible` plays the animation.
+  const [mounted, setMounted] = useState(initialOpen);
   const [visible, setVisible] = useState(false);
-  const styleClasses = useStyles();
+  const classes = useStyles();
   const lightboxRef = useRef();
-  const beforeOpen = useCallback(
-    () => (opt_beforeOpen ? opt_beforeOpen() : undefined),
-    [opt_beforeOpen]
-  );
-  const afterClose = useCallback(
-    () => (opt_afterClose ? opt_afterClose() : undefined),
-    [opt_afterClose]
-  );
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // This bypasses the exhaustive-deps eslint error
-  const onOpenFnRef = useRef();
-  onOpenFnRef.current = onOpen;
   const animateInRef = useRef();
   animateInRef.current = animateIn;
-  const lightboxContainWrapperRef = useRef();
-  lightboxContainWrapperRef.current = `.${styleClasses.lightboxContainWrapper}`;
 
   useImperativeHandle(
     ref,
     () => ({
       open: () => {
-        beforeOpen();
-        setShow(true);
+        if (beforeOpen) {
+          beforeOpen();
+        }
+        setMounted(true);
+        setVisible(true);
       },
       close: () => {
-        setShow(false);
+        setVisible(false);
       },
     }),
     [beforeOpen]
   );
 
   useEffect(() => {
-    if (show) {
-      setVisible(true);
-    } else {
-      getRefElement(lightboxRef).then((element) => {
-        element = element.current;
-        if (element != undefined) {
-          const animation = element.animate(
-            ANIMATION_PRESETS[animateInRef.current],
-            {
-              duration: ANIMATION_DURATION,
-              direction: 'reverse',
-              fill: 'both',
-              easing: 'ease-in',
-            }
-          );
-          animation.onfinish = (opt_anim) => {
-            setVisible(false);
-            setStyle(
-              opt_anim.currentTarget.effect.target,
-              'opacity',
-              ANIMATION_PRESETS[animateInRef.current][0].opacity
-            );
-            setStyle(
-              opt_anim.currentTarget.effect.target,
-              'visibility',
-              ANIMATION_PRESETS[animateInRef.current][0].visibility
-            );
-            afterClose();
-          };
-          return () => {
-            animation.cancel();
-            animation.onfinish();
-            afterClose();
-          };
-        }
-      });
-    }
-  }, [show, afterClose]);
-
-  useEffect(() => {
-    if (!show && !visible) {
+    let animation;
+    const element = lightboxRef.current;
+    if (element == undefined) {
       return;
     }
     if (visible) {
-      getRefElement(lightboxRef).then((element) => {
-        element = element.current;
-        const animation = element.animate(
-          ANIMATION_PRESETS[animateInRef.current],
-          {
-            duration: ANIMATION_DURATION,
-            fill: 'both',
-            easing: 'ease-in',
-          }
+      const animation = element.animate(
+        ANIMATION_PRESETS[animateInRef.current],
+        {
+          duration: ANIMATION_DURATION,
+          fill: 'both',
+          easing: 'ease-in',
+        }
+      );
+      animation.onfinish = (opt_anim) => {
+        setStyle(
+          opt_anim.currentTarget.effect.target,
+          'opacity',
+          ANIMATION_PRESETS[animateInRef.current][1].opacity
         );
-        animation.onfinish = (opt_anim) => {
+        setStyle(
+          opt_anim.currentTarget.effect.target,
+          'visibility',
+          ANIMATION_PRESETS[animateInRef.current][1].visibility
+        );
+        opt_anim.currentTarget.effect.target.focus();
+      };
+    } else {
+      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+        duration: ANIMATION_DURATION,
+        direction: 'reverse',
+        fill: 'both',
+        easing: 'ease-in',
+      });
+      animation.onfinish = (opt_anim) => {
+        if (opt_anim) {
           setStyle(
             opt_anim.currentTarget.effect.target,
             'opacity',
-            ANIMATION_PRESETS[animateInRef.current][1].opacity
+            ANIMATION_PRESETS[animateInRef.current][0].opacity
           );
           setStyle(
             opt_anim.currentTarget.effect.target,
             'visibility',
-            ANIMATION_PRESETS[animateInRef.current][1].visibility
+            ANIMATION_PRESETS[animateInRef.current][0].visibility
           );
-          opt_anim.currentTarget.effect.target.focus();
-        };
-        return () => {
-          animation.cancel();
-          animation.onfinish();
-        };
-      });
+        }
+        setMounted(false);
+        if (afterClose) {
+          afterClose();
+        }
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+    return () => {
+      if (animation) {
+        animation.cancel();
+        animation.onfinish();
+      }
+    };
+  }, [visible, afterClose]);
 
   return (
-    visible && (
+    mounted && (
       <ContainWrapper
         id={id}
         ref={(r) => {
@@ -210,12 +183,12 @@ function LightboxWithRef(
         size={true}
         layout={true}
         paint={true}
-        class={`${styleClasses.lightboxContainWrapper}`}
+        className={classes.lightboxContainWrapper}
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
-            setShow(false);
+            setVisible(false);
           }
         }}
         {...rest}
@@ -224,9 +197,9 @@ function LightboxWithRef(
         <button
           ariaLabel={closeButtonAriaLabel}
           tabIndex={-1}
-          class={`${styleClasses.closeButton}`}
+          className={classes.closeButton}
           onClick={() => {
-            setShow(false);
+            setVisible(false);
           }}
         />
       </ContainWrapper>
