@@ -41,7 +41,9 @@ const {unitTestsToRun} = require('./helpers-unit');
  */
 function updateBrowsers(config) {
   if (argv.edge) {
-    Object.assign(config, {browsers: ['Edge']});
+    Object.assign(config, {
+      browsers: [argv.headless ? 'EdgeHeadless' : 'Edge'],
+    });
     return;
   }
 

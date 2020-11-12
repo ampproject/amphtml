@@ -16,10 +16,10 @@
 
 import {AmpDocService} from '../../src/service/ampdoc-impl';
 import {
-  IntersectionObserverHostApi,
+  IntersectionObserver3pHost,
   getIntersectionChangeEntry,
   intersectionRatio,
-} from '../../src/utils/intersection-observer-polyfill';
+} from '../../src/utils/intersection-observer-3p-host';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
@@ -34,7 +34,7 @@ const fakeAmpDoc = {
 };
 installHiddenObserverForDoc(fakeAmpDoc);
 
-describes.sandboxed('IntersectionObserverHostApi', {}, (env) => {
+describes.sandboxed('IntersectionObserver3pHost', {}, (env) => {
   let testDoc;
   let testEle;
   let baseElement;
@@ -86,7 +86,7 @@ describes.sandboxed('IntersectionObserverHostApi', {}, (env) => {
         };
       },
     };
-    ioApi = new IntersectionObserverHostApi(baseElement, testIframe);
+    ioApi = new IntersectionObserver3pHost(baseElement, testIframe);
     insert(testIframe);
   });
 

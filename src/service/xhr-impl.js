@@ -28,7 +28,6 @@ import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
 import {parseJson} from '../json';
-import {startsWith} from '../string';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -161,7 +160,7 @@ export class Xhr {
     }
 
     return res.text().then((txt) => {
-      if (!startsWith(txt, dev().assertString(prefix))) {
+      if (!txt.startsWith(dev().assertString(prefix))) {
         user().warn(
           'XHR',
           `Failed to strip missing prefix "${prefix}" in fetch response.`

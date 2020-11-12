@@ -773,35 +773,30 @@ describes.realWin(
 
       it('should error and return undefined on invalid metadata', () => {
         const spy = env.sandbox.stub(user(), 'error');
-        const metadata = ampConsent.configureMetadataByConsentString_(
+        const metadata = ampConsent.validateMetadata_(
           'bad metadata',
           'consentString'
         );
-        expect(spy.args[0][1]).to.match(
-          /CMP metadata is invalid or no consent string is found./
-        );
+        expect(spy.args[0][1]).to.match(/CMP metadata is not an object./);
         expect(metadata).to.be.undefined;
       });
 
-      it('should return undefined with no consent string', () => {
+      it('should work with no consent string', () => {
         const spy = env.sandbox.stub(user(), 'error');
-        const metadata = ampConsent.configureMetadataByConsentString_({
+        const metadata = ampConsent.validateMetadata_({
           'gdprApplies': true,
         });
-        expect(spy.args[0][1]).to.match(
-          /CMP metadata is invalid or no consent string is found./
+        expect(spy).to.not.be.called;
+        expect(metadata).to.deep.equals(
+          constructMetadata(undefined, undefined, true)
         );
-        expect(metadata).to.be.undefined;
       });
 
       it('should remove invalid consentStringType', () => {
         const spy = env.sandbox.stub(user(), 'error');
         const responseMetadata = {'consentStringType': 4};
         expect(
-          ampConsent.configureMetadataByConsentString_(
-            responseMetadata,
-            'consentString'
-          )
+          ampConsent.validateMetadata_(responseMetadata, 'consentString')
         ).to.deep.equals(constructMetadata());
         expect(spy.args[0][1]).to.match(
           /Consent metadata value "%s" is invalid./
@@ -809,10 +804,7 @@ describes.realWin(
         expect(spy.args[0][2]).to.match(/consentStringType/);
         responseMetadata['consentStringType'] = CONSENT_STRING_TYPE.TCF_V2;
         expect(
-          ampConsent.configureMetadataByConsentString_(
-            responseMetadata,
-            'consentString'
-          )
+          ampConsent.validateMetadata_(responseMetadata, 'consentString')
         ).to.deep.equals(constructMetadata(2));
       });
 
@@ -820,10 +812,7 @@ describes.realWin(
         const spy = env.sandbox.stub(user(), 'error');
         const responseMetadata = {'additionalConsent': 4};
         expect(
-          ampConsent.configureMetadataByConsentString_(
-            responseMetadata,
-            'consentString'
-          )
+          ampConsent.validateMetadata_(responseMetadata, 'consentString')
         ).to.deep.equals(constructMetadata());
         expect(spy.args[0][1]).to.match(
           /Consent metadata value "%s" is invalid./
@@ -835,10 +824,7 @@ describes.realWin(
         const spy = env.sandbox.stub(user(), 'error');
         const responseMetadata = {'gdprApplies': 4};
         expect(
-          ampConsent.configureMetadataByConsentString_(
-            responseMetadata,
-            'consentString'
-          )
+          ampConsent.validateMetadata_(responseMetadata, 'consentString')
         ).to.deep.equals(constructMetadata());
         expect(spy.args[0][1]).to.match(
           /Consent metadata value "%s" is invalid./

@@ -18,6 +18,7 @@
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
 const log = require('fancy-log');
+const path = require('path');
 const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
@@ -46,7 +47,8 @@ const cache = new Map();
 function getFilesToTransform() {
   return globby
     .sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/'])
-    .concat(globby.sync(THIRD_PARTY_TRANSFORM_GLOBS));
+    .concat(globby.sync(THIRD_PARTY_TRANSFORM_GLOBS))
+    .map(path.normalize);
 }
 
 /**
@@ -62,13 +64,12 @@ function preClosureBabel() {
   const babel = gulpBabel({caller: {name: 'pre-closure'}});
 
   return through.obj((file, enc, next) => {
-    const {relative, path} = file;
-    if (!filesToTransform.includes(relative)) {
+    if (!filesToTransform.includes(file.relative)) {
       return next(null, file);
     }
 
-    if (cache.has(path)) {
-      return next(null, cache.get(path));
+    if (cache.has(file.path)) {
+      return next(null, cache.get(file.path));
     }
 
     let data, err;

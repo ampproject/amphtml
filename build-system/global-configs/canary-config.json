@@ -1,14 +1,10 @@
 {
-  "allow-doc-opt-in": [
-    "amp-next-page",
-    "analytics-chunks",
-    "analytics-chunks-inabox"
-  ],
+  "allow-doc-opt-in": ["amp-next-page", "analytics-chunks-inabox"],
   "allow-url-opt-in": ["pump-early-frame"],
+  "amp-accordion-display-locking": 0.1,
   "canary": 1,
-  "a4a-no-signing": 1,
   "a4aProfilingRate": 0.01,
-  "adsense-ad-size-optimization": 0.05,
+  "adsense-ad-size-optimization": 0.1,
   "amp-access-iframe": 1,
   "amp-action-macro": 1,
   "amp-ad-ff-adx-ady": 0.01,
@@ -29,15 +25,15 @@
   "flexAdSlots": 0.05,
   "intersect-resources": 1,
   "ios-fixed-no-transfer": 1,
-  "protocol-adapters": 1,
   "pump-early-frame": 1,
   "remove-task-timeout": 0,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
-  "version-locking": 1,
   "amp-ad-no-center-css": 0,
-  "sticky-ad-padding-bottom": 1,
-  "analytics-chunks": 1,
-  "ad-adsense-gam-round-params": 0.1,
-  "render-on-idle-fix": 1
+  "render-on-idle-fix": 1,
+  "build-in-chunks": 1,
+  "visibility-trigger-improvements": 1,
+  "adsense-ptt-exp": 0.1,
+  "doubleclick-ptt-exp": 0.1,
+  "amp-cid-backup": 1
 }

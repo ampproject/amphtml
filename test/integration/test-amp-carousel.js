@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../src/common-signals';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe.configure().ifChrome(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+const t = describe.configure().ifChrome();
 
 t.run('amp-carousel', function () {
   this.timeout(10000);
@@ -32,9 +33,9 @@ t.run('amp-carousel', function () {
 
   function waitForCarouselLayout() {
     const carousel = document.querySelector('amp-carousel');
-    return whenUpgradedToCustomElement(carousel).then(() => {
-      return carousel.whenBuilt();
-    });
+    return whenUpgradedToCustomElement(carousel).then(() =>
+      carousel.signals().whenSignal(CommonSignals.LOAD_START)
+    );
   }
 
   describes.integration(
@@ -72,8 +73,7 @@ t.run('amp-carousel', function () {
         }
       );
 
-      // TODO(#29783): De-flake and un-skip this test.
-      it.skip(
+      it(
         'should not have any buttons visible when theres only a single ' +
           'item',
         () => {
@@ -133,7 +133,7 @@ t.run('amp-carousel', function () {
         }
       );
 
-      it.skip(
+      it(
         'should have the next button visible when amp-mode-mouse ' +
           'class is not on body & `controls` specified',
         () => {
@@ -150,7 +150,7 @@ t.run('amp-carousel', function () {
         }
       );
 
-      it.skip('should only have the next button enabled when on first item', () => {
+      it('should only have the next button enabled when on first item', () => {
         document.body.classList.add('amp-mode-mouse');
         const amp = document.querySelector('#carousel-1');
         const prevBtn = amp.querySelector('.amp-carousel-button-prev');
@@ -161,7 +161,7 @@ t.run('amp-carousel', function () {
         expect(nextBtn).to.be.visible;
       });
 
-      it.skip('should not be able to go past the first or last item', () => {
+      it('should not be able to go past the first or last item', () => {
         document.body.classList.add('amp-mode-mouse');
         const amp = document.querySelector('#carousel-1');
         const impl = amp.implementation_;
@@ -181,7 +181,7 @@ t.run('amp-carousel', function () {
         expect(prevBtn).to.have.class('amp-disabled');
       });
 
-      it.skip('should only have the prev button enabled when on last item', () => {
+      it('should only have the prev button enabled when on last item', () => {
         document.body.classList.add('amp-mode-mouse');
         const amp = document.querySelector('#carousel-1');
         const impl = amp.implementation_;

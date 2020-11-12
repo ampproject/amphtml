@@ -5,7 +5,8 @@
 **Structure:** Each subdirectory should contain the following:
 
 - A single `.ts` file that implements a specific transform (`*-transform.ts`)
-- A `test/` subdirectory containing one or more pairs of input and output files (`test/*-[input|output].html`)
+- A `test/` subdirectory containing one or more subdirectories labelled by test name, with each subdirectory containing one pair of input and output files (`test/*/[input|output].html`)
+- Optionally, in each individual test subdirectory, an `options.json` file for specific configurations for specific tests (`test/*/options.json`)
 
 **Example:**
 
@@ -14,13 +15,17 @@
     ├── foo
     │   ├── foo-transform.ts
     │   └── test
-    │       ├── testName-input.html
-    │       └── testName-output.html
+    │       └── testName
+    │           ├── input.html
+    │           ├── output.html
+    │           └── options.json
     ├── bar
     │   ├── bar-transform.ts
     │   └── test
-    │       ├── testName1-input.html
-    │       ├── testName1-output.html
-    │       ├── testName2-input.html
-    │       └── testName2-output.html
+    │       ├── testName1
+    │       │   ├── input.html
+    │       │   └── output.html
+    │       └── testName2
+    │           ├── input.html
+    │           └── output.html
 ```

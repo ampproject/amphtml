@@ -32,10 +32,14 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 /**
  * Performs a clean build of the AMP runtime in testing mode.
  * Used by `gulp e2e|integration|visual_diff`.
+ *
+ * @param {boolean} opt_compiled pass true to build the compiled runtime
+ *   (`gulp dist` instead of `gulp build`). Otherwise uses the value of
+ *   --compiled to determine which build to generate.
  */
-async function buildRuntime() {
+async function buildRuntime(opt_compiled = false) {
   await clean();
-  if (argv.compiled) {
+  if (argv.compiled || opt_compiled === true) {
     await doDist({fortesting: true});
   } else {
     await doBuild({fortesting: true});
@@ -92,8 +96,16 @@ function logFiles(files) {
  * @return {Array<string>}
  */
 function getFilesFromArgv() {
+  // TODO: https://github.com/ampproject/amphtml/issues/30223
+  // Switch from globby to a lib that supports Windows.
+  const toPosix = (str) => str.replace(/\\\\?/g, '/');
   return argv.files
-    ? globby.sync(argv.files.split(',').map((s) => s.trim()))
+    ? globby.sync(
+        argv.files
+          .split(',')
+          .map((s) => s.trim())
+          .map(toPosix)
+      )
     : [];
 }
 
@@ -149,18 +161,18 @@ function usesFilesOrLocalChanges(taskName) {
 }
 
 /**
- * Runs 'yarn' to install packages in a given directory.
+ * Runs 'npm install' to install packages in a given directory.
  *
  * @param {string} dir
  */
 function installPackages(dir) {
   log(
     'Running',
-    cyan('yarn'),
+    cyan('npm install'),
     'to install packages in',
     cyan(path.relative(ROOT_DIR, dir)) + '...'
   );
-  execOrDie(`npx yarn --cwd ${dir}`, {'stdio': 'ignore'});
+  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore'});
 }
 
 module.exports = {

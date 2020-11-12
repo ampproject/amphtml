@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
+import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {
   AmpScript,
   AmpScriptService,
@@ -56,8 +56,10 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
-    // Make @ampproject/worker-dom dependency a no-op for these unit tests.
-    env.sandbox.stub(WorkerDOM, 'upgrade').resolves();
+    // Make @ampproject/worker-dom dependency essentially a noop for these tests.
+    env.sandbox
+      .stub(WorkerDOM, 'upgrade')
+      .callsFake((unused, scriptsPromise) => scriptsPromise);
   });
 
   function stubFetch(url, headers, text, responseUrl) {

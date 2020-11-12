@@ -22,7 +22,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as experiments from '../../../../src/experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
@@ -731,6 +731,14 @@ describes.realWin(
             /(\?|&)is_amp=5(&|$)/
           );
         });
+        it('does not set ptt parameter by default', () =>
+          expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=(&|$)/));
+        it('sets ptt parameter', () => {
+          forceExperimentBranch(impl.win, 'adsense-ptt-exp', '21068092');
+          return expect(impl.getAdUrl()).to.eventually.match(
+            /(\?|&)ptt=12(&|$)/
+          );
+        });
       });
 
       // Not using arrow function here because otherwise the way closure behaves
@@ -892,29 +900,99 @@ describes.realWin(
         });
       });
 
-      it('should have module nomodule experiment id in url when runtime type is 2', () => {
-        env.sandbox.stub(ampdoc, 'getMetaByName').returns('2');
-        impl.buildCallback();
-        return impl.getAdUrl().then((url) => {
-          expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+      describe('module/nomodule', () => {
+        it('should have module nomodule experiment id in url when runtime type is 2', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('2');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+          });
+        });
+
+        it('should have module nomodule experiment id in url when runtime type is 10', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('10');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+          });
+        });
+
+        // 2, 4, and 10 should the only one that triggers this experiment diversion.
+        it('should not have module nomodule experiment id in url when runtime type is 0', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('0');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+            expect(url).to.not.have.string(
+              MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT
+            );
+          });
         });
       });
 
-      it('should have module nomodule experiment id in url when runtime type is 10', () => {
-        env.sandbox.stub(ampdoc, 'getMetaByName').returns('10');
-        impl.buildCallback();
-        return impl.getAdUrl().then((url) => {
-          expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+      describe('SSR experiments', () => {
+        it('should include SSR experiments', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=45,3579282=0');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.have.string('579823748245!357928200');
+          });
         });
-      });
 
-      // 2, 4, and 10 should the only one that triggers this experiment diversion.
-      it('should not have module nomodule experiment id in url when runtime type is 0', () => {
-        env.sandbox.stub(ampdoc, 'getMetaByName').returns('0');
-        impl.buildCallback();
-        return impl.getAdUrl().then((url) => {
-          expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
-          expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+        it('should pad value to two chars', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=1');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.have.string('579823748201');
+          });
+        });
+
+        it('should ignore excessively large value', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=100');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).not.to.have.string('5798237482');
+          });
+        });
+
+        it('should ignore negative values', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=-1');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).not.to.have.string('5798237482');
+          });
+        });
+
+        it('should ignore non-number values', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=testing');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).not.to.have.string('5798237482');
+          });
         });
       });
     });

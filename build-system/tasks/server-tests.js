@@ -27,7 +27,7 @@ const {cyan, green, red} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 
 const transformsDir = path.resolve('build-system/server/new-server/transforms');
-const inputPaths = [`${transformsDir}/**/*input.html`];
+const inputPaths = [`${transformsDir}/**/input.html`];
 
 let passed = 0;
 let failed = 0;
@@ -49,10 +49,40 @@ async function getInput(inputFile) {
  * @return {string}
  */
 function getTestName(inputFile) {
-  const testPath = path.relative(transformsDir, inputFile);
-  const transformName = path.dirname(path.dirname(testPath));
-  const testSuffix = path.basename(testPath).replace('-input.html', '');
+  const transformName = path.basename(getTransformerDir(inputFile));
+  const testSuffix = getTestPath(inputFile);
   return `${transformName} → ${testSuffix}`;
+}
+
+/**
+ * Computes the directory of the transformer used in the test.
+ *
+ * @param {string} inputFile
+ * @return {string}
+ */
+function getTransformerDir(inputFile) {
+  // The prior assumption is that the transformer is in the parent directory.
+  // However, with Jest (and to mimic Jest), this is not necessarily true.
+  let transformerDir = inputFile;
+  while (path.basename(path.dirname(transformerDir)) != 'transforms') {
+    transformerDir = path.dirname(transformerDir);
+  }
+  return transformerDir;
+}
+
+/**
+ * Computes the relative dirname of the input from the test directory.
+ * For example, if the input is "test/foo/bar/input.html", we get "foo/bar".
+ *
+ * @param {string} inputFile
+ * @return {string}
+ */
+function getTestPath(inputFile) {
+  let testDir = inputFile;
+  while (path.basename(testDir) != 'test') {
+    testDir = path.dirname(testDir);
+  }
+  return path.dirname(path.relative(testDir, inputFile));
 }
 
 /**
@@ -68,17 +98,17 @@ async function getExpectedOutput(inputFile) {
 
 /**
  * Extracts the JS transform for a test from its transform file.
- *
  * @param {string} inputFile
+ * @param {!Object} extraOptions
  * @return {string}
  */
-async function getTransform(inputFile) {
-  const transformDir = path.dirname(path.dirname(inputFile));
+async function getTransform(inputFile, extraOptions) {
+  const transformDir = getTransformerDir(inputFile);
   const parsed = path.parse(transformDir);
   const transformPath = path.join(parsed.dir, 'dist', parsed.base);
   const transformFile = (await globby(path.resolve(transformPath, '*.js')))[0];
   // TODO(rsimha): Change require to import when node v14 is the active LTS.
-  return require(transformFile).default;
+  return require(transformFile).default(extraOptions);
 }
 
 /**
@@ -90,6 +120,21 @@ async function getTransform(inputFile) {
  */
 async function getOutput(transform, input) {
   return (await posthtml(transform).process(input)).html;
+}
+
+/**
+ * Loads optional arguments residing in a options.json file, if any.
+ *
+ * @param {string} inputFile
+ * @return {!Object}
+ */
+function loadOptions(inputFile) {
+  const transformDir = path.dirname(inputFile);
+  const optionsPath = path.join(transformDir, 'options.json');
+  if (fs.existsSync(optionsPath)) {
+    return require(optionsPath);
+  }
+  return {};
 }
 
 /**
@@ -134,7 +179,8 @@ function runTest() {
     const input = await getInput(inputFile);
     const testName = getTestName(inputFile);
     const expectedOutput = await getExpectedOutput(inputFile);
-    const transform = await getTransform(inputFile);
+    const extraOptions = loadOptions(inputFile);
+    const transform = await getTransform(inputFile, extraOptions);
     const output = await getOutput(transform, input);
     try {
       assert.strictEqual(output, expectedOutput);

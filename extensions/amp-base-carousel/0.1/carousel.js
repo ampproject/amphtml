@@ -391,8 +391,9 @@ export class Carousel {
    *   allowWrap: (boolean|undefined),
    * }=} options
    */
-  advance(delta, {actionSource, allowWrap = false} = {}) {
+  advance(delta, options = {}) {
     const {slides_, currentIndex_, requestedIndex_} = this;
+    const {actionSource, allowWrap = false} = options;
 
     // If we have a requested index, use that as the reference point. The
     // current index may not be updated yet.This allows calling `advance`
@@ -478,7 +479,8 @@ export class Carousel {
    *   actionSource: (!ActionSource|undefined),
    * }=} options
    */
-  goToSlide(index, {smoothScroll = true, actionSource} = {}) {
+  goToSlide(index, options = {}) {
+    const {smoothScroll = true, actionSource} = options;
     if (index < 0 || index > this.slides_.length - 1 || isNaN(index)) {
       return;
     }
@@ -1178,10 +1180,11 @@ export class Carousel {
     }
 
     // We are updating during a programmatic scroll, so go to the correct
-    // index.
+    // index (and update offset accordingly).
     if (this.requestedIndex_ !== null) {
       this.currentIndex_ = this.requestedIndex_;
       this.requestedIndex_ = null;
+      this.currentElementOffset_ = 0;
     }
 
     const totalLength = sum(this.getSlideLengths_());

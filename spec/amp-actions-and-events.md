@@ -396,7 +396,8 @@ event.response</pre></td>
     <code>position</code> is optional. One of <code>top</code>, <code>center</code>
     or <code>bottom</code> (default <code>top</code>).
     Specifies the position of the element relative to the viewport after
-    scrolling.</td>
+    scrolling.<br>
+    As an accessibility best practice, pair this with a call to <code>focus()</code> to focus on the element being scrolled to.</td>
   </tr>
   <tr>
     <td><code>focus</code></td>

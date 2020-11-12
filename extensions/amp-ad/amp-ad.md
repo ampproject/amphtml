@@ -237,6 +237,10 @@ parent of the ad. When the `data-ad-container-id` is specified, and such a
 the container component instead of the ad component during no fill. This feature
 can be useful when an ad indicator is in presence.
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Advertisement"`.
+
 ### common attributes
 
 This element includes
@@ -364,6 +368,8 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [LockerDome](../../ads/lockerdome.md)
 - [LOGLY](../../ads/logly.md)
 - [LOKA](../../ads/loka.md)
+- [LuckyAds](../../ads/luckyads.md)
+- [Macaw](../../ads/macaw.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
 - [Mediaad.org](../../ads/mediaad.md)
@@ -379,6 +385,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [Monetizer101](../../ads/monetizer101.md)
 - [mox](../../ads/mox.md)
 - [my6Sense](../../ads/my6sense.md)
+- [MyOffrz](../../ads/myoffrz.md)
 - [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
 - [NativeRoll](../../ads/nativeroll.md)
@@ -418,6 +425,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
 - [RelapPro](../../ads/relappro.md)
+- [Remixd](../../ads/remixd.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [rnetplus](../../ads/rnetplus.md)
@@ -496,6 +504,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [Strossle](../../ads/strossle.md)
 - [Taboola](../../ads/taboola.md)
 - [TE Medya](../../ads/temedya.md)
+- [vlyby](../../ads/vlyby.md)
 - [Whopa InFeed](../../ads/whopainfeed.md)
 - [Yahoo Native-Display Ads Federation](../../ads/yahoofedads.md)
 - [Yahoo Native Ads](../../ads/yahoonativeads.md)

@@ -447,32 +447,71 @@ describe('Validator.DocSizeAmpEmail', () => {
   const validBlob = '<b>Hello, World</b>\n';
   assertStrictEqual(20, validBlob.length);
 
-  it('accepts 100000 bytes in the test document', () => {
-    const body = Array(4946).join(validBlob);
+  it('accepts 200000 bytes in the test document', () => {
+    const body = Array(9946).join(validBlob);
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
-    assertStrictEqual(100000, htmlparser.byteLength(test.ampHtmlFileContents));
+    assertStrictEqual(200000, htmlparser.byteLength(test.ampHtmlFileContents));
     test.inlineOutput = false;
     test.expectedOutput = 'PASS';
     test.run();
   });
 
-  it('will not accept 100001 bytes in the test document', () => {
-    const body = Array(4946).join(validBlob) + ' ';
+  it('will not accept 200001 bytes in the test document', () => {
+    const body = Array(9946).join(validBlob) + ' ';
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
-    assertStrictEqual(100001, htmlparser.byteLength(test.ampHtmlFileContents));
+    assertStrictEqual(200001, htmlparser.byteLength(test.ampHtmlFileContents));
     test.inlineOutput = false;
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'amp4email_feature_tests/doc_size.html:4978:6 ' +
-        'Document exceeded 100000 bytes limit. Actual size 100001 bytes. ' +
+        'amp4email_feature_tests/doc_size.html:9978:6 ' +
+        'Document exceeded 200000 bytes limit. Actual size 200001 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
         'email-spec/amp-email-format/?format=email)';
     test.run();
   });
+});
+
+describe('Validator.ScriptLength', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // This string is 10 bytes of inline script.
+  const inlineScriptBlob = 'alert(\'\');';
+  assertStrictEqual(10, inlineScriptBlob.length);
+
+  it('accepts 10000 bytes of inline style',
+     () => {
+       const inlineScript = Array(1001).join(inlineScriptBlob);
+       assertStrictEqual(10000, inlineScript.length);
+       const test = new ValidatorTestCase('feature_tests/inline_script_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('replace_inline_script', inlineScript);
+       test.expectedOutput = 'PASS';
+       test.run();
+     });
+
+  it('will not accept 10010 bytes in inline script',
+     () => {
+       const inlineScript = Array(1001).join(inlineScriptBlob) + ' ';
+       assertStrictEqual(10001, inlineScript.length);
+       const test = new ValidatorTestCase('feature_tests/inline_script_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('replace_inline_script', inlineScript);
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/inline_script_length.html:35:2 The inline script ' +
+           'is 10001 bytes, which exceeds the limit of 10000 bytes. ' +
+           '(see https://amp.dev/documentation/components/amp-script/#faq)';
+       test.run();
+     });
 });
 
 describe('Validator.CssLength', () => {
@@ -674,11 +713,7 @@ describe('Validator.CssLengthAmpEmail', () => {
        test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-       test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:34:6 Document exceeded ' +
-           '100000 bytes limit. Actual size 196140 bytes. ' +
-           '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
-           'email-spec/amp-email-format/?format=email)';
+       test.expectedOutput = 'PASS';
        test.run();
      });
 
@@ -694,13 +729,8 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutputFile = null;
        // TODO(gregable): This should not pass for the case when there are more
-       // than 75,000 bytes of inline style. It fails for now due to the 100k
-       // doc size limit.
-       test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:34:6 Document exceeded ' +
-           '100000 bytes limit. Actual size 196166 bytes. ' +
-           '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
-           'email-spec/amp-email-format/?format=email)\n' +
+       // than 75,000 bytes of inline style.
+       test.expectedOutput = 'PASS\n' +
            'amp4email_feature_tests/css_length.html:34:6 The author ' +
            'stylesheet specified in tag \'style amp-custom\' and the ' +
            'combined inline styles is too large - document contains 75010 ' +
@@ -1494,7 +1524,7 @@ describe('ValidatorRulesMakeSense', () => {
       // AMP4ADS format lists approved extensions.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       // Changes to the following map must be approved by the Ads Working
-      // Group, @wg-ads.
+      // Group, @wg-monetization.
       const approvedAmp4AdsExtensions = {
         'amp-accordion': ['0.1', 'latest'],
         'amp-ad-exit': ['0.1', 'latest'],
@@ -1534,7 +1564,7 @@ describe('ValidatorRulesMakeSense', () => {
           it(extension + ' has html_format either explicitly or implicitly' +
                  ' set for AMP4ADS but ' + extension + ' version ' + version +
                  ' is not approved for AMP4ADS. If this version is intended' +
-                 ' for AMP4ADS please get approval from @wg-ads and then' +
+                 ' for AMP4ADS please get approval from @wg-monetization and then' +
                  ' update this test. Otherwise remove the version for' +
                  ' AMP4ADS from the tagspec',
              () => {

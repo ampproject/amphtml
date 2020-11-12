@@ -20,7 +20,6 @@ import {addParamToUrl} from '../../../src/url';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
@@ -358,5 +357,5 @@ function isDocTransformed(root) {
   }
   const {documentElement} = root.ownerDocument;
   const transformed = documentElement.getAttribute('transformed');
-  return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
+  return Boolean(transformed) && transformed.startsWith(TRANSFORMED_PREFIX);
 }

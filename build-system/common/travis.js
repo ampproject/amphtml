@@ -49,130 +49,106 @@ function isTravisPushBuild() {
 }
 
 /**
+ * Returns a function to test the environment and look up a Travis environment
+ * variable
+ * @param {function():boolean} testFn
+ * @param {string} errorMsg
+ * @param {string} envKey
+ * @return {function():string}
+ */
+function travisEnv(testFn, errorMsg, envKey) {
+  return function () {
+    if (!testFn()) {
+      log(red('ERROR:'), errorMsg, 'Cannot get', cyan(`process.env.${envKey}`));
+    }
+    return process.env[envKey];
+  };
+}
+
+const travisBuildEnv = (envKey) =>
+  travisEnv(isTravisBuild, 'This is not a Travis build.', envKey);
+
+/**
  * Returns the build number of the ongoing Travis build.
+ * @function
  * @return {string}
  */
-function travisBuildNumber() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_BUILD_NUMBER') + '.'
-    );
-  }
-  return process.env.TRAVIS_BUILD_NUMBER;
-}
+const travisBuildNumber = travisBuildEnv('TRAVIS_BUILD_NUMBER');
+
+/**
+ * Return the build URL of the ongoing Travis build.
+ * @function
+ * @return {string}
+ */
+const travisBuildUrl = travisBuildEnv('TRAVIS_BUILD_WEB_URL');
 
 /**
  * Returns the job number of the ongoing Travis job.
+ * @function
  * @return {string}
  */
-function travisJobNumber() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_JOB_NUMBER') + '.'
-    );
-  }
-  return process.env.TRAVIS_JOB_NUMBER;
-}
+const travisJobNumber = travisBuildEnv('TRAVIS_JOB_NUMBER');
 
 /**
  * Return the job URL of the ongoing Travis job.
+ * @function
  * @return {string}
  */
-function travisJobUrl() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_JOB_WEB_URL') + '.'
-    );
-  }
-  return process.env.TRAVIS_JOB_WEB_URL;
-}
+const travisJobUrl = travisBuildEnv('TRAVIS_JOB_WEB_URL');
 
 /**
  * Returns the repo slug associated with the ongoing Travis build.
+ * @function
  * @return {string}
  */
-function travisRepoSlug() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_REPO_SLUG') + '.'
-    );
-  }
-  return process.env.TRAVIS_REPO_SLUG;
-}
+const travisRepoSlug = travisBuildEnv('TRAVIS_REPO_SLUG');
 
 /**
  * Returns the commit SHA being tested by the ongoing Travis PR build.
+ * @function
  * @return {string}
  */
-function travisPullRequestSha() {
-  if (!isTravisPullRequestBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis PR build. Cannot get',
-      cyan('process.env.TRAVIS_PULL_REQUEST_SHA') + '.'
-    );
-  }
-  return process.env.TRAVIS_PULL_REQUEST_SHA;
-}
+const travisPullRequestSha = travisEnv(
+  isTravisPullRequestBuild,
+  'This is not a Travis PR build.',
+  'TRAVIS_PULL_REQUEST_SHA'
+);
 
 /**
  * Returns the name of the branch being tested by the ongoing Travis PR build.
+ * @function
  * @return {string}
  */
-function travisPullRequestBranch() {
-  if (!isTravisPullRequestBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis PR build. Cannot get',
-      cyan('process.env.TRAVIS_PULL_REQUEST_BRANCH') + '.'
-    );
-  }
-  return process.env.TRAVIS_PULL_REQUEST_BRANCH;
-}
+const travisPullRequestBranch = travisEnv(
+  isTravisPullRequestBuild,
+  'This is not a Travis PR build.',
+  'TRAVIS_PULL_REQUEST_BRANCH'
+);
 
 /**
  * Returns the Travis branch for push builds.
+ * @function
  * @return {string}
  */
-function travisPushBranch() {
-  if (!isTravisPushBuild()) {
-    log(
-      red('ERRROR:'),
-      'This is not a Travis push build. Cannot get',
-      cyan('process.env.TRAVIS_BRANCH') + '.'
-    );
-  }
-  return process.env.TRAVIS_BRANCH;
-}
+const travisPushBranch = travisEnv(
+  isTravisPushBuild,
+  'This is not a Travis push build.',
+  'TRAVIS_BRANCH'
+);
 
 /**
  * Returns the commit SHA being tested by the ongoing Travis build.
+ * @function
  * @return {string}
  */
-function travisCommitSha() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_COMMIT') + '.'
-    );
-  }
-  return process.env.TRAVIS_COMMIT;
-}
+const travisCommitSha = travisBuildEnv('TRAVIS_COMMIT');
 
 module.exports = {
   isTravisBuild,
   isTravisPullRequestBuild,
   isTravisPushBuild,
   travisBuildNumber,
+  travisBuildUrl,
   travisCommitSha,
   travisJobNumber,
   travisJobUrl,

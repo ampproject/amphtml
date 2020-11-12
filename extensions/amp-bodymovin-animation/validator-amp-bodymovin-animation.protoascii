@@ -31,9 +31,7 @@ tags: {  # <amp-bodymovin-animation>
 
   attrs: {
     name: "loop"
-    value_casei: "false"
-    value_casei: "number"
-    value_casei: "true"
+    value_regex_casei: "[1-9][0-9]*|false|true"
   }
   attrs: {
     name: "noautoplay"

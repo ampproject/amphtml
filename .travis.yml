@@ -1,7 +1,7 @@
 language: node_js
 dist: xenial
 node_js:
-  - '12'
+  - '14'
 notifications:
   email:
     recipients:
@@ -9,9 +9,6 @@ notifications:
     on_success: change
     on_failure: change
 before_install:
-  # Install the latest version of Yarn (Xenial's built-in version v1.15.2 is outdated)
-  - curl -o- -L https://yarnpkg.com/install.sh | bash
-  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
@@ -52,9 +49,9 @@ stages:
 jobs:
   include:
     - stage: build
-      name: 'Build'
+      name: 'Unminified Build'
       script:
-        - unbuffer node build-system/pr-check/build.js
+        - unbuffer node build-system/pr-check/unminified-build.js
     - stage: build
       name: 'Checks'
       script:
@@ -64,13 +61,17 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: 'Dist, Bundle Size'
+      name: 'Nomodule Build'
       script:
-        - unbuffer node build-system/pr-check/dist-bundle-size.js
+        - unbuffer node build-system/pr-check/nomodule-build.js
     - stage: build
-      name: 'Module Dist, Bundle Size'
+      name: 'Module Build'
       script:
-        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
+        - unbuffer node build-system/pr-check/module-build.js
+    - stage: test
+      name: 'Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/bundle-size.js
     - stage: test
       name: 'Visual Diff Tests'
       script:
@@ -87,6 +88,10 @@ jobs:
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
+    - stage: test
+      name: 'ESM Tests'
+      script:
+        - unbuffer node build-system/pr-check/esm-tests.js
     - stage: experiment
       name: 'Experiment A Tests'
       script:

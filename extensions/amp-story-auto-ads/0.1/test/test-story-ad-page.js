@@ -310,6 +310,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       ampAdElement.appendChild(iframe);
       iframe.contentDocument.write(`
         <body>
+          <meta name="amp-cta-type" content="SHOP">
           <amp-ad-exit id="exit-api">
             <script type="application/json">
             {
@@ -322,17 +323,16 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         </body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const anchor = doc.querySelector('a');
       expect(anchor.href).to.equal('https://amp.dev/');
-      expect(anchor.textContent).to.equal('Learn More');
+      expect(anchor.textContent).to.equal('Shop Now');
     });
 
     it('throws on missing cta url', async () => {
       expectAsyncConsoleError(
-        '[amp-story-auto-ads:page] Both CTA Type & CTA Url are required in ad response.'
+        '[amp-story-auto-ads:ui] Both CTA Type & CTA Url are required in ad response.'
       );
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
       const created = await storyAdPage.maybeCreateCta();
@@ -341,7 +341,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
     it('throws on missing cta type', async () => {
       expectAsyncConsoleError(
-        '[amp-story-auto-ads:page] Both CTA Type & CTA Url are required in ad response.'
+        '[amp-story-auto-ads:ui] Both CTA Type & CTA Url are required in ad response.'
       );
       ampAdElement.setAttribute('data-vars-ctaurl', 'INSTALL');
       const created = await storyAdPage.maybeCreateCta();
@@ -423,7 +423,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
       const created = await storyAdPage.maybeCreateCta();
-      expect(created).to.be.false;
+      expect(created).to.be.true;
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
       expect(attribution).not.to.exist;
     });
@@ -444,7 +444,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
       const created = await storyAdPage.maybeCreateCta();
-      expect(created).to.be.false;
+      expect(created).to.be.true;
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
       expect(attribution).not.to.exist;
     });

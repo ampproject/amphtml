@@ -37,7 +37,6 @@ const PlayerStates = {
  * Icons from Google Material Icons
  * https://material.io/tools/icons
  */
-/*eslint-disable*/
 const icons = {
   'play': `<path d="M8 5v14l11-7z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
@@ -51,8 +50,6 @@ const icons = {
      <path d="M0 0h24v24H0z" fill="none"></path>`,
   'seek': `<circle cx="12" cy="12" r="12" />`,
 };
-
-/*eslint-enable */
 
 const bigPlayDivDisplayStyle = 'table-cell';
 
@@ -896,11 +893,13 @@ export function onAdLoad(global) {
 
 /**
  * Called intermittently as the ad plays, allowing us to display ad counter.
- * @param {!Object} global
+ * @param {!Object} unusedEvent
  * @visibleForTesting
  */
-export function onAdProgress(global) {
-  const {adPosition, totalAds} = global.getAdData();
+export function onAdProgress(unusedEvent) {
+  const adPodInfo = currentAd.getAdPodInfo();
+  const adPosition = adPodInfo.getAdPosition();
+  const totalAds = adPodInfo.getTotalAds();
   const remainingTime = adsManager.getRemainingTime();
   const remainingMinutes = Math.floor(remainingTime / 60);
   let remainingSeconds = Math.floor(remainingTime % 60);
@@ -1754,8 +1753,7 @@ const VideoEvents = {
   /**
    * amp:video:visibility
    *
-   * Fired when the video's visibility changes. Normally fired
-   * from `viewportCallback`.
+   * Fired when the video's visibility changes.
    *
    * @event amp:video:visibility
    * @property {boolean} visible Whether the video player is visible or not.

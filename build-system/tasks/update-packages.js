@@ -15,13 +15,12 @@
  */
 'use strict';
 
+const checkDependencies = require('check-dependencies');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {exec, execOrDie, getStderr} = require('../common/exec');
+const {execOrDie} = require('../common/exec');
 const {isTravisBuild} = require('../common/travis');
-
-const yarnExecutable = 'npx yarn';
 
 /**
  * Writes the given contents to the patched file if updated
@@ -119,27 +118,24 @@ function patchRRule() {
 }
 
 /**
- * Does a yarn check on node_modules, and if it is outdated, runs yarn.
+ * Checks if all packages are current, and if not, runs `npm install`.
  */
-function runYarnCheck() {
-  const integrityCmd = yarnExecutable + ' check --integrity';
-  if (getStderr(integrityCmd).trim() != '') {
+function runNpmCheck() {
+  const results = checkDependencies.sync({
+    verbose: true,
+    log: () => {},
+    error: console.log,
+  });
+  if (!results.depsWereOk) {
     log(
       colors.yellow('WARNING:'),
       'The packages in',
       colors.cyan('node_modules'),
       'do not match',
-      colors.cyan('package.json.')
+      colors.cyan('package.json') + '.'
     );
-    const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
-    exec(verifyTreeCmd);
-    log('Running', colors.cyan('yarn'), 'to update packages...');
-    /**
-     * NOTE: executing yarn with --production=false prevents having
-     * NODE_ENV=production variable set which forces yarn to not install
-     * devDependencies. This usually breaks gulp for example.
-     */
-    execOrDie(`${yarnExecutable} install --production=false`); // Stop execution when Ctrl + C is detected.
+    log('Running', colors.cyan('npm install'), 'to update packages...');
+    execOrDie('npm install');
   } else {
     log(
       colors.green('All packages in'),
@@ -164,7 +160,7 @@ function maybeUpdatePackages() {
  */
 async function updatePackages() {
   if (!isTravisBuild()) {
-    runYarnCheck();
+    runNpmCheck();
   }
   patchWebAnimations();
   patchIntersectionObserver();
@@ -177,4 +173,4 @@ module.exports = {
 };
 
 updatePackages.description =
-  'Runs yarn if node_modules is out of date, and applies custom patches';
+  'Runs npm install if node_modules is out of date, and applies custom patches';

@@ -15,9 +15,7 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
-import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -50,7 +48,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -61,6 +58,11 @@ import {installUrlReplacementsForEmbed} from '../../../src/service/url-replaceme
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
+import {padStart} from '../../../src/string';
 import {parseJson} from '../../../src/json';
 import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
@@ -177,15 +179,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
-};
-
-/**
- * @const @enum {string}
- */
-export const NO_SIGNING_EXP = {
-  id: 'a4a-no-signing',
-  control: '21066324',
-  experiment: '21066325',
 };
 
 /** @const @enum {string} */
@@ -331,13 +324,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.iframe = null;
 
-    /**
-     * TODO(keithwrightbos) - remove once resume behavior is verified.
-     * {boolean} whether most recent ad request was generated as part
-     *    of resume callback.
-     */
-    this.fromResumeCallback = false;
-
     /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
@@ -385,6 +371,9 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?function(!Element)}
      */
     this.transferDomBody_ = null;
+
+    /** @private {function(boolean)} */
+    this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
   }
 
   /** @override */
@@ -550,7 +539,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.friendlyIframeEmbed_) {
       return;
     }
-    this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
     const resource = this.getResource();
@@ -748,7 +736,11 @@ export class AmpA4A extends AMP.BaseElement {
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
           {consentState, consentString, gdprApplies},
-          this.tryExecuteRealTimeConfig_(consentState, consentString)
+          this.tryExecuteRealTimeConfig_(
+            consentState,
+            consentString,
+            /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
+          )
         ));
       })
       // This block returns the (possibly empty) response to the XHR request.
@@ -870,10 +862,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    return (
-      getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-      NO_SIGNING_EXP.experiment
-    );
+    // eslint-disable-next-line no-undef
+    return !!NO_SIGNING_RTV;
   }
 
   /**
@@ -883,7 +873,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
   streamResponse_(httpResponse, checkStillCurrent) {
-    if (!httpResponse.body) {
+    if (httpResponse.status === 204) {
       this.forceCollapse();
       return Promise.reject(NO_CONTENT_RESPONSE);
     }
@@ -1252,7 +1242,9 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
-    return this.attemptToRenderCreative();
+    return this.attemptToRenderCreative().then(() => {
+      observeWithSharedInOb(this.element, this.boundViewportCallback_);
+    });
   }
 
   /**
@@ -1343,6 +1335,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.tearDownSlot();
     return true;
   }
@@ -1381,7 +1374,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
     this.transferDomBody_ = null;
-    this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
   }
@@ -1420,8 +1412,12 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
-  /** @override  */
-  viewportCallback(inViewport) {
+  // TODO: Rename to viewportCallback once BaseElement.viewportCallback has been removed.
+  /**
+   * @param {boolean}  inViewport
+   * @protected
+   */
+  viewportCallbackTemp(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -1671,7 +1667,7 @@ export class AmpA4A extends AMP.BaseElement {
     const {height, width} = this.creativeSize_;
     const {extensions, fonts, head} = headData;
     this.iframe = createSecureFrame(
-      this.element.ownerDocument,
+      this.win,
       this.getIframeTitle(),
       height,
       width
@@ -2160,6 +2156,13 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} whether this is a sticky ad unit
+   */
+  isStickyAd() {
+    return false;
+  }
+
+  /**
    * Checks if the given lifecycle event has a corresponding amp-analytics event
    * and fires the analytics trigger if so.
    * @param {string} lifecycleStage
@@ -2209,15 +2212,21 @@ export class AmpA4A extends AMP.BaseElement {
    * the rtc-config attribute on the amp-ad element, warn.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState, consentString) {
+  tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
     if (!!AMP.RealTimeConfigManager) {
       try {
-        return new AMP.RealTimeConfigManager(this).maybeExecuteRealTimeConfig(
+        return new AMP.RealTimeConfigManager(
+          this.getAmpDoc()
+        ).maybeExecuteRealTimeConfig(
+          this.element,
           this.getCustomRealTimeConfigMacros_(),
           consentState,
-          consentString
+          consentString,
+          consentMetadata,
+          this.verifyStillCurrent()
         );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
@@ -2314,6 +2323,40 @@ export class AmpA4A extends AMP.BaseElement {
       return MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT;
     }
     return null;
+  }
+
+  /**
+   * Returns any enabled SSR experiments via the amp-usqp meta tag. These
+   * correspond to the proto field ids in cs/AmpTransformerParams.
+   *
+   * These experiments do not have a fully unique experiment id for each value,
+   * so we concatenate the key and value to generate a psuedo id. We assume
+   * that any experiment is either a boolean (so two branches), or an enum with
+   * 100 or less branches. So, the value is padded a leading 0 if necessary.
+   *
+   * @protected
+   * @return {!Array<string>}
+   */
+  getSsrExpIds_() {
+    const exps = [];
+    const meta = this.getAmpDoc().getMetaByName('amp-usqp');
+    if (meta) {
+      const keyValues = meta.split(',');
+      for (let i = 0; i < keyValues.length; i++) {
+        const kv = keyValues[i].split('=');
+        if (kv.length !== 2) {
+          continue;
+        }
+        // Reasonably assume that all important exps are either booleans, or
+        // enums with 100 or less branches.
+        const val = Number(kv[1]);
+        if (!isNaN(kv[0]) && val >= 0 && val < 100) {
+          const padded = padStart(kv[1], 2, '0');
+          exps.push(kv[0] + padded);
+        }
+      }
+    }
+    return exps;
   }
 }
 

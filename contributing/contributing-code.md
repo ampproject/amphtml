@@ -10,7 +10,7 @@ This document describes the process you will go through to make a change in AMP.
 
 We want to make it as easy as possible to get in small fixes. A fix for a small bug should be as easy as creating a PR with the change, adding/fixing a test, and sending it to a reviewer.
 
-- [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so. If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
+- [ ] Agree to the [OpenJSF Contributor License Agreement (CLA)](#contributor-license-agreement).
 - [ ] (optional) If you are fixing a bug and there is an existing GitHub issue, assign it to yourself (if you can) or comment on it to let others know you are working on it. If there is no GitHub issue consider filing one, but for minor fixes your PR description may be enough.
 - [ ] (optional) [Find a guide](#find-a-guide) before you start coding to help you answer questions.
 - [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change. There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes. If in doubt ask your guide or the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
@@ -31,7 +31,7 @@ Significant changes (e.g. new components or significant changes to behavior) req
 **If you are deprecating/removing a feature, follow the [deprecation process](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#deprecations) instead of this process.**
 
 - [ ] _Before you start coding_, [find a guide](#find-a-guide) who you can discuss your change with and who can help guide you through the process.
-- [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so. If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
+- [ ] Agree to the [OpenJSF Contributor License Agreement (CLA)](#contributor-license-agreement).
 - [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your guide on it. The I2I should include:
   - A description of the change you plan to implement.
   - If you are integrating a third-party service, provide a link to the third-party's site and product.
@@ -63,7 +63,7 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
 ## Implementation
 
 - (optional) [Join AMP on GitHub](https://goo.gl/forms/T65peVtfQfEoDWeD3). You don't need to wait to be added to the org before you start coding.
-- [Perform the one-time setup if needed](./getting-started-quick.md#one-time-setup): Set up your GitHub account, install Node, Yarn, Gulp CLI, fork repo, track repo, etc.
+- [Perform the one-time setup if needed](./getting-started-quick.md#one-time-setup): Set up your GitHub account, install Node, Gulp CLI, fork repo, track repo, etc.
 - [Create a working branch](./getting-started-e2e.md#create-a-git-branch).
 - [Build AMP](./getting-started-e2e.md#building-amp-and-starting-a-local-server).
 - Write your code.
@@ -74,9 +74,12 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
     - **CSS**: [Writing CSS For AMP Runtime](./writing-css.md)
     - **Creating new components**:
       - [Instructions and Guidelines for building an AMP component](./building-an-amp-extension.md)
-      - Learn to create your first component in this [codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0)
+      - Learn to create your first component in this [guide](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md)
       - Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
     - **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
+    - **Accessibility**:
+      - [Web Fundamentals - Accessibility](https://developers.google.com/web/fundamentals/accessibility/)
+      - [web.dev Lighthouse accessibility audits guide](https://web.dev/lighthouse-accessibility/)
   - [Put your change behind an experiment flag](./building-an-amp-extension.md#experiments) unless it is a minor fix or your reviewer indicates this is not needed.
   - [Commit your files](./getting-started-e2e.md#edit-files-and-commit-them).
 - [Test your changes](./getting-started-e2e.md#testing-your-changes).
@@ -91,7 +94,7 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
     - [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
     - [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
 - Send your code for review.
-  - [Sign the Contributor License Agreement](#contributor-license-agreement) if you have not already done so.
+  - [Agree to the Contributor License Agreement](#contributor-license-agreement) if you have not already done so.
   - [Pull the latest changes from the amphtml repo](./getting-started-e2e.md#pull-the-latest-changes-from-the-amphtml-repository) and resolve any conflicts.
   - Run the **pre push** check, which is a tool that helps catch any issues before you submit your code. To enable the git pre-push hook, see [`enable-git-pre-push.sh`](../build-system/common/enable-git-pre-push.sh#L17-L20).
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
@@ -114,24 +117,17 @@ In particular, we strive to design the overall component set, so that a large nu
 We have a few additional resources that provide an introduction to contributing extended components:
 
 - ["Building an AMP Extension"](./building-an-amp-extension.md) has a detailed description of how to build an AMP component.
-- ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0) provides a quick overview of the steps you need to go through to create a component with examples you can modify for your component.
 - The ["Building a new AMP component" talk at AMP Conf 2017](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) provides an introduction to contributing AMP components.
 
 For further detail on integrating third-party services (e.g., fonts, embeds, etc.), see our [3p contribution guidelines](https://github.com/ampproject/amphtml/tree/master/3p).
 
 ## Contributor License Agreement
 
-AMP requires all contributors to either sign an individual Contributor License Agreement or be covered by a corporate Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
+AMP requires all contributors to agree to the OpenJSF Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
 
-We recommend you handle signing/being covered by a CLA _before_ you send a PR to avoid problems, though this is not absolutely necessary until your code is ready to be merged in.
+To agree to the OpenJSF Contributor License Agreement, visit [https://cla-assistant.io/ampproject/amphtml](https://cla-assistant.io/ampproject/amphtml), read through the agreement, and click "Sign in with GitHub to agree."
 
-**Make sure that the email you associate with your CLA is the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
-
-- **If you are contributing code on your own behalf** you can sign the [individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
-- **If you are planning on contributing code on behalf of your company:**
-  - Your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so. Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process that may take a couple of days. To ensure you can get your code reviewed and merged quickly please start this process as soon as possible. The signer of your corporate CLA will associate a Google Group to the corporate CLA, and any email address added to this Google Group will be considered to be covered by this corporate CLA.
-  - To be covered by your company's corporate CLA the owner of the Google Group associated with the corporate CLA (someone at your company) will need to add your address to this Google Group.
-  - If you aren't sure whehther your company has already signed a corporate CLA, if you don't know who at your company owns the Google Group you need to be added to, or you run into any other questions about the corporate CLA, please reach out to @mrjoro (via cc on a PR or on [Slack](https://amphtml.slack.com) ([signup](https://bit.ly/amp-slack-signup))) or the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/details/) channel on Slack.
+Alternatively, you also have the option of downloading the Contributor License Agreement from https://individual-cla.openjsf.org, filling it in, signing it, writing in your GitHub handle, and emailing it to operations@openjsf.org. As processing your CLA is done manually, this takes much longer and is therefore not recommended.
 
 ## Code review and approval
 

@@ -159,7 +159,7 @@ git branch -u upstream/master master
 
 # Building AMP and starting a local server
 
-Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the Yarn package manager, Closure Compiler, and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.
+Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the NPM package manager, Closure Compiler, and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.
 
 - Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). If you're on Mac or Linux, an easy way to install Node.js is with `nvm`: [here](https://github.com/creationix/nvm).
 
@@ -167,15 +167,7 @@ Now that you have all of the files copied locally you can actually build the cod
   nvm install --lts
   ```
 
-- Install the stable version of [Yarn](https://yarnpkg.com/) (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
-
-  ```sh
-  curl -o- -L https://yarnpkg.com/install.sh | bash
-  ```
-
-  An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
-
-- Closure Compiler is automatically installed by Yarn, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
+- Closure Compiler is automatically installed by NPM, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
 
   - Note: If you are using Mac OS and have multiple versions of Java installed, make sure you are using Java 8 by adding this to `~/.bashrc`:
 
@@ -186,20 +178,20 @@ Now that you have all of the files copied locally you can actually build the cod
 - If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
 
   ```sh
-  yarn global remove gulp
+  npm uninstall --global gulp
   ```
 
 - Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
 
   ```sh
-  yarn global add gulp-cli
+  npm install --global gulp-cli
   ```
 
   An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
 
 - In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
   ```
-  yarn
+  npm install
   ```
   You should see a progress indicator and some messages scrolling by. You may see some warnings about optional dependencies, which are generally safe to ignore.
 
@@ -303,18 +295,18 @@ If there are changes that conflict with changes on your branch (e.g. someone mod
 
 The common workflow for making changes to files in Git is:
 
-- edit some files using your favorite editor
+- Edit some files using your favorite editor
 
-- if your code requires a new dependency, run `yarn add --exact [--dev] <packagename>`, which will automatically update `package.json` and `yarn.lock`
+- If your code requires a new dependency, run `npm install [--save-dev] <packagename>`, which will automatically update `package.json` and `package-lock.json`
 
-  - If it is a build-time dependency, use the `--dev` flag
+  - If it is a build-time dependency, use the `--save-dev` flag
   - If it is a runtime dependency, add it to `build-system/compile/sources.js`
 
-- if you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
+- If you manually edited `package.json`, run `npm install` to install the dependency and generate an updated `package-lock.json` file
 
-- tell Git that you care about these changes by _staging_ them using the `git add` command
+- Tell Git that you care about these changes by _staging_ them using the `git add` command
 
-- create a checkpoint (called a _commit_) that bundles together the changes you've staged by using the `git commit` command
+- Create a checkpoint (called a _commit_) that bundles together the changes you've staged by using the `git commit` command
 
 Git commits bundle together related changes into a logical unit. (If you're familiar with some other source control systems this terminology may make you think that when you create a commit you're "checking in" your code to the amphtml repository; that's _not_ what a Git commit is.)
 
@@ -464,6 +456,12 @@ Testing tips:
 
 For more help, see [How to get help](#how-to-get-help).
 
+# Perform manual tests
+
+Beyond technical/automated tests, manually test your changes and make sure that they work as expected, and that they follow AMP's [design principles](https://github.com/ampproject/amphtml/blob/master/contributing/DESIGN_PRINCIPLES.md). In particular, make sure that your changes are accessible - see [W3C WAI Easy Checks](https://www.w3.org/WAI/test-evaluate/preliminary/) for an initial set of suggested manual tests. Some aspects of manual testing can be semi-automated, using tools such as [Lighthouse](https://developers.google.com/web/tools/lighthouse) (which includes an accessibility audit report) and [Microsoft's Accessibility Insights](https://accessibilityinsights.io/).
+
+Note that for more extensive automated accessibility testing, there are further options available that integrate directly within existing test/integration workflows, such as [Deque's axe-core](https://github.com/dequelabs/axe-core).
+
 # Push your changes to your GitHub fork
 
 Up to this point you've been making changes in a branch on your local repository. Those changes aren't visible anywhere else--not even your GitHub fork--so if you want other people to see your changes you will need to push your branch to your GitHub fork. This is a necessary step to request a code review (known as a pull request) and to ultimately get your changes added to the amphtml repository.
@@ -534,7 +532,7 @@ When you're done click "Create pull request." This will bring you to your Pull R
 
 On the Pull Request page you can see that a few checks are running:
 
-- The tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
+- The tests are being run on [Travis](https://travis-ci.com/ampproject/amphtml/pull_requests)
 
 - The system is verifying that you have signed a CLA (Contributor License Agreement). If this is your first time submitting a Pull Request for AMP on GitHub you'll need to sign a CLA. (Make sure the email address you use to sign the CLA is the same one that you configured Git with.) See details in the [Contributing code](../CONTRIBUTING.md#contributing-code) documentation.
 
@@ -603,7 +601,7 @@ If you're looking for ideas on your next contribution feel free to reach out to 
 
 This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP open source project. If you find yourself wanting to know more there are a lot of resources available. Here are a few:
 
-- The ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/index.html) provides step-by-step instructions for a common type of code contribution to AMP. Even if your project involves modifying an existing AMP component this codelab will give you an overview of how AMP components work.
+- The ["Building an AMP Extension" guide](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md) provides step-by-step instructions for a common type of code contribution to AMP. Even if your project involves modifying an existing AMP component, this guide will give you an overview of how AMP components work.
 - GitHub has a lot of helpful introductory material, including:
   - a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
   - the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))

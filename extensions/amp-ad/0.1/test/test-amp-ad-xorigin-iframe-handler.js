@@ -59,6 +59,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adImpl.lifecycleReporter = {
       addPingsForVisibility: (unusedElement) => {},
     };
+    adImpl.isStickyAd = () => false;
+    adImpl.onResizeSuccess = window.sandbox.spy();
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
@@ -235,7 +237,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       it('should be able to use user-error API', () => {
         const err = new Error();
         err.message = 'error test';
-        const userErrorReportSpy = window.sandbox./*OK*/ spy(
+        const userErrorReportSpy = window.sandbox.stub(
           iframeHandler,
           'userErrorForAnalytics_'
         );
@@ -364,6 +366,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
+          expect(adImpl.onResizeSuccess).to.be.called;
         });
     });
 
@@ -389,6 +392,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
+          expect(adImpl.onResizeSuccess).to.be.called;
         });
     });
 
@@ -442,52 +446,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             },
           });
         });
-    });
-
-    it('should be not pausable w/o experiment', () => {
-      expect(iframeHandler.iframe).to.equal(iframe);
-      expect(iframe.getAttribute('allow') || '').to.not.have.string(
-        'execution-while-not-rendered'
-      );
-      expect(iframeHandler.isPausable()).to.be.false;
-      iframeHandler.setPaused(true);
-      expect(iframe).to.not.have.attribute('hidden');
-    });
-  });
-
-  describe('Initialized iframe with pausable-iframe', () => {
-    beforeEach(() => {
-      toggleExperiment(window, 'pausable-iframe', true);
-      iframeHandler.init(iframe);
-    });
-
-    afterEach(() => {
-      toggleExperiment(window, 'pausable-iframe', false);
-    });
-
-    it('should be configured pausable w/experiment', () => {
-      expect(iframe.getAttribute('allow') || '').to.have.string(
-        "execution-while-not-rendered 'none'"
-      );
-    });
-
-    it('should introspect as pausable w/experiment when supported', () => {
-      // Even if configured, the pausability still depends on whether the
-      // platform supports the relevant feature policies.
-      if (
-        iframe.featurePolicy &&
-        iframe.featurePolicy.features().includes('execution-while-not-rendered')
-      ) {
-        expect(iframeHandler.isPausable()).to.be.true;
-      }
-    });
-
-    it('should be hidden on pause', () => {
-      expect(iframe).to.not.have.attribute('hidden');
-      iframeHandler.setPaused(true);
-      expect(iframe).to.have.attribute('hidden');
-      iframeHandler.setPaused(false);
-      expect(iframe).to.not.have.attribute('hidden');
     });
   });
 });
