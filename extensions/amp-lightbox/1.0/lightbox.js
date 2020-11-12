@@ -43,16 +43,6 @@ const ANIMATION_PRESETS = {
 };
 
 /**
- * @param {} value
- * @return {string}
- */
-function useValueRef(value) {
-  const ref = useRef();
-  ref.current = value;
-  return ref;
-}
-
-/**
  * @param {!LightboxDef.Props} props
  * @param {{current: (!LightboxDef.LightboxApi|null)}} ref
  * @return {PreactDef.Renderable}
@@ -66,6 +56,7 @@ function LightboxWithRef(
     initialOpen,
     onBeforeOpen,
     onAfterClose,
+    enableAnimation,
     ...rest
   },
   ref
@@ -81,9 +72,10 @@ function LightboxWithRef(
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
-  const animateInRef = useValueRef(animateIn);
-  const onBeforeOpenRef = useValueRef(onBeforeOpen);
-  const onAfterCloseRef = useValueRef(onAfterClose);
+  const animateInRef = useRef(animateIn);
+  const onBeforeOpenRef = useRef(onBeforeOpen);
+  const onAfterCloseRef = useRef(onAfterClose);
+  const enableAnimationRef = useRef(enableAnimation);
 
   useImperativeHandle(
     ref,
@@ -97,9 +89,10 @@ function LightboxWithRef(
       },
       close: () => {
         setVisible(false);
+        setTimeout(() => setMounted(false), ANIMATION_DURATION);
       },
     }),
-    [onBeforeOpenRef]
+    []
   );
 
   useEffect(() => {
@@ -108,6 +101,8 @@ function LightboxWithRef(
       return;
     }
     let animation;
+
+    // "Make Visible" Animation
     if (visible) {
       const postVisibleAnim = () => {
         setStyle(element, 'opacity', 1);
@@ -115,7 +110,7 @@ function LightboxWithRef(
         element.focus();
       };
 
-      if (!element.animate) {
+      if (!element.animate || !enableAnimationRef) {
         postVisibleAnim();
         return;
       }
@@ -126,10 +121,10 @@ function LightboxWithRef(
       });
       animation.onfinish = postVisibleAnim;
     } else {
+      // "Make Invisible" Animation
       const postInvisibleAnim = () => {
         setStyle(element, 'opacity', 0);
         setStyle(element, 'visibility', 0);
-        setMounted(false);
         if (onAfterCloseRef.current) {
           onAfterCloseRef.current();
         }
@@ -152,7 +147,7 @@ function LightboxWithRef(
         animation.onfinish();
       }
     };
-  }, [visible, animateInRef, onAfterCloseRef]);
+  }, [visible]);
 
   return (
     mounted && (
@@ -171,6 +166,7 @@ function LightboxWithRef(
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
             setVisible(false);
+            setTimeout(() => setMounted(false), ANIMATION_DURATION);
           }
         }}
         {...rest}
@@ -182,6 +178,7 @@ function LightboxWithRef(
           className={classes.closeButton}
           onClick={() => {
             setVisible(false);
+            setTimeout(() => setMounted(false), ANIMATION_DURATION);
           }}
         />
       </ContainWrapper>

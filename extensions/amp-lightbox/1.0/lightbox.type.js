@@ -26,7 +26,8 @@ var LightboxDef = {};
  *   scrollable: (boolean),
  *   initialOpen: (boolean),
  *   onBeforeOpen: (function|undefined),
- *   onAfterClose: (function|undefined)
+ *   onAfterClose: (function|undefined),
+ *   enableAnimation: (boolean)
  * }}
  */
 LightboxDef.Props;

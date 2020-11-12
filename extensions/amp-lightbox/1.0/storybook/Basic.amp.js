@@ -38,10 +38,10 @@ export const Default = () => {
     <main>
       <amp-lightbox id="lightbox" layout="nodisplay" animate-in={animateIn}>
         <p>Test</p>
+        <button on="tap:lightbox.close">Close</button>
       </amp-lightbox>
       <div class="buttons" style={{marginTop: 8}}>
         <button on="tap:lightbox.open">Open</button>
-        <button on="tap:lightbox.close">Close</button>
       </div>
     </main>
   );
