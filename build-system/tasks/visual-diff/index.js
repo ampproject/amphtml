@@ -765,7 +765,17 @@ function installPercy_() {
   }
 
   puppeteer = require('puppeteer');
-  percySnapshot = require('@percy/puppeteer').percySnapshot;
+
+  const originalPercySnapshot = require('@percy/puppeteer').percySnapshot;
+  percySnapshot = (page, name, options = {}) =>
+    originalPercySnapshot(page, name, {
+      ...options,
+      percyCss: [
+        // Loader animation may otherwise be captured in slightly different
+        // points, thus causing the test to flake.
+        '.i-amphtml-new-loader { display: none }',
+      ].join('\n'),
+    });
 }
 
 function setupCleanup_() {
