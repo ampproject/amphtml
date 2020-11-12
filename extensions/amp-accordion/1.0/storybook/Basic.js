@@ -17,9 +17,9 @@
 import * as Preact from '../../../../src/preact';
 import {
   Accordion,
+  AccordionContent,
+  AccordionHeader,
   AccordionSection,
-  AccordionSectionContent,
-  AccordionSectionHeader,
 } from '../accordion';
 import {boolean, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
@@ -68,14 +68,17 @@ export const _default = () => {
         expandSingleSection={expandSingleSection}
         animate={animate}
       >
-        <AccordionSection id="section1" key={1} header={<h2>Section 1</h2>}>
-          <p>Content in section 1.</p>
+        <AccordionSection id="section1" key={1}>
+          <AccordionHeader as="h2">Section 1</AccordionHeader>
+          <AccordionContent>Content in section 1.</AccordionContent>
         </AccordionSection>
-        <AccordionSection key={2} header={<h2>Section 2</h2>}>
-          <div>Content in section 2.</div>
+        <AccordionSection key={2}>
+          <AccordionHeader as="h2">Section 2</AccordionHeader>
+          <AccordionContent>Content in section 2.</AccordionContent>
         </AccordionSection>
-        <AccordionSection key={3} expanded header={<h2>Section 3</h2>}>
-          <div>Content in section 3.</div>
+        <AccordionSection key={3} expanded>
+          <AccordionHeader as="h2">Section 3</AccordionHeader>
+          <AccordionContent>Content in section 3.</AccordionContent>
         </AccordionSection>
       </AccordionWithActions>
     </main>
@@ -93,37 +96,33 @@ function AccordionWithEvents(props) {
   return (
     <section>
       <Accordion ref={ref} {...props}>
-        <AccordionSection
-          id="section1"
-          key={1}
-          expanded
-          header={<h2>Section 1</h2>}
-        >
-          <p>Content in section 1.</p>
+        <AccordionSection id="section1" key={1} expanded>
+          <AccordionHeader as="h2">Section 1</AccordionHeader>
+          <AccordionContent>Content in section 1.</AccordionContent>
         </AccordionSection>
         <AccordionSection
           id="section2"
           key={2}
-          header={<h2>Section 2</h2>}
           onExpandStateChange={(expanded) => {
             if (expanded) {
               ref.current.expand('section3');
             }
           }}
         >
-          <div>Content in section 2.</div>
+          <AccordionHeader as="h2">Section 2</AccordionHeader>
+          <AccordionContent>Content in section 1.</AccordionContent>
         </AccordionSection>
         <AccordionSection
           id="section3"
           key={3}
-          header={<h2>Section 3</h2>}
           onExpandStateChange={(expanded) => {
             if (!expanded) {
               ref.current.collapse('section2');
             }
           }}
         >
-          <div>Content in section 3.</div>
+          <AccordionHeader as="h2">Section 3</AccordionHeader>
+          <AccordionContent>Content in section 3.</AccordionContent>
         </AccordionSection>
       </Accordion>
       <div style={{marginTop: 8}}>
@@ -148,38 +147,6 @@ export const events = () => {
         expandSingleSection={expandSingleSection}
         animate={animate}
       ></AccordionWithEvents>
-    </main>
-  );
-};
-
-export const restructure = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
-  return (
-    <main>
-      <AccordionWithActions
-        expandSingleSection={expandSingleSection}
-        animate={animate}
-      >
-        <AccordionSection id="section1" key={1} expanded animate>
-          <AccordionSectionHeader>Header 1</AccordionSectionHeader>
-          <AccordionSectionContent>
-            Content in section 1.
-          </AccordionSectionContent>
-        </AccordionSection>
-        <AccordionSection key={2}>
-          <AccordionSectionHeader>Header 2</AccordionSectionHeader>
-          <AccordionSectionContent>
-            Content in section 2.
-          </AccordionSectionContent>
-        </AccordionSection>
-        <AccordionSection key={3} expanded>
-          <AccordionSectionHeader>Header 3</AccordionSectionHeader>
-          <AccordionSectionContent>
-            Content in section 3.
-          </AccordionSectionContent>
-        </AccordionSection>
-      </AccordionWithActions>
     </main>
   );
 };

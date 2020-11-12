@@ -17,9 +17,9 @@
 import * as Preact from '../../../src/preact';
 import {
   Accordion,
+  AccordionContent,
+  AccordionHeader,
   AccordionSection,
-  AccordionSectionContent,
-  AccordionSectionHeader,
 } from './accordion';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
@@ -123,8 +123,8 @@ function getState(element, mu) {
     const contentProps = dict({'as': contentShim});
     return (
       <AccordionSection {...sectionProps}>
-        <AccordionSectionHeader {...headerProps}></AccordionSectionHeader>
-        <AccordionSectionContent {...contentProps}></AccordionSectionContent>
+        <AccordionHeader {...headerProps}></AccordionHeader>
+        <AccordionContent {...contentProps}></AccordionContent>
       </AccordionSection>
     );
   });

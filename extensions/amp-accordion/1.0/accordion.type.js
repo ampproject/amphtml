@@ -24,10 +24,11 @@ var AccordionDef = {};
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   expandSingleSection: (boolean|undefined),
  *   animate: (boolean|undefined),
+ *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.Props;
+AccordionDef.AccordionProps;
 
 /**
  * @typedef {{
@@ -39,18 +40,27 @@ AccordionDef.Props;
  *   onExpandStateChange: (function(boolean):undefined|undefined),
  * }}
  */
-AccordionDef.SectionProps;
+AccordionDef.AccordionSectionProps;
 
 /**
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   role: (string|undefined),
- *   headerClassName: (string|undefined),
+ *   className: (string|undefined),
  *   tabIndex: (number|string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.SectionHeaderProps;
+AccordionDef.AccordionHeaderProps;
+
+/**
+ * @typedef {{
+ *   as: (string|PreactDef.FunctionalComponent|undefined),
+ *   className: (string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+AccordionDef.AccordionContentProps;
 
 /**
  * @typedef {{
@@ -60,15 +70,6 @@ AccordionDef.SectionHeaderProps;
  * }}
  */
 AccordionDef.HeaderProps;
-
-/**
- * @typedef {{
- *   as: (string|PreactDef.FunctionalComponent|undefined),
- *   contentClassName: (string|undefined),
- *   children: (?PreactDef.Renderable|undefined),
- * }}
- */
-AccordionDef.SectionContentProps;
 
 /**
  * @typedef {{
@@ -84,9 +85,20 @@ AccordionDef.ContentProps;
  *   isExpanded: (function(string, boolean):boolean),
  *   toggleExpanded: (function(string)|undefined),
  *   animate: (boolean|undefined),
+ *   prefix: (string),
  * }}
  */
-AccordionDef.ContextProps;
+AccordionDef.AccordionContextProps;
+
+/**
+ * @typedef {{
+ *   animate: (boolean),
+ *   contentId: (string),
+ *   expanded: (boolean),
+ *   expandHandler: (function():undefined)
+ * }}
+ */
+AccordionDef.SectionContextProps;
 
 /** @interface */
 AccordionDef.AccordionApi = class {
