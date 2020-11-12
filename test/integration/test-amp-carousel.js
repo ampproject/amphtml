@@ -327,7 +327,7 @@ t.run('amp-carousel', function () {
         expect(nextBtn).to.be.visible;
       });
 
-      it.skip('should only have the prev button enabled when on last item', () => {
+      it('should only have the prev button enabled when on last item', () => {
         document.body.classList.add('amp-mode-mouse');
         const amp = document.querySelector('#carousel-1');
         const impl = amp.implementation_;
