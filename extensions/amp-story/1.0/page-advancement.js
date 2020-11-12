@@ -621,8 +621,8 @@ export class ManualAdvancement extends AdvancementConfig {
       pageRect = this.element_.getLayoutBox();
     } else {
       pageRect = this.element_
-        .querySelector('amp-story-page[active]') /*OK*/
-        .getBoundingClientRect();
+        .querySelector('amp-story-page[active]')
+        ./*OK*/ getBoundingClientRect();
     }
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
