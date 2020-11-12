@@ -126,7 +126,7 @@ const CLOSURE_SRC_GLOBS = [
   // Needed to access UserNotificationManager from other extensions
   'extensions/amp-user-notification/**/*.js',
   // Needed for amp-youtube 1.0
-  'extensions/amp-video/1.0/base-element.js',
+  'extensions/amp-video/1.0/**/*.js',
   // Needed for VideoService
   'extensions/amp-video-service/**/*.js',
   // Needed to access ConsentPolicyManager from other extensions
