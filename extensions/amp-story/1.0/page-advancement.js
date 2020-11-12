@@ -502,7 +502,6 @@ export class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.isInStoryPageSideEdge_(event, pageRect)) {
-      console.log('isInStoryPageSideEdge_');
       event.preventDefault();
       return false;
     }
@@ -613,7 +612,7 @@ export class ManualAdvancement extends AdvancementConfig {
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
 
-    // pageRect can use LayoutBox for mobile since the story page uses the whole screen.
+    // Can use LayoutBox for mobile since the story page occupies entire screen.
     // Desktop UI needs to use the getBoundingClientRect.
     let pageRect;
     if (
