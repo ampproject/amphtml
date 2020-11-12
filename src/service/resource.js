@@ -762,6 +762,9 @@ export class Resource {
    */
   whenWithinViewport(viewport) {
     devAssert(viewport !== false);
+    if (WITHIN_VIEWPORT_INOB) {
+      return Promise.reject('WITHIN_VIEWPORT_INOB');
+    }
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
       return Promise.resolve();
