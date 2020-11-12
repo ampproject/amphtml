@@ -15,7 +15,12 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Accordion, AccordionSection} from '../accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from '../accordion';
 import {mount} from 'enzyme';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -23,7 +28,12 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
   describe('standalone accordion section', () => {
     it('should render a default section', () => {
       const wrapper = mount(
-        <AccordionSection header={<h1>header1</h1>}>content1</AccordionSection>
+        <AccordionSection>
+          <AccordionHeader>
+            <h1>header1</h1>
+          </AccordionHeader>
+          <AccordionContent>content1</AccordionContent>
+        </AccordionSection>
       );
 
       const dom = wrapper.getDOMNode();
@@ -44,8 +54,11 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should render an expanded section', () => {
       const wrapper = mount(
-        <AccordionSection expanded header={<h1>header1</h1>}>
-          content1
+        <AccordionSection expanded>
+          <AccordionHeader>
+            <h1>header1</h1>
+          </AccordionHeader>
+          <AccordionContent>content1</AccordionContent>
         </AccordionSection>
       );
 
@@ -65,7 +78,12 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should toggle expanded state', () => {
       const wrapper = mount(
-        <AccordionSection header={<h1>header1</h1>}>content1</AccordionSection>
+        <AccordionSection>
+          <AccordionHeader>
+            <h1>header1</h1>
+          </AccordionHeader>
+          <AccordionContent>content1</AccordionContent>
+        </AccordionSection>
       );
       const dom = wrapper.getDOMNode();
       const header = dom.children[0];
@@ -96,14 +114,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     beforeEach(() => {
       wrapper = mount(
         <Accordion>
-          <AccordionSection key={1} expanded header="header1">
-            content1
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>content1</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={2} header="header2">
-            content2
+          <AccordionSection key={2}>
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={3} header="header3">
-            content3
+          <AccordionSection key={3}>
+            <AccordionHeader>header3</AccordionHeader>
+            <AccordionContent>content3</AccordionContent>
           </AccordionSection>
         </Accordion>
       );
@@ -274,14 +295,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     beforeEach(() => {
       wrapper = mount(
         <Accordion expandSingleSection>
-          <AccordionSection key={1} expanded header="header1">
-            content1
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>content1</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={2} header="header2">
-            content2
+          <AccordionSection key={2}>
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={3} header="header3">
-            content3
+          <AccordionSection key={3}>
+            <AccordionHeader>header3</AccordionHeader>
+            <AccordionContent>content3</AccordionContent>
           </AccordionSection>
         </Accordion>
       );
@@ -337,11 +361,13 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       animateStub = env.sandbox.stub(Element.prototype, 'animate');
       wrapper = mount(
         <Accordion animate>
-          <AccordionSection key={1} expanded header="header1">
-            content1
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>content1</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={2} header="header2">
-            content2
+          <AccordionSection key={2}>
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
           </AccordionSection>
         </Accordion>
       );
@@ -469,19 +495,21 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
       wrapper = mount(
         <Accordion ref={ref}>
-          <AccordionSection key={1} expanded header="header1">
-            content1
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>content1</AccordionContent>
           </AccordionSection>
           <AccordionSection
             key={2}
             id="section2"
-            header="header2"
             onExpandStateChange={onExpandStateChange}
           >
-            content2
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={3} header="header3">
-            content3
+          <AccordionSection key={3}>
+            <AccordionHeader>header3</AccordionHeader>
+            <AccordionContent>content3</AccordionContent>
           </AccordionSection>
         </Accordion>
       );
@@ -584,14 +612,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         ref = Preact.createRef();
         wrapper = mount(
           <Accordion ref={ref}>
-            <AccordionSection key={1} expanded header="header1" id="section1">
-              content1
+            <AccordionSection key={1} expanded id="section1">
+              <AccordionHeader>header1</AccordionHeader>
+              <AccordionContent>content1</AccordionContent>
             </AccordionSection>
-            <AccordionSection key={2} header="header2" id="section2">
-              content2
+            <AccordionSection key={2} id="section2">
+              <AccordionHeader>header2</AccordionHeader>
+              <AccordionContent>content2</AccordionContent>
             </AccordionSection>
-            <AccordionSection key={3} header="header3">
-              content3
+            <AccordionSection key={3}>
+              <AccordionHeader>header3</AccordionHeader>
+              <AccordionContent>content3</AccordionContent>
             </AccordionSection>
           </Accordion>
         );

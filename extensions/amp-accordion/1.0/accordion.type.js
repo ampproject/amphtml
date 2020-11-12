@@ -24,26 +24,43 @@ var AccordionDef = {};
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   expandSingleSection: (boolean|undefined),
  *   animate: (boolean|undefined),
+ *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.Props;
+AccordionDef.AccordionProps;
 
 /**
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
- *   headerAs: (string|PreactDef.FunctionalComponent|undefined),
- *   contentAs: (string|PreactDef.FunctionalComponent|undefined),
  *   expanded: (boolean|undefined),
  *   animate: (boolean|undefined),
- *   headerClassName: (string|undefined),
- *   contentClassName: (string|undefined),
- *   header: (!PreactDef.Renderable),
+ *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  *   onExpandStateChange: (function(boolean):undefined|undefined),
  * }}
  */
-AccordionDef.SectionProps;
+AccordionDef.AccordionSectionProps;
+
+/**
+ * @typedef {{
+ *   as: (string|PreactDef.FunctionalComponent|undefined),
+ *   role: (string|undefined),
+ *   className: (string|undefined),
+ *   tabIndex: (number|string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+AccordionDef.AccordionHeaderProps;
+
+/**
+ * @typedef {{
+ *   as: (string|PreactDef.FunctionalComponent|undefined),
+ *   className: (string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+AccordionDef.AccordionContentProps;
 
 /**
  * @typedef {{
@@ -68,9 +85,20 @@ AccordionDef.ContentProps;
  *   isExpanded: (function(string, boolean):boolean),
  *   toggleExpanded: (function(string)|undefined),
  *   animate: (boolean|undefined),
+ *   prefix: (string),
  * }}
  */
-AccordionDef.ContextProps;
+AccordionDef.AccordionContextProps;
+
+/**
+ * @typedef {{
+ *   animate: (boolean),
+ *   contentId: (string),
+ *   expanded: (boolean),
+ *   expandHandler: (function():undefined)
+ * }}
+ */
+AccordionDef.SectionContextProps;
 
 /** @interface */
 AccordionDef.AccordionApi = class {

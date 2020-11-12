@@ -15,7 +15,12 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {Accordion, AccordionSection} from './accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from './accordion';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
@@ -111,16 +116,21 @@ function getState(element, mu) {
       EXPAND_STATE_SHIM_PROP,
       getExpandStateTrigger
     );
-    const props = dict({
+    const sectionProps = dict({
       'key': section,
       'as': sectionShim,
-      'headerAs': headerShim,
-      'contentAs': contentShim,
       'expanded': section.hasAttribute('expanded'),
       'id': section.getAttribute('id'),
       'onExpandStateChange': expandStateShim,
     });
-    return <AccordionSection {...props} />;
+    const headerProps = dict({'as': headerShim});
+    const contentProps = dict({'as': contentShim});
+    return (
+      <AccordionSection {...sectionProps}>
+        <AccordionHeader {...headerProps}></AccordionHeader>
+        <AccordionContent {...contentProps}></AccordionContent>
+      </AccordionSection>
+    );
   });
   return dict({'children': children});
 }
