@@ -38,8 +38,8 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
     expect(iframe.prop('src')).to.equal(
       'https://www.youtube.com/embed/IAvf-rkzNck?enablejsapi=1&amp=1&playsinline=1'
     );
-    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
-    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
+    expect(wrapper.find('iframe').prop('style').width).to.equal(600);
+    expect(wrapper.find('iframe').prop('style').height).to.equal(500);
     expect(wrapper.find('div')).to.have.lengthOf(2);
   });
 
