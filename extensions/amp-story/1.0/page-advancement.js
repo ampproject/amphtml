@@ -19,6 +19,7 @@ import {
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -501,7 +502,7 @@ export class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.isInStoryPageSideEdge_(event, pageRect)) {
-      console.log("isInStoryPageSideEdge_");
+      console.log('isInStoryPageSideEdge_');
       event.preventDefault();
       return false;
     }
@@ -553,7 +554,7 @@ export class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    * @private
    */
-  isInStoryPageSideEdge_(event, pageRect) {    
+  isInStoryPageSideEdge_(event, pageRect) {
     return (
       event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
       event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
@@ -612,8 +613,12 @@ export class ManualAdvancement extends AdvancementConfig {
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
 
+    // pageRect can use LayoutBox for mobile since the story page uses the whole screen.
+    // Desktop UI needs to use the getBoundingClientRect.
     let pageRect;
-    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS) {
+    if (
+      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
+    ) {
       pageRect = this.element_.getLayoutBox();
     } else {
       pageRect = this.element_
@@ -621,7 +626,6 @@ export class ManualAdvancement extends AdvancementConfig {
         .getBoundingClientRect();
     }
 
-    debugger;
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
       event.preventDefault();

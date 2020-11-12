@@ -608,10 +608,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           if (state.vh === 0 && state.vw === 0) {
             return;
           }
-          this.storeService_.dispatch(Action.SET_PAGE_SIZE, {
-            height,
-            width,
-          });
+          this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
           if (!this.cssVariablesStyleEl_) {
             const doc = this.win.document;
             this.cssVariablesStyleEl_ = doc.createElement('style');
