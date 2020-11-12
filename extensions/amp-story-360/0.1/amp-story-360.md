@@ -93,7 +93,7 @@ The `amp-story-360` component accepts 1 descendant. This descendant must be an [
 
 [sourcecode:html]
 <amp-story-360 layout="fill">
-<amp-image layout="fill" src="assets/image360.jpg"></amp-image>
+  <amp-img layout="fill" src="assets/image360.jpg"></amp-img>
 </amp-story-360>
 [/sourcecode]
 
@@ -101,10 +101,9 @@ The `amp-story-360` component accepts 1 descendant. This descendant must be an [
 
 [sourcecode:html]
 <amp-story-360 layout="fill">
-<amp-video layout="fill" poster="assets/poster.jpg" autoplay loop>
-
-<source src="assets/video360.mp4" type="video/mp4" />
-</amp-video>
+  <amp-video layout="fill" poster="assets/poster.jpg" autoplay loop>
+    <source src="assets/video360.mp4" type="video/mp4" />
+  </amp-video>
 </amp-story-360>
 [/sourcecode]
 
