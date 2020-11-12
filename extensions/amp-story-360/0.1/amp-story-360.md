@@ -55,9 +55,9 @@ limitations under the License.
 [tip type="important"]Change image sources to ampproject/amphtml/master!!![/tip]
 
 <figure class="centered-fig">
-  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://raw.githubusercontent.com/processprocess/amphtml/360-docs/extensions/amp-story-360/img/Nov-11-2020%2016-28-57.gif">
+  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://raw.githubusercontent.com/processprocess/amphtml/360-docs/extensions/amp-story-360/img/amp-story-360.gif">
     <noscript>
-    <img alt="amp-story-player example" src="https://raw.githubusercontent.com/processprocess/amphtml/360-docs/extensions/amp-story-360/img/Nov-11-2020%2016-28-57.gif" />
+    <img alt="amp-story-player example" src="https://raw.githubusercontent.com/processprocess/amphtml/360-docs/extensions/amp-story-360/img/amp-story-360.gif" />
   </noscript>
   </amp-anim>
 </figure>
