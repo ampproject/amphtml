@@ -66,7 +66,7 @@ function LightboxWithRef(
   // To close, it's the reverse.
   // `mounted` mounts the component. `visible` plays the animation.
   const [mounted, setMounted] = useState(initialOpen);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(initialOpen);
   const classes = useStyles();
   const lightboxRef = useRef();
 
