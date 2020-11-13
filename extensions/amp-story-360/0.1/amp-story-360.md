@@ -108,6 +108,8 @@ The `amp-story-360` component accepts 1 descendant. This descendant must be an [
 </amp-story-360>
 [/sourcecode]
 
+Be sure to import the `amp-video` component.
+
 #### Defining a initial point of view (PoV)
 
 [sourcecode:html]
