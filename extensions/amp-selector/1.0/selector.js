@@ -16,6 +16,7 @@
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
+import {Keys} from '../../../src/utils/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,
@@ -43,6 +44,7 @@ function SelectorWithRef(
     value,
     multiple,
     onChange,
+    onKeyDown,
     role = 'listbox',
     children,
     ...rest
@@ -128,6 +130,7 @@ function SelectorWithRef(
       aria-multiselectable={multiple}
       disabled={disabled}
       multiple={multiple}
+      onKeyDown={onKeyDown}
     >
       <SelectorContext.Provider value={context}>
         {children}
@@ -147,28 +150,49 @@ export {Selector};
 export function Option({
   as: Comp = 'div',
   disabled = false,
-  onClick,
+  onClick: customOnClick,
+  onKeyDown: customOnKeyDown,
   option,
   role = 'option',
   style,
-  tabIndex = '0',
+  tabIndex = 0,
   ...rest
 }) {
   const {
-    selected,
-    selectOption,
     disabled: selectorDisabled,
     multiple: selectorMultiple,
+    selected,
+    selectOption,
   } = useContext(SelectorContext);
-  const clickHandler = (e) => {
+
+  const trySelect = useCallback(() => {
     if (selectorDisabled || disabled) {
       return;
     }
-    if (onClick) {
-      onClick(e);
-    }
     selectOption(option);
-  };
+  }, [disabled, option, selectOption, selectorDisabled]);
+
+  const onClick = useCallback(
+    (e) => {
+      trySelect();
+      if (customOnClick) {
+        customOnClick(e);
+      }
+    },
+    [customOnClick, trySelect]
+  );
+
+  const onKeyDown = useCallback(
+    (e) => {
+      if (e.key === Keys.ENTER || e.key === Keys.SPACE) {
+        trySelect();
+      }
+      if (customOnKeyDown) {
+        customOnKeyDown(e);
+      }
+    },
+    [customOnKeyDown, trySelect]
+  );
 
   const isSelected =
     /** @type {!Array} */ (selected).includes(option) && !disabled;
@@ -184,7 +208,8 @@ export function Option({
     ...rest,
     disabled,
     'aria-disabled': String(disabled),
-    onClick: clickHandler,
+    onClick,
+    onKeyDown,
     option,
     role,
     selected: isSelected,
@@ -192,5 +217,5 @@ export function Option({
     style: {...statusStyle, ...style},
     tabIndex,
   };
-  return <Comp {...optionProps}></Comp>;
+  return <Comp {...optionProps} />;
 }
