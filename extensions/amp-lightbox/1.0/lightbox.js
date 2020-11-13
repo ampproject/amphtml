@@ -86,8 +86,8 @@ function LightboxWithRef(
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
   const animateInRef = useValueRef(animateIn);
-  const onBeforeOpenRef = useRef(onBeforeOpen);
-  const onAfterCloseRef = useRef(onAfterClose);
+  const onBeforeOpenRef = useValueRef(onBeforeOpen);
+  const onAfterCloseRef = useValueRef(onAfterClose);
   const enableAnimationRef = useValueRef(enableAnimation);
 
   useImperativeHandle(
@@ -104,7 +104,7 @@ function LightboxWithRef(
         setVisible(false);
       },
     }),
-    []
+    [onBeforeOpenRef]
   );
 
   useEffect(() => {
@@ -159,7 +159,7 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animateInRef, enableAnimationRef]);
+  }, [visible, animateInRef, enableAnimationRef, onAfterCloseRef]);
 
   return (
     mounted && (
