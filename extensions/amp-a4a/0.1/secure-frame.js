@@ -70,7 +70,7 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
  */
 export function createSecureFrame(win, title, height, width) {
   const sandbox = Services.platformFor(win).isSafari()
-    ? sandboxVals + ' allow scripts'
+    ? sandboxVals + ' allow-scripts'
     : sandboxVals;
 
   const {document} = win;
