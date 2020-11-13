@@ -43,11 +43,13 @@ const ANIMATION_PRESETS = {
 };
 
 /**
- * @param {any} current
- * @return {Object}
+ * @param {T} current
+ * @return {{current: T}}
+ * @template T
  */
 function useValueRef(current) {
   const valueRef = useRef(null);
+  console.log(typeof valueRef);
   valueRef.current = current;
   return valueRef;
 }
