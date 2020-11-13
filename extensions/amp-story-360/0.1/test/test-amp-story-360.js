@@ -17,7 +17,6 @@
 import '../amp-story-360';
 import {
   Action,
-  StateProperty,
   AmpStoryStoreService
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
