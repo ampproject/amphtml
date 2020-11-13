@@ -17,11 +17,13 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentMetadataDef,
+  EXPOSED_CONSENT_API,
   assertMetadataValues,
   constructMetadata,
   convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
+  validateExposesApi,
 } from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {
@@ -574,6 +576,30 @@ export class AmpConsent extends AMP.BaseElement {
         this.validateMetadata_(opt_responseMetadata)
       );
     }
+  }
+
+  /**
+   * Check if `exposes` API has been set from CMP and merge with inline.
+   * Expose the proper APIs, if applicable.
+   */
+  exposeApis_() {
+    this.getConsentRemote_().then((response) => {
+      const remoteExposes = response ? validateExposesApi(response) : [];
+      const inlineExposes = validateExposesApi(this.consentConfig_);
+      const mergedExposes = remoteExposes.concat(inlineExposes);
+      const uniqueExposes = [];
+      for (let i = 0; i < mergedExposes.length; i++) {
+        if (uniqueExposes.indexOf(mergedExposes[i]) === -1) {
+          uniqueExposes.push(mergedExposes[i]);
+          switch (mergedExposes[i]) {
+            case EXPOSED_CONSENT_API.TCF_POST_MESSAGE:
+              this.setUpTcfPostMessageProxy_();
+            default:
+              continue;
+          }
+        }
+      }
+    });
   }
 
   /**
