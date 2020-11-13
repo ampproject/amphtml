@@ -43,6 +43,17 @@ const ANIMATION_PRESETS = {
 };
 
 /**
+ * @param {string} refName
+ * @param {any} current
+ * @return {Object}
+ */
+function useValueRef(refName, current) {
+  const valueRef = useRef(null);
+  valueRef.current = current;
+  return valueRef;
+}
+
+/**
  * @param {!LightboxDef.Props} props
  * @param {{current: (!LightboxDef.LightboxApi|null)}} ref
  * @return {PreactDef.Renderable}
@@ -72,10 +83,11 @@ function LightboxWithRef(
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
-  const animateInRef = useRef(animateIn);
+  // We use `useValueRef` for props that might change (user-controlled)
+  const animateInRef = useValueRef(animateIn);
   const onBeforeOpenRef = useRef(onBeforeOpen);
   const onAfterCloseRef = useRef(onAfterClose);
-  const enableAnimationRef = useRef(enableAnimation);
+  const enableAnimationRef = useValueRef(enableAnimation);
 
   useImperativeHandle(
     ref,
@@ -146,7 +158,7 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible]);
+  }, [visible, animateInRef, enableAnimationRef]);
 
   return (
     mounted && (
