@@ -89,7 +89,6 @@ function LightboxWithRef(
       },
       close: () => {
         setVisible(false);
-        setTimeout(() => setMounted(false), ANIMATION_DURATION);
       },
     }),
     []
@@ -127,6 +126,8 @@ function LightboxWithRef(
         if (onAfterCloseRef.current) {
           onAfterCloseRef.current();
         }
+        animation = null;
+        setMounted(false);
       };
       if (!element.animate || !enableAnimationRef.current) {
         postInvisibleAnim();
@@ -165,7 +166,6 @@ function LightboxWithRef(
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
             setVisible(false);
-            setTimeout(() => setMounted(false), ANIMATION_DURATION);
           }
         }}
         {...rest}
@@ -177,7 +177,6 @@ function LightboxWithRef(
           className={classes.closeButton}
           onClick={() => {
             setVisible(false);
-            setTimeout(() => setMounted(false), ANIMATION_DURATION);
           }}
         />
       </ContainWrapper>
