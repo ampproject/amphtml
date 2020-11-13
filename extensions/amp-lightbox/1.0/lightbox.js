@@ -43,11 +43,10 @@ const ANIMATION_PRESETS = {
 };
 
 /**
- * @param {string} refName
  * @param {any} current
  * @return {Object}
  */
-function useValueRef(refName, current) {
+function useValueRef(current) {
   const valueRef = useRef(null);
   valueRef.current = current;
   return valueRef;
