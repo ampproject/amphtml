@@ -52,11 +52,6 @@ describes.realWin(
     async function createAmpStory360(imagePath) {
       const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
-<<<<<<< HEAD
-
-=======
-      
->>>>>>> c52788a6336521de8c32f1d91177d1f64d069326
       element = createElementWithAttributes(win.document, 'amp-story-360', {
         'layout': 'fill',
         'duration': '1s',
