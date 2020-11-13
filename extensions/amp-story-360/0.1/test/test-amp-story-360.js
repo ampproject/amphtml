@@ -17,7 +17,7 @@
 import '../amp-story-360';
 import {
   Action,
-  AmpStoryStoreService
+  AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -52,7 +52,7 @@ describes.realWin(
     async function createAmpStory360(imagePath) {
       const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
-      
+
       element = createElementWithAttributes(win.document, 'amp-story-360', {
         'layout': 'fill',
         'duration': '1s',
@@ -134,7 +134,10 @@ describes.realWin(
       await threesixty.layoutCallback();
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await storeService.dispatch(Action.TOGGLE_PAUSED, true);
-      await storeService.dispatch(Action.CHANGE_PAGE, {id: 'notPage1', index: 1});
+      await storeService.dispatch(Action.CHANGE_PAGE, {
+        id: 'notPage1',
+        index: 1,
+      });
       await storeService.dispatch(Action.TOGGLE_PAUSED, false);
       expect(threesixty.isPlaying_).to.be.false;
     });
