@@ -293,10 +293,10 @@ The width can be set either in `em`s or percentages of the parent width, and it 
 [sourcecode:html]
 <amp-story-grid-layer template="fill" aspect-ratio="400:600">
 
-<div class="center-quiz">
+  <div class="center-quiz">
     <amp-story-interactive-quiz
-        style="font-size:0.2em"
-        ...>
+      style="font-size:0.2em"
+      ...>
     </amp-story-interactive-quiz>
   </div>
 </amp-story-grid-layer>
