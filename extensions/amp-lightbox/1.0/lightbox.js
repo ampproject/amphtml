@@ -144,7 +144,6 @@ function LightboxWithRef(
     return () => {
       if (animation) {
         animation.cancel();
-        animation.onfinish();
       }
     };
   }, [visible]);
