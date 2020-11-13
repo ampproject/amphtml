@@ -37,6 +37,7 @@ import {useStyles} from './accordion.jss';
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.AccordionContextProps} */ ({})
 );
+
 const SectionContext = Preact.createContext(
   /** @type {AccordionDef.SectionContextProps} */ ({})
 );
@@ -268,6 +269,8 @@ export function AccordionSection({
   const id = propId || genId;
   const [suffix] = useState(generateRandomId);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
+  const [contentIdState, setContentIdState] = useState(null);
+  const [headerIdState, setHeaderIdState] = useState(null);
 
   const {
     registerSection,
@@ -279,7 +282,9 @@ export function AccordionSection({
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
   const animate = contextAnimate ?? defaultAnimate;
-  const contentId = `${prefix || 'a'}-content-${id}-${suffix}`;
+  const contentId =
+    contentIdState || `${prefix || 'a'}-content-${id}-${suffix}`;
+  const headerId = headerIdState || `${prefix || 'a'}-header-${id}-${suffix}`;
 
   // Storing this state change callback in a ref because this may change
   // frequently and we do not want to trigger a re-register of the section
@@ -316,10 +321,13 @@ export function AccordionSection({
       /** @type {AccordionDef.SectionContextProps} */ ({
         animate,
         contentId,
+        headerId,
         expanded,
         expandHandler,
+        registerContentId: setContentIdState,
+        registerHeaderId: setHeaderIdState,
       }),
-    [animate, contentId, expanded, expandHandler]
+    [animate, contentId, headerId, expanded, expandHandler]
   );
 
   return (
@@ -336,19 +344,33 @@ export function AccordionSection({
  * @return {PreactDef.Renderable}
  */
 export function AccordionHeader({
-  as: Comp = 'header',
+  as: Comp = 'div',
   role = 'button',
   className = '',
   tabIndex = 0,
+  id,
   children,
   ...rest
 }) {
-  const {contentId, expanded, expandHandler} = useContext(SectionContext);
+  const {
+    contentId,
+    headerId,
+    expanded,
+    expandHandler,
+    registerHeaderId,
+  } = useContext(SectionContext);
   const classes = useStyles();
+
+  useLayoutEffect(() => {
+    if (registerHeaderId) {
+      registerHeaderId(id);
+    }
+  }, [registerHeaderId, id]);
 
   return (
     <Comp
       {...rest}
+      id={headerId}
       role={role}
       className={`${className} ${classes.sectionChild} ${classes.header}`}
       tabIndex={tabIndex}
@@ -367,19 +389,33 @@ export function AccordionHeader({
  */
 export function AccordionContent({
   as: Comp = 'div',
+  role = 'region',
   className = '',
+  id,
   children,
   ...rest
 }) {
   const ref = useRef(null);
   const hasMountedRef = useRef(false);
-  const {contentId, expanded, animate} = useContext(SectionContext);
+  const {
+    contentId,
+    headerId,
+    expanded,
+    animate,
+    registerContentId,
+  } = useContext(SectionContext);
   const classes = useStyles();
 
   useEffect(() => {
     hasMountedRef.current = true;
     return () => (hasMountedRef.current = false);
   }, []);
+
+  useLayoutEffect(() => {
+    if (registerContentId) {
+      registerContentId(id);
+    }
+  }, [registerContentId, id]);
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
@@ -396,6 +432,8 @@ export function AccordionContent({
       ref={ref}
       className={`${className} ${classes.sectionChild} ${classes.content}`}
       id={contentId}
+      aria-labelledby={headerId}
+      role={role}
       hidden={!expanded}
     >
       {children}

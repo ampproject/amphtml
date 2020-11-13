@@ -48,6 +48,7 @@ AccordionDef.AccordionSectionProps;
  *   role: (string|undefined),
  *   className: (string|undefined),
  *   tabIndex: (number|string|undefined),
+ *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
@@ -56,7 +57,9 @@ AccordionDef.AccordionHeaderProps;
 /**
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
+ *   role: (string|undefined)
  *   className: (string|undefined),
+ *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
@@ -64,8 +67,11 @@ AccordionDef.AccordionContentProps;
 
 /**
  * @typedef {{
- *   role: (string|undefined),
+ *   id: (string),
+ *   role: (string),
  *   onClick: (function()|undefined),
+ *   aria-controls: (string),
+ *   aria-expanded: (string),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
@@ -73,6 +79,9 @@ AccordionDef.HeaderProps;
 
 /**
  * @typedef {{
+ *   id: (string),
+ *   role: (string),
+ *   aria-labelledby: (string),
  *   hidden: (boolean),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
@@ -94,8 +103,11 @@ AccordionDef.AccordionContextProps;
  * @typedef {{
  *   animate: (boolean),
  *   contentId: (string),
+ *   headerId: (string),
  *   expanded: (boolean),
- *   expandHandler: (function():undefined)
+ *   expandHandler: (function()),
+ *   registerContentId: (function(string)),
+ *   registerHeaderId: (function(string)),
  * }}
  */
 AccordionDef.SectionContextProps;
