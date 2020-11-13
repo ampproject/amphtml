@@ -220,10 +220,10 @@ describes.realWin(
 
     it(
       'should calculate a negative time when target is in future ' +
-        'when using the "count-up" attribute',
+        'when using the "data-count-up" attribute',
       () => {
         const countUp = true;
-        element.setAttribute('count-up', '');
+        element.setAttribute('data-count-up', '');
         element.setAttribute('when-ended', 'continue');
         element.build();
         const timeObj = Object.assign(
@@ -263,10 +263,10 @@ describes.realWin(
 
     it(
       'should calculate a positive time when target is in past ' +
-        'when using the "count-up" attribute',
+        'when using the "data-count-up" attribute',
       () => {
         const countUp = true;
-        element.setAttribute('count-up', '');
+        element.setAttribute('data-count-up', '');
         element.setAttribute('when-ended', 'continue');
         element.build();
         const timeObj = Object.assign(

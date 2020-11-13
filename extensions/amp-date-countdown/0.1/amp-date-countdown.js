@@ -158,7 +158,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
     /** @private {boolean} */
-    this.countUp_ = this.element.hasAttribute('count-up');
+    this.countUp_ = this.element.hasAttribute('data-count-up');
 
     this.getAmpDoc()
       .whenFirstVisible()
