@@ -136,7 +136,9 @@ The `duration` attribute is required for animation.
 
 #### Gyroscope
 
-Use the device gyroscope sensor to set the image's orientation. The component defaults to the `heading-end` value.
+Use the device gyroscope sensor to set the image's orientation.  
+The component defaults to the `heading-end` value upon navigating to the page.  
+If `heading-end` is not provided, `heading-start` is used. If neither are provided the heading will default to 0.
 
 Serve the story over `https` to use this feature.
 
@@ -159,7 +161,7 @@ If the device requires user permission to access the device’s gyroscope sensor
 
 ##### Animation fallback
 
-If the device does not support gyroscope or the user declines permission, the component will fallback to animating.
+If the device does not support gyroscope or the user declines permission, the component will fallback to animating if the animation is defined.
 
 ## Attributes
 
@@ -167,11 +169,13 @@ If the device does not support gyroscope or the user declines permission, the co
 
 #### heading-start {float} optional
 
-Specifies the heading (horizontal angle in degrees) at the beginning of an animation.
+Specifies the heading (horizontal angle in degrees) at the beginning of an animation.  
+Centered on 0 (default) with a negative angle looking towards the left, positive angle to the right.
 
 #### pitch-start {float} optional
 
-Specifies the pitch (vertical angle in degrees) at the beginning of an animation.
+Specifies the pitch (vertical angle in degrees) at the beginning of an animation.  
+Centered on 0 (default) at the horizon, with a negative angle looking downwards, positive angle upwards.
 
 #### zoom-start {float} optional
 
