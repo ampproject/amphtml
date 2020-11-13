@@ -49,7 +49,6 @@ const ANIMATION_PRESETS = {
  */
 function useValueRef(current) {
   const valueRef = useRef(null);
-  console.log(typeof valueRef);
   valueRef.current = current;
   return valueRef;
 }
