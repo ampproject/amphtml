@@ -69,6 +69,8 @@ describes.realWin(
         'https://invalid.response.com/': '{"consentRequired": 3}',
         'https://xssi-prefix/': 'while(1){"consentRequired": false}',
         'https://example.test/': '{}',
+        'https://expose1/':
+          '{"consentRequired": true, "exposes": ["tcfPostMessageApi"]}',
       };
 
       xhrServiceMock = {
@@ -830,6 +832,56 @@ describes.realWin(
           /Consent metadata value "%s" is invalid./
         );
         expect(spy.args[0][2]).to.match(/gdprApplies/);
+      });
+    });
+
+    describe('exposes api', () => {
+      let ampConsent;
+      let consentElement;
+      let tcfPostMessageSpy;
+
+      afterEach(async () => {
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        tcfPostMessageSpy = env.sandbox.stub(
+          ampConsent,
+          'setUpTcfPostMessageProxy_'
+        );
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(tcfPostMessageSpy).to.be.calledOnce;
+      });
+
+      it('shoud use only server exposes', () => {
+        consentElement = createConsentElement(
+          doc,
+          dict({
+            'consentInstanceId': 'abc',
+            'checkConsentHref': 'https://expose1',
+          })
+        );
+      });
+
+      it('shoud use only inline exposes', () => {
+        consentElement = createConsentElement(
+          doc,
+          dict({
+            'consentInstanceId': 'abc',
+            'checkConsentHref': 'https://response1',
+            'exposes': ['tcfPostMessageApi'],
+          })
+        );
+      });
+
+      it('shoud use both server and inline exposes', () => {
+        consentElement = createConsentElement(
+          doc,
+          dict({
+            'consentInstanceId': 'abc',
+            'checkConsentHref': 'https://expose1',
+            'exposes': ['tcfPostMessageApi'],
+          })
+        );
       });
     });
 
