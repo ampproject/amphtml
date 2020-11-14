@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {dev, devAssert} from '../../../src/log';
-import {toWin} from '../../../src/types';
-import {memo} from '../../../src/utils/object';
 import {Deferred} from '../../../src/utils/promise';
+import {memo} from '../../../src/utils/object';
+import {toWin} from '../../../src/types';
 
 const OBSERVERS_MAP_PROP = '__AMP_A4A_VP_MAP';
 
@@ -33,12 +32,6 @@ export function whenWithinViewport(element, viewportNum) {
   if (!WITHIN_VIEWPORT_INOB) {
     return Promise.reject('!WITHIN_VIEWPORT_INOB');
   }
-
-  // QQQQ: not checking isLayoutPending. It's not checked everywhere anyway.
-  // // Resolve is already laid out or viewport is true.
-  // if (!this.isLayoutPending() || viewport === true) {
-  //   return Promise.resolve();
-  // }
 
   const win = toWin(element.ownerDocument.defaultView);
   const observersMap = memo(win, OBSERVERS_MAP_PROP, createObserversMap);
@@ -74,12 +67,10 @@ function createObserver(win, viewportNum) {
     }
   };
 
-  const observer = new win.IntersectionObserver(
-    callback,
-    {
-      root: win.document,
-      rootMargin: `${(viewportNum - 1) * 100}%`,
-    });
+  const observer = new win.IntersectionObserver(callback, {
+    root: win.document,
+    rootMargin: `${(viewportNum - 1) * 100}%`,
+  });
 
   return (element) => {
     let deferred = elements.get(element);

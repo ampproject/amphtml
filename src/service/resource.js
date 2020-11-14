@@ -1013,7 +1013,7 @@ export class Resource {
   /**
    * Returns true if the resource layout has not completed or failed.
    * @return {boolean}
-   * */
+   */
   isLayoutPending() {
     return (
       this.state_ != ResourceState.LAYOUT_COMPLETE &&
