@@ -177,57 +177,10 @@ export function objectsEqualShallow(o1, o2) {
  * @template T,R
  */
 export function memo(obj, prop, factory) {
-  return memoInternal(obj, prop, factory, /* args */ null);
-}
-
-/**
- * @param {T} obj
- * @param {string} prop
- * @param {function(T, string):R} factory
- * @param {...?} args
- * @return {R}
- * @template T,R
- */
-export function memoWithArgs(obj, prop, factory, ...args) {
-  return memoInternal(obj, prop, factory, args);
-}
-
-/**
- * @param {T} obj
- * @param {string} prop
- * @param {function(T, string):R} factory
- * @param {?Array} args
- * @return {R}
- * @template T,R
- */
-function memoInternal(obj, prop, factory, args) {
   let result = /** @type {?R} */ (obj[prop]);
   if (result === undefined) {
-    result = callFactory(factory, obj, prop, args);
+    result = factory(obj, prop);
     obj[prop] = result;
   }
   return result;
-}
-
-/**
- * @param {function(T, string):R} factory
- * @param {T} obj
- * @param {string} prop
- * @param {?Array} args
- * @return {R}
- * @template T,R
- */
-function callFactory(factory, obj, prop, args) {
-  switch (args ? args.length : 0) {
-    case 0:
-      return factory(obj, prop);
-    case 1:
-      return factory(obj, prop, args[0]);
-    case 2:
-      return factory(obj, prop, args[0], args[1]);
-    case 3:
-      return factory(obj, prop, args[0], args[1], args[2]);
-    default:
-      return factory.apply(null, [obj, prop].concat(args));
-  }
 }
