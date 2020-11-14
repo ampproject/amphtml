@@ -3,7 +3,15 @@
     "approvers": ["ampproject/wg-performance"],
     "threshold": 0.1
   },
+  "dist/v0.mjs": {
+    "approvers": ["ampproject/wg-performance"],
+    "threshold": 0.1
+  },
   "dist/amp4ads-v0.js": {
+    "approvers": ["ampproject/wg-monetization", "ampproject/wg-performance"],
+    "threshold": 0.1
+  },
+  "dist/amp4ads-v0.mjs": {
     "approvers": ["ampproject/wg-monetization", "ampproject/wg-performance"],
     "threshold": 0.1
   },
@@ -11,11 +19,23 @@
     "approvers": ["ampproject/wg-analytics", "ampproject/wg-performance"],
     "threshold": 0.1
   },
+  "dist/v0/amp-analytics-0.1.mjs": {
+    "approvers": ["ampproject/wg-analytics", "ampproject/wg-performance"],
+    "threshold": 0.1
+  },
   "dist/v0/amp-story-0.1.js": {
     "approvers": ["ampproject/wg-stories", "ampproject/wg-performance"],
     "threshold": 0.5
   },
+  "dist/v0/amp-story-0.1.mjs": {
+    "approvers": ["ampproject/wg-stories", "ampproject/wg-performance"],
+    "threshold": 0.5
+  },
   "dist/v0/amp-story-1.0.js": {
+    "approvers": ["ampproject/wg-stories", "ampproject/wg-performance"],
+    "threshold": 0.5
+  },
+  "dist/v0/amp-story-1.0.mjs": {
     "approvers": ["ampproject/wg-stories", "ampproject/wg-performance"],
     "threshold": 0.5
   }
