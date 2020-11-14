@@ -15,12 +15,13 @@
  */
 
 import {getNextArrow, getPrevArrow, getSlides} from './helpers';
+import sleep from 'sleep-promise';
 
 describes.endtoend(
-  'AMP carousel arrows with custom arrows',
+  'AMP carousel advancing with multiple visible',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/multi-visible-single-advance.amp.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-carousel/0.1/multi-visible-single-advance.amp.html',
     experiments: ['amp-base-carousel'],
     environments: ['single'],
   },
@@ -47,10 +48,14 @@ describes.endtoend(
       // Click `next` more than necessary
       for (let i = 0; i < 7; i++) {
         await controller.click(nextArrow);
+        // Need to sleep due to amp-base-carousel buffering clicks
+        await sleep(1000);
       }
 
+      let slideRect = await rect(slides[slideCount - slidesInView]);
       // Check that last 3 slides are in view
-      await expect(rect(slides[slideCount - slidesInView])).to.include({x: 0});
+      // Less than 5 for flakiness that comes from `controll.getElementRect()`
+      await expect(slideRect['x']).to.be.lessThan(5);
 
       // Check that arrows are correctly enabled/disabled
       await expect(controller.getElementProperty(nextArrow, 'disabled')).to.be
@@ -61,10 +66,13 @@ describes.endtoend(
       // Click `prev` the correct number of times to take us back to first slide.
       for (let i = 0; i < slideCount - slidesInView; i++) {
         await controller.click(prevArrow);
+        await sleep(1000);
       }
 
-      // Check that first 3 slides are in view
-      await expect(rect(slides[0])).to.include({x: 0});
+      slideRect = await rect(slides[0]);
+      // Check that last 3 slides are in view
+      // Less than 5 for flakiness that comes from `controll.getElementRect()`
+      await expect(slideRect['x']).to.be.lessThan(5);
 
       // Check that arrows are correctly enabled/disabled
       await expect(controller.getElementProperty(nextArrow, 'disabled')).to.be
