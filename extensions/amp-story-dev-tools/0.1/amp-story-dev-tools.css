@@ -15,13 +15,13 @@
  */
 
 amp-story-dev-tools {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
   background-color: #121212 !important;
-  font-size: 16px;
-  font-family: 'Poppins', sans-serif;
-  color: white;
-  padding: 30px 10%;
-  text-align: center;
+  font-size: 16px !important;
+  font-family: 'Poppins', sans-serif !important;
+  color: white !important;
+  padding: 30px 10% !important;
+  text-align: center !important;
 }

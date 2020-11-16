@@ -36,12 +36,12 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    this.loadFonts_();
   }
 
   /** @override */
   buildCallback() {
+    this.loadFonts_();
+
     // TODO(mszylkowski): Create actual layout.
     const message = this.element.ownerDocument.createElement('div');
     message.textContent = 'AMP Story Dev-tools was loaded, page WIP';
