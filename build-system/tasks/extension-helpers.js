@@ -194,7 +194,11 @@ function getExtensionsToBuild(preBuild = false) {
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
   if (
-    !(preBuild || argv.noextensions || argv.extensions || argv.extensions_from)
+    !preBuild &&
+    !argv.noextensions &&
+    !argv.extensions &&
+    !argv.extensions_from &&
+    !argv.core_runtime_only
   ) {
     const allExtensions = [];
     for (const extension in extensions) {
@@ -221,7 +225,7 @@ function parseExtensionFlags(preBuild = false) {
   const coreRuntimeOnlyMessage =
     green('⤷ Use ') +
     cyan('--core_runtime_only ') +
-    green('to build just the core runtime.');
+    green('to build just the core runtime and skip other JS targets.');
   const noExtensionsMessage =
     green('⤷ Use ') +
     cyan('--noextensions ') +
@@ -241,7 +245,7 @@ function parseExtensionFlags(preBuild = false) {
     cyan('foo.amp.html') +
     green('.');
 
-  if (argv.core_runtime_only) {
+  if (argv.core_runtime_only && !(argv.extensions || argv.extensions_from)) {
     log(green('Building just the core runtime.'));
   } else if (preBuild) {
     log(
