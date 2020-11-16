@@ -72,10 +72,18 @@ function ScrollerWithRef(
   const axis = useMemo(() => Axis.X, []);
 
   /**
-   * The number of slides we want to place before the
-   * reference or resting index. Only needed if loop=true.
+   * The number of slides we want to place before the reference or resting index.
+   * Normalized to == restingIndex if loop=false.
    */
   const pivotIndex = loop ? Math.floor(children.length / 2) : restingIndex;
+
+  /**
+   * Whether to early exit from the scroll handler.
+   * This is useful on each render where the container is scrolled to the active
+   * slide at a non-integer pixel position. This is likely to happen
+   * with responsive containers or non-integer `visibleCount`.
+   */
+  const ignoreProgrammaticScrollRef = useRef(false);
 
   const advance = useCallback(
     (by) => {
@@ -111,8 +119,8 @@ function ScrollerWithRef(
   const offsetRef = useRef(restingIndex);
 
   /**
-   * The partial scroll position between two slides.
-   * Only needed if snap=false.
+   * The partial scroll position as a percentage of the current visible slide.
+   * Only modified if snap=false.
    */
   const scrollOffset = useRef(0);
 
@@ -143,6 +151,7 @@ function ScrollerWithRef(
       return;
     }
     setStyle(container, 'scrollBehavior', 'auto');
+    ignoreProgrammaticScrollRef.current = true;
     scrollContainerToElement(
       axis,
       alignment,
@@ -204,6 +213,10 @@ function ScrollerWithRef(
   };
 
   const handleScroll = () => {
+    if (ignoreProgrammaticScrollRef.current) {
+      ignoreProgrammaticScrollRef.current = false;
+      return;
+    }
     updateCurrentIndex();
     debouncedResetScrollReferencePoint();
   };
