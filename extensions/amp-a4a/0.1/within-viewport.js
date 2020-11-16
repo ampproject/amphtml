@@ -81,7 +81,7 @@ function createObserver(win, viewportNum) {
     });
   } catch (e) {
     observer = new win.IntersectionObserver(callback, {
-      rootMargin: `${(viewportNum - 1) * win.innerHeight}px`,
+      rootMargin: `${(viewportNum - 1) * win./*OK*/ innerHeight}px`,
     });
   }
 
