@@ -64,7 +64,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>data-media-id</strong></td>
-    <td>The JW Platform media id. This is an 8-digit alphanumeric sequence that can be found in the <a href="https://dashboard.jwplayer.com/#/content">Content</a> section in your JW Player Dashboard. (<strong>Required if <code>data-playlist-id</code> is not defined.</strong>)</td>
+    <td>The JW Platform media id. This is an 8-digit alphanumeric sequence that can be found in the <a href="https://dashboard.jwplayer.com/#/content">Content</a> section in your JW Player Dashboard. (<strong>Required if <code>data-playlist-id</code> is not defined.</strong>). Note: <code>outstream</code> is also a valid value.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-playlist-id</strong></td>
