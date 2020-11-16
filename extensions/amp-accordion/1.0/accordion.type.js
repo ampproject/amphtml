@@ -106,8 +106,8 @@ AccordionDef.AccordionContextProps;
  *   headerId: (string),
  *   expanded: (boolean),
  *   expandHandler: (function()),
- *   registerContentId: (function(string)),
- *   registerHeaderId: (function(string)),
+ *   setContentId: (function(string)),
+ *   setHeaderId: (function(string)),
  * }}
  */
 AccordionDef.SectionContextProps;

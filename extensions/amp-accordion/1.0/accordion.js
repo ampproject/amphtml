@@ -324,8 +324,8 @@ export function AccordionSection({
         headerId,
         expanded,
         expandHandler,
-        registerContentId: setContentIdState,
-        registerHeaderId: setHeaderIdState,
+        setContentId: setContentIdState,
+        setHeaderId: setHeaderIdState,
       }),
     [animate, contentId, headerId, expanded, expandHandler]
   );
@@ -357,15 +357,15 @@ export function AccordionHeader({
     headerId,
     expanded,
     expandHandler,
-    registerHeaderId,
+    setHeaderId,
   } = useContext(SectionContext);
   const classes = useStyles();
 
   useLayoutEffect(() => {
-    if (registerHeaderId) {
-      registerHeaderId(id);
+    if (setHeaderId) {
+      setHeaderId(id);
     }
-  }, [registerHeaderId, id]);
+  }, [setHeaderId, id]);
 
   return (
     <Comp
@@ -397,13 +397,9 @@ export function AccordionContent({
 }) {
   const ref = useRef(null);
   const hasMountedRef = useRef(false);
-  const {
-    contentId,
-    headerId,
-    expanded,
-    animate,
-    registerContentId,
-  } = useContext(SectionContext);
+  const {contentId, headerId, expanded, animate, setContentId} = useContext(
+    SectionContext
+  );
   const classes = useStyles();
 
   useEffect(() => {
@@ -412,10 +408,10 @@ export function AccordionContent({
   }, []);
 
   useLayoutEffect(() => {
-    if (registerContentId) {
-      registerContentId(id);
+    if (setContentId) {
+      setContentId(id);
     }
-  }, [registerContentId, id]);
+  }, [setContentId, id]);
 
   useLayoutEffect(() => {
     const hasMounted = hasMountedRef.current;
