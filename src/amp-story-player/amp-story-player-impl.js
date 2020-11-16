@@ -1272,6 +1272,17 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * @param {string} pageId
+   * @public
+   */
+  goToPageId(pageId) {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest('selectPage', {'id': pageId})
+    );
+  }
+
+  /**
    * Sends a message to the current story to navigate delta pages.
    * @param {number} delta
    * @private
