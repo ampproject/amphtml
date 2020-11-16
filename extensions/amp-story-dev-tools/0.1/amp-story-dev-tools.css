@@ -25,7 +25,3 @@ amp-story-dev-tools {
   padding: 30px 10% !important;
   text-align: center !important;
 }
-
-amp-story[standalone] {
-  display: none !important;
-}

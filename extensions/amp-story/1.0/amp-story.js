@@ -89,6 +89,7 @@ import {
   computedStyle,
   resetStyles,
   setImportantStyles,
+  toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
@@ -2870,6 +2871,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
     this.win.document.body.appendChild(devToolsEl);
+    this.element.setAttribute('hide', '');
 
     Services.extensionsFor(this.win).installExtensionForDoc(
       this.getAmpDoc(),
