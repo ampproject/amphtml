@@ -73,17 +73,10 @@ function createObserver(win, viewportNum) {
   const root = /** @type {?Element} */ (iframed
     ? /** @type {*} */ (win.document)
     : null);
-  let observer;
-  try {
-    observer = new win.IntersectionObserver(callback, {
-      root,
-      rootMargin: `${(viewportNum - 1) * 100}%`,
-    });
-  } catch (e) {
-    observer = new win.IntersectionObserver(callback, {
-      rootMargin: `${(viewportNum - 1) * win./*OK*/ innerHeight}px`,
-    });
-  }
+  const observer = new win.IntersectionObserver(callback, {
+    root,
+    rootMargin: `${(viewportNum - 1) * 100}%`,
+  });
 
   return (element) => {
     let deferred = elements.get(element);

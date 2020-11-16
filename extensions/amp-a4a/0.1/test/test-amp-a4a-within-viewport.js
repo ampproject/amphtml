@@ -70,12 +70,12 @@ describes.realWin(
       impl = await element.getImpl();
     });
 
-    function notifyIntersection(root, rootMargin, isIntersecting) {
+    function notifyIntersection(rootMargin, isIntersecting) {
       for (let i = 0; i < observers.length; i++) {
         const {elements, callback, options} = observers[i];
         if (
           elements.includes(element) &&
-          options.root === root &&
+          options.root === doc &&
           options.rootMargin === rootMargin
         ) {
           callback([
@@ -85,19 +85,19 @@ describes.realWin(
               intersectionRatio: isIntersecting ? 1 : 0,
               boundingClientRect: element.getBoundingClientRect(),
               intersectionRect: element.getBoundingClientRect(),
-              rootBounds: root.documentElement.getBoundingClientRect(),
+              rootBounds: doc.documentElement.getBoundingClientRect(),
             },
           ]);
         }
       }
     }
 
-    function isObserved(root, rootMargin) {
+    function isObserved(rootMargin) {
       for (let i = 0; i < observers.length; i++) {
         const {elements, options} = observers[i];
         if (
           elements.includes(element) &&
-          options.root === root &&
+          options.root === doc &&
           options.rootMargin === rootMargin
         ) {
           return true;
@@ -110,48 +110,48 @@ describes.realWin(
       await impl.whenWithinViewport(true);
     });
 
-    it('should resolve immediately when the element is alrady loaded', async () => {
+    it('should resolve immediately when the element is already loaded', async () => {
       env.sandbox.stub(impl.getResource(), 'isLayoutPending').returns(false);
       await impl.whenWithinViewport(1);
     });
 
     it('should wait for within-viewport for viewport=1', async () => {
       const promise = impl.whenWithinViewport(1);
-      expect(isObserved(doc, '0%')).to.be.true;
-      notifyIntersection(doc, '0%', true);
+      expect(isObserved('0%')).to.be.true;
+      notifyIntersection('0%', true);
 
-      expect(isObserved(doc, '0%')).to.be.false;
+      expect(isObserved('0%')).to.be.false;
       await promise;
     });
 
     it('should wait for within-viewport for viewport=3', async () => {
       const promise = impl.whenWithinViewport(3);
       // 200% = (3 - 1) * 100%
-      expect(isObserved(doc, '200%')).to.be.true;
-      notifyIntersection(doc, '200%', true);
+      expect(isObserved('200%')).to.be.true;
+      notifyIntersection('200%', true);
 
-      expect(isObserved(doc, '200%')).to.be.false;
+      expect(isObserved('200%')).to.be.false;
       await promise;
     });
 
     it('should ignore non-intersecting notifications', () => {
       impl.whenWithinViewport(1);
-      expect(isObserved(doc, '0%')).to.be.true;
-      notifyIntersection(doc, '0%', false);
+      expect(isObserved('0%')).to.be.true;
+      notifyIntersection('0%', false);
 
-      expect(isObserved(doc, '0%')).to.be.true;
+      expect(isObserved('0%')).to.be.true;
     });
 
     it('should ignore notifications for other root margins', () => {
       impl.whenWithinViewport(1);
       impl.whenWithinViewport(3);
-      expect(isObserved(doc, '0%')).to.be.true;
-      expect(isObserved(doc, '200%')).to.be.true;
+      expect(isObserved('0%')).to.be.true;
+      expect(isObserved('200%')).to.be.true;
 
-      notifyIntersection(doc, '0%', true);
+      notifyIntersection('0%', true);
 
-      expect(isObserved(doc, '0%')).to.be.false;
-      expect(isObserved(doc, '200%')).to.be.true;
+      expect(isObserved('0%')).to.be.false;
+      expect(isObserved('200%')).to.be.true;
     });
   }
 );

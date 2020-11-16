@@ -2113,4 +2113,49 @@ describes.realWin('Resource renderOutsideViewport', {amp: true}, (env) => {
       });
     });
   });
+
+  describe('whenWithinViewport', () => {
+    it('should resolve correctly', () => {
+      env.sandbox
+        .stub(resource, 'isWithinViewportRatio')
+        .withArgs(3)
+        .onCall(0)
+        .returns(false)
+        .onCall(1)
+        .returns(false)
+        .onCall(2)
+        .returns(true)
+        .onCall(3)
+        .callsFake(() => {
+          throw new Error('should not call!');
+        });
+      const promise = resource.whenWithinViewport(3);
+      // Multiple calls should return the same promise.
+      expect(resource.whenWithinViewport(3)).to.equal(promise);
+      expect(Object.keys(resource.withViewportDeferreds_)).to.jsonEqual(['3']);
+      // Call again should do nothing.
+      resource.resolveDeferredsWhenWithinViewports_();
+      resource.resolveDeferredsWhenWithinViewports_();
+      return promise;
+    });
+
+    it('should resolve immediately if already laid out', () => {
+      env.sandbox.stub(resource, 'isLayoutPending').returns(false);
+      return resource.whenWithinViewport();
+    });
+
+    it('should resolve correctly with float', () => {
+      const isWithinViewportRatioStub = env.sandbox.stub(
+        resource,
+        'isWithinViewportRatio'
+      );
+      const ratio = {};
+      env.sandbox.stub(resource, 'getDistanceViewportRatio').returns(ratio);
+      isWithinViewportRatioStub.withArgs(1.25).returns(false);
+      isWithinViewportRatioStub.withArgs(1.25, ratio).returns(true);
+      const promise = resource.whenWithinViewport(1.25);
+      resource.resolveDeferredsWhenWithinViewports_();
+      return promise;
+    });
+  });
 });
