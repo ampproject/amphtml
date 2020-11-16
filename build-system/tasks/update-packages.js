@@ -17,6 +17,7 @@
 
 const checkDependencies = require('check-dependencies');
 const colors = require('ansi-colors');
+const del = require('del');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const {execOrDie} = require('../common/exec');
@@ -95,6 +96,19 @@ function patchIntersectionObserver() {
 }
 
 /**
+ * Deletes the map file for rrule, which breaks closure compiler.
+ * TODO(rsimha): Remove this workaround after a fix is merged for
+ * https://github.com/google/closure-compiler/issues/3720.
+ */
+function removeRruleSourcemap() {
+  const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
+  if (fs.existsSync(rruleMapFile)) {
+    del.sync(rruleMapFile);
+    log(colors.green('Deleted'), colors.cyan(rruleMapFile));
+  }
+}
+
+/**
  * Checks if all packages are current, and if not, runs `npm install`.
  */
 function runNpmCheck() {
@@ -141,6 +155,7 @@ async function updatePackages() {
   }
   patchWebAnimations();
   patchIntersectionObserver();
+  removeRruleSourcemap();
 }
 
 module.exports = {

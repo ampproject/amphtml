@@ -22,7 +22,7 @@ describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');
 
   it('should accept date strings and RRule strings', function () {
-    this.timeout(3000);
+    this.timeout(5000);
     const containedDate = '09/04/1998';
     const notContainedDate = '09/03/1998';
     const containedRrule =
