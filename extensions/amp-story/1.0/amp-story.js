@@ -403,10 +403,6 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeStandaloneStory_();
     }
 
-    if (this.maybeLoadStoryDevTools_()) {
-      return;
-    }
-
     // buildCallback already runs in a mutate context. Calling another
     // mutateElement explicitly will force the runtime to remeasure the
     // amp-story element, fixing rendering bugs where the story is inactive
@@ -942,6 +938,9 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.maybeLoadStoryDevTools_()) {
+      return;
+    }
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
       this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
       return Promise.resolve();
@@ -2869,11 +2868,9 @@ export class AmpStory extends AMP.BaseElement {
 
     this.element.setAttribute('mode', 'inspect');
 
-    this.mutateElement(() => {
-      const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
-      this.win.document.body.appendChild(devToolsEl);
-      devToolsEl.appendChild(this.element);
-    });
+    const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
+    this.win.document.body.appendChild(devToolsEl);
+    this.element.remove();
 
     Services.extensionsFor(this.win).installExtensionForDoc(
       this.getAmpDoc(),
