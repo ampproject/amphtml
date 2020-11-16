@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {dev, userAssert} from '../../../src/log';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
+import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 
 /** @type {string} */
@@ -66,7 +67,7 @@ export class AmpAd extends AMP.BaseElement {
       );
 
       // TODO(powerivq, #30890): Remove after data collection finishes
-      if (!window.document.documentMode) {
+      if (!window.document.documentMode && !getMode().test) {
         dev().expectedError(TAG, 'ad type: ' + type);
       }
 
