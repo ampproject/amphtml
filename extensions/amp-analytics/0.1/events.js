@@ -1352,7 +1352,12 @@ export class VideoEventTracker extends EventTracker {
         devAssert(isFiniteNumber(normalizedPercentageInt));
         devAssert(normalizedPercentageInt % percentageInterval == 0);
 
-        if (lastPercentage == normalizedPercentageInt) {
+        // Don't trigger if current percentage is the same as
+        // last triggered percentage
+        if (
+          lastPercentage == normalizedPercentageInt &&
+          percentages.length > 1
+        ) {
           return;
         }
 
