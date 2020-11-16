@@ -75,7 +75,9 @@ AccordionDef.AccordionContentProps;
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.HeaderProps;
+AccordionDef.HeaderShimProps;
+// AccordionDef.HeaderShimProps is not a public API
+// The definition is included here for completeness
 
 /**
  * @typedef {{
@@ -86,7 +88,9 @@ AccordionDef.HeaderProps;
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.ContentProps;
+AccordionDef.ContentShimProps;
+// AccordionDef.ContentShimProps is not a public API
+// The definition is included here for completeness
 
 /**
  * @typedef {{
@@ -97,7 +101,7 @@ AccordionDef.ContentProps;
  *   prefix: (string),
  * }}
  */
-AccordionDef.AccordionContextProps;
+AccordionDef.AccordionContext;
 
 /**
  * @typedef {{
@@ -110,7 +114,7 @@ AccordionDef.AccordionContextProps;
  *   setHeaderId: (function(string)),
  * }}
  */
-AccordionDef.SectionContextProps;
+AccordionDef.SectionContext;
 
 /** @interface */
 AccordionDef.AccordionApi = class {

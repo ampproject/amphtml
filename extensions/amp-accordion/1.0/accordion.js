@@ -35,11 +35,11 @@ import {
 import {useStyles} from './accordion.jss';
 
 const AccordionContext = Preact.createContext(
-  /** @type {AccordionDef.AccordionContextProps} */ ({})
+  /** @type {AccordionDef.AccordionContext} */ ({})
 );
 
 const SectionContext = Preact.createContext(
-  /** @type {AccordionDef.SectionContextProps} */ ({})
+  /** @type {AccordionDef.SectionContext} */ ({})
 );
 
 /** @type {!Object<string, boolean>} */
@@ -207,7 +207,7 @@ function AccordionWithRef(
 
   const context = useMemo(
     () =>
-      /** @type {!AccordionDef.AccordionContextProps} */ ({
+      /** @type {!AccordionDef.AccordionContext} */ ({
         registerSection,
         toggleExpanded,
         isExpanded,
@@ -318,7 +318,7 @@ export function AccordionSection({
 
   const context = useMemo(
     () =>
-      /** @type {AccordionDef.SectionContextProps} */ ({
+      /** @type {AccordionDef.SectionContext} */ ({
         animate,
         contentId,
         headerId,

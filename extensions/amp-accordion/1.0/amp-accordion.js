@@ -162,7 +162,7 @@ function getExpandStateTrigger(section) {
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.SectionProps} props
+ * @param {!AccordionDef.SectionShimProps} props
  * @return {PreactDef.Renderable}
  */
 function SectionShim(sectionElement, {expanded, children}) {
@@ -183,7 +183,7 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.HeaderProps} props
+ * @param {!AccordionDef.HeaderShimProps} props
  * @return {PreactDef.Renderable}
  */
 function HeaderShim(
