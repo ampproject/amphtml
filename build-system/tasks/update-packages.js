@@ -95,29 +95,6 @@ function patchIntersectionObserver() {
 }
 
 /**
- * TODO(samouri): remove this patch when a better fix is upstreamed (https://github.com/jakubroztocil/rrule/pull/410).
- *
- * Patches rrule to remove references to luxon. Even though rrule marks luxon as an optional dependency,
- * it is used as if it's a required one (static import). rrule relies on its consumers either
- * installing luxon or adding it as a webpack-style external. We don't want the former and
- * can't yet do the latter.
- *
- * This function replaces the reference to luxon with a mock that throws (which the code handles well).
- */
-function patchRRule() {
-  const path = 'node_modules/rrule/dist/es5/rrule.min.js';
-  const patchedContents = fs
-    .readFileSync(path)
-    .toString()
-    .replace(
-      /require\("luxon"\)/g,
-      `{ DateTime: { fromJSDate() { throw TypeError() } } }`
-    );
-
-  writeIfUpdated(path, patchedContents);
-}
-
-/**
  * Checks if all packages are current, and if not, runs `npm install`.
  */
 function runNpmCheck() {
@@ -164,7 +141,6 @@ async function updatePackages() {
   }
   patchWebAnimations();
   patchIntersectionObserver();
-  patchRRule();
 }
 
 module.exports = {
