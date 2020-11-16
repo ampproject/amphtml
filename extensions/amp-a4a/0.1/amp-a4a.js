@@ -642,7 +642,7 @@ export class AmpA4A extends AMP.BaseElement {
   whenWithinViewport(viewport) {
     devAssert(viewport !== false);
     const resource = this.getResource();
-    if (WITHIN_VIEWPORT_INOB || getMode().test) {
+    if (WITHIN_VIEWPORT_INOB || getMode().localDev || getMode().test) {
       // Resolve is already laid out or viewport is true.
       if (!resource.isLayoutPending() || viewport === true) {
         return Promise.resolve();
