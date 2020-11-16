@@ -1241,7 +1241,7 @@ export class ResourcesImpl {
         const expediteFirstMeasure =
           !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
         const needsMeasure =
-          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
+          premeasured || requested || relayoutAll || expediteFirstMeasure;
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,
