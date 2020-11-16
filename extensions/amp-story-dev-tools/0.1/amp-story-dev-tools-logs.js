@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
+import {AmpStoryDevToolsTab} from './amp-story-dev-tools-tab';
+import {dev} from '../../../src/log';
 import {getInstance} from 'amphtml-validator';
 import {htmlFor} from '../../../src/static-template';
 import {loadScript} from '../../../src/validator-integration';
 import {urls} from '../../../src/config';
+
+const buildLogsTabTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`<div class="i-amphtml-dev-tools-logs i-amphtml-dev-tools-tab">
+    <h1>Logs</h1>
+  </div>`;
+};
 
 const buildLogMessageTemplate = (element) => {
   const html = htmlFor(element);
@@ -33,36 +42,25 @@ const buildLogMessageTemplate = (element) => {
   </div>`;
 };
 
-export class DevToolsLogTab {
+export class DevToolsLogTab extends AmpStoryDevToolsTab {
   /**
-   *
    * @param {!Element} element the element that will be used to log everything.
+   * @param {!Element} win
+   * @param {!AmpStoryDevTools} devTools
+   * @param {string} storyUrl
    */
-  constructor(element) {
-    this.element = element;
-  }
+  constructor(element, win, devTools, storyUrl) {
+    super(buildLogsTabTemplate(element), win, devTools, storyUrl);
 
-  /**
-   * @public
-   * @param {string} url
-   */
-  setStoryUrl(url) {
-    this.element.innerHTML = '<h1>Logs</h1>';
     loadScript(this.element.ownerDocument, `${urls.cdn}/v0/validator.js`)
       .then(() => getInstance())
       .then((validator) => {
-        this.validateUrlAndLog_(validator.sandbox.amp.validator, url, (error) =>
-          this.addLog_(error)
+        this.validateUrlAndLog_(
+          validator.sandbox.amp.validator,
+          storyUrl,
+          (error) => this.addLog_(error)
         );
       });
-  }
-
-  /**
-   * Returns the root element of the logs.
-   * @return {!Element}
-   */
-  getElement() {
-    return this.element;
   }
 
   /**
@@ -115,10 +113,14 @@ export class DevToolsLogTab {
         });
       },
       (reason) => {
-        // Failure
-        console.error(reason);
+        dev().error('AMP-STORY-DEV-TOOLS', reason);
       }
     );
+  }
+
+  /** @override */
+  getElement() {
+    return this.element;
   }
 }
 

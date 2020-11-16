@@ -2334,11 +2334,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   maybeLoadStoryDevTools_() {
-    const params = parseQueryString(this.win.location.hash);
-    const devToolsEnabled = params['devTools'];
-
     if (
-      devToolsEnabled != 'true' ||
+      !getMode().development ||
       this.element.getAttribute('mode') === 'inspect'
     ) {
       return false;
@@ -2348,8 +2345,8 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mutateElement(() => {
       const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
-      devToolsEl.appendChild(this.element);
       this.win.document.body.appendChild(devToolsEl);
+      devToolsEl.appendChild(this.element);
     });
 
     Services.extensionsFor(this.win).installExtensionForDoc(

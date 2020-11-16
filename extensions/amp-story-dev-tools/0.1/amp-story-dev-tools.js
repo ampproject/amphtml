@@ -20,6 +20,7 @@ import {
   DevToolsDevicesTab,
 } from './amp-story-dev-tools-devices';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
+import {DevToolsIframeTab} from './amp-story-dev-tools-iframe-tab';
 import {DevToolsLogTab} from './amp-story-dev-tools-logs';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
@@ -51,19 +52,34 @@ const buildContainerTemplate = (element) => {
   return html`
     <div class="i-amphtml-dev-tools-container">
       <div class="i-amphtml-dev-tools-header">
-        <span class="i-amphtml-dev-tools-brand">Story Dev-Tools</span>
-        <div class="i-amphtml-dev-tools-tabs"></div>
-        <span class="i-amphtml-dev-tools-url-bar">
-          <input
-            type="url"
-            id="story-url"
-            placeholder="Story URL"
-            autocomplete="on"
-          />
-          <button class="i-amphtml-dev-tools-url-button">
-            Change
-          </button>
+        <span class="i-amphtml-dev-tools-brand">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="30"
+            height="30"
+            viewBox="0 0 30 30"
+            fill="none"
+          >
+            <circle cx="15" cy="15" r="15" fill="white" />
+            <path
+              d="M19.5 9.00015C20.3284 9.00015 21 9.67173 21 10.5002V19.5002C21 20.3286 20.3284 21.0002 19.5 21.0002V9.00015Z"
+              fill="#202125"
+            />
+            <path
+              d="M8.25 9.00015C8.25 8.17173 8.92157 7.50015 9.75 7.50015H16.5C17.3284 7.50015 18 8.17173 18 9.00015V21.0002C18 21.8286 17.3284 22.5002 16.5 22.5002H9.75C8.92157 22.5002 8.25 21.8286 8.25 21.0002V9.00015Z"
+              fill="#202125"
+            />
+            <path
+              d="M22.5 10.5002C23.1213 10.5002 23.625 11.0038 23.625 11.6252V18.3752C23.625 18.9965 23.1213 19.5002 22.5 19.5002V10.5002Z"
+              fill="#202125"
+            />
+          </svg>
+          <span class="i-amphtml-dev-tools-brand-text">
+            <span>WEB STORIES</span>
+            <span>DEV - TOOLS</span>
+          </span>
         </span>
+        <div class="i-amphtml-dev-tools-tabs"></div>
         <svg
           title="Close dev tools"
           class="i-amphtml-dev-tools-close"
@@ -85,33 +101,15 @@ const buildContainerTemplate = (element) => {
   `;
 };
 
-const buildDevicesTabTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`<div
-    class="i-amphtml-dev-tools-devices i-amphtml-dev-tools-tab"
-  ></div>`;
-};
-
-const buildPageSpeedTabTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`<div class="i-amphtml-dev-tools-page-speed i-amphtml-dev-tools-tab">
-    <iframe class="i-amphtml-dev-tools-page-speed-iframe" frameborder="0">
-  </div>`;
-};
-
-const buildLogsTabTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`<div class="i-amphtml-dev-tools-logs i-amphtml-dev-tools-tab">
-    <h1>Logs</h1>
-  </div>`;
-};
-
 const PAGE_SPEED_URL = 'https://amp.dev/page-experience/?url=';
 
-/** @enum */
+const AMP_TEST_URL = 'https://search.google.com/test/amp?&url=';
+
+/** @enum {string} */
 const DevToolsTab = {
   DEVICES: 'Devices',
   PAGE_SPEED: 'Page Speed',
+  AMP_TEST: 'AMP Test',
   LOGS: 'Logs',
 };
 
@@ -120,30 +118,54 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    const hashParams = parseQueryString(this.win.location.hash);
+
     this.win.document.title = `Story Dev-Tools (${this.win.document.title})`;
 
+    // TODO: Remove support for url queryParam when widely available.
     /** @private {string} */
-    this.storyUrl_ = this.win.location.href.split('#')[0];
+    this.storyUrl_ = hashParams['url'] || this.win.location.href.split('#')[0];
 
     /** @private {Element} */
     this.containerEl_ = this.setUpLayout_();
 
     /** @private {DevToolsTab} */
-    this.tab_ = null;
+    this.currentTab_ =
+      Object.values(DevToolsTab).find(
+        (e) => e.toLowerCase().replace(' ', '-') === hashParams['tab']
+      ) || DevToolsTab.DEVICES;
+
+    this.tabContents_ = {
+      [DevToolsTab.DEVICES]: new DevToolsDevicesTab(
+        this.element,
+        this.win,
+        this,
+        this.storyUrl_,
+        this.parseDevices_(hashParams)
+      ),
+      [DevToolsTab.LOGS]: new DevToolsLogTab(
+        this.element,
+        this.win,
+        this,
+        this.storyUrl_
+      ),
+      [DevToolsTab.PAGE_SPEED]: new DevToolsIframeTab(
+        this.element,
+        this.win,
+        this,
+        this.storyUrl_,
+        PAGE_SPEED_URL + this.storyUrl_
+      ),
+      [DevToolsTab.AMP_TEST]: new DevToolsIframeTab(
+        this.element,
+        this.win,
+        this,
+        this.storyUrl_,
+        AMP_TEST_URL + this.storyUrl_
+      ),
+    };
 
     this.loadFonts_();
-
-    /** @private {!DevToolsLogTab} */
-    this.logs_ = new DevToolsLogTab(buildLogsTabTemplate(this.element));
-
-    /** @private {!DevToolsDevicesTab} */
-    this.devices_ = new DevToolsDevicesTab(
-      buildDevicesTabTemplate(this.element),
-      this,
-      this.storyUrl_
-    );
-
-    this.screenSizes_ = DEFAULT_SCREEN_SIZES;
   }
 
   /** @override */
@@ -170,23 +192,38 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       tabsContainer.appendChild(tab);
     });
 
-    const queryHash = parseQueryString(this.win.location.hash);
+    // this.tabContents_[DevToolsTab.LOGS] = new DevToolsLogTab(
+    //   buildLogsTabTemplate(this.element),
+    //   this.storyUrl_
+    // );
 
-    // Parse devices from hashString
-    if (queryHash['devices']) {
-      this.screenSizes_ = [];
+    // Go to tab in hashString
+    this.switchTab_(
+      Object.values(DevToolsTab).find(
+        (e) => e.toLowerCase().replace(' ', '-') === this.currentTab_
+      ) || DevToolsTab.DEVICES
+    );
+  }
+
+  /**
+   * Get devices from the queryHash into list of devices
+   * @param {*} queryHash
+   * @return {any[]}
+   */
+  parseDevices_(queryHash) {
+    if (queryHash['devices'] != undefined) {
+      const screenSizes = [];
+      const simplifyDeviceName = (name) =>
+        name.toLowerCase().replace(/[^a-z0-9]/gi, '');
+
       queryHash['devices'].split(';').forEach((device) => {
         const deviceSpecs = device.split(':');
         let currSpecs = null;
         if (deviceSpecs.length == 1) {
           currSpecs = ALL_SCREEN_SIZES.find((el) => {
             // Find first device that has prefix of the device name passed in.
-            const currDeviceName = el.name
-              .toLowerCase()
-              .replace(/[^a-z0-9]/gi, '');
-            const specDeviceName = deviceSpecs[0]
-              .toLowerCase()
-              .replace(/[^a-z0-9]/gi, '');
+            const currDeviceName = simplifyDeviceName(el.name);
+            const specDeviceName = simplifyDeviceName(deviceSpecs[0]);
             return (
               currDeviceName.substring(0, specDeviceName.length) ==
               specDeviceName
@@ -203,21 +240,12 @@ export class AmpStoryDevTools extends AMP.BaseElement {
           }
         }
         if (currSpecs) {
-          this.screenSizes_.push(currSpecs);
+          screenSizes.push(currSpecs);
         }
       });
-      this.devices_.setDevices(this.screenSizes_);
+      return screenSizes;
     }
-
-    this.updateStoryUrl_(this.storyUrl_);
-
-    // Go to tab in hashString
-    const tabFromHash = queryHash['tab'];
-    this.switchTab_(
-      Object.values(DevToolsTab).find(
-        (e) => e.toLowerCase().replace(' ', '-') === tabFromHash
-      ) || DevToolsTab.DEVICES
-    );
+    return DEFAULT_SCREEN_SIZES;
   }
 
   /**
@@ -228,12 +256,6 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     this.element.textContent = '';
     const container = buildContainerTemplate(this.element);
     this.element.appendChild(container);
-    container.querySelector('#story-url').value = this.storyUrl_;
-    container
-      .querySelector('.i-amphtml-dev-tools-url-button')
-      .addEventListener('click', () => {
-        this.updateStoryUrl_(container.querySelector('#story-url').value);
-      });
     this.element
       .querySelector('.i-amphtml-dev-tools-close')
       .addEventListener('click', () => {
@@ -243,23 +265,16 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   }
 
   /**
-   *
-   * @param {DevToolsTab} tab
+   * Switches the tab shown to the parameter passed.
+   * @param {!DevToolsTab} tab
    */
   switchTab_(tab) {
-    this.tab_ = tab;
+    this.currentTab_ = tab;
     toArray(
       this.element.querySelectorAll('.i-amphtml-dev-tools-tab')
     ).forEach((e) => e.remove());
-    if (tab === DevToolsTab.DEVICES) {
-      this.setUpDevicesTab_(this.containerEl_);
-    } else if (tab === DevToolsTab.PAGE_SPEED) {
-      this.setUpPageSpeedTab_(this.containerEl_);
-    } else if (tab === DevToolsTab.LOGS) {
-      this.setUpLogsTab_(this.containerEl_);
-    } else {
-      return;
-    }
+    this.containerEl_.appendChild(this.tabContents_[tab].getElement());
+    this.tabContents_[tab].onTabAttached();
     toArray(
       this.element.querySelector('.i-amphtml-dev-tools-tabs').children
     ).forEach((e) => {
@@ -267,46 +282,16 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     });
   }
 
-  /**
-   * Creates the devices layouts
-   * @param {!Element} container
-   */
-  setUpDevicesTab_(container) {
-    const devicesContainer = this.devices_.getElement();
-    container.appendChild(devicesContainer);
-    this.devices_.recalculateLayout();
-  }
-
-  /**
-   * @private
-   * @param {string} storyUrl
-   */
-  updateStoryUrl_(storyUrl) {
-    this.storyUrl_ = storyUrl;
-    this.logs_.setStoryUrl(storyUrl);
-    this.devices_.setStoryUrl(storyUrl);
-    this.switchTab_(this.tab_);
-  }
-
-  /**
-   * Creates the devices layouts
-   * @param {!Element} container
-   */
-  setUpPageSpeedTab_(container) {
-    const pageSpeedContainer = buildPageSpeedTabTemplate(this.element);
-    container.appendChild(pageSpeedContainer);
-    const iframe = pageSpeedContainer.getElementsByTagName('iframe')[0];
-    iframe.src = PAGE_SPEED_URL + this.storyUrl_;
-  }
-
-  /**
-   * Creates the devices layouts
-   * @param {!Element} container
-   */
-  setUpLogsTab_(container) {
-    const logsContainer = this.logs_.getElement();
-    container.appendChild(logsContainer);
-  }
+  // /**
+  //  * Creates the devices layouts
+  //  * @param {!Element} container
+  //  */
+  // setUpPageSpeedTab_(container) {
+  //   const pageSpeedContainer = buildPageSpeedTabTemplate(this.element);
+  //   container.appendChild(pageSpeedContainer);
+  //   const iframe = pageSpeedContainer.getElementsByTagName('iframe')[0];
+  //   iframe.src = PAGE_SPEED_URL + this.storyUrl_;
+  // }
 
   /**
    * Closes the dev tools by navigating to the story.
@@ -347,7 +332,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    this.getViewport().onResize(() => this.devices_.recalculateLayout());
+    this.getViewport().onResize(() =>
+      this.tabContents_[this.currentTab_].onLayoutChanged()
+    );
   }
 }
 

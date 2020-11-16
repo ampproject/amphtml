@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpStoryDevToolsTab} from './amp-story-dev-tools-tab';
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
@@ -115,6 +116,13 @@ export const ALL_SCREEN_SIZES = [
   },
 ];
 
+const buildDevicesTabTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`<div
+    class="i-amphtml-dev-tools-devices i-amphtml-dev-tools-tab"
+  ></div>`;
+};
+
 /**
  * Generates the template for a device.
  * @param {!Element} element
@@ -124,19 +132,6 @@ const buildDeviceTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-dev-tools-device">
-      <svg
-        title="Remove device"
-        class="i-amphtml-dev-tools-device-remove"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="white"
-        width="18px"
-        height="18px"
-      >
-        <path
-          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-        />
-      </svg>
       <div class="i-amphtml-dev-tools-device-specs"></div>
       <div class="i-amphtml-dev-tools-device-name"></div>
       <div class="lds-dual-ring"></div>
@@ -150,43 +145,65 @@ const buildDeviceTemplate = (element) => {
   `;
 };
 
-export class DevToolsDevicesTab {
+/**
+ * Generates the template for a device.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildDeviceChipTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <span class="i-amphtml-dev-tools-device-chip">
+      <span>Name</span>
+      <svg
+        title="cross"
+        class="i-amphtml-dev-tools-device-remove"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="white"
+        width="18px"
+        height="18px"
+      >
+        <path
+          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        />
+      </svg>
+    </span>
+  `;
+};
+
+export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
   /**
    * @param {!Element} element the element that will be used to log everything.
-   * @param {!AmpStoryDevTools} parent
-   * @param {string} url
+   * @param {!Element} win
+   * @param {!AmpStoryDevTools} devTools
+   * @param {string} storyUrl
+   * @param {!Array} devices
    */
-  constructor(element, parent, url) {
-    this.element = element;
+  constructor(element, win, devTools, storyUrl, devices) {
+    super(buildDevicesTabTemplate(element), win, devTools, storyUrl);
 
-    this.devices_ = DEFAULT_SCREEN_SIZES;
+    /** @private {Array} */
+    this.devices_ = devices;
 
-    this.storyUrl_ = url + '#ignoreLocalStorageHistory=true';
-
-    this.parent = parent;
-
+    /** @private {?PlayersManager} */
     this.playersManager_ = null;
   }
 
   /**
-   * @public
-   * @param {string} url
-   */
-  setStoryUrl(url) {
-    this.setUpTab_(url + '#ignoreLocalStorageHistory=true');
-  }
-
-  /**
    * Creates the devices layouts
-   * @param {string} url
+   * @private
    */
-  setUpTab_(url) {
-    this.storyUrl_ = url;
+  setUpTab_() {
     this.element.textContent = '';
-    this.element.appendChild(this.buildAddDeviceButton());
-    this.playersManager_ = new PlayersManager(this.parent.win, this.storyUrl_);
+    this.element.appendChild(this.buildAddDeviceButton_());
+    const chipList = this.element.ownerDocument.createElement('div');
+    chipList.classList.add('i-amphtml-dev-tools-device-chips');
+    this.element.appendChild(chipList);
+    this.playersManager_ = new PlayersManager(this.win_, this.storyUrl_);
+    console.log(this.devices_);
     this.devices_.forEach((device) => {
-      const deviceLayout = this.createDeviceLayout_(device, url);
+      const deviceLayout = this.createDeviceLayout_(device);
       this.element.appendChild(deviceLayout);
       device.element = deviceLayout;
     });
@@ -194,9 +211,10 @@ export class DevToolsDevicesTab {
 
   /**
    * Builds the add device button
+   * @private
    * @return {!Element}
    */
-  buildAddDeviceButton() {
+  buildAddDeviceButton_() {
     // Create select with an 'Add device' option by default.
     const deviceSelect = this.element.ownerDocument.createElement('select');
     const addDevicesOption = this.element.ownerDocument.createElement('option');
@@ -226,7 +244,7 @@ export class DevToolsDevicesTab {
         this.devices_.push(deviceSpecsCopy);
         this.updateDevicesInHash_();
         deviceSelect.value = '';
-        this.recalculateLayout();
+        this.onLayoutChanged();
       }
     });
     return deviceSelect;
@@ -236,10 +254,9 @@ export class DevToolsDevicesTab {
    * Creates a device layout for preview
    * @private
    * @param {*} device
-   * @param {string} url
    * @return {!Element}
    */
-  createDeviceLayout_(device, url) {
+  createDeviceLayout_(device) {
     const deviceLayout = buildDeviceTemplate(this.element);
     deviceLayout.querySelector(
       '.i-amphtml-dev-tools-device-name'
@@ -252,7 +269,7 @@ export class DevToolsDevicesTab {
     devicePlayer.setAttribute('height', device.height);
     const storyA = devicePlayer.querySelector('a');
     storyA.textContent = 'Story 1';
-    storyA.href = url;
+    storyA.href = this.storyUrl_;
     this.playersManager_.addPlayer(devicePlayer);
     setStyles(devicePlayer, {
       width: device.width + 'px',
@@ -261,25 +278,8 @@ export class DevToolsDevicesTab {
     setStyles(deviceLayout, {
       height: device.deviceHeight ? device.deviceHeight + 'px' : 'fit-content',
     });
-
-    deviceLayout
-      .querySelector('.i-amphtml-dev-tools-device-remove')
-      .addEventListener('click', () => {
-        this.devices_ = this.devices_.filter((d) => d.element != deviceLayout);
-        deviceLayout.remove();
-        this.updateDevicesInHash_();
-        this.recalculateLayout();
-        this.playersManager_.removePlayer(devicePlayer);
-      });
+    this.addDeviceChip_(device, deviceLayout);
     return deviceLayout;
-  }
-
-  /**
-   * @public
-   * @param {any} devices List of devices
-   */
-  setDevices(devices) {
-    this.devices_ = devices;
   }
 
   /**
@@ -297,39 +297,63 @@ export class DevToolsDevicesTab {
         return device.name.toLowerCase().replace(/[^a-z0-9]/gi, '');
       })
       .join(';');
-    this.parent.updateHash({'devices': hashValue || ''});
+    this.devTools_.updateHash({'devices': hashValue || ''});
   }
 
   /**
-   * Returns the root element of the logs.
-   * @return {!Element}
+   * @param {*} device
+   * @param {!Element} deviceLayout
+   */
+  addDeviceChip_(device, deviceLayout) {
+    const deviceChip = buildDeviceChipTemplate(this.element);
+    deviceChip.querySelector('span').textContent = device.name;
+    deviceChip.querySelector('svg').addEventListener('click', () => {
+      deviceLayout.remove();
+      deviceChip.remove();
+      this.devices_ = this.devices_.filter((d) => d.element != deviceLayout);
+      this.onLayoutChanged();
+      this.updateDevicesInHash_();
+    });
+    this.element
+      .querySelector('.i-amphtml-dev-tools-device-chips')
+      .appendChild(deviceChip);
+  }
+
+  /**
+   * @override
    */
   getElement() {
     return this.element;
   }
 
   /**
-   * Gets the sizes of the devices and tab, and scales the devices to leave 10% of gap in both axes.
-   * Also calculates the left position of the devices in absolute units
-   * @public
+   * @override
    */
-  recalculateLayout() {
-    let maxDeviceWidths = 0;
+  onTabAttached() {
+    this.setUpTab_();
+    this.onLayoutChanged();
+  }
+
+  /**
+   * @override
+   */
+  onLayoutChanged() {
+    let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     this.devices_.forEach((deviceSpecs) => {
-      maxDeviceWidths += deviceSpecs.width;
+      sumDeviceWidths += deviceSpecs.width;
       maxDeviceHeights = Math.max(
         maxDeviceHeights,
         deviceSpecs.deviceHeight || deviceSpecs.height + 100
       );
     });
     const scale = Math.min(
-      (this.element.clientWidth / maxDeviceWidths) * 0.9,
-      (this.element.clientHeight / maxDeviceHeights) * 0.8
+      (this.element./*OK*/ clientWidth / sumDeviceWidths) * 0.9,
+      (this.element./*OK*/ clientHeight / maxDeviceHeights) * 0.8
     );
     let cumWidthSum = 0;
     const paddingSize =
-      (this.element.clientWidth - maxDeviceWidths * scale) /
+      (this.element./*OK*/ clientWidth - sumDeviceWidths * scale) /
       (this.devices_.length + 1);
     toArray(
       this.element.querySelectorAll('.i-amphtml-dev-tools-device')
@@ -363,38 +387,61 @@ class PlayersManager {
     this.win_ = win;
 
     this.storyUrl_ = storyUrl;
+
+    /** @private {?string} */
+    this.lastPageId_ = null;
   }
 
   /**
    * Adds the player and sets up listeners
-   * @param {AmpStoryPlayer} player
+   * @param {!Element} player
    */
   addPlayer(player) {
     player.classList.add('i-amphtml-element');
     const playerImpl = new AmpStoryPlayer(this.win_, player);
+    player.addEventListener('ready', () => {
+      if (this.lastPageId_ != null) {
+        playerImpl.show(this.storyUrl_, this.lastPageId_);
+      }
+    });
     playerImpl.load();
+    this.registerPlayerListeners_(player);
     this.players_.push(playerImpl);
-    this.registerPlayerListeners_(playerImpl);
   }
 
   /**
    * Registers listeners on player
    * @private
-   * @param {AmpStoryPlayer} player
+   * @param {!Element} player
    */
   registerPlayerListeners_(player) {
-    player.element_.addEventListener('storyNavigation', (event) => {
-      this.players_.forEach((p) => {
-        p.show(this.storyUrl_, event.detail.pageId);
-      });
-    });
+    player.removeEventListener('storyNavigation', this.navigateTo_);
+    player.navigationListener = player.addEventListener(
+      'storyNavigation',
+      (e) => this.navigateTo_(e)
+    );
   }
 
   /**
    * Removes the player from the list of synced players.
-   * @param {AmpStoryPlayer} player
+   * @param {Element} player
    */
   removePlayer(player) {
     this.players_ = this.players_.filter((p) => p != player);
+  }
+
+  /**
+   * Navigates all the players to the pageId in the event
+   * @private
+   * @param {Event} event
+   */
+  navigateTo_(event) {
+    if (this.lastPageId_ == event.detail.pageId) {
+      return;
+    }
+    this.lastPageId_ = event.detail.pageId;
+    this.players_.forEach((p) => {
+      p.show(null, event.detail.pageId);
+    });
   }
 }

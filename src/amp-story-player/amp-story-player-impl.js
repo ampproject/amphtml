@@ -742,12 +742,15 @@ export class AmpStoryPlayer {
 
   /**
    * Shows the story provided by the URL in the player.
-   * @param {string} storyUrl
+   * @param {?string} storyUrl
    * @param {string=} pageId
    */
   show(storyUrl, pageId = null) {
     // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
+    const storyIdx =
+      storyUrl != null
+        ? findIndex(this.stories_, ({href}) => href === storyUrl)
+        : this.currentIdx_;
 
     // TODO(#28987): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
@@ -1294,6 +1297,18 @@ export class AmpStoryPlayer {
     }
 
     this.sendSelectPageDelta_(delta);
+  }
+
+  /**
+   * Sends a message to the current story to navigate to the page id.
+   * @param {string} pageId
+   * @private
+   */
+  selectPageById_(pageId) {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest('selectPage', {'page': pageId})
+    );
   }
 
   /**
