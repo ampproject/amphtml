@@ -15,6 +15,8 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {getMode} from '../../../src/mode';
+import {isIframed} from '../../../src/dom';
 import {memo} from '../../../src/utils/object';
 import {toWin} from '../../../src/types';
 
@@ -29,7 +31,7 @@ const OBSERVERS_MAP_PROP = '__AMP_A4A_VP_MAP';
 export function whenWithinViewport(element, viewportNum) {
   // This can only fully be implemented when `root=document` is polyfilled
   // everywhere.
-  if (!WITHIN_VIEWPORT_INOB) {
+  if (!(WITHIN_VIEWPORT_INOB || getMode().localDev || getMode().test)) {
     return Promise.reject('!WITHIN_VIEWPORT_INOB');
   }
 
@@ -67,10 +69,21 @@ function createObserver(win, viewportNum) {
     }
   };
 
-  const observer = new win.IntersectionObserver(callback, {
-    root: win.document,
-    rootMargin: `${(viewportNum - 1) * 100}%`,
-  });
+  const iframed = isIframed(win);
+  const root = /** @type {?Element} */ (iframed
+    ? /** @type {*} */ (win.document)
+    : null);
+  let observer;
+  try {
+    observer = new win.IntersectionObserver(callback, {
+      root,
+      rootMargin: `${(viewportNum - 1) * 100}%`,
+    });
+  } catch (e) {
+    observer = new win.IntersectionObserver(callback, {
+      rootMargin: `${(viewportNum - 1) * win.innerHeight}px`,
+    });
+  }
 
   return (element) => {
     let deferred = elements.get(element);
