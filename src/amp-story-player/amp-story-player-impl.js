@@ -751,50 +751,45 @@ export class AmpStoryPlayer {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
 
-    if (storyIdx === this.currentIdx_) {
-      if (pageId != null) {
-        this.goToPageId_(pageId);
-      }
-      return;
+    if (storyIdx !== this.currentIdx_) {
+      const adjacentStoriesIdx = this.iframePool_.findAdjacent(
+        storyIdx,
+        this.stories_.length - 1
+      );
+
+      adjacentStoriesIdx.forEach((idx) => {
+        const story = this.stories_[idx];
+        let {iframeIdx} = story;
+
+        if (iframeIdx === -1) {
+          const visibilityState =
+            idx === storyIdx
+              ? VisibilityState.VISIBLE
+              : VisibilityState.PRERENDER;
+          this.allocateIframeForStory_(
+            idx,
+            storyIdx < this.currentIdx_ /** reverse */,
+            visibilityState
+          );
+          iframeIdx = story.iframeIdx;
+        }
+
+        let iframePosition;
+        if (idx === storyIdx) {
+          iframePosition = IframePosition.CURRENT;
+          this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
+          tryFocus(this.iframes_[iframeIdx]);
+        } else {
+          iframePosition =
+            idx > storyIdx ? IframePosition.NEXT : IframePosition.PREVIOUS;
+        }
+
+        this.updateIframePosition_(iframeIdx, iframePosition);
+      });
+
+      this.currentIdx_ = storyIdx;
+      this.onNavigation_();
     }
-
-    const adjacentStoriesIdx = this.iframePool_.findAdjacent(
-      storyIdx,
-      this.stories_.length - 1
-    );
-
-    adjacentStoriesIdx.forEach((idx) => {
-      const story = this.stories_[idx];
-      let {iframeIdx} = story;
-
-      if (iframeIdx === -1) {
-        const visibilityState =
-          idx === storyIdx
-            ? VisibilityState.VISIBLE
-            : VisibilityState.PRERENDER;
-        this.allocateIframeForStory_(
-          idx,
-          storyIdx < this.currentIdx_ /** reverse */,
-          visibilityState
-        );
-        iframeIdx = story.iframeIdx;
-      }
-
-      let iframePosition;
-      if (idx === storyIdx) {
-        iframePosition = IframePosition.CURRENT;
-        this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
-        tryFocus(this.iframes_[iframeIdx]);
-      } else {
-        iframePosition =
-          idx > storyIdx ? IframePosition.NEXT : IframePosition.PREVIOUS;
-      }
-
-      this.updateIframePosition_(iframeIdx, iframePosition);
-    });
-
-    this.currentIdx_ = storyIdx;
-    this.onNavigation_();
 
     if (pageId != null) {
       this.goToPageId_(pageId);
