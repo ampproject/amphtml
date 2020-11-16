@@ -48,52 +48,6 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         expect(advancement).to.not.be.instanceOf(ManualAdvancement);
       });
 
-      it('should return a manual advancement for a link in the edge of a story page in desktop UI', () => {
-        const storyEl = win.document.createElement('amp-story');
-        const pageEl = win.document.createElement('amp-story-page');
-        const gridLayerEl = win.document.createElement('amp-story-grid-layer');
-        const linkEl = win.document.createElement('a');
-
-        linkEl.setAttribute(
-          'style',
-          'position:absolute;top:350px;right:-10px;width:30px;'
-        );
-
-        // const story = storyEl.getImpl();
-        // story.desktopMedia_ = {matches: true};
-
-        storyEl.appendChild(pageEl);
-        pageEl.appendChild(gridLayerEl);
-        gridLayerEl.appendChild(linkEl);
-
-        const advancement = AdvancementConfig.forElement(win, linkEl);
-
-        expect(advancement).to.be.instanceOf(ManualAdvancement);
-      });
-
-      it('should not return a manual advancement for a link not in the edge of a story page in desktop UI', () => {
-        const storyEl = win.document.createElement('amp-story');
-        const pageEl = win.document.createElement('amp-story-page');
-        const gridLayerEl = win.document.createElement('amp-story-grid-layer');
-        const linkEl = win.document.createElement('a');
-
-        linkEl.setAttribute(
-          'style',
-          'position:absolute;top:350px;right:40px;width:30px;'
-        );
-
-        // const story = storyEl.getImpl();
-        // story.desktopMedia_ = {matches: true};
-
-        storyEl.appendChild(pageEl);
-        pageEl.appendChild(gridLayerEl);
-        gridLayerEl.appendChild(linkEl);
-
-        const advancement = AdvancementConfig.forElement(win, linkEl);
-
-        expect(advancement).to.not.be.instanceOf(ManualAdvancement);
-      });
-
       it('should unpause on visibilitychange', async () => {
         // Fix #28425, on player swipe doesn't get touchend so UI doesn't show.
         const storyEl = win.document.createElement('amp-story');
