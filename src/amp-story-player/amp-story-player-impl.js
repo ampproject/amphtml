@@ -173,11 +173,6 @@ export class AmpStoryPlayer {
    * @param {!Element} element
    */
   constructor(win, element) {
-    console./*OK*/ assert(
-      element.childElementCount > 0,
-      'Missing configuration.'
-    );
-
     /** @private {!Window} */
     this.win_ = win;
 
