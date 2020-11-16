@@ -163,5 +163,16 @@ FAIL
 >>   ^~~~~~~~~
 amp-date-countdown/0.1/test/validator-amp-date-countdown.html:161:2 Attribute 'template' in tag 'amp-date-countdown' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-date-countdown)
 |    </amp-date-countdown>
+|
+|    <!-- Should allow `data-count-up` attribute. -->
+|    <amp-date-countdown data-count-up timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+|    </amp-date-countdown>
+|
+|    <!-- Should error if `data-count-up` attribute is given a non-empty value. -->
+|    <amp-date-countdown data-count-up="true" timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+>>   ^~~~~~~~~
+amp-date-countdown/0.1/test/validator-amp-date-countdown.html:169:2 The attribute 'data-count-up' in tag 'amp-date-countdown' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-date-countdown)
+|    </amp-date-countdown>
+|
 |  </body>
 |  </html>

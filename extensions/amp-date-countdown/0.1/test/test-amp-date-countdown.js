@@ -37,6 +37,7 @@ describes.realWin(
 
       element = win.document.createElement('amp-date-countdown');
       element.setAttribute('end-date', ISOEndDate);
+      element.setAttribute('layout', 'responsive');
       win.document.body.appendChild(element);
       impl = element.implementation_;
     });
@@ -216,5 +217,91 @@ describes.realWin(
         '1 Days 0 Hours 0 Minutes 0 Seconds'
       );
     });
+
+    it(
+      'should calculate a negative time when target is in future ' +
+        'when using the "data-count-up" attribute',
+      () => {
+        const countUp = true;
+        element.setAttribute('data-count-up', '');
+        element.setAttribute('when-ended', 'continue');
+        element.build();
+        const timeObj = Object.assign(
+          impl.getYDHMSFromMs_(
+            endDate -
+              twoDaysBeforeEndDate - //two days in future
+              24 * 60 * 60 * 1000 - //minus 1 day
+              60 * 60 * 1000 - //minus 1 hour
+              60 * 1000 - //minus 1 minute
+              1000, //minus 1 second
+            countUp
+          ), // hours * minutes * seconds * ms
+          impl.getLocaleWord_('en')
+        ); // English
+        const itemElement = win.document.createElement('div');
+        itemElement.textContent =
+          timeObj.d +
+          ' ' +
+          timeObj.days +
+          ' ' +
+          timeObj.h +
+          ' ' +
+          timeObj.hours +
+          ' ' +
+          timeObj.m +
+          ' ' +
+          timeObj.minutes +
+          ' ' +
+          timeObj.s +
+          ' ' +
+          timeObj.seconds;
+        expect(itemElement.textContent).to.equal(
+          '0 Days -22 Hours -58 Minutes -58 Seconds'
+        );
+      }
+    );
+
+    it(
+      'should calculate a positive time when target is in past ' +
+        'when using the "data-count-up" attribute',
+      () => {
+        const countUp = true;
+        element.setAttribute('data-count-up', '');
+        element.setAttribute('when-ended', 'continue');
+        element.build();
+        const timeObj = Object.assign(
+          impl.getYDHMSFromMs_(
+            twoDaysBeforeEndDate -
+              endDate + //two days in past
+              24 * 60 * 60 * 1000 + //plus 1 day
+              60 * 60 * 1000 + //plus 1 hour
+              60 * 1000 + //plus 1 minute
+              1000, //plus 1 second
+            countUp
+          ), // hours * minutes * seconds * ms
+          impl.getLocaleWord_('en')
+        ); // English
+        const itemElement = win.document.createElement('div');
+        itemElement.textContent =
+          timeObj.d +
+          ' ' +
+          timeObj.days +
+          ' ' +
+          timeObj.h +
+          ' ' +
+          timeObj.hours +
+          ' ' +
+          timeObj.m +
+          ' ' +
+          timeObj.minutes +
+          ' ' +
+          timeObj.s +
+          ' ' +
+          timeObj.seconds;
+        expect(itemElement.textContent).to.equal(
+          '0 Days 22 Hours 58 Minutes 59 Seconds'
+        );
+      }
+    );
   }
 );
