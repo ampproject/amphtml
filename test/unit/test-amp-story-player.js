@@ -940,7 +940,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
 
-      player.goToPageId('page-2');
+      player.show('', 'page-2');
 
       await nextTick();
 

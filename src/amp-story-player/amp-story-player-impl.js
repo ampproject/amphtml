@@ -736,12 +736,15 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Shows the story provided by the URL in the player.
+   * Shows the story provided by the URL in the player and go to the page if provided.
    * @param {string} storyUrl
+   * @param {string=} pageId
    */
-  show(storyUrl) {
+  show(storyUrl, pageId = null) {
     // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
+    const storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
 
     // TODO(#28987): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
@@ -749,6 +752,9 @@ export class AmpStoryPlayer {
     }
 
     if (storyIdx === this.currentIdx_) {
+      if (pageId != null) {
+        this.goToPageId_(pageId);
+      }
       return;
     }
 
@@ -789,6 +795,10 @@ export class AmpStoryPlayer {
 
     this.currentIdx_ = storyIdx;
     this.onNavigation_();
+
+    if (pageId != null) {
+      this.goToPageId_(pageId);
+    }
   }
 
   /** Sends a message muting the current story. */
@@ -1273,9 +1283,9 @@ export class AmpStoryPlayer {
 
   /**
    * @param {string} pageId
-   * @public
+   * @private
    */
-  goToPageId(pageId) {
+  goToPageId_(pageId) {
     const {iframeIdx} = this.stories_[this.currentIdx_];
     this.messagingPromises_[iframeIdx].then((messaging) =>
       messaging.sendRequest('selectPage', {'id': pageId})
