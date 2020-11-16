@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
+import {
+  Axis,
+  findOverlappingIndex,
+  getPercentageOffsetFromAlignment,
+  scrollContainerToElement,
+} from './dimensions';
 import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
@@ -46,6 +52,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 function ScrollerWithRef(
   {
     advanceCount,
+    alignment,
     autoAdvanceCount,
     children,
     loop,
@@ -62,12 +69,13 @@ function ScrollerWithRef(
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
+  const axis = useMemo(() => Axis.X, []);
 
   /**
    * The number of slides we want to place before the
    * reference or resting index. Only needed if loop=true.
    */
-  const pivotIndex = Math.floor(children.length / 2);
+  const pivotIndex = loop ? Math.floor(children.length / 2) : restingIndex;
 
   const advance = useCallback(
     (by) => {
@@ -75,40 +83,15 @@ function ScrollerWithRef(
       if (!container) {
         return;
       }
-      const slideWidth = container./* OK */ offsetWidth / visibleCount;
-      // Modify scrollLeft is preferred to `setRestingIndex` when possible
-      // to enable smooth scrolling between slides.
-      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
-      currentIndex.current = mod(currentIndex.current + by, children.length);
-      if (mixedLength) {
-        if (loop) {
-          const newPosition =
-            container.children[mod(pivotIndex + by, children.length)]
-              ./* OK */ offsetLeft;
-          if (container./* OK */ scrollLeft === newPosition) {
-            // There is not enough room to continue scrolling, so manually go to slide.
-            setRestingIndex(currentIndex.current);
-          } else {
-            container./* OK */ scrollLeft = newPosition;
-          }
-        } else {
-          // TODO: If lastSlide.offsetWidth < container.offsetWidth,
-          // the next arrow does not appropriately disable when the
-          // container reaches the end of its scrollWidth.
-          setRestingIndex(currentIndex.current);
-        }
-      } else {
-        container./* OK */ scrollLeft += slideWidth * by;
-      }
+      scrollContainerToElement(
+        axis,
+        alignment,
+        container,
+        container.children[mod(pivotIndex + by, container.children.length)],
+        scrollOffset.current
+      );
     },
-    [
-      children.length,
-      loop,
-      mixedLength,
-      pivotIndex,
-      setRestingIndex,
-      visibleCount,
-    ]
+    [alignment, axis, pivotIndex]
   );
   useImperativeHandle(
     ref,
@@ -160,47 +143,15 @@ function ScrollerWithRef(
       return;
     }
     setStyle(container, 'scrollBehavior', 'auto');
-    let position;
-    const slideWidth = container./* OK */ offsetWidth / visibleCount;
-    if (loop) {
-      if (snap) {
-        if (mixedLength) {
-          position = container.children[pivotIndex]./* OK */ offsetLeft;
-        } else {
-          position = slideWidth * pivotIndex;
-        }
-      } else {
-        if (mixedLength) {
-          position =
-            container.children[pivotIndex]./* OK */ offsetLeft +
-            scrollOffset.current;
-        } else {
-          position = mod(
-            scrollOffset.current + slideWidth * offsetRef.current,
-            container./* OK */ scrollWidth
-          );
-        }
-      }
-    } else {
-      if (snap) {
-        if (mixedLength) {
-          position = container.children[restingIndex]./* OK */ offsetLeft;
-        } else {
-          position = slideWidth * restingIndex;
-        }
-      } else {
-        if (mixedLength) {
-          position =
-            container.children[restingIndex]./* OK */ offsetLeft +
-            scrollOffset.current;
-        } else {
-          position = scrollOffset.current;
-        }
-      }
-    }
-    container./* OK */ scrollLeft = position;
+    scrollContainerToElement(
+      axis,
+      alignment,
+      container,
+      container.children[pivotIndex],
+      scrollOffset.current
+    );
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [loop, mixedLength, restingIndex, pivotIndex, snap, visibleCount]);
+  }, [axis, alignment, loop, pivotIndex, restingIndex]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(
@@ -231,24 +182,25 @@ function ScrollerWithRef(
     if (!container) {
       return;
     }
-    if (mixedLength) {
-      const acc = {index: 0, width: 0};
-      for (let i = 0; i < container.children.length; i++) {
-        const slide = container.children[i];
-        if (container./* OK */ scrollLeft >= acc.width) {
-          scrollOffset.current = container./* OK */ scrollLeft - acc.width;
-          acc.width += slide./* OK */ scrollWidth;
-          acc.index = loop ? restingIndex - pivotIndex + i : i;
-        }
-      }
-      currentIndex.current = mod(acc.index, children.length);
-    } else {
-      const slideWidth = container./* OK */ offsetWidth / visibleCount;
-      scrollOffset.current =
-        container./* OK */ scrollLeft - offsetRef.current * slideWidth;
-      const slideOffset = Math.round(scrollOffset.current / slideWidth);
-      currentIndex.current = mod(slideOffset, children.length);
+    const overlappingIndex = findOverlappingIndex(
+      axis,
+      alignment,
+      container,
+      container.children,
+      pivotIndex
+    );
+    if (!snap) {
+      scrollOffset.current = getPercentageOffsetFromAlignment(
+        axis,
+        alignment,
+        container,
+        container.children[overlappingIndex]
+      );
     }
+    currentIndex.current = mod(
+      overlappingIndex - offsetRef.current,
+      children.length
+    );
   };
 
   const handleScroll = () => {
