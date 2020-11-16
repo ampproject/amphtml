@@ -24,6 +24,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {
   useCallback,
   useImperativeHandle,
@@ -163,25 +164,27 @@ function ScrollerWithRef(
   }, [axis, alignment, loop, pivotIndex, restingIndex]);
 
   // Trigger render by setting the resting index to the current scroll state.
-  const debouncedResetScrollReferencePoint = useMemo(
-    () =>
-      debounce(
-        window,
-        () => {
-          // Check if the resting index we are centered around is the same as where
-          // we stopped scrolling. If so, we do not need to move anything.
-          if (
-            currentIndex.current === null ||
-            currentIndex.current === restingIndex
-          ) {
-            return;
-          }
-          setRestingIndex(currentIndex.current);
-        },
-        RESET_SCROLL_REFERENCE_POINT_WAIT_MS
-      ),
-    [restingIndex, setRestingIndex]
-  );
+  const debouncedResetScrollReferencePoint = useMemo(() => {
+    // Use local window if possible.
+    const win = containerRef.current
+      ? toWin(containerRef.current.ownerDocument.defaultView)
+      : window;
+    return debounce(
+      win,
+      () => {
+        // Check if the resting index we are centered around is the same as where
+        // we stopped scrolling. If so, we do not need to move anything.
+        if (
+          currentIndex.current === null ||
+          currentIndex.current === restingIndex
+        ) {
+          return;
+        }
+        setRestingIndex(currentIndex.current);
+      },
+      RESET_SCROLL_REFERENCE_POINT_WAIT_MS
+    );
+  }, [restingIndex, setRestingIndex]);
 
   // Track current slide without forcing render.
   // This is necessary for smooth scrolling because
@@ -213,10 +216,6 @@ function ScrollerWithRef(
   };
 
   const handleScroll = () => {
-    if (ignoreProgrammaticScrollRef.current) {
-      ignoreProgrammaticScrollRef.current = false;
-      return;
-    }
     updateCurrentIndex();
     debouncedResetScrollReferencePoint();
   };
