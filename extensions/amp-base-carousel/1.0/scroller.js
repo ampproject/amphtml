@@ -92,15 +92,21 @@ function ScrollerWithRef(
       if (!container) {
         return;
       }
-      scrollContainerToElement(
+      // Smooth scrolling is preferred to `setRestingIndex` whenever possible.
+      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
+      currentIndex.current = mod(currentIndex.current + by, children.length);
+      const didScroll = scrollContainerToElement(
         axis,
         alignment,
         container,
         container.children[mod(pivotIndex + by, container.children.length)],
         scrollOffset.current
       );
+      if (!didScroll) {
+        setRestingIndex(currentIndex.current);
+      }
     },
-    [alignment, axis, pivotIndex]
+    [alignment, axis, children.length, pivotIndex, setRestingIndex]
   );
   useImperativeHandle(
     ref,

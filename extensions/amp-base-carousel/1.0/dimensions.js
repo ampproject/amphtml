@@ -206,6 +206,7 @@ export function updateScrollPosition(axis, el, delta) {
  * @param {!Element} container The scrolling container.
  * @param {!Element} el The Element to scroll to.
  * @param {number} offset A percentage offset within the element to scroll to.
+ * @return {boolean} Whether not scrolling was performed.
  */
 export function scrollContainerToElement(
   axis,
@@ -223,4 +224,5 @@ export function scrollContainerToElement(
   const delta = snapOffset - scrollOffset - offset * length;
 
   updateScrollPosition(axis, container, delta);
+  return !!delta;
 }
