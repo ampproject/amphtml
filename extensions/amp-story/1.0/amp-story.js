@@ -89,7 +89,6 @@ import {
   computedStyle,
   resetStyles,
   setImportantStyles,
-  toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
@@ -459,6 +458,10 @@ export class AmpStory extends AMP.BaseElement {
           this.switchTo_(args['id'], NavigationDirection.NEXT)
         );
       });
+    }
+
+    if (this.maybeLoadStoryDevTools_()) {
+      return;
     }
   }
 
@@ -938,9 +941,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.maybeLoadStoryDevTools_()) {
-      return;
-    }
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
       this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
       return Promise.resolve();
@@ -2870,7 +2870,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
     this.win.document.body.appendChild(devToolsEl);
-    this.element.remove();
 
     Services.extensionsFor(this.win).installExtensionForDoc(
       this.getAmpDoc(),

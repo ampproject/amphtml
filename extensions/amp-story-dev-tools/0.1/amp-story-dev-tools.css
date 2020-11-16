@@ -16,7 +16,7 @@
 
 amp-story-dev-tools {
   width: 100% !important;
-  height: 100% !important;
+  height: 100vh !important;
   box-sizing: border-box !important;
   background-color: #121212 !important;
   font-size: 16px !important;
@@ -24,4 +24,8 @@ amp-story-dev-tools {
   color: white !important;
   padding: 30px 10% !important;
   text-align: center !important;
+}
+
+amp-story[standalone] {
+  display: none !important;
 }
