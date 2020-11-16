@@ -403,6 +403,10 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeStandaloneStory_();
     }
 
+    if (this.maybeLoadStoryDevTools_()) {
+      return;
+    }
+
     // buildCallback already runs in a mutate context. Calling another
     // mutateElement explicitly will force the runtime to remeasure the
     // amp-story element, fixing rendering bugs where the story is inactive
@@ -2849,6 +2853,33 @@ export class AmpStory extends AMP.BaseElement {
         win.CSS.supports('display', 'grid') &&
         win.CSS.supports('color', 'var(--test)')
     );
+  }
+
+  /**
+   * Loads amp-story-dev-tools if it is enabled.
+   * @private
+   */
+  maybeLoadStoryDevTools_() {
+    if (
+      !getMode().development ||
+      this.element.getAttribute('mode') === 'inspect'
+    ) {
+      return false;
+    }
+
+    this.element.setAttribute('mode', 'inspect');
+
+    this.mutateElement(() => {
+      const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
+      this.win.document.body.appendChild(devToolsEl);
+      devToolsEl.appendChild(this.element);
+    });
+
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-story-dev-tools'
+    );
+    return true;
   }
 }
 
