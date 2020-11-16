@@ -36,6 +36,10 @@ tags: {  # <amp-date-countdown>
     value_casei: "minutes"
     value_casei: "seconds"
   }
+  attrs {
+    name: "data-count-up"
+    value: ""
+  }
   attrs: {
     name: "end-date"
     mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
