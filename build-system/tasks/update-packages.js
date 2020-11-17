@@ -17,6 +17,7 @@
 
 const checkDependencies = require('check-dependencies');
 const colors = require('ansi-colors');
+const del = require('del');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const {execOrDie} = require('../common/exec');
@@ -95,26 +96,16 @@ function patchIntersectionObserver() {
 }
 
 /**
- * TODO(samouri): remove this patch when a better fix is upstreamed (https://github.com/jakubroztocil/rrule/pull/410).
- *
- * Patches rrule to remove references to luxon. Even though rrule marks luxon as an optional dependency,
- * it is used as if it's a required one (static import). rrule relies on its consumers either
- * installing luxon or adding it as a webpack-style external. We don't want the former and
- * can't yet do the latter.
- *
- * This function replaces the reference to luxon with a mock that throws (which the code handles well).
+ * Deletes the map file for rrule, which breaks closure compiler.
+ * TODO(rsimha): Remove this workaround after a fix is merged for
+ * https://github.com/google/closure-compiler/issues/3720.
  */
-function patchRRule() {
-  const path = 'node_modules/rrule/dist/es5/rrule.min.js';
-  const patchedContents = fs
-    .readFileSync(path)
-    .toString()
-    .replace(
-      /require\("luxon"\)/g,
-      `{ DateTime: { fromJSDate() { throw TypeError() } } }`
-    );
-
-  writeIfUpdated(path, patchedContents);
+function removeRruleSourcemap() {
+  const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
+  if (fs.existsSync(rruleMapFile)) {
+    del.sync(rruleMapFile);
+    log(colors.green('Deleted'), colors.cyan(rruleMapFile));
+  }
 }
 
 /**
@@ -164,7 +155,7 @@ async function updatePackages() {
   }
   patchWebAnimations();
   patchIntersectionObserver();
-  patchRRule();
+  removeRruleSourcemap();
 }
 
 module.exports = {
