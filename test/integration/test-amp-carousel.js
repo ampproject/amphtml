@@ -83,8 +83,8 @@ t.run('amp-carousel', function () {
           const nextBtn = amp.querySelector('.amp-carousel-button-next');
           expect(prevBtn).to.not.be.null;
           expect(nextBtn).to.not.be.null;
-          expect(prevBtn).to.be.hidden;
-          expect(nextBtn).to.be.hidden;
+          expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
+          expect(nextBtn.classList.contains('amp-disabled')).to.be.true;
         }
       );
     }
@@ -145,7 +145,7 @@ t.run('amp-carousel', function () {
           expect(document.body).to.not.have.class('amp-mode-mouse');
           expect(prevBtn).to.not.be.null;
           expect(nextBtn).to.not.be.null;
-          expect(prevBtn).to.be.hidden;
+          expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
           expect(nextBtn).to.be.visible;
         }
       );
@@ -157,7 +157,7 @@ t.run('amp-carousel', function () {
         const nextBtn = amp.querySelector('.amp-carousel-button-next');
         expect(prevBtn).to.not.be.null;
         expect(nextBtn).to.not.be.null;
-        expect(prevBtn).to.be.hidden;
+        expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
         expect(nextBtn).to.be.visible;
       });
 
@@ -249,8 +249,8 @@ t.run('amp-carousel', function () {
           const nextBtn = amp.querySelector('.amp-carousel-button-next');
           expect(prevBtn).to.not.be.null;
           expect(nextBtn).to.not.be.null;
-          expect(prevBtn).to.be.hidden;
-          expect(nextBtn).to.be.hidden;
+          expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
+          expect(nextBtn.classList.contains('amp-disabled')).to.be.true;
         }
       );
     }
@@ -311,7 +311,7 @@ t.run('amp-carousel', function () {
           expect(document.body).to.not.have.class('amp-mode-mouse');
           expect(prevBtn).to.not.be.null;
           expect(nextBtn).to.not.be.null;
-          expect(prevBtn).to.be.hidden;
+          expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
           expect(nextBtn).to.be.visible;
         }
       );
@@ -323,7 +323,7 @@ t.run('amp-carousel', function () {
         const nextBtn = amp.querySelector('.amp-carousel-button-next');
         expect(prevBtn).to.not.be.null;
         expect(nextBtn).to.not.be.null;
-        expect(prevBtn).to.be.hidden;
+        expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
         expect(nextBtn).to.be.visible;
       });
 

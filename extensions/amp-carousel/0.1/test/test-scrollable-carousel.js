@@ -139,6 +139,57 @@ describes.realWin(
       }
     );
 
+    it('should properly style controls; focusable but not visible', () => {
+      return getAmpScrollableCarousel().then((carousel) => {
+        const impl = carousel.implementation_;
+        const container = carousel.getElementsByClassName(
+          'i-amphtml-scrollable-carousel-container'
+        )[0];
+        const carouselSlideEls = container.getElementsByClassName(
+          'amp-carousel-slide'
+        );
+
+        // show control buttons correctly
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+        // Explicitly check if buttons don't have visibility hidden or display none
+        expect(impl.prevButton_.tabIndex).to.equal(-1);
+        expect(impl.nextButton_.tabIndex).to.equal(0);
+        expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
+        expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+
+        impl.nextButton_.focus();
+        expect(doc.activeElement).to.equal(impl.nextButton_);
+
+        // Scroll to end
+        for (let i = 0; i < carouselSlideEls.length - 1; i++) {
+          impl.goCallback(1, /*animate*/ false);
+        }
+        // Explicitly check if buttons don't have visibility hidden or display none
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;
+        expect(impl.prevButton_.tabIndex).to.equal(0);
+        expect(impl.nextButton_.tabIndex).to.equal(-1);
+        expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
+        expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+        expect(doc.activeElement).to.equal(impl.nextButton_);
+
+        impl.prevButton_.focus();
+
+        for (let i = 0; i < carouselSlideEls.length - 1; i++) {
+          impl.goCallback(-1, /*animate*/ false);
+        }
+        // Explicitly check if buttons don't have visibility hidden or display none
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(impl.prevButton_.tabIndex).to.equal(-1);
+        expect(impl.nextButton_.tabIndex).to.equal(0);
+        expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
+        expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+        expect(doc.activeElement).to.equal(impl.prevButton_);
+      });
+    });
+
     // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
     it.skip(
       'should behave correctly when clicking on next button and the ' +
@@ -444,3 +495,15 @@ describes.realWin(
     });
   }
 );
+
+/**
+ *
+ * @param {Element} element
+ * @returns {boolean}
+ */
+function isScreenReaderHidden(element) {
+  const computedStyle = getComputedStyle(element);
+  return (
+    computedStyle.visibility === 'hidden' || computedStyle.display === 'none'
+  );
+}
