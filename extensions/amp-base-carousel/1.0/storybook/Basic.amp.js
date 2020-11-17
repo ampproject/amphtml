@@ -32,6 +32,7 @@ export default {
 export const Default = () => {
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
+  const snapBy = number('snap by', 1);
   const advanceCount = number('advance count', 1, {min: 1});
   const autoAdvance = boolean('auto advance', true);
   const autoAdvanceCount = number('auto advance count', 1);
@@ -57,6 +58,7 @@ export const Default = () => {
         width="880"
         height="225"
         snap={String(snap)}
+        snap-by={snapBy}
         loop={loop}
         layout="responsive"
         visible-count={visibleCount}
@@ -99,6 +101,7 @@ export const mixedLength = () => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
+  const snapBy = number('snap by', 1);
   const mixedLength = boolean('mixed length', true);
   const controls = select('show controls', ['auto', 'always', 'never']);
 
@@ -108,6 +111,7 @@ export const mixedLength = () => {
       mixed-length={mixedLength}
       loop={loop}
       snap={String(snap)}
+      snap-by={snapBy}
       width={width}
       height={height}
     >

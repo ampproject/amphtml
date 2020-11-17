@@ -77,6 +77,7 @@ function BaseCarouselWithRef(
     onTouchStart,
     outsetArrows,
     snap = true,
+    snapBy = 1,
     visibleCount = 1,
     _thumbnails = false,
     ...rest
@@ -234,6 +235,7 @@ function BaseCarouselWithRef(
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         snap={snap}
+        snapBy={snapBy}
         ref={scrollRef}
         visibleCount={mixedLength ? 1 : visibleCount}
         _thumbnails={_thumbnails}

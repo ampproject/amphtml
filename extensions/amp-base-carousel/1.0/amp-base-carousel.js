@@ -104,6 +104,7 @@ AmpBaseCarousel['props'] = {
   'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
   'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
+  'snapBy': {attr: 'snap-by', type: 'number', media: true},
   'visibleCount': {attr: 'visible-count', type: 'number', media: true},
 };
 
