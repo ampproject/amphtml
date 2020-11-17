@@ -54,6 +54,14 @@ const TOP_REGION = 0.8;
  */
 const PROTECTED_SCREEN_EDGE_PX = 48;
 
+/**
+ * Maximum percent of screen that can be occupied by a single link
+ * before the link is considered navigation blocking and ignored.
+ * @const {number}
+ * @private
+ */
+const MAX_LINK_SCREEN_PERCENT = 0.8;
+
 const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
   interactiveElementsSelectors()
 ).join(',');
@@ -464,8 +472,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInStoryPageSideEdge_(event, this.element_.getLayoutBox()) &&
-          !this.isTooLargeOnPage_(event, this.element_.getLayoutBox())
+          !this.isInStoryPageSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
           return true;
@@ -503,8 +510,8 @@ export class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (
-      this.isInStoryPageSideEdge_(event, pageRect) &&
-      this.isTooLargeOnPage_(event, pageRect)
+      this.isInStoryPageSideEdge_(event, pageRect) ||
+      this.isTooLargeOnPage_(target, pageRect)
     ) {
       event.preventDefault();
       return false;
@@ -567,13 +574,23 @@ export class ManualAdvancement extends AdvancementConfig {
   /**
    * Checks if click target is too large on the page and preventing navigation.
    * If yes, the link is ignored & logged.
-   * @param {!Event} event
+   * @param {!Element} target
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isTooLargeOnPage_(event, pageRect) {
-    return event.clientX <= pageRect.x;
+  isTooLargeOnPage_(target, pageRect) {
+    const targetRect = target./*OK*/ getBoundingClientRect();
+    console.log(targetRect);
+    if (
+      (targetRect.height * targetRect.width) /
+        (pageRect.width * pageRect.height) >=
+      MAX_LINK_SCREEN_PERCENT
+    ) {
+      // user().error(TAG, 'Link occupies over 80% of page size; overriden to allow for navigation.');
+      return true;
+    }
+    return false;
   }
 
   /**
