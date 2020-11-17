@@ -56,6 +56,7 @@ export function springAds(global, data) {
       context,
       slotName: data['adslot'],
     });
-    window.ASCDP && window.ASCDP.adS.renderAd(data.adslot);
+    const adlib = window.ASCDP || context.master.ASCDP || '';
+    adlib && adlib.adS.renderAd(data.adslot);
   }
 }
