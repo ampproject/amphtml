@@ -235,30 +235,108 @@ describes.realWin(
       expect(header0).to.have.attribute('aria-controls');
       expect(header0).to.have.attribute('role');
       expect(header0).to.have.attribute('aria-expanded');
+      expect(header0).to.have.attribute('id');
       expect(header0.getAttribute('aria-expanded')).to.equal('true');
       expect(content0).to.have.attribute('id');
+      expect(content0).to.have.attribute('aria-labelledby');
+      expect(content0).to.have.attribute('role');
       expect(header0.getAttribute('aria-controls')).to.equal(
         content0.getAttribute('id')
+      );
+      expect(header0.getAttribute('id')).to.equal(
+        content0.getAttribute('aria-labelledby')
       );
 
       expect(header1).to.have.attribute('tabindex');
       expect(header1).to.have.attribute('aria-controls');
       expect(header1).to.have.attribute('role');
       expect(header1).to.have.attribute('aria-expanded');
+      expect(header1).to.have.attribute('id');
       expect(header1.getAttribute('aria-expanded')).to.equal('false');
       expect(content1).to.have.attribute('id');
+      expect(content1).to.have.attribute('aria-labelledby');
+      expect(content1).to.have.attribute('role');
       expect(header1.getAttribute('aria-controls')).to.equal(
         content1.getAttribute('id')
+      );
+      expect(header1.getAttribute('id')).to.equal(
+        content1.getAttribute('aria-labelledby')
       );
 
       expect(header2).to.have.attribute('tabindex');
       expect(header2).to.have.attribute('aria-controls');
       expect(header2).to.have.attribute('role');
       expect(header2).to.have.attribute('aria-expanded');
+      expect(header2).to.have.attribute('id');
       expect(header2.getAttribute('aria-expanded')).to.equal('false');
       expect(content2).to.have.attribute('id');
+      expect(content2).to.have.attribute('aria-labelledby');
+      expect(content2).to.have.attribute('role');
       expect(header2.getAttribute('aria-controls')).to.equal(
         content2.getAttribute('id')
+      );
+      expect(header2.getAttribute('id')).to.equal(
+        content2.getAttribute('aria-labelledby')
+      );
+    });
+
+    it('should not overwrite existing header and content ids', async () => {
+      element = html`
+        <amp-accordion layout="fixed" width="300" height="200">
+          <section expanded id="section1">
+            <h1 id="h1">header1</h1>
+            <div id="c1">content1</div>
+          </section>
+          <section>
+            <h1 id="h2">header2</h1>
+            <div>content2</div>
+          </section>
+          <section>
+            <h1>header3</h1>
+            <div id="c3">content3</div>
+          </section>
+        </amp-accordion>
+      `;
+      win.document.body.appendChild(element);
+      await element.build();
+
+      const sections = element.children;
+      const {
+        firstElementChild: header0,
+        lastElementChild: content0,
+      } = sections[0];
+      const {
+        firstElementChild: header1,
+        lastElementChild: content1,
+      } = sections[1];
+      const {
+        firstElementChild: header2,
+        lastElementChild: content2,
+      } = sections[2];
+
+      expect(header0.getAttribute('id')).to.equal('h1');
+      expect(content0.getAttribute('id')).to.equal('c1');
+      expect(header0.getAttribute('aria-controls')).to.equal(
+        content0.getAttribute('id')
+      );
+      expect(header0.getAttribute('id')).to.equal(
+        content0.getAttribute('aria-labelledby')
+      );
+
+      expect(header1.getAttribute('id')).to.equal('h2');
+      expect(header1.getAttribute('aria-controls')).to.equal(
+        content1.getAttribute('id')
+      );
+      expect(header1.getAttribute('id')).to.equal(
+        content1.getAttribute('aria-labelledby')
+      );
+
+      expect(content2.getAttribute('id')).to.equal('c3');
+      expect(header2.getAttribute('aria-controls')).to.equal(
+        content2.getAttribute('id')
+      );
+      expect(header2.getAttribute('id')).to.equal(
+        content2.getAttribute('aria-labelledby')
       );
     });
 
