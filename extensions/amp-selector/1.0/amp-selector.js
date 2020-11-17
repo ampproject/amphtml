@@ -65,24 +65,19 @@ class AmpSelector extends PreactBaseElement {
       this.mutateProps(dict({'value': value}));
     };
 
-    this.registerApiAction('clear', (api) => api./*OK*/ clear());
+    this.registerApiAction('clear', (api) => {
+      api./*OK*/ clear();
+      this.mutateProps(dict({'value': []}));
+    });
     this.registerApiAction('selectUp', (api, invocation) => {
       const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
-      const initialValue = /** @type {!Array<string>} */ (this.getProp(
-        'value',
-        []
-      ));
-      selectByDelta(delta, initialValue, options, api);
+      api./*OK*/ selectBy(delta);
     });
     this.registerApiAction('selectDown', (api, invocation) => {
       const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
-      const initialValue = /** @type {!Array<string>} */ (this.getProp(
-        'value',
-        []
-      ));
-      selectByDelta(delta, initialValue, options, api);
+      api./*OK*/ selectBy(delta);
     });
     this.registerApiAction('toggle', (api, invocation) => {
       const {args} = invocation;
@@ -170,6 +165,7 @@ function getOptions(element, mu) {
         as: OptionShim,
         option,
         disabled,
+        order: index,
         role: child.getAttribute('role') || 'option',
         shimDomElement: child,
         // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
@@ -236,33 +232,6 @@ function callbackByDelta(delta, value, options, cb) {
   const selectUpWhenNoneSelected = previous === -1 && delta < 0;
   const index = selectUpWhenNoneSelected ? delta : previous + delta;
   cb(mod(index, options.length));
-}
-
-/**
- * This method modifies the selected state by at most one value of the
- * current selected state by the given delta.
- * The modification is done in FIFO order. When no values are selected,
- * the new selected state becomes the option at the given delta.
- *
- * ex: (1, [0, 2], [0, 1, 2, 3]) => [2, 1]
- * ex: (-1, [2, 1], [0, 1, 2, 3]) => [1]
- * ex: (2, [2, 1], [0, 1, 2, 3]) => [1, 0]
- * ex: (-1, [], [0, 1, 2, 3]) => [3]
- * @param {number} delta
- * @param {!Array<string>} value
- * @param {Array<string>} options
- * @param {!SelectorDef.SelectorApi} api
- * @return {{value: Array<string>, option: string}|undefined}
- */
-function selectByDelta(delta, value, options, api) {
-  callbackByDelta(delta, value.shift(), options, (index) => {
-    const option = options[index];
-    // Only add option if it is not already selected.
-    if (value.indexOf(option) === -1) {
-      api./*OK */ toggle(option, /* select */ true);
-      value.push(option);
-    }
-  });
 }
 
 /**

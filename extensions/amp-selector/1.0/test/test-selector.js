@@ -240,13 +240,13 @@ describes.sandboxed('Selector preact component', {}, () => {
         ref = Preact.createRef();
         wrapper = mount(
           <Selector ref={ref} multiple defaultValue={['a']}>
-            <Option key={1} option="a">
+            <Option key={1} option="a" order={1}>
               option a
             </Option>
-            <Option key={2} option="b">
+            <Option key={2} option="b" order={2}>
               option b
             </Option>
-            <Option key={3} option="c" disabled>
+            <Option key={3} option="c" disabled order={3}>
               option c
             </Option>
           </Selector>
@@ -328,6 +328,45 @@ describes.sandboxed('Selector preact component', {}, () => {
         // No options are selected.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('select by delta', async () => {
+        // First option is selected by default.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Next option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Try to select next option (disabled).
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(-1);
+        wrapper.update();
+
+        // Previous option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(0);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
       });
     });
@@ -337,13 +376,13 @@ describes.sandboxed('Selector preact component', {}, () => {
         ref = Preact.useRef();
         wrapper = mount(
           <Selector ref={ref} defaultValue={['a']}>
-            <Option key={1} option="a">
+            <Option key={1} option="a" order={1}>
               option a
             </Option>
-            <Option key={2} option="b">
+            <Option key={2} option="b" order={2}>
               option b
             </Option>
-            <Option key={3} option="c" disabled>
+            <Option key={3} option="c" disabled order={3}>
               option c
             </Option>
           </Selector>
@@ -425,6 +464,45 @@ describes.sandboxed('Selector preact component', {}, () => {
         // No options are selected.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('select by delta', async () => {
+        // First option is selected by default.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Next option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Try to select next option (disabled).
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(-1);
+        wrapper.update();
+
+        // Previous option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(0);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
       });
     });

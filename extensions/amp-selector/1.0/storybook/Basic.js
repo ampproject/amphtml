@@ -50,7 +50,7 @@ function SelectorWithActions(props) {
       <Selector ref={ref} {...props}>
         {props.children.slice(0, 2)}
         {show && (
-          <Option as="div" option="2.5">
+          <Option as="div" option="2.5" order={2}>
             Option 2.5
           </Option>
         )}
@@ -70,13 +70,19 @@ function SelectorWithActions(props) {
         <button onClick={() => ref.current./*OK*/ toggle('2', false)}>
           deselect (option "2")
         </button>
+        <button onClick={() => ref.current./*OK*/ selectBy(-2)}>
+          select up by 2
+        </button>
+        <button onClick={() => ref.current./*OK*/ selectBy(1)}>
+          select down by 1
+        </button>
         <button onClick={() => ref.current./*OK*/ clear()}>clear all</button>
       </div>
     </section>
   );
 }
 
-export const listItems = () => {
+export const actionsAndOrder = () => {
   return (
     <>
       <SelectorWithActions multiple aria-label="Image menu">
@@ -86,6 +92,7 @@ export const listItems = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
           option="1"
+          order={0}
           disabled
         ></Option>
         <Option
@@ -94,6 +101,7 @@ export const listItems = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
           option="2"
+          order={1}
         ></Option>
         <br />
         <Option
@@ -102,6 +110,7 @@ export const listItems = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
           option="3"
+          order={3}
         ></Option>
         <Option
           as="img"
@@ -109,6 +118,7 @@ export const listItems = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
           option="4"
+          order={4}
         ></Option>
       </SelectorWithActions>
     </>

@@ -18,12 +18,15 @@ import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
+import {mod} from '../../../src/utils/math';
 import {
   useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from '../../../src/preact';
 
@@ -54,7 +57,9 @@ function SelectorWithRef(
   const [selectedState, setSelectedState] = useState(
     value ? value : defaultValue
   );
+  const optionsRef = useRef([]);
   const selected = value ? value : selectedState;
+
   const selectOption = useCallback(
     (option) => {
       if (!option) {
@@ -80,10 +85,11 @@ function SelectorWithRef(
 
   const context = useMemo(
     () => ({
-      selected,
-      selectOption,
       disabled,
       multiple,
+      optionsRef,
+      selected,
+      selectOption,
     }),
     [disabled, multiple, selected, selectOption]
   );
@@ -112,14 +118,49 @@ function SelectorWithRef(
     [setSelectedState, selectOption, selected]
   );
 
+  /**
+   * This method modifies the selected state by at most one value of the
+   * current selected state by the given delta.
+   * The modification is done in FIFO order. When no values are selected,
+   * the new selected state becomes the option at the given delta.
+   *
+   * Only meaningful if `order` is provided to `Option` children.
+   *
+   * ex: (1, [0, 2], [0, 1, 2, 3]) => [2, 1]
+   * ex: (-1, [2, 1], [0, 1, 2, 3]) => [1]
+   * ex: (2, [2, 1], [0, 1, 2, 3]) => [1, 0]
+   * ex: (-1, [], [0, 1, 2, 3]) => [3]
+   */
+  const selectBy = useCallback(
+    (delta) => {
+      if (!optionsRef.current.length) {
+        return;
+      }
+      const options = optionsRef.current.filter((v) => v != undefined);
+      if (!options.length) {
+        return;
+      }
+      const previous = options.indexOf(selected.shift());
+      // If previousIndex === -1 is true, then a negative delta will be offset
+      // one more than is wanted when looping back around in the options.
+      // This occurs when no options are selected and "selectUp" is called.
+      const selectUpWhenNoneSelected = previous === -1 && delta < 0;
+      const index = selectUpWhenNoneSelected ? delta : previous + delta;
+      const option = options[mod(index, options.length)];
+      selectOption(option);
+    },
+    [selected, selectOption]
+  );
+
   useImperativeHandle(
     ref,
     () =>
       /** @type {!SelectorDef.SelectorApi} */ ({
         clear,
+        selectBy,
         toggle,
       }),
-    [clear, toggle]
+    [clear, selectBy, toggle]
   );
 
   return (
@@ -153,6 +194,7 @@ export function Option({
   onClick: customOnClick,
   onKeyDown: customOnKeyDown,
   option,
+  order,
   role = 'option',
   style,
   tabIndex = 0,
@@ -161,9 +203,17 @@ export function Option({
   const {
     disabled: selectorDisabled,
     multiple: selectorMultiple,
+    optionsRef,
     selected,
     selectOption,
   } = useContext(SelectorContext);
+
+  useLayoutEffect(() => {
+    if (order != undefined) {
+      optionsRef.current[order] = option;
+    }
+    return () => delete optionsRef[order];
+  }, [order, option, optionsRef]);
 
   const trySelect = useCallback(() => {
     if (selectorDisabled || disabled) {

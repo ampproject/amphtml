@@ -34,11 +34,15 @@ var SelectorDef = {};
 SelectorDef.Props;
 
 /**
+ * Note: `order` must be a positive integer to use
+ * `selectBy`, otherwise it will be noop.
+ *
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent),
  *   option: *,
  *   disabled: (boolean|undefined),
  *   shimDomElement: !Element,
+ *   order: (number|undefined),
  *   onClick: (?function(!Event)|undefined),
  *   role: (string|undefined),
  *   shimSelected: (boolean|undefined),
@@ -66,4 +70,9 @@ SelectorDef.SelectorApi = class {
    * @param {boolean|undefined} value
    */
   toggle(option, value) {}
+
+  /**
+   * @param {number} delta
+   */
+  selectBy(delta) {}
 };
