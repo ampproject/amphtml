@@ -736,59 +736,64 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Shows the story provided by the URL in the player.
-   * @param {string} storyUrl
+   * Shows the story provided by the URL in the player and go to the page if provided.
+   * @param {?string} storyUrl
+   * @param {string=} pageId
    */
-  show(storyUrl) {
+  show(storyUrl, pageId = null) {
     // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
+    const storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
 
     // TODO(#28987): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
 
-    if (storyIdx === this.currentIdx_) {
-      return;
+    if (storyIdx !== this.currentIdx_) {
+      const adjacentStoriesIdx = this.iframePool_.findAdjacent(
+        storyIdx,
+        this.stories_.length - 1
+      );
+
+      adjacentStoriesIdx.forEach((idx) => {
+        const story = this.stories_[idx];
+        let {iframeIdx} = story;
+
+        if (iframeIdx === -1) {
+          const visibilityState =
+            idx === storyIdx
+              ? VisibilityState.VISIBLE
+              : VisibilityState.PRERENDER;
+          this.allocateIframeForStory_(
+            idx,
+            storyIdx < this.currentIdx_ /** reverse */,
+            visibilityState
+          );
+          iframeIdx = story.iframeIdx;
+        }
+
+        let iframePosition;
+        if (idx === storyIdx) {
+          iframePosition = IframePosition.CURRENT;
+          this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
+          tryFocus(this.iframes_[iframeIdx]);
+        } else {
+          iframePosition =
+            idx > storyIdx ? IframePosition.NEXT : IframePosition.PREVIOUS;
+        }
+
+        this.updateIframePosition_(iframeIdx, iframePosition);
+      });
+
+      this.currentIdx_ = storyIdx;
+      this.onNavigation_();
     }
 
-    const adjacentStoriesIdx = this.iframePool_.findAdjacent(
-      storyIdx,
-      this.stories_.length - 1
-    );
-
-    adjacentStoriesIdx.forEach((idx) => {
-      const story = this.stories_[idx];
-      let {iframeIdx} = story;
-
-      if (iframeIdx === -1) {
-        const visibilityState =
-          idx === storyIdx
-            ? VisibilityState.VISIBLE
-            : VisibilityState.PRERENDER;
-        this.allocateIframeForStory_(
-          idx,
-          storyIdx < this.currentIdx_ /** reverse */,
-          visibilityState
-        );
-        iframeIdx = story.iframeIdx;
-      }
-
-      let iframePosition;
-      if (idx === storyIdx) {
-        iframePosition = IframePosition.CURRENT;
-        this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
-        tryFocus(this.iframes_[iframeIdx]);
-      } else {
-        iframePosition =
-          idx > storyIdx ? IframePosition.NEXT : IframePosition.PREVIOUS;
-      }
-
-      this.updateIframePosition_(iframeIdx, iframePosition);
-    });
-
-    this.currentIdx_ = storyIdx;
-    this.onNavigation_();
+    if (pageId != null) {
+      this.goToPageId_(pageId);
+    }
   }
 
   /** Sends a message muting the current story. */
@@ -1269,6 +1274,17 @@ export class AmpStoryPlayer {
         )
         .then((event) => this.dispatchPageAttachmentEvent_(event.value));
     });
+  }
+
+  /**
+   * @param {string} pageId
+   * @private
+   */
+  goToPageId_(pageId) {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest('selectPage', {'id': pageId})
+    );
   }
 
   /**

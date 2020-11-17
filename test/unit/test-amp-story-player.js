@@ -929,6 +929,26 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       });
     });
 
+    it('navigate to id when calling gotToPageId', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+      player.show('', 'page-2');
+
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('selectPage', {
+        'id': 'page-2',
+      });
+    });
+
     it('takes to first story when swiping on the last one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
