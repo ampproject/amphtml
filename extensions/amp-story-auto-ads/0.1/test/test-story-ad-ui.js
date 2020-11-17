@@ -95,6 +95,13 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       });
     });
 
+    it('returns false without error in inabox', () => {
+      const metadata = {
+        'cta-url': 'https://www.kittens.com',
+      };
+      expect(validateCtaMetadata(metadata, true /* opt_inabox */)).to.be.false;
+    });
+
     it('returns false if no cta url', () => {
       const metadata = {
         'cta-type': 'SHOP',
