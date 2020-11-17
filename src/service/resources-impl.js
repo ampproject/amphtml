@@ -31,6 +31,7 @@ import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
+import {isAmp4Email} from '../format';
 import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
@@ -217,7 +218,10 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    if (isExperimentOn(this.win, 'intersect-resources')) {
+    if (
+      isExperimentOn(this.win, 'intersect-resources') &&
+      !isAmp4Email(this.win.document)
+    ) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and
