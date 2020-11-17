@@ -19,6 +19,7 @@ import {
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -463,7 +464,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
+          !this.isInStoryPageSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
           return true;
@@ -500,7 +501,7 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (this.isInScreenSideEdge_(event, pageRect)) {
+    if (this.isInStoryPageSideEdge_(event, pageRect)) {
       event.preventDefault();
       return false;
     }
@@ -546,16 +547,16 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Checks if click was inside of one of the side edges of the screen.
+   * Checks if click was inside of one of the side edges of the page.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isInScreenSideEdge_(event, pageRect) {
+  isInStoryPageSideEdge_(event, pageRect) {
     return (
-      event.clientX <= PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.width - PROTECTED_SCREEN_EDGE_PX
+      event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
     );
   }
 
@@ -610,7 +611,19 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
-    const pageRect = this.element_.getLayoutBox();
+
+    // Can use LayoutBox for mobile since the story page occupies entire screen.
+    // Desktop UI needs to use the getBoundingClientRect.
+    let pageRect;
+    if (
+      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
+    ) {
+      pageRect = this.element_.getLayoutBox();
+    } else {
+      pageRect = this.element_
+        .querySelector('amp-story-page[active]')
+        ./*OK*/ getBoundingClientRect();
+    }
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
