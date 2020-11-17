@@ -460,6 +460,10 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
+
+    if (this.maybeLoadStoryDevTools_()) {
+      return;
+    }
   }
 
   /**
@@ -2849,6 +2853,31 @@ export class AmpStory extends AMP.BaseElement {
         win.CSS.supports('display', 'grid') &&
         win.CSS.supports('color', 'var(--test)')
     );
+  }
+
+  /**
+   * Loads amp-story-dev-tools if it is enabled.
+   * @private
+   */
+  maybeLoadStoryDevTools_() {
+    if (
+      !getMode().development ||
+      this.element.getAttribute('mode') === 'inspect'
+    ) {
+      return false;
+    }
+
+    this.element.setAttribute('mode', 'inspect');
+
+    const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
+    this.win.document.body.appendChild(devToolsEl);
+    this.element.setAttribute('hide', '');
+
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-story-dev-tools'
+    );
+    return true;
   }
 }
 
