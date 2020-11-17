@@ -71,6 +71,7 @@ import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
+import {whenWithinViewport} from './within-viewport';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -632,6 +633,28 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Resolves when underlying element is within the viewport range given or
+   * has been loaded already.
+   * @param {number|boolean} viewport derived from renderOutsideViewport.
+   * @return {!Promise}
+   * @protected
+   */
+  whenWithinViewport(viewport) {
+    devAssert(viewport !== false);
+    const resource = this.getResource();
+    if (WITHIN_VIEWPORT_INOB || getMode().localDev || getMode().test) {
+      // Resolve is already laid out or viewport is true.
+      if (!resource.isLayoutPending() || viewport === true) {
+        return Promise.resolve();
+      }
+      // Track when within the specified number of viewports.
+      const viewportNum = dev().assertNumber(viewport);
+      return whenWithinViewport(this.element, viewportNum);
+    }
+    return resource.whenWithinViewport(viewport);
+  }
+
+  /**
    * This is the entry point into the ad promise chain.
    *
    * Calling this function will initiate the following sequence of events: ad
@@ -677,7 +700,7 @@ export class AmpA4A extends AMP.BaseElement {
         // meeting the definition as opposed to waiting on the promise.
         const delay = this.delayAdRequestEnabled();
         if (delay) {
-          return this.getResource().whenWithinViewport(
+          return this.whenWithinViewport(
             typeof delay == 'number' ? delay : this.renderOutsideViewport()
           );
         }
