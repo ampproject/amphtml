@@ -464,7 +464,8 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInStoryPageSideEdge_(event, this.element_.getLayoutBox())
+          !this.isInStoryPageSideEdge_(event, this.element_.getLayoutBox()) &&
+          !this.isTooLargeOnPage_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
           return true;
@@ -501,7 +502,10 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (this.isInStoryPageSideEdge_(event, pageRect)) {
+    if (
+      this.isInStoryPageSideEdge_(event, pageRect) &&
+      this.isTooLargeOnPage_(event, pageRect)
+    ) {
       event.preventDefault();
       return false;
     }
@@ -558,6 +562,18 @@ export class ManualAdvancement extends AdvancementConfig {
       event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
       event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
     );
+  }
+
+  /**
+   * Checks if click target is too large on the page and preventing navigation.
+   * If yes, the link is ignored & logged.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isTooLargeOnPage_(event, pageRect) {
+    return event.clientX <= pageRect.x;
   }
 
   /**
