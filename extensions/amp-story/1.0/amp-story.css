@@ -975,3 +975,12 @@ amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
   --i-amphtml-interactive-animation-delay: 350ms !important;
 }
+
+amp-story-page[active] .panner,
+amp-story-page[active] .scaler {
+  transition: transform 1s ease-in-out;
+}
+
+.scaler, .panner {
+  height: 100%;
+}
