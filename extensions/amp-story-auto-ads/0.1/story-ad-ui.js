@@ -125,12 +125,16 @@ export function localizeCtaText(ctaType, localizationService) {
 /**
  * Returns a boolean indicating if there is sufficent metadata to render CTA.
  * @param {!StoryAdUIMetadata} metadata
+ * @param {=boolean} opt_inabox
  * @return {boolean}
  */
-export function validateCtaMetadata(metadata) {
+export function validateCtaMetadata(metadata, opt_inabox) {
   // If making a CTA layer we need a button name & outlink url.
   if (!metadata[A4AVarNames.CTA_TYPE] || !metadata[A4AVarNames.CTA_URL]) {
-    user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
+    // Don't polute inabox logs, as we don't know when this is intended to
+    // be a story ad.
+    !opt_inabox &&
+      user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
     return false;
   }
   return true;
