@@ -180,6 +180,10 @@ amp-story[standalone]:fullscreen {
   max-width: none !important;
 }
 
+amp-story[hide] {
+  display: none !important;
+}
+
 amp-story .amp-video-eq {
   height: 14px !important;;
   width: 14px !important;
