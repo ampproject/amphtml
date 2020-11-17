@@ -463,8 +463,9 @@ export class Resource {
   }
 
   /** Removes the premeasured rect, likely forcing a manual measure. */
-  invalidatePremeasurement() {
+  invalidatePremeasurementAndRequestMeasure() {
     this.premeasuredRect_ = null;
+    this.requestMeasure();
   }
 
   /**
@@ -761,6 +762,8 @@ export class Resource {
    *    viewport range given.
    */
   whenWithinViewport(viewport) {
+    // TODO(#30620): remove this method once IntersectionObserver{root:doc} is
+    // polyfilled.
     devAssert(viewport !== false);
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
@@ -1010,7 +1013,7 @@ export class Resource {
   /**
    * Returns true if the resource layout has not completed or failed.
    * @return {boolean}
-   * */
+   */
   isLayoutPending() {
     return (
       this.state_ != ResourceState.LAYOUT_COMPLETE &&
