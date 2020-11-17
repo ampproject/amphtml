@@ -581,13 +581,15 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isTooLargeOnPage_(target, pageRect) {
     const targetRect = target./*OK*/ getBoundingClientRect();
-    console.log(targetRect);
     if (
       (targetRect.height * targetRect.width) /
         (pageRect.width * pageRect.height) >=
       MAX_LINK_SCREEN_PERCENT
     ) {
-      // user().error(TAG, 'Link occupies over 80% of page size; overriden to allow for navigation.');
+      user().error(
+        'AMP-STORY-PAGE',
+        'Link occupies over 80% of page size; overriden to allow for navigation.'
+      );
       return true;
     }
     return false;
