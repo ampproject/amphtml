@@ -53,6 +53,7 @@ function ScrollerWithRef(
     restingIndex,
     setRestingIndex,
     snap,
+    snapBy = 1,
     visibleCount,
     _thumbnails,
     ...rest
@@ -141,6 +142,7 @@ function ScrollerWithRef(
       pivotIndex,
       restingIndex,
       snap,
+      snapBy,
       visibleCount,
       _thumbnails,
     },
@@ -338,6 +340,7 @@ function renderSlides(
     offsetRef,
     pivotIndex,
     snap,
+    snapBy,
     visibleCount,
     _thumbnails,
   },
@@ -351,7 +354,9 @@ function renderSlides(
         key={key}
         data-slide={index}
         class={`${classes.slideSizing} ${classes.slideElement} ${
-          snap ? classes.enableSnap : classes.disableSnap
+          snap && mod(index, snapBy) === 0
+            ? classes.enableSnap
+            : classes.disableSnap
         } ${_thumbnails ? classes.thumbnails : ''}`}
         style={{flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`}}
       >

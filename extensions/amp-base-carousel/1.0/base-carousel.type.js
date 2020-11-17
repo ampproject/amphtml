@@ -34,6 +34,7 @@ var BaseCarouselDef = {};
  *   mixedLength: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
  *   snap: (boolean|undefined),
+ *   snapBy: (number|undefined),
  *   visibleCount: (number|undefined),
  * }}
  */
@@ -48,6 +49,7 @@ BaseCarouselDef.Props;
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),
  *   snap: (boolean|undefined),
+ *   snapBy: (number|undefined),
  *   visibleCount: (number|undefined),
  * }}
  */
@@ -63,6 +65,7 @@ BaseCarouselDef.ScrollerProps;
  *   pivotIndex: number,
  *   restingIndex: number,
  *   snap: (boolean|undefined),
+ *   snapBy: (number|undefined),
  *   src: (string|undefined),
  *   thumbnailSrc: (string|undefined),
  *   visibleCount: (number|undefined),
