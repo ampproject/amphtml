@@ -77,6 +77,7 @@ The example below demonstrates an `<amp-mega-menu>` with three menu items. The f
         <div role="dialog">
           <amp-img
             src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+            alt="Apples"
             width="300"
             height="200"
           ></amp-img>
@@ -127,6 +128,7 @@ The example below demonstrates this ability by nesting `<amp-list>` inside `<amp
             <div role="dialog">
               <amp-img
                 src="{{server_for_email}}{{img}}"
+                alt="{{name}}"
                 width="320"
                 height="213"
               ></amp-img>

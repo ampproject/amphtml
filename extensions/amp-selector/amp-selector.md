@@ -45,32 +45,34 @@ Example:
   <amp-selector layout="container" name="single_image_select">
     <ul>
       <li>
-        <amp-img src="/img1.png" width="50" height="50" option="1"></amp-img>
+        <amp-img src="/img1.png" width="50" height="50" option="1" alt="Image 1"></amp-img>
       </li>
       <li>
-        <amp-img src="/img2.png" width="50" height="50" option="2"></amp-img>
+        <amp-img src="/img2.png" width="50" height="50" option="2" alt="Image 2"></amp-img>
       </li>
       <li option="na" selected>None of the Above</li>
     </ul>
   </amp-selector>
   <amp-selector layout="container" name="multi_image_select" multiple>
-    <amp-img src="/img1.png" width="50" height="50" option="1"></amp-img>
-    <amp-img src="/img2.png" width="50" height="50" option="2"></amp-img>
-    <amp-img src="/img3.png" width="50" height="50" option="3"></amp-img>
+    <amp-img src="/img1.png" width="50" height="50" option="1" alt="Image 1"></amp-img>
+    <amp-img src="/img2.png" width="50" height="50" option="2" alt="Image 2"></amp-img>
+    <amp-img src="/img3.png" width="50" height="50" option="3" alt="Image 3"></amp-img>
   </amp-selector>
   <amp-selector layout="container" name="multi_image_select_1" multiple>
     <amp-carousel id="carousel-1" width="200" height="60" controls>
-      <amp-img src="/img1.png" width="80" height="60" option="a"></amp-img>
+      <amp-img src="/img1.png" width="80" height="60" option="a" alt="Image 1"></amp-img>
       <amp-img
         src="/img2.png"
+        alt="Image 2"
         width="80"
         height="60"
         option="b"
         selected
       ></amp-img>
-      <amp-img src="/img3.png" width="80" height="60" option="c"></amp-img>
+      <amp-img src="/img3.png" width="80" height="60" option="c" alt="Image 3"></amp-img>
       <amp-img
         src="/img4.png"
+        alt="Image 4"
         width="80"
         height="60"
         option="d"
@@ -86,16 +88,17 @@ Example:
   form="form1"
 >
   <amp-carousel id="carousel-1" width="400" height="300" type="slides" controls>
-    <amp-img src="/img1.png" width="80" height="60" option="a"></amp-img>
+    <amp-img src="/img1.png" width="80" height="60" option="a" alt="Image 1"></amp-img>
     <amp-img
       src="/img2.png"
+      alt="Image 2"
       width="80"
       height="60"
       option="b"
       selected
     ></amp-img>
-    <amp-img src="/img3.png" width="80" height="60" option="c"></amp-img>
-    <amp-img src="/img4.png" width="80" height="60" option="d"></amp-img>
+    <amp-img src="/img3.png" width="80" height="60" option="c" alt="Image 3"></amp-img>
+    <amp-img src="/img4.png" width="80" height="60" option="d" alt="Image 4"></amp-img>
   </amp-carousel>
 </amp-selector>
 ```

@@ -87,6 +87,7 @@ to preserve the collapsed/expanded state.[/filter]
   <section expanded>
     <h2>Section 3</h2>
     <amp-img src="{{server_for_email}}/static/inline-examples/images/squirrel.jpg"
+      alt="Squirrel"
       width="320"
       height="256"></amp-img>
   </section>
@@ -118,6 +119,7 @@ animation when the content is expanded and "roll up" animation when collapsed.
     <h2>Section 3</h2>
     <amp-img
       src="{{server_for_email}}/static/inline-examples/images/squirrel.jpg"
+      alt="Squirrel"
       width="320"
       height="256"
     ></amp-img>
@@ -162,6 +164,7 @@ collapsed `<section>`, any currently expanded `<section>` collapses.
     <h2>Section 3</h2>
     <amp-img
       src="{{server_for_email}}/static/inline-examples/images/squirrel.jpg"
+      alt="Squirrel"
       width="320"
       height="256"
     ></amp-img>

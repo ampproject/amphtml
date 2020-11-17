@@ -83,6 +83,7 @@ either image, the image displays in the lightbox.
   layout="responsive"
   width="360"
   height="360"
+  alt="frog"
 ></amp-img>
 
 <amp-img
@@ -93,6 +94,7 @@ either image, the image displays in the lightbox.
   layout="responsive"
   width="360"
   height="360"
+  alt="cat"
 ></amp-img>
 ```
 
@@ -104,7 +106,7 @@ caption as follows:
 
 1.  If the image is in a `figure` tag, the content of the `<figcaption>`
     displays for the caption.
-1.  If the image specifies an `aria-describedby` attribute, the content of the
+2.  If the image specifies an `aria-describedby` attribute, the content of the
     element whose ID is specified by the `aria-describedby` attribute displays
     for the caption.
 
@@ -119,6 +121,7 @@ caption as follows:
     layout="responsive"
     width="300"
     height="246"
+    alt="dog"
   ></amp-img>
   <figcaption>Border Collie</figcaption>
 </figure>
@@ -134,6 +137,7 @@ caption as follows:
     layout="responsive"
     width="300"
     height="246"
+    alt="dog"
   ></amp-img>
   <div id="imageDescription">This is a border collie.</div>
 </div>

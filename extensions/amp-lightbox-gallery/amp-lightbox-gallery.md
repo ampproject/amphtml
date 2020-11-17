@@ -53,9 +53,9 @@ between images, and offers a thumbnail gallery view for browsing all picture
 thumbnails in a grid.
 
 ```html
-<amp-img src="cat.jpg" width="100" height="100" lightbox></amp-img>
-<amp-img src="dog.jpg" width="100" height="100" lightbox></amp-img>
-<amp-img src="bird.jpg" width="100" height="100" lightbox></amp-img>
+<amp-img src="cat.jpg" width="100" height="100" alt="cat" lightbox></amp-img>
+<amp-img src="dog.jpg" width="100" height="100" alt="dog" lightbox></amp-img>
+<amp-img src="bird.jpg" width="100" height="100" alt="bird" lightbox></amp-img>
 ```
 
 ### Display a lightbox with `<amp-carousel>`
@@ -75,9 +75,9 @@ were originally on. Currently, only the `type='slides'` carousel is supported.
   layout="responsive"
   type="slides"
 >
-  <amp-img src="image1" width="200" height="100"></amp-img>
-  <amp-img src="image1" width="200" height="100"></amp-img>
-  <amp-img src="image1" width="200" height="100"></amp-img>
+  <amp-img src="image1" width="200" height="100" alt="Image 1"></amp-img>
+  <amp-img src="image1" width="200" height="100" alt="Image 2"></amp-img>
+  <amp-img src="image1" width="200" height="100" alt="Image 3"></amp-img>
 </amp-carousel>
 ```
 
@@ -154,6 +154,7 @@ thumbnail item for your lightboxed element via the attribute
   height="200"
   layout="nodisplay"
   src="https://picsum.photos/200/200?image=1074"
+  alt="Thumbnail"
 >
 </amp-img>
 ```

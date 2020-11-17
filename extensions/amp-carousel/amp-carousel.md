@@ -54,16 +54,19 @@ navigation arrow.
 >
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+    alt="Apples"
     width="450"
     height="300"
   ></amp-img>
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+    alt="Lemons"
     width="450"
     height="300"
   ></amp-img>
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+    alt="Blueberries"
     width="450"
     height="300"
   ></amp-img>
@@ -252,12 +255,15 @@ autoplay.
   role="region"
   aria-label="Looping carousel">
   <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+    alt="Apples"
     width="450"
     height="300"></amp-img>
   <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+    alt="Lemons"
     width="450"
     height="300"></amp-img>
   <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+    alt="Blueberries"
     width="450"
     height="300"></amp-img>
 </amp-carousel>

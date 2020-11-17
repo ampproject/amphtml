@@ -71,6 +71,7 @@ The following example demonstrates an `<amp-nested-menu>` with two levels of nes
                 <h4 amp-nested-submenu-close>go back</h4>
                 <amp-img
                   src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+                  alt="Apples"
                   layout="responsive"
                   width="450"
                   height="300"
@@ -117,6 +118,7 @@ The example below demonstrates this ability by nesting `<amp-nested-menu>` insid
               <button amp-nested-submenu-close>close</button>
               <amp-img
                 src="{{imageUrl}}"
+                alt="{{title}}"
                 layout="responsive"
                 width="400"
                 height="300"
