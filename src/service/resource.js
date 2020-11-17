@@ -465,6 +465,7 @@ export class Resource {
   /** Removes the premeasured rect, likely forcing a manual measure. */
   invalidatePremeasurement() {
     this.premeasuredRect_ = null;
+    this.requestMeasure();
   }
 
   /**

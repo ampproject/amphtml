@@ -742,6 +742,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       expect(resource1.hasBeenPremeasured()).true;
       resources.viewport_.changeObservable_.fire({relayoutAll_: true});
       expect(resource1.hasBeenPremeasured()).false;
+      expect(resource1.isMeasureRequested()).true;
     });
 
     it('should applySizesAndMediaQuery on relayout', () => {
