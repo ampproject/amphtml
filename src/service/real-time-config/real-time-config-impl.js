@@ -73,14 +73,14 @@ export const RTC_ERROR_ENUM = {
 
 export class RealTimeConfigManager {
   /**
-   * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4aElement
+   * @param {!../ampdoc-impl.AmpDoc} ampDoc
    */
-  constructor(a4aElement) {
-    /** @private {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} */
-    this.a4aElement_ = a4aElement;
+  constructor(ampDoc) {
+    /** @protected {!../ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = ampDoc;
 
     /** @private {!Window} */
-    this.win_ = this.a4aElement_.win;
+    this.win_ = ampDoc.win;
 
     /** @private {!Object<string, boolean>} */
     this.seenUrls_ = {};
@@ -93,9 +93,6 @@ export class RealTimeConfigManager {
 
     /** @private {?RtcConfigDef} */
     this.rtcConfig_ = null;
-
-    /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = this.a4aElement_.getAmpDoc();
 
     /** @private {?CONSENT_POLICY_STATE} */
     this.consentState_ = null;
@@ -142,7 +139,7 @@ export class RealTimeConfigManager {
       ERROR_TYPE: errorType,
       HREF: this.win_.location.href,
     };
-    const service = Services.urlReplacementsForDoc(this.a4aElement_.element);
+    const service = Services.urlReplacementsForDoc(this.ampDoc_);
     const url = service.expandUrlSync(errorReportingUrl, macros, allowlist);
     new this.win_.Image().src = url;
   }
@@ -157,7 +154,7 @@ export class RealTimeConfigManager {
    * @return {string}
    */
   getCalloutParam_(url) {
-    const urlService = Services.urlForDoc(this.a4aElement_.element);
+    const urlService = Services.urlForDoc(this.ampDoc_);
     const parsedUrl = urlService.parse(url);
     return (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
   }
@@ -165,21 +162,25 @@ export class RealTimeConfigManager {
   /**
    * For a given A4A Element, sends out Real Time Config requests to
    * any urls or vendors specified by the publisher.
+   * @param {!Element} element
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
    *   substitutions available to use.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {!Function} checkStillCurrent
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    * @visibleForTesting
    */
   maybeExecuteRealTimeConfig(
+    element,
     customMacros,
     consentState,
     consentString,
-    consentMetadata
+    consentMetadata,
+    checkStillCurrent
   ) {
-    if (!this.validateRtcConfig_(this.a4aElement_.element)) {
+    if (!this.validateRtcConfig_(element)) {
       return;
     }
     this.consentState_ = consentState;
@@ -188,8 +189,8 @@ export class RealTimeConfigManager {
     this.modifyRtcConfigForConsentStateSettings();
     customMacros = this.assignMacros(customMacros);
     this.rtcStartTime_ = Date.now();
-    this.handleRtcForCustomUrls(customMacros);
-    this.handleRtcForVendorUrls(customMacros);
+    this.handleRtcForCustomUrls(customMacros, checkStillCurrent);
+    this.handleRtcForVendorUrls(customMacros, checkStillCurrent);
     return Promise.all(this.promiseArray_);
   }
 
@@ -300,8 +301,9 @@ export class RealTimeConfigManager {
   /**
    * Manages sending the RTC callouts for the Custom URLs.
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   * @param {!Function} checkStillCurrent
    */
-  handleRtcForCustomUrls(customMacros) {
+  handleRtcForCustomUrls(customMacros, checkStillCurrent) {
     // For each publisher defined URL, inflate the url using the macros,
     // and send the RTC request.
     (this.rtcConfig_.urls || []).forEach((urlObj) => {
@@ -314,15 +316,21 @@ export class RealTimeConfigManager {
       } else {
         dev().warn(TAG, `Invalid url: ${urlObj}`);
       }
-      this.inflateAndSendRtc_(url, customMacros, errorReportingUrl);
+      this.inflateAndSendRtc_(
+        url,
+        customMacros,
+        errorReportingUrl,
+        checkStillCurrent
+      );
     });
   }
 
   /**
    * Manages sending the RTC callouts for all specified vendors.
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   * @param {!Function} checkStillCurrent
    */
-  handleRtcForVendorUrls(customMacros) {
+  handleRtcForVendorUrls(customMacros, checkStillCurrent) {
     // For each vendor the publisher has specified, inflate the vendor
     // url if it exists, and send the RTC request.
     Object.keys(this.rtcConfig_.vendors || []).forEach((vendor) => {
@@ -364,6 +372,7 @@ export class RealTimeConfigManager {
         url,
         macros,
         errorReportingUrl,
+        checkStillCurrent,
         vendor.toLowerCase()
       );
     });
@@ -373,15 +382,19 @@ export class RealTimeConfigManager {
    * @param {string} url
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
    * @param {string} errorReportingUrl
+   * @param {!Function} checkStillCurrent
    * @param {string=} opt_vendor
    * @private
    */
-  inflateAndSendRtc_(url, macros, errorReportingUrl, opt_vendor) {
+  inflateAndSendRtc_(
+    url,
+    macros,
+    errorReportingUrl,
+    checkStillCurrent,
+    opt_vendor
+  ) {
     let {timeoutMillis} = this.rtcConfig_;
     const callout = opt_vendor || this.getCalloutParam_(url);
-    const checkStillCurrent = this.a4aElement_.verifyStillCurrent.bind(
-      this.a4aElement_
-    )();
     /**
      * The time that it takes to substitute the macros into the URL can vary
      * depending on what the url requires to be substituted, i.e. a long
@@ -398,7 +411,7 @@ export class RealTimeConfigManager {
           errorReportingUrl
         );
       }
-      if (!Services.urlForDoc(this.a4aElement_.element).isSecure(url)) {
+      if (!Services.urlForDoc(this.ampDoc_).isSecure(url)) {
         return this.buildErrorResponse_(
           RTC_ERROR_ENUM.INSECURE_URL,
           callout,
@@ -432,9 +445,11 @@ export class RealTimeConfigManager {
       Services.timerFor(this.win_)
         .timeoutPromise(
           timeoutMillis,
-          Services.urlReplacementsForDoc(
-            this.a4aElement_.element
-          ).expandUrlAsync(url, macros, allowlist)
+          Services.urlReplacementsForDoc(this.ampDoc_).expandUrlAsync(
+            url,
+            macros,
+            allowlist
+          )
         )
         .then((url) => {
           checkStillCurrent();
@@ -602,10 +617,7 @@ export class RealTimeConfigManager {
       }
       const validateErrorReportingUrl = (urlObj) => {
         const errorUrl = urlObj['errorReportingUrl'];
-        if (
-          errorUrl &&
-          !Services.urlForDoc(this.a4aElement_.element).isSecure(errorUrl)
-        ) {
+        if (errorUrl && !Services.urlForDoc(this.ampDoc_).isSecure(errorUrl)) {
           dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorUrl}`);
           urlObj['errorReportingUrl'] = undefined;
         }

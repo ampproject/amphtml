@@ -42,12 +42,10 @@ describes.realWin(
     let win;
     let doc;
     let videoManagerStub;
-    let any;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      any = env.sandbox.match.any;
 
       videoManagerStub = {
         register: env.sandbox.spy(),
@@ -81,10 +79,6 @@ describes.realWin(
       addAttributesToElement(el, layoutConfigAttrs(opt_size));
       doc.body.appendChild(el);
       return el;
-    }
-
-    function spyDispatch(el) {
-      return env.sandbox.spy(el, 'dispatchCustomEvent');
     }
 
     function acceptMockedMessages(videoIframe) {
@@ -234,13 +228,13 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const dispatch = spyDispatch(videoIframe);
-
         const invalidEvents = 'tacos al pastor'.split(' ');
 
         invalidEvents.forEach((event) => {
+          const spy = env.sandbox.spy();
+          videoIframe.addEventListener(event, spy);
           videoIframe.implementation_.onMessage_({data: {event}});
-          expect(dispatch.withArgs(event)).to.not.have.been.called;
+          expect(spy).to.not.have.been.called;
         });
       });
 
@@ -248,8 +242,6 @@ describes.realWin(
         const videoIframe = createVideoIframe();
 
         await layoutAndLoad(videoIframe);
-
-        const dispatch = spyDispatch(videoIframe);
 
         acceptMockedMessages(videoIframe);
 
@@ -265,8 +257,10 @@ describes.realWin(
 
         for (let i = 0; i < validEvents.length; i++) {
           const event = validEvents[i];
+          const spy = env.sandbox.spy();
+          videoIframe.addEventListener(event, spy);
           videoIframe.implementation_.onMessage_({data: {event}});
-          expect(dispatch.withArgs(event)).to.have.been.calledOnce;
+          expect(spy).to.have.been.calledOnce;
         }
       });
 
@@ -352,7 +346,8 @@ describes.realWin(
 
         it(`should ${verb} custom analytics event ${sufix}`, async () => {
           const videoIframe = createVideoIframe();
-          const dispatch = spyDispatch(videoIframe);
+          const eventSpy = env.sandbox.spy();
+          videoIframe.addEventListener(VideoEvents.CUSTOM_TICK, eventSpy);
 
           await layoutAndLoad(videoIframe);
 
@@ -373,18 +368,16 @@ describes.realWin(
 
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
-            const expectedDispatch = dispatch.withArgs(
-              VideoEvents.CUSTOM_TICK,
-              expectedEventVars
-            );
             implementation_.onMessage_({data});
-            expect(expectedDispatch).to.have.been.calledOnce;
+            expect(eventSpy).to.be.calledOnce;
+            const eventData = eventSpy.firstCall.firstArg.data;
+            expect(eventData.eventType).to.equal(expectedEventVars.eventType);
+            expect(eventData.vars).to.deep.equal(expectedEventVars.vars);
           } else {
             allowConsoleError(() => {
               expect(() => implementation_.onMessage_({data})).to.throw();
             });
-            expect(dispatch.withArgs(VideoEvents.CUSTOM_TICK, any)).to.not.have
-              .been.called;
+            expect(eventSpy).to.not.have.been.called;
           }
         });
       });

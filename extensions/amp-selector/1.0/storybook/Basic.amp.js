@@ -29,6 +29,11 @@ export default {
   },
 };
 
+const imgStyle = {
+  display: 'inline-block',
+  margin: '2px',
+};
+
 export const WithAmpImg = () => {
   return (
     <amp-selector class="sample-selector" layout="container">
@@ -37,6 +42,7 @@ export const WithAmpImg = () => {
         width="90"
         height="60"
         option="1"
+        style={imgStyle}
       ></amp-img>
       <amp-img
         src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
@@ -44,6 +50,7 @@ export const WithAmpImg = () => {
         height="60"
         disabled
         option="2"
+        style={imgStyle}
       ></amp-img>
       <div class="divider inline-block mx1"></div>
       <amp-img
@@ -51,12 +58,14 @@ export const WithAmpImg = () => {
         width="90"
         height="60"
         option="3"
+        style={imgStyle}
       ></amp-img>
       <amp-img
         src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
         width="90"
         height="60"
         option="4"
+        style={imgStyle}
       ></amp-img>
     </amp-selector>
   );
@@ -93,7 +102,9 @@ export const Actions = () => {
         multiple
       >
         <ul>
-          <li option="1">Option 1</li>
+          <li option="1" selected>
+            Option 1
+          </li>
           <li option="2">Option 2</li>
           <li option="3">Option 3</li>
           <li option="4">Option 4</li>

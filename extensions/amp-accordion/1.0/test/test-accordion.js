@@ -15,14 +15,25 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Accordion, AccordionSection} from '../accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from '../accordion';
 import {mount} from 'enzyme';
+import {waitFor} from '../../../../testing/test-helper';
 
 describes.sandboxed('Accordion preact component', {}, (env) => {
   describe('standalone accordion section', () => {
     it('should render a default section', () => {
       const wrapper = mount(
-        <AccordionSection header={<h1>header1</h1>}>content1</AccordionSection>
+        <AccordionSection>
+          <AccordionHeader>
+            <h1>header1</h1>
+          </AccordionHeader>
+          <AccordionContent>content1</AccordionContent>
+        </AccordionSection>
       );
 
       const dom = wrapper.getDOMNode();
@@ -43,8 +54,11 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should render an expanded section', () => {
       const wrapper = mount(
-        <AccordionSection expanded header={<h1>header1</h1>}>
-          content1
+        <AccordionSection expanded>
+          <AccordionHeader>
+            <h1>header1</h1>
+          </AccordionHeader>
+          <AccordionContent>content1</AccordionContent>
         </AccordionSection>
       );
 
@@ -64,7 +78,12 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should toggle expanded state', () => {
       const wrapper = mount(
-        <AccordionSection header={<h1>header1</h1>}>content1</AccordionSection>
+        <AccordionSection>
+          <AccordionHeader>
+            <h1>header1</h1>
+          </AccordionHeader>
+          <AccordionContent>content1</AccordionContent>
+        </AccordionSection>
       );
       const dom = wrapper.getDOMNode();
       const header = dom.children[0];
@@ -95,14 +114,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     beforeEach(() => {
       wrapper = mount(
         <Accordion>
-          <AccordionSection key={1} expanded header="header1">
-            content1
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>content1</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={2} header="header2">
-            content2
+          <AccordionSection key={2}>
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={3} header="header3">
-            content3
+          <AccordionSection key={3}>
+            <AccordionHeader>header3</AccordionHeader>
+            <AccordionContent>content3</AccordionContent>
           </AccordionSection>
         </Accordion>
       );
@@ -273,14 +295,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     beforeEach(() => {
       wrapper = mount(
         <Accordion expandSingleSection>
-          <AccordionSection key={1} expanded header="header1">
-            content1
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>content1</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={2} header="header2">
-            content2
+          <AccordionSection key={2}>
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={3} header="header3">
-            content3
+          <AccordionSection key={3}>
+            <AccordionHeader>header3</AccordionHeader>
+            <AccordionContent>content3</AccordionContent>
           </AccordionSection>
         </Accordion>
       );
@@ -336,11 +361,13 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       animateStub = env.sandbox.stub(Element.prototype, 'animate');
       wrapper = mount(
         <Accordion animate>
-          <AccordionSection key={1} expanded header="header1">
-            content1
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>content1</AccordionContent>
           </AccordionSection>
-          <AccordionSection key={2} header="header2">
-            content2
+          <AccordionSection key={2}>
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
           </AccordionSection>
         </Accordion>
       );
@@ -457,6 +484,121 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     });
   });
 
+  describe('fire events on expand and collapse', () => {
+    let wrapper;
+    let ref;
+    let onExpandStateChange;
+
+    beforeEach(() => {
+      onExpandStateChange = env.sandbox.spy();
+      ref = Preact.useRef();
+
+      wrapper = mount(
+        <Accordion ref={ref}>
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>content1</AccordionContent>
+          </AccordionSection>
+          <AccordionSection
+            key={2}
+            id="section2"
+            onExpandStateChange={onExpandStateChange}
+          >
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
+          </AccordionSection>
+          <AccordionSection key={3}>
+            <AccordionHeader>header3</AccordionHeader>
+            <AccordionContent>content3</AccordionContent>
+          </AccordionSection>
+        </Accordion>
+      );
+      document.body.appendChild(wrapper.getDOMNode());
+    });
+
+    it('should fire events on click', async () => {
+      const sections = wrapper.find(AccordionSection);
+
+      // Expand
+      sections.at(1).find('header').simulate('click');
+      await waitFor(
+        () => onExpandStateChange.callCount == 1,
+        'event callback called'
+      );
+      expect(onExpandStateChange.callCount).to.equal(1);
+      expect(onExpandStateChange.args[0][0]).to.be.true;
+
+      // Collapse
+      sections.at(1).find('header').simulate('click');
+      await waitFor(
+        () => onExpandStateChange.callCount == 2,
+        'event callback called'
+      );
+      expect(onExpandStateChange.callCount).to.equal(2);
+      expect(onExpandStateChange.args[1][0]).to.be.false;
+
+      // Expand
+      sections.at(1).find('header').simulate('click');
+      await waitFor(
+        () => onExpandStateChange.callCount == 3,
+        'event callback called'
+      );
+      expect(onExpandStateChange.callCount).to.equal(3);
+      expect(onExpandStateChange.args[2][0]).to.be.true;
+
+      // Collapse
+      sections.at(1).find('header').simulate('click');
+      await waitFor(
+        () => onExpandStateChange.callCount == 4,
+        'event callback called'
+      );
+      expect(onExpandStateChange.callCount).to.equal(4);
+      expect(onExpandStateChange.args[3][0]).to.be.false;
+    });
+
+    it('should fire events on API toggle', async () => {
+      // Expand All
+      ref.current.toggle();
+      wrapper.update();
+      await waitFor(
+        () => onExpandStateChange.callCount == 1,
+        'event callback called'
+      );
+      expect(onExpandStateChange.callCount).to.equal(1);
+      expect(onExpandStateChange.args[0][0]).to.be.true;
+
+      // Collapse All
+      ref.current.collapse();
+      wrapper.update();
+      await waitFor(
+        () => onExpandStateChange.callCount == 2,
+        'event callback called'
+      );
+      expect(onExpandStateChange.callCount).to.equal(2);
+      expect(onExpandStateChange.args[1][0]).to.be.false;
+
+      // Collapsing an already collapsed section should do nothing
+      ref.current.collapse('section2');
+      wrapper.update();
+      await waitFor(
+        () => onExpandStateChange.callCount == 2,
+        'event callback called'
+      );
+      expect(onExpandStateChange.callCount).to.equal(2);
+      expect(onExpandStateChange.args[1][0]).to.be.false;
+
+      // Expand All
+      ref.current.expand();
+      wrapper.update();
+      await waitFor(
+        () => onExpandStateChange.callCount == 3,
+        'event callback called'
+      );
+      expect(onExpandStateChange.callCount).to.equal(3);
+      expect(onExpandStateChange.args[2][0]).to.be.true;
+    });
+  });
+
   describe('imperative api', () => {
     let wrapper;
     let ref;
@@ -470,14 +612,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         ref = Preact.createRef();
         wrapper = mount(
           <Accordion ref={ref}>
-            <AccordionSection key={1} expanded header="header1" id="section1">
-              content1
+            <AccordionSection key={1} expanded id="section1">
+              <AccordionHeader>header1</AccordionHeader>
+              <AccordionContent>content1</AccordionContent>
             </AccordionSection>
-            <AccordionSection key={2} header="header2" id="section2">
-              content2
+            <AccordionSection key={2} id="section2">
+              <AccordionHeader>header2</AccordionHeader>
+              <AccordionContent>content2</AccordionContent>
             </AccordionSection>
-            <AccordionSection key={3} header="header3">
-              content3
+            <AccordionSection key={3}>
+              <AccordionHeader>header3</AccordionHeader>
+              <AccordionContent>content3</AccordionContent>
             </AccordionSection>
           </Accordion>
         );
