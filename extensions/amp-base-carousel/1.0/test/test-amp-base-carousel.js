@@ -280,7 +280,7 @@ describes.realWin(
 
         // Make sure internal state index is updated before attempting to call prev(),
         // Since this is typically updated automatically on debounce, there is a risk that
-        // the test will call prev() on the slide at the 0th index unless we force i here.
+        // the test will call prev() on the slide at the 0th index unless we force is here.
         element.enqueAction(invocation('goToSlide', {index: 1}));
         await waitFor(() => scroller.scrollLeft > 0, 'to slide 1');
 
