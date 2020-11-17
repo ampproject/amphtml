@@ -1997,6 +1997,7 @@ describe('amp-a4a', () => {
     describe('delay request experiment', () => {
       let getAdUrlSpy;
       let a4a;
+
       beforeEach(async () => {
         const fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2010,48 +2011,54 @@ describe('amp-a4a', () => {
         a4a = new MockA4AImpl(a4aElement);
         getAdUrlSpy = window.sandbox.spy(a4a, 'getAdUrl');
       });
+
       it('should delay request until within renderOutsideViewport', async () => {
         window.sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
         let whenWithinViewportResolve;
         getResourceStub.returns({
           getUpgradeDelayMs: () => 1,
           renderOutsideViewport: () => 3,
-          whenWithinViewport: (viewport) => {
-            expect(viewport).to.equal(3);
+        });
+        const whenWithinViewportStub = window.sandbox
+          .stub(a4a, 'whenWithinViewport')
+          .callsFake(() => {
             return new Promise((resolve) => {
               whenWithinViewportResolve = resolve;
             });
-          },
-        });
+          });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         // Delay to all getAdUrl to potentially execute.
         await Services.timerFor(a4a.win).promise(1);
         expect(getAdUrlSpy).to.not.be.called;
+        expect(whenWithinViewportStub).to.be.calledOnce.calledWith(3);
         whenWithinViewportResolve();
         await a4a.adPromise_;
         return expect(getAdUrlSpy).to.be.calledOnce;
       });
+
       it('should delay request until numeric value', async () => {
         window.sandbox.stub(a4a, 'delayAdRequestEnabled').returns(6);
         let whenWithinViewportResolve;
         getResourceStub.returns({
           getUpgradeDelayMs: () => 1,
           renderOutsideViewport: () => 3,
-          whenWithinViewport: (viewport) => {
-            expect(viewport).to.equal(6);
+        });
+        const whenWithinViewportStub = window.sandbox
+          .stub(a4a, 'whenWithinViewport')
+          .callsFake(() => {
             return new Promise((resolve) => {
               whenWithinViewportResolve = resolve;
             });
-          },
-        });
+          });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         // Delay to all getAdUrl to potentially execute.
         await Services.timerFor(a4a.win).promise(1);
         expect(getAdUrlSpy).to.not.be.called;
+        expect(whenWithinViewportStub).to.be.calledOnce.calledWith(6);
         whenWithinViewportResolve();
         await a4a.adPromise_;
         return expect(getAdUrlSpy).to.be.calledOnce;
