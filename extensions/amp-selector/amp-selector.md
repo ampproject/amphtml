@@ -134,17 +134,9 @@ The attributes above behave the same way as they do on a standard HTML [`<select
 
 The `keyboard-select-mode` attribute dictates the keyboard navigation behavior for options inside `<amp-selector>`.
 
-<ul>
-  <li>
-    `none` (default): The tab key changes focus between items in the `<amp-selector>`. The user must press enter or space to change the selection. Arrow keys are disabled.
-  </li>
-  <li>
-    `focus`: Tab key gives focus to `<amp-selector>`. The user navigates between items with the arrow keys. Must press space or enter to change the selection.
-  </li>
-  <li>
-    `select`: Tab key gives focus to `<amp-selector>`. The selection changes as the user navigates options with arrow keys.
-  </li>
-</ul>
+- `none` (default): The tab key changes focus between items in the `<amp-selector>`. The user must press enter or space to change the selection. Arrow keys are disabled.
+- `focus`: Tab key gives focus to `<amp-selector>`. The user navigates between items with the arrow keys. Must press space or enter to change the selection.
+- `select`: Tab key gives focus to `<amp-selector>`. The selection changes as the user navigates options with arrow keys.
 
 ### Attributes on `<amp-selector>` options
 
@@ -169,13 +161,8 @@ Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 Multi-selectors and single-selectors fire this when selecting or unselecting options.
 Tapping disabled options does not trigger the `select` event.
 
-<ul>
-  <li>
-  `event.targetOption` contains the `option` attribute value of the selected element.</li>
-  <li>
-  `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
-  </li>
-</ul>
+- `event.targetOption` contains the `option` attribute value of the selected element.
+- `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
 
 ## Validation
 
