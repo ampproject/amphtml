@@ -86,7 +86,7 @@ This attribute is similar to the `controls` attribute in the HTML5 `video`. If t
 
 Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers.
 
-### dock<
+### dock
 
 Requires [`amp-video-docking`](../amp-video-docking/amp-video-docking.md) component. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
 
