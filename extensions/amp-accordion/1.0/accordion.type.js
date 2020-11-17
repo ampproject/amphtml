@@ -48,6 +48,7 @@ AccordionDef.AccordionSectionProps;
  *   role: (string|undefined),
  *   className: (string|undefined),
  *   tabIndex: (number|string|undefined),
+ *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
@@ -56,28 +57,40 @@ AccordionDef.AccordionHeaderProps;
 /**
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
+ *   role: (string|undefined)
  *   className: (string|undefined),
+ *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
 AccordionDef.AccordionContentProps;
 
 /**
+ * This is not a public API, it exists to define properties for reference
+ * that are used in the HeaderShim defined in amp-accordion
  * @typedef {{
- *   role: (string|undefined),
+ *   id: (string),
+ *   role: (string),
  *   onClick: (function()|undefined),
+ *   aria-controls: (string),
+ *   aria-expanded: (string),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.HeaderProps;
+AccordionDef.HeaderShimProps;
 
 /**
+ * This is not a public API, it exists to define properties for reference
+ * that are used in the ContentShim defined in amp-accordion
  * @typedef {{
+ *   id: (string),
+ *   role: (string),
+ *   aria-labelledby: (string),
  *   hidden: (boolean),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-AccordionDef.ContentProps;
+AccordionDef.ContentShimProps;
 
 /**
  * @typedef {{
@@ -88,17 +101,20 @@ AccordionDef.ContentProps;
  *   prefix: (string),
  * }}
  */
-AccordionDef.AccordionContextProps;
+AccordionDef.AccordionContext;
 
 /**
  * @typedef {{
  *   animate: (boolean),
  *   contentId: (string),
+ *   headerId: (string),
  *   expanded: (boolean),
- *   expandHandler: (function():undefined)
+ *   expandHandler: (function()),
+ *   setContentId: (function(string)),
+ *   setHeaderId: (function(string)),
  * }}
  */
-AccordionDef.SectionContextProps;
+AccordionDef.SectionContext;
 
 /** @interface */
 AccordionDef.AccordionApi = class {
