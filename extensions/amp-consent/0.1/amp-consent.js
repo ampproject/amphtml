@@ -18,6 +18,7 @@ import {
   CONSENT_ITEM_STATE,
   ConsentMetadataDef,
   EXPOSED_CONSENT_API,
+  TCF_POST_MESSAGE_API_COMMANDS,
   assertMetadataValues,
   constructMetadata,
   convertEnumValueToState,
@@ -54,6 +55,7 @@ import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
+const TCF_API_LOCATOR = '__tcfapiLocator';
 const TAG = 'amp-consent';
 
 /**
@@ -752,10 +754,99 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Checks if the payload from the `tcfapiCall` is valid.
+   * @param {JsonObject} payload
+   * @return {boolean}
+   */
+  isValidTcfApiCall_(payload) {
+    if (!isObject(payload)) {
+      user().error(TAG, `"tcfapiCall" is not an object: ${payload}`);
+      return false;
+    }
+    const {command, parameter, version} = payload;
+    if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
+      user().error(
+        TAG,
+        `Unsupported command found in "tcfapiCall": ${command}`
+      );
+      return false;
+    }
+    if (parameter !== undefined) {
+      user().error(
+        TAG,
+        `Unsupported parameter found in "tcfapiCall": ${parameter}`
+      );
+      return false;
+    }
+    if (version != '2') {
+      user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Set up the __tfcApiLocator window and listeners.
+   *
+   * Window is a dummy iframe that signals to 3p iframes
+   * that the document supports the tcfPostMessage API.
+   *
+   * The listeners will listen for post messages from 3p
+   * iframes that have the follow structure:
+   * {
+   *  "__tcfapiCall": {
+   *    "command": cmd,
+   *    "parameter": arg,
+   *    "version": v,
+   *    "callId": id,
+   *  }
+   * }
    */
   setUpTcfPostMessageProxy_() {
-    // TODO (micajuineho): Implement
+    // Check if __tcfApiLocator API already exists (dirty AMP)
+    if (!this.win.frames[TCF_API_LOCATOR]) {
+      // Add window listener for 3p iframe PostMessages
+      this.win.addEventListener('message', (event) => {
+        const data = getData(event);
+
+        if (
+          !data ||
+          !data['__tcfapiCall'] ||
+          !this.isValidTcfApiCall_(data['__tcfapiCall'])
+        ) {
+          return;
+        }
+
+        const payload = data.__tcfapiCall;
+
+        // Ensure the message came from a valid source.
+        const iframes = this.getAmpDoc()
+          .getRootNode()
+          .querySelectorAll('iframe');
+
+        for (let i = 0; i < iframes.length; i++) {
+          if (iframes[i].contentWindow === event.source) {
+            const cmd = payload.command;
+            // TODO (micajuineho): implement command methods
+            switch (cmd) {
+              case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
+              case TCF_POST_MESSAGE_API_COMMANDS.PING:
+              case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
+              case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
+              default:
+                return;
+            }
+          }
+        }
+      });
+
+      // Set up the __tcfApiLocator window to singal PostMessage support
+      const iframe = this.element.ownerDocument.createElement('iframe');
+      iframe.setAttribute('name', TCF_API_LOCATOR);
+      toggle(iframe, false);
+      iframe.setAttribute('aria-hidden', true);
+      this.element.appendChild(dev().assertElement(iframe));
+    }
   }
 }
 
