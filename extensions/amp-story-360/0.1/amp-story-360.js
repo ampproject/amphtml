@@ -568,14 +568,46 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   onDeviceOrientation_(e) {
+    const smoothFactor = 0.1;
+
+    if (!this.smoothA_) {
+      this.smoothA_ = e.alpha;
+    } else {
+      this.smoothA_ =
+        e.alpha * smoothFactor + this.smoothA_ * (1 - smoothFactor);
+    }
+
+    if (!this.smoothB_) {
+      this.smoothB_ = e.beta;
+    } else {
+      this.smoothB_ =
+        e.beta * smoothFactor + this.smoothB_ * (1 - smoothFactor);
+    }
+
+    if (!this.smoothG_) {
+      this.smoothG_ = e.gamma;
+    } else {
+      this.smoothG_ =
+        e.gamma * smoothFactor + this.smoothG_ * (1 - smoothFactor);
+    }
+
+    console.log(
+      'e.alpha: ' + Math.round(e.alpha),
+      'smoothA_: ' + Math.round(this.smoothA_),
+      'e.beta: ' + Math.round(e.beta),
+      'smoothB_: ' + Math.round(this.smoothB_),
+      'e.gamma: ' + Math.round(e.gamma),
+      'smoothG_: ' + Math.round(this.smoothG_)
+    );
+
     let rot = Matrix.identity(3);
     rot = Matrix.mul(
       3,
-      Matrix.rotation(3, 1, 0, deg2rad(e.alpha - this.headingOffset_)),
+      Matrix.rotation(3, 1, 0, deg2rad(this.smoothA_ - this.headingOffset_)),
       rot
     );
-    rot = Matrix.mul(3, Matrix.rotation(3, 2, 1, deg2rad(e.beta)), rot);
-    rot = Matrix.mul(3, Matrix.rotation(3, 0, 2, deg2rad(e.gamma)), rot);
+    rot = Matrix.mul(3, Matrix.rotation(3, 2, 1, deg2rad(this.smoothB_)), rot);
+    rot = Matrix.mul(3, Matrix.rotation(3, 0, 2, deg2rad(this.smoothG_)), rot);
     this.renderer_.setCamera(rot, 1);
     this.renderer_.render(true);
   }
