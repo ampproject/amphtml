@@ -100,9 +100,13 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
 
 .amp-carousel-button.amp-disabled {
   animation: none;
-  opacity: 0;
-  visibility: hidden;
   pointer-events: none;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 1px;
 }
 
 .amp-carousel-button-prev {

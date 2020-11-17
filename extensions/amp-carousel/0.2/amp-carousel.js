@@ -498,9 +498,11 @@ class AmpCarousel extends AMP.BaseElement {
     this.prevButton_.classList.toggle('amp-disabled', prevDisabled);
     this.prevButton_.setAttribute('aria-disabled', prevDisabled);
     this.prevButton_.title = this.getPrevButtonTitle_(index);
+    this.prevButton_.tabIndex = prevDisabled ? -1 : 0;
     this.nextButton_.classList.toggle('amp-disabled', nextDisabled);
     this.nextButton_.setAttribute('aria-disabled', nextDisabled);
     this.nextButton_.title = this.getNextButtonTitle_(index);
+    this.nextButton_.tabIndex = nextDisabled ? -1 : 0;
   }
 
   /**

@@ -189,6 +189,8 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
     this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
+    this.prevButton_.tabIndex = this.hasPrev() ? 0 : -1;
+    this.nextButton_.tabIndex = this.hasNext() ? 0 : -1;
   }
 
   /**
