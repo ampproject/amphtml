@@ -18,6 +18,7 @@ import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
+import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -61,7 +62,6 @@ import {isArray, toWin} from './types';
  *           ||                         ||
  *           ||                 =========
  *           ||
- *           || viewportCallback
  *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
@@ -126,9 +126,6 @@ export class BaseElement {
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {boolean} */
-    this.inViewport_ = false;
 
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
@@ -282,13 +279,6 @@ export class BaseElement {
   }
 
   /**
-   * @return {boolean}
-   */
-  isInViewport() {
-    return this.inViewport_;
-  }
-
-  /**
    * This method is called when the element is added to DOM for the first time
    * and before `buildCallback` to give the element a chance to redirect its
    * implementation to another `BaseElement` implementation. The returned
@@ -331,6 +321,16 @@ export class BaseElement {
    * @param {boolean=} opt_onLayout
    */
   preconnectCallback(opt_onLayout) {
+    // Subclasses may override.
+  }
+
+  /**
+   * Override in subclass to adjust the element when it is being added to
+   * the DOM. Could e.g. be used to add a listener. Notice, that this
+   * callback is called immediately after `buildCallback()` if the element
+   * is attached to the DOM.
+   */
+  attachedCallback() {
     // Subclasses may override.
   }
 
@@ -452,13 +452,6 @@ export class BaseElement {
   firstLayoutCompleted() {
     this.togglePlaceholder(false);
   }
-
-  /**
-   * Instructs the resource that it has either entered or exited the visible
-   * viewport. Intended to be implemented by actual components.
-   * @param {boolean} unusedInViewport
-   */
-  viewportCallback(unusedInViewport) {}
 
   /**
    * Requests the element to stop its activity when the document goes into
@@ -630,7 +623,7 @@ export class BaseElement {
   forwardEvents(events, element) {
     const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
       listen(element, eventType, (event) => {
-        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+        dispatchCustomEvent(this.element, eventType, getData(event) || {});
       })
     );
 
@@ -924,15 +917,6 @@ export class BaseElement {
    */
   expand() {
     Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
-  }
-
-  /**
-   * Called every time an owned AmpElement expands itself.
-   * See {@link expand}.
-   * @param {!AmpElement} unusedElement Child element that was expanded.
-   */
-  expandedCallback(unusedElement) {
-    // Subclasses may override.
   }
 
   /**

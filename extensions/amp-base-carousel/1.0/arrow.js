@@ -21,7 +21,13 @@ import {useStyles} from './base-carousel.jss';
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow({customArrow, by, advance, disabled, outsetArrows}) {
+export function Arrow({
+  advance,
+  by,
+  customArrow = <DefaultArrow by={by} />,
+  disabled,
+  outsetArrows,
+}) {
   const {
     'disabled': customDisabled,
     'onClick': onCustomClick,
@@ -34,7 +40,7 @@ export function Arrow({customArrow, by, advance, disabled, outsetArrows}) {
     if (onCustomClick) {
       onCustomClick(e);
     }
-    advance(by);
+    advance();
   };
   const classes = useStyles();
   const classNames = `${classes.arrow} ${
@@ -56,34 +62,6 @@ export function Arrow({customArrow, by, advance, disabled, outsetArrows}) {
 
 /**
  * @param {!BaseCarouselDef.ArrowProps} props
- * @return {PreactDef.VNode}
- */
-export function ArrowPrev({customArrow, ...rest}) {
-  return (
-    <Arrow
-      by={-1}
-      customArrow={customArrow || <DefaultArrow by={-1} />}
-      {...rest}
-    />
-  );
-}
-
-/**
- * @param {!BaseCarouselDef.ArrowProps} props
- * @return {PreactDef.Renderable}
- */
-export function ArrowNext({customArrow, ...rest}) {
-  return (
-    <Arrow
-      by={1}
-      customArrow={customArrow || <DefaultArrow by={1} />}
-      {...rest}
-    />
-  );
-}
-
-/**
- * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({by, ...rest}) {
@@ -100,23 +78,13 @@ function DefaultArrow({by, ...rest}) {
       <div class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}></div>
       <div class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}></div>
       <svg class={classes.arrowIcon} viewBox="0 0 24 24">
-        {by < 0 ? (
-          <path
-            d="M14,7.4 L9.4,12 L14,16.6"
-            fill="none"
-            stroke-width="2px"
-            stroke-linejoin="round"
-            stroke-linecap="round"
-          />
-        ) : (
-          <path
-            d="M10,7.4 L14.6,12 L10,16.6"
-            fill="none"
-            stroke-width="2px"
-            stroke-linejoin="round"
-            stroke-linecap="round"
-          />
-        )}
+        <path
+          d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
+          fill="none"
+          stroke-width="2px"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        />
       </svg>
     </button>
   );

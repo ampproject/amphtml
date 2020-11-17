@@ -1,10 +1,7 @@
 {
-  "allow-doc-opt-in": [
-    "amp-next-page",
-    "analytics-chunks",
-    "analytics-chunks-inabox"
-  ],
+  "allow-doc-opt-in": ["amp-next-page", "analytics-chunks-inabox"],
   "allow-url-opt-in": ["pump-early-frame"],
+  "amp-accordion-display-locking": 0.1,
   "canary": 1,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 0.1,
@@ -33,7 +30,10 @@
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
   "amp-ad-no-center-css": 0,
-  "analytics-chunks": 1,
   "render-on-idle-fix": 1,
-  "build-in-chunks": 1
+  "build-in-chunks": 1,
+  "visibility-trigger-improvements": 1,
+  "adsense-ptt-exp": 0.1,
+  "doubleclick-ptt-exp": 0.1,
+  "amp-cid-backup": 1
 }

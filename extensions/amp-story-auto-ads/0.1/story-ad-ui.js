@@ -74,7 +74,7 @@ export function getStoryAdMetaTags(doc) {
  * Creates object containing information extracted from the creative
  * that is needed to render story ad ui e.g. cta, attribution, etc.
  * @param {!Document} doc
- * @return {Object}
+ * @return {StoryAdUIMetadata}
  */
 export function getStoryAdMetadataFromDoc(doc) {
   const storyMetaTags = getStoryAdMetaTags(doc);
@@ -125,12 +125,16 @@ export function localizeCtaText(ctaType, localizationService) {
 /**
  * Returns a boolean indicating if there is sufficent metadata to render CTA.
  * @param {!StoryAdUIMetadata} metadata
+ * @param {=boolean} opt_inabox
  * @return {boolean}
  */
-export function validateCtaMetadata(metadata) {
+export function validateCtaMetadata(metadata, opt_inabox) {
   // If making a CTA layer we need a button name & outlink url.
   if (!metadata[A4AVarNames.CTA_TYPE] || !metadata[A4AVarNames.CTA_URL]) {
-    user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
+    // Don't polute inabox logs, as we don't know when this is intended to
+    // be a story ad.
+    !opt_inabox &&
+      user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
     return false;
   }
   return true;
@@ -208,4 +212,54 @@ export function maybeCreateAttribution(win, metadata, container) {
  */
 export function handleAttributionClick(win, href) {
   openWindowDialog(win, href, '_blank');
+}
+
+/**
+ * @param {!Document} doc
+ * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
+ * @param {!Element} container
+ * @param {!StoryAdUIMetadata} uiMetadata
+ * @return {!Promise<?Element>} If anchor was successfully created.
+ */
+export function createCta(doc, buttonFitter, container, uiMetadata) {
+  const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
+  const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
+
+  // TODO(ccordry): Move button to shadow root.
+  const a = createElementWithAttributes(
+    doc,
+    'a',
+    dict({
+      'class': 'i-amphtml-story-ad-link',
+      'target': '_blank',
+      'href': ctaUrl,
+    })
+  );
+
+  const fitPromise = buttonFitter.fit(
+    dev().assertElement(container),
+    a, // Container
+    ctaText // Content
+  );
+
+  return fitPromise.then((success) => {
+    if (!success) {
+      user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
+      return null;
+    }
+
+    a.href = ctaUrl;
+    a.textContent = ctaText;
+
+    if (a.protocol !== 'https:' && a.protocol !== 'http:') {
+      user().warn(TAG, 'CTA url is not valid. Ad was discarded');
+      return null;
+    }
+
+    const ctaLayer = doc.createElement('amp-story-cta-layer');
+    ctaLayer.className = 'i-amphtml-cta-container';
+    ctaLayer.appendChild(a);
+    container.appendChild(ctaLayer);
+    return a;
+  });
 }

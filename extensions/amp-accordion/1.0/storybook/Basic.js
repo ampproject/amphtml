@@ -15,7 +15,12 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Accordion, AccordionSection} from '../accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from '../accordion';
 import {boolean, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -25,20 +30,135 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function AccordionWithActions(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <Accordion ref={ref} {...props} />
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current.toggle('section1')}>
+          toggle(section1)
+        </button>
+        <button onClick={() => ref.current.toggle()}>toggle all</button>
+        <button onClick={() => ref.current.expand('section1')}>
+          expand(section1)
+        </button>
+        <button onClick={() => ref.current.expand()}>expand all</button>
+        <button onClick={() => ref.current.collapse('section1')}>
+          collapse(section1)
+        </button>
+        <button onClick={() => ref.current.collapse()}>collapse all</button>
+      </div>
+    </section>
+  );
+}
+
 export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
   return (
-    <Accordion expandSingleSection={expandSingleSection} animate={animate}>
-      <AccordionSection key={1} header={<h2>Section 1</h2>}>
-        <p>Content in section 1.</p>
-      </AccordionSection>
-      <AccordionSection key={2} header={<h2>Section 2</h2>}>
-        <div>Content in section 2.</div>
-      </AccordionSection>
-      <AccordionSection key={3} expanded header={<h2>Section 3</h2>}>
-        <div>Content in section 2.</div>
-      </AccordionSection>
-    </Accordion>
+    <main>
+      <AccordionWithActions
+        expandSingleSection={expandSingleSection}
+        animate={animate}
+      >
+        <AccordionSection id="section1" key={1}>
+          <AccordionHeader>
+            <h2>Section 1</h2>
+          </AccordionHeader>
+          <AccordionContent>Content in section 1.</AccordionContent>
+        </AccordionSection>
+        <AccordionSection key={2}>
+          <AccordionHeader>
+            <h2>Section 2</h2>
+          </AccordionHeader>
+          <AccordionContent>Content in section 2.</AccordionContent>
+        </AccordionSection>
+        <AccordionSection key={3} expanded>
+          <AccordionHeader>
+            <h2>Section 3</h2>
+          </AccordionHeader>
+          <AccordionContent>Content in section 3.</AccordionContent>
+        </AccordionSection>
+      </AccordionWithActions>
+    </main>
+  );
+};
+
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function AccordionWithEvents(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <Accordion ref={ref} {...props}>
+        <AccordionSection id="section1" key={1} expanded>
+          <AccordionHeader>
+            <h2>Section 1</h2>
+          </AccordionHeader>
+          <AccordionContent>Content in section 1.</AccordionContent>
+        </AccordionSection>
+        <AccordionSection
+          id="section2"
+          key={2}
+          onExpandStateChange={(expanded) => {
+            if (expanded) {
+              ref.current.expand('section3');
+            }
+          }}
+        >
+          <AccordionHeader>
+            <h2>Section 2</h2>
+          </AccordionHeader>
+          <AccordionContent>Content in section 1.</AccordionContent>
+        </AccordionSection>
+        <AccordionSection
+          id="section3"
+          key={3}
+          onExpandStateChange={(expanded) => {
+            if (!expanded) {
+              ref.current.collapse('section2');
+            }
+          }}
+        >
+          <AccordionHeader>
+            <h2>Section 3</h2>
+          </AccordionHeader>
+          <AccordionContent>Content in section 3.</AccordionContent>
+        </AccordionSection>
+      </Accordion>
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current.expand('section2')}>
+          expand(section2)
+        </button>
+        <button onClick={() => ref.current.collapse('section3')}>
+          collapse(section3)
+        </button>
+        <button onClick={() => ref.current.toggle()}>toggle all</button>
+      </div>
+    </section>
+  );
+}
+
+export const events = () => {
+  const expandSingleSection = boolean('expandSingleSection', false);
+  const animate = boolean('animate', false);
+  return (
+    <main>
+      <AccordionWithEvents
+        expandSingleSection={expandSingleSection}
+        animate={animate}
+      ></AccordionWithEvents>
+    </main>
   );
 };

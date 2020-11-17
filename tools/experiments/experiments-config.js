@@ -244,12 +244,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
   {
-    id: 'analytics-chunks',
-    name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
-    spec: 'https://github.com/ampproject/amphtml/issues/28435',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
     id: 'analytics-chunks-inabox',
     name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
     spec: 'https://github.com/ampproject/amphtml/issues/28435',
@@ -269,6 +263,12 @@ export const EXPERIMENTS = [
     id: 'auto-ads-layout-callback',
     name: 'Move ads placement into layoutCallback',
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
+  },
+  {
+    id: 'amp-cid-backup',
+    name: 'Backup AMP-generated CIDs to Storage.',
+    spec: 'https://github.com/ampproject/amphtml/issues/29484',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
   },
   {
     id: 'layout-aspect-ratio-css',

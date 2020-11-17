@@ -16,6 +16,7 @@
 
 import {
   A4AVarNames,
+  createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
   localizeCtaText,
@@ -39,8 +40,9 @@ import {
   isJsonScriptTag,
   toggleAttribute,
 } from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
 import {getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
@@ -104,6 +106,9 @@ export class StoryAdPage {
     /** @private {?Element} */
     this.adElement_ = null;
 
+    /** @private {?HTMLIFrameElement} */
+    this.adFrame_ = null;
+
     /** @private {?Element} */
     this.adChoicesIcon_ = null;
 
@@ -124,6 +129,9 @@ export class StoryAdPage {
 
     /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
+
+    /** @private {boolean} */
+    this.is3pAdFrame_ = false;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -207,12 +215,7 @@ export class StoryAdPage {
     this.pageElement_.appendChild(gridLayer);
     this.pageElement_.appendChild(paneGridLayer);
 
-    // Set up listener for ad-loaded event.
-    this.adElement_
-      .signals()
-      // TODO(ccordry): Investigate using a better signal waiting for video loads.
-      .whenSignal(CommonSignals.INI_LOAD)
-      .then(() => this.onAdLoaded_());
+    this.listenForAdLoadSignals_();
 
     this.analyticsEvent_(AnalyticsEvents.AD_REQUESTED, {
       [AnalyticsVars.AD_REQUESTED]: Date.now(),
@@ -228,6 +231,11 @@ export class StoryAdPage {
    */
   maybeCreateCta() {
     return Promise.resolve().then(() => {
+      // Inabox story ads control their own CTA creation.
+      if (this.is3pAdFrame_) {
+        return true;
+      }
+
       const uiMetadata = map();
 
       // Template Ads.
@@ -249,18 +257,18 @@ export class StoryAdPage {
         return false;
       }
 
-      const ctaText =
+      uiMetadata[A4AVarNames.CTA_TYPE] =
         localizeCtaText(
           uiMetadata[A4AVarNames.CTA_TYPE],
           this.localizationService_
-        ) || '';
+        ) || uiMetadata[A4AVarNames.CTA_TYPE];
 
       // Store the cta-type as an accesible var for any further pings.
       this.analytics_.then((analytics) =>
         analytics.setVar(
           this.index_, // adIndex
           AnalyticsVars.CTA_TYPE,
-          ctaText
+          uiMetadata[A4AVarNames.CTA_TYPE]
         )
       );
 
@@ -280,8 +288,7 @@ export class StoryAdPage {
         );
       }
 
-      const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
-      return this.createCtaLayer_(ctaUrl, ctaText);
+      return this.createCtaLayer_(uiMetadata);
     });
   }
 
@@ -319,6 +326,47 @@ export class StoryAdPage {
   }
 
   /**
+   * Creates listeners to receive signal that ad is ready to be shown
+   * for both FIE & inabox case.
+   * @private
+   */
+  listenForAdLoadSignals_() {
+    // Friendly frame INI_LOAD.
+    this.adElement_
+      .signals()
+      // TODO(ccordry): Investigate using a better signal waiting for video loads.
+      .whenSignal(CommonSignals.INI_LOAD)
+      .then(() => this.onAdLoaded_());
+
+    // Inabox custom event.
+    const removeListener = listen(this.win_, 'message', (e) => {
+      if (getData(e) !== 'amp-story-ad-load') {
+        return;
+      }
+      if (this.getAdFrame_() && e.source === this.adFrame_.contentWindow) {
+        this.is3pAdFrame_ = true;
+        this.pageElement_.setAttribute('xdomain-ad', '');
+        this.onAdLoaded_();
+        removeListener();
+      }
+    });
+  }
+
+  /**
+   * Returns the iframe containing the creative if it exists.
+   * @return {?HTMLIFrameElement}
+   */
+  getAdFrame_() {
+    if (this.adFrame_) {
+      return this.adFrame_;
+    }
+    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (elementByTag(
+      devAssert(this.pageElement_),
+      'iframe'
+    )));
+  }
+
+  /**
    * Things that need to happen after the created ad is "loaded".
    * @private
    */
@@ -336,9 +384,10 @@ export class StoryAdPage {
       [AnalyticsVars.AD_LOADED]: Date.now(),
     });
 
-    const adFrame = elementByTag(this.pageElement_, 'iframe');
-    if (adFrame) {
-      this.adDoc_ = getFrameDoc(/** @type {!HTMLIFrameElement} */ (adFrame));
+    if (this.getAdFrame_() && !this.is3pAdFrame_) {
+      this.adDoc_ = getFrameDoc(
+        /** @type {!HTMLIFrameElement} */ (this.adFrame_)
+      );
     }
 
     this.loaded_ = true;
@@ -348,56 +397,28 @@ export class StoryAdPage {
 
   /**
    * Create layer to contain outlink button.
-   * @param {string} ctaUrl
-   * @param {string} ctaText
+   * @param {!./story-ad-ui.StoryAdUIMetadata} uiMetadata
    * @return {Promise<boolean>}
    */
-  createCtaLayer_(ctaUrl, ctaText) {
-    // TODO(ccordry): Move button to shadow root.
-    const a = createElementWithAttributes(
+  createCtaLayer_(uiMetadata) {
+    return createCta(
       this.doc_,
-      'a',
-      dict({
-        'class': 'i-amphtml-story-ad-link',
-        'target': '_blank',
-        'href': ctaUrl,
-      })
-    );
-
-    const fitPromise = this.buttonFitter_.fit(
-      dev().assertElement(this.pageElement_),
-      a, // Container
-      ctaText // Content
-    );
-
-    return fitPromise.then((success) => {
-      if (!success) {
-        user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
-        return false;
+      devAssert(this.buttonFitter_),
+      dev().assertElement(this.pageElement_), // Container.
+      uiMetadata
+    ).then((anchor) => {
+      if (anchor) {
+        // Click listener so that we can fire `story-ad-click` analytics trigger at
+        // the appropriate time.
+        anchor.addEventListener('click', () => {
+          const vars = {
+            [AnalyticsVars.AD_CLICKED]: Date.now(),
+          };
+          this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
+        });
+        return true;
       }
-
-      a.href = ctaUrl;
-      a.textContent = ctaText;
-
-      if (a.protocol !== 'https:' && a.protocol !== 'http:') {
-        user().warn(TAG, 'CTA url is not valid. Ad was discarded');
-        return false;
-      }
-
-      // Click listener so that we can fire `story-ad-click` analytics trigger at
-      // the appropriate time.
-      a.addEventListener('click', () => {
-        const vars = {
-          [AnalyticsVars.AD_CLICKED]: Date.now(),
-        };
-        this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
-      });
-
-      const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
-      ctaLayer.className = 'i-amphtml-cta-container';
-      ctaLayer.appendChild(a);
-      this.pageElement_.appendChild(ctaLayer);
-      return true;
+      return false;
     });
   }
 

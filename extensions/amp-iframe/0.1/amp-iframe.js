@@ -164,7 +164,7 @@ export class AmpIframe extends AMP.BaseElement {
       !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
-        'if allow-same-origin is set. See https://github.com/ampproject/' +
+        ' if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
       element
     );
@@ -662,7 +662,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
     if (this.iframe_ && mutations['title']) {
       // only propagating title because propagating all causes e2e error:
-      // See <https://travis-ci.org/ampproject/amphtml/jobs/657440421>
+      // See <https://travis-ci.com/ampproject/amphtml/jobs/657440421>
       this.propagateAttributes(['title'], this.iframe_);
     }
   }

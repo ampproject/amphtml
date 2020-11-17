@@ -84,6 +84,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['documentStateUpdate']('documentStateUpdate', closeEvent);
   }
 
+  function buildCircularWrappingConfig() {
+    const configEl = document.createElement('script');
+    configEl.textContent = JSON.stringify({
+      'behavior': {
+        'on': 'end',
+        'action': 'circular-wrapping',
+      },
+    });
+    configEl.setAttribute('type', 'application/json');
+    return configEl;
+  }
+
   beforeEach(() => {
     win = env.win;
     fakeMessaging = {
@@ -311,7 +323,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should not dispatch noNextStory when circular wrapping is enabled', async () => {
     buildStoryPlayer(1);
-    playerEl.setAttribute('enable-circular-wrapping', '');
+    playerEl.appendChild(buildCircularWrappingConfig());
 
     await manager.loadPlayers();
     await nextTick();
@@ -355,7 +367,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should not dispatch noPreviousStory when circular wrapping is enabled', async () => {
     buildStoryPlayer(2);
-    playerEl.setAttribute('enable-circular-wrapping', '');
+    playerEl.appendChild(buildCircularWrappingConfig());
 
     await manager.loadPlayers();
     await nextTick();
@@ -899,10 +911,28 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       return expect(() => player.go(-1)).to.throw('Out of Story range.');
     });
 
+    it('go with page delta should change current story page', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+      player.go(0, 4);
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('selectPage', {
+        'delta': 4,
+      });
+    });
+
     it('takes to first story when swiping on the last one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+      playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -927,7 +957,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('takes to last story when swiping on the first one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+      playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -951,7 +981,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('navigate to first story when last story is finished', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+      playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -976,7 +1006,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('navigate to last story when first story is requested to go back', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+      playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
 

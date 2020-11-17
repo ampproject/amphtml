@@ -44,7 +44,7 @@ import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {RealTimeConfigManager} from '../real-time-config-manager';
+import {RealTimeConfigManager} from '../../../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {cancellation} from '../../../../src/error';
@@ -89,7 +89,7 @@ if (NO_SIGNING_RTV) {
       );
     });
 
-    it('should contain the correct security features', async () => {
+    it('should contain the correct csp meta content', async () => {
       await a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
@@ -120,6 +120,32 @@ if (NO_SIGNING_RTV) {
           'https://use.fontawesome.com ' +
           'https://use.typekit.net ' +
           "'unsafe-inline';"
+      );
+    });
+
+    it('should set the correct sandbox features', async () => {
+      env.sandbox
+        .stub(Services.platformFor(env.win), 'isSafari')
+        .returns(false);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      expect(fie.getAttribute('sandbox')).to.equal(
+        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
+          'allow-same-origin allow-top-navigation'
+      );
+    });
+
+    it('should add allow-scripts to sandbox in Safari', async () => {
+      env.sandbox.stub(Services.platformFor(env.win), 'isSafari').returns(true);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      expect(fie.getAttribute('sandbox')).to.equal(
+        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
+          'allow-same-origin allow-top-navigation allow-scripts'
       );
     });
 
@@ -1388,7 +1414,16 @@ describe('amp-a4a', () => {
       expect(a4a.isVerifiedAmpCreative()).to.be.true;
       expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
       expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
-      expect(maybeExecuteRealTimeConfigStub.calledWith({}, null)).to.be.true;
+      expect(
+        maybeExecuteRealTimeConfigStub.calledWith(
+          a4aElement,
+          {},
+          null,
+          null,
+          null,
+          window.sandbox.match.any
+        )
+      ).to.be.true;
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
       expect(
         getAdUrlSpy.calledWith(

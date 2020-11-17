@@ -446,6 +446,12 @@ Type attribute value: `snowplow`, `snowplow_v2`
 
 Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [github.com/snowplow/snowplow/wiki](https://github.com/snowplow/snowplow/wiki/Google-AMP-Tracker).
 
+### Tail
+
+Type attribute value: `tail`
+
+Adds support for Tail. More details for adding Tail support can be found at [tail.digital](https://tail.digital).
+
 ### Rambler/TOP-100
 
 Type attribute value: `top100`

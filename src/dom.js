@@ -927,6 +927,21 @@ export function toggleAttribute(element, name, forced) {
 }
 
 /**
+ * Parses a string as a boolean value using the expanded rules for DOM boolean
+ * attributes:
+ * - a `null` or `undefined` returns `null`;
+ * - an empty string returns `true`;
+ * - a "false" string returns `false`;
+ * - otherwise, `true` is returned.
+ *
+ * @param {?string|undefined} s
+ * @return {boolean|undefined}
+ */
+export function parseBooleanAttribute(s) {
+  return s == null ? undefined : s !== 'false';
+}
+
+/**
  * @param {!Window} win
  * @return {number} The width of the vertical scrollbar, in pixels.
  */
@@ -935,4 +950,20 @@ export function getVerticalScrollbarWidth(win) {
   const windowWidth = win./*OK*/ innerWidth;
   const documentWidth = documentElement./*OK*/ clientWidth;
   return windowWidth - documentWidth;
+}
+
+/**
+ * Dispatches a custom event.
+ *
+ * @param {!Node} node
+ * @param {string} name
+ * @param {!Object=} opt_data Event data.
+ */
+export function dispatchCustomEvent(node, name, opt_data) {
+  const data = opt_data || {};
+  // Constructors of events need to come from the correct window. Sigh.
+  const event = node.ownerDocument.createEvent('Event');
+  event.data = data;
+  event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
+  node.dispatchEvent(event);
 }

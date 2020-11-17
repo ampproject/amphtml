@@ -22,6 +22,7 @@ import {
   childElement,
   childElementByTag,
   childElementsByTag,
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   insertAfterOrAtStart,
@@ -270,7 +271,7 @@ class AmpVideo extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
     if (mutations['src']) {
-      element.dispatchCustomEvent(VideoEvents.RELOAD);
+      dispatchCustomEvent(element, VideoEvents.RELOAD);
     }
     if (mutations['artwork'] || mutations['poster']) {
       const artwork = element.getAttribute('artwork');
@@ -292,11 +293,6 @@ class AmpVideo extends AMP.BaseElement {
     // TODO(@aghassemi, 10756) Either make metadata observable or submit
     // an event indicating metadata changed (in case metadata changes
     // while the video is playing).
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -587,7 +583,7 @@ class AmpVideo extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
     });
 
     this.unlisteners_.push(forwardEventsUnlisten, mutedOrUnmutedEventUnlisten);
@@ -619,7 +615,7 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   onVideoLoaded_() {
-    this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(this.element, VideoEvents.LOAD);
   }
 
   /** @override */
