@@ -258,7 +258,7 @@ export class ResourcesImpl {
       // Unfortunately, a viewport size change invalidates all premeasurements.
       if (this.relayoutAll_ && this.intersectionObserver_) {
         this.resources_.forEach((resource) =>
-          resource.invalidatePremeasurement()
+          resource.invalidatePremeasurementAndRequestMeasure()
         );
       }
     });
@@ -1241,7 +1241,7 @@ export class ResourcesImpl {
         const expediteFirstMeasure =
           !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
         const needsMeasure =
-          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
+          premeasured || requested || relayoutAll || expediteFirstMeasure;
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,
