@@ -2640,6 +2640,13 @@ export class AmpStory extends AMP.BaseElement {
       this.previous_();
     } else if (data['delta']) {
       this.switchDelta_(data['delta']);
+    } else if (data['id']) {
+      this.switchTo_(
+        data['id'],
+        this.getPageIndexById(data['id']) > this.getPageIndex(this.activePage_)
+          ? NavigationDirection.NEXT
+          : NavigationDirection.PREVIOUS
+      );
     }
   }
 
