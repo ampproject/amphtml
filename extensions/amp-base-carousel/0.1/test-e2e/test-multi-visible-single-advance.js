@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getPrevArrow, getSlides} from './helpers';
-import sleep from 'sleep-promise';
+import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
 
 describes.endtoend(
   'AMP carousel advancing with multiple visible',
