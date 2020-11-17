@@ -737,7 +737,7 @@ export class AmpStoryPlayer {
 
   /**
    * Shows the story provided by the URL in the player and go to the page if provided.
-   * @param {string} storyUrl
+   * @param {!string} storyUrl
    * @param {string=} pageId
    */
   show(storyUrl, pageId = null) {
