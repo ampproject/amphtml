@@ -61,6 +61,7 @@ function AccordionWithRef(
     as: Comp = 'section',
     expandSingleSection = false,
     animate = false,
+    experimentDisplayLocking = false,
     children,
     id,
     ...rest
@@ -213,8 +214,16 @@ function AccordionWithRef(
         isExpanded,
         animate,
         prefix,
+        experimentDisplayLocking,
       }),
-    [animate, registerSection, toggleExpanded, prefix, isExpanded]
+    [
+      registerSection,
+      toggleExpanded,
+      isExpanded,
+      animate,
+      prefix,
+      experimentDisplayLocking,
+    ]
   );
 
   return (
@@ -278,6 +287,7 @@ export function AccordionSection({
     isExpanded,
     toggleExpanded,
     prefix,
+    experimentDisplayLocking,
   } = useContext(AccordionContext);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
@@ -326,8 +336,16 @@ export function AccordionSection({
         expandHandler,
         setContentId: setContentIdState,
         setHeaderId: setHeaderIdState,
+        experimentDisplayLocking,
       }),
-    [animate, contentId, headerId, expanded, expandHandler]
+    [
+      animate,
+      contentId,
+      headerId,
+      expanded,
+      expandHandler,
+      experimentDisplayLocking,
+    ]
   );
 
   return (
@@ -397,15 +415,46 @@ export function AccordionContent({
 }) {
   const ref = useRef(null);
   const hasMountedRef = useRef(false);
-  const {contentId, headerId, expanded, animate, setContentId} = useContext(
-    SectionContext
-  );
+  const {
+    contentId,
+    headerId,
+    expanded,
+    animate,
+    setContentId,
+    expandHandler,
+    experimentDisplayLocking,
+  } = useContext(SectionContext);
   const classes = useStyles();
+  const [contentVisibility, setContentVisibility] = useState(false);
+  const useDisplayLocking = contentVisibility && experimentDisplayLocking;
 
   useEffect(() => {
     hasMountedRef.current = true;
     return () => (hasMountedRef.current = false);
   }, []);
+
+  useEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+    const element = ref.current;
+    const win = element.ownerDocument.defaultView;
+    const supportsContentVisibility = win.CSS.supports(
+      'content-visibility',
+      'hidden-matchable'
+    );
+    setContentVisibility(supportsContentVisibility);
+    if (!experimentDisplayLocking || !supportsContentVisibility) {
+      return;
+    }
+    const beforeMatchHandler = () => {
+      if (element.hasAttribute('hidden')) {
+        expandHandler();
+      }
+    };
+    element.addEventListener('beforematch', beforeMatchHandler);
+    return () => element.removeEventListener('beforematch', beforeMatchHandler);
+  }, [expandHandler, experimentDisplayLocking]);
 
   useLayoutEffect(() => {
     if (setContentId) {
@@ -426,7 +475,9 @@ export function AccordionContent({
     <Comp
       {...rest}
       ref={ref}
-      className={`${className} ${classes.sectionChild} ${classes.content}`}
+      className={`${className} ${classes.sectionChild} ${classes.content} ${
+        !expanded && useDisplayLocking ? classes.contentHiddenMatchable : ''
+      }`}
       id={contentId}
       aria-labelledby={headerId}
       role={role}

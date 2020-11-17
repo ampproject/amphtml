@@ -39,10 +39,16 @@ const header = {
 // or delete if not used
 const content = {};
 
+const contentHiddenMatchable = {
+  'content-visibility': 'hidden-matchable !important',
+  display: 'block !important',
+};
+
 const JSS = {
   sectionChild,
   header,
   content,
+  contentHiddenMatchable,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

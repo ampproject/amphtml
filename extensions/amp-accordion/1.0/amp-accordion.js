@@ -47,6 +47,10 @@ const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
 const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
 
+const isDisplayLockingEnabledForAccordion = (win) =>
+  isExperimentOn(win, 'amp-accordion-display-locking') &&
+  win.document.body.onbeforematch !== undefined;
+
 /** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
   /** @override */
@@ -62,6 +66,12 @@ class AmpAccordion extends PreactBaseElement {
     );
 
     const {element} = this;
+    const experimentDisplayLocking = isDisplayLockingEnabledForAccordion(
+      this.win
+    );
+    if (experimentDisplayLocking) {
+      element.classList.add('i-amphtml-display-locking');
+    }
 
     const mu = new MutationObserver(() => {
       this.mutateProps(getState(element, mu));
@@ -72,7 +82,10 @@ class AmpAccordion extends PreactBaseElement {
     });
 
     const {'children': children} = getState(element, mu);
-    return dict({'children': children});
+    return dict({
+      'experimentDisplayLocking': experimentDisplayLocking,
+      'children': children,
+    });
   }
 
   /** @override */
