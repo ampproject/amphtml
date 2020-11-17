@@ -29,6 +29,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {debounce} from '../../../src/utils/rate-limit';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -191,6 +192,20 @@ export class AmpSidebar extends AMP.BaseElement {
             this.user().error(TAG, 'Failed to instantiate toolbar', e);
           }
         });
+
+        if (toolbarElements.length) {
+          this.getViewport().onResize(
+            debounce(
+              this.win,
+              () => {
+                this.toolbars_.forEach((toolbar) => {
+                  toolbar.onLayoutChange();
+                });
+              },
+              100
+            )
+          );
+        }
       });
 
     this.maybeBuildNestedMenu_();
