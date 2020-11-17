@@ -66,6 +66,8 @@ AccordionDef.AccordionHeaderProps;
 AccordionDef.AccordionContentProps;
 
 /**
+ * This is not a public API, it exists to define properties for reference
+ * that are used in the HeaderShim defined in amp-accordion
  * @typedef {{
  *   id: (string),
  *   role: (string),
@@ -76,10 +78,10 @@ AccordionDef.AccordionContentProps;
  * }}
  */
 AccordionDef.HeaderShimProps;
-// AccordionDef.HeaderShimProps is not a public API
-// The definition is included here for completeness
 
 /**
+ * This is not a public API, it exists to define properties for reference
+ * that are used in the ContentShim defined in amp-accordion
  * @typedef {{
  *   id: (string),
  *   role: (string),
@@ -89,8 +91,6 @@ AccordionDef.HeaderShimProps;
  * }}
  */
 AccordionDef.ContentShimProps;
-// AccordionDef.ContentShimProps is not a public API
-// The definition is included here for completeness
 
 /**
  * @typedef {{
