@@ -19,7 +19,7 @@ FAIL
 |    Custom Javascript (other than allowlisted script locations) is rejected.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡lang="en">
 |   <head>
 |     <meta charset="utf-8">
 |     <link rel=canonical href=http://output.jsbin.com/mumifuyewi/hello-world.html>

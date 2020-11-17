@@ -2527,7 +2527,7 @@ var xxx_messageInfo_HtmlFormat proto.InternalMessageInfo
 // NEXT AVAILABLE TAG: 40
 type TagSpec struct {
 	// The html_format field tells the validator for which html formats
-	// (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
+	// (ie: (<html ⚡lang="en"> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
 	// The repeated field is not allowed to be empty, it must have at least one
 	// HtmlFormat.
 	HtmlFormat []HtmlFormat_Code `protobuf:"varint,21,rep,name=html_format,json=htmlFormat,enum=amp.validator.HtmlFormat_Code" json:"html_format,omitempty"`
@@ -2937,7 +2937,7 @@ func (m *TagSpec) GetMarkDescendants() *AncestorMarker {
 // NEXT AVAILABLE TAG: 6
 type DocSpec struct {
 	// The html_format field tells the validator for which html formats
-	// (ie: (<html ⚡> vs <html a4⚡>) this DocSpec is defined for.
+	// (ie: (<html ⚡lang="en"> vs <html a4⚡>) this DocSpec is defined for.
 	HtmlFormat []HtmlFormat_Code `protobuf:"varint,1,rep,name=html_format,json=htmlFormat,enum=amp.validator.HtmlFormat_Code" json:"html_format,omitempty"`
 	// If a Type Identifier is in enabled_by then this DocSpec will be used
 	// in validating parsed documents with that Type Identifier. If a Type
@@ -3025,7 +3025,7 @@ func (m *DocSpec) GetMaxBytesSpecUrl() string {
 // NEXT AVAILABLE TAG: 20
 type DocCssSpec struct {
 	// The html_format field tells the validator for which html formats
-	// (ie: (<html ⚡> vs <html a4⚡>) this DocCssSpec is defined for.
+	// (ie: (<html ⚡lang="en"> vs <html a4⚡>) this DocCssSpec is defined for.
 	HtmlFormat []HtmlFormat_Code `protobuf:"varint,1,rep,name=html_format,json=htmlFormat,enum=amp.validator.HtmlFormat_Code" json:"html_format,omitempty"`
 	// If a Type Identifier is in enabled_by then this DocCssSpec will be used
 	// in validating parsed documents with that Type Identifier. If a Type

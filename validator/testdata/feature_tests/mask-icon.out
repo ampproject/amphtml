@@ -19,7 +19,7 @@ PASS
 |    Test for `link rel="mask-icon` tagsepc, due to the non-standard color attr.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

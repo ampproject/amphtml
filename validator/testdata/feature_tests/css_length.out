@@ -21,7 +21,7 @@ PASS
 |    this test to verify the max_byte_length rules for CSS author stylesheets.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">

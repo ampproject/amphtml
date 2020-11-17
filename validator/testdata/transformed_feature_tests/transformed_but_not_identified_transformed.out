@@ -19,7 +19,7 @@ FAIL
 |    This tests a transformed AMP document that is not identified as transformed.
 |  -->
 |  <!doctype html>
-|  <html ⚡ i-amphtml-layout i-amphtml-no-boilerplate>
+|  <html ⚡ lang="en" i-amphtml-layout i-amphtml-no-boilerplate>
 >> ^~~~~~~~~
 transformed_feature_tests/transformed_but_not_identified_transformed.html:21:0 The attribute 'i-amphtml-layout' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 >> ^~~~~~~~~

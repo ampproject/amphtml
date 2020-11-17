@@ -28,7 +28,7 @@ feature_tests/leaks.html:24:12 Invalid or missing doctype declaration. Should be
 >>             ^~~~~~~~~
 feature_tests/leaks.html:24:12 The attribute 'system' may not appear in tag 'html !doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |
-|  <html ⚡ manifest="https://leaking.via/html-manifest">
+|  <html ⚡ lang="en" manifest="https://leaking.via/html-manifest">
 >> ^~~~~~~~~
 feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |

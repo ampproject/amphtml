@@ -24,7 +24,7 @@ FAIL
 |    identifier will no longer emit errors, regardless of the error type.
 |  -->
 |  <!doctype html>
-|  <html ⚡ data-ampdevmode>
+|  <html ⚡ lang="en" data-ampdevmode>
 >> ^~~~~~~~~
 feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'data-ampdevmode'. Validator will suppress errors regarding any other tag with this attribute.
 |  <head>
