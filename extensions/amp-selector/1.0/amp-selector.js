@@ -17,7 +17,6 @@
 import * as Preact from '../../../src/preact';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-selector-1.0.css';
-import {Keys} from '../../../src/utils/key-codes';
 import {Option, Selector} from './selector';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -29,25 +28,12 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
-import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
-import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
+import {useCallback, useLayoutEffect} from '../../../src/preact';
 
 /** @const {string} */
 const TAG = 'amp-selector';
-
-/**
- * Set of namespaces that can be set for lifecycle reporters.
- *
- * @enum {string}
- */
-const KEYBOARD_SELECT_MODE = {
-  NONE: 'none',
-  FOCUS: 'focus',
-  SELECT: 'select',
-};
 
 class AmpSelector extends PreactBaseElement {
   /** @override */
@@ -112,6 +98,7 @@ class AmpSelector extends PreactBaseElement {
     const {children, value, options} = getOptions(element, mu);
     this.optionState = options;
     return dict({
+      'as': SelectorShim,
       'shimDomElement': element,
       'children': children,
       'value': value,
@@ -142,8 +129,6 @@ function getOptions(element, mu) {
   const options = [];
   const value = [];
   const optionChildren = toArray(element.querySelectorAll('[option]'));
-  const kbs =
-    element.getAttribute('keyboard-select-mode') || KEYBOARD_SELECT_MODE.NONE;
   optionChildren
     // Skip options that are themselves within an option
     .filter(
@@ -157,14 +142,12 @@ function getOptions(element, mu) {
       const option = child.getAttribute('option') || index.toString();
       const selected = child.hasAttribute('selected');
       const disabled = child.hasAttribute('disabled');
-      const tabIndex =
-        child.getAttribute('tabindex') ?? kbs === KEYBOARD_SELECT_MODE.SELECT
-          ? -1
-          : 0;
+      const tabIndex = child.getAttribute('tabindex');
       const props = {
         as: OptionShim,
         option,
         disabled,
+        onFocus: () => tryFocus(child),
         order: index,
         role: child.getAttribute('role') || 'option',
         shimDomElement: child,
@@ -211,36 +194,13 @@ function fireSelectEvent(win, action, el, option, value, trust) {
 }
 
 /**
- * This method uses the given callback on the target index found by
- * modifying the given value state by the given delta.
- *
- * ex: (1, "a", ["a", "b", "c", "d"]) => cb(1)
- * ex: (-1, "c", ["a", "b", "c", "d"]) => cb(1)
- * ex: (2, "c", ["a", "b", "c", "d"]) => cb(1)
- * ex: (-1, undefined, ["a", "b", "c", "d"]) => cb(2)
- * @param {number} delta
- * @param {!Array<string>} value
- * @param {Array<string>} options
- * @param {Function} cb
- * @return {{value: Array<string>, option: string}|undefined}
- */
-function callbackByDelta(delta, value, options, cb) {
-  const previous = options.indexOf(value);
-  // If previousIndex === -1 is true, then a negative delta will be offset
-  // one more than is wanted when looping back around in the options.
-  // This occurs when the given value is undefined.
-  const selectUpWhenNoneSelected = previous === -1 && delta < 0;
-  const index = selectUpWhenNoneSelected ? delta : previous + delta;
-  cb(mod(index, options.length));
-}
-
-/**
  * @param {!SelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
 function OptionShim({
   shimDomElement,
   onClick,
+  onFocus,
   onKeyDown,
   selected,
   disabled,
@@ -259,6 +219,7 @@ function OptionShim({
   );
 
   useLayoutEffect(() => syncEvent('click', onClick), [onClick, syncEvent]);
+  useLayoutEffect(() => syncEvent('focus', onFocus), [onFocus, syncEvent]);
   useLayoutEffect(() => syncEvent('keydown', onKeyDown), [
     onKeyDown,
     syncEvent,
@@ -288,66 +249,21 @@ function OptionShim({
 
 /**
  * @param {!SelectorDef.Props} props
- * @param {{current: (!SelectorDef.SelectorApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function SelectorShimWithRef(
-  {
-    shimDomElement,
-    children,
-    multiple,
-    disabled,
-    keyboardSelectMode = KEYBOARD_SELECT_MODE.NONE,
-    role = 'listbox',
-    tabIndex,
-    value,
-    options,
-    ...rest
-  },
-  ref
-) {
-  const valueRef = useRef(value);
-  valueRef.current = value;
-  const focusRef = useRef(options[0]);
-  const focus = useCallback(
-    (index) => {
-      focusRef.current = options[index];
-      const option = children[index];
-      if (option && option.props && option.props.shimDomElement) {
-        tryFocus(option.props.shimDomElement);
-      }
-    },
-    [options, children]
-  );
-
-  const onKeyDown = useCallback(
-    (e) => {
-      const {key} = e;
-      let dir;
-      switch (key) {
-        case Keys.LEFT_ARROW: // Fallthrough.
-        case Keys.UP_ARROW:
-          dir = -1;
-          break;
-        case Keys.RIGHT_ARROW: // Fallthrough.
-        case Keys.DOWN_ARROW:
-          dir = 1;
-          break;
-        default:
-          break;
-      }
-      if (dir) {
-        if (keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT) {
-          selectByDelta(dir, valueRef.current, options, ref.current);
-        } else if (keyboardSelectMode === KEYBOARD_SELECT_MODE.FOCUS) {
-          callbackByDelta(dir, focusRef.current, options, focus);
-        }
-      }
-    },
-    [focus, keyboardSelectMode, options, ref]
-  );
-
+function SelectorShim({
+  shimDomElement,
+  children,
+  multiple,
+  disabled,
+  onKeyDown,
+  role = 'listbox',
+  tabIndex,
+}) {
   useLayoutEffect(() => {
+    if (!onKeyDown) {
+      return;
+    }
     shimDomElement.addEventListener('keydown', onKeyDown);
     return () =>
       shimDomElement.removeEventListener('keydown', devAssert(onKeyDown));
@@ -368,31 +284,16 @@ function SelectorShimWithRef(
   }, [shimDomElement, role]);
 
   useLayoutEffect(() => {
-    shimDomElement.tabIndex =
-      tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1;
-  }, [shimDomElement, keyboardSelectMode, tabIndex]);
+    if (tabIndex != undefined) {
+      shimDomElement.tabIndex = tabIndex;
+    }
+  }, [shimDomElement, tabIndex]);
 
-  return (
-    <Selector
-      role={role}
-      children={children}
-      multiple={multiple}
-      disabled={disabled}
-      tabIndex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
-      }
-      ref={ref}
-      value={value}
-      {...rest}
-    />
-  );
+  return <div children={children} />;
 }
 
-const SelectorShim = forwardRef(SelectorShimWithRef);
-Selector.displayName = 'SelectorShim'; // Make findable for tests.
-
 /** @override */
-AmpSelector['Component'] = SelectorShim;
+AmpSelector['Component'] = Selector;
 
 /** @override */
 AmpSelector['detached'] = true;

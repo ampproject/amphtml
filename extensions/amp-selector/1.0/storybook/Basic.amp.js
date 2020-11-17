@@ -93,12 +93,18 @@ WithUl.story = {
 };
 
 export const Actions = () => {
+  const keyboardSelectMode = select(
+    'keyboard select mode',
+    ['none', 'focus', 'select'],
+    'focus'
+  );
   return (
     <>
       <amp-selector
         id="actionsSample"
         layout="container"
         class="sample-selector"
+        keyboard-select-mode={keyboardSelectMode}
         multiple
       >
         <ul>
@@ -148,25 +154,4 @@ export const Responsive = () => {
 
 Responsive.story = {
   name: 'responsive',
-};
-
-export const keyboardSelectMode = () => {
-  const keyboardSelectMode = select(
-    'keyboard select mode',
-    ['none', 'focus', 'select'],
-    'focus'
-  );
-  return (
-    <amp-selector
-      keyboard-select-mode={keyboardSelectMode}
-      aria-label="Option menu"
-    >
-      <ul>
-        <li option="1">Option 1</li>
-        <li option="2">Option 2</li>
-        <li option="3">Option 3</li>
-        <li option="4">Option 4</li>
-      </ul>
-    </amp-selector>
-  );
 };

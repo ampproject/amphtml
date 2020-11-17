@@ -16,9 +16,9 @@
 
 import * as Preact from '../../../../src/preact';
 import {Option, Selector} from '../selector';
+import {select, withKnobs} from '@storybook/addon-knobs';
 import {useState} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import {withKnobs} from '@storybook/addon-knobs';
 export default {
   title: 'Selector',
   component: Selector,
@@ -83,9 +83,18 @@ function SelectorWithActions(props) {
 }
 
 export const actionsAndOrder = () => {
+  const keyboardSelectMode = select(
+    'keyboard select mode',
+    ['none', 'focus', 'select'],
+    'select'
+  );
   return (
     <>
-      <SelectorWithActions multiple aria-label="Image menu">
+      <SelectorWithActions
+        keyboardSelectMode={keyboardSelectMode}
+        multiple
+        aria-label="Image menu"
+      >
         <Option
           as="img"
           alt="Sea landscape"

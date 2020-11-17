@@ -348,15 +348,15 @@ describes.sandboxed('Selector preact component', {}, () => {
         ref.current.selectBy(1);
         wrapper.update();
 
-        // Try to select next option (disabled).
-        expect(option0).to.not.have.attribute('selected');
+        // Skip next option (disabled) and select the option after that.
+        expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
 
         ref.current.selectBy(-1);
         wrapper.update();
 
-        // Previous option is selected.
+        // Skip previous option (disabled) and select the option before that.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
@@ -484,15 +484,15 @@ describes.sandboxed('Selector preact component', {}, () => {
         ref.current.selectBy(1);
         wrapper.update();
 
-        // Try to select next option (disabled).
-        expect(option0).to.not.have.attribute('selected');
+        // Skip next option (disabled) and select the option after that.
+        expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
 
         ref.current.selectBy(-1);
         wrapper.update();
 
-        // Previous option is selected.
+        // Skip previous option (disabled) and select the option before that.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
