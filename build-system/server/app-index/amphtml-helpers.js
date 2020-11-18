@@ -61,7 +61,7 @@ const AmpDoc = ({body, css, head, canonical}) => {
   assert(canonical);
   return html`
     <!DOCTYPE html>
-    <html ⚡lang="en">
+    <html ⚡ lang="en">
       <head>
         <title>AMP Dev Server</title>
         <meta charset="utf-8" />

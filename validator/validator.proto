@@ -538,7 +538,7 @@ message HtmlFormat {
 // NEXT AVAILABLE TAG: 40
 message TagSpec {
   // The html_format field tells the validator for which html formats
-  // (ie: (<html ⚡lang="en"> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
+  // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
   // The repeated field is not allowed to be empty, it must have at least one
   // HtmlFormat.
   repeated HtmlFormat.Code html_format = 21;
@@ -705,7 +705,7 @@ message TagSpec {
 // NEXT AVAILABLE TAG: 6
 message DocSpec {
   // The html_format field tells the validator for which html formats
-  // (ie: (<html ⚡lang="en"> vs <html a4⚡>) this DocSpec is defined for.
+  // (ie: (<html ⚡> vs <html a4⚡>) this DocSpec is defined for.
   repeated HtmlFormat.Code html_format = 1;
   // If a Type Identifier is in enabled_by then this DocSpec will be used
   // in validating parsed documents with that Type Identifier. If a Type
@@ -728,7 +728,7 @@ message DocSpec {
 // NEXT AVAILABLE TAG: 20
 message DocCssSpec {
   // The html_format field tells the validator for which html formats
-  // (ie: (<html ⚡lang="en"> vs <html a4⚡>) this DocCssSpec is defined for.
+  // (ie: (<html ⚡> vs <html a4⚡>) this DocCssSpec is defined for.
   repeated HtmlFormat.Code html_format = 1;
   // If a Type Identifier is in enabled_by then this DocCssSpec will be used
   // in validating parsed documents with that Type Identifier. If a Type

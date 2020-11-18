@@ -127,7 +127,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     const doc = new DOMParser().parseFromString(source, 'text/html');
     const root = doc.documentElement;
 
-    // <html ⚡lang="en"> -> <html ⚡4ads>
+    // <html ⚡> -> <html ⚡4ads>
     if (root.hasAttribute('⚡')) {
       root.removeAttribute('⚡');
     } else if (root.hasAttribute('amp')) {

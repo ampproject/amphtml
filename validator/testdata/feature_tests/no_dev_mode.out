@@ -28,7 +28,7 @@ FAIL
 |    and some comments, this is the same as dev_mode.html.
 |  -->
 |  <!doctype html>
-|  <html ⚡lang="en">
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

@@ -19,7 +19,7 @@ PASS
 |      This tests a <style> tag in body and should pass.
 |  -->
 |  <!doctype html>
-|  <html ⚡lang="en">
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>STAMP examples</title>

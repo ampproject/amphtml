@@ -23,7 +23,7 @@ PASS
 |    even if the attribute names and values of the two body tags agree.
 |  -->
 |  <!doctype html>
-|  <html ⚡lang="en">
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

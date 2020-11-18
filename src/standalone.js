@@ -23,7 +23,7 @@ import {isAmphtml} from './format';
  */
 export function installStandaloneExtension(ampdoc) {
   const {win} = ampdoc;
-  // Only enabled when the document is tagged as <html amp> or <html ⚡lang="en">.
+  // Only enabled when the document is tagged as <html amp> or <html ⚡ lang="en">.
   if (!isAmphtml(win.document)) {
     return;
   }

@@ -21,7 +21,7 @@ FAIL
 |    into the first one. However, for AMPHTML only a single BODY tag is allowed.
 |  -->
 |  <!doctype html>
-|  <html ⚡lang="en">
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

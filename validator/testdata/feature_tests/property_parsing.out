@@ -20,7 +20,7 @@ PASS
 |    See https://github.com/ampproject/amphtml/issues/4577 for history.
 |  -->
 |  <!doctype html>
-|  <html ⚡lang="en">
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
