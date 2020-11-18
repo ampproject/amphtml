@@ -141,7 +141,6 @@ export class PageScroller {
       // threshold, (re)set the scroll parameters to include momentum.
       this.scrollState_.durationMs = this.win_.innerHeight * 1.2;
       this.scrollState_.isRunning = true;
-      this.scrollState_.multiplier = 1;
 
       requestAnimationFrame((timestamp) => {
         this.scrollState_.startTimeMs = timestamp;
@@ -150,6 +149,7 @@ export class PageScroller {
       });
     }
 
+    this.scrollState_.multiplier = 1;
     this.touchEventState_.startY = 0;
     this.scrollState_.deltaY = 0;
   }
