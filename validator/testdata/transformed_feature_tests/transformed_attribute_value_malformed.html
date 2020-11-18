@@ -1,5 +1,5 @@
 <!--
-  Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+  Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
 -->
 <!--
   Test Description:
-  This is the minimum valid tranformed AMP document; it includes all of the
-  required fields from the spec, but nothing else.
+  This tests that the value of the transformed attribute catches malformed name. Only
+  `self` or AMP caches listed at https://cdn.ampproject.org/caches.json are valid.
 -->
 <!doctype html>
-<html ⚡ transformed="google;v=1..3">
+<html ⚡ transformed="foobar;v=1">
 <head>
   <meta charset="utf-8">
   <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
