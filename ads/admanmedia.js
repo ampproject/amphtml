@@ -27,7 +27,11 @@ export function admanmedia(global, data) {
   loadScript(
     global,
     `https://pub.admanmedia.com/go?id=${encodedId}`,
-    () => { global.context.renderStart(); },
-    () => { global.context.noContentAvailable(); }
+    () => {
+      global.context.renderStart();
+    },
+    () => {
+      global.context.noContentAvailable();
+    }
   );
 }
