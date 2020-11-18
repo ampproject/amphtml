@@ -17,6 +17,10 @@
 import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
+import {
+  INTERSECT_RESOURCES_EXP,
+  divertIntersectResources,
+} from '../experiments/intersect-resources-exp';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {Resource, ResourceState} from './resource';
@@ -26,11 +30,7 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../experiments';
+import {getExperimentBranch, isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
@@ -56,13 +56,6 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
 const MAX_BUILD_CHUNK_SIZE = 10;
-
-/** @const {!{id: string, control: string, experiment: string}} */
-export const INTERSECT_RESOURCES_EXP = {
-  id: 'intersect-resources',
-  control: '21068800',
-  experiment: '21068801',
-};
 
 /**
  * @implements {ResourcesInterface}
@@ -229,7 +222,7 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    this.divertIntersectResources_();
+    divertIntersectResources(this.win);
 
     if (
       getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
@@ -353,28 +346,6 @@ export class ResourcesImpl {
     });
 
     this.schedulePass();
-  }
-
-  /**
-   * Select exp vs control for intersect-resources.
-   * @private
-   */
-  divertIntersectResources_() {
-    // We shouldn't report metrics for email as it is opted out.
-    if (isAmp4Email(this.win.document)) {
-      return;
-    }
-    const expInfoList = /** @type {!Array<!../experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: INTERSECT_RESOURCES_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          INTERSECT_RESOURCES_EXP.control,
-          INTERSECT_RESOURCES_EXP.experiment,
-        ],
-      },
-    ]);
-    randomlySelectUnsetExperiments(this.win, expInfoList);
   }
 
   /** @private */

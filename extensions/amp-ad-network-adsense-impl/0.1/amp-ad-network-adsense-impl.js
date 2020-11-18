@@ -23,7 +23,7 @@
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {INTERSECT_RESOURCES_EXP} from '../../../src/service/resources-impl';
+import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
