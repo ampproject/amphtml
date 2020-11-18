@@ -23,6 +23,7 @@
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {INTERSECT_RESOURCES_EXP} from '../../../src/service/resources-impl';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -237,6 +238,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         experimentId: PTT_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(PTT_EXP_BRANCHES),
+      },
+      {
+        experimentId: INTERSECT_RESOURCES_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          INTERSECT_RESOURCES_EXP.control,
+          INTERSECT_RESOURCES_EXP.experiment,
+        ],
       },
     ]);
     const setExps = randomlySelectUnsetExperiments(

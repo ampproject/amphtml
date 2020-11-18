@@ -26,6 +26,11 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
@@ -33,7 +38,6 @@ import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isAmp4Email} from '../format';
 import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -52,6 +56,13 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
 const MAX_BUILD_CHUNK_SIZE = 10;
+
+/** @const {!{id: string, control: string, experiment: string}} */
+export const INTERSECT_RESOURCES_EXP = {
+  id: 'intersect-resources',
+  control: '21068800',
+  experiment: '21068801',
+};
 
 /**
  * @implements {ResourcesInterface}
@@ -218,8 +229,11 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
+    this.divertIntersectResources_();
+
     if (
-      isExperimentOn(this.win, 'intersect-resources') &&
+      getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
+        INTERSECT_RESOURCES_EXP.experiment &&
       !isAmp4Email(this.win.document)
     ) {
       const iframed = isIframed(this.win);
@@ -339,6 +353,28 @@ export class ResourcesImpl {
     });
 
     this.schedulePass();
+  }
+
+  /**
+   * Select exp vs control for intersect-resources.
+   * @private
+   */
+  divertIntersectResources_() {
+    // We shouldn't report metrics for email as it is opted out.
+    if (isAmp4Email(this.win.document)) {
+      return;
+    }
+    const expInfoList = /** @type {!Array<!../experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: INTERSECT_RESOURCES_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          INTERSECT_RESOURCES_EXP.control,
+          INTERSECT_RESOURCES_EXP.experiment,
+        ],
+      },
+    ]);
+    randomlySelectUnsetExperiments(this.win, expInfoList);
   }
 
   /** @private */

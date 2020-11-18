@@ -54,6 +54,7 @@ import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
+import {INTERSECT_RESOURCES_EXP} from '../../../src/service/resources-impl';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
@@ -443,6 +444,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         experimentId: PTT_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(PTT_EXP_BRANCHES),
+      },
+      {
+        experimentId: INTERSECT_RESOURCES_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          INTERSECT_RESOURCES_EXP.control,
+          INTERSECT_RESOURCES_EXP.experiment,
+        ],
       },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
