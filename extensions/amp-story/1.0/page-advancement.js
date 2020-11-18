@@ -588,7 +588,7 @@ export class ManualAdvancement extends AdvancementConfig {
     ) {
       user().error(
         'AMP-STORY-PAGE',
-        'Link was too large; skipped for navigation. For more information, see https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story.md#links-in-amp-story-grid-layer'
+        'Link was too large; skipped for navigation. For more information, see https://github.com/ampproject/amphtml/issues/31108'
       );
       return true;
     }
