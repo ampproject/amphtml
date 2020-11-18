@@ -980,8 +980,13 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   --i-amphtml-interactive-animation-delay: 350ms !important;
 }
 
-.i-amphtml-story-loaded amp-story-page .panner,
-.i-amphtml-story-loaded amp-story-page .scaler {
+amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-page .panner,
+amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-page .scaler {
+  transition: transform 1s ease-in-out;
+}
+
+.i-amphtml-story-desktop-panels amp-story-page[active] .panner,
+.i-amphtml-story-desktop-panels amp-story-page[active] .scaler {
   transition: transform 1s ease-in-out;
 }
 
