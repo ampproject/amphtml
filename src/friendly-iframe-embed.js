@@ -18,6 +18,7 @@ import {CommonSignals} from './common-signals';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {VisibilityState} from './visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {dev, devAssert, rethrowAsync, userAssert} from './log';
 import {
@@ -34,6 +35,7 @@ import {installForChildWin as installIntersectionObserver} from './polyfills/int
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
+import {isFieResourcesOn} from './experiments/fie-resources-exp';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -378,7 +380,10 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    this.removeResources_();
+    const fieResourcesOn = isFieResourcesOn(this.win);
+    if (!fieResourcesOn) {
+      this.removeResources_();
+    }
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
       this.ampdoc.dispose();
@@ -431,6 +436,24 @@ export class FriendlyIframeEmbed {
    */
   whenIniLoaded() {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
+  }
+
+  /**
+   * Pause the embed.
+   */
+  pause() {
+    if (this.ampdoc) {
+      this.ampdoc.overrideVisibilityState(VisibilityState.PAUSED);
+    }
+  }
+
+  /**
+   * Resume the embed.
+   */
+  resume() {
+    if (this.ampdoc) {
+      this.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+    }
   }
 
   /**
