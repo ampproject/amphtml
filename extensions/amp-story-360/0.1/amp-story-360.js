@@ -571,11 +571,13 @@ export class AmpStory360 extends AMP.BaseElement {
     let rot = Matrix.identity(3);
     rot = Matrix.mul(
       3,
-      Matrix.rotation(3, 1, 0, deg2rad(this.smoothA_ - this.headingOffset_)),
+      Matrix.rotation(3, 1, 0, deg2rad(e.alpha - this.headingOffset_)),
       rot
     );
-    rot = Matrix.mul(3, Matrix.rotation(3, 2, 1, deg2rad(this.smoothB_)), rot);
-    rot = Matrix.mul(3, Matrix.rotation(3, 0, 2, deg2rad(this.smoothG_)), rot);
+    rot = Matrix.mul(3, Matrix.rotation(3, 2, 1, deg2rad(e.beta)), rot);
+    rot = Matrix.mul(3, Matrix.rotation(3, 0, 2, deg2rad(e.gamma)), rot);
+
+    const smoothFactor = 0.66;
 
     if (!this.rot_) {
       this.rot_ = rot;
@@ -585,7 +587,6 @@ export class AmpStory360 extends AMP.BaseElement {
       });
     }
 
-    const smoothFactor = 0.9;
     this.renderer_.setCamera(this.rot_, 1);
     this.renderer_.render(true);
   }
