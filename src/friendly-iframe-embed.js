@@ -21,7 +21,6 @@ import {Signals} from './utils/signals';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {dev, devAssert, rethrowAsync, userAssert} from './log';
 import {
-  disposeServicesForDoc,
   disposeServicesForEmbed,
   getTopWindow,
   setParentWindow,
@@ -382,7 +381,6 @@ export class FriendlyIframeEmbed {
     this.removeResources_();
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
-      disposeServicesForDoc(this.ampdoc);
       this.ampdoc.dispose();
     }
   }

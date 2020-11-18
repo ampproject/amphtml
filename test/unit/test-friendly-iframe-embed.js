@@ -29,14 +29,12 @@ import {
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {getFriendlyIframeEmbedOptional} from '../../src/iframe-helper';
+import {installExtensionsService} from '../../src/service/extensions-impl';
 import {
-  getServiceForDoc,
   installServiceInEmbedScope,
   registerServiceBuilder,
-  registerServiceBuilderForDoc,
   setParentWindow,
 } from '../../src/service';
-import {installExtensionsService} from '../../src/service/extensions-impl';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
@@ -400,7 +398,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
-      isSingleDoc: () => false,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
@@ -440,13 +437,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .stub(FriendlyIframeEmbed.prototype, 'whenReady')
       .returns(Promise.resolve());
 
-    let disposableDocService;
-    const disposableFactory = function () {
-      return {
-        dispose: env.sandbox.spy(),
-      };
-    };
-
     const embedPromise = installFriendlyIframeEmbed(
       iframe,
       document.body,
@@ -460,16 +450,10 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     return embedPromise
       .then((embed) => {
         expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
-
-        // Register a disposable service.
-        registerServiceBuilderForDoc(embed.ampdoc, 'a', disposableFactory);
-        disposableDocService = getServiceForDoc(embed.ampdoc, 'a');
-
         embed.destroy();
       })
       .then(() => {
         expect(ampdoc.dispose).to.be.calledOnce;
-        expect(disposableDocService.dispose).to.be.calledOnce;
       });
   });
 
