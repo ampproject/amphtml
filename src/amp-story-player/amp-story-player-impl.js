@@ -18,6 +18,7 @@ import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Deferred} from '../utils/promise';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
+import {PageScroller} from './page-scroller';
 import {VisibilityState} from '../visibility-state';
 import {
   addParamsToUrl,
@@ -239,17 +240,8 @@ export class AmpStoryPlayer {
 
     this.attachCallbacksToElement_();
 
-    /** @private {!Object} */
-    this.scrollEventState_ = {
-      startY: 0,
-      endY: 0,
-      currentDistance: 0,
-      isRunning: false,
-      isDistanceAsc: false,
-      distance: 20,
-      acceleration: 2,
-      deceleration: 0.885,
-    };
+    /** @private {!PageScroller} */
+    this.pageScroller_ = new PageScroller(win);
   }
 
   /**
@@ -585,8 +577,8 @@ export class AmpStoryPlayer {
             this.onTouchMove_(/** @type {!Event} */ (data));
           });
 
-          messaging.registerHandler('touchend', () => {
-            this.onTouchEnd_();
+          messaging.registerHandler('touchend', (event, data) => {
+            this.onTouchEnd_(/** @type {!Event} */ (data));
           });
 
           messaging.registerHandler('selectDocument', (event, data) => {
@@ -1447,7 +1439,8 @@ export class AmpStoryPlayer {
 
     this.touchEventState_.startX = coordinates.x;
     this.touchEventState_.startY = coordinates.y;
-    this.scrollEventState_.startY = this.win_.scrollY;
+
+    this.pageScroller_.onTouchStart(event.timeStamp, coordinates.y);
   }
 
   /**
@@ -1462,7 +1455,7 @@ export class AmpStoryPlayer {
     }
 
     if (this.touchEventState_.isSwipeX === false) {
-      this.forwardScrollingEvent_(coordinates.y);
+      this.pageScroller_.onTouchMove(event.timeStamp, coordinates.y);
       return;
     }
 
@@ -1485,79 +1478,18 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Forwards scrolling event from iframe to parent window.
-   * @param {number} touchEventY
-   * @private
-   */
-  forwardScrollingEvent_(touchEventY) {
-    const deltaY = touchEventY - this.touchEventState_.startY;
-    this.applySmoothScroll_(deltaY);
-  }
-
-  /**
-   * Applies smooth scrolling to parent page when scrolling on the player.
-   * @param {number} deltaY
-   */
-  applySmoothScroll_(deltaY) {
-    if (!this.scrollEventState_.isRunning) {
-      this.scrollEventState_.endY = this.scrollEventState_.startY;
-      this.scrollEventState_.isRunning = true;
-      this.scrollEventState_.currentDistance = deltaY > 0 ? -0.1 : 0.1;
-      this.scrollEventState_.isDistanceAsc = true;
-      this.recursiveScroll_();
-      return;
-    }
-
-    this.scrollEventState_.isDistanceAsc = false;
-    this.scrollEventState_.currentDistance =
-      deltaY > 0
-        ? -this.scrollEventState_.distance
-        : this.scrollEventState_.distance;
-  }
-
-  /**
-   * @private
-   */
-  recursiveScroll_() {
-    if (!this.scrollEventState_.isRunning) {
-      return;
-    }
-
-    this.scrollEventState_.currentDistance *= this.scrollEventState_
-      .isDistanceAsc
-      ? this.scrollEventState_.acceleration
-      : this.scrollEventState_.deceleration;
-
-    if (
-      Math.abs(this.scrollEventState_.currentDistance) < 0.1 &&
-      !this.scrollEventState_.isDistanceAsc
-    ) {
-      this.scrollEventState_.isRunning = false;
-    }
-
-    if (
-      Math.abs(this.scrollEventState_.currentDistance) >=
-      Math.abs(this.scrollEventState_.distance)
-    ) {
-      this.scrollEventState_.isDistanceAsc = false;
-    }
-
-    this.scrollEventState_.endY += this.scrollEventState_.currentDistance;
-    this.win_.scroll(0, this.scrollEventState_.endY);
-
-    requestAnimationFrame(this.recursiveScroll_.bind(this));
-  }
-
-  /**
    * Reacts to touchend events. Resets cached touch event states.
+   * @param {!Event} event
    * @private
    */
-  onTouchEnd_() {
+  onTouchEnd_(event) {
     if (this.touchEventState_.isSwipeX === true) {
       this.onSwipeX_({
         deltaX: this.touchEventState_.lastX - this.touchEventState_.startX,
         last: true,
       });
+    } else {
+      this.pageScroller_.onTouchEnd(event.timeStamp);
     }
 
     this.touchEventState_.startX = 0;
