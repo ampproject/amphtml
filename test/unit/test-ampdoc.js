@@ -30,7 +30,11 @@ import {
 } from '../../src/web-components';
 import {Signals} from '../../src/utils/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
-import {setParentWindow, registerServiceBuilderForDoc, getServiceForDoc} from '../../src/service';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+  setParentWindow,
+} from '../../src/service';
 import {waitFor} from '../../testing/test-helper';
 
 describes.realWin('AmpDocService', {}, (env) => {

@@ -25,7 +25,11 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
-import {getParentWindowFrameElement, registerServiceBuilder, disposeServicesForDoc} from '../service';
+import {
+  disposeServicesForDoc,
+  getParentWindowFrameElement,
+  registerServiceBuilder,
+} from '../service';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../utils/object';
