@@ -29,7 +29,6 @@ import {
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {getFriendlyIframeEmbedOptional} from '../../src/iframe-helper';
-import {installExtensionsService} from '../../src/service/extensions-impl';
 import {
   getServiceForDoc,
   installServiceInEmbedScope,
@@ -37,6 +36,7 @@ import {
   registerServiceBuilderForDoc,
   setParentWindow,
 } from '../../src/service';
+import {installExtensionsService} from '../../src/service/extensions-impl';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';

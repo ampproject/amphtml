@@ -366,7 +366,14 @@ function getServiceInternal(holder, id) {
  * @param {boolean=} opt_override
  * @param {boolean=} opt_adopted
  */
-function registerServiceInternal(holder, context, id, ctor, opt_override, opt_adopted) {
+function registerServiceInternal(
+  holder,
+  context,
+  id,
+  ctor,
+  opt_override,
+  opt_adopted
+) {
   const services = getServices(holder);
   let s = services[id];
 
