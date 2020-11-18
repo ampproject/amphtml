@@ -17,9 +17,10 @@
 amp-story-dev-tools {
   width: 100%;
   height: 100%;
-  background-color: #121212 !important;
+  background-color: black !important;
   font-size: 16px;
   font-family: 'Poppins', sans-serif;
+  color: white;
 }
 
 .i-amphtml-dev-tools-container {
@@ -47,7 +48,6 @@ amp-story-dev-tools {
   letter-spacing: 0.1em;
   line-height: 1.2em;
   padding-left: 10px;
-
 }
 
 .i-amphtml-dev-tools-brand-text > span:nth-child(2) {
@@ -93,6 +93,20 @@ amp-story-dev-tools {
   width: 80%;
 }
 
+.i-amphtml-dev-tools-error-count {
+  background: #EF5346;
+  color: black;
+  font-size: 10px;
+  line-height: 18px;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  margin-left: 5px;
+  border-radius: 50%;
+  font-weight: bold;
+  display: inline-block;
+}
+
 /* Devices */
 
 .i-amphtml-dev-tools-devices {
@@ -101,7 +115,7 @@ amp-story-dev-tools {
 }
 
 .i-amphtml-dev-tools-device {
-  background: black;
+  background: #101010;
   border-radius: 40px;
   box-shadow: 0px 11.0046px 27.5114px rgba(0, 0, 0, 0.34), inset 0px 2.20091px 3.30137px rgba(44, 46, 52, 0.6);
   display: flex;
@@ -109,9 +123,22 @@ amp-story-dev-tools {
   overflow: hidden;
   position: absolute;
   margin: auto;
+  height: fit-content;
   top: 0;
   bottom: 0;
   transition: transform ease-out 0.15s, left ease-out 0.15s;
+  padding: 10px 8px;
+  height: fit-content;
+}
+
+.i-amphtml-dev-tools-device-screen {
+  border-radius: 30px;
+  background: #2E3137;
+  overflow: hidden;
+}
+
+.i-amphtml-dev-tools-tab-blurred .i-amphtml-dev-tools-device {
+  /* transition: none; */
 }
 
 .i-amphtml-dev-tools-device-name {
@@ -171,20 +198,7 @@ amp-story-player a {
   margin: 1em;
 }
 
-select {
-  position: absolute;
-  right: 1em;
-  top: 1em;
-  width: 10em;
-  color: white;
-  background: black;
-  border: none;
-  border-radius: .5em;
-  padding: .5em .8em;
-  font-family: 'Poppins', sans-serif;
-}
-
-.i-amphtml-dev-tools-device-chips {
+.i-amphtml-dev-tools-device-chips-container {
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -194,6 +208,7 @@ select {
 .i-amphtml-dev-tools-device-chip {
   border-radius: 16px;
   background: #2e2e2e;
+  border: 1px solid #2e2e2e;
   height: 32px;
   font-size: 13px;
   line-height: 20px;
@@ -201,6 +216,9 @@ select {
   align-items: center;
   padding: 0 6px 0 10px;
   margin: 0 5px;
+  max-width: 300px;
+  transition: background 0.2s ease-in-out, color 0.2s ease-in-out, max-width 0.2s ease-in-out;
+  white-space: nowrap;
 }
 
 .i-amphtml-dev-tools-device-chip svg {
@@ -209,6 +227,68 @@ select {
   border-radius: 50%;
   padding: 2px;
   margin-left: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.i-amphtml-dev-tools-device-chips .i-amphtml-dev-tools-device-chip[inactive] {
+  max-width: 0px;
+}
+
+.i-amphtml-dev-tools-device-chip[inactive] {
+  background: transparent;
+}
+
+.i-amphtml-dev-tools-device-chip[inactive] svg {
+  transform: rotate(45deg);
+  background: #ffffff22;
+}
+
+.i-amphtml-dev-tools-device-popup-bg {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #111111cc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.i-amphtml-dev-tools-device-chip.i-amphtml-dev-tools-add-device {
+  background: #79B3FF;
+  color: black;
+  cursor: pointer;
+}
+
+.i-amphtml-dev-tools-device-chip.i-amphtml-dev-tools-add-device svg {
+  transform: rotate(45deg);
+  fill: #79B3FF;
+}
+
+.i-amphtml-dev-tools-device-popup-container {
+  background: black;
+  width: min(650px, 90%);
+  border-radius: 10px;
+  padding: 40px;
+  position: relative;
+}
+
+.i-amphtml-dev-tools-device-popup-container .i-amphtml-dev-tools-device-chip {
+  margin: 4px;
+}
+
+.i-amphtml-dev-tools-device-popup-close {
+  cursor: pointer;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  opacity: .6;
+}
+
+.i-amphtml-dev-tools-device-popup-close:hover {
+  opacity: 1;
 }
 
 /* PAGE_SPEED TAB */

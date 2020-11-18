@@ -104,6 +104,7 @@ export class DevToolsLogTab extends AmpStoryDevToolsTab {
     getUrl_(url).then(
       (html) => {
         const validationResult = validator.validateString(html);
+        this.devTools_.setErrorCount(validationResult.errors.length);
         validationResult.errors.forEach((error) => {
           error.lineContent = html
             .split('\n')

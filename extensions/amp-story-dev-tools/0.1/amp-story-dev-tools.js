@@ -165,6 +165,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       ),
     };
 
+    this.errorsCountEl_ = element.ownerDocument.createElement('span');
+    this.errorsCountEl_.classList.add('i-amphtml-dev-tools-error-count');
+
     this.loadFonts_();
   }
 
@@ -177,6 +180,10 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     Object.values(DevToolsTab).forEach((e) => {
       const tab = this.win.document.createElement('span');
       tab.textContent = e;
+      if (e == DevToolsTab.LOGS) {
+        tab.appendChild(this.errorsCountEl_);
+      }
+      tab.tabName = e;
       tab.addEventListener('click', () => {
         if (this.tab_ != e) {
           this.switchTab_(e);
@@ -192,17 +199,15 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       tabsContainer.appendChild(tab);
     });
 
-    // this.tabContents_[DevToolsTab.LOGS] = new DevToolsLogTab(
-    //   buildLogsTabTemplate(this.element),
-    //   this.storyUrl_
-    // );
+    this.switchTab_(this.currentTab_);
+  }
 
-    // Go to tab in hashString
-    this.switchTab_(
-      Object.values(DevToolsTab).find(
-        (e) => e.toLowerCase().replace(' ', '-') === this.currentTab_
-      ) || DevToolsTab.DEVICES
-    );
+  /**
+   * @public
+   * @param {number} errorCount
+   */
+  setErrorCount(errorCount) {
+    this.errorsCountEl_.textContent = errorCount;
   }
 
   /**
@@ -278,20 +283,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     toArray(
       this.element.querySelector('.i-amphtml-dev-tools-tabs').children
     ).forEach((e) => {
-      return e.toggleAttribute('active', e.textContent === tab);
+      return e.toggleAttribute('active', e.tabName === tab);
     });
   }
-
-  // /**
-  //  * Creates the devices layouts
-  //  * @param {!Element} container
-  //  */
-  // setUpPageSpeedTab_(container) {
-  //   const pageSpeedContainer = buildPageSpeedTabTemplate(this.element);
-  //   container.appendChild(pageSpeedContainer);
-  //   const iframe = pageSpeedContainer.getElementsByTagName('iframe')[0];
-  //   iframe.src = PAGE_SPEED_URL + this.storyUrl_;
-  // }
 
   /**
    * Closes the dev tools by navigating to the story.

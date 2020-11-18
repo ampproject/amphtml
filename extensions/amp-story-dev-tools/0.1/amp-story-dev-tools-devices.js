@@ -132,14 +132,16 @@ const buildDeviceTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-dev-tools-device">
-      <div class="i-amphtml-dev-tools-device-specs"></div>
-      <div class="i-amphtml-dev-tools-device-name"></div>
-      <div class="lds-dual-ring"></div>
-      <amp-story-player width="1" height="1" layout="fixed">
-        <a></a>
-      </amp-story-player>
-      <div class="i-amphtml-dev-tools-device-footer">
-        <div></div>
+      <div class="i-amphtml-dev-tools-device-screen">
+        <div class="i-amphtml-dev-tools-device-specs"></div>
+        <div class="i-amphtml-dev-tools-device-name"></div>
+        <div class="lds-dual-ring"></div>
+        <amp-story-player width="1" height="1" layout="fixed">
+          <a></a>
+        </amp-story-player>
+        <div class="i-amphtml-dev-tools-device-footer">
+          <div></div>
+        </div>
       </div>
     </div>
   `;
@@ -172,18 +174,59 @@ const buildDeviceChipTemplate = (element) => {
   `;
 };
 
+/**
+ * Generates the template for a device.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildAddDevicePopupTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-dev-tools-device-popup-bg">
+      <div class="i-amphtml-dev-tools-device-popup-container">
+      <svg
+      title="cross"
+      class="i-amphtml-dev-tools-device-popup-close"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="white"
+      width="18px"
+      height="18px"
+    >
+      <path
+        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+      />
+    </svg>
+      </div>
+    </span>
+  `;
+};
+
+/**
+ * @typedef {{
+ *  element: !Element,
+ *  player: !Element
+ *  chip: !Element,
+ *  width: number,
+ *  height: number,
+ *  deviceHeight: ?number,
+ *  custom: ?boolean,
+ * }}
+ */
+export let DeviceInfo;
+
 export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
   /**
    * @param {!Element} element the element that will be used to log everything.
    * @param {!Element} win
    * @param {!AmpStoryDevTools} devTools
    * @param {string} storyUrl
-   * @param {!Array} devices
+   * @param {!Array<DeviceInfo>} devices
    */
   constructor(element, win, devTools, storyUrl, devices) {
     super(buildDevicesTabTemplate(element), win, devTools, storyUrl);
 
-    /** @private {Array} */
+    /** @private {!Array<DeviceInfo>} */
     this.devices_ = devices;
 
     /** @private {?PlayersManager} */
@@ -196,16 +239,23 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
    */
   setUpTab_() {
     this.element.textContent = '';
-    this.element.appendChild(this.buildAddDeviceButton_());
-    const chipList = this.element.ownerDocument.createElement('div');
+    const chipListContainer = this.element.ownerDocument.createElement('div');
+    chipListContainer.classList.add(
+      'i-amphtml-dev-tools-device-chips-container'
+    );
+    this.element.appendChild(chipListContainer);
+
+    const chipList = this.element.ownerDocument.createElement('span');
     chipList.classList.add('i-amphtml-dev-tools-device-chips');
-    this.element.appendChild(chipList);
+    chipListContainer.appendChild(chipList);
+
+    chipListContainer.appendChild(this.buildAddDeviceButton_());
+
+    const devicesList = this.devices_;
+    this.devices_ = [];
     this.playersManager_ = new PlayersManager(this.win_, this.storyUrl_);
-    console.log(this.devices_);
-    this.devices_.forEach((device) => {
-      const deviceLayout = this.createDeviceLayout_(device);
-      this.element.appendChild(deviceLayout);
-      device.element = deviceLayout;
+    devicesList.forEach((device) => {
+      this.addDevice_(device);
     });
   }
 
@@ -215,45 +265,19 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
    * @return {!Element}
    */
   buildAddDeviceButton_() {
-    // Create select with an 'Add device' option by default.
-    const deviceSelect = this.element.ownerDocument.createElement('select');
-    const addDevicesOption = this.element.ownerDocument.createElement('option');
-    addDevicesOption.textContent = 'Add device';
-    addDevicesOption.value = '';
-    deviceSelect.appendChild(addDevicesOption);
-    ALL_SCREEN_SIZES.forEach((size) => {
-      const optionEl = this.element.ownerDocument.createElement('option');
-      optionEl.value = size.name;
-      optionEl.textContent = `${size.name} - ${size.width} x ${size.height}`;
-      deviceSelect.appendChild(optionEl);
+    const addDeviceButton = buildDeviceChipTemplate(this.element);
+    addDeviceButton.classList.add('i-amphtml-dev-tools-add-device');
+    addDeviceButton.querySelector('span').textContent = 'ADD DEVICE';
+    addDeviceButton.addEventListener('click', () => {
+      this.showAddDevicePopup_();
     });
-    deviceSelect.value = '';
-    deviceSelect.addEventListener('change', () => {
-      const newDevice = ALL_SCREEN_SIZES.find(
-        (e) => e.name === deviceSelect.value
-      );
-      if (newDevice) {
-        // Copy specs so object in ALL_SCREEN_SIZES is not modified
-        const deviceSpecsCopy = {...newDevice};
-        const deviceLayout = this.createDeviceLayout_(
-          newDevice,
-          this.storyUrl_
-        );
-        deviceSpecsCopy.element = deviceLayout;
-        this.element.appendChild(deviceLayout);
-        this.devices_.push(deviceSpecsCopy);
-        this.updateDevicesInHash_();
-        deviceSelect.value = '';
-        this.onLayoutChanged();
-      }
-    });
-    return deviceSelect;
+    return addDeviceButton;
   }
 
   /**
    * Creates a device layout for preview
    * @private
-   * @param {*} device
+   * @param {DeviceInfo} device
    * @return {!Element}
    */
   createDeviceLayout_(device) {
@@ -275,10 +299,15 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
       width: device.width + 'px',
       height: device.height + 'px',
     });
-    setStyles(deviceLayout, {
-      height: device.deviceHeight ? device.deviceHeight + 'px' : 'fit-content',
-    });
-    this.addDeviceChip_(device, deviceLayout);
+    setStyles(
+      deviceLayout.querySelector('.i-amphtml-dev-tools-device-screen'),
+      {
+        height: device.deviceHeight
+          ? device.deviceHeight + 'px'
+          : 'fit-content',
+      }
+    );
+    device.player = devicePlayer;
     return deviceLayout;
   }
 
@@ -301,22 +330,49 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
   }
 
   /**
-   * @param {*} device
-   * @param {!Element} deviceLayout
+   * @param {DeviceInfo} device
+   * @return {!Element} the device chip
    */
-  addDeviceChip_(device, deviceLayout) {
+  addDeviceChip_(device) {
     const deviceChip = buildDeviceChipTemplate(this.element);
     deviceChip.querySelector('span').textContent = device.name;
     deviceChip.querySelector('svg').addEventListener('click', () => {
-      deviceLayout.remove();
-      deviceChip.remove();
-      this.devices_ = this.devices_.filter((d) => d.element != deviceLayout);
-      this.onLayoutChanged();
+      this.removeDevice_(device);
       this.updateDevicesInHash_();
     });
     this.element
       .querySelector('.i-amphtml-dev-tools-device-chips')
       .appendChild(deviceChip);
+    return deviceChip;
+  }
+
+  /**
+   * @private
+   * @param {DeviceInfo} deviceSpecs
+   */
+  addDevice_(deviceSpecs) {
+    const deviceLayout = this.createDeviceLayout_(deviceSpecs, this.storyUrl_);
+    deviceSpecs.element = deviceLayout;
+    this.element.appendChild(deviceLayout);
+    this.devices_.push(deviceSpecs);
+    deviceSpecs.chip = this.addDeviceChip_(deviceSpecs);
+    this.onLayoutChanged();
+    console.log(this.devices_);
+  }
+
+  /**
+   * @private
+   * @param {DeviceInfo} device
+   */
+  removeDevice_(device) {
+    device.chip.setAttribute('inactive', '');
+    setTimeout(() => {
+      device.chip.remove();
+    }, 200);
+    this.playersManager_.removePlayer(device.player);
+    this.devices_ = this.devices_.filter((d) => d != device);
+    device.element.remove();
+    this.onLayoutChanged();
   }
 
   /**
@@ -363,11 +419,55 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
       const cumPaddings = (i + 1) * paddingSize;
       const leftOffset = cumPaddings + cumWidthSum + scaleWidthChange;
       setStyles(deviceLayout, {
-        'transform': `scale(${scale})`,
+        'transform': `perspective(100px) translateZ(${
+          (100 * (scale - 1)) / scale
+        }px)`,
         'left': leftOffset + 'px',
       });
       cumWidthSum += deviceSpecs.width * scale;
     });
+  }
+
+  /**
+   * @private
+   */
+  showAddDevicePopup_() {
+    this.element.classList.add('i-amphtml-dev-tools-tab-blurred');
+    const popup = buildAddDevicePopupTemplate(this.element);
+    popup
+      .querySelector('.i-amphtml-dev-tools-device-popup-close')
+      .addEventListener('click', () => {
+        popup.remove();
+        this.element.classList.remove('i-amphtml-dev-tools-tab-blurred');
+      });
+    const chipsContainer = popup.querySelector(
+      '.i-amphtml-dev-tools-device-popup-container'
+    );
+    ALL_SCREEN_SIZES.forEach((device) => {
+      const deviceChip = buildDeviceChipTemplate(this.element);
+      let correspondingDevice = this.devices_.find(
+        (d) => d.name == device.name
+      );
+      if (!correspondingDevice) {
+        deviceChip.setAttribute('inactive', '');
+      }
+      deviceChip.querySelector('span').textContent = device.name;
+      deviceChip.querySelector('svg').addEventListener('click', () => {
+        if (deviceChip.hasAttribute('inactive')) {
+          deviceChip.removeAttribute('inactive');
+          correspondingDevice = {...device};
+          this.addDevice_(correspondingDevice);
+          this.updateDevicesInHash_();
+        } else {
+          deviceChip.setAttribute('inactive', '');
+          this.removeDevice_(correspondingDevice);
+          correspondingDevice = null;
+          this.updateDevicesInHash_();
+        }
+      });
+      chipsContainer.appendChild(deviceChip);
+    });
+    this.element.appendChild(popup);
   }
 }
 
@@ -394,6 +494,7 @@ class PlayersManager {
 
   /**
    * Adds the player and sets up listeners
+   * @public
    * @param {!Element} player
    */
   addPlayer(player) {
@@ -424,6 +525,7 @@ class PlayersManager {
 
   /**
    * Removes the player from the list of synced players.
+   * @public
    * @param {Element} player
    */
   removePlayer(player) {
