@@ -16,6 +16,15 @@
 
 /**
  * Applies scroll and momentum to window by using touch events.
+ *
+ * It works using the following principles:
+ *
+ * On touchstart: (Re)set coordinates and timer. If user swiped while still
+ *                scrolling, increase multiplier for scrolling offset.
+ * On touchmove: Scroll 1:1 and calculate distance (deltaY) and acceleration of
+ *               the touch movement.
+ * On touchend: If meeting the momentum threshold, scroll by extra pixels
+ *              (scrolling offset) by a pre-set duration using an easing fn.
  */
 export class PageScroller {
   /**
@@ -54,7 +63,8 @@ export class PageScroller {
   }
 
   /**
-   * Reacts to onTouchStart events. Applies multiplier if criteria is met.
+   * Reacts to onTouchStart events. (Re)sets coordinates and timer.
+   * Applies multiplier if criteria is met or resets it.
    * @param {number} timeStamp
    * @param {number} startY
    */
@@ -69,7 +79,8 @@ export class PageScroller {
         this.touchEventState_.touchStartTimeMs <
         this.scrollState_.maxTimeBetweenSwipesMs
     ) {
-      // User swiped while still scrolling, increase the multiplier for the offset.
+      // User swiped while still scrolling, increase the multiplier for the
+      // offset.
       this.scrollState_.multiplier += this.scrollState_.acceleration;
     } else {
       this.scrollState_.multiplier = 1;
@@ -79,7 +90,8 @@ export class PageScroller {
   }
 
   /**
-   * Reacts to onTouchMove events. Scrolls 1:1 if criteria is met.
+   * Reacts to onTouchMove events. Scrolls 1:1 if criteria is met. Calculates
+   * distance (deltaY) and acceleration.
    * @param {number} timeStamp
    * @param {number} currentY
    */
@@ -177,15 +189,9 @@ export class PageScroller {
       return;
     }
 
-    const percentageElapsed = runTime / this.scrollState_.durationMs;
-
-    const progress = this.getScrollTo_({
-      percentTimeElapsed: Math.min(percentageElapsed, 1),
-      x1: 0.2,
-      y1: 0.46,
-      x2: 0.5,
-      y2: 0.9,
-    });
+    const progress = this.easeOutQuartFn_(
+      runTime / this.scrollState_.durationMs
+    );
 
     const scrollDelta = progress * this.scrollState_.offsetPx;
 
@@ -202,39 +208,12 @@ export class PageScroller {
   }
 
   /**
-   * Uses the cubic bezier function to return scrolling position given percent
-   * of time elapsed and 2 points in the graph.
-   * P0: (0, 0)
-   * P1: (x1, y1)
-   * P2: (x2, y2)
-   * P3: (1, 1)
-   * @param {!Object} cubicBezierParams
-   * @return {number} percentage progress (value between 0 and 1).
+   * Ease out quart function.
+   * @param {number} pTimeElapsed Percentage of time elapsed.
+   * @return {number} Percentage progress, value between 0 and 1.
    * @private
    */
-  getScrollTo_({percentTimeElapsed, x1, y1, x2, y2}) {
-    const B1 = (t) => {
-      return Math.pow(t, 3);
-    };
-
-    const B2 = (t) => {
-      return 3 * t * t * (1 - t);
-    };
-
-    const B3 = (t) => {
-      return 3 * t * Math.pow(1 - t, 2);
-    };
-
-    const B4 = (t) => {
-      return Math.pow(1 - t, 3);
-    };
-
-    return (
-      1 -
-      (x1 * B1(percentTimeElapsed) +
-        y1 * B2(percentTimeElapsed) +
-        x2 * B3(percentTimeElapsed) +
-        y2 * B4(percentTimeElapsed))
-    );
+  easeOutQuartFn_(pTimeElapsed) {
+    return 1 - --pTimeElapsed * pTimeElapsed * pTimeElapsed * pTimeElapsed;
   }
 }
