@@ -59,7 +59,7 @@ export function vlyby(global, data) {
 
     s.setAttribute('type', 'text/javascript');
     s.setAttribute('async', 'true');
-    s.setAttribute('src', '//amp.vlyby.com/qad/qad-outer2.js');
+    s.setAttribute('src', '//cdn.vlyby.com/amp/qad/qad-outer2.js');
     s.setAttribute('data-PubId', data['publisherid']);
     s.setAttribute('data-PlacementId', data['placementid']);
     s.setAttribute('data-DivId', id);
