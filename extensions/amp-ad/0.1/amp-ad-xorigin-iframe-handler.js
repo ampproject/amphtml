@@ -458,7 +458,9 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
-            this.baseInstance_.onResizeSuccess();
+            if (this.baseInstance_.onResizeSuccess) {
+              this.baseInstance_.onResizeSuccess();
+            }
             this.sendEmbedSizeResponse_(
               info.success,
               id,
