@@ -992,4 +992,5 @@ amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-
 
 .scaler, .panner {
   height: 100%;
+  -webkit-backface-visibility: hidden;
 }
