@@ -963,6 +963,15 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-story-dev-tools',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      hasCss: true,
+    },
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-story-education',
     version: '0.1',
     latestVersion: '0.1',
