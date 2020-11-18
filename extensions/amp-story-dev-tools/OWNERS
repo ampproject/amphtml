@@ -10,19 +10,10 @@
           notify: true,
         },
         {
-          name: 'newmuis',
-          notify: true,
-        },
-        {
-          name: 'enriqe',
-          notify: true,
-        },
-        {
-          name: 'processprocess',
-        },
-        {
           name: 'mszylkowski',
+          notify: true,
         },
+        {name: 'newmuis'},
       ],
     },
   ],
