@@ -588,7 +588,7 @@ export class ManualAdvancement extends AdvancementConfig {
     ) {
       user().error(
         'AMP-STORY-PAGE',
-        'Link occupies over 80% of page size; overriden to allow for navigation.'
+        'Link was too large; skipped for navigation. For more information, see https://amp.dev/documentation/components/amp-story/'
       );
       return true;
     }
