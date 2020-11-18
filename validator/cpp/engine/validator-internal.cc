@@ -4664,7 +4664,9 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
     ValidationResult* result) const {
   CHECK_NE(0, format_identifiers.size());
   bool has_mandatory_type_identifier = false;
-  static LazyRE2 transformed_value_regex = {"^\\w+;v=(\\d+)$"};
+  // The named values should match up to `self` and AMP caches listed at
+  // https://cdn.ampproject.org/caches.json
+  static LazyRE2 transformed_value_regex = {"^(bing|google|self);v=(\\d+)$"};
   for (const ParsedHtmlTagAttr& attr : html_tag.Attributes()) {
     // Verify this attribute is a type identifier. Other attributes are
     // validated in ValidateAttributes.
@@ -4688,12 +4690,11 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
             type_identifier != TypeIdentifier::kCssStrict)
           has_mandatory_type_identifier = true;
         // The type identifier "transformed" has restrictions on its value.
-        // It must be \w+;v=\d+ (e.g. google;v=1).
-        if ((type_identifier == TypeIdentifier::kTransformed) &&
-            !attr.value().empty()) {
+        if (type_identifier == TypeIdentifier::kTransformed) {
+          std::string name;
           std::string version;
           if (RE2::FullMatch(attr.value(), *transformed_value_regex,
-                             &version)) {
+                             &name, &version)) {
             int32_t transformer_version;
             if (absl::SimpleAtoi(version, &transformer_version)) {
               result->set_transformer_version(transformer_version);
