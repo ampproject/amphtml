@@ -54,6 +54,14 @@ const TOP_REGION = 0.8;
  */
 const PROTECTED_SCREEN_EDGE_PX = 48;
 
+/**
+ * Maximum percent of screen that can be occupied by a single link
+ * before the link is considered navigation blocking and ignored.
+ * @const {number}
+ * @private
+ */
+const MAX_LINK_SCREEN_PERCENT = 0.8;
+
 const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
   interactiveElementsSelectors()
 ).join(',');
@@ -501,7 +509,10 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (this.isInStoryPageSideEdge_(event, pageRect)) {
+    if (
+      this.isInStoryPageSideEdge_(event, pageRect) ||
+      this.isTooLargeOnPage_(target, pageRect)
+    ) {
       event.preventDefault();
       return false;
     }
@@ -558,6 +569,30 @@ export class ManualAdvancement extends AdvancementConfig {
       event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
       event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
     );
+  }
+
+  /**
+   * Checks if click target is too large on the page and preventing navigation.
+   * If yes, the link is ignored & logged.
+   * @param {!Element} target
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isTooLargeOnPage_(target, pageRect) {
+    const targetRect = target./*OK*/ getBoundingClientRect();
+    if (
+      (targetRect.height * targetRect.width) /
+        (pageRect.width * pageRect.height) >=
+      MAX_LINK_SCREEN_PERCENT
+    ) {
+      user().error(
+        'AMP-STORY-PAGE',
+        'Link was too large; skipped for navigation. For more information, see https://github.com/ampproject/amphtml/issues/31108'
+      );
+      return true;
+    }
+    return false;
   }
 
   /**
