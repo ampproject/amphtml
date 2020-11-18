@@ -1216,7 +1216,7 @@ const adConfig = jsonConfiguration({
   },
 
   'vlyby': {
-    prefetch: 'https://amp.vlyby.com/qad/qad-outer2.js',
+    prefetch: 'https://cdn.vlyby.com/amp/qad/qad-outer2.js',
   },
 
   'vmfive': {
