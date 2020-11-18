@@ -6192,7 +6192,9 @@ class ParsedValidatorRules {
    */
   validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
     let hasMandatoryTypeIdentifier = false;
-    const transformedValueRe = new RegExp(/^\w+;v=(\d+)$/);
+    // The named values should match up to `self` and AMP caches listed at
+    // https://cdn.ampproject.org/caches.json
+    const transformedValueRe = new RegExp(/^(bing|google|self);v=(\d+)$/);
     for (const attr of attrs) {
       // Verify this attribute is a type identifier. Other attributes are
       // validated in validateAttributes.
@@ -6215,11 +6217,10 @@ class ParsedValidatorRules {
             hasMandatoryTypeIdentifier = true;
           }
           // The type identifier "transformed" has restrictions on it's value.
-          // It must be \w+;v=\d+ (e.g. google;v=1).
           if ((typeIdentifier === 'transformed') && (attr.value !== '')) {
             const reResult = transformedValueRe.exec(attr.value);
             if (reResult !== null) {
-              validationResult.transformerVersion = parseInt(reResult[1], 10);
+              validationResult.transformerVersion = parseInt(reResult[2], 10);
             } else {
               context.addError(
                   generated.ValidationError.Code.INVALID_ATTR_VALUE,
