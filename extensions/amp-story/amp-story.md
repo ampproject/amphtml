@@ -462,6 +462,11 @@ Example:
 
 We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
 
+Please note the following guidelines for including links in your amp-story:
+
+- Parts of links that are too far to the left or right edge of a story page will yield to navigation.
+- Links that occupy too much of the page area will be ignored for navigation.
+
 #### Customizing tooltip for links or interactive components
 
 You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
