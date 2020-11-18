@@ -976,8 +976,8 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   --i-amphtml-interactive-animation-delay: 350ms !important;
 }
 
-amp-story-page[active] .panner,
-amp-story-page[active] .scaler {
+.i-amphtml-story-loaded amp-story-page .panner,
+.i-amphtml-story-loaded amp-story-page .scaler {
   transition: transform 1s ease-in-out;
 }
 

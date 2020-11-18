@@ -9,6 +9,288 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-panning-image-0.1.js"></script>
+    <style amp-custom="" nonce="cAHK8XtTWR4ZuCt+rpkP1Q">
+      body {
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-font-smoothing: antialiased;
+        color: white;
+        font-family: 'Roboto', sans-serif;
+      }
+
+      a,
+      a:visited {
+        color: white;
+      }
+
+      amp-story-page {
+        background-color: #000;
+      }
+
+      .container {
+        padding: 24px 40px;
+        position: relative;
+      }
+
+      amp-img.partner-logo img,
+      amp-img.slide-image:not(.slide-image-full) img {
+        object-fit: contain;
+      }
+
+      amp-img.slide-image-full img {
+        object-fit: cover;
+        object-position: inherit;
+      }
+
+      amp-img.slide-streetview img {
+        object-fit: cover;
+        object-position: center center;
+      }
+
+      .image-overlay {
+        background-color: rgba(0,0,0,0.502);
+      }
+
+      .cover-image-overlay {
+        background-color: rgba(0,0,0,0.302);
+      }
+
+      .cover-presention {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .cover-title {
+        font-family: 'Google Sans', sans-serif;
+        font-size: 32px;
+        font-weight: 400;
+        letter-spacing: 0;
+        line-height: 36px;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+
+      .cover-subtitle {
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        font-weight: 400;
+        letter-spacing: 0.1px;
+        line-height: 24px;
+        text-align: center;
+      }
+
+      .cover-logo {
+        align-items: center;
+        bottom: 22px;
+        display: flex;
+        left: 0;
+        position: absolute;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .gac-logo-text {
+        fill: white;
+        height: 22px;
+        width: 184px;
+      }
+
+      .gac-logo-circle {
+        bottom: 2px;
+        height: 32px;
+        margin-right: 4px;
+        position: relative;
+        width: 32px;
+      }
+
+      .partner-name {
+        font-family: 'Roboto', sans-serif;
+        font-size: 12px;
+        font-weight: 400;
+        text-align: center;
+      }
+
+      .partner-logo {
+        display: block;
+        margin: 0 auto 16px auto;
+      }
+
+      .partner-no-logo {
+        background: white;
+        height: 2px;
+        margin: 0 auto 16px auto;
+        width: 30px;
+      }
+
+      .slide-caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+      }
+
+      .slide-text {
+        font-family: 'Google Sans', sans-serif;
+        font-size: 18px;
+        letter-spacing: 0;
+        line-height: 24px;
+        max-width: 600px;
+        padding: 0 24px 24px 24px;
+        position: relative;
+      }
+
+      .slide-text p {
+        font-size: 18px;
+      }
+
+      .slide-text h3 {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 32px;
+        margin-bottom: 24px;
+      }
+
+      .hide-text {
+        visibility: hidden;
+      }
+
+      .slide-text-gradient {
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0, transparent 100%);
+        bottom: 0;
+        height: 250%;
+        left: 0;
+        position: absolute;
+        width: 100%;
+      }
+
+      .read-more-gradient {
+        height: 50%;
+      }
+
+      .slide-attribution {
+        cursor: pointer;
+        height: 48px;
+        position: absolute;
+        left: 12px;
+        top: 8px;
+        z-index: 200;
+      }
+
+      .slide-attribution-mask {
+        margin-left: 12px;
+        max-width: calc(calc(100 * var(--story-page-vw)) - 100px);
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .slide-attribution a {
+        align-items: center;
+        color: white;
+        display: flex;
+        font-size: 12px;
+        height: 100%;
+        letter-spacing: 0.3px;
+        line-height: 16px;
+        margin: 0;
+        text-decoration: none;
+      }
+
+      .slide-attribution span,
+      .slide-attribution strong {
+        display: block;
+        line-height: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+      }
+
+      .slide-attribution-icon {
+        fill: white;
+        height: 24px;
+        width: 24px;
+      }
+
+      .read-more-button {
+        background: white;
+        border-radius: 8px;
+        width: calc(100% - 48px);
+        max-width: 370px;
+        margin: 0 auto;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+      }
+
+      .read-more-button .gac-logo-circle {
+        width: 42px;
+        height: 42px;
+        bottom: 0;
+        margin-right: 12px;
+      }
+
+      .read-more-button h3 {
+        font-family: 'Google Sans', sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+        color: #202124;
+        margin: 0;
+      }
+
+      .read-more-button p {
+        font-family: 'Google Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: #9aa0a6;
+        margin: 0;
+      }
+
+      /* Desktop style */
+      @media screen and (min-width: 841px) {
+        .cover-presention {
+          margin: 0 auto;
+          max-width: 700px;
+        }
+
+        .cover-title {
+          font-size: 44px;
+          line-height: 52px;
+        }
+
+        .slide-text {
+          padding: 0 40px 40px 40px;
+        }
+
+        .slide-text h3 {
+          font-size: 28px;
+          line-height: 36px;
+        }
+      }
+
+      /* Animations. */
+      .reveal-transition {
+        opacity: 1;
+        animation-duration: 1.2s;
+        animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1); /* QUANTUM_TRANSITION_EASE_OUT */
+        animation-fill-mode: both;
+      }
+
+      amp-story-page[active] .reveal-transition {
+        animation-name: gac-reveal;
+      }
+
+      @keyframes gac-reveal {
+        0% {
+          transform: translate3d(0, 0, 0);
+        }
+        100% {
+          transform: translate3d(0, -100%, 0);
+        }
+      }
+
+    </style>
   </head>
   <body>
     <amp-story
@@ -22,24 +304,37 @@
         <amp-story-grid-layer template="fill">
           <amp-story-panning-image 
             layout="fill"
-            src="img/map.png"
-            x="0"
-            y="0"
+            src="img/in_the_conservatory.jpg"
+            x="50"
+            y="50"
             zoom="1"
           ></amp-story-panning-image>
+          <div class="cover-image-overlay"></div>
         </amp-story-grid-layer>  
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div class="container"><div class="cover-presention"><h1 class="cover-title">There's No Way Of Telling</h1>
+          <h2 class="cover-subtitle">From the #HistoryOfUs series: Manet's "In The Conservatory", 1878/79</h2>
+        </br>
+          <p class="cover-subtitle"><a href="https://eferrier.users.x20web.corp.google.com/www/no_crawl/art_stamp/example_art_story.html"> Adapted from this GAC story</a></p>
+          
+        </div>
+          <div class="cover-logo">
+          <div><div class="partner-no-logo"></div><p class="partner-name">By Alte Nationalgalerie, Staatliche Museen zu Berlin</p>
+        </div></div>
+        
+        </div></amp-story-grid-layer>        
       </amp-story-page>
 
       <amp-story-page id="page2">
         <amp-story-grid-layer template="fill">
           <amp-story-panning-image 
             layout="fill"
-            src="img/map.png"
-            x="100"
-            y="0"
-            zoom="1"
+            src="img/in_the_conservatory.jpg"
+            x="50"
+            y="50"
+            zoom=".5"
           ></amp-story-panning-image>
-        </amp-story-grid-layer>        
+        </amp-story-grid-layer>   
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient" animate-in="fade-in" animate-in-duration="1.2s" style="opacity: 0;"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>Some people see a blue and black dress. Some people see gold and white. When Édouard Manet’s “In the Conservatory” (1878/79) first came to Berlin, it was seen as almost scandalously erotic and immoral, even making the Prussian Empress blush.</p></div></div></div></amp-story-grid-layer>     
       </amp-story-page>
 
       <amp-story-page id="page3">
@@ -47,35 +342,145 @@
           <amp-story-grid-layer template="fill">
             <amp-story-panning-image 
               layout="fill"
-              src="img/map.png"
-              x="100"
-              y="0"
+              src="img/in_the_conservatory.jpg"
+              x="57"
+              y="40"
               zoom="2"
             ></amp-story-panning-image>
           </amp-story-grid-layer> 
         </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>But why? There’s no nudity, no suggestiveness. It’s just two people chilling in a garden, right? And they’re a married couple! What’s the problem?</p></div></div></div></amp-story-grid-layer>
       </amp-story-page>     
       
       <amp-story-page id="page4">
         <amp-story-grid-layer template="fill">
           <amp-story-panning-image 
             layout="fill"
-            src="img/map.png"
-            x="70"
-            y="80"
-            zoom="2"
+            src="img/in_the_conservatory.jpg"
+            x="29"
+            y="24"
+            zoom="2.5"
           ></amp-story-panning-image>
         </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>Ambiguity is a fascinating thing, especially in art. And Manet’s painting, as with all great art (and all great relationships), becomes more fascinating, complex and ambiguous the deeper you dive.</p></div></div></div></amp-story-grid-layer>
       </amp-story-page>  
       
       <amp-story-page id="page5">
         <amp-story-grid-layer template="fill">
-          <amp-img 
+          <amp-story-panning-image 
             layout="fill"
-            src="img/map.png"
-          ></amp-img>
+            src="img/in_the_conservatory.jpg"
+            x="29"
+            y="24"
+            zoom="5"
+          ></amp-story-panning-image>
         </amp-story-grid-layer>
-      </amp-story-page>  
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>What is this couple’s relationship really like?</p></div></div></div></amp-story-grid-layer>
+      </amp-story-page> 
+      
+      <amp-story-page id="page6">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-image 
+            layout="fill"
+            src="img/in_the_conservatory.jpg"
+            x="30"
+            y="25"
+            zoom="8"
+          ></amp-story-panning-image>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>Is Madame Guillemet feeling detached as she stares into the distance? Is she bored by the presence of her husband?</p></div></div></div></amp-story-grid-layer>
+      </amp-story-page> 
+
+      <amp-story-page id="page7">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-image 
+            layout="fill"
+            src="img/in_the_conservatory.jpg"
+            x="64"
+            y="20"
+            zoom="3"
+          ></amp-story-panning-image>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>Is Madame Guillemet feeling detached as she stares into the distance? Is she bored by the presence of her husband?</p></div></div></div></amp-story-grid-layer>
+      </amp-story-page> 
+
+      <amp-story-page id="page8">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-image 
+            layout="fill"
+            src="img/in_the_conservatory.jpg"
+            x="56.6"
+            y="45"
+            zoom="5"
+          ></amp-story-panning-image>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>Right at the centre of the picture, the couple’s hands almost touch. Is it separation we see here, or a restrained intimacy?</p></div></div></div></amp-story-grid-layer>
+      </amp-story-page> 
+
+      <amp-story-page id="page9">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-image 
+            layout="fill"
+            src="img/in_the_conservatory.jpg"
+            x="33"
+            y="83"
+            zoom="5"
+          ></amp-story-panning-image>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>Her other hand is gloved ...</p></div></div></div></amp-story-grid-layer>
+      </amp-story-page> 
+
+      <amp-story-page id="page10">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-image 
+            layout="fill"
+            src="img/in_the_conservatory.jpg"
+            x="52"
+            y="45"
+            zoom="7"
+          ></amp-story-panning-image>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>... but this one is naked.</p></div></div></div></amp-story-grid-layer>
+      </amp-story-page>       
+
+      <amp-story-page id="page11">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-image 
+            layout="fill"
+            src="img/in_the_conservatory.jpg"
+            x="56.6"
+            y="45"
+            zoom="4"
+          ></amp-story-panning-image>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>Their wedding rings are prominent, and what’s with Monsieur Guillemet’s jutting cigar? Perhaps it’s just a cigar (Sigmund Freud was still studying for his doctorate in Vienna when this was painted, after all) ...</p></div></div></div></amp-story-grid-layer>
+      </amp-story-page>      
+
+      <amp-story-page id="page12">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-image 
+            layout="fill"
+            src="img/in_the_conservatory.jpg"
+            x="40"
+            y="24"
+            zoom="3.5"
+          ></amp-story-panning-image>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>... but in the literature of the time, conservatories were seen as new and exotic, the setting for affairs and erotic scenes.</p></div></div></div></amp-story-grid-layer>
+      </amp-story-page> 
+
+      <amp-story-page id="page13">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-image 
+            layout="fill"
+            src="img/in_the_conservatory.jpg"
+            x="50"
+            y="50"
+            zoom=".5"
+          ></amp-story-panning-image>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" class="i-amphtml-element i-amphtml-layout-container i-amphtml-story-layer i-amphtml-story-grid-template-fill i-amphtml-built i-amphtml-layout" i-amphtml-layout="container"><div><div class="slide-attribution"><a href="https://artsandculture.google.com/asset/in-the-conservatory-edouard-manet/QwGnAJGHf7dMBQ" target="_blank" rel="noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" class="slide-attribution-icon"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg><div class="slide-attribution-mask"><div animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="transform: translate(-319.964px, 0px);"><span>In the Conservatory by Edouard Manet</span><strong>Alte Nationalgalerie, Staatliche Museen zu Berlin</strong></div></div></a></div><div class="slide-caption"><div class="slide-text-gradient"></div><div class="slide-text " animate-in="fade-in" animate-in-delay="0.7s" animate-in-duration="1s" animate-in-timing-function="cubic-bezier(0.215, 0.610, 0.355, 1.000)" style="opacity: 0;"><p>Whatever the truth, “In the Conservatory” is a reminder that nobody but a couple really understands their own relationship. It’s all just too ambiguous and complicated.<br><a href="/asset/im-wintergarten/QwGnAJGHf7dMBQ">read more</a></p></div></div></div></amp-story-grid-layer>        
+      </amp-story-page>
 
     </amp-story>
   </body>

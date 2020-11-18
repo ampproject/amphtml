@@ -39,9 +39,9 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
     this.isOnActivePage_ = null;
 
     this.src_ = element.getAttribute('src');
-    this.x_ = parseInt(element.getAttribute('x'));
-    this.y_ = parseInt(element.getAttribute('y'));
-    this.zoom_ = parseInt(element.getAttribute('zoom') || 1);
+    this.x_ = parseFloat(element.getAttribute('x'));
+    this.y_ = parseFloat(element.getAttribute('y'));
+    this.zoom_ = parseFloat(element.getAttribute('zoom') || 1);
   }
 
   /** @override */
@@ -80,19 +80,23 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
   }
 
   update_() {
-    // get active siblings attributes
     if (this.isOnActivePage_) {
       this.siblings_.forEach((sibling) => {
-        sibling.querySelector(
-          '.scaler'
-        ).style.transform = `scale(${this.zoom_})`;
-
-        const offsetX = this.x_ * 0.01 * this.element.offsetWidth;
-        sibling.querySelector(
-          '.panner'
-        ).style.transform = `translate(calc(-${this.x_}% + ${offsetX}px), -${this.y_}%)`;
+        this.sizeElement_(sibling);
       });
     }
+  }
+
+  sizeElement_(element) {
+    element.querySelector('.scaler').style.transform = `scale(${this.zoom_})`;
+
+    // const offsetX = this.x_ * 0.01 * element.offsetWidth;
+    const offsetX = element.offsetWidth / 2;
+    const offsetY = element.offsetHeight / 2;
+
+    element.querySelector(
+      '.panner'
+    ).style.transform = `translate(calc(-${this.x_}% + ${offsetX}px), calc(-${this.y_}% + ${offsetY}px))`;
   }
 
   /**
