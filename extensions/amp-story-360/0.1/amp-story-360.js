@@ -57,6 +57,12 @@ const CENTER_OFFSET = 90;
 const MIN_WEBGL_DISTANCE = 2;
 
 /**
+ * Factor to average previous and next rotation values.
+ * @const {number}
+ */
+const ROT_SMOOTHING = 0.66;
+
+/**
  * Generates the template for the permission button.
  *
  * @param {!Element} element
@@ -305,6 +311,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private WebGL extension for lost context. */
     this.lostGlContext_ = null;
+
+    /** @private {!Array<number>} */
+    this.rot_ = null;
   }
 
   /** @override */
@@ -577,15 +586,12 @@ export class AmpStory360 extends AMP.BaseElement {
     rot = Matrix.mul(3, Matrix.rotation(3, 2, 1, deg2rad(e.beta)), rot);
     rot = Matrix.mul(3, Matrix.rotation(3, 0, 2, deg2rad(e.gamma)), rot);
 
-    const smoothFactor = 0.66;
-
-    if (!this.rot_) {
-      this.rot_ = rot;
-    } else {
-      this.rot_ = rot.map((val, i) => {
-        return val * smoothFactor + this.rot_[i] * (1 - smoothFactor);
-      });
-    }
+    // Smoothen sensor data by averaging previous and next rotation values.
+    this.rot_ = this.rot_
+      ? rot.map(
+          (val, i) => val * ROT_SMOOTHING + this.rot_[i] * (1 - ROT_SMOOTHING)
+        )
+      : rot;
 
     this.renderer_.setCamera(this.rot_, 1);
     this.renderer_.render(true);
