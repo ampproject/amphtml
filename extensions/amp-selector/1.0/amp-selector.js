@@ -142,8 +142,8 @@ function getOptions(element, mu) {
         as: OptionShim,
         option,
         disabled,
+        index,
         onFocus: () => tryFocus(child),
-        order: index,
         role: child.getAttribute('role') || 'option',
         shimDomElement: child,
         // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.

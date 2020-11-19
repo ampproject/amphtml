@@ -50,7 +50,7 @@ function SelectorWithActions(props) {
       <Selector ref={ref} {...props}>
         {props.children.slice(0, 2)}
         {show && (
-          <Option as="div" option="2.5" order={2}>
+          <Option as="div" option="2.5" index={2}>
             Option 2.5
           </Option>
         )}
@@ -101,7 +101,7 @@ export const actionsAndOrder = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
           option="1"
-          order={0}
+          index={0}
           disabled
         ></Option>
         <Option
@@ -110,7 +110,7 @@ export const actionsAndOrder = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
           option="2"
-          order={1}
+          index={1}
         ></Option>
         <br />
         <Option
@@ -119,7 +119,7 @@ export const actionsAndOrder = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
           option="3"
-          order={3}
+          index={3}
         ></Option>
         <Option
           as="img"
@@ -127,7 +127,7 @@ export const actionsAndOrder = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
           option="4"
-          order={4}
+          index={4}
         ></Option>
       </SelectorWithActions>
     </>

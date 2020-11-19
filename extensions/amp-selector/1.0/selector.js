@@ -138,7 +138,7 @@ function SelectorWithRef(
    * This method uses the given callback on the target index found by
    * modifying the given value state by the given delta.
    *
-   * Only meaningful if `order` is provided to `Option` children.
+   * Only meaningful if `index` is provided to `Option` children.
    *
    * ex: (1, "a", ["a", "b", "c", "d"]) => cb(1)
    * ex: (-1, "c", ["a", "b", "c", "d"]) => cb(1)
@@ -174,7 +174,7 @@ function SelectorWithRef(
    * The modification is done in FIFO order. When no values are selected,
    * the new selected state becomes the option at the given delta.
    *
-   * Only meaningful if `order` is provided to `Option` children.
+   * Only meaningful if `index` is provided to `Option` children.
    *
    * ex: (1, [0, 2], [0, 1, 2, 3]) => [2, 1]
    * ex: (-1, [2, 1], [0, 1, 2, 3]) => [1]
@@ -270,11 +270,11 @@ export {Selector};
 export function Option({
   as: Comp = 'div',
   disabled = false,
+  index,
   onClick: customOnClick,
   onFocus: customOnFocus,
   onKeyDown: customOnKeyDown,
   option,
-  order,
   role = 'option',
   style,
   tabIndex,
@@ -308,11 +308,11 @@ export function Option({
     if (!refFromContext || !refFromContext.current) {
       return;
     }
-    if (order != undefined && !disabled) {
-      refFromContext.current[order] = option;
+    if (index != undefined && !disabled) {
+      refFromContext.current[index] = option;
     }
-    return () => delete refFromContext.current[order];
-  }, [disabled, order, option, optionsRef]);
+    return () => delete refFromContext.current[index];
+  }, [disabled, index, option, optionsRef]);
 
   useEffect(() => {
     if (!focusRef) {

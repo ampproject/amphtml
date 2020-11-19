@@ -240,13 +240,13 @@ describes.sandboxed('Selector preact component', {}, () => {
         ref = Preact.createRef();
         wrapper = mount(
           <Selector ref={ref} multiple defaultValue={['a']}>
-            <Option key={1} option="a" order={1}>
+            <Option key={1} option="a" index={1}>
               option a
             </Option>
-            <Option key={2} option="b" order={2}>
+            <Option key={2} option="b" index={2}>
               option b
             </Option>
-            <Option key={3} option="c" disabled order={3}>
+            <Option key={3} option="c" disabled index={3}>
               option c
             </Option>
           </Selector>
@@ -376,13 +376,13 @@ describes.sandboxed('Selector preact component', {}, () => {
         ref = Preact.useRef();
         wrapper = mount(
           <Selector ref={ref} defaultValue={['a']}>
-            <Option key={1} option="a" order={1}>
+            <Option key={1} option="a" index={1}>
               option a
             </Option>
-            <Option key={2} option="b" order={2}>
+            <Option key={2} option="b" index={2}>
               option b
             </Option>
-            <Option key={3} option="c" disabled order={3}>
+            <Option key={3} option="c" disabled index={3}>
               option c
             </Option>
           </Selector>

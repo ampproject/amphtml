@@ -34,7 +34,7 @@ var SelectorDef = {};
 SelectorDef.Props;
 
 /**
- * Note: `order` must be a positive integer to use
+ * Note: `index` must be a positive integer to use
  * `selectBy`, otherwise it will be noop.
  *
  * @typedef {{
@@ -42,7 +42,7 @@ SelectorDef.Props;
  *   option: *,
  *   disabled: (boolean|undefined),
  *   shimDomElement: !Element,
- *   order: (number|undefined),
+ *   index: (number|undefined),
  *   onClick: (?function(!Event)|undefined),
  *   role: (string|undefined),
  *   shimSelected: (boolean|undefined),
