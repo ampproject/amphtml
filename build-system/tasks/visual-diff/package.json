@@ -6,7 +6,7 @@
   "devDependencies": {
     "@percy/agent": "0.28.5",
     "@percy/puppeteer": "1.1.0",
-    "puppeteer": "5.4.1"
+    "puppeteer": "5.5.0"
   },
   "resolutions": {
     "**/**/minimist": "^1.2.3"
