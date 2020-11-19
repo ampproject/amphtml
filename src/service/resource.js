@@ -1033,13 +1033,6 @@ export class Resource {
   }
 
   /**
-   * @return {boolean} true if the resource has been loaded at least once.
-   */
-  hasLoadedOnce() {
-    return this.loadedOnce_;
-  }
-
-  /**
    * Whether the resource is currently visible in the viewport.
    * @return {boolean}
    */
