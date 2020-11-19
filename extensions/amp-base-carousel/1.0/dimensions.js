@@ -35,7 +35,7 @@ export const Alignment = {
 /**
  * @param {!Axis} axis The Axis to get the Dimension for.
  * @param {*} el The Element to get the Dimension For.
- * @return {!BaseCarouselDef.DimensionDef} The dimension for the Element along the given Axis.
+ * @return {!DimensionDef} The dimension for the Element along the given Axis.
  */
 export function getDimension(axis, el) {
   const {
@@ -126,7 +126,7 @@ export function getPercentageOffsetFromAlignment(
  * @param {!Alignment} alignment The alignment to look for within the parent
  *    container.
  * @param {!Element} container  The parent container to look in.
- * @param {!Array<!Element>} children The children to look among.
+ * @param {!HTMLCollection} children The children to look among.
  * @param {number} startIndex The index to start looking at.
  * @return {number|undefined} The overlapping index, if one exists.
  */
@@ -146,6 +146,7 @@ export function findOverlappingIndex(
 
   // Move outwards, since the closer indicies are more likely to overlap.
   for (let i = 1; i <= children.length / 2; i++) {
+    console.log('for loop');
     const nextIndex = mod(startIndex + i, children.length);
     const prevIndex = mod(startIndex - i, children.length);
 

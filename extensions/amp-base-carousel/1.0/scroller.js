@@ -31,6 +31,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from '../../../src/preact';
 import {useStyles} from './base-carousel.jss';
 
@@ -70,7 +71,7 @@ function ScrollerWithRef(
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
-  const axis = useMemo(() => Axis.X, []);
+  const [axis] = useState(Axis.X);
 
   /**
    * The number of slides we want to place before the reference or resting index.

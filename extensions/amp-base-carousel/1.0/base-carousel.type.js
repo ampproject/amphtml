@@ -77,15 +77,6 @@ BaseCarouselDef.SlideProps;
 
 /**
  * @typedef {{
- *   start: number,
- *   end: number,
- *   length: number,
- * }}
- */
-BaseCarouselDef.DimensionDef;
-
-/**
- * @typedef {{
  *   advance: (function():undefined|undefined),
  *   customArrow: (PreactDef.VNode|undefined),
  *   by: number,
