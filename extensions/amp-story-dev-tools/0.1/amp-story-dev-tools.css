@@ -29,11 +29,10 @@ amp-story-dev-tools {
 .i-amphtml-story-dev-tools-container {
   width: 100% !important;
   height: 100% !important;
-  padding: 30px 10% !important;
 }
 
 .i-amphtml-story-dev-tools-header {
-  width: 80% !important;
+  width: 100% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -43,7 +42,7 @@ amp-story-dev-tools {
 }
 
 .i-amphtml-story-dev-tools-brand {
-  display: inherit !important;
+  display: inline-flex !important;
 }
 
 .i-amphtml-story-dev-tools-brand-text > span {
@@ -56,6 +55,7 @@ amp-story-dev-tools {
 .i-amphtml-story-dev-tools-brand-text > span:nth-child(2) {
   color: #79B3FF !important;
   font-size: 10px !important;
+  text-align: left;
 }
 
 .i-amphtml-story-dev-tools-button {
@@ -88,7 +88,7 @@ amp-story-dev-tools {
 
 .i-amphtml-story-dev-tools-tabs > span {
   padding-bottom: 0.2em !important;
-  margin: 0 1em !important;
+  margin: 0 16px !important;
   cursor: pointer !important;
   opacity: 0.4 !important;
 }

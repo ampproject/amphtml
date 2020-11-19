@@ -53,7 +53,7 @@ const buildContainerTemplate = (element) => {
             viewBox="0 0 30 30"
             fill="none"
           >
-            <circle cx="15" cy="15" r="15" fill="white" />
+            <circle cx="15" cy="15" r="15" fill="white"></circle>
             <path
               d="M19.5 9.00015C20.3284 9.00015 21 9.67173 21 10.5002V19.5002C21 20.3286 20.3284 21.0002 19.5 21.0002V9.00015Z"
               fill="#202125"
