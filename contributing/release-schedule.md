@@ -10,7 +10,7 @@
   - [Detailed schedule](#detailed-schedule)
   - [Release Freezes](#release-freezes)
 
-A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
+A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change to be live for all users.**
 
 ## Release Channels
 
@@ -56,13 +56,13 @@ The _Experimental Channel_ **may be less stable** and it may contain features no
 
 The **lts** release channel provides a previous **stable** build for one-month intervals. On the second Monday of each month, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
-In the event that the second Monday of the month falls on a holiday, the promotion will be performed after the end of the [release freeze](#release-freezes).
+If the second Monday of the month falls on a holiday, the promotion will be performed after the end of the [release freeze](#release-freezes).
 
 Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the longer cycle, the **lts** release may be as much as seven weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
 
 ## Determining if your change is in a release
 
-[_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) are used to track the status of current and past releases; from the initial cut, to testing via **experimantal**/**beta** channels, to eventual release via the **stable** and **lts** channels. Announcements about releases are made on the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+[_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) are used to track the status of current and past releases; from the initial cut, to testing via **experimental**/**beta** channels, to eventual release via the **stable** and **lts** channels. Announcements about releases are made on the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 
 You can determine what changes are in a given build using one of the following:
 
@@ -76,7 +76,7 @@ We are intentionally cautious with our release cadence.
 In determining how often we should push new versions of AMP to everyone, we have to weigh many factors including:
 
 - stability for the millions of sites/billions of pages built using AMP
-- cache busting that might happen when we push a new version
+- cache-busting that might happen when we push a new version
 - the desire to get new features out quickly
 
 After considering all of these factors, we have arrived at the 1-2 week push cycle. Thus far, we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
@@ -85,7 +85,7 @@ After considering all of these factors, we have arrived at the 1-2 week push cyc
 
 We try to stick to this schedule as closely as possible, though complications may cause delays. You can track the latest status about any release in the [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 
-- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.com/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
+- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.com/ampproject/amphtml/branches) and are pushed to users who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
 - Wednesday: we check bug reports for _Experimental Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
 - Thursday-Monday: we continue to monitor error rates and bug reports for _Experimental Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
 - Tuesday the following week: the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)
@@ -104,10 +104,10 @@ If a one week release freeze is announced for Week N:
 
 A release freeze may happen due to:
 
-- Times when there are not enough people available to push the AMP release to **stable** and monitor it. Currently most of the people performing AMP releases are based in the United States, so this will usually be the weeks of the major US holidays of Independence Day (July 4), Thanksgiving (fourth Thursday in November), Christmas (25 December) and New Year's Eve/Day (December 31/January 1).
+- Times when there are not enough people available to push the AMP release to **stable** and monitor it. Currently, most of the people performing AMP releases are based in the United States, so this will usually be the weeks of the major US holidays of Independence Day (July 4), Thanksgiving (fourth Thursday in November), Christmas (25 December), and New Year's Eve/Day (December 31/January 1).
 - An emergency situation, such as a security or privacy issue as determined by the [Technical Steering Committee (TSC)](https://github.com/ampproject/meta-tsc) or the people performing the release.
-- Other situations when stability of the codebase is deemed to be particularly important as determined by the TSC.
+- Other situations when the stability of the codebase is deemed to be particularly important as determined by the TSC.
 
-In all cases except emergencies the release freezes will be announced at least one month in advance.
+In all cases, except emergencies, the release freezes will be announced at least one month in advance.
 
 Note that unless otherwise announced a release freeze does not imply a code freeze. Code may still be written, reviewed and merged during a release freeze.
