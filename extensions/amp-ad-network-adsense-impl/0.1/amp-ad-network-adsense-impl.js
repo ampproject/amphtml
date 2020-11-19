@@ -23,6 +23,7 @@
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -271,7 +272,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentTuple) {
+  getAdUrl(consentTuple, opt_unusedRtcResponsesPromise, opt_serveNpaSignal) {
     let consentState = undefined;
     let consentString = undefined;
     let gdprApplies = undefined;
@@ -348,7 +349,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'iu': slotname,
       'npa':
         consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        !!opt_serveNpaSignal
           ? 1
           : null,
       'adtest': adTestOn ? 'on' : null,
@@ -411,6 +413,28 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         },
         experimentIds
       );
+    });
+  }
+
+  /** @override */
+  getServeNpaSignal() {
+    const npaSignal = this.element.getAttribute('always-serve-npa');
+    if (npaSignal == undefined) {
+      return Promise.resolve(false);
+    }
+    if (npaSignal == '') {
+      return Promise.resolve(true);
+    }
+    return Services.geoForDocOrNull(this.element).then((geoService) => {
+      if (geoService) {
+        const locations = npaSignal.split(',');
+        for (let i = 0; i < locations.length; i++) {
+          if (geoService.isInCountryGroup(locations[i]) === GEO_IN_GROUP.IN) {
+            return true;
+          }
+        }
+      }
+      return false;
     });
   }
 

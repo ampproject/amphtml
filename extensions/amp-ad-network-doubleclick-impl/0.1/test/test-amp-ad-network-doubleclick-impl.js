@@ -46,6 +46,7 @@ import {
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Layout} from '../../../../src/layout';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
@@ -1038,6 +1039,39 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           expect(url).to.not.match(/(\?|&)npa=(&|$)/);
         }));
 
+    it('should save opt_serveNpaSignal', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+          undefined,
+          true
+        )
+        .then(() => {
+          expect(impl.serveNpaSignal_).to.be.true;
+        }));
+
+    it('should include npa=1 if `serveNpaSignal` is found, regardless of consent', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+          undefined,
+          true
+        )
+        .then((url) => {
+          expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        }));
+
+    it('should include npa=1 if `serveNpaSignal` is false & insufficient consent', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.INSUFFICIENT},
+          undefined,
+          false
+        )
+        .then((url) => {
+          expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        }));
+
     it('should include gdpr_consent, if TC String is provided', () =>
       impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
         expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
@@ -1102,6 +1136,68 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
         }).npa
       ).to.equal(1);
+    });
+
+    it('should include npa=1 when `serveNpaSignal_` is true', () => {
+      const element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: 320,
+        width: 50,
+        'data-slot': '/1234/abc/def',
+        'always-serve-npa': 'gdpr',
+      });
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.serveNpaSignal_ = true;
+      expect(
+        impl.getPageParameters({
+          consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        }).npa
+      ).to.equal(1);
+    });
+  });
+
+  describe('#getServeNpaSignal', () => {
+    it('should return false if no attribute found', async () => {
+      const element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: 320,
+        width: 50,
+        'data-slot': '/1234/abc/def',
+      });
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(await impl.getServeNpaSignal()).to.false;
+    });
+
+    it('should return true, regardless of geo location if empty string', async () => {
+      const element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: 320,
+        width: 50,
+        'data-slot': '/1234/abc/def',
+        'always-serve-npa': '',
+      });
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(await impl.getServeNpaSignal()).to.true;
+    });
+
+    it('should return if doc is served from a defined geo group', async () => {
+      // Stub service
+      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+        Promise.resolve({
+          isInCountryGroup(country) {
+            return country === 'usca' ? GEO_IN_GROUP.IN : GEO_IN_GROUP.NOT_IN;
+          },
+        })
+      );
+      const element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: 320,
+        width: 50,
+        'data-slot': '/1234/abc/def',
+        'always-serve-npa': 'gdpr,usca',
+      });
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(await impl.getServeNpaSignal()).to.true;
     });
   });
 

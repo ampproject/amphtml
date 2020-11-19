@@ -757,13 +757,18 @@ export class AmpA4A extends AMP.BaseElement {
           ? consentMetadata['gdprApplies']
           : consentMetadata;
 
-        return /** @type {!Promise<?string>} */ (this.getAdUrl(
-          {consentState, consentString, gdprApplies},
-          this.tryExecuteRealTimeConfig_(
-            consentState,
-            consentString,
-            /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
-          )
+        return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
+          (npaSignal) =>
+            this.getAdUrl(
+              {consentState, consentString, gdprApplies},
+              this.tryExecuteRealTimeConfig_(
+                consentState,
+                consentString,
+                /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata),
+                npaSignal
+              ),
+              npaSignal
+            )
         ));
       })
       // This block returns the (possibly empty) response to the XHR request.
@@ -1451,10 +1456,24 @@ export class AmpA4A extends AMP.BaseElement {
    * by network.
    * @param {!ConsentTupleDef=} opt_ununsedConsentTuple
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
+   * @param {boolean=} opt_serveNpaSignal
    * @return {!Promise<string>|string}
    */
-  getAdUrl(opt_ununsedConsentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(
+    opt_ununsedConsentTuple,
+    opt_rtcResponsesPromise,
+    opt_serveNpaSignal
+  ) {
     throw new Error('getAdUrl not implemented!');
+  }
+
+  /**
+   * Checks if the `always-serve-npa` attribute is present and valid
+   * based on the geolocation.  To be implemented by network.
+   * @return {!Promise<boolean>}
+   */
+  getServeNpaSignal() {
+    return Promise.resolve(false);
   }
 
   /**
@@ -2236,9 +2255,15 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {boolean} serveNpaSignal
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
+  tryExecuteRealTimeConfig_(
+    consentState,
+    consentString,
+    consentMetadata,
+    serveNpaSignal
+  ) {
     if (!!AMP.RealTimeConfigManager) {
       try {
         return new AMP.RealTimeConfigManager(
@@ -2249,7 +2274,8 @@ export class AmpA4A extends AMP.BaseElement {
           consentState,
           consentString,
           consentMetadata,
-          this.verifyStillCurrent()
+          this.verifyStillCurrent(),
+          serveNpaSignal
         );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
