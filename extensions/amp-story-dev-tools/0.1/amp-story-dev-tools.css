@@ -18,10 +18,87 @@ amp-story-dev-tools {
   width: 100% !important;
   height: 100% !important;
   box-sizing: border-box !important;
-  background-color: #121212 !important;
+  background-color: black !important;
   font-size: 16px !important;
   font-family: 'Poppins', sans-serif !important;
   color: white !important;
   padding: 30px 10% !important;
   text-align: center !important;
+}
+
+.i-amphtml-story-dev-tools-container {
+  width: 100%;
+  height: 100%;
+  padding: 30px 10%;
+}
+
+.i-amphtml-story-dev-tools-header {
+  width: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.i-amphtml-story-dev-tools-brand {
+  display: inherit;
+}
+
+.i-amphtml-story-dev-tools-brand-text > span {
+  display: block;
+  letter-spacing: 0.1em;
+  line-height: 1.2em;
+  padding-left: 10px;
+}
+
+.i-amphtml-story-dev-tools-brand-text > span:nth-child(2) {
+  color: #79B3FF;
+  font-size: 10px;
+}
+
+.i-amphtml-story-dev-tools-button {
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #79B3FF55;
+  border-radius: 20px;
+  padding: 0 6px 0 10px;
+  height: 32px;
+  box-sizing: border-box;
+  color: #79B3FF;
+  transition: background 0.05s ease-in-out;
+}
+
+.i-amphtml-story-dev-tools-button:hover {
+  background: #79B3FF55;
+}
+
+.i-amphtml-story-dev-tools-button svg {
+  background: #79B3FF;
+  padding: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-left: 10px;
+  box-sizing: border-box;
+}
+
+.i-amphtml-story-dev-tools-tabs > span {
+  padding-bottom: 0.2em;
+  margin: 0 1em;
+  cursor: pointer;
+  opacity: 0.4;
+}
+
+.i-amphtml-story-dev-tools-tabs > span:not([active]):hover {
+  opacity: 0.7;
+}
+
+.i-amphtml-story-dev-tools-tabs > span[active] {
+  opacity: 1;
+  cursor: initial;
+  border-bottom: 2px solid white;
 }
