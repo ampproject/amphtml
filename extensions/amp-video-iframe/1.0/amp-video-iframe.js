@@ -29,7 +29,8 @@ const TAG = 'amp-video-iframe';
  */
 function getIntersectionObserverEntryAsync(element) {
   return new Promise((resolve) => {
-    const observer = new IntersectionObserver((entries) => {
+    const {parentWindow} = element.ownerDocument;
+    const observer = new parentWindow.IntersectionObserver((entries) => {
       resolve(entries[entries.length - 1]);
       observer.disconnect();
     });
