@@ -239,14 +239,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: Object.values(PTT_EXP_BRANCHES),
       },
-      {
-        experimentId: INTERSECT_RESOURCES_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          INTERSECT_RESOURCES_EXP.control,
-          INTERSECT_RESOURCES_EXP.experiment,
-        ],
-      },
     ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
@@ -258,6 +250,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
     if (moduleNomoduleExpId) {
       addExperimentIdToElement(moduleNomoduleExpId, this.element);
+    }
+    const intersectResourcesExpId = getExperimentBranch(
+      this.win,
+      INTERSECT_RESOURCES_EXP.id
+    );
+    if (intersectResourcesExpId) {
+      addExperimentIdToElement(intersectResourcesExpId, this.element);
     }
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {

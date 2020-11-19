@@ -97,13 +97,14 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
+  getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -445,14 +446,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: Object.values(PTT_EXP_BRANCHES),
       },
-      {
-        experimentId: INTERSECT_RESOURCES_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          INTERSECT_RESOURCES_EXP.control,
-          INTERSECT_RESOURCES_EXP.experiment,
-        ],
-      },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
@@ -462,6 +455,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
     }
+
+    const intersectResourcesExpId = getExperimentBranch(
+      this.win,
+      INTERSECT_RESOURCES_EXP.id
+    );
+
+    if (intersectResourcesExpId) {
+      this.experimentIds.push(intersectResourcesExpId);
+    }
+
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
