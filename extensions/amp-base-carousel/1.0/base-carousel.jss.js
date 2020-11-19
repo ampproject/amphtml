@@ -39,8 +39,16 @@ const horizontalScroll = {
   overflowY: 'hidden',
   // Hide scrollbar.
   '&$hideScrollbar': {
+    height: '100%',
     paddingBottom: '20px',
   },
+};
+
+const verticalScroll = {
+  flexDirection: 'column',
+  scrollSnapTypeY: 'mandatory', // Firefox/IE
+  scrollSnapType: 'y mandatory',
+  overflowX: 'hidden',
 };
 
 /*
@@ -61,8 +69,6 @@ const hideScrollbar = {
   scrollbarWidth: 'none',
 
   boxSizing: '',
-  height: '100%',
-  paddingBottom: '20px',
 
   // Chrome, Safari
   '&::-webkit-scrollbar': {
@@ -229,6 +235,7 @@ const JSS = {
   scrollContainer,
   hideScrollbar,
   horizontalScroll,
+  verticalScroll,
   slideElement,
   thumbnails,
   enableSnap,

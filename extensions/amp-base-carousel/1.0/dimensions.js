@@ -33,6 +33,14 @@ export const Alignment = {
 };
 
 /**
+ * @enum {string}
+ */
+export const Orientation = {
+  HORIZONTAL: 'horizontal',
+  VERTICAL: 'vertical',
+};
+
+/**
  * @typedef {{
  *   start: number,
  *   end: number,
