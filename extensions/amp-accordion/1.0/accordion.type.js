@@ -87,7 +87,7 @@ AccordionDef.HeaderShimProps;
  *   id: (string),
  *   role: (string),
  *   aria-labelledby: (string),
- *   aria-hidden: (boolean),
+ *   aria-hidden: (string),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
