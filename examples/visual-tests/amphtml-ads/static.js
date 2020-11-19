@@ -17,6 +17,7 @@
 'use strict';
 
 const {fillIframeSrcdoc} = require('./helpers');
+const sleep = require('sleep-promise');
 
 /**
  * Percy preserves the DOM object as snapshot so the content of iframe is not
@@ -26,5 +27,8 @@ const {fillIframeSrcdoc} = require('./helpers');
 module.exports = {
   'page view': async (page, name) => {
     await fillIframeSrcdoc(page);
+
+    // To combat visual diff flakiness possibly due to image loading
+    await sleep(300);
   },
 };
