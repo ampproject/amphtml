@@ -18,6 +18,7 @@ import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Deferred} from '../utils/promise';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
+import {PageScroller} from './page-scroller';
 import {VisibilityState} from '../visibility-state';
 import {
   addParamsToUrl,
@@ -233,6 +234,9 @@ export class AmpStoryPlayer {
     this.currentStoryLoadDeferred_ = null;
 
     this.attachCallbacksToElement_();
+
+    /** @private {!PageScroller} */
+    this.pageScroller_ = new PageScroller(win);
   }
 
   /**
@@ -568,8 +572,8 @@ export class AmpStoryPlayer {
             this.onTouchMove_(/** @type {!Event} */ (data));
           });
 
-          messaging.registerHandler('touchend', () => {
-            this.onTouchEnd_();
+          messaging.registerHandler('touchend', (event, data) => {
+            this.onTouchEnd_(/** @type {!Event} */ (data));
           });
 
           messaging.registerHandler('selectDocument', (event, data) => {
@@ -1474,53 +1478,59 @@ export class AmpStoryPlayer {
       return;
     }
 
-    this.touchEventState_.startX = coordinates.x;
-    this.touchEventState_.startY = coordinates.y;
+    this.touchEventState_.startX = coordinates.screenX;
+    this.touchEventState_.startY = coordinates.screenY;
+
+    this.pageScroller_.onTouchStart(event.timeStamp, coordinates.clientY);
   }
 
   /**
-   * Reacts to touchmove events and handles horizontal swipes.
+   * Reacts to touchmove events.
    * @param {!Event} event
    * @private
    */
   onTouchMove_(event) {
-    if (this.touchEventState_.isSwipeX === false) {
-      return;
-    }
-
     const coordinates = this.getClientTouchCoordinates_(event);
     if (!coordinates) {
       return;
     }
 
-    const {x, y} = coordinates;
-    this.touchEventState_.lastX = x;
+    if (this.touchEventState_.isSwipeX === false) {
+      this.pageScroller_.onTouchMove(event.timeStamp, coordinates.clientY);
+      return;
+    }
+
+    const {screenX, screenY} = coordinates;
+    this.touchEventState_.lastX = screenX;
 
     if (this.touchEventState_.isSwipeX === null) {
       this.touchEventState_.isSwipeX =
-        Math.abs(this.touchEventState_.startX - x) >
-        Math.abs(this.touchEventState_.startY - y);
+        Math.abs(this.touchEventState_.startX - screenX) >
+        Math.abs(this.touchEventState_.startY - screenY);
       if (!this.touchEventState_.isSwipeX) {
         return;
       }
     }
 
     this.onSwipeX_({
-      deltaX: x - this.touchEventState_.startX,
+      deltaX: screenX - this.touchEventState_.startX,
       last: false,
     });
   }
 
   /**
    * Reacts to touchend events. Resets cached touch event states.
+   * @param {!Event} event
    * @private
    */
-  onTouchEnd_() {
+  onTouchEnd_(event) {
     if (this.touchEventState_.isSwipeX === true) {
       this.onSwipeX_({
         deltaX: this.touchEventState_.lastX - this.touchEventState_.startX,
         last: true,
       });
+    } else {
+      this.pageScroller_.onTouchEnd(event.timeStamp);
     }
 
     this.touchEventState_.startX = 0;
@@ -1697,7 +1707,7 @@ export class AmpStoryPlayer {
       return null;
     }
 
-    const {screenX: x, screenY: y} = touches[0];
-    return {x, y};
+    const {screenX, screenY, clientX, clientY} = touches[0];
+    return {screenX, screenY, clientX, clientY};
   }
 }
