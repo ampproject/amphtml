@@ -15,9 +15,9 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-selector',
@@ -93,12 +93,18 @@ WithUl.story = {
 };
 
 export const Actions = () => {
+  const keyboardSelectMode = select(
+    'keyboard select mode',
+    ['none', 'focus', 'select'],
+    'focus'
+  );
   return (
     <>
       <amp-selector
         id="actionsSample"
         layout="container"
         class="sample-selector"
+        keyboard-select-mode={keyboardSelectMode}
         multiple
       >
         <ul>

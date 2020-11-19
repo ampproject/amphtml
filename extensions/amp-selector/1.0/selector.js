@@ -16,19 +16,34 @@
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
+import {Keys} from '../../../src/utils/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
+import {mod} from '../../../src/utils/math';
+import {tryFocus} from '../../../src/dom';
 import {
   useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from '../../../src/preact';
 
 const SelectorContext = Preact.createContext(
   /** @type {SelectorDef.ContextProps} */ ({selected: []})
 );
+
+/**
+ * Set of namespaces that can be set for lifecycle reporters.
+ *
+ * @enum {string}
+ */
+export const KEYBOARD_SELECT_MODE = {
+  NONE: 'none',
+  FOCUS: 'focus',
+  SELECT: 'select',
+};
 
 /**
  * @param {!SelectorDef.Props} props
@@ -40,10 +55,13 @@ function SelectorWithRef(
     as: Comp = 'div',
     disabled,
     defaultValue = [],
+    keyboardSelectMode = KEYBOARD_SELECT_MODE.NONE,
     value,
     multiple,
     onChange,
+    onKeyDown: customOnKeyDown,
     role = 'listbox',
+    tabIndex,
     children,
     ...rest
   },
@@ -52,6 +70,9 @@ function SelectorWithRef(
   const [selectedState, setSelectedState] = useState(
     value ? value : defaultValue
   );
+  const optionsRef = useRef([]);
+  const focusRef = useRef({active: null, focusMap: {}});
+
   const selected = value ? value : selectedState;
   const selectOption = useCallback(
     (option) => {
@@ -78,12 +99,15 @@ function SelectorWithRef(
 
   const context = useMemo(
     () => ({
+      disabled,
+      focusRef,
+      keyboardSelectMode,
+      multiple,
+      optionsRef,
       selected,
       selectOption,
-      disabled,
-      multiple,
     }),
-    [disabled, multiple, selected, selectOption]
+    [disabled, focusRef, keyboardSelectMode, multiple, selected, selectOption]
   );
 
   useEffect(() => {
@@ -110,14 +134,108 @@ function SelectorWithRef(
     [setSelectedState, selectOption, selected]
   );
 
+  /**
+   * This method uses the given callback on the target index found by
+   * modifying the given value state by the given delta.
+   *
+   * Only meaningful if `index` is provided to `Option` children.
+   *
+   * ex: (1, "a", ["a", "b", "c", "d"]) => cb(1)
+   * ex: (-1, "c", ["a", "b", "c", "d"]) => cb(1)
+   * ex: (2, "c", ["a", "b", "c", "d"]) => cb(1)
+   * ex: (-1, undefined, ["a", "b", "c", "d"]) => cb(2)
+   * @param {number} delta
+   * @param {!Array<string>} value
+   * @param {Array<string>} options
+   * @param {Function} cb
+   * @return {{value: Array<string>, option: string}|undefined}
+   */
+  const callbackByDelta = useCallback((delta, value, cb) => {
+    if (!optionsRef.current.length) {
+      return;
+    }
+    const options = optionsRef.current.filter((v) => v != undefined);
+    if (!options.length) {
+      return;
+    }
+    const previous = options.indexOf(value);
+    // If previousIndex === -1 is true, then a negative delta will be offset
+    // one more than is wanted when looping back around in the options.
+    // This occurs when the given value is undefined.
+    const selectUpWhenNoneSelected = previous === -1 && delta < 0;
+    const index = selectUpWhenNoneSelected ? delta : previous + delta;
+    const option = options[mod(index, options.length)];
+    cb(option);
+  }, []);
+
+  /**
+   * This method modifies the selected state by at most one value of the
+   * current selected state by the given delta.
+   * The modification is done in FIFO order. When no values are selected,
+   * the new selected state becomes the option at the given delta.
+   *
+   * Only meaningful if `index` is provided to `Option` children.
+   *
+   * ex: (1, [0, 2], [0, 1, 2, 3]) => [2, 1]
+   * ex: (-1, [2, 1], [0, 1, 2, 3]) => [1]
+   * ex: (2, [2, 1], [0, 1, 2, 3]) => [1, 0]
+   * ex: (-1, [], [0, 1, 2, 3]) => [3]
+   */
+  const selectBy = useCallback(
+    (delta) => callbackByDelta(delta, selected.shift(), selectOption),
+    [callbackByDelta, selected, selectOption]
+  );
+
+  const focusBy = useCallback(
+    (delta) =>
+      callbackByDelta(delta, focusRef.current.active, (option) => {
+        const focus = focusRef.current.focusMap[option];
+        if (focus) {
+          focus();
+        }
+      }),
+    [callbackByDelta]
+  );
+
   useImperativeHandle(
     ref,
     () =>
       /** @type {!SelectorDef.SelectorApi} */ ({
         clear,
+        selectBy,
         toggle,
       }),
-    [clear, toggle]
+    [clear, selectBy, toggle]
+  );
+
+  const onKeyDown = useCallback(
+    (e) => {
+      if (customOnKeyDown) {
+        customOnKeyDown(e);
+      }
+      const {key} = e;
+      let dir;
+      switch (key) {
+        case Keys.LEFT_ARROW: // Fallthrough.
+        case Keys.UP_ARROW:
+          dir = -1;
+          break;
+        case Keys.RIGHT_ARROW: // Fallthrough.
+        case Keys.DOWN_ARROW:
+          dir = 1;
+          break;
+        default:
+          break;
+      }
+      if (dir) {
+        if (keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT) {
+          selectBy(dir);
+        } else if (keyboardSelectMode === KEYBOARD_SELECT_MODE.FOCUS) {
+          focusBy(dir);
+        }
+      }
+    },
+    [customOnKeyDown, keyboardSelectMode, focusBy, selectBy]
   );
 
   return (
@@ -127,7 +245,12 @@ function SelectorWithRef(
       aria-disabled={disabled}
       aria-multiselectable={multiple}
       disabled={disabled}
+      keyboardSelectMode={keyboardSelectMode}
       multiple={multiple}
+      onKeyDown={onKeyDown}
+      tabIndex={
+        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
+      }
     >
       <SelectorContext.Provider value={context}>
         {children}
@@ -147,28 +270,90 @@ export {Selector};
 export function Option({
   as: Comp = 'div',
   disabled = false,
-  onClick,
+  index,
+  onClick: customOnClick,
+  onFocus: customOnFocus,
+  onKeyDown: customOnKeyDown,
   option,
   role = 'option',
   style,
-  tabIndex = '0',
+  tabIndex,
   ...rest
 }) {
+  const ref = useRef(null);
   const {
+    disabled: selectorDisabled,
+    focusRef,
+    keyboardSelectMode,
+    multiple: selectorMultiple,
+    optionsRef,
     selected,
     selectOption,
-    disabled: selectorDisabled,
-    multiple: selectorMultiple,
   } = useContext(SelectorContext);
-  const clickHandler = (e) => {
+
+  const focus = useCallback(
+    (e) => {
+      if (customOnFocus) {
+        customOnFocus(e);
+      }
+      if (ref.current) {
+        tryFocus(ref.current);
+      }
+    },
+    [customOnFocus]
+  );
+
+  useEffect(() => {
+    const refFromContext = optionsRef;
+    if (!refFromContext || !refFromContext.current) {
+      return;
+    }
+    if (index != undefined && !disabled) {
+      refFromContext.current[index] = option;
+    }
+    return () => delete refFromContext.current[index];
+  }, [disabled, index, option, optionsRef]);
+
+  useEffect(() => {
+    if (!focusRef) {
+      return;
+    }
+    const refFromContext = focusRef.current;
+    if (!refFromContext || !refFromContext.focusMap) {
+      return;
+    }
+    refFromContext.focusMap[option] = focus;
+    return () => delete refFromContext.focusMap[option];
+  }, [focus, focusRef, option]);
+
+  const trySelect = useCallback(() => {
     if (selectorDisabled || disabled) {
       return;
     }
-    if (onClick) {
-      onClick(e);
-    }
     selectOption(option);
-  };
+  }, [disabled, option, selectOption, selectorDisabled]);
+
+  const onClick = useCallback(
+    (e) => {
+      trySelect();
+      if (customOnClick) {
+        customOnClick(e);
+      }
+    },
+    [customOnClick, trySelect]
+  );
+
+  const onKeyDown = useCallback(
+    (e) => {
+      if (e.key === Keys.ENTER || e.key === Keys.SPACE) {
+        trySelect();
+      }
+      if (customOnKeyDown) {
+        customOnKeyDown(e);
+      }
+    },
+    [customOnKeyDown, trySelect]
+  );
 
   const isSelected =
     /** @type {!Array} */ (selected).includes(option) && !disabled;
@@ -184,13 +369,17 @@ export function Option({
     ...rest,
     disabled,
     'aria-disabled': String(disabled),
-    onClick: clickHandler,
+    onClick,
+    onFocus: () => (focusRef.current.active = option),
+    onKeyDown,
     option,
+    ref,
     role,
     selected: isSelected,
     'aria-selected': String(isSelected),
     style: {...statusStyle, ...style},
-    tabIndex,
+    tabIndex:
+      tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0,
   };
-  return <Comp {...optionProps}></Comp>;
+  return <Comp {...optionProps} />;
 }
