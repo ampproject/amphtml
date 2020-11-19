@@ -85,12 +85,7 @@ class AmpSelector extends PreactBaseElement {
       this.mutateProps({children, options});
     });
     mu.observe(element, {
-      attributeFilter: [
-        'option',
-        'selected',
-        'disabled',
-        'keyboard-select-mode',
-      ],
+      attributeFilter: ['option', 'selected', 'disabled'],
       childList: true,
       subtree: true,
     });
