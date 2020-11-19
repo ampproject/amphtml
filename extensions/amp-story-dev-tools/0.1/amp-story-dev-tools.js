@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  AmpStoryDevToolsTab,
+  createTabContentsTemplate,
+} from './amp-story-dev-tools-tab';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
@@ -123,6 +127,28 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       Object.values(DevToolsTab).find(
         (e) => e.toLowerCase().replace(' ', '-') === hashParams['tab']
       ) || DevToolsTab.PREVIEW;
+
+    /** @private {!Object} maps tabs to contents */
+    this.tabContents_ = {
+      [DevToolsTab.PREVIEW]: new AmpStoryDevToolsTab(
+        createTabContentsTemplate(this.element, DevToolsTab.PREVIEW),
+        this.win,
+        this,
+        this.storyUrl_
+      ),
+      [DevToolsTab.ERRORS]: new AmpStoryDevToolsTab(
+        createTabContentsTemplate(this.element, DevToolsTab.ERRORS),
+        this.win,
+        this,
+        this.storyUrl_
+      ),
+      [DevToolsTab.PAGE_EXPERIENCE]: new AmpStoryDevToolsTab(
+        createTabContentsTemplate(this.element, DevToolsTab.PAGE_EXPERIENCE),
+        this.win,
+        this,
+        this.storyUrl_
+      ),
+    };
   }
 
   /** @override */
@@ -173,7 +199,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   }
 
   /**
-   * Switches the tab shown.
+   * Switches the tab shown by activating the tab button and switching the contents.
    * @param {!DevToolsTab} tab
    */
   switchTab_(tab) {
@@ -183,7 +209,13 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     ).forEach((e) => {
       return e.toggleAttribute('active', e.tabName === tab);
     });
-    // TODO(mszylkowski): Remove previous tab and add current tab to the screen.
+
+    // Remove old tab and replace with new one
+    this.element.querySelector('.i-amphtml-story-dev-tools-tab').remove();
+    this.element
+      .querySelector('.i-amphtml-story-dev-tools-container')
+      .appendChild(this.tabContents_[tab].getElement());
+    this.tabContents_[tab].onTabAttached();
   }
 
   /**
