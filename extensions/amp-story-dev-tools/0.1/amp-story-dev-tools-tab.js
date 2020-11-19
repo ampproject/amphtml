@@ -14,60 +14,37 @@
  * limitations under the License.
  */
 
-import {htmlFor} from '../../../src/static-template';
-
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.
- * @param {!Element} element
+ * @param {!Window} win
+ * @param {string} storyUrl
  * @param {string} name
  * @return {!Element} the layout
  */
-export function createTabContentsTemplate(element, name) {
-  const html = htmlFor(element);
-  const layout = html`<div class="i-amphtml-story-dev-tools-tab">
-    <h1>Title here</h1>
-  </div>`;
-  layout.querySelector('h1').textContent = name;
-  return layout;
+export function createTabElement(win, storyUrl, name) {
+  const element = win.document.createElement('amp-story-dev-tools-tab');
+  element.setAttribute('story-url', storyUrl);
+  const innerTitle = win.document.createElement('h1');
+  innerTitle.textContent = name;
+  element.appendChild(innerTitle);
+  return element;
 }
 
-export class AmpStoryDevToolsTab {
+export class AmpStoryDevToolsTab extends AMP.BaseElement {
   /**
    * @param {!Element} element
    * @param {!Element} win
    * @param {!AmStoryDevTools} devTools
-   * @param {string} storyUrl_
+   * @param {string} storyUrl
    */
-  constructor(element, win, devTools, storyUrl_) {
+  constructor(element) {
+    super(element);
     /** @protected {!Element} */
     this.element = element;
 
-    /** @protected {!Element} */
-    this.win_ = win;
-
-    /** @protected {!AmpStoryDevTools} */
-    this.devTools_ = devTools;
+    this.element.classList.add('i-amphtml-story-dev-tools-tab');
 
     /** @protected  {string} */
-    this.storyUrl_ = storyUrl_;
-
-    /** @protected {boolean} whether the layout was built before */
-    this.layoutBuilt_ = false;
-  }
-
-  /**
-   * Called when the tab is added to the dom, used to initialize contents if needed.
-   * @public
-   */
-  onTabAttached() {
-    // Subclass can override.
-  }
-
-  /**
-   * Get the root element of the tab contents.
-   * @return {!Element}
-   */
-  getElement() {
-    return this.element;
+    this.storyUrl_ = element.getAttribute('story-url');
   }
 }

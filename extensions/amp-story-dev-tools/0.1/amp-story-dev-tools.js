@@ -17,6 +17,7 @@
 import {
   AmpStoryDevToolsTab,
   createTabContentsTemplate,
+  createTabElement,
 } from './amp-story-dev-tools-tab';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
@@ -69,7 +70,7 @@ const buildContainerTemplate = (element) => {
           </span>
         </span>
         <div class="i-amphtml-story-dev-tools-tabs"></div>
-        <div
+        <a
           class="i-amphtml-story-dev-tools-button i-amphtml-story-dev-tools-close"
         >
           <span>OPEN STORY</span>
@@ -85,7 +86,7 @@ const buildContainerTemplate = (element) => {
               fill="black"
             />
           </svg>
-        </div>
+        </a>
       </div>
       <div class="i-amphtml-story-dev-tools-tab">
         <div class="lds-dual-ring"></div>
@@ -94,11 +95,26 @@ const buildContainerTemplate = (element) => {
   `;
 };
 
+/**
+ * Updates the hashString with the dictionary<string, string> passed in
+ * @public
+ * @param {!Object} updates
+ * @param {!Window} win
+ */
+export function updateHash(updates, win) {
+  let queryHash = parseQueryString(win.location.hash);
+  queryHash = Object.assign(queryHash, updates);
+  win.location.hash = Object.entries(queryHash)
+    .filter((e) => e[1] != undefined)
+    .map((e) => e[0] + '=' + e[1])
+    .join('&');
+}
+
 /** @enum {string} */
 const DevToolsTab = {
   PREVIEW: 'Preview',
   PAGE_EXPERIENCE: 'Page Experience',
-  ERRORS: 'Errors',
+  LOGS: 'Logs',
 };
 
 export class AmpStoryDevTools extends AMP.BaseElement {
@@ -122,23 +138,20 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
     /** @private {!Object} maps tabs to contents */
     this.tabContents_ = {
-      [DevToolsTab.PREVIEW]: new AmpStoryDevToolsTab(
-        createTabContentsTemplate(this.element, DevToolsTab.PREVIEW),
+      [DevToolsTab.PREVIEW]: createTabElement(
         this.win,
-        this,
-        this.storyUrl_
+        this.storyUrl_,
+        DevToolsTab.PREVIEW
       ),
-      [DevToolsTab.ERRORS]: new AmpStoryDevToolsTab(
-        createTabContentsTemplate(this.element, DevToolsTab.ERRORS),
+      [DevToolsTab.LOGS]: createTabElement(
         this.win,
-        this,
-        this.storyUrl_
+        this.storyUrl_,
+        DevToolsTab.LOGS
       ),
-      [DevToolsTab.PAGE_EXPERIENCE]: new AmpStoryDevToolsTab(
-        createTabContentsTemplate(this.element, DevToolsTab.PAGE_EXPERIENCE),
+      [DevToolsTab.PAGE_EXPERIENCE]: createTabElement(
         this.win,
-        this,
-        this.storyUrl_
+        this.storyUrl_,
+        DevToolsTab.PAGE_EXPERIENCE
       ),
     };
   }
@@ -146,8 +159,38 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.loadFonts_();
-
     this.buildLayout_();
+    this.initializeListeners_();
+
+    this.switchTab_(this.currentTab_);
+  }
+
+  /**
+   * @private
+   */
+  initializeListeners_() {
+    const tabsContainer = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-tabs'
+    );
+    tabsContainer.addEventListener('click', (event) => {
+      const tab = event.target.textContent;
+      if (
+        Object.values(DevToolsTab).find((t) => t === tab) &&
+        this.currentTab_ != tab
+      ) {
+        this.switchTab_(tab);
+        // Update hashString with tab selected or null if tab = preview (default)
+        updateHash(
+          {
+            'tab':
+              tab == DevToolsTab.PREVIEW
+                ? null
+                : tab.toLowerCase().replace(' ', '-'),
+          },
+          this.win
+        );
+      }
+    });
   }
 
   /**
@@ -156,34 +199,19 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   buildLayout_() {
     const container = buildContainerTemplate(this.element);
     this.element.appendChild(container);
-    this.element
-      .querySelector('.i-amphtml-story-dev-tools-close')
-      .addEventListener('click', () => {
-        this.win.location.href = this.storyUrl_;
-      });
+    this.element.querySelector(
+      '.i-amphtml-story-dev-tools-close'
+    ).href = this.storyUrl_;
 
     // Create tabs on top
     const tabsContainer = container.querySelector(
       '.i-amphtml-story-dev-tools-tabs'
     );
-    Object.values(DevToolsTab).forEach((e) => {
-      const tab = this.win.document.createElement('span');
-      tab.textContent = e;
-      tab.addEventListener('click', () => {
-        if (this.currentTab_ != e) {
-          this.switchTab_(e);
-          // Update hashString with tab selected or null if tab = preview (default)
-          this.updateHash({
-            'tab':
-              e == DevToolsTab.PREVIEW
-                ? null
-                : e.toLowerCase().replace(' ', '-'),
-          });
-        }
-      });
+    Object.values(DevToolsTab).forEach((tabTitle) => {
+      const tab = this.win.document.createElement('button');
+      tab.textContent = tabTitle;
       tabsContainer.appendChild(tab);
     });
-    this.switchTab_(this.currentTab_);
   }
 
   /**
@@ -202,22 +230,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     this.element.querySelector('.i-amphtml-story-dev-tools-tab').remove();
     this.element
       .querySelector('.i-amphtml-story-dev-tools-container')
-      .appendChild(this.tabContents_[tab].getElement());
-    this.tabContents_[tab].onTabAttached();
-  }
-
-  /**
-   * Updates the hashString with the dictionary<string, string> passed in
-   * @public
-   * @param {!Object} updates
-   */
-  updateHash(updates) {
-    let queryHash = parseQueryString(this.win.location.hash);
-    queryHash = Object.assign(queryHash, updates);
-    this.win.location.hash = Object.entries(queryHash)
-      .filter((e) => e[1] != undefined)
-      .map((e) => e[0] + '=' + e[1])
-      .join('&');
+      .appendChild(this.tabContents_[tab]);
   }
 
   /**
@@ -240,4 +253,5 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
 AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
   AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
+  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab, CSS);
 });

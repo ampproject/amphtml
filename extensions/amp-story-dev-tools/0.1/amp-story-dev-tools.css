@@ -23,24 +23,18 @@ amp-story-dev-tools {
   font-family: 'Poppins', sans-serif !important;
   color: white !important;
   padding: 30px 10% !important;
-  text-align: center !important;
-}
-
-.i-amphtml-story-dev-tools-container {
-  height: 100% !important;
+  --i-amphtml-story-dev-tools-accent: #79B3FF;
+  --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55;
 }
 
 .i-amphtml-story-dev-tools-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  color: white !important;
-  height: 40px !important;
-  box-sizing: border-box !important;
 }
 
 .i-amphtml-story-dev-tools-brand {
-  display: inline-flex !important;
+  display: flex !important;
 }
 
 .i-amphtml-story-dev-tools-brand-text > span {
@@ -51,9 +45,8 @@ amp-story-dev-tools {
 }
 
 .i-amphtml-story-dev-tools-brand-text > span:nth-child(2) {
-  color: #79B3FF !important;
+  color: var(--i-amphtml-story-dev-tools-accent) !important;
   font-size: 10px !important;
-  text-align: left;
 }
 
 .i-amphtml-story-dev-tools-button {
@@ -61,21 +54,21 @@ amp-story-dev-tools {
   font-size: 13px !important;
   display: flex !important;
   align-items: center !important;
-  border: 1px solid #79B3FF55 !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-accent-translucent) !important;
   border-radius: 20px !important;
   padding: 0 6px 0 10px !important;
   height: 32px !important;
   box-sizing: border-box !important;
-  color: #79B3FF !important;
-  transition: background 0.05s ease-in-out !important;
+  color: var(--i-amphtml-story-dev-tools-accent) !important;
+  text-decoration: none !important;
 }
 
 .i-amphtml-story-dev-tools-button:hover {
-  background: #79B3FF55 !important;
+  background: var(--i-amphtml-story-dev-tools-accent-translucent) !important;
 }
 
 .i-amphtml-story-dev-tools-button svg {
-  background: #79B3FF !important;
+  background: var(--i-amphtml-story-dev-tools-accent) !important;
   padding: 3px !important;
   width: 20px !important;
   height: 20px !important;
@@ -84,18 +77,25 @@ amp-story-dev-tools {
   box-sizing: border-box !important;
 }
 
-.i-amphtml-story-dev-tools-tabs > span {
+.i-amphtml-story-dev-tools-tabs > button {
   padding-bottom: 0.2em !important;
   margin: 0 16px !important;
   cursor: pointer !important;
   opacity: 0.4 !important;
+  font-size: inherit !important;
+  background: none !important;
+  border: none !important;
+  color: inherit !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
 }
 
-.i-amphtml-story-dev-tools-tabs > span:not([active]):hover {
-  opacity: 0.7 !important;
+.i-amphtml-story-dev-tools-tabs > button:not([active]):hover, .i-amphtml-story-dev-tools-tabs > button:not([active]):focus {
+  opacity: 0.9 !important;
 }
 
-.i-amphtml-story-dev-tools-tabs > span[active] {
+.i-amphtml-story-dev-tools-tabs > button[active] {
   opacity: 1 !important;
   cursor: initial !important;
   border-bottom: 2px solid white !important;
