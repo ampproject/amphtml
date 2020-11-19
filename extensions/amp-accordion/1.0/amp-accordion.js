@@ -255,7 +255,7 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
  */
 function ContentShimWithRef(
   sectionElement,
-  {hidden, id, role, 'aria-labelledby': ariaLabelledBy},
+  {id, role, 'aria-labelledby': ariaLabelledBy},
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;
@@ -268,11 +268,10 @@ function ContentShimWithRef(
     contentElement.setAttribute('id', id);
     contentElement.setAttribute('role', role);
     contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
-    toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, contentElement, hidden, id, role, ariaLabelledBy]);
+  }, [sectionElement, contentElement, id, role, ariaLabelledBy]);
   return <div />;
 }
 

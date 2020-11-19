@@ -39,8 +39,12 @@ const header = {
 // or delete if not used
 const content = {};
 
+const contentHidden = {
+  display: 'none !important',
+};
+
 const contentHiddenMatchable = {
-  'content-visibility': 'hidden-matchable !important',
+  contentVisibility: 'hidden-matchable !important',
   display: 'block !important',
 };
 
@@ -48,6 +52,7 @@ const JSS = {
   sectionChild,
   header,
   content,
+  contentHidden,
   contentHiddenMatchable,
 };
 

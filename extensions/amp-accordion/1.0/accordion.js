@@ -426,7 +426,7 @@ export function AccordionContent({
   } = useContext(SectionContext);
   const classes = useStyles();
   const [contentVisibility, setContentVisibility] = useState(false);
-  const useDisplayLocking = contentVisibility && experimentDisplayLocking;
+  const enableDisplayLocking = contentVisibility && experimentDisplayLocking;
 
   useEffect(() => {
     hasMountedRef.current = true;
@@ -437,8 +437,13 @@ export function AccordionContent({
     if (!ref.current) {
       return;
     }
+
     const element = ref.current;
     const win = element.ownerDocument.defaultView;
+    if (!win) {
+      return;
+    }
+
     const supportsContentVisibility = win.CSS.supports(
       'content-visibility',
       'hidden-matchable'
@@ -447,8 +452,9 @@ export function AccordionContent({
     if (!experimentDisplayLocking || !supportsContentVisibility) {
       return;
     }
+
     const beforeMatchHandler = () => {
-      if (element.hasAttribute('hidden')) {
+      if (!element.parentElement.hasAttribute('expanded')) {
         expandHandler();
       }
     };
@@ -476,12 +482,13 @@ export function AccordionContent({
       {...rest}
       ref={ref}
       className={`${className} ${classes.sectionChild} ${classes.content} ${
-        !expanded && useDisplayLocking ? classes.contentHiddenMatchable : ''
+        !expanded ? classes.contentHidden : ''
+      } ${
+        !expanded && enableDisplayLocking ? classes.contentHiddenMatchable : ''
       }`}
       id={contentId}
       aria-labelledby={headerId}
       role={role}
-      hidden={!expanded}
     >
       {children}
     </Comp>

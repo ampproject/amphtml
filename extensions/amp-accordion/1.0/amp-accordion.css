@@ -30,6 +30,9 @@
   border: solid 1px #dfdfdf;
 }
 
+/* TODO: This CSS is duplicated from ./accordion.jss.js for purposes of display
+ * locking.  Look into de-duping once experiment is launched.
+ */
 amp-accordion.i-amphtml-display-locking > section:not([expanded]) > :last-child,
 amp-accordion.i-amphtml-display-locking
   > section:not([expanded])
@@ -37,4 +40,9 @@ amp-accordion.i-amphtml-display-locking
   * {
   content-visibility: hidden-matchable !important;
   display: block !important;
+}
+
+amp-accordion > section:not([expanded]) > :last-child,
+amp-accordion > section:not([expanded]) > :last-child * {
+  display: none !important;
 }
