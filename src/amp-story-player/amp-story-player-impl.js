@@ -1437,10 +1437,10 @@ export class AmpStoryPlayer {
       return;
     }
 
-    this.touchEventState_.startX = coordinates.x;
-    this.touchEventState_.startY = coordinates.y;
+    this.touchEventState_.startX = coordinates.screenX;
+    this.touchEventState_.startY = coordinates.screenY;
 
-    this.pageScroller_.onTouchStart(event.timeStamp, coordinates.y);
+    this.pageScroller_.onTouchStart(event.timeStamp, coordinates.clientY);
   }
 
   /**
@@ -1455,24 +1455,24 @@ export class AmpStoryPlayer {
     }
 
     if (this.touchEventState_.isSwipeX === false) {
-      this.pageScroller_.onTouchMove(event.timeStamp, coordinates.y);
+      this.pageScroller_.onTouchMove(event.timeStamp, coordinates.clientY);
       return;
     }
 
-    const {x, y} = coordinates;
-    this.touchEventState_.lastX = x;
+    const {screenX, screenY} = coordinates;
+    this.touchEventState_.lastX = screenX;
 
     if (this.touchEventState_.isSwipeX === null) {
       this.touchEventState_.isSwipeX =
-        Math.abs(this.touchEventState_.startX - x) >
-        Math.abs(this.touchEventState_.startY - y);
+        Math.abs(this.touchEventState_.startX - screenX) >
+        Math.abs(this.touchEventState_.startY - screenY);
       if (!this.touchEventState_.isSwipeX) {
         return;
       }
     }
 
     this.onSwipeX_({
-      deltaX: x - this.touchEventState_.startX,
+      deltaX: screenX - this.touchEventState_.startX,
       last: false,
     });
   }
@@ -1666,7 +1666,7 @@ export class AmpStoryPlayer {
       return null;
     }
 
-    const {screenX: x, screenY: y} = touches[0];
-    return {x, y};
+    const {screenX, screenY, clientX, clientY} = touches[0];
+    return {screenX, screenY, clientX, clientY};
   }
 }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {throttle} from '../utils/rate-limit';
+
 /**
  * Applies scroll and momentum to window by using touch events.
  *
@@ -34,6 +36,9 @@ export class PageScroller {
     /** @private {!Window} */
     this.win_ = win;
 
+    /** @private {number} */
+    this.cachedWinHeight_ = null;
+
     /** @private {!Object} */
     this.touchEventState_ = {
       startY: 0,
@@ -48,7 +53,7 @@ export class PageScroller {
       startY: 0,
       isRunning: false,
       acceleration: 1,
-      speedLimit: 1.2,
+      speedLimit: 0.3,
       startTimeMs: null,
       maxTimeBetweenSwipesMs: 250,
       moveTimeThresholdMs: 100,
@@ -71,7 +76,9 @@ export class PageScroller {
   onTouchStart(timeStamp, startY) {
     this.touchEventState_.startY = startY;
     this.touchEventState_.touchStartTimeMs = timeStamp;
-    this.scrollState_.startY = this.win_.scrollY;
+    this.scrollState_.startY = this.win_./*OK*/ scrollY;
+    this.cachedWinHeight_ =
+      this.cachedWinHeight_ || this.win_./*OK*/ innerHeight;
 
     if (
       this.scrollState_.isRunning &&
@@ -96,8 +103,20 @@ export class PageScroller {
    * @param {number} currentY
    */
   onTouchMove(timeStamp, currentY) {
+    this.scrollState_.acceleration = Math.abs(
+      this.scrollState_.deltaY /
+        (timeStamp - this.touchEventState_.touchMoveTimeMs)
+    );
     this.touchEventState_.touchMoveTimeMs = timeStamp;
-    currentY += this.scrollState_.deltaY;
+
+    throttle(this.win_, this.thottledScroll_.bind(this, currentY), 50)();
+  }
+
+  /**
+   * @param {number} currentY
+   * @private
+   */
+  thottledScroll_(currentY) {
     this.scrollState_.deltaY = currentY - this.touchEventState_.startY;
 
     this.scrollState_.meetsDeltaYThreshold =
@@ -107,13 +126,7 @@ export class PageScroller {
       return;
     }
 
-    this.scrollState_.acceleration = Math.abs(
-      this.scrollState_.deltaY /
-        (this.touchEventState_.touchMoveTimeMs -
-          this.touchEventState_.touchStartTimeMs)
-    );
-
-    this.win_.scroll(0, this.scrollState_.startY - this.scrollState_.deltaY);
+    this.win_.scrollBy(0, -this.scrollState_.deltaY);
   }
 
   /**
@@ -139,12 +152,12 @@ export class PageScroller {
     ) {
       // If timefromLastTouchMove is low enough and the offset is above the
       // threshold, (re)set the scroll parameters to include momentum.
-      this.scrollState_.durationMs = this.win_.innerHeight * 1.2;
+      this.scrollState_.durationMs = this.cachedWinHeight_ * 1.2;
       this.scrollState_.isRunning = true;
 
       requestAnimationFrame((timestamp) => {
         this.scrollState_.startTimeMs = timestamp;
-        this.scrollState_.startY = this.win_.scrollY;
+        this.scrollState_.startY = this.win_./*OK*/ scrollY;
         this.scrollOnNextTick_(timestamp);
       });
     }
@@ -161,10 +174,10 @@ export class PageScroller {
    * @return {number}
    */
   calculateOffset_() {
-    const maxOffset = this.win_.innerHeight * this.scrollState_.speedLimit;
+    const maxOffset = this.cachedWinHeight_ * this.scrollState_.speedLimit;
 
     let offset =
-      Math.pow(this.scrollState_.acceleration, 2) * this.win_.innerHeight;
+      Math.pow(this.scrollState_.acceleration, 2) * this.cachedWinHeight_;
 
     offset = Math.min(maxOffset, offset);
 
