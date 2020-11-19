@@ -19,7 +19,7 @@ import {htmlFor} from '../../../src/static-template';
 
 const buildLogsTabTemplate = (element) => {
   const html = htmlFor(element);
-  return html`<div class="i-amphtml-dev-tools-iframe i-amphtml-dev-tools-tab">
+  return html`<div class="i-amphtml-story-dev-tools-iframe i-amphtml-story-dev-tools-tab">
       <iframe frameborder="0">
     </div>`;
 };

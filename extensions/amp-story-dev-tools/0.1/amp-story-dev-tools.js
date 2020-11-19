@@ -50,9 +50,9 @@ const fontsToLoad = [
 const buildContainerTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-dev-tools-container">
-      <div class="i-amphtml-dev-tools-header">
-        <span class="i-amphtml-dev-tools-brand">
+    <div class="i-amphtml-story-dev-tools-container">
+      <div class="i-amphtml-story-dev-tools-header">
+        <span class="i-amphtml-story-dev-tools-brand">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="30"
@@ -74,27 +74,31 @@ const buildContainerTemplate = (element) => {
               fill="#202125"
             />
           </svg>
-          <span class="i-amphtml-dev-tools-brand-text">
+          <span class="i-amphtml-story-dev-tools-brand-text">
             <span>WEB STORIES</span>
             <span>DEV - TOOLS</span>
           </span>
         </span>
-        <div class="i-amphtml-dev-tools-tabs"></div>
-        <svg
-          title="Close dev tools"
-          class="i-amphtml-dev-tools-close"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="white"
-          width="18px"
-          height="18px"
+        <div class="i-amphtml-story-dev-tools-tabs"></div>
+        <div
+          class="i-amphtml-story-dev-tools-button i-amphtml-story-dev-tools-close"
         >
-          <path
-            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-          />
-        </svg>
+          <span>OPEN STORY</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+          >
+            <path
+              d="M9.9165 4.08333L9.094 4.90583L10.599 6.41667H4.6665V7.58333H10.599L9.094 9.08833L9.9165 9.91667L12.8332 7L9.9165 4.08333ZM2.33317 2.91667H6.99984V1.75H2.33317C1.6915 1.75 1.1665 2.275 1.1665 2.91667V11.0833C1.1665 11.725 1.6915 12.25 2.33317 12.25H6.99984V11.0833H2.33317V2.91667Z"
+              fill="black"
+            />
+          </svg>
+        </div>
       </div>
-      <div class="i-amphtml-dev-tools-tab">
+      <div class="i-amphtml-story-dev-tools-tab">
         <div class="lds-dual-ring"></div>
       </div>
     </div>
@@ -103,13 +107,10 @@ const buildContainerTemplate = (element) => {
 
 const PAGE_SPEED_URL = 'https://amp.dev/page-experience/?url=';
 
-const AMP_TEST_URL = 'https://search.google.com/test/amp?&url=';
-
 /** @enum {string} */
 const DevToolsTab = {
   DEVICES: 'Devices',
   PAGE_SPEED: 'Page Speed',
-  AMP_TEST: 'AMP Test',
   LOGS: 'Logs',
 };
 
@@ -156,17 +157,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
         this.storyUrl_,
         PAGE_SPEED_URL + this.storyUrl_
       ),
-      [DevToolsTab.AMP_TEST]: new DevToolsIframeTab(
-        this.element,
-        this.win,
-        this,
-        this.storyUrl_,
-        AMP_TEST_URL + this.storyUrl_
-      ),
     };
 
     this.errorsCountEl_ = element.ownerDocument.createElement('span');
-    this.errorsCountEl_.classList.add('i-amphtml-dev-tools-error-count');
 
     this.loadFonts_();
   }
@@ -175,7 +168,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   buildCallback() {
     // Create tabs on navbar.
     const tabsContainer = this.containerEl_.querySelector(
-      '.i-amphtml-dev-tools-tabs'
+      '.i-amphtml-story-dev-tools-tabs'
     );
     Object.values(DevToolsTab).forEach((e) => {
       const tab = this.win.document.createElement('span');
@@ -207,7 +200,19 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @param {number} errorCount
    */
   setErrorCount(errorCount) {
-    this.errorsCountEl_.textContent = errorCount;
+    if (errorCount > 0) {
+      this.errorsCountEl_.textContent = errorCount;
+      this.errorsCountEl_.classList.add(
+        'i-amphtml-story-dev-tools-errors-status'
+      );
+    } else {
+      console.log(this.errorsCountEl_);
+      this.errorsCountEl_.appendChild(htmlFor(
+        this.element
+      )`<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" class="i-amphtml-story-dev-tools-errors-status">
+          <path d="M7 0C3.136 0 0 3.136 0 7C0 10.864 3.136 14 7 14C10.864 14 14 10.864 14 7C14 3.136 10.864 0 7 0ZM5.6 10.5L2.8 7.7L3.78 6.72L5.6 8.54L10.22 3.92L11.2 4.9L5.6 10.5Z" fill="#2DE661"/>
+        </svg>`);
+    }
   }
 
   /**
@@ -262,7 +267,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     const container = buildContainerTemplate(this.element);
     this.element.appendChild(container);
     this.element
-      .querySelector('.i-amphtml-dev-tools-close')
+      .querySelector('.i-amphtml-story-dev-tools-close')
       .addEventListener('click', () => {
         this.closeDevTools_();
       });
@@ -276,12 +281,12 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   switchTab_(tab) {
     this.currentTab_ = tab;
     toArray(
-      this.element.querySelectorAll('.i-amphtml-dev-tools-tab')
+      this.element.querySelectorAll('.i-amphtml-story-dev-tools-tab')
     ).forEach((e) => e.remove());
     this.containerEl_.appendChild(this.tabContents_[tab].getElement());
     this.tabContents_[tab].onTabAttached();
     toArray(
-      this.element.querySelector('.i-amphtml-dev-tools-tabs').children
+      this.element.querySelector('.i-amphtml-story-dev-tools-tabs').children
     ).forEach((e) => {
       return e.toggleAttribute('active', e.tabName === tab);
     });

@@ -16,6 +16,7 @@
 
 import {AmpStoryDevToolsTab} from './amp-story-dev-tools-tab';
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -116,10 +117,20 @@ export const ALL_SCREEN_SIZES = [
   },
 ];
 
+const BEST_PRACTICES_URL =
+  'https://developers.google.com/search/docs/guides/web-stories-creation-best-practices';
+
+const LEARN_MORE_WEBSTORIES_URL = 'https://amp.dev/about/stories/';
+
+const AMP_TEST_URL = 'https://search.google.com/test/amp?&url=';
+
+const WEBSTORIES_GOOGLE_URL =
+  'https://developers.google.com/search/docs/guides/enable-web-stories';
+
 const buildDevicesTabTemplate = (element) => {
   const html = htmlFor(element);
   return html`<div
-    class="i-amphtml-dev-tools-devices i-amphtml-dev-tools-tab"
+    class="i-amphtml-story-dev-tools-devices i-amphtml-story-dev-tools-tab"
   ></div>`;
 };
 
@@ -131,15 +142,15 @@ const buildDevicesTabTemplate = (element) => {
 const buildDeviceTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-dev-tools-device">
-      <div class="i-amphtml-dev-tools-device-screen">
-        <div class="i-amphtml-dev-tools-device-specs"></div>
-        <div class="i-amphtml-dev-tools-device-name"></div>
+    <div class="i-amphtml-story-dev-tools-device">
+      <div class="i-amphtml-story-dev-tools-device-screen">
+        <div class="i-amphtml-story-dev-tools-device-specs"></div>
+        <div class="i-amphtml-story-dev-tools-device-name"></div>
         <div class="lds-dual-ring"></div>
         <amp-story-player width="1" height="1" layout="fixed">
           <a></a>
         </amp-story-player>
-        <div class="i-amphtml-dev-tools-device-footer">
+        <div class="i-amphtml-story-dev-tools-device-footer">
           <div></div>
         </div>
       </div>
@@ -148,18 +159,18 @@ const buildDeviceTemplate = (element) => {
 };
 
 /**
- * Generates the template for a device.
+ * Generates the template for a device chip.
  * @param {!Element} element
  * @return {!Element}
  */
 const buildDeviceChipTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <span class="i-amphtml-dev-tools-device-chip">
+    <span class="i-amphtml-story-dev-tools-device-chip">
       <span>Name</span>
       <svg
         title="cross"
-        class="i-amphtml-dev-tools-device-remove"
+        class="i-amphtml-story-dev-tools-device-remove"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="white"
@@ -175,30 +186,161 @@ const buildDeviceChipTemplate = (element) => {
 };
 
 /**
- * Generates the template for a device.
+ * Generates the template for a help button.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildHelpButtonTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <span class="i-amphtml-story-dev-tools-button">
+      <span>HELP</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 8 14"
+        fill="none"
+      >
+        <path
+          d="M2.97362 9.56098V8.7832C2.97362 8.15086 3.10152 7.61969 3.35731 7.1897C3.61311 6.74706 4.05436 6.25384 4.68106 5.71003C5.06475 5.36856 5.3717 5.05239 5.60192 4.76152C5.83213 4.458 5.94724 4.08491 5.94724 3.64228C5.94724 3.1617 5.77458 2.757 5.42926 2.42818C5.09672 2.09937 4.6235 1.93496 4.00959 1.93496C3.39568 1.93496 2.91607 2.11834 2.57074 2.4851C2.22542 2.83921 1.98241 3.22493 1.84173 3.64228L0 2.88347C0.140687 2.45348 0.377298 2.01716 0.709832 1.57453C1.04237 1.11924 1.47722 0.746161 2.01439 0.455285C2.56435 0.151762 3.22302 0 3.99041 0C4.78337 0 5.48042 0.158085 6.08154 0.474255C6.69544 0.790425 7.16867 1.22042 7.5012 1.76423C7.83373 2.29539 8 2.90244 8 3.58537C8 4.09124 7.90408 4.5402 7.71223 4.93225C7.53317 5.3243 7.30296 5.67209 7.02158 5.97561C6.753 6.27913 6.49081 6.55104 6.23501 6.79133C5.81295 7.17073 5.51239 7.51852 5.33333 7.83469C5.15428 8.15086 5.06475 8.54291 5.06475 9.01084V9.56098H2.97362ZM4.00959 14C3.60032 14 3.255 13.8609 2.97362 13.5827C2.70504 13.3044 2.57074 12.9693 2.57074 12.5772C2.57074 12.1852 2.70504 11.85 2.97362 11.5718C3.255 11.2936 3.60032 11.1545 4.00959 11.1545C4.40608 11.1545 4.73861 11.2936 5.00719 11.5718C5.28857 11.85 5.42926 12.1852 5.42926 12.5772C5.42926 12.9693 5.28857 13.3044 5.00719 13.5827C4.73861 13.8609 4.40608 14 4.00959 14Z"
+          fill="black"
+        />
+      </svg>
+    </span>
+  `;
+};
+
+/**
+ * Generates the template for the help dialog.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildHelpPopupTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-dev-tools-device-popup-bg">
+      <div class="i-amphtml-story-dev-tools-device-popup-container">
+        <h1>Quick tip</h1>
+        <div class="i-amphtml-story-dev-tools-device-popup-help-tips">
+          <p>
+            You can simply add #development=1 to the end of your Web Story URL
+            to access the Web Stories Dev-Tools.
+          </p>
+          <span>https://yourstory.com<b>#development=1</b></span>
+        </div>
+        <h1>Helpful links</h1>
+        <a
+          target="_blank"
+          href="https://developers.google.com/search/docs/guides/web-stories-creation-best-practices"
+          >Best practices for creating Web Stories
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+          >
+            <path
+              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
+              fill="white"
+            /></svg
+        ></a>
+        <a target="_blank" href="https://amp.dev/about/stories/"
+          >Learn more about Web Stories<svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+          >
+            <path
+              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
+              fill="white"
+            /></svg
+        ></a>
+        <a
+          target="_blank"
+          href="https://search.google.com/test/amp?url="
+          class="i-amphtml-story-dev-tools-help-search-preview-link"
+          >Web Stories Google Search Preview Tool<svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+          >
+            <path
+              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
+              fill="white"
+            /></svg
+        ></a>
+        <a
+          target="_blank"
+          href="https://developers.google.com/search/docs/guides/enable-web-stories"
+          >Web Stories on Google<svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+          >
+            <path
+              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
+              fill="white"
+            /></svg
+        ></a>
+        <svg
+          title="cross"
+          class="i-amphtml-story-dev-tools-device-popup-close"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="white"
+          width="18px"
+          height="18px"
+        >
+          <path
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+          />
+        </svg>
+      </div>
+    </div>
+  `;
+};
+
+/**
+ * Generates the template for the add device dialog.
  * @param {!Element} element
  * @return {!Element}
  */
 const buildAddDevicePopupTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-dev-tools-device-popup-bg">
-      <div class="i-amphtml-dev-tools-device-popup-container">
-      <svg
-      title="cross"
-      class="i-amphtml-dev-tools-device-popup-close"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="white"
-      width="18px"
-      height="18px"
-    >
-      <path
-        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-      />
-    </svg>
+    <div class="i-amphtml-story-dev-tools-device-popup-bg">
+      <div
+        class="i-amphtml-story-dev-tools-device-popup-container i-amphtml-story-dev-tools-device-popup-add-devices"
+      >
+        <h1>Mobile</h1>
+        <div class="i-amphtml-story-dev-tools-device-popup-mobile"></div>
+        <h1>Tablet</h1>
+        <div class="i-amphtml-story-dev-tools-device-popup-tablet"></div>
+        <h1>Desktop</h1>
+        <div class="i-amphtml-story-dev-tools-device-popup-desktop"></div>
+        <svg
+          title="cross"
+          class="i-amphtml-story-dev-tools-device-popup-close"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="white"
+          width="18px"
+          height="18px"
+        >
+          <path
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+          />
+        </svg>
       </div>
-    </span>
+    </div>
   `;
 };
 
@@ -241,15 +383,16 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
     this.element.textContent = '';
     const chipListContainer = this.element.ownerDocument.createElement('div');
     chipListContainer.classList.add(
-      'i-amphtml-dev-tools-device-chips-container'
+      'i-amphtml-story-dev-tools-device-chips-container'
     );
     this.element.appendChild(chipListContainer);
 
     const chipList = this.element.ownerDocument.createElement('span');
-    chipList.classList.add('i-amphtml-dev-tools-device-chips');
+    chipList.classList.add('i-amphtml-story-dev-tools-device-chips');
     chipListContainer.appendChild(chipList);
 
     chipListContainer.appendChild(this.buildAddDeviceButton_());
+    chipListContainer.appendChild(this.buildHelpButton_());
 
     const devicesList = this.devices_;
     this.devices_ = [];
@@ -266,10 +409,26 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
    */
   buildAddDeviceButton_() {
     const addDeviceButton = buildDeviceChipTemplate(this.element);
-    addDeviceButton.classList.add('i-amphtml-dev-tools-add-device');
+    addDeviceButton.classList.add('i-amphtml-story-dev-tools-add-device');
     addDeviceButton.querySelector('span').textContent = 'ADD DEVICE';
     addDeviceButton.addEventListener('click', () => {
       this.showAddDevicePopup_();
+    });
+    return addDeviceButton;
+  }
+
+  /**
+   * Builds the add device button
+   * @private
+   * @return {!Element}
+   */
+  buildHelpButton_() {
+    const addDeviceButton = buildHelpButtonTemplate(this.element);
+    addDeviceButton.classList.add('i-amphtml-story-dev-tools-button');
+    addDeviceButton.classList.add('i-amphtml-story-dev-tools-help');
+    addDeviceButton.querySelector('span').textContent = 'HELP';
+    addDeviceButton.addEventListener('click', () => {
+      this.showHelpPopup_();
     });
     return addDeviceButton;
   }
@@ -283,10 +442,10 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
   createDeviceLayout_(device) {
     const deviceLayout = buildDeviceTemplate(this.element);
     deviceLayout.querySelector(
-      '.i-amphtml-dev-tools-device-name'
+      '.i-amphtml-story-dev-tools-device-name'
     ).textContent = device.name ? device.name : 'Custom device';
     deviceLayout.querySelector(
-      '.i-amphtml-dev-tools-device-specs'
+      '.i-amphtml-story-dev-tools-device-specs'
     ).textContent = `${device.width} x ${device.height}`;
     const devicePlayer = deviceLayout.querySelector('amp-story-player');
     devicePlayer.setAttribute('width', device.width);
@@ -300,7 +459,7 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
       height: device.height + 'px',
     });
     setStyles(
-      deviceLayout.querySelector('.i-amphtml-dev-tools-device-screen'),
+      deviceLayout.querySelector('.i-amphtml-story-dev-tools-device-screen'),
       {
         height: device.deviceHeight
           ? device.deviceHeight + 'px'
@@ -341,7 +500,7 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
       this.updateDevicesInHash_();
     });
     this.element
-      .querySelector('.i-amphtml-dev-tools-device-chips')
+      .querySelector('.i-amphtml-story-dev-tools-device-chips')
       .appendChild(deviceChip);
     return deviceChip;
   }
@@ -412,7 +571,7 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
       (this.element./*OK*/ clientWidth - sumDeviceWidths * scale) /
       (this.devices_.length + 1);
     toArray(
-      this.element.querySelectorAll('.i-amphtml-dev-tools-device')
+      this.element.querySelectorAll('.i-amphtml-story-dev-tools-device')
     ).forEach((deviceLayout, i) => {
       const deviceSpecs = this.devices_[i];
       const scaleWidthChange = deviceSpecs.width * (scale - 1) * 0.5; // Accounts for width change on scaling
@@ -432,17 +591,23 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
    * @private
    */
   showAddDevicePopup_() {
-    this.element.classList.add('i-amphtml-dev-tools-tab-blurred');
     const popup = buildAddDevicePopupTemplate(this.element);
     popup
-      .querySelector('.i-amphtml-dev-tools-device-popup-close')
+      .querySelector('.i-amphtml-story-dev-tools-device-popup-close')
       .addEventListener('click', () => {
-        popup.remove();
-        this.element.classList.remove('i-amphtml-dev-tools-tab-blurred');
+        setTimeout(() => {
+          popup.remove();
+        }, 200);
+        popup.removeAttribute('active');
       });
-    const chipsContainer = popup.querySelector(
-      '.i-amphtml-dev-tools-device-popup-container'
-    );
+    const sections = ['mobile', 'tablet', 'desktop'].reduce((obj, section) => {
+      obj[section] = popup.querySelector(
+        `.i-amphtml-story-dev-tools-device-popup-${escapeCssSelectorIdent(
+          section
+        )}`
+      );
+      return obj;
+    }, {});
     ALL_SCREEN_SIZES.forEach((device) => {
       const deviceChip = buildDeviceChipTemplate(this.element);
       let correspondingDevice = this.devices_.find(
@@ -465,9 +630,45 @@ export class DevToolsDevicesTab extends AmpStoryDevToolsTab {
           this.updateDevicesInHash_();
         }
       });
-      chipsContainer.appendChild(deviceChip);
+      let chipSection = sections['mobile'];
+      if (device.width / device.height > 1) {
+        chipSection = sections['desktop'];
+      } else if (device.width / device.height > 0.75) {
+        chipSection = sections['tablet'];
+      }
+      chipSection.appendChild(deviceChip);
     });
+
+    // Add popup to screen.
     this.element.appendChild(popup);
+    setTimeout(() => {
+      popup.setAttribute('active', '');
+    }, 1);
+  }
+
+  /**
+   * @private
+   */
+  showHelpPopup_() {
+    const popup = buildHelpPopupTemplate(this.element);
+    popup
+      .querySelector('.i-amphtml-story-dev-tools-device-popup-close')
+      .addEventListener('click', () => {
+        setTimeout(() => {
+          popup.remove();
+        }, 200);
+        popup.removeAttribute('active');
+      });
+
+    popup.querySelector(
+      '.i-amphtml-story-dev-tools-help-search-preview-link'
+    ).href += this.storyUrl_;
+
+    // Add popup to screen
+    this.element.appendChild(popup);
+    setTimeout(() => {
+      popup.setAttribute('active', '');
+    }, 1);
   }
 }
 

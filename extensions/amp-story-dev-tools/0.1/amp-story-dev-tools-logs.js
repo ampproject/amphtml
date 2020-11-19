@@ -23,22 +23,24 @@ import {urls} from '../../../src/config';
 
 const buildLogsTabTemplate = (element) => {
   const html = htmlFor(element);
-  return html`<div class="i-amphtml-dev-tools-logs i-amphtml-dev-tools-tab">
+  return html`<div
+    class="i-amphtml-story-dev-tools-logs i-amphtml-story-dev-tools-tab"
+  >
     <h1>Logs</h1>
   </div>`;
 };
 
 const buildLogMessageTemplate = (element) => {
   const html = htmlFor(element);
-  return html`<div class="i-amphtml-dev-tools-log-message">
+  return html`<div class="i-amphtml-story-dev-tools-log-message">
     <div>
-      <span class="i-amphtml-dev-tools-log-type"></span>
+      <span class="i-amphtml-story-dev-tools-log-type"></span>
       <span> at </span>
-      <span class="i-amphtml-dev-tools-log-position"></span>
+      <span class="i-amphtml-story-dev-tools-log-position"></span>
     </div>
-    <span class="i-amphtml-dev-tools-log-description"></span>
-    <a class="i-amphtml-dev-tools-log-spec" target="_blank">Learn more</a>
-    <pre class="i-amphtml-dev-tools-log-code"></pre>
+    <span class="i-amphtml-story-dev-tools-log-description"></span>
+    <a class="i-amphtml-story-dev-tools-log-spec" target="_blank">Learn more</a>
+    <pre class="i-amphtml-story-dev-tools-log-code"></pre>
   </div>`;
 };
 
@@ -70,20 +72,24 @@ export class DevToolsLogTab extends AmpStoryDevToolsTab {
   addLog_(content) {
     const {code, line, col, specUrl, lineContent, message} = content;
     const logEl = buildLogMessageTemplate(this.element);
-    logEl.querySelector('.i-amphtml-dev-tools-log-type').textContent = code;
-    const codeEl = logEl.querySelector('.i-amphtml-dev-tools-log-code');
+    logEl.querySelector(
+      '.i-amphtml-story-dev-tools-log-type'
+    ).textContent = code;
+    const codeEl = logEl.querySelector('.i-amphtml-story-dev-tools-log-code');
     lineContent.forEach((l, i) => {
       const lineEl = this.element.ownerDocument.createElement('div');
       lineEl.textContent = (i + line - 1).toString() + '|' + l;
       codeEl.appendChild(lineEl);
     });
     logEl.querySelector(
-      '.i-amphtml-dev-tools-log-position'
+      '.i-amphtml-story-dev-tools-log-position'
     ).textContent = `${line}:${col}`;
     logEl.querySelector(
-      '.i-amphtml-dev-tools-log-description'
+      '.i-amphtml-story-dev-tools-log-description'
     ).textContent = message;
-    const specUrlElement = logEl.querySelector('.i-amphtml-dev-tools-log-spec');
+    const specUrlElement = logEl.querySelector(
+      '.i-amphtml-story-dev-tools-log-spec'
+    );
     if (specUrl) {
       specUrlElement.href = specUrl;
     } else {
