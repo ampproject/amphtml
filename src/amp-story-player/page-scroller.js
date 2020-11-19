@@ -36,9 +36,6 @@ export class PageScroller {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {number} */
-    this.cachedWinHeight_ = null;
-
     /** @private {!Object} */
     this.touchEventState_ = {
       startY: 0,
@@ -77,8 +74,6 @@ export class PageScroller {
     this.touchEventState_.startY = startY;
     this.touchEventState_.touchStartTimeMs = timeStamp;
     this.scrollState_.startY = this.win_./*OK*/ scrollY;
-    this.cachedWinHeight_ =
-      this.cachedWinHeight_ || this.win_./*OK*/ innerHeight;
 
     if (
       this.scrollState_.isRunning &&
@@ -126,7 +121,7 @@ export class PageScroller {
       return;
     }
 
-    this.win_.scrollBy(0, -this.scrollState_.deltaY);
+    this.win_./*OK*/ scrollBy(0, -this.scrollState_.deltaY);
   }
 
   /**
@@ -152,7 +147,7 @@ export class PageScroller {
     ) {
       // If timefromLastTouchMove is low enough and the offset is above the
       // threshold, (re)set the scroll parameters to include momentum.
-      this.scrollState_.durationMs = this.cachedWinHeight_ * 1.2;
+      this.scrollState_.durationMs = this.win_./*OK*/ innerHeight * 1.2;
       this.scrollState_.isRunning = true;
 
       requestAnimationFrame((timestamp) => {
@@ -174,10 +169,12 @@ export class PageScroller {
    * @return {number}
    */
   calculateOffset_() {
-    const maxOffset = this.cachedWinHeight_ * this.scrollState_.speedLimit;
+    const maxOffset =
+      this.win_./*OK*/ innerHeight * this.scrollState_.speedLimit;
 
     let offset =
-      Math.pow(this.scrollState_.acceleration, 2) * this.cachedWinHeight_;
+      Math.pow(this.scrollState_.acceleration, 2) *
+      this.win_./*OK*/ innerHeight;
 
     offset = Math.min(maxOffset, offset);
 
