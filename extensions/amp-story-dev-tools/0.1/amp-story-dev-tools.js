@@ -169,10 +169,6 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     Object.values(DevToolsTab).forEach((e) => {
       const tab = this.win.document.createElement('span');
       tab.textContent = e;
-      if (e == DevToolsTab.LOGS) {
-        tab.appendChild(this.errorsCountEl_);
-      }
-      tab.tabName = e;
       tab.addEventListener('click', () => {
         if (this.currentTab_ != e) {
           this.switchTab_(e);
@@ -199,7 +195,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     toArray(
       this.element.querySelector('.i-amphtml-story-dev-tools-tabs').children
     ).forEach((e) => {
-      return e.toggleAttribute('active', e.tabName === tab);
+      return e.toggleAttribute('active', e.textContent === tab);
     });
 
     // Remove old tab and replace with new one
