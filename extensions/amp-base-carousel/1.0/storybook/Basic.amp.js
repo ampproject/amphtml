@@ -42,6 +42,11 @@ export const Default = () => {
   const visibleCount = text('visible count', '(min-width: 400px) 2, 1');
   const outsetArrows = text('outset arrows', '(min-width: 400px) true, false');
   const controls = select('show controls', ['auto', 'always', 'never']);
+  const orientation = select(
+    'orientation',
+    ['horizontal', 'vertical'],
+    'vertical'
+  );
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
 
@@ -55,20 +60,20 @@ export const Default = () => {
         auto-advance-interval={autoAdvanceInterval}
         auto-advance-loops={autoAdvanceLoops}
         controls={controls}
+        orientation={orientation}
         outset-arrows={outsetArrows}
-        width="880"
-        height="225"
+        width="450"
+        height="450"
         snap={String(snap)}
         snap-align={snapAlign}
         snap-by={snapBy}
         loop={loop}
-        layout="responsive"
         visible-count={visibleCount}
       >
         {Array.from({length: slideCount}, (x, i) => {
           const v = colorIncrement * (i + 1);
           return (
-            <amp-layout width="440" height="225" layout="responsive">
+            <amp-layout width="225" height="225" layout="responsive">
               <div
                 style={{
                   backgroundColor: `rgb(${v}, 100, 100)`,

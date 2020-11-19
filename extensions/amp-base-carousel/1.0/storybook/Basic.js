@@ -49,12 +49,17 @@ function CarouselWithActions(props) {
 }
 
 export const _default = () => {
-  const width = number('width', 440);
-  const height = number('height', 225);
+  const width = number('width', 225);
+  const height = number('height', 440);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const snap = boolean('snap', true);
   const snapAlign = select('snap alignment', SNAP_ALIGN, 'start');
   const snapBy = number('snap by', 1);
+  const orientation = select(
+    'orientation',
+    ['horizontal', 'vertical'],
+    'vertical'
+  );
   const loop = boolean('loop', true);
   const advanceCount = number('advance count', 1, {min: 1});
   const visibleCount = number('visible count', 2, {min: 1});
@@ -66,6 +71,7 @@ export const _default = () => {
       advanceCount={advanceCount}
       controls={controls}
       loop={loop}
+      orientation={orientation}
       outsetArrows={outsetArrows}
       snap={snap}
       snapAlign={snapAlign}
@@ -83,7 +89,7 @@ export const _default = () => {
               height,
               textAlign: 'center',
               fontSize: '48pt',
-              lineHeight: height + 'px',
+              lineHeight: height / visibleCount + 'px',
             }}
           >
             {i}
