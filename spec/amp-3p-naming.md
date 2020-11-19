@@ -27,7 +27,7 @@ Since third-party services are usually bundled as a product, the component must 
 
 **Exception**: Brand name may be confused with a component that's generic
 
-Let's imagine a service named **_Toast.io_**. Regardless of what the service provides, naming a component for this service "`<amp-toast>`" would be bad, since it can be confused for the generic term for [a "toast" component](https://google.com/serch?q=toast+component). In this case, the name must communicate that it's a third-party embed:
+Let's imagine a service named **_Toast.io_**. Regardless of what the service provides, naming a component for this service "`<amp-toast>`" would be bad, since it can be confused for the generic term for [a "toast" component](https://google.com/search?q=toast+component). In this case, the name must communicate that it's a third-party embed:
 
 - ❌ This is **not OK**: `<amp-toast>`
 - ✅ This is **OK**: `<amp-embed-toast>`
