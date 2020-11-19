@@ -25,12 +25,25 @@ export const INTERSECT_RESOURCES_EXP = {
 };
 
 /**
+ * Determine if browser supports IntersectionObserver
+ * @return {boolean}
+ */
+function supportsIntersectionObserver() {
+  try {
+    new IntersectionObserver(() => {}, {root: document});
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
  * Select exp vs control for intersect-resources.
  * @param {!Window} win
  */
 export function divertIntersectResources(win) {
-  // We shouldn't report metrics for email as it is opted out.
-  if (isAmp4Email(win.document)) {
+  // Only record metrics for inOb eligible browsers. AMP4Email always falls back.
+  if (isAmp4Email(win.document) || !supportsIntersectionObserver()) {
     return;
   }
   const expInfoList = /** @type {!Array<!../experiments.ExperimentInfo>} */ ([
