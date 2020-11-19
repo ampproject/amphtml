@@ -202,6 +202,7 @@ function VideoWrapperWithRef(
         }}
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        onError={() => readyDeferred.reject()}
         style={fillStretch}
       >
         {sources}

@@ -59,39 +59,38 @@ class AmpVideoIframe extends VideoBaseElement {}
  */
 const onMessage = (e) => {
   const {currentTarget} = e;
-  const method = e.data?.method;
-  const messageId = e.data?.id;
+  const method = e.data && e.data['method'];
+  const messageId = e.data && e.data['id'];
   if (method) {
     if (method == 'getIntersection') {
-      getIntersectionRatioMinAutoplay(currentTarget).then(
-        (intersectionRatio) => {
-          currentTarget.contentWindow./*OK*/ postMessage(
-            JSON.stringify(
-              dict({
-                'id': messageId,
-                'intersectionRatio': intersectionRatio,
-              })
-            )
-          );
-        }
-      );
+      getIntersectionRatioMinAutoplayFactory(
+        currentTarget.ownerDocument.parentWindow
+      )(currentTarget).then((intersectionRatio) => {
+        currentTarget.contentWindow./*OK*/ postMessage(
+          JSON.stringify(
+            dict({
+              'id': messageId,
+              'intersectionRatio': intersectionRatio,
+            })
+          )
+        );
+      });
       return;
     }
     throw new Error(`Unknown method ${method}`);
   }
-  const event = e.data?.event;
+  const event = e.data && e.data['event'];
   if (!event) {
     return;
   }
   if (event === 'analytics') {
-    // TODO
+    // TODO(alanorozco): In classic AMP, this is an indirect chain of:
+    // VideoEvents.CUSTOM_TICK -> VideoAnalyticsEvents.CUSTOM.
+    // VideoManager "massages" the data for this event, adding a prefix.
+    // Whatever the VideoManager does, needs to be refactored.
     return;
   }
-  if (event === 'error') {
-    // TODO
-    return;
-  }
-  if (BUBBLE_MESSAGE_EVENTS.indexOf(event) > -1) {
+  if (event === 'error' || BUBBLE_MESSAGE_EVENTS.indexOf(event) > -1) {
     currentTarget.dispatchEvent(
       createCustomEvent(window, event, /* detail */ null, {
         bubbles: true,
