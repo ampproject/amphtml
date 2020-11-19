@@ -305,6 +305,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private WebGL extension for lost context. */
     this.lostGlContext_ = null;
+
+    /** @private {!Array<number>} */
+    this.rot_ = null;
   }
 
   /** @override */
@@ -576,7 +579,11 @@ export class AmpStory360 extends AMP.BaseElement {
     );
     rot = Matrix.mul(3, Matrix.rotation(3, 2, 1, deg2rad(e.beta)), rot);
     rot = Matrix.mul(3, Matrix.rotation(3, 0, 2, deg2rad(e.gamma)), rot);
-    this.renderer_.setCamera(rot, 1);
+
+    // Smoothen sensor data by averaging previous and next rotation matrix values.
+    this.rot_ = this.rot_ ? rot.map((val, i) => (val + this.rot_[i]) / 2) : rot;
+
+    this.renderer_.setCamera(this.rot_, 1);
     this.renderer_.render(true);
   }
 
