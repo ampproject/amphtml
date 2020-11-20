@@ -34,8 +34,6 @@ export class AmpStoryDevToolsTab extends AMP.BaseElement {
   /** @param {!Element} element */
   constructor(element) {
     super(element);
-    /** @protected {!Element} */
-    this.element = element;
 
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
 

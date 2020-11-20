@@ -108,14 +108,21 @@ const ALL_SCREEN_SIZES = [
 ];
 
 /**
+ * Method that returns lowercase and remove non-alphanumeric, used on matching hashString.
+ * @param {string} name
+ * @return {string}
+ */
+function simplifyDeviceName(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]/gi, '');
+}
+
+/**
  * Get devices from the queryHash into list of devices
  * @param {*} queryHash
  * @return {any[]}
  */
 function parseDevices(queryHash) {
   const screenSizes = [];
-  const simplifyDeviceName = (name) =>
-    name.toLowerCase().replace(/[^a-z0-9]/gi, '');
 
   queryHash['devices'].split(';').forEach((device) => {
     const deviceSpecs = device.split(':');
@@ -129,15 +136,6 @@ function parseDevices(queryHash) {
           currDeviceName.substring(0, specDeviceName.length) == specDeviceName
         );
       });
-    } else {
-      currSpecs = {
-        'width': parseInt(deviceSpecs[0], 10),
-        'height': parseInt(deviceSpecs[1], 10),
-        'custom': true,
-      };
-      if (deviceSpecs.length >= 3) {
-        currSpecs.name = deviceSpecs[2];
-      }
     }
     if (currSpecs) {
       screenSizes.push(currSpecs);
@@ -145,6 +143,19 @@ function parseDevices(queryHash) {
   });
   return screenSizes;
 }
+
+/**
+ * @typedef {{
+ *  element: !Element,
+ *  player: !Element
+ *  chip: !Element,
+ *  width: number,
+ *  height: number,
+ *  deviceHeight: ?number,
+ *  custom: ?boolean,
+ * }}
+ */
+export let DeviceInfo;
 
 export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   /** @param {!Element} element */
@@ -156,6 +167,95 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     /** @private  {string} */
     this.storyUrl_ = element.getAttribute('story-url');
 
-    /** */
+    /** @private {!Array<DeviceInfo>} */
+    this.devices_ = parseDevices(
+      this.element.getAttribute('devices') | DEFAULT_DEVICES
+    );
+  }
+
+  /**
+   * Builds the add device button
+   * @private
+   * @return {!Element}
+   */
+  buildAddDeviceButton_() {
+    const addDeviceButton = buildDeviceChipTemplate(this.element);
+    addDeviceButton.classList.add('i-amphtml-story-dev-tools-add-device');
+    addDeviceButton.querySelector('span').textContent = 'ADD DEVICE';
+    addDeviceButton.addEventListener('click', () => {
+      this.showAddDevicePopup_();
+    });
+    return addDeviceButton;
+  }
+
+  /**
+   * Builds the add device button
+   * @private
+   * @return {!Element}
+   */
+  buildHelpButton_() {
+    const addDeviceButton = buildHelpButtonTemplate(this.element);
+    addDeviceButton.classList.add('i-amphtml-story-dev-tools-button');
+    addDeviceButton.classList.add('i-amphtml-story-dev-tools-help');
+    addDeviceButton.querySelector('span').textContent = 'HELP';
+    addDeviceButton.addEventListener('click', () => {
+      this.showHelpPopup_();
+    });
+    return addDeviceButton;
+  }
+
+  /**
+   * Creates a device layout for preview
+   * @private
+   * @param {DeviceInfo} device
+   * @return {!Element}
+   */
+  createDeviceLayout_(device) {
+    const deviceLayout = buildDeviceTemplate(this.element);
+    deviceLayout.querySelector(
+      '.i-amphtml-story-dev-tools-device-name'
+    ).textContent = device.name ? device.name : 'Custom device';
+    deviceLayout.querySelector(
+      '.i-amphtml-story-dev-tools-device-specs'
+    ).textContent = `${device.width} x ${device.height}`;
+    const devicePlayer = deviceLayout.querySelector('amp-story-player');
+    devicePlayer.setAttribute('width', device.width);
+    devicePlayer.setAttribute('height', device.height);
+    const storyA = devicePlayer.querySelector('a');
+    storyA.textContent = 'Story 1';
+    storyA.href = this.storyUrl_;
+    this.playersManager_.addPlayer(devicePlayer);
+    setStyles(devicePlayer, {
+      width: device.width + 'px',
+      height: device.height + 'px',
+    });
+    setStyles(
+      deviceLayout.querySelector('.i-amphtml-story-dev-tools-device-screen'),
+      {
+        height: device.deviceHeight
+          ? device.deviceHeight + 'px'
+          : 'fit-content',
+      }
+    );
+    device.player = devicePlayer;
+    return deviceLayout;
+  }
+
+  /**
+   * @private
+   */
+  updateDevicesInHash_() {
+    const hashValue = this.devices_
+      .map((device) => {
+        if (device.custom) {
+          return (
+            `${device.width}:${device.height}` +
+            (device.name ? ':' + device.name : '')
+          );
+        }
+        return device.name.toLowerCase().replace(/[^a-z0-9]/gi, '');
+      })
+      .join(';');
+    this.devTools_.updateHash({'devices': hashValue || ''});
   }
 }
