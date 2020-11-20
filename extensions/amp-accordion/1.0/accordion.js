@@ -425,8 +425,11 @@ export function AccordionContent({
     experimentDisplayLocking,
   } = useContext(SectionContext);
   const classes = useStyles();
-  const [contentVisibility, setContentVisibility] = useState(false);
-  const enableDisplayLocking = contentVisibility && experimentDisplayLocking;
+  const [supportsContentVisibility, setSupportsContentVisibility] = useState(
+    false
+  );
+  const enableDisplayLocking =
+    supportsContentVisibility && experimentDisplayLocking;
 
   useEffect(() => {
     hasMountedRef.current = true;
@@ -444,17 +447,17 @@ export function AccordionContent({
       return;
     }
 
-    const supportsContentVisibility = win.CSS.supports(
+    const newSupportsContentVisibility = win.CSS.supports(
       'content-visibility',
       'hidden-matchable'
     );
-    setContentVisibility(supportsContentVisibility);
-    if (!experimentDisplayLocking || !supportsContentVisibility) {
+    setSupportsContentVisibility(newSupportsContentVisibility);
+    if (!experimentDisplayLocking || !newSupportsContentVisibility) {
       return;
     }
 
     const beforeMatchHandler = () => {
-      if (!element.parentElement.hasAttribute('expanded')) {
+      if (element.getAttribute('aria-hidden') === 'true') {
         expandHandler();
       }
     };
@@ -482,9 +485,11 @@ export function AccordionContent({
       {...rest}
       ref={ref}
       className={`${className} ${classes.sectionChild} ${classes.content} ${
-        !expanded ? classes.contentHidden : ''
-      } ${
-        !expanded && enableDisplayLocking ? classes.contentHiddenMatchable : ''
+        !expanded
+          ? enableDisplayLocking
+            ? classes.contentHiddenMatchable
+            : classes.contentHidden
+          : ''
       }`}
       id={contentId}
       aria-labelledby={headerId}
