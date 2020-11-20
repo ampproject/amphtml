@@ -14,21 +14,234 @@
  * limitations under the License.
  */
 
+import {htmlFor} from '../../../src/static-template';
+
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.
  * @param {!Window} win
  * @param {string} storyUrl
- * @param {string} name
+ * @param {?string} devices
  * @return {!Element} the layout
  */
-export function createTabElement(win, storyUrl, name) {
-  const element = win.document.createElement('amp-story-dev-tools-tab');
+export function createTabPreviewElement(win, storyUrl, devices) {
+  const element = win.document.createElement('amp-story-dev-tools-tab-preview');
   element.setAttribute('story-url', storyUrl);
+  devices ? element.setAttribute('devices', devices) : null;
   const innerTitle = win.document.createElement('h1');
   innerTitle.textContent = name;
   element.appendChild(innerTitle);
   return element;
 }
+
+/**
+ * Generates the template for a device.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildDeviceTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-dev-tools-device">
+      <div class="i-amphtml-story-dev-tools-device-screen">
+        <div class="i-amphtml-story-dev-tools-device-specs"></div>
+        <div class="i-amphtml-story-dev-tools-device-name"></div>
+        <div class="lds-dual-ring"></div>
+        <amp-story-player width="1" height="1" layout="fixed">
+          <a></a>
+        </amp-story-player>
+        <div class="i-amphtml-story-dev-tools-device-footer">
+          <div></div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+/**
+ * Generates the template for a device chip.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildDeviceChipTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <span class="i-amphtml-story-dev-tools-device-chip">
+      <span>Name</span>
+      <svg
+        title="cross"
+        class="i-amphtml-story-dev-tools-device-remove"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="white"
+        width="18px"
+        height="18px"
+      >
+        <path
+          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        />
+      </svg>
+    </span>
+  `;
+};
+
+/**
+ * Generates the template for a help button.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildHelpButtonTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <span class="i-amphtml-story-dev-tools-button">
+      <span>HELP</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 8 14"
+        fill="none"
+      >
+        <path
+          d="M2.97362 9.56098V8.7832C2.97362 8.15086 3.10152 7.61969 3.35731 7.1897C3.61311 6.74706 4.05436 6.25384 4.68106 5.71003C5.06475 5.36856 5.3717 5.05239 5.60192 4.76152C5.83213 4.458 5.94724 4.08491 5.94724 3.64228C5.94724 3.1617 5.77458 2.757 5.42926 2.42818C5.09672 2.09937 4.6235 1.93496 4.00959 1.93496C3.39568 1.93496 2.91607 2.11834 2.57074 2.4851C2.22542 2.83921 1.98241 3.22493 1.84173 3.64228L0 2.88347C0.140687 2.45348 0.377298 2.01716 0.709832 1.57453C1.04237 1.11924 1.47722 0.746161 2.01439 0.455285C2.56435 0.151762 3.22302 0 3.99041 0C4.78337 0 5.48042 0.158085 6.08154 0.474255C6.69544 0.790425 7.16867 1.22042 7.5012 1.76423C7.83373 2.29539 8 2.90244 8 3.58537C8 4.09124 7.90408 4.5402 7.71223 4.93225C7.53317 5.3243 7.30296 5.67209 7.02158 5.97561C6.753 6.27913 6.49081 6.55104 6.23501 6.79133C5.81295 7.17073 5.51239 7.51852 5.33333 7.83469C5.15428 8.15086 5.06475 8.54291 5.06475 9.01084V9.56098H2.97362ZM4.00959 14C3.60032 14 3.255 13.8609 2.97362 13.5827C2.70504 13.3044 2.57074 12.9693 2.57074 12.5772C2.57074 12.1852 2.70504 11.85 2.97362 11.5718C3.255 11.2936 3.60032 11.1545 4.00959 11.1545C4.40608 11.1545 4.73861 11.2936 5.00719 11.5718C5.28857 11.85 5.42926 12.1852 5.42926 12.5772C5.42926 12.9693 5.28857 13.3044 5.00719 13.5827C4.73861 13.8609 4.40608 14 4.00959 14Z"
+          fill="black"
+        />
+      </svg>
+    </span>
+  `;
+};
+
+/**
+ * Generates the template for the help dialog.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildHelpPopupTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-dev-tools-device-popup-bg">
+      <div class="i-amphtml-story-dev-tools-device-popup-container">
+        <h1>Quick tip</h1>
+        <div class="i-amphtml-story-dev-tools-device-popup-help-tips">
+          <p>
+            You can simply add #development=1 to the end of your Web Story URL
+            to access the Web Stories Dev-Tools.
+          </p>
+          <span>https://yourstory.com<b>#development=1</b></span>
+        </div>
+        <h1>Helpful links</h1>
+        <a
+          target="_blank"
+          href="https://developers.google.com/search/docs/guides/web-stories-creation-best-practices"
+          >Best practices for creating Web Stories
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+          >
+            <path
+              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
+              fill="white"
+            /></svg
+        ></a>
+        <a target="_blank" href="https://amp.dev/about/stories/"
+          >Learn more about Web Stories<svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+          >
+            <path
+              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
+              fill="white"
+            /></svg
+        ></a>
+        <a
+          target="_blank"
+          href="https://search.google.com/test/amp?url="
+          class="i-amphtml-story-dev-tools-help-search-preview-link"
+          >Web Stories Google Search Preview Tool<svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+          >
+            <path
+              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
+              fill="white"
+            /></svg
+        ></a>
+        <a
+          target="_blank"
+          href="https://developers.google.com/search/docs/guides/enable-web-stories"
+          >Web Stories on Google<svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+          >
+            <path
+              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
+              fill="white"
+            /></svg
+        ></a>
+        <svg
+          title="cross"
+          class="i-amphtml-story-dev-tools-device-popup-close"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="white"
+          width="18px"
+          height="18px"
+        >
+          <path
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+          />
+        </svg>
+      </div>
+    </div>
+  `;
+};
+
+/**
+ * Generates the template for the add device dialog.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildAddDevicePopupTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-dev-tools-device-popup-bg">
+      <div
+        class="i-amphtml-story-dev-tools-device-popup-container i-amphtml-story-dev-tools-device-popup-add-devices"
+      >
+        <h1>Mobile</h1>
+        <div class="i-amphtml-story-dev-tools-device-popup-mobile"></div>
+        <h1>Tablet</h1>
+        <div class="i-amphtml-story-dev-tools-device-popup-tablet"></div>
+        <h1>Desktop</h1>
+        <div class="i-amphtml-story-dev-tools-device-popup-desktop"></div>
+        <svg
+          title="cross"
+          class="i-amphtml-story-dev-tools-device-popup-close"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="white"
+          width="18px"
+          height="18px"
+        >
+          <path
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+          />
+        </svg>
+      </div>
+    </div>
+  `;
+};
 
 const DEFAULT_DEVICES = 'iphone11discover;oneplus5t;pixel2';
 
@@ -172,6 +385,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       this.element.getAttribute('devices') | DEFAULT_DEVICES
     );
   }
+
+  /** @override */
+  buildCallback() {}
 
   /**
    * Builds the add device button

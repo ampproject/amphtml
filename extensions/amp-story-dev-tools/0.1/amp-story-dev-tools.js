@@ -16,6 +16,7 @@
 
 import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
+import {createTabPreviewElement} from './amp-story-dev-tools-tab-preview';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
 import {toArray} from '../../../src/types';
@@ -101,19 +102,22 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    const hashParams = parseQueryString(this.win.location.hash);
+    /** @private {!Object<string, string>} */
+    this.hashParams_ = parseQueryString(this.win.location.hash);
 
     this.win.document.title = `Story Dev-Tools (${this.win.document.title})`;
 
     // TODO: Remove support for url queryParam when widely available.
     /** @private {string} */
-    this.storyUrl_ = hashParams['url'] || this.win.location.href.split('#')[0];
+    this.storyUrl_ =
+      this.hashParams_['url'] || this.win.location.href.split('#')[0];
 
     /** @private {!DevToolsTab} get URL param for tab (eg: #tab=page-experience) or default to PREVIEW*/
     this.currentTab_ =
-      (hashParams['tab']
+      (this.hashParams_['tab']
         ? Object.values(DevToolsTab).find(
-            (tab) => tab.toLowerCase().replace(' ', '-') === hashParams['tab']
+            (tab) =>
+              tab.toLowerCase().replace(' ', '-') === this.hashParams_['tab']
           )
         : null) || DevToolsTab.PREVIEW;
 
@@ -153,7 +157,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       tabSelector.classList.add('i-amphtml-story-dev-tools-tab-selector');
       tabSelector.setAttribute('data-tab', tabTitle);
       tabSelector.textContent = tabTitle;
-      this.tabSelectors_.append(tabSelector);
+      this.tabSelectors_.push(tabSelector);
       tabsContainer.appendChild(tabSelector);
     });
   }
@@ -190,13 +194,19 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @private
    */
   buildTabs_() {
-    this.tabContents_ = Object.values(DevToolsTab).reduce(
-      (tabContents, tab) => {
-        tabContents[tab] = createTabElement(this.win, this.storyUrl_, tab);
-        return tabContents;
-      },
-      {}
+    this.tabContents_[DevToolsTab.PREVIEW] = createTabPreviewElement(
+      this.win,
+      this.storyUrl_,
+      this.hashParams_['devices']
     );
+
+    // Object.values(DevToolsTab).reduce(
+    //   (tabContents, tab) => {
+    //     tabContents[tab] = createTabElement(this.win, this.storyUrl_, tab);
+    //     return tabContents;
+    //   },
+    //   {}
+    // );
   }
 
   /**
