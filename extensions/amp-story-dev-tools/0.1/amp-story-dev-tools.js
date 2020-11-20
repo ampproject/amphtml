@@ -18,7 +18,6 @@ import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
-import {toArray} from '../../../src/types';
 import {updateHash} from './utils';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
