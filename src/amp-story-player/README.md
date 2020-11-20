@@ -409,11 +409,9 @@ This new API is still a work in progress, and will send more information when it
 
 ## Additional use case demos
 
-Circle entry point + scrolling + lightbox:
-https://codepen.io/maenrique/pen/rNLyqXg
+<a href="https://codepen.io/maenrique/pen/rNLyqXg" target="_blank" rel="noopener noreferrer">Circle entry point + scrolling + lightbox</a>
 
-Card entry point + scrolling + lightbox
-https://codepen.io/maenrique/pen/WNxpPqJ
+<a href="https://codepen.io/maenrique/pen/WNxpPqJ" target="_blank" rel="noopener noreferrer">Card entry point + scrolling + lightbox</a>
 
 ## Additional explorations and roadmap
 
