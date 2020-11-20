@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {Axis} from '../0.1/dimensions';
-import {debounce} from '../../../src/utils/rate-limit';
 import {
+  Axis,
   findOverlappingIndex,
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
 } from './dimensions';
+import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
