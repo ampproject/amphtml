@@ -72,6 +72,7 @@ export function Thumbnails({
       className={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
+      snapAlign="center"
       controls={pointerFine ? 'always' : 'never'}
       loop={loop}
       ref={ref}

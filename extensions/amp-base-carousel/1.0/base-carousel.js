@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
+import {Alignment} from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
@@ -77,6 +78,7 @@ function BaseCarouselWithRef(
     onTouchStart,
     outsetArrows,
     snap = true,
+    snapAlign = Alignment.START,
     snapBy = 1,
     visibleCount = 1,
     _thumbnails = false,
@@ -229,6 +231,7 @@ function BaseCarouselWithRef(
       )}
       <Scroller
         advanceCount={advanceCount}
+        alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
         loop={loop}
         mixedLength={mixedLength}

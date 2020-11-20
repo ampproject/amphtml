@@ -49,6 +49,7 @@ export function StreamGallery(props) {
     minVisibleCount = 1,
     outsetArrows,
     peek = 0,
+    slideAlign = 'start',
     snap,
     ...rest
   } = props;
@@ -124,6 +125,7 @@ export function StreamGallery(props) {
       loop={loop}
       outsetArrows={outsetArrows}
       snap={snap}
+      snapAlign={slideAlign}
       ref={ref}
       visibleCount={visibleCount}
       {...rest}
