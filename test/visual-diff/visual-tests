@@ -800,14 +800,6 @@
       "no_base_test": true
     },
     {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 2a9df8b8d (Merge)
-=======
->>>>>>> 76cc4b917 (Merge)
       "url": "examples/visual-tests/amp-carousel/amp-carousel.html",
       "name": "amp-carousel",
       "loading_complete_delay_ms": 2000,
@@ -817,28 +809,18 @@
       "name": "amp-carousel-slides",
       "loading_complete_delay_ms": 2000,
     },
-<<<<<<< HEAD
     {
       "url": "examples/visual-tests/amp-story/basic-transformed.html",
       "name": "amp-story: basic example transformed with toolbox-optimizer",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [".i-amphtml-story-loaded"]
     },
-=======
-=======
-=======
-      // TODO(#22070, @ampproject/wg-stories): Identify signal of first WebGL render.
-      "flaky": true,
->>>>>>> f6794bc92 (Timeout for image to render.)
->>>>>>> 2a9df8b8d (Merge)
-      "url": "examples/visual-tests/amp-story/amp-story-360.html",
-=======
+    {
       "url": "examples/visual-tests/amp-story/amp-story-360-image.html",
->>>>>>> 9f1a8a1f1 (Video visual diff. Add class for loading_complete_selector.)
       "name": "amp-story-360: 360 image rendering",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".amp-story-360-rendered",
+        ".amp-story-360-loaded",
       ]
     },
     {
@@ -846,7 +828,7 @@
       "name": "amp-story-360: 360 video rendering",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".amp-story-360-rendered",
+        ".amp-story-360-loaded",
       ]
     }
   ]
