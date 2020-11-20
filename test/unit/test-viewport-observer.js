@@ -26,7 +26,6 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
     let ctorSpy;
     const noop = () => {};
 
-    const setIframed = () => (win.parent = {});
     beforeEach(() => {
       ctorSpy = env.sandbox.stub();
       win = {
@@ -36,54 +35,14 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
       };
     });
 
-    it('When not iframed, uses null root.', () => {
+    it('Uses implicit root.', () => {
       createViewportObserver(noop, win);
-
-      expect(ctorSpy).calledWith(noop, {
-        root: null,
-        rootMargin: '25%',
-        threshold: undefined,
-      });
-    });
-
-    it('When iframed, use document root.', () => {
-      setIframed();
-      createViewportObserver(noop, win);
-
-      expect(ctorSpy).calledWith(noop, {
-        root: win.document,
-        rootMargin: '25%',
-        threshold: undefined,
-      });
-    });
-
-    it('If ctor throws, fallback to rootless', () => {
-      setIframed();
-      ctorSpy.callsFake((_cb, {root}) => {
-        if (root === win.document) {
-          throw new Error();
-        }
-      });
-      createViewportObserver(noop, win);
-
-      expect(ctorSpy).calledWith(noop, {
-        root: win.document,
-        rootMargin: '25%',
-        threshold: undefined,
-      });
-      expect(ctorSpy).calledWith(noop, {
-        rootMargin: '150px',
-        threshold: undefined,
-      });
+      expect(ctorSpy).calledWith(noop, {threshold: undefined});
     });
 
     it('Pass along threshold argument', () => {
       createViewportObserver(noop, win, 0.5);
-      expect(ctorSpy).calledWith(noop, {
-        root: null,
-        rootMargin: '25%',
-        threshold: 0.5,
-      });
+      expect(ctorSpy).calledWith(noop, {threshold: 0.5});
     });
   });
 

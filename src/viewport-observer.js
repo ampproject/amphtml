@@ -15,7 +15,6 @@
  */
 import {devAssert} from '../src/log';
 import {getMode} from './mode';
-import {isIframed} from './dom';
 import {toWin} from './types';
 
 /**
@@ -33,28 +32,7 @@ import {toWin} from './types';
  * @return {!IntersectionObserver}
  */
 export function createViewportObserver(ioCallback, win, threshold) {
-  const iframed = isIframed(win);
-  const root = /** @type {?Element} */ (iframed
-    ? /** @type {*} */ (win.document)
-    : null);
-
-  // TODO(#30794): See if we can safely remove rootMargin without adversely
-  // affecting metrics.
-
-  // Chrome 81+ supports rootMargin in x-origin iframes via {root: document}
-  // but this throws in other browsers.
-  try {
-    return new win.IntersectionObserver(ioCallback, {
-      root,
-      rootMargin: '25%',
-      threshold,
-    });
-  } catch (e) {
-    return new win.IntersectionObserver(ioCallback, {
-      rootMargin: '150px',
-      threshold,
-    });
-  }
+  return new win.IntersectionObserver(ioCallback, {threshold});
 }
 
 /** @type {!WeakMap<!Window, !IntersectionObserver>} */
