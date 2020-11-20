@@ -213,9 +213,6 @@ export class Resource {
      */
     this.pendingChangeSize_ = undefined;
 
-    /** @private {boolean} */
-    this.loadedOnce_ = false;
-
     const deferred = new Deferred();
 
     /** @private @const {!Promise} */
@@ -997,7 +994,6 @@ export class Resource {
       this.loadPromiseResolve_ = null;
     }
     this.layoutPromise_ = null;
-    this.loadedOnce_ = true;
     this.state_ = success
       ? ResourceState.LAYOUT_COMPLETE
       : ResourceState.LAYOUT_FAILED;
@@ -1030,13 +1026,6 @@ export class Resource {
    */
   loadedOnce() {
     return this.loadPromise_;
-  }
-
-  /**
-   * @return {boolean} true if the resource has been loaded at least once.
-   */
-  hasLoadedOnce() {
-    return this.loadedOnce_;
   }
 
   /**
