@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -555,5 +556,89 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       });
       cumWidthSum += deviceSpecs.width * scale;
     });
+  }
+
+  /**
+   * @private
+   */
+  showAddDevicePopup_() {
+    const popup = buildAddDevicePopupTemplate(this.element);
+    popup
+      .querySelector('.i-amphtml-story-dev-tools-device-popup-close')
+      .addEventListener('click', () => {
+        setTimeout(() => {
+          popup.remove();
+        }, 200);
+        popup.removeAttribute('active');
+      });
+    const sections = ['mobile', 'tablet', 'desktop'].reduce((obj, section) => {
+      obj[section] = popup.querySelector(
+        `.i-amphtml-story-dev-tools-device-popup-${escapeCssSelectorIdent(
+          section
+        )}`
+      );
+      return obj;
+    }, {});
+    ALL_SCREEN_SIZES.forEach((device) => {
+      const deviceChip = buildDeviceChipTemplate(this.element);
+      let correspondingDevice = this.devices_.find(
+        (d) => d.name == device.name
+      );
+      if (!correspondingDevice) {
+        deviceChip.setAttribute('inactive', '');
+      }
+      deviceChip.querySelector('span').textContent = device.name;
+      deviceChip.querySelector('svg').addEventListener('click', () => {
+        if (deviceChip.hasAttribute('inactive')) {
+          deviceChip.removeAttribute('inactive');
+          correspondingDevice = {...device};
+          this.addDevice_(correspondingDevice);
+          this.updateDevicesInHash_();
+        } else {
+          deviceChip.setAttribute('inactive', '');
+          this.removeDevice_(correspondingDevice);
+          correspondingDevice = null;
+          this.updateDevicesInHash_();
+        }
+      });
+      let chipSection = sections['mobile'];
+      if (device.width / device.height > 1) {
+        chipSection = sections['desktop'];
+      } else if (device.width / device.height > 0.75) {
+        chipSection = sections['tablet'];
+      }
+      chipSection.appendChild(deviceChip);
+    });
+
+    // Add popup to screen.
+    this.element.appendChild(popup);
+    setTimeout(() => {
+      popup.setAttribute('active', '');
+    }, 1);
+  }
+
+  /**
+   * @private
+   */
+  showHelpPopup_() {
+    const popup = buildHelpPopupTemplate(this.element);
+    popup
+      .querySelector('.i-amphtml-story-dev-tools-device-popup-close')
+      .addEventListener('click', () => {
+        setTimeout(() => {
+          popup.remove();
+        }, 200);
+        popup.removeAttribute('active');
+      });
+
+    popup.querySelector(
+      '.i-amphtml-story-dev-tools-help-search-preview-link'
+    ).href += this.storyUrl_;
+
+    // Add popup to screen
+    this.element.appendChild(popup);
+    setTimeout(() => {
+      popup.setAttribute('active', '');
+    }, 1);
   }
 }
