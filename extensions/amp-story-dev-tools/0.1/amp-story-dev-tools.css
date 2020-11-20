@@ -17,11 +17,88 @@
 amp-story-dev-tools {
   width: 100% !important;
   height: 100% !important;
-  box-sizing: border-box !important;
-  background-color: #121212 !important;
+  background-color: black !important;
   font-size: 16px !important;
   font-family: 'Poppins', sans-serif !important;
   color: white !important;
   padding: 30px 10% !important;
-  text-align: center !important;
+  --i-amphtml-story-dev-tools-accent: #79B3FF;
+  --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55;
+}
+
+amp-story-dev-tools, amp-story-dev-tools * {
+  box-sizing: border-box !important;
+}
+
+.i-amphtml-story-dev-tools-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.i-amphtml-story-dev-tools-brand {
+  display: flex !important;
+}
+
+.i-amphtml-story-dev-tools-brand-text > span {
+  display: block !important;
+  letter-spacing: 0.1em !important;
+  line-height: 1.2em !important;
+  padding-inline-start: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-brand-text > span:nth-child(2) {
+  color: var(--i-amphtml-story-dev-tools-accent) !important;
+  font-size: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-button {
+  cursor: pointer !important;
+  font-size: 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-accent-translucent) !important;
+  border-radius: 20px !important;
+  padding-inline-start: 10px !important;
+  padding-inline-end: 6px !important;
+  height: 32px !important;
+  color: var(--i-amphtml-story-dev-tools-accent) !important;
+  text-decoration: none !important;
+}
+
+.i-amphtml-story-dev-tools-button:hover {
+  background: var(--i-amphtml-story-dev-tools-accent-translucent) !important;
+}
+
+.i-amphtml-story-dev-tools-button svg {
+  background: var(--i-amphtml-story-dev-tools-accent) !important;
+  padding: 3px !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  margin-inline-start: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector {
+  padding-bottom: 0.2em !important;
+  margin: 0 16px !important;
+  cursor: pointer !important;
+  opacity: 0.4 !important;
+  font-size: inherit !important;
+  background: none !important;
+  border: none !important;
+  color: inherit !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector:not([active]):hover, .i-amphtml-story-dev-tools-tabs > button:not([active]):focus {
+  opacity: 0.9 !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector[active] {
+  opacity: 1 !important;
+  cursor: initial !important;
+  border-bottom: 2px solid white !important;
 }
