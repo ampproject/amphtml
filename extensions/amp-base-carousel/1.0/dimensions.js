@@ -33,9 +33,18 @@ export const Alignment = {
 };
 
 /**
+ * @typedef {{
+ *   start: number,
+ *   end: number,
+ *   length: number,
+ * }}
+ */
+let BaseCarouselDimensionDef;
+
+/**
  * @param {!Axis} axis The Axis to get the Dimension for.
  * @param {*} el The Element to get the Dimension For.
- * @return {!DimensionDef} The dimension for the Element along the given Axis.
+ * @return {!BaseCarouselDimensionDef} The dimension for the Element along the given Axis.
  */
 export function getDimension(axis, el) {
   const {
