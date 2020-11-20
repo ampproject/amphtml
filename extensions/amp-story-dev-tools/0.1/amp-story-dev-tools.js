@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AmpStoryDevToolsTab,
-  createTabContentsTemplate,
-  createTabElement,
-} from './amp-story-dev-tools-tab';
+import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
@@ -88,9 +84,6 @@ const buildContainerTemplate = (element) => {
           </svg>
         </a>
       </div>
-      <div class="i-amphtml-story-dev-tools-tab">
-        <div class="lds-dual-ring"></div>
-      </div>
     </div>
   `;
 };
@@ -137,23 +130,13 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       ) || DevToolsTab.PREVIEW;
 
     /** @private {!Object} maps tabs to contents */
-    this.tabContents_ = {
-      [DevToolsTab.PREVIEW]: createTabElement(
-        this.win,
-        this.storyUrl_,
-        DevToolsTab.PREVIEW
-      ),
-      [DevToolsTab.LOGS]: createTabElement(
-        this.win,
-        this.storyUrl_,
-        DevToolsTab.LOGS
-      ),
-      [DevToolsTab.PAGE_EXPERIENCE]: createTabElement(
-        this.win,
-        this.storyUrl_,
-        DevToolsTab.PAGE_EXPERIENCE
-      ),
-    };
+    this.tabContents_ = Object.values(DevToolsTab).reduce(
+      (tabContents, tab) => {
+        tabContents[tab] = createTabElement(this.win, this.storyUrl_, tab);
+        return tabContents;
+      },
+      {}
+    );
   }
 
   /** @override */
@@ -219,18 +202,16 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @param {!DevToolsTab} tab
    */
   switchTab_(tab) {
-    this.currentTab_ = tab;
+    this.tabContents_[this.currentTab_].remove();
+    this.element
+      .querySelector('.i-amphtml-story-dev-tools-container')
+      .appendChild(this.tabContents_[tab]);
     toArray(
       this.element.querySelector('.i-amphtml-story-dev-tools-tabs').children
     ).forEach((e) => {
       return e.toggleAttribute('active', e.textContent === tab);
     });
-
-    // Remove old tab and replace with new one
-    this.element.querySelector('.i-amphtml-story-dev-tools-tab').remove();
-    this.element
-      .querySelector('.i-amphtml-story-dev-tools-container')
-      .appendChild(this.tabContents_[tab]);
+    this.currentTab_ = tab;
   }
 
   /**
