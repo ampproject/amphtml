@@ -9,4 +9,4 @@ Potential tools:
 - Story insights: Parse the story and find out layout inconsistencies
 - Validation: Ensure story is valid AMP
 
-`http://localhost:8000/examples/amp-story/interactive_quizzes.html#development=1`
+`http://localhost:8000/examples/amp-story/ampconf.html#development=1`
