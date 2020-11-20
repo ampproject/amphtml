@@ -16,6 +16,7 @@
 
 import {getCarousel, getScrollingElement, getSlide} from './helpers';
 import {useStyles} from '../base-carousel.jss';
+import sleep from 'sleep-promise';
 
 const pageWidth = 1000;
 const pageHeight = 600;
@@ -75,6 +76,9 @@ describes.endtoend(
 
       await controller.scrollTo(el, {left: 333});
       await expect(prop(el, 'scrollLeft')).to.equal(333);
+
+      // Wait for render with updated active slide.
+      await sleep(100);
       await controller.setWindowRect({
         width: 600,
         height: 600,
