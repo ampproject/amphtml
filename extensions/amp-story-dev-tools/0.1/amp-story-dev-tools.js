@@ -119,6 +119,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
     /** @private {!Object<string, !Element>} maps tabs to contents */
     this.tabContents_ = {};
+
+    /** @private {!Array<!Element>} */
+    this.tabSelectors_ = [];
   }
 
   /** @override */
@@ -150,6 +153,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       tabSelector.classList.add('i-amphtml-story-dev-tools-tab-selector');
       tabSelector.setAttribute('data-tab', tabTitle);
       tabSelector.textContent = tabTitle;
+      this.tabSelectors_.append(tabSelector);
       tabsContainer.appendChild(tabSelector);
     });
   }
@@ -200,19 +204,20 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @param {!DevToolsTab} tab
    */
   switchTab_(tab) {
-    this.tabContents_[this.currentTab_].remove();
-    this.element
-      .querySelector('.i-amphtml-story-dev-tools-container')
-      .appendChild(this.tabContents_[tab]);
-    toArray(
-      this.element.querySelectorAll('.i-amphtml-story-dev-tools-tab-selector')
-    ).forEach((tabSelector) => {
-      return tabSelector.toggleAttribute(
-        'active',
-        tabSelector.getAttribute('data-tab') === tab
-      );
+    const container = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-container'
+    );
+    this.mutateElement(() => {
+      this.tabContents_[this.currentTab_].remove();
+      container.appendChild(this.tabContents_[tab]);
+      this.tabSelectors_.forEach((tabSelector) => {
+        return tabSelector.toggleAttribute(
+          'active',
+          tabSelector.getAttribute('data-tab') === tab
+        );
+      });
+      this.currentTab_ = tab;
     });
-    this.currentTab_ = tab;
   }
 
   /**
