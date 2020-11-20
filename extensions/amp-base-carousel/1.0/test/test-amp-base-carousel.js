@@ -21,6 +21,7 @@ import {
   waitForChildPromise,
 } from '../../../../src/dom';
 import {mod} from '../../../../src/utils/math';
+import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -285,7 +286,13 @@ describes.realWin(
         await waitFor(() => scroller.scrollLeft > 0, 'to slide 1');
 
         element.enqueAction(invocation('prev'));
-        await waitFor(() => scroller.scrollLeft == 0, 'returned to prev slide');
+        // Wait for a longer timeout than the 200 default in waitFor.
+        await poll(
+          'returned to prev slide',
+          () => scroller.scrollLeft == 0,
+          undefined /* opt_onError */,
+          400 /* opt_timeout */
+        );
       });
 
       it('should execute goToSlide action', async () => {
