@@ -223,6 +223,10 @@ function ScrollerWithRef(
   };
 
   const handleScroll = () => {
+    if (ignoreProgrammaticScrollRef.current) {
+      ignoreProgrammaticScrollRef.current = false;
+      return;
+    }
     updateCurrentIndex();
     debouncedResetScrollReferencePoint();
   };
