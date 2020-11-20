@@ -77,7 +77,7 @@ describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
   }
 
   it('tracking should observe an element', () => {
-    service = new LoadingIndicatorImpl(ampdoc); 
+    service = new LoadingIndicatorImpl(ampdoc);
     service.track(el);
     expect(io.observed).to.include(el);
   });
