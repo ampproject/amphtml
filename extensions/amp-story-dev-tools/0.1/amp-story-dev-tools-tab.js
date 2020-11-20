@@ -31,12 +31,7 @@ export function createTabElement(win, storyUrl, name) {
 }
 
 export class AmpStoryDevToolsTab extends AMP.BaseElement {
-  /**
-   * @param {!Element} element
-   * @param {!Element} win
-   * @param {!AmStoryDevTools} devTools
-   * @param {string} storyUrl
-   */
+  /** @param {!Element} element */
   constructor(element) {
     super(element);
     /** @protected {!Element} */
