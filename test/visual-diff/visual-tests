@@ -804,7 +804,10 @@
 =======
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 2a9df8b8d (Merge)
+=======
+>>>>>>> 76cc4b917 (Merge)
       "url": "examples/visual-tests/amp-carousel/amp-carousel.html",
       "name": "amp-carousel",
       "loading_complete_delay_ms": 2000,
@@ -829,13 +832,22 @@
 >>>>>>> f6794bc92 (Timeout for image to render.)
 >>>>>>> 2a9df8b8d (Merge)
       "url": "examples/visual-tests/amp-story/amp-story-360.html",
+=======
+      "url": "examples/visual-tests/amp-story/amp-story-360-image.html",
+>>>>>>> 9f1a8a1f1 (Video visual diff. Add class for loading_complete_selector.)
       "name": "amp-story-360: 360 image rendering",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-      ],
-      // For shader to render image.
-      "loading_complete_delay_ms": 1000
+        ".amp-story-360-rendered",
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-360-video.html",
+      "name": "amp-story-360: 360 video rendering",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".amp-story-360-rendered",
+      ]
     }
   ]
 }

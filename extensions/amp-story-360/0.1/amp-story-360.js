@@ -707,7 +707,32 @@ export class AmpStory360 extends AMP.BaseElement {
           this.image_ = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
+<<<<<<< HEAD
           this.initRenderer_();
+=======
+          this.renderer_.setImageOrientation(
+            this.sceneHeading_,
+            this.scenePitch_,
+            this.sceneRoll_
+          );
+          this.renderer_.setImage(img);
+          this.renderer_.resize();
+          if (this.orientations_.length < 1) {
+            return;
+          }
+          this.renderInitialPosition_();
+          this.isReady_ = true;
+          if (this.gyroscopeControls_) {
+            this.maybeSetGyroscopeDefaultHeading_();
+          }
+          if (this.isPlaying_) {
+            this.animate_();
+          }
+          // For visual tests.
+          this.mutateElement(() => {
+            this.element.classList.add('amp-story-360-rendered');
+          });
+>>>>>>> 76cc4b917 (Merge)
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
@@ -736,8 +761,35 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
+<<<<<<< HEAD
           this.setupGlContextListeners_();
           this.initRenderer_();
+=======
+          this.renderer_.setImageOrientation(
+            this.sceneHeading_,
+            this.scenePitch_,
+            this.sceneRoll_
+          );
+          this.renderer_.setImage(
+            dev().assertElement(this.ampVideoEl_.querySelector('video'))
+          );
+          this.renderer_.resize();
+          if (this.orientations_.length < 1) {
+            return;
+          }
+          this.renderInitialPosition_();
+          this.isReady_ = true;
+          if (this.gyroscopeControls_) {
+            this.maybeSetGyroscopeDefaultHeading_();
+          }
+          if (this.isPlaying_) {
+            this.animate_();
+          }
+          // For visual tests.
+          this.mutateElement(() => {
+            this.element.classList.add('amp-story-360-rendered');
+          });
+>>>>>>> 76cc4b917 (Merge)
         },
         () => {
           user().error(TAG, 'Failed to load the amp-video.');
