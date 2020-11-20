@@ -153,7 +153,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       tabSelector.classList.add('i-amphtml-story-dev-tools-tab-selector');
       tabSelector.setAttribute('data-tab', tabTitle);
       tabSelector.textContent = tabTitle;
-      this.tabSelectors_.append(tabSelector);
+      this.tabSelectors_.push(tabSelector);
       tabsContainer.appendChild(tabSelector);
     });
   }
