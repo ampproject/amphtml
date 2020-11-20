@@ -707,7 +707,6 @@ export class AmpStory360 extends AMP.BaseElement {
           this.image_ = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
-          this.setupGlContextListeners_();
           this.initRenderer_();
         },
         () => {
