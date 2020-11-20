@@ -781,9 +781,11 @@ export class AmpStory360 extends AMP.BaseElement {
     if (this.isPlaying_) {
       this.animate_();
     }
+    this.markAsLoaded_();
   }
 
-  addClassForVisualTests_() {
+  /** @private */
+  markAsLoaded_() {
     this.mutateElement(() => {
       this.element.classList.add('amp-story-360-loaded');
     });
