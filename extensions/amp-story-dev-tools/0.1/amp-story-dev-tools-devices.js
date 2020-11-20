@@ -232,8 +232,8 @@ const buildHelpPopupTemplate = (element) => {
         <h1>Helpful links</h1>
         <a
           target="_blank"
-          href="https://developers.google.com/search/docs/guides/web-stories-creation-best-practices"
-          >Best practices for creating Web Stories
+          href="https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/"
+          >Best practices for creating a successful Web Story
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
