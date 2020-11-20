@@ -17,7 +17,6 @@
 amp-story-dev-tools {
   width: 100% !important;
   height: 100% !important;
-  box-sizing: border-box !important;
   background-color: black !important;
   font-size: 16px !important;
   font-family: 'Poppins', sans-serif !important;
@@ -25,6 +24,10 @@ amp-story-dev-tools {
   padding: 30px 10% !important;
   --i-amphtml-story-dev-tools-accent: #79B3FF;
   --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55;
+}
+
+amp-story-dev-tools, amp-story-dev-tools * {
+  box-sizing: border-box !important;
 }
 
 .i-amphtml-story-dev-tools-header {
@@ -41,7 +44,7 @@ amp-story-dev-tools {
   display: block !important;
   letter-spacing: 0.1em !important;
   line-height: 1.2em !important;
-  padding-left: 10px !important;
+  padding-inline-start: 10px !important;
 }
 
 .i-amphtml-story-dev-tools-brand-text > span:nth-child(2) {
@@ -56,9 +59,9 @@ amp-story-dev-tools {
   align-items: center !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-accent-translucent) !important;
   border-radius: 20px !important;
-  padding: 0 6px 0 10px !important;
+  padding-inline-start: 10px !important;
+  padding-inline-end: 6px !important;
   height: 32px !important;
-  box-sizing: border-box !important;
   color: var(--i-amphtml-story-dev-tools-accent) !important;
   text-decoration: none !important;
 }
@@ -73,11 +76,10 @@ amp-story-dev-tools {
   width: 20px !important;
   height: 20px !important;
   border-radius: 50% !important;
-  margin-left: 10px !important;
-  box-sizing: border-box !important;
+  margin-inline-start: 10px !important;
 }
 
-.i-amphtml-story-dev-tools-tabs > button {
+.i-amphtml-story-dev-tools-tab-selector {
   padding-bottom: 0.2em !important;
   margin: 0 16px !important;
   cursor: pointer !important;
@@ -91,11 +93,11 @@ amp-story-dev-tools {
   font-family: inherit !important;
 }
 
-.i-amphtml-story-dev-tools-tabs > button:not([active]):hover, .i-amphtml-story-dev-tools-tabs > button:not([active]):focus {
+.i-amphtml-story-dev-tools-tab-selector:not([active]):hover, .i-amphtml-story-dev-tools-tabs > button:not([active]):focus {
   opacity: 0.9 !important;
 }
 
-.i-amphtml-story-dev-tools-tabs > button[active] {
+.i-amphtml-story-dev-tools-tab-selector[active] {
   opacity: 1 !important;
   cursor: initial !important;
   border-bottom: 2px solid white !important;

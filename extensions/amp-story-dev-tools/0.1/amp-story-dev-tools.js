@@ -19,6 +19,7 @@ import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
 import {toArray} from '../../../src/types';
+import {updateHash} from './utils';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
 const fontsToLoad = [
@@ -88,21 +89,6 @@ const buildContainerTemplate = (element) => {
   `;
 };
 
-/**
- * Updates the hashString with the dictionary<string, string> passed in
- * @public
- * @param {!Object} updates
- * @param {!Window} win
- */
-export function updateHash(updates, win) {
-  let queryHash = parseQueryString(win.location.hash);
-  queryHash = Object.assign(queryHash, updates);
-  win.location.hash = Object.entries(queryHash)
-    .filter((e) => e[1] != undefined)
-    .map((e) => e[0] + '=' + e[1])
-    .join('&');
-}
-
 /** @enum {string} */
 const DevToolsTab = {
   PREVIEW: 'Preview',
@@ -125,18 +111,17 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
     /** @private {!DevToolsTab} get URL param for tab (eg: #tab=page-experience) or default to PREVIEW*/
     this.currentTab_ =
-      Object.values(DevToolsTab).find(
-        (e) => e.toLowerCase().replace(' ', '-') === hashParams['tab']
-      ) || DevToolsTab.PREVIEW;
+      (hashParams['tab']
+        ? Object.values(DevToolsTab).find(
+            (tab) => tab.toLowerCase().replace(' ', '-') === hashParams['tab']
+          )
+        : null) || DevToolsTab.PREVIEW;
 
-    /** @private {!Object} maps tabs to contents */
-    this.tabContents_ = Object.values(DevToolsTab).reduce(
-      (tabContents, tab) => {
-        tabContents[tab] = createTabElement(this.win, this.storyUrl_, tab);
-        return tabContents;
-      },
-      {}
-    );
+    /** @private {!Object<string, !Element>} maps tabs to contents */
+    this.tabContents_ = {};
+
+    /** @private {!Array<!Element>} */
+    this.tabSelectors_ = [];
   }
 
   /** @override */
@@ -145,7 +130,32 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     this.buildLayout_();
     this.initializeListeners_();
 
+    this.buildTabs_();
     this.switchTab_(this.currentTab_);
+  }
+
+  /**
+   * @private
+   */
+  buildLayout_() {
+    const container = buildContainerTemplate(this.element);
+    this.element.appendChild(container);
+    this.element.querySelector(
+      '.i-amphtml-story-dev-tools-close'
+    ).href = this.storyUrl_;
+
+    // Create tabs on top
+    const tabsContainer = container.querySelector(
+      '.i-amphtml-story-dev-tools-tabs'
+    );
+    Object.values(DevToolsTab).forEach((tabTitle) => {
+      const tabSelector = this.win.document.createElement('button');
+      tabSelector.classList.add('i-amphtml-story-dev-tools-tab-selector');
+      tabSelector.setAttribute('data-tab', tabTitle);
+      tabSelector.textContent = tabTitle;
+      this.tabSelectors_.append(tabSelector);
+      tabsContainer.appendChild(tabSelector);
+    });
   }
 
   /**
@@ -156,9 +166,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       '.i-amphtml-story-dev-tools-tabs'
     );
     tabsContainer.addEventListener('click', (event) => {
-      const tab = event.target.textContent;
+      const tab = event.target.getAttribute('data-tab');
       if (
-        Object.values(DevToolsTab).find((t) => t === tab) &&
+        Object.values(DevToolsTab).find((t) => t == tab) &&
         this.currentTab_ != tab
       ) {
         this.switchTab_(tab);
@@ -179,22 +189,14 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   /**
    * @private
    */
-  buildLayout_() {
-    const container = buildContainerTemplate(this.element);
-    this.element.appendChild(container);
-    this.element.querySelector(
-      '.i-amphtml-story-dev-tools-close'
-    ).href = this.storyUrl_;
-
-    // Create tabs on top
-    const tabsContainer = container.querySelector(
-      '.i-amphtml-story-dev-tools-tabs'
+  buildTabs_() {
+    this.tabContents_ = Object.values(DevToolsTab).reduce(
+      (tabContents, tab) => {
+        tabContents[tab] = createTabElement(this.win, this.storyUrl_, tab);
+        return tabContents;
+      },
+      {}
     );
-    Object.values(DevToolsTab).forEach((tabTitle) => {
-      const tab = this.win.document.createElement('button');
-      tab.textContent = tabTitle;
-      tabsContainer.appendChild(tab);
-    });
   }
 
   /**
@@ -202,16 +204,20 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @param {!DevToolsTab} tab
    */
   switchTab_(tab) {
-    this.tabContents_[this.currentTab_].remove();
-    this.element
-      .querySelector('.i-amphtml-story-dev-tools-container')
-      .appendChild(this.tabContents_[tab]);
-    toArray(
-      this.element.querySelector('.i-amphtml-story-dev-tools-tabs').children
-    ).forEach((e) => {
-      return e.toggleAttribute('active', e.textContent === tab);
+    const container = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-container'
+    );
+    this.mutateElement(() => {
+      this.tabContents_[this.currentTab_].remove();
+      container.appendChild(this.tabContents_[tab]);
+      this.tabSelectors_.forEach((tabSelector) => {
+        return tabSelector.toggleAttribute(
+          'active',
+          tabSelector.getAttribute('data-tab') === tab
+        );
+      });
+      this.currentTab_ = tab;
     });
-    this.currentTab_ = tab;
   }
 
   /**
