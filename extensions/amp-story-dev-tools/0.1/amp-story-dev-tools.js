@@ -15,11 +15,13 @@
  */
 
 import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
+import {
+  AmpStoryDevToolsTabPreview,
+  createTabPreviewElement,
+} from './amp-story-dev-tools-tab-preview';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
-import {createTabPreviewElement} from './amp-story-dev-tools-tab-preview';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
-import {toArray} from '../../../src/types';
 import {updateHash} from './utils';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
@@ -199,14 +201,16 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       this.storyUrl_,
       this.hashParams_['devices']
     );
-
-    // Object.values(DevToolsTab).reduce(
-    //   (tabContents, tab) => {
-    //     tabContents[tab] = createTabElement(this.win, this.storyUrl_, tab);
-    //     return tabContents;
-    //   },
-    //   {}
-    // );
+    this.tabContents_[DevToolsTab.PAGE_EXPERIENCE] = createTabElement(
+      this.win,
+      this.storyUrl_,
+      DevToolsTab.PAGE_EXPERIENCE
+    );
+    this.tabContents_[DevToolsTab.LOGS] = createTabElement(
+      this.win,
+      this.storyUrl_,
+      DevToolsTab.LOGS
+    );
   }
 
   /**
@@ -249,6 +253,11 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
-  AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
   AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab, CSS);
+  AMP.registerElement(
+    'amp-story-dev-tools-tab-preview',
+    AmpStoryDevToolsTabPreview,
+    CSS
+  );
+  AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
 });

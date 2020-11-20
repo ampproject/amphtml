@@ -15,6 +15,9 @@
  */
 
 import {htmlFor} from '../../../src/static-template';
+import {setStyles} from '../../../src/style';
+import {toArray} from '../../../src/types';
+import {updateHash} from './utils';
 
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.
@@ -27,9 +30,6 @@ export function createTabPreviewElement(win, storyUrl, devices) {
   const element = win.document.createElement('amp-story-dev-tools-tab-preview');
   element.setAttribute('story-url', storyUrl);
   devices ? element.setAttribute('devices', devices) : null;
-  const innerTitle = win.document.createElement('h1');
-  innerTitle.textContent = name;
-  element.appendChild(innerTitle);
   return element;
 }
 
@@ -331,13 +331,13 @@ function simplifyDeviceName(name) {
 
 /**
  * Get devices from the queryHash into list of devices
- * @param {*} queryHash
+ * @param {string} queryHash
  * @return {any[]}
  */
 function parseDevices(queryHash) {
   const screenSizes = [];
 
-  queryHash['devices'].split(';').forEach((device) => {
+  queryHash.split(';').forEach((device) => {
     const deviceSpecs = device.split(':');
     let currSpecs = null;
     if (deviceSpecs.length == 1) {
@@ -382,12 +382,31 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
     /** @private {!Array<DeviceInfo>} */
     this.devices_ = parseDevices(
-      this.element.getAttribute('devices') | DEFAULT_DEVICES
+      this.element.getAttribute('devices') || DEFAULT_DEVICES
     );
   }
 
   /** @override */
-  buildCallback() {}
+  buildCallback() {
+    const chipListContainer = this.element.ownerDocument.createElement('div');
+    chipListContainer.classList.add(
+      'i-amphtml-story-dev-tools-device-chips-container'
+    );
+    this.element.appendChild(chipListContainer);
+
+    const chipList = this.element.ownerDocument.createElement('span');
+    chipList.classList.add('i-amphtml-story-dev-tools-device-chips');
+    chipListContainer.appendChild(chipList);
+
+    chipListContainer.appendChild(this.buildAddDeviceButton_());
+    chipListContainer.appendChild(this.buildHelpButton_());
+
+    const devicesList = this.devices_;
+    this.devices_ = [];
+    devicesList.forEach((device) => {
+      this.addDevice_(device);
+    });
+  }
 
   /**
    * Builds the add device button
@@ -410,23 +429,22 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @return {!Element}
    */
   buildHelpButton_() {
-    const addDeviceButton = buildHelpButtonTemplate(this.element);
-    addDeviceButton.classList.add('i-amphtml-story-dev-tools-button');
-    addDeviceButton.classList.add('i-amphtml-story-dev-tools-help');
-    addDeviceButton.querySelector('span').textContent = 'HELP';
-    addDeviceButton.addEventListener('click', () => {
+    const addHelpButton = buildHelpButtonTemplate(this.element);
+    addHelpButton.classList.add('i-amphtml-story-dev-tools-button');
+    addHelpButton.classList.add('i-amphtml-story-dev-tools-help');
+    addHelpButton.addEventListener('click', () => {
       this.showHelpPopup_();
     });
-    return addDeviceButton;
+    return addHelpButton;
   }
 
   /**
    * Creates a device layout for preview
    * @private
-   * @param {DeviceInfo} device
+   * @param {!DeviceInfo} device
    * @return {!Element}
    */
-  createDeviceLayout_(device) {
+  buildDeviceLayout_(device) {
     const deviceLayout = buildDeviceTemplate(this.element);
     deviceLayout.querySelector(
       '.i-amphtml-story-dev-tools-device-name'
@@ -440,7 +458,6 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     const storyA = devicePlayer.querySelector('a');
     storyA.textContent = 'Story 1';
     storyA.href = this.storyUrl_;
-    this.playersManager_.addPlayer(devicePlayer);
     setStyles(devicePlayer, {
       width: device.width + 'px',
       height: device.height + 'px',
@@ -459,9 +476,37 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
   /**
    * @private
+   * @param {DeviceInfo} deviceSpecs
+   */
+  addDevice_(deviceSpecs) {
+    const deviceLayout = this.buildDeviceLayout_(deviceSpecs, this.storyUrl_);
+    deviceSpecs.element = deviceLayout;
+    this.element.appendChild(deviceLayout);
+    this.devices_.push(deviceSpecs);
+    deviceSpecs.chip = this.addDeviceChip_(deviceSpecs);
+    this.onLayoutChanged();
+  }
+
+  /**
+   * @private
+   * @param {DeviceInfo} device
+   */
+  removeDevice_(device) {
+    device.chip.setAttribute('inactive', '');
+    setTimeout(() => {
+      device.chip.remove();
+    }, 200);
+    this.playersManager_.removePlayer(device.player);
+    this.devices_ = this.devices_.filter((d) => d != device);
+    device.element.remove();
+    this.onLayoutChanged();
+  }
+
+  /**
+   * @private
    */
   updateDevicesInHash_() {
-    const hashValue = this.devices_
+    const devicesStringRepresentation = this.devices_
       .map((device) => {
         if (device.custom) {
           return (
@@ -472,6 +517,43 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
         return device.name.toLowerCase().replace(/[^a-z0-9]/gi, '');
       })
       .join(';');
-    this.devTools_.updateHash({'devices': hashValue || ''});
+    this.element.setAttribute('devices', devicesStringRepresentation);
+    updateHash({'devices': devicesStringRepresentation}, this.win);
+  }
+
+  /** @override */
+  onMeasureChanged() {
+    let sumDeviceWidths = 0;
+    let maxDeviceHeights = 0;
+    this.devices_.forEach((deviceSpecs) => {
+      sumDeviceWidths += deviceSpecs.width;
+      maxDeviceHeights = Math.max(
+        maxDeviceHeights,
+        deviceSpecs.deviceHeight || deviceSpecs.height + 100
+      );
+    });
+    const scale = Math.min(
+      (this.element./*OK*/ clientWidth / sumDeviceWidths) * 0.9,
+      (this.element./*OK*/ clientHeight / maxDeviceHeights) * 0.8
+    );
+    let cumWidthSum = 0;
+    const paddingSize =
+      (this.element./*OK*/ clientWidth - sumDeviceWidths * scale) /
+      (this.devices_.length + 1);
+    toArray(
+      this.element.querySelectorAll('.i-amphtml-story-dev-tools-device')
+    ).forEach((deviceLayout, i) => {
+      const deviceSpecs = this.devices_[i];
+      const scaleWidthChange = deviceSpecs.width * (scale - 1) * 0.5; // Accounts for width change on scaling
+      const cumPaddings = (i + 1) * paddingSize;
+      const leftOffset = cumPaddings + cumWidthSum + scaleWidthChange;
+      setStyles(deviceLayout, {
+        'transform': `perspective(100px) translateZ(${
+          (100 * (scale - 1)) / scale
+        }px)`,
+        'left': leftOffset + 'px',
+      });
+      cumWidthSum += deviceSpecs.width * scale;
+    });
   }
 }
