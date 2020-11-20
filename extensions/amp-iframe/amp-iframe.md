@@ -145,7 +145,7 @@ AMP element. However, it's possible to resize an `amp-iframe` at runtime. To do
 so:
 
 1.  The `amp-iframe` must be defined with the `resizable` attribute.
-2.  The `amp-iframe` must have an `overflow` child element.
+2.  The `amp-iframe` must have an `overflow` child element. This element can typically be a `div`. However, if the `amp-iframe` is child of a `p` element, it is recommended to use a `span` or `button` (to eliminate issues caused by `p` element's [phrasing content](https://html.spec.whatwg.org/#phrasing-content)).
 3.  The `amp-iframe` must set the `allow-same-origin` sandbox attribute.
 4.  The iframe document must send an `embed-size` request as a window message.
 5.  The `embed-size` request will be denied if the request height is less than a
