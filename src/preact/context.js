@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
+import * as Preact from 'preact';
 import {Loading, reducer as loadingReducer} from '../loading';
-import {createContext, useContext, useMemo, useRef} from './index';
+import {useContext, useMemo, useRef} from 'preact/hooks';
+const createContext = Preact.createContext;
 
 /** @type {PreactDef.Context} */
 let context;

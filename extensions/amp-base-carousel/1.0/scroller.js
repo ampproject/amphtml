@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from 'preact';
 import {
   Axis,
   findOverlappingIndex,
@@ -21,7 +21,7 @@ import {
   scrollContainerToElement,
 } from './dimensions';
 import {debounce} from '../../../src/utils/rate-limit';
-import {forwardRef} from '../../../src/preact/compat';
+import {forwardRef} from 'preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
 import {toWin} from '../../../src/types';
@@ -32,8 +32,11 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from 'preact/hooks';
 import {useStyles} from './base-carousel.jss';
+const h = Preact.createElement;
+var React;
+window.React = React = Preact;
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -236,7 +239,8 @@ function ScrollerWithRef(
     loop &&
     incrementCount > 1 &&
     children.length - pivotIndex - visibleCount < incrementCount;
-  return (
+
+  const ret = (
     <div
       ref={containerRef}
       onScroll={handleScroll}
@@ -248,6 +252,7 @@ function ScrollerWithRef(
       {needMoreSlidesToScroll && slides}
     </div>
   );
+  return ret;
 }
 
 const Scroller = forwardRef(ScrollerWithRef);

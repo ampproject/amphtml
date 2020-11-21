@@ -82,7 +82,7 @@ class AmpWorker {
       loc = win.testLocation;
     }
     // Use RTV to make sure we fetch prod/canary/experiment correctly.
-    const useLocal = getMode().localDev || getMode().test;
+    const useLocal = getMode().localDev || getMode().test || true;
     const useRtvVersion = !useLocal;
     const url = calculateEntryPointScriptUrl(
       loc,

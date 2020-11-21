@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from 'preact';
 import {Alignment} from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
@@ -22,7 +22,6 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
 import {
-  toChildArray,
   useCallback,
   useContext,
   useEffect,
@@ -30,8 +29,11 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from 'preact/hooks';
 import {toWin} from '../../../src/types';
+const h = Preact.createElement;
+var React;
+window.React = React = Preact;
 
 /**
  * @enum {string}
@@ -86,14 +88,14 @@ function BaseCarouselWithRef(
   },
   ref
 ) {
-  const childrenArray = useMemo(() => toChildArray(children), [children]);
+  const childrenArray = useMemo(() => Preact.toChildArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(0);
-  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
+  const currentSlide = carouselContext.currentSlide || currentSlideState;
   const currentSlideRef = useRef(currentSlide);
   const setCurrentSlide =
-    carouselContext.setCurrentSlide ?? setCurrentSlideState;
+    carouselContext.setCurrentSlide || setCurrentSlideState;
   const {slides, setSlides} = carouselContext;
   const scrollRef = useRef(null);
   const containRef = useRef(null);
@@ -255,19 +257,24 @@ function BaseCarouselWithRef(
           be optimized to only display the minimum necessary for the current 
           and next viewport.
         */}
-        {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < visibleCount * 3 || mixedLength ? (
-            <WithAmpContext
-              key={index}
-              renderable={index == currentSlide}
-              playable={index == currentSlide}
-            >
-              {child}
-            </WithAmpContext>
-          ) : (
-            <></>
-          )
-        )}
+        {childrenArray.map((child, index) => {
+          // const calc =  Math.abs(index - currentSlide) < visibleCount * 3 ||
+          //   mixedLength ? (
+          //   <WithAmpContext
+          //     key={index}
+          //     renderable={true}
+          //     playable={true}
+          //   >
+          //     {child}
+          //   </WithAmpContext>
+          // ) : (
+          //   <></>
+          // );
+          // return calc;
+          return child;
+        }
+        )
+      }
       </Scroller>
       {!hideControls && (
         <Arrow

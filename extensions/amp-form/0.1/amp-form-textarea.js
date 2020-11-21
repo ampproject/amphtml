@@ -298,6 +298,7 @@ export function maybeResizeTextarea(element) {
         const shouldResize = hasExpanded || scrollHeight <= minScrollHeight;
 
         if (shouldResize) {
+          console.error('resizing!');
           element.dataset[AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA] = '';
           // Set the textarea height to the height of the text
           setStyle(element, 'height', px(minScrollHeight + offset));

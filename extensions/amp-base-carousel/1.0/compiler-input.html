@@ -1,0 +1,51 @@
+<!-- /**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compiler Demo</title>
+    <script async src="https://cdn.ampproject.org/v0.js"></script> 
+    <script custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.js" async></script> 
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+</head> 
+<body>
+    <amp-state id="visibleCount">
+        <script type="application/json">
+            2
+        </script>
+    </amp-state>
+    <amp-base-carousel
+        type="carousel"
+        height="500px"
+        width="500px"
+        layout="fixed"
+        role="region"
+        aria-label="Basic carousel"
+        visible-count="2"
+        [visible-count]="visibleCount"
+    >
+        <img src="https://unsplash.it/300/300?bust=1" height="300" width="300" ></img>
+        <img src="https://unsplash.it/300/300?bust=2" height="300" width="300" ></img>
+        <img src="https://unsplash.it/300/300?bust=3" height="300" width="300" ></img>
+        <img src="https://unsplash.it/300/300?bust=4" height="300" width="300" ></img>
+        <img src="https://unsplash.it/300/300?bust=5" height="300" width="300" ></img>
+        <img src="https://unsplash.it/300/300?bust=6" height="300" width="300" ></img> 
+    </amp-base-carousel>
+    <button on="tap:AMP.setState({visibleCount: visibleCount - 1})">visibleCount-1</button> 
+    <button on="tap:AMP.setState({visibleCount: visibleCount + 1})">visibleCount+1</button>
+</body> 
+</html>
