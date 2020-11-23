@@ -218,3 +218,26 @@ amp-story-player a {
   position: absolute !important;
   right: 0 !important;
 }
+
+.i-amphtml-story-dev-tools-device-popup-help-tips {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-dev-tools-device-popup-help-tips p {
+  font-size: 14px !important;
+}
+
+.i-amphtml-story-dev-tools-device-popup-help-tips span {
+  color: #ffffff77 !important;
+  font-size: 12px !important;
+  border: 1px solid #ffffff20 !important;
+  padding: 10px 20px !important;
+  border-radius: 20px !important;
+  margin-left: 20px !important;
+}
+
+.i-amphtml-story-dev-tools-device-popup-help-tips span b {
+  color: #79B3FF !important;
+}

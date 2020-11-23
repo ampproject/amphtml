@@ -593,27 +593,14 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     }, {});
     ALL_SCREEN_SIZES.forEach((device) => {
       const deviceChip = buildDeviceChipTemplate(this.element);
-      let correspondingDevice = this.devices_.find(
+      const correspondingDevice = this.devices_.find(
         (d) => d.name == device.name
       );
-      deviceChip.device = device;
+      deviceChip.device = correspondingDevice || device;
       if (!correspondingDevice) {
         deviceChip.setAttribute('inactive', '');
       }
       deviceChip.querySelector('span').textContent = device.name;
-      deviceChip.addEventListener('click', () => {
-        if (deviceChip.hasAttribute('inactive')) {
-          deviceChip.removeAttribute('inactive');
-          correspondingDevice = {...device};
-          this.addDevice_(correspondingDevice);
-          this.updateDevicesInHash_();
-        } else {
-          deviceChip.setAttribute('inactive', '');
-          this.removeDevice_(correspondingDevice);
-          correspondingDevice = null;
-          this.updateDevicesInHash_();
-        }
-      });
       let chipSection = sections['mobile'];
       if (device.width / device.height > 1) {
         chipSection = sections['desktop'];
@@ -621,6 +608,21 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
         chipSection = sections['tablet'];
       }
       chipSection.appendChild(deviceChip);
+    });
+
+    popup.addEventListener('click', (event) => {
+      const chip = closest(event.target, (el) => el.device);
+      if (!chip) {
+        return;
+      }
+      const deviceWasActive = chip && !chip.hasAttribute('inactive');
+      if (deviceWasActive) {
+        this.removeDevice_(chip.device);
+      } else {
+        this.addDevice_(chip.device);
+      }
+      chip.toggleAttribute('inactive', deviceWasActive);
+      this.updateDevicesInHash_();
     });
 
     // Add popup to screen.

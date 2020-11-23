@@ -261,9 +261,8 @@ AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
   AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab, CSS);
   AMP.registerElement(
     'amp-story-dev-tools-tab-preview',
-    AmpStoryDevToolsTabPreview,
-    CSS
+    AmpStoryDevToolsTabPreview
   );
-  AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
-  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab, CSS);
+  AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools);
+  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab);
 });
