@@ -29,6 +29,10 @@ const TAG = 'ie-media-bug';
  * @package
  */
 export function ieMediaCheckAndFix(win, opt_platform) {
+  if (IS_ESM) {
+    return null;
+  }
+
   const platform = opt_platform || Services.platformFor(win);
   if (!platform.isIe() || matchMediaIeQuite(win)) {
     return null;

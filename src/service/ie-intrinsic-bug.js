@@ -27,6 +27,10 @@ import {transparentPng} from '../utils/img';
  * @package
  */
 export function ieIntrinsicCheckAndFix(win, opt_platform) {
+  if (IS_ESM) {
+    return;
+  }
+
   const platform = opt_platform || Services.platformFor(win);
   if (!platform.isIe()) {
     return;
