@@ -35,12 +35,9 @@ export class AmpStoryDevToolsTab extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    this.element.classList.add('i-amphtml-story-dev-tools-tab');
+
     /** @protected  {string} */
     this.storyUrl_ = element.getAttribute('story-url');
-  }
-
-  /** @override */
-  buildCallback() {
-    this.element.classList.add('i-amphtml-story-dev-tools-tab');
   }
 }
