@@ -16,6 +16,7 @@
 
 import {getCarousel, getNextArrow, getPrevArrow, getSlides} from './helpers';
 import {useStyles} from '../base-carousel.jss';
+import sleep from 'sleep-promise';
 
 const pageWidth = 500;
 const pageHeight = 800;
@@ -54,6 +55,10 @@ describes.endtoend(
 
     it('should move forwards once', async () => {
       await controller.click(nextArrow);
+
+      // Wait for render with updated active slide.
+      await sleep(100);
+
       await expect(css(prevArrow, 'opacity')).to.equal('1');
       await expect(css(nextArrow, 'opacity')).to.equal('1');
 
