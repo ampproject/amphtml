@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
+import {CSS} from '../../../build/amp-story-dev-tools-tab-preview-0.1.css';
+import {closest} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
@@ -44,15 +47,9 @@ const buildDeviceTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-dev-tools-device">
       <div class="i-amphtml-story-dev-tools-device-screen">
-        <div class="i-amphtml-story-dev-tools-device-specs"></div>
-        <div class="i-amphtml-story-dev-tools-device-name"></div>
-        <div class="lds-dual-ring"></div>
-        <amp-story-player width="1" height="1" layout="fixed">
+        <amp-story-player width="1" height="1" layout="container">
           <a></a>
         </amp-story-player>
-        <div class="i-amphtml-story-dev-tools-device-footer">
-          <div></div>
-        </div>
       </div>
     </div>
   `;
@@ -70,16 +67,20 @@ const buildDeviceChipTemplate = (element) => {
       <span>Name</span>
       <svg
         title="cross"
-        class="i-amphtml-story-dev-tools-device-remove"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="white"
         width="18px"
         height="18px"
       >
-        <path
-          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-        />
+        <rect width="20" height="3" x="2" y="10.5"></rect>
+        <rect
+          width="3"
+          height="20"
+          x="10.5"
+          y="2"
+          class="i-amphtml-story-dev-tools-device-chip-add-stick"
+        ></rect>
       </svg>
     </span>
   `;
@@ -93,7 +94,9 @@ const buildDeviceChipTemplate = (element) => {
 const buildHelpButtonTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <span class="i-amphtml-story-dev-tools-button">
+    <span
+      class="i-amphtml-story-dev-tools-button i-amphtml-story-dev-tools-button-help"
+    >
       <span>HELP</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -132,8 +135,8 @@ const buildHelpPopupTemplate = (element) => {
         <h1>Helpful links</h1>
         <a
           target="_blank"
-          href="https://developers.google.com/search/docs/guides/web-stories-creation-best-practices"
-          >Best practices for creating Web Stories
+          href="https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/"
+          >Best practices for creating a successful Web Story
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -164,21 +167,6 @@ const buildHelpPopupTemplate = (element) => {
           href="https://search.google.com/test/amp?url="
           class="i-amphtml-story-dev-tools-help-search-preview-link"
           >Web Stories Google Search Preview Tool<svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 32 32"
-            fill="none"
-          >
-            <path
-              d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z"
-              fill="white"
-            /></svg
-        ></a>
-        <a
-          target="_blank"
-          href="https://developers.google.com/search/docs/guides/enable-web-stories"
-          >Web Stories on Google<svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
             height="32"
@@ -376,10 +364,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    this.element.classList.add('i-amphtml-story-dev-tools-tab');
-
-    /** @private  {string} */
-    this.storyUrl_ = element.getAttribute('story-url');
+    /** @private  {?string} */
+    this.storyUrl_ = null;
 
     /** @private {!Array<DeviceInfo>} */
     this.devices_ = parseDevices(
@@ -389,6 +375,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const styleTag = this.element.ownerDocument.createElement('style');
+    styleTag.textContent = CSS;
+    this.element.appendChild(styleTag);
+
+    this.storyUrl_ = this.element.getAttribute('story-url');
+    this.element.classList.add('i-amphtml-story-dev-tools-tab');
     const chipListContainer = this.element.ownerDocument.createElement('div');
     chipListContainer.classList.add(
       'i-amphtml-story-dev-tools-device-chips-container'
@@ -398,6 +390,13 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     const chipList = this.element.ownerDocument.createElement('span');
     chipList.classList.add('i-amphtml-story-dev-tools-device-chips');
     chipListContainer.appendChild(chipList);
+    chipList.addEventListener('click', (event) => {
+      const chip = closest(event.target, (el) => el.device);
+      if (chip) {
+        this.removeDevice_(chip.device);
+        this.updateDevicesInHash_();
+      }
+    });
 
     chipListContainer.appendChild(this.buildAddDeviceButton_());
     chipListContainer.appendChild(this.buildHelpButton_());
@@ -417,6 +416,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   buildAddDeviceButton_() {
     const addDeviceButton = buildDeviceChipTemplate(this.element);
     addDeviceButton.classList.add('i-amphtml-story-dev-tools-add-device');
+    addDeviceButton.classList.add('i-amphtml-story-dev-tools-button');
     addDeviceButton.querySelector('span').textContent = 'ADD DEVICE';
     addDeviceButton.addEventListener('click', () => {
       this.showAddDevicePopup_();
@@ -431,8 +431,6 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   buildHelpButton_() {
     const addHelpButton = buildHelpButtonTemplate(this.element);
-    addHelpButton.classList.add('i-amphtml-story-dev-tools-button');
-    addHelpButton.classList.add('i-amphtml-story-dev-tools-help');
     addHelpButton.addEventListener('click', () => {
       this.showHelpPopup_();
     });
@@ -447,12 +445,6 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   buildDeviceLayout_(device) {
     const deviceLayout = buildDeviceTemplate(this.element);
-    deviceLayout.querySelector(
-      '.i-amphtml-story-dev-tools-device-name'
-    ).textContent = device.name ? device.name : 'Custom device';
-    deviceLayout.querySelector(
-      '.i-amphtml-story-dev-tools-device-specs'
-    ).textContent = `${device.width} x ${device.height}`;
     const devicePlayer = deviceLayout.querySelector('amp-story-player');
     devicePlayer.setAttribute('width', device.width);
     devicePlayer.setAttribute('height', device.height);
@@ -463,6 +455,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       width: device.width + 'px',
       height: device.height + 'px',
     });
+    const playerImpl = new AmpStoryPlayer(this.win, devicePlayer);
+    playerImpl.load();
     setStyles(
       deviceLayout.querySelector('.i-amphtml-story-dev-tools-device-screen'),
       {
@@ -485,7 +479,13 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     this.element.appendChild(deviceLayout);
     this.devices_.push(deviceSpecs);
     deviceSpecs.chip = this.addDeviceChip_(deviceSpecs);
-    this.onLayoutChanged();
+    this.onLayoutMeasure();
+    setStyles(deviceLayout, {'opacity': '1'});
+    setTimeout(() => {
+      setStyles(deviceLayout, {
+        'transition': 'transform ease-out 0.15s',
+      });
+    }, 150);
   }
 
   /**
@@ -497,10 +497,23 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     setTimeout(() => {
       device.chip.remove();
     }, 200);
-    this.playersManager_.removePlayer(device.player);
     this.devices_ = this.devices_.filter((d) => d != device);
     device.element.remove();
-    this.onLayoutChanged();
+    this.onLayoutMeasure();
+  }
+
+  /**
+   * @param {DeviceInfo} device
+   * @return {!Element} the device chip
+   */
+  addDeviceChip_(device) {
+    const deviceChip = buildDeviceChipTemplate(this.element);
+    deviceChip.querySelector('span').textContent = device.name;
+    deviceChip.device = device;
+    this.element
+      .querySelector('.i-amphtml-story-dev-tools-device-chips')
+      .appendChild(deviceChip);
+    return deviceChip;
   }
 
   /**
@@ -523,7 +536,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   }
 
   /** @override */
-  onMeasureChanged() {
+  onLayoutMeasure() {
+    const layoutBox = this.getLayoutBox();
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     this.devices_.forEach((deviceSpecs) => {
@@ -534,13 +548,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       );
     });
     const scale = Math.min(
-      (this.element./*OK*/ clientWidth / sumDeviceWidths) * 0.9,
-      (this.element./*OK*/ clientHeight / maxDeviceHeights) * 0.8
+      (layoutBox.width / sumDeviceWidths) * 0.9,
+      (layoutBox.height / maxDeviceHeights) * 0.8
     );
     let cumWidthSum = 0;
     const paddingSize =
-      (this.element./*OK*/ clientWidth - sumDeviceWidths * scale) /
-      (this.devices_.length + 1);
+      (layoutBox.width - sumDeviceWidths * scale) / (this.devices_.length + 1);
     toArray(
       this.element.querySelectorAll('.i-amphtml-story-dev-tools-device')
     ).forEach((deviceLayout, i) => {
@@ -551,8 +564,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       setStyles(deviceLayout, {
         'transform': `perspective(100px) translateZ(${
           (100 * (scale - 1)) / scale
-        }px)`,
-        'left': leftOffset + 'px',
+        }px) translateX(${leftOffset / scale}px)`,
       });
       cumWidthSum += deviceSpecs.width * scale;
     });
@@ -584,11 +596,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       let correspondingDevice = this.devices_.find(
         (d) => d.name == device.name
       );
+      deviceChip.device = device;
       if (!correspondingDevice) {
         deviceChip.setAttribute('inactive', '');
       }
       deviceChip.querySelector('span').textContent = device.name;
-      deviceChip.querySelector('svg').addEventListener('click', () => {
+      deviceChip.addEventListener('click', () => {
         if (deviceChip.hasAttribute('inactive')) {
           deviceChip.removeAttribute('inactive');
           correspondingDevice = {...device};

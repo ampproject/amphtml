@@ -22,6 +22,7 @@ import {
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
+import {toggle} from '../../../src/style';
 import {updateHash} from './utils';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
@@ -196,6 +197,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @private
    */
   buildTabs_() {
+    const container = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-container'
+    );
     this.tabContents_[DevToolsTab.PREVIEW] = createTabPreviewElement(
       this.win,
       this.storyUrl_,
@@ -211,6 +215,10 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       this.storyUrl_,
       DevToolsTab.LOGS
     );
+    Object.values(this.tabContents_).forEach((tabContent) => {
+      container.appendChild(tabContent);
+      toggle(tabContent, false);
+    });
   }
 
   /**
@@ -218,12 +226,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @param {!DevToolsTab} tab
    */
   switchTab_(tab) {
-    const container = this.element.querySelector(
-      '.i-amphtml-story-dev-tools-container'
-    );
     this.mutateElement(() => {
-      this.tabContents_[this.currentTab_].remove();
-      container.appendChild(this.tabContents_[tab]);
+      toggle(this.tabContents_[this.currentTab_], false);
+      toggle(this.tabContents_[tab], true);
       this.tabSelectors_.forEach((tabSelector) => {
         return tabSelector.toggleAttribute(
           'active',

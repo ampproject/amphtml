@@ -30,6 +30,12 @@ amp-story-dev-tools, amp-story-dev-tools * {
   box-sizing: border-box !important;
 }
 
+.i-amphtml-story-dev-tools-container {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 .i-amphtml-story-dev-tools-header {
   display: flex !important;
   align-items: center !important;
@@ -55,7 +61,7 @@ amp-story-dev-tools, amp-story-dev-tools * {
 .i-amphtml-story-dev-tools-button {
   cursor: pointer !important;
   font-size: 13px !important;
-  display: flex !important;
+  display: inline-flex !important;
   align-items: center !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-accent-translucent) !important;
   border-radius: 20px !important;
@@ -101,4 +107,8 @@ amp-story-dev-tools, amp-story-dev-tools * {
   opacity: 1 !important;
   cursor: initial !important;
   border-bottom: 2px solid white !important;
+}
+
+.i-amphtml-story-dev-tools-tab {
+  flex: 1 !important;
 }

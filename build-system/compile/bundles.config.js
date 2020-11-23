@@ -968,6 +968,7 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     options: {
       hasCss: true,
+      cssBinaries: ['amp-story-dev-tools-tab-preview'],
     },
     type: TYPES.MISC,
   },
