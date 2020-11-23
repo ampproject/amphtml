@@ -36,6 +36,7 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
 
     this.siblings_ = null;
 
+    /** @private {?boolean} */
     this.isOnActivePage_ = null;
 
     this.src_ = element.getAttribute('src');
@@ -49,7 +50,7 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
     this.container_ = htmlFor(this.element)`
       <div class='wrapper'>
         <div class='scaler'>
-          <img class='panner' src="map.png">
+          <img class='panner'>
         </div>
       </div>
     `;
@@ -82,12 +83,12 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
   update_() {
     if (this.isOnActivePage_) {
       this.siblings_.forEach((sibling) => {
-        this.sizeElement_(sibling);
+        this.positionElement_(sibling);
       });
     }
   }
 
-  sizeElement_(element) {
+  positionElement_(element) {
     element.querySelector('.scaler').style.transform = `scale(${this.zoom_})`;
 
     // const offsetX = this.x_ * 0.01 * element.offsetWidth;
