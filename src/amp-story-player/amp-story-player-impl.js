@@ -196,6 +196,9 @@ export class AmpStoryPlayer {
     this.rootEl_ = null;
 
     /** @private {boolean} */
+    this.isPrerendered_ = false;
+
+    /** @private {boolean} */
     this.isLaidOut_ = false;
 
     /** @private {boolean} */
@@ -232,6 +235,12 @@ export class AmpStoryPlayer {
 
     /** @private {?Deferred} */
     this.currentStoryLoadDeferred_ = null;
+
+    /** @private {?Deferred} */
+    this.currentStoryPrerenderDeferred_ = null;
+
+    /** @private {!Deferred} */
+    this.prerenderCallbackDeferred_ = new Deferred();
 
     this.attachCallbacksToElement_();
 
@@ -681,18 +690,46 @@ export class AmpStoryPlayer {
       return;
     }
 
+    this.prerenderCallbackDeferred_.promise.then(() => {
+      if (this.stories_.length > 0) {
+        this.updateVisibilityState_(
+          0 /** iframeIdx */,
+          VisibilityState.VISIBLE
+        );
+
+        this.waitForStoryToLoadPromise_(0 /** iframeIdx */);
+      }
+      this.isLaidOut_ = true;
+    });
+  }
+
+  /**
+   * @public
+   */
+  prerenderCallback() {
+    if (this.isPrerendered_) {
+      return;
+    }
+
     for (let idx = 0; idx < this.stories_.length && idx < MAX_IFRAMES; idx++) {
       const story = this.stories_[idx];
       const {iframeIdx} = story;
       const iframe = this.iframes_[iframeIdx];
-      this.layoutIframe_(
+
+      this.updateIframeSrc_(
         story,
         iframe,
-        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER
-      );
+        VisibilityState.PRERENDER,
+        this.navigationPromiseForPrerender_.bind(this)
+      ).then(() => this.prerenderCallbackDeferred_.resolve());
     }
 
-    this.isLaidOut_ = true;
+    // Unblock layoutCallback when there are no stories initially.
+    if (this.stories_.length === 0) {
+      this.prerenderCallbackDeferred_.resolve();
+    }
+
+    this.isPrerendered_ = true;
   }
 
   /**
@@ -735,6 +772,21 @@ export class AmpStoryPlayer {
     this.messagingPromises_[iframeIdx].then((messaging) =>
       messaging.registerHandler('storyContentLoaded', () => {
         this.currentStoryLoadDeferred_.resolve();
+      })
+    );
+  }
+
+  /**
+   * Resolves when story in given iframe is finished prerendering.
+   * @param {number} iframeIdx
+   * @private
+   */
+  waitForStoryToPrerenderPromise_(iframeIdx) {
+    this.currentStoryPrerenderDeferred_ = new Deferred();
+
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.registerHandler('prerenderComplete', () => {
+        this.currentStoryPrerenderDeferred_.resolve();
       })
     );
   }
@@ -1103,36 +1155,33 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Updates the iframe src only after determined by the lifeCycleWaitPromise.
+   *
+   * If the lifecycle is layout, it will wait for the current story to finish
+   * loading the content before neighboring iframes.
+   * If the lifecycle is prerender, it will wait for the current story to finish
+   * prerendering before neighboring iframes.
    * @param {!StoryDef} story
    * @param {!Element} iframe
    * @param {!VisibilityState} visibilityState
+   * @param {function} lifeCycleWaitPromise Waiting promise determined by the lifecycle.
    * @return {!Promise}
    * @private
    */
-  layoutIframe_(story, iframe, visibilityState) {
+  updateIframeSrc_(story, iframe, visibilityState, lifeCycleWaitPromise) {
     return this.maybeGetCacheUrl_(story.href)
       .then((storyUrl) => {
-        if (this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)) {
+        if (
+          this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)
+          // && iframe[AMP_VISIBILITY_STATE] === visibilityState
+        ) {
           return Promise.resolve();
         }
 
-        let navigationPromise;
-        if (visibilityState === VisibilityState.VISIBLE) {
-          if (this.currentStoryLoadDeferred_) {
-            // Reject previous navigation promise.
-            this.currentStoryLoadDeferred_.reject(
-              'Cancelling previous story load.'
-            );
-          }
-          navigationPromise = Promise.resolve();
-          this.waitForStoryToLoadPromise_(story.iframeIdx);
-        } else {
-          navigationPromise = this.currentStoryLoadDeferred_.promise;
-        }
-
-        return navigationPromise.then(() => {
+        return lifeCycleWaitPromise(story, visibilityState).then(() => {
           const {href} = this.getEncodedLocation_(storyUrl, visibilityState);
           iframe.setAttribute('src', href);
+          // iframe[AMP_VISIBILITY_STATE] = visibilityState;
           if (story.title) {
             iframe.setAttribute('title', story.title);
           }
@@ -1142,6 +1191,70 @@ export class AmpStoryPlayer {
         console /*OK*/
           .log({reason});
       });
+  }
+
+  /**
+   * Returns a promise that resolves only when the first story iframe is
+   * finished prerendering.
+   * @param {!StoryDef} story
+   * @return {!Promise}
+   * @private
+   */
+  navigationPromiseForPrerender_(story) {
+    if (story.idx === 0 && this.currentStoryPrerenderDeferred_) {
+      // Reject previous prerender promise.
+      this.currentStoryPrerenderDeferred_.reject(
+        'Cancelling previous prerender promise.'
+      );
+    }
+
+    if (story.idx === 0) {
+      this.waitForStoryToPrerenderPromise_(story.iframeIdx);
+      return Promise.resolve();
+    }
+
+    return this.currentStoryPrerenderDeferred_.promise;
+  }
+
+  /**
+   * Returns a promise that resolves only when current story finished loading
+   * its content.
+   * @param {!StoryDef} story
+   * @param {!VisibilityState} visibilityState
+   * @return {!Promise}
+   * @private
+   */
+  navigationPromiseForLayout_(story, visibilityState) {
+    if (
+      visibilityState === VisibilityState.VISIBLE &&
+      this.currentStoryLoadDeferred_
+    ) {
+      // Reject previous story load.
+      this.currentStoryLoadDeferred_.reject('Cancelling previous story load.');
+    }
+
+    if (visibilityState === VisibilityState.VISIBLE) {
+      this.waitForStoryToLoadPromise_(story.iframeIdx);
+      return Promise.resolve();
+    }
+
+    return this.currentStoryLoadDeferred_.promise;
+  }
+
+  /**
+   * @param {!StoryDef} story
+   * @param {!Element} iframe
+   * @param {!VisibilityState} visibilityState
+   * @return {!Promise}
+   * @private
+   */
+  layoutIframe_(story, iframe, visibilityState) {
+    return this.updateIframeSrc_(
+      story,
+      iframe,
+      visibilityState,
+      this.navigationPromiseForLayout_.bind(this)
+    );
   }
 
   /**

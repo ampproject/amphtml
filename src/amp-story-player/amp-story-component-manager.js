@@ -43,19 +43,37 @@ export class AmpStoryComponentManager {
       return;
     }
 
-    const intersectingCallback = (entries) => {
+    const ioPrerenderCb = (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+        elImpl.prerenderCallback();
+
+        observer.unobserve(elImpl.getElement());
+      });
+    };
+
+    const observer = new IntersectionObserver(ioPrerenderCb, {
+      rootMargin: '200%',
+    });
+    observer.observe(elImpl.getElement());
+
+    const ioLayoutCb = (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) {
           return;
         }
         elImpl.layoutCallback();
+
+        visible.unobserve(elImpl.getElement());
       });
     };
 
-    const observer = new IntersectionObserver(intersectingCallback, {
-      rootMargin: '100%',
+    const visible = new IntersectionObserver(ioLayoutCb, {
+      threshold: [0.2],
     });
-    observer.observe(elImpl.getElement());
+    visible.observe(elImpl.getElement());
   }
 
   /**
@@ -87,7 +105,12 @@ export class AmpStoryComponentManager {
    */
   layoutIfVisible_(elImpl) {
     const elTop = elImpl.getElement()./*OK*/ getBoundingClientRect().top;
-    if (this.win_./*OK*/ innerHeight * 2 > elTop) {
+    const winInnerHeight = this.win_./*OK*/ innerHeight;
+
+    if (winInnerHeight * 2 > elTop) {
+      elImpl.prerenderCallback();
+    }
+    if (winInnerHeight > elTop) {
       elImpl.layoutCallback();
     }
   }
