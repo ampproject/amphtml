@@ -83,12 +83,7 @@ const slideElement = {
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  '&$horizontalSlide': {
-    height: '100%',
-  },
 };
-
-const horizontalSlide = {};
 
 const enableSnap = {
   scrollSnapAlign: 'start',
@@ -239,7 +234,6 @@ const JSS = {
   hideScrollbar,
   horizontalScroll,
   verticalScroll,
-  horizontalSlide,
   slideElement,
   thumbnails,
   enableSnap,
