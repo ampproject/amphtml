@@ -133,6 +133,7 @@ function ScrollerWithRef(
 
   const slides = renderSlides(
     {
+      axis,
       children,
       loop,
       mixedLength,
@@ -309,6 +310,7 @@ export {Scroller};
  */
 function renderSlides(
   {
+    axis,
     children,
     loop,
     mixedLength,
@@ -333,8 +335,12 @@ function renderSlides(
           snap && mod(index, snapBy) === 0
             ? classes.enableSnap
             : classes.disableSnap
-        } ${_thumbnails ? classes.thumbnails : ''}`}
-        style={{flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`}}
+        } ${_thumbnails ? classes.thumbnails : ''} ${
+          axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
+        } `}
+        style={{
+          flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
+        }}
       >
         {child}
       </div>

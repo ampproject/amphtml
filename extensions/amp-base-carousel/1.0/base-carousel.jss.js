@@ -77,14 +77,18 @@ const hideScrollbar = {
 };
 
 const slideElement = {
-  height: '100%',
   position: 'relative',
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
+  '&$horizontalSlide': {
+    height: '100%',
+  },
 };
+
+const horizontalSlide = {};
 
 const enableSnap = {
   scrollSnapAlign: 'start',
@@ -235,6 +239,7 @@ const JSS = {
   hideScrollbar,
   horizontalScroll,
   verticalScroll,
+  horizontalSlide,
   slideElement,
   thumbnails,
   enableSnap,
