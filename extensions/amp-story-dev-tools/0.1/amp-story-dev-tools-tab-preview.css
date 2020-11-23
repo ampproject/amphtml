@@ -39,27 +39,6 @@
   padding-top: 40px;
 }
 
-.i-amphtml-story-dev-tools-device-name {
-  font-size: 1.5em !important;
-  text-align: center !important;
-  margin: .5em !important;
-  padding: 0.2em !important;
-  border-radius: 2em !important;
-  color: white !important;
-  font-weight: 700 !important;
-  font-family: 'Poppins', sans-serif !important;
-  background: #5F6367 !important;
-}
-
-.i-amphtml-story-dev-tools-device-specs {
-  font-size: 1em !important;
-  text-align: center !important;
-  padding: .2em !important;
-  color: white !important;
-  font-weight: 400 !important;
-  font-family: 'Poppins', sans-serif !important;
-}
-
 amp-story-player a {
   display: none !important;
 }
@@ -131,6 +110,10 @@ amp-story-player a {
 .i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device svg {
   fill: #79B3FF !important;
   background: black !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device:hover {
+  background: #92c1ff !important;
 }
 
 .i-amphtml-story-dev-tools-device-popup-bg {
