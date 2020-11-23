@@ -165,6 +165,7 @@ exports.rules = [
     mustNotDependOn: 'extensions/**/*.js',
     allowlist: [
       // See todo note in ads/_a4a-config.js
+      'ads/google/a4a/utils.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
     ],
   },
   // Rules for extensions and main src.
@@ -248,6 +249,7 @@ exports.rules = [
       'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-iframe.js',
 
       // Amp geo in group enum
+      'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
 

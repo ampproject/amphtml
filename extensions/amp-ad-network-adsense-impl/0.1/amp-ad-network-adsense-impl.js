@@ -23,7 +23,6 @@
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -36,6 +35,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaSignal,
   googleAdUrl,
   isCdnProxy,
   isReportingEnabled,
@@ -418,24 +418,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getServeNpaSignal() {
-    const npaSignal = this.element.getAttribute('always-serve-npa');
-    if (npaSignal == undefined) {
-      return Promise.resolve(false);
-    }
-    if (npaSignal == '') {
-      return Promise.resolve(true);
-    }
-    return Services.geoForDocOrNull(this.element).then((geoService) => {
-      if (geoService) {
-        const locations = npaSignal.split(',');
-        for (let i = 0; i < locations.length; i++) {
-          if (geoService.isInCountryGroup(locations[i]) === GEO_IN_GROUP.IN) {
-            return true;
-          }
-        }
-      }
-      return false;
-    });
+    return getServeNpaSignal(this.element);
   }
 
   /** @override */

@@ -18,6 +18,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
@@ -764,8 +765,7 @@ export class AmpA4A extends AMP.BaseElement {
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
-                /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata),
-                npaSignal
+                /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
               ),
               npaSignal
             )
@@ -1474,6 +1474,38 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getServeNpaSignal() {
     return Promise.resolve(false);
+  }
+
+  /**
+   * Checks if the `block-rtc` attribute is present and valid
+   * based on the geolocation.
+   * @return {!Promise<boolean>}
+   */
+  getBlockRtc_() {
+    const blockRtcLocations = this.element.getAttribute('block-rtc');
+    if (blockRtcLocations == undefined) {
+      return Promise.resolve(false);
+    }
+    if (blockRtcLocations == '') {
+      return Promise.resolve(true);
+    }
+    return Services.geoForDocOrNull(this.element).then((geoService) => {
+      if (!geoService) {
+        // Err on safe side and signal for RTC callouts.
+        return true;
+      }
+      const locations = blockRtcLocations.split(',');
+      for (let i = 0; i < locations.length; i++) {
+        const geoGroup = geoService.isInCountryGroup(locations[i]);
+        if (geoGroup === GEO_IN_GROUP.IN) {
+          return true;
+        } else if (geoGroup === GEO_IN_GROUP.NOT_DEFINED) {
+          user().warn('AMP-AD', `Geo group "${locations[i]}" was not defined.`);
+        }
+      }
+      // Not in any of the defined geo groups.
+      return false;
+    });
   }
 
   /**
@@ -2251,35 +2283,34 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Attempts to execute Real Time Config, if the ad network has enabled it.
    * If it is not supported by the network, but the publisher has included
-   * the rtc-config attribute on the amp-ad element, warn.
+   * the rtc-config attribute on the amp-ad element, warn. Additionaly,
+   * if the publisher has included a valid `block-rtc` attribute, don't send.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
-   * @param {boolean} serveNpaSignal
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(
-    consentState,
-    consentString,
-    consentMetadata,
-    serveNpaSignal
-  ) {
+  tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
     if (!!AMP.RealTimeConfigManager) {
-      try {
-        return new AMP.RealTimeConfigManager(
-          this.getAmpDoc()
-        ).maybeExecuteRealTimeConfig(
-          this.element,
-          this.getCustomRealTimeConfigMacros_(),
-          consentState,
-          consentString,
-          consentMetadata,
-          this.verifyStillCurrent(),
-          serveNpaSignal
-        );
-      } catch (err) {
-        user().error(TAG, 'Could not perform Real Time Config.', err);
-      }
+      return this.getBlockRtc_().then((shouldBlock) => {
+        try {
+          if (shouldBlock) {
+            return;
+          }
+          return new AMP.RealTimeConfigManager(
+            this.getAmpDoc()
+          ).maybeExecuteRealTimeConfig(
+            this.element,
+            this.getCustomRealTimeConfigMacros_(),
+            consentState,
+            consentString,
+            consentMetadata,
+            this.verifyStillCurrent()
+          );
+        } catch (err) {
+          user().error(TAG, 'Could not perform Real Time Config.', err);
+        }
+      });
     } else if (this.element.getAttribute('rtc-config')) {
       user().error(
         TAG,

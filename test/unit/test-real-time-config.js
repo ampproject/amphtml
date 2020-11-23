@@ -808,50 +808,32 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       expectedRtcConfig.vendors = {};
       expectedRtcConfig.urls = [];
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
-      rtc.modifyRtcConfigForConsentStateSettings(false);
-      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
-    });
-
-    it('should clear all callouts if serveNpaSignal is found', () => {
-      rtc.rtcConfig_.sendRegardlessOfConsentState = ['INSUFFICIENT'];
-      const expectedRtcConfig = {...rtc.rtcConfig_};
-      expectedRtcConfig.vendors = {};
-      expectedRtcConfig.urls = [];
-      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
-      rtc.modifyRtcConfigForConsentStateSettings(true);
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
     it('should handle empty urls array', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.urls = [];
-      expect(() =>
-        rtc.modifyRtcConfigForConsentStateSettings(false)
-      ).not.to.throw();
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle empty vendors object', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.vendors = {};
-      expect(() =>
-        rtc.modifyRtcConfigForConsentStateSettings(false)
-      ).not.to.throw();
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle missing urls array', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.urls = undefined;
-      expect(() =>
-        rtc.modifyRtcConfigForConsentStateSettings(false)
-      ).not.to.throw();
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle missing vendors object', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.vendors = undefined;
-      expect(() =>
-        rtc.modifyRtcConfigForConsentStateSettings(false)
-      ).not.to.throw();
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should clear just invalid custom URLs', () => {
@@ -872,7 +854,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.urls = [];
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
-      rtc.modifyRtcConfigForConsentStateSettings(false);
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
@@ -890,7 +872,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.vendors = {};
       rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
-      rtc.modifyRtcConfigForConsentStateSettings(false);
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
@@ -927,7 +909,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         },
       ];
       rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
-      rtc.modifyRtcConfigForConsentStateSettings(false);
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
@@ -967,7 +949,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         'https://www.other-rtc.com/example2',
       ];
       rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
-      rtc.modifyRtcConfigForConsentStateSettings(false);
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
@@ -975,7 +957,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       rtc.consentState_ = 'FAKE_NEW_CONSENT_STATE';
       const expectedRtcConfig = {...rtc.rtcConfig_};
 
-      rtc.modifyRtcConfigForConsentStateSettings(false);
+      rtc.modifyRtcConfigForConsentStateSettings();
       expectedRtcConfig.urls = [];
       expectedRtcConfig.vendors = {};
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
@@ -984,7 +966,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     it('should not clear RTC for a null consent state', () => {
       rtc.consentState_ = null;
       const expectedRtcConfig = {...rtc.rtcConfig_};
-      rtc.modifyRtcConfigForConsentStateSettings(false);
+      rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
   });

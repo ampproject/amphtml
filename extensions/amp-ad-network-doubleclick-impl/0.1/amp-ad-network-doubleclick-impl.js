@@ -39,6 +39,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaSignal,
   googleAdUrl,
   googleBlockParameters,
   googlePageParameters,
@@ -104,7 +105,6 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
@@ -768,24 +768,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getServeNpaSignal() {
-    const npaSignal = this.element.getAttribute('always-serve-npa');
-    if (npaSignal == undefined) {
-      return Promise.resolve(false);
-    }
-    if (npaSignal == '') {
-      return Promise.resolve(true);
-    }
-    return Services.geoForDocOrNull(this.element).then((geoService) => {
-      if (geoService) {
-        const locations = npaSignal.split(',');
-        for (let i = 0; i < locations.length; i++) {
-          if (geoService.isInCountryGroup(locations[i]) === GEO_IN_GROUP.IN) {
-            return true;
-          }
-        }
-      }
-      return false;
-    });
+    return getServeNpaSignal(this.element);
   }
 
   /**

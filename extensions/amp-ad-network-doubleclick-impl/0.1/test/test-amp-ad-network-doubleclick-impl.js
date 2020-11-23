@@ -46,7 +46,6 @@ import {
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Layout} from '../../../../src/layout';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
@@ -1153,51 +1152,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           consentState: CONSENT_POLICY_STATE.SUFFICIENT,
         }).npa
       ).to.equal(1);
-    });
-  });
-
-  describe('#getServeNpaSignal', () => {
-    it('should return false if no attribute found', async () => {
-      const element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-        height: 320,
-        width: 50,
-        'data-slot': '/1234/abc/def',
-      });
-      const impl = new AmpAdNetworkDoubleclickImpl(element);
-      expect(await impl.getServeNpaSignal()).to.false;
-    });
-
-    it('should return true, regardless of geo location if empty string', async () => {
-      const element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-        height: 320,
-        width: 50,
-        'data-slot': '/1234/abc/def',
-        'always-serve-npa': '',
-      });
-      const impl = new AmpAdNetworkDoubleclickImpl(element);
-      expect(await impl.getServeNpaSignal()).to.true;
-    });
-
-    it('should return if doc is served from a defined geo group', async () => {
-      // Stub service
-      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-        Promise.resolve({
-          isInCountryGroup(country) {
-            return country === 'usca' ? GEO_IN_GROUP.IN : GEO_IN_GROUP.NOT_IN;
-          },
-        })
-      );
-      const element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-        height: 320,
-        width: 50,
-        'data-slot': '/1234/abc/def',
-        'always-serve-npa': 'gdpr,usca',
-      });
-      const impl = new AmpAdNetworkDoubleclickImpl(element);
-      expect(await impl.getServeNpaSignal()).to.true;
     });
   });
 

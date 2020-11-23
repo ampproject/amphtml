@@ -31,7 +31,6 @@ import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -1016,37 +1015,6 @@ describes.realWin(
             expect(url).not.to.have.string('5798237482');
           });
         });
-      });
-    });
-
-    describe('#getServeNpaSignal', () => {
-      beforeEach(() => {
-        createImplTag({
-          width: '300',
-          height: '150',
-        });
-      });
-
-      it('should return false if no attribute found', async () => {
-        expect(await impl.getServeNpaSignal()).to.false;
-      });
-
-      it('should return true, regardless of geo location if empty string', async () => {
-        impl.element.setAttribute('always-serve-npa', '');
-        expect(await impl.getServeNpaSignal()).to.true;
-      });
-
-      it('should return if doc is served from a defined geo group', async () => {
-        // Stub service
-        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-          Promise.resolve({
-            isInCountryGroup(country) {
-              return country === 'usca' ? GEO_IN_GROUP.IN : GEO_IN_GROUP.NOT_IN;
-            },
-          })
-        );
-        impl.element.setAttribute('always-serve-npa', 'gdpr,usca');
-        expect(await impl.getServeNpaSignal()).to.true;
       });
     });
 

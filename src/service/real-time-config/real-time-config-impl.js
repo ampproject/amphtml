@@ -169,7 +169,6 @@ export class RealTimeConfigManager {
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @param {!Function} checkStillCurrent
-   * @param {boolean} serveNpaSignal
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    * @visibleForTesting
    */
@@ -179,8 +178,7 @@ export class RealTimeConfigManager {
     consentState,
     consentString,
     consentMetadata,
-    checkStillCurrent,
-    serveNpaSignal
+    checkStillCurrent
   ) {
     if (!this.validateRtcConfig_(element)) {
       return;
@@ -188,7 +186,7 @@ export class RealTimeConfigManager {
     this.consentState_ = consentState;
     this.consentString_ = consentString;
     this.consentMetadata_ = consentMetadata;
-    this.modifyRtcConfigForConsentStateSettings(serveNpaSignal);
+    this.modifyRtcConfigForConsentStateSettings();
     customMacros = this.assignMacros(customMacros);
     this.rtcStartTime_ = Date.now();
     this.handleRtcForCustomUrls(customMacros, checkStillCurrent);
@@ -241,8 +239,7 @@ export class RealTimeConfigManager {
 
   /**
    * Goes through the RTC config, and for any URL that we should not callout
-   * as per the current consent state and the `always-serve-npa` signal
-   * presence, deletes it from the RTC config.
+   * as per the current consent state, deletes it from the RTC config.
    * For example, if the RTC config looked like:
    *    {vendors: {vendorA: {'sendRegardlessOfConsentState': true}
    *               vendorB: {'macros': {'SLOT_ID': 1}}},
@@ -253,28 +250,23 @@ export class RealTimeConfigManager {
    * and the consentState is CONSENT_POLICY_STATE.UNKNOWN,
    * then this method call would clear the callouts to vendorB, and to the first
    * custom URL.
-   * @param {boolean} serveNpaSignal
    */
-  modifyRtcConfigForConsentStateSettings(serveNpaSignal) {
+  modifyRtcConfigForConsentStateSettings() {
     if (
-      !serveNpaSignal &&
-      (this.consentState_ == undefined ||
-        this.consentState_ == CONSENT_POLICY_STATE.SUFFICIENT ||
-        this.consentState_ == CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED)
+      this.consentState_ == undefined ||
+      this.consentState_ == CONSENT_POLICY_STATE.SUFFICIENT ||
+      this.consentState_ == CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
     ) {
       return;
     }
 
     const isGloballyValid = this.isValidCalloutForConsentState(this.rtcConfig_);
-    this.rtcConfig_.urls = (this.rtcConfig_.urls || []).filter(
-      (url) =>
-        !serveNpaSignal &&
-        this.isValidCalloutForConsentState(url, isGloballyValid)
+    this.rtcConfig_.urls = (this.rtcConfig_.urls || []).filter((url) =>
+      this.isValidCalloutForConsentState(url, isGloballyValid)
     );
 
     Object.keys(this.rtcConfig_.vendors || {}).forEach((vendor) => {
       if (
-        serveNpaSignal ||
         !this.isValidCalloutForConsentState(
           this.rtcConfig_.vendors[vendor],
           isGloballyValid
