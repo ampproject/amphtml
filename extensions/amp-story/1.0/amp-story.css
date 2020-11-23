@@ -990,7 +990,13 @@ amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-
   transition: transform 1s ease-in-out;
 }
 
-.scaler, .panner {
+amp-story-panning-image .wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+ 
+amp-story-panning-image .panner {
   height: 100%;
   -webkit-backface-visibility: hidden;
 }
