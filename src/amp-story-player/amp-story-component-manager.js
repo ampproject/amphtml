@@ -50,14 +50,14 @@ export class AmpStoryComponentManager {
         }
         elImpl.prerenderCallback();
 
-        observer.unobserve(elImpl.getElement());
+        prerenderObserver.unobserve(elImpl.getElement());
       });
     };
 
-    const observer = new IntersectionObserver(ioPrerenderCb, {
+    const prerenderObserver = new IntersectionObserver(ioPrerenderCb, {
       rootMargin: '200%',
     });
-    observer.observe(elImpl.getElement());
+    prerenderObserver.observe(elImpl.getElement());
 
     const ioLayoutCb = (entries) => {
       entries.forEach((entry) => {
@@ -66,14 +66,14 @@ export class AmpStoryComponentManager {
         }
         elImpl.layoutCallback();
 
-        visible.unobserve(elImpl.getElement());
+        visibleObserver.unobserve(elImpl.getElement());
       });
     };
 
-    const visible = new IntersectionObserver(ioLayoutCb, {
+    const visibleObserver = new IntersectionObserver(ioLayoutCb, {
       threshold: [0.2],
     });
-    visible.observe(elImpl.getElement());
+    visibleObserver.observe(elImpl.getElement());
   }
 
   /**
