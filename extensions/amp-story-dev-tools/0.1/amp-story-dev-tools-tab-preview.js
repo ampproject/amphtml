@@ -368,9 +368,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     this.storyUrl_ = null;
 
     /** @private {!Array<DeviceInfo>} */
-    this.devices_ = parseDevices(
-      this.element.getAttribute('devices') || DEFAULT_DEVICES
-    );
+    this.devices_ = [];
   }
 
   /** @override */
@@ -401,9 +399,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     chipListContainer.appendChild(this.buildAddDeviceButton_());
     chipListContainer.appendChild(this.buildHelpButton_());
 
-    const devicesList = this.devices_;
-    this.devices_ = [];
-    devicesList.forEach((device) => {
+    parseDevices(
+      this.element.getAttribute('devices') || DEFAULT_DEVICES
+    ).forEach((device) => {
       this.addDevice_(device);
     });
   }
@@ -477,8 +475,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     const deviceLayout = this.buildDeviceLayout_(deviceSpecs, this.storyUrl_);
     deviceSpecs.element = deviceLayout;
     this.element.appendChild(deviceLayout);
-    this.devices_.push(deviceSpecs);
     deviceSpecs.chip = this.addDeviceChip_(deviceSpecs);
+    this.devices_.push(deviceSpecs);
     this.onLayoutMeasure();
     setStyles(deviceLayout, {'opacity': '1'});
     setTimeout(() => {
@@ -554,14 +552,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     let cumWidthSum = 0;
     const paddingSize =
       (layoutBox.width - sumDeviceWidths * scale) / (this.devices_.length + 1);
-    toArray(
-      this.element.querySelectorAll('.i-amphtml-story-dev-tools-device')
-    ).forEach((deviceLayout, i) => {
-      const deviceSpecs = this.devices_[i];
+    this.devices_.forEach((deviceSpecs, i) => {
       const scaleWidthChange = deviceSpecs.width * (scale - 1) * 0.5; // Accounts for width change on scaling
       const cumPaddings = (i + 1) * paddingSize;
       const leftOffset = cumPaddings + cumWidthSum + scaleWidthChange;
-      setStyles(deviceLayout, {
+      setStyles(deviceSpecs.element, {
         'transform': `perspective(100px) translateZ(${
           (100 * (scale - 1)) / scale
         }px) translateX(${leftOffset / scale}px)`,
