@@ -20,6 +20,7 @@ import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 const CONTROLS = ['auto', 'always', 'never'];
+const SNAP_ALIGN = ['start', 'center'];
 
 export default {
   title: 'BaseCarousel',
@@ -52,6 +53,8 @@ export const _default = () => {
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const snap = boolean('snap', true);
+  const snapAlign = select('snap alignment', SNAP_ALIGN, 'start');
+  const snapBy = number('snap by', 1);
   const loop = boolean('loop', true);
   const advanceCount = number('advance count', 1, {min: 1});
   const visibleCount = number('visible count', 2, {min: 1});
@@ -65,6 +68,8 @@ export const _default = () => {
       loop={loop}
       outsetArrows={outsetArrows}
       snap={snap}
+      snapAlign={snapAlign}
+      snapBy={snapBy}
       style={{width, height}}
       visibleCount={visibleCount}
     >
@@ -100,6 +105,8 @@ export const mixedLength = () => {
   const autoAdvanceLoops = number('auto advance loops', 3);
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
+  const snapAlign = select('snap alignment', SNAP_ALIGN, 'start');
+  const snapBy = number('snap by', 1);
   const mixedLength = boolean('mixed length', true);
   const controls = select('show controls', ['auto', 'always', 'never']);
   const randomPreset = [
@@ -118,6 +125,8 @@ export const mixedLength = () => {
       mixedLength={mixedLength}
       loop={loop}
       snap={snap}
+      snapAlign={snapAlign}
+      snapBy={snapBy}
       style={{width, height}}
     >
       {Array.from({length: slideCount}, (x, i) => {
@@ -210,6 +219,8 @@ export const WithCaptions = () => {
 export const AutoAdvance = () => {
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const snap = boolean('snap', true);
+  const snapAlign = select('snap alignment', SNAP_ALIGN, 'start');
+  const snapBy = number('snap by', 1);
   const loop = boolean('loop', true);
   const autoAdvance = boolean('auto advance', true);
   const autoAdvanceCount = number('auto advance count', 1);
@@ -227,6 +238,8 @@ export const AutoAdvance = () => {
       autoAdvance={autoAdvance}
       loop={loop}
       snap={snap}
+      snapAlign={snapAlign}
+      snapBy={snapBy}
       style={{width: '600px', height: '300px'}}
       visibleCount={visibleCount}
     >

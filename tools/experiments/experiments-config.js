@@ -151,12 +151,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'disable-amp-story-default-media',
-    name: 'Removes default media for amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/14535',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
-  },
-  {
     id: 'amp-story-responsive-units',
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
@@ -274,10 +268,5 @@ export const EXPERIMENTS = [
     id: 'layout-aspect-ratio-css',
     name: 'Responsive layouts implemented via aspect-ratio CSS',
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
-  },
-  {
-    id: 'same-origin-iframe',
-    name: 'Allow same-origin iframes with disallowDocumentAccess',
-    spec: 'https://github.com/ampproject/amphtml/issues/30824',
   },
 ];

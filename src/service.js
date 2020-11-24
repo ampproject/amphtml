@@ -364,8 +364,16 @@ function getServiceInternal(holder, id) {
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
  * @param {boolean=} opt_override
+ * @param {boolean=} opt_adopted
  */
-function registerServiceInternal(holder, context, id, ctor, opt_override) {
+function registerServiceInternal(
+  holder,
+  context,
+  id,
+  ctor,
+  opt_override,
+  opt_adopted
+) {
   const services = getServices(holder);
   let s = services[id];
 
@@ -377,6 +385,7 @@ function registerServiceInternal(holder, context, id, ctor, opt_override) {
       reject: null,
       context: null,
       ctor: null,
+      adopted: opt_adopted || false,
     };
   }
 
@@ -387,6 +396,7 @@ function registerServiceInternal(holder, context, id, ctor, opt_override) {
 
   s.ctor = ctor;
   s.context = context;
+  s.adopted = opt_adopted || false;
 
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
@@ -511,14 +521,15 @@ export function disposeServicesForEmbed(embedWin) {
  * @param {!Object} holder Object holding the service instances.
  */
 function disposeServicesInternal(holder) {
-  // TODO(dvoytenko): Consider marking holder as destroyed for later-arriving
-  // service to be canceled automatically.
   const services = getServices(holder);
   for (const id in services) {
     if (!Object.prototype.hasOwnProperty.call(services, id)) {
       continue;
     }
     const serviceHolder = services[id];
+    if (serviceHolder.adopted) {
+      continue;
+    }
     if (serviceHolder.obj) {
       disposeServiceInternal(id, serviceHolder.obj);
     } else if (serviceHolder.promise) {
@@ -561,7 +572,9 @@ export function adoptServiceForEmbedDoc(ampdoc, id) {
     id,
     function () {
       return service;
-    }
+    },
+    /* override */ false,
+    /* adopted */ true
   );
 }
 

@@ -75,19 +75,21 @@ describes.realWin(
       (await ft.implementation_).unlayoutCallback();
     });
 
-    it.only('re-calculates font size if a resize is detected by the measurer', async () => {
+    it('re-calculates font size if a resize is detected by the measurer', async () => {
       const ft = await getFitText(
         'Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.'
       );
       expect(ft.style.fontSize).to.equal('17px');
-      // ft.style.lineHeight = '14px';
+      const setupUpdateFontSizeSpy = env.sandbox.spy(
+        ft.implementation_,
+        'updateFontSize_'
+      );
       ft.setAttribute('width', '50');
       ft.setAttribute('height', '100');
       ft.style.width = '50px';
       ft.style.height = '100px';
-      await ft.implementation_.mutateElement(() => {});
       await ft.implementation_.layoutCallback();
-      expect(ft.style.fontSize).to.equal('8px');
+      expect(setupUpdateFontSizeSpy).to.be.calledOnce;
       (await ft.implementation_).unlayoutCallback();
     });
   }
