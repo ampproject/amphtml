@@ -1085,6 +1085,9 @@ export class AmpStoryPlayer {
     this.messagingPromises_[detachedStory.iframeIdx].then((messaging) => {
       messaging.unregisterHandler('documentStateUpdate');
       messaging.unregisterHandler('selectDocument');
+      messaging.unregisterHandler('touchstart');
+      messaging.unregisterHandler('touchmove');
+      messaging.unregisterHandler('touchend');
     });
 
     nextStory.iframeIdx = detachedStory.iframeIdx;
