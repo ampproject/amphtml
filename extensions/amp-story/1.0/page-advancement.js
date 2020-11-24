@@ -472,7 +472,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInStoryPageSideEdge_(event, this.element_.getLayoutBox())
+          !this.isInStoryPageSideEdge_(event, this.getStoryPageRect_())
         ) {
           shouldHandleEvent = false;
           return true;
@@ -647,18 +647,7 @@ export class ManualAdvancement extends AdvancementConfig {
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
 
-    // Can use LayoutBox for mobile since the story page occupies entire screen.
-    // Desktop UI needs to use the getBoundingClientRect.
-    let pageRect;
-    if (
-      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
-    ) {
-      pageRect = this.element_.getLayoutBox();
-    } else {
-      pageRect = this.element_
-        .querySelector('amp-story-page[active]')
-        ./*OK*/ getBoundingClientRect();
-    }
+    const pageRect = this.getStoryPageRect_();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
@@ -717,6 +706,25 @@ export class ManualAdvancement extends AdvancementConfig {
     };
 
     this.onTapNavigation(this.getTapDirection_(page));
+  }
+
+  /**
+   * Calculates the pageRect based on the UIType.
+   * We can an use LayoutBox for mobile since the story page occupies entire screen.
+   * Desktop UI needs the most recent value from the getBoundingClientRect function.
+   * @return {DOMRect | LayoutBox}
+   * @private
+   */
+  getStoryPageRect_() {
+    if (
+      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
+    ) {
+      return this.element_.getLayoutBox();
+    } else {
+      return this.element_
+        .querySelector('amp-story-page[active]')
+        ./*OK*/ getBoundingClientRect();
+    }
   }
 
   /**
