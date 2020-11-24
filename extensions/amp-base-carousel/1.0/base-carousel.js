@@ -79,8 +79,8 @@ function isRTL(element) {
 function BaseCarouselWithRef(
   {
     advanceCount = 1,
-    arrowPrev: customArrowPrev,
-    arrowNext: customArrowNext,
+    arrowPrev,
+    arrowNext,
     autoAdvance: shouldAutoAdvance = false,
     autoAdvanceCount = 1,
     autoAdvanceInterval: customAutoAdvanceInterval = MIN_AUTO_ADVANCE_INTERVAL,
@@ -216,27 +216,6 @@ function BaseCarouselWithRef(
     setRtl(isRTL(containRef.current));
   }, [setRtl]);
 
-  const arrowPrev = (
-    <Arrow
-      advance={prev}
-      by={-advanceCount}
-      customArrow={customArrowPrev}
-      disabled={disableForDir(-1)}
-      outsetArrows={outsetArrows}
-      rtl={rtl}
-    />
-  );
-  const arrowNext = (
-    <Arrow
-      advance={next}
-      by={advanceCount}
-      customArrow={customArrowNext}
-      disabled={disableForDir(1)}
-      outsetArrows={outsetArrows}
-      rtl={rtl}
-    />
-  );
-
   return (
     <ContainWrapper
       size={true}
@@ -266,7 +245,16 @@ function BaseCarouselWithRef(
       tabIndex="0"
       {...rest}
     >
-      {!hideControls && rtl ? arrowNext : arrowPrev}
+      {!hideControls && (
+        <Arrow
+          advance={prev}
+          by={-advanceCount}
+          customArrow={arrowPrev}
+          disabled={disableForDir(-1)}
+          outsetArrows={outsetArrows}
+          rtl={rtl}
+        />
+      )}
       <Scroller
         advanceCount={advanceCount}
         alignment={snapAlign}
@@ -307,7 +295,16 @@ function BaseCarouselWithRef(
           )
         )}
       </Scroller>
-      {!hideControls && rtl ? arrowPrev : arrowNext}
+      {!hideControls && (
+        <Arrow
+          advance={next}
+          by={advanceCount}
+          customArrow={arrowNext}
+          disabled={disableForDir(1)}
+          outsetArrows={outsetArrows}
+          rtl={rtl}
+        />
+      )}
     </ContainWrapper>
   );
 }
