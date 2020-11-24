@@ -236,9 +236,6 @@ export class AmpStoryPlayer {
     /** @private {?Deferred} */
     this.currentStoryLoadDeferred_ = null;
 
-    /** @private {?Deferred} */
-    this.currentStoryPrerenderDeferred_ = null;
-
     /** @private {!Deferred} */
     this.prerenderCallbackDeferred_ = new Deferred();
 
@@ -696,8 +693,6 @@ export class AmpStoryPlayer {
           0 /** iframeIdx */,
           VisibilityState.VISIBLE
         );
-
-        this.waitForStoryToLoadPromise_(0 /** iframeIdx */);
       }
       this.isLaidOut_ = true;
     });
@@ -772,21 +767,6 @@ export class AmpStoryPlayer {
     this.messagingPromises_[iframeIdx].then((messaging) =>
       messaging.registerHandler('storyContentLoaded', () => {
         this.currentStoryLoadDeferred_.resolve();
-      })
-    );
-  }
-
-  /**
-   * Resolves when story in given iframe is finished prerendering.
-   * @param {number} iframeIdx
-   * @private
-   */
-  waitForStoryToPrerenderPromise_(iframeIdx) {
-    this.currentStoryPrerenderDeferred_ = new Deferred();
-
-    this.messagingPromises_[iframeIdx].then((messaging) =>
-      messaging.registerHandler('prerenderComplete', () => {
-        this.currentStoryPrerenderDeferred_.resolve();
       })
     );
   }
@@ -1201,19 +1181,19 @@ export class AmpStoryPlayer {
    * @private
    */
   navigationPromiseForPrerender_(story) {
-    if (story.idx === 0 && this.currentStoryPrerenderDeferred_) {
-      // Reject previous prerender promise.
-      this.currentStoryPrerenderDeferred_.reject(
+    if (story.idx === 0 && this.currentStoryLoadDeferred_) {
+      // Cancel previous story load promise.
+      this.currentStoryLoadDeferred_.reject(
         'Cancelling previous prerender promise.'
       );
     }
 
     if (story.idx === 0) {
-      this.waitForStoryToPrerenderPromise_(story.iframeIdx);
+      this.waitForStoryToLoadPromise_(story.iframeIdx);
       return Promise.resolve();
     }
 
-    return this.currentStoryPrerenderDeferred_.promise;
+    return this.currentStoryLoadDeferred_.promise;
   }
 
   /**
@@ -1229,7 +1209,7 @@ export class AmpStoryPlayer {
       visibilityState === VisibilityState.VISIBLE &&
       this.currentStoryLoadDeferred_
     ) {
-      // Reject previous story load.
+      // Cancel previous story load.
       this.currentStoryLoadDeferred_.reject('Cancelling previous story load.');
     }
 
