@@ -367,7 +367,7 @@ export class ResourcesImpl {
 
       // With IntersectionObserver, no need for remeasuring hacks.
       if (!this.intersectionObserver_) {
-        const fixPromise = !IS_ESM && ieMediaCheckAndFix(this.win);
+        const fixPromise = ieMediaCheckAndFix(this.win);
         const remeasure = () => this.remeasurePass_.schedule();
         if (fixPromise) {
           fixPromise.then(remeasure);
