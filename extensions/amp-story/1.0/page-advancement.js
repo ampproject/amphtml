@@ -47,12 +47,21 @@ const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 const TOP_REGION = 0.8;
 
 /**
- * Protected edges of the screen in pixels. When tapped on these areas, we will
+ * Protected edges of the screen as a percent of page width. When tapped on these areas, we will
  * always perform navigation. Even if a clickable element is there.
  * @const {number}
  * @private
  */
-const PROTECTED_SCREEN_EDGE_PX = 48;
+const PROTECTED_SCREEN_EDGE_PERCENT = 12;
+
+/**
+ * Minimum protected edges of the screen in pixels.
+ * If PROTECTED_SCREEN_EDGE_PERCENT results in a protected edge value less than MINIMUM_PROTECTED_SCREEN_EDGE_PX,
+ * we will use MINIMUM_PROTECTED_SCREEN_EDGE_PX.
+ * @const {number}
+ * @private
+ */
+const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
 
 /**
  * Maximum percent of screen that can be occupied by a single link
@@ -565,10 +574,21 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInStoryPageSideEdge_(event, pageRect) {
-    return (
-      event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
-    );
+    const sideEdgeWidth =
+      pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
+
+    if (sideEdgeWidth > MINIMUM_PROTECTED_SCREEN_EDGE_PX) {
+      return (
+        event.clientX <= pageRect.x + sideEdgeWidth ||
+        event.clientX >= pageRect.x + pageRect.width - sideEdgeWidth
+      );
+    } else {
+      return (
+        event.clientX <= pageRect.x + MINIMUM_PROTECTED_SCREEN_EDGE_PX ||
+        event.clientX >=
+          pageRect.x + pageRect.width - MINIMUM_PROTECTED_SCREEN_EDGE_PX
+      );
+    }
   }
 
   /**
