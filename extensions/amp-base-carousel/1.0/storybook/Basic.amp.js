@@ -24,7 +24,10 @@ export default {
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
-    extensions: [{name: 'amp-base-carousel', version: '1.0'}],
+    extensions: [
+      {name: 'amp-bind', version: '0.1'},
+      {name: 'amp-base-carousel', version: '1.0'},
+    ],
     experiments: ['amp-base-carousel-bento'],
   },
 };
@@ -58,6 +61,7 @@ export const Default = () => {
         outset-arrows={outsetArrows}
         width="880"
         height="225"
+        data-amp-bind-slide="activeSlide"
         snap={String(snap)}
         snap-align={snapAlign}
         snap-by={snapBy}
@@ -91,6 +95,9 @@ export const Default = () => {
         <button on="tap:carousel.goToSlide(index=3)">goToSlide(index=3)</button>
         <button on="tap:carousel.next">Next</button>
         <button on="tap:carousel.prev">Prev</button>
+        <button on="tap:AMP.setState({activeSlide: 3})">
+          mutate slide to index 3
+        </button>
       </div>
     </main>
   );

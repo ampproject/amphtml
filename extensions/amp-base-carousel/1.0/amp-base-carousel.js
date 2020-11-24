@@ -43,6 +43,13 @@ class AmpBaseCarousel extends PreactBaseElement {
       },
       ActionTrust.LOW
     );
+    const mu = new MutationObserver(() => {
+      const slide = parseInt(element.getAttribute('slide'), 10);
+      if (!isNaN(slide)) {
+        this.api().goToSlide(slide);
+      }
+    });
+    mu.observe(element, {attributeFilter: ['slide']});
     return dict({
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
