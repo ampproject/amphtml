@@ -2749,85 +2749,18 @@ class ExtensionsContext {
   }
 }
 
-// If any script in the page uses LTS, all scripts must use LTS. This is used
-// to record when a script is seen and validate following script tags.
+// If any script in the page uses a specific release version, then all scripts
+// must use that specific release version. This is used to record the first seen
+// script tag and ensure all following script tags follow the convention set by
+// it.
 /** @enum {string} */
 const ScriptReleaseVersion = {
-  UNKNOWN: 'UNKNOWN',
-  STANDARD: 'STANDARD',
+  UNKNOWN: 'unknown',
+  STANDARD: 'standard',
   LTS: 'LTS',
+  MODULE_NOMODULE: 'module/nomodule',
+  MODULE_NOMODULE_LTS: 'module/nomodule LTS',
 };
-
-/**
- * Gets the name attribute for an extension script tag.
- * @param {!parserInterface.ParsedHtmlTag} tag
- * @return {string}
- */
-function ExtensionScriptNameAttribute(tag) {
-  if (tag.upperName() == 'SCRIPT') {
-    for (const attribute
-             of ['custom-element', 'custom-template', 'host-service']) {
-      if (attribute in tag.attrsByKey()) {
-        return attribute;
-      }
-    }
-  }
-  return '';
-}
-
-/**
- * Gets the extension name for an extension script tag.
- * @param {!parserInterface.ParsedHtmlTag} tag
- * @return {string}
- */
-function ExtensionScriptName(tag) {
-  const nameAttr = ExtensionScriptNameAttribute(tag);
-  if (nameAttr) {
-    // Extension script names are required to be in lowercase by the
-    // validator, so we don't need to lowercase them here.
-    return tag.attrsByKey()[nameAttr] || '';
-  }
-  return '';
-}
-
-/**
- * Tests if a tag is an extension script tag.
- * @param {!parserInterface.ParsedHtmlTag} tag
- * @return {boolean}
- */
-function IsExtensionScript(tag) {
-  return !!ExtensionScriptNameAttribute(tag);
-}
-
-/**
- * Tests if a tag is an async script tag.
- * @param {!parserInterface.ParsedHtmlTag} tag
- * @return {boolean}
- */
-function IsAsyncScriptTag(tag) {
-  return tag.upperName() == 'SCRIPT' && 'async' in tag.attrsByKey() &&
-      'src' in tag.attrsByKey();
-}
-
-/**
- * Tests if a tag is the AMP runtime script tag.
- * @param {!parserInterface.ParsedHtmlTag} tag
- * @return {boolean}
- */
-function IsAmpRuntimeScript(tag) {
-  const src = tag.attrsByKey()['src'] || '';
-  return IsAsyncScriptTag(tag) && !IsExtensionScript(tag) &&
-      src.startsWith('https://cdn.ampproject.org/') && src.endsWith('/v0.js');
-}
-
-/**
- * Tests if a URL is for the LTS version of a script.
- * @param {string} url
- * @return {boolean}
- */
-function IsLtsScriptUrl(url) {
-  return url.startsWith('https://cdn.ampproject.org/lts/');
-}
 
 /**
  * The Context keeps track of the line / column that the validator is
@@ -3075,16 +3008,12 @@ class Context {
   /**
    * Record if this document contains a tag requesting the LTS runtime engine.
    * @param {!parserInterface.ParsedHtmlTag} parsedTag
-   * @param {!generated.ValidationResult} result
    * @private
    */
-  recordScriptReleaseVersionFromTagResult_(parsedTag, result) {
+  recordScriptReleaseVersionFromTagResult_(parsedTag) {
     if (this.getScriptReleaseVersion() === ScriptReleaseVersion.UNKNOWN &&
-        (IsExtensionScript(parsedTag) || IsAmpRuntimeScript(parsedTag))) {
-      const src = parsedTag.attrsByKey()['src'] || '';
-      this.scriptReleaseVersion_ = IsLtsScriptUrl(src) ?
-          ScriptReleaseVersion.LTS :
-          ScriptReleaseVersion.STANDARD;
+        (parsedTag.isExtensionScript() || parsedTag.isAmpRuntimeScript())) {
+      this.scriptReleaseVersion_ = getScriptReleaseVersion(parsedTag);
     }
   }
 
@@ -3113,8 +3042,7 @@ class Context {
     this.recordAttrRequiresExtension_(encounteredTag, tagResult);
     this.updateFromTagResult_(referencePointResult);
     this.updateFromTagResult_(tagResult);
-    this.recordScriptReleaseVersionFromTagResult_(
-        encounteredTag, tagResult.validationResult);
+    this.recordScriptReleaseVersionFromTagResult_(encounteredTag);
     this.addInlineStyleByteSize(tagResult.inlineStyleCssBytes);
   }
 
@@ -4772,7 +4700,7 @@ function getExtensionNameAttribute(extensionSpec) {
  * @param {!generated.ValidationResult} result
  * @return {boolean}
  */
-function validateAttributeInExtension(tagSpec, context, attr, result) {
+function validateAttrInExtension(tagSpec, context, attr, result) {
   asserts.assert(tagSpec.extensionSpec !== null);
 
   const {extensionSpec} = tagSpec;
@@ -4791,7 +4719,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
     return true;
   } else if (attr.name === 'src') {
     const srcUrlRe =
-        /^https:\/\/cdn\.ampproject\.org(?:\/lts)?\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js$/;
+        /^https:\/\/cdn\.ampproject\.org(?:\/lts)?\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?$/;
     const reResult = srcUrlRe.exec(attr.value);
     // If the src URL matches this regex and the base name of the file matches
     // the extension, look to see if the version matches.
@@ -4838,34 +4766,80 @@ function validateClassAttr(attr, tagSpec, context, result) {
 }
 
 /**
+ * @param {!parserInterface.ParsedHtmlTag} tag
+ * @return {!ScriptReleaseVersion}
+ */
+function getScriptReleaseVersion(tag) {
+  if (tag.isModuleLtsScriptTag() || tag.isNomoduleLtsScriptTag())
+    return ScriptReleaseVersion.MODULE_NOMODULE_LTS;
+  if (tag.isModuleScriptTag() || tag.isNomoduleScriptTag())
+    return ScriptReleaseVersion.MODULE_NOMODULE;
+  if (tag.isLtsScriptTag()) return ScriptReleaseVersion.LTS;
+  return ScriptReleaseVersion.STANDARD;
+}
+
+/**
  * Validates that LTS is used for either all script sources or none.
- * @param {!parserInterface.ParsedAttr} srcAttr
+ * @param {!parserInterface.ParsedHtmlTag} tag
  * @param {!generated.TagSpec} tagSpec
  * @param {!Context} context
  * @param {!generated.ValidationResult} result
  */
-function validateScriptSrcAttr(srcAttr, tagSpec, context, result) {
+function validateScriptSrcAttr(tag, tagSpec, context, result) {
   if (context.getScriptReleaseVersion() === ScriptReleaseVersion.UNKNOWN)
     return;
 
-  const scriptReleaseVersion = IsLtsScriptUrl(srcAttr.value) ?
-      ScriptReleaseVersion.LTS :
-      ScriptReleaseVersion.STANDARD;
+  const scriptReleaseVersion = getScriptReleaseVersion(tag);
 
   if (context.getScriptReleaseVersion() != scriptReleaseVersion) {
     const specName = tagSpec.extensionSpec !== null ?
         tagSpec.extensionSpec.name :
         tagSpec.specName;
-    context.addError(
-        scriptReleaseVersion == ScriptReleaseVersion.LTS ?
-            generated.ValidationError.Code.LTS_SCRIPT_AFTER_NON_LTS :
-            generated.ValidationError.Code.NON_LTS_SCRIPT_AFTER_LTS,
-        context.getLineCol(),
-        /*params=*/[specName],
 
-        'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-            'amphtml#required-markup',
-        result);
+    switch (context.getScriptReleaseVersion()) {
+      case ScriptReleaseVersion.LTS:
+        context.addError(
+            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.getLineCol(),
+            /*params=*/
+            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
+            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
+                'amphtml#required-markup',
+            result);
+        break;
+      case ScriptReleaseVersion.MODULE_NOMODULE:
+        context.addError(
+            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.getLineCol(),
+            /*params=*/
+            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
+            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
+                'amphtml#required-markup',
+            result);
+        break;
+      case ScriptReleaseVersion.MODULE_NOMODULE_LTS:
+        context.addError(
+            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.getLineCol(),
+            /*params=*/
+            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
+            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
+                'amphtml#required-markup',
+            result);
+        break;
+      case ScriptReleaseVersion.STANDARD:
+        context.addError(
+            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.getLineCol(),
+            /*params=*/
+            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
+            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
+                'amphtml#required-markup',
+            result);
+        break;
+      default:
+        break;
+    }
   }
 }
 
@@ -5211,9 +5185,10 @@ function validateAttributes(
     // If |spec| is the runtime or an extension script, validate that LTS is
     // either used by all pages or no pages.
     if (attr.name == 'src' &&
-        (IsExtensionScript(encounteredTag) ||
-         IsAmpRuntimeScript(encounteredTag))) {
-      validateScriptSrcAttr(attr, spec, context, result.validationResult);
+        (encounteredTag.isExtensionScript() ||
+         encounteredTag.isAmpRuntimeScript())) {
+      validateScriptSrcAttr(
+          encounteredTag, spec, context, result.validationResult);
     }
 
     if (!(attr.name in attrsByName)) {
@@ -5240,7 +5215,7 @@ function validateAttributes(
       // this method.  For 'src', we also keep track whether we validated it
       // this way, (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
-          validateAttributeInExtension(
+          validateAttrInExtension(
               spec, context, attr, result.validationResult)) {
         if (attr.name === 'src') {
           seenExtensionSrcAttr = true;
@@ -5933,6 +5908,9 @@ class ParsedValidatorRules {
 
     // For every tagspec that contains an ExtensionSpec, we add several
     // TagSpec fields corresponding to the data found in the ExtensionSpec.
+    // The addition of module/nomodule extensions happens in validator_gen_js.py
+    // and are built as proper JavaScript classes. They will also be expanded
+    // by this method.
     this.expandExtensionSpec_ = function() {
       const numTags = this.rules_.tags.length;
       for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
@@ -6505,6 +6483,8 @@ class ParsedValidatorRules {
           // that has been validated, then move on to the next
           // alsoRequiresTagWarning.
           if (alsoRequiresTagspec.getSpec().extensionSpec !== null &&
+              alsoRequiresTagspec.getSpec().specName.endsWith(
+                  'extension script') &&
               this.hasValidatedAlternativeTagSpec(
                   context, alsoRequiresTagspec.getSpec().extensionSpec.name)) {
             continue;
