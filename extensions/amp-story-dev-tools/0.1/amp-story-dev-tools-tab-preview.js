@@ -20,7 +20,6 @@ import {closest} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
-import {toArray} from '../../../src/types';
 import {updateHash} from './utils';
 
 /**
@@ -232,9 +231,9 @@ const buildAddDevicePopupTemplate = (element) => {
   `;
 };
 
-const DEFAULT_DEVICES = 'iphone11discover;oneplus5t;pixel2';
+const DEFAULT_DEVICES = 'iphone11native;oneplus5t;pixel2';
 
-const ALL_SCREEN_SIZES = [
+const ALL_DEVICES = [
   {
     'name': 'Pixel 2',
     'width': 411,
@@ -319,7 +318,12 @@ function simplifyDeviceName(name) {
 }
 
 /**
- * Get devices from the queryHash into list of devices
+ * Get devices from the element attribute into list of devices.
+ *
+ * Uses simplifyDeviceName function to match the names passed on the attribute,
+ * finding the first device in the list of ALL_DEVICES that starts with the string passed.
+ * Eg: `devices="ipad;iphone"` will find the ipad and also the first device in ALL_DEVICES
+ * that starts with "iphone" (ignoring case and symbols)
  * @param {string} queryHash
  * @return {any[]}
  */
@@ -330,7 +334,7 @@ function parseDevices(queryHash) {
     const deviceSpecs = device.split(':');
     let currSpecs = null;
     if (deviceSpecs.length == 1) {
-      currSpecs = ALL_SCREEN_SIZES.find((el) => {
+      currSpecs = ALL_DEVICES.find((el) => {
         // Find first device that has prefix of the device name passed in.
         const currDeviceName = simplifyDeviceName(el.name);
         const specDeviceName = simplifyDeviceName(deviceSpecs[0]);
@@ -354,7 +358,6 @@ function parseDevices(queryHash) {
  *  width: number,
  *  height: number,
  *  deviceHeight: ?number,
- *  custom: ?boolean,
  * }}
  */
 export let DeviceInfo;
@@ -519,15 +522,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   updateDevicesInHash_() {
     const devicesStringRepresentation = this.devices_
-      .map((device) => {
-        if (device.custom) {
-          return (
-            `${device.width}:${device.height}` +
-            (device.name ? ':' + device.name : '')
-          );
-        }
-        return device.name.toLowerCase().replace(/[^a-z0-9]/gi, '');
-      })
+      .map((device) => simplifyDeviceName(device.name))
       .join(';');
     this.element.setAttribute('devices', devicesStringRepresentation);
     updateHash({'devices': devicesStringRepresentation}, this.win);
@@ -557,9 +552,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       const cumPaddings = (i + 1) * paddingSize;
       const leftOffset = cumPaddings + cumWidthSum + scaleWidthChange;
       setStyles(deviceSpecs.element, {
-        'transform': `perspective(100px) translateZ(${
+        'transform': `translateX(${leftOffset}px) perspective(100px) translateZ(${
           (100 * (scale - 1)) / scale
-        }px) translateX(${leftOffset / scale}px)`,
+        }px)`,
       });
       cumWidthSum += deviceSpecs.width * scale;
     });
@@ -586,7 +581,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       );
       return obj;
     }, {});
-    ALL_SCREEN_SIZES.forEach((device) => {
+    ALL_DEVICES.forEach((device) => {
       const deviceChip = buildDeviceChipTemplate(this.element);
       const correspondingDevice = this.devices_.find(
         (d) => d.name == device.name
