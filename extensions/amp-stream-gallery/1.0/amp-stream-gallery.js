@@ -63,17 +63,21 @@ AmpStreamGallery['children'] = {
 
 /** @override */
 AmpStreamGallery['props'] = {
-  'extraSpace': {attr: 'extra-space', type: 'string'},
-  'insetArrowVisibility': {attr: 'inset-arrow-visibility', type: 'string'},
-  'loop': {attr: 'loop', type: 'boolean'},
-  'minItemWidth': {attr: 'min-item-width', type: 'number'},
-  'maxItemWidth': {attr: 'max-item-width', type: 'number'},
-  'maxVisibleCount': {attr: 'max-visible-count', type: 'number'},
-  'minVisibleCount': {attr: 'min-visible-count', type: 'number'},
-  'outsetArrows': {attr: 'outset-arrows', type: 'boolean'},
-  'peek': {attr: 'peek', type: 'number'},
-  'slideAlign': {attr: 'slide-align', type: 'string'},
-  'snap': {attr: 'snap', type: 'boolean'},
+  'extraSpace': {attr: 'extra-space', type: 'string', media: true},
+  'insetArrowVisibility': {
+    attr: 'inset-arrow-visibility',
+    type: 'string',
+    media: true,
+  },
+  'loop': {attr: 'loop', type: 'boolean', media: true},
+  'minItemWidth': {attr: 'min-item-width', type: 'number', media: true},
+  'maxItemWidth': {attr: 'max-item-width', type: 'number', media: true},
+  'maxVisibleCount': {attr: 'max-visible-count', type: 'number', media: true},
+  'minVisibleCount': {attr: 'min-visible-count', type: 'number', media: true},
+  'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
+  'peek': {attr: 'peek', type: 'number', media: true},
+  'slideAlign': {attr: 'slide-align', type: 'string', media: true},
+  'snap': {attr: 'snap', type: 'boolean', media: true},
 };
 
 /** @override */

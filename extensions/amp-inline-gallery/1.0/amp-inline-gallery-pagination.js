@@ -42,7 +42,7 @@ AmpInlineGalleryPagination['Component'] = Pagination;
 
 /** @override */
 AmpInlineGalleryPagination['props'] = {
-  'inset': {attr: 'inset', type: 'boolean'},
+  'inset': {attr: 'inset', type: 'boolean', media: true},
 };
 
 /** @override */
