@@ -1156,11 +1156,11 @@ export class AmpStoryPlayer {
           if (this.currentStoryLoadDeferred_) {
             // Cancel previous story load promise.
             this.currentStoryLoadDeferred_.reject(
-              'Cancelling previous prerender promise.'
+              'Cancelling previous story load promise.'
             );
           }
-          this.waitForStoryToLoadPromise_(story.iframeIdx);
           navigationPromise = Promise.resolve();
+          this.waitForStoryToLoadPromise_(story.iframeIdx);
         } else {
           navigationPromise = this.currentStoryLoadDeferred_.promise;
         }
