@@ -19,8 +19,20 @@ import {AmpStoryPlayer} from './amp-story-player-impl';
 import {initLogConstructor} from '../log';
 import {throttle} from '../utils/rate-limit';
 
-/** @const {string} */
+/** @const {number} */
 const SCROLL_THROTTLE_MS = 500;
+
+/**
+ * Minimum amount of viewports away from the player to start prerendering.
+ * @const {number}
+ */
+const MIN_VIEWPORT_PRERENDER_DISTANCE = 2;
+
+/**
+ * Minimum player visibility in viewport to change from prerender to visible.
+ * @const {number}
+ */
+const MIN_PLAYER_VISIBILITY_FOR_LAYOUT = 0.3;
 
 export class AmpStoryComponentManager {
   /**
@@ -54,8 +66,10 @@ export class AmpStoryComponentManager {
       });
     };
 
+    const rootMarginInPercentage =
+      (MIN_VIEWPORT_PRERENDER_DISTANCE * 100).toString() + '%';
     const prerenderObserver = new IntersectionObserver(ioPrerenderCb, {
-      rootMargin: '200%',
+      rootMargin: rootMarginInPercentage,
     });
     prerenderObserver.observe(elImpl.getElement());
 
@@ -71,7 +85,7 @@ export class AmpStoryComponentManager {
     };
 
     const visibleObserver = new IntersectionObserver(ioLayoutCb, {
-      threshold: [0.2],
+      threshold: [MIN_PLAYER_VISIBILITY_FOR_LAYOUT],
     });
     visibleObserver.observe(elImpl.getElement());
   }
@@ -107,10 +121,10 @@ export class AmpStoryComponentManager {
     const elTop = elImpl.getElement()./*OK*/ getBoundingClientRect().top;
     const winInnerHeight = this.win_./*OK*/ innerHeight;
 
-    if (winInnerHeight * 2 > elTop) {
+    if (winInnerHeight * MIN_VIEWPORT_PRERENDER_DISTANCE > elTop) {
       elImpl.prerenderCallback();
     }
-    if (winInnerHeight > elTop) {
+    if (winInnerHeight * (1 - MIN_PLAYER_VISIBILITY_FOR_LAYOUT) > elTop) {
       elImpl.layoutCallback();
     }
   }
