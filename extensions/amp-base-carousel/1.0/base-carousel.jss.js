@@ -163,11 +163,11 @@ const outsetArrow = {
   transform: 'translateY(-50%)',
   alignItems: 'center',
   pointerEvents: 'auto',
-  '&$arrowPrev$ltr': {
+  '&$arrowPrev': {
     marginInlineStart: '4px',
     marginInlineEnd: '10px',
   },
-  '&$arrowNext$ltr, &$arrowPrev$rtl': {
+  '&$arrowNext': {
     marginInlineStart: '10px',
     marginInlineEnd: '4px',
   },
