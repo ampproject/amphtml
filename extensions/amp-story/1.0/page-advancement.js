@@ -574,21 +574,17 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInStoryPageSideEdge_(event, pageRect) {
-    const sideEdgeWidth =
+    const sideEdgeWidthFromPercent =
       pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
+    const sideEdgeLimit = Math.max(
+      sideEdgeWidthFromPercent,
+      MINIMUM_PROTECTED_SCREEN_EDGE_PX
+    );
 
-    if (sideEdgeWidth > MINIMUM_PROTECTED_SCREEN_EDGE_PX) {
-      return (
-        event.clientX <= pageRect.x + sideEdgeWidth ||
-        event.clientX >= pageRect.x + pageRect.width - sideEdgeWidth
-      );
-    } else {
-      return (
-        event.clientX <= pageRect.x + MINIMUM_PROTECTED_SCREEN_EDGE_PX ||
-        event.clientX >=
-          pageRect.x + pageRect.width - MINIMUM_PROTECTED_SCREEN_EDGE_PX
-      );
-    }
+    return (
+      event.clientX <= pageRect.x + sideEdgeLimit ||
+      event.clientX >= pageRect.x + pageRect.width - sideEdgeLimit
+    );
   }
 
   /**
