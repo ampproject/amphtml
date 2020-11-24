@@ -715,7 +715,7 @@ export class AmpStoryPlayer {
         story,
         iframe,
         VisibilityState.PRERENDER,
-        this.navigationPromiseForPrerender_.bind(this)
+        idx === 0 /** isFirstStory */
       ).then(() => this.prerenderCallbackDeferred_.resolve());
     }
 
@@ -1135,27 +1135,37 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Updates the iframe src only after determined by the lifeCycleWaitPromise.
-   *
-   * If the lifecycle is layout, it will wait for the current story to finish
-   * loading the content before neighboring iframes.
-   * If the lifecycle is prerender, it will wait for the current story to finish
-   * prerendering before neighboring iframes.
+   * Updates the iframe src. It waits for first story before setting it to
+   * neighboring stories
    * @param {!StoryDef} story
    * @param {!Element} iframe
    * @param {!VisibilityState} visibilityState
-   * @param {function} lifeCycleWaitPromise Waiting promise determined by the lifecycle.
+   * @param {boolean} isFirstStory
    * @return {!Promise}
    * @private
    */
-  updateIframeSrc_(story, iframe, visibilityState, lifeCycleWaitPromise) {
+  updateIframeSrc_(story, iframe, visibilityState, isFirstStory) {
     return this.maybeGetCacheUrl_(story.href)
       .then((storyUrl) => {
         if (this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)) {
           return Promise.resolve();
         }
 
-        return lifeCycleWaitPromise(story, visibilityState).then(() => {
+        let navigationPromise;
+        if (isFirstStory) {
+          if (this.currentStoryLoadDeferred_) {
+            // Cancel previous story load promise.
+            this.currentStoryLoadDeferred_.reject(
+              'Cancelling previous prerender promise.'
+            );
+          }
+          this.waitForStoryToLoadPromise_(story.iframeIdx);
+          navigationPromise = Promise.resolve();
+        } else {
+          navigationPromise = this.currentStoryLoadDeferred_.promise;
+        }
+
+        return navigationPromise.then(() => {
           const {href} = this.getEncodedLocation_(storyUrl, visibilityState);
           iframe.setAttribute('src', href);
           if (story.title) {
@@ -1170,54 +1180,6 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Returns a promise that resolves only when the first story iframe is
-   * finished prerendering.
-   * @param {!StoryDef} story
-   * @return {!Promise}
-   * @private
-   */
-  navigationPromiseForPrerender_(story) {
-    if (story.idx === 0 && this.currentStoryLoadDeferred_) {
-      // Cancel previous story load promise.
-      this.currentStoryLoadDeferred_.reject(
-        'Cancelling previous prerender promise.'
-      );
-    }
-
-    if (story.idx === 0) {
-      this.waitForStoryToLoadPromise_(story.iframeIdx);
-      return Promise.resolve();
-    }
-
-    return this.currentStoryLoadDeferred_.promise;
-  }
-
-  /**
-   * Returns a promise that resolves only when current story finished loading
-   * its content.
-   * @param {!StoryDef} story
-   * @param {!VisibilityState} visibilityState
-   * @return {!Promise}
-   * @private
-   */
-  navigationPromiseForLayout_(story, visibilityState) {
-    if (
-      visibilityState === VisibilityState.VISIBLE &&
-      this.currentStoryLoadDeferred_
-    ) {
-      // Cancel previous story load.
-      this.currentStoryLoadDeferred_.reject('Cancelling previous story load.');
-    }
-
-    if (visibilityState === VisibilityState.VISIBLE) {
-      this.waitForStoryToLoadPromise_(story.iframeIdx);
-      return Promise.resolve();
-    }
-
-    return this.currentStoryLoadDeferred_.promise;
-  }
-
-  /**
    * @param {!StoryDef} story
    * @param {!Element} iframe
    * @param {!VisibilityState} visibilityState
@@ -1229,7 +1191,7 @@ export class AmpStoryPlayer {
       story,
       iframe,
       visibilityState,
-      this.navigationPromiseForLayout_.bind(this)
+      visibilityState === VisibilityState.VISIBLE /** isFirstStory */
     );
   }
 
