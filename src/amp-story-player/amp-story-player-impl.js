@@ -1151,17 +1151,13 @@ export class AmpStoryPlayer {
   updateIframeSrc_(story, iframe, visibilityState, lifeCycleWaitPromise) {
     return this.maybeGetCacheUrl_(story.href)
       .then((storyUrl) => {
-        if (
-          this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)
-          // && iframe[AMP_VISIBILITY_STATE] === visibilityState
-        ) {
+        if (this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)) {
           return Promise.resolve();
         }
 
         return lifeCycleWaitPromise(story, visibilityState).then(() => {
           const {href} = this.getEncodedLocation_(storyUrl, visibilityState);
           iframe.setAttribute('src', href);
-          // iframe[AMP_VISIBILITY_STATE] = visibilityState;
           if (story.title) {
             iframe.setAttribute('title', story.title);
           }
