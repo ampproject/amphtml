@@ -46,8 +46,8 @@ AmpInlineGalleryThumbnails['passthroughNonEmpty'] = true;
 
 /** @override */
 AmpInlineGalleryThumbnails['props'] = {
-  'aspectRatio': {attr: 'aspect-ratio', type: 'number'},
-  'loop': {attr: 'loop', type: 'boolean'},
+  'aspectRatio': {attr: 'aspect-ratio', type: 'number', media: true},
+  'loop': {attr: 'loop', type: 'boolean', media: true},
 };
 
 /** @override */
