@@ -34,6 +34,7 @@ var BaseCarouselDef = {};
  *   mixedLength: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
  *   snap: (boolean|undefined),
+ *   snapAlign: (string|undefined),
  *   snapBy: (number|undefined),
  *   visibleCount: (number|undefined),
  * }}
@@ -49,6 +50,7 @@ BaseCarouselDef.Props;
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),
  *   snap: (boolean|undefined),
+ *   snapAlign: (string|undefined),
  *   snapBy: (number|undefined),
  *   visibleCount: (number|undefined),
  * }}
