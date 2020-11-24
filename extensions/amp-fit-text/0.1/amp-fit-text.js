@@ -41,6 +41,9 @@ class AmpFitText extends AMP.BaseElement {
     /** @private {number} */
     this.maxFontSize_ = -1;
 
+    /** @private @const {?Array<unlistenDef>} */
+    this.unlisteners_ = [];
+
     /**
      * Synchronously stores updated textContent, but only after it has been
      * updated.
@@ -83,7 +86,6 @@ class AmpFitText extends AMP.BaseElement {
     this.element.appendChild(this.content_);
     this.element.appendChild(this.measurer_);
 
-
     this.minFontSize_ =
       getLengthNumeral(this.element.getAttribute('min-font-size')) || 6;
 
@@ -106,14 +108,19 @@ class AmpFitText extends AMP.BaseElement {
       },
     });
 
-    const observer = new ResizeObserver(() => 
-    this.mutateElement(() => {    
-      console.log("resize triggered");
-      this.updateFontSize_();
-    }));
-    observer.observe(this.content_);
-    observer.observe(this.measurer_);
-    return () => observer.disconnect();
+    if (window.ResizeObserver) {
+      const observer = new ResizeObserver(() =>
+        this.mutateElement(() => {
+          this.updateMeasurerContent_();
+          this.updateFontSize_();
+        })
+      );
+      observer.observe(this.content_);
+      observer.observe(this.measurer_);
+      this.unlisteners_.push(() => {
+        observer.disconnect();
+      });
+    }
   }
 
   /** @override */
@@ -133,6 +140,13 @@ class AmpFitText extends AMP.BaseElement {
     });
   }
 
+  /** @override */
+  unlayoutCallback() {
+    while (this.unlisteners_.length > 0) {
+      this.unlisteners_.pop()();
+    }
+  }
+
   /**
    * Copies text from the displayed content to the measurer element.
    */
@@ -144,15 +158,6 @@ class AmpFitText extends AMP.BaseElement {
   updateFontSize_() {
     const maxHeight = this.content_./*OK*/ offsetHeight;
     const maxWidth = this.content_./*OK*/ offsetWidth;
-    // maxHeight;
-    // maxWidth;
-    // const observer = new IntersectionObserver((entries) => {
-    //   const boundingRect = entries[0].boundingClientRect;
-    //   maxHeight = boundingRect.height;
-    //   maxWidth = boundingRect.width;
-    // });
-    // observer.observe(this.measurer_);
-
     const fontSize = calculateFontSize_(
       this.measurer_,
       maxHeight,
@@ -194,6 +199,7 @@ export function calculateFontSize_(
       minFontSize = mid;
     }
   }
+
   return minFontSize;
 }
 
