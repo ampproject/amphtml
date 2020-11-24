@@ -711,7 +711,7 @@ export class ManualAdvancement extends AdvancementConfig {
   /**
    * Calculates the pageRect based on the UIType.
    * We can an use LayoutBox for mobile since the story page occupies entire screen.
-   * Desktop UI needs to use the higher latency getBoundingClientRect function.
+   * Desktop UI needs the most recent value from the getBoundingClientRect function.
    * @return {DOMRect | LayoutBox}
    * @private
    */
