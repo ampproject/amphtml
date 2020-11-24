@@ -18,6 +18,9 @@ import {getCarousel, getNextArrow, getPrevArrow, getSlides} from './helpers';
 import {useStyles} from '../base-carousel.jss';
 import sleep from 'sleep-promise';
 
+const pageWidth = 800;
+const pageHeight = 600;
+
 describes.endtoend(
   'AMP carousel advancing with multiple visible',
   {
@@ -25,6 +28,7 @@ describes.endtoend(
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/multi-visible-single-advance.amp.html',
     experiments: ['amp-base-carousel-bento'],
     environments: ['single'],
+    initialRect: {width: pageWidth, height: pageHeight},
   },
   async function (env) {
     const styles = useStyles();
@@ -61,10 +65,9 @@ describes.endtoend(
         await sleep(1000);
       }
 
-      let slideRect = await rect(slides[slideCount - slidesInView]);
       // Check that last 3 slides are in view
-      // Less than 5 for flakiness that comes from `control.getElementRect()`
-      await expect(slideRect['x']).to.equal(0);
+      const lastSlide = await rect(slides[slideCount - slidesInView]);
+      await expect(lastSlide['x']).to.equal(0);
 
       // Check that arrows are correctly enabled/disabled
       await expect(css(nextArrow, 'opacity')).to.equal('0');
@@ -76,10 +79,9 @@ describes.endtoend(
         await sleep(1000);
       }
 
-      slideRect = await rect(slides[0]);
       // Check that last 3 slides are in view
-      // Less than 5 for flakiness that comes from `control.getElementRect()`
-      await expect(slideRect['x']).to.equal(0);
+      const firstSlide = await rect(slides[0]);
+      await expect(firstSlide['x']).to.equal(0);
 
       // Check that arrows are correctly enabled/disabled
       await expect(css(nextArrow, 'opacity')).to.equal('1');
