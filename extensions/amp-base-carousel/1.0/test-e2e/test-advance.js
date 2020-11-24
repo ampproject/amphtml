@@ -57,7 +57,7 @@ describes.endtoend(
       await controller.click(nextArrow);
 
       // Wait for render with updated active slide.
-      await sleep(100);
+      await sleep(400);
 
       await expect(css(prevArrow, 'opacity')).to.equal('1');
       await expect(css(nextArrow, 'opacity')).to.equal('1');
