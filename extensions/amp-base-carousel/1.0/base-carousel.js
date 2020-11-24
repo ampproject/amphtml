@@ -55,6 +55,23 @@ const Interaction = {
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
+ * Whether the element is on a page whose direction is right to left.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isRTL(element) {
+  const doc = element.ownerDocument;
+  if (!doc) {
+    return false;
+  }
+  const dir =
+    doc.dir ||
+    doc.body.getAttribute('dir') ||
+    doc.documentElement.getAttribute('dir');
+  return dir == 'rtl';
+}
+
+/**
  * @param {!BaseCarouselDef.Props} props
  * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
  * @return {PreactDef.Renderable}
@@ -62,8 +79,8 @@ const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 function BaseCarouselWithRef(
   {
     advanceCount = 1,
-    arrowPrev,
-    arrowNext,
+    arrowPrev: customArrowPrev,
+    arrowNext: customArrowNext,
     autoAdvance: shouldAutoAdvance = false,
     autoAdvanceCount = 1,
     autoAdvanceInterval: customAutoAdvanceInterval = MIN_AUTO_ADVANCE_INTERVAL,
@@ -191,12 +208,41 @@ function BaseCarouselWithRef(
     return interaction.current === Interaction.TOUCH;
   }, [controls, outsetArrows]);
 
+  const [rtl, setRtl] = useState(false);
+  useLayoutEffect(() => {
+    if (!containRef.current) {
+      return;
+    }
+    setRtl(isRTL(containRef.current));
+  }, [setRtl]);
+
+  const arrowPrev = (
+    <Arrow
+      advance={prev}
+      by={-advanceCount}
+      customArrow={customArrowPrev}
+      disabled={disableForDir(-1)}
+      outsetArrows={outsetArrows}
+      rtl={rtl}
+    />
+  );
+  const arrowNext = (
+    <Arrow
+      advance={next}
+      by={advanceCount}
+      customArrow={customArrowNext}
+      disabled={disableForDir(1)}
+      outsetArrows={outsetArrows}
+      rtl={rtl}
+    />
+  );
+
   return (
     <ContainWrapper
       size={true}
       layout={true}
       paint={true}
-      contentStyle={{display: 'flex'}}
+      contentStyle={{display: 'flex', direction: rtl ? 'rtl' : 'ltr'}}
       ref={containRef}
       contentRef={contentRef}
       onFocus={(e) => {
@@ -220,15 +266,7 @@ function BaseCarouselWithRef(
       tabIndex="0"
       {...rest}
     >
-      {!hideControls && (
-        <Arrow
-          advance={prev}
-          by={-advanceCount}
-          customArrow={arrowPrev}
-          disabled={disableForDir(-1)}
-          outsetArrows={outsetArrows}
-        />
-      )}
+      {!hideControls && rtl ? arrowNext : arrowPrev}
       <Scroller
         advanceCount={advanceCount}
         alignment={snapAlign}
@@ -269,15 +307,7 @@ function BaseCarouselWithRef(
           )
         )}
       </Scroller>
-      {!hideControls && (
-        <Arrow
-          advance={next}
-          by={advanceCount}
-          customArrow={arrowNext}
-          disabled={disableForDir(1)}
-          outsetArrows={outsetArrows}
-        />
-      )}
+      {!hideControls && rtl ? arrowPrev : arrowNext}
     </ContainWrapper>
   );
 }

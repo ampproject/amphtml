@@ -118,12 +118,25 @@ const arrow = {
   justifyContent: 'space-between',
   // Center the button vertically.
   top: '50%',
-  transform: 'translateY(-50%)',
   alignItems: 'center',
   pointerEvents: 'auto',
+  '&$ltr': {
+    transform: 'translateY(-50%)',
+  },
+  '&$rtl': {
+    transform: 'scaleX(-1) translateY(-50%)',
+  },
+  '&$arrowPrev$ltr, &$arrowNext$rtl': {
+    left: 0,
+  },
+  '&$arrowNext$ltr, &$arrowPrev$rtl': {
+    right: 0,
+  },
 };
-const arrowPrev = {left: 0};
-const arrowNext = {right: 0};
+const rtl = {};
+const ltr = {};
+const arrowPrev = {};
+const arrowNext = {};
 const arrowDisabled = {
   pointerEvents: 'none',
   '&$insetArrow': {
@@ -150,11 +163,11 @@ const outsetArrow = {
   transform: 'translateY(-50%)',
   alignItems: 'center',
   pointerEvents: 'auto',
-  '&$arrowPrev': {
+  '&$arrowPrev$ltr': {
     marginInlineStart: '4px',
     marginInlineEnd: '10px',
   },
-  '&$arrowNext': {
+  '&$arrowNext$ltr, &$arrowPrev$rtl': {
     marginInlineStart: '10px',
     marginInlineEnd: '4px',
   },
@@ -235,6 +248,8 @@ const JSS = {
   disableSnap,
   slideSizing,
   arrow,
+  ltr,
+  rtl,
   arrowPrev,
   arrowNext,
   arrowDisabled,
