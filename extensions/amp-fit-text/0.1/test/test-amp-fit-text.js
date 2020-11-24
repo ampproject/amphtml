@@ -53,13 +53,14 @@ describes.realWin(
         .then(() => ft);
     }
 
-    it('renders', () => {
+    it('renders', async () => {
       const text = 'Lorem ipsum';
-      return getFitText(text).then((ft) => {
+      return getFitText(text).then(async (ft) => {
         const content = ft.querySelector('.i-amphtml-fit-text-content');
         expect(content).to.not.equal(null);
         expect(content.textContent).to.equal(text);
         expect(ft.textContent).to.equal(text);
+        (await ft.implementation_).unlayoutCallback();
       });
     });
 
@@ -71,6 +72,25 @@ describes.realWin(
       await ft.implementation_.mutateElement(() => {});
       const content = ft.querySelector('.i-amphtml-fit-text-content');
       expect(content.textContent).to.equal(newText);
+      (await ft.implementation_).unlayoutCallback();
+    });
+
+    it('re-calculates font size if a resize is detected by the measurer', async () => {
+      const ft = await getFitText(
+        'Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.'
+      );
+      expect(ft.style.fontSize).to.equal('17px');
+      const setupUpdateFontSizeSpy = env.sandbox.spy(
+        ft.implementation_,
+        'updateFontSize_'
+      );
+      ft.setAttribute('width', '50');
+      ft.setAttribute('height', '100');
+      ft.style.width = '50px';
+      ft.style.height = '100px';
+      await ft.implementation_.layoutCallback();
+      expect(setupUpdateFontSizeSpy).to.be.calledOnce;
+      (await ft.implementation_).unlayoutCallback();
     });
   }
 );
