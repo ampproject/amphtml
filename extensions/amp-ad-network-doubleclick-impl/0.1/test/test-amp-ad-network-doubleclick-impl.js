@@ -1736,9 +1736,7 @@ describes.realWin(
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        env.sandbox
-          .stub(impl, 'getResource')
-          .returns({whenWithinViewport: () => Promise.resolve()});
+        env.sandbox.stub(impl, 'whenWithinViewport').returns(Promise.resolve());
       });
 
       it('should use experiment value', () => {

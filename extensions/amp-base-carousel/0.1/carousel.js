@@ -907,9 +907,7 @@ export class Carousel {
       return false;
     }
 
-    return this.forwards_
-      ? this.isScrollAtRightEdge()
-      : this.isScrollAtLeftEdge();
+    return this.isScrollAtEndingEdge_();
   }
 
   /**
@@ -921,29 +919,38 @@ export class Carousel {
       return false;
     }
 
-    return this.forwards_
-      ? this.isScrollAtLeftEdge()
-      : this.isScrollAtRightEdge();
+    return this.isScrollAtBeginningEdge_();
   }
 
   /**
    * @return {boolean} True if the scrolling is at the right edge of the
-   *    carousel. Note that this ignores RTL, and only checks for the right
-   *    edge.
+   *    carousel in LTR and left edge of the carousel if RTL.
+   * @private
    */
-  isScrollAtRightEdge() {
+  isScrollAtEndingEdge_() {
     const el = this.scrollContainer_;
-    const {width} = el./*OK*/ getBoundingClientRect();
-    return el./*OK*/ scrollLeft + Math.ceil(width) >= el./*OK*/ scrollWidth;
+    const vector =
+      el./*OK*/ getBoundingClientRect().width * (this.forwards_ ? 1 : -1);
+    const roundedVector = this.forwards_
+      ? Math.ceil(vector)
+      : Math.floor(vector);
+    const edgeClosestToEnd = el./*OK*/ scrollLeft + roundedVector;
+    const containerScrollWidth = el./*OK*/ scrollWidth;
+
+    const atEndingEdge = this.forwards_
+      ? edgeClosestToEnd >= containerScrollWidth
+      : edgeClosestToEnd <= -containerScrollWidth;
+    return atEndingEdge;
   }
 
   /**
    * @return {boolean} True if the scrolling is at the left edge of the
-   *    carousel. Note that this ignores RTL, and only checks for the left
-   *    edge.
+   *    carousel for LTR and right edge for RTL.
+   * @private
    */
-  isScrollAtLeftEdge() {
-    return this.scrollContainer_./*OK*/ scrollLeft <= 0;
+  isScrollAtBeginningEdge_() {
+    const currentScrollPos = this.scrollContainer_./*OK*/ scrollLeft;
+    return this.forwards_ ? currentScrollPos <= 0 : currentScrollPos >= 0;
   }
 
   /**
@@ -1038,7 +1045,10 @@ export class Carousel {
       // If an item is at the start of the group, it gets an aligned.
       const shouldSnap = mod(slideIndex, this.snapBy_) === 0;
 
-      setStyles(child, {
+      // If it's a slide, make sure to set the alignment of the element
+      // with the content and not the wrapping div.
+      const element = child.children.length ? child.children[0] : child;
+      setStyles(element, {
         'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
         'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
       });
