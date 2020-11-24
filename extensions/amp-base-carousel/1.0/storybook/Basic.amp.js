@@ -45,6 +45,7 @@ export const Default = () => {
   const visibleCount = text('visible count', '(min-width: 400px) 2, 1');
   const outsetArrows = text('outset arrows', '(min-width: 400px) true, false');
   const controls = select('show controls', ['auto', 'always', 'never']);
+  const defaultSlide = number('default slide', 0);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
 
@@ -62,6 +63,7 @@ export const Default = () => {
         width="880"
         height="225"
         data-amp-bind-slide="activeSlide"
+        slide={defaultSlide}
         snap={String(snap)}
         snap-align={snapAlign}
         snap-by={snapBy}

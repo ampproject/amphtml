@@ -50,7 +50,10 @@ class AmpBaseCarousel extends PreactBaseElement {
       }
     });
     mu.observe(element, {attributeFilter: ['slide']});
+
+    const defaultSlide = parseInt(element.getAttribute('slide'), 10) || 0;
     return dict({
+      'defaultSlide': defaultSlide,
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },

@@ -70,6 +70,7 @@ function BaseCarouselWithRef(
     autoAdvanceLoops = Number.POSITIVE_INFINITY,
     children,
     controls = Controls.AUTO,
+    defaultSlide = 0,
     loop,
     mixedLength = false,
     onFocus,
@@ -89,7 +90,9 @@ function BaseCarouselWithRef(
   const childrenArray = useMemo(() => toChildArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
-  const [currentSlideState, setCurrentSlideState] = useState(0);
+  const [currentSlideState, setCurrentSlideState] = useState(
+    Math.min(Math.max(defaultSlide, 0), length)
+  );
   const currentSlide = carouselContext.currentSlide ?? currentSlideState;
   const currentSlideRef = useRef(currentSlide);
   const setCurrentSlide =
