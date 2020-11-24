@@ -21,6 +21,7 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
+import {isRTL} from '../../../src/dom';
 import {
   toChildArray,
   useCallback,
@@ -54,23 +55,6 @@ const Interaction = {
 };
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
-
-/**
- * Whether the element is on a page whose direction is right to left.
- * @param {!Element} element
- * @return {boolean}
- */
-function isRTL(element) {
-  const doc = element.ownerDocument;
-  if (!doc) {
-    return false;
-  }
-  const dir =
-    doc.dir ||
-    doc.body.getAttribute('dir') ||
-    doc.documentElement.getAttribute('dir');
-  return dir == 'rtl';
-}
 
 /**
  * @param {!BaseCarouselDef.Props} props
@@ -214,7 +198,11 @@ function BaseCarouselWithRef(
     if (!containRef.current) {
       return;
     }
-    setRtl(isRTL(containRef.current));
+    const doc = containRef.current.ownerDocument;
+    if (!doc) {
+      return;
+    }
+    setRtl(isRTL(doc));
   }, [setRtl]);
 
   return (
