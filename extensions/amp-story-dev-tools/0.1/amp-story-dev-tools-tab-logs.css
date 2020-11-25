@@ -18,54 +18,31 @@ amp-story-dev-tools-tab-logs {
   overflow-y: scroll !important;
   margin-top: 30px !important;
   scrollbar-width: none !important;
+  --i-amphtml-story-dev-tools-logs-error-color: #FF5252 !important;
+  --i-amphtml-story-dev-tools-log-message-background: #ffffff0f;
+  --i-amphtml-story-dev-tools-log-spec-white-accent: #ffffff22;
 }
 
 amp-story-dev-tools-tab-logs::-webkit-scrollbar {
   display: none !important;
 }
 
-.i-amphtml-story-dev-tools-logs:after {
-  content: "" !important;
-  position: absolute !important;
-  z-index: 1 !important;
-  bottom: 40px !important;
-  left: 10% !important;
-  pointer-events: none !important;
-  background-image: linear-gradient(to bottom, transparent, black) !important;
-  width: 80% !important;
-  height: 20px !important;
-}
-
-.i-amphtml-story-dev-tools-logs:before {
-  content: "" !important;
-  position: absolute !important;
-  z-index: 1 !important;
-  top: 100px !important;
-  left: 10% !important;
-  pointer-events: none !important;
-  background-image: linear-gradient(to bottom, black, transparent) !important;
-  width: 80% !important;
-  height: 20px !important;
-}
-
 .i-amphtml-story-dev-tools-log-message {
-  margin-bottom: 1em !important;
-  background: #ffffff0f !important;
+  margin-bottom: 16px !important;
+  background: var(--i-amphtml-story-dev-tools-log-message-background) !important;
   color: white !important;
   position: relative !important;
-  padding: 1em !important;
-  border-radius: 1em !important;
-  box-shadow: 0px 2px 4px #000000 !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
 }
 
 .i-amphtml-story-dev-tools-log-type {
   margin: 0 !important;
   font-weight: 700 !important;
-  font-size: 1em !important;
+  font-size: 16px !important;
 }
 
 .i-amphtml-story-dev-tools-log-position {
-  margin-right: 1em !important;
   font-family: monospace !important;
 }
 
@@ -76,13 +53,13 @@ amp-story-dev-tools-tab-logs::-webkit-scrollbar {
   right: 10px !important;
   top: 10px !important;
   border-radius: 20px !important;
-  border: 2px solid #ffffff22 !important;
+  border: 2px solid var(--i-amphtml-story-dev-tools-log-spec-white-accent) !important;
   padding: 5px 10px !important;
   font-size: 12px !important;
 }
 
 .i-amphtml-story-dev-tools-log-spec:hover {
-  background: #ffffff22 !important;
+  background: var(--i-amphtml-story-dev-tools-log-spec-white-accent) !important;
 }
 
 .i-amphtml-story-dev-tools-log-code {
@@ -96,5 +73,5 @@ amp-story-dev-tools-tab-logs::-webkit-scrollbar {
 }
 
 .i-amphtml-story-dev-tools-log-code div:nth-child(2) {
-  color: #FF5252 !important;
+  color: var(--i-amphtml-story-dev-tools-logs-error-color) !important;
 }
