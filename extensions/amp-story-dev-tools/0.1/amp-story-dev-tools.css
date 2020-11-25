@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import './amp-story-dev-tools-tab-preview.css';
+
 amp-story-dev-tools {
   width: 100% !important;
   height: 100% !important;
@@ -23,6 +25,7 @@ amp-story-dev-tools {
   color: white !important;
   padding: 30px 10% !important;
   --i-amphtml-story-dev-tools-accent: #79B3FF;
+  --i-amphtml-story-dev-tools-accent-light: #92c1ff;
   --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55;
 }
 
