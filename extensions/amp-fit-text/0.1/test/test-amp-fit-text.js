@@ -80,15 +80,19 @@ describes.realWin(
         'Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.'
       );
       expect(ft.style.fontSize).to.equal('17px');
-      ft.setAttribute('width', '50');
-      ft.setAttribute('height', '100');
-      ft.style.width = '50px';
-      ft.style.height = '100px';
       const setupUpdateFontSizeSpy = env.sandbox.spy(
         ft.implementation_,
         'updateFontSize_'
       );
       await ft.implementation_.layoutCallback();
+      // Verify that layoutCallback calls updateFontSize.
+      expect(setupUpdateFontSizeSpy).to.be.called;
+      // Modify the size of the fit-text box.
+      ft.setAttribute('width', '50');
+      ft.setAttribute('height', '100');
+      ft.style.width = '50px';
+      ft.style.height = '100px';
+      // Verify that the ResizeObserver calls updateFontSize.
       expect(setupUpdateFontSizeSpy).to.be.called;
       (await ft.implementation_).unlayoutCallback();
     });

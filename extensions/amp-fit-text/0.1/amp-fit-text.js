@@ -41,11 +41,8 @@ class AmpFitText extends AMP.BaseElement {
     /** @private {number} */
     this.maxFontSize_ = -1;
 
-    /** @private {!Array<unlistenDef>} */
-    this.unlisteners_ = [];
-
-    /** @private {ResizeObserver} */
-    this.observer_ = null;
+    /** @private {unlistenDef} */
+    this.resizeObserverUnlistener_ = null;
 
     /**
      * Synchronously stores updated textContent, but only after it has been
@@ -110,20 +107,6 @@ class AmpFitText extends AMP.BaseElement {
         return this.textContent_ || this.contentWrapper_.textContent;
       },
     });
-
-    if (window.ResizeObserver) {
-      const observer = new ResizeObserver(() =>
-        this.mutateElement(() => {
-          this.updateMeasurerContent_();
-          this.updateFontSize_();
-        })
-      );
-      observer.observe(this.content_);
-      observer.observe(this.measurer_);
-      this.unlisteners_.push(() => {
-        observer.disconnect();
-      });
-    }
   }
 
   /** @override */
@@ -138,20 +121,20 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (window.ResizeObserver) {
-      if (this.observer_ == null) {
-        this.observer_ = new ResizeObserver(() =>
+    if (this.win.ResizeObserver) {
+      if (this.resizeObserverUnlistener_ == null) {
+        const observer = new ResizeObserver(() =>
           this.mutateElement(() => {
             this.updateMeasurerContent_();
             this.updateFontSize_();
           })
         );
+        observer.observe(this.content_);
+        observer.observe(this.measurer_);
+        this.resizeObserverUnlistener_ = function () {
+          observer.disconnect();
+        };
       }
-      this.observer_.observe(this.content_);
-      this.observer_.observe(this.measurer_);
-      this.unlisteners_.push(() => {
-        this.observer_.disconnect();
-      });
     }
     return this.mutateElement(() => {
       this.updateFontSize_();
@@ -160,9 +143,7 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    while (this.unlisteners_.length > 0) {
-      this.unlisteners_.pop()();
-    }
+    this.resizeObserverUnlistener_();
   }
 
   /**
