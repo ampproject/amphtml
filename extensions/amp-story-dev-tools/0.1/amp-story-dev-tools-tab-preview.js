@@ -145,9 +145,10 @@ const buildHelpDialogTemplate = (element) => {
         </div>
         <h1>Helpful links</h1>
         <a
+          class="i-amphtml-story-dev-tools-device-dialog-link"
           target="_blank"
           href="https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/"
-          >Best practices for creating a successful Web Story
+          ><span>Best practices for creating a successful Web Story</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -160,8 +161,12 @@ const buildHelpDialogTemplate = (element) => {
               fill="white"
             /></svg
         ></a>
-        <a target="_blank" href="https://amp.dev/about/stories/"
-          >Learn more about Web Stories<svg
+        <a
+          class="i-amphtml-story-dev-tools-device-dialog-link"
+          target="_blank"
+          href="https://amp.dev/about/stories/"
+          ><span>Learn more about Web Stories</span
+          ><svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
             height="32"
@@ -174,10 +179,11 @@ const buildHelpDialogTemplate = (element) => {
             /></svg
         ></a>
         <a
+          class="i-amphtml-story-dev-tools-device-dialog-link i-amphtml-story-dev-tools-help-search-preview-link"
           target="_blank"
           href="https://search.google.com/test/amp?url="
-          class="i-amphtml-story-dev-tools-help-search-preview-link"
-          >Web Stories Google Search Preview Tool<svg
+          ><span>Web Stories Google Search Preview Tool</span
+          ><svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
             height="32"
@@ -372,7 +378,7 @@ function parseDevices(queryHash) {
       const currDeviceName = simplifyDeviceName(el.name);
       const specDeviceName = simplifyDeviceName(deviceName);
       return (
-        currDeviceName.substring(0, specDeviceName.length) == specDeviceName
+        currDeviceName.substring(0, specDeviceName.length) === specDeviceName
       );
     });
     if (currSpecs) {
