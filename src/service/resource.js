@@ -213,9 +213,6 @@ export class Resource {
      */
     this.pendingChangeSize_ = undefined;
 
-    /** @private {boolean} */
-    this.loadedOnce_ = false;
-
     const deferred = new Deferred();
 
     /** @private @const {!Promise} */
@@ -463,8 +460,9 @@ export class Resource {
   }
 
   /** Removes the premeasured rect, likely forcing a manual measure. */
-  invalidatePremeasurement() {
+  invalidatePremeasurementAndRequestMeasure() {
     this.premeasuredRect_ = null;
+    this.requestMeasure();
   }
 
   /**
@@ -761,6 +759,8 @@ export class Resource {
    *    viewport range given.
    */
   whenWithinViewport(viewport) {
+    // TODO(#30620): remove this method once IntersectionObserver{root:doc} is
+    // polyfilled.
     devAssert(viewport !== false);
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
@@ -994,7 +994,6 @@ export class Resource {
       this.loadPromiseResolve_ = null;
     }
     this.layoutPromise_ = null;
-    this.loadedOnce_ = true;
     this.state_ = success
       ? ResourceState.LAYOUT_COMPLETE
       : ResourceState.LAYOUT_FAILED;
@@ -1010,7 +1009,7 @@ export class Resource {
   /**
    * Returns true if the resource layout has not completed or failed.
    * @return {boolean}
-   * */
+   */
   isLayoutPending() {
     return (
       this.state_ != ResourceState.LAYOUT_COMPLETE &&
@@ -1027,13 +1026,6 @@ export class Resource {
    */
   loadedOnce() {
     return this.loadPromise_;
-  }
-
-  /**
-   * @return {boolean} true if the resource has been loaded at least once.
-   */
-  hasLoadedOnce() {
-    return this.loadedOnce_;
   }
 
   /**

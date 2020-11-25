@@ -18,6 +18,7 @@ import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Deferred} from '../utils/promise';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
+import {PageScroller} from './page-scroller';
 import {VisibilityState} from '../visibility-state';
 import {
   addParamsToUrl,
@@ -173,11 +174,6 @@ export class AmpStoryPlayer {
    * @param {!Element} element
    */
   constructor(win, element) {
-    console./*OK*/ assert(
-      element.childElementCount > 0,
-      'Missing configuration.'
-    );
-
     /** @private {!Window} */
     this.win_ = win;
 
@@ -238,6 +234,9 @@ export class AmpStoryPlayer {
     this.currentStoryLoadDeferred_ = null;
 
     this.attachCallbacksToElement_();
+
+    /** @private {!PageScroller} */
+    this.pageScroller_ = new PageScroller(win);
   }
 
   /**
@@ -573,8 +572,8 @@ export class AmpStoryPlayer {
             this.onTouchMove_(/** @type {!Event} */ (data));
           });
 
-          messaging.registerHandler('touchend', () => {
-            this.onTouchEnd_();
+          messaging.registerHandler('touchend', (event, data) => {
+            this.onTouchEnd_(/** @type {!Event} */ (data));
           });
 
           messaging.registerHandler('selectDocument', (event, data) => {
@@ -741,59 +740,64 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Shows the story provided by the URL in the player.
-   * @param {string} storyUrl
+   * Shows the story provided by the URL in the player and go to the page if provided.
+   * @param {?string} storyUrl
+   * @param {string=} pageId
    */
-  show(storyUrl) {
+  show(storyUrl, pageId = null) {
     // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
+    const storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
 
     // TODO(#28987): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
 
-    if (storyIdx === this.currentIdx_) {
-      return;
+    if (storyIdx !== this.currentIdx_) {
+      const adjacentStoriesIdx = this.iframePool_.findAdjacent(
+        storyIdx,
+        this.stories_.length - 1
+      );
+
+      adjacentStoriesIdx.forEach((idx) => {
+        const story = this.stories_[idx];
+        let {iframeIdx} = story;
+
+        if (iframeIdx === -1) {
+          const visibilityState =
+            idx === storyIdx
+              ? VisibilityState.VISIBLE
+              : VisibilityState.PRERENDER;
+          this.allocateIframeForStory_(
+            idx,
+            storyIdx < this.currentIdx_ /** reverse */,
+            visibilityState
+          );
+          iframeIdx = story.iframeIdx;
+        }
+
+        let iframePosition;
+        if (idx === storyIdx) {
+          iframePosition = IframePosition.CURRENT;
+          this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
+          tryFocus(this.iframes_[iframeIdx]);
+        } else {
+          iframePosition =
+            idx > storyIdx ? IframePosition.NEXT : IframePosition.PREVIOUS;
+        }
+
+        this.updateIframePosition_(iframeIdx, iframePosition);
+      });
+
+      this.currentIdx_ = storyIdx;
+      this.onNavigation_();
     }
 
-    const adjacentStoriesIdx = this.iframePool_.findAdjacent(
-      storyIdx,
-      this.stories_.length - 1
-    );
-
-    adjacentStoriesIdx.forEach((idx) => {
-      const story = this.stories_[idx];
-      let {iframeIdx} = story;
-
-      if (iframeIdx === -1) {
-        const visibilityState =
-          idx === storyIdx
-            ? VisibilityState.VISIBLE
-            : VisibilityState.PRERENDER;
-        this.allocateIframeForStory_(
-          idx,
-          storyIdx < this.currentIdx_ /** reverse */,
-          visibilityState
-        );
-        iframeIdx = story.iframeIdx;
-      }
-
-      let iframePosition;
-      if (idx === storyIdx) {
-        iframePosition = IframePosition.CURRENT;
-        this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
-        tryFocus(this.iframes_[iframeIdx]);
-      } else {
-        iframePosition =
-          idx > storyIdx ? IframePosition.NEXT : IframePosition.PREVIOUS;
-      }
-
-      this.updateIframePosition_(iframeIdx, iframePosition);
-    });
-
-    this.currentIdx_ = storyIdx;
-    this.onNavigation_();
+    if (pageId != null) {
+      this.goToPageId_(pageId);
+    }
   }
 
   /** Sends a message muting the current story. */
@@ -1081,6 +1085,9 @@ export class AmpStoryPlayer {
     this.messagingPromises_[detachedStory.iframeIdx].then((messaging) => {
       messaging.unregisterHandler('documentStateUpdate');
       messaging.unregisterHandler('selectDocument');
+      messaging.unregisterHandler('touchstart');
+      messaging.unregisterHandler('touchmove');
+      messaging.unregisterHandler('touchend');
     });
 
     nextStory.iframeIdx = detachedStory.iframeIdx;
@@ -1277,6 +1284,17 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * @param {string} pageId
+   * @private
+   */
+  goToPageId_(pageId) {
+    const {iframeIdx} = this.stories_[this.currentIdx_];
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.sendRequest('selectPage', {'id': pageId})
+    );
+  }
+
+  /**
    * Sends a message to the current story to navigate delta pages.
    * @param {number} delta
    * @private
@@ -1463,53 +1481,59 @@ export class AmpStoryPlayer {
       return;
     }
 
-    this.touchEventState_.startX = coordinates.x;
-    this.touchEventState_.startY = coordinates.y;
+    this.touchEventState_.startX = coordinates.screenX;
+    this.touchEventState_.startY = coordinates.screenY;
+
+    this.pageScroller_.onTouchStart(event.timeStamp, coordinates.clientY);
   }
 
   /**
-   * Reacts to touchmove events and handles horizontal swipes.
+   * Reacts to touchmove events.
    * @param {!Event} event
    * @private
    */
   onTouchMove_(event) {
-    if (this.touchEventState_.isSwipeX === false) {
-      return;
-    }
-
     const coordinates = this.getClientTouchCoordinates_(event);
     if (!coordinates) {
       return;
     }
 
-    const {x, y} = coordinates;
-    this.touchEventState_.lastX = x;
+    if (this.touchEventState_.isSwipeX === false) {
+      this.pageScroller_.onTouchMove(event.timeStamp, coordinates.clientY);
+      return;
+    }
+
+    const {screenX, screenY} = coordinates;
+    this.touchEventState_.lastX = screenX;
 
     if (this.touchEventState_.isSwipeX === null) {
       this.touchEventState_.isSwipeX =
-        Math.abs(this.touchEventState_.startX - x) >
-        Math.abs(this.touchEventState_.startY - y);
+        Math.abs(this.touchEventState_.startX - screenX) >
+        Math.abs(this.touchEventState_.startY - screenY);
       if (!this.touchEventState_.isSwipeX) {
         return;
       }
     }
 
     this.onSwipeX_({
-      deltaX: x - this.touchEventState_.startX,
+      deltaX: screenX - this.touchEventState_.startX,
       last: false,
     });
   }
 
   /**
    * Reacts to touchend events. Resets cached touch event states.
+   * @param {!Event} event
    * @private
    */
-  onTouchEnd_() {
+  onTouchEnd_(event) {
     if (this.touchEventState_.isSwipeX === true) {
       this.onSwipeX_({
         deltaX: this.touchEventState_.lastX - this.touchEventState_.startX,
         last: true,
       });
+    } else {
+      this.pageScroller_.onTouchEnd(event.timeStamp);
     }
 
     this.touchEventState_.startX = 0;
@@ -1686,7 +1710,7 @@ export class AmpStoryPlayer {
       return null;
     }
 
-    const {screenX: x, screenY: y} = touches[0];
-    return {x, y};
+    const {screenX, screenY, clientX, clientY} = touches[0];
+    return {screenX, screenY, clientX, clientY};
   }
 }

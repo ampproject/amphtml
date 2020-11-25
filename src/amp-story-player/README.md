@@ -16,10 +16,10 @@ This update contains guidance on using the Web Story Player to support:
 
 - [Navigating between stories](#Navigating-between-stories)
 - [Integrating Web Stories into your website (entrypoints)](<#Integrating-web-stories-into-your-website-(entrypoints)>)
-- [(Beta) Programmatically fetching more stories](<#(Beta)-Programmatically-fetching-more-stories>)
-- [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>)
-- [(Beta) Customizing position & visibility of story UI controls](<#(Beta)-Customizing-position-&-visibility-of-story-UI-controls>)
-- [(Beta) Custom Events](<#(Beta)-Custom-Events>)
+- [Programmatically fetching more stories](#Programmatically-fetching-more-stories)
+- [Circular wrapping](#Circular-wrapping)
+- [Customizing position & visibility of story UI controls](#Customizing-position-&-visibility-of-story-UI-controls)
+- [Custom Events](#Custom-Events)
 - [Upcoming API Change: Poster Image](#Upcoming-API-Change:-Poster-Image)
 
 Beyond this, you’ll also find:
@@ -97,7 +97,7 @@ There are many ways in which you can use the player on your own surfaces. Below 
 </tbody>
 </table>
 
-## (Beta) Programmatically fetching more stories
+## Programmatically fetching more stories
 
 You can now create an “infinite scroll” experience by fetching more stories as the user navigates through them in your player. Simply use the new JSON configuration to specify an endpoint, and the player will automatically fetch more stories as it gets closer to the last story in the player.
 
@@ -160,7 +160,7 @@ Example:
 ]
 ```
 
-## (Beta) Circular Wrapping
+## Circular Wrapping
 
 You can now create a circular consumption of stories. This enables users to go back to the first story when they finish the last one. To do this, use the JSON configuration with the `circular-wrapping` action.
 
@@ -186,7 +186,7 @@ Here’s an example of how the configuration looks:
 
 The configuration must be a direct child of the <amp-story-player> element, with the `type=”application/json”` attribute.
 
-## (Beta) Customizing position & visibility of story UI controls
+## Customizing position & visibility of story UI controls
 
 You can now customize controls of the story UI with a variety of options. These include new buttons, changing the position (start or end), among others.
 
@@ -359,13 +359,13 @@ On desktop, you can now display a button that navigates from the current story t
   </tr>
 </table>
 
-## (Beta) Custom Events
+## Custom Events
 
 We’ve recently introduced some new events that the player will dispatch and that you can listen to. To see the existing events, refer to the documentation of [Custom Events](https://github.com/ampproject/amphtml/blob/master/spec/amp-story-player.md#custom-events).
 
 ### noNextStory
 
-Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>).
+Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
 ```javascript
 player.addEventListener('noNextStory', (event) => {
@@ -375,7 +375,7 @@ player.addEventListener('noNextStory', (event) => {
 
 ### noPreviousStory
 
-Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>).
+Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
 ```javascript
 player.addEventListener('noPreviousStory', (event) => {
@@ -409,11 +409,9 @@ This new API is still a work in progress, and will send more information when it
 
 ## Additional use case demos
 
-Circle entry point + scrolling + lightbox:
-https://codepen.io/maenrique/pen/rNLyqXg
+<a href="https://codepen.io/maenrique/pen/rNLyqXg" target="_blank" rel="noopener noreferrer">Circle entry point + scrolling + lightbox</a>
 
-Card entry point + scrolling + lightbox
-https://codepen.io/maenrique/pen/WNxpPqJ
+<a href="https://codepen.io/maenrique/pen/WNxpPqJ" target="_blank" rel="noopener noreferrer">Card entry point + scrolling + lightbox</a>
 
 ## Additional explorations and roadmap
 

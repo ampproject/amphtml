@@ -24,13 +24,13 @@ limitations under the License.
 
 # <a name="`amp-story-player`"></a> `amp-story-player`
 
-<figure class="centered-fig">
-  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif">
-    <noscript>
-    <img alt="amp-story-player example" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif" />
-  </noscript>
-  </amp-anim>
-</figure>
+<table>
+  <tr>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/player-in-recipe.png?raw=true"></td>
+<td><img src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif?raw=true"></td>
+  </tr>
+</table>
 
 <table>
   <tr>
@@ -41,6 +41,7 @@ limitations under the License.
     <td width="40%"><strong>Required Scripts</strong></td>
     <td>
     <code>&lt;script async src="https://cdn.ampproject.org/amp-story-player-v0.js">&lt;/script></code>
+    <br> <br>
     <code>&lt;link href="https://cdn.ampproject.org/amp-story-player-v0.css" rel='stylesheet' type='text/css'></code>
     </td>
   </tr>
@@ -77,10 +78,9 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a non-AM
   />
 </head>
 <body>
-  <amp-story-player style="width: 360px; height: 600px;">
+  <amp-story-player style="width: 360px; height: 600px;" amp-cache="cdn.ampproject.org">
     <a
       href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/"
-      style="--story-player-poster: url('https://amp.dev/static/samples/img/story_dog2_portrait.jpg')"
     >
       Stories in AMP - Hello World
     </a>
@@ -98,12 +98,6 @@ The inline width and height ensures that the player will not cause any jumps in 
 
 Inline CSS properties for the width and height of the player. e.g. `style="width: 360px; height: 600px;"`
 
-#### exit-control
-
-e.g. `<amp-story-player exit-control="close-button">`
-
-Set to `back-button` or `close-button`. The button will dispatch an `amp-story-player-back` or `amp-story-player-close` when clicked. This button will disappear when a page attachment is open and reappear when closed.
-
 #### amp-cache
 
 e.g. `<amp-story-player amp-cache="cdn.ampproject.org">`
@@ -119,32 +113,15 @@ The `<amp-story-player>` component contains one or more `<a>` tags. Point the hr
 
 Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
 
-Use a poster image as a placeholder to display to users while the story loads. Add the `--story-player-poster` CSS variable as an inline style of the `<a>` tag and point to the poster image URL.
-
 ### Attributes
 
 #### href
 
 URL pointing to the story.
 
-#### style="--story-player-poster: url('...');" [recommended]
-
-CSS variable with the URL pointing to the poster image of the story.
-
-```html
-<amp-story-player style="width: 360px; height: 600px;">
-  <a
-    href="https://www.example.com/story.html"
-    style="--story-player-poster: url('https://www.example.com/assets/cover1.html');"
-  >
-    A title that describes this story.
-  </a>
-</amp-story-player>
-```
-
 ## Programmatic Control
 
-Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')` and on instances of the global class variable,`const player = new AmpStoryPlayer(window, playerEl)`.
+Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')` and on instances of the global class variable, `const player = new AmpStoryPlayer(window, playerEl)`.
 
 ### Methods
 
@@ -152,7 +129,7 @@ Call the player's various methods to programmatically control the player. These 
 
 Will initialize the player manually. This can be useful when the player is dynamically.
 
-```
+```javascript
 const playerEl = document.body.querySelector('amp-story-player');
 const player = new AmpStoryPlayer(window, playerEl);
 player.load();
@@ -178,7 +155,7 @@ If the player is currently on the third story out of five stories:
 
 Will change the current story being displayed by the player.
 
-```
+```javascript
 player.show(url);
 ```
 
@@ -196,7 +173,7 @@ Each story object contains the following properties:
 
 The player will rewrite the URL using the AMP Cache prefix if provided in the [player level attribute](#amp-cache).
 
-```
+```javascript
 player.add([
  {href: '/stories/1', title: 'A great story', posterImage: 'poster1.png'},
  {href: '/stories/2', posterImage: 'poster2.png'},
@@ -210,7 +187,7 @@ Will mute/unmute the current story. This will not persist across stories, eg. ca
 
 Please note that due to browser restrictions on autoplaying media with sound, the default state is muted and the story cannot be unmuted unless the user manually unmuted previously. Only webviews explicitly allowing autoplaying media with sound can use `unmute()` right away.
 
-```
+```javascript
 player.mute();
 player.unmute();
 ```
@@ -219,7 +196,7 @@ player.unmute();
 
 Will play/pause the current story. This will affect e.g. page auto-advancement or media playing.
 
-```
+```javascript
 player.play();
 player.pause();
 ```
@@ -232,9 +209,271 @@ player.pause();
 
 Will cause a custom event to be fired, see `page-attachment-open` and `page-attachment-close`.
 
-```
+```javascript
 player.getStoryState('page-attachment');
 ```
+
+## Programmatically fetching more stories
+
+You can create an “infinite scroll” experience by fetching more stories as the user navigates through them in your player. Simply use the new JSON configuration to specify an endpoint, and the player will automatically fetch more stories as it gets closer to the last story in the player.
+
+### JSON Configuration
+
+Here’s an example of how the configuration looks:
+
+```html
+<amp-story-player>
+ <script type="application/json">
+   {
+     "behavior": {
+       "on": "end",
+       "action": "fetch",
+       "endpoint": "https://example.com/my-endpoint.json?offset=${offset}"
+     }
+   }
+ </script>
+ <a href="./story1.html"> ... </a>
+ <a href="./story2.html"> ... </a>
+  ...
+```
+
+</amp-story-player>
+
+The configuration must be a direct child of the <amp-story-player> element, with the `type=”application/json”` attribute.
+
+The `endpoint` property of the url takes in an optional variable `${offset}` that you can add as a parameter, which you can use for pagination.
+
+### Response
+
+The expected response payload coming from the endpoint should be a JSON containing an array of Story objects, the structure is described below.
+
+#### href
+
+The URL where your story is located.
+
+#### title (optional)
+
+The title of your story.
+
+#### posterImage (optional)
+
+The poster image of your story.
+
+Example:
+
+```json
+[
+  {
+    "href": "https://example.com/story3.html",
+    "title": "My third cool story", // optional
+    "posterImage": "https://example.com/assets/story3.png" // optional
+  },
+  {
+    "href": "https://example.com/story4.html",
+    "title": "My fourth cool story", // optional
+    "posterImage": "https://example.com/assets/story4.png" // optional
+  }
+]
+```
+
+## Circular Wrapping
+
+Circular wrapping enables users to go back to the first story when they finish the last one. To do this, use the JSON configuration with the `circular-wrapping` action.
+
+### JSON Configuration
+
+Here’s an example of how the configuration looks:
+
+```html
+<amp-story-player>
+ <script type="application/json">
+   {
+     "behavior": {
+       "on": "end",
+       "action": "circular-wrapping"
+     }
+   }
+ </script>
+ <a href="./story1.html"> ... </a>
+ <a href="./story2.html"> ... </a>
+  ...
+</amp-story-player>
+```
+
+The configuration must be a direct child of the <amp-story-player> element, with the `type=”application/json”` attribute.
+
+## Customizing position & visibility of story UI controls
+
+You can now customize controls of the story UI with a variety of options. These include new buttons, changing the position (start or end), among others.
+
+See [examples](#Example-#1---Close-button-on-the-start-position) below to get an idea of what you can do.
+
+<table>
+  <tr>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-left.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-and-skip-next.png?raw=true"></td>
+<td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
+  </tr>
+</table>
+
+To configure them, specify a JSON configuration with the `type=”application/json”` attribute as a child of the `<amp-story-player>` element.
+
+Inside the configuration, specify an array of “controls”. The “controls” structure is described below.
+
+The configuration will end up looking like the following:
+
+```html
+<amp-story-player>
+
+ <script type="application/json">
+   {
+     "controls": [
+       {
+         "name": "close",
+         "position": "start"
+       },
+       {
+         "name": "skip-next"
+       }
+     ]
+   }
+ </script>
+
+<a href="./story1.html"> ... </a>
+<a href="./story2.html"> ... </a>
+</amp-story-player>
+```
+
+### Close
+
+Specify a control object with the “close” name to get the close icon.
+
+- `event`: The close button dispatches the `amp-story-player-close` event.
+
+The “close” control supports the following customizable properties:
+
+- `position`: “start” or “end”.
+  - Places the icon either on the left or right on LTR languages.
+- `visibility`: “hidden” or “visible” (default).
+  - Toggles the control’s visibility. If omitted, the default is visible.
+  - See [Example #2 - Showing skip-to-next story on desktop.](#Example-#2---Showing-skip-to-next-story-on-desktop)
+- `backgroundImageUrl`: string with url or data string (escaped).
+  - Changes the icon image to the provided url or data string (for inline svgs).
+
+### Skip-next
+
+Skips to the next story inside the player (only available on desktop).
+
+The “skip-next” control supports the following customizable properties:
+
+- `position`: “start” or “end”.
+  - Places the icon either on the left or right on LTR languages.
+- `visibility`: “hidden” or “visible” (default).
+  - Toggles the control’s visibility. If omitted, the default is visible.
+- `backgroundImageUrl`: string with url or data string (escaped).
+  - Changes the icon image to the provided url or data string (for inline svgs).
+
+### Custom control
+
+You can add a custom control to the stories inside the player with a custom control. Simply specify a “name” and an “backgroundImageUrl”, and any optional properties:
+
+- `name` (**required**): a string with the name of the control. e.g. “lightbox”. **The dispatched event will depend on this name.** The custom event will be the name of the control prefixed with `amp-story-player-*`. E.g. `amp-story-player-lightbox`:
+
+```javascript
+const player = document.body.querySelector("amp-story-player");
+
+// Listen to when the specified control was clicked.
+player.addEventListener("amp-story-player-lightbox", () => {
+  // This will trigger when the control with the "lightbox" name is clicked.
+  performCustomAction();
+});
+```
+
+- `backgroundImageUrl` (**required**): Accepts URLs, as well as svgs and `data` paths (note that strings must be JSON escaped). See [example 3](#Example-#3---Changing-the-icon-of-the-close-button).
+  - Changes the control icon.
+- `position`: “start” or “end”.
+  - Places the icon either on the left or right on LTR languages.
+- `visibility`: “hidden” or “visible” (default).
+  - Toggles the control’s visibility. If omitted, the default is visible.
+
+### Example #1 - Close button on the start position
+
+Since by default the close button will be placed to the end, all we have to do is move the close button to the start.
+
+<table>
+  <tr>
+    <td>
+      <pre lang="html">
+<amp-story-player>
+ <script type="application/json">
+   {
+     "controls": [
+       {
+         "name": "close",
+         "position": "start"
+       }
+     ],
+   }
+ </script>
+ ...
+</amp-story-player>
+      </pre>
+    </td>
+    <td><img width="360" height="600" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
+  </tr>
+</table>
+
+### Example #2 - Showing skip-to-next story on desktop
+
+On desktop, you can now display a button that navigates from the current story to the next one. It will also automatically be disabled once the user reaches the end of the stories in the player.
+
+<table>
+  <tr>
+    <td>
+      <pre lang="html">
+<amp-story-player>
+ <script type="application/json">
+   {
+     "controls": [
+       {
+         "name": "skip-next"
+       }
+     ],
+   }
+ </script>
+ ...
+</amp-story-player>
+      </pre>
+    </td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
+  </tr>
+</table>
+
+### Example #3 - Changing the icon of the close button
+
+<table>
+  <tr>
+    <td>
+      <pre lang="html">
+<amp-story-player>
+ <script type="application/json">
+   {
+     "controls": [
+       {
+         "name": "close",
+         "backgroundImageUrl": "data:image\/svg+xml;charset=utf-8,<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M5.77778 9.33333H4V4H9.33333V5.77778H5.77778V9.33333ZM4 14.6667H5.77778V18.2222H9.33333V20H4V14.6667ZM18.2222 18.2222H14.6667V20H20V14.6667H18.2222V18.2222ZM14.6667 5.77778V4H20V9.33333H18.2222V5.77778H14.6667Z\" fill=\"white\"\/><\/svg>",
+         "position": "start"
+       }
+     ]
+   }
+ </script>
+ ...
+</amp-story-player>
+      </pre>
+    </td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
+  </tr>
+</table>
 
 ## Custom Events
 
@@ -242,7 +481,7 @@ player.getStoryState('page-attachment');
 
 Fired when the player is ready for interaction. There is also a sync property `isReady` that can be used to avoid race conditions.
 
-```
+```javascript
 player.addEventListener('ready', () => {
   console.log('Player is ready!!');
 })
@@ -256,7 +495,7 @@ if (player.isReady) {
 
 Fired when the player changes to a new story and provides the `index`, the player's story after changing, and `remaining`, the number of stories left.
 
-```
+```javascript
 player.addEventListener('navigation', (event) => {
   console.log('Navigated from story 0 to story 1 of 3');
   console.log('Current story:' event.index); // 1
@@ -264,21 +503,31 @@ player.addEventListener('navigation', (event) => {
 })
 ```
 
-#### amp-story-player-back
+### noNextStory
 
-Fired when the exit control back button is clicked.
+Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
+```javascript
+player.addEventListener('noNextStory', (event) => {
+  console.log('User is tapping on the last page and there are no more stories.');
+});
 ```
-player.addEventListener('amp-story-player-back', () => {
-  console.log('Back button clicked');
-})
+
+### noPreviousStory
+
+Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
+
+```javascript
+player.addEventListener('noPreviousStory', (event) => {
+  console.log('User is tapping back on the first page and there are no more stories.');
+});
 ```
 
 #### amp-story-player-close
 
 Fired when the exit control close button is clicked.
 
-```
+```javascript
 player.addEventListener('amp-story-player-close', () => {
   console.log('Close button clicked');
 })
@@ -288,7 +537,7 @@ player.addEventListener('amp-story-player-close', () => {
 
 Fired when a page attachment is opened or `getStoryState('page-attachment')` was called and the story's page attachment is open.
 
-```
+```javascript
 player.addEventListener('page-attachment-open', () => {
   console.log('The page attachment is open');
 })
@@ -298,7 +547,7 @@ player.addEventListener('page-attachment-open', () => {
 
 Fired when a page attachment is closed or `getStoryState('page-attachment')` was called and the story's page attachment is closed.
 
-```
+```javascript
 player.addEventListener('page-attachment-close', () => {
   console.log('The page attachment is closed');
 })
@@ -308,7 +557,7 @@ player.addEventListener('page-attachment-close', () => {
 
 This makes use of `page-attachment-close`, `page-attachment-open` and `amp-story-player-back`.
 
-```
+```javascript
 player.addEventListener('page-attachment-close', () => {
   textEl.style.backgroundColor = 'blue';
 })
