@@ -738,9 +738,6 @@
     {
       "url": "examples/visual-tests/amphtml-ads/amp-inabox-static.html",
       "name": "amphtml-ads: inabox static",
-      "loading_complete_selectors": [
-        ".view", ".activeview"
-      ],
       "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
       "no_base_test": true
     },
