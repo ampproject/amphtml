@@ -70,6 +70,10 @@ tags: {  # <amp-accordion> > <section>
   spec_name: "amp-accordion > section"
   descriptive_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"
+  attrs: {
+    name: "access-hide"
+    value: ""
+  }
   attrs: { name: "expanded" value: "" }
   # amp-bind
   attrs: {
