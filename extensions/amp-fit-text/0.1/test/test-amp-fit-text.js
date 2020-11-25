@@ -80,16 +80,16 @@ describes.realWin(
         'Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.'
       );
       expect(ft.style.fontSize).to.equal('17px');
-      const setupUpdateFontSizeSpy = env.sandbox.spy(
-        ft.implementation_,
-        'updateFontSize_'
-      );
       ft.setAttribute('width', '50');
       ft.setAttribute('height', '100');
       ft.style.width = '50px';
       ft.style.height = '100px';
+      const setupUpdateFontSizeSpy = env.sandbox.spy(
+        ft.implementation_,
+        'updateFontSize_'
+      );
       await ft.implementation_.layoutCallback();
-      expect(setupUpdateFontSizeSpy).to.be.calledOnce;
+      expect(setupUpdateFontSizeSpy).to.be.called;
       (await ft.implementation_).unlayoutCallback();
     });
   }
