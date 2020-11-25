@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line local/no-module-exports, no-undef
 module.exports = {
   stories: [
     '../../../../builtins/storybook/*.amp.js',
@@ -26,4 +25,9 @@ module.exports = {
     '@storybook/addon-knobs',
     '@ampproject/storybook-addon',
   ],
+  webpackFinal: async (config) => {
+    // Disable entry point size warnings.
+    config.performance.hints = false;
+    return config;
+  },
 };

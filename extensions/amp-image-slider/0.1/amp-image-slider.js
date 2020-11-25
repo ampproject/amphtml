@@ -24,6 +24,10 @@ import {clamp} from '../../../src/utils/math';
 import {dev, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {setStyles} from '../../../src/style';
 
 export class AmpImageSlider extends AMP.BaseElement {
@@ -714,6 +718,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
     // Extensions such as amp-carousel still uses .setOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents
@@ -757,6 +764,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.unregisterEvents_();
     return true;
   }
@@ -771,8 +779,11 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.registerEvents_();
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  viewportCallback_(inViewport) {
     // Show hint if back into viewport and user does not explicitly
     // disable this
     if (inViewport && this.shouldHintReappear_) {

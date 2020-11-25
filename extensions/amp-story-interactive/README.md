@@ -1,8 +1,10 @@
 # Interactive components
 
-### Developer preview - August 2020
-
 ## Summary
+
+The interactive components extension provides story creators with a set of interactive experiences they can use to make stories more engaging.
+
+A more complete version of this document can be found in [amp.dev](https://amp.dev/documentation/components/amp-story-interactive/?format=stories).
 
 <table>
   <tr>
@@ -11,19 +13,6 @@
 <td><img src="https://user-images.githubusercontent.com/22420856/90187528-e9bca800-dd87-11ea-8a22-0a99970fab1c.png"></td>
   </tr>
 </table>
-
-This release contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in September. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
-
-This developer preview update covers:
-
-- Details on the new quiz and poll components, as well as quiz and category results
-- Code examples to show proper configuration
-- API to support a backend and integration details
-- Fully functional example Stories demonstrating good usage of these components
-- Additional demos for the variety of styling and customization options
-- Examples for how you can easily integrate these components into WYSIWYG editors and tools
-- Additional explorations and roadmap
-- FAQs (please feel free to reach out with other questions & thoughts)
 
 ## List of interactive components
 
@@ -46,16 +35,14 @@ This developer preview update covers:
 <tr>
 <td>
 <strong>amp-story-interactive-results</strong>
-<br><br>Component that can display 2-4 different states/categories depending on the options selected on the previous pages of a story.<br><br>Requires polls or quizzes in previous pages to feed into the state of the component, and the state will be calculated following the strategy specified: correctness, category-voting, etc.<br><br>Note: we're still finalizing the design for the component, check status of <a href="https://github.com/ampproject/amphtml/pull/29837">#29837</a<</td>
+<br><br>Component that can display 2-4 different states/categories depending on the options selected on the previous pages of a story.<br><br>Requires polls or quizzes in previous pages to feed into the state of the component, and the state will be calculated following the strategy specified: correctness, category-voting, etc.</td>
 <td><img src="https://user-images.githubusercontent.com/22420856/89945317-2b661b00-dbef-11ea-9319-e36bede95460.png"></td>
 </tr>
 </table>
 
 ## Environment setup
 
-Optional: Most things covered here will work out of the box, but be sure to activate the nightly releases for any bug fixes and latest updates to the codebase. In order to run the nightly version of AMP on your machine, go to the [AMP Experiments](https://cdn.ampproject.org/experiments.html) and enable the nightly release.
-
-Also add the following import to your AMP documents:
+Add the following import to your AMP documents:
 
 ```html
 <script

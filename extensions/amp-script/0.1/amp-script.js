@@ -29,7 +29,6 @@ import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
 
@@ -145,11 +144,12 @@ export class AmpScript extends AMP.BaseElement {
     if (
       this.nodom_ &&
       (this.element.hasAttribute('width') ||
-        this.element.hasAttribute('height'))
+        this.element.hasAttribute('height') ||
+        this.element.hasAttribute('layout'))
     ) {
       user().warn(
         TAG,
-        'Cannot set width or height of a nodom <amp-script>',
+        'Cannot set width, height, or layout of a nodom <amp-script>',
         this.element
       );
     }
@@ -390,8 +390,8 @@ export class AmpScript extends AMP.BaseElement {
           if (
             !contentType ||
             !(
-              startsWith(contentType, 'application/javascript') ||
-              startsWith(contentType, 'text/javascript')
+              contentType.startsWith('application/javascript') ||
+              contentType.startsWith('text/javascript')
             )
           ) {
             // TODO(#24266): Refactor to %s interpolation when error string
@@ -775,7 +775,7 @@ export class SanitizerImpl {
     const output = {};
     for (let i = 0; i < storage.length; i++) {
       const key = storage.key(i);
-      if (key && !startsWith(key, 'amp-')) {
+      if (key && !key.startsWith('amp-')) {
         output[key] = storage.getItem(key);
       }
     }
@@ -823,7 +823,7 @@ export class SanitizerImpl {
         user().error(TAG, 'Storage.clear() is not supported in amp-script.');
       }
     } else {
-      if (startsWith(key, 'amp-')) {
+      if (key.startsWith('amp-')) {
         user().error(TAG, 'Invalid "amp-" prefix for storage key: %s', key);
       } else {
         if (value === null) {

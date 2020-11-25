@@ -17,11 +17,7 @@
 import {createUseStyles} from 'react-jss';
 
 const scrollContainer = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+  position: 'relative',
   boxSizing: 'content-box !important',
   width: '100%',
   height: '100%',
@@ -29,6 +25,7 @@ const scrollContainer = {
 
   display: 'flex',
   flexWrap: 'nowrap',
+  flexGrow: 1,
 
   scrollBehavior: 'smooth',
   WebkitOverflowScrolling: 'touch',
@@ -75,7 +72,6 @@ const hideScrollbar = {
 };
 
 const slideElement = {
-  flex: '0 0 100%',
   height: '100%',
   position: 'relative',
   overflow: 'hidden',
@@ -83,8 +79,17 @@ const slideElement = {
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
+};
+
+const enableSnap = {
   scrollSnapAlign: 'start',
   scrollSnapStop: 'always',
+};
+
+const disableSnap = {
+  scrollSnapStop: 'none',
+  scrollSnapAlign: 'none',
+  scrollSnapCoordinate: 'none',
 };
 
 /** Slides only have one child */
@@ -99,10 +104,14 @@ const slideSizing = {
   '& > ::slotted(*)': {
     width: '100%',
   },
+  '&$thumbnails': {
+    padding: '0px 4px',
+  },
 };
 
-const arrowPlacement = {
-  position: 'absolute',
+const thumbnails = {};
+
+const arrow = {
   zIndex: 1,
   display: 'flex',
   flexDirection: 'row',
@@ -116,8 +125,39 @@ const arrowPlacement = {
 const arrowPrev = {left: 0};
 const arrowNext = {right: 0};
 const arrowDisabled = {
-  opacity: 0,
   pointerEvents: 'none',
+  '&$insetArrow': {
+    opacity: 0,
+  },
+  '&$outsetArrow': {
+    opacity: 0.5,
+  },
+};
+
+const insetArrow = {
+  position: 'absolute',
+  padding: '12px',
+};
+
+const outsetArrow = {
+  position: 'relative',
+  flexShrink: 0,
+  height: '100%',
+  borderRadius: '50%',
+  backgroundSize: '24px 24px',
+  // Center the button vertically.
+  top: '50%',
+  transform: 'translateY(-50%)',
+  alignItems: 'center',
+  pointerEvents: 'auto',
+  '&$arrowPrev': {
+    marginInlineStart: '4px',
+    marginInlineEnd: '10px',
+  },
+  '&$arrowNext': {
+    marginInlineStart: '10px',
+    marginInlineEnd: '4px',
+  },
 };
 
 const defaultArrowButton = {
@@ -128,25 +168,29 @@ const defaultArrowButton = {
   width: '36px',
   height: '36px',
   padding: 0,
-  margin: '12px',
   backgroundColor: 'transparent',
   border: 'none',
   outline: 'none',
   stroke: 'currentColor',
   transition: '200ms stroke',
   color: '#FFF',
-  '&:hover': {
+  '&:hover:not([disabled])': {
     color: '#222',
   },
-  '&:active': {
+  '&:active:not([disabled])': {
     transitionDuration: '0ms',
   },
-  '&:hover $arrowBackground': {
+  '&:hover:not([disabled]) $arrowBackground': {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
-  '&:active $arrowBackground': {
+  '&:active:not([disabled]) $arrowBackground': {
     backgroundColor: 'rgba(255, 255, 255, 1.0)',
     transitionDuration: '0ms',
+  },
+  '&:focus': {
+    border: '1px black solid',
+    borderRadius: '50%',
+    boxShadow: '0 0 0 1pt white',
   },
 };
 
@@ -186,11 +230,16 @@ const JSS = {
   hideScrollbar,
   horizontalScroll,
   slideElement,
+  thumbnails,
+  enableSnap,
+  disableSnap,
   slideSizing,
-  arrowPlacement,
+  arrow,
   arrowPrev,
   arrowNext,
   arrowDisabled,
+  insetArrow,
+  outsetArrow,
   defaultArrowButton,
   arrowBaseStyle,
   arrowFrosting,

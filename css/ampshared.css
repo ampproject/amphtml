@@ -520,11 +520,11 @@ amp-accordion > section {
 }
 
 /* Collapse content by default. */
-amp-accordion > section > :last-child {
+amp-accordion:not(.i-amphtml-built) > section > :last-child {
   display: none !important;
 }
 
 /* Expand content when needed. */
-amp-accordion > section[expanded] > :last-child {
+amp-accordion:not(.i-amphtml-built) > section[expanded] > :last-child {
   display: block !important;
 }

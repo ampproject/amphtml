@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.121 */
+/** Version: 0.1.22.133 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -76,6 +76,7 @@ const AnalyticsEvent = {
   ACTION_USER_CONSENT_DEFERRED_ACCOUNT: 1021,
   ACTION_USER_DENY_DEFERRED_ACCOUNT: 1022,
   ACTION_DEFERRED_ACCOUNT_REDIRECT: 1023,
+  ACTION_GET_ENTITLEMENTS: 1024,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -84,6 +85,10 @@ const AnalyticsEvent = {
   EVENT_GPAY_CANNOT_CONFIRM_TX_ID: 3004,
   EVENT_GOOGLE_UPDATED: 3005,
   EVENT_NEW_TX_ID: 3006,
+  EVENT_UNLOCKED_BY_SUBSCRIPTION: 3007,
+  EVENT_UNLOCKED_BY_METER: 3008,
+  EVENT_NO_ENTITLEMENTS: 3009,
+  EVENT_HAS_METERING_ENTITLEMENTS: 3010,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -1466,6 +1471,59 @@ class Timestamp {
 /**
  * @implements {Message}
  */
+class ToastCloseRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?boolean} */
+    this.close_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getClose() {
+    return this.close_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setClose(value) {
+    this.close_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.close_, // field 1 - close
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'ToastCloseRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class ViewSubscriptionsResponse {
   /**
    * @param {!Array<*>=} data
@@ -1533,6 +1591,7 @@ const PROTO_MAP = {
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse,
   'Timestamp': Timestamp,
+  'ToastCloseRequest': ToastCloseRequest,
   'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
 };
 
@@ -5880,10 +5939,15 @@ function parseQueryString$1(query) {
     .split('&')
     .reduce((params, param) => {
       const item = param.split('=');
-      const key = decodeURIComponent(item[0] || '');
-      const value = decodeURIComponent(item[1] || '');
-      if (key) {
-        params[key] = value;
+      try {
+        const key = decodeURIComponent(item[0] || '');
+        const value = decodeURIComponent(item[1] || '');
+        if (key) {
+          params[key] = value;
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        log_4(`SwG could not parse a URL query param: ${item[0]}`);
       }
       return params;
     }, {});
@@ -6015,7 +6079,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.121',
+    '_client': 'SwG 0.1.22.133',
   });
 }
 
@@ -7134,7 +7198,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.121',
+        '_client': 'SwG 0.1.22.133',
         'supportsEventManager': true,
       },
       args || {}
@@ -7983,7 +8047,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.121');
+    context.setClientVersion('SwG 0.1.22.133');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10346,6 +10410,13 @@ class DialogManager {
     }
   }
 
+  /**
+   * @returns {?Dialog}
+   */
+  getDialog() {
+    return this.dialog_;
+  }
+
   /** @private */
   close_() {
     this.dialog_.close();
@@ -10414,6 +10485,9 @@ const MeterClientTypes = {
  * limitations under the License.
  */
 
+const IFRAME_BOX_SHADOW =
+  'rgba(60, 64, 67, .3) 0 -2px 5px, rgba(60, 64, 67, .15) 0 -5px 5px';
+
 class MeterToastApi {
   /**
    * @param {!./deps.DepsDef} deps
@@ -10441,8 +10515,15 @@ class MeterToastApi {
         productId: deps.pageConfig().getProductId(),
         hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
       }),
-      /* shouldFadeBody */ true
+      /* shouldFadeBody */ false
     );
+
+    /** @private @const {!function()} */
+    this.sendCloseRequestFunction_ = () => {
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+    };
   }
 
   /**
@@ -10457,7 +10538,18 @@ class MeterToastApi {
       ViewSubscriptionsResponse,
       this.startNativeFlow_.bind(this)
     );
-    return this.dialogManager_.openView(this.activityIframeView_);
+    return this.dialogManager_.openView(this.activityIframeView_).then(() => {
+      this.setDialogBoxShadow_();
+      // Allow closing of the iframe with any scroll or click event.
+      this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+      this.win_.addEventListener('touchstart', this.sendCloseRequestFunction_);
+      this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
+      this.win_.addEventListener('wheel', this.sendCloseRequestFunction_);
+      // Making body's overflow property 'hidden' to prevent scrolling
+      // while swiping on the iframe.
+      const $body = this.win_.document.body;
+      setStyle($body, 'overflow', 'hidden');
+    });
   }
 
   /**
@@ -10466,6 +10558,36 @@ class MeterToastApi {
    */
   setOnCancelCallback(onCancelCallback) {
     this.activityIframeView_.onCancel(onCancelCallback);
+  }
+
+  /**
+   * Removes the event listeners that close the iframe and make the body visible.
+   */
+  removeCloseEventListener() {
+    this.win_.removeEventListener('click', this.sendCloseRequestFunction_);
+    this.win_.removeEventListener('touchstart', this.sendCloseRequestFunction_);
+    this.win_.removeEventListener('mousedown', this.sendCloseRequestFunction_);
+    this.win_.removeEventListener('wheel', this.sendCloseRequestFunction_);
+    const $body = this.win_.document.body;
+    setStyle($body, 'overflow', 'visible');
+  }
+
+  /**
+   * Changes the iframe box shadow to match desired specifications on mobile.
+   */
+  setDialogBoxShadow_() {
+    const mq = this.win_.matchMedia('(max-width: 640px), (max-height: 640px)');
+    const element = this.dialogManager_.getDialog().getElement();
+    if (mq.matches) {
+      setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
+    }
+    mq.addListener((changed) => {
+      if (changed.matches) {
+        setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
+      } else {
+        setImportantStyles(element, {'box-shadow': ''});
+      }
+    });
   }
 
   /**
@@ -10832,6 +10954,10 @@ class EntitlementsManager {
       return;
     }
 
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_METER, false);
+
     const jwt = new EntitlementJwt();
     jwt.setSource(entitlement.source);
     jwt.setJwt(entitlement.subscriptionToken);
@@ -11065,6 +11191,9 @@ class EntitlementsManager {
 
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_NO_ENTITLEMENTS, false);
       return;
     }
 
@@ -11079,9 +11208,15 @@ class EntitlementsManager {
   maybeShowToast_(entitlement) {
     // Don't show toast for metering entitlements.
     if (entitlement.source === GOOGLE_METERING_SOURCE) {
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS, false);
       return Promise.resolve();
     }
 
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION, false);
     // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
@@ -11124,6 +11259,7 @@ class EntitlementsManager {
         if (onCloseDialog) {
           onCloseDialog();
         }
+        meterToastApi.removeCloseEventListener();
         this.sendPingback_(entitlements);
       });
       return meterToastApi.start();
@@ -11149,13 +11285,17 @@ class EntitlementsManager {
         }
 
         // Add metering params.
-        const productId = this.pageConfig_.getProductId();
-        if (productId && params && params.metering && params.metering.state) {
+        if (
+          this.publicationId_ &&
+          params &&
+          params.metering &&
+          params.metering.state
+        ) {
           /** @type {!GetEntitlementsParamsInternalDef} */
           const encodableParams = {
             metering: {
               clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
-              owner: productId,
+              owner: this.publicationId_,
               resource: {
                 hashedCanonicalUrl,
               },
@@ -11201,7 +11341,12 @@ class EntitlementsManager {
         }
         return serviceUrl(url);
       })
-      .then((url) => this.fetcher_.fetchCredentialedJson(url))
+      .then((url) => {
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.ACTION_GET_ENTITLEMENTS, false);
+        return this.fetcher_.fetchCredentialedJson(url);
+      })
       .then((json) => {
         if (json.errorMessages && json.errorMessages.length > 0) {
           json.errorMessages.forEach((errorMessage) => {
@@ -17069,6 +17214,11 @@ class ConfiguredRuntime {
   /** @override */
   setOnLoginRequest(callback) {
     this.callbacks_.setOnLoginRequest(callback);
+  }
+
+  /** @override */
+  triggerLoginRequest(request) {
+    this.callbacks_.triggerLoginRequest(request);
   }
 
   /** @override */

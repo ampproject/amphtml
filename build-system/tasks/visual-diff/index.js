@@ -48,6 +48,15 @@ const {waitUntilUsed} = require('tcp-port-used');
 let puppeteer;
 let percySnapshot;
 
+// CSS injected in every page tested.
+// Normally, as in https://docs.percy.io/docs/percy-specific-css
+// Otherwise, as a <style> in an iframe, see snippets/iframe-wrapper.js
+const percyCss = [
+  // Loader animation may otherwise be captured in slightly different points,
+  // causing the test to flake.
+  '.i-amphtml-new-loader * { animation: none !important; }',
+].join('\n');
+
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
 };
@@ -159,7 +168,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: argv.compiled}
+    {compiled: true}
   );
 }
 
@@ -576,11 +585,12 @@ async function snapshotWebpages(browser, webpages) {
           snapshotOptions.widths = [viewport.width];
           log('verbose', 'Wrapping viewport-constrained page in an iframe');
           await page.evaluate(
-            WRAP_IN_IFRAME_SNIPPET.replace(
-              /__WIDTH__/g,
-              viewport.width
-            ).replace(/__HEIGHT__/g, viewport.height)
+            WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, viewport.width)
+              .replace(/__HEIGHT__/g, viewport.height)
+              .replace(/__PERCY_CSS__/g, percyCss)
           );
+        } else {
+          snapshotOptions.percyCss = percyCss;
         }
 
         try {
@@ -748,19 +758,19 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp build|dist --fortesting'),
+        colors.cyan('gulp dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    await buildRuntime();
+    await buildRuntime(/* opt_compiled */ true);
   }
 }
 
 function installPercy_() {
-  if (!argv.noyarn) {
+  if (!argv.noinstall) {
     installPackages(__dirname);
   }
 
@@ -819,6 +829,5 @@ visualDiff.flags = {
   'percy_disabled':
     '  Disables Percy integration (for testing local changes only)',
   'nobuild': '  Skip build',
-  'noyarn': '  Skip calling yarn to install dependencies',
-  'compiled': '  Runs tests against minified JS',
+  'noinstall': '  Skip installing npm dependencies',
 };

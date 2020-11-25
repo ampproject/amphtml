@@ -68,12 +68,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25022',
   },
   {
-    id: 'ampdoc-fie',
-    name: 'Install AmpDoc on FIE level',
-    spec: 'https://github.com/ampproject/amphtml/issues/22734',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22733',
-  },
-  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -155,12 +149,6 @@ export const EXPERIMENTS = [
     name: 'Visual storytelling in AMP (v0.1)',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
-  },
-  {
-    id: 'disable-amp-story-default-media',
-    name: 'Removes default media for amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/14535',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
   },
   {
     id: 'amp-story-responsive-units',
@@ -250,12 +238,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
   {
-    id: 'analytics-chunks',
-    name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
-    spec: 'https://github.com/ampproject/amphtml/issues/28435',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
     id: 'analytics-chunks-inabox',
     name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
     spec: 'https://github.com/ampproject/amphtml/issues/28435',
@@ -275,6 +257,12 @@ export const EXPERIMENTS = [
     id: 'auto-ads-layout-callback',
     name: 'Move ads placement into layoutCallback',
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
+  },
+  {
+    id: 'amp-cid-backup',
+    name: 'Backup AMP-generated CIDs to Storage.',
+    spec: 'https://github.com/ampproject/amphtml/issues/29484',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
   },
   {
     id: 'layout-aspect-ratio-css',

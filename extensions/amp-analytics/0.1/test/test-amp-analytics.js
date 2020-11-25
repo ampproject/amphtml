@@ -34,6 +34,7 @@ import {
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {macroTask} from '../../../../testing/yield';
 
 describes.realWin(
   'amp-analytics',
@@ -152,7 +153,6 @@ describes.realWin(
 
       el.connectedCallback();
       const analytics = new AmpAnalytics(el);
-      analytics.createdCallback();
       analytics.buildCallback();
       return analytics;
     }
@@ -201,7 +201,6 @@ describes.realWin(
         const analytics = new AmpAnalytics(el);
         doc.body.appendChild(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
         // Initialization has not started.
         expect(analytics.iniPromise_).to.be.null;
@@ -216,20 +215,22 @@ describes.realWin(
         el.textContent = config;
         const whenFirstVisibleStub = env.sandbox
           .stub(ampdoc, 'whenFirstVisible')
-          .callsFake(() => new Promise(function () {}));
+          .callsFake(() => Promise.resolve());
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.getAmpDoc = () => ampdoc;
         analytics.buildCallback();
         const iniPromise = analytics.iniPromise_;
         expect(iniPromise).to.be.ok;
-        expect(el).to.have.attribute('hidden');
         // Viewer.whenFirstVisible is the first blocking call to initialize.
         expect(whenFirstVisibleStub).to.be.calledOnce;
 
         // Repeated call, returns pre-created promise.
         expect(analytics.ensureInitialized_()).to.equal(iniPromise);
         expect(whenFirstVisibleStub).to.be.calledOnce;
+        return iniPromise.then(() => {
+          expect(el).to.have.attribute('hidden');
+        });
       });
 
       it('does not send a hit when multiple child tags exist', function () {
@@ -250,7 +251,6 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
@@ -266,7 +266,6 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
@@ -399,7 +398,7 @@ describes.realWin(
         });
       });
 
-      it('fills internally provided trigger vars', function () {
+      it('fills internally provided trigger vars', async function* () {
         const analytics = getAnalyticsTag({
           'requests': {
             'timer':
@@ -415,7 +414,7 @@ describes.realWin(
             'visibility': {'on': 'visible', 'request': 'visible'},
           },
         });
-
+        await macroTask();
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
             /https:\/\/e.com\/start=[0-9]+&duration=[0-9]/
@@ -457,7 +456,7 @@ describes.realWin(
         });
       });
 
-      it('updates requestCount on each request', () => {
+      it('updates requestCount on each request', async function* () {
         const analytics = getAnalyticsTag({
           'host': 'example.test',
           'requests': {
@@ -469,6 +468,7 @@ describes.realWin(
             {'on': 'visible', 'request': 'pageview2'},
           ],
         });
+        await macroTask();
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('/test1=1');
           requestVerifier.verifyRequest('/test2=2');
@@ -1702,12 +1702,13 @@ describes.realWin(
         analytics.getAmpDoc = () => ampdoc;
       });
 
-      it('Initializes a new Linker.', () => {
+      it('Initializes a new Linker.', async function* () {
         env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({});
 
         const linkerStub = env.sandbox.stub(LinkerManager.prototype, 'init');
 
         analytics.buildCallback();
+        await macroTask();
         return analytics.layoutCallback().then(() => {
           expect(linkerStub.calledOnce).to.be.true;
         });

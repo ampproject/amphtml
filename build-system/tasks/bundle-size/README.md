@@ -15,7 +15,6 @@ This file is dynamically fetched by the [Bundle-Size GitHub App](https://github.
 
 If a pull request requires a bundle-size approval from more than one _set_ of
 approvers, it will fall back to the default set of approvers
-(`@ampproject/wg-runtime` and `@ampproject/wg-performance`). Members of
-`@ampproject/wg-infra` can also approve all bundle size increases or app
-failures, but this should only be done when the cause for the failure is an
-infrastructure issue.
+(`@ampproject/wg-performance`). Members of `@ampproject/wg-infra` can also
+approve all bundle size increases or app failures, but this should only be
+done when the cause for the failure is an infrastructure issue.

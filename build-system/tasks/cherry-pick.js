@@ -17,25 +17,8 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
-const {getOutput} = require('../common/exec');
+const {execOrThrow, getOutput} = require('../common/exec');
 const {green, cyan, red, yellow} = require('ansi-colors');
-
-/**
- * Executes a shell command, and logs an error message if the command fails.
- *
- * @param {string} cmd
- * @param {string} msg
- * @return {!Object}
- */
-function execOrThrow(cmd, msg) {
-  const result = getOutput(cmd);
-  if (result.status) {
-    log(yellow('ERROR:'), msg);
-    throw new Error(result.stderr);
-  }
-
-  return result;
-}
 
 /**
  * Determines the name of the cherry-pick branch.

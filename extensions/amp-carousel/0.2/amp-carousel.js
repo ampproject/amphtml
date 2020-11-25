@@ -21,7 +21,10 @@ import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  dispatchCustomEvent,
+} from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
@@ -115,6 +118,12 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
+
+    /**
+     * Whether to show control buttons
+     * @private {boolean}
+     */
+    this.showControls_ = false;
   }
 
   /** @override */
@@ -193,6 +202,18 @@ class AmpCarousel extends AMP.BaseElement {
     // Need to wait for slides to exist first.
     this.carousel_.goToSlide(Number(this.element.getAttribute('slide') || '0'));
     // Signal for runtime to check children for layout.
+
+    if (this.element.hasAttribute('controls')) {
+      this.showControls_ = true;
+    } else {
+      Services.inputFor(this.win).onMouseDetected((mouseDetected) => {
+        if (mouseDetected) {
+          this.showControls_ = true;
+          this.updateUi_();
+        }
+      }, true);
+    }
+
     return this.mutateElement(() => {});
   }
 
@@ -470,17 +491,18 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    const bothDisabled =
-      this.hadTouch_ && !this.element.hasAttribute('controls');
+    const bothDisabled = this.hadTouch_ && !this.showControls_;
     const prevDisabled = bothDisabled || this.carousel_.isAtStart();
     const nextDisabled = bothDisabled || this.carousel_.isAtEnd();
 
     this.prevButton_.classList.toggle('amp-disabled', prevDisabled);
     this.prevButton_.setAttribute('aria-disabled', prevDisabled);
     this.prevButton_.title = this.getPrevButtonTitle_(index);
+    this.prevButton_.tabIndex = prevDisabled ? -1 : 0;
     this.nextButton_.classList.toggle('amp-disabled', nextDisabled);
     this.nextButton_.setAttribute('aria-disabled', nextDisabled);
     this.nextButton_.title = this.getNextButtonTitle_(index);
+    this.nextButton_.tabIndex = nextDisabled ? -1 : 0;
   }
 
   /**
@@ -547,7 +569,7 @@ class AmpCarousel extends AMP.BaseElement {
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
+    dispatchCustomEvent(this.element, name, data);
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 

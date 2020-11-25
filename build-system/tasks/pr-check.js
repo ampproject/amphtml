@@ -24,7 +24,7 @@ const {
   timedExec,
 } = require('../pr-check/utils');
 const {determineBuildTargets} = require('../pr-check/build-targets');
-const {runYarnChecks} = require('../pr-check/yarn-checks');
+const {runNpmChecks} = require('../pr-check/npm-checks');
 
 const FILENAME = 'pr-check.js';
 
@@ -49,7 +49,7 @@ async function prCheck(cb) {
   };
 
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
+  if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
     return;
   }

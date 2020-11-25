@@ -15,13 +15,13 @@
  */
 'use strict';
 
+const checkDependencies = require('check-dependencies');
 const colors = require('ansi-colors');
+const del = require('del');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {exec, execOrDie, getStderr} = require('../common/exec');
+const {execOrDie} = require('../common/exec');
 const {isTravisBuild} = require('../common/travis');
-
-const yarnExecutable = 'npx yarn';
 
 /**
  * Writes the given contents to the patched file if updated
@@ -96,50 +96,37 @@ function patchIntersectionObserver() {
 }
 
 /**
- * TODO(samouri): remove this patch when a better fix is upstreamed (https://github.com/jakubroztocil/rrule/pull/410).
- *
- * Patches rrule to remove references to luxon. Even though rrule marks luxon as an optional dependency,
- * it is used as if it's a required one (static import). rrule relies on its consumers either
- * installing luxon or adding it as a webpack-style external. We don't want the former and
- * can't yet do the latter.
- *
- * This function replaces the reference to luxon with a mock that throws (which the code handles well).
+ * Deletes the map file for rrule, which breaks closure compiler.
+ * TODO(rsimha): Remove this workaround after a fix is merged for
+ * https://github.com/google/closure-compiler/issues/3720.
  */
-function patchRRule() {
-  const path = 'node_modules/rrule/dist/es5/rrule.min.js';
-  const patchedContents = fs
-    .readFileSync(path)
-    .toString()
-    .replace(
-      /require\("luxon"\)/g,
-      `{ DateTime: { fromJSDate() { throw TypeError() } } }`
-    );
-
-  writeIfUpdated(path, patchedContents);
+function removeRruleSourcemap() {
+  const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
+  if (fs.existsSync(rruleMapFile)) {
+    del.sync(rruleMapFile);
+    log(colors.green('Deleted'), colors.cyan(rruleMapFile));
+  }
 }
 
 /**
- * Does a yarn check on node_modules, and if it is outdated, runs yarn.
+ * Checks if all packages are current, and if not, runs `npm install`.
  */
-function runYarnCheck() {
-  const integrityCmd = yarnExecutable + ' check --integrity';
-  if (getStderr(integrityCmd).trim() != '') {
+function runNpmCheck() {
+  const results = checkDependencies.sync({
+    verbose: true,
+    log: () => {},
+    error: console.log,
+  });
+  if (!results.depsWereOk) {
     log(
       colors.yellow('WARNING:'),
       'The packages in',
       colors.cyan('node_modules'),
       'do not match',
-      colors.cyan('package.json.')
+      colors.cyan('package.json') + '.'
     );
-    const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
-    exec(verifyTreeCmd);
-    log('Running', colors.cyan('yarn'), 'to update packages...');
-    /**
-     * NOTE: executing yarn with --production=false prevents having
-     * NODE_ENV=production variable set which forces yarn to not install
-     * devDependencies. This usually breaks gulp for example.
-     */
-    execOrDie(`${yarnExecutable} install --production=false`); // Stop execution when Ctrl + C is detected.
+    log('Running', colors.cyan('npm install'), 'to update packages...');
+    execOrDie('npm install');
   } else {
     log(
       colors.green('All packages in'),
@@ -164,11 +151,11 @@ function maybeUpdatePackages() {
  */
 async function updatePackages() {
   if (!isTravisBuild()) {
-    runYarnCheck();
+    runNpmCheck();
   }
   patchWebAnimations();
   patchIntersectionObserver();
-  patchRRule();
+  removeRruleSourcemap();
 }
 
 module.exports = {
@@ -177,4 +164,4 @@ module.exports = {
 };
 
 updatePackages.description =
-  'Runs yarn if node_modules is out of date, and applies custom patches';
+  'Runs npm install if node_modules is out of date, and applies custom patches';

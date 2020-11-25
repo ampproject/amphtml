@@ -23,7 +23,6 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -34,8 +33,8 @@ class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   init() {
     const {element} = this;
-    this.registerApiAction('prev', (api) => api.advance(-1), ActionTrust.LOW);
-    this.registerApiAction('next', (api) => api.advance(1), ActionTrust.LOW);
+    this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);
+    this.registerApiAction('next', (api) => api.next(), ActionTrust.LOW);
     this.registerApiAction(
       'goToSlide',
       (api, invocation) => {
@@ -57,7 +56,7 @@ class AmpBaseCarousel extends PreactBaseElement {
       isExperimentOn(this.win, 'amp-base-carousel-bento'),
       'expected amp-base-carousel-bento experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
   }
 }
 
@@ -81,6 +80,9 @@ AmpBaseCarousel['children'] = {
   },
   'children': {
     name: 'children',
+    props: {
+      'thumbnailSrc': {attr: 'data-thumbnail-src'},
+    },
     selector: '*', // This should be last as catch-all.
     single: false,
   },
@@ -88,7 +90,23 @@ AmpBaseCarousel['children'] = {
 
 /** @override */
 AmpBaseCarousel['props'] = {
-  'loop': {attr: 'loop', type: 'boolean'},
+  'advanceCount': {attr: 'advance-count', type: 'number', media: true},
+  'autoAdvance': {attr: 'auto-advance', type: 'boolean', media: true},
+  'autoAdvanceCount': {attr: 'auto-advance-count', type: 'number', media: true},
+  'autoAdvanceInterval': {
+    attr: 'auto-advance-interval',
+    type: 'number',
+    media: true,
+  },
+  'autoAdvanceLoops': {attr: 'auto-advance-loops', type: 'number', media: true},
+  'controls': {attr: 'controls', type: 'string', media: true},
+  'loop': {attr: 'loop', type: 'boolean', media: true},
+  'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
+  'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
+  'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
+  'snapBy': {attr: 'snap-by', type: 'number', media: true},
+  'snapAlign': {attr: 'snap-align', type: 'string', media: true},
+  'visibleCount': {attr: 'visible-count', type: 'number', media: true},
 };
 
 /** @override */

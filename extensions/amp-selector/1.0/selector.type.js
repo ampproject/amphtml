@@ -34,11 +34,15 @@ var SelectorDef = {};
 SelectorDef.Props;
 
 /**
+ * Note: `index` must be a positive integer to use
+ * `selectBy`, otherwise it will be noop.
+ *
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent),
  *   option: *,
  *   disabled: (boolean|undefined),
  *   shimDomElement: !Element,
+ *   index: (number|undefined),
  *   onClick: (?function(!Event)|undefined),
  *   role: (string|undefined),
  *   shimSelected: (boolean|undefined),
@@ -50,9 +54,28 @@ SelectorDef.OptionProps;
 /**
  * @typedef {{
  *   disabled: (boolean|undefined),
+ *   focusRef: ({current: {active: *, focusMap: !Object}),
+ *   keyboardSelectMode: (string|undefined),
  *   multiple: (boolean|undefined),
+ *   optionsRef: ({current: !Array<*>}),
  *   selected: (!Array|undefined),
  *   selectOption: (function(*):undefined|undefined),
  * }}
  */
 SelectorDef.ContextProps;
+
+/** @interface */
+SelectorDef.SelectorApi = class {
+  clear() {}
+
+  /**
+   * @param {*} option
+   * @param {boolean|undefined} value
+   */
+  toggle(option, value) {}
+
+  /**
+   * @param {number} delta
+   */
+  selectBy(delta) {}
+};

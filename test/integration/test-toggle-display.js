@@ -14,49 +14,51 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {BrowserController} from '../../testing/test-helper';
 import {setInitialDisplay, toggle} from '../../src/style';
 
-describe('toggle display helper', () => {
-  let fixture;
-  let img;
+describes.integration(
+  'toggle display helper',
+  {
+    enableIe: true,
+    body:
+      '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',
+  },
+  (env) => {
+    let browser, doc;
+    let img;
 
-  beforeEach(() => {
-    return createFixtureIframe('test/fixtures/images.html', 500)
-      .then((f) => {
-        fixture = f;
+    beforeEach(async () => {
+      const {win} = env;
+      doc = win.document;
+      browser = new BrowserController(win);
 
-        // Wait for one <amp-img> element to load.
-        return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
-      })
-      .then(() => {
-        img = fixture.doc.querySelector('amp-img');
-      });
-  });
+      await browser.waitForElementLayout('amp-img');
+      img = doc.querySelector('amp-img');
+    });
 
-  describes.repeated(
-    'toggle',
-    {
-      'regular': () => {},
-      'inline display style': (el) => {
-        setInitialDisplay(el, 'inline-block');
-      },
-      'stylesheet display style': () => {
-        const s = fixture.doc.createElement('style');
-        s.innerText = 'amp-img { display: inline-block !important; }';
-        fixture.doc.head.appendChild(s);
-      },
-    },
-    (name, setup) => {
-      it('toggle display', () => {
-        setup(img);
-
-        toggle(img, false);
-        expect(img).to.have.display('none');
-        toggle(img, true);
-        expect(img).to.not.have.display('none');
-      });
+    function expectToggleDisplay(el) {
+      toggle(el, false);
+      expect(el).to.have.display('none');
+      toggle(el, true);
+      expect(el).to.not.have.display('none');
     }
-  );
-});
+
+    it('toggles regular display', () => {
+      expectToggleDisplay(img);
+    });
+
+    it('toggles initial display style', () => {
+      setInitialDisplay(img, 'inline-block');
+      expectToggleDisplay(img);
+    });
+
+    it('toggles stylesheet display style', () => {
+      const style = doc.createElement('style');
+      style.innerText = 'amp-img { display: inline-block !important; }';
+      doc.head.appendChild(style);
+
+      expectToggleDisplay(img);
+    });
+  }
+);

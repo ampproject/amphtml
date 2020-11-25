@@ -37,8 +37,9 @@ Before diving into the details on creating a new AMP extension, please familiari
 
 All AMP extensions (and built-in elements) have their tag names prefixed
 with `amp-`. Make sure to choose an accurate and clear name for your
-extension. For example, video players are also suffixed with `-player`
-(e.g. amp-brid-player).
+extension.
+
+Extensions that embed a third-party service must follow the [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
 
 ## Directory structure
 
@@ -253,14 +254,6 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
 - **Return**: **True** if your element need to re-layout.
 - **Usage Example**: amp-iframe
 
-#### viewportCallback
-
-- **Default**: Does nothing.
-- **Override**: Rarely.
-- **Usage**: Use if your element need to know when it comes into viewport
-  and when it goes out of it for finer control.
-- **Usage Example**: amp-carousel, amp-anim
-
 ## Element styling
 
 You can write a stylesheet to style your element to provide a minimal
@@ -377,8 +370,6 @@ current slide when the user moves to it.
 
 ```javascript
 const owners = Services.ownersForDoc(this.element);
-owners.updateInViewport(this.element, oldSlide, false);
-owners.updateInViewport(this.element, newSlide, true);
 owners.scheduleLayout(this.element, newSlide);
 this.setControlsState();
 owners.schedulePause(this.element, oldSlide);
@@ -747,9 +738,9 @@ HTML document and use your element in it by creating a file in the
 name. Browse that directory to see examples for other elements and
 extensions.
 
-Also consider contributing to
-[ampbyexample.com](https://ampbyexample.com/) on
-[GitHub](https://github.com/ampproject/amp-by-example).
+Also consider contributing an example to
+[amp.dev](https://amp.dev/) on
+[GitHub](https://github.com/ampproject/amp.dev).
 
 ## Updating build configs
 

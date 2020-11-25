@@ -107,9 +107,13 @@ import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {install as installIntersectionObserver} from '../src/polyfills/intersection-observer';
-import {maybeTrackImpression} from '../src/impression';
+import {
+  maybeTrackImpression,
+  resetTrackImpressionPromiseForTesting,
+} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
+
 import fetchMock from 'fetch-mock/es5/client-bundle';
 import sinon from /*OK*/ 'sinon';
 
@@ -220,6 +224,8 @@ export const realWin = describeEnv((spec) => [
  *   hash: (string|undefined),
  *   amp: (boolean),
  *   timeout: (number),
+ *   ifIe: (boolean),
+ *   enableIe: (boolean),
  * }} spec
  * @param {function({
  *   win: !Window,
@@ -304,19 +310,21 @@ function describeEnv(factory) {
    * @param {function(string, function())} describeFunc
    */
   const templateFunc = function (name, spec, fn, describeFunc) {
-    const fixtures = [new SandboxFixture(spec)];
-    factory(spec).forEach((fixture) => {
-      if (fixture && fixture.isOn()) {
-        fixtures.push(fixture);
-      }
-    });
-    return describeFunc(name, function () {
+    const fixtures = [new SandboxFixture(spec)].concat(
+      factory(spec).filter((fixture) => fixture && fixture.isOn())
+    );
+
+    return describeFunc(name, () => {
       const env = Object.create(null);
 
+      // Note: If this `beforeEach` function is made async/always returns a
+      // Promise, even if it resolves immediately, tests start failing. It's
+      // not entirely clear why. Don't refactor this to be an async for-loop
+      // like the `afterEach` below.
       beforeEach(() => {
         let totalPromise = undefined;
         // Set up all fixtures.
-        fixtures.forEach((fixture, unusedIndex) => {
+        fixtures.forEach((fixture) => {
           if (totalPromise) {
             totalPromise = totalPromise.then(() => fixture.setup(env));
           } else {
@@ -329,28 +337,26 @@ function describeEnv(factory) {
         return totalPromise;
       });
 
-      afterEach(() => {
-        // Tear down all fixtures.
-        let teardown = Promise.resolve();
-        fixtures
-          .slice(0)
-          .reverse()
-          .forEach((fixture) => {
-            teardown = teardown.then(() => fixture.teardown(env));
-          });
+      afterEach(async () => {
+        // Tear down all fixtures in reverse order.
+        for (let i = fixtures.length - 1; i >= 0; --i) {
+          await fixtures[i].teardown(env);
+        }
 
-        return teardown.then(() => {
-          // Delete all other keys.
-          for (const key in env) {
-            delete env[key];
-          }
-        });
+        // Delete all other keys.
+        for (const key in env) {
+          delete env[key];
+        }
       });
 
       let d = describe.configure();
+      // Allow for specifying IE-only and IE-enabled test suites.
       if (spec.ifIe) {
         d = d.ifIe();
+      } else if (spec.enableIe) {
+        d = d.enableIe();
       }
+
       d.run(SUB, function () {
         if (spec.timeout) {
           this.timeout(spec.timeout);
@@ -398,6 +404,7 @@ class FixtureInterface {
 
   /**
    * @param {!Object} env
+   * @return {!Promise|undefined}
    */
   teardown(unusedEnv) {}
 }
@@ -489,7 +496,7 @@ class IntegrationFixture {
   }
 
   /** @override */
-  setup(env) {
+  async setup(env) {
     const body =
       typeof this.spec.body == 'function' ? this.spec.body() : this.spec.body;
     const css =
@@ -514,26 +521,32 @@ class IntegrationFixture {
       url = addParamsToUrl(url, this.spec.params);
     }
 
+    const docUrl =
+      addParamsToUrl(url, {
+        body,
+        css,
+        experiments,
+        extensions,
+      }) + `#${this.hash}`;
+
+    // If shadow mode, wrap doc in shadow viewer.
+    const src =
+      ampDocType == 'shadow'
+        ? addParamsToUrl('/amp4test/compose-shadow', {docUrl})
+        : docUrl;
+
+    env.iframe = createElementWithAttributes(document, 'iframe', {
+      src,
+      style,
+    });
+
     return new Promise((resolve, reject) => {
-      const docUrl =
-        addParamsToUrl(url, {body, css, experiments, extensions}) +
-        `#${this.hash}`;
-
-      let src = docUrl;
-      // If shadow mode, wrap doc in shadow viewer.
-      if (ampDocType == 'shadow') {
-        src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
-      }
-
-      env.iframe = createElementWithAttributes(document, 'iframe', {
-        src,
-        style,
-      });
       env.iframe.onload = function () {
         env.win = env.iframe.contentWindow;
         resolve();
       };
       env.iframe.onerror = reject;
+
       document.body.appendChild(env.iframe);
     });
   }
@@ -734,12 +747,12 @@ class AmpFixture {
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Ensure cached meta name/content pairs are cleared before each test
       ampdoc.meta_ = null;
+      maybeTrackImpression(win);
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
-    maybeTrackImpression(self);
     const extensionIds = [];
     if (spec.extensions) {
       spec.extensions.forEach((extensionIdWithVersion) => {
@@ -834,6 +847,8 @@ class AmpFixture {
         env.embed = embed;
         env.parentWin = env.win;
         env.win = embed.win;
+        env.parentAmpdoc = env.ampdoc;
+        env.ampdoc = embed.ampdoc;
         configureAmpTestMode(embed.win);
       });
       completePromise = completePromise
@@ -865,6 +880,7 @@ class AmpFixture {
   /** @override */
   teardown(env) {
     const {win} = env;
+    resetTrackImpressionPromiseForTesting();
     if (env.embed) {
       env.embed.destroy();
     }

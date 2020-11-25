@@ -30,7 +30,6 @@ import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
 import {makeBodyVisibleRecovery} from './style-installer';
-import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
 
@@ -241,10 +240,10 @@ export function isCancellation(errorOrMessage) {
     return false;
   }
   if (typeof errorOrMessage == 'string') {
-    return startsWith(errorOrMessage, CANCELLED);
+    return errorOrMessage.startsWith(CANCELLED);
   }
   if (typeof errorOrMessage.message == 'string') {
-    return startsWith(errorOrMessage.message, CANCELLED);
+    return errorOrMessage.message.startsWith(CANCELLED);
   }
   return false;
 }
@@ -266,10 +265,10 @@ export function isBlockedByConsent(errorOrMessage) {
     return false;
   }
   if (typeof errorOrMessage == 'string') {
-    return startsWith(errorOrMessage, BLOCK_BY_CONSENT);
+    return errorOrMessage.startsWith(BLOCK_BY_CONSENT);
   }
   if (typeof errorOrMessage.message == 'string') {
-    return startsWith(errorOrMessage.message, BLOCK_BY_CONSENT);
+    return errorOrMessage.message.startsWith(BLOCK_BY_CONSENT);
   }
   return false;
 }
@@ -695,7 +694,7 @@ export function detectJsEngineFromStack() {
     const {stack} = e;
 
     // Safari 12 and under only mentions the method name.
-    if (startsWith(stack, 't@')) {
+    if (stack.startsWith('t@')) {
       return 'Safari';
     }
 
@@ -716,7 +715,7 @@ export function detectJsEngineFromStack() {
     }
 
     // Finally, chrome includes the error message in the stack.
-    if (startsWith(stack, 'Error: message')) {
+    if (stack.startsWith('Error: message')) {
       return 'Chrome';
     }
   }

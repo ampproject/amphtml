@@ -1524,7 +1524,7 @@ describe('ValidatorRulesMakeSense', () => {
       // AMP4ADS format lists approved extensions.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       // Changes to the following map must be approved by the Ads Working
-      // Group, @wg-ads.
+      // Group, @wg-monetization.
       const approvedAmp4AdsExtensions = {
         'amp-accordion': ['0.1', 'latest'],
         'amp-ad-exit': ['0.1', 'latest'],
@@ -1564,7 +1564,7 @@ describe('ValidatorRulesMakeSense', () => {
           it(extension + ' has html_format either explicitly or implicitly' +
                  ' set for AMP4ADS but ' + extension + ' version ' + version +
                  ' is not approved for AMP4ADS. If this version is intended' +
-                 ' for AMP4ADS please get approval from @wg-ads and then' +
+                 ' for AMP4ADS please get approval from @wg-monetization and then' +
                  ' update this test. Otherwise remove the version for' +
                  ' AMP4ADS from the tagspec',
              () => {

@@ -463,43 +463,6 @@ describe('Resources', () => {
     // The other task is not updated.
     expect(task2.priority).to.equal(LayoutPriority.ADS);
   });
-
-  describe('slow element ratio (ser)', () => {
-    const slowTask = {resource: {isInViewport: () => true}};
-    const fastTask = {resource: {isInViewport: () => false}};
-
-    it('No layouts --> 0', () => {
-      resources.firstVisibleTime_ = 1;
-      expect(resources.getSlowElementRatio()).equal(0);
-    });
-
-    it('0 slow / 1 total --> 0', () => {
-      resources.firstVisibleTime_ = 1;
-      resources.taskComplete_(fastTask);
-      expect(resources.getSlowElementRatio()).equal(0);
-    });
-
-    it('ser is 0 if page was never visible', () => {
-      resources.firstVisibleTime_ = -1;
-      resources.taskComplete_(slowTask);
-      expect(resources.getSlowElementRatio()).equal(0);
-    });
-
-    it('1 slow / 1 total --> 1', () => {
-      resources.firstVisibleTime_ = 1;
-      resources.taskComplete_(slowTask);
-      expect(resources.getSlowElementRatio()).equal(1);
-    });
-
-    it('9 slow/ 10 total --> 0.9', () => {
-      resources.firstVisibleTime_ = 1;
-      for (let i = 0; i < 9; i++) {
-        resources.taskComplete_(slowTask);
-      }
-      resources.taskComplete_(fastTask);
-      expect(resources.getSlowElementRatio()).equal(0.9);
-    });
-  });
 });
 
 describes.fakeWin(
@@ -647,7 +610,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
 
     element.idleRenderOutsideViewport = () => true;
@@ -773,6 +735,15 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       // Neither should have applySizesOrMediaQuery() called.
       expect(resource1.applySizesAndMediaQuery).to.not.be.called;
       expect(resource2.applySizesAndMediaQuery).to.not.be.called;
+    });
+
+    it('should invalidate premeasurements after resize event', () => {
+      resource1.premeasure({});
+      expect(resource1.hasBeenPremeasured()).true;
+      expect(resource1.isMeasureRequested()).false;
+      resources.viewport_.changeObservable_.fire({relayoutAll_: true});
+      expect(resource1.hasBeenPremeasured()).false;
+      expect(resource1.isMeasureRequested()).true;
     });
 
     it('should applySizesAndMediaQuery on relayout', () => {
@@ -1409,7 +1380,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       },
       pauseCallback() {},
       resumeCallback() {},
-      dispatchCustomEvent() {},
       applySizesAndMediaQuery() {},
       updateLayoutBox() {},
       getBoundingClientRect() {

@@ -19,7 +19,7 @@ import {maybeSwitchToCompiledJs} from '../../testing/iframe';
 import {parseQueryString} from '../../src/url';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
-// TODO(wg-ads, #29112): Unskip on Safari.
+// TODO(wg-monetization, #29112): Unskip on Safari.
 const t = describe.configure().skipSafari();
 
 t.run('AMPHTML ad on AMP Page', () => {

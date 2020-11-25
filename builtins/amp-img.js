@@ -52,8 +52,8 @@ export class AmpImg extends BaseElement {
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = true;
+    /** @private {?boolean} */
+    this.prerenderAllowed_ = null;
 
     /** @private {?Element} */
     this.img_ = null;
@@ -135,13 +135,6 @@ export class AmpImg extends BaseElement {
           onLayout
         );
       }
-    }
-  }
-
-  /** @override */
-  firstAttachedCallback() {
-    if (this.element.hasAttribute('noprerender')) {
-      this.prerenderAllowed_ = false;
     }
   }
 
@@ -262,6 +255,9 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
+    if (this.prerenderAllowed_ == null) {
+      this.prerenderAllowed_ = !this.element.hasAttribute('noprerender');
+    }
     return this.prerenderAllowed_;
   }
 
@@ -349,6 +345,32 @@ export class AmpImg extends BaseElement {
         this.togglePlaceholder(false);
       });
       this.allowImgLoadFallback_ = false;
+    }
+  }
+
+  /**
+   * Utility method to propagate data attributes from this element
+   * to the target element. (For use with arbitrary data attributes.)
+   * Removes any data attributes that are missing on this element from
+   * the target element.
+   * AMP Bind attributes are excluded.
+   *
+   * @param {!Element} targetElement
+   */
+  propagateDataset(targetElement) {
+    for (const key in targetElement.dataset) {
+      if (!(key in this.element.dataset)) {
+        delete targetElement.dataset[key];
+      }
+    }
+
+    for (const key in this.element.dataset) {
+      if (key.startsWith('ampBind') && key !== 'ampBind') {
+        continue;
+      }
+      if (targetElement.dataset[key] !== this.element.dataset[key]) {
+        targetElement.dataset[key] = this.element.dataset[key];
+      }
     }
   }
 }

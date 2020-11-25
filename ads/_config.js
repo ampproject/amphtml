@@ -960,6 +960,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'remixd': {
+    preconnect: 'https://tags.remixd.com',
+    renderStartImplemented: true,
+  },
+
   'revcontent': {
     prefetch:
       'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
@@ -1211,7 +1216,7 @@ const adConfig = jsonConfiguration({
   },
 
   'vlyby': {
-    prefetch: 'https://amp.vlyby.com/qad/qad-outer2.js',
+    prefetch: 'https://cdn.vlyby.com/amp/qad/qad-outer2.js',
   },
 
   'vmfive': {

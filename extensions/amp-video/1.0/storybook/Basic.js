@@ -79,11 +79,10 @@ const VideoTagPlayer = ({i}) => {
       artwork={artwork}
       title={title}
       style={{width, height}}
-    >
-      {sources.map((props) => (
+      sources={sources.map((props) => (
         <source {...props}></source>
       ))}
-    </VideoWrapper>
+    />
   );
 };
 
