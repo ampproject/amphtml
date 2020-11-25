@@ -39,7 +39,7 @@ export const AutoLightboxEvents = {
  */
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
-  // Only enabled on single documents tagged as <html amp> or <html ⚡ lang="en">.
+  // Only enabled on single documents tagged as <html amp> or <html ⚡>.
   if (!isAmphtml(win.document) || !ampdoc.isSingleDoc()) {
     return;
   }
