@@ -398,7 +398,7 @@ describes.realWin(
             'https://server-test-1/':
               '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
             'https://server-test-2/':
-              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": false}}',
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": false, "purposeOne": true}}',
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -484,7 +484,8 @@ describes.realWin(
             'consentMetadata': constructMetadata(
               CONSENT_STRING_TYPE.US_PRIVACY_STRING,
               '1~1.35.41.101',
-              false
+              false,
+              true
             ),
             'isDirty': undefined,
           });
@@ -522,7 +523,7 @@ describes.realWin(
             'https://server-test-4/':
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://server-test-5/':
-              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": true}}',
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": true, "purposeOne": true}}',
             'https://server-test-6/':
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -597,6 +598,7 @@ describes.realWin(
             'consentMetadata': constructMetadata(
               CONSENT_STRING_TYPE.US_PRIVACY_STRING,
               '1~1.35.41.101',
+              true,
               true
             ),
           });
@@ -773,10 +775,7 @@ describes.realWin(
 
       it('should error and return undefined on invalid metadata', () => {
         const spy = env.sandbox.stub(user(), 'error');
-        const metadata = ampConsent.validateMetadata_(
-          'bad metadata',
-          'consentString'
-        );
+        const metadata = ampConsent.validateMetadata_('bad metadata');
         expect(spy.args[0][1]).to.match(/CMP metadata is not an object./);
         expect(metadata).to.be.undefined;
       });
@@ -795,25 +794,25 @@ describes.realWin(
       it('should remove invalid consentStringType', () => {
         const spy = env.sandbox.stub(user(), 'error');
         const responseMetadata = {'consentStringType': 4};
-        expect(
-          ampConsent.validateMetadata_(responseMetadata, 'consentString')
-        ).to.deep.equals(constructMetadata());
+        expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
+          constructMetadata()
+        );
         expect(spy.args[0][1]).to.match(
           /Consent metadata value "%s" is invalid./
         );
         expect(spy.args[0][2]).to.match(/consentStringType/);
         responseMetadata['consentStringType'] = CONSENT_STRING_TYPE.TCF_V2;
-        expect(
-          ampConsent.validateMetadata_(responseMetadata, 'consentString')
-        ).to.deep.equals(constructMetadata(2));
+        expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
+          constructMetadata(2)
+        );
       });
 
       it('should remove invalid additionalConsent', () => {
         const spy = env.sandbox.stub(user(), 'error');
         const responseMetadata = {'additionalConsent': 4};
-        expect(
-          ampConsent.validateMetadata_(responseMetadata, 'consentString')
-        ).to.deep.equals(constructMetadata());
+        expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
+          constructMetadata()
+        );
         expect(spy.args[0][1]).to.match(
           /Consent metadata value "%s" is invalid./
         );
@@ -823,13 +822,25 @@ describes.realWin(
       it('should remove invalid gdprApplies', () => {
         const spy = env.sandbox.stub(user(), 'error');
         const responseMetadata = {'gdprApplies': 4};
-        expect(
-          ampConsent.validateMetadata_(responseMetadata, 'consentString')
-        ).to.deep.equals(constructMetadata());
+        expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
+          constructMetadata()
+        );
         expect(spy.args[0][1]).to.match(
           /Consent metadata value "%s" is invalid./
         );
         expect(spy.args[0][2]).to.match(/gdprApplies/);
+      });
+
+      it('should remove invalid purposeOne', () => {
+        const spy = env.sandbox.stub(user(), 'error');
+        const responseMetadata = {'purposeOne': 'accepted'};
+        expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
+          constructMetadata()
+        );
+        expect(spy.args[0][1]).to.match(
+          /Consent metadata value "%s" is invalid./
+        );
+        expect(spy.args[0][2]).to.match(/purposeOne/);
       });
     });
 
@@ -925,6 +936,7 @@ describes.realWin(
             'consentStringType': CONSENT_STRING_TYPE.TCF_V1,
             'additionalConsent': '1~1.35.41.101',
             'gdprApplies': true,
+            'purposeOne': true,
           },
         };
         event.source = iframe.contentWindow;
@@ -932,7 +944,12 @@ describes.realWin(
         expect(actionSpy).to.be.calledWith(
           ACTION_TYPE.ACCEPT,
           'accept-string',
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '1~1.35.41.101', true)
+          constructMetadata(
+            CONSENT_STRING_TYPE.TCF_V1,
+            '1~1.35.41.101',
+            true,
+            true
+          )
         );
       });
 
