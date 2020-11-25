@@ -54,6 +54,12 @@ amp-story-dev-tools, amp-story-dev-tools * {
   font-size: 10px !important;
 }
 
+.i-amphtml-story-dev-tools-container {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 .i-amphtml-story-dev-tools-button {
   cursor: pointer !important;
   font-size: 13px !important;
@@ -103,4 +109,8 @@ amp-story-dev-tools, amp-story-dev-tools * {
   opacity: 1 !important;
   cursor: initial !important;
   border-bottom: 2px solid white !important;
+}
+
+.i-amphtml-story-dev-tools-tab {
+  flex: 1 !important;
 }

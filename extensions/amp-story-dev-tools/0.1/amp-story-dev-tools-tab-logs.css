@@ -14,94 +14,87 @@
  * limitations under the License.
  */
 
+amp-story-dev-tools-tab-logs {
+  overflow-y: scroll !important;
+  margin-top: 30px !important;
+  scrollbar-width: none !important;
+}
+
+amp-story-dev-tools-tab-logs::-webkit-scrollbar {
+  display: none !important;
+}
 
 .i-amphtml-story-dev-tools-logs:after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  bottom: 40px;
-  left: 10%;
-  pointer-events: none;
-  background-image: linear-gradient(to bottom, transparent, black);
-  width: 80%;
-  height: 20px;
+  content: "" !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  bottom: 40px !important;
+  left: 10% !important;
+  pointer-events: none !important;
+  background-image: linear-gradient(to bottom, transparent, black) !important;
+  width: 80% !important;
+  height: 20px !important;
 }
 
 .i-amphtml-story-dev-tools-logs:before {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  top: 100px;
-  left: 10%;
-  pointer-events: none;
-  background-image: linear-gradient(to bottom, black, transparent);
-  width: 80%;
-  height: 20px;
+  content: "" !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  top: 100px !important;
+  left: 10% !important;
+  pointer-events: none !important;
+  background-image: linear-gradient(to bottom, black, transparent) !important;
+  width: 80% !important;
+  height: 20px !important;
 }
 
 .i-amphtml-story-dev-tools-log-message {
-  margin-bottom: 1em;
-  background: #ffffff0f;
-  color: white;
-  position: relative;
-  padding: 1em;
-  border-radius: 1em;
-  box-shadow: 0px 2px 4px #000000;
+  margin-bottom: 1em !important;
+  background: #ffffff0f !important;
+  color: white !important;
+  position: relative !important;
+  padding: 1em !important;
+  border-radius: 1em !important;
+  box-shadow: 0px 2px 4px #000000 !important;
 }
 
 .i-amphtml-story-dev-tools-log-type {
-  margin: 0;
-  font-weight: 700;
-  font-size: 1em;
+  margin: 0 !important;
+  font-weight: 700 !important;
+  font-size: 1em !important;
 }
 
 .i-amphtml-story-dev-tools-log-position {
-  margin-right: 1em;
-  font-family: monospace;
+  margin-right: 1em !important;
+  font-family: monospace !important;
 }
 
 .i-amphtml-story-dev-tools-log-spec {
-  color: white;
-  text-decoration: none;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  border-radius: 20px;
-  border: 2px solid #ffffff22;
-  padding: 5px 10px;
-  font-size: 12px;
+  color: white !important;
+  text-decoration: none !important;
+  position: absolute !important;
+  right: 10px !important;
+  top: 10px !important;
+  border-radius: 20px !important;
+  border: 2px solid #ffffff22 !important;
+  padding: 5px 10px !important;
+  font-size: 12px !important;
 }
 
 .i-amphtml-story-dev-tools-log-spec:hover {
-  background: #ffffff22;
+  background: #ffffff22 !important;
 }
 
 .i-amphtml-story-dev-tools-log-code {
-  margin-bottom: 0px;
-  line-height: 24px;
+  margin-bottom: 0px !important;
+  line-height: 24px !important;
+}
+
+.i-amphtml-story-dev-tools-log-code div {
+  text-overflow: ellipsis !important;
+  overflow-x: hidden !important;
 }
 
 .i-amphtml-story-dev-tools-log-code div:nth-child(2) {
-  color: #FF5252;
-}
-
-/* Loader indicator */
-.lds-dual-ring {
-  display: inline-block;
-  width: 80px;
-  height: 80px;
-  position: absolute;
-  left: calc(50% - 40px);
-  top: calc(50% - 40px);
-}
-.lds-dual-ring:after {
-  content: " ";
-  display: block;
-  width: 64px;
-  height: 64px;
-  margin: 8px;
-  border-radius: 50%;
-  border: 6px solid #888;
-  border-color: #888 transparent #888 transparent;
-  animation: lds-dual-ring 1.2s linear infinite;
+  color: #FF5252 !important;
 }

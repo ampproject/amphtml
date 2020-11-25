@@ -15,9 +15,14 @@
  */
 
 import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
+import {
+  AmpStoryDevToolsTabLogs,
+  createTabLogsElement,
+} from './amp-story-dev-tools-tab-logs';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
+import {toggle} from '../../../src/style';
 import {updateHash} from './utils';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
@@ -189,13 +194,27 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @private
    */
   buildTabs_() {
-    this.tabContents_ = Object.values(DevToolsTab).reduce(
-      (tabContents, tab) => {
-        tabContents[tab] = createTabElement(this.win, this.storyUrl_, tab);
-        return tabContents;
-      },
-      {}
+    const container = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-container'
     );
+    this.tabContents_[DevToolsTab.PREVIEW] = createTabElement(
+      this.win,
+      this.storyUrl_
+    );
+    this.tabContents_[DevToolsTab.PAGE_EXPERIENCE] = createTabElement(
+      this.win,
+      this.storyUrl_,
+      DevToolsTab.PAGE_EXPERIENCE
+    );
+    this.tabContents_[DevToolsTab.LOGS] = createTabLogsElement(
+      this.win,
+      this.storyUrl_,
+      DevToolsTab.LOGS
+    );
+    Object.values(this.tabContents_).forEach((tabContent) => {
+      container.appendChild(tabContent);
+      toggle(tabContent, false);
+    });
   }
 
   /**
@@ -209,6 +228,8 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     this.mutateElement(() => {
       this.tabContents_[this.currentTab_].remove();
       container.appendChild(this.tabContents_[tab]);
+      toggle(this.tabContents_[this.currentTab_], false);
+      toggle(this.tabContents_[tab], true);
       this.tabSelectors_.forEach((tabSelector) => {
         return tabSelector.toggleAttribute(
           'active',
@@ -239,5 +260,6 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
 AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
   AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
-  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab, CSS);
+  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab);
+  AMP.registerElement('amp-story-dev-tools-tab-logs', AmpStoryDevToolsTabLogs);
 });
