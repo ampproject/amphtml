@@ -69,7 +69,7 @@ const buildDeviceChipTemplate = (element) => {
       class="i-amphtml-story-dev-tools-device-chip"
       data-action="toggleDeviceChip"
     >
-      <span>Name</span>
+      <span class="i-amphtml-story-dev-tools-device-chip-name">Name</span>
       <svg
         title="cross"
         xmlns="http://www.w3.org/2000/svg"
@@ -453,7 +453,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       'data-action',
       PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG
     );
-    addDeviceButton.querySelector('span').textContent = 'ADD DEVICE';
+    addDeviceButton.querySelector(
+      '.i-amphtml-story-dev-tools-device-chip-name'
+    ).textContent = 'ADD DEVICE';
     return addDeviceButton;
   }
 
@@ -579,7 +581,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   buildDeviceChip_(deviceName) {
     const deviceChip = buildDeviceChipTemplate(this.element);
-    deviceChip.querySelector('span').textContent = deviceName;
+    deviceChip.querySelector(
+      '.i-amphtml-story-dev-tools-device-chip-name'
+    ).textContent = deviceName;
     deviceChip.setAttribute('data-action', PREVIEW_ACTIONS.REMOVE_DEVICE);
     deviceChip.setAttribute('data-device', deviceName);
     return deviceChip;
@@ -665,6 +669,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   showAddDeviceDialog_() {
     const dialog = buildAddDeviceDialogTemplate(this.element);
 
+    // Find the sections for the different screen sizes, where chips will be attached.
     const sections = ['mobile', 'tablet', 'desktop'].reduce((obj, section) => {
       obj[section] = dialog.querySelector(
         `.i-amphtml-story-dev-tools-device-dialog-${escapeCssSelectorIdent(
@@ -674,20 +679,20 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       return obj;
     }, {});
 
+    // Add a chip for each device on the right category, and mark as inactive if device not selected.
     ALL_DEVICES.forEach((device) => {
-      const deviceChip = buildDeviceChipTemplate(this.element);
-      deviceChip.setAttribute('data-device', device.name);
+      const chip = this.buildDeviceChip_(device.name);
+      chip.setAttribute('data-action', PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP);
       if (!this.devices_.find((d) => d.name == device.name)) {
-        deviceChip.setAttribute('inactive', '');
+        chip.setAttribute('inactive', '');
       }
-      deviceChip.querySelector('span').textContent = device.name;
-      let chipSection = sections['mobile'];
       if (device.width / device.height > 1) {
-        chipSection = sections['desktop'];
+        sections['desktop'].appendChild(chip);
       } else if (device.width / device.height > 0.75) {
-        chipSection = sections['tablet'];
+        sections['tablet'].appendChild(chip);
+      } else {
+        sections['mobile'].appendChild(chip);
       }
-      chipSection.appendChild(deviceChip);
     });
 
     this.mutateElement(() => this.element.appendChild(dialog));
