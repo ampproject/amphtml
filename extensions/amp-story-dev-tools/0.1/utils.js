@@ -47,9 +47,9 @@ export function removeAfterTimeout(context, element, timeout) {
  * @public
  * @param {!Element} context the mutateElement context
  * @param {!Element} element the element to remove
+ * @param {number} timeout time in ms after which the element will be removed
  * @param {string} attributeName
  * @param {string=} attributeValue
- * @param {number} timeout time in ms after which the element will be removed
  */
 export function addAttributeAfterTimeout(
   context,
