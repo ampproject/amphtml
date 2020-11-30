@@ -41,7 +41,7 @@ export const withDisplayLocking = () => {
       >
         <section id="section1">
           <h2>Section 1</h2>
-          <p>Puppies are cute.</p>
+          <div>Puppies are cute.</div>
         </section>
         <section>
           <h2>Section 2</h2>

@@ -524,7 +524,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       // The state is NOT immediately reflected: expanded attribute is removed,
       // but `content[hidden]` is deferred until animation is complete.
       expect(section.getDOMNode()).to.not.have.attribute('expanded');
-      expect(content.hidden).to.be.false;
+      expect(content.className.includes('i-amphtml-animating')).to.be.true;
       expect(content).to.have.display('block');
 
       // Animation has been started.
@@ -543,8 +543,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
       // Cleanup the animation.
       animation.onfinish();
-      expect(content.hidden).to.be.true;
-      expect(content).to.have.display('none');
+      expect(content.className.includes('i-amphtml-animating')).to.be.false;
+      expect(content.className.includes('content-hidden')).to.be.true;
     });
 
     it('should make animations cancelable', () => {
@@ -560,8 +560,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       section.find('div').at(0).simulate('click');
       expect(animateStub).to.be.calledOnce;
 
-      // Hidden is not set yet.
-      expect(content.hidden).to.be.false;
+      // Currently animating
+      expect(content.className.includes('i-amphtml-animating')).to.be.true;
 
       // Unclick. This should cancel the previous animation.
       section.find('div').at(0).simulate('click');
@@ -569,7 +569,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
       expect(animation.cancel).to.be.calledOnce;
       animation.oncancel();
-      expect(content.hidden).to.be.true;
+      expect(content.className.includes('i-amphtml-animating')).to.be.false;
     });
 
     it('should ignore animations if not available on the platform', () => {

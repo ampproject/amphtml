@@ -27,7 +27,6 @@ const sectionChild = {
   position: 'relative !important',
 };
 
-// TODO(#30445): update these styles after team agrees on styling
 const header = {
   cursor: 'pointer',
   backgroundColor: '#efefef',
@@ -35,9 +34,9 @@ const header = {
   border: 'solid 1px #dfdfdf',
 };
 
-// TODO(#30445): update these styles after team agrees on styling
-// or delete if not used
-const content = {};
+const content = {
+  display: 'block',
+};
 
 const contentHidden = {
   '&:not(.i-amphtml-animating)': {

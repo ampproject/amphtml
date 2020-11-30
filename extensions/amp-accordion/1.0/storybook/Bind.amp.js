@@ -43,7 +43,7 @@ export const withAmpBind = () => {
       >
         <section data-amp-bind-expanded="section1">
           <h2>Section 1</h2>
-          <p>Puppies are cute.</p>
+          <div>Puppies are cute.</div>
         </section>
         <section data-amp-bind-expanded="section2">
           <h2>Section 2</h2>

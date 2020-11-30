@@ -110,11 +110,12 @@ function AccordionWithRef(
   );
 
   const toggleExpanded = useCallback(
-    (id) => {
+    (id, opt_expand) => {
       setExpandedMap((expandedMap) => {
+        const newExpanded = opt_expand || !expandedMap[id];
         const newExpandedMap = setExpanded(
           id,
-          !expandedMap[id],
+          newExpanded,
           expandedMap,
           expandSingleSection
         );
@@ -309,22 +310,25 @@ export function AccordionSection({
     }
   }, [registerSection, id, defaultExpanded]);
 
-  const expandHandler = useCallback(() => {
-    if (toggleExpanded) {
-      toggleExpanded(id);
-    } else {
-      setExpandedState((prev) => {
-        const newValue = !prev;
-        Promise.resolve().then(() => {
-          const onExpandStateChange = onExpandStateChangeRef.current;
-          if (onExpandStateChange) {
-            onExpandStateChange(newValue);
-          }
+  const toggleHandler = useCallback(
+    (opt_expand) => {
+      if (toggleExpanded) {
+        toggleExpanded(id, opt_expand);
+      } else {
+        setExpandedState((prev) => {
+          const newValue = opt_expand || !prev;
+          Promise.resolve().then(() => {
+            const onExpandStateChange = onExpandStateChangeRef.current;
+            if (onExpandStateChange) {
+              onExpandStateChange(newValue);
+            }
+          });
+          return newValue;
         });
-        return newValue;
-      });
-    }
-  }, [id, toggleExpanded]);
+      }
+    },
+    [id, toggleExpanded]
+  );
 
   const context = useMemo(
     () =>
@@ -333,7 +337,7 @@ export function AccordionSection({
         contentId,
         headerId,
         expanded,
-        expandHandler,
+        toggleHandler,
         setContentId: setContentIdState,
         setHeaderId: setHeaderIdState,
         experimentDisplayLocking,
@@ -343,7 +347,7 @@ export function AccordionSection({
       contentId,
       headerId,
       expanded,
-      expandHandler,
+      toggleHandler,
       experimentDisplayLocking,
     ]
   );
@@ -374,7 +378,7 @@ export function AccordionHeader({
     contentId,
     headerId,
     expanded,
-    expandHandler,
+    toggleHandler,
     setHeaderId,
   } = useContext(SectionContext);
   const classes = useStyles();
@@ -393,7 +397,7 @@ export function AccordionHeader({
       className={`${className} ${classes.sectionChild} ${classes.header}`}
       tabIndex={tabIndex}
       aria-controls={contentId}
-      onClick={expandHandler}
+      onClick={() => toggleHandler()}
       aria-expanded={String(expanded)}
     >
       {children}
@@ -421,7 +425,7 @@ export function AccordionContent({
     expanded,
     animate,
     setContentId,
-    expandHandler,
+    toggleHandler,
     experimentDisplayLocking,
   } = useContext(SectionContext);
   const classes = useStyles();
@@ -440,11 +444,11 @@ export function AccordionContent({
   }, []);
 
   useEffect(() => {
-    if (!ref.current) {
+    const element = ref.current;
+    if (!element) {
       return;
     }
 
-    const element = ref.current;
     const win = element.ownerDocument.defaultView;
     if (!win) {
       return;
@@ -460,13 +464,11 @@ export function AccordionContent({
     }
 
     const beforeMatchHandler = () => {
-      if (element.getAttribute('aria-hidden') === 'true') {
-        expandHandler();
-      }
+      toggleHandler(true);
     };
     element.addEventListener('beforematch', beforeMatchHandler);
     return () => element.removeEventListener('beforematch', beforeMatchHandler);
-  }, [expandHandler, experimentDisplayLocking]);
+  }, [toggleHandler, experimentDisplayLocking]);
 
   useLayoutEffect(() => {
     if (setContentId) {

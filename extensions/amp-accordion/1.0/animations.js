@@ -41,7 +41,6 @@ export function animateExpand(content) {
         opacity: 0,
         overflowY: 'auto',
       });
-      content.hidden = false;
       content.classList.add('i-amphtml-animating');
       const targetHeight = content./*OK*/ scrollHeight;
 
@@ -88,12 +87,6 @@ export function animateCollapse(content) {
   return animate(
     content,
     () => {
-      // Measure the starting height.
-      // This looks ugly, but avoids weird `hidden` state management in the
-      // component itself. Most importantly, this has no performance issues
-      // by itself b/c flipping `hidden` back and forth before measure has
-      // no effect - the `useLayoutEffect` assures this.
-      content.hidden = false;
       content.classList.add('i-amphtml-animating');
       const startHeight = content./*OK*/ offsetHeight;
 
@@ -119,8 +112,6 @@ export function animateCollapse(content) {
       );
     },
     () => {
-      // Undo the `content.hidden = true` above.
-      content.hidden = true;
       content.classList.remove('i-amphtml-animating');
     }
   );
