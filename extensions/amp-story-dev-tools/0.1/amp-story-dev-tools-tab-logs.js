@@ -95,6 +95,9 @@ const buildLogMessageTemplate = (element) => {
   </div>`;
 };
 
+/** @const {string} */
+const TAG = 'AMP-STORY-DEV-TOOLS';
+
 export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
   /** @param {!Element} element */
   constructor(element) {
@@ -127,14 +130,14 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
         const htmlLines = html.split('\n');
         const validationResult = validator.validateString(html);
         const errorList = validationResult.errors.map((error) => {
-          error.lineContent = htmlLines.slice(error.line - 2, error.line + 3);
+          error.htmlLines = htmlLines.slice(error.line - 2, error.line + 3);
           error.message = validator.renderErrorMessage(error);
           return error;
         });
         this.buildLogsList_(errorList);
       },
       (reason) => {
-        dev().error('AMP-STORY-DEV-TOOLS', reason);
+        dev().error(TAG, reason);
       }
     );
   }
@@ -153,7 +156,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
         const codeEl = logEl.querySelector(
           '.i-amphtml-story-dev-tools-log-code'
         );
-        content.lineContent.forEach((l, i) => {
+        content.htmlLines.forEach((l, i) => {
           const lineEl = this.element.ownerDocument.createElement('div');
           lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
           codeEl.appendChild(lineEl);
