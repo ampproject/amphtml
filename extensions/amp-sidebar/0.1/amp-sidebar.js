@@ -210,7 +210,11 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     if (!element.hasAttribute('role')) {
-      element.setAttribute('role', 'menu');
+      element.setAttribute('role', 'dialog');
+    }
+
+    if (!element.hasAttribute('aria-modal')) {
+      element.setAttribute('aria-modal', true);
     }
     // Make sidebar programmatically focusable and focus on `open` for a11y.
     element.tabIndex = -1;
