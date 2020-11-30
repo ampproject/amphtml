@@ -110,7 +110,6 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
       (html) => {
         const htmlLines = html.split('\n');
         const validationResult = validator.validateString(html);
-        console.log(html, htmlLines);
         const errorList = validationResult.errors.map((error) => {
           error.lineContent = htmlLines.slice(error.line - 2, error.line + 3);
           error.message = validator.renderErrorMessage(error);
@@ -129,7 +128,6 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @param {Array<Object>} errorList
    */
   buildErrorList_(errorList) {
-    console.log(errorList);
     this.mutateElement(() => {
       errorList.forEach((content) => {
         const logEl = buildLogMessageTemplate(this.element);
