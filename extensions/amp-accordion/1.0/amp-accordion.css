@@ -21,7 +21,7 @@
 
 .i-amphtml-accordion-content {
   margin: 0;
-  display: block;
+  display: block !important;
 }
 
 /* heading

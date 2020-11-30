@@ -35,7 +35,7 @@ const header = {
 };
 
 const content = {
-  display: 'block',
+  display: 'block !important',
 };
 
 const contentHidden = {
@@ -47,7 +47,6 @@ const contentHidden = {
 const contentHiddenMatchable = {
   '&:not(.i-amphtml-animating)': {
     contentVisibility: 'hidden-matchable !important',
-    display: 'block !important',
   },
 };
 
