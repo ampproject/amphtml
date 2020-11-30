@@ -199,7 +199,8 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     );
     this.tabContents_[DevToolsTab.PREVIEW] = createTabElement(
       this.win,
-      this.storyUrl_
+      this.storyUrl_,
+      DevToolsTab.PREVIEW
     );
     this.tabContents_[DevToolsTab.PAGE_EXPERIENCE] = createTabElement(
       this.win,

@@ -27,6 +27,15 @@ amp-story-dev-tools-tab-logs::-webkit-scrollbar {
   display: none !important;
 }
 
+amp-story-dev-tools-tab-logs h1 {
+  font-size: 16px;
+}
+
+amp-story-dev-tools-tab-logs h1 * {
+  vertical-align: middle;
+  margin-inline-end: 10px;
+}
+
 .i-amphtml-story-dev-tools-log-message {
   margin-bottom: 16px !important;
   background: var(--i-amphtml-story-dev-tools-log-message-background) !important;
