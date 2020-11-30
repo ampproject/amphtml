@@ -5,6 +5,32 @@ formats:
 teaser:
   text: Fill this in with teaser text to improve SEO. Use the component description.
 draft: true
+tags:
+  - image
+  - transition
+  - animaion
+  - media
+author: philipbell
+toc: true
+$title: amp-story-panning-media
+version: '0.1'
+versions:
+  - '0.1'
+latest_version: '0.1'
+is_current: true
+$path: /documentation/components/amp-story-panning-media.html
+$localization:
+  path: '/{locale}/documentation/components/amp-story-panning-media.html'
+scripts:
+  - >-
+    <script async custom-element="amp-story-panning-media"
+    src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"></script>
+layouts:
+  - Fill
+  - fixed
+  - fixed height
+  - flex item
+  - nodisplay
 ---
 
 <!--
