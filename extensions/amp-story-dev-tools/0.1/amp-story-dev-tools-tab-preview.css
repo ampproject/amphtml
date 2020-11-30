@@ -105,6 +105,7 @@ amp-story-player a {
   transform: rotate(90deg) !important;
 }
 
+/* Removes the second line in the + (to convert to -) when the device is selected (not inactive) */
 .i-amphtml-story-dev-tools-device-chip:not([inactive]):not(.i-amphtml-story-dev-tools-add-device) .i-amphtml-story-dev-tools-device-chip-add-stick {
   fill: transparent !important;
 }
