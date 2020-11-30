@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import {getCarousel, getNextArrow, getPrevArrow, getSlides} from './helpers';
+import {
+  getCarousel,
+  getNextArrow,
+  getPrevArrow,
+  getSlides,
+  sleep,
+} from './helpers';
 import {useStyles} from '../base-carousel.jss';
-import sleep from 'sleep-promise';
 
 const pageWidth = 500;
 const pageHeight = 800;

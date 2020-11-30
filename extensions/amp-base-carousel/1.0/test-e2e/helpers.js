@@ -53,3 +53,7 @@ export async function getPrevArrow(styles, controller) {
 export async function getNextArrow(styles, controller) {
   return controller.findElement(`.${styles[NEXT_ARROW_CLASS]}`);
 }
+
+export function sleep(ms) {
+  return new Promise((res) => setTimeout(res, ms));
+}
