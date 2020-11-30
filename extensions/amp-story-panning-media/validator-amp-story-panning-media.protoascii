@@ -28,7 +28,7 @@ tags: {  # <amp-story-panning-media>
   html_format: AMP
   tag_name: "AMP-STORY-PANNING-MEDIA"
   requires_extension: "amp-story-panning-media"
-  mandatory_parent: "AMP-STORY-GRID-LAYER"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
   spec_url: "https://amp.dev/documentation/components/amp-story-panning-media"
   amp_layout: {
     supported_layouts: FILL
