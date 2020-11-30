@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
+import {Layout} from '../../../src/layout';
 
 export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @param {!AmpElement} element */
