@@ -49,7 +49,7 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
   buildCallback() {
     this.container_ = htmlFor(this.element)`
       <div class='wrapper'>
-        <img class='panner'>
+        <img>
       </div>
     `;
     this.element.appendChild(this.container_);
@@ -89,7 +89,7 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
   positionElement_(element) {
     // const offsetX = this.x_ * 0.01 * element.offsetWidth;
     element.querySelector(
-      '.panner'
+      'img'
     ).style.transform = `scale(${this.zoom_}) translate(${this.x_}%, ${this.y_}%)`;
   }
 

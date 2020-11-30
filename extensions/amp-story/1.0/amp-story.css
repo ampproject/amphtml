@@ -980,13 +980,11 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   --i-amphtml-interactive-animation-delay: 350ms !important;
 }
 
-amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-page .panner,
-amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-page .scaler {
+amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-page img {
   transition: transform 1s ease-in-out;
 }
 
-.i-amphtml-story-desktop-panels amp-story-page[active] .panner,
-.i-amphtml-story-desktop-panels amp-story-page[active] .scaler {
+.i-amphtml-story-desktop-panels amp-story-page[active] img {
   transition: transform 1s ease-in-out;
 }
 
@@ -996,7 +994,7 @@ amp-story-panning-image .wrapper {
   justify-content: center;
 }
  
-amp-story-panning-image .panner {
+amp-story-panning-image img {
   height: 100%;
   -webkit-backface-visibility: hidden;
 }
