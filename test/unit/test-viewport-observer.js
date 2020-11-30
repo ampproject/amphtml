@@ -77,9 +77,7 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
       const win = el.ownerDocument.defaultView;
       // Grabs the IO Callback shared by all the viewport observers.
       const ioCallback = win.IntersectionObserver.getCall(0).args[0];
-      if (tracked.has(el)) {
-        ioCallback([{target: el, isIntersecting: inViewport}]);
-      }
+      ioCallback([{target: el, isIntersecting: inViewport}]);
     }
 
     it('observed element should have its callback fired each time it enters/exist the viewport.', () => {
@@ -130,6 +128,15 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
           'Assertion failed'
         );
       });
+    });
+
+    it('A quick observe and unobserve pair should not cause an error or fire the callback', () => {
+      const spy = env.sandbox.spy();
+      observeWithSharedInOb(el1, spy);
+      unobserveWithSharedInOb(el1);
+      toggleViewport(el1, true);
+
+      expect(spy).not.called;
     });
   });
 });

@@ -92,6 +92,8 @@ function ioCallback(entries) {
   for (let i = 0; i < entries.length; i++) {
     const {isIntersecting, target} = entries[i];
     const viewportCallback = viewportCallbacks.get(target);
-    viewportCallback(isIntersecting);
+    if (viewportCallback) {
+      viewportCallback(isIntersecting);
+    }
   }
 }
