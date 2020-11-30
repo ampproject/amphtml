@@ -653,9 +653,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       // Calculate the width change when scaling that needs to be added.
       const scaleWidthChange = deviceSpecs.width * (1 - scale) * 0.5 + 10;
       setStyles(deviceSpecs.element, {
-        'transform': `translateX(${
-          cumWidthSum - scaleWidthChange
-        }px) perspective(100px) translateZ(${(100 * (scale - 1)) / scale}px)`,
+        'transform': `perspective(100px) translate3d(${
+          (cumWidthSum - scaleWidthChange) / scale
+        }px, 0px, ${(100 * (scale - 1)) / scale}px)`,
       });
       cumWidthSum += deviceSpecs.width * scale + paddingSize;
     });
