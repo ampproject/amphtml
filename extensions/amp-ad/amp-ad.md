@@ -413,6 +413,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [PubGuru](../../ads/pubguru.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
+- [Pulse](../../ads/pulse.md)
 - [PulsePoint](../../ads/pulsepoint.md)
 - [PuffNetwork](../../ads/puffnetwork.md)
 - [Purch](../../ads/purch.md)
