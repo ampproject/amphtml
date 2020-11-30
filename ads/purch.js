@@ -24,7 +24,7 @@ export function purch(global, data) {
   validateData(data, [], ['pid', 'divid', 'config']);
   global.data = data;
 
-  const adsrc = 'https://ads.servebom.com/serve/creative_amp.js';
+  const adsrc = 'https://ramp.purch.com/serve/creative_amp.js';
   validateSrcPrefix('https:', adsrc);
   writeScript(global, adsrc);
 }

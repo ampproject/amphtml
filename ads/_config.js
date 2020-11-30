@@ -919,7 +919,7 @@ const adConfig = jsonConfiguration({
   },
 
   'purch': {
-    prefetch: 'https://ads.servebom.com/serve/creative_amp.js',
+    prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
     renderStartImplemented: true,
   },
 
