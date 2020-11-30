@@ -26,51 +26,58 @@ const COLLAPSE_CURVE = 'cubic-bezier(0.39, 0.575, 0.565, 1)';
  * @return {!UnlistenDef}
  */
 export function animateExpand(content) {
-  return animate(content, () => {
-    const oldHeight = getStyle(content, 'height');
-    const oldOpacity = getStyle(content, 'opacity');
-    const oldOverflowY = getStyle(content, 'overflowY');
+  return animate(
+    content,
+    () => {
+      const oldHeight = getStyle(content, 'height');
+      const oldOpacity = getStyle(content, 'opacity');
+      const oldOverflowY = getStyle(content, 'overflowY');
 
-    // Measure the expanded height. This is relatively heavy with a sync
-    // layout. But no way around it. The hope that the `commitStyles` API
-    // may eventually make this unneeded.
-    setStyles(content, {
-      height: 0,
-      opacity: 0,
-      overflowY: 'auto',
-    });
-    content.hidden = false;
-    const targetHeight = content./*OK*/ scrollHeight;
+      // Measure the expanded height. This is relatively heavy with a sync
+      // layout. But no way around it. The hope that the `commitStyles` API
+      // may eventually make this unneeded.
+      setStyles(content, {
+        height: 0,
+        opacity: 0,
+        overflowY: 'auto',
+      });
+      content.hidden = false;
+      content.classList.add('i-amphtml-animating');
+      const targetHeight = content./*OK*/ scrollHeight;
 
-    // Reset back. The animation will take care of these properties
-    // going forward.
-    setStyles(content, {
-      height: oldHeight,
-      opacity: oldOpacity,
-      overflowY: oldOverflowY,
-    });
+      // Reset back. The animation will take care of these properties
+      // going forward.
+      setStyles(content, {
+        height: oldHeight,
+        opacity: oldOpacity,
+        overflowY: oldOverflowY,
+      });
 
-    const duration = getTransitionDuration(targetHeight);
+      const duration = getTransitionDuration(targetHeight);
 
-    return content.animate(
-      [
+      return content.animate(
+        [
+          {
+            height: 0,
+            opacity: 0,
+            overflowY: 'hidden',
+          },
+          {
+            height: targetHeight + 'px',
+            opacity: 1,
+            overflowY: 'hidden',
+          },
+        ],
         {
-          height: 0,
-          opacity: 0,
-          overflowY: 'hidden',
-        },
-        {
-          height: targetHeight + 'px',
-          opacity: 1,
-          overflowY: 'hidden',
-        },
-      ],
-      {
-        easing: EXPAND_CURVE,
-        duration,
-      }
-    );
-  });
+          easing: EXPAND_CURVE,
+          duration,
+        }
+      );
+    },
+    () => {
+      content.classList.remove('i-amphtml-animating');
+    }
+  );
 }
 
 /**
@@ -87,6 +94,7 @@ export function animateCollapse(content) {
       // by itself b/c flipping `hidden` back and forth before measure has
       // no effect - the `useLayoutEffect` assures this.
       content.hidden = false;
+      content.classList.add('i-amphtml-animating');
       const startHeight = content./*OK*/ offsetHeight;
 
       const duration = getTransitionDuration(startHeight);
@@ -113,6 +121,7 @@ export function animateCollapse(content) {
     () => {
       // Undo the `content.hidden = true` above.
       content.hidden = true;
+      content.classList.remove('i-amphtml-animating');
     }
   );
 }

@@ -430,6 +430,9 @@ export function AccordionContent({
   );
   const enableDisplayLocking =
     supportsContentVisibility && experimentDisplayLocking;
+  const hiddenClass = enableDisplayLocking
+    ? classes.contentHiddenMatchable
+    : classes.contentHidden;
 
   useEffect(() => {
     hasMountedRef.current = true;
@@ -485,11 +488,7 @@ export function AccordionContent({
       {...rest}
       ref={ref}
       className={`${className} ${classes.sectionChild} ${classes.content} ${
-        !expanded
-          ? enableDisplayLocking
-            ? classes.contentHiddenMatchable
-            : classes.contentHidden
-          : ''
+        !expanded ? hiddenClass : ''
       }`}
       id={contentId}
       aria-labelledby={headerId}

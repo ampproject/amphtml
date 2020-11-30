@@ -40,12 +40,16 @@ const header = {
 const content = {};
 
 const contentHidden = {
-  display: 'none !important',
+  '&:not(.i-amphtml-animating)': {
+    display: 'none !important',
+  },
 };
 
 const contentHiddenMatchable = {
-  contentVisibility: 'hidden-matchable !important',
-  display: 'block !important',
+  '&:not(.i-amphtml-animating)': {
+    contentVisibility: 'hidden-matchable !important',
+    display: 'block !important',
+  },
 };
 
 const JSS = {
