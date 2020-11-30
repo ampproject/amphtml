@@ -231,8 +231,8 @@ A message can be either an Object, or a String that’s serialized using JSON st
 
 - **app**: A sentinel that both the Viewer and AMP Documents will use to know that the message they’ve received is a part of the AMP Viewer Integrations API. The value should always be set to `'__AMPHTML__'`.
 - **type**: This signals that the message is either a request or a response.
-  - For a request message, specify a value of `'q'`.
-  - For a response message, specify a value of `'s'`.
+    - For a request message, specify a value of `'q'`.
+    - For a response message, specify a value of `'s'`.
 - **requestid**: A unique ID to identify the request. A simple request counter that increases its value with each request message should work just fine.
 - **name**: Specifies the message name.
 - **rsvp**: Set to `true` if you need a response to your message; otherwise, `false`.

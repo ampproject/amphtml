@@ -83,8 +83,8 @@ A server endpoint needs to provide ad responses in the following JSON format:
 - `templateId`: the ID of the inlined template that is going to be used.
 - `data`: the data model to populate the selected template. The fields should match the variable names in the selected template.
 - `vars`: extra variables needed by the story. They will be added to the `amp-ad` element as data attributes, and picked by runtime for different use cases:
-  - CTA button rendering (see details in the ["CTA ad" section](#cta-ad))
-  - Provide dynamic content of the ad for tracking purpose (see details in the "tracking" section)
+    - CTA button rendering (see details in the ["CTA ad" section](#cta-ad))
+    - Provide dynamic content of the ad for tracking purpose (see details in the "tracking" section)
 
 #### Response headers
 

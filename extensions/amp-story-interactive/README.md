@@ -70,10 +70,10 @@ All of them support the styling attributes:
 - **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
 - **chip-style**: Alternates the visual style of the component, defaults to _flat_. Supports _flat_ and _shadow_ (_transparent_ might also be available in upcoming PR). Only affects quizzes and polls, but not binary-polls.
 - **style**: We have exposed the following CSS properties, available to be overridden through a class declaration:
-  - **--interactive-accent-color**: Default color of the prompt background, and quizzes' option letters, defaults to blue.
-  - **--interactive-prompt-background**: Color or gradient for the prompt background, defaults to \_var(--interactive-accent-color). Note: We recommend setting the accent color to match the prompt background color.
-  - **--interactive-prompt-text-color**: Color of the prompt text, defaults to white. Note: We recommend changing to black/dark if the accent color is bright.
-  - **--interactive-prompt-alignment**: Text alignment of the prompt, defaults to _initial_.
+    - **--interactive-accent-color**: Default color of the prompt background, and quizzes' option letters, defaults to blue.
+    - **--interactive-prompt-background**: Color or gradient for the prompt background, defaults to \_var(--interactive-accent-color). Note: We recommend setting the accent color to match the prompt background color.
+    - **--interactive-prompt-text-color**: Color of the prompt text, defaults to white. Note: We recommend changing to black/dark if the accent color is bright.
+    - **--interactive-prompt-alignment**: Text alignment of the prompt, defaults to _initial_.
 
 Quizzes support:
 
@@ -152,7 +152,7 @@ All of them support the styling attributes:
 
 - **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
 - **style**: We have exposed the following CSS properties, available to be overridden here:
-  - **--interactive-accent-color**: Default color of the accents.
+    - **--interactive-accent-color**: Default color of the accents.
 
 ### Percentage results
 

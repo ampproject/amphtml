@@ -51,8 +51,8 @@ The RTC Response to a GET must meet the following requirements:
 - Status Code = 200
 - See [here for Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
 - Body of response is a JSON object of targeting information such as:
-  - **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
-  - The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using Google Ad Manager, refer to Google Ad Manager docs).
+    - **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
+    - The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using Google Ad Manager, refer to Google Ad Manager docs).
 
 The body of the response must meet the following specification:
 
@@ -70,11 +70,11 @@ The body of the response must meet the following specification:
 </table>
 
 - "targeting"
-  - Optional parameter
-  - Value is an object of key/value pairs to use for targeting in DFP
+    - Optional parameter
+    - Value is an object of key/value pairs to use for targeting in DFP
 - "categoryExclusions"
-  - Optional parameter
-  - Value is an array of categories to use for category exclusions in DFP
+    - Optional parameter
+    - Value is an array of categories to use for category exclusions in DFP
 
 The RTC responses will be merged with whatever JSON targeting is specified on the amp-ad element.
 

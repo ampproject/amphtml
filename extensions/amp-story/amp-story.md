@@ -286,9 +286,9 @@ These guidelines apply to the story poster image(s):
 - The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
 - If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
 - Each poster image should meet the recommended minimium size:
-  - Portrait: 640px x 853px
-  - Landscape: 853px x 640px
-  - Square: 640px x 640px
+    - Portrait: 640px x 853px
+    - Landscape: 853px x 640px
+    - Square: 640px x 640px
 
 ### Story generator meta tags
 
@@ -358,7 +358,7 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 - [Optional] Add the [`data-poll-interval`](#data-poll-interval) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
 - [Optional] When finishing the live broadcast, add the [`live-story-disabled`](#live-story-disabled) attribute to the `<amp-story>` element to disable the polling.
 - On each `<amp-story-page>`:
-  - Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
+    - Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
 
 ```html
 <amp-story id="story1" live-story ...>

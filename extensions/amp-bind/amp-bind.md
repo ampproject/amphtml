@@ -132,13 +132,13 @@ In the example above:
 
 - The `<amp-state>` component declares state using JSON. The `<amp-state>` element has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
 - The page loads with visual defaults.
-  - The `<div>` element has `class="greenBorder"` defined.
-  - The second `<p>` element has "I want cupcakes." defined within the tags.
-  - The `<amp-img>` `src` points to a url.
+    - The `<div>` element has `class="greenBorder"` defined.
+    - The second `<p>` element has "I want cupcakes." defined within the tags.
+    - The `<amp-img>` `src` points to a url.
 - Changeable elements have **bindings** that point to **expressions**.
-  - The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**.
-  - The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` **expression**.
-  - The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` **expression**.
+    - The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**.
+    - The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` **expression**.
+    - The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` **expression**.
 
 If a user clicks the "Set to sushi" button:
 
@@ -543,7 +543,7 @@ Using `AMP.pushState()` sets the current state to the most recent pushed state.
 - Expressions may only access the containing document's [state](#state).
 - Expressions **do not** have access to `window` or `document`. `global` references the top-level state.
 - Only `amp-bind` [allowed-listed functions](#allowed-listed functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
-  - Custom functions, classes and loops are disallowed.
+    - Custom functions, classes and loops are disallowed.
 - Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
 - A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
 

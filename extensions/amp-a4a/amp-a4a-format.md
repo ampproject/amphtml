@@ -458,12 +458,12 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 - Like a general AMP document, the creative's `<head>` tag must contain a
   `<script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>` tag.
 - Unlike general AMP, `<noscript>` is prohibited.
-  - _Rationale:_ Since AMPHTML ads requires Javascript to be enabled to function
+    - _Rationale:_ Since AMPHTML ads requires Javascript to be enabled to function
     at all, `<noscript>` blocks serve no purpose in AMPHTML ads and
     only cost network bandwidth.
 - Unlike general AMP, `<script type="application/ld+json">` is
   prohibited.
-  - _Rationale:_ JSON LD is used for structured data markup on host
+    - _Rationale:_ JSON LD is used for structured data markup on host
     pages, but ad creatives are not standalone documents and don't
     contain structured data. JSON LD blocks in them would just cost
     network bandwidth.
