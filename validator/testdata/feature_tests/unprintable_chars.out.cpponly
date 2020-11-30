@@ -32,7 +32,7 @@ feature_tests/unprintable_chars.html:1:0 Tag or text which is only allowed insid
 |    most developers.
 |  -->
 |  <!doctype html>
-|  <html ⚡ lang="en">
+|  <html ⚡>
 |  <head>
 |    <meta charset="utf-8">
 >>   ^~~~~~~~~

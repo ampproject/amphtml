@@ -21,7 +21,7 @@ FAIL
 |    https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md.
 |  -->
 |  <!doctype html>
-|  <html ⚡ lang="en">
+|  <html ⚡>
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

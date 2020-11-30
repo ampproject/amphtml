@@ -30,7 +30,7 @@ feature_tests/leaks.html:24:0 The attribute '"https://leaking.via/doctype"' may 
 >> ^~~~~~~~~
 feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html !doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |
-|  <html ⚡ lang="en" manifest="https://leaking.via/html-manifest">
+|  <html ⚡ manifest="https://leaking.via/html-manifest">
 >> ^~~~~~~~~
 feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |

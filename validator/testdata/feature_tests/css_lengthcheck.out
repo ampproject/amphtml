@@ -22,7 +22,7 @@ FAIL
 |      error as it requires -1 or fewer bytes in the tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡ lang="en">
+|  <html ⚡>
 |  <head>
 |    <meta charset="utf-8">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
