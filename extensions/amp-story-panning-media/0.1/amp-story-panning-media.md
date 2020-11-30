@@ -1,12 +1,10 @@
 ---
-$category@: presentation
+$category@: media
 formats:
-  - websites
-  - email
+  - stories
 teaser:
   text: Fill this in with teaser text to improve SEO. Use the component description.
-draft: 
-  - true
+draft: true
 ---
 
 <!--
