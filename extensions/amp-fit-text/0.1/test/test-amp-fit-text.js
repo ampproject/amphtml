@@ -55,13 +55,11 @@ describes.realWin(
 
     it('renders', async () => {
       const text = 'Lorem ipsum';
-      return getFitText(text).then(async (ft) => {
-        const content = ft.querySelector('.i-amphtml-fit-text-content');
-        expect(content).to.not.equal(null);
-        expect(content.textContent).to.equal(text);
-        expect(ft.textContent).to.equal(text);
-        (await ft.implementation_).unlayoutCallback();
-      });
+      const ft = await getFitText(text);
+      const content = ft.querySelector('.i-amphtml-fit-text-content');
+      expect(content).to.not.equal(null);
+      expect(ft.textContent).to.equal(text);
+      (await ft.implementation_).unlayoutCallback();
     });
 
     it('supports update of textContent', async () => {

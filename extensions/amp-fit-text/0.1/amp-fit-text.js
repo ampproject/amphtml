@@ -121,20 +121,18 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.win.ResizeObserver) {
-      if (this.resizeObserverUnlistener_ == null) {
-        const observer = new ResizeObserver(() =>
-          this.mutateElement(() => {
-            this.updateMeasurerContent_();
-            this.updateFontSize_();
-          })
-        );
-        observer.observe(this.content_);
-        observer.observe(this.measurer_);
-        this.resizeObserverUnlistener_ = function () {
-          observer.disconnect();
-        };
-      }
+    if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
+      const observer = new ResizeObserver(() =>
+        this.mutateElement(() => {
+          this.updateMeasurerContent_();
+          this.updateFontSize_();
+        })
+      );
+      observer.observe(this.content_);
+      observer.observe(this.measurer_);
+      this.resizeObserverUnlistener_ = function () {
+        observer.disconnect();
+      };
     }
     return this.mutateElement(() => {
       this.updateFontSize_();
@@ -143,7 +141,9 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.resizeObserverUnlistener_();
+    if (this.resizeObserverUnlistener_ !== null) {
+      this.resizeObserverUnlistener_();
+    }
   }
 
   /**
