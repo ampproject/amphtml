@@ -133,10 +133,15 @@ const arrow = {
     right: 0,
   },
 };
+
 const rtl = {};
+
 const ltr = {};
+
 const arrowPrev = {};
+
 const arrowNext = {};
+
 const arrowDisabled = {
   pointerEvents: 'none',
   '&$insetArrow': {
