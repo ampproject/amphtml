@@ -108,11 +108,39 @@ ABSL_FLAG(bool, duplicate_html_body_elements_is_error, false,
           "If true, duplicate <html>,<body> elements is considered error for "
           "validation purposes. (Default is to allow, leaving it to HTML5 "
           "user-agent to treat them as per the spec).");
-
+ABSL_FLAG(bool, allow_module_nomodule, false,
+          "If true, then script versions for module and nomdule are allowed "
+          "in AMP documents. This gating should be temporary and removed "
+          "after necessary transformers are in place. See b/173803451.");
 
 namespace amp::validator {
 
 constexpr char kAmpCacheRootUrl[] = "https://cdn.ampproject.org/";
+// Examples (note these are the same as kNomoduleLtsScriptSrcRe):
+// https://cdn.ampproject.org/lts/v0.js
+// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
+static const LazyRE2 kLtsScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+// Examples:
+// https://cdn.ampproject.org/v0.mjs
+// https://cdn.ampproject.org/v0/amp-ad-0.1.mjs
+static const LazyRE2 kModuleScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
+// Examples:
+// https://cdn.ampproject.org/v0.js
+// https://cdn.ampproject.org/v0/amp-ad-0.1.js
+static const LazyRE2 kNomoduleScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+// Examples:
+// https://cdn.ampproject.org/lts/v0.mjs
+// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs
+static const LazyRE2 kModuleLtsScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
+// Examples (note these are the same as kLtsScriptSrcRe):
+// https://cdn.ampproject.org/lts/v0.js
+// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
+static const LazyRE2 kNomoduleLtsScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
 
 namespace {
 
@@ -216,6 +244,34 @@ class ParsedHtmlTagAttr {
   std::string attr_value_;  // Stored unescaped.
 };                          // class ParsedHtmlTagAttr
 
+// If any script in the page uses a specific release version, then all scripts
+// must use that specific release version. This is used to record the first seen
+// script tag and ensure all following script tags follow the convention set by
+// it.
+enum ScriptReleaseVersion {
+  UNKNOWN,
+  STANDARD,
+  LTS,
+  MODULE_NOMODULE,
+  MODULE_NOMODULE_LTS
+};
+
+std::string ScriptReleaseVersionToString(ScriptReleaseVersion version) {
+  switch (version) {
+    case ScriptReleaseVersion::UNKNOWN:
+      return "unknown";
+    case ScriptReleaseVersion::STANDARD:
+      return "standard";
+    case ScriptReleaseVersion::LTS:
+      return "LTS";
+    case ScriptReleaseVersion::MODULE_NOMODULE:
+      return "module/nomodule";
+    case ScriptReleaseVersion::MODULE_NOMODULE_LTS:
+      return "module/nomodule LTS";
+  }
+  return "";
+}
+
 class ParsedHtmlTag {
  public:
   explicit ParsedHtmlTag(htmlparser::Node* node) : node_(node) {
@@ -270,6 +326,70 @@ class ParsedHtmlTag {
   }
 
   bool IsEmpty() const { return node_->Data().empty(); }
+
+  std::string ExtensionScriptNameAttribute() const {
+    if (UpperName() == "SCRIPT") {
+      for (const std::string& attribute :
+           {"custom-element", "custom-template", "host-service"}) {
+        if (GetAttr(attribute).has_value()) {
+          return attribute;
+        }
+      }
+    }
+    return "";
+  }
+
+  bool IsExtensionScript() const {
+    return !ExtensionScriptNameAttribute().empty();
+  }
+
+  bool IsAsyncScriptTag() const {
+    return UpperName() == "SCRIPT" && GetAttr("async").has_value() &&
+           GetAttr("src").has_value();
+  }
+
+  bool IsAmpRuntimeScript() const {
+    const string_view src = GetAttr("src").value_or("");
+    return IsAsyncScriptTag() && !IsExtensionScript() &&
+           StartsWith(src, kAmpCacheRootUrl) &&
+           (EndsWith(src, "/v0.js") || EndsWith(src, "/v0.mjs") ||
+            EndsWith(src, "/v0.mjs?f=sxg"));
+  }
+
+  bool IsLtsScriptTag() const {
+    return IsAsyncScriptTag() &&
+           RE2::FullMatch(GetAttr("src").value_or(""), *kLtsScriptSrcRe);
+  }
+
+  bool IsModuleScriptTag() const {
+    return IsAsyncScriptTag() && (GetAttr("type").value_or("") == "module") &&
+           RE2::FullMatch(GetAttr("src").value_or(""), *kModuleScriptSrcRe);
+  }
+
+  bool IsNomoduleScriptTag() const {
+    return IsAsyncScriptTag() && GetAttr("nomodule").has_value() &&
+           RE2::FullMatch(GetAttr("src").value_or(""), *kNomoduleScriptSrcRe);
+  }
+
+  bool IsModuleLtsScriptTag() const {
+    return IsAsyncScriptTag() && (GetAttr("type").value_or("") == "module") &&
+           RE2::FullMatch(GetAttr("src").value_or(""), *kModuleLtsScriptSrcRe);
+  }
+
+  bool IsNomoduleLtsScriptTag() const {
+    return IsAsyncScriptTag() && GetAttr("nomodule").has_value() &&
+           RE2::FullMatch(GetAttr("src").value_or(""),
+                          *kNomoduleLtsScriptSrcRe);
+  }
+
+  ScriptReleaseVersion GetScriptReleaseVersion() const {
+    if (IsModuleLtsScriptTag() || IsNomoduleLtsScriptTag())
+      return ScriptReleaseVersion::MODULE_NOMODULE_LTS;
+    if (IsModuleScriptTag() || IsNomoduleScriptTag())
+      return ScriptReleaseVersion::MODULE_NOMODULE;
+    if (IsLtsScriptTag()) return ScriptReleaseVersion::LTS;
+    return ScriptReleaseVersion::STANDARD;
+  }
 
   const vector<ParsedHtmlTagAttr>& Attributes() const { return attributes_; }
 
@@ -1234,6 +1354,10 @@ class ParsedValidatorRules {
   void FilterRules(const ValidatorRules& all_rules,
                    ValidatorRules* filtered_rules) const;
 
+  void ExpandModuleExtensionSpec(TagSpec* tagspec,
+                                 const string_view spec_name) const;
+  void ExpandNomoduleExtensionSpec(TagSpec* tagspec,
+                                   const string_view spec_name) const;
   void ExpandExtensionSpec(ValidatorRules* rules) const;
 
   // Returns true iff `tagspec` is usable for the HTML Format these rules are
@@ -1937,44 +2061,6 @@ struct ValueSetProvision {
   std::string value;
 };
 
-// If any script in the page uses LTS, all scripts must use LTS. This is used to
-// record when a script is seen and validate following script tags.
-enum ScriptReleaseVersion { UNKNOWN, STANDARD, LTS };
-
-std::string ExtensionScriptNameAttribute(const ParsedHtmlTag& tag) {
-  if (tag.UpperName() == "SCRIPT") {
-    for (const std::string& attribute :
-         {"custom-element", "custom-template", "host-service"}) {
-      if (tag.GetAttr(attribute).has_value()) {
-        return attribute;
-      }
-    }
-  }
-  return "";
-}
-
-bool IsExtensionScript(const ParsedHtmlTag& tag) {
-  return !ExtensionScriptNameAttribute(tag).empty();
-}
-
-bool IsAsyncScriptTag(const ParsedHtmlTag& tag) {
-  return tag.UpperName() == "SCRIPT" && tag.GetAttr("async").has_value() &&
-         tag.GetAttr("src").has_value();
-}
-
-// This diverges from
-// google3/search/amphtml/transformers/amp_runtime_and_extensions.cc by
-// excluding amp4ads, since amp4ads does not currently support LTS
-bool IsAmpRuntimeScript(const ParsedHtmlTag& tag) {
-  const string_view src = tag.GetAttr("src").value_or("");
-  return IsAsyncScriptTag(tag) && !IsExtensionScript(tag) &&
-         StartsWith(src, kAmpCacheRootUrl) && EndsWith(src, "/v0.js");
-}
-
-bool IsLtsScriptUrl(string_view url) {
-  return StartsWith(url, StrCat(kAmpCacheRootUrl, "lts/"));
-}
-
 // The context keeps track of the line / column that the validator is
 // in, as well as the mandatory and unique tag specs that have already
 // been validated. So, this constitutes the mutable state for the
@@ -2104,7 +2190,7 @@ class Context {
     RecordAttrRequiresExtension(encountered_tag, tag_result);
     UpdateFromTagResult(reference_point_result);
     UpdateFromTagResult(tag_result);
-    RecordScriptReleaseVersionFromTagResult(encountered_tag, tag_result);
+    RecordScriptReleaseVersionFromTagResult(encountered_tag);
     AddInlineStyleByteSize(tag_result.inline_style_css_bytes);
   }
 
@@ -2322,13 +2408,10 @@ class Context {
   }
 
   void RecordScriptReleaseVersionFromTagResult(
-      const ParsedHtmlTag& parsed_tag, const ValidateTagResult& tag_result) {
+      const ParsedHtmlTag& parsed_tag) {
     if (script_release_version() == ScriptReleaseVersion::UNKNOWN &&
-        (IsExtensionScript(parsed_tag) || IsAmpRuntimeScript(parsed_tag))) {
-      const string_view script_src = parsed_tag.GetAttr("src").value_or("");
-      script_release_version_ = IsLtsScriptUrl(script_src)
-                                    ? ScriptReleaseVersion::LTS
-                                    : ScriptReleaseVersion::STANDARD;
+        (parsed_tag.IsExtensionScript() || parsed_tag.IsAmpRuntimeScript())) {
+      script_release_version_ = parsed_tag.GetScriptReleaseVersion();
     }
   }
 
@@ -3812,7 +3895,7 @@ bool ValidateAttrInExtension(const TagSpec& tag_spec, const Context& context,
   CHECK(tag_spec.has_extension_spec());
 
   static LazyRE2 src_url_re = {
-      R"re(https://cdn\.ampproject\.org(?:/lts)?/v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js)re"};
+      R"re(https://cdn\.ampproject\.org(?:/lts)?/v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?)re"};
 
   const auto& extension_spec = tag_spec.extension_spec();
   // TagSpecs with extensions will only be evaluated if their dispatch_key
@@ -3874,31 +3957,69 @@ void ValidateClassAttr(const ParsedHtmlTagAttr& class_attr,
   }
 }
 
-// Validates that LTS is used for either all script sources or none.
-void ValidateScriptSrcAttr(const ParsedHtmlTagAttr& src_attr,
-                           const TagSpec& tag_spec, const Context& context,
-                           ValidationResult* result) {
+// Validates the same script release version is used for all script sources.
+void ValidateScriptSrcAttr(const ParsedHtmlTag& tag, const TagSpec& tag_spec,
+                           const Context& context, ValidationResult* result) {
   if (context.script_release_version() == ScriptReleaseVersion::UNKNOWN) return;
 
   const ScriptReleaseVersion script_release_version =
-      IsLtsScriptUrl(src_attr.value()) ? ScriptReleaseVersion::LTS
-                                       : ScriptReleaseVersion::STANDARD;
+      tag.GetScriptReleaseVersion();
 
   if (context.script_release_version() != script_release_version) {
     const std::string spec_name = tag_spec.has_extension_spec()
                                       ? tag_spec.extension_spec().name()
                                       : tag_spec.spec_name();
-    context.AddError(
-        script_release_version == ScriptReleaseVersion::LTS
-            ? ValidationError::LTS_SCRIPT_AFTER_NON_LTS
-            : ValidationError::NON_LTS_SCRIPT_AFTER_LTS,
-        context.line_col(),
-        /*params=*/{spec_name},
-        "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
-        "amphtml#required-markup",
-        result);
+    switch (context.script_release_version()) {
+      case ScriptReleaseVersion::LTS:
+        context.AddError(
+            ValidationError::INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.line_col(),
+            /*params=*/
+            {spec_name, ScriptReleaseVersionToString(script_release_version),
+             ScriptReleaseVersionToString(context.script_release_version())},
+            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+            "amphtml#required-markup",
+            result);
+        break;
+      case ScriptReleaseVersion::MODULE_NOMODULE:
+        context.AddError(
+            ValidationError::INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.line_col(),
+            /*params=*/
+            {spec_name, ScriptReleaseVersionToString(script_release_version),
+             ScriptReleaseVersionToString(context.script_release_version())},
+            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+            "amphtml#required-markup",
+            result);
+        break;
+      case ScriptReleaseVersion::MODULE_NOMODULE_LTS:
+        context.AddError(
+            ValidationError::INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.line_col(),
+            /*params=*/
+            {spec_name, ScriptReleaseVersionToString(script_release_version),
+             ScriptReleaseVersionToString(context.script_release_version())},
+            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+            "amphtml#required-markup",
+            result);
+        break;
+      case ScriptReleaseVersion::STANDARD:
+        context.AddError(
+            ValidationError::INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.line_col(),
+            /*params=*/
+            {spec_name, ScriptReleaseVersionToString(script_release_version),
+             ScriptReleaseVersionToString(context.script_release_version())},
+            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+            "amphtml#required-markup",
+            result);
+        break;
+      default:
+        break;
+    }
   }
 }
+
 // Helper method for ValidateAttributes.
 void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
                      const Context& context, const TagSpec& tag_spec,
@@ -4200,9 +4321,10 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
 
     // If |spec| is the runtime or an extension script, validate that LTS is
     // either used by all pages or no pages.
-    if (attr.name() == "src" && (IsExtensionScript(encountered_tag) ||
-                                 IsAmpRuntimeScript(encountered_tag))) {
-      ValidateScriptSrcAttr(attr, spec, context, &result->validation_result);
+    if (attr.name() == "src" && (encountered_tag.IsExtensionScript() ||
+                                 encountered_tag.IsAmpRuntimeScript())) {
+      ValidateScriptSrcAttr(encountered_tag, spec, context,
+                            &result->validation_result);
     }
 
     auto jt = attr_ids_by_name.find(attr.name());
@@ -4594,9 +4716,54 @@ void ParsedValidatorRules::FilterRules(const ValidatorRules& all_rules,
   }
 }
 
+// For every tagspec that contains an ExtensionSpec, add module specific
+// requirements for that tagspec that will be added to ValidatorRules.
+void ParsedValidatorRules::ExpandModuleExtensionSpec(
+    TagSpec* tagspec, const string_view spec_name) const {
+  tagspec->set_spec_name(StrCat(spec_name, " module extension script"));
+  tagspec->set_descriptive_name(tagspec->spec_name());
+  tagspec->add_satisfies(tagspec->spec_name());
+  tagspec->add_requires(StrCat(spec_name, " nomodule extension script"));
+  AttrSpec* attr = tagspec->add_attrs();
+  attr->set_name("crossorigin");
+  attr->add_value("anonymous");
+  attr->set_mandatory(true);
+  attr = tagspec->add_attrs();
+  attr->set_name("src");
+  attr->set_value_regex(
+      "https://cdn\\.ampproject\\.org(?:/lts)?/(v0|v0/"
+      "amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs");
+  attr->set_mandatory(true);
+  attr = tagspec->add_attrs();
+  attr->set_name("type");
+  attr->add_value("module");
+  attr->set_mandatory(true);
+}
+
+// For every tagspec that contains an ExtensionSpec, add nomodule specific
+// requirements for that tagspec that will be added to ValidatorRules.
+void ParsedValidatorRules::ExpandNomoduleExtensionSpec(
+    TagSpec* tagspec, const string_view spec_name) const {
+  tagspec->set_spec_name(StrCat(spec_name, " nomodule extension script"));
+  tagspec->set_descriptive_name(tagspec->spec_name());
+  tagspec->add_satisfies(tagspec->spec_name());
+  tagspec->add_requires(StrCat(spec_name, " module extension script"));
+  AttrSpec* attr = tagspec->add_attrs();
+  attr->set_name("nomodule");
+  attr->add_value("");
+  attr->set_mandatory(true);
+  attr = tagspec->add_attrs();
+  attr->set_name("src");
+  attr->set_value_regex(
+      "https://cdn\\.ampproject\\.org(?:/lts)?/(v0|v0/"
+      "amp-[a-z0-9-]*-[a-z0-9.]*)\\.js");
+  attr->set_mandatory(true);
+}
+
 // For every tagspec that contains an ExtensionSpec, we add several TagSpec
 // fields corresponding to the data found in the ExtensionSpec.
 void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
+  vector<TagSpec> new_tagspecs;
   for (int ii = 0; ii < rules->tags_size(); ++ii) {
     TagSpec* tagspec = rules->mutable_tags(ii);
     if (!tagspec->has_extension_spec()) continue;
@@ -4615,6 +4782,35 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
 
     // Disallow any contents in the script cdata.
     tagspec->mutable_cdata()->set_whitespace_only(true);
+
+    // TODO(b/173803451): allow module/nomodule tagspecs.
+    if (GetFlag(FLAGS_allow_module_nomodule)) {
+      // Add module/nomodule tagspecs for AMP ExtensionSpec tagspecs.
+      const auto& html_formats = tagspec->html_format();
+      if (std::find(html_formats.begin(), html_formats.end(),
+                    HtmlFormat::AMP) != html_formats.end()) {
+        TagSpec basic_tagspec = *tagspec;
+        basic_tagspec.clear_html_format();
+        basic_tagspec.add_html_format(HtmlFormat::AMP);
+        basic_tagspec.clear_enabled_by();
+        basic_tagspec.add_enabled_by("transformed");
+
+        // Expand module script tagspec.
+        TagSpec module_tagspec = basic_tagspec;
+        ExpandModuleExtensionSpec(&module_tagspec,
+                                  tagspec->extension_spec().name());
+        new_tagspecs.push_back(module_tagspec);
+        // Expand nomodule script tagspec.
+        TagSpec nomodule_tagspec = basic_tagspec;
+        ExpandNomoduleExtensionSpec(&nomodule_tagspec,
+                                    tagspec->extension_spec().name());
+        new_tagspecs.push_back(nomodule_tagspec);
+      }
+    }
+  }
+  // Add module and nomodule tagspecs.
+  for (TagSpec new_tagspec : new_tagspecs) {
+    rules->mutable_tags()->Add(std::move(new_tagspec));
   }
 }
 
