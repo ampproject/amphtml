@@ -66,8 +66,7 @@ export class AmpStoryComponentManager {
       });
     };
 
-    const rootMarginInPercentage =
-      (MIN_VIEWPORT_PRERENDER_DISTANCE * 100).toString() + '%';
+    const rootMarginInPercentage = `${MIN_VIEWPORT_PRERENDER_DISTANCE * 100}%`;
     const prerenderObserver = new IntersectionObserver(ioPrerenderCb, {
       rootMargin: rootMarginInPercentage,
     });
