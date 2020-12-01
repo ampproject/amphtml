@@ -153,7 +153,9 @@ THREE.OrbitControls.prototype.addEventListener;
 THREE.Scene = class extends THREE.Object3D {};
 THREE.Group = class extends THREE.Object3D {};
 
-THREE.Camera = class extends THREE.Object3D {
+THREE.Camera = class extends (
+  THREE.Object3D
+) {
   constructor() {
     super();
     this.fov = 0;
