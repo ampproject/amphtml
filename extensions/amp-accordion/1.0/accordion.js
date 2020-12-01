@@ -499,7 +499,6 @@ export function AccordionContent({
       id={contentId}
       aria-labelledby={headerId}
       role={role}
-      aria-hidden={String(!expanded)}
     >
       {children}
     </Comp>
