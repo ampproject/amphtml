@@ -519,6 +519,15 @@ describe
         );
       });
 
+      it('should allowlist h1, h2, h3 and amp-img elements', () => {
+        const html =
+          '<h1>Heading 1</h1>' +
+          '<h2>Heading 2</h2>' +
+          '<h3>Heading 3</h3>' +
+          '<amp-img></amp-img>';
+        expect(purifyTripleMustache(html)).to.be.equal(html);
+      });
+
       it('should allowlist table related elements and anchor tags', () => {
         const html =
           '<table class="valid-class">' +

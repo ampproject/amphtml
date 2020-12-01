@@ -525,6 +525,24 @@ describes.repeated(
         });
         expect(result.innerHTML).to.equal('value = <a>test</a>');
       });
+
+      it('should not sanitize allowlisted elements', () => {
+        textContentSetup('value = {{{value}}}');
+        template.compileCallback();
+        const result = template.render({
+          value:
+            '<h1>Heading 1</h1>' +
+            '<h2>Heading 2</h2>' +
+            '<h3>Heading 3</h3>' +
+            '<amp-img></amp-img>',
+        });
+        expect(result.innerHTML).to.equal(
+          'value = <h1>Heading 1</h1>' +
+            '<h2>Heading 2</h2>' +
+            '<h3>Heading 3</h3>' +
+            '<amp-img i-amphtml-ignore=""></amp-img>'
+        );
+      });
     });
 
     describe('tables', () => {
