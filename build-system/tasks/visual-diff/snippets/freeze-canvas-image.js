@@ -8,7 +8,7 @@ canvases.forEach((canvas) => {
   const img = document.createElement('img');
   img.style.width = '100%';
   img.style.height = '100%';
-  img.setAttribute('src', canvas.toDataURL('image/png', 1));
+  img.setAttribute('src', canvas.toDataURL());
   parentNode.appendChild(img);
   parentNode.removeChild(canvas);
 });
