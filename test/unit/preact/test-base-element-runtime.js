@@ -35,7 +35,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     doc = win.document;
     html = htmlFor(doc);
 
-    Impl = class extends PreactBaseElement {
+    Impl = class extends (
+      PreactBaseElement
+    ) {
       isLayoutSupported() {
         return true;
       }
