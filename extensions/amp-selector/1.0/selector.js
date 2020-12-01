@@ -260,11 +260,11 @@ function SelectorWithRef(
         }
         value={selected}
       >
+        <input hidden defaultValue={selected} name={name} form={form} />
         <SelectorContext.Provider value={context}>
           {children}
         </SelectorContext.Provider>
       </Comp>
-      <input hidden defaultValue={selected} name={name} form={form} />
     </>
   );
 }

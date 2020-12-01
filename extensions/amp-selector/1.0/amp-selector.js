@@ -259,28 +259,30 @@ function SelectorShim({
   tabIndex,
   value,
 }) {
-  const input = useRef(
-    createElementWithAttributes(shimDomElement.ownerDocument, 'input', {
-      'hidden': '',
-    })
-  );
+  const input = useRef(null);
+  if (!input.current) {
+    input.current = createElementWithAttributes(
+      shimDomElement.ownerDocument,
+      'input',
+      {
+        'hidden': '',
+      }
+    );
+  }
 
   useLayoutEffect(() => {
     const el = input.current;
-    shimDomElement.appendChild(el);
+    shimDomElement.insertBefore(el, shimDomElement.firstChild);
     return () => shimDomElement.removeChild(el);
-  }, [shimDomElement, input]);
+  }, [shimDomElement]);
 
-  const syncAttr = useCallback(
-    (attr, value) => {
-      if (value) {
-        input.current.setAttribute(attr, value);
-      } else {
-        input.current.removeAttribute(attr);
-      }
-    },
-    [input]
-  );
+  const syncAttr = useCallback((attr, value) => {
+    if (value) {
+      input.current.setAttribute(attr, value);
+    } else {
+      input.current.removeAttribute(attr);
+    }
+  }, []);
 
   useLayoutEffect(() => syncAttr('form', form), [form, syncAttr]);
   useLayoutEffect(() => syncAttr('name', name), [name, syncAttr]);
