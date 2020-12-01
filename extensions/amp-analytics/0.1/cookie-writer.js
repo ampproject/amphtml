@@ -17,12 +17,12 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
+import {SameSite, setCookie} from '../../../src/cookies';
 import {Services} from '../../../src/services';
 import {hasOwn} from '../../../src/utils/object';
 import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '../../../src/types';
-import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
 import {variableServiceForDoc} from './variables';
 
@@ -117,7 +117,7 @@ export class CookieWriter {
 
     if (inputConfig['enabled'] === false) {
       // Enabled by default
-      // TODO: Allow indiviual cookie object to override the value
+      // TODO: Allow individual cookie object to override the value
       return Promise.resolve();
     }
 
@@ -128,12 +128,14 @@ export class CookieWriter {
     for (let i = 0; i < ids.length; i++) {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
+      const sameSite = this.getSameSiteType_(cookieObj['sameSite']);
       if (this.isValidCookieConfig_(cookieName, cookieObj)) {
         promises.push(
           this.expandAndWrite_(
             cookieName,
             cookieObj['value'],
-            cookieExpireDateMs
+            cookieExpireDateMs,
+            sameSite
           )
         );
       }
@@ -212,9 +214,15 @@ export class CookieWriter {
    * @param {string} cookieName
    * @param {string} cookieValue
    * @param {number} cookieExpireDateMs
+   * @param {SameSite=} sameSite
    * @return {!Promise}
    */
-  expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs) {
+  expandAndWrite_(
+    cookieName,
+    cookieValue,
+    cookieExpireDateMs,
+    sameSite = SameSite.LAX
+  ) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
@@ -226,11 +234,30 @@ export class CookieWriter {
           const expireDate = Date.now() + cookieExpireDateMs;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
+            sameSite,
           });
         }
       })
       .catch((e) => {
         user().error(TAG, 'Error expanding cookie string', e);
       });
+  }
+
+  /**
+   * Converts SameSite string to SameSite type.
+   * @param {string=} sameSite
+   * @return {SameSite|undefined}
+   */
+  getSameSiteType_(sameSite) {
+    switch (sameSite) {
+      case 'Strict':
+        return SameSite.STRICT;
+      case 'Lax':
+        return SameSite.LAX;
+      case 'None':
+        return SameSite.NONE;
+      default:
+        return;
+    }
   }
 }

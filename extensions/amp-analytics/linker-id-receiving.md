@@ -86,7 +86,7 @@ The `enabled` value can be used to override default vendor settings.
 
 ##### Cookie Names
 
-Each key within the `cookies` config object defines the cookie name. It's value needs to be an object containing a single key-value pair. That key should be named `value`, and its value should be the macro that determines the information stored in the cookie.
+Each key within the `cookies` config object defines the cookie name. It's value needs to be an object. The key should be named `value`, and its value should be the macro that determines the information stored in the cookie.
 
 Note: The following key values are reserved, and cannot be used as cookie names. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`'].
 
@@ -97,6 +97,10 @@ Each cookie to write is defined by an object, where the value is defined by the 
 Two macros are supported for the `value` field. [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](#linker-param).
 
 If there's error resoving the value, or the value is resolved to empty string. Nothing will be written to the cookie.
+
+###### SameSite Cookies
+
+To specify a SameSite value for a cookie, include a key-value pair in the cookie value object where the key is `sameSite` and the value is one of `Strict`, `Lax` or `None`. If `sameSite` is not specified or is an invalid value, it defaults to `Lax` which is the current [default browser behavior](https://web.dev/samesite-cookies-explained/#samesitelax-by-default).
 
 ##### LINKER PARAM
 

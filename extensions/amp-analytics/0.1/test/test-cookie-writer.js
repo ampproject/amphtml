@@ -285,12 +285,12 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=123; path=/; domain=example.test; ' +
-          'expires=Tue, 01 Jan 2019 08:00:00 GMT'
+          'expires=Tue, 01 Jan 2019 08:00:00 GMT; SameSite=Lax'
       );
     });
   });
 
-  it('should write cookie with custom expiration (number value)', () => {
+  it('should write cookie with custom expiration (number value) and default to SameSite=Lax', () => {
     win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
@@ -307,7 +307,30 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
-          'expires=Mon, 08 Jan 2018 08:00:00 GMT'
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Lax'
+      );
+    });
+  });
+
+  it('should write cookie with the specified SameType value', () => {
+    win.location = 'https://www.example.test/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'aCookie': {
+            'value': 'testValue',
+            'sameSite': 'Strict',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.test; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Strict'
       );
     });
   });
@@ -329,7 +352,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
-          'expires=Mon, 08 Jan 2018 08:00:00 GMT'
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Lax'
       );
     });
   });
@@ -352,7 +375,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
-          'expires=Mon, 08 Jan 2018 08:00:00 GMT'
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Lax'
       );
     });
   });
@@ -374,7 +397,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
-          'expires=Mon, 01 Jan 2018 08:00:00 GMT'
+          'expires=Mon, 01 Jan 2018 08:00:00 GMT; SameSite=Lax'
       );
     });
   });
@@ -396,7 +419,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
-          'expires=Mon, 25 Dec 2017 08:00:00 GMT'
+          'expires=Mon, 25 Dec 2017 08:00:00 GMT; SameSite=Lax'
       );
     });
   });
@@ -419,7 +442,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
       return cookieWriter.write().then(() => {
         expect(win.document.lastSetCookieRaw).to.equal(
           'aCookie=testValue; path=/; domain=example.test; ' +
-            'expires=Tue, 01 Jan 2019 08:00:00 GMT'
+            'expires=Tue, 01 Jan 2019 08:00:00 GMT; SameSite=Lax'
         );
       });
     });
