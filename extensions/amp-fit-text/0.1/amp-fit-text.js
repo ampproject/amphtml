@@ -41,7 +41,7 @@ class AmpFitText extends AMP.BaseElement {
     /** @private {number} */
     this.maxFontSize_ = -1;
 
-    /** @private {unlistenDef} */
+    /** @private {?unlistenDef} */
     this.resizeObserverUnlistener_ = null;
 
     /**
@@ -122,8 +122,9 @@ class AmpFitText extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
-      const observer = new ResizeObserver(() =>
+      const observer = new this.win.ResizeObserver(() =>
         this.mutateElement(() => {
+          console.log('resize Observer');
           this.updateMeasurerContent_();
           this.updateFontSize_();
         })
@@ -143,6 +144,7 @@ class AmpFitText extends AMP.BaseElement {
   unlayoutCallback() {
     if (this.resizeObserverUnlistener_ !== null) {
       this.resizeObserverUnlistener_();
+      this.resizeObserverUnlistener_ = null;
     }
   }
 
