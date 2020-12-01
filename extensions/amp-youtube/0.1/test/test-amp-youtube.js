@@ -239,22 +239,24 @@ describes.realWin(
     });
 
     it('adds an img placeholder in prerender mode if source is videoid', async () => {
-      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (
-        yt
-      ) {
-        const iframe = yt.querySelector('iframe');
-        expect(iframe).to.be.null;
-        const imgPlaceholder = yt.querySelector('img[placeholder]');
-        expect(imgPlaceholder).to.not.be.null;
-        expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
-        expect(imgPlaceholder.src).to.be.equal(
-          `https://i.ytimg.com/vi/${EXAMPLE_VIDEOID}/sddefault.jpg#404_is_fine`
-        );
-        expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
-          'origin'
-        );
-        expect(imgPlaceholder.getAttribute('alt')).to.equal('Loading video');
-      });
+      const yt = await getYt(
+        {'data-videoid': EXAMPLE_VIDEOID},
+        true,
+        function (yt) {
+          const iframe = yt.querySelector('iframe');
+          expect(iframe).to.be.null;
+          const imgPlaceholder = yt.querySelector('img[placeholder]');
+          expect(imgPlaceholder).to.not.be.null;
+          expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+          expect(imgPlaceholder.src).to.be.equal(
+            `https://i.ytimg.com/vi/${EXAMPLE_VIDEOID}/sddefault.jpg#404_is_fine`
+          );
+          expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
+            'origin'
+          );
+          expect(imgPlaceholder.getAttribute('alt')).to.equal('Loading video');
+        }
+      );
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       const imgPlaceholder = yt.querySelector('img[placeholder]');
@@ -284,18 +286,20 @@ describes.realWin(
     });
 
     it('loads only default when it exists if source is videoid', async () => {
-      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (
-        yt
-      ) {
-        const iframe = yt.querySelector('iframe');
-        expect(iframe).to.be.null;
-        const imgPlaceholder = yt.querySelector('img[placeholder]');
-        expect(imgPlaceholder).to.not.be.null;
-        expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
-        expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
-          'origin'
-        );
-      });
+      const yt = await getYt(
+        {'data-videoid': EXAMPLE_VIDEOID},
+        true,
+        function (yt) {
+          const iframe = yt.querySelector('iframe');
+          expect(iframe).to.be.null;
+          const imgPlaceholder = yt.querySelector('img[placeholder]');
+          expect(imgPlaceholder).to.not.be.null;
+          expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+          expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
+            'origin'
+          );
+        }
+      );
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       const imgPlaceholder = yt.querySelector('img[placeholder]');
