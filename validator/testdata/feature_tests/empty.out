@@ -21,4 +21,4 @@ feature_tests/empty.html:1:0 The mandatory tag 'head > style[amp-boilerplate]' i
 >> ^~~~~~~~~
 feature_tests/empty.html:1:0 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
 >> ^~~~~~~~~
-feature_tests/empty.html:1:0 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+feature_tests/empty.html:1:0 The mandatory tag 'amphtml engine script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)

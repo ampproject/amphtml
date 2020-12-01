@@ -1492,7 +1492,7 @@ describe('ValidatorRulesMakeSense', () => {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
-        const specName = tagSpec.extensionSpec.name + ' extension .js script';
+        const specName = tagSpec.extensionSpec.name + ' extension script';
 
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;

@@ -5940,7 +5940,7 @@ class ParsedValidatorRules {
         if (tagSpec.extensionSpec == null) continue;
         if (tagSpec.specName === null)
           tagSpec.specName =
-              tagSpec.extensionSpec.name + ' extension .js script';
+              tagSpec.extensionSpec.name + ' extension script';
         if (tagSpec.descriptiveName === null)
           tagSpec.descriptiveName = tagSpec.specName;
         tagSpec.mandatoryParent = 'HEAD';

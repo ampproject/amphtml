@@ -3835,7 +3835,7 @@ tags: {
 # Note that the type TEXT/PLAIN description is define in
 # validator-amp-mustache.protoascii.
 
-# The three tagspecs below all handle the runtime engine v0.js script. They
+# The three tagspecs below all handle the runtime engine script. They
 # enforce that exactly one runtime script must be included. This tagspec is
 # for the standard runtime, while the one below it is an identical spec but for
 # the LTS runtime, with the only difference being the src attribute. The third
@@ -3859,9 +3859,9 @@ attr_lists: {
 tags: {
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amphtml engine v0.js script"
-  descriptive_name: "amphtml engine v0.js script"
-  mandatory_alternatives: "amphtml engine v0.js script"
+  spec_name: "amphtml engine script"
+  descriptive_name: "amphtml engine script"
+  mandatory_alternatives: "amphtml engine script"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3883,9 +3883,9 @@ tags: {
 tags: {
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amphtml engine v0.js lts script"
-  descriptive_name: "amphtml engine v0.js script"
-  mandatory_alternatives: "amphtml engine v0.js script"
+  spec_name: "amphtml engine lts script"
+  descriptive_name: "amphtml engine script"
+  mandatory_alternatives: "amphtml engine script"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3907,8 +3907,8 @@ tags: {
 tags: {
   html_format: AMP4EMAIL
   tag_name: "SCRIPT"
-  spec_name: "amphtml engine v0.js script [AMP4EMAIL]"
-  descriptive_name: "amphtml engine v0.js script"
+  spec_name: "amphtml engine script [AMP4EMAIL]"
+  descriptive_name: "amphtml engine script"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -3931,8 +3931,8 @@ tags: {
 tags: {
   html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp4ads engine amp4ads-v0.js script"
-  descriptive_name: "amphtml engine amp4ads-v0.js script"
+  spec_name: "amp4ads engine script"
+  descriptive_name: "amphtml engine script"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"

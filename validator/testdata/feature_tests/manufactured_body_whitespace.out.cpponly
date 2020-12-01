@@ -37,7 +37,7 @@ feature_tests/manufactured_body_whitespace.html:28:2 The parent tag of tag 'styl
 feature_tests/manufactured_body_whitespace.html:28:641 The tag 'noscript > style[amp-boilerplate]' may only appear as a descendant of tag 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 >>   ^~~~~~~~~
-feature_tests/manufactured_body_whitespace.html:29:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+feature_tests/manufactured_body_whitespace.html:29:2 The parent tag of tag 'amphtml engine script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  </head>
 |  <body>
 |  Hello, world.

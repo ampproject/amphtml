@@ -40,7 +40,7 @@ feature_tests/multiple_body_tags_3.html:33:2 The parent tag of tag 'style amp-cu
 feature_tests/multiple_body_tags_3.html:33:641 The tag 'noscript > style[amp-boilerplate]' may only appear as a descendant of tag 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 >>   ^~~~~~~~~
-feature_tests/multiple_body_tags_3.html:34:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+feature_tests/multiple_body_tags_3.html:34:2 The parent tag of tag 'amphtml engine script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  </head>
 |  <body class="foo">
 |    <!-- You might think there's only one body in this doc, but this is
