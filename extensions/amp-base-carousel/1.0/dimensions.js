@@ -105,7 +105,7 @@ export function getPosition(axis, alignment, el) {
 export function overlaps(axis, el, position) {
   const {start, end} = getDimension(axis, el);
   // Ignore the end point, since that is shared with the adjacent Element.
-  return start <= position && position < end;
+  return Math.round(start) <= position && position < Math.round(end);
 }
 
 /**
@@ -230,7 +230,7 @@ export function scrollContainerToElement(
   const scrollOffset = startAligned
     ? getStart(axis, container)
     : getCenter(axis, container);
-  const delta = snapOffset - scrollOffset - offset * length;
+  const delta = Math.round(snapOffset - scrollOffset - offset * length);
 
   updateScrollPosition(axis, container, delta);
   return !!delta;
