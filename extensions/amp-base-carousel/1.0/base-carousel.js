@@ -54,6 +54,15 @@ const Interaction = {
   NONE: 'none',
 };
 
+/**
+ * @enum {string}
+ */
+const Direction = {
+  LTR: 'ltr',
+  RTL: 'rtl',
+  AUTO: 'auto',
+};
+
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
@@ -72,6 +81,7 @@ function BaseCarouselWithRef(
     autoAdvanceLoops = Number.POSITIVE_INFINITY,
     children,
     controls = Controls.AUTO,
+    dir = Direction.AUTO,
     loop,
     mixedLength = false,
     onFocus,
@@ -193,9 +203,9 @@ function BaseCarouselWithRef(
     return interaction.current === Interaction.TOUCH;
   }, [controls, outsetArrows]);
 
-  const [rtl, setRtl] = useState(false);
+  const [rtl, setRtl] = useState(dir === Direction.RTL);
   useLayoutEffect(() => {
-    if (!containRef.current) {
+    if (!containRef.current || dir !== Direction.AUTO) {
       return;
     }
     const doc = containRef.current.ownerDocument;
@@ -203,14 +213,17 @@ function BaseCarouselWithRef(
       return;
     }
     setRtl(isRTL(doc));
-  }, [setRtl]);
+  }, [dir, setRtl]);
 
   return (
     <ContainWrapper
       size={true}
       layout={true}
       paint={true}
-      contentStyle={{display: 'flex', direction: rtl ? 'rtl' : 'ltr'}}
+      contentStyle={{
+        display: 'flex',
+        direction: rtl ? Direction.RTL : Direction.LTR,
+      }}
       ref={containRef}
       contentRef={contentRef}
       onFocus={(e) => {
