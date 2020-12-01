@@ -123,6 +123,8 @@ function checkLinksInFile(file) {
       // Localhost links don't work unless a `gulp` server is running.
       {pattern: /localhost/},
       // Templated links are merely used to generate other markdown files.
+      {pattern: /https:\/\/codepen.*/},
+      // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
     ],
   };

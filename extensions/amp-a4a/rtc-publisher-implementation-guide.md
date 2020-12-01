@@ -134,7 +134,7 @@ The value of `rtc-config` must conform to the following specification:
     - Optional parameter
     - Type: Object
         - Key is the name of the vendor to use.
-            - Vendor to use must appear as a key in [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js)
+            - Vendor to use must appear as a key in [callout-vendors.js](https://github.com/ampproject/amphtml/blob/master/src/service/real-time-config/callout-vendors.js)
         - Value is a mapping of macros to values.
     - Macros for a given vendor URL are specified by that particular vendor.
       - E.g., in Example 1 above, VendorA has specified the macro SLOT_ID in their callout URL (see Vendor URL Specification below). The RTC config specifies the value "1" to substitute for SLOT_ID in the callout URL.
