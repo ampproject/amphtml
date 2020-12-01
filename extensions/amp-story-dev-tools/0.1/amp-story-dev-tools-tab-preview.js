@@ -34,8 +34,8 @@ import {setStyles} from '../../../src/style';
  */
 export function createTabPreviewElement(win, storyUrl, devices) {
   const element = win.document.createElement('amp-story-dev-tools-tab-preview');
-  element.setAttribute('story-url', storyUrl);
-  devices ? element.setAttribute('devices', devices) : null;
+  element.setAttribute('data-story-url', storyUrl);
+  devices ? element.setAttribute('data-devices', devices) : null;
   return element;
 }
 
@@ -414,7 +414,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.storyUrl_ = this.element.getAttribute('story-url');
+    this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
     const chipListContainer = this.element.ownerDocument.createElement('div');
     chipListContainer.classList.add(
@@ -429,10 +429,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     chipListContainer.appendChild(this.buildHelpButton_());
 
     parseDevices(
-      this.element.getAttribute('devices') || DEFAULT_DEVICES
+      this.element.getAttribute('data-devices') || DEFAULT_DEVICES
     ).forEach((device) => {
       this.addDevice_(device.name);
     });
+    this.repositionDevices_();
   }
 
   /** @override */
@@ -524,10 +525,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
           this.hideCurrentDialog_();
           break;
         case PREVIEW_ACTIONS.REMOVE_DEVICE:
-          this.removeDevice_(actionElement.getAttribute('data-device'));
-          break;
         case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
-          this.onAddDeviceChipToggled_(actionElement);
+          this.onDeviceChipToggled_(actionElement);
           break;
       }
     }
@@ -593,14 +592,15 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @param {!Element} chipElement
    * @private
    */
-  onAddDeviceChipToggled_(chipElement) {
+  onDeviceChipToggled_(chipElement) {
     const deviceName = chipElement.getAttribute('data-device');
     if (this.removeDevice_(deviceName)) {
-      chipElement.setAttribute('inactive', '');
+      this.mutateElement(() => chipElement.setAttribute('inactive', ''));
     } else {
-      chipElement.removeAttribute('inactive');
+      this.mutateElement(() => chipElement.removeAttribute('inactive'));
       this.addDevice_(deviceName);
     }
+    this.repositionDevices_();
   }
 
   /**
@@ -611,7 +611,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     const devicesStringRepresentation = this.devices_
       .map((device) => simplifyDeviceName(device.name))
       .join(';');
-    this.element.setAttribute('devices', devicesStringRepresentation);
+    this.element.setAttribute('data-devices', devicesStringRepresentation);
     updateHash(
       {
         'devices':
@@ -624,12 +624,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   }
 
   /**
-   * When measure changes, we recalculate the positions of the devices to keep them spaced and scaled evenly.
-   * @override
+   * Recalculate the positions of the devices to keep them spaced and scaled evenly.
+   * @private
    * */
-  onLayoutMeasure() {
+  repositionDevices_() {
     const layoutBox = this.getLayoutBox();
-    console.log(this.devices_);
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
@@ -647,18 +646,24 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     );
     const paddingSize =
       (layoutBox.width - sumDeviceWidths * scale) / (this.devices_.length + 1);
-    console.log(paddingSize, layoutBox.width, sumDeviceWidths);
     let cumWidthSum = paddingSize;
-    this.devices_.forEach((deviceSpecs) => {
-      // Calculate the width change when scaling that needs to be added.
-      const scaleWidthChange = deviceSpecs.width * (1 - scale) * 0.5 + 10;
-      setStyles(deviceSpecs.element, {
-        'transform': `perspective(100px) translate3d(${
-          (cumWidthSum - scaleWidthChange) / scale
-        }px, 0px, ${(100 * (scale - 1)) / scale}px)`,
+    this.mutateElement(() => {
+      this.devices_.forEach((deviceSpecs) => {
+        // Calculate the width change when scaling that needs to be added.
+        const scaleWidthChange = deviceSpecs.width * (1 - scale) * 0.5 + 10;
+        setStyles(deviceSpecs.element, {
+          'transform': `perspective(100px) translate3d(${
+            (cumWidthSum - scaleWidthChange) / scale
+          }px, 0px, ${(100 * (scale - 1)) / scale}px)`,
+        });
+        cumWidthSum += deviceSpecs.width * scale + paddingSize;
       });
-      cumWidthSum += deviceSpecs.width * scale + paddingSize;
     });
+  }
+
+  /** @override */
+  onMeasureChanged() {
+    this.repositionDevices_();
   }
 
   /**

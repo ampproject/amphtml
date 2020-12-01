@@ -15,20 +15,23 @@
  */
 
  amp-story-dev-tools-tab-preview {
-  --i-amphtml-story-dev-tools-device-background: #101010 !important;
-  --i-amphtml-story-dev-tools-device-screen: #2E3137 !important;
   --i-amphtml-story-dev-tools-device-shadow: 0px 11.0046px 27.5114px rgba(0, 0, 0, 0.34), inset 0px 2.20091px 3.30137px rgba(44, 46, 52, 0.6) !important;
-  --i-amphtml-story-dev-tools-device-chip-background: #2e2e2e !important;
-  --i-amphtml-story-dev-tools-device-chip-background-hover: #3d3d3d !important;
-  --i-amphtml-story-dev-tools-device-chip-icon-background: black !important;
 
-  --i-amphtml-story-dev-tools-device-dialog-background: #111111cc !important;
-  --i-amphtml-story-dev-tools-device-dialog-help-url-border: #ffffff22;
-  --i-amphtml-story-dev-tools-device-dialog-help-url-color: #ffffff77;
+  --i-amphtml-story-dev-tools-device-gray-1: #101010 !important;
+  --i-amphtml-story-dev-tools-device-gray-2: #2E3137 !important;
+  --i-amphtml-story-dev-tools-device-gray-3: #2E2E2E !important;
+  --i-amphtml-story-dev-tools-device-gray-4: #3D3D3D !important;
+  --i-amphtml-story-dev-tools-device-gray-transparent-1: #111111CC !important;
+  --i-amphtml-story-dev-tools-device-white-transparent-1: #FFFFFF22 !important;
+  --i-amphtml-story-dev-tools-device-white-transparent-2: #FFFFFF77 !important;
+  --i-amphtml-story-dev-tools-device-white-transparent-3: #FFFFFFCC !important;
+
+  --i-amphtml-story-dev-tools-material-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --i-amphtml-story-dev-tools-material-easing-decelerated: cubic-bezier(0.0, 0.0, 0.2, 1);
  }
 
 .i-amphtml-story-dev-tools-device {
-  background: var(--i-amphtml-story-dev-tools-device-background) !important;
+  background: var(--i-amphtml-story-dev-tools-device-gray-1) !important;
   border-radius: 40px !important;
   box-shadow: var(--i-amphtml-story-dev-tools-device-shadow) !important;
   overflow: hidden !important;
@@ -38,8 +41,8 @@
   top: 0 !important;
   bottom: 0 !important;
   padding: 10px 8px !important;
-  transition: transform ease-out 0.15s !important;
-  animation: i-amphtml-story-dev-tools-fade-in 0.5s ease-in-out !important;
+  transition: transform var(--i-amphtml-story-dev-tools-material-easing) 0.15s !important;
+  animation: i-amphtml-story-dev-tools-fade-in 0.5s var(--i-amphtml-story-dev-tools-material-easing-decelerated) !important;
 }
 
 @keyframes i-amphtml-story-dev-tools-fade-in {
@@ -50,7 +53,7 @@
 
 .i-amphtml-story-dev-tools-device-screen {
   border-radius: 30px !important;
-  background: var(--i-amphtml-story-dev-tools-device-screen) !important;
+  background: var(--i-amphtml-story-dev-tools-device-gray-2) !important;
   overflow: hidden !important;
   padding-top: 40px !important;
 }
@@ -67,6 +70,9 @@ amp-story-player a {
 }
 
 .i-amphtml-story-dev-tools-device-chip {
+  --i-amphtml-story-dev-tools-device-chip-background: var(--i-amphtml-story-dev-tools-device-gray-3) !important;
+  --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-device-gray-4) !important;
+  --i-amphtml-story-dev-tools-device-chip-icon-background: black !important;
   border-radius: 16px !important;
   background: var(--i-amphtml-story-dev-tools-device-chip-background) !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-device-chip-background) !important;
@@ -91,13 +97,13 @@ amp-story-player a {
   border-radius: 50% !important;
   padding: 2px !important;
   margin-inline-start: 10px !important;
-  transition: transform 0.2s ease-in-out !important;
+  transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing) !important;
 }
 
 .i-amphtml-story-dev-tools-device-chip[inactive] {
   --i-amphtml-story-dev-tools-device-chip-background: transparent !important;
-  --i-amphtml-story-dev-tools-device-chip-background-hover: #1d1d1d !important;
-  --i-amphtml-story-dev-tools-device-chip-icon-background: #ffffff22 !important;
+  --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-device-gray-1) !important;
+  --i-amphtml-story-dev-tools-device-chip-icon-background: var(--i-amphtml-story-dev-tools-device-white-transparent-1) !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-device-chip-icon-background) !important;
 }
 
@@ -135,7 +141,7 @@ amp-story-player a {
   justify-content: center !important;
   align-items: center !important;
   z-index: 1 !important;
-  transition: background 0.2s ease-in-out !important;
+  transition: background 0.2s var(--i-amphtml-story-dev-tools-material-easing) !important;
 }
 
 .i-amphtml-story-dev-tools-device-dialog-container {
@@ -144,13 +150,13 @@ amp-story-player a {
   border-radius: 10px !important;
   padding: 40px !important;
   position: relative !important;
-  transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out !important;
-  transform: translateY(3vh) !important;
+  transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing), opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing) !important;
+  transform: translateY(5vh) !important;
   opacity: 0 !important;
 }
 
 .i-amphtml-story-dev-tools-device-dialog-bg[active] {
-  background: var(--i-amphtml-story-dev-tools-device-dialog-background) !important;
+  background: var(--i-amphtml-story-dev-tools-device-gray-transparent-1) !important;
 }
 
 .i-amphtml-story-dev-tools-device-dialog-bg[active] .i-amphtml-story-dev-tools-device-dialog-container  {
@@ -177,11 +183,11 @@ amp-story-player a {
 }
 
 .i-amphtml-story-dev-tools-device-dialog-link {
-  color: #ffffffcc !important;
+  color: var(--i-amphtml-story-dev-tools-device-white-transparent-3) !important;
   text-decoration: none !important;
   display: block !important;
   padding: 10px 0 !important;
-  transition: color 0.2s ease-in-out !important;
+  transition: color 0.2s var(--i-amphtml-story-dev-tools-material-easing) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -190,7 +196,7 @@ amp-story-player a {
 .i-amphtml-story-dev-tools-device-dialog-link svg {
   vertical-align: middle !important;
   opacity: 0.6 !important;
-  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out !important;
+  transition: opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing), transform 0.2s var(--i-amphtml-story-dev-tools-material-easing) !important;
 }
 
 .i-amphtml-story-dev-tools-device-dialog-link:hover {
@@ -203,7 +209,7 @@ amp-story-player a {
 }
 
 .i-amphtml-story-dev-tools-device-dialog-link:not(:last-child) {
-  border-bottom: 1px solid #ffffff22 !important;
+  border-bottom: 1px solid var(--i-amphtml-story-dev-tools-device-white-transparent-1) !important;
 }
 
 .i-amphtml-story-dev-tools-device-dialog-container .i-amphtml-story-dev-tools-device-chip {
@@ -240,8 +246,8 @@ amp-story-player a {
 }
 
 .i-amphtml-story-dev-tools-device-dialog-help-tips span {
-  color: var(--i-amphtml-story-dev-tools-device-dialog-help-url-color) !important;
-  border: 1px solid var(--i-amphtml-story-dev-tools-device-dialog-help-url-border) !important;
+  color: var(--i-amphtml-story-dev-tools-device-white-transparent-2) !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-device-white-transparent-1) !important;
   font-size: 12px !important;
   padding: 10px 20px !important;
   border-radius: 20px !important;
