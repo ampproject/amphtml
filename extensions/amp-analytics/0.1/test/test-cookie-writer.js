@@ -320,8 +320,32 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
       dict({
         'cookies': {
           'cookieMaxAge': 604800, // 1 week in seconds
+          'sameSite': 'Lax',
           'aCookie': {
-            'value': 'testValue',
+            'value': '123',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=123; path=/; domain=example.test; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Lax'
+      );
+    });
+  });
+
+  it('should override the SameType value', () => {
+    win.location = 'https://www.example.test/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'sameSite': 'Lax',
+          'aCookie': {
+            'value': '123',
             'sameSite': 'Strict',
           },
         },
@@ -329,8 +353,31 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.test; ' +
+        'aCookie=123; path=/; domain=example.test; ' +
           'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Strict'
+      );
+    });
+  });
+
+  it('should append Secure for SameType=None', () => {
+    win.location = 'https://www.example.test/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'aCookie': {
+            'value': 'testValue',
+            'sameSite': 'None',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.test; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=None; Secure'
       );
     });
   });

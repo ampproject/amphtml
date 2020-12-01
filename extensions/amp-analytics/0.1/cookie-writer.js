@@ -128,7 +128,10 @@ export class CookieWriter {
     for (let i = 0; i < ids.length; i++) {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
-      const sameSite = this.getSameSiteType_(cookieObj['sameSite']);
+      const sameSite = this.getSameSiteType_(
+        // individual cookie sameSite overrides config sameSite
+        cookieObj['sameSite'] || inputConfig['sameSite']
+      );
       if (this.isValidCookieConfig_(cookieName, cookieObj)) {
         promises.push(
           this.expandAndWrite_(
@@ -232,9 +235,13 @@ export class CookieWriter {
         // provide a way to overwrite or erase existing cookie
         if (value) {
           const expireDate = Date.now() + cookieExpireDateMs;
+          // SameSite=None must be secure as per
+          // https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure
+          const secure = sameSite === SameSite.NONE;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
             sameSite,
+            secure,
           });
         }
       })

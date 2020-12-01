@@ -98,9 +98,44 @@ Two macros are supported for the `value` field. [`QUERY_PARAM`](https://github.c
 
 If there's error resoving the value, or the value is resolved to empty string. Nothing will be written to the cookie.
 
-###### SameSite Cookies
+##### SameSite Cookies
 
-To specify a SameSite value for a cookie, include a key-value pair in the cookie value object where the key is `sameSite` and the value is one of `Strict`, `Lax` or `None`. If `sameSite` is not specified or is an invalid value, it defaults to `Lax` which is the current [default browser behavior](https://web.dev/samesite-cookies-explained/#samesitelax-by-default).
+To specify a SameSite value for a cookie, include a key-value pair where the key is `sameSite` and the value is one of `Strict`, `Lax` or `None`. If `sameSite` is not specified or is an invalid value, it defaults to `Lax` (which is the current [browser behavior](https://web.dev/samesite-cookies-explained/#samesitelax-by-default)). If `sameSite` is set to `None`, we pair it with the `Secure` attribute as [recommended](https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure) to prevent the cookie from getting rejected.
+
+There are 2 ways to set SameSite cookies:
+
+1. Set the SameSite attribute for all cookies using the `sameSite` key and value as one of `Strict`, `Lax` or `None` in the `cookies` config object, such as:
+
+```
+'cookies': {
+  'sameSite': 'Strict',
+  'cookieName1': {
+    'value': 'QUERY_PARAM(example)',
+  },
+  'cookieName2': {
+    'value': 'LINKER_PARAM(exampleParamName, exampleIdName)',
+  },
+}
+```
+
+This will set SameSite=Strict for `cookieName1` and `cookieName2`.
+
+1. Set or override the SameSite attribute using the `sameSite` key on an individual cookie object, such as:
+
+```
+'cookies': {
+  'sameSite': 'None',
+  'cookieName1': {
+    'value': 'QUERY_PARAM(example)',
+    'sameSite: 'Strict',
+  },
+  'cookieName2': {
+    'value': 'LINKER_PARAM(exampleParamName, exampleIdName)',
+  },
+}
+```
+
+This will set the SameSite=None for `cookieName2` and override `cookieName1` to SameSite=Strict.
 
 ##### LINKER PARAM
 
