@@ -27,7 +27,6 @@ import {
   useContext,
   useEffect,
   useImperativeHandle,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -101,13 +100,6 @@ function BaseCarouselWithRef(
   const scrollRef = useRef(null);
   const containRef = useRef(null);
   const contentRef = useRef(null);
-
-  const [axis, setAxis] = useState(
-    orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y
-  );
-  useLayoutEffect(() => {
-    setAxis(orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y);
-  }, [orientation, setAxis]);
 
   const autoAdvanceTimesRef = useRef(0);
   const autoAdvanceInterval = useMemo(
@@ -244,7 +236,7 @@ function BaseCarouselWithRef(
         advanceCount={advanceCount}
         alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
-        axis={axis}
+        axis={orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}
