@@ -786,7 +786,7 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @private */
   markAsLoaded_() {
     this.mutateElement(() => {
-      this.element.classList.add('amp-story-360-loaded');
+      this.element.classList.add('i-amphtml-story-360-loaded');
     });
   }
 
