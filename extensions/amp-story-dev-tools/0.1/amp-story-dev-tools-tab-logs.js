@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {Services} from '../../../src/services';
+import {dev, userAssert} from '../../../src/log';
 import {getInstance} from 'amphtml-validator';
 import {htmlFor} from '../../../src/static-template';
 
@@ -27,32 +28,8 @@ import {htmlFor} from '../../../src/static-template';
  */
 export function createTabLogsElement(win, storyUrl) {
   const element = win.document.createElement('amp-story-dev-tools-tab-logs');
-  element.setAttribute('story-url', storyUrl);
+  element.setAttribute('data-story-url', storyUrl);
   return element;
-}
-
-/**
- * Fetches the contents of a URL as a Promise.
- * @private
- * @param {string} url
- * @return {!Promise<string>} The fetched document.
- */
-function getUrl(url) {
-  return new Promise(function (resolve, reject) {
-    const xhr = new XMLHttpRequest();
-
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
-          resolve(xhr.responseText);
-        } else {
-          reject('Fetching file for validation failed: ' + url);
-        }
-      }
-    };
-    xhr.open('GET', url, true);
-    xhr.send();
-  });
 }
 
 /**
@@ -95,21 +72,18 @@ const buildLogMessageTemplate = (element) => {
   </div>`;
 };
 
-/** @const {string} */
-const TAG = 'AMP-STORY-DEV-TOOLS';
-
 export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
   /** @param {!Element} element */
   constructor(element) {
     super(element);
 
-    /** @protected  {string} */
+    /** @private  {string} */
     this.storyUrl_ = '';
   }
 
   /** @override */
   buildCallback() {
-    this.storyUrl_ = this.element.getAttribute('story-url');
+    this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
 
     getInstance().then((validator) => {
@@ -125,21 +99,21 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @param {string} url
    */
   validateUrl_(validator, url) {
-    getUrl(url).then(
-      (html) => {
-        const htmlLines = html.split('\n');
-        const validationResult = validator.validateString(html);
-        const errorList = validationResult.errors.map((error) => {
-          error.htmlLines = htmlLines.slice(error.line - 2, error.line + 3);
-          error.message = validator.renderErrorMessage(error);
-          return error;
+    Services.xhrFor(this.win)
+      .fetchText(url)
+      .then((response) => {
+        userAssert(response.ok, 'Invalid story url');
+        response.text().then((html) => {
+          const htmlLines = html.split('\n');
+          const validationResult = validator.validateString(html);
+          const errorList = validationResult.errors.map((error) => {
+            error.htmlLines = htmlLines.slice(error.line - 2, error.line + 3);
+            error.message = validator.renderErrorMessage(error);
+            return error;
+          });
+          this.buildLogsList_(errorList);
         });
-        this.buildLogsList_(errorList);
-      },
-      (reason) => {
-        dev().error(TAG, reason);
-      }
-    );
+      });
   }
 
   /**
@@ -147,36 +121,33 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @param {Array<Object>} errorList
    */
   buildLogsList_(errorList) {
-    this.mutateElement(() => {
-      this.element.appendChild(this.buildLogsTitle_(errorList.length));
-      errorList.forEach((content) => {
-        const logEl = buildLogMessageTemplate(this.element);
-        logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
-          content.code;
-        const codeEl = logEl.querySelector(
-          '.i-amphtml-story-dev-tools-log-code'
-        );
-        content.htmlLines.forEach((l, i) => {
-          const lineEl = this.element.ownerDocument.createElement('div');
-          lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
-          codeEl.appendChild(lineEl);
-        });
-        logEl.querySelector(
-          '.i-amphtml-story-dev-tools-log-position'
-        ).textContent = `${content.line}:${content.col}`;
-        logEl.querySelector(
-          '.i-amphtml-story-dev-tools-log-description'
-        ).textContent = content.message;
-        const specUrlElement = logEl.querySelector(
-          '.i-amphtml-story-dev-tools-log-spec'
-        );
-        if (content.specUrl) {
-          specUrlElement.href = content.specUrl;
-        } else {
-          specUrlElement.remove();
-        }
-        this.element.appendChild(logEl);
+    this.element.appendChild(this.buildLogsTitle_(errorList.length));
+    errorList.forEach((content) => {
+      const logEl = buildLogMessageTemplate(this.element);
+      logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
+        content.code;
+      const codeEl = logEl.querySelector('.i-amphtml-story-dev-tools-log-code');
+      content.htmlLines.forEach((l, i) => {
+        const lineEl = this.element.ownerDocument.createElement('div');
+        lineEl.classList.add('i-amphtml-story-dev-tools-log-code-line');
+        lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
+        codeEl.appendChild(lineEl);
       });
+      logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-position'
+      ).textContent = `${content.line}:${content.col}`;
+      logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-description'
+      ).textContent = content.message;
+      const specUrlElement = logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-spec'
+      );
+      if (content.specUrl) {
+        specUrlElement.href = content.specUrl;
+      } else {
+        specUrlElement.remove();
+      }
+      this.mutateElement(() => this.element.appendChild(logEl));
     });
   }
 
@@ -188,7 +159,10 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    */
   buildLogsTitle_(errorCount) {
     const statusIcon = buildStatusIcon(this.element, errorCount == 0);
-    const title = htmlFor(this.element)`<h1></h1>`;
+    statusIcon.classList.add('i-amphtml-story-dev-tools-log-status-icon');
+    const title = htmlFor(
+      this.element
+    )`<div class="i-amphtml-story-dev-tools-log-status-title"></div>`;
     const statusText = htmlFor(this.element)`<span></span>`;
     statusText.textContent = errorCount
       ? `Failed - ${errorCount} errors`

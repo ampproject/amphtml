@@ -17,28 +17,26 @@
 amp-story-dev-tools-tab-logs {
   overflow-y: scroll !important;
   margin-top: 30px !important;
-  scrollbar-width: none !important;
   --i-amphtml-story-dev-tools-logs-error-color: #FF5252 !important;
-  --i-amphtml-story-dev-tools-log-message-background: #ffffff0f;
-  --i-amphtml-story-dev-tools-log-spec-white-accent: #ffffff22;
+  --i-amphtml-story-dev-tools-log-white-transparent-1: #ffffff0f;
+  --i-amphtml-story-dev-tools-log-white-transparent-2: #ffffff22;
 }
 
-amp-story-dev-tools-tab-logs::-webkit-scrollbar {
-  display: none !important;
+.i-amphtml-story-dev-tools-log-status-title {
+  font-size: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  line-height: 16px !important;
+  margin-bottom: 10px !important;
 }
 
-amp-story-dev-tools-tab-logs h1 {
-  font-size: 16px;
-}
-
-amp-story-dev-tools-tab-logs h1 * {
-  vertical-align: middle;
-  margin-inline-end: 10px;
+.i-amphtml-story-dev-tools-log-status-icon {
+  margin-inline-end: 10px !important;
 }
 
 .i-amphtml-story-dev-tools-log-message {
   margin-bottom: 16px !important;
-  background: var(--i-amphtml-story-dev-tools-log-message-background) !important;
+  background: var(--i-amphtml-story-dev-tools-log-white-transparent-1) !important;
   color: white !important;
   position: relative !important;
   padding: 16px !important;
@@ -62,13 +60,13 @@ amp-story-dev-tools-tab-logs h1 * {
   right: 10px !important;
   top: 10px !important;
   border-radius: 20px !important;
-  border: 2px solid var(--i-amphtml-story-dev-tools-log-spec-white-accent) !important;
+  border: 2px solid var(--i-amphtml-story-dev-tools-log-white-transparent-2) !important;
   padding: 5px 10px !important;
   font-size: 12px !important;
 }
 
 .i-amphtml-story-dev-tools-log-spec:hover {
-  background: var(--i-amphtml-story-dev-tools-log-spec-white-accent) !important;
+  background: var(--i-amphtml-story-dev-tools-log-white-transparent-2) !important;
 }
 
 .i-amphtml-story-dev-tools-log-code {
@@ -76,11 +74,11 @@ amp-story-dev-tools-tab-logs h1 * {
   line-height: 24px !important;
 }
 
-.i-amphtml-story-dev-tools-log-code div {
+.i-amphtml-story-dev-tools-log-code-line {
   text-overflow: ellipsis !important;
   overflow-x: hidden !important;
 }
 
-.i-amphtml-story-dev-tools-log-code div:nth-child(2) {
+.i-amphtml-story-dev-tools-log-code-line:nth-child(2) {
   color: var(--i-amphtml-story-dev-tools-logs-error-color) !important;
 }
