@@ -162,7 +162,6 @@ const prettifyGlobs = [
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
-  '**/*.md',
   '!.github/ISSUE_TEMPLATE/**',
   '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
