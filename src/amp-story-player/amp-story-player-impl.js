@@ -423,11 +423,11 @@ export class AmpStoryPlayer {
     this.iframePool_.addStoryIdx(idx);
 
     if (this.isLaidOut_) {
-      this.layoutIframe_(
+      this.updateIframeSrc_(
         story,
         iframe,
-        // In case it is the first story, it becomes immediately visibile
-        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER
+        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER,
+        idx === 0 /** isFirstStory */
       );
     }
   }
@@ -685,6 +685,11 @@ export class AmpStoryPlayer {
   layoutCallback() {
     if (this.isLaidOut_) {
       return;
+    }
+
+    // Unblock layoutCallback() if prerenderCallback wasn't called.
+    if (!this.isPrerendered_) {
+      this.prerenderCallback();
     }
 
     this.prerenderCallbackDeferred_.promise.then(() => {
@@ -1072,7 +1077,12 @@ export class AmpStoryPlayer {
     const {iframeIdx} = story;
     const iframeEl = this.iframes_[iframeIdx];
 
-    this.layoutIframe_(story, iframeEl, VisibilityState.VISIBLE).then(() => {
+    this.updateIframeSrc_(
+      story,
+      iframeEl,
+      VisibilityState.VISIBLE,
+      true /** isFirstStory */
+    ).then(() => {
       this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
       this.updateIframePosition_(iframeIdx, IframePosition.CURRENT);
       tryFocus(iframeEl);
@@ -1126,7 +1136,12 @@ export class AmpStoryPlayer {
     detachedStory.iframeIdx = -1;
 
     const nextIframe = this.iframes_[nextStory.iframeIdx];
-    this.layoutIframe_(nextStory, nextIframe, visibilityState);
+    this.updateIframeSrc_(
+      nextStory,
+      nextIframe,
+      visibilityState,
+      visibilityState === VisibilityState.VISIBLE /** isFirstStory */
+    );
     this.updateIframePosition_(
       nextStory.iframeIdx,
       reverse ? IframePosition.PREVIOUS : IframePosition.NEXT
@@ -1177,22 +1192,6 @@ export class AmpStoryPlayer {
         console /*OK*/
           .log({reason});
       });
-  }
-
-  /**
-   * @param {!StoryDef} story
-   * @param {!Element} iframe
-   * @param {!VisibilityState} visibilityState
-   * @return {!Promise}
-   * @private
-   */
-  layoutIframe_(story, iframe, visibilityState) {
-    return this.updateIframeSrc_(
-      story,
-      iframe,
-      visibilityState,
-      visibilityState === VisibilityState.VISIBLE /** isFirstStory */
-    );
   }
 
   /**
