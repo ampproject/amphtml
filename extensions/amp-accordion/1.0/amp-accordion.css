@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-/* heading/content */
-.i-amphtml-accordion-header {
-  margin: 0;
-}
-
-.i-amphtml-accordion-content {
-  margin: 0;
-  display: block !important;
-}
-
 /* heading
  * TODO(#30445): update these styles after team agrees on styling
  */
@@ -32,6 +22,20 @@
   background-color: #efefef;
   padding-right: 20px;
   border: solid 1px #dfdfdf;
+  margin: 0;
+}
+
+.i-amphtml-accordion-content {
+  margin: 0;
+  display: block;
+}
+
+amp-accordion > section:not([expanded]) > :last-child:not(.i-amphtml-animating),
+amp-accordion
+  > section:not([expanded])
+  > :last-child:not(.i-amphtml-animating)
+  * {
+  display: none !important;
 }
 
 /* TODO: This CSS is duplicated from ./accordion.jss.js for purposes of display
@@ -46,12 +50,4 @@ amp-accordion.i-amphtml-display-locking
   * {
   content-visibility: hidden-matchable !important;
   display: block !important;
-}
-
-amp-accordion > section:not([expanded]) > :last-child:not(.i-amphtml-animating),
-amp-accordion
-  > section:not([expanded])
-  > :last-child:not(.i-amphtml-animating)
-  * {
-  display: none !important;
 }

@@ -26,57 +26,50 @@ const COLLAPSE_CURVE = 'cubic-bezier(0.39, 0.575, 0.565, 1)';
  * @return {!UnlistenDef}
  */
 export function animateExpand(content) {
-  return animate(
-    content,
-    () => {
-      const oldHeight = getStyle(content, 'height');
-      const oldOpacity = getStyle(content, 'opacity');
-      const oldOverflowY = getStyle(content, 'overflowY');
+  return animate(content, () => {
+    const oldHeight = getStyle(content, 'height');
+    const oldOpacity = getStyle(content, 'opacity');
+    const oldOverflowY = getStyle(content, 'overflowY');
 
-      // Measure the expanded height. This is relatively heavy with a sync
-      // layout. But no way around it. The hope that the `commitStyles` API
-      // may eventually make this unneeded.
-      setStyles(content, {
-        height: 0,
-        opacity: 0,
-        overflowY: 'auto',
-      });
-      content.classList.add('i-amphtml-animating');
-      const targetHeight = content./*OK*/ scrollHeight;
+    // Measure the expanded height. This is relatively heavy with a sync
+    // layout. But no way around it. The hope that the `commitStyles` API
+    // may eventually make this unneeded.
+    setStyles(content, {
+      height: 0,
+      opacity: 0,
+      overflowY: 'auto',
+    });
+    const targetHeight = content./*OK*/ scrollHeight;
 
-      // Reset back. The animation will take care of these properties
-      // going forward.
-      setStyles(content, {
-        height: oldHeight,
-        opacity: oldOpacity,
-        overflowY: oldOverflowY,
-      });
+    // Reset back. The animation will take care of these properties
+    // going forward.
+    setStyles(content, {
+      height: oldHeight,
+      opacity: oldOpacity,
+      overflowY: oldOverflowY,
+    });
 
-      const duration = getTransitionDuration(targetHeight);
+    const duration = getTransitionDuration(targetHeight);
 
-      return content.animate(
-        [
-          {
-            height: 0,
-            opacity: 0,
-            overflowY: 'hidden',
-          },
-          {
-            height: targetHeight + 'px',
-            opacity: 1,
-            overflowY: 'hidden',
-          },
-        ],
+    return content.animate(
+      [
         {
-          easing: EXPAND_CURVE,
-          duration,
-        }
-      );
-    },
-    () => {
-      content.classList.remove('i-amphtml-animating');
-    }
-  );
+          height: 0,
+          opacity: 0,
+          overflowY: 'hidden',
+        },
+        {
+          height: targetHeight + 'px',
+          opacity: 1,
+          overflowY: 'hidden',
+        },
+      ],
+      {
+        easing: EXPAND_CURVE,
+        duration,
+      }
+    );
+  });
 }
 
 /**
@@ -84,37 +77,29 @@ export function animateExpand(content) {
  * @return {!UnlistenDef}
  */
 export function animateCollapse(content) {
-  return animate(
-    content,
-    () => {
-      content.classList.add('i-amphtml-animating');
-      const startHeight = content./*OK*/ offsetHeight;
+  return animate(content, () => {
+    const startHeight = content./*OK*/ offsetHeight;
+    const duration = getTransitionDuration(startHeight);
 
-      const duration = getTransitionDuration(startHeight);
-
-      return content.animate(
-        [
-          {
-            height: startHeight + 'px',
-            opacity: 1,
-            overflowY: 'hidden',
-          },
-          {
-            height: '0',
-            opacity: 0,
-            overflowY: 'hidden',
-          },
-        ],
+    return content.animate(
+      [
         {
-          easing: COLLAPSE_CURVE,
-          duration,
-        }
-      );
-    },
-    () => {
-      content.classList.remove('i-amphtml-animating');
-    }
-  );
+          height: startHeight + 'px',
+          opacity: 1,
+          overflowY: 'hidden',
+        },
+        {
+          height: '0',
+          opacity: 0,
+          overflowY: 'hidden',
+        },
+      ],
+      {
+        easing: COLLAPSE_CURVE,
+        duration,
+      }
+    );
+  });
 }
 
 /**
@@ -124,12 +109,14 @@ export function animateCollapse(content) {
  * @return {!UnlistenDef}
  */
 function animate(element, prepare, cleanup = undefined) {
+  element.classList.add('i-amphtml-animating');
   let player = prepare();
   player.onfinish = player.oncancel = () => {
     player = null;
     if (cleanup) {
       cleanup();
     }
+    element.classList.remove('i-amphtml-animating');
   };
   return () => {
     if (player) {

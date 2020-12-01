@@ -35,7 +35,7 @@ const header = {
 };
 
 const content = {
-  display: 'block !important',
+  display: 'block',
 };
 
 const contentHidden = {

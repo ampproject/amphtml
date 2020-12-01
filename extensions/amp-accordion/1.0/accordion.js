@@ -112,7 +112,7 @@ function AccordionWithRef(
   const toggleExpanded = useCallback(
     (id, opt_expand) => {
       setExpandedMap((expandedMap) => {
-        const newExpanded = opt_expand || !expandedMap[id];
+        const newExpanded = opt_expand ?? !expandedMap[id];
         const newExpandedMap = setExpanded(
           id,
           newExpanded,
@@ -316,7 +316,7 @@ export function AccordionSection({
         toggleExpanded(id, opt_expand);
       } else {
         setExpandedState((prev) => {
-          const newValue = opt_expand || !prev;
+          const newValue = opt_expand ?? !prev;
           Promise.resolve().then(() => {
             const onExpandStateChange = onExpandStateChangeRef.current;
             if (onExpandStateChange) {
@@ -444,6 +444,10 @@ export function AccordionContent({
   }, []);
 
   useEffect(() => {
+    if (!experimentDisplayLocking) {
+      return;
+    }
+
     const element = ref.current;
     if (!element) {
       return;
@@ -459,7 +463,7 @@ export function AccordionContent({
       'hidden-matchable'
     );
     setSupportsContentVisibility(newSupportsContentVisibility);
-    if (!experimentDisplayLocking || !newSupportsContentVisibility) {
+    if (!newSupportsContentVisibility) {
       return;
     }
 
