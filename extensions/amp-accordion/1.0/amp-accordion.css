@@ -27,7 +27,6 @@
 
 .i-amphtml-accordion-content {
   margin: 0;
-  display: block;
 }
 
 amp-accordion > section:not([expanded]) > :last-child:not(.i-amphtml-animating),

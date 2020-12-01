@@ -34,10 +34,6 @@ const header = {
   border: 'solid 1px #dfdfdf',
 };
 
-const content = {
-  display: 'block',
-};
-
 const contentHidden = {
   '&:not(.i-amphtml-animating)': {
     display: 'none !important',
@@ -53,7 +49,6 @@ const contentHiddenMatchable = {
 const JSS = {
   sectionChild,
   header,
-  content,
   contentHidden,
   contentHiddenMatchable,
 };

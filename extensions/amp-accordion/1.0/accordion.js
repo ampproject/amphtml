@@ -468,7 +468,7 @@ export function AccordionContent({
     }
 
     const beforeMatchHandler = () => {
-      toggleHandler(true);
+      toggleHandler(/* force expand */ true);
     };
     element.addEventListener('beforematch', beforeMatchHandler);
     return () => element.removeEventListener('beforematch', beforeMatchHandler);
@@ -493,8 +493,8 @@ export function AccordionContent({
     <Comp
       {...rest}
       ref={ref}
-      className={`${className} ${classes.sectionChild} ${classes.content} ${
-        !expanded ? hiddenClass : ''
+      className={`${className} ${classes.sectionChild} ${
+        expanded ? '' : hiddenClass
       }`}
       id={contentId}
       aria-labelledby={headerId}
