@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+ @import '../extensions/amp-story/1.0/amp-story-shadow-reset.css';
+
 .story-player-iframe {
   height: 100%;
   width: 100%;
