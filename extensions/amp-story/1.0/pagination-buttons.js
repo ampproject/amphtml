@@ -57,6 +57,7 @@ const ForwardButtonStates = {
   NEXT_STORY: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NO_NEXT_PAGE,
+    // i18n
     label: 'Next story',
   },
   REPLAY: {
