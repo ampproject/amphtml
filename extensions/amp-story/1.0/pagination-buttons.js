@@ -333,10 +333,8 @@ export class PaginationButtons {
         const viewer = Services.viewerForDoc(this.ampStory_.element);
         if (!hasBookend) {
           if (viewer.hasCapability('swipe')) {
-            console.log("raxsha" + viewer);
             this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
           } else {
-            console.log("raxsha" + viewer);
             this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
           }
         }
