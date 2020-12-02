@@ -18,7 +18,7 @@ limitations under the License.
 
 ## Introduction
 
-This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration). The AMP Viewer Integration API provides a protocol to establish a connection and send [messages](https://github.com/ampproject/amphtml/blob/viewer-doc-api-link/extensions/amp-viewer-integration/amp-doc-viewer-api.md) between the Viewer and AMP documents.
+This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration). The AMP Viewer Integration API provides a protocol to establish a connection and send [messages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/amp-doc-viewer-api.md) between the Viewer and AMP documents.
 
 <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/intro.png" height="300px"></img>
 
@@ -48,13 +48,13 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
    ```javascript
    {
-     app: “__AMPHTML__”,     // Hey viewer, it's me AMP Doc!
+     app: "__AMPHTML__",     // Hey viewer, it's me AMP Doc!
      requestid: 1,           // A unique ID for the request
-     type: “q”,              // Represents a REQUEST
-     name: “channelOpen”,    // Let’s shake hands
+     type: "q",              // Represents a REQUEST
+     name: "channelOpen",    // Let’s shake hands
      data: {
-       url: “amp...yoursite.com”,   // from the amp cache
-       sourceUrl: “yoursite.com”    // the original source url
+       url: "amp...yoursite.com",   // from the amp cache
+       sourceUrl: "yoursite.com"    // the original source url
      }
      rsvp: true              // response required
    };
@@ -68,8 +68,8 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
    ```javascript
    {
-     app: “__AMPHTML__”,    // Hey AMP Doc, it's me Viewer!
-     type: “s”,             // Represents a RESPONSE
+     app: "__AMPHTML__",    // Hey AMP Doc, it's me Viewer!
+     type: "s",             // Represents a RESPONSE
      requestid: 1,          // The same ID used in the REQUEST
    };
    ```
@@ -134,13 +134,13 @@ In the previous section, we set up the connection between the Viewer and AMP Doc
 
    ```javascript
    {
-     app: “__AMPHTML__”,     // Hey viewer, it's me AMP Doc!
+     app: "__AMPHTML__",     // Hey viewer, it's me AMP Doc!
      requestid: 1,           // A unique ID for the request
-     type: “q”,              // Represents a REQUEST
-     name: “channelOpen”,    // Let’s shake hands
+     type: "q",              // Represents a REQUEST
+     name: "channelOpen",    // Let’s shake hands
      data: {
-       url: “amp...yoursite.com”,   // from the amp cache
-       sourceUrl: “yoursite.com”    // the original source url
+       url: "amp...yoursite.com",   // from the amp cache
+       sourceUrl: "yoursite.com"    // the original source url
      }
      rsvp: true              // response required
    };
@@ -154,8 +154,8 @@ In the previous section, we set up the connection between the Viewer and AMP Doc
 
    ```javascript
    {
-     app: “__AMPHTML__”,    // Hey AMP Doc, it's me Viewer!
-     type: “s”,             // Represents a RESPONSE
+     app: "__AMPHTML__",    // Hey AMP Doc, it's me Viewer!
+     type: "s",             // Represents a RESPONSE
      requestid: 1,          // The same ID used in the REQUEST
    };
    ```
@@ -198,8 +198,8 @@ AMP Cache providers must include the [amp-viewer-integration](https://github.com
 
    ```javascript
    var initParams = {
-     origin: “http://yourAmpDocsOrigin.com”
-     someOtherParam: “someValue,anotherValue”
+     origin: "http://yourAmpDocsOrigin.com"
+     someOtherParam: "someValue,anotherValue"
    };
    ```
 
@@ -261,8 +261,8 @@ To establish a handshake initiated by the AMP Document:
      type: "q",
      name: "channelOpen",
      data: {
-       url: “amp...yoursite.com”,
-       sourceUrl: “yoursite.com”
+       url: "amp...yoursite.com",
+       sourceUrl: "yoursite.com"
      }
      rsvp: true,
    };
@@ -272,8 +272,8 @@ To establish a handshake initiated by the AMP Document:
 
    ```javascript
    {
-     app: “__AMPHTML__”,
-     type: “s”,
+     app: "__AMPHTML__",
+     type: "s",
      requestid: 1,
    };
    ```
@@ -316,13 +316,13 @@ The AMP Document sends the following message to the Viewer over the port:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
+  app: "__AMPHTML__",
   requestid: 1,
-  type: “q”,
-  name: “channelOpen”,
+  type: "q",
+  name: "channelOpen",
   data: {
-    url: “amp...yoursite.com”,
-    sourceUrl: “yoursite.com”
+    url: "amp...yoursite.com",
+    sourceUrl: "yoursite.com"
   }
   rsvp: true,
 };
@@ -332,8 +332,8 @@ The Viewer needs to respond with the following message over the port:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
-  type: “s”,
+  app: "__AMPHTML__",
+  type: "s",
   requestid: 1,
 };
 ```
@@ -348,8 +348,8 @@ _Example: Parameters in an object_
 
 ```javascript
 var initParams = {
-  origin: “http://yourAmpDocsOrigin.com”,
-  cap: “handshakepoll”
+  origin: "http://yourAmpDocsOrigin.com",
+  cap: "handshakepoll"
 };
 ```
 
@@ -374,13 +374,13 @@ Eventually, the AMP Document receives and loads the message. The AMP Document se
 
 ```javascript
 {
-  app: “__AMPHTML__”,
+  app: "__AMPHTML__",
   requestid: 1,
-  type: “q”,
-  name: “channelOpen”,
+  type: "q",
+  name: "channelOpen",
   data: {
-    url: “amp...yoursite.com”,
-    sourceUrl: “yoursite.com”
+    url: "amp...yoursite.com",
+    sourceUrl: "yoursite.com"
   }
   rsvp: true,
 };
@@ -390,8 +390,8 @@ The Viewer needs to respond with the following message via `postMessage()`:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
-  type: “s”,
+  app: "__AMPHTML__",
+  type: "s",
   requestid: 1,
 };
 ```
@@ -404,13 +404,13 @@ A message needs to be sent from the Viewer to the AMP Doc:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
+  app: "__AMPHTML__",
   requestid: 2,
-  type: “q”,
-  name: “visibilitychange”,     // The message type.
+  type: "q",
+  name: "visibilitychange",     // The message type.
   data: {
-    state: “the new state”,     // See visibility-state.js for allowed
-                                // values. Can be “visible” or “hidden”.
+    state: "the new state",     // See visibility-state.js for allowed
+                                // values. Can be "visible" or "hidden".
   }
   rsvp: true
 };
@@ -424,8 +424,8 @@ Touch events go straight to the AMP Document. So how does the Viewer know when t
 
 ```javascript
 var initParams = {
-  origin: “http://yourAmpDocsOrigin.com”,
-  cap: “foo,swipe”
+  origin: "http://yourAmpDocsOrigin.com",
+  cap: "foo,swipe"
 };
 ```
 
@@ -445,10 +445,10 @@ The message forwarded from the AMP Doc to the Viewer looks like this:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
+  app: "__AMPHTML__",
   requestid: 1,
-  type: “q”,
-  name: “touchmove”,
+  type: "q",
+  name: "touchmove",
   data: {
     … // The event data.
   }
