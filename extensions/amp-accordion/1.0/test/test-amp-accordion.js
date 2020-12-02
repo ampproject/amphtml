@@ -558,8 +558,6 @@ describes.realWin(
         const section1 = element.children[0];
         const content1 = section1.lastElementChild;
 
-        expect(win.AMP.isExperimentOn('amp-accordion-display-locking')).to.be
-          .true;
         expect(section1).not.to.have.attribute('expanded');
         content1.dispatchEvent(new Event('beforematch'));
         await waitForExpanded(section1, true);
@@ -575,8 +573,6 @@ describes.realWin(
         const section2 = element.children[1];
         const content2 = section2.lastElementChild;
 
-        expect(win.AMP.isExperimentOn('amp-accordion-display-locking')).to.be
-          .true;
         expect(section2).to.have.attribute('expanded');
         content2.dispatchEvent(new Event('beforematch'));
 
@@ -594,8 +590,6 @@ describes.realWin(
         const section1 = element.children[0];
         const content1 = section1.lastElementChild;
 
-        expect(win.AMP.isExperimentOn('amp-accordion-display-locking')).to.be
-          .true;
         expect(section1).not.to.have.attribute('expanded');
         content1.dispatchEvent(new Event('beforematch'));
         content1.dispatchEvent(new Event('beforematch'));
