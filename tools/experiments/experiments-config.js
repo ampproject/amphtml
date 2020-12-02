@@ -269,4 +269,9 @@ export const EXPERIMENTS = [
     name: 'Responsive layouts implemented via aspect-ratio CSS',
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
+  {
+    id: 'fie-resources',
+    name: 'Separate FIE resource manager from the main doc',
+    spec: 'https://github.com/ampproject/amphtml/issues/31246',
+  },
 ];

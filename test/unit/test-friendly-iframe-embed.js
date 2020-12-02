@@ -390,6 +390,60 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     });
   });
 
+  it('should pause and resume FIE using ampdoc visibility', async () => {
+    // AmpDoc is created.
+    const ampdocSignals = new Signals();
+    let childWinForAmpDoc;
+    const ampdoc = {
+      get win() {
+        return childWinForAmpDoc;
+      },
+      setReady: env.sandbox.spy(),
+      signals: () => ampdocSignals,
+      getHeadNode: () => childWinForAmpDoc.document.head,
+      overrideVisibilityState: env.sandbox.spy(),
+      dispose: env.sandbox.spy(),
+    };
+    ampdocServiceMock
+      .expects('installFieDoc')
+      .withExactArgs(
+        'https://acme.org/url1',
+        env.sandbox.match((arg) => {
+          // Match childWin argument.
+          childWinForAmpDoc = arg;
+          return true;
+        }),
+        env.sandbox.match(() => true)
+      )
+      .returns(ampdoc)
+      .once();
+
+    env.sandbox
+      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
+      .returns(Promise.resolve());
+
+    const embed = await installFriendlyIframeEmbed(
+      iframe,
+      document.body,
+      {
+        url: 'https://acme.org/url1',
+        html: '',
+        extensionIds: [],
+      },
+      preinstallCallback
+    );
+
+    embed.pause();
+    expect(ampdoc.overrideVisibilityState).to.be.calledOnce.calledWith(
+      'paused'
+    );
+
+    embed.resume();
+    expect(ampdoc.overrideVisibilityState).to.be.calledTwice.calledWith(
+      'visible'
+    );
+  });
+
   it('should dispose ampdoc', () => {
     // AmpDoc is created.
     const ampdocSignals = new Signals();

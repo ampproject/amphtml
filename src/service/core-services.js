@@ -26,6 +26,7 @@ import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHiddenObserverForDoc} from './hidden-observer-impl';
 import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
+import {installInaboxResourcesServiceForDoc} from '../inabox/inabox-resources';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
 import {installLoadingIndicatorForDoc} from './loading-indicator';
@@ -45,6 +46,7 @@ import {installViewerServiceForDoc} from './viewer-impl';
 import {installViewportServiceForDoc} from './viewport/viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {installXhrService} from './xhr-impl';
+import {isFieResourcesOn} from '../experiments/fie-resources-exp';
 
 /**
  * Install builtins.
@@ -123,15 +125,24 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
     : installHistoryServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'resources')
-    : installResourcesServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'owners')
-    : installOwnersServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
-    : installMutatorServiceForDoc(ampdoc);
+  const fieResourcesOn = isFieResourcesOn(ampdoc.win);
+  if (fieResourcesOn) {
+    isEmbedded
+      ? installInaboxResourcesServiceForDoc(ampdoc)
+      : installResourcesServiceForDoc(ampdoc);
+    installOwnersServiceForDoc(ampdoc);
+    installMutatorServiceForDoc(ampdoc);
+  } else {
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'resources')
+      : installResourcesServiceForDoc(ampdoc);
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'owners')
+      : installOwnersServiceForDoc(ampdoc);
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
+      : installMutatorServiceForDoc(ampdoc);
+  }
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);
