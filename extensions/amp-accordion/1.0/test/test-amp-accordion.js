@@ -546,6 +546,7 @@ describes.realWin(
       afterEach(() => {
         win.CSS.supports = defaultCssSupports;
         win.document.body.onbeforematch = defaultBeforeMatch;
+        toggleExperiment(win, 'amp-accordion-display-locking', false);
       });
 
       it('should expand collpased section with beforematch event', async () => {
