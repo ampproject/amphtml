@@ -78,4 +78,40 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     await new Promise(setTimeout);
     expect(schedulePassSpy).to.be.calledOnce;
   });
+
+  it('should pause and resume resources on doc visibility', () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
+    resources.add(element1);
+    resources.add(element2);
+
+    env.sandbox.stub(element1, 'pauseCallback');
+    env.sandbox.stub(element1, 'resumeCallback');
+    env.sandbox.stub(element2, 'pauseCallback');
+    env.sandbox.stub(element2, 'resumeCallback');
+
+    env.ampdoc.overrideVisibilityState('paused');
+    expect(element1.pauseCallback).to.be.calledOnce;
+    expect(element2.pauseCallback).to.be.calledOnce;
+
+    env.ampdoc.overrideVisibilityState('visible');
+    expect(element1.resumeCallback).to.be.calledOnce;
+    expect(element2.resumeCallback).to.be.calledOnce;
+  });
+
+  it('should unload all resources on dispose', async () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
+    resources.add(element1);
+    resources.add(element2);
+
+    const resource1 = resources.get()[0];
+    const resource2 = resources.get()[1];
+    env.sandbox.stub(resource1, 'unload');
+    env.sandbox.stub(resource2, 'unload');
+
+    resources.dispose();
+    expect(resource1.unload).to.be.calledOnce;
+    expect(resource2.unload).to.be.calledOnce;
+  });
 });

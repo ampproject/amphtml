@@ -2993,6 +2993,50 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('pause and resume', () => {
+    let a4a;
+    let pauseStub, resumeStub;
+
+    beforeEach(async () => {
+      const fixture = await createIframePromise();
+      const element = createA4aElement(fixture.doc);
+      a4a = new MockA4AImpl(element);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+
+      // Never resolve
+      window.sandbox
+        ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+        .callsFake(() => {
+          return new Promise(() => {});
+        });
+      const creativeString = buildCreativeString();
+      const metaData = a4a.getAmpAdMetadata(creativeString);
+      await a4a.renderAmpCreative_(metaData);
+
+      pauseStub = window.sandbox./*OK*/ stub(
+        FriendlyIframeEmbed.prototype,
+        'pause'
+      );
+      resumeStub = window.sandbox./*OK*/ stub(
+        FriendlyIframeEmbed.prototype,
+        'resume'
+      );
+    });
+
+    it('should pause the embed', () => {
+      expect(pauseStub).to.not.be.called;
+      expect(resumeStub).to.not.be.called;
+
+      a4a.pauseCallback();
+      expect(pauseStub).to.be.calledOnce;
+
+      a4a.resumeCallback();
+      expect(resumeStub).to.be.calledOnce;
+    });
+  });
+
   describe('canonical AMP', () => {
     describe('preferential rendering', () => {
       let a4aElement;

@@ -609,6 +609,7 @@ const forbiddenTerms = {
   'overrideVisibilityState': {
     message: 'overrideVisibilityState is a restricted API.',
     allowlist: [
+      'src/friendly-iframe-embed.js',
       'src/multidoc-manager.js',
       'src/service/ampdoc-impl.js',
       'src/service/viewer-impl.js',

@@ -535,10 +535,18 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
+  pauseCallback() {
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.pause();
+    }
+  }
+
+  /** @override */
   resumeCallback() {
     // FIE that was not destroyed on unlayoutCallback does not require a new
     // ad request.
     if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.resume();
       return;
     }
     // If layout of page has not changed, onLayoutMeasure will not be called
