@@ -9,14 +9,67 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-1.0.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-latest.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script>
     (self.AMP = self.AMP || []).push(function(AMP) {
       AMP.toggleExperiment('amp-selector-bento', true);
     });
-</script>
+  </script>
+  <style amp-custom>
+    .radio-selector [option] {
+      display: flex;
+      align-items: center;
+    }
+    .radio-selector [option]:before {
+      transition: background 0.25s ease-in-out;
+      content: "";
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      margin: 4px;
+      border-radius: 100%;
+      border: solid 1px blue;
+    }
+    .radio-selector [option][selected]:before {
+      text-align: center;
+      content: "✓";
+      color: white;
+      background-color: blue;
+    }
+  </style>
 </head>
 <body>
-    <h1>Selector Examples</h1>
+    <h2>Form Select</h2>
+    <form id="myForm" method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-selector class="radio-selector"
+        name="selectorInput"
+        layout="container" multiple
+        name="my-selector">
+        <div option="a">Option A</div>
+        <div option="b">Option B</div>
+        <div option="c">Option C</div>
+      </amp-selector>
+      <button>Submit</button>
+      <div submit-success>
+        <template type="amp-mustache">
+          Success! {{selectorInput}}, {{selectorInput2}}
+        </template>
+      </div>
+    </form>
+
+    <h2>More Form Options</h2>
+    <amp-selector class="radio-selector"
+      form="myForm"
+      name="selectorInput2"
+      layout="container" multiple
+      name="my-selector">
+      <div option="d" selected>Option D</div>
+      <div option="e">Option E</div>
+      <div option="f">Option F</div>
+    </amp-selector>
+
+    <h2>Img Select</h2>
     <amp-selector class="sample-selector" layout="container">
       <amp-img
         src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
