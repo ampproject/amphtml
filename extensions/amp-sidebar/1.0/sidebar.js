@@ -32,7 +32,7 @@ import {useStyles} from './sidebar.jss';
  * @param ref
  * @return {PreactDef.Renderable}
  */
-function SidebarWithRef({as: Comp = 'div', children, side, ...rest}, ref) {
+function SidebarWithRef({as: Comp = 'p', children, side, ...rest}, ref) {
   const [opened, setOpened] = useState(true);
   const toggle = useCallback(() => setOpened((prev) => !prev), []);
   const open = useCallback(() => setOpened(true), []);
@@ -52,6 +52,8 @@ function SidebarWithRef({as: Comp = 'div', children, side, ...rest}, ref) {
   const sideClass = side === 'left' ? classes.left : classes.right;
   const closedClass =
     side === 'left' ? classes.leftClosed : classes.rightClosed;
+
+  //console.log('chiild', children, Comp);
 
   return (
     <Comp

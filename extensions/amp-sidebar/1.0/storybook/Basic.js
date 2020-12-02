@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Sidebar} from '../sidebar';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
+import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -47,9 +47,11 @@ function SidebarWithActions(props) {
 }
 
 export const _default = () => {
+  const sideConfigurations = ['left', 'right', undefined];
+  const side = select('type', sideConfigurations, sideConfigurations[0]);
   return (
     <main>
-      <SidebarWithActions side="left">Content</SidebarWithActions>
+      <SidebarWithActions side={side}>Content</SidebarWithActions>
     </main>
   );
 };

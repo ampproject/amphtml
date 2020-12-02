@@ -25,15 +25,21 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
-/** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpSidebar extends PreactBaseElement {
   /** @override */
   init() {
     this.registerApiAction('toggle', (api) => api./*OK*/ toggle());
     this.registerApiAction('open', (api) => api./*OK*/ open());
-    this.registerApiAction('close', (api) => api./*OK*/ close());
+    this.registerApiAction('close', (api) => {
+      console.log(api.close);
+      api./*OK*/ close();
+    });
 
-    return dict();
+    const {element} = this;
+    //console.log(element.children);
+    //console.log('doing init');
+    //const {element} = this;
+    return dict({'children': element.children});
   }
 
   /** @override */
@@ -49,8 +55,11 @@ class AmpSidebar extends PreactBaseElement {
 /** @override */
 AmpSidebar['Component'] = Sidebar;
 
-/** @override */
-AmpSidebar['passthrough'] = true;
+AmpSidebar['layoutSizeDefined'] = true;
+
+AmpSidebar['lightDomTag'] = 'div';
+//AmpSidebar['passthrough'] = true;
+//AmpSidebar['passthrough'] = true;
 
 /** @override */
 AmpSidebar['props'] = {

@@ -32,7 +32,9 @@ export default {
 export const _default = () => {
   return (
     <main>
-      <amp-sidebar id="sidebar">Hello World!</amp-sidebar>
+      <amp-sidebar id="sidebar" side="left">
+        Hello World!
+      </amp-sidebar>
       <div class="buttons" style={{marginTop: 8}}>
         <button on="tap:sidebar.toggle()">toggle</button>
         <button on="tap:sidebar.open()">open</button>
