@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
+import {Alignment} from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
+import {isRTL} from '../../../src/dom';
 import {
   toChildArray,
   useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -51,6 +54,15 @@ const Interaction = {
   NONE: 'none',
 };
 
+/**
+ * @enum {string}
+ */
+const Direction = {
+  LTR: 'ltr',
+  RTL: 'rtl',
+  AUTO: 'auto',
+};
+
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
@@ -69,6 +81,7 @@ function BaseCarouselWithRef(
     autoAdvanceLoops = Number.POSITIVE_INFINITY,
     children,
     controls = Controls.AUTO,
+    dir = Direction.AUTO,
     loop,
     mixedLength = false,
     onFocus,
@@ -77,6 +90,7 @@ function BaseCarouselWithRef(
     onTouchStart,
     outsetArrows,
     snap = true,
+    snapAlign = Alignment.START,
     snapBy = 1,
     visibleCount = 1,
     _thumbnails = false,
@@ -189,12 +203,27 @@ function BaseCarouselWithRef(
     return interaction.current === Interaction.TOUCH;
   }, [controls, outsetArrows]);
 
+  const [rtl, setRtl] = useState(dir === Direction.RTL);
+  useLayoutEffect(() => {
+    if (!containRef.current || dir !== Direction.AUTO) {
+      return;
+    }
+    const doc = containRef.current.ownerDocument;
+    if (!doc) {
+      return;
+    }
+    setRtl(isRTL(doc));
+  }, [dir, setRtl]);
+
   return (
     <ContainWrapper
       size={true}
       layout={true}
       paint={true}
-      contentStyle={{display: 'flex'}}
+      contentStyle={{
+        display: 'flex',
+        direction: rtl ? Direction.RTL : Direction.LTR,
+      }}
       ref={containRef}
       contentRef={contentRef}
       onFocus={(e) => {
@@ -225,10 +254,12 @@ function BaseCarouselWithRef(
           customArrow={arrowPrev}
           disabled={disableForDir(-1)}
           outsetArrows={outsetArrows}
+          rtl={rtl}
         />
       )}
       <Scroller
         advanceCount={advanceCount}
+        alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
         loop={loop}
         mixedLength={mixedLength}
@@ -273,6 +304,7 @@ function BaseCarouselWithRef(
           customArrow={arrowNext}
           disabled={disableForDir(1)}
           outsetArrows={outsetArrows}
+          rtl={rtl}
         />
       )}
     </ContainWrapper>

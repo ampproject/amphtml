@@ -35,52 +35,50 @@ FAIL
 |  </head>
 |  <body>
 |    <!-- Valid: as direct child of <amp-img> -->
-|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40>
+|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40 i-amphtml-ssr>
 |      <img class=i-amphtml-blurry-placeholder placeholder src="data:...">
->>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:38:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
 |    </amp-img>
 |
 |    <!-- Invalid: missing class attribute as direct child of <amp-img> -->
-|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40>
+|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40 i-amphtml-ssr>
 |      <img placeholder src="data:...">
 >>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:43:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/blurry_image_placeholder.html:43:4 The mandatory attribute 'class' is missing in tag 'img'.
 |    </amp-img>
 |
 |    <!-- Invalid: class attribute with invalid value as direct child of <amp-img> -->
-|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40>
+|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40 i-amphtml-ssr>
 |      <img class=blurry-placeholder placeholder src="data:...">
 >>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:48:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/blurry_image_placeholder.html:48:4 The attribute 'class' in tag 'img' is set to the invalid value 'blurry-placeholder'.
 |    </amp-img>
 |
 |    <!-- Invalid: missing placeholder attribute as direct child of <amp-img> -->
-|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40>
+|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40 i-amphtml-ssr>
 |      <img class=i-amphtml-blurry-placeholder src="data:...">
 >>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:53:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/blurry_image_placeholder.html:53:4 The attribute 'class' in tag 'img' is set to the invalid value 'i-amphtml-blurry-placeholder'.
 |    </amp-img>
 |
 |    <!-- Invalid: placeholder attribute with invalid value as direct child of <amp-img> -->
-|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40>
+|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40 i-amphtml-ssr>
 |      <img class=i-amphtml-blurry-placeholder placeholder="blurry" src="data:...">
 >>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:58:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/blurry_image_placeholder.html:58:4 The attribute 'placeholder' in tag 'img' is set to the invalid value 'blurry'.
 |    </amp-img>
 |
 |    <!-- Invalid: missing src attribute as direct child of <amp-img> -->
-|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40>
+|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40 i-amphtml-ssr>
 |      <img class=i-amphtml-blurry-placeholder placeholder>
 >>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:63:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/blurry_image_placeholder.html:63:4 The mandatory attribute 'src' is missing in tag 'img'.
 |    </amp-img>
 |
 |    <!-- Invalid: src attribute with invalid protocol as direct child of <amp-img> -->
-|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40>
+|    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40 i-amphtml-ssr>
 |      <img class=i-amphtml-blurry-placeholder placeholder src="ftp:...">
 >>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:68:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/blurry_image_placeholder.html:68:4 Invalid URL protocol 'ftp:' for attribute 'src' in tag 'img'.
 |    </amp-img>
 |  </body>
 |  </html>

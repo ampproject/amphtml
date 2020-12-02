@@ -37,8 +37,9 @@ Before diving into the details on creating a new AMP extension, please familiari
 
 All AMP extensions (and built-in elements) have their tag names prefixed
 with `amp-`. Make sure to choose an accurate and clear name for your
-extension. For example, video players are also suffixed with `-player`
-(e.g. amp-brid-player).
+extension.
+
+Extensions that embed a third-party service must follow the [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
 
 ## Directory structure
 

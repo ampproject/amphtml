@@ -908,6 +908,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'pulse': {
+    prefetch: 'https://static.pulse.mail.ru/pulse-widget-amp.js',
+    renderStartImplemented: true,
+  },
+
   'pulsepoint': {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
@@ -1216,7 +1221,7 @@ const adConfig = jsonConfiguration({
   },
 
   'vlyby': {
-    prefetch: 'https://amp.vlyby.com/qad/qad-outer2.js',
+    prefetch: 'https://cdn.vlyby.com/amp/qad/qad-outer2.js',
   },
 
   'vmfive': {

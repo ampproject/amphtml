@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {Keys} from '../../../../src/utils/key-codes';
 import {Option, Selector} from '../selector';
 import {mount} from 'enzyme';
 
@@ -239,13 +240,13 @@ describes.sandboxed('Selector preact component', {}, () => {
         ref = Preact.createRef();
         wrapper = mount(
           <Selector ref={ref} multiple defaultValue={['a']}>
-            <Option key={1} option="a">
+            <Option key={1} option="a" index={1}>
               option a
             </Option>
-            <Option key={2} option="b">
+            <Option key={2} option="b" index={2}>
               option b
             </Option>
-            <Option key={3} option="c" disabled>
+            <Option key={3} option="c" disabled index={3}>
               option c
             </Option>
           </Selector>
@@ -327,6 +328,45 @@ describes.sandboxed('Selector preact component', {}, () => {
         // No options are selected.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('select by delta', async () => {
+        // First option is selected by default.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Next option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Skip next option (disabled) and select the option after that.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(-1);
+        wrapper.update();
+
+        // Skip previous option (disabled) and select the option before that.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(0);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
       });
     });
@@ -336,13 +376,13 @@ describes.sandboxed('Selector preact component', {}, () => {
         ref = Preact.useRef();
         wrapper = mount(
           <Selector ref={ref} defaultValue={['a']}>
-            <Option key={1} option="a">
+            <Option key={1} option="a" index={1}>
               option a
             </Option>
-            <Option key={2} option="b">
+            <Option key={2} option="b" index={2}>
               option b
             </Option>
-            <Option key={3} option="c" disabled>
+            <Option key={3} option="c" disabled index={3}>
               option c
             </Option>
           </Selector>
@@ -425,6 +465,252 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(disabledOption).to.not.have.attribute('selected');
+      });
+
+      it('select by delta', async () => {
+        // First option is selected by default.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Next option is selected.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(1);
+        wrapper.update();
+
+        // Skip next option (disabled) and select the option after that.
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(-1);
+        wrapper.update();
+
+        // Skip previous option (disabled) and select the option before that.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+
+        ref.current.selectBy(0);
+        wrapper.update();
+
+        // Nothing has changed.
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(disabledOption).to.not.have.attribute('selected');
+      });
+    });
+  });
+
+  describe('keyboard interactions', () => {
+    let wrapper;
+    let ref;
+
+    let selector;
+    let options;
+    let option0;
+    let option1;
+    let option2;
+
+    describe('multi-select selector', () => {
+      beforeEach(() => {
+        ref = Preact.createRef();
+        wrapper = mount(
+          <Selector ref={ref} multiple>
+            <Option key={1} option="a">
+              option a
+            </Option>
+            <Option key={2} option="b">
+              option b
+            </Option>
+            <Option key={3} option="c">
+              option c
+            </Option>
+          </Selector>
+        );
+
+        selector = wrapper.find('div').first();
+        options = wrapper.find(Option);
+        option0 = options.at(0).getDOMNode();
+        option1 = options.at(1).getDOMNode();
+        option2 = options.at(2).getDOMNode();
+      });
+
+      afterEach(() => {
+        wrapper.unmount();
+      });
+
+      it('navigate by arrows do not change selection state', () => {
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        selector.simulate('keydown', {key: Keys.LEFT_ARROW});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        selector.simulate('keydown', {key: Keys.RIGHT_ARROW});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        selector.simulate('keydown', {key: Keys.DOWN_ARROW});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        selector.simulate('keydown', {key: Keys.UP_ARROW});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+      });
+
+      it('Enter to select', () => {
+        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        // Subsequent Enter will deselect.
+        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        // Select multiple options.
+        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        options.at(1).find('div').simulate('keydown', {key: Keys.ENTER});
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+      });
+
+      it('Space to select', () => {
+        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        // Subsequent Space will deselect.
+        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        // Select multiple options.
+        options.at(0).find('div').simulate('keydown', {key: Keys.SPACE});
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+      });
+    });
+
+    describe('single-select selector ', () => {
+      beforeEach(() => {
+        ref = Preact.createRef();
+        wrapper = mount(
+          <Selector ref={ref}>
+            <Option key={1} option="a">
+              option a
+            </Option>
+            <Option key={2} option="b">
+              option b
+            </Option>
+            <Option key={3} option="c">
+              option c
+            </Option>
+          </Selector>
+        );
+
+        selector = wrapper.find('div').first();
+        options = wrapper.find(Option);
+        option0 = options.at(0).getDOMNode();
+        option1 = options.at(1).getDOMNode();
+        option2 = options.at(2).getDOMNode();
+      });
+
+      afterEach(() => {
+        wrapper.unmount();
+      });
+
+      it('navigate by arrows do not change selection state', () => {
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        selector.simulate('keydown', {key: Keys.LEFT_ARROW});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        selector.simulate('keydown', {key: Keys.RIGHT_ARROW});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        selector.simulate('keydown', {key: Keys.DOWN_ARROW});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        selector.simulate('keydown', {key: Keys.UP_ARROW});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+      });
+
+      it('Enter to select', () => {
+        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        // Subsequent Enter does nothing.
+        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        expect(option0).to.have.attribute('selected');
+        expect(option1).to.not.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        // Select new option deselects the first.
+        options.at(1).find('div').simulate('keydown', {key: Keys.ENTER});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+      });
+
+      it('Space to select', () => {
+        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        // Subsequent Space does nothing.
+        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
+
+        // Select new option deselects the first.
+        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        expect(option0).to.not.have.attribute('selected');
+        expect(option1).to.have.attribute('selected');
+        expect(option2).to.not.have.attribute('selected');
       });
     });
   });
