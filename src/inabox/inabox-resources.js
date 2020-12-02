@@ -74,7 +74,7 @@ export class InaboxResources {
             break;
           case VisibilityState.VISIBLE:
             this.resources_.forEach((r) => r.resume());
-            this.schedulePass();
+            this./*OK*/ schedulePass();
             break;
         }
       });
