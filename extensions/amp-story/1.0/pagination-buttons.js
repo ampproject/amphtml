@@ -54,6 +54,11 @@ const ForwardButtonStates = {
     // TODO: Here and other labels: i18n.
     label: 'Next page',
   },
+  NEXT_STORY: {
+    className: 'i-amphtml-story-fwd-next',
+    triggers: EventType.NO_NEXT_PAGE,
+    label: 'Next story',
+  },
   REPLAY: {
     className: 'i-amphtml-story-fwd-replay',
     triggers: EventType.REPLAY,
@@ -330,7 +335,7 @@ export class PaginationButtons {
     if (pageIndex === totalPages - 1) {
       this.ampStory_.hasBookend().then((hasBookend) => {
         if (!hasBookend) {
-          this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+          this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
         }
       });
     }
