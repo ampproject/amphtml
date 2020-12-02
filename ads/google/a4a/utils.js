@@ -1116,11 +1116,11 @@ export function getAmpRuntimeTypeParameter(win) {
  * @return {!Promise<boolean>}
  * @visibleForTesting
  */
-export function getServeNpaSignal(element) {
-  const npaSignal = element.getAttribute('always-serve-npa');
-  if (npaSignal == undefined) {
+export function getServeNpaPromise(element) {
+  if (!element.hasAttribute('always-serve-npa')) {
     return Promise.resolve(false);
   }
+  const npaSignal = element.getAttribute('always-serve-npa');
   if (npaSignal == '') {
     return Promise.resolve(true);
   }

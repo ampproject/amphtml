@@ -36,6 +36,7 @@ import {
   devAssert,
   duplicateErrorIfNecessary,
   user,
+  userAssert,
 } from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -1482,18 +1483,15 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<boolean>}
    */
   getBlockRtc_() {
-    const blockRtcLocations = this.element.getAttribute('block-rtc');
-    if (blockRtcLocations == undefined) {
+    if (
+      !this.element.hasAttribute('block-rtc') ||
+      !this.element.getAttribute('block-rtc')
+    ) {
       return Promise.resolve(false);
     }
-    if (blockRtcLocations == '') {
-      return Promise.resolve(true);
-    }
     return Services.geoForDocOrNull(this.element).then((geoService) => {
-      if (!geoService) {
-        // Err on safe side and signal for RTC callouts.
-        return true;
-      }
+      userAssert(geoService, '%s: requires <amp-geo> to use `block-rtc`', TAG);
+      const blockRtcLocations = this.element.getAttribute('block-rtc');
       const locations = blockRtcLocations.split(',');
       for (let i = 0; i < locations.length; i++) {
         const geoGroup = geoService.isInCountryGroup(locations[i]);

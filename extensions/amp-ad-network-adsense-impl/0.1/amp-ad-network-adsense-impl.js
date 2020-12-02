@@ -35,7 +35,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
-  getServeNpaSignal,
+  getServeNpaPromise,
   googleAdUrl,
   isCdnProxy,
   isReportingEnabled,
@@ -418,7 +418,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getServeNpaSignal() {
-    return getServeNpaSignal(this.element);
+    return getServeNpaPromise(this.element);
   }
 
   /** @override */

@@ -32,7 +32,7 @@ import {
   getEnclosingContainerTypes,
   getIdentityToken,
   getIdentityTokenRequestUrl,
-  getServeNpaSignal,
+  getServeNpaPromise,
   googleAdUrl,
   groupAmpAdsByType,
   maybeAppendErrorParameter,
@@ -1052,7 +1052,7 @@ describe('Google A4A utils', () => {
     });
   });
 
-  describes.realWin('#getServeNpaSignal', {}, (env) => {
+  describes.realWin('#getServeNpaPromise', {}, (env) => {
     let win, doc, element, geoService;
 
     beforeEach(() => {
@@ -1074,12 +1074,12 @@ describe('Google A4A utils', () => {
     });
 
     it('should return false if no attribute found', async () => {
-      expect(await getServeNpaSignal(element)).to.false;
+      expect(await getServeNpaPromise(element)).to.false;
     });
 
     it('should return true, regardless of geo location if empty string', async () => {
       element.setAttribute('always-serve-npa', '');
-      expect(await getServeNpaSignal(element)).to.true;
+      expect(await getServeNpaPromise(element)).to.true;
     });
 
     it('should return if doc is served from a defined geo group', async () => {
@@ -1087,7 +1087,7 @@ describe('Google A4A utils', () => {
         .stub(Services, 'geoForDocOrNull')
         .returns(Promise.resolve(geoService));
       element.setAttribute('always-serve-npa', 'gdpr,usca');
-      expect(await getServeNpaSignal(element)).to.true;
+      expect(await getServeNpaPromise(element)).to.true;
     });
 
     it('should return false when doc is in an undefined group or not in', async () => {
@@ -1098,13 +1098,13 @@ describe('Google A4A utils', () => {
 
       // Undefined group
       element.setAttribute('always-serve-npa', 'tx');
-      expect(await getServeNpaSignal(element)).to.false;
+      expect(await getServeNpaPromise(element)).to.false;
       expect(warnSpy.args[0][0]).to.match(/AMP-AD/);
       expect(warnSpy.args[0][1]).to.match(/Geo group "tx" was not defined./);
       expect(warnSpy).to.have.been.calledOnce;
       // Not in
       element.setAttribute('always-serve-npa', 'gdpr');
-      expect(await getServeNpaSignal(element)).to.false;
+      expect(await getServeNpaPromise(element)).to.false;
     });
 
     it('should return true when geoService is null', async () => {
@@ -1113,7 +1113,7 @@ describe('Google A4A utils', () => {
         .stub(Services, 'geoForDocOrNull')
         .returns(Promise.resolve(geoService));
       element.setAttribute('always-serve-npa', 'gdpr');
-      expect(await getServeNpaSignal(element)).to.true;
+      expect(await getServeNpaPromise(element)).to.true;
     });
   });
 });

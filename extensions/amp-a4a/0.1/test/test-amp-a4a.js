@@ -2813,9 +2813,9 @@ describe('amp-a4a', () => {
         expect(await a4a.getBlockRtc_()).to.false;
       });
 
-      it('should return true, regardless of geo location if empty string', async () => {
+      it('should return false if empty string', async () => {
         element.setAttribute('block-rtc', '');
-        expect(await a4a.getBlockRtc_()).to.true;
+        expect(await a4a.getBlockRtc_()).to.false;
       });
 
       it('should return if doc is served from a defined geo group', async () => {
@@ -2843,13 +2843,32 @@ describe('amp-a4a', () => {
         expect(await a4a.getBlockRtc_()).to.false;
       });
 
-      it('should return true when geoService is null', async () => {
+      it('should throw an error when there is no geoService', async () => {
         geoService = null;
         env.sandbox
           .stub(Services, 'geoForDocOrNull')
           .returns(Promise.resolve(geoService));
-        element.setAttribute('block-rtc', 'gdpr');
-        expect(await a4a.getBlockRtc_()).to.true;
+        element.setAttribute('block-rtc', 'usca');
+        await expect(a4a.getBlockRtc_()).to.be.rejectedWith(
+          /requires <amp-geo> to use `block-rtc`/
+        );
+      });
+
+      it('should not execute RealTimeConfig if the attribute is valid', async () => {
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+        const maybeExecuteRealTimeConfigStub = window.sandbox.stub();
+        AMP.RealTimeConfigManager = RealTimeConfigManager;
+        window.sandbox
+          .stub(
+            AMP.RealTimeConfigManager.prototype,
+            'maybeExecuteRealTimeConfig'
+          )
+          .callsFake(maybeExecuteRealTimeConfigStub);
+        element.setAttribute('block-rtc', 'usca');
+        await a4a.tryExecuteRealTimeConfig_();
+        expect(maybeExecuteRealTimeConfigStub).to.not.be.called;
       });
     });
   });

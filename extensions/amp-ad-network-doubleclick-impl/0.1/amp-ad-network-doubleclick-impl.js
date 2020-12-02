@@ -39,7 +39,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
-  getServeNpaSignal,
+  getServeNpaPromise,
   googleAdUrl,
   googleBlockParameters,
   googlePageParameters,
@@ -768,7 +768,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getServeNpaSignal() {
-    return getServeNpaSignal(this.element);
+    return getServeNpaPromise(this.element);
   }
 
   /**
