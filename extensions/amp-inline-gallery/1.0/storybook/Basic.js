@@ -19,7 +19,7 @@ import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
 import {InlineGallery} from '../inline-gallery';
 import {Pagination} from '../pagination';
 import {Thumbnails} from '../thumbnails';
-import {boolean, number, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -41,6 +41,11 @@ export const _default = () => {
   const thumbnailHeight = number('thumbnail height', 50);
   const loop = boolean('thumbnail loop', false);
   const aspectRatio = number('thumbnail aspect ratio (w/h)', 3 / 2);
+  const orientation = select(
+    'orientation',
+    ['horizontal', 'vertical'],
+    'vertical'
+  );
 
   return (
     <>
@@ -52,6 +57,7 @@ export const _default = () => {
           autoAdvanceInterval={autoAdvanceInterval}
           autoAdvanceLoops={autoAdvanceLoops}
           autoAdvance={autoAdvance}
+          orientation={orientation}
         >
           <img
             src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"

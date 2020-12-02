@@ -33,6 +33,14 @@ export const Alignment = {
 };
 
 /**
+ * @enum {string}
+ */
+export const Orientation = {
+  HORIZONTAL: 'horizontal',
+  VERTICAL: 'vertical',
+};
+
+/**
  * @typedef {{
  *   start: number,
  *   end: number,
@@ -57,9 +65,9 @@ export function getDimension(axis, el) {
   } = el./*OK*/ getBoundingClientRect();
 
   return {
-    start: axis == Axis.X ? left : top,
-    end: axis == Axis.X ? right : bottom,
-    length: axis == Axis.X ? width : height,
+    start: Math.round(axis == Axis.X ? left : top),
+    end: Math.round(axis == Axis.X ? right : bottom),
+    length: Math.round(axis == Axis.X ? width : height),
   };
 }
 
@@ -105,7 +113,7 @@ export function getPosition(axis, alignment, el) {
 export function overlaps(axis, el, position) {
   const {start, end} = getDimension(axis, el);
   // Ignore the end point, since that is shared with the adjacent Element.
-  return Math.round(start) <= position && position < Math.round(end);
+  return start <= position && position < end;
 }
 
 /**
