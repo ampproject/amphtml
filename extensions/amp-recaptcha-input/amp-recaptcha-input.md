@@ -64,7 +64,7 @@ grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
 ```js
 {
   ...other form params
-  “reCAPTCHA_body_key”: “returned_reCAPTCHA_response_token”
+  "reCAPTCHA_body_key": "returned_reCAPTCHA_response_token"
 }
 ```
 
