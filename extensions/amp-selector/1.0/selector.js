@@ -55,9 +55,11 @@ function SelectorWithRef(
     as: Comp = 'div',
     disabled,
     defaultValue = [],
+    form,
     keyboardSelectMode = KEYBOARD_SELECT_MODE.NONE,
     value,
     multiple,
+    name,
     onChange,
     onKeyDown: customOnKeyDown,
     role = 'listbox',
@@ -245,13 +247,17 @@ function SelectorWithRef(
       aria-disabled={disabled}
       aria-multiselectable={multiple}
       disabled={disabled}
+      form={form}
       keyboardSelectMode={keyboardSelectMode}
       multiple={multiple}
+      name={name}
       onKeyDown={onKeyDown}
       tabIndex={
         tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
       }
+      value={selected}
     >
+      <input hidden defaultValue={selected} name={name} form={form} />
       <SelectorContext.Provider value={context}>
         {children}
       </SelectorContext.Provider>

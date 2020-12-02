@@ -89,10 +89,11 @@ export const actionsAndOrder = () => {
     'select'
   );
   return (
-    <>
+    <form>
       <SelectorWithActions
         keyboardSelectMode={keyboardSelectMode}
         multiple
+        name="poll"
         aria-label="Image menu"
       >
         <Option
@@ -130,7 +131,7 @@ export const actionsAndOrder = () => {
           index={4}
         ></Option>
       </SelectorWithActions>
-    </>
+    </form>
   );
 };
 
