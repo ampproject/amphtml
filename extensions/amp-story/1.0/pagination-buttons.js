@@ -20,6 +20,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
+import {Services} from '../../../src/services';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {devAssert} from '../../../src/log';
@@ -28,6 +29,9 @@ import {renderAsElement} from './simple-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+
+/** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+this.viewer_ = null;
 
 /** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {
@@ -335,8 +339,15 @@ export class PaginationButtons {
 
     if (pageIndex === totalPages - 1) {
       this.ampStory_.hasBookend().then((hasBookend) => {
+        this.viewer_ = Services.viewerForDoc(this.element);
         if (!hasBookend) {
-          this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+          if (this.viewer_.hasCapability('swipe')) {
+            console.log("raxsha" + this.viewer_);
+            this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+          } else {
+            console.log("raxsha" + this.viewer_);
+            this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+          }
         }
       });
     }
