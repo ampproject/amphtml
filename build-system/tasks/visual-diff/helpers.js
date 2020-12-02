@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fancyLog = require('fancy-log');
-const sleep = require('sleep-promise');
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
@@ -265,6 +265,7 @@ async function waitForSelectorExistence(page, selector) {
 module.exports = {
   escapeHtml,
   log,
+  sleep,
   waitForPageLoad,
   verifySelectorsInvisible,
   verifySelectorsVisible,
