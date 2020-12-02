@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from 'preact';
 import {useStyles} from './base-carousel.jss';
+const h = Preact.createElement;
+var React;
+window.React = React = Preact;
 
 /**
  * @param {!BaseCarouselDef.ArrowProps} props
