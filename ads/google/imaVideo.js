@@ -823,6 +823,14 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   );
   adsManager.addEventListener(global.google.ima.AdEvent.Type.LOADED, onAdLoad);
   adsManager.addEventListener(
+    global.google.ima.AdEvent.Type.PAUSED,
+    onAdPaused
+  );
+  adsManager.addEventListener(
+    global.google.ima.AdEvent.Type.RESUMED,
+    onAdResumed
+  );
+  adsManager.addEventListener(
     global.google.ima.AdEvent.Type.AD_PROGRESS,
     onAdProgress
   );
@@ -959,6 +967,30 @@ export function onContentResumeRequested() {
   }
 
   videoPlayer.addEventListener('ended', onContentEnded);
+}
+
+/**
+ * Called when the IMA SDK emmitts the event: AdEvent.Type.PAUSED.
+ * Sets the (ads) controls to reflect a paused state.
+ * Does not need to set the big play pause since that is handled
+ * by the SDK generally.
+ * @visibleForTesting
+ */
+export function onAdPaused() {
+  // show play button while ad is paused
+  changeIcon(playPauseDiv, 'play');
+}
+
+/**
+ * Called when the IMA SDK emmitts the event: AdEvent.Type.RESUMED.
+ * Sets the (ads) controls to reflect a paused state.
+ * Does not need to set the big play pause since that is handled
+ * by the SDK generally.
+ * @visibleForTesting
+ */
+export function onAdResumed() {
+  // show pause button when ad resumes
+  changeIcon(playPauseDiv, 'pause');
 }
 
 /**
@@ -1524,6 +1556,7 @@ export function getPropertiesForTesting() {
     timeNode,
     uiTicker,
     videoPlayer,
+    icons,
   };
 }
 
