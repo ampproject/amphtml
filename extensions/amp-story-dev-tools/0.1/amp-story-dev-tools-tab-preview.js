@@ -65,7 +65,7 @@ const buildDeviceTemplate = (element) => {
 const buildDeviceChipTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <span
+    <button
       class="i-amphtml-story-dev-tools-device-chip"
       data-action="toggleDeviceChip"
     >
@@ -87,7 +87,7 @@ const buildDeviceChipTemplate = (element) => {
           class="i-amphtml-story-dev-tools-device-chip-add-stick"
         ></rect>
       </svg>
-    </span>
+    </button>
   `;
 };
 
@@ -99,7 +99,7 @@ const buildDeviceChipTemplate = (element) => {
 const buildHelpButtonTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <span
+    <button
       class="i-amphtml-story-dev-tools-button i-amphtml-story-dev-tools-button-help"
     >
       <span>HELP</span>
@@ -115,7 +115,7 @@ const buildHelpButtonTemplate = (element) => {
           fill="black"
         />
       </svg>
-    </span>
+    </button>
   `;
 };
 
@@ -195,20 +195,23 @@ const buildHelpDialogTemplate = (element) => {
               fill="white"
             /></svg
         ></a>
-        <svg
-          title="cross"
+        <button
           data-action="closeDialog"
           class="i-amphtml-story-dev-tools-device-dialog-close"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="white"
-          width="18px"
-          height="18px"
         >
-          <path
-            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-          />
-        </svg>
+          <svg
+            title="cross"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="white"
+            width="18px"
+            height="18px"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   `;
@@ -236,20 +239,23 @@ const buildAddDeviceDialogTemplate = (element) => {
         <div class="i-amphtml-story-dev-tools-device-dialog-tablet"></div>
         <h1>Desktop</h1>
         <div class="i-amphtml-story-dev-tools-device-dialog-desktop"></div>
-        <svg
-          title="cross"
+        <button
           data-action="closeDialog"
           class="i-amphtml-story-dev-tools-device-dialog-close"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="white"
-          width="18px"
-          height="18px"
         >
-          <path
-            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-          />
-        </svg>
+          <svg
+            title="cross"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="white"
+            width="18px"
+            height="18px"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   `;
@@ -410,18 +416,26 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
     /** @private {?Element} the current dialog being shown or null if none are active. */
     this.currentDialog_ = null;
+
+    /** @private {!Element} container for the device previews */
+    this.devicesContainer_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
+
+    this.devicesContainer_ = htmlFor(
+      this.element
+    )`<div class="i-amphtml-story-dev-tools-devices-container"></div>`;
+    this.element.appendChild(this.devicesContainer_);
+
     const chipListContainer = this.element.ownerDocument.createElement('div');
     chipListContainer.classList.add(
       'i-amphtml-story-dev-tools-device-chips-container'
     );
     this.element.appendChild(chipListContainer);
-
     const chipList = this.element.ownerDocument.createElement('span');
     chipList.classList.add('i-amphtml-story-dev-tools-device-chips');
     chipListContainer.appendChild(chipList);
@@ -545,7 +559,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     deviceSpecs.element = deviceLayout;
     deviceSpecs.chip = this.buildDeviceChip_(deviceSpecs.name);
     this.mutateElement(() => {
-      this.element.appendChild(deviceLayout);
+      this.devicesContainer_.appendChild(deviceLayout);
       this.element
         .querySelector('.i-amphtml-story-dev-tools-device-chips')
         .appendChild(deviceSpecs.chip);

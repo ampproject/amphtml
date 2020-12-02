@@ -28,7 +28,12 @@
 
   --i-amphtml-story-dev-tools-material-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
   --i-amphtml-story-dev-tools-material-easing-decelerated: cubic-bezier(0.0, 0.0, 0.2, 1);
- }
+}
+
+.i-amphtml-story-dev-tools-devices-container {
+  width: 100% !important;
+  height: 100% !important;
+}
 
 .i-amphtml-story-dev-tools-device {
   background: var(--i-amphtml-story-dev-tools-device-gray-1) !important;
@@ -73,6 +78,7 @@ amp-story-player a {
   --i-amphtml-story-dev-tools-device-chip-background: var(--i-amphtml-story-dev-tools-device-gray-3) !important;
   --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-device-gray-4) !important;
   --i-amphtml-story-dev-tools-device-chip-icon-background: black !important;
+  color: white !important;
   border-radius: 16px !important;
   background: var(--i-amphtml-story-dev-tools-device-chip-background) !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-device-chip-background) !important;
@@ -85,9 +91,10 @@ amp-story-player a {
   margin: 0 5px !important;
   white-space: nowrap !important;
   cursor: pointer !important;
+  outline: none;
 }
 
-.i-amphtml-story-dev-tools-device-chip:hover {
+.i-amphtml-story-dev-tools-device-chip:hover, .i-amphtml-story-dev-tools-device-chip:focus {
   background: var(--i-amphtml-story-dev-tools-device-chip-background-hover) !important;
 }
 
@@ -126,7 +133,7 @@ amp-story-player a {
   background: black !important;
 }
 
-.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device:hover {
+.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device:hover, .i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device:focus {
   background: var(--i-amphtml-story-dev-tools-accent-light) !important;
 }
 
@@ -224,9 +231,12 @@ amp-story-player a {
   right: 0 !important;
   opacity: .6 !important;
   box-sizing: content-box !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
 }
 
-.i-amphtml-story-dev-tools-device-dialog-close:hover {
+.i-amphtml-story-dev-tools-device-dialog-close:hover, .i-amphtml-story-dev-tools-device-dialog-close:focus {
   opacity: 1 !important;
 }
 

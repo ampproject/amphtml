@@ -73,9 +73,12 @@ amp-story-dev-tools, amp-story-dev-tools * {
   height: 32px !important;
   color: var(--i-amphtml-story-dev-tools-accent) !important;
   text-decoration: none !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  outline: none !important;
 }
 
-.i-amphtml-story-dev-tools-button:hover {
+.i-amphtml-story-dev-tools-button:hover, .i-amphtml-story-dev-tools-button:focus  {
   background: var(--i-amphtml-story-dev-tools-accent-translucent) !important;
 }
 
