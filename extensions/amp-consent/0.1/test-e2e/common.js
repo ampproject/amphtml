@@ -115,3 +115,7 @@ export async function verifyPromptsHidden(controller, hiddenMap) {
     }
   }
 }
+
+export function sleep(ms) {
+  return new Promise((res) => setTimeout(res, ms));
+}

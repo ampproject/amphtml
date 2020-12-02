@@ -530,7 +530,10 @@ class AmpCarousel extends AMP.BaseElement {
 
       if (isSlides) {
         const wrapper = document.createElement('div');
-        wrapper.className = 'i-amphtml-carousel-slotted';
+        wrapper.classList.add(
+          'i-amphtml-carousel-slotted',
+          'i-amphtml-carousel-wrapper'
+        );
         wrapper.appendChild(slide);
         return wrapper;
       }
