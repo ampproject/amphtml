@@ -15,7 +15,6 @@
  */
 
 import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
-import sleep from 'sleep-promise';
 
 describes.endtoend(
   'amp story bookend',
@@ -29,6 +28,10 @@ describes.endtoend(
   async (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
+
+    function sleep(ms) {
+      return new Promise((res) => setTimeout(res, ms));
+    }
 
     beforeEach(async () => {
       controller = env.controller;

@@ -17,11 +17,10 @@
 import {
   findElements,
   resetAllElements,
+  sleep,
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
-
-import sleep from 'sleep-promise';
 
 describes.endtoend(
   'amp-consent',
