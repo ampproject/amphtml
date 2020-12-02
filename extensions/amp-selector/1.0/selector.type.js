@@ -23,9 +23,11 @@ var SelectorDef = {};
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   disabled: (boolean|undefined),
+ *   form: (string|undefined),
  *   shimDomElement: !Element,
  *   value: (!Array|undefined),
  *   multiple: (boolean|undefined),
+ *   name: (string|undefined),
  *   onChange: (?function({value: !Array, option: *})|undefined),
  *   role: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),

@@ -22,6 +22,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
+  createElementWithAttributes,
   toggleAttribute,
   tryFocus,
 } from '../../../src/dom';
@@ -30,7 +31,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
-import {useCallback, useLayoutEffect} from '../../../src/preact';
+import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
 /** @const {string} */
 const TAG = 'amp-selector';
@@ -249,12 +250,44 @@ function OptionShim({
 function SelectorShim({
   shimDomElement,
   children,
+  form,
   multiple,
+  name,
   disabled,
   onKeyDown,
   role = 'listbox',
   tabIndex,
+  value,
 }) {
+  const input = useRef(null);
+  if (!input.current) {
+    input.current = createElementWithAttributes(
+      shimDomElement.ownerDocument,
+      'input',
+      {
+        'hidden': '',
+      }
+    );
+  }
+
+  useLayoutEffect(() => {
+    const el = input.current;
+    shimDomElement.insertBefore(el, shimDomElement.firstChild);
+    return () => shimDomElement.removeChild(el);
+  }, [shimDomElement]);
+
+  const syncAttr = useCallback((attr, value) => {
+    if (value) {
+      input.current.setAttribute(attr, value);
+    } else {
+      input.current.removeAttribute(attr);
+    }
+  }, []);
+
+  useLayoutEffect(() => syncAttr('form', form), [form, syncAttr]);
+  useLayoutEffect(() => syncAttr('name', name), [name, syncAttr]);
+  useLayoutEffect(() => syncAttr('value', value), [value, syncAttr]);
+
   useLayoutEffect(() => {
     if (!onKeyDown) {
       return;
@@ -296,6 +329,7 @@ AmpSelector['detached'] = true;
 /** @override */
 AmpSelector['props'] = {
   'disabled': {attr: 'disabled', type: 'boolean'},
+  'form': {attr: 'form'},
   'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
   'role': {attr: 'role'},
