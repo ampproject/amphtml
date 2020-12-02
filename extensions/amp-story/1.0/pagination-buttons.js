@@ -30,9 +30,6 @@ import {renderAsElement} from './simple-template';
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
 
-/** @private {?../../../src/service/viewer-interface.ViewerInterface} */
-this.viewer_ = null;
-
 /** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {
   CLOSE_BOOKEND: {
@@ -57,12 +54,6 @@ const ForwardButtonStates = {
     triggers: EventType.NEXT_PAGE,
     // TODO: Here and other labels: i18n.
     label: 'Next page',
-  },
-  NEXT_STORY: {
-    className: 'i-amphtml-story-fwd-next',
-    triggers: EventType.NO_NEXT_PAGE,
-    // i18n
-    label: 'Next story',
   },
   REPLAY: {
     className: 'i-amphtml-story-fwd-replay',
@@ -339,13 +330,13 @@ export class PaginationButtons {
 
     if (pageIndex === totalPages - 1) {
       this.ampStory_.hasBookend().then((hasBookend) => {
-        this.viewer_ = Services.viewerForDoc(this.element);
+        const viewer = Services.viewerForDoc(this.ampStory_.element);
         if (!hasBookend) {
-          if (this.viewer_.hasCapability('swipe')) {
-            console.log("raxsha" + this.viewer_);
-            this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+          if (viewer.hasCapability('swipe')) {
+            console.log("raxsha" + viewer);
+            this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
           } else {
-            console.log("raxsha" + this.viewer_);
+            console.log("raxsha" + viewer);
             this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
           }
         }
