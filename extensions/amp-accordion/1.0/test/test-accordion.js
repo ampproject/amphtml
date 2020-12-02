@@ -49,7 +49,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const content = dom.children[1];
       expect(content.localName).to.equal('div');
       expect(content.innerHTML).to.equal('content1');
-      expect(content.getAttribute('aria-hidden')).to.equal('true');
+      expect(content.className.includes('content-hidden')).to.be.true;
     });
 
     it('should render an expanded section', () => {
@@ -73,7 +73,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const content = dom.children[1];
       expect(content.localName).to.equal('div');
       expect(content.innerHTML).to.equal('content1');
-      expect(content.getAttribute('aria-hidden')).to.equal('false');
+      expect(content.className.includes('content-hidden')).to.be.false;
     });
 
     it('should toggle expanded state', () => {
@@ -92,19 +92,19 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       // Start unexpanded.
       expect(dom).to.not.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('false');
-      expect(content.getAttribute('aria-hidden')).to.equal('true');
+      expect(content.className.includes('content-hidden')).to.be.true;
 
       // Click on header to expand.
       wrapper.find('div').at(0).simulate('click');
       expect(dom).to.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('true');
-      expect(content.getAttribute('aria-hidden')).to.equal('false');
+      expect(content.className.includes('content-hidden')).to.be.false;
 
       // Click on header again to collapse.
       wrapper.find('div').at(0).simulate('click');
       expect(dom).to.not.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('false');
-      expect(content.getAttribute('aria-hidden')).to.equal('true');
+      expect(content.className.includes('content-hidden')).to.be.true;
     });
   });
 
@@ -158,9 +158,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(content0.textContent).to.equal('content1');
       expect(content1.textContent).to.equal('content2');
       expect(content2.textContent).to.equal('content3');
-      expect(content0.getAttribute('aria-hidden')).to.equal('false');
-      expect(content1.getAttribute('aria-hidden')).to.equal('true');
-      expect(content2.getAttribute('aria-hidden')).to.equal('true');
+      expect(content0.className.includes('content-hidden')).to.be.false;
+      expect(content1.className.includes('content-hidden')).to.be.true;
+      expect(content2.className.includes('content-hidden')).to.be.true;
 
       // Styling.
       expect(header0.className.includes('section-child')).to.be.true;
@@ -170,11 +170,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(header2.className.includes('section-child')).to.be.true;
       expect(header2.className.includes('header')).to.be.true;
       expect(content0.className.includes('section-child')).to.be.true;
-      expect(content0.className.includes('content')).to.be.true;
       expect(content1.className.includes('section-child')).to.be.true;
-      expect(content1.className.includes('content')).to.be.true;
       expect(content2.className.includes('section-child')).to.be.true;
-      expect(content2.className.includes('content')).to.be.true;
     });
 
     it('should include a11y related attributes', () => {
@@ -336,8 +333,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
           .find('div')
           .at(1)
           .getDOMNode()
-          .getAttribute('aria-hidden')
-      ).to.equal('true');
+          .className.includes('content-hidden')
+      ).to.be.true;
     });
 
     it('should adjust state when expandSingleSection changes', async () => {
@@ -419,16 +416,16 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
           .find('div')
           .at(1)
           .getDOMNode()
-          .getAttribute('aria-hidden')
-      ).to.equal('true');
+          .className.includes('content-hidden')
+      ).to.be.true;
       expect(
         sections
           .at(1)
           .find('div')
           .at(1)
           .getDOMNode()
-          .getAttribute('aria-hidden')
-      ).to.equal('false');
+          .className.includes('content-hidden')
+      ).to.be.false;
     });
 
     it('should collapse a section on click', () => {
@@ -451,8 +448,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
           .find('div')
           .at(1)
           .getDOMNode()
-          .getAttribute('aria-hidden')
-      ).to.equal('true');
+          .className.includes('content-hidden')
+      ).to.be.true;
     });
   });
 
@@ -583,7 +580,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       section.find('div').at(0).simulate('click');
 
       // Immediately hidden, which means animation has not been even tried.
-      expect(content.getAttribute('aria-hidden')).to.equal('true');
+      expect(content.className.includes('content-hidden')).to.be.true;
     });
   });
 

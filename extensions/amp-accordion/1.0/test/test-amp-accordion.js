@@ -35,7 +35,7 @@ describes.realWin(
     async function waitForExpanded(el, expanded) {
       const isExpandedOrNot = () =>
         el.hasAttribute('expanded') === expanded &&
-        el.lastElementChild.getAttribute('aria-hidden') === String(!expanded);
+        el.firstElementChild.getAttribute('aria-expanded') === String(expanded);
       await waitFor(isExpandedOrNot, 'element expanded updated');
     }
 

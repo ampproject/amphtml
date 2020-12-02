@@ -249,13 +249,13 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.ContentProps} props
+ * @param {!AccordionDef.ContentShimProps} props
  * @param {{current: ?}} ref
  * @return {PreactDef.Renderable}
  */
 function ContentShimWithRef(
   sectionElement,
-  {id, role, 'aria-labelledby': ariaLabelledBy, 'aria-hidden': ariaHidden},
+  {id, role, 'aria-labelledby': ariaLabelledBy},
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;
@@ -268,11 +268,10 @@ function ContentShimWithRef(
     contentElement.setAttribute('id', id);
     contentElement.setAttribute('role', role);
     contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
-    contentElement.setAttribute('aria-hidden', ariaHidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, contentElement, id, role, ariaLabelledBy, ariaHidden]);
+  }, [sectionElement, contentElement, id, role, ariaLabelledBy]);
   return <div />;
 }
 
