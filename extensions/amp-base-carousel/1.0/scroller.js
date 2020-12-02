@@ -31,7 +31,6 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
 } from '../../../src/preact';
 import {useStyles} from './base-carousel.jss';
 
@@ -56,6 +55,7 @@ function ScrollerWithRef(
     advanceCount,
     alignment,
     autoAdvanceCount,
+    axis,
     children,
     loop,
     mixedLength,
@@ -71,7 +71,6 @@ function ScrollerWithRef(
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
-  const [axis] = useState(Axis.X);
 
   /**
    * The number of slides we want to place before the reference or resting index.
@@ -240,7 +239,9 @@ function ScrollerWithRef(
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
+      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
+        axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
+      }`}
       tabindex={0}
       {...rest}
     >
@@ -332,8 +333,10 @@ function renderSlides(
           snap && mod(index, snapBy) === 0
             ? classes.enableSnap
             : classes.disableSnap
-        } ${_thumbnails ? classes.thumbnails : ''}`}
-        style={{flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`}}
+        } ${_thumbnails ? classes.thumbnails : ''} `}
+        style={{
+          flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
+        }}
       >
         {child}
       </div>

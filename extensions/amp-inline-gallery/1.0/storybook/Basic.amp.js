@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -42,6 +42,11 @@ export const Default = () => {
   const autoAdvanceLoops = text('auto advance loops', 3);
   const loop = boolean('loop thumbnails', false);
   const aspectRatio = text('thumbnails aspect ratio', undefined);
+  const orientation = select(
+    'orientation',
+    ['horizontal', 'vertical'],
+    'vertical'
+  );
   return (
     <amp-inline-gallery style={{maxWidth: '360px'}} layout="container">
       <amp-inline-gallery-pagination
@@ -54,6 +59,7 @@ export const Default = () => {
         auto-advance-count={autoAdvanceCount}
         auto-advance-interval={autoAdvanceInterval}
         auto-advance-loops={autoAdvanceLoops}
+        orientation={orientation}
         width="360"
         height="240"
       >

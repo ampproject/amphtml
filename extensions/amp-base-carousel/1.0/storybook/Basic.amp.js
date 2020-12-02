@@ -19,6 +19,8 @@ import {boolean, number, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
+const ORIENTATIONS = ['horizontal', 'vertical'];
+
 export default {
   title: 'amp-base-carousel',
   decorators: [withKnobs, withA11y, withAmp],
@@ -42,6 +44,7 @@ export const Default = () => {
   const visibleCount = text('visible count', '(min-width: 400px) 2, 1');
   const outsetArrows = text('outset arrows', '(min-width: 400px) true, false');
   const controls = select('show controls', ['auto', 'always', 'never']);
+  const orientation = select('orientation', ORIENTATIONS, 'vertical');
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
 
@@ -55,20 +58,20 @@ export const Default = () => {
         auto-advance-interval={autoAdvanceInterval}
         auto-advance-loops={autoAdvanceLoops}
         controls={controls}
+        orientation={orientation}
         outset-arrows={outsetArrows}
-        width="880"
-        height="225"
+        width="450"
+        height="450"
         snap={String(snap)}
         snap-align={snapAlign}
         snap-by={snapBy}
         loop={loop}
-        layout="responsive"
         visible-count={visibleCount}
       >
         {Array.from({length: slideCount}, (x, i) => {
           const v = colorIncrement * (i + 1);
           return (
-            <amp-layout width="440" height="225" layout="responsive">
+            <amp-layout width="225" height="225" layout="responsive">
               <div
                 style={{
                   backgroundColor: `rgb(${v}, 100, 100)`,
@@ -97,8 +100,8 @@ export const Default = () => {
 };
 
 export const mixedLength = () => {
-  const width = number('width', 440);
-  const height = number('height', 225);
+  const width = number('width', 300);
+  const height = number('height', 300);
   const slideCount = number('slide count', 7, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const loop = boolean('loop', true);
@@ -113,12 +116,15 @@ export const mixedLength = () => {
     [252, 113, 115, 186, 248, 188, 162, 104, 100, 109, 175, 227, 143, 249, 280],
   ];
   const preset = select('random preset', [1, 2, 3]);
+  const orientation = select('orientation', ORIENTATIONS, 'vertical');
+  const horizontal = orientation == 'horizontal';
 
   return (
     <amp-base-carousel
       controls={controls}
       mixed-length={mixedLength}
       loop={loop}
+      orientation={orientation}
       snap={String(snap)}
       snap-align={snapAlign}
       snap-by={snapBy}
@@ -132,8 +138,12 @@ export const mixedLength = () => {
             style={{
               backgroundColor: `rgb(${v}, 100, 100)`,
               border: 'solid white 1px',
-              width: `${randomPreset[preset - 1 || 0][i]}px`,
-              height: `100px`,
+              width: horizontal
+                ? `${randomPreset[preset - 1 || 0][i]}px`
+                : '100px',
+              height: horizontal
+                ? '100px'
+                : `${randomPreset[preset - 1 || 0][i]}px`,
             }}
           ></div>
         );

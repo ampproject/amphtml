@@ -43,6 +43,13 @@ const horizontalScroll = {
   },
 };
 
+const verticalScroll = {
+  flexDirection: 'column',
+  scrollSnapTypeY: 'mandatory', // Firefox/IE
+  scrollSnapType: 'y mandatory',
+  overflowX: 'hidden',
+};
+
 /*
  * Styles to hide scrollbars, with three different methods:
  *
@@ -61,8 +68,6 @@ const hideScrollbar = {
   scrollbarWidth: 'none',
 
   boxSizing: '',
-  height: '100%',
-  paddingBottom: '20px',
 
   // Chrome, Safari
   '&::-webkit-scrollbar': {
@@ -72,7 +77,6 @@ const hideScrollbar = {
 };
 
 const slideElement = {
-  height: '100%',
   position: 'relative',
   overflow: 'hidden',
   display: 'flex',
@@ -247,6 +251,7 @@ const JSS = {
   scrollContainer,
   hideScrollbar,
   horizontalScroll,
+  verticalScroll,
   slideElement,
   thumbnails,
   enableSnap,
