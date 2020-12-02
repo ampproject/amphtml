@@ -30,6 +30,13 @@ const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    this.slide_ = null;
+  }
+
   /** @override */
   init() {
     const {element} = this;
@@ -43,17 +50,10 @@ class AmpBaseCarousel extends PreactBaseElement {
       },
       ActionTrust.LOW
     );
-    const mu = new MutationObserver(() => {
-      const slide = parseInt(element.getAttribute('slide'), 10);
-      if (!isNaN(slide)) {
-        this.api().goToSlide(slide);
-      }
-    });
-    mu.observe(element, {attributeFilter: ['slide']});
 
-    const defaultSlide = parseInt(element.getAttribute('slide'), 10) || 0;
+    this.slide_ = parseInt(element.getAttribute('slide'), 10) || 0;
     return dict({
-      'defaultSlide': defaultSlide,
+      'defaultSlide': this.slide_,
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },
@@ -67,6 +67,18 @@ class AmpBaseCarousel extends PreactBaseElement {
       'expected amp-base-carousel-bento experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  checkPropsPostMutations() {
+    const slide = parseInt(this.element.getAttribute('slide'), 10);
+    if (slide === this.slide_) {
+      return;
+    }
+    this.slide_ = slide;
+    if (!isNaN(slide)) {
+      this.api().goToSlide(slide);
+    }
   }
 }
 
@@ -113,6 +125,7 @@ AmpBaseCarousel['props'] = {
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
+  'slide': {attr: 'slide', type: 'number', media: true, default: true},
   'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
   'snapBy': {attr: 'snap-by', type: 'number', media: true},
   'snapAlign': {attr: 'snap-align', type: 'string', media: true},
