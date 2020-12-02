@@ -28,19 +28,19 @@ class AmpStoryPlayerWrapper extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.player_.buildCallback();
-    this.player_.prerenderCallback();
-  }
-
-  /** @override */
-  renderOutsideViewport() {
-    // Only call layoutCallback() when player is in viewport.
-    return false;
   }
 
   /** @override */
   layoutCallback() {
     this.player_.layoutCallback();
+    this.player_.markAsVisible();
+
     return Promise.resolve();
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return true;
   }
 
   /** @override */

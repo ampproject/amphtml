@@ -196,9 +196,6 @@ export class AmpStoryPlayer {
     this.rootEl_ = null;
 
     /** @private {boolean} */
-    this.isPrerendered_ = false;
-
-    /** @private {boolean} */
     this.isLaidOut_ = false;
 
     /** @private {boolean} */
@@ -237,7 +234,10 @@ export class AmpStoryPlayer {
     this.currentStoryLoadDeferred_ = null;
 
     /** @private {!Deferred} */
-    this.prerenderCallbackDeferred_ = new Deferred();
+    this.prerenderStoriesDeferred_ = new Deferred();
+
+    /** @private {!Deferred} */
+    this.visibleDeferred_ = new Deferred();
 
     this.attachCallbacksToElement_();
 
@@ -679,38 +679,8 @@ export class AmpStoryPlayer {
     };
   }
 
-  /**
-   * @public
-   */
-  layoutCallback() {
-    if (this.isLaidOut_) {
-      return;
-    }
-
-    // Unblock layoutCallback() if prerenderCallback wasn't called.
-    if (!this.isPrerendered_) {
-      this.prerenderCallback();
-    }
-
-    this.prerenderCallbackDeferred_.promise.then(() => {
-      if (this.stories_.length > 0) {
-        this.updateVisibilityState_(
-          0 /** iframeIdx */,
-          VisibilityState.VISIBLE
-        );
-      }
-      this.isLaidOut_ = true;
-    });
-  }
-
-  /**
-   * @public
-   */
-  prerenderCallback() {
-    if (this.isPrerendered_) {
-      return;
-    }
-
+  /** @private */
+  prerenderStories_() {
     for (let idx = 0; idx < this.stories_.length && idx < MAX_IFRAMES; idx++) {
       const story = this.stories_[idx];
       const {iframeIdx} = story;
@@ -721,15 +691,41 @@ export class AmpStoryPlayer {
         iframe,
         VisibilityState.PRERENDER,
         idx === 0 /** isFirstStory */
-      ).then(() => this.prerenderCallbackDeferred_.resolve());
+      ).then(() => this.prerenderStoriesDeferred_.resolve());
     }
 
     // Unblock layoutCallback when there are no stories initially.
     if (this.stories_.length === 0) {
-      this.prerenderCallbackDeferred_.resolve();
+      this.prerenderStoriesDeferred_.resolve();
     }
+  }
 
-    this.isPrerendered_ = true;
+  /** @public */
+  markAsVisible() {
+    this.prerenderStoriesDeferred_.promise.then(() =>
+      this.visibleDeferred_.resolve()
+    );
+  }
+
+  /**
+   * @public
+   */
+  layoutCallback() {
+    if (this.isLaidOut_) {
+      return;
+    }
+    this.prerenderStories_();
+
+    this.visibleDeferred_.promise.then(() => {
+      if (this.stories_.length > 0) {
+        this.updateVisibilityState_(
+          0 /** iframeIdx */,
+          VisibilityState.VISIBLE
+        );
+      }
+    });
+
+    this.isLaidOut_ = true;
   }
 
   /**

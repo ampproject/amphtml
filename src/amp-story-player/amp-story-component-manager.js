@@ -28,12 +28,6 @@ const SCROLL_THROTTLE_MS = 500;
  */
 const MIN_VIEWPORT_PRERENDER_DISTANCE = 2;
 
-/**
- * Minimum player visibility in viewport to change from prerender to visible.
- * @const {number}
- */
-const MIN_PLAYER_VISIBILITY_FOR_LAYOUT = 0.3;
-
 export class AmpStoryComponentManager {
   /**
    * @param {!Window} win
@@ -42,6 +36,9 @@ export class AmpStoryComponentManager {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
+
+    /** @private {?function} */
+    this.scrollHandler_ = null;
   }
 
   /**
@@ -55,23 +52,6 @@ export class AmpStoryComponentManager {
       return;
     }
 
-    const ioPrerenderCb = (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
-          return;
-        }
-        elImpl.prerenderCallback();
-
-        prerenderObserver.unobserve(elImpl.getElement());
-      });
-    };
-
-    const rootMarginInPercentage = `${MIN_VIEWPORT_PRERENDER_DISTANCE * 100}%`;
-    const prerenderObserver = new IntersectionObserver(ioPrerenderCb, {
-      rootMargin: rootMarginInPercentage,
-    });
-    prerenderObserver.observe(elImpl.getElement());
-
     const ioLayoutCb = (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) {
@@ -79,13 +59,27 @@ export class AmpStoryComponentManager {
         }
         elImpl.layoutCallback();
 
+        layoutObserver.unobserve(elImpl.getElement());
+      });
+    };
+
+    const layoutObserver = new IntersectionObserver(ioLayoutCb, {
+      rootMargin: `${MIN_VIEWPORT_PRERENDER_DISTANCE * 100}%`,
+    });
+    layoutObserver.observe(elImpl.getElement());
+
+    const ioVisibleCb = (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+        elImpl.markAsVisible();
+
         visibleObserver.unobserve(elImpl.getElement());
       });
     };
 
-    const visibleObserver = new IntersectionObserver(ioLayoutCb, {
-      threshold: [MIN_PLAYER_VISIBILITY_FOR_LAYOUT],
-    });
+    const visibleObserver = new IntersectionObserver(ioVisibleCb);
     visibleObserver.observe(elImpl.getElement());
   }
 
@@ -96,15 +90,14 @@ export class AmpStoryComponentManager {
    * @private
    */
   layoutFallback_(elImpl) {
-    // TODO(Enriqe): pause elements when scrolling away from viewport.
-    this.win_.addEventListener(
-      'scroll',
-      throttle(
-        this.win_,
-        this.layoutIfVisible_.bind(this, elImpl),
-        SCROLL_THROTTLE_MS
-      )
+    this.scrollHandler_ = throttle(
+      this.win_,
+      this.layoutIfVisible_.bind(this, elImpl),
+      SCROLL_THROTTLE_MS
     );
+
+    // TODO(Enriqe): pause elements when scrolling away from viewport.
+    this.win_.addEventListener('scroll', this.scrollHandler_);
 
     // Calls it once it in case scroll event never fires.
     this.layoutIfVisible_(elImpl);
@@ -121,10 +114,11 @@ export class AmpStoryComponentManager {
     const winInnerHeight = this.win_./*OK*/ innerHeight;
 
     if (winInnerHeight * MIN_VIEWPORT_PRERENDER_DISTANCE > elTop) {
-      elImpl.prerenderCallback();
-    }
-    if (winInnerHeight * (1 - MIN_PLAYER_VISIBILITY_FOR_LAYOUT) > elTop) {
       elImpl.layoutCallback();
+    }
+    if (winInnerHeight > elTop) {
+      elImpl.markAsVisible();
+      this.win_.removeEventListener('scroll', this.scrollHandler_);
     }
   }
 
