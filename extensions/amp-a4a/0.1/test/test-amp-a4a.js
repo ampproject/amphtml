@@ -44,7 +44,6 @@ import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {RealTimeConfigManager} from '../../../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {cancellation} from '../../../../src/error';
@@ -55,6 +54,7 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
+import {installRealTimeConfigServiceForDoc} from '../../../../src/service/real-time-config/real-time-config-impl';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
@@ -1293,6 +1293,7 @@ describe('amp-a4a', () => {
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.be.calledOnce;
     });
+
     it('resumeCallback does not call onLayoutMeasure for FIE', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1325,6 +1326,7 @@ describe('amp-a4a', () => {
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.not.be.called;
     });
+
     it('resumeCallback w/ measure required no onLayoutMeasure', async () => {
       // Force non-FIE
       adResponse.body = adResponse.body.replace('⚡4ads', '');
@@ -1361,6 +1363,7 @@ describe('amp-a4a', () => {
       a4a.resumeCallback();
       expect(onLayoutMeasureSpy).to.not.be.called;
     });
+
     it('should run end-to-end and render in friendly iframe', async () => {
       // TODO(ccordry): delete this test when no signing launches.
       // eslint-disable-next-line no-undef
@@ -1376,18 +1379,21 @@ describe('amp-a4a', () => {
       );
       const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
+      a4aElement.setAttribute('rtc-config', true);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.releaseType_ = '0';
       const getAdUrlSpy = window.sandbox.spy(a4a, 'getAdUrl');
       const rtcResponse = Promise.resolve([
         {response: 'a', rtcTime: 1, callout: 'https://a.com'},
       ]);
+
+      installRealTimeConfigServiceForDoc(doc);
       const maybeExecuteRealTimeConfigStub = window.sandbox
         .stub()
         .returns(rtcResponse);
-      AMP.RealTimeConfigManager = RealTimeConfigManager;
+      const rtc = await Services.realTimeConfigForDoc(doc);
       window.sandbox
-        .stub(AMP.RealTimeConfigManager.prototype, 'maybeExecuteRealTimeConfig')
+        .stub(rtc, 'maybeExecuteRealTimeConfig')
         .callsFake(maybeExecuteRealTimeConfigStub);
       const tryExecuteRealTimeConfigSpy = window.sandbox.spy(
         a4a,
@@ -1479,6 +1485,7 @@ describe('amp-a4a', () => {
         LayoutPriority.CONTENT
       );
     });
+
     it('should update priority for non AMP if in experiment', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1518,6 +1525,7 @@ describe('amp-a4a', () => {
       );
       expect(is3pThrottled(a4a.win)).to.be.false;
     });
+
     // TODO (keithwrightbos) - move into above e2e once signed creative with
     // image within creative can be regenerated.
     it('should prefetch amp images', async () => {
@@ -1564,6 +1572,7 @@ describe('amp-a4a', () => {
         )
       ).to.not.be.ok;
     });
+
     it('must not be position:fixed', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1582,6 +1591,7 @@ describe('amp-a4a', () => {
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.not.be.ok;
     });
+
     it('does not initialize promise chain 0 height/width', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1608,6 +1618,7 @@ describe('amp-a4a', () => {
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.ok;
     });
+
     it('does not initialize promise chain when hidden by media query', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1629,6 +1640,7 @@ describe('amp-a4a', () => {
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.ok;
     });
+
     it('does not initialize promise chain when has attribute "hidden"', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1726,15 +1738,19 @@ describe('amp-a4a', () => {
         }
       }
     }
+
     it('#layoutCallback valid AMP', () => {
       return executeLayoutCallbackTest(true);
     });
+
     it('#layoutCallback not valid AMP', () => {
       return executeLayoutCallbackTest(false);
     });
+
     it('#layoutCallback AMP render fail, recover non-AMP', () => {
       return executeLayoutCallbackTest(true, true);
     });
+
     it('should run end-to-end in the presence of an XHR error', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1762,6 +1778,7 @@ describe('amp-a4a', () => {
       expect(iframe).to.be.visible;
       expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
     });
+
     it('should use adUrl from onNetworkFailure', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1797,6 +1814,7 @@ describe('amp-a4a', () => {
       expect(iframe).to.be.visible;
       expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
     });
+
     it('should not execute frame GET if disabled via onNetworkFailure', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1827,6 +1845,7 @@ describe('amp-a4a', () => {
       const iframe = a4aElement.querySelector('iframe');
       expect(iframe).to.not.be.ok;
     });
+
     it('should handle XHR error when resolves before layoutCallback', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -1849,6 +1868,7 @@ describe('amp-a4a', () => {
       expect(iframe).to.be.visible;
       expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
     });
+
     it('should handle XHR error when resolves after layoutCallback', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -2064,6 +2084,7 @@ describe('amp-a4a', () => {
         return expect(getAdUrlSpy).to.be.calledOnce;
       });
     });
+
     it('should ignore invalid safeframe version header', async () => {
       adResponse.headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
@@ -2129,6 +2150,7 @@ describe('amp-a4a', () => {
       a4a = new MockA4AImpl(createA4aElement(fixture.doc));
       return fixture;
     });
+
     it('should parse metadata', () => {
       const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
       const expected = Object.assign(metaData, {
@@ -2136,6 +2158,7 @@ describe('amp-a4a', () => {
       });
       expect(actual).to.deep.equal(expected);
     });
+
     // TODO(levitzky) remove the following two tests after metadata bug is
     // fixed.
     it('should parse metadata with wrong opening tag', () => {
@@ -2150,6 +2173,7 @@ describe('amp-a4a', () => {
       };
       expect(actual).to.deep.equal(expected);
     });
+
     it('should return null if metadata opening tag is (truly) wrong', () => {
       const creative = buildCreativeString(metaData).replace(
         '<script type="application/json" amp-ad-metadata>',
@@ -2169,14 +2193,17 @@ describe('amp-a4a', () => {
         )
       ).to.be.null;
     });
+
     it('should return null if invalid extensions', () => {
       metaData.customElementExtensions = 'amp-vine';
       expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
+
     it('should return null if non-array stylesheets', () => {
       metaData.customStylesheets = 'https://fonts.googleapis.com/css?foobar';
       expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
+
     it('should return null if invalid stylesheet object', () => {
       metaData.customStylesheets = [
         {href: 'https://fonts.googleapis.com/css?foobar'},
@@ -2184,6 +2211,7 @@ describe('amp-a4a', () => {
       ];
       expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
+
     it('should not include amp images if not an array', () => {
       metaData.images = 'https://foo.com';
       const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
@@ -2194,6 +2222,7 @@ describe('amp-a4a', () => {
       delete expected.images;
       expect(actual).to.deep.equal(expected);
     });
+
     it('should tolerate missing images', () => {
       delete metaData.images;
       const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
@@ -2204,6 +2233,7 @@ describe('amp-a4a', () => {
       delete expected.images;
       expect(actual).to.deep.equal(expected);
     });
+
     it('should limit to 5 images', () => {
       while (metaData.images.length < 10) {
         metaData.images.push('https://another.image.com?abc=def');
@@ -2288,6 +2318,7 @@ describe('amp-a4a', () => {
     let a4aElement;
     let a4a;
     let fixture;
+
     beforeEach(async () => {
       fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -2296,15 +2327,18 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       return fixture;
     });
+
     it('should return false if throttled', () => {
       incrementLoadingAds(fixture.win);
       expect(a4a.renderOutsideViewport()).to.be.false;
     });
+
     it('should return true if throttled, but AMP creative', () => {
       incrementLoadingAds(fixture.win);
       a4a.isVerifiedAmpCreative_ = true;
       expect(a4a.renderOutsideViewport()).to.equal(3);
     });
+
     it('should return 1.25 if prefer-viewability-over-views', () => {
       a4aElement.setAttribute(
         'data-loading-strategy',
@@ -2320,6 +2354,7 @@ describe('amp-a4a', () => {
     const metaData = AmpA4A.prototype.getAmpAdMetadata(buildCreativeString());
     let a4aElement;
     let a4a;
+
     beforeEach(async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);
@@ -3053,7 +3088,6 @@ describe('amp-a4a', () => {
 describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
   let element;
   let a4a;
-  let errorSpy;
 
   beforeEach(() => {
     // ensures window location == AMP cache passes
@@ -3067,31 +3101,11 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
     });
     doc.body.appendChild(element);
     a4a = new AmpA4A(element);
-    errorSpy = env.sandbox.spy(user(), 'error');
   });
 
   describe('#tryExecuteRealTimeConfig', () => {
-    beforeEach(() => {
-      AMP.RealTimeConfigManager = undefined;
-    });
-
     it('should not execute if RTC never imported', () => {
       expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
-    });
-    it('should log user error if RTC Config set but RTC not supported', () => {
-      element.setAttribute(
-        'rtc-config',
-        JSON.stringify({'urls': ['https://a.com']})
-      );
-      expect(allowConsoleError(() => a4a.tryExecuteRealTimeConfig_())).to.be
-        .undefined;
-      expect(errorSpy.calledOnce).to.be.true;
-      expect(
-        errorSpy.calledWith(
-          'amp-a4a',
-          'RTC not supported for ad network doubleclick'
-        )
-      ).to.be.true;
     });
   });
 
