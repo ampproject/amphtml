@@ -34,6 +34,7 @@ class AmpBaseCarousel extends PreactBaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {?number} */
     this.slide_ = null;
   }
 
@@ -51,9 +52,9 @@ class AmpBaseCarousel extends PreactBaseElement {
       ActionTrust.LOW
     );
 
-    this.slide_ = parseInt(element.getAttribute('slide'), 10) || 0;
+    this.slide_ = parseInt(element.getAttribute('slide'), 10);
     return dict({
-      'defaultSlide': this.slide_,
+      'defaultSlide': this.slide_ || 0,
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },
@@ -70,7 +71,7 @@ class AmpBaseCarousel extends PreactBaseElement {
   }
 
   /** @override */
-  checkPropsPostMutations() {
+  mutationObserverCallback() {
     const slide = parseInt(this.element.getAttribute('slide'), 10);
     if (slide === this.slide_) {
       return;
@@ -131,7 +132,6 @@ AmpBaseCarousel['props'] = {
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
-  'slide': {attr: 'slide', type: 'number', media: true, default: true},
   'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
   'snapBy': {attr: 'snap-by', type: 'number', media: true},
   'snapAlign': {attr: 'snap-align', type: 'string', media: true},
