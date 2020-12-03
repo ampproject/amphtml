@@ -356,8 +356,7 @@ function createBaseCustomElementClass(win) {
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.implementation_ = newImpl;
-      this.classList.remove('amp-unresolved');
-      this.classList.remove('i-amphtml-unresolved');
+      this.classList.remove('amp-unresolved', 'i-amphtml-unresolved');
       this.assertLayout_();
       // TODO(wg-performance): Don't set BaseElement ivars externally.
       this.implementation_.layout_ = this.layout_;
@@ -478,8 +477,7 @@ function createBaseCustomElementClass(win) {
           this.preconnect(/* onLayout */ false);
           this.built_ = true;
           this.classList.add('i-amphtml-built');
-          this.classList.remove('i-amphtml-notbuilt');
-          this.classList.remove('amp-notbuilt');
+          this.classList.remove('i-amphtml-notbuilt', 'amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
           if (this.isConnected_) {
             this.connected_();
@@ -760,9 +758,11 @@ function createBaseCustomElementClass(win) {
       this.isConnected_ = true;
 
       if (!this.everAttached) {
-        this.classList.add('i-amphtml-element');
-        this.classList.add('i-amphtml-notbuilt');
-        this.classList.add('amp-notbuilt');
+        this.classList.add(
+          'i-amphtml-element',
+          'i-amphtml-notbuilt',
+          'amp-notbuilt'
+        );
       }
 
       if (!this.ampdoc_) {
@@ -816,8 +816,7 @@ function createBaseCustomElementClass(win) {
           this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved');
-          this.classList.add('i-amphtml-unresolved');
+          this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
         // Classically, sizes/media queries are applied just before

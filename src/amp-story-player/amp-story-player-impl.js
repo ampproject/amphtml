@@ -467,8 +467,10 @@ export class AmpStoryPlayer {
     const button = this.doc_.createElement('button');
     this.rootEl_.appendChild(button);
 
-    button.classList.add(DEPRECATED_BUTTON_CLASSES[option]);
-    button.classList.add(DEPRECATED_BUTTON_CLASSES.BASE);
+    button.classList.add(
+      DEPRECATED_BUTTON_CLASSES[option],
+      DEPRECATED_BUTTON_CLASSES.BASE
+    );
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(

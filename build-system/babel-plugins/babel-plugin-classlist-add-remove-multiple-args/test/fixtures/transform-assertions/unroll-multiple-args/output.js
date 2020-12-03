@@ -1,0 +1,22 @@
+classList.add('something');
+classList.add(a);
+classList.add(b);
+classList.remove(a);
+classList.remove(b);
+classList.remove(c);
+classList.remove(d);
+a.classList.remove(a);
+a.classList.remove(b);
+a.b.classList.add(x);
+a.b.classList.add(y);
+c.d.f.classList.add(x);
+c.d.f.classList.add(y);
+c.d.f.classList.add('one-two-three');
+// should leave all of the following intact
+leave.this.alone(x, y, z);
+leave.this.alone.add(a, b);
+leave.this.alone.remove(1, 2, 3);
+classList(a, b, c);
+classList.notAddOrRemove(a, b, c);
+add(1, 2, 3);
+remove(1, 2, 3);

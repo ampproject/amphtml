@@ -142,8 +142,7 @@ export class AmpSidebar extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
-    element.classList.add('i-amphtml-overlay');
-    element.classList.add('i-amphtml-scrollable');
+    element.classList.add('i-amphtml-overlay', 'i-amphtml-scrollable');
 
     this.side_ = element.getAttribute('side');
 

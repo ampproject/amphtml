@@ -608,12 +608,15 @@ export class ConsentUI {
   resetIframe_() {
     const {classList} = this.parent_;
     // It is ok to remove classes even when they're not present
-    classList.remove(consentUiClasses.iframeActive);
-    classList.remove(consentUiClasses.modal);
-    classList.remove(consentUiClasses.borderEnabled);
+    classList.remove(
+      consentUiClasses.iframeActive,
+      consentUiClasses.modal,
+      consentUiClasses.borderEnabled,
+      consentUiClasses.iframeFullscreen,
+      consentUiClasses.in
+    );
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
-    classList.remove(consentUiClasses.iframeFullscreen);
     // TODO(micajuineho) consolidate code to user viewport
     if (this.isFullscreen_) {
       this.sendViewerEvent_(CANCEL_OVERLAY);
@@ -621,7 +624,6 @@ export class ConsentUI {
       this.viewport_.leaveLightboxMode();
     }
     this.isFullscreen_ = false;
-    classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
     toggle(dev().assertElement(this.placeholder_), false);

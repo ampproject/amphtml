@@ -529,15 +529,13 @@ export class AmpForm {
   handleClearAction_() {
     this.form_.reset();
     this.setState_(FormState.INITIAL);
-    this.form_.classList.remove('user-valid');
-    this.form_.classList.remove('user-invalid');
+    this.form_.classList.remove('user-valid', 'user-invalid');
 
     const validityElements = this.form_.querySelectorAll(
       '.user-valid, .user-invalid'
     );
     iterateCursor(validityElements, (element) => {
-      element.classList.remove('user-valid');
-      element.classList.remove('user-invalid');
+      element.classList.remove('user-valid', 'user-invalid');
     });
 
     const messageElements = this.form_.querySelectorAll(

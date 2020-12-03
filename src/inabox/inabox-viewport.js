@@ -149,8 +149,7 @@ class InaboxViewportImpl {
 
     // Top-level mode classes.
     const docElement = win.document.documentElement;
-    docElement.classList.add('i-amphtml-singledoc');
-    docElement.classList.add('i-amphtml-standalone');
+    docElement.classList.add('i-amphtml-singledoc', 'i-amphtml-standalone');
     if (isIframed(win)) {
       docElement.classList.add('i-amphtml-iframed');
     }

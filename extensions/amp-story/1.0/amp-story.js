@@ -1826,8 +1826,10 @@ export class AmpStory extends AMP.BaseElement {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
-          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove(
+            'i-amphtml-story-desktop-panels',
+            'i-amphtml-story-desktop-fullbleed'
+          );
         });
         break;
       case UIType.DESKTOP_PANELS:
@@ -1859,8 +1861,10 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('i-amphtml-vertical', '');
           setImportantStyles(this.win.document.body, {height: 'auto'});
           this.element.removeAttribute('desktop');
-          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove(
+            'i-amphtml-story-desktop-fullbleed',
+            'i-amphtml-story-desktop-panels'
+          );
           for (let i = 0; i < pageAttachments.length; i++) {
             this.element.insertBefore(
               pageAttachments[i],

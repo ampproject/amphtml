@@ -275,8 +275,10 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   createZoomButton_() {
     this.zoomButton_ = this.element.ownerDocument.createElement('div');
-    this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
-    this.zoomButton_.classList.add('amp-pan-zoom-button');
+    this.zoomButton_.classList.add(
+      'amp-pan-zoom-in-icon',
+      'amp-pan-zoom-button'
+    );
     this.zoomButton_.addEventListener('click', () => {
       if (this.zoomButton_.classList.contains('amp-pan-zoom-in-icon')) {
         this.transform(0, 0, this.maxScale_);
