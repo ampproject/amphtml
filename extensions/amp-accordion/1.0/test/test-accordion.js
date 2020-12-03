@@ -49,7 +49,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const content = dom.children[1];
       expect(content.localName).to.equal('div');
       expect(content.innerHTML).to.equal('content1');
-      expect(content.hidden).to.be.true;
+      expect(content.className.includes('content-hidden')).to.be.true;
     });
 
     it('should render an expanded section', () => {
@@ -73,7 +73,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const content = dom.children[1];
       expect(content.localName).to.equal('div');
       expect(content.innerHTML).to.equal('content1');
-      expect(content.hidden).to.be.false;
+      expect(content.className.includes('content-hidden')).to.be.false;
     });
 
     it('should toggle expanded state', () => {
@@ -92,19 +92,19 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       // Start unexpanded.
       expect(dom).to.not.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('false');
-      expect(content.hidden).to.be.true;
+      expect(content.className.includes('content-hidden')).to.be.true;
 
       // Click on header to expand.
       wrapper.find('div').at(0).simulate('click');
       expect(dom).to.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('true');
-      expect(content.hidden).to.be.false;
+      expect(content.className.includes('content-hidden')).to.be.false;
 
       // Click on header again to collapse.
       wrapper.find('div').at(0).simulate('click');
       expect(dom).to.not.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('false');
-      expect(content.hidden).to.be.true;
+      expect(content.className.includes('content-hidden')).to.be.true;
     });
   });
 
@@ -158,9 +158,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(content0.textContent).to.equal('content1');
       expect(content1.textContent).to.equal('content2');
       expect(content2.textContent).to.equal('content3');
-      expect(content0.hidden).to.be.false;
-      expect(content1.hidden).to.be.true;
-      expect(content2.hidden).to.be.true;
+      expect(content0.className.includes('content-hidden')).to.be.false;
+      expect(content1.className.includes('content-hidden')).to.be.true;
+      expect(content2.className.includes('content-hidden')).to.be.true;
 
       // Styling.
       expect(header0.className.includes('section-child')).to.be.true;
@@ -170,11 +170,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(header2.className.includes('section-child')).to.be.true;
       expect(header2.className.includes('header')).to.be.true;
       expect(content0.className.includes('section-child')).to.be.true;
-      expect(content0.className.includes('content')).to.be.true;
       expect(content1.className.includes('section-child')).to.be.true;
-      expect(content1.className.includes('content')).to.be.true;
       expect(content2.className.includes('section-child')).to.be.true;
-      expect(content2.className.includes('content')).to.be.true;
     });
 
     it('should include a11y related attributes', () => {
@@ -330,7 +327,14 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(sections.at(0).getDOMNode()).to.not.have.attribute('expanded');
 
       // Contents.
-      expect(sections.at(0).find('div').at(1).getDOMNode().hidden).to.be.true;
+      expect(
+        sections
+          .at(0)
+          .find('div')
+          .at(1)
+          .getDOMNode()
+          .className.includes('content-hidden')
+      ).to.be.true;
     });
 
     it('should adjust state when expandSingleSection changes', async () => {
@@ -406,8 +410,22 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(sections.at(1).getDOMNode()).to.have.attribute('expanded');
 
       // Contents.
-      expect(sections.at(0).find('div').at(1).getDOMNode().hidden).to.be.true;
-      expect(sections.at(1).find('div').at(1).getDOMNode().hidden).to.be.false;
+      expect(
+        sections
+          .at(0)
+          .find('div')
+          .at(1)
+          .getDOMNode()
+          .className.includes('content-hidden')
+      ).to.be.true;
+      expect(
+        sections
+          .at(1)
+          .find('div')
+          .at(1)
+          .getDOMNode()
+          .className.includes('content-hidden')
+      ).to.be.false;
     });
 
     it('should collapse a section on click', () => {
@@ -424,7 +442,14 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(sections.at(0).getDOMNode()).to.not.have.attribute('expanded');
 
       // Contents.
-      expect(sections.at(0).find('div').at(1).getDOMNode().hidden).to.be.true;
+      expect(
+        sections
+          .at(0)
+          .find('div')
+          .at(1)
+          .getDOMNode()
+          .className.includes('content-hidden')
+      ).to.be.true;
     });
   });
 
@@ -496,7 +521,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       // The state is NOT immediately reflected: expanded attribute is removed,
       // but `content[hidden]` is deferred until animation is complete.
       expect(section.getDOMNode()).to.not.have.attribute('expanded');
-      expect(content.hidden).to.be.false;
+      expect(content.className.includes('i-amphtml-animating')).to.be.true;
       expect(content).to.have.display('block');
 
       // Animation has been started.
@@ -515,8 +540,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
       // Cleanup the animation.
       animation.onfinish();
-      expect(content.hidden).to.be.true;
-      expect(content).to.have.display('none');
+      expect(content.className.includes('i-amphtml-animating')).to.be.false;
+      expect(content.className.includes('content-hidden')).to.be.true;
     });
 
     it('should make animations cancelable', () => {
@@ -532,8 +557,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       section.find('div').at(0).simulate('click');
       expect(animateStub).to.be.calledOnce;
 
-      // Hidden is not set yet.
-      expect(content.hidden).to.be.false;
+      // Currently animating
+      expect(content.className.includes('i-amphtml-animating')).to.be.true;
 
       // Unclick. This should cancel the previous animation.
       section.find('div').at(0).simulate('click');
@@ -541,7 +566,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
       expect(animation.cancel).to.be.calledOnce;
       animation.oncancel();
-      expect(content.hidden).to.be.true;
+      expect(content.className.includes('i-amphtml-animating')).to.be.false;
     });
 
     it('should ignore animations if not available on the platform', () => {
@@ -555,7 +580,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       section.find('div').at(0).simulate('click');
 
       // Immediately hidden, which means animation has not been even tried.
-      expect(content.hidden).to.be.true;
+      expect(content.className.includes('content-hidden')).to.be.true;
     });
   });
 
@@ -671,6 +696,99 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       );
       expect(onExpandStateChange.callCount).to.equal(3);
       expect(onExpandStateChange.args[2][0]).to.be.true;
+    });
+  });
+
+  describe('display locking', () => {
+    let wrapper;
+    let cssSupports;
+    let getJsx;
+    let experimentDisplayLocking;
+
+    beforeEach(() => {
+      cssSupports = window.CSS.supports;
+      getJsx = (experimentDisplayLocking) => (
+        <Accordion experimentDisplayLocking={experimentDisplayLocking}>
+          <AccordionSection key={1} expanded>
+            <AccordionHeader>header1</AccordionHeader>
+            <AccordionContent>Puppies are cute.</AccordionContent>
+          </AccordionSection>
+          <AccordionSection key={2}>
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>Kittens are furry.</AccordionContent>
+          </AccordionSection>
+          <AccordionSection key={3}>
+            <AccordionHeader>header3</AccordionHeader>
+            <AccordionContent>Elephants have great memory.</AccordionContent>
+          </AccordionSection>
+        </Accordion>
+      );
+    });
+
+    afterEach(() => {
+      window.CSS.supports = cssSupports;
+    });
+
+    it('should expand based on beforematch event', async () => {
+      // Mock environment to support 'content-visibility'
+      // Turn on the experimentDisplayLocking prop
+      window.CSS.supports = () => true;
+      experimentDisplayLocking = true;
+      wrapper = mount(getJsx(experimentDisplayLocking));
+      document.body.appendChild(wrapper.getDOMNode());
+
+      const sections = wrapper.find(AccordionSection);
+      const section2 = sections.at(1).getDOMNode();
+      const content2 = sections.at(1).find('div').at(1).getDOMNode();
+
+      // Expand a collapsed section
+      expect(section2).to.not.have.attribute('expanded');
+      content2.dispatchEvent(new Event('beforematch'));
+      wrapper.update();
+      expect(section2).to.have.attribute('expanded');
+
+      // Expanded section should not collapse
+      content2.dispatchEvent(new Event('beforematch'));
+      wrapper.update();
+      expect(section2).to.have.attribute('expanded');
+    });
+
+    it('should not expand if "content-visibility" not supported', async () => {
+      // Mock environment to NOT support 'content-visibility'
+      // Turn on the experimentDisplayLocking prop
+      window.CSS.supports = (selector) => selector !== 'content-visibility';
+      experimentDisplayLocking = true;
+      wrapper = mount(getJsx(experimentDisplayLocking));
+      document.body.appendChild(wrapper.getDOMNode());
+
+      const sections = wrapper.find(AccordionSection);
+      const section2 = sections.at(1).getDOMNode();
+      const content2 = sections.at(1).find('div').at(1).getDOMNode();
+
+      // Section should not expand
+      expect(section2).to.not.have.attribute('expanded');
+      content2.dispatchEvent(new Event('beforematch'));
+      wrapper.update();
+      expect(section2).to.not.have.attribute('expanded');
+    });
+
+    it('should not expand if experimentDisplayLocking prop is "false"', async () => {
+      // Mock environment to support 'content-visibility'
+      // Turn OFF the experimentDisplayLocking prop
+      window.CSS.supports = () => true;
+      experimentDisplayLocking = false;
+      wrapper = mount(getJsx(experimentDisplayLocking));
+      document.body.appendChild(wrapper.getDOMNode());
+
+      const sections = wrapper.find(AccordionSection);
+      const section2 = sections.at(1).getDOMNode();
+      const content2 = sections.at(1).find('div').at(1).getDOMNode();
+
+      // Section should not expand
+      expect(section2).to.not.have.attribute('expanded');
+      content2.dispatchEvent(new Event('beforematch'));
+      wrapper.update();
+      expect(section2).to.not.have.attribute('expanded');
     });
   });
 

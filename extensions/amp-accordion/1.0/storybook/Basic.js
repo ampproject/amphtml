@@ -62,29 +62,31 @@ function AccordionWithActions(props) {
 export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
+  const experimentDisplayLocking = boolean('experimentDisplayLocking', false);
   return (
     <main>
       <AccordionWithActions
         expandSingleSection={expandSingleSection}
         animate={animate}
+        experimentDisplayLocking={experimentDisplayLocking}
       >
         <AccordionSection id="section1" key={1}>
           <AccordionHeader>
             <h2>Section 1</h2>
           </AccordionHeader>
-          <AccordionContent>Content in section 1.</AccordionContent>
+          <AccordionContent>Puppies are cute.</AccordionContent>
         </AccordionSection>
         <AccordionSection key={2}>
           <AccordionHeader>
             <h2>Section 2</h2>
           </AccordionHeader>
-          <AccordionContent>Content in section 2.</AccordionContent>
+          <AccordionContent>Kittens are furry.</AccordionContent>
         </AccordionSection>
         <AccordionSection key={3} expanded>
           <AccordionHeader>
             <h2>Section 3</h2>
           </AccordionHeader>
-          <AccordionContent>Content in section 3.</AccordionContent>
+          <AccordionContent>Elephants have great memory.</AccordionContent>
         </AccordionSection>
       </AccordionWithActions>
     </main>
@@ -106,7 +108,7 @@ function AccordionWithEvents(props) {
           <AccordionHeader>
             <h2>Section 1</h2>
           </AccordionHeader>
-          <AccordionContent>Content in section 1.</AccordionContent>
+          <AccordionContent>Puppies are cute.</AccordionContent>
         </AccordionSection>
         <AccordionSection
           id="section2"
@@ -120,7 +122,7 @@ function AccordionWithEvents(props) {
           <AccordionHeader>
             <h2>Section 2</h2>
           </AccordionHeader>
-          <AccordionContent>Content in section 1.</AccordionContent>
+          <AccordionContent>Kittens are furry.</AccordionContent>
         </AccordionSection>
         <AccordionSection
           id="section3"
@@ -134,7 +136,7 @@ function AccordionWithEvents(props) {
           <AccordionHeader>
             <h2>Section 3</h2>
           </AccordionHeader>
-          <AccordionContent>Content in section 3.</AccordionContent>
+          <AccordionContent>Elephants have great memory.</AccordionContent>
         </AccordionSection>
       </Accordion>
       <div style={{marginTop: 8}}>
@@ -153,11 +155,13 @@ function AccordionWithEvents(props) {
 export const events = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
+  const experimentDisplayLocking = boolean('experimentDisplayLocking', false);
   return (
     <main>
       <AccordionWithEvents
         expandSingleSection={expandSingleSection}
         animate={animate}
+        experimentDisplayLocking={experimentDisplayLocking}
       ></AccordionWithEvents>
     </main>
   );

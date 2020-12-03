@@ -47,6 +47,10 @@ const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
 const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
 
+const isDisplayLockingEnabledForAccordion = (win) =>
+  isExperimentOn(win, 'amp-accordion-display-locking') &&
+  win.document.body.onbeforematch !== undefined;
+
 /** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
   /** @override */
@@ -62,6 +66,12 @@ class AmpAccordion extends PreactBaseElement {
     );
 
     const {element} = this;
+    const experimentDisplayLocking = isDisplayLockingEnabledForAccordion(
+      this.win
+    );
+    if (experimentDisplayLocking) {
+      element.classList.add('i-amphtml-display-locking');
+    }
 
     const mu = new MutationObserver(() => {
       this.mutateProps(getState(element, mu));
@@ -72,7 +82,10 @@ class AmpAccordion extends PreactBaseElement {
     });
 
     const {'children': children} = getState(element, mu);
-    return dict({'children': children});
+    return dict({
+      'experimentDisplayLocking': experimentDisplayLocking,
+      'children': children,
+    });
   }
 
   /** @override */
@@ -236,13 +249,13 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.ContentProps} props
+ * @param {!AccordionDef.ContentShimProps} props
  * @param {{current: ?}} ref
  * @return {PreactDef.Renderable}
  */
 function ContentShimWithRef(
   sectionElement,
-  {hidden, id, role, 'aria-labelledby': ariaLabelledBy},
+  {id, role, 'aria-labelledby': ariaLabelledBy},
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;
@@ -255,11 +268,10 @@ function ContentShimWithRef(
     contentElement.setAttribute('id', id);
     contentElement.setAttribute('role', role);
     contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
-    toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, contentElement, hidden, id, role, ariaLabelledBy]);
+  }, [sectionElement, contentElement, id, role, ariaLabelledBy]);
   return <div />;
 }
 
