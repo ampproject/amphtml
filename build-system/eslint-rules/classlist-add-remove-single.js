@@ -59,6 +59,16 @@ module.exports = {
         ) {
           return;
         }
+        let rightMostIdentifier = node.expression.callee.object;
+        while (rightMostIdentifier.type === 'MemberExpression') {
+          rightMostIdentifier = rightMostIdentifier.property;
+        }
+        if (
+          rightMostIdentifier.type !== 'Identifier' ||
+          rightMostIdentifier.name !== 'classList'
+        ) {
+          return;
+        }
         const id = JSON.stringify(removeLoc(callee));
         const last = lastByCallee[id];
         if (!last || last.parent !== node.parent) {
