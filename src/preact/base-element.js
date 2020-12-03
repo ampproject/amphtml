@@ -368,7 +368,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   /**
    * A callback called immediately after mutations have been observed on a
    * component. This differs from `checkPropsPostMutations` in that it is
-   * called with all mutation records.
+   * called in all cases of mutation.
    * @protected
    */
   mutationObserverCallback() {}
