@@ -15,15 +15,14 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, user, userAssert} from '../../../src/log';
 import {getInstance} from 'amphtml-validator';
 import {htmlFor} from '../../../src/static-template';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.
  * @param {!Window} win
  * @param {string} storyUrl
- * @param {string} name
  * @return {!Element} the layout
  */
 export function createTabLogsElement(win, storyUrl) {
