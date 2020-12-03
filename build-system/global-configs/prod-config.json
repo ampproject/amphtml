@@ -23,7 +23,7 @@
   "fix-inconsistent-responsive-height-selection": 0,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
-  "intersect-resources": 1,
+  "intersect-resources": 0,
   "ios-fixed-no-transfer": 0,
   "pump-early-frame": 1,
   "swg-gpay-api": 1,
@@ -31,5 +31,6 @@
   "amp-ad-no-center-css": 0,
   "adsense-ptt-exp": 0.1,
   "doubleclick-ptt-exp": 0.1,
+  "fie-resources": 0.1,
   "visibility-trigger-improvements": 1
 }
