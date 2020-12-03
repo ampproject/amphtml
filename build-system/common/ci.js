@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,21 @@
  */
 'use strict';
 
-const gulp = require('gulp');
-const gulpAva = require('gulp-ava');
-const {isCiBuild} = require('../common/ci');
+/**
+ * @fileoverview Provides functions that extract various kinds of CI state.
+ */
 
 /**
- * Runs ava tests.
- * @return {!Vinyl}
+ * Returns true if this is a CI build.
+ * @return {boolean}
  */
-async function ava() {
-  return gulp
-    .src([
-      require.resolve('./csvify-size/test.js'),
-      require.resolve('./get-zindex/test.js'),
-      require.resolve('./prepend-global/test.js'),
-    ])
-    .pipe(
-      gulpAva({
-        'concurrency': 5,
-        'failFast': true,
-        'silent': isCiBuild(),
-      })
-    );
+function isCiBuild() {
+  // Travis: https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+  // GitHub Actions: https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
+  // CircleCI: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
+  return !!process.env.CI;
 }
 
 module.exports = {
-  ava,
+  isCiBuild,
 };
-
-ava.description = 'Runs ava tests for gulp tasks';
