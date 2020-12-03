@@ -30,6 +30,7 @@ var BaseCarouselDef = {};
  *   autoAdvanceLoops: (number|undefined),
  *   children: (!PreactDef.Renderable),
  *   controls: (string|undefined),
+ *   defaultSlide: (number|undefined),
  *   loop: (boolean|undefined),
  *   mixedLength: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
