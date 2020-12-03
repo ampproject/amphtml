@@ -33,8 +33,6 @@ class AmpStoryPlayerWrapper extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.player_.layoutCallback();
-    this.player_.markAsVisible();
-
     return Promise.resolve();
   }
 

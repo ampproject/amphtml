@@ -67,20 +67,6 @@ export class AmpStoryComponentManager {
       rootMargin: `${MIN_VIEWPORT_PRERENDER_DISTANCE * 100}%`,
     });
     layoutObserver.observe(elImpl.getElement());
-
-    const ioVisibleCb = (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
-          return;
-        }
-        elImpl.markAsVisible();
-
-        visibleObserver.unobserve(elImpl.getElement());
-      });
-    };
-
-    const visibleObserver = new IntersectionObserver(ioVisibleCb);
-    visibleObserver.observe(elImpl.getElement());
   }
 
   /**
@@ -115,9 +101,6 @@ export class AmpStoryComponentManager {
 
     if (winInnerHeight * MIN_VIEWPORT_PRERENDER_DISTANCE > elTop) {
       elImpl.layoutCallback();
-    }
-    if (winInnerHeight > elTop) {
-      elImpl.markAsVisible();
       this.win_.removeEventListener('scroll', this.scrollHandler_);
     }
   }

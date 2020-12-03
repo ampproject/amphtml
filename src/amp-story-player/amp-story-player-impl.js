@@ -700,11 +700,24 @@ export class AmpStoryPlayer {
     }
   }
 
-  /** @public */
-  markAsVisible() {
-    this.prerenderStoriesDeferred_.promise.then(() =>
-      this.visibleDeferred_.resolve()
-    );
+  /** @private */
+  initializeVisibleIO_() {
+    const ioVisibleCb = (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+
+        this.prerenderStoriesDeferred_.promise.then(() =>
+          this.visibleDeferred_.resolve()
+        );
+
+        visibleObserver.unobserve(this.element_);
+      });
+    };
+
+    const visibleObserver = new IntersectionObserver(ioVisibleCb);
+    visibleObserver.observe(this.element_);
   }
 
   /**
@@ -715,6 +728,7 @@ export class AmpStoryPlayer {
       return;
     }
     this.prerenderStories_();
+    this.initializeVisibleIO_();
 
     this.visibleDeferred_.promise.then(() => {
       if (this.stories_.length > 0) {
