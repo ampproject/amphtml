@@ -26,6 +26,10 @@ amp-story-dev-tools {
   padding: 30px 10% !important;
   --i-amphtml-story-dev-tools-accent: #79B3FF;
   --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55;
+
+  --i-amphtml-story-dev-tools-error-color: #FF5252 !important;
+  --i-amphtml-story-dev-tools-white-transparent-1: #ffffff0f;
+  --i-amphtml-story-dev-tools-white-transparent-2: #ffffff22;
 }
 
 amp-story-dev-tools, amp-story-dev-tools * {

@@ -17,9 +17,6 @@
 amp-story-dev-tools-tab-logs {
   overflow-y: scroll !important;
   margin-top: 30px !important;
-  --i-amphtml-story-dev-tools-logs-error-color: #FF5252 !important;
-  --i-amphtml-story-dev-tools-log-white-transparent-1: #ffffff0f;
-  --i-amphtml-story-dev-tools-log-white-transparent-2: #ffffff22;
 }
 
 .i-amphtml-story-dev-tools-log-status-title {
@@ -36,7 +33,7 @@ amp-story-dev-tools-tab-logs {
 
 .i-amphtml-story-dev-tools-log-message {
   margin-bottom: 16px !important;
-  background: var(--i-amphtml-story-dev-tools-log-white-transparent-1) !important;
+  background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
   color: white !important;
   position: relative !important;
   padding: 16px !important;
@@ -60,13 +57,13 @@ amp-story-dev-tools-tab-logs {
   right: 10px !important;
   top: 10px !important;
   border-radius: 20px !important;
-  border: 2px solid var(--i-amphtml-story-dev-tools-log-white-transparent-2) !important;
+  border: 2px solid var(--i-amphtml-story-dev-tools-white-transparent-2) !important;
   padding: 5px 10px !important;
   font-size: 12px !important;
 }
 
 .i-amphtml-story-dev-tools-log-spec:hover {
-  background: var(--i-amphtml-story-dev-tools-log-white-transparent-2) !important;
+  background: var(--i-amphtml-story-dev-tools-white-transparent-2) !important;
 }
 
 .i-amphtml-story-dev-tools-log-code {
@@ -80,5 +77,5 @@ amp-story-dev-tools-tab-logs {
 }
 
 .i-amphtml-story-dev-tools-log-code-line:nth-child(2) {
-  color: var(--i-amphtml-story-dev-tools-logs-error-color) !important;
+  color: var(--i-amphtml-story-dev-tools-error-color) !important;
 }

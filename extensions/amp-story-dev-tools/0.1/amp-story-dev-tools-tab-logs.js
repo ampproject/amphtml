@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getInstance} from 'amphtml-validator';
 import {htmlFor} from '../../../src/static-template';
 
@@ -72,6 +72,9 @@ const buildLogMessageTemplate = (element) => {
   </div>`;
 };
 
+/** @const {string} */
+const TAG = 'AMP_STORY_DEV_TOOLS_LOGS';
+
 export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
   /** @param {!Element} element */
   constructor(element) {
@@ -85,8 +88,11 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
   buildCallback() {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
+  }
 
-    getInstance().then((validator) => {
+  /** @override */
+  layoutCallback() {
+    return getInstance().then((validator) => {
       this.validateUrl_(validator.sandbox.amp.validator, this.storyUrl_);
     });
   }
@@ -97,31 +103,38 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @private
    * @param {!Validator} validator
    * @param {string} url
+   * @return {!Promise}
    */
   validateUrl_(validator, url) {
-    Services.xhrFor(this.win)
+    return Services.xhrFor(this.win)
       .fetchText(url)
       .then((response) => {
         userAssert(response.ok, 'Invalid story url');
-        response.text().then((html) => {
-          const htmlLines = html.split('\n');
-          const validationResult = validator.validateString(html);
-          const errorList = validationResult.errors.map((error) => {
-            error.htmlLines = htmlLines.slice(error.line - 2, error.line + 3);
-            error.message = validator.renderErrorMessage(error);
-            return error;
-          });
-          this.buildLogsList_(errorList);
+        return response.text();
+      })
+      .then((html) => {
+        const htmlLines = html.split('\n');
+        const validationResult = validator.validateString(html);
+        const errorList = validationResult.errors.map((error) => {
+          error.htmlLines = htmlLines.slice(error.line - 2, error.line + 3);
+          error.message = validator.renderErrorMessage(error);
+          return error;
         });
+        return this.buildLogsList_(errorList);
+      })
+      .catch((error) => {
+        user().error(TAG, error);
       });
   }
 
   /**
    * @private
    * @param {Array<Object>} errorList
+   * @return {!Promise}
    */
   buildLogsList_(errorList) {
-    this.element.appendChild(this.buildLogsTitle_(errorList.length));
+    const logsContainer = this.element.ownerDocument.createElement('div');
+    logsContainer.appendChild(this.buildLogsTitle_(errorList.length));
     errorList.forEach((content) => {
       const logEl = buildLogMessageTemplate(this.element);
       logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
@@ -147,7 +160,10 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
       } else {
         specUrlElement.remove();
       }
-      this.mutateElement(() => this.element.appendChild(logEl));
+      logsContainer.appendChild(logEl);
+    });
+    this.mutateElement(() => {
+      this.element.appendChild(logsContainer);
     });
   }
 
