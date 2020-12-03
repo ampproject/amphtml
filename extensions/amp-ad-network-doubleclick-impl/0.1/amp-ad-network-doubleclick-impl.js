@@ -366,7 +366,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // holdback branch sends non-numeric value.
       return false;
     }
-    return vpRange || 12;
+    // eslint-disable-next-line no-undef
+    const defaultRange = IDLE_VIEWPORT_RANGE_3 ? 3 : 12;
+    return vpRange || defaultRange;
   }
 
   /** @override */
