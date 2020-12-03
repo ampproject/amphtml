@@ -190,14 +190,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'amp-user-location',
-    name:
-      'Expose the browser geolocation API for latitude and longitude ' +
-      'access after user interaction and approval',
-    spec: 'https://github.com/ampproject/amphtml/issues/8929',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
-  },
-  {
     id: 'untrusted-xhr-interception',
     name:
       'Enable "xhrInterceptor" capability for untrusted viewers. ' +
@@ -268,5 +260,10 @@ export const EXPERIMENTS = [
     id: 'layout-aspect-ratio-css',
     name: 'Responsive layouts implemented via aspect-ratio CSS',
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
+  },
+  {
+    id: 'fie-resources',
+    name: 'Separate FIE resource manager from the main doc',
+    spec: 'https://github.com/ampproject/amphtml/issues/31246',
   },
 ];

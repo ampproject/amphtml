@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {Alignment} from './dimensions';
+import {Alignment, Axis, Orientation} from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
@@ -89,6 +89,7 @@ function BaseCarouselWithRef(
     onMouseEnter,
     onSlideChange,
     onTouchStart,
+    orientation = Orientation.HORIZONTAL,
     outsetArrows,
     snap = true,
     snapAlign = Alignment.START,
@@ -110,9 +111,11 @@ function BaseCarouselWithRef(
   const setCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
   const {slides, setSlides} = carouselContext;
+
   const scrollRef = useRef(null);
   const containRef = useRef(null);
   const contentRef = useRef(null);
+
   const autoAdvanceTimesRef = useRef(0);
   const autoAdvanceInterval = useMemo(
     () => Math.max(customAutoAdvanceInterval, MIN_AUTO_ADVANCE_INTERVAL),
@@ -264,6 +267,7 @@ function BaseCarouselWithRef(
         advanceCount={advanceCount}
         alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
+        axis={orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}
