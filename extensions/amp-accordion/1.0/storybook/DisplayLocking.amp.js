@@ -24,56 +24,48 @@ export default {
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
-    extensions: [
-      {name: 'amp-bind', version: '0.1'},
-      {name: 'amp-accordion', version: '1.0'},
-    ],
-    experiments: ['amp-accordion-bento'],
+    extensions: [{name: 'amp-accordion', version: '1.0'}],
+    experiments: ['amp-accordion-bento', 'amp-accordion-display-locking'],
   },
 };
 
-export const withAmpBind = () => {
+export const withDisplayLocking = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
   return (
     <main>
       <amp-accordion
+        id="accordion"
         expand-single-section={expandSingleSection}
         animate={animate}
       >
-        <section data-amp-bind-expanded="section1">
+        <section id="section1">
           <h2>Section 1</h2>
           <div>Puppies are cute.</div>
         </section>
-        <section data-amp-bind-expanded="section2">
+        <section>
           <h2>Section 2</h2>
           <div>Kittens are furry.</div>
         </section>
-        <section expanded data-amp-bind-expanded="section3">
+        <section expanded>
           <h2>Section 3</h2>
           <div>Elephants have great memory.</div>
         </section>
       </amp-accordion>
 
       <div class="buttons" style={{marginTop: 8}}>
-        <button on="tap:AMP.setState({section1: true})">
-          Expand Section 1
+        <button on="tap:accordion.toggle(section='section1')">
+          toggle(section1)
         </button>
-        <button on="tap:AMP.setState({section1: false})">
-          Collapse Section 1
+        <button on="tap:accordion.toggle()">toggle all</button>
+        <button on="tap:accordion.expand(section='section1')">
+          expand(section1)
         </button>
-        <button on="tap:AMP.setState({section2: true})">
-          Expand Section 2
+        <button on="tap:accordion.expand()">expand all</button>
+        <button on="tap:accordion.collapse(section='section1')">
+          collapse(section1)
         </button>
-        <button on="tap:AMP.setState({section2: false})">
-          Collapse Section 2
-        </button>
-        <button on="tap:AMP.setState({section3: true})">
-          Expand Section 3
-        </button>
-        <button on="tap:AMP.setState({section3: false})">
-          Collapse Section 3
-        </button>
+        <button on="tap:accordion.collapse()">collapse all</button>
       </div>
     </main>
   );
