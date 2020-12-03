@@ -19,7 +19,6 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
-import {GEO_IN_GROUP} from '../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
@@ -34,10 +33,7 @@ import {isFiniteNumber} from '../../src/types';
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;
   let fetchJsonStub;
-  let getCalloutParam_,
-    maybeExecuteRealTimeConfig_,
-    validateRtcConfig_,
-    getBlockRtc_;
+  let getCalloutParam_, maybeExecuteRealTimeConfig_, validateRtcConfig_;
   let truncUrl_, inflateAndSendRtc_, sendErrorMessage;
   let rtc;
 
@@ -68,7 +64,6 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
     getCalloutParam_ = rtc.getCalloutParam_.bind(rtc);
     validateRtcConfig_ = rtc.validateRtcConfig_.bind(rtc);
-    getBlockRtc_ = rtc.getBlockRtc_.bind(rtc);
     truncUrl_ = rtc.truncUrl_.bind(rtc);
     inflateAndSendRtc_ = rtc.inflateAndSendRtc_.bind(rtc);
     sendErrorMessage = rtc.sendErrorMessage.bind(rtc);
@@ -638,27 +633,6 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         }
       });
     }
-    it('should handle valid block-rtc attribute', async () => {
-      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-        Promise.resolve({
-          isInCountryGroup() {
-            return GEO_IN_GROUP.IN;
-          },
-        })
-      );
-      element.setAttribute('block-rtc', 'validGeoGroup');
-      setRtcConfig({urls: ['https://foo.com']});
-      const rtcResult = await maybeExecuteRealTimeConfig_(
-        element,
-        {},
-        CONSENT_POLICY_STATE.SUFFICIENT,
-        /* consentString */ undefined,
-        /* consentMetadata */ undefined,
-        () => {}
-      );
-      expect(rtcResult).to.deep.equal([]);
-      expect(fetchJsonStub).to.not.be.called;
-    });
   });
 
   describe('#validateRtcConfig', () => {
@@ -763,70 +737,6 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       element.setAttribute('rtc-config', rtcConfig);
       validatedRtcConfig = validateRtcConfig_(element);
       expect(validatedRtcConfig).to.be.false;
-    });
-  });
-
-  describe('block-rtc attribute', () => {
-    let geoService;
-
-    beforeEach(() => {
-      geoService = {
-        isInCountryGroup(country) {
-          switch (country) {
-            case 'usca':
-              return GEO_IN_GROUP.IN;
-            case 'gdpr':
-              return GEO_IN_GROUP.NOT_IN;
-            default:
-              return GEO_IN_GROUP.NOT_DEFINED;
-          }
-        },
-      };
-    });
-
-    it('should return false if no attribute found', async () => {
-      expect(await getBlockRtc_(element)).to.false;
-    });
-
-    it('should return false if empty string', async () => {
-      element.setAttribute('block-rtc', '');
-      expect(await getBlockRtc_(element)).to.false;
-    });
-
-    it('should return if doc is served from a defined geo group', async () => {
-      env.sandbox
-        .stub(Services, 'geoForDocOrNull')
-        .returns(Promise.resolve(geoService));
-      element.setAttribute('block-rtc', 'gdpr,usca');
-      expect(await getBlockRtc_(element)).to.true;
-    });
-
-    it('should return false when doc is in an undefined group or not in', async () => {
-      const warnSpy = env.sandbox.stub(user(), 'warn');
-      env.sandbox
-        .stub(Services, 'geoForDocOrNull')
-        .returns(Promise.resolve(geoService));
-
-      // Undefined group
-      element.setAttribute('block-rtc', 'tx');
-      expect(await getBlockRtc_(element)).to.false;
-      expect(warnSpy.args[0][0]).to.match(/AMP-AD/);
-      expect(warnSpy.args[0][1]).to.match(/Geo group "tx" was not defined./);
-      expect(warnSpy).to.have.been.calledOnce;
-      // Not in
-      element.setAttribute('block-rtc', 'gdpr');
-      expect(await getBlockRtc_(element)).to.false;
-    });
-
-    it('should throw an error when there is no geoService', async () => {
-      geoService = null;
-      env.sandbox
-        .stub(Services, 'geoForDocOrNull')
-        .returns(Promise.resolve(geoService));
-      element.setAttribute('block-rtc', 'usca');
-      await expect(getBlockRtc_(element)).to.be.rejectedWith(
-        /requires <amp-geo> to use `block-rtc`/
-      );
     });
   });
 

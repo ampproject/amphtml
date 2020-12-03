@@ -18,6 +18,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
@@ -35,6 +36,7 @@ import {
   devAssert,
   duplicateErrorIfNecessary,
   user,
+  userAssert,
 } from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -1476,6 +1478,35 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Checks if the `block-rtc` attribute is present and valid
+   * based on the geolocation.
+   * @return {!Promise<boolean>}
+   */
+  getBlockRtc_() {
+    if (
+      !this.element.hasAttribute('block-rtc') ||
+      !this.element.getAttribute('block-rtc')
+    ) {
+      return Promise.resolve(false);
+    }
+    return Services.geoForDocOrNull(this.element).then((geoService) => {
+      userAssert(geoService, '%s: requires <amp-geo> to use `block-rtc`', TAG);
+      const blockRtcLocations = this.element.getAttribute('block-rtc');
+      const locations = blockRtcLocations.split(',');
+      for (let i = 0; i < locations.length; i++) {
+        const geoGroup = geoService.isInCountryGroup(locations[i]);
+        if (geoGroup === GEO_IN_GROUP.IN) {
+          return true;
+        } else if (geoGroup === GEO_IN_GROUP.NOT_DEFINED) {
+          user().warn('AMP-AD', `Geo group "${locations[i]}" was not defined.`);
+        }
+      }
+      // Not in any of the defined geo groups.
+      return false;
+    });
+  }
+
+  /**
    * Resets ad url state to null, used to prevent frame get fallback if error
    * is thrown after url construction but prior to layoutCallback.
    */
@@ -2250,7 +2281,8 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Attempts to execute Real Time Config, if the ad network has enabled it.
    * If it is not supported by the network, but the publisher has included
-   * the rtc-config attribute on the amp-ad element, warn.
+   * the rtc-config attribute on the amp-ad element, warn. Additionaly,
+   * if the publisher has included a valid `block-rtc` attribute, don't send.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
@@ -2258,20 +2290,25 @@ export class AmpA4A extends AMP.BaseElement {
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
     if (!!AMP.RealTimeConfigManager) {
-      try {
-        return new AMP.RealTimeConfigManager(
-          this.getAmpDoc()
-        ).maybeExecuteRealTimeConfig(
-          this.element,
-          this.getCustomRealTimeConfigMacros_(),
-          consentState,
-          consentString,
-          consentMetadata,
-          this.verifyStillCurrent()
-        );
-      } catch (err) {
-        user().error(TAG, 'Could not perform Real Time Config.', err);
-      }
+      return this.getBlockRtc_().then((shouldBlock) => {
+        try {
+          if (shouldBlock) {
+            return;
+          }
+          return new AMP.RealTimeConfigManager(
+            this.getAmpDoc()
+          ).maybeExecuteRealTimeConfig(
+            this.element,
+            this.getCustomRealTimeConfigMacros_(),
+            consentState,
+            consentString,
+            consentMetadata,
+            this.verifyStillCurrent()
+          );
+        } catch (err) {
+          user().error(TAG, 'Could not perform Real Time Config.', err);
+        }
+      });
     } else if (this.element.getAttribute('rtc-config')) {
       user().error(
         TAG,
