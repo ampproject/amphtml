@@ -67,8 +67,8 @@ const SidebarEvents = {
   CLOSE: 'sidebarClose',
 };
 
-/** @private @const {!Array<string>} */
-const EXCLUDE_FROM_SWIPE_CLOSE = ['input'];
+/** @private @const {Object<string, Object<string, Array<string>>>} */
+const EXCLUDE_FROM_SWIPE_CLOSE = {'input': {'type': ['range']}};
 
 /**
  * @extends {AMP.BaseElement}
@@ -621,11 +621,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
 
-    if (
-      event &&
-      event.target &&
-      !EXCLUDE_FROM_SWIPE_CLOSE.includes(event.target.localName)
-    ) {
+    if (event && event.target && !excludeFromSwipeClose(event.target)) {
       this.currentSwipeForThisElement_ = true;
       this.swipeToDismiss_.swipeMove(data);
     }
@@ -737,3 +733,19 @@ export class AmpSidebar extends AMP.BaseElement {
 AMP.extension('amp-sidebar', '0.1', (AMP) => {
   AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
 });
+
+/**
+ * @param {Element} element
+ * @return {boolean}
+ */
+function excludeFromSwipeClose(element) {
+  const excludeData = EXCLUDE_FROM_SWIPE_CLOSE[element.localName];
+  if (excludeData) {
+    for (const k in excludeData) {
+      if (excludeData[k].includes(element[k])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
