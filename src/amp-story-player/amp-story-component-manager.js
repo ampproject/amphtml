@@ -24,6 +24,7 @@ import {initLogConstructor} from '../log';
  * @const {number}
  */
 const MIN_VIEWPORT_PRERENDER_DISTANCE = 2;
+
 export class AmpStoryComponentManager {
   /**
    * @param {!Window} win
