@@ -14,12 +14,26 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../experiments';
+import {randomlySelectUnsetExperiments} from '../experiments';
+
+/** @const {!{id: string, control: string, experiment: string}} */
+export const FIE_RESOURCES_EXP = {
+  id: 'fie-resources',
+  control: '21068940',
+  experiment: '21068941',
+};
 
 /**
+ * Select exp vs control for fie-resources.
  * @param {!Window} win
- * @return {boolean}
  */
-export function isFieResourcesOn(win) {
-  return isExperimentOn(win, 'fie-resources');
+export function divertFieResources(win) {
+  const expInfoList = /** @type {!Array<!../experiments.ExperimentInfo>} */ ([
+    {
+      experimentId: FIE_RESOURCES_EXP.id,
+      isTrafficEligible: () => true,
+      branches: [FIE_RESOURCES_EXP.control, FIE_RESOURCES_EXP.experiment],
+    },
+  ]);
+  randomlySelectUnsetExperiments(win, expInfoList);
 }
