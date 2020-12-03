@@ -106,7 +106,7 @@ There are 2 ways to set SameSite cookies:
 
 1. Set the SameSite attribute for all cookies using the `sameSite` key and value as one of `Strict`, `Lax` or `None` in the `cookies` config object, such as:
 
-```
+```js
 'cookies': {
   'sameSite': 'Strict',
   'cookieName1': {
@@ -122,7 +122,7 @@ This will set SameSite=Strict for `cookieName1` and `cookieName2`.
 
 1. Set or override the SameSite attribute using the `sameSite` key on an individual cookie object, such as:
 
-```
+```js
 'cookies': {
   'sameSite': 'None',
   'cookieName1': {

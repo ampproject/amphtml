@@ -35,6 +35,9 @@ const RESERVED_KEYS = {
   'cookieMaxAge': true,
   'cookieSecure': true,
   'cookieDomain': true,
+  'sameSite': true,
+  'SameSite': true,
+  'secure': true,
 };
 
 export class CookieWriter {
@@ -129,8 +132,11 @@ export class CookieWriter {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
       const sameSite = this.getSameSiteType_(
-        // individual cookie sameSite overrides config sameSite
-        cookieObj['sameSite'] || inputConfig['sameSite']
+        // individual cookie sameSite/SameSite overrides config sameSite/SameSite
+        cookieObj['sameSite'] ||
+          cookieObj['SameSite'] ||
+          inputConfig['sameSite'] ||
+          inputConfig['SameSite']
       );
       if (this.isValidCookieConfig_(cookieName, cookieObj)) {
         promises.push(
@@ -217,15 +223,10 @@ export class CookieWriter {
    * @param {string} cookieName
    * @param {string} cookieValue
    * @param {number} cookieExpireDateMs
-   * @param {SameSite=} sameSite
+   * @param {!SameSite=} sameSite
    * @return {!Promise}
    */
-  expandAndWrite_(
-    cookieName,
-    cookieValue,
-    cookieExpireDateMs,
-    sameSite = SameSite.LAX
-  ) {
+  expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs, sameSite) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
