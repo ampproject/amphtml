@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/* heading/content */
-.i-amphtml-accordion-header,
-.i-amphtml-accordion-content {
-  margin: 0;
-}
-
 /* heading
  * TODO(#30445): update these styles after team agrees on styling
  */
@@ -28,4 +22,31 @@
   background-color: #efefef;
   padding-right: 20px;
   border: solid 1px #dfdfdf;
+  margin: 0;
+}
+
+.i-amphtml-accordion-content {
+  margin: 0;
+}
+
+amp-accordion > section:not([expanded]) > :last-child:not(.i-amphtml-animating),
+amp-accordion
+  > section:not([expanded])
+  > :last-child:not(.i-amphtml-animating)
+  * {
+  display: none !important;
+}
+
+/* TODO: This CSS is duplicated from ./accordion.jss.js for purposes of display
+ * locking.  Look into de-duping once experiment is launched.
+ */
+amp-accordion.i-amphtml-display-locking
+  > section:not([expanded])
+  > :last-child:not(.i-amphtml-animating),
+amp-accordion.i-amphtml-display-locking
+  > section:not([expanded])
+  > :last-child:not(.i-amphtml-animating)
+  * {
+  content-visibility: hidden-matchable !important;
+  display: block !important;
 }
