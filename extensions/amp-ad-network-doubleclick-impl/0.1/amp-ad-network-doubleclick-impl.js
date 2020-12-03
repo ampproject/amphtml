@@ -51,6 +51,7 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -467,9 +468,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win,
       INTERSECT_RESOURCES_EXP.id
     );
-
     if (intersectResourcesExpId) {
       this.experimentIds.push(intersectResourcesExpId);
+    }
+
+    const fieResourcesExpId = getExperimentBranch(
+      this.win,
+      FIE_RESOURCES_EXP.id
+    );
+    if (fieResourcesExpId) {
+      this.experimentIds.push(fieResourcesExpId);
     }
 
     const ssrExpIds = this.getSsrExpIds_();

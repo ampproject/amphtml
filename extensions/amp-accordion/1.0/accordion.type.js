@@ -24,6 +24,7 @@ var AccordionDef = {};
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   expandSingleSection: (boolean|undefined),
  *   animate: (boolean|undefined),
+ *   experimentDisplayLocking: (boolean|undefined),
  *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
@@ -86,7 +87,6 @@ AccordionDef.HeaderShimProps;
  *   id: (string),
  *   role: (string),
  *   aria-labelledby: (string),
- *   hidden: (boolean),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
@@ -99,6 +99,7 @@ AccordionDef.ContentShimProps;
  *   toggleExpanded: (function(string)|undefined),
  *   animate: (boolean|undefined),
  *   prefix: (string),
+ *   experimentDisplayLocking: (boolean),
  * }}
  */
 AccordionDef.AccordionContext;
@@ -112,6 +113,7 @@ AccordionDef.AccordionContext;
  *   expandHandler: (function()),
  *   setContentId: (function(string)),
  *   setHeaderId: (function(string)),
+ *   experimentDisplayLocking: (boolean),
  * }}
  */
 AccordionDef.SectionContext;
