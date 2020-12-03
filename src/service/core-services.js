@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import {
+  FIE_RESOURCES_EXP,
+  divertFieResources,
+} from '../experiments/fie-resources-exp';
 import {adoptServiceForEmbedDoc} from '../service';
 import {devAssert} from '../log';
+import {getExperimentBranch} from '../experiments';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -46,7 +51,6 @@ import {installViewerServiceForDoc} from './viewer-impl';
 import {installViewportServiceForDoc} from './viewport/viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {installXhrService} from './xhr-impl';
-import {isFieResourcesOn} from '../experiments/fie-resources-exp';
 
 /**
  * Install builtins.
@@ -125,7 +129,15 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
     : installHistoryServiceForDoc(ampdoc);
-  const fieResourcesOn = isFieResourcesOn(ampdoc.win);
+
+  // fie-resources experiment.
+  if (ampdoc.isSingleDoc()) {
+    divertFieResources(ampdoc.win);
+  }
+  const fieResourcesOn =
+    ampdoc.getParent() &&
+    getExperimentBranch(ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
+      FIE_RESOURCES_EXP.experiment;
   if (fieResourcesOn) {
     isEmbedded
       ? installInaboxResourcesServiceForDoc(ampdoc)
@@ -143,6 +155,7 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
       ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
       : installMutatorServiceForDoc(ampdoc);
   }
+
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);
