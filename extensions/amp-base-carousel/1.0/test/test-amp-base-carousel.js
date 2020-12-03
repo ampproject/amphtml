@@ -358,10 +358,40 @@ describes.realWin(
       }
 
       element.enqueAction(invocation('goToSlide', {index: 1}));
-      await waitFor(() => scroller.scrollLeft > 0, 'to to slide 1');
+      await waitFor(() => scroller.scrollLeft > 0, 'go to slide 1');
 
       element.enqueAction(invocation('goToSlide', {index: 0}));
       await waitFor(() => scroller.scrollLeft == 0, 'returned to first slide');
+    });
+
+    it('should go to slide 0 when slide attr is mutated to 0', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+      await getSlidesFromShadow();
+
+      const scroller = element.shadowRoot.querySelector(
+        `[class*=${styles.scrollContainer}]`
+      );
+
+      element.setAttribute('slide', '1');
+      await waitFor(() => scroller.scrollLeft > 0, 'go to slide 1');
+
+      element.setAttribute('slide', '0');
+      await waitFor(() => scroller.scrollLeft == 0, 'returned to first slide');
+    });
+
+    it('should start at slide 1 with slide attr set to 1', async () => {
+      element.setAttribute('slide', '1');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+      await getSlidesFromShadow();
+
+      const scroller = element.shadowRoot.querySelector(
+        `[class*=${styles.scrollContainer}]`
+      );
+      await waitFor(() => scroller.scrollLeft > 0, 'render at slide 1');
     });
 
     it('should respect outset-arrows even if controls=never', async () => {

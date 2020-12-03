@@ -366,9 +366,17 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
-   * A callback called immediately or after mutations have been observed. The
-   * implementation can verify if any additional properties need to be mutated
-   * via `mutateProps()` API.
+   * A callback called immediately after mutations have been observed on a
+   * component. This differs from `checkPropsPostMutations` in that it is
+   * called in all cases of mutation.
+   * @protected
+   */
+  mutationObserverCallback() {}
+
+  /**
+   * A callback called immediately after mutations have been observed on a
+   * component's defined props. The implementation can verify if any
+   * additional properties need to be mutated via `mutateProps()` API.
    * @protected
    */
   checkPropsPostMutations() {}
@@ -398,6 +406,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    */
   checkMutations_(records) {
     const Ctor = this.constructor;
+    this.mutationObserverCallback();
     const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
     if (rerender) {
       this.checkPropsPostMutations();

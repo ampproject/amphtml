@@ -30,6 +30,14 @@ const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?number} */
+    this.slide_ = null;
+  }
+
   /** @override */
   init() {
     const {element} = this;
@@ -43,7 +51,10 @@ class AmpBaseCarousel extends PreactBaseElement {
       },
       ActionTrust.LOW
     );
+
+    this.slide_ = parseInt(element.getAttribute('slide'), 10);
     return dict({
+      'defaultSlide': this.slide_ || 0,
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },
@@ -57,6 +68,18 @@ class AmpBaseCarousel extends PreactBaseElement {
       'expected amp-base-carousel-bento experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const slide = parseInt(this.element.getAttribute('slide'), 10);
+    if (slide === this.slide_) {
+      return;
+    }
+    this.slide_ = slide;
+    if (!isNaN(slide)) {
+      this.api().goToSlide(slide);
+    }
   }
 }
 
