@@ -63,10 +63,12 @@ export const _default = () => {
   const outsetArrows = boolean('outset arrows', false);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   const controls = select('show controls', CONTROLS);
+  const defaultSlide = number('default slide', 0);
   return (
     <CarouselWithActions
       advanceCount={advanceCount}
       controls={controls}
+      defaultSlide={defaultSlide}
       loop={loop}
       orientation={orientation}
       outsetArrows={outsetArrows}

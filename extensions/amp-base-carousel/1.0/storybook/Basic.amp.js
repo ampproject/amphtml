@@ -26,7 +26,10 @@ export default {
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
-    extensions: [{name: 'amp-base-carousel', version: '1.0'}],
+    extensions: [
+      {name: 'amp-bind', version: '0.1'},
+      {name: 'amp-base-carousel', version: '1.0'},
+    ],
     experiments: ['amp-base-carousel-bento'],
   },
 };
@@ -44,6 +47,7 @@ export const Default = () => {
   const visibleCount = text('visible count', '(min-width: 400px) 2, 1');
   const outsetArrows = text('outset arrows', '(min-width: 400px) true, false');
   const controls = select('show controls', ['auto', 'always', 'never']);
+  const defaultSlide = number('default slide', 0);
   const orientation = select('orientation', ORIENTATIONS, 'vertical');
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
@@ -62,6 +66,8 @@ export const Default = () => {
         outset-arrows={outsetArrows}
         width="450"
         height="450"
+        data-amp-bind-slide="activeSlide"
+        slide={defaultSlide}
         snap={String(snap)}
         snap-align={snapAlign}
         snap-by={snapBy}
@@ -94,6 +100,9 @@ export const Default = () => {
         <button on="tap:carousel.goToSlide(index=3)">goToSlide(index=3)</button>
         <button on="tap:carousel.next">Next</button>
         <button on="tap:carousel.prev">Prev</button>
+        <button on="tap:AMP.setState({activeSlide: 3})">
+          mutate slide to index 3
+        </button>
       </div>
     </main>
   );
