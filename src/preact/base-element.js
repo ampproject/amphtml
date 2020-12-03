@@ -406,7 +406,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    */
   checkMutations_(records) {
     const Ctor = this.constructor;
-    this.mutationObserverCallback(records);
+    this.mutationObserverCallback();
     const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
     if (rerender) {
       this.checkPropsPostMutations();
