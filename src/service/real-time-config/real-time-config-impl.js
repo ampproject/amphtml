@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {CONSENT_POLICY_STATE} from '../../consent-state';
+import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../services';
 import {dev, user, userAssert} from '../../log';
@@ -183,15 +184,19 @@ export class RealTimeConfigManager {
     if (!this.validateRtcConfig_(element)) {
       return;
     }
-    this.consentState_ = consentState;
-    this.consentString_ = consentString;
-    this.consentMetadata_ = consentMetadata;
-    this.modifyRtcConfigForConsentStateSettings();
-    customMacros = this.assignMacros(customMacros);
-    this.rtcStartTime_ = Date.now();
-    this.handleRtcForCustomUrls(customMacros, checkStillCurrent);
-    this.handleRtcForVendorUrls(customMacros, checkStillCurrent);
-    return Promise.all(this.promiseArray_);
+    return this.getBlockRtc_(element).then((shouldBlock) => {
+      if (!shouldBlock) {
+        this.consentState_ = consentState;
+        this.consentString_ = consentString;
+        this.consentMetadata_ = consentMetadata;
+        this.modifyRtcConfigForConsentStateSettings();
+        customMacros = this.assignMacros(customMacros);
+        this.rtcStartTime_ = Date.now();
+        this.handleRtcForCustomUrls(customMacros, checkStillCurrent);
+        this.handleRtcForVendorUrls(customMacros, checkStillCurrent);
+      }
+      return Promise.all(this.promiseArray_);
+    });
   }
 
   /**
@@ -546,6 +551,36 @@ export class RealTimeConfigManager {
               Date.now() - this.rtcStartTime_
             );
       });
+  }
+
+  /**
+   * Checks if the `block-rtc` attribute is present and valid
+   * based on the geolocation.
+   * @param {!Element} element
+   * @return {!Promise<boolean>}
+   */
+  getBlockRtc_(element) {
+    if (
+      !element.hasAttribute('block-rtc') ||
+      !element.getAttribute('block-rtc')
+    ) {
+      return Promise.resolve(false);
+    }
+    return Services.geoForDocOrNull(element).then((geoService) => {
+      userAssert(geoService, '%s: requires <amp-geo> to use `block-rtc`', TAG);
+      const blockRtcLocations = element.getAttribute('block-rtc');
+      const locations = blockRtcLocations.split(',');
+      for (let i = 0; i < locations.length; i++) {
+        const geoGroup = geoService.isInCountryGroup(locations[i]);
+        if (geoGroup === GEO_IN_GROUP.IN) {
+          return true;
+        } else if (geoGroup === GEO_IN_GROUP.NOT_DEFINED) {
+          user().warn('AMP-AD', `Geo group "${locations[i]}" was not defined.`);
+        }
+      }
+      // Not in any of the defined geo groups.
+      return false;
+    });
   }
 
   /**
