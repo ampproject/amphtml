@@ -39,7 +39,7 @@ class AmpSidebar extends PreactBaseElement {
     //console.log(element.children);
     //console.log('doing init');
     //const {element} = this;
-    return dict({'children': element.children});
+    return dict({});
   }
 
   /** @override */
@@ -57,9 +57,7 @@ AmpSidebar['Component'] = Sidebar;
 
 AmpSidebar['layoutSizeDefined'] = true;
 
-AmpSidebar['lightDomTag'] = 'div';
-//AmpSidebar['passthrough'] = true;
-//AmpSidebar['passthrough'] = true;
+AmpSidebar['passthrough'] = true;
 
 /** @override */
 AmpSidebar['props'] = {
