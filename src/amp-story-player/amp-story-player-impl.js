@@ -15,6 +15,7 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
+import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {Deferred} from '../utils/promise';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
@@ -702,22 +703,13 @@ export class AmpStoryPlayer {
 
   /** @private */
   initializeVisibleIO_() {
-    const ioVisibleCb = (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
-          return;
-        }
-
-        this.prerenderStoriesDeferred_.promise.then(() =>
-          this.visibleDeferred_.resolve()
-        );
-
-        visibleObserver.unobserve(this.element_);
-      });
+    const cb = () => {
+      this.prerenderStoriesDeferred_.promise.then(() =>
+        this.visibleDeferred_.resolve()
+      );
     };
 
-    const visibleObserver = new IntersectionObserver(ioVisibleCb);
-    visibleObserver.observe(this.element_);
+    new AmpStoryPlayerViewportObserver(this.win_, this.element_, cb.bind(this));
   }
 
   /**

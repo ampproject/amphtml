@@ -16,18 +16,14 @@
 
 import {AmpStoryEntryPoint} from './amp-story-entry-point/amp-story-entry-point-impl';
 import {AmpStoryPlayer} from './amp-story-player-impl';
+import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {initLogConstructor} from '../log';
-import {throttle} from '../utils/rate-limit';
-
-/** @const {number} */
-const SCROLL_THROTTLE_MS = 500;
 
 /**
  * Minimum amount of viewports away from the player to start prerendering.
  * @const {number}
  */
 const MIN_VIEWPORT_PRERENDER_DISTANCE = 2;
-
 export class AmpStoryComponentManager {
   /**
    * @param {!Window} win
@@ -36,9 +32,6 @@ export class AmpStoryComponentManager {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
-
-    /** @private {?function} */
-    this.scrollHandler_ = null;
   }
 
   /**
@@ -47,62 +40,12 @@ export class AmpStoryComponentManager {
    * @private
    */
   layoutEl_(elImpl) {
-    if (!this.win_.IntersectionObserver || this.win_ !== this.win_.parent) {
-      this.layoutFallback_(elImpl);
-      return;
-    }
-
-    const ioLayoutCb = (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
-          return;
-        }
-        elImpl.layoutCallback();
-
-        layoutObserver.unobserve(elImpl.getElement());
-      });
-    };
-
-    const layoutObserver = new IntersectionObserver(ioLayoutCb, {
-      rootMargin: `${MIN_VIEWPORT_PRERENDER_DISTANCE * 100}%`,
-    });
-    layoutObserver.observe(elImpl.getElement());
-  }
-
-  /**
-   * Fallback for when IntersectionObserver is not supported. Calls
-   * layoutCallback on the element when it is close to the viewport.
-   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
-   * @private
-   */
-  layoutFallback_(elImpl) {
-    this.scrollHandler_ = throttle(
+    new AmpStoryPlayerViewportObserver(
       this.win_,
-      this.layoutIfVisible_.bind(this, elImpl),
-      SCROLL_THROTTLE_MS
+      elImpl.getElement(),
+      elImpl.layoutCallback.bind(elImpl),
+      MIN_VIEWPORT_PRERENDER_DISTANCE
     );
-
-    // TODO(Enriqe): pause elements when scrolling away from viewport.
-    this.win_.addEventListener('scroll', this.scrollHandler_);
-
-    // Calls it once it in case scroll event never fires.
-    this.layoutIfVisible_(elImpl);
-  }
-
-  /**
-   * Checks if element is close to the viewport and calls layoutCallback when it
-   * is.
-   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
-   * @private
-   */
-  layoutIfVisible_(elImpl) {
-    const elTop = elImpl.getElement()./*OK*/ getBoundingClientRect().top;
-    const winInnerHeight = this.win_./*OK*/ innerHeight;
-
-    if (winInnerHeight * MIN_VIEWPORT_PRERENDER_DISTANCE > elTop) {
-      elImpl.layoutCallback();
-      this.win_.removeEventListener('scroll', this.scrollHandler_);
-    }
   }
 
   /**
