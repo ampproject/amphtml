@@ -262,16 +262,14 @@ export class ResourcesImpl {
         this.maybeChangeHeight_ = true;
       }
 
-      // With IntersectionObserver, we only need to handle viewport resize.
-      if (this.relayoutAll_ || !this.intersectionObserver_) {
-        this.schedulePass();
-      }
       // Unfortunately, a viewport size change invalidates all premeasurements.
       if (this.relayoutAll_ && this.intersectionObserver_) {
         this.resources_.forEach((resource) =>
           resource.invalidatePremeasurementAndRequestMeasure()
         );
       }
+
+      this.schedulePass();
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
