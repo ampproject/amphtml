@@ -334,9 +334,9 @@ _Example_: Displays a prompt user interface on an AMP Story
   <amp-story-consent id="consent-ui" layout="nodisplay">
     <script type="application/json">
       {
-        “title”: "My title",
-        “message”: "My example message.",
-        “vendors”: ["Item 1", "Item 2", "Item 3", "Item 4"]
+        "title": "My title",
+        "message": "My example message.",
+        "vendors": ["Item 1", "Item 2", "Item 3", "Item 4"]
       }
     </script>
   </amp-story-consent>

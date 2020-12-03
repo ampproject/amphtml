@@ -100,6 +100,12 @@ AmpBaseCarousel['props'] = {
   },
   'autoAdvanceLoops': {attr: 'auto-advance-loops', type: 'number', media: true},
   'controls': {attr: 'controls', type: 'string', media: true},
+  'orientation': {
+    attr: 'orientation',
+    type: 'string',
+    media: true,
+    default: 'horizontal',
+  },
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
