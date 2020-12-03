@@ -255,7 +255,7 @@ amp-story-player a {
   font-size: 14px !important;
 }
 
-.i-amphtml-story-dev-tools-device-dialog-help-tips span {
+.i-amphtml-story-dev-tools-device-dialog-help-tips .i-amphtml-story-dev-tools-device-dialog-help-hint {
   color: var(--i-amphtml-story-dev-tools-device-white-transparent-2) !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-device-white-transparent-1) !important;
   font-size: 12px !important;
@@ -264,6 +264,6 @@ amp-story-player a {
   margin-inline-start: 20px !important;
 }
 
-.i-amphtml-story-dev-tools-device-dialog-help-tips span b {
+.i-amphtml-story-dev-tools-device-dialog-help-tips .i-amphtml-story-dev-tools-device-dialog-help-hint b {
   color: var(--i-amphtml-story-dev-tools-accent-light) !important;
 }

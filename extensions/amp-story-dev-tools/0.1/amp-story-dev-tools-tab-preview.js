@@ -141,7 +141,9 @@ const buildHelpDialogTemplate = (element) => {
             You can simply add #development=1 to the end of your Web Story URL
             to access the Web Stories Dev-Tools.
           </p>
-          <span>https://yourstory.com<b>#development=1</b></span>
+          <span class="i-amphtml-story-dev-tools-device-dialog-help-hint"
+            >https://yourstory.com<b>#development=1</b></span
+          >
         </div>
         <h1>Helpful links</h1>
         <a
