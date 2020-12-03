@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {CSS as COMPONENT_CSS} from './sidebar.jss';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './sidebar';
@@ -58,6 +59,9 @@ AmpSidebar['Component'] = Sidebar;
 AmpSidebar['layoutSizeDefined'] = true;
 
 AmpSidebar['passthrough'] = true;
+
+/** @override */
+AmpSidebar['shadowCss'] = COMPONENT_CSS;
 
 /** @override */
 AmpSidebar['props'] = {
