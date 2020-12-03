@@ -35,7 +35,6 @@ import {installForChildWin as installIntersectionObserver} from './polyfills/int
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
-import {isFieResourcesOn} from './experiments/fie-resources-exp';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -380,10 +379,8 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    const fieResourcesOn = isFieResourcesOn(this.win);
-    if (!fieResourcesOn) {
-      this.removeResources_();
-    }
+    // TODO(#31246): remove when the fie-resources experiment is cleaned up.
+    this.removeResources_();
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
       this.ampdoc.dispose();
