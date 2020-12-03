@@ -189,12 +189,6 @@ amp-story-player a {
   justify-content: space-between !important;
 }
 
-.i-amphtml-story-dev-tools-device-dialog-link svg {
-  vertical-align: middle !important;
-  opacity: 0.6 !important;
-  transition: opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard), transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard) !important;
-}
-
 .i-amphtml-story-dev-tools-device-dialog-link:hover {
   color: white !important;
 }
@@ -208,6 +202,7 @@ amp-story-player a {
   width: 32px !important;
   height: 32px !important;
   opacity: 0.6 !important;
+  transition: opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard), transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard) !important;
 }
 
 .i-amphtml-story-dev-tools-device-dialog-link:hover .i-amphtml-story-dev-tools-device-dialog-arrow {
