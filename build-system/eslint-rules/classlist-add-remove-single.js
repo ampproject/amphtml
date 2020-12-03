@@ -15,6 +15,16 @@
  */
 
 /**
+ * @fileoverview
+ * Expects multiple calls to the same classList.add|remove to be folded into one.
+ * Bad:
+ *    element.classList.add(a);
+ *    element.classList.add(b);
+ * Good:
+ *    element.classList.add(a, b);
+ */
+
+/**
  * Removes location data from a node so that its scope is identifiable
  * @param {!Object} node
  * @return {!Object}
