@@ -68,7 +68,7 @@ module.exports = function (babel) {
         }
         path.replaceWithMultiple(
           path.node.arguments.map((argument) =>
-            t.callExpression(path.node.callee, [argument])
+            t.callExpression(t.cloneDeep(path.node.callee), [argument])
           )
         );
       },
