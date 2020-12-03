@@ -227,6 +227,7 @@ import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {puffnetwork} from '../ads/puffnetwork';
+import {pulse} from '../ads/pulse';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
@@ -345,6 +346,7 @@ const AMP_EMBED_ALLOWED = {
   postquare: true,
   ppstudio: true,
   pubexchange: true,
+  pulse: true,
   rbinfox: true,
   readmo: true,
   recreativ: true,
@@ -550,6 +552,7 @@ register('pubguru', pubguru);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('puffnetwork', puffnetwork);
+register('pulse', pulse);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
