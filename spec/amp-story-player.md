@@ -113,6 +113,10 @@ The `<amp-story-player>` component contains one or more `<a>` tags. Point the hr
 
 Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
 
+### Ignore loca
+
+ignoreLocalStorageHistory
+
 ### Attributes
 
 #### href
@@ -154,7 +158,7 @@ If the player is currently on the third story out of five stories:
 **Parameters**
 
 - string or null: the URL of the story to show.
-- string (optional): the page id of the page to display.
+- string (optional): the ID attribute of the page element.
 
 Will change the current story being displayed by the player.
 
@@ -510,13 +514,13 @@ player.addEventListener('navigation', (event) => {
 
 #### storyNavigation
 
-Fired when the story inside the player changes to a new page. It provides the `pageId` and `progress` of the story. The progress is the completion percentage of the story. e.g. In a story containing 5 pages, it will be 0.5 when reaching the 3rd page. And will reach 1 once the last page is reached.
+Fired when the story inside the player changes to a new page. It provides the `pageId` and `progress` of the story. The progress is the completion percentage of the story represented as a number between 0 and 1.
 
 ```javascript
 player.addEventListener('storyNavigation', (event) => {
   console.log('User navigated from one page to the other.');
   console.log('Current page id:' event.pageId); // page-2
-  console.log('Story rogress:' event.progress); // Number from 0 to 1.
+  console.log('Story progress:' event.progress); // Number from 0 to 1.
 })
 ```
 
