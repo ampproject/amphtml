@@ -22,7 +22,7 @@ const path = require('path');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {gitDiffAddedNameOnlyMaster} = require('../common/git');
 const {green, cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {linkCheckGlobs} = require('../test-configs/config');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -47,7 +47,7 @@ async function checkLinks() {
     log(green('INFO:'), 'Skipping check because this is a large refactor.');
     return;
   }
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(green('Starting checks...'));
   }
   filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
@@ -72,7 +72,7 @@ function reportResults(results) {
     );
     log(
       yellow('NOTE 1:'),
-      "Valid links that don't resolve on Travis can be ignored via",
+      "Valid links that don't resolve during CI can be ignored via",
       cyan('ignorePatterns'),
       'in',
       cyan('build-system/tasks/check-links.js') + '.'
@@ -149,12 +149,12 @@ function checkLinksInFile(file) {
         }
         switch (status) {
           case 'alive':
-            if (!isTravisBuild()) {
+            if (!isCiBuild()) {
               log(`[${green('✔')}] ${link}`);
             }
             break;
           case 'ignored':
-            if (!isTravisBuild()) {
+            if (!isCiBuild()) {
               log(`[${yellow('•')}] ${link}`);
             }
             break;

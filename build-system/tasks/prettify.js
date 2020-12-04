@@ -32,7 +32,7 @@ const tempy = require('tempy');
 const {exec} = require('../common/exec');
 const {getFilesToCheck, logOnSameLine} = require('../common/utils');
 const {green, cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
@@ -82,12 +82,12 @@ function printErrorWithSuggestedFixes(file) {
  * @return {!Promise}
  */
 function runPrettify(filesToCheck) {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(green('Starting checks...'));
   }
   return new Promise((resolve, reject) => {
     const onData = (data) => {
-      if (!isTravisBuild()) {
+      if (!isCiBuild()) {
         logOnSameLine(green('Checked: ') + path.relative(rootDir, data.path));
       }
     };
@@ -148,7 +148,7 @@ function runPrettify(filesToCheck) {
     };
 
     const onFinish = () => {
-      if (!isTravisBuild()) {
+      if (!isCiBuild()) {
         logOnSameLine('Checked ' + cyan(filesToCheck.length) + ' file(s)');
       }
       resolve();

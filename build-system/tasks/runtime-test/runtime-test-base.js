@@ -27,8 +27,8 @@ const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
+const {isCiBuild} = require('../../common/ci');
 const {isGithubActionsBuild} = require('../../common/github-actions');
-const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
@@ -109,7 +109,7 @@ function updateBrowsers(config) {
 
   // Default to Chrome.
   Object.assign(config, {
-    browsers: [isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions'],
+    browsers: [isCiBuild() ? 'Chrome_ci' : 'Chrome_no_extensions'],
   });
 }
 
@@ -159,7 +159,7 @@ function getFiles(testType) {
 function updateReporters(config) {
   if (
     (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
-    !isTravisBuild()
+    !isCiBuild()
   ) {
     config.reporters = ['mocha'];
   }
@@ -209,9 +209,7 @@ class RuntimeTestConfig {
       this.plugins.push('karma-coverage-istanbul-reporter');
       this.coverageIstanbulReporter = {
         dir: 'test/coverage',
-        reports: isTravisBuild()
-          ? ['lcovonly']
-          : ['html', 'text', 'text-summary'],
+        reports: isCiBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
     }

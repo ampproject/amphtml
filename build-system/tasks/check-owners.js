@@ -29,7 +29,7 @@ const request = require('request');
 const util = require('util');
 const {cyan, red, green} = require('ansi-colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 const requestPost = util.promisify(request.post);
 
@@ -65,7 +65,7 @@ async function checkFile(file) {
   const contents = fs.readFileSync(file, 'utf8').toString();
   try {
     JSON5.parse(contents);
-    if (!isTravisBuild()) {
+    if (!isCiBuild()) {
       log(green('SUCCESS:'), 'No errors in', cyan(file));
     }
   } catch {

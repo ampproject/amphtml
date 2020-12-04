@@ -25,7 +25,7 @@ const config = require('../test-configs/config');
 const minimatch = require('minimatch');
 const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../common/git');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 /**
  * Checks if the given file is an OWNERS file.
@@ -244,8 +244,8 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
     buildTargets.add('RUNTIME');
   }
-  // Test all targets on Travis during package upgrades.
-  if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
+  // Test all targets during CI builds for package upgrades.
+  if (isCiBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
     const allTargets = Object.keys(targetMatchers);
     allTargets.forEach((target) => buildTargets.add(target));
   }

@@ -17,7 +17,7 @@
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 const {execScriptAsync, exec} = require('./exec');
-const {isTravisBuild} = require('./travis');
+const {isCiBuild} = require('./ci');
 
 const {green, cyan} = colors;
 
@@ -32,7 +32,7 @@ const killSuffix = process.platform == 'win32' ? '>NUL' : '';
  * @return {number}
  */
 exports.createCtrlcHandler = function (command) {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(
       green('Running'),
       cyan(command) + green('. Press'),
