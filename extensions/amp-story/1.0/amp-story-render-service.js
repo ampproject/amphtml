@@ -20,7 +20,7 @@ import {user} from '../../../src/log';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /**
- * Maximum milliseconds to wait for all extensions to load before erroring.
+ * Maximum milliseconds to wait for service to load before logging a warning.
  * @const
  */
 const LOAD_TIMEOUT = 3000;
