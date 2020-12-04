@@ -113,10 +113,6 @@ The `<amp-story-player>` component contains one or more `<a>` tags. Point the hr
 
 Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
 
-### Ignore loca
-
-ignoreLocalStorageHistory
-
 ### Attributes
 
 #### href
