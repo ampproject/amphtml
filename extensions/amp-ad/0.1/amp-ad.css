@@ -50,6 +50,10 @@ amp-embed iframe {
   border: 1px, solid, #696969;
 }
 
+amp-ad[sticky] {
+  visibility: hidden;
+}
+
 amp-ad[type='adsense'],
 amp-ad[type='doubleclick'] {
   direction: ltr;
