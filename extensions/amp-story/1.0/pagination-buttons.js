@@ -20,9 +20,9 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Services} from '../../../src/services';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
+import {Services} from '../../../src/services';
 import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
