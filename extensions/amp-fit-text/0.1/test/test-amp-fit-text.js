@@ -59,7 +59,7 @@ describes.realWin(
       const text = 'Lorem ipsum';
       const ft = await getFitText(text);
       const content = ft.querySelector('.i-amphtml-fit-text-content');
-      expect(content).to.not.equal(null);
+      expect(content).to.not.be.null;
       expect(ft.textContent).to.equal(text);
       await ft.implementation_.unlayoutCallback();
     });
