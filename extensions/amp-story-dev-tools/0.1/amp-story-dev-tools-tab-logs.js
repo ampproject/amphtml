@@ -162,6 +162,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
       logsContainer.appendChild(logEl);
     });
     this.mutateElement(() => {
+      this.element.textContent = '';
       this.element.appendChild(logsContainer);
     });
   }
