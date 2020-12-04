@@ -121,53 +121,5 @@
         </form>
     </section>
   </amp-accordion>
-
-  <!-- accordion should allow access-hide in section -->
-  <!-- (part of amp-access) (see: #25807) -->
-  <amp-accordion expand-single-section disable-session-states>
-    <section amp-access="NOT nwPlus" access-hide>
-        <h2 class="accordion-header">
-          Web-Abo 
-          <span class="show-more">&#9207;</span>
-          <span class="show-less">&#9206;</span>
-        </h2>
-        <div>***</div>
-    </section>
-    <!-- access-hide attribute should not have non-empty value -->
-    <section amp-access="NOT nwPlus" access-hide="test">
-        <h2 class="accordion-header">
-          Tagespass
-          <span class="show-more">&#9207;</span>
-          <span class="show-less">&#9206;</span>
-        </h2>
-        <div>***</div>
-    </section>
-    <!-- LOGIN-Form -->
-    <section amp-access="NOT loggedIn" amp-access-hide>
-        <h2 class="accordion-header">
-          Login
-          <span class="show-more">&#9207;</span>
-          <span class="show-less">&#9206;</span>
-        </h2>
-        <form 
-          id="loginform-overlay" 
-          class="text-center" 
-          method="post" 
-          action-xhr="test" 
-          target="_top" 
-          on="submit:loading-spinner.show;submit-success:loginform.hide,loading-spinner.hide,logoutform.show"
-        >
-          <input 
-            id="my_user" 
-            type="text" 
-            name="my_user" 
-            maxlength="50" 
-            size="20" 
-            placeholder="Benutzername o. E-Mail" 
-            required
-          />
-        </form>
-    </section>
-  </amp-accordion>
 </body>
 </html>
