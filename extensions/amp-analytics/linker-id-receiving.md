@@ -86,9 +86,9 @@ The `enabled` value can be used to override default vendor settings.
 
 ##### Cookie Names
 
-Each key within the `cookies` config object defines the cookie name. It's value needs to be an object containing a single key-value pair. That key should be named `value`, and its value should be the macro that determines the information stored in the cookie.
+Each key within the `cookies` config object defines the cookie name. It's value needs to be an object. The key should be named `value`, and its value should be the macro that determines the information stored in the cookie.
 
-Note: The following key values are reserved, and cannot be used as cookie names. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`'].
+Note: The following key values are reserved, and cannot be used as cookie names. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`', '`sameSite`', '`SameSite`', '`secure`'].
 
 ##### Cookie Values
 
@@ -97,6 +97,45 @@ Each cookie to write is defined by an object, where the value is defined by the 
 Two macros are supported for the `value` field. [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](#linker-param).
 
 If there's error resoving the value, or the value is resolved to empty string. Nothing will be written to the cookie.
+
+##### SameSite Cookies
+
+To specify a SameSite value for a cookie, include a key-value pair where the key is `sameSite` and the value is one of `Strict`, `Lax` or `None`. If `sameSite` is set to `None`, we pair it with the `Secure` attribute as [recommended](https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure) to prevent the cookie from getting rejected.
+
+There are 2 ways to set SameSite cookies:
+
+1. Set the SameSite attribute for all cookies using the `sameSite` key and value as one of `Strict`, `Lax` or `None` in the `cookies` config object, such as:
+
+```js
+'cookies': {
+  'sameSite': 'Strict',
+  'cookieName1': {
+    'value': 'QUERY_PARAM(example)',
+  },
+  'cookieName2': {
+    'value': 'LINKER_PARAM(exampleParamName, exampleIdName)',
+  },
+}
+```
+
+This will set SameSite=Strict for `cookieName1` and `cookieName2`.
+
+1. Set or override the SameSite attribute using the `sameSite` key on an individual cookie object, such as:
+
+```js
+'cookies': {
+  'sameSite': 'None',
+  'cookieName1': {
+    'value': 'QUERY_PARAM(example)',
+    'sameSite': 'Strict',
+  },
+  'cookieName2': {
+    'value': 'LINKER_PARAM(exampleParamName, exampleIdName)',
+  },
+}
+```
+
+This will set the SameSite=None for `cookieName2` and override `cookieName1` to SameSite=Strict.
 
 ##### LINKER PARAM
 

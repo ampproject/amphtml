@@ -17,12 +17,12 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
+import {SameSite, setCookie} from '../../../src/cookies';
 import {Services} from '../../../src/services';
 import {hasOwn} from '../../../src/utils/object';
 import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '../../../src/types';
-import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
 import {variableServiceForDoc} from './variables';
 
@@ -35,6 +35,9 @@ const RESERVED_KEYS = {
   'cookieMaxAge': true,
   'cookieSecure': true,
   'cookieDomain': true,
+  'sameSite': true,
+  'SameSite': true,
+  'secure': true,
 };
 
 export class CookieWriter {
@@ -117,7 +120,7 @@ export class CookieWriter {
 
     if (inputConfig['enabled'] === false) {
       // Enabled by default
-      // TODO: Allow indiviual cookie object to override the value
+      // TODO: Allow individual cookie object to override the value
       return Promise.resolve();
     }
 
@@ -128,12 +131,20 @@ export class CookieWriter {
     for (let i = 0; i < ids.length; i++) {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
+      const sameSite = this.getSameSiteType_(
+        // individual cookie sameSite/SameSite overrides config sameSite/SameSite
+        cookieObj['sameSite'] ||
+          cookieObj['SameSite'] ||
+          inputConfig['sameSite'] ||
+          inputConfig['SameSite']
+      );
       if (this.isValidCookieConfig_(cookieName, cookieObj)) {
         promises.push(
           this.expandAndWrite_(
             cookieName,
             cookieObj['value'],
-            cookieExpireDateMs
+            cookieExpireDateMs,
+            sameSite
           )
         );
       }
@@ -212,9 +223,10 @@ export class CookieWriter {
    * @param {string} cookieName
    * @param {string} cookieValue
    * @param {number} cookieExpireDateMs
+   * @param {!SameSite=} sameSite
    * @return {!Promise}
    */
-  expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs) {
+  expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs, sameSite) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
@@ -224,13 +236,36 @@ export class CookieWriter {
         // provide a way to overwrite or erase existing cookie
         if (value) {
           const expireDate = Date.now() + cookieExpireDateMs;
+          // SameSite=None must be secure as per
+          // https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure
+          const secure = sameSite === SameSite.NONE;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
+            sameSite,
+            secure,
           });
         }
       })
       .catch((e) => {
         user().error(TAG, 'Error expanding cookie string', e);
       });
+  }
+
+  /**
+   * Converts SameSite string to SameSite type.
+   * @param {string=} sameSite
+   * @return {SameSite|undefined}
+   */
+  getSameSiteType_(sameSite) {
+    switch (sameSite) {
+      case 'Strict':
+        return SameSite.STRICT;
+      case 'Lax':
+        return SameSite.LAX;
+      case 'None':
+        return SameSite.NONE;
+      default:
+        return;
+    }
   }
 }
