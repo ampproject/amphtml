@@ -88,7 +88,7 @@ The `enabled` value can be used to override default vendor settings.
 
 Each key within the `cookies` config object defines the cookie name. It's value needs to be an object. The key should be named `value`, and its value should be the macro that determines the information stored in the cookie.
 
-Note: The following key values are reserved, and cannot be used as cookie names. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`'].
+Note: The following key values are reserved, and cannot be used as cookie names. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`', '`sameSite`', '`SameSite`', '`secure`'].
 
 ##### Cookie Values
 
@@ -100,7 +100,7 @@ If there's error resoving the value, or the value is resolved to empty string. N
 
 ##### SameSite Cookies
 
-To specify a SameSite value for a cookie, include a key-value pair where the key is `sameSite` and the value is one of `Strict`, `Lax` or `None`. If `sameSite` is not specified or is an invalid value, it defaults to `Lax` (which is the current [browser behavior](https://web.dev/samesite-cookies-explained/#samesitelax-by-default)). If `sameSite` is set to `None`, we pair it with the `Secure` attribute as [recommended](https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure) to prevent the cookie from getting rejected.
+To specify a SameSite value for a cookie, include a key-value pair where the key is `sameSite` and the value is one of `Strict`, `Lax` or `None`. If `sameSite` is set to `None`, we pair it with the `Secure` attribute as [recommended](https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure) to prevent the cookie from getting rejected.
 
 There are 2 ways to set SameSite cookies:
 
@@ -127,7 +127,7 @@ This will set SameSite=Strict for `cookieName1` and `cookieName2`.
   'sameSite': 'None',
   'cookieName1': {
     'value': 'QUERY_PARAM(example)',
-    'sameSite: 'Strict',
+    'sameSite': 'Strict',
   },
   'cookieName2': {
     'value': 'LINKER_PARAM(exampleParamName, exampleIdName)',
