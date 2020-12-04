@@ -481,7 +481,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       },
       {
         experimentId: IDLE_CWV_EXP,
-        isTrafficEligible: () => true,
+        isTrafficEligible: () => () => !!this.performance_,
         branches: Object.values(IDLE_CWV_EXP_BRANCHES),
       },
     ]);
