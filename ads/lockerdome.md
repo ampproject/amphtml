@@ -34,4 +34,4 @@ For details on the configuration semantics, please contact [LockerDome](https://
 
 ### Required parameters
 
-- `data-slot`
+-   `data-slot`

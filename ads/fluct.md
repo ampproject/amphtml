@@ -35,5 +35,5 @@ For more information, please [contact fluct](https://corp.fluct.jp/en/contact.ph
 
 ### Required parameters
 
-- `data-g`
-- `data-u`
+-   `data-g`
+-   `data-u`

@@ -104,8 +104,8 @@ e.g. `<amp-story-player amp-cache="cdn.ampproject.org">`
 
 If specified, the player will rewrite the URL using the AMP Cache prefix provided. Currently there are two AMP Cache providers:
 
-- `cdn.ampproject.org`
-- `www.bing-amp.com`
+-   `cdn.ampproject.org`
+-   `www.bing-amp.com`
 
 ## Specify embedded stories
 
@@ -139,19 +139,19 @@ player.load();
 
 **Parameters**
 
-- number: the story in the player to which you want to move, relative to the current story.
+-   number: the story in the player to which you want to move, relative to the current story.
 
 If the player is currently on the third story out of five stories:
 
-- `player.go(1)` will go forward one story to the fourth story
-- `player.go(-1)` will go backward one story to the second story
-- If no value is passed or if delta equals 0, current story will persist and no action will be taken.
+-   `player.go(1)` will go forward one story to the fourth story
+-   `player.go(-1)` will go backward one story to the second story
+-   If no value is passed or if delta equals 0, current story will persist and no action will be taken.
 
 #### show
 
 **Parameters**
 
-- string: the URL of the story to show.
+-   string: the URL of the story to show.
 
 Will change the current story being displayed by the player.
 
@@ -163,13 +163,13 @@ player.show(url);
 
 **Parameters**
 
-- array of story objects
+-   array of story objects
 
 Each story object contains the following properties:
 
-- href string: story URL
-- title string (optional): story title, to be added to the anchor's title
-- posterImage string (optional): a URL for the story poster. Used as a placeholder while the story loads.
+-   href string: story URL
+-   title string (optional): story title, to be added to the anchor's title
+-   posterImage string (optional): a URL for the story poster. Used as a placeholder while the story loads.
 
 The player will rewrite the URL using the AMP Cache prefix if provided in the [player level attribute](#amp-cache).
 
@@ -205,7 +205,7 @@ player.pause();
 
 **Parameters**
 
-- string: the story state, currently only `page-attachment`.
+-   string: the story state, currently only `page-attachment`.
 
 Will cause a custom event to be fired, see `page-attachment-open` and `page-attachment-close`.
 
@@ -348,17 +348,17 @@ The configuration will end up looking like the following:
 
 Specify a control object with the “close” name to get the close icon.
 
-- `event`: The close button dispatches the `amp-story-player-close` event.
+-   `event`: The close button dispatches the `amp-story-player-close` event.
 
 The “close” control supports the following customizable properties:
 
-- `position`: “start” or “end”.
-  - Places the icon either on the left or right on LTR languages.
-- `visibility`: “hidden” or “visible” (default).
-  - Toggles the control’s visibility. If omitted, the default is visible.
-  - See [Example #2 - Showing skip-to-next story on desktop.](#Example-#2---Showing-skip-to-next-story-on-desktop)
-- `backgroundImageUrl`: string with url or data string (escaped).
-  - Changes the icon image to the provided url or data string (for inline svgs).
+-   `position`: “start” or “end”.
+    -   Places the icon either on the left or right on LTR languages.
+-   `visibility`: “hidden” or “visible” (default).
+    -   Toggles the control’s visibility. If omitted, the default is visible.
+    -   See [Example #2 - Showing skip-to-next story on desktop.](#Example-#2---Showing-skip-to-next-story-on-desktop)
+-   `backgroundImageUrl`: string with url or data string (escaped).
+    -   Changes the icon image to the provided url or data string (for inline svgs).
 
 ### Skip-next
 
@@ -366,18 +366,18 @@ Skips to the next story inside the player (only available on desktop).
 
 The “skip-next” control supports the following customizable properties:
 
-- `position`: “start” or “end”.
-  - Places the icon either on the left or right on LTR languages.
-- `visibility`: “hidden” or “visible” (default).
-  - Toggles the control’s visibility. If omitted, the default is visible.
-- `backgroundImageUrl`: string with url or data string (escaped).
-  - Changes the icon image to the provided url or data string (for inline svgs).
+-   `position`: “start” or “end”.
+    -   Places the icon either on the left or right on LTR languages.
+-   `visibility`: “hidden” or “visible” (default).
+    -   Toggles the control’s visibility. If omitted, the default is visible.
+-   `backgroundImageUrl`: string with url or data string (escaped).
+    -   Changes the icon image to the provided url or data string (for inline svgs).
 
 ### Custom control
 
 You can add a custom control to the stories inside the player with a custom control. Simply specify a “name” and an “backgroundImageUrl”, and any optional properties:
 
-- `name` (**required**): a string with the name of the control. e.g. “lightbox”. **The dispatched event will depend on this name.** The custom event will be the name of the control prefixed with `amp-story-player-*`. E.g. `amp-story-player-lightbox`:
+-   `name` (**required**): a string with the name of the control. e.g. “lightbox”. **The dispatched event will depend on this name.** The custom event will be the name of the control prefixed with `amp-story-player-*`. E.g. `amp-story-player-lightbox`:
 
 ```javascript
 const player = document.body.querySelector("amp-story-player");
@@ -389,12 +389,12 @@ player.addEventListener("amp-story-player-lightbox", () => {
 });
 ```
 
-- `backgroundImageUrl` (**required**): Accepts URLs, as well as svgs and `data` paths (note that strings must be JSON escaped). See [example 3](#Example-#3---Changing-the-icon-of-the-close-button).
-  - Changes the control icon.
-- `position`: “start” or “end”.
-  - Places the icon either on the left or right on LTR languages.
-- `visibility`: “hidden” or “visible” (default).
-  - Toggles the control’s visibility. If omitted, the default is visible.
+-   `backgroundImageUrl` (**required**): Accepts URLs, as well as svgs and `data` paths (note that strings must be JSON escaped). See [example 3](#Example-#3---Changing-the-icon-of-the-close-button).
+    -   Changes the control icon.
+-   `position`: “start” or “end”.
+    -   Places the icon either on the left or right on LTR languages.
+-   `visibility`: “hidden” or “visible” (default).
+    -   Toggles the control’s visibility. If omitted, the default is visible.
 
 ### Example #1 - Close button on the start position
 
