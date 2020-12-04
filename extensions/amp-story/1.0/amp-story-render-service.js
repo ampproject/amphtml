@@ -15,7 +15,15 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
+import {user} from '../../../src/log';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
+
+/**
+ * Maximum milliseconds to wait for all extensions to load before erroring.
+ * @const
+ */
+const LOAD_TIMEOUT = 3000;
 
 /** @implements {../../../src/render-delaying-services.RenderDelayingService} */
 export class AmpStoryRenderService {
@@ -27,6 +35,9 @@ export class AmpStoryRenderService {
      * @private {!../../../src/service/ampdoc-impl.AmpDoc}
      */
     this.ampdoc_ = ampdoc;
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /**
@@ -35,7 +46,7 @@ export class AmpStoryRenderService {
    * @return {!Promise}
    */
   whenReady() {
-    return this.ampdoc_.whenReady().then((body) => {
+    const whenReadyPromise = this.ampdoc_.whenReady().then((body) => {
       const storyEl = body.querySelector('amp-story[standalone]');
 
       if (!storyEl) {
@@ -46,5 +57,15 @@ export class AmpStoryRenderService {
         return storyEl.signals().whenSignal(CommonSignals.LOAD_END);
       });
     });
+
+    return this.timer_
+      .timeoutPromise(
+        LOAD_TIMEOUT,
+        whenReadyPromise,
+        `Render timeout waiting for service AmpStoryRenderService to be ready.`
+      )
+      .catch((reason) => {
+        user().warn(reason);
+      });
   }
 }
