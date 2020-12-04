@@ -1,0 +1,283 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ amp-story-dev-tools-tab-preview {
+  --i-amphtml-story-dev-tools-device-shadow: 0px 11.0046px 27.5114px rgba(0, 0, 0, 0.34), inset 0px 2.20091px 3.30137px rgba(44, 46, 52, 0.6) !important;
+}
+
+.i-amphtml-story-dev-tools-devices-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.i-amphtml-story-dev-tools-device {
+  background: var(--i-amphtml-story-dev-tools-gray-1) !important;
+  border-radius: 40px !important;
+  box-shadow: var(--i-amphtml-story-dev-tools-device-shadow) !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  margin: auto !important;
+  height: fit-content !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  padding: 10px 8px !important;
+  transition: transform var(--i-amphtml-story-dev-tools-material-easing-standard) 0.15s !important;
+  /* Fades in after transition:transform ends (above) so devices are in place before the fade-in */
+  animation: i-amphtml-story-dev-tools-fade-in 0.3s var(--i-amphtml-story-dev-tools-material-easing-decelerated) !important;
+}
+
+@keyframes i-amphtml-story-dev-tools-fade-in {
+  0% {opacity: 0; }
+  50% {opacity: 0; }
+  100% {opacity: 1; }
+}
+
+.i-amphtml-story-dev-tools-device-screen {
+  border-radius: 30px !important;
+  background: var(--i-amphtml-story-dev-tools-gray-2) !important;
+  overflow: hidden !important;
+  padding-top: 40px !important;
+}
+
+amp-story-player a {
+  display: none !important;
+}
+
+.i-amphtml-story-dev-tools-device-chips-container {
+  position: absolute !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip {
+  --i-amphtml-story-dev-tools-device-chip-background: var(--i-amphtml-story-dev-tools-gray-3) !important;
+  --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-gray-4) !important;
+  --i-amphtml-story-dev-tools-device-chip-icon-background: black !important;
+  color: white !important;
+  border-radius: 16px !important;
+  background: var(--i-amphtml-story-dev-tools-device-chip-background) !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-device-chip-background) !important;
+  height: 32px !important;
+  font-size: 13px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding-inline-start: 10px !important;
+  padding-inline-end: 6px !important;
+  margin: 0 5px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  outline: none;
+}
+
+.i-amphtml-story-dev-tools-device-chip:hover, .i-amphtml-story-dev-tools-device-chip:focus {
+  background: var(--i-amphtml-story-dev-tools-device-chip-background-hover) !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip svg {
+  cursor: pointer !important;
+  background: var(--i-amphtml-story-dev-tools-device-chip-icon-background) !important;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  margin-inline-start: 10px !important;
+  transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard) !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip[inactive] {
+  --i-amphtml-story-dev-tools-device-chip-background: transparent !important;
+  --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-gray-1) !important;
+  --i-amphtml-story-dev-tools-device-chip-icon-background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-device-chip-icon-background) !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip[inactive] svg {
+  transform: rotate(90deg) !important;
+}
+
+/* Removes the second line in the + (to convert to -) when the device is selected (not inactive) */
+.i-amphtml-story-dev-tools-device-chip:not([inactive]):not(.i-amphtml-story-dev-tools-add-device) .i-amphtml-story-dev-tools-device-chip-add-stick {
+  fill: transparent !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device {
+  background: var(--i-amphtml-story-dev-tools-accent) !important;
+  color: black !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device svg {
+  fill: var(--i-amphtml-story-dev-tools-accent) !important;
+  background: black !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device:hover, .i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device:focus {
+  background: var(--i-amphtml-story-dev-tools-accent-light) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-bg {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: transparent !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 1 !important;
+  transition: background 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container {
+  background: black !important;
+  width: min(650px, 90%) !important;
+  border-radius: 10px !important;
+  padding: 40px !important;
+  position: relative !important;
+  transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-accelerated), opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing-accelerated) !important;
+  transform: translateY(5vh) !important;
+  opacity: 0 !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-bg[active] {
+  background: var(--i-amphtml-story-dev-tools-gray-transparent-1) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-bg[active] .i-amphtml-story-dev-tools-device-dialog-container  {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-decelerated), opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing-decelerated) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container h1 {
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  opacity: .4 !important;
+  letter-spacing: 1px !important;
+  font-weight: normal !important;
+  margin: 0px !important;
+  margin-bottom: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container h1:not(:first-child) {
+  margin-top: 25px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container.i-amphtml-story-dev-tools-device-dialog-add-devices h1 {
+  margin-inline-start: 15px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-link {
+  color: var(--i-amphtml-story-dev-tools-white-transparent-3) !important;
+  text-decoration: none !important;
+  display: block !important;
+  padding: 10px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-link:hover {
+  color: white !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-link:not(:last-child) {
+  border-bottom: 1px solid var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-arrow {
+  background: url('data:image/svg+xml;charset=utf-8, <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z" fill="white"/></svg>') !important;
+  width: 32px !important;
+  height: 32px !important;
+  opacity: 0.6 !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-link:hover .i-amphtml-story-dev-tools-device-dialog-arrow {
+  opacity: 1 !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container .i-amphtml-story-dev-tools-device-chip {
+  margin: 4px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-close {
+  cursor: pointer !important;
+  width: 40px !important;
+  height: 40px !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  opacity: .6 !important;
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-close:hover, .i-amphtml-story-dev-tools-device-dialog-close:focus {
+  opacity: 1 !important;
+}
+
+.i-amphtml-story-dev-tools-button-help {
+  position: absolute !important;
+  right: 0 !important;
+}
+
+.i-amphtml-story-dev-tools-button-icon {
+  background: var(--i-amphtml-story-dev-tools-accent)!important;
+  width: 20px !important;
+  height: 20px !important;
+  margin-inline-start: 10px !important;
+  position: relative !important;
+  border-radius: 50% !important;
+}
+
+.i-amphtml-story-dev-tools-button-icon:after {
+  content: '' !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  left: 0 !important;
+}
+
+.i-amphtml-story-dev-tools-button-help-icon:after {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 8 14" fill="black"><path d="M2.97362 9.56098V8.7832C2.97362 8.15086 3.10152 7.61969 3.35731 7.1897C3.61311 6.74706 4.05436 6.25384 4.68106 5.71003C5.06475 5.36856 5.3717 5.05239 5.60192 4.76152C5.83213 4.458 5.94724 4.08491 5.94724 3.64228C5.94724 3.1617 5.77458 2.757 5.42926 2.42818C5.09672 2.09937 4.6235 1.93496 4.00959 1.93496C3.39568 1.93496 2.91607 2.11834 2.57074 2.4851C2.22542 2.83921 1.98241 3.22493 1.84173 3.64228L0 2.88347C0.140687 2.45348 0.377298 2.01716 0.709832 1.57453C1.04237 1.11924 1.47722 0.746161 2.01439 0.455285C2.56435 0.151762 3.22302 0 3.99041 0C4.78337 0 5.48042 0.158085 6.08154 0.474255C6.69544 0.790425 7.16867 1.22042 7.5012 1.76423C7.83373 2.29539 8 2.90244 8 3.58537C8 4.09124 7.90408 4.5402 7.71223 4.93225C7.53317 5.3243 7.30296 5.67209 7.02158 5.97561C6.753 6.27913 6.49081 6.55104 6.23501 6.79133C5.81295 7.17073 5.51239 7.51852 5.33333 7.83469C5.15428 8.15086 5.06475 8.54291 5.06475 9.01084V9.56098H2.97362ZM4.00959 14C3.60032 14 3.255 13.8609 2.97362 13.5827C2.70504 13.3044 2.57074 12.9693 2.57074 12.5772C2.57074 12.1852 2.70504 11.85 2.97362 11.5718C3.255 11.2936 3.60032 11.1545 4.00959 11.1545C4.40608 11.1545 4.73861 11.2936 5.00719 11.5718C5.28857 11.85 5.42926 12.1852 5.42926 12.5772C5.42926 12.9693 5.28857 13.3044 5.00719 13.5827C4.73861 13.8609 4.40608 14 4.00959 14Z"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-help-tips {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-help-tips p {
+  font-size: 14px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-help-tips .i-amphtml-story-dev-tools-device-dialog-help-hint {
+  color: var(--i-amphtml-story-dev-tools-white-transparent-2) !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  font-size: 12px !important;
+  padding: 10px 20px !important;
+  border-radius: 20px !important;
+  margin-inline-start: 20px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-help-tips .i-amphtml-story-dev-tools-device-dialog-help-hint b {
+  color: var(--i-amphtml-story-dev-tools-accent-light) !important;
+}
