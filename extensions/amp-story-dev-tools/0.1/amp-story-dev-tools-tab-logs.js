@@ -91,9 +91,9 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return getInstance().then((validator) => {
-      this.validateUrl_(validator.sandbox.amp.validator, this.storyUrl_);
-    });
+    return getInstance().then((validator) =>
+      this.validateUrl_(validator.sandbox.amp.validator, this.storyUrl_)
+    );
   }
 
   /**

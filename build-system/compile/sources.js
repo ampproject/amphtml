@@ -37,6 +37,7 @@ const COMMON_GLOBS = [
   'third_party/webcomponentsjs/ShadowCSS.js',
   'third_party/zuho/**/*.js',
   'node_modules/dompurify/package.json',
+  'node_modules/amphtml-validator/index.js',
   'node_modules/dompurify/dist/purify.es.js',
   'node_modules/intersection-observer/package.json',
   'node_modules/intersection-observer/intersection-observer.install.js',
