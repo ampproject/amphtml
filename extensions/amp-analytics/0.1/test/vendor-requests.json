@@ -37,6 +37,9 @@
     "pageview": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
     "event": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=!category*!action*!label*!value&et=4&api=8_0"
   },
+  "blackcrowai": {
+    "pageview": "https://api.blackcrow.ai/v1/js/events/view"
+  },
   "blueconic": {
     "event": "https://!tenantId/s/!pixelId.gif?",
     "trackingIdentifier": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues",
