@@ -1515,6 +1515,11 @@ describe('amp-a4a', () => {
         .stub(a4a, 'maybeValidateAmpCreative')
         .returns(Promise.resolve());
       a4a.onLayoutMeasure();
+      a4a.uiHandler = {
+        getScrollPromiseForStickyAd: () => Promise.resolve(null),
+        isStickyAd: () => false,
+        maybeInitStickyAd: () => {},
+      };
       await a4a.layoutCallback();
       expect(
         renderNonAmpCreativeSpy.calledOnce,
@@ -1948,6 +1953,9 @@ describe('amp-a4a', () => {
           applyUnlayoutUI: () => {
             unlayoutUISpy();
           },
+          getScrollPromiseForStickyAd: () => Promise.resolve(null),
+          maybeInitStickyAd: () => {},
+          cleanup: () => {},
         };
         window.sandbox
           .stub(a4a, 'getLayoutBox')
