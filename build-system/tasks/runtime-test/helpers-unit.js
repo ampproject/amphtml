@@ -26,7 +26,7 @@ const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMaster} = require('../../common/git');
 const {green, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
 const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
@@ -145,7 +145,7 @@ function getUnitTestsToRun() {
     reportTestSkipped();
     return;
   }
-  if (isTravisBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
+  if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
     log(
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
@@ -204,7 +204,7 @@ function unitTestsToRun() {
 
   filesChanged.forEach((file) => {
     if (!fs.existsSync(file)) {
-      if (!isTravisBuild()) {
+      if (!isCiBuild()) {
         log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
       }
     } else if (isUnitTest(file)) {

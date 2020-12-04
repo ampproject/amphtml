@@ -19,7 +19,7 @@ const colors = require('ansi-colors');
 const log = require('fancy-log');
 const {getStderr} = require('../common/exec');
 const {gitDiffFileMaster} = require('../common/git');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 const PACKAGE_JSON_PATHS = [
   'package.json',
@@ -49,7 +49,7 @@ async function checkExactVersions() {
       console.log(gitDiffFileMaster(file));
       success = false;
     } else {
-      if (!isTravisBuild()) {
+      if (!isCiBuild()) {
         log(
           colors.green('SUCCESS:'),
           'All packages in',

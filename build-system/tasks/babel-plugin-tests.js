@@ -16,7 +16,7 @@
 'use strict';
 
 const jest = require('@jest/core');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 /**
  * Entry point for `gulp babel-plugin-tests`. Runs the jest-based tests for
@@ -28,7 +28,7 @@ async function babelPluginTests() {
     automock: false,
     coveragePathIgnorePatterns: ['/node_modules/'],
     modulePathIgnorePatterns: ['/test/fixtures/', '<rootDir>/build/'],
-    reporters: [isTravisBuild() ? 'jest-silent-reporter' : 'jest-dot-reporter'],
+    reporters: [isCiBuild() ? 'jest-silent-reporter' : 'jest-dot-reporter'],
     setupFiles: ['./build-system/babel-plugins/testSetupFile.js'],
     testEnvironment: 'node',
     testPathIgnorePatterns: ['/node_modules/'],

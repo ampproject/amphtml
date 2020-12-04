@@ -129,12 +129,12 @@ def InstallNodeDependencies():
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
       ['npm', 'install', '--userconfig', '../.npmrc'],
-      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
+      stdout=(open(os.devnull, 'wb') if os.environ.get('CI') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(['npm', 'install', '--userconfig', '../../../.npmrc'],
                         cwd='js/nodejs',
                         stdout=(open(os.devnull, 'wb')
-                                if os.environ.get('TRAVIS') else sys.stdout))
+                                if os.environ.get('CI') else sys.stdout))
   logging.info('... done')
 
 
@@ -586,7 +586,7 @@ def Main(parsed_args):
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
-      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
+      level=(logging.ERROR if os.environ.get('CI') else logging.INFO))
   EnsureNodeJsIsInstalled()
   CheckPrereqs()
   InstallNodeDependencies()
