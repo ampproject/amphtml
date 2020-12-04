@@ -15,9 +15,9 @@
  */
 
 import {Services} from '../../../src/services';
-import {getInstance} from 'amphtml-validator';
 import {htmlFor} from '../../../src/static-template';
 import {user, userAssert} from '../../../src/log';
+import validator from 'amphtml-validator';
 
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.
@@ -91,9 +91,11 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return getInstance().then((validator) =>
-      this.validateUrl_(validator.sandbox.amp.validator, this.storyUrl_)
-    );
+    return validator
+      .getInstance()
+      .then((validator) =>
+        this.validateUrl_(validator.sandbox.amp.validator, this.storyUrl_)
+      );
   }
 
   /**
