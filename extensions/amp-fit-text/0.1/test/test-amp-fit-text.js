@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {calculateFontSize_, updateOverflow_} from '../amp-fit-text';
 import {macroTask} from '../../../../testing/yield';
 import {spy} from 'fetch-mock';
@@ -76,15 +77,18 @@ describes.realWin(
     });
 
     it('re-calculates font size if a resize is detected by the measurer', async () => {
+      const clock = lolex.install({target: win});
       const ft = await getFitText(
         'Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.'
       );
+      clock.tick(700);
+      await macroTask();
+      await macroTask();
       const updateFontSizeSpy = env.sandbox.spy(
         ft.implementation_,
         'updateFontSize_'
       );
       // Verify that layoutCallback calls updateFontSize.
-      await macroTask(200);
       console.log('layout');
       expect(updateFontSizeSpy).to.be.calledOnce;
       updateFontSizeSpy.resetHistory();
@@ -95,7 +99,9 @@ describes.realWin(
       ft.style.width = '50px';
       ft.style.height = '100px';
 
-      await macroTask(200);
+      clock.tick(700);
+      await macroTask();
+      await macroTask();
       console.log('after resize');
       // Verify that the ResizeObserver calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;
