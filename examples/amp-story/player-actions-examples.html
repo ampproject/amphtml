@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Player Actions</title>
+    <script async src="../../dist/amp-story-player.js"></script>
+    <link href="../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <style page>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <style injected>
+      .story-player-iframe {
+        background-size: cover;
+        display: block;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        flex: 0 0 100%;
+      }
+
+      .title {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        font-size: 40px;
+        padding: 88px 32px 32px 32px;
+        line-height: 1.25;
+        text-shadow: 3px 3px #000;
+      }
+
+      div {
+          padding: 0px 0px 20px 0px;
+          font-size: 24px;
+      }
+
+      amp-story-player {
+          padding: 0px 0px 20px 0px;
+          width: 360px;
+          height: 600px;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  </head>
+  <body>
+    <h1>This is a Non-AMP webpage that displays Stories containing Player Actions.</h1>
+    <div>For more info on player actions, see go/amp-story-player-actions.</div>
+    <amp-story-player>
+        <a href="./shop-for-clothes.html"
+            data-poster-portrait-src="/examples/visual-tests/amp-story/img/overview.jpg"
+            class="story">
+          <span class="title">Shop for clothes</span>
+        </a>
+        <a href="./shop-for-cars.html"
+            data-poster-portrait-src="/examples/visual-tests/amp-story/img/overview.jpg"
+            class="story">
+          <span class="title">Shop for cars</span>
+        </a>
+    </amp-story-player>
+    <h1>My Shopping Cart</h1>
+    <div> The cart currently contains: X items.</div>
+  </body>
+</html>
