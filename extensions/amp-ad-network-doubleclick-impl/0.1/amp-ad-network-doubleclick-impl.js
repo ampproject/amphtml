@@ -384,19 +384,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     let fallbackRange = 12;
+    if (!this.performance_) {
+      return fallbackRange;
+    }
+
     const idleCwvExpSelectedBranch = getExperimentBranch(
       this.win,
       IDLE_CWV_EXP
     );
-    if (this.performance_) {
-      if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.CONTROL) {
-        this.performance_.addEnabledExperiment('dfp-idle-cwv-control');
-      } else if (
-        idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.EXPERIMENT
-      ) {
-        fallbackRange = 3;
-        this.performance_.addEnabledExperiment('dfp-idle-cwv-exp');
-      }
+    if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.CONTROL) {
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-control');
+    } else if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.EXPERIMENT) {
+      fallbackRange = 3;
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-exp');
     }
     return fallbackRange;
   }
