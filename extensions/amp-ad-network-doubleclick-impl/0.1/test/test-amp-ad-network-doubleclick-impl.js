@@ -1123,7 +1123,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       impl.win.ampAdSlotIdCounter = 1;
       expect(impl.element.getAttribute('data-amp-slot-index')).to.not.be.ok;
       impl.layoutMeasureExecuted_ = true;
-      impl.uiHandler = {applyUnlayoutUI: () => {}};
+      impl.uiHandler = {applyUnlayoutUI: () => {}, cleanup: () => {}};
       const placeholder = doc.createElement('div');
       placeholder.setAttribute('placeholder', '');
       const fallback = doc.createElement('div');

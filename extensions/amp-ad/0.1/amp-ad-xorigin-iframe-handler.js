@@ -183,7 +183,7 @@ export class AmpAdXOriginIframeHandler {
       )
     );
 
-    if (this.baseInstance_.isStickyAd()) {
+    if (this.uiHandler_.isStickyAd()) {
       setStyle(iframe, 'pointer-events', 'none');
       this.unlisteners_.push(
         listenFor(
@@ -458,9 +458,7 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
-            if (this.baseInstance_.onResizeSuccess) {
-              this.baseInstance_.onResizeSuccess();
-            }
+            this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
               id,
