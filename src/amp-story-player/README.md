@@ -303,7 +303,7 @@ Since by default the close button will be placed to the end, all we have to do i
 </amp-story-player>
       </pre>
     </td>
-    <td><img width="360" height="600" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
   </tr>
 </table>
 
