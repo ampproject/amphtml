@@ -184,7 +184,6 @@ amp-story-player a {
   text-decoration: none !important;
   display: block !important;
   padding: 10px 0 !important;
-  transition: color 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -203,12 +202,10 @@ amp-story-player a {
   width: 32px !important;
   height: 32px !important;
   opacity: 0.6 !important;
-  transition: opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard), transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard) !important;
 }
 
 .i-amphtml-story-dev-tools-device-dialog-link:hover .i-amphtml-story-dev-tools-device-dialog-arrow {
   opacity: 1 !important;
-  transform: translateX(4px) !important;
 }
 
 .i-amphtml-story-dev-tools-device-dialog-container .i-amphtml-story-dev-tools-device-chip {
