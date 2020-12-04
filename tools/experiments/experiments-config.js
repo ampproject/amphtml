@@ -90,12 +90,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz items (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/6106',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
     id: 'amp-action-macro',
     name: 'AMP extension for defining action macros',
     spec: 'https://github.com/ampproject/amphtml/issues/19494',
