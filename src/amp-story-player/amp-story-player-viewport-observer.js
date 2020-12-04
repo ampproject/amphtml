@@ -74,7 +74,7 @@ export class AmpStoryPlayerViewportObserver {
       });
     };
 
-    const observer = new IntersectionObserver(inObCallback, {
+    const observer = new this.win_.IntersectionObserver(inObCallback, {
       rootMargin: `${this.viewportDistance_ * 100}%`,
     });
 
