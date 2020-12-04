@@ -1154,6 +1154,7 @@ const forbiddenTermsSrcInclusive = {
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
+      'validator/js/engine/htmlparser-interface.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js',
