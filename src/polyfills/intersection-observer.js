@@ -19,14 +19,27 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver.
  */
 
-import {IntersectionObserverStub} from '../polyfillstub/intersection-observer-stub';
+import {
+  IntersectionObserverStub,
+  supportsDocumentRoot,
+} from '../polyfillstub/intersection-observer-stub';
 
 /**
  * @param {!Window} win
  */
 export function install(win) {
-  if (!win.IntersectionObserver) {
+  const NativeIntersectionObserver = win.IntersectionObserver;
+  if (!NativeIntersectionObserver) {
     win.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (IntersectionObserverStub);
+  } else if (!supportsDocumentRoot(win)) {
+    win.IntersectionObserver = function (ioCallback, opts) {
+      if (opts && opts.root && opts.root.nodeType === 9) {
+        return new IntersectionObserverStub(ioCallback, opts);
+      } else {
+        return new NativeIntersectionObserver(ioCallback, opts);
+      }
+    };
+    win.IntersectionObserver.native = NativeIntersectionObserver;
   }
   fixEntry(win);
 }

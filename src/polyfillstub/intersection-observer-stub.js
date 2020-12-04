@@ -36,8 +36,21 @@ export function shouldLoadPolyfill(win) {
   return (
     !win.IntersectionObserver ||
     win.IntersectionObserver === IntersectionObserverStub ||
-    !win.IntersectionObserverEntry
+    !win.IntersectionObserverEntry ||
+    !supportsDocumentRoot(win)
   );
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function supportsDocumentRoot(win) {
+  try {
+    new win.IntersectionObserver(() => {}, {root: win.document});
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -60,9 +73,25 @@ export function upgradePolyfill(win, installer) {
   // instance deployed in v0.js vs the polyfill extension.
   const Stub = /** @type {typeof IntersectionObserverStub} */ (win.IntersectionObserver);
   if (Stub && UPGRADERS in Stub) {
+    const NativeIntersectionObserver =
+      win.IntersectionObserver && win.IntersectionObserver.native;
     delete win.IntersectionObserver;
     delete win.IntersectionObserverEntry;
     installer();
+    const PolyfilledIntersectionObserver = win.IntersectionObserver;
+    // NativeIntersectionObserver only exists in the case of an InOb
+    // that doesn't support {root: document}. In this case we'd like to
+    // select the fastest InOb we can on a per-instance basis.
+    if (NativeIntersectionObserver) {
+      win.IntersectionObserver = function (ioCallback, opts) {
+        if (opts && opts.root && opts.root.nodeType === 9) {
+          return new PolyfilledIntersectionObserver(ioCallback, opts);
+        } else {
+          return new NativeIntersectionObserver(ioCallback, opts);
+        }
+      };
+    }
+
     const Impl = win.IntersectionObserver;
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
@@ -104,13 +133,6 @@ export class IntersectionObserverStub {
       rootMargin: '0px 0px 0px 0px',
       ...options,
     };
-
-    // Must fail on any non-element root. This is critical because this
-    // failure is used as a feature-detection for document root support.
-    const {root} = this.options_;
-    if (root && root.nodeType !== /* ELEMENT */ 1) {
-      throw new Error('root must be an Element');
-    }
 
     /** @private {?Array<!Element>} */
     this.elements_ = [];
