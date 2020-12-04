@@ -86,6 +86,10 @@ const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/freeze-form-values.js'),
   'utf8'
 );
+const FREEZE_CANVAS_IMAGE_SNIPPET = fs.readFileSync(
+  path.resolve(__dirname, 'snippets/freeze-canvas-image.js'),
+  'utf8'
+);
 
 // HTML snippet to create an error page snapshot.
 const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
@@ -573,6 +577,7 @@ async function snapshotWebpages(browser, webpages) {
         // snippet files for description of each.
         await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
         await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
+        await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
 
         // Create a default set of snapshot options for Percy and modify
         // them based on the test's configuration.
