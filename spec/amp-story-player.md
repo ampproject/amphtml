@@ -140,23 +140,28 @@ player.load();
 **Parameters**
 
 - number: the story in the player to which you want to move, relative to the current story.
+- number (optional): the page of the story to which you want to move, relative to the current page.
 
 If the player is currently on the third story out of five stories:
 
 - `player.go(1)` will go forward one story to the fourth story
 - `player.go(-1)` will go backward one story to the second story
-- If no value is passed or if delta equals 0, current story will persist and no action will be taken.
+- `player.go(-1, 1)` will go backward one story and navigate one page backwards
+- `player.go(0, 5)` will stay in the current story and navigate 5 pages forward
 
 #### show
 
 **Parameters**
 
-- string: the URL of the story to show.
+- string or null: the URL of the story to show.
+- string (optional): the ID attribute of the page element.
 
 Will change the current story being displayed by the player.
 
 ```javascript
-player.show(url);
+player.show('cool-story.html'); // Will display cool-story.html
+player.show('cool-story.html', 'page-4'); // Will display cool-story.html and switch to page-4
+player.show(null, 'page-4'); // Stay on current story and switch to page-4
 ```
 
 #### add
@@ -419,7 +424,7 @@ Since by default the close button will be placed to the end, all we have to do i
 </amp-story-player>
       </pre>
     </td>
-    <td><img width="360" height="600" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
   </tr>
 </table>
 
@@ -500,6 +505,18 @@ player.addEventListener('navigation', (event) => {
   console.log('Navigated from story 0 to story 1 of 3');
   console.log('Current story:' event.index); // 1
   console.log('Current story:' event.remaining); // 1
+})
+```
+
+#### storyNavigation
+
+Fired when the story inside the player changes to a new page. It provides the `pageId` and `progress` of the story. The progress is the completion percentage of the story represented as a number between 0 and 1.
+
+```javascript
+player.addEventListener('storyNavigation', (event) => {
+  console.log('User navigated from one page to the other.');
+  console.log('Current page id:' event.pageId); // page-2
+  console.log('Story progress:' event.progress); // Number from 0 to 1.
 })
 ```
 
