@@ -780,6 +780,14 @@ export class AmpStory360 extends AMP.BaseElement {
     if (this.isPlaying_) {
       this.animate_();
     }
+    this.markAsLoaded_();
+  }
+
+  /** @private */
+  markAsLoaded_() {
+    this.mutateElement(() => {
+      this.element.classList.add('i-amphtml-story-360-loaded');
+    });
   }
 
   /** @private */
