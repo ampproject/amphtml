@@ -30,3 +30,39 @@ export function updateHash(updates, win) {
     .map((keyValue) => keyValue[0] + '=' + keyValue[1])
     .join('&');
 }
+
+/**
+ * Deletes the node after the passed timeout.
+ * @public
+ * @param {!Element} context the mutateElement context
+ * @param {!Element} element the element to remove
+ * @param {number} timeout time in ms after which the element will be removed
+ */
+export function removeAfterTimeout(context, element, timeout) {
+  setTimeout(() => context.mutateElement(() => element.remove()), timeout);
+}
+
+/**
+ * Deletes the node after the passed timeout.
+ * @public
+ * @param {!Element} context the mutateElement context
+ * @param {!Element} element the element to remove
+ * @param {number} timeout time in ms after which the element will be removed
+ * @param {string} attributeName
+ * @param {string=} attributeValue
+ */
+export function addAttributeAfterTimeout(
+  context,
+  element,
+  timeout,
+  attributeName,
+  attributeValue = ''
+) {
+  setTimeout(
+    () =>
+      context.mutateElement(() =>
+        element.setAttribute(attributeName, attributeValue)
+      ),
+    timeout
+  );
+}
