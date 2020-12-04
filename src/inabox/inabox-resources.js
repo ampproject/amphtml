@@ -20,7 +20,9 @@ import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';
 import {Services} from '../services';
+import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
+import {getMode} from '../mode';
 import {registerServiceBuilderForDoc} from '../service';
 
 const TAG = 'inabox-resources';
@@ -62,10 +64,27 @@ export class InaboxResources {
 
     const input = Services.inputFor(this.win);
     input.setupInputModeClasses(ampdoc);
+
+    // TODO(#31246): launch the visibility logic in inabox as well.
+    if (getMode(this.win).runtime != 'inabox') {
+      ampdoc.onVisibilityChanged(() => {
+        switch (ampdoc.getVisibilityState()) {
+          case VisibilityState.PAUSED:
+            this.resources_.forEach((r) => r.pause());
+            break;
+          case VisibilityState.VISIBLE:
+            this.resources_.forEach((r) => r.resume());
+            this./*OK*/ schedulePass();
+            break;
+        }
+      });
+    }
   }
 
   /** @override */
   dispose() {
+    this.resources_.forEach((r) => r.unload());
+    this.resources_.length = 0;
     if (this.inViewportObserver_) {
       this.inViewportObserver_.disconnect();
       this.inViewportObserver_ = null;
