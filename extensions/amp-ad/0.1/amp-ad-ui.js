@@ -190,7 +190,6 @@ export class AmpAdUIHandler {
         position: 'fixed',
         bottom: '0',
         right: '0',
-        visibility: 'visible',
       });
 
       this.element_.classList.add('i-amphtml-amp-ad-sticky-layout');

@@ -436,6 +436,8 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
+
+    this.uiHandler.maybeInitStickyAd();
   }
 
   /** @override */
@@ -1303,11 +1305,8 @@ export class AmpA4A extends AMP.BaseElement {
       this.uiHandler.getScrollPromiseForStickyAd(),
     ])
       .then((values) => {
-        checkStillCurrent();
-
-        this.uiHandler.maybeInitStickyAd();
-
         const creativeMetaData = values[0];
+        checkStillCurrent();
         if (this.isCollapsed_) {
           return Promise.resolve();
         }
