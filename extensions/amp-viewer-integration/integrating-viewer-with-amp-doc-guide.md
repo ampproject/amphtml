@@ -60,6 +60,7 @@ To establish communication between the Viewer and AMP Document, we need to estab
     };
     ```
 
+
 3. The Viewer responds to the AMP Document by also using `postMessage()`.
 
     <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake3.png" height="300px"></img>
