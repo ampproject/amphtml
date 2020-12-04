@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import './amp-story-dev-tools-tab-preview.css';
+
 amp-story-dev-tools {
   width: 100% !important;
   height: 100% !important;
@@ -23,11 +25,31 @@ amp-story-dev-tools {
   color: white !important;
   padding: 30px 10% !important;
   --i-amphtml-story-dev-tools-accent: #79B3FF;
+  --i-amphtml-story-dev-tools-accent-light: #92c1ff;
   --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55;
+
+  --i-amphtml-story-dev-tools-gray-1: #101010 !important;
+  --i-amphtml-story-dev-tools-gray-2: #2E3137 !important;
+  --i-amphtml-story-dev-tools-gray-3: #2E2E2E !important;
+  --i-amphtml-story-dev-tools-gray-4: #3D3D3D !important;
+  --i-amphtml-story-dev-tools-gray-transparent-1: #111111CC !important;
+  --i-amphtml-story-dev-tools-white-transparent-1: #FFFFFF22 !important;
+  --i-amphtml-story-dev-tools-white-transparent-2: #FFFFFF77 !important;
+  --i-amphtml-story-dev-tools-white-transparent-3: #FFFFFFCC !important;
+
+  --i-amphtml-story-dev-tools-material-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --i-amphtml-story-dev-tools-material-easing-accelerated: cubic-bezier(0.4, 0.0, 1, 1);
+  --i-amphtml-story-dev-tools-material-easing-decelerated: cubic-bezier(0.0, 0.0, 0.2, 1);
 }
 
 amp-story-dev-tools, amp-story-dev-tools * {
   box-sizing: border-box !important;
+}
+
+.i-amphtml-story-dev-tools-container {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .i-amphtml-story-dev-tools-header {
@@ -55,7 +77,7 @@ amp-story-dev-tools, amp-story-dev-tools * {
 .i-amphtml-story-dev-tools-button {
   cursor: pointer !important;
   font-size: 13px !important;
-  display: flex !important;
+  display: inline-flex !important;
   align-items: center !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-accent-translucent) !important;
   border-radius: 20px !important;
@@ -64,9 +86,12 @@ amp-story-dev-tools, amp-story-dev-tools * {
   height: 32px !important;
   color: var(--i-amphtml-story-dev-tools-accent) !important;
   text-decoration: none !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  outline: none !important;
 }
 
-.i-amphtml-story-dev-tools-button:hover {
+.i-amphtml-story-dev-tools-button:hover, .i-amphtml-story-dev-tools-button:focus  {
   background: var(--i-amphtml-story-dev-tools-accent-translucent) !important;
 }
 
@@ -101,4 +126,8 @@ amp-story-dev-tools, amp-story-dev-tools * {
   opacity: 1 !important;
   cursor: initial !important;
   border-bottom: 2px solid white !important;
+}
+
+.i-amphtml-story-dev-tools-tab {
+  flex: 1 !important;
 }
