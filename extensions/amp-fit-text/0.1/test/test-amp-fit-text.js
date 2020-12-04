@@ -84,7 +84,7 @@ describes.realWin(
         'updateFontSize_'
       );
       // Verify that layoutCallback calls updateFontSize.
-      await macroTask(1000);
+      await macroTask(200);
       console.log('layout');
       expect(updateFontSizeSpy).to.be.calledOnce;
       updateFontSizeSpy.resetHistory();
@@ -95,7 +95,7 @@ describes.realWin(
       ft.style.width = '50px';
       ft.style.height = '100px';
 
-      await macroTask(500);
+      await macroTask(200);
       console.log('after resize');
       // Verify that the ResizeObserver calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;
