@@ -363,9 +363,8 @@ function checkPythonVersion() {
  * @return {Promise}
  */
 async function main() {
-  // NPM is already used by default on Travis and Github Actions, so there is
-  // nothing more to do.
-  if (process.env.TRAVIS || process.env.GITHUB_ACTIONS) {
+  // NPM is already used by default during CI, so there is nothing more to do.
+  if (process.env.CI) {
     return;
   }
   ensureNpm();

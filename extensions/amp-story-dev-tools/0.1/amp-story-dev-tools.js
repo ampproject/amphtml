@@ -17,8 +17,9 @@
 import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
 import {
   AmpStoryDevToolsTabLogs,
-  createTabLogsElement,
-} from './amp-story-dev-tools-tab-logs';
+  AmpStoryDevToolsTabPreview,
+  createTabPreviewElement,
+} from './amp-story-dev-tools-tab-preview';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/url';
@@ -105,19 +106,22 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    const hashParams = parseQueryString(this.win.location.hash);
+    /** @private {!Object<string, string>} */
+    this.hashParams_ = parseQueryString(this.win.location.hash);
 
     this.win.document.title = `Story Dev-Tools (${this.win.document.title})`;
 
     // TODO: Remove support for url queryParam when widely available.
     /** @private {string} */
-    this.storyUrl_ = hashParams['url'] || this.win.location.href.split('#')[0];
+    this.storyUrl_ =
+      this.hashParams_['url'] || this.win.location.href.split('#')[0];
 
     /** @private {!DevToolsTab} get URL param for tab (eg: #tab=page-experience) or default to PREVIEW*/
     this.currentTab_ =
-      (hashParams['tab']
+      (this.hashParams_['tab']
         ? Object.values(DevToolsTab).find(
-            (tab) => tab.toLowerCase().replace(' ', '-') === hashParams['tab']
+            (tab) =>
+              tab.toLowerCase().replace(' ', '-') === this.hashParams_['tab']
           )
         : null) || DevToolsTab.PREVIEW;
 
@@ -197,10 +201,10 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     const container = this.element.querySelector(
       '.i-amphtml-story-dev-tools-container'
     );
-    this.tabContents_[DevToolsTab.PREVIEW] = createTabElement(
+    this.tabContents_[DevToolsTab.PREVIEW] = createTabPreviewElement(
       this.win,
       this.storyUrl_,
-      DevToolsTab.PREVIEW
+      this.hashParams_['devices']
     );
     this.tabContents_[DevToolsTab.PAGE_EXPERIENCE] = createTabElement(
       this.win,
@@ -223,12 +227,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @param {!DevToolsTab} tab
    */
   switchTab_(tab) {
-    const container = this.element.querySelector(
-      '.i-amphtml-story-dev-tools-container'
-    );
     this.mutateElement(() => {
-      this.tabContents_[this.currentTab_].remove();
-      container.appendChild(this.tabContents_[tab]);
       toggle(this.tabContents_[this.currentTab_], false);
       toggle(this.tabContents_[tab], true);
       this.tabSelectors_.forEach((tabSelector) => {
@@ -263,4 +262,8 @@ AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
   AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
   AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab);
   AMP.registerElement('amp-story-dev-tools-tab-logs', AmpStoryDevToolsTabLogs);
+  AMP.registerElement(
+    'amp-story-dev-tools-tab-preview',
+    AmpStoryDevToolsTabPreview
+  );
 });

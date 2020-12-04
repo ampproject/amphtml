@@ -24,7 +24,7 @@ const posthtml = require('posthtml');
 const through = require('through2');
 const {buildNewServer} = require('../server/typescript-compile');
 const {cyan, green, red} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 const transformsDir = path.resolve('build-system/server/new-server/transforms');
 const inputPaths = [`${transformsDir}/**/input.html`];
@@ -191,7 +191,7 @@ function runTest() {
       return;
     }
     ++passed;
-    if (!isTravisBuild()) {
+    if (!isCiBuild()) {
       console.log(green('✔'), 'Passed', cyan(testName));
     }
     cb();

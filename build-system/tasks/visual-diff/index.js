@@ -20,7 +20,6 @@ const colors = require('ansi-colors');
 const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
-const sleep = require('sleep-promise');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -31,6 +30,7 @@ const {
   waitForPageLoad,
   verifySelectorsInvisible,
   verifySelectorsVisible,
+  sleep,
 } = require('./helpers');
 const {
   gitBranchName,
@@ -84,6 +84,10 @@ const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
 );
 const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/freeze-form-values.js'),
+  'utf8'
+);
+const FREEZE_CANVAS_IMAGE_SNIPPET = fs.readFileSync(
+  path.resolve(__dirname, 'snippets/freeze-canvas-image.js'),
   'utf8'
 );
 
@@ -573,6 +577,7 @@ async function snapshotWebpages(browser, webpages) {
         // snippet files for description of each.
         await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
         await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
+        await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
 
         // Create a default set of snapshot options for Percy and modify
         // them based on the test's configuration.
