@@ -20,7 +20,6 @@ const colors = require('ansi-colors');
 const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
-const sleep = require('sleep-promise');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -31,6 +30,7 @@ const {
   waitForPageLoad,
   verifySelectorsInvisible,
   verifySelectorsVisible,
+  sleep,
 } = require('./helpers');
 const {
   gitBranchName,
