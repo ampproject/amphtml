@@ -15,6 +15,8 @@
  */
 
 import {calculateFontSize_, updateOverflow_} from '../amp-fit-text';
+import {macroTask} from '../../../../testing/yield';
+import {spy} from 'fetch-mock';
 
 describes.realWin(
   'amp-fit-text component',
@@ -59,7 +61,7 @@ describes.realWin(
       const content = ft.querySelector('.i-amphtml-fit-text-content');
       expect(content).to.not.equal(null);
       expect(ft.textContent).to.equal(text);
-      (await ft.implementation_).unlayoutCallback();
+      await ft.implementation_.unlayoutCallback();
     });
 
     it('supports update of textContent', async () => {
@@ -70,29 +72,34 @@ describes.realWin(
       await ft.implementation_.mutateElement(() => {});
       const content = ft.querySelector('.i-amphtml-fit-text-content');
       expect(content.textContent).to.equal(newText);
-      (await ft.implementation_).unlayoutCallback();
+      await ft.implementation_.unlayoutCallback();
     });
 
     it('re-calculates font size if a resize is detected by the measurer', async () => {
       const ft = await getFitText(
         'Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.'
       );
-      expect(ft.style.fontSize).to.equal('17px');
-      const setupUpdateFontSizeSpy = env.sandbox.spy(
+      const updateFontSizeSpy = env.sandbox.spy(
         ft.implementation_,
         'updateFontSize_'
       );
-      await ft.implementation_.layoutCallback();
       // Verify that layoutCallback calls updateFontSize.
-      expect(setupUpdateFontSizeSpy).to.be.called;
+      await macroTask(1000);
+      console.log('layout');
+      expect(updateFontSizeSpy).to.be.calledOnce;
+      updateFontSizeSpy.resetHistory();
+      console.log('before resize');
       // Modify the size of the fit-text box.
       ft.setAttribute('width', '50');
       ft.setAttribute('height', '100');
       ft.style.width = '50px';
       ft.style.height = '100px';
+
+      await macroTask(500);
+      console.log('after resize');
       // Verify that the ResizeObserver calls updateFontSize.
-      expect(setupUpdateFontSizeSpy).to.be.called;
-      (await ft.implementation_).unlayoutCallback();
+      expect(updateFontSizeSpy).to.be.calledOnce;
+      await ft.implementation_.unlayoutCallback();
     });
   }
 );
