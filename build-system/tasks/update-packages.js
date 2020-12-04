@@ -21,7 +21,7 @@ const del = require('del');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const {execOrDie} = require('../common/exec');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 /**
  * Writes the given contents to the patched file if updated
@@ -31,7 +31,7 @@ const {isTravisBuild} = require('../common/travis');
 function writeIfUpdated(patchedName, file) {
   if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
     fs.writeFileSync(patchedName, file);
-    if (!isTravisBuild()) {
+    if (!isCiBuild()) {
       log(colors.green('Patched'), colors.cyan(patchedName));
     }
   }
@@ -104,7 +104,9 @@ function removeRruleSourcemap() {
   const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
   if (fs.existsSync(rruleMapFile)) {
     del.sync(rruleMapFile);
-    log(colors.green('Deleted'), colors.cyan(rruleMapFile));
+    if (!isCiBuild()) {
+      log(colors.green('Deleted'), colors.cyan(rruleMapFile));
+    }
   }
 }
 
@@ -140,7 +142,7 @@ function runNpmCheck() {
  * Used as a pre-requisite by several gulp tasks.
  */
 function maybeUpdatePackages() {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     updatePackages();
   }
 }
@@ -150,7 +152,7 @@ function maybeUpdatePackages() {
  * polyfills if necessary.
  */
 async function updatePackages() {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     runNpmCheck();
   }
   patchWebAnimations();

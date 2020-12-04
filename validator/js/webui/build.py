@@ -97,7 +97,7 @@ def InstallNodeDependencies():
   logging.info('installing AMP Validator webui dependencies ...')
   subprocess.check_call(
       ['npm', 'install', '--userconfig', '../../../.npmrc'],
-      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
+      stdout=(open(os.devnull, 'wb') if os.environ.get('CI') else sys.stdout))
   logging.info('... done')
 
 
@@ -149,7 +149,7 @@ def Main():
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
-      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
+      level=(logging.ERROR if os.environ.get('CI') else logging.INFO))
   GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()
