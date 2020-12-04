@@ -209,8 +209,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
-
-    this.uiHandler.maybeInitStickyAd();
   }
 
   /**
@@ -386,6 +384,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       scrollPromise,
     ])
       .then((consents) => {
+        this.uiHandler.maybeInitStickyAd();
+
         // Use JsonObject to preserve field names so that ampContext can access
         // values with name
         // ampcontext.js and this file are compiled in different compilation unit

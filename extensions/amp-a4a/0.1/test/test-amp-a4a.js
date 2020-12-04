@@ -1518,6 +1518,7 @@ describe('amp-a4a', () => {
       a4a.uiHandler = {
         getScrollPromiseForStickyAd: () => Promise.resolve(null),
         isStickyAd: () => false,
+        maybeInitStickyAd: () => {},
       };
       await a4a.layoutCallback();
       expect(
@@ -1953,6 +1954,7 @@ describe('amp-a4a', () => {
             unlayoutUISpy();
           },
           getScrollPromiseForStickyAd: () => Promise.resolve(null),
+          maybeInitStickyAd: () => {},
           cleanup: () => {},
         };
         window.sandbox
