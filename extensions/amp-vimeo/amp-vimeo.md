@@ -52,8 +52,9 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
   </tr>
   <tr>
     <td width="40%"><strong>do-not-track</strong></td>
-    <td>If this attribute is present, the player will be prevented from tracking session data, including cookies. For more details see the
-    <a href="https://developer.vimeo.com/api/oembed/videos">Vimeo oEmbed Documentation</a></td>
+    <td>If this attribute is present the player will be blocked from tracking any session data, including all cookies and
+    <a href="https://vimeo.com/stats">stats</a>. (It has the same effect as enabling a Do Not Track setting in your browser).
+    See the 'dnt' parameter in the <a href="https://developer.vimeo.com/api/oembed/videos">Vimeo oEmbed Documentation</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
