@@ -7,10 +7,5 @@
     "define_experiment_constant": "NO_SIGNING_RTV"
   },
   "experimentB": {},
-  "experimentC": {
-    "name": "DoubleClick viewport range = 3",
-    "environment": "AMP",
-    "expiration_date_utc": "2021-01-30",
-    "define_experiment_constant": "IDLE_VIEWPORT_RANGE_3"
-  }
+  "experimentC": {}
 }
