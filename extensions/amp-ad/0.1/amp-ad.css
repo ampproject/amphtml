@@ -76,10 +76,6 @@ amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid'] 
   width: 100% !important;
 }
 
-amp-ad.i-amphtml-amp-ad-sticky-layout {
-  overflow: visible !important;
-}
-
 amp-ad .amp-ad-close-button {
   position: absolute;
   visibility: visible;
@@ -118,4 +114,29 @@ amp-ad .amp-ad-close-button:before {
 [dir='rtl'] amp-ad .amp-ad-close-button:before {
   right: -20px;
   left: 0;
+}
+
+amp-ad[sticky] {
+  z-index: 11;
+  position: fixed;
+  overflow: visible !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+amp-ad[sticky='top'] {
+  width: 100% !important;
+  background: #fff;
+  top: 0;
+}
+
+amp-ad[sticky='bottom'] {
+  width: 100% !important;
+  background: #fff;
+  bottom: 0;
+}
+
+amp-ad[sticky='bottom-right'] {
+  bottom: 0;
+  right: 0;
 }

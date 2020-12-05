@@ -24,10 +24,22 @@ import {dict} from '../../../src/utils/object';
 
 import {getAdContainer} from '../../../src/ad-helper';
 import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 
 const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
 const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;
+
+/**
+ * Permissible sticky ad options.
+ * @const @enum {string}
+ */
+const StickyAdPositions = {
+  TOP: 'top',
+  BOTTOM: 'bottom',
+  BOTTOM_RIGHT: 'bottom-right',
+};
+
+const STICKY_AD_PROP = 'sticky';
 
 export class AmpAdUIHandler {
   /**
@@ -46,10 +58,18 @@ export class AmpAdUIHandler {
     this.containerElement_ = null;
 
     /**
-     * Whether this is a sticky ad unit.
-     * @private {boolean}
+     * If this is a sticky ad unit, the sticky position option.
+     * @private {?StickyAdPositions}
      */
-    this.isStickyAd_ = this.element_.hasAttribute('sticky');
+    this.stickyAdPosition_ = null;
+    if (this.element_.hasAttribute(STICKY_AD_PROP)) {
+      // TODO(powerivq@) Kargo is currently running an experiment using empty sticky attribute, so
+      // we default the position to bottom right. Remove this default afterwards.
+      this.stickyAdPosition_ =
+        this.element_.getAttribute(STICKY_AD_PROP) ||
+        StickyAdPositions.BOTTOM_RIGHT;
+      this.element_.setAttribute(STICKY_AD_PROP, this.stickyAdPosition_);
+    }
 
     /**
      * Whether the close button has been rendered for a sticky ad unit.
@@ -178,22 +198,15 @@ export class AmpAdUIHandler {
    * @return {boolean}
    */
   isStickyAd() {
-    return this.isStickyAd_;
+    return this.stickyAdPosition_ !== null;
   }
 
   /**
    * Initialize sticky ad related features
    */
   maybeInitStickyAd() {
-    if (this.isStickyAd_) {
-      setStyles(this.element_, {
-        position: 'fixed',
-        bottom: '0',
-        right: '0',
-        visibility: 'visible',
-      });
-
-      this.element_.classList.add('i-amphtml-amp-ad-sticky-layout');
+    if (this.isStickyAd()) {
+      setStyle(this.element_, 'visibility', 'visible');
     }
   }
 
@@ -202,7 +215,7 @@ export class AmpAdUIHandler {
    * @return {Promise}
    */
   getScrollPromiseForStickyAd() {
-    if (this.isStickyAd_) {
+    if (this.isStickyAd()) {
       return new Promise((resolve) => {
         const unlisten = Services.viewportForDoc(
           this.element_.getAmpDoc()
@@ -219,7 +232,7 @@ export class AmpAdUIHandler {
    * When a sticky ad is shown, the close button should be rendered at the same time.
    */
   onResizeSuccess() {
-    if (this.isStickyAd_ && !this.closeButtonRendered_) {
+    if (this.isStickyAd() && !this.closeButtonRendered_) {
       this.addCloseButton_();
       this.closeButtonRendered_ = true;
     }
