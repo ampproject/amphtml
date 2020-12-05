@@ -34,7 +34,6 @@ import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
@@ -573,7 +572,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   setupGestures_(element) {
-    if (!isExperimentOn(this.win, 'amp-sidebar-swipe-to-dismiss')) {
+    if (!(/* experiment: amp-sidebar-swipe-to-dismiss */ true)) {
       return;
     }
     // stop propagation of swipe event inside amp-viewer
