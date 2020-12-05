@@ -392,7 +392,7 @@ Adds support for Pinpoll. Configuration details can be found at [pinpoll.com](ht
 
 Type attribute value: `pressboard`
 
-Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp).
+Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca] `http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp`.
 
 ### Quantcast Measurement
 
