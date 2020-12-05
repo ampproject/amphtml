@@ -39,7 +39,8 @@ export class AmpActionMacro extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     userAssert(
-      isExperimentOn(this.win, 'amp-action-macro'),
+      /* experiment: amp-action-macro */
+      true,
       'Experiment is off'
     );
     const {element} = this;

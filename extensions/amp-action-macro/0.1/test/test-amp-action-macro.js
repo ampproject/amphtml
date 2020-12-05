@@ -35,8 +35,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-
-      toggleExperiment(win, 'amp-action-macro', true);
     });
 
     function newActionMacro() {
@@ -60,7 +58,6 @@ describes.realWin(
 
     it('should not build if experiment is off', () => {
       return allowConsoleError(() => {
-        toggleExperiment(env.win, 'amp-action-macro', false);
         return newActionMacro().catch((err) => {
           expect(err.message).to.include('Experiment is off');
         });
@@ -75,8 +72,6 @@ describes.realWin(
       let unreferrableMacro;
       let unreferrableMacroElement;
       beforeEach(() => {
-        toggleExperiment(win, 'amp-action-macro', true);
-
         // This macro is referrable and can be invoked by the macro element(s)
         // defined after it.
         referrableMacroElement = doc.createElement('amp-action-macro');
