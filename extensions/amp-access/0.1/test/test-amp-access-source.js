@@ -110,11 +110,8 @@ describes.fakeWin(
       config['type'] = 'client';
       expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
 
-      allowConsoleError(() => {
-        config['type'] = 'iframe';
-        expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
-        expectSourceType(ampdoc, config, 'iframe', AccessIframeAdapter);
-      });
+      config['type'] = 'iframe';
+      expectSourceType(ampdoc, config, 'iframe', AccessIframeAdapter);
 
       config['type'] = 'server';
       expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
