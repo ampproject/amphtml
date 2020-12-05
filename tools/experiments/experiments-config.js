@@ -84,12 +84,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz items (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/6106',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
     id: 'ios-fixed-no-transfer',
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
