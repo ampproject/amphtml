@@ -109,7 +109,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
     // EXPERIMENT
     // AMP.toggleExperiment(EXPERIMENT, true); //for dev
     userAssert(
-      isExperimentOn(this.win, 'amp-playbuzz'),
+      /* experiment: amp-playbuzz */
+      true,
       'Enable amp-playbuzz experiment'
     );
 
