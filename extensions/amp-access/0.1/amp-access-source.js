@@ -229,7 +229,7 @@ export class AccessSource {
     }
     if (
       type == AccessType.IFRAME &&
-      !isExperimentOn(this.ampdoc.win, 'amp-access-iframe')
+      !(/* experiment: amp-access-iframe */ true)
     ) {
       user().error(TAG, 'Experiment "amp-access-iframe" is not enabled.');
       type = AccessType.CLIENT;
