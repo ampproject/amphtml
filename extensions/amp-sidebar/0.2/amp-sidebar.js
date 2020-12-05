@@ -574,7 +574,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   setupGestures_(element) {
-    if (!isExperimentOn(this.win, 'amp-sidebar-swipe-to-dismiss')) {
+    if (!(/* experiment: amp-sidebar-swipe-to-dismiss */ true)) {
       return;
     }
     // stop propagation of swipe event inside amp-viewer
