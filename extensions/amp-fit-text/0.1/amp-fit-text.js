@@ -124,7 +124,6 @@ class AmpFitText extends AMP.BaseElement {
     if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
       const observer = new this.win.ResizeObserver(() =>
         this.mutateElement(() => {
-          console.log('resize Observer');
           this.updateMeasurerContent_();
           this.updateFontSize_();
         })
@@ -136,7 +135,6 @@ class AmpFitText extends AMP.BaseElement {
       };
     }
     return this.mutateElement(() => {
-      console.log('layout mutate');
       this.updateFontSize_();
     });
   }
@@ -144,7 +142,6 @@ class AmpFitText extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     if (this.resizeObserverUnlistener_ !== null) {
-      console.log('unlayout');
       this.resizeObserverUnlistener_();
       this.resizeObserverUnlistener_ = null;
     }
@@ -168,7 +165,6 @@ class AmpFitText extends AMP.BaseElement {
       this.minFontSize_,
       this.maxFontSize_
     );
-    console.log('updateFontSize');
     setStyle(this.contentWrapper_, 'fontSize', px(fontSize));
     updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight, fontSize);
   }
