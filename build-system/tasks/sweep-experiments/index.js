@@ -231,7 +231,7 @@ function collectWork(
     const percentage = prodConfig[experiment];
 
     if (removeExperiment && experiment !== removeExperiment) {
-      return;
+      continue;
     }
 
     if (
