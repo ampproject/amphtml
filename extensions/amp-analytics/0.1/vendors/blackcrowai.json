@@ -1,0 +1,24 @@
+{
+  "requests": {
+    "pageview": "https://api.blackcrow.ai/v1/js/events/view"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "transport": {
+    "useBody": true
+  },
+  "extraUrlParams": {
+    "page_referrer_url": "DOCUMENT_REFERRER",
+    "visitor_id": "CLIENT_ID(_ga)",
+    "page_url": "SOURCE_URL",
+    "google_tracking_id": "${google_tracking_id}",
+    "device_info": "USER_AGENT",
+    "site_name": "${site_name}",
+    "page_id": "amp",
+    "page_title": "TITLE"
+  }
+}
