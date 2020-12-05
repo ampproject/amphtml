@@ -1656,13 +1656,9 @@ describes.realWin(
       });
 
       describe('amp-story rewriteStyles', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', true);
-        });
+        beforeEach(() => {});
 
-        afterEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', false);
-        });
+        afterEach(() => {});
 
         it('should rewrite vw styles', async () => {
           await createStoryWithPages(1, ['cover']);
