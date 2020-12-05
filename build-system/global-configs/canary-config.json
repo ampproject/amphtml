@@ -21,7 +21,6 @@
   "ios-fixed-no-transfer": 1,
   "remove-task-timeout": 0,
   "swg-gpay-api": 1,
-  "swg-gpay-native": 1,
   "amp-ad-no-center-css": 0,
   "render-on-idle-fix": 1,
   "build-in-chunks": 1,
