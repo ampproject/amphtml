@@ -40,7 +40,7 @@ describes.realWin(
         vimeo.setAttribute('layout', 'responsive');
       }
       if (opt_doNotTrack) {
-        vimeo.setAttribute('do-not-track', 'do-not-track');
+        vimeo.setAttribute('do-not-track', '');
       }
       doc.body.appendChild(vimeo);
       await vimeo.build();
