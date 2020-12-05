@@ -15,12 +15,13 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
-const {exec} = require('../../common/exec');
+const path = require('path');
 const {getOutput} = require('../../common/process');
 const {magenta, cyan} = require('ansi-colors');
 const {readJsonSync, writeFileSync} = require('fs-extra');
 
-const dirsContainRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];
+const containRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];
+const containExampleHtml = ['examples', 'test'];
 
 const experimentsConfigPath = 'tools/experiments/experiments-config.js';
 const prodConfigPath = 'build-system/global-configs/prod-config.json';
@@ -37,29 +38,40 @@ const globalWritablePaths = [
  * @return {?string}
  */
 function getStdout(cmd) {
-  const {stdout} = getOutput(cmd);
+  const {stdout, stderr} = getOutput(cmd);
+  if (!stdout && stderr) {
+    throw new Error(`${cmd}\n\n${stderr}`);
+  }
   return stdout && stdout.trim();
 }
 
+function getStdoutLines(cmd) {
+  const stdout = getStdout(cmd);
+  return !stdout ? [] : stdout.split('\n');
+}
+
 /**
+ * @param {string} str
+ * @return {string}
+ */
+const cmdEscape = (str) => str.replace(/["`]/g, (c) => `\\${c}`);
+
+/**
+ * @param {!Array<string>} dirs
  * @param {string} string
  * @return {!Array<string>}
  */
-const filesContainingString = (string) =>
-  getStdout(
-    `grep -lr "${cmdEscape(string)}" {${dirsContainRuntimeSource.join(',')}}`
-  )
-    .split('\n')
-    .filter((name) => name.endsWith('.js'));
+const filesContainingPattern = (dirs, string) =>
+  getStdoutLines(`grep -Elr "${cmdEscape(string)}" {${dirs.join(',')}}`);
 
 /**
  * @param {string} fromHash
  * @return {!Array<string>}
  */
 const getModifiedSourceFiles = (fromHash) =>
-  getStdout(`git diff --name-only ${fromHash}..HEAD | grep .js`)
-    .split('\n')
-    .filter((file) => !globalWritablePaths.includes(file));
+  getStdoutLines(`git diff --name-only ${fromHash}..HEAD | grep .js`).filter(
+    (file) => !globalWritablePaths.includes(file)
+  );
 
 /**
  * Runs a jscodeshift transform under this directory.
@@ -79,11 +91,10 @@ const jscodeshift = (transform, args = []) =>
  * @return {Array<string>} modified files
  */
 function removeFromExperimentsConfig(id) {
-  jscodeshift(
-    'remove-experiment-config.js'[
-      (`--experimentId=${id}`, experimentsConfigPath)
-    ]
-  );
+  jscodeshift('remove-experiment-config.js', [
+    `--experimentId=${id}`,
+    experimentsConfigPath,
+  ]);
   return [experimentsConfigPath];
 }
 
@@ -105,7 +116,10 @@ function removeFromJsonConfig(config, path, id) {
  * @return {Array<string>} modified files
  */
 function removeFromRuntimeSource(id, percentage) {
-  const possiblyModifiedSourceFiles = filesContainingString(id);
+  const possiblyModifiedSourceFiles = filesContainingPattern(
+    containRuntimeSource,
+    id
+  ).filter((name) => name.endsWith('.js'));
   if (possiblyModifiedSourceFiles.length > 0) {
     jscodeshift('remove-experiment-runtime.js', [
       `--isExperimentOnLaunched=${percentage}`,
@@ -117,53 +131,35 @@ function removeFromRuntimeSource(id, percentage) {
 }
 
 /**
- * @param {string} str
- * @return {string}
- */
-const cmdEscape = (str) => str.replace(/["`]/g, (c) => `\\${c}`);
-
-/**
  * @param {string} id
  * @param {*} workItem
  * @param {!Array<string>} modified
- * @return {?string}
+ * @return {? string}
  */
-function gitCommitSingleExperiment(
-  id,
-  {previousHistory, percentage},
-  modified
-) {
-  exec(`git add ${modified.join(' ')}`);
-  const commitMessage =
-    `${readableRemovalId(id, {previousHistory, percentage})}\n\n` +
-    `${prodConfigPath.split('/').pop()} history:\n\n` +
-    previousHistory
-      .map(
+function gitCommitSingleExperiment(id, workItem, modified) {
+  const messageLines = [readableRemovalId(id, workItem)];
+  if (workItem.previousHistory.length > 0) {
+    messageLines.push(
+      '',
+      `Previous history on ${prodConfigPath.split('/').pop()}:`,
+      '',
+      ...workItem.previousHistory.map(
         ({hash, authorDate, subject}) =>
-          ` - ${hash} - ${authorDate}\n   ${subject}\n`
+          `- ${hash} - ${authorDate} - ${subject}`
       )
-      .join('\n');
-  return getStdout(`git commit -m "${cmdEscape(commitMessage)}"`);
+    );
+  }
+  getStdout(`git add ${modified.join(' ')}`);
+  return getStdout(`git commit -m "${cmdEscape(messageLines.join('\n'))}"`);
 }
 
 function readableRemovalId(id, {percentage, previousHistory}) {
-  const {knownPr, authorDate, hash} = previousHistory[0];
-  return (
-    `(${truncateYyyyMmDd(authorDate)}, ${knownPr || hash}) ` +
-    `\`${id}\`: ${percentage}`
-  );
+  const lastCommit = previousHistory[0];
+  const prefix = lastCommit
+    ? `(${truncateYyyyMmDd(lastCommit.authorDate)}, ${lastCommit.hash})`
+    : 'Remove';
+  return `${prefix} \`${id}\`: ${percentage}`;
 }
-
-/**
- * @param {!Array<string>=} extraFiles
- * @return {*}
- */
-const lintFix = (extraFiles = []) =>
-  getOutput(
-    `gulp lint --fix --files="${[experimentsConfigPath]
-      .concat(extraFiles)
-      .join(',')}"`
-  );
 
 /**
  * @param {number=} daysAgo
@@ -199,19 +195,105 @@ const findConfigBitCommits = (
   configPath,
   experiment,
   percentage
-) => {
-  const out = getStdout(
-    'git log' +
-      ' --pretty="format:%h %aI %s"' +
-      ` -S '"${experiment}": ${percentage},'` +
-      ` --until=${cutoffDateFormatted}` +
-      ` ${configPath}`
-  );
-  if (out.length <= 0) {
-    return [];
+) =>
+  getStdoutLines(
+    [
+      'git log',
+      `--until=${cutoffDateFormatted}`,
+      // Look for entries that contain exact percentage string, like:
+      // "my-experiment-launched": 0,
+      `-S '"${experiment}": ${percentage},'`,
+      // %h: hash
+      // %aI: authorDate
+      // %s: subject
+      ' --format="%h %aI %s"',
+      configPath,
+    ].join(' ')
+  ).map((line) => {
+    const tokens = line.split(' ');
+    // PR numbers in subject lines create spammy references when commit,
+    // remove them early on.
+    if (/^\(#[0-9]+\)$/.test(tokens[tokens.length - 1])) {
+      tokens.pop();
+    }
+    return {
+      hash: tokens.shift(),
+      authorDate: tokens.shift(),
+      subject: tokens.join(' '),
+    };
+  });
+
+/**
+ * @param {string} files
+ * @return {string}
+ */
+const fileListMarkdown = (files) =>
+  files.map((path) => `- \`${path}\``).join('\n');
+
+/**
+ * @return {string}
+ */
+const readmeMdGithubLink = () =>
+  `https://github.com/ampproject/amphtml/${path.relative(
+    process.cwd(),
+    __dirname
+  )}`;
+
+/**
+ * @param {{
+ *   removed: string,
+ *   cutoffDateFormatted: string,
+ *   modifiedSourceFiles: Array<string>,
+ *   htmlFilesWithReferences: Array<string>,
+ * }} vars
+ * @return {string}
+ */
+function summaryCommitMessage({
+  removed,
+  cutoffDateFormatted,
+  modifiedSourceFiles,
+  htmlFilesWithReferences,
+}) {
+  const lines = [
+    `🚮 Sweep experiments older than ${cutoffDateFormatted}`,
+    '',
+    `Sweep experiments last flipped globally up to ${cutoffDateFormatted}:`,
+    '',
+    removed.join('\n'),
+  ];
+
+  if (modifiedSourceFiles.length > 0) {
+    lines.push(
+      '',
+      '---',
+      '',
+      '**⚠️ This changes Javascript source files**',
+      '',
+      'The following may contain errors and/or require intervention to remove superfluous conditionals:',
+      '',
+      fileListMarkdown(modifiedSourceFiles),
+      '',
+      `Refer to the removal guide for [suggestions on handling these modified Javascript files.](${readmeMdGithubLink()}#followup)`
+    );
   }
-  return out.split('\n');
-};
+
+  if (htmlFilesWithReferences.length > 0) {
+    lines.push(
+      '',
+      '---',
+      '',
+      '**⚠️ There are HTML files with possible references**',
+      '',
+      'The following HTML files contain references to experiment names which may be stale and should be manually removed:',
+      '',
+      fileListMarkdown(htmlFilesWithReferences),
+      '',
+      `Refer to the removal guide for [suggestions on handling these HTML files.](${readmeMdGithubLink()}#followup:html)`
+    );
+  }
+
+  return lines.join('\n');
+}
 
 /**
  * @param {!Object<string, *>} prodConfig
@@ -226,46 +308,36 @@ function collectWork(
   cutoffDateFormatted,
   removeExperiment
 ) {
-  const work = {};
-  for (const experiment in prodConfig) {
-    const percentage = prodConfig[experiment];
-
-    if (removeExperiment && experiment !== removeExperiment) {
-      continue;
-    }
-
-    if (
-      !removeExperiment &&
-      (experiment === 'canary' ||
-        !(percentage >= 1 || percentage <= 0) ||
-        percentage !== canaryConfig[experiment])
-    ) {
-      continue;
-    }
-
-    const commitStrings = findConfigBitCommits(
+  if (removeExperiment) {
+    // 0 if not on prodConfig
+    const percentage = Number(prodConfig[removeExperiment]);
+    const previousHistory = findConfigBitCommits(
       cutoffDateFormatted,
       prodConfigPath,
-      experiment,
+      removeExperiment,
       percentage
     );
-    if (commitStrings.length <= 0) {
-      continue;
-    }
+    return {percentage, previousHistory};
+  }
 
-    work[experiment] = {
-      percentage,
-      previousHistory: commitStrings.map((line) => {
-        const tokens = line.split(' ');
-        const hash = tokens.shift();
-        const authorDate = tokens.shift();
-        const knownPr = /\(#[0-9]+\)/.test(tokens[tokens.length - 1])
-          ? tokens[tokens.length - 1].replace(/[()]/g, '')
-          : null;
-        const subject = tokens.join(' ');
-        return {hash, authorDate, knownPr, subject};
-      }),
-    };
+  const work = {};
+  for (const [experiment, percentage] of Object.entries(prodConfig)) {
+    if (
+      typeof percentage === 'number' &&
+      percentage === canaryConfig[experiment] &&
+      experiment !== 'canary' &&
+      (percentage >= 1 || percentage <= 0)
+    ) {
+      const previousHistory = findConfigBitCommits(
+        cutoffDateFormatted,
+        prodConfigPath,
+        experiment,
+        percentage
+      );
+      if (previousHistory.length > 0) {
+        work[experiment] = {percentage, previousHistory};
+      }
+    }
   }
   return work;
 }
@@ -276,24 +348,25 @@ async function sweepExperiments() {
   const prodConfig = readJsonSync(prodConfigPath);
   const canaryConfig = readJsonSync(canaryConfigPath);
 
-  const cutoffPointFormatted = daysAgo(
+  const cutoffDateFormatted = daysAgo(
     argv.experiment ? 0 : argv.days_ago || 365
   ).toISOString();
 
   const work = collectWork(
     prodConfig,
     canaryConfig,
-    cutoffPointFormatted,
+    cutoffDateFormatted,
     argv.experiment
   );
-  const report = [];
+
+  const removed = [];
 
   let at = 0;
   const total = Object.keys(work).length;
 
   if (total === 0) {
     log(cyan('No experiments to remove.'));
-    log(`Cutoff at ${cutoffPointFormatted}`);
+    log(`Cutoff at ${cutoffDateFormatted}`);
     return;
   }
 
@@ -316,14 +389,12 @@ async function sweepExperiments() {
       ...removeFromExperimentsConfig(id),
       ...removeFromJsonConfig(prodConfig, prodConfigPath, id),
       ...removeFromJsonConfig(canaryConfig, canaryConfigPath, id),
-      ...removeFromRuntimeSource(id),
+      ...removeFromRuntimeSource(id, work[id].percentage),
     ];
 
-    if (argv.skip_lint_fix) {
-      log('❗️ (Not fixing lint issues due to --skip_lint_fix)');
-    } else {
-      lintFix(modified);
-    }
+    getStdout(
+      `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
+    );
 
     gitCommitSingleExperiment(id, work[id], modified)
       .split('\n')
@@ -331,31 +402,27 @@ async function sweepExperiments() {
 
     log();
 
-    report.push(`- ${readableRemovalId(id, work[id])}`);
+    removed.push(`- ${readableRemovalId(id, work[id])}`);
   }
 
-  if (report.length > 0) {
-    let reportCommitMessage =
-      `🚮 Sweep experiments\n\n` +
-      `Sweep experiments last flipped globally up to ${truncateYyyyMmDd(
-        cutoffPointFormatted
-      )}:\n\n` +
-      report.join('\n') +
-      '\n\n';
-
+  if (removed.length > 0) {
     const modifiedSourceFiles = getModifiedSourceFiles(headHash);
-    if (modifiedSourceFiles.length > 0) {
-      reportCommitMessage += String(
-        '---\n\n**⚠️ This changes Javascript source files**\n\n' +
-          'The following may contain errors and/or require intervention to remove superfluous conditionals:\n\n' +
-          modifiedSourceFiles.map((path) => `- \`${path}\``).join('\n') +
-          '\n\n'
-      );
-    }
+
+    const htmlFilesWithReferences = filesContainingPattern(
+      containExampleHtml,
+      `['"](${Object.keys(work).join('|')})['"]`
+    ).filter((name) => name.endsWith('.html'));
 
     log(
       getStdout(
-        `git commit --allow-empty -m "${cmdEscape(reportCommitMessage)}"`
+        `git commit --allow-empty -m "${cmdEscape(
+          summaryCommitMessage({
+            removed,
+            modifiedSourceFiles,
+            htmlFilesWithReferences,
+            cutoffDateFormatted: truncateYyyyMmDd(cutoffDateFormatted),
+          })
+        )}"`
       ),
       '\n\n',
       getStdout('git log --pretty=format:%b "HEAD^..HEAD"'),
@@ -379,8 +446,7 @@ sweepExperiments.description =
 sweepExperiments.flags = {
   'days_ago':
     ' How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
-  'experiment': ' Remove a specific experiment id.',
   'dry':
-    " Don't write, but only display which experiments would be removed from the cutoff point.",
-  'skip_lint_fix': ' Skips lint-fixing modified files before each commit.',
+    " Don't write, but only list the experiments that would be removed by this command.",
+  'experiment': ' Remove a specific experiment id.',
 };
