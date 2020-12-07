@@ -48,10 +48,11 @@ const Controls = {
  * @enum {string}
  */
 const Interaction = {
-  FOCUS: 'focus',
-  MOUSE: 'mouse',
-  TOUCH: 'touch',
-  NONE: 'none',
+  GENERIC: 0,
+  FOCUS: 1,
+  MOUSE: 2,
+  TOUCH: 3,
+  NONE: 4,
 };
 
 /**
@@ -175,9 +176,18 @@ function BaseCarouselWithRef(
     ref,
     () =>
       /** @type {!BaseCarouselDef.CarouselApi} */ ({
-        goToSlide: (index) => setRestingIndex(index),
-        next,
-        prev,
+        goToSlide: (index) => {
+          interaction.current = Interaction.GENERIC;
+          setRestingIndex(index);
+        },
+        next: () => {
+          interaction.current = Interaction.GENERIC;
+          next();
+        },
+        prev: () => {
+          interaction.current = Interaction.GENERIC;
+          prev();
+        },
         root: containRef.current,
         node: contentRef.current,
       }),
