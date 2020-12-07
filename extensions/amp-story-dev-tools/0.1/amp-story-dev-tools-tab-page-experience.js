@@ -47,7 +47,5 @@ export class AmpStoryDevToolsTabPageExperience extends AMP.BaseElement {
     const iframe = htmlFor(this.element)`<iframe frameborder="0">`;
     iframe.src = 'https://amp.dev/page-experience/?url=' + this.storyUrl_;
     this.element.appendChild(iframe);
-
-    console.log('page experience tab');
   }
 }
