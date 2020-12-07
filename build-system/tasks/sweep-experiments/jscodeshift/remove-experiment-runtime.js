@@ -39,7 +39,9 @@ export default function transformer(file, api, options) {
 
   const {isExperimentOnExperiment, isExperimentOnLaunched} = options;
 
-  return j(file.source)
+  const root = j(file.source);
+
+  return root
     .find(
       j.CallExpression,
       (node) =>
@@ -53,21 +55,13 @@ export default function transformer(file, api, options) {
       const {name} = path.node.callee;
 
       // remove unused imports
-      j(path)
-        .closest(j.Program)
-        .find(
-          j.ImportSpecifier,
-          (node) => node.imported && node.imported.name === name
-        )
+      root
+        .find(j.ImportSpecifier, {imported: {name}})
         .closest(j.ImportDeclaration)
         .forEach((path) => {
           if (
-            j(path.scope.node)
-              .find(
-                j.CallExpression,
-                (node) => node.callee && node.callee.name === name
-              )
-              .size() > 1
+            j(path.scope.node).find(j.CallExpression, {callee: {name}}).size() >
+            1
           ) {
             return;
           }
