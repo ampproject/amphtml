@@ -35,6 +35,7 @@ tags: {  # <amp-story-player>
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
   }
 }
 descendant_tag_list {
