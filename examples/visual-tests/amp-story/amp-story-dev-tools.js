@@ -20,7 +20,11 @@ module.exports = {
     await page.waitFor(1000);
   },
   'shows the logs tab properly': async (page, name) => {
-    await page.tap('.i-amphtml-story-dev-tools-tab-selector:last-child()');
+    await page.tap('.i-amphtml-story-dev-tools-tab-selector:[data-tabs="Logs"]');
+    await page.waitFor(1000);
+  },
+  'shows the page-experience tab properly': async (page, name) => {
+    await page.tap('.i-amphtml-story-dev-tools-tab-selector:[data-tabs="Page Experience"]');
     await page.waitFor(1000);
   },
  };
