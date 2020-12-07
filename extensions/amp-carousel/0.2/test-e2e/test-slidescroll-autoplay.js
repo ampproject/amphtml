@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
+
 describes.endtoend(
   'AMP carousel 0.2 slideChange on type="slide" with autoplay',
   {
@@ -29,7 +31,7 @@ describes.endtoend(
      * If given a selector, click on it to fire the event being listened for.
      * @return {!Promise}
      */
-    function slideChageEventAfterClicking(opt_selector) {
+    function slideChangeEventAfterClicking(opt_selector) {
       return controller.evaluate((opt_selector) => {
         return new Promise((resolve) => {
           document.addEventListener(
@@ -50,21 +52,21 @@ describes.endtoend(
 
     it('should fire low trust event for autoplay advance', async () => {
       for (let i = 0; i < 3; i++) {
-        const event = await slideChageEventAfterClicking(/*autoplay*/);
-        await expect(event.actionTrust).to.equal(1); //ActionTrust.LOW
+        const event = await slideChangeEventAfterClicking();
+        await expect(event.actionTrust).to.equal(ActionTrust.LOW);
       }
     });
 
     it('should fire high trust event on user interaction', async () => {
-      const event = await slideChageEventAfterClicking(
+      const event = await slideChangeEventAfterClicking(
         '.amp-carousel-button-next'
       );
-      await expect(event.actionTrust).to.equal(3); //ActionTrust.HIGH
+      await expect(event.actionTrust).to.equal(ActionTrust.HIGH);
     });
 
     it('should fire high trust event on user interaction throw amp-bind', async () => {
-      const event = await slideChageEventAfterClicking('#go-to-last');
-      await expect(event.actionTrust).to.equal(3); //ActionTrust.HIGH
+      const event = await slideChangeEventAfterClicking('#go-to-last');
+      await expect(event.actionTrust).to.equal(ActionTrust.HIGH);
     });
   }
 );
