@@ -20,13 +20,14 @@ jobs:
       - name: setup-node
         uses: actions/setup-node@v2.1.2
 
-      - name: run
-        id: run
+      - name: sweep
+        id: sweep
         run: |
+          npm ci
+                    
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-          npm ci
           npx gulp sweep-experiments
 
           title=$(git log -1 --format=%s)
@@ -48,15 +49,15 @@ jobs:
           echo "::set-output name=branch::$(echo "sweep-experiments-${hash}")"
 
       - id: pull-request
-        name: create-pull-request
+        name: pull-request
         uses: peter-evans/create-pull-request@v3
         with:
           draft: true
-          title: ${{ steps.run.outputs.title }}
-          body: ${{ steps.run.outputs.body }}
-          branch: ${{ steps.run.outputs.branch }}
+          title: ${{ steps.get-summary.outputs.title }}
+          body: ${{ steps.sweep.outputs.body }}
+          branch: ${{ steps.sweep.outputs.branch }}
 
-      - name: create-or-update-comment
+      - name: comment
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ steps.pull-request.outputs.pull-request-number }}
@@ -64,5 +65,5 @@ jobs:
             You may checkout this pull request to follow-up manually:
             
             ```
-            git checkout -t upstream/${{ steps.sweep.branch }}
+            git checkout -t upstream/${{ steps.sweep.outputs.branch }}
             ```
