@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../src/amp-events';
 import {createFixtureIframe} from '../../testing/iframe.js';
 
-describe.configure().run('Configuration', function () {
+describe('Configuration', function () {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/configuration.html', 500).then(

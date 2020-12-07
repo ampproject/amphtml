@@ -35,7 +35,7 @@ async function main() {
 
   downloadDistOutput(FILENAME);
   timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp performance --nobuild --quiet');
+  timedExecOrDie('gulp performance --nobuild --quiet --headless');
 
   stopTimer(FILENAME, FILENAME, startTime);
 }

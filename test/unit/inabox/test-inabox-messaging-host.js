@@ -176,7 +176,7 @@ describes.realWin('inabox-host:messaging', {}, (env) => {
       ).to.be.false;
     });
 
-    it('should allow read-only messages from frames with no whitelist', () => {
+    it('should allow read-only messages from frames with no allowlist', () => {
       expect(
         host.processMessage({
           source: iframe3.contentWindow,
@@ -191,7 +191,7 @@ describes.realWin('inabox-host:messaging', {}, (env) => {
       ).to.be.true;
     });
 
-    it('should ignore write messages from frames with no whitelist', () => {
+    it('should ignore write messages from frames with no allowlist', () => {
       expect(
         host.processMessage({
           source: iframe3.contentWindow,

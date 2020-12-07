@@ -627,6 +627,39 @@ describes.fakeWin('LiveListManager', {amp: true}, (env) => {
     }
   );
 
+  it("should not poll if all amp-live-list's are disabled on visible", () => {
+    const fetchSpy = env.sandbox.spy(manager, 'work_');
+    const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+    liveList.toggle(false);
+    liveList2.toggle(false);
+    ready();
+    // Important that we set this before build since then is when they register
+    liveList.buildCallback();
+    liveList2.buildCallback();
+    expect(liveList.isEnabled()).to.be.false;
+    expect(liveList2.isEnabled()).to.be.false;
+    return manager.whenDocReady_().then(() => {
+      expect(ampdoc.isVisible()).to.be.true;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('hidden');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('visible');
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('inactive');
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('visible');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('prerender');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      clock.tick(20000);
+      expect(fetchSpy).to.have.not.been.called;
+    });
+  });
+
   it('should fetch with url', () => {
     env.sandbox.stub(Math, 'random').callsFake(() => 1);
     env.sandbox.stub(ampdoc, 'isVisible').returns(true);

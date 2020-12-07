@@ -34,7 +34,7 @@ export class Expander {
    * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
    *   variable resolutions.
    * @param {boolean=} opt_sync If the method should resolve syncronously.
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
    *   that can be substituted.
    * @param {boolean=} opt_noEncode Should not urlEncode macro resolution.
    */
@@ -43,7 +43,7 @@ export class Expander {
     opt_bindings,
     opt_collectVars,
     opt_sync,
-    opt_whiteList,
+    opt_allowlist,
     opt_noEncode
   ) {
     /** @const {?../variable-source.VariableSource} */
@@ -60,7 +60,7 @@ export class Expander {
     this.sync_ = opt_sync;
 
     /**@const {!Object<string, boolean>|undefined} */
-    this.whiteList_ = opt_whiteList;
+    this.allowlist_ = opt_allowlist;
 
     /**@const {boolean|undefined} */
     this.encode_ = !opt_noEncode;
@@ -75,7 +75,7 @@ export class Expander {
     if (!url.length) {
       return this.sync_ ? url : Promise.resolve(url);
     }
-    const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
+    const expr = this.variableSource_.getExpr(this.bindings_, this.allowlist_);
 
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
@@ -91,7 +91,7 @@ export class Expander {
    * @return {!Array}
    */
   getMacroNames(url) {
-    const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
+    const expr = this.variableSource_.getExpr(this.bindings_, this.allowlist_);
     const matches = url.match(expr);
     if (matches) {
       return matches;

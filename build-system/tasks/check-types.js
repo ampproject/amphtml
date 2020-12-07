@@ -16,14 +16,12 @@
 
 const log = require('fancy-log');
 const {
-  checkTypesNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
+const {
+  displayLifecycleDebugging,
+} = require('../compile/debug-compilation-lifecycle');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
@@ -67,11 +65,9 @@ async function checkTypes() {
     })
     .sort();
   return compileCss()
-    .then(async () => {
-      await startNailgunServer(checkTypesNailgunPort, /* detached */ false);
-    })
     .then(() => {
       log('Checking types...');
+      displayLifecycleDebugging();
       return Promise.all([
         closureCompile(
           compileSrcs.concat(extensionSrcs),
@@ -120,9 +116,6 @@ async function checkTypes() {
         ),
       ]);
     })
-    .then(async () => {
-      await stopNailgunServer(checkTypesNailgunPort);
-    })
     .then(() => exitCtrlcHandler(handlerProcess));
 }
 
@@ -135,6 +128,5 @@ module.exports = {
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
-  disable_nailgun:
-    "  Doesn't use nailgun to invoke closure compiler (much slower)",
+  debug: '  Outputs the file contents during compilation lifecycles',
 };

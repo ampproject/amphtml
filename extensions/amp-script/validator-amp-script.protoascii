@@ -33,10 +33,10 @@ tags: {  # <amp-script> (local script)
     name: "id"
     add_value_to_set: AMP_SCRIPT_IDS
     mandatory: true
-    # When updating this blacklisted_value_regex, also update for
+    # When updating this disallowed_value_regex, also update for
     # mandatory-id-attr and $GLOBAL_ATTRS in validator-main.protoascii, and
     # validator-amp-mustache.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -171,19 +171,25 @@ tags: {  # <amp-script> (local script)
   attr_lists: "nonce-attr"
   cdata: {
     max_bytes: 10000
-    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-script#faq"
-    blacklisted_cdata_regex: {
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-script/#faq"
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-script"
+  spec_url: "https://amp.dev/documentation/components/amp-script/"
 }
 tags: {  # <amp-script>
   html_format: AMP
   tag_name: "AMP-SCRIPT"
   disallowed_ancestor: "AMP-SCRIPT"
   requires_extension: "amp-script"
+  attrs: {
+    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/27076
+    name: "data-ampdevmode"
+    value: "false"
+    disallowed_value_regex: "false"
+  }
   attrs: {
     name: "max-age"
     value_regex: "[0-9]+"
@@ -193,10 +199,8 @@ tags: {  # <amp-script>
     }
   }
   attrs: {
-    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/27076
-    name: "data-ampdevmode"
-    value: "false"
-    blacklisted_value_regex: "false"
+    name: "nodom"
+    value: ""
   }
   attrs: { name: "sandbox" }
   attrs: {
@@ -211,7 +215,7 @@ tags: {  # <amp-script>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   amp_layout {

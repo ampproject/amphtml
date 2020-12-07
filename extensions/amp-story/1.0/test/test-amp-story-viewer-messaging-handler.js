@@ -20,7 +20,6 @@ import {
   getStoreService,
 } from '../amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from '../amp-story-viewer-messaging-handler';
-import {HistoryState, setHistoryState} from '../utils';
 
 describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
   let fakeViewerService;
@@ -97,7 +96,7 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
     });
 
     it('should return the PAGE_ATTACHMENT_STATE', async () => {
-      setHistoryState(env.win, HistoryState.ATTACHMENT_PAGE_ID, 'SOME_ID');
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',
         {state: 'PAGE_ATTACHMENT_STATE'}
@@ -106,11 +105,10 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
         state: 'PAGE_ATTACHMENT_STATE',
         value: true,
       });
-      setHistoryState(env.win, HistoryState.ATTACHMENT_PAGE_ID, null);
     });
 
     it('should return the STORY_PROGRESS', async () => {
-      storeService.dispatch(Action.SET_PAGE_IDS, [1, 2, 3, 4]);
+      storeService.dispatch(Action.SET_PAGE_IDS, [1, 2, 3, 4, 5]);
       storeService.dispatch(Action.CHANGE_PAGE, {id: 3, index: 2});
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',

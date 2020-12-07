@@ -57,7 +57,7 @@ const strings = {
     string: 'More about AMP results',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS]: {
-    string: 'Tip 2/2',
+    string: 'Tip 2 of 2',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS]: {
     string: 'Swipe to go to the next story',
@@ -66,7 +66,7 @@ const strings = {
     string: 'Got it',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS]: {
-    string: 'Tip 1/2',
+    string: 'Tip 1 of 2',
   },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE]: {
     string: 'Tip',
@@ -80,17 +80,26 @@ const strings = {
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
     string: 'Updated',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_A]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_RESULTS_SCORE]: {
+    string: 'SCORE:',
+  },
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A]: {
     string: 'A',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_B]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B]: {
     string: 'B',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_C]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C]: {
     string: 'C',
   },
-  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_D]: {
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D]: {
     string: 'D',
+  },
+  [LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL]: {
+    string: 'Pause',
+  },
+  [LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL]: {
+    string: 'Play',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: ':(',

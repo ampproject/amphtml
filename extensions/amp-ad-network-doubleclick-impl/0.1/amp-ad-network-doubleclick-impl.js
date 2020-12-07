@@ -20,10 +20,15 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../amp-a4a/0.1/real-time-config-manager';
-import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
+import '../../../src/service/real-time-config/real-time-config-impl';
 import {
-  AMP_AD_NO_CENTER_CSS_EXP,
+  AmpA4A,
+  ConsentTupleDef,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
+import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -43,23 +48,17 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {
-  AmpA4A,
-  ConsentTupleDef,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
+import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
+import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
@@ -74,6 +73,11 @@ import {
 } from './sra-utils';
 import {WindowInterface} from '../../../src/window-interface';
 import {
+  addAmpExperimentIdToElement,
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {
   assertDoesNotContainDisplay,
   setImportantStyles,
   setStyles,
@@ -87,10 +91,6 @@ import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {
-  extractUrlExperimentId,
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -148,27 +148,12 @@ const ZINDEX_EXP_BRANCHES = {
 };
 
 /** @const {string} */
-const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
+const PTT_EXP = 'doubleclick-ptt-exp';
 
-/**
- * Branches of the random subdomain for SafeFrame experiment.
- * @const @enum{string}
- * @visibleForTesting
- */
-export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
-  CONTROL: '21065817',
-  EXPERIMENT: '21065818',
-};
-
-/**
- * @const @enum {string}
- * @visibleForTesting
- * TODO(#28555): Clean up experiment
- */
-export const EXPAND_JSON_TARGETING_EXP = {
-  ID: 'expand-json-targeting',
-  CONTROL: '21066261',
-  EXPERIMENT: '21066262',
+/** @const @enum{string} */
+const PTT_EXP_BRANCHES = {
+  CONTROL: '21068093',
+  EXPERIMENT: '21068094',
 };
 
 /**
@@ -195,6 +180,14 @@ let tokensToInstances = {};
 
 /** @private {?Promise} */
 let sraRequests = null;
+
+/**
+ * The random subdomain to load SafeFrame from, if SafeFrame is
+ * being loaded from a random subdomain and if the subdomain
+ * has been generated.
+ * @private {?string}
+ */
+let safeFrameRandomSubdomain = null;
 
 /** @typedef {{
       adUrl: !Promise<string>,
@@ -255,6 +248,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
+
+    /** @type {!Array<string>} */
+    this.ampExperimentIds = [];
 
     /** @protected {boolean} */
     this.useSra = false;
@@ -320,14 +316,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {ConsentTupleDef} */
     this.consentTuple = {};
-
-    /**
-     * The random subdomain to load SafeFrame from, if SafeFrame is
-     * being loaded from a random subdomain and if the subdomain
-     * has been generated.
-     * @private {?string}
-     */
-    this.safeFrameRandomSubdomain_ = null;
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
@@ -398,9 +386,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource()
-      .whenWithinViewport(renderOutsideViewport)
-      .then(() => (this.isIdleRender_ = false));
+    this.whenWithinViewport(renderOutsideViewport).then(
+      () => (this.isIdleRender_ = false)
+    );
     return vpRange;
   }
 
@@ -435,8 +423,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoMap = /** @type {!Object<string, !../../../src/experiments.ExperimentInfo>} */ ({
-      [DOUBLECLICK_SRA_EXP]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: DOUBLECLICK_SRA_EXP,
         isTrafficEligible: () =>
           !forcedExperimentId &&
           !this.win.document./*OK*/ querySelector(
@@ -448,44 +437,46 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
         ),
       },
-      [ZINDEX_EXP]: {
+      {
+        experimentId: ZINDEX_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
-      [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
+      {
+        experimentId: PTT_EXP,
         isTrafficEligible: () => true,
-        branches: [
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
-        ],
+        branches: Object.values(PTT_EXP_BRANCHES),
       },
-      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [AMP_AD_NO_CENTER_CSS_EXP.control],
-          [AMP_AD_NO_CENTER_CSS_EXP.experiment],
-        ],
-      },
-      [[FIE_INIT_CHUNKING_EXP.id]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_INIT_CHUNKING_EXP.control],
-          [FIE_INIT_CHUNKING_EXP.experiment],
-        ],
-      },
-      [[EXPAND_JSON_TARGETING_EXP.ID]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [EXPAND_JSON_TARGETING_EXP.CONTROL],
-          [EXPAND_JSON_TARGETING_EXP.EXPERIMENT],
-        ],
-      },
-      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
-    });
-    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
+    ]);
+    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
+    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
+    if (moduleNomoduleExpId) {
+      this.experimentIds.push(moduleNomoduleExpId);
+    }
+
+    const intersectResourcesExpId = getExperimentBranch(
+      this.win,
+      INTERSECT_RESOURCES_EXP.id
+    );
+    if (intersectResourcesExpId) {
+      this.experimentIds.push(intersectResourcesExpId);
+    }
+
+    const fieResourcesExpId = getExperimentBranch(
+      this.win,
+      FIE_RESOURCES_EXP.id
+    );
+    if (fieResourcesExpId) {
+      this.experimentIds.push(fieResourcesExpId);
+    }
+
+    const ssrExpIds = this.getSsrExpIds_();
+    for (let i = 0; i < ssrExpIds.length; i++) {
+      addAmpExperimentIdToElement(ssrExpIds[i], this.element);
+    }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
     }
@@ -493,11 +484,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * For easier unit testing.
-   * @param {!Object<string, !../../../src/experiments.ExperimentInfo>} experimentInfoMap
+   * @param {!Array<!../../../src/experiments.ExperimentInfo>} experimentInfoList
    * @return {!Object<string, string>}
    */
-  randomlySelectUnsetExperiments_(experimentInfoMap) {
-    return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  randomlySelectUnsetExperiments_(experimentInfoList) {
+    return randomlySelectUnsetExperiments(this.win, experimentInfoList);
   }
 
   /**
@@ -582,7 +573,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isFluidRequest_ =
         !!multiSizeStr && multiSizeStr.indexOf('fluid') != -1;
     }
-    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
@@ -603,6 +593,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {consentString, gdprApplies} = consentTuple;
 
     return {
+      'ptt': this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT)
+        ? 13
+        : null,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
         consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
@@ -657,7 +650,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
-      'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
       'msz': msz,
@@ -747,25 +739,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
 
-    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) =>
-      this.mergeRtcResponses_(results)
-    );
-
-    // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
-    const isJsonTargetingExpOn =
-      isExperimentOn(this.win, 'expand-json-targeting') &&
-      getExperimentBranch(this.win, EXPAND_JSON_TARGETING_EXP.ID) ===
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT;
-
-    const targetingExpansionPromise = isJsonTargetingExpOn
-      ? timerService
-          .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
-          .catch(() => {
-            dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
-          })
-      : Promise.resolve();
-
     const checkStillCurrent = this.verifyStillCurrent();
+
+    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) => {
+      checkStillCurrent();
+      return this.mergeRtcResponses_(results);
+    });
+
+    const targetingExpansionPromise = timerService
+      .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
+      .catch(() => {
+        dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
+      });
 
     Promise.all([
       rtcParamsPromise,
@@ -919,11 +904,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getCustomRealTimeConfigMacros_() {
     /**
-     * This whitelist allow attributes on the amp-ad element to be used as
+     * This lists allowed attributes on the amp-ad element to be used as
      * macros for constructing the RTC URL. Add attributes here, in lowercase,
      * to make them available.
      */
-    const whitelist = {
+    const allowlist = {
       'height': true,
       'width': true,
       'data-slot': true,
@@ -951,7 +936,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           parseInt(opt_timeout, 10)
         ),
       ATTR: (name) => {
-        if (!whitelist[name.toLowerCase()]) {
+        if (!allowlist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
@@ -1185,8 +1170,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
@@ -1210,16 +1195,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getSafeframePath() {
-    const randomSubdomainExperimentBranch =
-      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
-    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
-      return super.getSafeframePath();
-    }
-    this.safeFrameRandomSubdomain_ =
-      this.safeFrameRandomSubdomain_ || this.getRandomString_();
+    safeFrameRandomSubdomain =
+      safeFrameRandomSubdomain || this.getRandomString_();
 
     return (
-      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `https://${safeFrameRandomSubdomain}.safeframe.googlesyndication.com/safeframe/` +
       `${this.safeframeVersion}/html/container.html`
     );
   }
@@ -1302,11 +1282,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       position: isMultiSizeFluid ? 'relative' : null,
     });
 
-    // Set the centering CSS if the experiment is off
+    // Check if this is a multi-size creative that's narrower than the ad slot.
     if (
-      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
-      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
-        AMP_AD_NO_CENTER_CSS_EXP.control
+      this.returnedSize_ &&
+      this.returnedSize_.width &&
+      this.returnedSize_.width < this.getSlotSize().width
     ) {
       setStyles(dev().assertElement(this.iframe), {
         top: '50%',
@@ -1723,7 +1703,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         headersObj,
                         done,
                         sraRequestAdUrlResolvers,
-                        sraUrl
+                        sraUrl,
+                        this.isInNoSigningExp()
                       );
                     }
                   );

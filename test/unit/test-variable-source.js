@@ -119,7 +119,7 @@ describes.fakeWin(
     });
 
     describes.realWin(
-      'Whitelist of variable substitutions',
+      'Allowlist of variable substitutions',
       {
         amp: {
           ampdoc: 'single',
@@ -129,10 +129,10 @@ describes.fakeWin(
         let variableSource;
         beforeEach(() => {
           variableSource = new VariableSource(env.ampdoc);
-          variableSource.variableWhitelist_ = ['ABC', 'ABCD', 'CANONICAL'];
+          variableSource.variableAllowlist_ = ['ABC', 'ABCD', 'CANONICAL'];
         });
 
-        it('Works with whitelisted variables', () => {
+        it('Works with allowlisted variables', () => {
           variableSource.setAsync('ABCD', () => Promise.resolve('abcd'));
           expect(variableSource.getExpr()).to.be.ok;
           expect(variableSource.getExpr().toString()).to.contain('ABCD');
@@ -145,7 +145,7 @@ describes.fakeWin(
             });
         });
 
-        it('Should not work with unwhitelisted variables', () => {
+        it('Should not work with unallowlisted variables', () => {
           variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
           expect(variableSource.getExpr()).to.be.ok;
           expect(variableSource.getExpr().toString()).not.to.contain('RANDOM');
@@ -158,7 +158,7 @@ describes.fakeWin(
             });
         });
 
-        it('Should ignore whitelisted variables for email documents', () => {
+        it('Should ignore allowlisted variables for email documents', () => {
           env.win.document.documentElement.setAttribute('amp4email', '');
           expect(variableSource.getExpr()).to.be.ok;
           expect(variableSource.getExpr().toString()).not.to.contain('ABC');
@@ -170,9 +170,9 @@ describes.fakeWin(
       }
     );
 
-    it('Should not work with empty variable whitelist', () => {
+    it('Should not work with empty variable allowlist', () => {
       const variableSource = new VariableSource(env.ampdoc);
-      variableSource.variableWhitelist_ = [''];
+      variableSource.variableAllowlist_ = [''];
 
       variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
       expect(variableSource.getExpr()).to.be.ok;

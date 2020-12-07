@@ -4,15 +4,19 @@
 {
   rules: [
     {
-      owners: [{name: 'dvoytenko'}, {name: 'ampproject/wg-runtime'}],
+      owners: [{name: 'dvoytenko'}, {name: 'ampproject/wg-performance'}],
     },
     {
       pattern: '{iframe-video,mediasession-helper,video-*}.js',
-      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+      owners: [{name: 'ampproject/wg-components'}],
     },
     {
-      pattern: '{cid-*,*-cid-*,*-cid,consent,consent-state,extension-analytics}.js',
-      owners: [{name: 'ampproject/wg-analytics'}],
+      pattern: '{cid-*,*-cid-*,*-cid,extension-analytics,analytics}.js',
+      owners: [{name: 'ampproject/wg-components'}],
+    },
+    {
+      pattern: '{consent,consent-state}.js',
+      owners: [{name: 'ampproject/wg-components'}],
     },
     {
       pattern: 'amp-story-*.js',
@@ -21,6 +25,13 @@
     {
       pattern: 'friendly-iframe-embed.js',
       owners: [{name: 'ampproject/wg-ads-reviewers'}],
+    },
+    {
+      pattern: '{3p-frame, 3p-frame-*}.js',
+      owners: [
+        {name: 'ampproject/wg-ads-reviewers'},
+        {name: 'ampproject/wg-components'},
+      ],
     },
   ],
 }

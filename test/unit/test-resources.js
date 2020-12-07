@@ -610,7 +610,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
 
     element.idleRenderOutsideViewport = () => true;
@@ -738,6 +737,21 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       expect(resource2.applySizesAndMediaQuery).to.not.be.called;
     });
 
+    it('should invalidate premeasurements after resize event', () => {
+      resource1.premeasure({});
+      expect(resource1.hasBeenPremeasured()).true;
+      expect(resource1.isMeasureRequested()).false;
+      resources.viewport_.changeObservable_.fire({relayoutAll_: true});
+      expect(resource1.hasBeenPremeasured()).false;
+      expect(resource1.isMeasureRequested()).true;
+    });
+
+    it('should schedule a pass after resize event', () => {
+      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+      resources.viewport_.changeObservable_.fire({relayoutAll_: false});
+      expect(schedulePassStub).calledOnce;
+    });
+
     it('should applySizesAndMediaQuery on relayout', () => {
       resources.relayoutAll_ = true;
 
@@ -805,31 +819,17 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource2.state_).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
-  it('should prerender only one screen with prerenderSize = 1', () => {
+  it('should prerender only one screen in visibilityState=prerender', () => {
     resources.visible_ = false;
     sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
-    resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 1009));
 
     resources.discoverWork_();
 
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
-  });
-
-  it('should NOT prerender anything with prerenderSize = 0', () => {
-    resources.visible_ = false;
-    sandbox
-      .stub(resources.ampdoc, 'getVisibilityState')
-      .returns(VisibilityState.PRERENDER);
-    resources.prerenderSize_ = 0;
-    viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
-
-    resources.discoverWork_();
-
-    expect(resources.queue_.getSize()).to.equal(0);
   });
 
   // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
@@ -1386,7 +1386,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       },
       pauseCallback() {},
       resumeCallback() {},
-      dispatchCustomEvent() {},
       applySizesAndMediaQuery() {},
       updateLayoutBox() {},
       getBoundingClientRect() {
@@ -1532,7 +1531,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
 
     resources.add(child1);
 
-    expect(resource1.requestMeasure).to.not.be.called;
+    expect(resource1.requestMeasure).to.be.calledOnce;
     expect(observer.observe).to.be.calledOnceWith(child1);
   });
 

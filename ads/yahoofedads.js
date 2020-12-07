@@ -33,8 +33,10 @@ export function yahoofedads(global, data) {
 
   global.amp = true;
   global.adConfig = {
+    'adPositionOverride': data.adPositionOverride,
     'adUnit': data.adUnit,
     'forceSource': data.forceSource,
+    'height': data.height,
     'lang': data.lang,
     'publisherUrl': data.url,
     'region': data.region,
@@ -42,11 +44,12 @@ export function yahoofedads(global, data) {
     'sectionId': data.sectionId,
     'site': data.site,
     'spaceId': data.spaceId,
+    'width': data.width,
   };
 
   loadScript(
     global,
-    'https://s.yimg.com/cv/apiv2/dy/fedads/fedads.mock.js',
+    'https://s.yimg.com/aaq/ampyahoofedads/yahoofedads.js',
     () => global.context.renderStart()
   );
 }

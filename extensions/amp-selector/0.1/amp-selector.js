@@ -165,7 +165,7 @@ export class AmpSelector extends AMP.BaseElement {
 
     /** If the element is in an `email` document, allow its `clear`,
      * `selectDown`, `selectUp`, and `toggle` actions. */
-    this.action_.addToWhitelist(
+    this.action_.addToAllowlist(
       TAG,
       ['clear', 'selectDown', 'selectUp', 'toggle'],
       ['email']
@@ -465,7 +465,7 @@ export class AmpSelector extends AMP.BaseElement {
         'selectedOptions': this.selectedOptions_(),
       })
     );
-    // TODO(wg-ui-and-a11y): Remove this in Q1 2020.
+    // TODO(wg-components): Remove this in Q1 2020.
     if (trust < ActionTrust.DEFAULT) {
       user().warn(
         TAG,

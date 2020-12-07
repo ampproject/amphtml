@@ -20,8 +20,8 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
-import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
+import {RTC_ERROR_ENUM} from '../../../../src/service/real-time-config/real-time-config-impl';
+import {RTC_VENDORS} from '../../../../src/service/real-time-config/callout-vendors';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
@@ -152,6 +152,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
         expectedParams,
         expectedJsonTargeting
       );
+      delete RTC_VENDORS['TEMP_VENDOR'];
     });
 
     it('should properly merge into existing json', () => {

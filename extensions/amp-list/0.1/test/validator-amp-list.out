@@ -216,7 +216,7 @@ amp-list/0.1/test/validator-amp-list.html:183:2 The parent tag of tag 'amp-list-
 |      load-more-bookmark="next">
 |      <button load-more-clickable></button>
 >>     ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:188:4 The parent tag of tag 'amp-list-load-more button[load-more-clickable]' is 'amp-list', but it can only be 'amp-list-load-more'. (see https://amp.dev/documentation/components/amp-list)
+amp-list/0.1/test/validator-amp-list.html:188:4 The parent tag of tag 'button' is 'amp-list', but it can only be 'amp-list-load-more'. (see https://amp.dev/documentation/components/amp-list)
 |    </amp-list>
 |    <amp-list width=10 height=10
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"

@@ -18,7 +18,7 @@
 const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [
-  'test/fixtures/*.html',
+  'test-bin/test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -41,6 +41,12 @@ const builtRuntimePaths = [
     watched: true,
   },
   {
+    pattern: 'dist/**/*.mjs',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+  {
     pattern: 'dist.3p/**/*',
     included: false,
     nocache: false,
@@ -48,6 +54,12 @@ const builtRuntimePaths = [
   },
   {
     pattern: 'dist.tools/**/*.js',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+  {
+    pattern: 'dist.tools/**/*.mjs',
     included: false,
     nocache: false,
     watched: true,
@@ -81,11 +93,8 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
 ];
 
-const unitTestOnSaucePaths = [
-  'test/unit/**/*.js',
-  'ads/**/test/test-*.js',
-  'ads/**/test/unit/test-*.js',
-];
+// TODO(rsimha, #28838): Refine this opt-in mechanism.
+const unitTestCrossBrowserPaths = ['test/unit/test-error.js'];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -114,23 +123,19 @@ const presubmitGlobs = [
   '!dist.3p/current/**/iframe-transport-client-lib.js',
   '!out/**/*.*',
   '!validator/validator.pb.go',
-  '!validator/chromeextension/*.*',
   '!validator/dist/**/*.*',
   '!validator/htmlparser/**/*.*',
-  '!validator/node_modules/**/*.*',
-  '!validator/nodejs/node_modules/**/*.*',
-  '!validator/webui/dist/**/*.*',
-  '!validator/webui/node_modules/**/*.*',
+  '!validator/js/chromeextension/*.*',
+  '!validator/js/webui/dist/**/*.*',
   '!build-system/server/new-server/transforms/dist/**/*.*',
-  '!build-system/tasks/e2e/node_modules/**/*.*',
+  '!build-system/tasks/performance/cache/**/*.*',
   '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',
-  '!build-system/tasks/visual-diff/node_modules/**/*.*',
   '!build-system/tasks/visual-diff/snippets/*.js',
   '!build/polyfills.js',
   '!build/polyfills/*.js',
   '!third_party/**/*.*',
-  '!src/purifier/node_modules/**/*.*',
+  '!**/node_modules/**/*.*',
   // Files in this testdata dir are machine-generated and are not part
   // of the AMP runtime, so shouldn't be checked.
   '!extensions/amp-a4a/*/test/testdata/*.js',
@@ -151,10 +156,10 @@ const prettifyGlobs = [
   '.lando.yml',
   '.lgtm.yml',
   '.travis.yml',
-  '**/.eslintrc',
   '.prettierrc',
   '.renovaterc.json',
   '.vscode/settings.json',
+  '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
@@ -217,6 +222,6 @@ module.exports = {
   prettifyGlobs,
   testPaths,
   thirdPartyFrames,
-  unitTestOnSaucePaths,
+  unitTestCrossBrowserPaths,
   unitTestPaths,
 };

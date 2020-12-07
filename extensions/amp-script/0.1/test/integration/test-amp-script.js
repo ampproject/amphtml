@@ -25,7 +25,6 @@ function poll(description, condition, opt_onError) {
 
 describe
   .configure()
-  .skipSinglePass()
   .skipFirefox()
   .run('amp-script', function () {
     this.timeout(TIMEOUT);
@@ -35,14 +34,12 @@ describe
     describes.integration(
       'container ',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert Hello World!</button>
         <button id="long">Long task</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
       (env) => {
@@ -122,7 +119,6 @@ describe
     describes.integration(
       'sanitizer',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <p>Number of mutations: <span id="mutationCount">0</span></p>
@@ -130,7 +126,6 @@ describe
         <button id="img">Insert img</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
       (env) => {
@@ -191,14 +186,12 @@ describe
     describes.integration(
       'defined-layout',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=fixed width=300 height=200
           src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
       (env) => {

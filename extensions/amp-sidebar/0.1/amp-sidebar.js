@@ -29,6 +29,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {debounce} from '../../../src/utils/rate-limit';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -150,6 +151,16 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.action_ = Services.actionServiceForDoc(element);
 
+    if (
+      this.element.parentNode != this.element.ownerDocument.body &&
+      this.element.parentNode != this.getAmpDoc().getBody()
+    ) {
+      this.user().warn(
+        TAG,
+        `${TAG} is recommended to be a direct child of the <body> element to preserve a logical DOM order.`
+      );
+    }
+
     if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
       this.side_ = this.setSideAttribute_(
         isRTL(this.document_) ? Side.RIGHT : Side.LEFT
@@ -178,6 +189,20 @@ export class AmpSidebar extends AMP.BaseElement {
             this.user().error(TAG, 'Failed to instantiate toolbar', e);
           }
         });
+
+        if (toolbarElements.length) {
+          this.getViewport().onResize(
+            debounce(
+              this.win,
+              () => {
+                this.toolbars_.forEach((toolbar) => {
+                  toolbar.onLayoutChange();
+                });
+              },
+              100
+            )
+          );
+        }
       });
 
     if (this.isIos_) {
@@ -229,7 +254,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     /** If the element is in an email document,
      * allow its `open`, `close`, and `toggle` actions. */
-    this.action_.addToWhitelist(
+    this.action_.addToAllowlist(
       'amp-sidebar',
       ['open', 'close', 'toggle'],
       ['email']

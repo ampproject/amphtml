@@ -42,7 +42,11 @@ Adds support for AFS Analytics. Additionally, the `websiteid` and `server` varia
 
 Type attribute value: `alexametrics`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Alexa Certified Site Metrics. The `atrk_acct` and `domain` variables must be specified. More information can be found at [Alexa’s Certified Metrics FAQ](https://support.alexa.com/hc/en-us/sections/200063374-Certified-Site-Metrics).
+
+<!-- markdown-link-check-enable -->
 
 ### Amplitude
 
@@ -59,6 +63,12 @@ Adds support for AT Internet. More details for adding AT Internet support can be
 Type attribute value: `baiduanalytics`
 
 Adds support for Baidu Analytics. More details for adding Baidu Analytics support can be found at [tongji.baidu.com/](http://tongji.baidu.com/web/help/article?id=268&type=0).
+
+### Black Crow AI
+
+Type attribute value: `blackcrowai`
+
+Adds support for Black Crow AI. You are required to fill out the `site_name` variable which is assigned to you by your account manager. If you wish to send scores to Google, please also include your GA account ID (i.e. `UA-123401-1`).
 
 ### BlueConic
 
@@ -141,6 +151,13 @@ Type attribute value: `gemius`
 
 Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
 
+### GfK Sensic
+
+Type attribute value: `gfksensic`
+
+Adds support for GfK Sensic audio stream usage analytics.
+Please refer to our [client documentation](https://confluence-docu.gfk.com/display/SENSIC/AMP+Integration) for details.
+
 ### Google Ads
 
 Type attribute value: `googleadwords`
@@ -163,6 +180,8 @@ Unlike other analytics vendors, Google Tag Manager is a tag management service, 
 
 Type attribute value: `ibeatanalytics`
 
+Adds support for Ibeat Analytics. More details for adding Ibeat support can be found at [Ibeat Integration Support](https://ibeat.indiatimes.com/support.html#h.a5rit14mwie1).
+
 ### INFOnline / IVW
 
 Type attribute value: `infonline`
@@ -177,6 +196,22 @@ Additionally, the following variables must be defined:
 - `url`: HTTPS location of `amp-analytics-infonline.html`
 
 More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/).
+
+### INFOnline anonymous
+
+Type attribute value: `infonline-anonymous`
+
+Adds support for the [anonymous INFOnline](https://www.infonline.de). Requires a copy of [infonline-anonymous.html](https://www.infonline.de/amp/infonline-anonymous.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `infonline-anonymous.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
+
+Additionally, the following variables must be defined:
+
+- `st`: offer ID
+- `co`: comment
+- `cp`: code
+- `url`: HTTPS location of `infonline-anonymous.html`
+- `dn`: The relay domain name
+
+More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
 
 ### ip-label
 
@@ -203,7 +238,11 @@ Adds support for Kenshoo. More information and configuration details can be foun
 
 Type attribute value: `krux`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Krux. Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
+
+<!-- markdown-link-check-enable -->
 
 ### Linkpulse
 
@@ -215,7 +254,13 @@ Adds support for Linkpulse. Configuration details can be found at [docs.linkpuls
 
 Type attribute value: `lotame`
 
-Adds support for Lotame. More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
+Adds support for Lotame. More information and configuration details can be found at [my.lotame.com](https://my.lotame.com/t/83h37h9/overview-1st-party-data-collection-in-google-amp).
+
+### Mapp Intelligence
+
+Type attribute value: `mapp_intelligence`
+
+Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/pages/viewpage.action?pageId=10027966).
 
 ### Marin Software
 
@@ -335,7 +380,7 @@ Type attribute value: `piStats`
 
 Type attribute value: `piano`
 
-Adds support for Piano. Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
+Adds support for Piano. Configuration details can be found at `http://vx.piano.io/javascript-tracking-amp`
 
 ### Pinpoll
 
@@ -347,13 +392,17 @@ Adds support for Pinpoll. Configuration details can be found at [pinpoll.com](ht
 
 Type attribute value: `pressboard`
 
-Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp).
+Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca] `http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp`.
 
 ### Quantcast Measurement
 
 Type attribute value: `quantcast`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
+
+<!-- markdown-link-check-enable -->
 
 ### Rakam
 
@@ -366,6 +415,13 @@ Type attribute value: `reppublika`
 ### Retargetly
 
 Type attribute value: `retargetly`
+
+### RudderStack
+
+Type attribute value: `rudderstack`
+
+Adds support for RudderStack page views and events.
+Find out more on the implementation check our documentation at `https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics`.
 
 ### Segment
 
@@ -396,6 +452,12 @@ Type attribute value: `snowplow`, `snowplow_v2`
 
 Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [github.com/snowplow/snowplow/wiki](https://github.com/snowplow/snowplow/wiki/Google-AMP-Tracker).
 
+### Tail
+
+Type attribute value: `tail`
+
+Adds support for Tail. More details for adding Tail support can be found at [tail.digital](https://tail.digital).
+
 ### Rambler/TOP-100
 
 Type attribute value: `top100`
@@ -424,7 +486,7 @@ Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru
 
 Type attribute value: `treasuredata`
 
-Adds support for Treasure Data. Configuration details can be found at [treasuredata.com](https://docs.treasuredata.com/articles/javascript-sdk-google-amp).
+Adds support for Treasure Data. Configuration details can be found at `https://docs.treasuredata.com/articles/javascript-sdk-google-amp`.
 
 ### Umeng+ Analytics
 

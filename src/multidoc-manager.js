@@ -377,6 +377,17 @@ export class MultidocManager {
               // Must be a font definition: no other stylesheets are allowed.
               if (parentLinks[href]) {
                 dev().fine(TAG, '- stylesheet already included: ', href);
+                // To accomodate icon fonts whose stylesheets include
+                // the class definitions in addition to the font definition,
+                // we re-import the stylesheet into the shadow document.
+                // Note: <link> in shadow mode is not yet fully supported on
+                // all browsers, so we use <style>@import "url"</style> instead
+                installStylesForDoc(
+                  ampdoc,
+                  `@import "${href}"`,
+                  /* callback */ null,
+                  /* isRuntimeCss */ false
+                );
               } else {
                 parentLinks[href] = true;
                 const el = this.win.document.createElement('link');

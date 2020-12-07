@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 // import to install chromedriver and geckodriver
-require('chromedriver'); // eslint-disable-line no-unused-vars
-require('geckodriver'); // eslint-disable-line no-unused-vars
+require('chromedriver');
+require('geckodriver');
 
+const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
+const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
@@ -26,12 +28,17 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
+  getCoverageObject,
+  mergeClientCoverage,
+} = require('istanbul-middleware/lib/core');
+const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
+const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
 const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -40,6 +47,7 @@ const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
@@ -331,6 +339,31 @@ class ItConfig {
 }
 
 /**
+ * Extracts code coverage data from the page and aggregates it with other tests.
+ * @param {!Object} env e2e driver environment.
+ * @return {Promise<void>}
+ */
+async function updateCoverage(env) {
+  const coverage = await env.controller.evaluate(() => window.__coverage__);
+  if (coverage) {
+    mergeClientCoverage(coverage);
+  }
+}
+
+/**
+ * Reports code coverage data to an aggregating endpoint.
+ * @return {Promise<void>}
+ */
+async function reportCoverage() {
+  const coverage = getCoverageObject();
+  await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
+    method: 'POST',
+    body: JSON.stringify(coverage),
+    headers: {'Content-type': 'application/json'},
+  });
+}
+
+/**
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
@@ -427,12 +460,16 @@ function describeEnv(factory) {
         await fixture.setup(env, browserName, SETUP_RETRIES);
 
         // don't install for CI
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           installRepl(global, env);
         }
       });
 
       afterEach(async function () {
+        if (argv.coverage) {
+          await updateCoverage(env);
+        }
+
         // If there is an async expect error, throw it in the final state.
         const lastExpectError = getLastExpectError();
         if (lastExpectError) {
@@ -445,8 +482,14 @@ function describeEnv(factory) {
           delete env[key];
         }
 
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           uninstallRepl();
+        }
+      });
+
+      after(async () => {
+        if (argv.coverage) {
+          await reportCoverage();
         }
       });
 

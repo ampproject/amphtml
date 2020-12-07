@@ -24,17 +24,19 @@ limitations under the License.
 
 # amp-inputmask
 
-## Behavior
+## Usage
 
-`amp-inputmask` enables the `mask` and `mask-output` attributes on `input` elements. These allow document authors to specify input masks for their form elements.
+`amp-inputmask` enables the `mask` and `mask-output` attributes on `input`
+elements. These allow document authors to specify input masks for their form
+elements.
 
 Input masks automatically add formatting characters to user input, and prevent
 users from typing input that doesn't match the mask. For example, an input mask
-on a telephone field automatically adds special characters like
-`(`, `)` and `-`, and users can type only the numbers needed while the mask prevents
-them from typing incorrect characters.
+on a telephone field automatically adds special characters like `(`, `)` and
+`-`, and users can type only the numbers needed while the mask prevents them
+from typing incorrect characters.
 
-#### Supported elements
+### Supported elements
 
 - `input[type=text]`
 - `input[type=tel]`
@@ -42,7 +44,7 @@ them from typing incorrect characters.
 
 ## Attributes
 
-#### mask
+### `mask` (required)
 
 Specifies the mask or masks to apply to the input element.
 
@@ -50,51 +52,51 @@ Custom masks are composed of the following characters,
 and may be listed separated by spaces:
 
 <table>
-<tr>
-<th width="30%"><code>mask</code><br>character</th>
-<th>Description</th>
-</tr>
-<tr>
-<td><code>L</code></td>
-<td>The user must add an alphabetical character</td>
-</tr>
-<tr>
-<td><code>0</code></td>
-<td>The user must add a numeric character</td>
-</tr>
-<tr>
-<td><code>A</code></td>
-<td>The user must add an alphanumeric character</td>
-</tr>
-<tr>
-<td><code>C</code></td>
-<td>The user must add an arbitrary character</td>
-</tr>
-<tr>
-<td><code>l</code></td>
-<td>The user may optionally add an alphabetical character</td>
-</tr>
-<tr>
-<td><code>a</code></td>
-<td>The user may optionally add an alphanumeric character</td>
-</tr>
-<tr>
-<td><code>c</code></td>
-<td>The user may optionally add an arbitrary character</td>
-</tr>
-<tr>
-<td><code>9</code></td>
-<td>The user may optionally add a numeric character.</td>
-</tr>
-<tr>
-<td><code>\</code></td>
-<td>The backslash `\` escapes the next character in the mask to be a character literal.</td>
-</tr>
-<tr>
-<td><code>_</code></td>
-<td>The mask will automatically insert a space character</td>
-</tr>
-</tbody>
+  <tr>
+    <th width="30%"><code>mask</code><br>character</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>L</code></td>
+    <td>The user must add an alphabetical character</td>
+  </tr>
+  <tr>
+    <td><code>0</code></td>
+    <td>The user must add a numeric character</td>
+  </tr>
+  <tr>
+    <td><code>A</code></td>
+    <td>The user must add an alphanumeric character</td>
+  </tr>
+  <tr>
+    <td><code>C</code></td>
+    <td>The user must add an arbitrary character</td>
+  </tr>
+  <tr>
+    <td><code>l</code></td>
+    <td>The user may optionally add an alphabetical character</td>
+  </tr>
+  <tr>
+    <td><code>a</code></td>
+    <td>The user may optionally add an alphanumeric character</td>
+  </tr>
+  <tr>
+    <td><code>c</code></td>
+    <td>The user may optionally add an arbitrary character</td>
+  </tr>
+  <tr>
+    <td><code>9</code></td>
+    <td>The user may optionally add a numeric character.</td>
+  </tr>
+  <tr>
+    <td><code>\</code></td>
+  <td>The backslash <code>\</code> escapes the next character in the mask to be a character
+    literal.</td>
+  </tr>
+  <tr>
+    <td><code>_</code></td>
+    <td>The mask will automatically insert a space character</td>
+  </tr>
 </table>
 
 As an example, this masked input will allow the user to enter a
@@ -120,19 +122,10 @@ The characters "+", "1", " ", "(", ")" and "-" will be automatically added as th
 
 The following named masks are supported:
 
-<table>
-<tr>
-<th width="30%"><code>mask</code><br></th>
-<th>Description</th>
-</tr>
-<tr>
-<td><code>payment-card</code></td>
-<td>The user must enter a payment card number.
+<strong>`payment-card`</strong>
+The user must enter a payment card number.
 The mask automatically adds spaces to chunk the numbers, and supports both
-American Express-style and Visa-style chunking.</td>
-</tr>
-</tbody>
-</table>
+American Express-style and Visa-style chunking.
 
 As an example, this masked input will allow the user to enter a payment card number.
 Space characters " " will be automatically added as the user types.
@@ -141,28 +134,28 @@ Space characters " " will be automatically added as the user types.
 <input type="tel" mask="payment-card" placeholder="0000 0000 0000 0000" />
 ```
 
-#### mask-trim-zeros
+### `mask-trim-zeros`
 
-Specifies how many zeros the mask will remove from pasted values into
-custom masks. For backwards compatibility, the default is `2`.
-Specify `0` to disable this behavior.
+Specifies how many zeros the mask will remove from pasted values into custom
+masks. For backwards compatibility, the default is `2`. Specify `0` to disable
+this behavior.
 
-When users paste values from spreadsheets, often there is a zero padding
-on the left side. For example, North American phone numbers are sometimes
-stored as 015551112222 where 1 is the country code, but it has been zero-padded.
-The `mask-trim-zeros` attribute will remove up to the given number of zeros.
-The `mask-trim-zeros` attribute does not affect named masks.
+When users paste values from spreadsheets, often there is a zero padding on the
+left side. For example, North American phone numbers are sometimes stored as
+015551112222 where 1 is the country code, but it has been zero-padded. The
+`mask-trim-zeros` attribute will remove up to the given number of zeros. The
+`mask-trim-zeros` attribute does not affect named masks
 
-#### mask-output
+### `mask-output`
 
 Specifies how the form will submit the input value.
 
 - **raw** (default): Outputs the value as-is with all special characters.
-- **alphanumeric**: Only outputs alphanumeric characters in the mask. The form will add a `type="hidden"` input with the masked input's `name` or `id` attribute with `-unmasked` appended.
+- **alphanumeric**: Only outputs alphanumeric characters in the mask. The form
+  will add a `type="hidden"` input with the masked input's `name` or `id`
+  attribute with `-unmasked` appended.
 
-Example:
-
-Here, the `mask-output` output attribute is set to `raw`.
+In the example below the `mask-output` output attribute is set to `raw`.
 
 ```html
 <input

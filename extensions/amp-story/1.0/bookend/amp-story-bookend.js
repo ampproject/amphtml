@@ -27,17 +27,13 @@ import {
 } from '../amp-story-share';
 import {DraggableDrawer} from '../amp-story-draggable-drawer';
 import {EventType, dispatch} from '../events';
-import {
-  HistoryState,
-  createShadowRootWithStyle,
-  getHistoryState,
-  setHistoryState,
-} from '../utils';
+import {HistoryState, getHistoryState, setHistoryState} from '../history';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../../src/localized-strings';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
+import {createShadowRootWithStyle} from '../utils';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';

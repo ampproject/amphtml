@@ -40,6 +40,13 @@ class AmpFitText extends AMP.BaseElement {
 
     /** @private {number} */
     this.maxFontSize_ = -1;
+
+    /**
+     * Synchronously stores updated textContent, but only after it has been
+     * updated.
+     * @private {string}
+     */
+    this.textContent_ = '';
   }
 
   /** @override */
@@ -72,7 +79,7 @@ class AmpFitText extends AMP.BaseElement {
     this.getRealChildNodes().forEach((node) => {
       this.contentWrapper_.appendChild(node);
     });
-    this.measurer_./*OK*/ innerHTML = this.contentWrapper_./*OK*/ innerHTML;
+    this.updateMeasurerContent_();
     this.element.appendChild(this.content_);
     this.element.appendChild(this.measurer_);
 
@@ -81,6 +88,22 @@ class AmpFitText extends AMP.BaseElement {
 
     this.maxFontSize_ =
       getLengthNumeral(this.element.getAttribute('max-font-size')) || 72;
+
+    // Make it so that updates to the textContent of the amp-fit-text element
+    // actually update the text of the content element.
+    Object.defineProperty(this.element, 'textContent', {
+      set: (v) => {
+        this.textContent_ = v;
+        this.mutateElement(() => {
+          this.contentWrapper_.textContent = v;
+          this.updateMeasurerContent_();
+          this.updateFontSize_();
+        });
+      },
+      get: () => {
+        return this.textContent_ || this.contentWrapper_.textContent;
+      },
+    });
   }
 
   /** @override */
@@ -100,10 +123,17 @@ class AmpFitText extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Copies text from the displayed content to the measurer element.
+   */
+  updateMeasurerContent_() {
+    this.measurer_./*OK*/ innerHTML = this.contentWrapper_./*OK*/ innerHTML;
+  }
+
   /** @private */
   updateFontSize_() {
-    const maxHeight = this.element./*OK*/ offsetHeight;
-    const maxWidth = this.element./*OK*/ offsetWidth;
+    const maxHeight = this.content_./*OK*/ offsetHeight;
+    const maxWidth = this.content_./*OK*/ offsetWidth;
     const fontSize = calculateFontSize_(
       this.measurer_,
       maxHeight,

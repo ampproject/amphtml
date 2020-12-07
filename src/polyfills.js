@@ -16,7 +16,7 @@
 
 /** @fileoverview */
 
-import {getMode} from './mode';
+import {install as installAbortController} from './polyfills/abort-controller';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -24,41 +24,40 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
 import {install as installIntersectionObserver} from './polyfills/intersection-observer';
+import {install as installMapSet} from './polyfills/map-set';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
+import {install as installSetAdd} from './polyfills/set-add';
+import {install as installStringStartsWith} from './polyfills/string-starts-with';
+import {install as installWeakMapSet} from './polyfills/weakmap-set';
 
-installFetch(self);
-installMathSign(self);
-installObjectAssign(self);
-installObjectValues(self);
-installPromise(self);
-installArrayIncludes(self);
+if (!IS_ESM) {
+  installFetch(self);
+  installMathSign(self);
+  installObjectAssign(self);
+  installObjectValues(self);
+  installPromise(self);
+  installArrayIncludes(self);
+  installMapSet(self);
+  installWeakMapSet(self);
+  installSetAdd(self);
+  installStringStartsWith(self);
+}
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  installDOMTokenList(self);
-  installDocContains(self);
-  installGetBoundingClientRect(self);
+  if (!IS_ESM) {
+    installDOMTokenList(self);
+    installDocContains(self);
+    installGetBoundingClientRect(self);
+  }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  installCustomElements(self, class {});
-  // The AMP and Inabox are launched separately and so there are two
-  // experiment constants.
-  if (
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL ||
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
-    getMode().localDev ||
-    getMode().test
-  ) {
+  if (!IS_SXG) {
+    installCustomElements(self, class {});
     installIntersectionObserver(self);
+    installAbortController(self);
   }
 }
-
-// TODO(#18268, erwinm): For whatever reason imports to modules that have no
-// export currently break for singlepass runs. This is a temporary workaround
-// until we figure the issue out.
-export const erwinmHack = 'this export is a temporary hack for single pass';

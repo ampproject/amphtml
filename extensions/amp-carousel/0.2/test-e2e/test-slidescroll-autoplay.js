@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../../src/action-constants';
 
 describes.endtoend(
   'AMP carousel 0.2 slideChange on type="slide" with autoplay',

@@ -51,7 +51,7 @@ To make sure the template is valid AMPHTML, ad network must make an HTTP request
 
 To update a template, an ad network just needs to update the page on their domain, then make another cache warm-up request.
 
-Note: at this stage, domains need to be whitelisted manually in AMP Cache to experiment with the feature.
+Note: at this stage, domains need to be allowlisted manually in AMP Cache to experiment with the feature.
 
 ## Ad server
 

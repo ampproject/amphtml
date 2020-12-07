@@ -18,11 +18,11 @@ import * as hooks from /*OK*/ 'preact/hooks';
 import * as preact from /*OK*/ 'preact';
 
 // Defines the type interfaces for the approved Preact APIs.
-// TODO: hydrate, isValidElement, Component, cloneElement, toChildArray
+// TODO: isValidElement, Component
 
 /**
  * @param {!PreactDef.FunctionalComponent|string} unusedType
- * @param {(!Object|null)=} unusedProps
+ * @param {?Object=} unusedProps
  * @param {...*} var_args
  * @return {!PreactDef.VNode}
  */
@@ -31,15 +31,34 @@ export function createElement(unusedType, unusedProps, var_args) {
 }
 
 /**
- * @param {!PreactDef.VNode} vnode
- * @param {Node} container
+ * @param {!PreactDef.VNode} unusedElement
+ * @param {?Object=} unusedProps
+ * @param {...PreactDef.Renderable} unusedChildren
+ * @return {!PreactDef.VNode}
  */
-export function render(vnode, container) {
-  preact.render(vnode, container, undefined);
+export function cloneElement(unusedElement, unusedProps, unusedChildren) {
+  return preact.cloneElement.apply(undefined, arguments);
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {?PreactDef.VNode} vnode
+ * @param {Node} container
+ * @param {?Node=} opt_replaceNode
+ */
+export function render(vnode, container, opt_replaceNode) {
+  preact.render(vnode, container, opt_replaceNode);
+}
+
+/**
+ * @param {!PreactDef.VNode} vnode
+ * @param {Node} container
+ */
+export function hydrate(vnode, container) {
+  preact.hydrate(vnode, container);
+}
+
+/**
+ * @param {?Object=} props
  * @return {PreactDef.Renderable}
  */
 export function Fragment(props) {
@@ -55,8 +74,9 @@ export function createRef() {
 }
 
 /**
- * @param {!Object} value
- * @return {!PreactDef.Context}
+ * @param {T} value
+ * @return {!PreactDef.Context<T>}
+ * @template T
  */
 export function createContext(value) {
   return preact.createContext(value);
@@ -100,8 +120,9 @@ export function useLayoutEffect(effect, opt_deps) {
 }
 
 /**
- * @param {PreactDef.Context} context
- * @return {!JsonObject}
+ * @param {PreactDef.Context<T>} context
+ * @return {T}
+ * @template T
  */
 export function useContext(context) {
   return hooks.useContext(context);
@@ -118,11 +139,30 @@ export function useMemo(cb, opt_deps) {
 }
 
 /**
- * @param {function(...*):T|undefined} cb
+ * @param {T} cb
  * @param {!Array<*>=} opt_deps
- * @return {function(...*):T|undefined}
+ * @return {T}
  * @template T
  */
 export function useCallback(cb, opt_deps) {
   return hooks.useCallback(cb, opt_deps);
+}
+
+/**
+ * @param {{current: (T|null)}} ref
+ * @param {function():T} create
+ * @param {!Array<*>=} opt_deps
+ * @return {undefined}
+ * @template T
+ */
+export function useImperativeHandle(ref, create, opt_deps) {
+  return hooks.useImperativeHandle(ref, create, opt_deps);
+}
+
+/**
+ * @param {!PreactDef.Renderable} unusedChildren
+ * @return {!Array<PreactDef.Renderable>}
+ */
+export function toChildArray(unusedChildren) {
+  return preact.toChildArray.apply(undefined, arguments);
 }

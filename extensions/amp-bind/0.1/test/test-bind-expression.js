@@ -140,7 +140,7 @@ describe('BindExpression', () => {
     });
 
     /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators */
-    it('disallow: non-whitelisted operators', () => {
+    it('disallow: non-allowlisted operators', () => {
       expect(evaluate('this')).to.be.null;
       expect(evaluate('self')).to.be.null;
       expect(evaluate('global')).to.be.null;
@@ -225,7 +225,7 @@ describe('BindExpression', () => {
       expect(evaluate('\'a"\\n"c\'')).to.equal('a"\n"c');
     });
 
-    it('whitelisted functions', () => {
+    it('allowlisted functions', () => {
       expect(evaluate('"abc".charAt(0)')).to.equal('a');
       expect(evaluate('"abc".charCodeAt(0)')).to.equal(97);
       expect(evaluate('"abc".concat("def")')).to.equal('abcdef');
@@ -249,7 +249,7 @@ describe('BindExpression', () => {
       expect(evaluate(`"\t\r"`)).to.equal(`\t\r`);
     });
 
-    it('ban: non-whitelisted string methods', () => {
+    it('ban: non-allowlisted string methods', () => {
       expect(() => {
         evaluate('"abc".anchor()');
       }).to.throw(Error, unsupportedFunctionError);
@@ -392,7 +392,7 @@ describe('BindExpression', () => {
       ]);
     });
 
-    it('non-whitelisted functions', () => {
+    it('non-allowlisted functions', () => {
       expect(() => {
         evaluate('["a", "b", "c"].find()');
       }).to.throw(Error, unsupportedFunctionError);
@@ -469,7 +469,7 @@ describe('BindExpression', () => {
       expect(evaluate('sqrt(4) + sqrt', {sqrt: 2})).to.equal(4);
       expect(evaluate('log(20) + log', {log: 1})).to.equal(3.995732273553991);
 
-      // Don't support non-whitelisted functions.
+      // Don't support non-allowlisted functions.
       expect(() => {
         evaluate('sin(0.5)');
       }).to.throw(unsupportedFunctionError);

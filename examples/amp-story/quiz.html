@@ -2,7 +2,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>amp-story-reaction-quiz example</title>
+  <title>amp-story-interactive-quiz example</title>
   <link rel="canonical" href="amps.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -14,9 +14,9 @@
       font-size: 48px;
     }
   </style>
-  <script async custom-element="amp-story"
-        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-        <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
 
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -33,12 +33,12 @@
           "requests": {
             "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
             "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
-            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&reactionType=${storyReactionType}&reactionId=${storyReactionId}&reactionResponseId=${storyReactionResponse}"
+            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&interactiveType=${storyInteractiveType}&interactiveId=${storyInteractiveId}&interactiveesponseId=${storyInteractiveResponse}"
           },
           "triggers": {
             "trackQuizResponse": {
-              "on": "story-reaction",
-              "tagname": "amp-story-reaction-quiz",
+              "on": "story-interactive",
+              "tagname": "amp-story-interactive-quiz",
               "request": "click"
             }
           }
@@ -68,17 +68,16 @@
             --accent-color: cadetblue;
           }
         </style>
-        <amp-story-reaction-quiz
+        <amp-story-interactive-quiz
           id='cat-question-appear'
-          endpoint="http://localhost:3000/reactions"
-          chip-corner="sharp"
-          theme="dark">
-          <h1>When did the domestic cat first appear on the scene?</h1>
-          <option>7,000 years ago</option>
-          <option correct>500,000 years ago</option>
-          <option>2 million years ago</option>
-          <option>34 million years ago</option>
-        </amp-story-reaction-quiz>
+          endpoint="http://localhost:3000/interactives"
+          theme="dark"
+          prompt-text="When did the domestic cat first appear on the scene?"
+          option-1-text="7,000 years ago"
+          option-2-text="500,000 years ago" option-2-correct=""
+          option-3-text="2 million years ago"
+          option-4-text="34 million years ago">
+        </amp-story-interactive-quiz>
       </amp-story-grid-layer>
     </amp-story-page>
     <amp-story-page id="quiz-question-2">
@@ -88,14 +87,14 @@
             layout="responsive">
         </amp-story-grid-layer>
         <amp-story-grid-layer>
-          <amp-story-reaction-quiz
+          <amp-story-interactive-quiz
             id='cat-question-handedness'
-            chip-style="shadow">
-            <h2>True or False: Cats can be right-pawed or left-pawed.</h2>
-            <option correct>True</option>
-            <option>False</option>
-            <option>The quick brown fox jumped over the lazy dog lorem ipsum dolor sit amet as d f ghjkl</option>
-          </amp-story-reaction-quiz>
+            chip-style="shadow"
+            prompt-text="True or False: Cats can be right-pawed or left-pawed."
+            option-1-text="True" option-1-correct="correct"
+            option-2-text="False"
+            option-3-text="The quick brown fox jumped over the lazy dog lorem ipsum dolor sit amet as d f ghjkl">
+          </amp-story-interactive-quiz>
         </amp-story-grid-layer>
       </amp-story-page>
       <amp-story-page id="quiz-question-3">
@@ -111,12 +110,12 @@
           }
         </style>
         <amp-story-grid-layer id="cat-question-cute">
-          <amp-story-reaction-quiz
-            id="cats-cute-quiz">
-            <h2>Are cats cute?</h2>
-            <option correct>Yes</option>
-            <option>No</option>
-          </amp-story-reaction-quiz>
+          <amp-story-interactive-quiz
+            id="cats-cute-quiz"
+            prompt-text="Are cats cute?"
+            option-1-text="Yes" option-1-correct="correct"
+            option-2-text="No">
+          </amp-story-interactive-quiz>
         </amp-story-grid-layer>
         <amp-story-page-attachment layout="nodisplay" theme="dark">
           <h1>Amazing title</h1>

@@ -16,7 +16,7 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {
-  InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
+  InternalWebAnimationRequestDef,
   WebAnimationDef,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,
@@ -28,7 +28,7 @@ import {
   WebKeyframesDef,
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
-  isWhitelistedProp,
+  isAllowlistedProp,
 } from './web-animation-types';
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
@@ -40,7 +40,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase, startsWith} from '../../../src/string';
+import {dashToCamelCase} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
@@ -486,7 +486,7 @@ export class MeasureScanner extends Scanner {
     if (isObject(specKeyframes)) {
       // Property -> keyframes form.
       // The object is cloned, while properties are verified to be
-      // whitelisted. Additionally, the `offset:0` frames are inserted
+      // allowlisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
       const object = /** @type {!Object<string, *>} */ (specKeyframes);
@@ -516,7 +516,7 @@ export class MeasureScanner extends Scanner {
 
     if (isArray(specKeyframes) && specKeyframes.length > 0) {
       // Keyframes -> property form.
-      // The array is cloned, while properties are verified to be whitelisted.
+      // The array is cloned, while properties are verified to be allowlisted.
       // Additionally, if the `offset:0` properties are inserted when absent
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
@@ -577,8 +577,8 @@ export class MeasureScanner extends Scanner {
       return;
     }
     userAssert(
-      isWhitelistedProp(prop),
-      'Property is not whitelisted for animation: %s',
+      isAllowlistedProp(prop),
+      'Property is not allowlisted for animation: %s',
       prop
     );
   }
@@ -725,13 +725,13 @@ export class MeasureScanner extends Scanner {
     // the previous and new vars.
     const result = map(prevVars);
     for (const k in newVars) {
-      if (startsWith(k, '--')) {
+      if (k.startsWith('--')) {
         result[k] = newVars[k];
       }
     }
     this.css_.withVars(result, () => {
       for (const k in newVars) {
-        if (startsWith(k, '--')) {
+        if (k.startsWith('--')) {
           result[k] = this.css_.resolveCss(newVars[k]);
         }
       }
@@ -972,7 +972,7 @@ class CssContextImpl {
     }
 
     // Resolve a var or a property.
-    return startsWith(prop, '--')
+    return prop.startsWith('--')
       ? styles.getPropertyValue(prop)
       : styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }

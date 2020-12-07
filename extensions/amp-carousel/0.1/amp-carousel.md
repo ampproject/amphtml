@@ -39,7 +39,14 @@ The carousel advances between items if the user swipes or clicks an optional nav
 [example preview="inline" playground="true" imports="amp-carousel"]
 
 ```html
-<amp-carousel width="450" height="300" layout="responsive" type="slides">
+<amp-carousel
+  width="450"
+  height="300"
+  layout="responsive"
+  type="slides"
+  role="region"
+  aria-label="Basic carousel"
+>
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
@@ -75,6 +82,8 @@ In the following example, we have a carousel of three images with preview button
   height="300"
   layout="responsive"
   type="slides"
+  role="region"
+  aria-label="Carousel with slide previews"
 >
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
@@ -128,6 +137,14 @@ In the following example, we have a carousel of three images with preview button
 
 [/example]
 
+### Accessibility considerations for `amp-carousel`
+
+Autoplaying, and particularly infinitely looping, carousels can be very distracting and confusing for users - especially for users with cognitive impairments. In general, we recommend avoiding autoplaying carousels. While autoplaying carousels stop once the user has interacted with the carousel, consider also adding an explicit "Play/Pause" control.
+
+By default, the `<amp-carousel>` is programmatically identified as a list when rendered (using `role="list"` on the container element, and `role="listitem"` on each item). However, for `<amp-carousel type="slides">`, no specific `role` is currently provided. As a result, it will not be obvious for assistive technology users reading/navigating through a page when they reach a carousel. We recommend including an explicit `role="region"` and a descriptive `aria-label` (either a generic `aria-label="Carousel"` or a more descriptive label such as `aria-label="Latest news items"`) to `<amp-carousel>`.
+
+Currently, an `<amp-carousel type="slides">` carousel is declared as an ARIA live region (using `aria-live="polite"`), meaning that every time a new slide is shown, the entire content of the slide is announced by assistive technologies (such as screen readers). Due to the way carousels are initially rendered, this can also result in the carousel's content being announced in its entirety when a page is loaded. This also means that pages that contain an `autoplay` carousel will continuously announce whenever a slide auto-advances. There is currently no work-around for this issue.
+
 ## Attributes
 
 <table>
@@ -179,7 +196,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
   </tr>
   <tr>
     <td width="40%"><strong>delay (optional)</strong></td>
-    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled. The <code>delay</code> attribute is only applicable to carousels with <code>type=slides</code>.</td>
+    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled.  Note that the minimum allowed value for <code>delay</code> is 1000 milliseconds.The <code>delay</code> attribute is only applicable to carousels with <code>type=slides</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>loop (optional)</strong></td>
@@ -197,7 +214,9 @@ The visibility of arrows can also be controlled via styling, and a media query c
   {% if not format=='email'%}  autoplay
   delay="3000"{% endif %}
   data-next-button-aria-label="Go to next slide"
-  data-previous-button-aria-label="Go to previous slide">
+  data-previous-button-aria-label="Go to previous slide"
+  role="region"
+  aria-label="Looping carousel">
   <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
     height="300"></amp-img>
@@ -250,7 +269,7 @@ Note that the SVG content needs to have certain characters, including `<`, `>` a
 
 As noted above, the `type="slides"` designation on `amp-carousel 0.1` supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
 
-Publishers should be aware that while this mode explictly supports `fixed` layout sizes, it also employs `display: flex;` in its styling. In other words nested elements can have `layout=fixed` sizing, though via styling it only respects absolute width up to 100%. One way to workaround this limitation is by using `flex-shrink: 0` on any fixed layout slides.
+Publishers should be aware that while this mode explicitly supports `fixed` layout sizes, it also employs `display: flex;` in its styling. In other words nested elements can have `layout=fixed` sizing, though via styling it only respects absolute width up to 100%. One way to workaround this limitation is by using `flex-shrink: 0` on any fixed layout slides.
 
 For an accessible and smooth user experience, it is generally good practice when using `type="slides"` that all children of that carousel and the carousel itself share the same dimensional ratios as well as the same layout type.
 

@@ -63,10 +63,27 @@ AMP will always pass the local stored consent string if there's one. Update to t
 
 Use the `getConsentPolicyInfo` API. `getConsentPolicyInfo` returns a promise with the raw consent string value.
 
-Ways to get the consent string for ad/analytics vendors coming soon.
+#### If you integrate with AMP as an analytics vendor
+
+Get the value using `CONSENT_STRING` macro, or `${consentString}`. A request with the varaible will only be sent out after the consent policy has resolved and the stored consent string (if any) will be returned.
 
 ### On Related Information
 
 In addition to the consent state and consent string, AMP extensions can also use the
 `getConsentPolicySharedData` API to receive additional consent related information about
 the user from the page owner. See [this](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response) for details about the `shareData`.
+
+### On Consent Metadata
+
+In addition to the consent state and consent string, AMP extensions can also use the `getConsentMetadata` to receive additional consent metadata information AMP receives from `checkConsentHref` or the CMP.
+
+Similar to the consent string, AMP will always pass the local stored consent metadata object if there's one. Update will only be reflected on the next page load. Below is an example `consentMetadata` object and its supported fields.
+
+```
+{
+  "consentStringType": {enum} [CONSENT_STRING_TYPE.TCF_V1, CONSENT_STRING_TYPE.TCF_V2, CONSENT_STRING_TYPE.US_PRIVACY_STRING] (optional),
+  "gdprApplies": {boolean} (optional),
+  "additionalConsent": {string} (optional),
+  "purposeOne": {boolean} (optional)
+}
+```

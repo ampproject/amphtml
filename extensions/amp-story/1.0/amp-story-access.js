@@ -115,7 +115,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     this.element.appendChild(drawerEl);
 
-    this.whitelistActions_();
+    this.allowlistActions_();
 
     this.initializeListeners_();
   }
@@ -255,18 +255,20 @@ export class AmpStoryAccess extends AMP.BaseElement {
     );
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    logoSrc
-      ? assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src')
-      : user().warn(
-          TAG,
-          'Expected "publisher-logo-src" attribute on <amp-story>'
-        );
+    if (logoSrc) {
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src');
+    } else {
+      user().warn(
+        TAG,
+        'Expected "publisher-logo-src" attribute on <amp-story>'
+      );
+    }
 
     return logoSrc;
   }
 
   /**
-   * Whitelists the <amp-access> actions.
+   * Allowlists the <amp-access> actions.
    * Depending on the publisher configuration, actions can be:
    *   - login
    *   - login-<namespace>
@@ -275,10 +277,10 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * Publishers can provide one (object) or multiple (array) configurations,
    * identified by their "namespace" property.
    * Each configuration can have one or multiple login URLs, called "type".
-   * All the namespace/type pairs have to be whitelisted.
+   * All the namespace/type pairs have to be allowlisted.
    * @private
    */
-  whitelistActions_() {
+  allowlistActions_() {
     const accessEl = dev().assertElement(
       this.win.document.getElementById('amp-access'),
       'Cannot find the amp-access configuration'
@@ -314,11 +316,11 @@ export class AmpStoryAccess extends AMP.BaseElement {
       }
     });
 
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
   }
 
   /**
-   * Whitelists an action for the given namespace / type pair.
+   * Allowlists an action for the given namespace / type pair.
    * @param {string=} namespace
    * @param {string=} type
    * @return {*} TODO(#23582): Specify return type

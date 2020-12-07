@@ -102,6 +102,16 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     expect(storyConsent.storyConsentConfig_).to.deep.equal(defaultConfig);
   });
 
+  it('should parse and merge legacy consent config', () => {
+    const newConsentConfig = {
+      'consentInstanceId': 'ABC',
+      'checkConsentHref': 'https://example.com',
+      'promptIfUnknownForGeoGroup': undefined,
+    };
+    storyConsent.buildCallback();
+    expect(storyConsent.consentConfig_).to.deep.equal(newConsentConfig);
+  });
+
   it('should require a story-consent title', () => {
     delete defaultConfig.title;
     setConfig(defaultConfig);
@@ -245,11 +255,11 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     expect(linkEl).not.to.have.display('none');
   });
 
-  it('should whitelist the <amp-consent> actions', () => {
+  it('should allowlist the <amp-consent> actions', () => {
     storyConsent.buildCallback();
 
     const actions = storyConsent.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'AMP-CONSENT',

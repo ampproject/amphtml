@@ -45,7 +45,7 @@ describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
       additionalContextMetadata: {},
     };
 
-    containerElement = document.createElement('div');
+    containerElement = env.win.document.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.getPageLayoutBox = () => ({
@@ -55,13 +55,9 @@ describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
       height: 0,
     });
     containerElement.getIntersectionChangeEntry = () => ({});
-    document.body.appendChild(containerElement);
+    env.win.document.body.appendChild(containerElement);
 
     new NameFrameRenderer().render(context, containerElement, creativeData);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(containerElement);
   });
 
   it('should append iframe child', () => {

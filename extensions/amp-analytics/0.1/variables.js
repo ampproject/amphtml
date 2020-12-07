@@ -21,7 +21,15 @@ import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getConsentPolicyState} from '../../../src/consent';
+import {
+  getActiveExperimentBranches,
+  getExperimentBranch,
+} from '../../../src/experiments';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
@@ -174,6 +182,24 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
+ * If given an experiment name returns the branch id if a branch is selected.
+ * If no branch name given, it returns a comma separated list of active branch
+ * experiment ids and their names or an empty string if none exist.
+ * @param {!Window} win
+ * @param {string=} opt_expName
+ * @return {string}
+ */
+function experimentBranchesMacro(win, opt_expName) {
+  if (opt_expName) {
+    return getExperimentBranch(win, opt_expName) || '';
+  }
+  const branches = getActiveExperimentBranches(win);
+  return Object.keys(branches)
+    .map((expName) => `${expName}:${branches[expName]}`)
+    .join(',');
+}
+
+/**
  * Provides support for processing of advanced variable syntax like nested
  * expansions macros etc.
  */
@@ -229,13 +255,22 @@ export class VariableService {
 
     // Returns a promise resolving to viewport.getScrollTop.
     this.register_('SCROLL_TOP', () =>
-      Services.viewportForDoc(this.ampdoc_).getScrollTop()
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollTop())
     );
 
     // Returns a promise resolving to viewport.getScrollLeft.
     this.register_('SCROLL_LEFT', () =>
-      Services.viewportForDoc(this.ampdoc_).getScrollLeft()
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
     );
+
+    this.register_('EXPERIMENT_BRANCHES', (opt_expName) =>
+      experimentBranchesMacro(this.ampdoc_.win, opt_expName)
+    );
+
+    // Returns the content of a meta tag in the ampdoc
+    this.register_('AMPDOC_META', (meta, defaultValue = '') => {
+      return this.ampdoc_.getMetaByName(meta) ?? defaultValue;
+    });
   }
 
   /**
@@ -247,6 +282,12 @@ export class VariableService {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
+      'CONSENT_STRING': getConsentPolicyInfo(element),
+      'CONSENT_METADATA': (key) =>
+        getConsentMetadataValue(
+          element,
+          userAssert(key, 'CONSENT_METADATA macro must contain a key')
+        ),
     };
     const perfMacros = isInFie(element)
       ? {}
@@ -269,7 +310,7 @@ export class VariableService {
             ),
           'FIRST_INPUT_DELAY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_INPUT_DELAY_VISIBLE
+              TickLabel.FIRST_INPUT_DELAY
             ),
           'CUMULATIVE_LAYOUT_SHIFT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
@@ -299,10 +340,10 @@ export class VariableService {
    * @param {!ExpansionOptions} options configuration to use for expansion.
    * @param {!Element} element amp-analytics element.
    * @param {!JsonObject=} opt_bindings
-   * @param {!Object=} opt_whitelist
+   * @param {!Object=} opt_allowlist
    * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
+  expandTemplate(template, options, element, opt_bindings, opt_allowlist) {
     return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
@@ -335,7 +376,7 @@ export class VariableService {
           element,
           urlReplacements,
           opt_bindings,
-          opt_whitelist,
+          opt_allowlist,
           argList
         );
       } else if (isArray(value)) {
@@ -349,7 +390,7 @@ export class VariableService {
                   element,
                   urlReplacements,
                   opt_bindings,
-                  opt_whitelist
+                  opt_allowlist
                 )
               : value[i];
         }
@@ -370,7 +411,7 @@ export class VariableService {
    * @param {!Element} element amp-analytics element.
    * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
    * @param {!JsonObject=} opt_bindings
-   * @param {!Object=} opt_whitelist
+   * @param {!Object=} opt_allowlist
    * @param {string=} opt_argList
    * @return {Promise<string>}
    */
@@ -380,7 +421,7 @@ export class VariableService {
     element,
     urlReplacements,
     opt_bindings,
-    opt_whitelist,
+    opt_allowlist,
     opt_argList
   ) {
     return this.expandTemplate(
@@ -392,12 +433,12 @@ export class VariableService {
       ),
       element,
       opt_bindings,
-      opt_whitelist
+      opt_allowlist
     ).then((val) =>
       urlReplacements.expandStringAsync(
         opt_argList ? val + opt_argList : val,
         opt_bindings || this.getMacros(element),
-        opt_whitelist
+        opt_allowlist
       )
     );
   }
@@ -496,6 +537,22 @@ function getConsentStateStr(element) {
       return null;
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
+  });
+}
+
+/**
+ * Get the associated value from the resolved consent metadata object
+ * @param {!Element} element
+ * @param {string} key
+ * @return {!Promise<?Object>}
+ */
+function getConsentMetadataValue(element, key) {
+  // Get the metadata using the default policy id
+  return getConsentMetadata(element).then((consentMetadata) => {
+    if (!consentMetadata) {
+      return null;
+    }
+    return consentMetadata[key];
   });
 }
 

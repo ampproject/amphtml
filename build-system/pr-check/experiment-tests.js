@@ -36,15 +36,11 @@ const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 function getConfig_() {
   const config = experimentsConfig[experiment];
 
-  if (!config) {
+  if (!config || !config.name || !config.define_experiment_constant) {
     return;
   }
 
-  if (!config.name || !config.command) {
-    return;
-  }
-
-  if (new Date(config['expiration_date_utc']) < Date.now) {
+  if (new Date(config['expiration_date_utc']) < Date.now()) {
     return;
   }
 
@@ -52,7 +48,7 @@ function getConfig_() {
 }
 
 function build_(config) {
-  const command = config.command.replace('gulp dist', 'gulp dist --fortesting');
+  const command = `gulp dist --fortesting --define_experiment_constant ${config.define_experiment_constant}`;
   timedExecOrDie('gulp clean');
   timedExecOrDie('gulp update-packages');
   timedExecOrDie(command);
@@ -73,7 +69,7 @@ function main() {
     console.log(
       `${FILELOGPREFIX} Skipping`,
       colors.cyan(`${experiment} Tests`),
-      `because ${experiment} is expired or does not exist.`
+      `because ${experiment} is expired, misconfigured, or does not exist.`
     );
   }
   stopTimer(FILENAME, FILENAME, startTime);

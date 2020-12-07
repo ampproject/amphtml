@@ -24,7 +24,7 @@ If you just want to validate a page, please see
 
 ## Chrome Extension
 
-Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
+Please see [js/chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/chromeextension/README.md).
 
 ## Visual Studio Code Extension
 
@@ -33,11 +33,11 @@ An extension for Visual Studio Code
 
 ## Command Line Tool and Node.js API
 
-Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
+Please see [js/nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/nodejs/README.md).
 
 ## Web UI
 
-Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
+Please see [js/webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/webui/README.md).
 
 ## JSON
 
@@ -49,8 +49,8 @@ rely on them in a production environment.
 ## Building a Custom Validator
 
 This is only useful for development - e.g. when making changes to
-`engine/validator.js` or when authoring an AMP extension, and it's rough around
-the edges. Below are instructions for Linux Ubuntu 14.
+`js/engine/validator.js` or when authoring an AMP extension, and it's rough
+around the edges. Below are instructions for Linux Ubuntu 14.
 
 ## Installation
 
@@ -61,9 +61,10 @@ Install these packages using apt-get:
 - `npm`
 - `openjdk-7-jre`
 - `protobuf-compiler`
-- `python2.7`
+- `python3`
+- `python3-pip`
 
-Then use pip to `pip install protobuf`.
+Then `pip3 install protobuf`.
 
 In addition, install Node.js v4.4.2. E.g.,
 [by downloading](https://nodejs.org/en/download/) or
@@ -75,21 +76,22 @@ In addition, install Node.js v4.4.2. E.g.,
 Dependencies:
 
 - npm
-- python 2.7 (should already be installed on OSX)
 - [homebrew](https://brew.sh/)
+- python 3 (e.g. [these instructions](https://docs.python-guide.org/starting/install3/osx/))
 
   - protobuf
 
     ```sh
-    brew install protobuf
-    mkdir -p /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages
-    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+    pip3 install --user protobuf
     ```
 
   - openjdk-7-jre
+
+    Install openjdk, then symlink the system Java wrappers to find it:
+
     ```sh
-    brew tap homebrew/cask
-    brew install Caskroom/cask/java
+    brew install openjdk
+    sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
     ```
 
 ### Usage

@@ -15,7 +15,11 @@
  */
 
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {ConsentConfig, expandPolicyConfig} from '../consent-config';
+import {
+  ConsentConfig,
+  expandConsentEndpointUrl,
+  expandPolicyConfig,
+} from '../consent-config';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
@@ -55,20 +59,38 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       );
     });
 
-    it('read cmp config', () => {
+    it('read cmp config', async () => {
       appendConfigScriptElement(doc, element, dict({}));
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      return expect(
-        consentConfig.getConsentConfigPromise()
-      ).to.eventually.deep.equal(
+      // Make a deep copy of the config to avoid error when deleting fields
+      const config = JSON.parse(
+        JSON.stringify(await consentConfig.getConsentConfigPromise())
+      );
+      expect(config['checkConsentHref']).to.match(/get-consent-v1/);
+      expect(config['promptUISrc']).to.match(/diy-consent.html/);
+      // Remove non deterministic field.
+      delete config['checkConsentHref'];
+      delete config['promptUISrc'];
+      expect(config).to.deep.equal(
         dict({
           'consentInstanceId': '_ping_',
-          'checkConsentHref': '/get-consent-v1',
-          'promptUISrc': '/examples/amp-consent/diy-consent.html',
           'consentRequired': 'remote',
         })
       );
+    });
+
+    it('should ignore promptUISrc w/ amp-story-consent', async () => {
+      appendConfigScriptElement(doc, element, dict({}));
+      element.setAttribute('type', '_ping_');
+      element.appendChild(doc.createElement('amp-story-consent'));
+      const expectedError =
+        'amp-consent/consent-config: ' +
+        '`promptUiSrc` cannot be specified while using' +
+        ' amp-story-consent.';
+      await expect(
+        new ConsentConfig(element).getConsentConfigPromise()
+      ).to.be.rejectedWith(expectedError);
     });
 
     it('converts deprecated format to new format', async () => {
@@ -198,12 +220,17 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       );
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      expect(await consentConfig.getConsentConfigPromise()).to.deep.equal(
+      // Make a deep copy of the config to avoid error when deleting fields
+      const config = JSON.parse(
+        JSON.stringify(await consentConfig.getConsentConfigPromise())
+      );
+      expect(config['promptUISrc']).to.match(/diy-consent.html/);
+      delete config['promptUISrc'];
+      expect(config).to.deep.equal(
         dict({
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/override',
           'consentRequired': false,
-          'promptUISrc': '/examples/amp-consent/diy-consent.html',
           'promptIfUnknownForGeoGroup': 'eea',
           'postPromptUI': 'test',
           'clientConfig': {
@@ -510,6 +537,36 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
         'consentRequired': 'remote',
         'policy': {},
       });
+    });
+  });
+
+  describe('expandConsentEndpointUrl', () => {
+    it('support expansion in allowed list', async () => {
+      const url = await expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID&pid=PAGE_VIEW_ID&pid64=PAGE_VIEW_ID_64&r=RANDOM'
+      );
+      expect(url).to.match(/cid=amp-.{22}&pid=[0-9]+&pid64=.{22}&r=RANDOM/);
+    });
+
+    it('override CLIENT_ID scope', async () => {
+      const u1 = await expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID'
+      );
+      const u2 = await expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID()'
+      );
+      const u3 = await expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID(123)'
+      );
+      const u4 = await expandConsentEndpointUrl(
+        doc.body,
+        'https://example.test?cid=CLIENT_ID(abc)'
+      );
+      expect(u1).to.equal(u2).to.equal(u3).to.equal(u4);
     });
   });
 

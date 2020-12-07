@@ -21,20 +21,23 @@
 import '../../../amp-ad/0.1/amp-ad';
 import * as bytesUtils from '../../../../src/utils/bytes';
 import {
+  AMP_EXPERIMENT_ATTRIBUTE,
+  QQID_HEADER,
+} from '../../../../ads/google/a4a/utils';
+import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
 } from '../../../amp-a4a/0.1/signature-verifier';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
+  MODULE_NOMODULE_PARAMS_EXP,
   XORIGIN_MODE,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  EXPAND_JSON_TARGETING_EXP,
-  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
@@ -44,14 +47,10 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
-import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
+import {toggleExperiment} from '../../../../src/experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -64,12 +63,6 @@ const realWinConfig = {
   amp: {
     extensions: ['amp-ad-network-doubleclick-impl'],
   },
-  ampAdCss: true,
-  allowExternalResources: true,
-};
-
-const realWinConfigAmpAd = {
-  amp: {ampdoc: 'amp-ad'},
   ampAdCss: true,
   allowExternalResources: true,
 };
@@ -708,7 +701,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           /(\?|&)ady=-?[0-9]+(&|$)/,
           /(\?|&)u_aw=[0-9]+(&|$)/,
           /(\?|&)u_ah=[0-9]+(&|$)/,
-          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_cd=(24|30)(&|$)/,
           /(\?|&)u_w=[0-9]+(&|$)/,
           /(\?|&)u_h=[0-9]+(&|$)/,
           /(\?|&)u_tz=-?[0-9]+(&|$)/,
@@ -817,12 +810,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
-      forceExperimentBranch(
-        win,
-        EXPAND_JSON_TARGETING_EXP.ID,
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
-      );
       element.setAttribute(
         'json',
         `{
@@ -838,12 +825,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting inside array', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
-      forceExperimentBranch(
-        win,
-        EXPAND_JSON_TARGETING_EXP.ID,
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
-      );
       element.setAttribute(
         'json',
         `{
@@ -997,15 +978,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
             return impl.getAdUrl().then((url2) => {
               expect(url2).to.match(/(\?|&)rc=1(&|$)/);
               expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
-              expect(url2).to.not.match(/(\?|&)frc=1(&|$)/);
             });
           });
-      });
-    });
-    it('has correct frc value', () => {
-      impl.fromResumeCallback = true;
-      impl.getAdUrl().then((url) => {
-        expect(url).to.match(/(\?|&)frc=1(&|$)/);
       });
     });
     it('should include identity', () => {
@@ -1105,6 +1079,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(url).to.not.match(/(=|%2C)2106317(3|4)(%2C|&|$)/);
       });
     });
+
+    it('does not set ptt parameter by default', () =>
+      expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=(&|$)/));
+    it('sets ptt parameter', () => {
+      impl.experimentIds = ['21068094'];
+      return expect(impl.getAdUrl()).to.eventually.match(/(\?|&)ptt=13(&|$)/);
+    });
   });
 
   describe('#getPageParameters', () => {
@@ -1142,7 +1123,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       impl.win.ampAdSlotIdCounter = 1;
       expect(impl.element.getAttribute('data-amp-slot-index')).to.not.be.ok;
       impl.layoutMeasureExecuted_ = true;
-      impl.uiHandler = {applyUnlayoutUI: () => {}};
+      impl.uiHandler = {applyUnlayoutUI: () => {}, cleanup: () => {}};
       const placeholder = doc.createElement('div');
       placeholder.setAttribute('placeholder', '');
       const fallback = doc.createElement('div');
@@ -1375,6 +1356,57 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       });
     });
 
+    it('should center iframe if narrower than ad slot', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('150x50', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
+      });
+    });
+
+    it('should not center iframe if narrower than slot but is fluid', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('0x0', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.not.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
+      });
+    });
+
+    it('should not center iframe if same size as ad slot', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('200x50', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.not.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
+      });
+    });
+
     it('amp creative - should force iframe to match size of slot', () => {
       stubForAmpCreative();
       env.sandbox
@@ -1564,8 +1596,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('should use random subdomain when experiment is enabled', () => {
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
-
       const expectedPath =
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
         '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
@@ -1573,21 +1603,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
     });
 
-    it('uses random subdomain if experiment is on without win.crypto', () => {
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+    it('should use the same random subdomain for every slot on a page', () => {
+      const first = impl.getSafeframePath();
 
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      const second = impl.getSafeframePath();
+
+      expect(first).to.equal(second);
+    });
+
+    it('uses random subdomain if experiment is on without win.crypto', () => {
       env.sandbox.stub(bytesUtils, 'getCryptoRandomBytesArray').returns(null);
 
       const expectedPath =
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
-        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
-
-      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
-    });
-
-    it('should use constant subdomain when experiment is disabled', () => {
-      const expectedPath =
-        '^https://tpc.googlesyndication.com' +
         '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
 
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
@@ -1629,96 +1658,6 @@ describes.realWin(
         expect(
           impl.onNetworkFailure(new Error('xhr failure'), TEST_URL)
         ).to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
-      });
-    });
-
-    describes.realWin('centering', realWinConfigAmpAd, (env) => {
-      const size = {width: '300px', height: '150px'};
-
-      /**
-       * @param {!Element} iframe
-       * @param {{width: number, height: number}} expectedSize
-       */
-      function verifyCss(iframe, expectedSize) {
-        expect(iframe).to.be.ok;
-        const style = env.win.getComputedStyle(iframe);
-        expect(style.width).to.equal(expectedSize.width);
-        expect(style.height).to.equal(expectedSize.height);
-        // We don't know the exact values by which the frame will be
-        // translated, as this can vary depending on whether we use the
-        // height/width attributes, or the actual size of the frame. To make
-        // this less of a hassle, we'll just match against regexp.
-        expect(style.transform).to.equal('none');
-      }
-
-      afterEach(() => env.win.document.body.removeChild(impl.element));
-
-      it('centers iframe in slot when height && width', () => {
-        const setup = createImplTag(
-          {
-            width: '300',
-            height: '150',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when !height && !width', () => {
-        const setup = createImplTag(
-          {
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when !height && width', () => {
-        const setup = createImplTag(
-          {
-            width: '300',
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when height && !width', () => {
-        const setup = createImplTag(
-          {
-            height: '150',
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
       });
     });
 
@@ -1797,9 +1736,7 @@ describes.realWin(
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        env.sandbox
-          .stub(impl, 'getResource')
-          .returns({whenWithinViewport: () => Promise.resolve()});
+        env.sandbox.stub(impl, 'whenWithinViewport').returns(Promise.resolve());
       });
 
       it('should use experiment value', () => {
@@ -1904,6 +1841,11 @@ describes.realWin(
     describe('#setPageLevelExperiments', () => {
       let randomlySelectUnsetExperimentsStub;
       let extractUrlExperimentIdStub;
+      const ampdocMock = {
+        whenFirstVisible: () => new Deferred().promise,
+        getMetaByName: () => null,
+      };
+
       beforeEach(() => {
         randomlySelectUnsetExperimentsStub = env.sandbox.stub(
           impl,
@@ -1914,13 +1856,25 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         env.sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        env.sandbox.stub(impl, 'getAmpDoc').returns({
-          whenFirstVisible: () => new Deferred().promise,
-          getMetaByName: () => null,
-        });
+        env.sandbox.stub(impl, 'getAmpDoc').returns(ampdocMock);
       });
+
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
+      });
+
+      it('should have correctly formatted experiment map', () => {
+        randomlySelectUnsetExperimentsStub.returns({});
+        impl.buildCallback();
+        const experimentMap =
+          randomlySelectUnsetExperimentsStub.firstCall.args[0];
+        Object.keys(experimentMap).forEach((key) => {
+          expect(key).to.be.a('string');
+          const {branches} = experimentMap[key];
+          expect(branches).to.exist;
+          expect(branches).to.be.a('array');
+          branches.forEach((branch) => expect(branch).to.be.a('string'));
+        });
       });
 
       it('should select SRA experiments', () => {
@@ -1929,14 +1883,14 @@ describes.realWin(
         });
         extractUrlExperimentIdStub.returns(undefined);
         impl.buildCallback();
-        expect(impl.experimentIds.includes('117152667')).to.be.true;
+        expect(impl.experimentIds).to.include('117152667');
         expect(impl.useSra).to.be.true;
       });
 
       it('should force-select SRA experiment from URL experiment ID', () => {
         randomlySelectUnsetExperimentsStub.returns({});
         impl.setPageLevelExperiments('8');
-        expect(impl.experimentIds.includes('117152667')).to.be.true;
+        expect(impl.experimentIds).to.include('117152667');
       });
 
       describe('should properly limit SRA traffic', () => {
@@ -1946,9 +1900,8 @@ describes.realWin(
           impl.setPageLevelExperiments();
           // args format is call array followed by parameter array so expect
           // first call, first param.
-          experimentInfoMap =
-            randomlySelectUnsetExperimentsStub.args[0][0]['doubleclickSraExp'];
-          expect(experimentInfoMap).to.be.ok;
+          experimentInfoMap = randomlySelectUnsetExperimentsStub.args[0][0][0];
+          expect(experimentInfoMap.experimentId).to.equal('doubleclickSraExp');
           expect(impl.useSra).to.be.false;
         });
 
@@ -1976,6 +1929,104 @@ describes.realWin(
         it('should not allow if block level refresh', () => {
           impl.element.setAttribute('data-enable-refresh', '');
           expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+        });
+      });
+
+      describe('detect module/nomodule experiment', () => {
+        it('should identify module/nomodule control when runtime-type is 10', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('10');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(impl.experimentIds).to.include(
+            MODULE_NOMODULE_PARAMS_EXP.CONTROL
+          );
+        });
+
+        it('should identify module/nomodule experiment when runtime-type is 2', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('2');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(impl.experimentIds).to.include(
+            MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT
+          );
+        });
+
+        // Only 2, 4, 10 should be recognized.
+        it('should ignore module/nomodule experiment when runtime-type is 6', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('6');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
+          ).to.be.false;
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
+          ).to.be.false;
+        });
+      });
+
+      describe('SSR experiments', () => {
+        it('should include SSR experiments', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=45,3579282=0');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+            '579823748245,357928200'
+          );
+        });
+
+        it('should pad value to two chars', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=1');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+            '579823748201'
+          );
+        });
+
+        it('should ignore excessively large value', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=100');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
+        });
+
+        it('should ignore negative values', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=-1');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
+        });
+
+        it('should ignore non-number values', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=testing');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
         });
       });
     });
