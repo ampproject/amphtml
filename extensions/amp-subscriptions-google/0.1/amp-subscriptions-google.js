@@ -154,7 +154,9 @@ export class GoogleSubscriptionsPlatform {
       )
       .map((exp) => exp.substring(4));
 
-    const swgConfig = {'experiments': SWG_CONFIG_EXPERIMENTS.concat(ampExperimentsForSwg)};
+    const swgConfig = {
+      'experiments': SWG_CONFIG_EXPERIMENTS.concat(ampExperimentsForSwg)
+    };
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
