@@ -16,7 +16,7 @@
 
 amp-story-dev-tools-tab-logs {
   overflow-y: scroll !important;
-  padding: 30px 10% !important;
+  padding: var(--i-amphtml-story-dev-tools-vertical-spacing) 10% !important;
 }
 
 .i-amphtml-story-dev-tools-log-status-title {

@@ -24,9 +24,10 @@ amp-story-dev-tools {
   font-size: 16px !important;
   font-family: 'Poppins', sans-serif !important;
   color: white !important;
-  --i-amphtml-story-dev-tools-accent: #79B3FF;
-  --i-amphtml-story-dev-tools-accent-light: #92c1ff;
-  --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55;
+  --i-amphtml-story-dev-tools-vertical-spacing: 30px !important;
+  --i-amphtml-story-dev-tools-accent: #79B3FF !important;
+  --i-amphtml-story-dev-tools-accent-light: #92c1ff !important;
+  --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55 !important;
 
   --i-amphtml-story-dev-tools-error-color: #FF5252 !important;
   --i-amphtml-story-dev-tools-gray-1: #101010 !important;
