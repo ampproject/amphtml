@@ -679,11 +679,12 @@
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1",
-      "name": "amp-story-interactive-quiz: sizing and positioning",
-      "viewport": {"width": 320, "height": 480},
+      "name": "amp-story-dev-tools: loading and running",
+      "viewport": {"width": 1080, "height": 720},
       "loading_complete_selectors": [
         "amp-story-dev-tools-tab-preview",
       ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-dev-tools.js"
     },
     {
       "flaky": true,
