@@ -220,8 +220,8 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       this.storyUrl_
     );
     Object.values(this.tabContents_).forEach((tabContent) => {
-      container.appendChild(tabContent);
       toggle(tabContent, false);
+      container.appendChild(tabContent);
     });
   }
 
