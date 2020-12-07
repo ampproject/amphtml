@@ -140,21 +140,21 @@ function removeFromRuntimeSource(id, percentage) {
  * @return {? string}
  */
 function gitCommitSingleExperiment(id, workItem, modified) {
-  const messageLines = [readableRemovalId(id, workItem)];
+  const messageParagraphs = [readableRemovalId(id, workItem)];
   if (workItem.previousHistory.length > 0) {
-    messageLines.push(
-      '',
+    messageParagraphs.push(
       `Previous history on ${prodConfigPath.split('/').pop()}:`,
-      '',
-      ...workItem.previousHistory.map(
-        ({hash, authorDate, subject}) =>
-          `- ${hash} - ${authorDate} - ${subject}`
-      )
+      workItem.previousHistory
+        .map(
+          ({hash, authorDate, subject}) =>
+            `- ${hash} - ${authorDate} - ${subject}`
+        )
+        .join('\n')
     );
   }
   return getStdout(
     `git add ${modified.join(' ')} && ` +
-      `git commit -m "${cmdEscape(messageLines.join('\n'))}"`
+      `git commit -m "${cmdEscape(messageParagraphs.join('\n\n'))}"`
   );
 }
 
@@ -259,45 +259,33 @@ function summaryCommitMessage({
   modifiedSourceFiles,
   htmlFilesWithReferences,
 }) {
-  const lines = [
+  const paragraphs = [
     `🚮 Sweep experiments older than ${cutoffDateFormatted}`,
-    '',
     `Sweep experiments last flipped globally up to ${cutoffDateFormatted}:`,
-    '',
     removed.join('\n'),
   ];
 
   if (modifiedSourceFiles.length > 0) {
-    lines.push(
-      '',
+    paragraphs.push(
       '---',
-      '',
       '**⚠️ This changes Javascript source files**',
-      '',
       'The following may contain errors and/or require intervention to remove superfluous conditionals:',
-      '',
       fileListMarkdown(modifiedSourceFiles),
-      '',
       `Refer to the removal guide for [suggestions on handling these modified Javascript files.](${readmeMdGithubLink()}#followup)`
     );
   }
 
   if (htmlFilesWithReferences.length > 0) {
-    lines.push(
-      '',
+    paragraphs.push(
       '---',
-      '',
       '**⚠️ There are HTML files with possible references**',
-      '',
       'The following HTML files contain references to experiment names which may be stale and should be manually removed:',
-      '',
       fileListMarkdown(htmlFilesWithReferences),
-      '',
       `Refer to the removal guide for [suggestions on handling these HTML files.](${readmeMdGithubLink()}#followup:html)`
     );
   }
 
-  return lines.join('\n');
+  return paragraphs.join('\n\n');
 }
 
 /**
