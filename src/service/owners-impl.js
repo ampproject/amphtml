@@ -108,21 +108,7 @@ export class OwnersImpl {
         return;
       }
       if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(
-          resource.whenBuilt().then(() => {
-            resource.measure();
-            if (!resource.isDisplayed()) {
-              return;
-            }
-            this.resources_.scheduleLayoutOrPreload(
-              resource,
-              /* layout */ true,
-              opt_parentPriority,
-              /* forceOutsideViewport */ true
-            );
-            return resource.loadedOnce();
-          })
-        );
+        promises.push(resource.element.load());
       } else if (resource.isDisplayed()) {
         promises.push(resource.loadedOnce());
       }

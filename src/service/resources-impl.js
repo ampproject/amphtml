@@ -24,6 +24,7 @@ import {
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 
+import {LoadScheduler} from './load-scheduler';
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
@@ -149,6 +150,9 @@ export class ResourcesImpl {
       this.relayoutAll_ = true;
       this.schedulePass();
     });
+
+    /** @private @const {!LoadScheduler} */
+    this.schedulerV2_ = new LoadScheduler(ampdoc);
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -426,6 +430,38 @@ export class ResourcesImpl {
   }
 
   /** @override */
+  forceLoad(element) {
+    const resource = Resource.forElement(element);
+    if (element.isLoadableV2()) {
+      this.schedulerV2_.schedule(element, /* force */ true);
+    } else {
+      resource.measure();
+      this.scheduleLayoutOrPreload(
+        resource,
+        /* layout */ true,
+        /* parentPriority */ 0,
+        /* forceOutsideViewport */ true
+      );
+    }
+    return resource.loadedOnce();
+  }
+
+  /** @override */
+  scheduleLoad(element) {
+    this.schedulerV2_.schedule(element);
+  }
+
+  /** @override */
+  scheduleLoadImmediate(element) {
+    this.schedulerV2_.scheduleImmediate(element);
+  }
+
+  /** @override */
+  unscheduleLoad(element) {
+    this.schedulerV2_.unschedule(element);
+  }
+
+  /** @override */
   add(element) {
     // Ensure the viewport is ready to accept the first element.
     this.addCount_++;
@@ -610,6 +646,7 @@ export class ResourcesImpl {
     if (!resource) {
       return;
     }
+    this.scheduler_.unschedule(resource);
     this.removeResource_(resource);
   }
 
@@ -1778,6 +1815,10 @@ export class ResourcesImpl {
     forceOutsideViewport,
     callback
   ) {
+    if (resource.element.isLoadableV2()) {
+      return;
+    }
+
     const taskId = resource.getTaskId(localId);
 
     const task = {

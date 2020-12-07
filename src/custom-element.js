@@ -55,6 +55,8 @@ const UpgradeState = {
   UPGRADE_IN_PROGRESS: 4,
 };
 
+const EMPTY_FUNC = () => {};
+
 /**
  * Caches whether the template tag is supported to avoid memory allocations.
  * @type {boolean|undefined}
@@ -341,6 +343,17 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Whether this element supports loaderV2 scheduler.
+     *
+     * @return {boolean}
+     * @final
+     * TODO(#31915): rename to just isLoadable
+     */
+    isLoadableV2() {
+      return this.implementation_.isLoadableV2();
+    }
+
+    /**
      * Completes the upgrade of the element with the provided implementation.
      * @param {!./base-element.BaseElement} newImpl
      * @param {number} upgradeStartTime
@@ -394,6 +407,15 @@ function createBaseCustomElementClass(win) {
      */
     whenBuilt() {
       return this.signals_.whenSignal(CommonSignals.BUILT);
+    }
+
+    /**
+     * Returns the promise that's rewsolved when the element has been loaded.
+     * If the loading fails, the resulting promise is rejected.
+     * @return {!Promise}
+     */
+    whenLoaded() {
+      return this.signals_.whenSignal(CommonSignals.LOAD_END).then(EMPTY_FUNC);
     }
 
     /**
@@ -498,6 +520,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Forces immediate load of this element.
+     * @return {!Promise}
+     */
+    load() {
+      return this.build().then(() => this.getResources().forceLoad(this));
+    }
+
+    /**
      * Called to instruct the element to preconnect to hosts it uses during
      * layout.
      * @param {boolean} onLayout Whether this was called after a layout.
@@ -534,12 +564,10 @@ function createBaseCustomElementClass(win) {
     /**
      * Updates the layout box of the element.
      * Should only be called by Resources.
-     * @param {!./layout-rect.LayoutRectDef} layoutBox
-     * @param {boolean} sizeChanged
      */
-    updateLayoutBox(layoutBox, sizeChanged = false) {
+    updateLayoutBox() {
       if (this.isBuilt()) {
-        this.onMeasure(sizeChanged);
+        this.onMeasure();
       }
     }
 
@@ -877,6 +905,9 @@ function createBaseCustomElementClass(win) {
     /** @private */
     connected_() {
       if (this.built_) {
+        if (this.isLoadableV2()) {
+          this.getResources().scheduleLoad(this);
+        }
         this.implementation_.attachedCallback();
       }
     }
@@ -1112,11 +1143,8 @@ function createBaseCustomElementClass(win) {
       }
 
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
-      const isLoadEvent = this.layoutCount_ == 0; // First layout is "load".
       this.signals_.reset(CommonSignals.UNLOAD);
-      if (isLoadEvent) {
-        this.signals_.signal(CommonSignals.LOAD_START);
-      }
+      this.signals_.signal(CommonSignals.LOAD_START);
 
       // Potentially start the loading indicator.
       this.toggleLoading(true);
@@ -1130,9 +1158,10 @@ function createBaseCustomElementClass(win) {
           if ((!getMode().test || signal) && signal.aborted) {
             throw cancellation();
           }
-          if (isLoadEvent) {
-            this.signals_.signal(CommonSignals.LOAD_END);
+          if (this.isLoadableV2()) {
+            this.getResources().unscheduleLoad(this);
           }
+          this.signals_.signal(CommonSignals.LOAD_END);
           this.readyState = 'complete';
           this.layoutCount_++;
           this.toggleLoading(false);
@@ -1148,13 +1177,14 @@ function createBaseCustomElementClass(win) {
           if ((!getMode().test || signal) && signal.aborted) {
             throw cancellation();
           }
-          // add layoutCount_ by 1 despite load fails or not
-          if (isLoadEvent) {
-            this.signals_.rejectSignal(
-              CommonSignals.LOAD_END,
-              /** @type {!Error} */ (reason)
-            );
+          if (this.isLoadableV2()) {
+            this.getResources().unscheduleLoad(this);
           }
+          // add layoutCount_ by 1 despite load fails or not
+          this.signals_.rejectSignal(
+            CommonSignals.LOAD_END,
+            /** @type {!Error} */ (reason)
+          );
           this.layoutCount_++;
           this.toggleLoading(false);
           throw reason;
@@ -1226,6 +1256,9 @@ function createBaseCustomElementClass(win) {
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
         this.reset_();
+        if (this.isLoadableV2()) {
+          this.getResources().scheduleLoad(this);
+        }
       }
       this.dispatchCustomEventForTesting(AmpEvents.UNLOAD);
       return isReLayoutNeeded;

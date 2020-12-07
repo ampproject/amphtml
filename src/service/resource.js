@@ -21,6 +21,7 @@ import {cancellation, isBlockedByConsent, reportError} from '../error';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
 import {
+  layoutRectFromDomRect,
   layoutRectLtwh,
   layoutRectSizeEquals,
   layoutSizeFromRect,
@@ -234,6 +235,12 @@ export class Resource {
      * @private {?ClientRect}
      */
     this.premeasuredRect_ = null;
+
+    /**
+     * A client rect that was "premeasured" by an IntersectionObserver.
+     * @private {?../layout-rect.LayoutRectDef}
+     */
+    this.loaderRectV2_ = null;
   }
 
   /**
@@ -512,11 +519,10 @@ export class Resource {
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
-    const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
     if (
       this.state_ == ResourceState.NOT_LAID_OUT ||
       oldBox.top != newBox.top ||
-      sizeChanges
+      !layoutRectSizeEquals(oldBox, newBox)
     ) {
       if (this.element.isUpgraded()) {
         if (this.state_ == ResourceState.NOT_LAID_OUT) {
@@ -538,7 +544,7 @@ export class Resource {
       this.initialLayoutBox_ = newBox;
     }
 
-    this.element.updateLayoutBox(newBox, sizeChanges);
+    this.element.updateLayoutBox();
   }
 
   /**
@@ -550,6 +556,24 @@ export class Resource {
       return Promise.resolve();
     }
     return Services.vsyncFor(this.hostWin).measure(() => this.measure());
+  }
+
+  /**
+   * @param {!ClientRect} rect
+   */
+  setLoaderRectV2(rect) {
+    devAssert(this.element.isLoadableV2());
+    const prev = this.loaderRectV2_;
+    this.loaderRectV2_ = layoutRectFromDomRect(rect);
+    if (
+      !prev ||
+      prev.width !== rect.width ||
+      prev.height !== rect.height ||
+      prev.top !== rect.top ||
+      prev.left !== rect.left
+    ) {
+      this.element.updateLayoutBox();
+    }
   }
 
   /**
@@ -607,7 +631,7 @@ export class Resource {
       0
     );
     this.isFixed_ = false;
-    this.element.updateLayoutBox(this.getLayoutBox());
+    this.element.updateLayoutBox();
     const owner = this.getOwner();
     if (owner) {
       owner.collapsedCallback(this.element);
@@ -658,6 +682,10 @@ export class Resource {
    * @return {!../layout-rect.LayoutSizeDef}
    */
   getLayoutSize() {
+    if (this.loaderRectV2_) {
+      const {width, height} = this.loaderRectV2_;
+      return {width, height};
+    }
     return layoutSizeFromRect(this.layoutBox_);
   }
 
@@ -672,6 +700,9 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
+    if (this.loaderRectV2_) {
+      return this.loaderRectV2_;
+    }
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
