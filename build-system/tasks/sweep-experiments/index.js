@@ -17,8 +17,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
 const log = require('fancy-log');
 const path = require('path');
+const {cyan, magenta, yellow} = require('ansi-colors');
 const {getOutput} = require('../../common/process');
-const {magenta, cyan} = require('ansi-colors');
 const {readJsonSync, writeFileSync} = require('fs-extra');
 
 const containRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];
@@ -33,6 +33,17 @@ const globalWritablePaths = [
   prodConfigPath,
   canaryConfigPath,
 ];
+
+/**
+ * Ignores experiments that cannot be removed automatically.
+ * @param {string} id
+ * @return {boolean}
+ */
+const isSpecialCannotBeRemoved = (id) =>
+  // These are passed through to a third-party, so we can't determine whether
+  // they're still in use by looking at this repo alone.
+  // See https://git.io/JIBeB (amp-subscriptions-google.js)
+  id.startsWith('swg-');
 
 /**
  * @param {string} cmd
@@ -303,7 +314,10 @@ function summaryCommitMessage({
  * @param {!Object<string, *>} canaryConfig
  * @param {string} cutoffDateFormatted
  * @param {string=} removeExperiment
- * @return {!Object<string, {percentage: number, previousHistory: Array}>}
+ * @return {!{
+ *   include: Object<string, {percentage: number, previousHistory: Array}>,
+ *   exclude: Object<string, {percentage: number, previousHistory: Array}>
+ * }}
  */
 function collectWork(
   prodConfig,
@@ -320,10 +334,14 @@ function collectWork(
       removeExperiment,
       percentage
     );
-    return {[removeExperiment]: {percentage, previousHistory}};
+    const entries = {[removeExperiment]: {percentage, previousHistory}};
+    return isSpecialCannotBeRemoved(removeExperiment)
+      ? {exclude: entries}
+      : {include: entries};
   }
 
-  const work = {};
+  const include = {};
+  const exclude = {};
   for (const [experiment, percentage] of Object.entries(prodConfig)) {
     if (
       typeof percentage === 'number' &&
@@ -338,11 +356,14 @@ function collectWork(
         percentage
       );
       if (previousHistory.length > 0) {
-        work[experiment] = {percentage, previousHistory};
+        const entries = isSpecialCannotBeRemoved(experiment)
+          ? exclude
+          : include;
+        entries[experiment] = {percentage, previousHistory};
       }
     }
   }
-  return work;
+  return {include, exclude};
 }
 
 /**
@@ -359,27 +380,31 @@ async function sweepExperiments() {
     argv.experiment ? 0 : argv.days_ago || 365
   ).toISOString();
 
-  const work = collectWork(
+  const {exclude, include} = collectWork(
     prodConfig,
     canaryConfig,
     cutoffDateFormatted,
     argv.experiment
   );
 
-  const total = Object.keys(work).length;
+  if (Object.keys(exclude).length > 0) {
+    log(yellow('The following experiments are excluded as they are special:'));
+    for (const experiment in exclude) {
+      log(readableRemovalId(experiment, exclude[experiment]));
+    }
+  }
 
+  const total = Object.keys(include).length;
   if (total === 0) {
     log(cyan('No experiments to remove.'));
     log(`Cutoff at ${cutoffDateFormatted}`);
     return;
   }
 
-  log();
   log(cyan('Removing references to the following experiments:'));
-  for (const experiment in work) {
-    log(readableRemovalId(experiment, work[experiment]));
+  for (const experiment in include) {
+    log(readableRemovalId(experiment, include[experiment]));
   }
-  log();
 
   if (argv.dry_run) {
     log('❗️ (Not making changes due to --dry_run)');
@@ -388,7 +413,7 @@ async function sweepExperiments() {
 
   const removed = [];
 
-  Object.entries(work).forEach(([id, workItem], i) => {
+  Object.entries(include).forEach(([id, workItem], i) => {
     log(`🚮 ${i + 1}/${total}`, magenta(`${id}...`));
 
     const modified = [
@@ -406,8 +431,6 @@ async function sweepExperiments() {
       .split('\n')
       .forEach((line) => log(line));
 
-    log();
-
     removed.push(`- ${readableRemovalId(id, workItem)}`);
   });
 
@@ -416,7 +439,7 @@ async function sweepExperiments() {
 
     const htmlFilesWithReferences = filesContainingPattern(
       containExampleHtml.map((dir) => `${dir}/**/*.html`),
-      `['"](${Object.keys(work).join('|')})['"]`
+      `['"](${Object.keys(include).join('|')})['"]`
     );
 
     log(
