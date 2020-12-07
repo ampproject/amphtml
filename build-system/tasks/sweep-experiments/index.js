@@ -199,10 +199,6 @@ function dateDaysAgo(daysAgo = 365) {
   return pastDate;
 }
 
-/** @return {?string} */
-const getHeadHash = () =>
-  getStdoutThrowOnError('git log  --pretty=format:%h HEAD^..HEAD');
-
 /**
  * @param {string} formattedDate
  * @return {string}
@@ -372,7 +368,7 @@ function collectWork(
  * See README.md for usage.
  */
 async function sweepExperiments() {
-  const headHash = getHeadHash();
+  const headHash = getStdoutThrowOnError('git log -1 --format:%h');
 
   const prodConfig = readJsonSync(prodConfigPath);
   const canaryConfig = readJsonSync(canaryConfigPath);
@@ -457,7 +453,7 @@ async function sweepExperiments() {
         )}"`
       ),
       '\n\n',
-      getStdoutThrowOnError('git log --pretty=format:%b "HEAD^..HEAD"'),
+      getStdoutThrowOnError('git log -1 --format:%b'),
       `\n\n`
     );
 
