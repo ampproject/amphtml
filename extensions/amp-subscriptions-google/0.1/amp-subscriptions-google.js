@@ -73,6 +73,8 @@ const AMP_ACTION_TO_SWG_EVENT = {
   },
 };
 
+const SWG_CONFIG_EXPERIMENTS = ['gpay-api', 'gpay-native'];
+
 /**
  */
 export class GoogleSubscriptionsPlatformService {
@@ -152,7 +154,7 @@ export class GoogleSubscriptionsPlatform {
       )
       .map((exp) => exp.substring(4));
 
-    const swgConfig = {'experiments': ampExperimentsForSwg};
+    const swgConfig = {'experiments': SWG_CONFIG_EXPERIMENTS.concat(ampExperimentsForSwg)};
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
