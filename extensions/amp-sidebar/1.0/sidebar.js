@@ -17,6 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
+import {setStyle} from '../../../src/style';
 import {
   useCallback,
   useEffect,
@@ -116,6 +117,8 @@ function SidebarWithRef(
     // "Make Visible" Animation
     if (opened) {
       const postVisibleAnim = () => {
+        setStyle(sidebarElement, 'transform', 'translateX(0)');
+        setStyle(maskElement, 'opacity', 1);
         sidebarElement./*REVIEW*/ focus();
       };
       if (!sidebarElement.animate || !maskElement.animate) {

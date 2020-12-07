@@ -54,7 +54,7 @@ export const _default = () => {
       <SidebarWithActions side={side}>
         Content
         <br />
-        Very Wide content ------------------------------!
+        Very Wide content -------------------------------!
         <ul>
           <li>1</li>
           <li>2</li>
