@@ -36,8 +36,8 @@ let animationHandler;
 function getBodymovinAnimationSdk(global, renderer, cb) {
   const scriptToLoad =
     renderer === 'svg'
-      ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
-      : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie_light.min.js'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js';
   loadScript(global, scriptToLoad, function () {
     cb(global.bodymovin);
   });
