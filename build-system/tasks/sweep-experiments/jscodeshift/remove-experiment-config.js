@@ -15,6 +15,23 @@
  */
 
 /**
+ * Removes an entry from files like tools/experiments/experiments-config.js,
+ * whose id property is specified by --experimentId:
+ *
+ *    [
+ *      {
+ *        ...
+ *      },
+ *   -  {
+ *   -    id: 'foo',
+ *   -    name: 'Foo.',
+ *   -    spec: '...',
+ *   -  },
+ *      {
+ *        ...
+ *      }
+ *    ]
+ *
  * @param {*} file
  * @param {*} api
  * @param {*} options

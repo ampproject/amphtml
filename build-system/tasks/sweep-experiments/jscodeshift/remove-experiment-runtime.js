@@ -17,6 +17,22 @@
 import {red} from 'ansi-colors';
 
 /**
+ * Replaces isExperimentOn() and toggleExperiment() calls when they match a name
+ * specified by --isExperimentOnExperiment
+ *
+ * - isExperimentOn() is replaced with boolean (--isExperimentOnLaunched):
+ *     isExperimentOn(win, 'foo') -> true
+ *
+ * - toggleExperiment() is replaced with either:
+ *
+ *     a. its toggle value in third argument:
+ *          toggleExperiment(win, 'foo', false) -> false
+ *
+ *     b. or the negation of --isExperimentOnLaunched when lacking third argument:
+ *          toggleExperiment(win, 'foo') -> !true
+ *
+ * Resulting unused imports of these functions are also removed.
+ *
  * @param {*} file
  * @param {*} api
  * @param {*} options
