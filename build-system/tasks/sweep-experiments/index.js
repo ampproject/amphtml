@@ -320,7 +320,7 @@ function collectWork(
       removeExperiment,
       percentage
     );
-    return {percentage, previousHistory};
+    return {[removeExperiment]: {percentage, previousHistory}};
   }
 
   const work = {};
