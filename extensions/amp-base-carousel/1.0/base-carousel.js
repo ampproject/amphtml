@@ -22,7 +22,6 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
-import {mod} from '../../../src/utils/math';
 import {
   toChildArray,
   useCallback,
