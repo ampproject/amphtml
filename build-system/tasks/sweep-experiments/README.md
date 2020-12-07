@@ -81,7 +81,7 @@ is now dead code:
 
 ```diff
 -  doStuffWhenExperimentIsOff() {
--    devAssert((/* isExperimentOn(win, 'my-experiment') // launched: false */ false);
+-    devAssert(/* isExperimentOn(win, 'my-experiment') // launched: false */ false);
 -    doStuff();
 -  }
 ```
@@ -91,7 +91,7 @@ is now dead code:
 Conditions that result on `false` should have their block removed altogether, for example:
 
 ```diff
-- if ((/* isExperimentOn(win, 'my-experiment') // launched: false */ false) {
+- if (/* isExperimentOn(win, 'my-experiment') // launched: false */ false) {
 -   doStuff();
 - } else {
     doStuffOtherwise();
