@@ -23,6 +23,10 @@ import {
   createTabPageExperienceElement,
 } from './amp-story-dev-tools-tab-page-experience';
 import {
+  AmpStoryDevToolsTabLogs,
+  createTabLogsElement,
+} from './amp-story-dev-tools-tab-logs';
+import {
   AmpStoryDevToolsTabPreview,
   createTabPreviewElement,
 } from './amp-story-dev-tools-tab-preview';
