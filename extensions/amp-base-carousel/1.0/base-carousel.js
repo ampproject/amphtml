@@ -22,6 +22,7 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
+import {mod} from '../../../src/utils/math';
 import {
   toChildArray,
   useCallback,
@@ -123,20 +124,19 @@ function BaseCarouselWithRef(
   );
 
   const autoAdvance = useCallback(() => {
-    // Count autoadvance loops as times we have reached the last visible slide.
-    if (currentSlideRef.current >= length - visibleCount) {
-      autoAdvanceTimesRef.current += 1;
-    }
     if (
-      autoAdvanceTimesRef.current == autoAdvanceLoops ||
+      autoAdvanceTimesRef.current + visibleCount / length >= autoAdvanceLoops ||
       interaction.current !== Interaction.NONE
     ) {
       return false;
     }
     if (loop || currentSlideRef.current + visibleCount < length) {
       scrollRef.current.advance(autoAdvanceCount); // Advance forward by specified count
+      // Count autoadvance loops as proportions of the carousel we have advanced through.
+      autoAdvanceTimesRef.current += autoAdvanceCount / length;
     } else {
-      scrollRef.current.advance(-(length - 1)); // Advance in reverse to first slide
+      scrollRef.current.advance(-currentSlideRef.current); // Advance in reverse to first slide
+      autoAdvanceTimesRef.current = Math.ceil(autoAdvanceTimesRef.current);
     }
     return true;
   }, [autoAdvanceCount, autoAdvanceLoops, length, loop, visibleCount]);
