@@ -16,7 +16,8 @@
 
 amp-story-dev-tools-tab-page-experience {
   margin: 0px 10% !important;
-  margin-bottom: var(--i-amphtml-story-dev-tools-vertical-spacing);
+  padding-bottom: var(--i-amphtml-story-dev-tools-vertical-spacing);
+  flex: 1 !important;
 }
 
 amp-story-dev-tools-tab-page-experience iframe {
