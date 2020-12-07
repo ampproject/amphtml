@@ -111,7 +111,8 @@ function SidebarWithRef(
       return;
     }
 
-    let animation;
+    let sidebarAnimation;
+    let maskAnimation;
     // "Make Visible" Animation
     if (opened) {
       const postVisibleAnim = () => {
@@ -123,7 +124,7 @@ function SidebarWithRef(
         postVisibleAnim();
         return;
       }
-      animation = sidebarElement.animate(
+      sidebarAnimation = sidebarElement.animate(
         ANIMATION_PRESETS[side === 'left' ? 'slideInLeft' : 'slideInRight'],
         {
           duration: ANIMATION_DURATION,
@@ -131,8 +132,8 @@ function SidebarWithRef(
           easing: ANIMATION_EASE_IN,
         }
       );
-      animation.onfinish = postVisibleAnim;
-      maskElement.animate(ANIMATION_PRESETS.fadeIn, {
+      sidebarAnimation.onfinish = postVisibleAnim;
+      maskAnimation = maskElement.animate(ANIMATION_PRESETS.fadeIn, {
         duration: ANIMATION_DURATION,
         fill: 'both',
         easing: ANIMATION_EASE_IN,
@@ -143,14 +144,15 @@ function SidebarWithRef(
         if (onAfterCloseRef.current) {
           onAfterCloseRef.current();
         }
-        animation = null;
+        sidebarAnimation = null;
+        maskAnimation = null;
         setMounted(false);
       };
       if (!sidebarElement.animate || !maskElement.animate) {
         postInvisibleAnim();
         return;
       }
-      animation = sidebarElement.animate(
+      sidebarAnimation = sidebarElement.animate(
         ANIMATION_PRESETS[side === 'left' ? 'slideInLeft' : 'slideInRight'],
         {
           duration: ANIMATION_DURATION,
@@ -159,8 +161,8 @@ function SidebarWithRef(
           easing: ANIMATION_EASE_IN,
         }
       );
-      animation.onfinish = postInvisibleAnim;
-      maskElement.animate(ANIMATION_PRESETS.fadeIn, {
+      sidebarAnimation.onfinish = postInvisibleAnim;
+      maskAnimation = maskElement.animate(ANIMATION_PRESETS.fadeIn, {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
@@ -168,8 +170,11 @@ function SidebarWithRef(
       });
     }
     return () => {
-      if (animation) {
-        animation.cancel();
+      if (sidebarAnimation) {
+        sidebarAnimation.cancel();
+      }
+      if (maskAnimation) {
+        maskAnimation.cancel();
       }
     };
   }, [opened, onAfterCloseRef, side]);
