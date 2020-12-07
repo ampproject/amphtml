@@ -16,7 +16,6 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {user} from '../../../src/log';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /**
@@ -26,9 +25,6 @@ import {whenUpgradedToCustomElement} from '../../../src/dom';
  * @const
  */
 const LOAD_TIMEOUT = 1500;
-
-/** @type {string} */
-const TAG = 'amp-story';
 
 /** @implements {../../../src/render-delaying-services.RenderDelayingService} */
 export class AmpStoryRenderService {
@@ -63,14 +59,6 @@ export class AmpStoryRenderService {
       });
     });
 
-    return this.timer_
-      .timeoutPromise(
-        LOAD_TIMEOUT,
-        whenReadyPromise,
-        `Render timeout waiting for service AmpStoryRenderService to be ready.`
-      )
-      .catch((reason) => {
-        user().warn(TAG, reason);
-      });
+    return Promise.race([whenReadyPromise, this.timer_.promise(LOAD_TIMEOUT)]);
   }
 }
