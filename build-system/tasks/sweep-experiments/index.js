@@ -383,8 +383,8 @@ async function sweepExperiments() {
   }
   log();
 
-  if (argv.dry) {
-    log('❗️ (Not making changes due to --dry)');
+  if (argv.dry_run) {
+    log('❗️ (Not making changes due to --dry_run)');
     return;
   }
 
@@ -452,7 +452,7 @@ sweepExperiments.description =
 sweepExperiments.flags = {
   'days_ago':
     ' How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
-  'dry':
+  'dry_run':
     " Don't write, but only list the experiments that would be removed by this command.",
   'experiment': ' Remove a specific experiment id.',
 };
