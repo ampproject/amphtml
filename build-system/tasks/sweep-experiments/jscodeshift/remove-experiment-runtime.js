@@ -59,14 +59,11 @@ export default function transformer(file, api, options) {
         .find(j.ImportSpecifier, {imported: {name}})
         .closest(j.ImportDeclaration)
         .forEach((path) => {
-          if (
-            j(path.scope.node).find(j.CallExpression, {callee: {name}}).size() >
-            1
-          ) {
+          if (root.find(j.CallExpression, {callee: {name}}).size() > 1) {
             return;
           }
           if (path.node.specifiers.length === 1) {
-            j(path).remove();
+            path.prune();
           } else {
             path.node.specifiers = path.node.specifiers.filter(
               (node) => node.imported && node.imported.name !== name
@@ -80,7 +77,7 @@ export default function transformer(file, api, options) {
         path.node.arguments[2] &&
         path.node.arguments[2].value == isExperimentOnLaunched
       ) {
-        j(path).remove();
+        path.prune();
         return;
       }
 
@@ -105,7 +102,7 @@ export default function transformer(file, api, options) {
           /* trailing */ false
         ),
       ];
-      j(path).replaceWith(replacement);
+      path.replace(replacement);
     })
     .toSource();
 }

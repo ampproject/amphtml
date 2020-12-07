@@ -30,18 +30,12 @@ export default function transformer(file, api, options) {
     .filter(
       (path) =>
         j(path)
-          .find(j.Property)
-          .filter(
-            (path) =>
-              path.node.key.type === 'Identifier' &&
-              path.node.key.name === 'id' &&
-              path.node.value.type === 'Literal' &&
-              path.node.value.value === experimentId
-          )
+          .find(j.Property, {
+            key: {type: 'Identifier', name: 'id'},
+            value: {type: 'Literal', value: experimentId},
+          })
           .size() !== 0
     )
-    .forEach((path) => {
-      j(path).remove();
-    })
+    .remove()
     .toSource();
 }

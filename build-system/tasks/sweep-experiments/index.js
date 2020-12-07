@@ -152,8 +152,10 @@ function gitCommitSingleExperiment(id, workItem, modified) {
       )
     );
   }
-  getStdout(`git add ${modified.join(' ')}`);
-  return getStdout(`git commit -m "${cmdEscape(messageLines.join('\n'))}"`);
+  return getStdout(
+    `git add ${modified.join(' ')} && ` +
+      `git commit -m "${cmdEscape(messageLines.join('\n'))}"`
+  );
 }
 
 function readableRemovalId(id, {percentage, previousHistory}) {
