@@ -184,6 +184,7 @@ function dateDaysAgo(daysAgo = 365) {
   pastDate.setDate(pastDate.getDate() - daysAgo - 1);
   pastDate.setHours(0);
   pastDate.setMinutes(0);
+  pastDate.setSeconds(0);
   return pastDate;
 }
 
@@ -215,7 +216,7 @@ const findConfigBitCommits = (
       'git log',
       `--until=${cutoffDateFormatted}`,
       // Look for entries that contain exact percentage string, like:
-      // "my-experiment-launched": 0,
+      // "my-launched-experiment": 1
       `-S '"${experiment}": ${percentage},'`,
       // %h: hash
       // %aI: authorDate
@@ -225,7 +226,7 @@ const findConfigBitCommits = (
     ].join(' ')
   ).map((line) => {
     const tokens = line.split(' ');
-    // PR numbers in subject lines create spammy references when commit,
+    // PR numbers in subject lines create spammy references when committed,
     // remove them early on.
     if (/^\(#[0-9]+\)$/.test(tokens[tokens.length - 1])) {
       tokens.pop();
@@ -251,7 +252,7 @@ const readmeMdGithubLink = () =>
   `https://github.com/ampproject/amphtml/${path.relative(
     process.cwd(),
     __dirname
-  )}`;
+  )}/README.md`;
 
 /**
  * @param {{
@@ -365,9 +366,6 @@ async function sweepExperiments() {
     argv.experiment
   );
 
-  const removed = [];
-
-  let at = 0;
   const total = Object.keys(work).length;
 
   if (total === 0) {
@@ -388,28 +386,30 @@ async function sweepExperiments() {
     return;
   }
 
-  for (const id in work) {
-    log(`🚮 ${++at}/${total}`, magenta(`${id}...`));
+  const removed = [];
+
+  Object.entries(work).forEach(([id, workItem], i) => {
+    log(`🚮 ${i + 1}/${total}`, magenta(`${id}...`));
 
     const modified = [
       ...removeFromExperimentsConfig(id),
       ...removeFromJsonConfig(prodConfig, prodConfigPath, id),
       ...removeFromJsonConfig(canaryConfig, canaryConfigPath, id),
-      ...removeFromRuntimeSource(id, work[id].percentage),
+      ...removeFromRuntimeSource(id, workItem.percentage),
     ];
 
     getStdout(
       `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
     );
 
-    gitCommitSingleExperiment(id, work[id], modified)
+    gitCommitSingleExperiment(id, workItem, modified)
       .split('\n')
       .forEach((line) => log(line));
 
     log();
 
-    removed.push(`- ${readableRemovalId(id, work[id])}`);
-  }
+    removed.push(`- ${readableRemovalId(id, workItem)}`);
+  });
 
   if (removed.length > 0) {
     const modifiedSourceFiles = getModifiedSourceFiles(headHash);
@@ -438,7 +438,6 @@ async function sweepExperiments() {
     const reportHash = getHeadHash();
     log(cyan('You may recover the above report at any point:'));
     log(`git log ${reportHash}`);
-    log();
   }
 }
 
