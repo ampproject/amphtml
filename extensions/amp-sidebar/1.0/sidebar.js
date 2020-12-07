@@ -28,12 +28,15 @@ import {
 import {useStyles} from './sidebar.jss';
 
 const ANIMATION_DURATION = 350;
-const ANIMATION_PRESETS = {
-  fadeIn: [{opacity: 0}, {opacity: 1}],
-  slideInLeft: [{transform: 'translateX(-100%)'}, {transform: 'translateX(0)'}],
-  slideInRight: [{transform: 'translateX(100%)'}, {transform: 'translateX(0)'}],
-};
-
+const ANIMATION_FADE_IN = [{opacity: 0}, {opacity: 1}];
+const ANIMATION_SLIDE_IN_LEFT = [
+  {transform: 'translateX(-100%)'},
+  {transform: 'translateX(0)'},
+];
+const ANIMATION_SLIDE_IN_RIGHT = [
+  {transform: 'translateX(100%)'},
+  {transform: 'translateX(0)'},
+];
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
 
 /**
@@ -107,7 +110,7 @@ function SidebarWithRef(
   useEffect(() => {
     const sidebarElement = sidebarRef.current;
     const maskElement = maskRef.current;
-    if (sidebarElement == undefined || maskElement == undefined) {
+    if (sidebarElement == null || maskElement == null) {
       return;
     }
 
@@ -118,14 +121,13 @@ function SidebarWithRef(
       const postVisibleAnim = () => {
         setStyle(sidebarElement, 'transform', 'translateX(0)');
         setStyle(maskElement, 'opacity', 1);
-        sidebarElement./*REVIEW*/ focus();
       };
       if (!sidebarElement.animate || !maskElement.animate) {
         postVisibleAnim();
         return;
       }
       sidebarAnimation = sidebarElement.animate(
-        ANIMATION_PRESETS[side === 'left' ? 'slideInLeft' : 'slideInRight'],
+        side === 'left' ? ANIMATION_SLIDE_IN_LEFT : ANIMATION_SLIDE_IN_RIGHT,
         {
           duration: ANIMATION_DURATION,
           fill: 'both',
@@ -133,7 +135,7 @@ function SidebarWithRef(
         }
       );
       sidebarAnimation.onfinish = postVisibleAnim;
-      maskAnimation = maskElement.animate(ANIMATION_PRESETS.fadeIn, {
+      maskAnimation = maskElement.animate(ANIMATION_FADE_IN, {
         duration: ANIMATION_DURATION,
         fill: 'both',
         easing: ANIMATION_EASE_IN,
@@ -153,7 +155,7 @@ function SidebarWithRef(
         return;
       }
       sidebarAnimation = sidebarElement.animate(
-        ANIMATION_PRESETS[side === 'left' ? 'slideInLeft' : 'slideInRight'],
+        side === 'left' ? ANIMATION_SLIDE_IN_LEFT : ANIMATION_SLIDE_IN_RIGHT,
         {
           duration: ANIMATION_DURATION,
           direction: 'reverse',
@@ -162,7 +164,7 @@ function SidebarWithRef(
         }
       );
       sidebarAnimation.onfinish = postInvisibleAnim;
-      maskAnimation = maskElement.animate(ANIMATION_PRESETS.fadeIn, {
+      maskAnimation = maskElement.animate(ANIMATION_FADE_IN, {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
@@ -190,7 +192,7 @@ function SidebarWithRef(
           size={false}
           layout={true}
           paint={true}
-          className={`${classes.baseClass} ${
+          className={`${classes.sidebarClass} ${
             side === 'left' ? classes.left : classes.right
           }`}
           role="menu"
@@ -200,9 +202,7 @@ function SidebarWithRef(
           {children}
         </ContainWrapper>
         <div
-          ref={(r) => {
-            maskRef.current = r;
-          }}
+          ref={maskRef}
           onClick={() => close()}
           className={`${classes.maskClass}`}
         ></div>

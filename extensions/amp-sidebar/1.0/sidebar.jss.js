@@ -16,7 +16,7 @@
 
 import {createUseStyles} from 'react-jss';
 
-const baseClass = {
+const sidebarClass = {
   position: 'fixed !important',
   top: 0,
   maxHeight: '100vh !important',
@@ -54,7 +54,7 @@ const maskClass = {
 };
 
 const JSS = {
-  baseClass,
+  sidebarClass,
   maskClass,
   left,
   right,
