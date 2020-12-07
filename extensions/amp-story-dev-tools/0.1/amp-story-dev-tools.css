@@ -24,7 +24,6 @@ amp-story-dev-tools {
   font-size: 16px !important;
   font-family: 'Poppins', sans-serif !important;
   color: white !important;
-  padding: 30px 10% !important;
   --i-amphtml-story-dev-tools-accent: #79B3FF;
   --i-amphtml-story-dev-tools-accent-light: #92c1ff;
   --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55;
@@ -58,6 +57,8 @@ amp-story-dev-tools, amp-story-dev-tools * {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  margin-top: 15px !important;
+  padding: 15px 10% !important;
 }
 
 .i-amphtml-story-dev-tools-brand {

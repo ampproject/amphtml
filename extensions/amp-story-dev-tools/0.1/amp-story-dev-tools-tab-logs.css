@@ -16,7 +16,7 @@
 
 amp-story-dev-tools-tab-logs {
   overflow-y: scroll !important;
-  margin-top: 30px !important;
+  padding: 30px 10% !important;
 }
 
 .i-amphtml-story-dev-tools-log-status-title {
@@ -74,6 +74,7 @@ amp-story-dev-tools-tab-logs {
 .i-amphtml-story-dev-tools-log-code-line {
   text-overflow: ellipsis !important;
   overflow-x: hidden !important;
+  display: block !important;
 }
 
 .i-amphtml-story-dev-tools-log-code-line:nth-child(2) {

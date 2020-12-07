@@ -144,7 +144,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
         content.code;
       const codeEl = logEl.querySelector('.i-amphtml-story-dev-tools-log-code');
       content.htmlLines.forEach((l, i) => {
-        const lineEl = this.element.ownerDocument.createElement('div');
+        const lineEl = this.element.ownerDocument.createElement('span');
         lineEl.classList.add('i-amphtml-story-dev-tools-log-code-line');
         lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
         codeEl.appendChild(lineEl);
