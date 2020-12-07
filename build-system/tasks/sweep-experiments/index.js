@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const argv = require('minimist')(process.argv.slice(2));
+const fastGlob = require('fast-glob');
 const log = require('fancy-log');
 const path = require('path');
 const {getOutput} = require('../../common/process');
@@ -57,12 +58,14 @@ function getStdoutLines(cmd) {
 const cmdEscape = (str) => str.replace(/["`]/g, (c) => `\\${c}`);
 
 /**
- * @param {!Array<string>} dirs
+ * @param {!Array<string>} glob
  * @param {string} string
  * @return {!Array<string>}
  */
-const filesContainingPattern = (dirs, string) =>
-  getStdoutLines(`grep -Elr "${cmdEscape(string)}" {${dirs.join(',')}}`);
+const filesContainingPattern = (glob, string) =>
+  getStdoutLines(
+    `grep -El "${cmdEscape(string)}" {${fastGlob.sync(glob).join(',')}}`
+  );
 
 /**
  * @param {string} fromHash
@@ -117,9 +120,9 @@ function removeFromJsonConfig(config, path, id) {
  */
 function removeFromRuntimeSource(id, percentage) {
   const possiblyModifiedSourceFiles = filesContainingPattern(
-    containRuntimeSource,
+    containRuntimeSource.map((dir) => `${dir}/**/*.js`),
     id
-  ).filter((name) => name.endsWith('.js'));
+  );
   if (possiblyModifiedSourceFiles.length > 0) {
     jscodeshift('remove-experiment-runtime.js', [
       `--isExperimentOnLaunched=${percentage}`,
@@ -409,9 +412,9 @@ async function sweepExperiments() {
     const modifiedSourceFiles = getModifiedSourceFiles(headHash);
 
     const htmlFilesWithReferences = filesContainingPattern(
-      containExampleHtml,
+      containExampleHtml.map((dir) => `${dir}/**/*.html`),
       `['"](${Object.keys(work).join('|')})['"]`
-    ).filter((name) => name.endsWith('.html'));
+    );
 
     log(
       getStdout(
