@@ -53,11 +53,11 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           draft: true
-          title: ${{ steps.get-summary.outputs.title }}
+          title: ${{ steps.sweep.outputs.title }}
           body: ${{ steps.sweep.outputs.body }}
           branch: ${{ steps.sweep.outputs.branch }}
 
-      - name: comment
+      - name: pull-request-comment
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ steps.pull-request.outputs.pull-request-number }}
