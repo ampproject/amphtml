@@ -15,9 +15,72 @@
  */
 'use strict';
 
+const {
+  isCircleciBuild,
+  isCircleciPullRequestBuild,
+  isCircleciPushBuild,
+} = require('./circleci');
+const {
+  isGithubActionsBuild,
+  isGithubActionsPullRequestBuild,
+  isGithubActionsPushBuild,
+} = require('./github-actions');
+const {
+  isTravisBuild,
+  isTravisPullRequestBuild,
+  isTravisPushBuild,
+} = require('./travis');
+
 /**
  * @fileoverview Provides functions that extract various kinds of CI state.
  */
+
+/**
+ * The full set of available CI services.
+ * @enum {string}
+ **/
+const ciService = {
+  TRAVIS: 'travis',
+  GITHUB_ACTIONS: 'github_actions',
+  CIRCLECI: 'circleci',
+  NONE: 'none',
+};
+
+/**
+ * Determines the service on which CI is being run, if any.
+ * @return {string}
+ */
+function getCiService() {
+  return isTravisBuild()
+    ? ciService.TRAVIS
+    : isGithubActionsBuild()
+    ? ciService.GITHUB_ACTIONS
+    : isCircleciBuild()
+    ? ciService.GITHUB_ACTIONS
+    : ciService.NONE;
+}
+
+/**
+ * Mapping of generic CI functions to service-specific functions.
+ */
+const serviceFunctionMap = {
+  'travis': {
+    'isPullRequestBuild': isTravisPullRequestBuild,
+    'isPushBuild': isTravisPushBuild,
+  },
+  'github_actions': {
+    'isPullRequestBuild': isGithubActionsPullRequestBuild,
+    'isPushBuild': isGithubActionsPushBuild,
+  },
+  'circleci': {
+    'isPullRequestBuild': isCircleciPullRequestBuild,
+    'isPushBuild': isCircleciPushBuild,
+  },
+  'none': {
+    'isPullRequestBuild': () => false,
+    'isPushBuild': () => false,
+  },
+};
 
 /**
  * Returns true if this is a CI build.
@@ -30,6 +93,24 @@ function isCiBuild() {
   return !!process.env.CI;
 }
 
+/**
+ * Returns true if this is a PR build.
+ * @return {boolean}
+ */
+function isPullRequestBuild() {
+  return serviceFunctionMap[getCiService()]['isPullRequestBuild']();
+}
+
+/**
+ * Returns true if this is a push build.
+ * @return {boolean}
+ */
+function isPushBuild() {
+  return serviceFunctionMap[getCiService()]['isPushBuild']();
+}
+
 module.exports = {
   isCiBuild,
+  isPullRequestBuild,
+  isPushBuild,
 };

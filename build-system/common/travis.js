@@ -21,7 +21,8 @@ const log = require('fancy-log');
 const {red, cyan} = colors;
 
 /**
- * @fileoverview Provides functions that extract various kinds of Travis state.
+ * @fileoverview Provides various kinds of Travis state. Reference:
+ * https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
  */
 
 /**
