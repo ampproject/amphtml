@@ -268,7 +268,7 @@ function summaryCommitMessage({
   if (modifiedSourceFiles.length > 0) {
     paragraphs.push(
       '---',
-      '### ⚠️ This changes Javascript source files',
+      '### ⚠️ Javascript source files require intervention',
       'The following may contain errors and/or require intervention to remove superfluous conditionals:',
       fileListMarkdown(modifiedSourceFiles),
       `Refer to the removal guide for [suggestions on handling these modified Javascript files.](${readmeMdGithubLink()}#followup)`
@@ -278,7 +278,7 @@ function summaryCommitMessage({
   if (htmlFilesWithReferences.length > 0) {
     paragraphs.push(
       '---',
-      '### ⚠️ There are HTML files with possible references',
+      '### ⚠️ HTML files may still contain references',
       'The following HTML files contain references to experiment names which may be stale and should be manually removed:',
       fileListMarkdown(htmlFilesWithReferences),
       `Refer to the removal guide for [suggestions on handling these HTML files.](${readmeMdGithubLink()}#followup:html)`
