@@ -31,9 +31,15 @@ makes it much easier to keep otherwise likely divergent behavior in
 sync.
 """
 
+import copy
 import hashlib
 import json
 import os
+
+# If true, then script versions for module and nomdule are allowed
+# in AMP documents. This gating should be temporary and removed
+# after necessary transformers are in place. See b/173803451.
+ALLOW_MODULE_NOMODULE = False
 
 
 def UnderscoreToCamelCase(under_score):
@@ -807,6 +813,63 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
       ]
       del rules.tags[:]
       rules.tags.extend(filtered_rules)
+
+    # TODO(b/173803451): allow module/nomodule tagspecs.
+    # Add module/nomodule tagspecs for AMP ExtensionSpec tagspecs.
+    if ALLOW_MODULE_NOMODULE:
+      additional_tagspecs = []
+      for t in rules.tags:
+        if t.extension_spec and t.extension_spec.name:
+          if validator_pb2.HtmlFormat.Code.Value('AMP') in t.html_format:
+            tagspec = copy.deepcopy(t)
+            # Reset html_format to AMP
+            del tagspec.html_format[:]
+            tagspec.html_format.extend(
+                [validator_pb2.HtmlFormat.Code.Value('AMP')])
+            # Reset enabled_by to transformed
+            del tagspec.enabled_by[:]
+            tagspec.enabled_by.extend(['transformed'])
+
+            # Generate needed attr specs
+            crossorigin_attrspec = validator_pb2.AttrSpec()
+            crossorigin_attrspec.name = 'crossorigin'
+            crossorigin_attrspec.value.extend(['anonymous'])
+            crossorigin_attrspec.mandatory = True
+            nomodule_attrspec = validator_pb2.AttrSpec()
+            nomodule_attrspec.name = 'nomodule'
+            nomodule_attrspec.value.extend([''])
+            nomodule_attrspec.mandatory = True
+            type_attrspec = validator_pb2.AttrSpec()
+            type_attrspec.name = 'type'
+            type_attrspec.value.extend(['module'])
+            type_attrspec.mandatory = True
+            type_attrspec.dispatch_key = type_attrspec.NAME_VALUE_DISPATCH
+
+            # Create module and nomodule extension tagspecs with spec_names
+            module_tagspec = copy.deepcopy(tagspec)
+            module_tagspec.spec_name = tagspec.extension_spec.name + (
+                ' module extension script')
+            nomodule_tagspec = copy.deepcopy(tagspec)
+            nomodule_tagspec.spec_name = tagspec.extension_spec.name + (
+                ' nomodule extension script')
+
+            # Module extension specifics
+            # Add requires/satisfies pair for module/nomodule
+            module_tagspec.requires.extend([nomodule_tagspec.spec_name])
+            module_tagspec.satisfies.extend([module_tagspec.spec_name])
+            # Add attr specs
+            module_tagspec.attrs.extend([crossorigin_attrspec, type_attrspec])
+
+            # Nomodule extension specifics
+            # Add requires/satisfies pair for module/nomodule
+            nomodule_tagspec.requires.extend([module_tagspec.spec_name])
+            nomodule_tagspec.satisfies.extend([nomodule_tagspec.spec_name])
+            # Add attr specs
+            nomodule_tagspec.attrs.extend([nomodule_attrspec])
+
+            # Add tag specs
+            additional_tagspecs.extend([module_tagspec, nomodule_tagspec])
+      rules.tags.extend(additional_tagspecs)
 
     registry = MessageRegistry()
 

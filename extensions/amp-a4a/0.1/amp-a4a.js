@@ -54,6 +54,7 @@ import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
 } from '../../../src/friendly-iframe-embed';
+import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
@@ -534,10 +535,18 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
+  pauseCallback() {
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.pause();
+    }
+  }
+
+  /** @override */
   resumeCallback() {
     // FIE that was not destroyed on unlayoutCallback does not require a new
     // ad request.
     if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.resume();
       return;
     }
     // If layout of page has not changed, onLayoutMeasure will not be called
@@ -1288,9 +1297,16 @@ export class AmpA4A extends AMP.BaseElement {
     }
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
-    return this.adPromise_
-      .then((creativeMetaData) => {
+
+    return Promise.all([
+      this.adPromise_,
+      this.uiHandler.getScrollPromiseForStickyAd(),
+    ])
+      .then((values) => {
         checkStillCurrent();
+
+        this.uiHandler.maybeInitStickyAd();
+        const creativeMetaData = values[0];
         if (this.isCollapsed_) {
           return Promise.resolve();
         }
@@ -1432,6 +1448,9 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
+    }
+    if (this.uiHandler) {
+      this.uiHandler.cleanup();
     }
   }
 
@@ -2239,27 +2258,24 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
-    if (!!AMP.RealTimeConfigManager) {
+    if (this.element.getAttribute('rtc-config')) {
+      installRealTimeConfigServiceForDoc(this.getAmpDoc());
       try {
-        return new AMP.RealTimeConfigManager(
+        return Services.realTimeConfigForDoc(
           this.getAmpDoc()
-        ).maybeExecuteRealTimeConfig(
-          this.element,
-          this.getCustomRealTimeConfigMacros_(),
-          consentState,
-          consentString,
-          consentMetadata,
-          this.verifyStillCurrent()
+        ).then((realTimeConfig) =>
+          realTimeConfig.maybeExecuteRealTimeConfig(
+            this.element,
+            this.getCustomRealTimeConfigMacros_(),
+            consentState,
+            consentString,
+            consentMetadata,
+            this.verifyStillCurrent()
+          )
         );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
-    } else if (this.element.getAttribute('rtc-config')) {
-      user().error(
-        TAG,
-        'RTC not supported for ad network ' +
-          `${this.element.getAttribute('type')}`
-      );
     }
   }
 

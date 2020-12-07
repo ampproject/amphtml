@@ -50,10 +50,12 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
+import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
@@ -96,13 +98,14 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
+  getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -453,6 +456,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
     }
+
+    const intersectResourcesExpId = getExperimentBranch(
+      this.win,
+      INTERSECT_RESOURCES_EXP.id
+    );
+    if (intersectResourcesExpId) {
+      this.experimentIds.push(intersectResourcesExpId);
+    }
+
+    const fieResourcesExpId = getExperimentBranch(
+      this.win,
+      FIE_RESOURCES_EXP.id
+    );
+    if (fieResourcesExpId) {
+      this.experimentIds.push(fieResourcesExpId);
+    }
+
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);

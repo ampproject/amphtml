@@ -34,13 +34,13 @@ const {
 const {cyan} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = isTravisBuild() ? 2 : 0;
+const TEST_RETRIES = isCiBuild() ? 2 : 0;
 
 const COV_DOWNLOAD_PATH = '/coverage/download';
 const COV_OUTPUT_DIR = './test/coverage-e2e';
