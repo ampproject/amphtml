@@ -19,12 +19,12 @@ import {Services} from '../../../src/services';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /**
- * Maximum milliseconds to wait for service to load before logging a warning.
+ * Maximum milliseconds to wait for service to load.
  * Needs to be shorter than the render delay timeout to account for the latency
  * downloading and executing the amp-story js.
  * @const
  */
-const LOAD_TIMEOUT = 1500;
+const LOAD_TIMEOUT = 2900;
 
 /** @implements {../../../src/render-delaying-services.RenderDelayingService} */
 export class AmpStoryRenderService {
