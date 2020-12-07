@@ -159,10 +159,10 @@ function BaseCarouselWithRef(
 
   const setRestingIndex = useCallback(
     (index) => {
-      index = length > 0 ? Math.min(Math.max(index, 0), length - 1) : -1;
       if (index < 0) {
         return;
       }
+      index = Math.min(Math.max(index, 0), length - 1);
       setCurrentSlide(index);
       currentSlideRef.current = index;
       if (onSlideChange) {
