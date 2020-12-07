@@ -16,6 +16,10 @@
 
 import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
 import {
+  AmpStoryDevToolsTabLogs,
+  createTabLogsElement,
+} from './amp-story-dev-tools-tab-logs';
+import {
   AmpStoryDevToolsTabPreview,
   createTabPreviewElement,
 } from './amp-story-dev-tools-tab-preview';
@@ -210,7 +214,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       this.storyUrl_,
       DevToolsTab.PAGE_EXPERIENCE
     );
-    this.tabContents_[DevToolsTab.LOGS] = createTabElement(
+    this.tabContents_[DevToolsTab.LOGS] = createTabLogsElement(
       this.win,
       this.storyUrl_,
       DevToolsTab.LOGS
@@ -259,9 +263,10 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
 AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
   AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
+  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab);
+  AMP.registerElement('amp-story-dev-tools-tab-logs', AmpStoryDevToolsTabLogs);
   AMP.registerElement(
     'amp-story-dev-tools-tab-preview',
     AmpStoryDevToolsTabPreview
   );
-  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab);
 });
