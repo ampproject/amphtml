@@ -46,6 +46,10 @@ function getStdout(cmd) {
   return stdout && stdout.trim();
 }
 
+/**
+ * @param {string} cmd
+ * @return {Array<string>}
+ */
 function getStdoutLines(cmd) {
   const stdout = getStdout(cmd);
   return !stdout ? [] : stdout.split('\n');
@@ -158,6 +162,11 @@ function gitCommitSingleExperiment(id, workItem, modified) {
   );
 }
 
+/**
+ * @param {string} id
+ * @param {{percentage: number, previousHistory: Array}} workItem
+ * @return {string}
+ */
 function readableRemovalId(id, {percentage, previousHistory}) {
   const lastCommit = previousHistory[0];
   const prefix = lastCommit
@@ -168,7 +177,7 @@ function readableRemovalId(id, {percentage, previousHistory}) {
 
 /**
  * @param {number=} daysAgo
- * @return {!Date}
+ * @return {!Date} "Rounded up" to the following day at 00:00:00
  */
 function daysAgo(daysAgo = 365) {
   const pastDate = new Date();
@@ -190,14 +199,14 @@ const truncateYyyyMmDd = (formattedDate) =>
 
 /**
  * @param {string} cutoffDateFormatted
- * @param {string} configPath
+ * @param {string} configJsonPath
  * @param {string} experiment
  * @param {number} percentage
- * @return {Array<string>}
+ * @return {Array<{hash: string, authorDate: string, subject: string}>}
  */
 const findConfigBitCommits = (
   cutoffDateFormatted,
-  configPath,
+  configJsonPath,
   experiment,
   percentage
 ) =>
@@ -212,7 +221,7 @@ const findConfigBitCommits = (
       // %aI: authorDate
       // %s: subject
       ' --format="%h %aI %s"',
-      configPath,
+      configJsonPath,
     ].join(' ')
   ).map((line) => {
     const tokens = line.split(' ');
@@ -335,6 +344,10 @@ function collectWork(
   return work;
 }
 
+/**
+ * Entry point to gulp sweep-experiments.
+ * See README.md for usage.
+ */
 async function sweepExperiments() {
   const headHash = getHeadHash();
 
