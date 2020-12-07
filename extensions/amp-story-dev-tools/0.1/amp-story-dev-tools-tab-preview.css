@@ -16,6 +16,7 @@
 
  amp-story-dev-tools-tab-preview {
   --i-amphtml-story-dev-tools-device-shadow: 0px 11.0046px 27.5114px rgba(0, 0, 0, 0.34), inset 0px 2.20091px 3.30137px rgba(44, 46, 52, 0.6) !important;
+  padding: var(--i-amphtml-story-dev-tools-vertical-spacing) 10% !important;
 }
 
 .i-amphtml-story-dev-tools-devices-container {
@@ -32,7 +33,7 @@
   margin: auto !important;
   height: fit-content !important;
   top: 0 !important;
-  bottom: 0 !important;
+  bottom: var(--i-amphtml-story-dev-tools-vertical-spacing) !important;
   padding: 10px 8px !important;
   transition: transform var(--i-amphtml-story-dev-tools-material-easing-standard) 0.15s !important;
   /* Fades in after transition:transform ends (above) so devices are in place before the fade-in */
@@ -58,8 +59,8 @@ amp-story-player a {
 
 .i-amphtml-story-dev-tools-device-chips-container {
   position: absolute !important;
-  bottom: 0 !important;
-  width: 100% !important;
+  bottom: var(--i-amphtml-story-dev-tools-vertical-spacing) !important;
+  width: 80% !important;
   text-align: center !important;
 }
 

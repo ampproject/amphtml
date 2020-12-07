@@ -580,6 +580,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * */
   repositionDevices_() {
     const layoutBox = this.getLayoutBox();
+    layoutBox.width *= 0.8; // To account for 10% horizontal padding.
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
