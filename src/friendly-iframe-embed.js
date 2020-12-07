@@ -488,7 +488,7 @@ export class FriendlyIframeEmbed {
     }
     Promise.all([
       this.whenReady(),
-      whenContentIniLoad(this.iframe, this.win, rect),
+      whenContentIniLoad(this.ampdoc || this.iframe, this.win, rect),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
