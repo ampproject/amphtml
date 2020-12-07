@@ -457,7 +457,7 @@ async function sweepExperiments() {
       `\n\n`
     );
 
-    const reportHash = getHeadHash();
+    const reportHash = getStdoutThrowOnError('git log -1 --format:%h');
     log(cyan('You may recover the above report at any point:'));
     log(`git log ${reportHash}`);
   }
