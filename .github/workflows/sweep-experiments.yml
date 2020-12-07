@@ -47,10 +47,22 @@ jobs:
           hash="${hash//$'\r'/'%0D'}"
           echo "::set-output name=branch::$(echo "sweep-experiments-${hash}")"
 
-      - name: create-pull-request
+      - id: pull-request
+        name: create-pull-request
         uses: peter-evans/create-pull-request@v3
         with:
           draft: true
           title: ${{ steps.run.outputs.title }}
           body: ${{ steps.run.outputs.body }}
           branch: ${{ steps.run.outputs.branch }}
+
+      - name: create-or-update-comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ steps.pull-request.outputs.pull-request-number }}
+          body: |
+            You may checkout this pull request to follow-up manually:
+            
+            ```
+            git checkout -t upstream/${{ steps.sweep.branch }}
+            ```
