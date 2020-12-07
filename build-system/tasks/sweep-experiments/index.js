@@ -179,7 +179,7 @@ function readableRemovalId(id, {percentage, previousHistory}) {
  * @param {number=} daysAgo
  * @return {!Date} "Rounded up" to the following day at 00:00:00
  */
-function daysAgo(daysAgo = 365) {
+function dateDaysAgo(daysAgo = 365) {
   const pastDate = new Date();
   pastDate.setDate(pastDate.getDate() - daysAgo - 1);
   pastDate.setHours(0);
@@ -354,7 +354,7 @@ async function sweepExperiments() {
   const prodConfig = readJsonSync(prodConfigPath);
   const canaryConfig = readJsonSync(canaryConfigPath);
 
-  const cutoffDateFormatted = daysAgo(
+  const cutoffDateFormatted = dateDaysAgo(
     argv.experiment ? 0 : argv.days_ago || 365
   ).toISOString();
 
