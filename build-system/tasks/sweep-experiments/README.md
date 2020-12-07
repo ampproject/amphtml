@@ -20,8 +20,7 @@ For all available options, see the [exported flags.](./index.js)
 
 ## Generated commmit history
 
-The tool modifies commit history, so you should make sure that the tool runs on
-a clean branch.
+The tool adds new commits to the history, so you should make sure that the tool runs on a clean branch.
 
 ### Removal commits
 
