@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8" />
+    <title>AMP Cooking</title>
+    <link rel="canonical" href="self.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script
+      async
+      custom-element="amp-base-carousel"
+      src="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-lightbox"
+      src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"
+    ></script>
+    <script>
+      (self.AMP = self.AMP || []).push(function (AMP) {
+        AMP.toggleExperiment('amp-base-carousel-bento', true);
+        AMP.toggleExperiment('amp-lightbox-bento', true);
+      });
+    </script>
+    <style amp-custom>
+      body {
+        font-family: sans-serif;
+        padding: 5% 10%;
+        max-width: 600px;
+      }
+      .article-slide {
+        height: 100%;
+        display: flex;
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      .article-description {
+        min-width: 40%;
+        padding: 16px;
+        padding-left: 60px;
+      }
+      .article-description h2 {
+        font-weight: 400;
+        letter-spacing: 1.08px;
+        text-transform: uppercase;
+        font-size: 12pt;
+        color: grey;
+        margin: 8px;
+      }
+      .article-description amp-fit-text {
+        color: #333;
+        font-weight: 700;
+        margin: 8px;
+      }
+      .article-description amp-fit-text:hover,
+      .article-description h2:hover {
+        color: steelblue;
+      }
+      .article-img {
+        border-top-right-radius: 5px 5px;
+        border-bottom-right-radius: 5px 5px;
+      }
+      a {
+        text-decoration: none;
+      }
+      .lightbox-container {
+        background: white;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .exit-lightbox-btn {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+      }
+      .instr-slide {
+        height: 100%;
+        max-height: 100%;
+        padding: 0px 50px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .instr-heading {
+        font-size: 30px;
+        margin: 10px;
+      }
+      .instr-nav {
+        bottom: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-radius: 5px;
+        background-color: lightgrey;
+      }
+      button {
+        padding: 10px;
+        background-color: slategrey;
+        color: white;
+        font-size: 16px;
+        height: 50px;
+        border-radius: 5px;
+        border: none;
+        width: 100%;
+      }
+      button:hover {
+        background-color: lightslategrey;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bento Recipe</h1>
+    <p>
+      This demo includes the following components and configurations:
+      <ul>
+        <li>amp-base-carousel with controls="never"</li>
+        <li>amp-lightbox full page (0.1 currently, needs to be 1.0 once open/close is fixed</li>
+      </ul>
+    </p>
+    <p>
+      For simple, hands-off cooking, this whole dish comes together in the oven.
+      Rich salmon is coated with vibrant pesto mayo and crispy panko
+      breadcrumbs, then roasted along with a hearty trio of delicata squash,
+      radishes, and onion.
+    </p>
+    <amp-img
+      src="https://media.blueapron.com/recipes/25524/square_newsletter_images/1601934021-33-0005-6243/1109_2P9_Sheet-Pesto-Salmon_030_SQ_Web.jpg?quality=80&width=850"
+      width="100"
+      height="100"
+      layout="responsive"
+      class="instr-img"
+    ></amp-img
+    ><br />
+    <button on="tap:recipe-instructions.goToSlide(index=0),recipe-lightbox.open">Get cooking!</button>
+    <amp-lightbox id="recipe-lightbox" layout="nodisplay">
+      <div class="lightbox-container">
+        <amp-img
+          role="button"
+          tabindex="0"
+          class="exit-lightbox-btn"
+          src="https://fonts.gstatic.com/s/i/googlematerialicons/close/v8/24px.svg"
+          width="50"
+          height="50"
+          on="tap:recipe-lightbox.close"
+        ></amp-img>
+        <amp-base-carousel
+          id="recipe-instructions"
+          controls="never"
+          layout="fill"
+        >
+          <div class="instr-slide">
+            <h1 class="instr-heading">1. Gather your ingredients</h1>
+            <amp-img
+              src="https://media.blueapron.com/recipes/25524/ingredient_images/1601933983-33-0005-7983/1109_2PRE09_large_feature.png"
+              width="300"
+              height="300"
+              layout="responsive"
+            ></amp-img>
+            <ul>
+              <li>2 Skin-On Salmon Fillets</li>
+              <li>1 Delicata Squash</li>
+              <li>1 Red Onion</li>
+              <li>1 Lemon</li>
+              <li>3 oz Radishes</li>
+              <li>¼ cup Panko Breadcrumbs</li>
+              <li>2 Tbsps Mayonnaise</li>
+              <li>⅓ cup Basil Pesto</li>
+              <li>
+                1 Tbsp Weeknight Hero Spice Blend (Onion Powder, Garlic Powder,
+                Smoked Paprika & Whole Dried Parsley)
+              </li>
+            </ul>
+            <div class="instr-nav">
+              <button on="tap:recipe-instructions.next">Start Prepping</button>
+            </div>
+          </div>
+          <div class="instr-slide">
+            <h1 class="instr-heading">2. Prepare & roast the vegetables</h1>
+            <amp-img
+              src="https://media.blueapron.com/recipes/25524/recipe_steps/48363/1601934036-33-0006-1878/1109_2P9_Sheet-Pesto-Salmon_022_Web.jpg?width=512"
+              width="457"
+              height="305"
+              layout="responsive"
+            ></amp-img>
+            <p>
+              Preheat the oven to 450°F. Wash and dry the fresh produce. Line
+              two sheet pans with foil. Cut off and discard the ends of the
+              squash. Halve lengthwise; using a spoon, scoop out and discard the
+              pulp and seeds. Cut the squash crosswise into 1-inch pieces. Halve
+              and peel the onion; cut into 1-inch-wide wedges, separating the
+              layers. Quarter the radishes lengthwise. Transfer the prepared
+              vegetables to one sheet pan. Drizzle with olive oil and season
+              with salt, pepper, and the spice blend; toss to coat. Arrange in
+              an even layer. Roast 24 to 26 minutes, or until browned and tender
+              when pierced with a fork. Remove from the oven.
+            </p>
+            <div class="instr-nav">
+              <amp-img
+                role="button"
+                tabindex="0"
+                src="https://fonts.gstatic.com/s/i/googlematerialicons/keyboard_backspace/v6/24px.svg"
+                height="50"
+                width="50"
+                on="tap:recipe-instructions.prev"
+              ></amp-img>
+              <button on="tap:recipe-instructions.next">Next Step</button>
+            </div>
+          </div>
+          <div class="instr-slide">
+            <h1 class="instr-heading">3. Coat the fish</h1>
+            <amp-img
+              src="https://media.blueapron.com/recipes/25524/recipe_steps/48364/1601934162-33-0007-1824/1203_2PF_Pesto-Salmon_133_WEB.jpg?width=512"
+              width="457"
+              height="305"
+              layout="responsive"
+            ></amp-img>
+            <p>
+              Meanwhile, on the remaining sheet pan, lightly oil the center of
+              the foil. In a bowl, combine the pesto and mayonnaise. Transfer
+              2/3 of the pesto mayo to a separate bowl and set aside. Pat the
+              fish dry with paper towels. Season with salt and pepper on both
+              sides. Transfer to the oiled portion of the foil, skin side down.
+              Evenly top with the remaining pesto mayo and enough of the
+              breadcrumbs to coat, pressing gently to adhere (you may have extra
+              breadcrumbs). Drizzle with olive oil.
+            </p>
+            <div class="instr-nav">
+              <amp-img
+                role="button"
+                tabindex="0"
+                src="https://fonts.gstatic.com/s/i/googlematerialicons/keyboard_backspace/v6/24px.svg"
+                height="50"
+                width="50"
+                on="tap:recipe-instructions.prev"
+              ></amp-img>
+              <button on="tap:recipe-instructions.next">Next Step</button>
+            </div>
+          </div>
+          <div class="instr-slide">
+            <h1 class="instr-heading">4. Bake the fish</h1>
+            <amp-img
+              src="https://media.blueapron.com/recipes/25524/recipe_steps/48363/1601934036-33-0006-1878/1109_2P9_Sheet-Pesto-Salmon_022_Web.jpg?width=512"
+              width="457"
+              height="305"
+              layout="responsive"
+            ></amp-img>
+            <p>
+              Bake the coated fish 15 to 17 minutes, or until the breadcrumbs
+              are lightly browned and the fish is cooked through.* Remove from
+              the oven.
+            </p>
+            <p><i>*An instant-read thermometer should register 145°F.</i></p>
+            <div class="instr-nav">
+              <amp-img
+                role="button"
+                tabindex="0"
+                src="https://fonts.gstatic.com/s/i/googlematerialicons/keyboard_backspace/v6/24px.svg"
+                height="50"
+                width="50"
+                on="tap:recipe-instructions.prev"
+              ></amp-img>
+              <button on="tap:recipe-instructions.next">Let's serve!</button>
+            </div>
+          </div>
+          <div class="instr-slide">
+            <h1 class="instr-heading">5. Finish & serve your dish</h1>
+            <amp-img
+              role="button"
+              tabindex="0"
+              src="https://media.blueapron.com/recipes/25524/recipe_steps/48366/1601934189-33-0006-4859/1203_2PF_Pesto-Salmon_145_WEB.jpg?width=512"
+              width="457"
+              height="305"
+              layout="responsive"
+            ></amp-img>
+            <p>
+              Meanwhile, quarter and deseed the lemon. To the bowl of reserved
+              pesto mayo, add the juice of 2 lemon wedges; stir to combine.
+              Taste, then season with salt and pepper if desired. Evenly top the
+              roasted vegetables with the juice of the remaining lemon wedges.
+              Serve the baked fish with the finished vegetables. Serve the
+              finished pesto mayo on the side. Enjoy!
+            </p>
+            <div class="instr-nav">
+              <amp-img
+                role="button"
+                tabindex="0"
+                src="https://fonts.gstatic.com/s/i/googlematerialicons/keyboard_backspace/v6/24px.svg"
+                height="50"
+                width="50"
+                on="tap:recipe-instructions.prev"
+              ></amp-img>
+              <button on="tap:recipe-lightbox.close">Finish cooking</button>
+            </div>
+          </div>
+        </amp-base-carousel>
+      </div>
+    </amp-lightbox>
+  </body>
+</html>
