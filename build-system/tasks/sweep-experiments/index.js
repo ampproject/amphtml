@@ -49,7 +49,7 @@ const isSpecialCannotBeRemoved = (id) =>
  * @param {string} cmd
  * @return {?string}
  */
-function getStdout(cmd) {
+function getStdoutThrowOnError(cmd) {
   const {stdout, stderr} = getOutput(cmd);
   if (!stdout && stderr) {
     throw new Error(`${cmd}\n\n${stderr}`);
@@ -62,7 +62,7 @@ function getStdout(cmd) {
  * @return {Array<string>}
  */
 function getStdoutLines(cmd) {
-  const stdout = getStdout(cmd);
+  const stdout = getStdoutThrowOnError(cmd);
   return !stdout ? [] : stdout.split('\n');
 }
 
@@ -98,7 +98,7 @@ const getModifiedSourceFiles = (fromHash) =>
  * @return {string}
  */
 const jscodeshift = (transform, args = []) =>
-  getStdout(
+  getStdoutThrowOnError(
     'npx jscodeshift ' +
       ` -t ${__dirname}/jscodeshift/${transform} ` +
       args.join(' ')
@@ -152,7 +152,7 @@ function removeFromRuntimeSource(id, percentage) {
  * @param {string} id
  * @param {*} workItem
  * @param {!Array<string>} modified
- * @return {? string}
+ * @return {Array<string>}
  */
 function gitCommitSingleExperiment(id, workItem, modified) {
   const messageParagraphs = [readableRemovalId(id, workItem)];
@@ -167,7 +167,7 @@ function gitCommitSingleExperiment(id, workItem, modified) {
         .join('\n')
     );
   }
-  return getStdout(
+  return getStdoutLines(
     `git add ${modified.join(' ')} && ` +
       `git commit -m "${cmdEscape(messageParagraphs.join('\n\n'))}"`
   );
@@ -200,7 +200,8 @@ function dateDaysAgo(daysAgo = 365) {
 }
 
 /** @return {?string} */
-const getHeadHash = () => getStdout('git log  --pretty=format:%h HEAD^..HEAD');
+const getHeadHash = () =>
+  getStdoutThrowOnError('git log  --pretty=format:%h HEAD^..HEAD');
 
 /**
  * @param {string} formattedDate
@@ -423,13 +424,15 @@ async function sweepExperiments() {
       ...removeFromRuntimeSource(id, workItem.percentage),
     ];
 
-    getStdout(
+    getStdoutThrowOnError(
       `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
     );
 
-    gitCommitSingleExperiment(id, workItem, modified)
-      .split('\n')
-      .forEach((line) => log(line));
+    for (const line of gitCommitSingleExperiment(id, workItem, modified)) {
+      log(line);
+    }
+
+    log();
 
     removed.push(`- ${readableRemovalId(id, workItem)}`);
   });
@@ -443,7 +446,7 @@ async function sweepExperiments() {
     );
 
     log(
-      getStdout(
+      getStdoutThrowOnError(
         `git commit --allow-empty -m "${cmdEscape(
           summaryCommitMessage({
             removed,
@@ -454,7 +457,7 @@ async function sweepExperiments() {
         )}"`
       ),
       '\n\n',
-      getStdout('git log --pretty=format:%b "HEAD^..HEAD"'),
+      getStdoutThrowOnError('git log --pretty=format:%b "HEAD^..HEAD"'),
       `\n\n`
     );
 
