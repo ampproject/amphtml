@@ -568,11 +568,12 @@ class AmpCarousel extends AMP.BaseElement {
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
     const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
-    const data = dict({'index': index, 'actionTrust': trust});
+    const data = dict({'index': index});
+    const dataWithActionTrust = dict({'index': index, 'actionTrust': trust});
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    dispatchCustomEvent(this.element, name, data);
+    dispatchCustomEvent(this.element, name, dataWithActionTrust);
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 

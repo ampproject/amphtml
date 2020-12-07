@@ -290,6 +290,19 @@ describes.realWin(
 
         expect(eventSpy).to.have.been.calledOnce;
       });
+
+      it('should dispatch event with index and actionTrust when changing slides', async () => {
+        container.addEventListener('slideChange', (event) => {
+          const {index, actionTrust} = event.data;
+          expect(index).to.eq(1);
+          expect(actionTrust).to.eq(ActionTrust.HIGH);
+        });
+        const carousel = await getCarousel({loop: false});
+
+        carousel.implementation_.interactionNext();
+
+        await afterIndexUpdate(carousel);
+      });
     });
 
     describe('goToSlide action', () => {
