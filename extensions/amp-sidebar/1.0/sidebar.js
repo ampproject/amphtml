@@ -88,13 +88,11 @@ function SidebarWithRef(
     setOpened(true);
   }, [onBeforeOpenRef]);
   const close = useCallback(() => setOpened(false), []);
-  const toggle = useCallback(() => {
-    if (opened) {
-      close();
-    } else {
-      open();
-    }
-  }, [opened, open, close]);
+  const toggle = useCallback(() => (opened ? close() : open()), [
+    opened,
+    open,
+    close,
+  ]);
 
   useImperativeHandle(
     ref,
