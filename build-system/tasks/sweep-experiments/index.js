@@ -368,7 +368,7 @@ function collectWork(
  * See README.md for usage.
  */
 async function sweepExperiments() {
-  const headHash = getStdoutThrowOnError('git log -1 --format:%h');
+  const headHash = getStdoutThrowOnError('git log -1 --format=%h');
 
   const prodConfig = readJsonSync(prodConfigPath);
   const canaryConfig = readJsonSync(canaryConfigPath);
@@ -453,11 +453,11 @@ async function sweepExperiments() {
         )}"`
       ),
       '\n\n',
-      getStdoutThrowOnError('git log -1 --format:%b'),
+      getStdoutThrowOnError('git log -1 --format=%b'),
       `\n\n`
     );
 
-    const reportHash = getStdoutThrowOnError('git log -1 --format:%h');
+    const reportHash = getStdoutThrowOnError('git log -1 --format=%h');
     log(cyan('You may recover the above report at any point:'));
     log(`git log ${reportHash}`);
   }
