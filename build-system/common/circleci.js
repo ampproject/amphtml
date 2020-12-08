@@ -16,36 +16,36 @@
 'use strict';
 
 /**
- * @fileoverview Provides various kinds of GitHub Actions state. Reference:
- * https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
+ * @fileoverview Provides various kinds of CircleCI state. Reference:
+ * Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
  */
 
 /**
- * Returns true if this is a GitHub Actions build.
+ * Returns true if this is a CircleCI build.
  * @return {boolean}
  */
-function isGithubActionsBuild() {
-  return !!process.env.GITHUB_ACTIONS;
+function isCircleciBuild() {
+  return !!process.env.CIRCLECI;
 }
 
 /**
  * Returns true if this is a PR build.
  * @return {boolean}
  */
-function isGithubActionsPullRequestBuild() {
-  return process.env.GITHUB_EVENT_NAME === 'pull_request';
+function isCircleciPullRequestBuild() {
+  return !!process.env.CIRCLE_PULL_REQUEST;
 }
 
 /**
  * Returns true if this is a Push build.
  * @return {boolean}
  */
-function isGithubActionsPushBuild() {
-  return process.env.GITHUB_EVENT_NAME === 'push';
+function isCircleciPushBuild() {
+  return !process.env.CIRCLE_PULL_REQUEST;
 }
 
 module.exports = {
-  isGithubActionsBuild,
-  isGithubActionsPullRequestBuild,
-  isGithubActionsPushBuild,
+  isCircleciBuild,
+  isCircleciPullRequestBuild,
+  isCircleciPushBuild,
 };
