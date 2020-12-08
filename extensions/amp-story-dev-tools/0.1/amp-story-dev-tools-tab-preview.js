@@ -440,6 +440,14 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       width: device.width + 'px',
       height: device.height + 'px',
     });
+    devicePlayer.addEventListener('storyNavigation', (event) => {
+      console.log(event.detail);
+      this.devices_.forEach((d) => {
+        if (d != device) {
+          d.player.show(null, event.detail.pageId);
+        }
+      });
+    });
     const playerImpl = new AmpStoryPlayer(this.win, devicePlayer);
     playerImpl.load();
     setStyles(
@@ -450,7 +458,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
           : 'fit-content',
       }
     );
-    device.player = devicePlayer;
+    device.player = playerImpl;
     return deviceLayout;
   }
 
