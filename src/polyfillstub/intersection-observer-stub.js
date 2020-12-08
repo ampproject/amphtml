@@ -41,8 +41,8 @@ let PolyfilledIntersectionObserver;
 export function shouldLoadPolyfill(win) {
   return (
     !win.IntersectionObserver ||
-    win.IntersectionObserver === IntersectionObserverStub ||
     !win.IntersectionObserverEntry ||
+    !!PolyfilledIntersectionObserver ||
     !supportsDocumentRoot(win)
   );
 }
@@ -75,6 +75,7 @@ export function installStub(win) {
 }
 
 /**
+ * Returns true if IntersectionObserver supports a document root.
  * @param {!Window} win
  * @return {boolean}
  */

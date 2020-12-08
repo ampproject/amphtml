@@ -71,14 +71,15 @@ describes.sandboxed('shouldLoadPolyfill', {}, () => {
   it('should load when native does not support {root: document}', () => {
     class NativeNoDocumentRoot {
       constructor(_unused, opts) {
-        if (opts && opts.root && opts.root.nodeType === 9) {
-          throw new TypeError();
+        if (opts && opts.root && opts.root.nodeType !== 1) {
+          throw new TypeError('Root must be an Element');
         }
       }
     }
     const win = {
       IntersectionObserver: NativeNoDocumentRoot,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      document: {nodeType: 9},
     };
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
@@ -93,6 +94,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, () => {
       IntersectionObserver: IntersectionObserverStub,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
     };
+    installStub(win);
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
 
@@ -101,15 +103,6 @@ describes.sandboxed('shouldLoadPolyfill', {}, () => {
       IntersectionObserver: NativeIntersectionObserver,
     };
     expect(shouldLoadPolyfill(win)).to.be.true;
-  });
-
-  it('should not load even if entry does not have isIntersecting', () => {
-    class IntersectionObserverEntryWithMissingIsIntersecting {}
-    const win = {
-      IntersectionObserver: NativeIntersectionObserver,
-      IntersectionObserverEntry: IntersectionObserverEntryWithMissingIsIntersecting,
-    };
-    expect(shouldLoadPolyfill(win)).to.be.false;
   });
 });
 
@@ -162,7 +155,6 @@ describes.fakeWin('install', {}, (env) => {
     expect('isIntersecting' in win.IntersectionObserverEntry.prototype).to.be
       .false;
     install(win);
-    expect(win.IntersectionObserver).to.equal(native);
     expect(win.IntersectionObserverEntry).to.equal(nativeEntry);
     expect('isIntersecting' in win.IntersectionObserverEntry.prototype).to.be
       .true;
