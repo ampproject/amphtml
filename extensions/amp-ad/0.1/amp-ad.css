@@ -23,6 +23,7 @@ amp-embed iframe {
   border: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  position: relative;
 }
 
 .i-amphtml-ad-default-holder {
