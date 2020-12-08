@@ -10,6 +10,7 @@ on:
 
 jobs:
   sweep-experiments:
+    name: Sweep Experiments
     runs-on: ubuntu-latest
 
     steps:
