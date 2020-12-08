@@ -53,8 +53,8 @@ jobs:
           hash="${hash//$'\r'/'%0D'}"
           echo "::set-output name=branch::$(echo "sweep-experiments-${hash}")"
 
-      - id: Create Pull Request
-        name: pull-request
+      - name: Create Pull Request
+        id: pull-request
         uses: peter-evans/create-pull-request@v3
         with:
           draft: true
