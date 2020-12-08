@@ -182,7 +182,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
   }
 
   /**
-   * @param {!URL} srcUnexpanded
+   * @param {string} srcUnexpanded
    * @private
    */
   createIframe_(srcUnexpanded) {
