@@ -68,6 +68,7 @@ jobs:
           branch: ${{ steps.sweep.outputs.branch }}
 
       - name: Comment on Pull Request
+        if: ${{ steps.pull-request.outputs.pull-request-number }}
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ steps.pull-request.outputs.pull-request-number }}
