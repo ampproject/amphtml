@@ -5,8 +5,8 @@ name: Sweep Experiments
 
 on:
   schedule:
-    # Every Sunday at 00:00:00
-    - cron: '0 0 * * 0'
+    # First day of the month at 00:00:00
+    - cron: '0 0 1 * *'
 
 jobs:
   sweep-experiments:
