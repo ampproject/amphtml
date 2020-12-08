@@ -66,6 +66,9 @@ export class DomTransformStream {
 
     /** @const @private */
     this.vsync_ = Services.vsyncFor(win);
+
+    /** @private {boolean} */
+    this.onEndCalled_ = false;
   }
 
   /**
@@ -95,6 +98,7 @@ export class DomTransformStream {
    * @param {!Document} unusedCompleteDoc
    */
   onEnd(unusedCompleteDoc) {
+    this.onEndCalled_ = true;
     this.bodyTransferResolver_(this.transferBodyChunk_());
   }
 
@@ -131,7 +135,9 @@ export class DomTransformStream {
   }
 
   /**
-   * Transfers available body elements in vsync cycle.
+   * Transfers available body elements in vsync cycle. This will leave the last
+   * element in the detached dom until `onEnd` is called so that we do not
+   * send elements that may be incomplete.
    * @return {!Promise}
    */
   transferBodyChunk_() {
@@ -147,8 +153,18 @@ export class DomTransformStream {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
         removeNoScriptElements(dev().assertElement(this.detachedBody_));
-        while (this.detachedBody_.firstChild) {
+
+        // Always leave one element that may get updated on next chunk.
+        while (this.detachedBody_.childElementCount > 1) {
           targetBody.appendChild(this.detachedBody_.firstChild);
+        }
+
+        // Transfer the rest of doc, including any non-element nodes that may
+        // be trailing.
+        if (this.onEndCalled_) {
+          while (this.detachedBody_.hasChildNodes()) {
+            targetBody.appendChild(this.detachedBody_.firstChild);
+          }
         }
       })
     );
