@@ -1,6 +1,8 @@
 # Executes `gulp sweep-experiments` on a schedule.
 # If experiments are swept, a PR is created.
 
+name: Sweep Experiments
+
 on:
   schedule:
     # Every Sunday at 00:00:00
