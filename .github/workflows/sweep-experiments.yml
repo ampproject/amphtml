@@ -19,8 +19,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set Up Environment
+      - name: Set Up Node
         uses: actions/setup-node@v2.1.2
+
+      - name: Set Up Environment
+        if: ${{ matrix.platform == 'macos-latest' || matrix.platform == 'ubuntu-latest'}}
+        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
 
       - name: Install Gulp CLI
         run: npm install --global --force gulp-cli
