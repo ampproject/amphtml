@@ -1,32 +1,37 @@
-# Executes `gulp sweep-experiments` every monday.
+# Executes `gulp sweep-experiments` on a schedule.
 # If experiments are swept, a PR is created.
 
 on:
   schedule:
-    - cron: '0 0 * * 1'
+    # Every Sunday at 00:00:00
+    - cron: '0 0 * * 0'
 
 jobs:
   sweep-experiments:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout
+      - name: Checkout Repo
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: setup-node
+      - name: Set Up Environment
         uses: actions/setup-node@v2.1.2
 
-      - name: sweep
+      - name: Install Gulp CLI
+        run: npm install --global --force gulp-cli
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Sweep
         id: sweep
         run: |
-          npm ci
-                    
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-          npx gulp sweep-experiments
+          gulp sweep-experiments
 
           title=$(git log -1 --format=%s)
           title="${title//'%'/'%25'}"
@@ -46,7 +51,7 @@ jobs:
           hash="${hash//$'\r'/'%0D'}"
           echo "::set-output name=branch::$(echo "sweep-experiments-${hash}")"
 
-      - id: pull-request
+      - id: Create Pull Request
         name: pull-request
         uses: peter-evans/create-pull-request@v3
         with:
@@ -55,13 +60,13 @@ jobs:
           body: ${{ steps.sweep.outputs.body }}
           branch: ${{ steps.sweep.outputs.branch }}
 
-      - name: pull-request-comment
+      - name: Comment on Pull Request
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ steps.pull-request.outputs.pull-request-number }}
           body: |
             You may checkout this pull request to follow-up manually:
-            
+
             ```
             git checkout -t upstream/${{ steps.sweep.outputs.branch }}
             ```
