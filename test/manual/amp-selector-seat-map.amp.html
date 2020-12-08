@@ -1,0 +1,257 @@
+<!-- ## Introduction --><!--
+This sample allows to multiple select seats in a seatmap with one click: this is useful when an user wants to book adjacent seats without clicking multiple times; go [here](/advanced/seatmap.html) for the basic seatmap sample.
+--><!-- -->
+<!doctype html>
+<html ⚡ lang="en">
+<head><meta charset="utf-8">
+    <title>SeatMap Multiple Selection</title>
+    <link rel="canonical" href="https://amp.dev/documentation/examples/interactivity-dynamic-content/seatmap_multiple_selection/index.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <!-- ## Setup -->
+    <!-- Additionally used AMP components must be imported in the header:  `amp-pan-zoom` for making the seatmap zoomable and scrollable -->
+    <script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js"></script>
+    <!-- `amp-bind` for enabling seat selection -->
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+    <!-- `amp-list` for showing a list of seats -->
+    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+    <!-- `amp-mustache` for rendering the `amp-list` content -->
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+    <!-- `amp-selector` for selecting seats on the seatmap -->
+    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-1.0.js"></script>
+    <style amp-custom>
+      :root {
+        --color-primary: #005AF0;
+        --color-secondary: #00DCC0;
+        --space-3: 1.5rem; /* 24px */
+        --space-4: 2rem;   /* 32px */
+      }
+      .seatmap-container {
+        position: relative;
+        height: 50vh;
+        min-width: 100%;
+        box-sizing: border-box;
+      }
+      .seatmap-container [placeholder] svg {
+        height: 100%;
+      }
+      .seatmap-container .disabled {
+        pointer-events: none;
+        cursor: default;
+        opacity: 0.5;
+        filter: alpha(opacity=50);
+      }
+      .seatmap-container .seat {
+        stroke-width: 3;
+        stroke: rgb(0,0,0);
+        fill:white;
+      }
+      .seatmap-container .unavailable {
+        fill: var(--color-secondary);
+        pointer-events: none;
+      }
+      .seatmap {
+        align-items: flex-start;
+      }
+      .seatmap svg {
+        box-sizing: border-box;
+        padding-top: var(--space-4);
+      }
+      .seatmap svg rect[selected].seat,  .seatmap svg rect.selected.seat{
+        fill: var(--color-primary);
+      }
+      .seatmap [option][selected] {
+        outline: none;
+      }
+      .seatmap >  amp-selector {
+          left: 0;
+          right: 0;
+          margin: auto;
+      }
+      .seatmap  amp-selector .svg-container {
+        padding: 0 var(--space-3);
+      }
+    </style>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
+    <noscript>
+      <style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style>
+    </noscript>
+
+  </head>
+  <body>
+    <!-- ## Seatmap state -->
+    <!-- Here we are using an `amp-state` called `seatMultiSelection` to keep all the useful information for the seat selection.
+
+- we load a list of neighbours seats from the server
+- `selectedSeats` contains a list of selected seat ids
+- `numberOfSeats` contains the number of seats we want automatically select
+-->
+    <amp-state id="seatMultiSelection" src="https://amp.dev/static/samples/json/seatmap-neighbours.json">
+      <script type="application/json">
+      {
+        "selectedSeats": [],
+        "numberOfSeats": 3
+      }
+      </script>
+    </amp-state>
+
+    <!-- ## Seatmap with multiple selection -->
+    <!--
+      Everytime a seat is selected, we automatically select the 2 seats on the right of it. In case the number of seats on the right of the selected one are less than 2, we only select the remaining on the line.
+    -->
+     <div class="seatmap-container">
+      <h1>Seat map</h1>
+      <amp-list layout="fill" src="https://amp.dev/static/samples/json/seats.json" binding="refresh" items="." single-item noloading>
+        <template type="amp-mustache">
+          <amp-pan-zoom layout="fill" class="seatmap">
+            <amp-selector on="select:AMP.setState({
+              seatMultiSelection: {
+                selectedSeats: event.selectedOptions.concat(
+                              seatMultiSelection.neighbours[event.selectedOptions[0]].slice(0, seatMultiSelection.numberOfSeats-1))
+                }
+              })" layout="fill">
+              <div class="svg-container">
+                <svg preserveAspectRatio="xMidYMin slice" viewBox="0 0 {{width}} {{height}}">
+                {{#seats}}
+                  <rect option="{{id}}" role="button" tabindex="0" class="seat {{unavailable}}" [class]="seatMultiSelection.selectedSeats.indexOf('{{id}}') != -1 ? 'selected seat {{unavailable}}' : 'seat {{unavailable}}'" x="{{x}}" y="{{y}}" width="{{width}}" height="{{height}}" rx="{{rx}}" ry="{{ry}}">
+              </rect>
+                {{/seats}}
+                </svg>
+              </div>
+            </amp-selector>
+          </amp-pan-zoom>
+        </template>
+        <div placeholder>
+          <svg class="disabled" viewBox="0 0 1225.3 900" preserveAspectRatio="xMidYMin slice">
+            
+            <rect role="button" tabindex="0" class="seat unavailable" x="5" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="859.1" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="954" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1048.8" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="99.9" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="194.8" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="289.7" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="384.6" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="479.5" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="574.4" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="669.3" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="764.2" y="0" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="5" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="859.1" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="954" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1048.8" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1143.7" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="99.9" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="194.8" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="289.7" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="384.6" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="479.5" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="574.4" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="669.3" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="764.1" y="185.6" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="5" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="859" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="954" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1048.8" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1143.7" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="99.9" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="194.8" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="289.7" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="384.6" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="479.5" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="574.4" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="669.3" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="764.1" y="370.8" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="5" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="859.1" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="954" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1048.8" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1143.7" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="99.9" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="194.8" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="289.7" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="384.6" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="479.5" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="574.4" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="669.3" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="764.2" y="556" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="0" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="963.1" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1058" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="1152.8" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="112.2" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="212.2" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="321" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="429.5" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="541.5" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="650.1" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="752.3" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            <rect role="button" tabindex="0" class="seat unavailable" x="855.2" y="741.2" width="72.5" height="72.5" rx="3" ry="3"/>
+             
+            </svg>
+          </div>
+      </amp-list>
+      </div>
+</body></html>
