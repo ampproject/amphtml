@@ -95,7 +95,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
   });
 
   describe('#transferBody', () => {
-    it('should transfer available chunks only after calling', async () => {
+    it('should transfer available elements (leaving 1) only after calling', async () => {
       const {body} = win.document;
       detachedDoc.write(`
         <!doctype html>
@@ -117,10 +117,10 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
       await flush();
 
       expect(body.querySelector('child-one')).to.exist;
-      expect(body.querySelector('child-two')).to.exist;
+      expect(body.querySelector('child-two')).not.to.exist;
     });
 
-    it('should keep transferring new chunks after call', async () => {
+    it('should keep transferring new elements (leaving 1) after call', async () => {
       const {body} = win.document;
       detachedDoc.write(`
         <!doctype html>
@@ -137,7 +137,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
       await flush();
 
       expect(body.querySelector('child-one')).to.exist;
-      expect(body.querySelector('child-one')).to.exist;
+      expect(body.querySelector('child-two')).not.to.exist;
 
       detachedDoc.write(`
         <child-three></child-three>
@@ -146,11 +146,12 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
       transformer.onChunk(detachedDoc);
       await flush();
 
+      expect(body.querySelector('child-two')).to.exist;
       expect(body.querySelector('child-three')).to.exist;
-      expect(body.querySelector('child-four')).to.exist;
+      expect(body.querySelector('child-four')).not.to.exist;
     });
 
-    it('should resolve only after onEnd is called', async () => {
+    it('should resolve and transfer final element only after onEnd is called', async () => {
       const {body} = win.document;
       const tranferCompleteSpy = env.sandbox.spy();
       transformer.transferBody(body /* targetBody */).then(tranferCompleteSpy);
