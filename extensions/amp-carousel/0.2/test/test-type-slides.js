@@ -282,17 +282,15 @@ describes.realWin(
 
       it('should dispatch event with index and actionTrust when changing slides', async () => {
         let event;
-        let counter = 0;
         container.addEventListener('slideChange', (e) => {
+          expect(event).to.be.undefined;
           event = e;
-          counter++;
         });
         const carousel = await getCarousel({loop: false});
 
         carousel.implementation_.interactionNext();
         await afterIndexUpdate(carousel);
 
-        expect(counter).to.equal(1);
         expect(event.data.index).to.eq(1);
         expect(event.data.actionTrust).to.eq(ActionTrust.HIGH);
       });
