@@ -54,14 +54,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
-    id: 'amp-google-vrview-image',
-    name: 'AMP VR Viewer for images via Google VRView',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-google-vrview-image/amp-google-vrview-image.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
