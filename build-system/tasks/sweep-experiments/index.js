@@ -265,7 +265,7 @@ const fileListMarkdown = (files) =>
  * @return {string}
  */
 const readmeMdGithubLink = () =>
-  `https://github.com/ampproject/amphtml/${path.relative(
+  `https://github.com/ampproject/amphtml/blob/master/${path.relative(
     process.cwd(),
     __dirname
   )}/README.md`;
