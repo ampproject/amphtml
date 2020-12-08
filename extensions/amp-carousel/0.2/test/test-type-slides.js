@@ -291,8 +291,8 @@ describes.realWin(
         carousel.implementation_.interactionNext();
         await afterIndexUpdate(carousel);
 
-        expect(event.data.index).to.eq(1);
-        expect(event.data.actionTrust).to.eq(ActionTrust.HIGH);
+        expect(event.data.index).to.equal(1);
+        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
       });
     });
 
