@@ -15,8 +15,8 @@
  */
 
 import {
-  installStub,
   IntersectionObserverStub,
+  installStub,
   resetSubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
@@ -70,7 +70,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, () => {
 
   it('should load when native does not support {root: document}', () => {
     class NativeNoDocumentRoot {
-      constructor(cb, opt) {
+      constructor(_unused, opts) {
         if (opts && opts.root && opts.root.nodeType === 9) {
           throw new TypeError();
         }
