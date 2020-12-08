@@ -76,6 +76,7 @@ export const Default = () => {
   ];
   const type = select('type', typeConfigurations, typeConfigurations[0]);
   const customEndpoint = text('data-share-endpoint', null);
+  const dataTarget = text('data-target', null);
   const paramUrl = text('data-param-url', null);
   const paramText = text('data-param-text', null);
   const paramAttribution = text('data-param-attribution', null);
@@ -88,6 +89,7 @@ export const Default = () => {
     <amp-social-share
       type={type}
       data-share-endpoint={customEndpoint}
+      data-target={dataTarget}
       data-param-text={paramText}
       data-param-url={paramUrl}
       data-param-attribution={paramAttribution}
