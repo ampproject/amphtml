@@ -124,6 +124,14 @@ function removeFromExperimentsConfig(id) {
  */
 function removeFromJsonConfig(config, path, id) {
   delete config[id];
+
+  for (const allowOptInKey of ['allow-doc-opt-in', 'allow-url-opt-in']) {
+    const index = config[allowOptInKey].indexOf(id);
+    if (index > -1) {
+      config[allowOptInKey].splice(index, 1);
+    }
+  }
+
   writeFileSync(path, JSON.stringify(config, null, 2) + '\n');
   return [path];
 }
