@@ -1,0 +1,67 @@
+# Executes `gulp sweep-experiments` every monday.
+# If experiments are swept, a PR is created.
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  sweep-experiments:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: setup-node
+        uses: actions/setup-node@v2.1.2
+
+      - name: sweep
+        id: sweep
+        run: |
+          npm ci
+                    
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+          npx gulp sweep-experiments
+
+          title=$(git log -1 --format=%s)
+          title="${title//'%'/'%25'}"
+          title="${title//$'\n'/'%0A'}"
+          title="${title//$'\r'/'%0D'}"
+          echo "::set-output name=title::$(echo "$title")"
+
+          body=$(git log -1 --format=%b)
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}"
+          echo "::set-output name=body::$(echo "$body")"
+
+          hash=$(git log -1 --format=%h)
+          hash="${hash//'%'/'%25'}"
+          hash="${hash//$'\n'/'%0A'}"
+          hash="${hash//$'\r'/'%0D'}"
+          echo "::set-output name=branch::$(echo "sweep-experiments-${hash}")"
+
+      - id: pull-request
+        name: pull-request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          draft: true
+          title: ${{ steps.sweep.outputs.title }}
+          body: ${{ steps.sweep.outputs.body }}
+          branch: ${{ steps.sweep.outputs.branch }}
+
+      - name: pull-request-comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ steps.pull-request.outputs.pull-request-number }}
+          body: |
+            You may checkout this pull request to follow-up manually:
+            
+            ```
+            git checkout -t upstream/${{ steps.sweep.outputs.branch }}
+            ```
