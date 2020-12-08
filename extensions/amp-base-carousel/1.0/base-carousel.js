@@ -159,7 +159,7 @@ function BaseCarouselWithRef(
 
   const setRestingIndex = useCallback(
     (index) => {
-      if (index < 0) {
+      if (length <= 0 || isNaN(index)) {
         return;
       }
       index = Math.min(Math.max(index, 0), length - 1);
