@@ -35,8 +35,8 @@ import {
 } from './service/core-services';
 import {
   installExtensionsService,
-  stubLegacyElements,
 } from './service/extensions-impl';
+  stubLegacyElements,
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {registerExtendedTemplate} from './service/template-impl';
