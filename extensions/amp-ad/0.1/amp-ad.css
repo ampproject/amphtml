@@ -52,6 +52,12 @@ amp-embed iframe {
 
 amp-ad[sticky] {
   visibility: hidden;
+  align-items: center;
+}
+
+amp-ad[amp-story] iframe {
+  width: 100%;
+  height: 100%;
 }
 
 amp-ad[type='adsense'],
@@ -116,12 +122,26 @@ amp-ad .amp-ad-close-button:before {
   left: 0;
 }
 
+amp-ad-sticky-padding {
+  display: block;
+  width: 100% !important;
+  background: #fff;
+  height: 4px;
+  max-height: 5px !important;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  /** Must be above the dismiss button to cover bottom shadow */
+  z-index: 12;
+}
+
 amp-ad[sticky] {
   z-index: 11;
   position: fixed;
   overflow: visible !important;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2) !important;
+  display: flex;
+  flex-direction: column;
 }
 
 amp-ad[sticky='top'] {

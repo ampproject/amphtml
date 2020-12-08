@@ -245,6 +245,7 @@ describes.realWin(
             height: '50px',
           });
           env.win.document.body.appendChild(adElement);
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -262,6 +263,7 @@ describes.realWin(
         });
 
         it('should tolerate string input', () => {
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {

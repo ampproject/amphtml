@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
+import {
+  STICKY_AD_TRANSITION_EXP,
+  divertStickyAdTransition,
+} from '../../../src/experiments/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {
   ancestorElementsByTag,
   createElementWithAttributes,
   removeElement,
 } from '../../../src/dom';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getExperimentBranch} from '../../../src/experiments';
 
 import {getAdContainer} from '../../../src/ad-helper';
 import {listen} from '../../../src/event-helper';
@@ -207,6 +213,17 @@ export class AmpAdUIHandler {
   maybeInitStickyAd() {
     if (this.isStickyAd()) {
       setStyle(this.element_, 'visibility', 'visible');
+
+      if (this.stickyAdPosition_ == StickyAdPositions.BOTTOM) {
+        const paddingBar = this.doc_.createElement('amp-ad-sticky-padding');
+        this.element_.insertBefore(
+          paddingBar,
+          devAssert(
+            this.element_.firstChild,
+            'amp-ad should have been expanded.'
+          )
+        );
+      }
     }
   }
 
@@ -312,10 +329,10 @@ export class AmpAdUIHandler {
     }
 
     // Special case: for sticky ads, we enforce 20% size limit and 50% height limit
-    if (this.element_.hasAttribute('sticky')) {
+    if (this.isStickyAd()) {
       const viewport = this.baseInstance_.getViewport();
       if (
-        newHeight * newWidth >
+        height * width >
           STICKY_AD_MAX_SIZE_LIMIT *
             viewport.getHeight() *
             viewport.getWidth() ||
@@ -328,12 +345,34 @@ export class AmpAdUIHandler {
     return this.baseInstance_
       .attemptChangeSize(newHeight, newWidth, event)
       .then(
-        () => resizeInfo,
+        () => {
+          divertStickyAdTransition(this.baseInstance_.win);
+          if (
+            getExperimentBranch(
+              this.baseInstance_.win,
+              STICKY_AD_TRANSITION_EXP.id
+            ) === STICKY_AD_TRANSITION_EXP.experiment
+          ) {
+            this.setSize_(this.element_.querySelector('iframe'), height, width);
+          }
+          return resizeInfo;
+        },
         () => {
           resizeInfo.success = false;
           return resizeInfo;
         }
       );
+  }
+
+  /**
+   * Force set the dimensions for an element
+   * @param {Any} element
+   * @param {number} newHeight
+   * @param {number} newWidth
+   */
+  setSize_(element, newHeight, newWidth) {
+    setStyle(element, 'height', newHeight, 'px');
+    setStyle(element, 'width', newWidth, 'px');
   }
 
   /**
