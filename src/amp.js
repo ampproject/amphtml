@@ -131,57 +131,42 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  if (
-    self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')
-  ) {
+  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
     perf.addEnabledExperiment('no-boilerplate');
   }
-  startupChunk(self.document, function initial() {
-    /** @const {!./service/ampdoc-impl.AmpDoc} */
-    const ampdoc = ampdocService.getAmpDoc(self.document);
-    installPlatformService(self);
-    installPerformanceService(self);
-    /** @const {!./service/performance-impl.Performance} */
-    const perf = Services.performanceFor(self);
-    if (
-      self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')
-    ) {
-      perf.addEnabledExperiment('no-boilerplate');
-    }
-    if (IS_ESM) {
-      perf.addEnabledExperiment('esm');
-    }
-    fontStylesheetTimeout(self);
-    perf.tick(TickLabel.INSTALL_STYLES);
-    if (IS_ESM) {
-      bootstrap(ampdoc, perf);
-    } else {
-      installStylesForDoc(
-        ampdoc,
-        ampDocCss + ampSharedCss,
-        () => bootstrap(ampdoc, perf),
-        /* opt_isRuntimeCss */ true,
-        /* opt_ext */ 'amp-runtime'
-      );
-    }
-  });
-
-  // Output a message to the console and add an attribute to the <html>
-  // tag to give some information that can be used in error reports.
-  // (At least by sophisticated users).
-  if (self.console) {
-    (console.info || console.log).call(
-      console,
-      `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
-      self.location.href
+  if (IS_ESM) {
+    perf.addEnabledExperiment('esm');
+  }
+  fontStylesheetTimeout(self);
+  perf.tick(TickLabel.INSTALL_STYLES);
+  if (IS_ESM) {
+    bootstrap(ampdoc, perf);
+  } else {
+    installStylesForDoc(
+      ampdoc,
+      ampDocCss + ampSharedCss,
+      () => bootstrap(ampdoc, perf),
+      /* opt_isRuntimeCss */ true,
+      /* opt_ext */ 'amp-runtime'
     );
   }
-  // This code is eleminated in prod build through a babel transformer.
-  if (getMode().localDev) {
-    self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
-  }
-  self.document.documentElement.setAttribute(
-    'amp-version',
-    internalRuntimeVersion()
+});
+
+// Output a message to the console and add an attribute to the <html>
+// tag to give some information that can be used in error reports.
+// (At least by sophisticated users).
+if (self.console) {
+  (console.info || console.log).call(
+    console,
+    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    self.location.href
   );
 }
+// This code is eleminated in prod build through a babel transformer.
+if (getMode().localDev) {
+  self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
+}
+self.document.documentElement.setAttribute(
+  'amp-version',
+  internalRuntimeVersion()
+);
