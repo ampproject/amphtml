@@ -58,7 +58,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
     <td>
       <ul>
         <li><code>&lt;amp-audio></code></li>
-        <li><code>&lt;amp-google-vrview-image></code></li>
         <li><code>&lt;amp-img></code></li>
         <li><code>&lt;amp-video></code></li>
         <li><code>&lt;source></code></li>
