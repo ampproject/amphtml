@@ -80,7 +80,7 @@ export class InaboxResources {
       });
     }
 
-    this.ampdoc_.whenReady().then(() => this.schedulePass(1));
+    this.ampdoc_.whenReady().then(() => this./*OK*/ schedulePass(1));
   }
 
   /** @override */
