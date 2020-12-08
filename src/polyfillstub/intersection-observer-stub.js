@@ -27,6 +27,12 @@ import {Services} from '../services';
 
 const UPGRADERS = '_upgraders';
 
+/** @type {IntersectionObserver} */
+let NativeIntersectionObserver;
+
+/** @type {IntersectionObserver} */
+let PolyfilledIntersectionObserver;
+
 /**
  * @param {!Window} win
  * @return {boolean}
@@ -41,6 +47,33 @@ export function shouldLoadPolyfill(win) {
   );
 }
 
+/** @type {!IntersectionObserver} */
+function IntersectionObserverDispatcher(ioCallback, opts) {
+  if (opts && opts.root && opts.root.nodeType === 9) {
+    return new PolyfilledIntersectionObserver(ioCallback, opts);
+  } else {
+    return new NativeIntersectionObserver(ioCallback, opts);
+  }
+}
+
+/**
+ * Installs the InOb stubs. This should only be called in two cases:
+ * 1. No native InOb exists.
+ * 2. Native InOb is present, but lacks document root support.
+ *
+ * @param {!Window} win
+ */
+export function installStub(win) {
+  PolyfilledIntersectionObserver = IntersectionObserverStub;
+  if (!win.IntersectionObserver) {
+    win.IntersectionObserver = IntersectionObserverStub;
+    return;
+  }
+
+  NativeIntersectionObserver = win.IntersectionObserver;
+  win.IntersectionObserver = IntersectionObserverDispatcher;
+}
+
 /**
  * @param {!Window} win
  * @return {boolean}
@@ -48,6 +81,7 @@ export function shouldLoadPolyfill(win) {
 export function supportsDocumentRoot(win) {
   try {
     new win.IntersectionObserver(() => {}, {root: win.document});
+    return true;
   } catch {
     return false;
   }
@@ -71,32 +105,20 @@ export function scheduleUpgradeIfNeeded(win) {
 export function upgradePolyfill(win, installer) {
   // Can't use the IntersectionObserverStub here directly since it's a separate
   // instance deployed in v0.js vs the polyfill extension.
-  const Stub = /** @type {typeof IntersectionObserverStub} */ (win.IntersectionObserver);
-  if (Stub && UPGRADERS in Stub) {
-    const NativeIntersectionObserver =
-      win.IntersectionObserver && win.IntersectionObserver.native;
+  const Stub = /** @type {typeof IntersectionObserverStub} */ (PolyfilledIntersectionObserver);
+  if (Stub) {
     delete win.IntersectionObserver;
     delete win.IntersectionObserverEntry;
     installer();
-    const PolyfilledIntersectionObserver = win.IntersectionObserver;
-    // NativeIntersectionObserver only exists in the case of an InOb
-    // that doesn't support {root: document}. In this case we'd like to
-    // select the fastest InOb we can on a per-instance basis.
     if (NativeIntersectionObserver) {
-      win.IntersectionObserver = function (ioCallback, opts) {
-        if (opts && opts.root && opts.root.nodeType === 9) {
-          return new PolyfilledIntersectionObserver(ioCallback, opts);
-        } else {
-          return new NativeIntersectionObserver(ioCallback, opts);
-        }
-      };
+      PolyfilledIntersectionObserver = win.IntersectionObserver;
+      win.IntersectionObserver = IntersectionObserverDispatcher;
     }
 
-    const Impl = win.IntersectionObserver;
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
-      microtask.then(() => upgrader(Impl));
+      microtask.then(() => upgrader(PolyfilledIntersectionObserver));
     };
     if (upgraders.length > 0) {
       /** @type {!Array} */ (upgraders).forEach(upgrade);

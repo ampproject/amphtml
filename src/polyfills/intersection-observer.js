@@ -20,26 +20,21 @@
  */
 
 import {
-  IntersectionObserverStub,
-  supportsDocumentRoot,
+  shouldLoadPolyfill,
+  installStub
 } from '../polyfillstub/intersection-observer-stub';
 
 /**
+ * Installs the IntersectionObserver polyfill. There are a few different modes of operation.
+ * - No native support: immediately register a Stub and upgrade lazily once the full polyfill loads.
+ * - Partial InOb support: choose between the lazily upgrading Stub and the native InOb on a per-instance basis.
+ * - Full InOb support: Don't install anything.
+ * 
  * @param {!Window} win
  */
 export function install(win) {
-  const NativeIntersectionObserver = win.IntersectionObserver;
-  if (!NativeIntersectionObserver) {
-    win.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (IntersectionObserverStub);
-  } else if (!supportsDocumentRoot(win)) {
-    win.IntersectionObserver = function (ioCallback, opts) {
-      if (opts && opts.root && opts.root.nodeType === 9) {
-        return new IntersectionObserverStub(ioCallback, opts);
-      } else {
-        return new NativeIntersectionObserver(ioCallback, opts);
-      }
-    };
-    win.IntersectionObserver.native = NativeIntersectionObserver;
+  if (shouldLoadPolyfill(win)) { 
+    installStub(win);
   }
   fixEntry(win);
 }
