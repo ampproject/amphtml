@@ -33,9 +33,7 @@ function isGithubActionsBuild() {
  * @return {boolean}
  */
 function isGithubActionsPullRequestBuild() {
-  return (
-    isGithubActionsBuild() && process.env.GITHUB_EVENT_NAME === 'pull_request'
-  );
+  return process.env.GITHUB_EVENT_NAME === 'pull_request';
 }
 
 /**
@@ -43,7 +41,7 @@ function isGithubActionsPullRequestBuild() {
  * @return {boolean}
  */
 function isGithubActionsPushBuild() {
-  return isGithubActionsBuild() && process.env.GITHUB_EVENT_NAME === 'push';
+  return process.env.GITHUB_EVENT_NAME === 'push';
 }
 
 module.exports = {

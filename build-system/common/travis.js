@@ -38,7 +38,7 @@ function isTravisBuild() {
  * @return {boolean}
  */
 function isTravisPullRequestBuild() {
-  return isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'pull_request';
+  return process.env.TRAVIS_EVENT_TYPE === 'pull_request';
 }
 
 /**
@@ -46,7 +46,7 @@ function isTravisPullRequestBuild() {
  * @return {boolean}
  */
 function isTravisPushBuild() {
-  return isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'push';
+  return process.env.TRAVIS_EVENT_TYPE === 'push';
 }
 
 /**

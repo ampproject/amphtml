@@ -33,7 +33,7 @@ function isCircleciBuild() {
  * @return {boolean}
  */
 function isCircleciPullRequestBuild() {
-  return isCircleciBuild() && !!process.env.CIRCLE_PULL_REQUEST;
+  return !!process.env.CIRCLE_PULL_REQUEST;
 }
 
 /**
@@ -41,7 +41,7 @@ function isCircleciPullRequestBuild() {
  * @return {boolean}
  */
 function isCircleciPushBuild() {
-  return isCircleciBuild() && !process.env.CIRCLE_PULL_REQUEST;
+  return !process.env.CIRCLE_PULL_REQUEST;
 }
 
 module.exports = {
