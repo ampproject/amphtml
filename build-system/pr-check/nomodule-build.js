@@ -34,7 +34,7 @@ const {
   uploadDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
+const {isPullRequestBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
 const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
@@ -49,7 +49,7 @@ async function main() {
     return;
   }
 
-  if (!isTravisPullRequestBuild()) {
+  if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting');
     uploadDistOutput(FILENAME);

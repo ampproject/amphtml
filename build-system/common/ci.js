@@ -15,9 +15,48 @@
  */
 'use strict';
 
+const {
+  isCircleciBuild,
+  isCircleciPullRequestBuild,
+  isCircleciPushBuild,
+} = require('./circleci');
+const {
+  isGithubActionsBuild,
+  isGithubActionsPullRequestBuild,
+  isGithubActionsPushBuild,
+} = require('./github-actions');
+const {
+  isTravisBuild,
+  isTravisPullRequestBuild,
+  isTravisPushBuild,
+} = require('./travis');
+
 /**
  * @fileoverview Provides functions that extract various kinds of CI state.
  */
+
+/**
+ * Maps generic CI functions to those that must be run on the current service.
+ */
+const serviceFunctionMap = isTravisBuild()
+  ? {
+      'isPullRequestBuild': isTravisPullRequestBuild,
+      'isPushBuild': isTravisPushBuild,
+    }
+  : isGithubActionsBuild()
+  ? {
+      'isPullRequestBuild': isGithubActionsPullRequestBuild,
+      'isPushBuild': isGithubActionsPushBuild,
+    }
+  : isCircleciBuild()
+  ? {
+      'isPullRequestBuild': isCircleciPullRequestBuild,
+      'isPushBuild': isCircleciPushBuild,
+    }
+  : {
+      'isPullRequestBuild': () => false,
+      'isPushBuild': () => false,
+    };
 
 /**
  * Returns true if this is a CI build.
@@ -30,6 +69,24 @@ function isCiBuild() {
   return !!process.env.CI;
 }
 
+/**
+ * Returns true if this is a PR build.
+ * @return {boolean}
+ */
+function isPullRequestBuild() {
+  return serviceFunctionMap['isPullRequestBuild']();
+}
+
+/**
+ * Returns true if this is a push build.
+ * @return {boolean}
+ */
+function isPushBuild() {
+  return serviceFunctionMap['isPushBuild']();
+}
+
 module.exports = {
   isCiBuild,
+  isPullRequestBuild,
+  isPushBuild,
 };

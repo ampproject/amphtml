@@ -21,7 +21,8 @@ const log = require('fancy-log');
 const {red, cyan} = colors;
 
 /**
- * @fileoverview Provides functions that extract various kinds of Travis state.
+ * @fileoverview Provides various kinds of Travis state. Reference:
+ * https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
  */
 
 /**
@@ -37,7 +38,7 @@ function isTravisBuild() {
  * @return {boolean}
  */
 function isTravisPullRequestBuild() {
-  return isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'pull_request';
+  return process.env.TRAVIS_EVENT_TYPE === 'pull_request';
 }
 
 /**
@@ -45,7 +46,7 @@ function isTravisPullRequestBuild() {
  * @return {boolean}
  */
 function isTravisPushBuild() {
-  return isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'push';
+  return process.env.TRAVIS_EVENT_TYPE === 'push';
 }
 
 /**
