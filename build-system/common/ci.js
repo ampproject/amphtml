@@ -36,51 +36,27 @@ const {
  */
 
 /**
- * The full set of available CI services.
- * @enum {string}
- **/
-const ciService = {
-  TRAVIS: 'travis',
-  GITHUB_ACTIONS: 'github_actions',
-  CIRCLECI: 'circleci',
-  NONE: 'none',
-};
-
-/**
- * Determines the service on which CI is being run, if any.
- * @return {string}
+ * Maps generic CI functions to those that must be run on the current service.
  */
-function getCiService() {
-  return isTravisBuild()
-    ? ciService.TRAVIS
-    : isGithubActionsBuild()
-    ? ciService.GITHUB_ACTIONS
-    : isCircleciBuild()
-    ? ciService.GITHUB_ACTIONS
-    : ciService.NONE;
-}
-
-/**
- * Mapping of generic CI functions to service-specific functions.
- */
-const serviceFunctionMap = {
-  'travis': {
-    'isPullRequestBuild': isTravisPullRequestBuild,
-    'isPushBuild': isTravisPushBuild,
-  },
-  'github_actions': {
-    'isPullRequestBuild': isGithubActionsPullRequestBuild,
-    'isPushBuild': isGithubActionsPushBuild,
-  },
-  'circleci': {
-    'isPullRequestBuild': isCircleciPullRequestBuild,
-    'isPushBuild': isCircleciPushBuild,
-  },
-  'none': {
-    'isPullRequestBuild': () => false,
-    'isPushBuild': () => false,
-  },
-};
+const serviceFunctionMap = isTravisBuild()
+  ? {
+      'isPullRequestBuild': isTravisPullRequestBuild,
+      'isPushBuild': isTravisPushBuild,
+    }
+  : isGithubActionsBuild()
+  ? {
+      'isPullRequestBuild': isGithubActionsPullRequestBuild,
+      'isPushBuild': isGithubActionsPushBuild,
+    }
+  : isCircleciBuild()
+  ? {
+      'isPullRequestBuild': isCircleciPullRequestBuild,
+      'isPushBuild': isCircleciPushBuild,
+    }
+  : {
+      'isPullRequestBuild': () => false,
+      'isPushBuild': () => false,
+    };
 
 /**
  * Returns true if this is a CI build.
@@ -98,7 +74,7 @@ function isCiBuild() {
  * @return {boolean}
  */
 function isPullRequestBuild() {
-  return serviceFunctionMap[getCiService()]['isPullRequestBuild']();
+  return serviceFunctionMap['isPullRequestBuild']();
 }
 
 /**
@@ -106,7 +82,7 @@ function isPullRequestBuild() {
  * @return {boolean}
  */
 function isPushBuild() {
-  return serviceFunctionMap[getCiService()]['isPushBuild']();
+  return serviceFunctionMap['isPushBuild']();
 }
 
 module.exports = {
