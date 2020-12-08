@@ -154,8 +154,8 @@ export class DomTransformStream {
         const targetBody = resolvedElements[0];
         removeNoScriptElements(dev().assertElement(this.detachedBody_));
 
-        // Always leave one element that may get updated on next chunk.
-        while (this.detachedBody_.childElementCount > 1) {
+        // Always leave one node that may get updated on next chunk.
+        while (this.detachedBody_.children.length > 1) {
           targetBody.appendChild(this.detachedBody_.firstChild);
         }
 
