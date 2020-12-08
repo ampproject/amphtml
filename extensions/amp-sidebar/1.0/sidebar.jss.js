@@ -32,12 +32,10 @@ const sidebarClass = {
 
 const left = {
   left: 0,
-  transform: 'translateX(-100%)',
 };
 
 const right = {
   right: 0,
-  transform: 'translateX(100%)',
 };
 
 const maskClass = {
@@ -50,7 +48,6 @@ const maskClass = {
   backgroundImage: 'none !important',
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
   zIndex: 2147483646,
-  opacity: 0,
 };
 
 const JSS = {

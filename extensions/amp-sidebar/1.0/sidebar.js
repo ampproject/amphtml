@@ -16,28 +16,35 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
 import {
   useCallback,
-  useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
 import {useStyles} from './sidebar.jss';
 
 const ANIMATION_DURATION = 350;
-const ANIMATION_FADE_IN = [{opacity: 0}, {opacity: 1}];
-const ANIMATION_SLIDE_IN_LEFT = [
-  {transform: 'translateX(-100%)'},
-  {transform: 'translateX(0)'},
-];
-const ANIMATION_SLIDE_IN_RIGHT = [
-  {transform: 'translateX(100%)'},
-  {transform: 'translateX(0)'},
-];
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
+
+const ANIMATION_KEYFRAMES_FADE_IN = [{'opacity': '0'}, {'opacity': '1'}];
+const ANIMATION_KEYFRAMES_SLIDE_IN_LEFT = [
+  {'transform': 'translateX(-100%)'},
+  {'transform': 'translateX(0)'},
+];
+const ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT = [
+  {'transform': 'translateX(100%)'},
+  {'transform': 'translateX(0)'},
+];
+
+const ANIMATION_STYLES_SIDEBAR_LEFT_INIT = {'transform': 'translateX(-100%)'};
+const ANIMATION_STYLES_SIDEBAR_RIGHT_INIT = {'transform': 'translateX(100%)'};
+const ANIMATION_STYLES_MASK_INIT = {'opacity': '0'};
+const ANIMATION_STYLES_SIDEBAR_FINAL = {'transform': ''};
+const ANIMATION_STYLES_MASK_FINAL = {'opacity': '1'};
 
 /**
  * @param {T} current
@@ -48,6 +55,13 @@ function useValueRef(current) {
   const valueRef = useRef(null);
   valueRef.current = current;
   return valueRef;
+}
+/**
+ * @param {!Element} element
+ * @param {!Object<string, *>} styles
+ */
+function safelySetStyles(element, styles) {
+  setStyles(element, assertDoesNotContainDisplay(styles));
 }
 
 /**
@@ -107,10 +121,10 @@ function SidebarWithRef(
     [open, close, toggle]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
     const maskElement = maskRef.current;
-    if (sidebarElement == null || maskElement == null) {
+    if (!sidebarElement || !maskElement) {
       return;
     }
 
@@ -119,15 +133,25 @@ function SidebarWithRef(
     // "Make Visible" Animation
     if (opened) {
       const postVisibleAnim = () => {
-        setStyle(sidebarElement, 'transform', 'translateX(0)');
-        setStyle(maskElement, 'opacity', 1);
+        safelySetStyles(sidebarElement, ANIMATION_STYLES_SIDEBAR_FINAL);
+        safelySetStyles(maskElement, ANIMATION_STYLES_MASK_FINAL);
       };
       if (!sidebarElement.animate || !maskElement.animate) {
         postVisibleAnim();
         return;
       }
+
+      safelySetStyles(
+        sidebarElement,
+        side === 'left'
+          ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
+          : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
+      );
+      safelySetStyles(maskElement, ANIMATION_STYLES_MASK_INIT);
       sidebarAnimation = sidebarElement.animate(
-        side === 'left' ? ANIMATION_SLIDE_IN_LEFT : ANIMATION_SLIDE_IN_RIGHT,
+        side === 'left'
+          ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
+          : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
           duration: ANIMATION_DURATION,
           fill: 'both',
@@ -135,7 +159,7 @@ function SidebarWithRef(
         }
       );
       sidebarAnimation.onfinish = postVisibleAnim;
-      maskAnimation = maskElement.animate(ANIMATION_FADE_IN, {
+      maskAnimation = maskElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
         duration: ANIMATION_DURATION,
         fill: 'both',
         easing: ANIMATION_EASE_IN,
@@ -155,7 +179,9 @@ function SidebarWithRef(
         return;
       }
       sidebarAnimation = sidebarElement.animate(
-        side === 'left' ? ANIMATION_SLIDE_IN_LEFT : ANIMATION_SLIDE_IN_RIGHT,
+        side === 'left'
+          ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
+          : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
           duration: ANIMATION_DURATION,
           direction: 'reverse',
@@ -164,7 +190,7 @@ function SidebarWithRef(
         }
       );
       sidebarAnimation.onfinish = postInvisibleAnim;
-      maskAnimation = maskElement.animate(ANIMATION_FADE_IN, {
+      maskAnimation = maskElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
@@ -186,9 +212,7 @@ function SidebarWithRef(
       <>
         <ContainWrapper
           as={Comp}
-          ref={(r) => {
-            sidebarRef.current = r;
-          }}
+          ref={sidebarRef}
           size={false}
           layout={true}
           paint={true}
