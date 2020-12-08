@@ -114,7 +114,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    const box = this.getLayoutBox();
+    const box = this./*OK*/ getBoundingClientRect();
     if (
       this.measuredWidth_ == box.width &&
       this.measuredHeight_ == box.height

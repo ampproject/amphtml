@@ -311,7 +311,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   onLayoutMeasure() {
-    this.slideWidth_ = this.element.getLayoutWidth();
+    this.slideWidth_ = this.element./*OK*/ offsetWidth;
   }
 
   /** @override */

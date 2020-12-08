@@ -920,6 +920,10 @@ const bannedTermsHelpString =
   'forbidden property/method or mark it with `object./*REVIEW*/property` ' +
   'if you are unsure and so that it stands out in code reviews.';
 
+const measurementApiDeprecated =
+  'getLayoutWidth/Box APIs are being deprecated. Please contact the' +
+  ' @ampproject/wg-performance for questions.';
+
 const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
@@ -1190,6 +1194,43 @@ const forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.getLayoutWidth': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'builtins/amp-img.js',
+      'src/service/resources-impl.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+    ],
+  },
+  '\\.getPageLayoutBox': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/base-element.js',
+      'src/custom-element.js',
+      'src/iframe-attributes.js',
+      'src/ini-load.js',
+      'src/service/mutator-impl.js',
+      'src/service/resource.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/safeframe-host.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils.js',
+      'extensions/amp-auto-ads/0.1/utils.js',
+      'extensions/amp-video-docking/0.1/amp-video-docking.js',
+      'extensions/amp-video-docking/0.1/math.js',
+      'ads/google/a4a/utils.js',
+    ],
+  },
+  '\\.getIntersectionElementLayoutBox': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/custom-element.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
