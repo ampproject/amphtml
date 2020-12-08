@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {applySandbox} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
 
 /**
@@ -42,8 +43,15 @@ export class AmpStoryDevToolsTabPageExperience extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.element.textContent = '';
     const iframe = htmlFor(this.element)`<iframe frameborder="0">`;
-    iframe.src = 'https://amp.dev/page-experience/?url=' + this.storyUrl_;
+    applySandbox(iframe);
+    iframe.src =
+      'https://amp.dev/page-experience/?url=' + escape(this.storyUrl_);
     this.element.appendChild(iframe);
   }
 }
