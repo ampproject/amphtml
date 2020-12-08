@@ -280,28 +280,22 @@ describes.realWin(
         expect(eventSpy).to.have.not.been.called;
       });
 
-      it('should dispatch when changing slides', async () => {
-        const eventSpy = env.sandbox.spy();
-        container.addEventListener('slideChange', eventSpy);
-        const carousel = await getCarousel({loop: false});
-
-        carousel.implementation_.interactionNext();
-        await afterIndexUpdate(carousel);
-
-        expect(eventSpy).to.have.been.calledOnce;
-      });
-
       it('should dispatch event with index and actionTrust when changing slides', async () => {
-        container.addEventListener('slideChange', (event) => {
-          const {index, actionTrust} = event.data;
-          expect(index).to.eq(1);
-          expect(actionTrust).to.eq(ActionTrust.HIGH);
+        let event;
+        let counter = 0;
+        container.addEventListener('slideChange', (e) => {
+          counter++;
+          event = e;
         });
         const carousel = await getCarousel({loop: false});
 
         carousel.implementation_.interactionNext();
 
         await afterIndexUpdate(carousel);
+
+        expect(counter).to.equal(1);
+        expect(event.data.index).to.equal(1);
+        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
       });
     });
 
