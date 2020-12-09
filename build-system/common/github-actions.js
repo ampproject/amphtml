@@ -21,18 +21,10 @@
  */
 
 /**
- * Returns true if this is a GitHub Actions build.
- * @return {boolean}
- */
-function isGithubActionsBuild() {
-  return !!process.env.GITHUB_ACTIONS;
-}
-
-/**
  * Returns true if this is a PR build.
  * @return {boolean}
  */
-function isGithubActionsPullRequestBuild() {
+function isPullRequestBuild() {
   return process.env.GITHUB_EVENT_NAME === 'pull_request';
 }
 
@@ -40,7 +32,7 @@ function isGithubActionsPullRequestBuild() {
  * Returns true if this is a Push build.
  * @return {boolean}
  */
-function isGithubActionsPushBuild() {
+function isPushBuild() {
   return process.env.GITHUB_EVENT_NAME === 'push';
 }
 
@@ -48,7 +40,7 @@ function isGithubActionsPushBuild() {
  * Returns the name of the branch being tested by the ongoing Github Actions PR build.
  * @return {string}
  */
-function githubActionsPullRequestBranch() {
+function pullRequestBranch() {
   return process.env['GITHUB_REF'];
 }
 
@@ -56,14 +48,14 @@ function githubActionsPullRequestBranch() {
  * Returns the commit SHA being tested by the ongoing Github Actions PR build.
  * @return {string}
  */
-function githubActionsPullRequestSha() {
+function pullRequestSha() {
   return process.env['GITHUB_SHA'];
 }
 
 module.exports = {
-  githubActionsPullRequestBranch,
-  githubActionsPullRequestSha,
-  isGithubActionsBuild,
-  isGithubActionsPullRequestBuild,
-  isGithubActionsPushBuild,
+  buildType: 'github-actions',
+  pullRequestBranch,
+  pullRequestSha,
+  isPullRequestBuild,
+  isPushBuild,
 };

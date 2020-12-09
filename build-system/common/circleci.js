@@ -21,18 +21,10 @@
  */
 
 /**
- * Returns true if this is a CircleCI build.
- * @return {boolean}
- */
-function isCircleciBuild() {
-  return !!process.env.CIRCLECI;
-}
-
-/**
  * Returns true if this is a PR build.
  * @return {boolean}
  */
-function isCircleciPullRequestBuild() {
+function isPullRequestBuild() {
   return !!process.env.CIRCLE_PULL_REQUEST;
 }
 
@@ -40,7 +32,7 @@ function isCircleciPullRequestBuild() {
  * Returns true if this is a Push build.
  * @return {boolean}
  */
-function isCircleciPushBuild() {
+function isPushBuild() {
   return !process.env.CIRCLE_PULL_REQUEST;
 }
 
@@ -48,7 +40,7 @@ function isCircleciPushBuild() {
  * Returns the name of the branch being tested by the ongoing CircleCI PR build.
  * @return {string}
  */
-function circleciPullRequestBranch() {
+function pullRequestBranch() {
   return process.env['CIRCLE_BRANCH'];
 }
 
@@ -56,14 +48,14 @@ function circleciPullRequestBranch() {
  * Returns the commit SHA being tested by the ongoing CircleCI PR build.
  * @return {string}
  */
-function circleciPullRequestSha() {
+function pullRequestSha() {
   return process.env['CIRCLE_SHA1'];
 }
 
 module.exports = {
-  circleciPullRequestBranch,
-  circleciPullRequestSha,
-  isCircleciBuild,
-  isCircleciPullRequestBuild,
-  isCircleciPushBuild,
+  buildType: 'circleci',
+  pullRequestBranch,
+  pullRequestSha,
+  isPullRequestBuild,
+  isPushBuild,
 };

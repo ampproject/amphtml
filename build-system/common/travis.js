@@ -21,18 +21,10 @@
  */
 
 /**
- * Returns true if this is a Travis build.
- * @return {boolean}
- */
-function isTravisBuild() {
-  return !!process.env.TRAVIS;
-}
-
-/**
  * Returns true if this is a Travis PR build.
  * @return {boolean}
  */
-function isTravisPullRequestBuild() {
+function isPullRequestBuild() {
   return process.env.TRAVIS_EVENT_TYPE === 'pull_request';
 }
 
@@ -40,8 +32,24 @@ function isTravisPullRequestBuild() {
  * Returns true if this is a Travis Push build.
  * @return {boolean}
  */
-function isTravisPushBuild() {
+function isPushBuild() {
   return process.env.TRAVIS_EVENT_TYPE === 'push';
+}
+
+/**
+ * Returns the commit SHA being tested by the ongoing Travis PR build.
+ * @return {string}
+ */
+function pullRequestSha() {
+  return process.env['TRAVIS_PULL_REQUEST_SHA'];
+}
+
+/**
+ * Returns the name of the branch being tested by the ongoing Travis PR build.
+ * @return {string}
+ */
+function pullRequestBranch() {
+  return process.env['TRAVIS_PULL_REQUEST_BRANCH'];
 }
 
 /**
@@ -85,22 +93,6 @@ function travisRepoSlug() {
 }
 
 /**
- * Returns the commit SHA being tested by the ongoing Travis PR build.
- * @return {string}
- */
-function travisPullRequestSha() {
-  return process.env['TRAVIS_PULL_REQUEST_SHA'];
-}
-
-/**
- * Returns the name of the branch being tested by the ongoing Travis PR build.
- * @return {string}
- */
-function travisPullRequestBranch() {
-  return process.env['TRAVIS_PULL_REQUEST_BRANCH'];
-}
-
-/**
  * Returns the Travis branch for push builds.
  * @return {string}
  */
@@ -117,16 +109,17 @@ function travisCommitSha() {
 }
 
 module.exports = {
-  isTravisBuild,
-  isTravisPullRequestBuild,
-  isTravisPushBuild,
+  buildType: 'travis',
+  isPullRequestBuild,
+  isPushBuild,
+  pullRequestBranch,
+  pullRequestSha,
+
   travisBuildNumber,
   travisBuildUrl,
   travisCommitSha,
   travisJobNumber,
   travisJobUrl,
-  travisPullRequestBranch,
-  travisPullRequestSha,
   travisPushBranch,
   travisRepoSlug,
 };

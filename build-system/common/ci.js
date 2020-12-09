@@ -18,62 +18,23 @@
 const log = require('fancy-log');
 const {red} = require('ansi-colors');
 
-const {
-  circleciPullRequestBranch,
-  circleciPullRequestSha,
-  isCircleciBuild,
-  isCircleciPullRequestBuild,
-  isCircleciPushBuild,
-} = require('./circleci');
-const {
-  githubActionsPullRequestBranch,
-  githubActionsPullRequestSha,
-  isGithubActionsBuild,
-  isGithubActionsPullRequestBuild,
-  isGithubActionsPushBuild,
-} = require('./github-actions');
-const {
-  isTravisBuild,
-  isTravisPullRequestBuild,
-  isTravisPushBuild,
-  travisPullRequestBranch,
-  travisPullRequestSha,
-} = require('./travis');
-
 /**
  * @fileoverview Provides functions that extract various kinds of CI state.
  */
 
-/**
- * Maps generic CI functions to those that must be run on the current service.
- */
-const serviceFunctionMap = isTravisBuild()
-  ? {
-      'ciPullRequestBranch': travisPullRequestBranch,
-      'ciPullRequestSha': travisPullRequestSha,
-      'isPullRequestBuild': isTravisPullRequestBuild,
-      'isPushBuild': isTravisPushBuild,
-    }
-  : isGithubActionsBuild()
-  ? {
-      'ciPullRequestBranch': githubActionsPullRequestBranch,
-      'ciPullRequestSha': githubActionsPullRequestSha,
-      'isPullRequestBuild': isGithubActionsPullRequestBuild,
-      'isPushBuild': isGithubActionsPushBuild,
-    }
-  : isCircleciBuild()
-  ? {
-      'ciPullRequestBranch': circleciPullRequestBranch,
-      'ciPullRequestSha': circleciPullRequestSha,
-      'isPullRequestBuild': isCircleciPullRequestBuild,
-      'isPushBuild': isCircleciPushBuild,
-    }
-  : {
-      'ciPullRequestBranch': () => '',
-      'ciPullRequestSha': () => '',
-      'isPullRequestBuild': () => false,
-      'isPushBuild': () => false,
-    };
+const {
+  buildType = '',
+  isPullRequestBuild = () => false,
+  isPushBuild = () => false,
+  pullRequestBranch = () => '',
+  pullRequestSha = () => '',
+} = process.env.TRAVIS
+  ? require('travis')()
+  : process.env.GITHUB_ACTIONS
+  ? require('github_actions')()
+  : process.env.CIRCLECI
+  ? require('circleci')()
+  : {};
 
 /**
  * Returns true if this is a CI build.
@@ -87,49 +48,36 @@ function isCiBuild() {
 }
 
 /**
- * Returns true if this is a PR build.
- * @return {boolean}
+ * Returns a functions that tests if a build type is active.
+ * @param {string} desiredBuildType
+ * @return {Function}
  */
-function isPullRequestBuild() {
-  return serviceFunctionMap['isPullRequestBuild']();
+function testBuildType(desiredBuildType) {
+  return () => buildType === desiredBuildType;
 }
 
 /**
- * Returns true if this is a push build.
- * @return {boolean}
- */
-function isPushBuild() {
-  return serviceFunctionMap['isPushBuild']();
-}
-
-/**
- * Returns the name of the PR branch.
+ * Returns a CI build variable, reporting an error if it's not a PR build.
+ * @param {Function} getter
  * @return {string}
  */
-function ciPullRequestBranch() {
-  if (!isPullRequestBuild()) {
-    log(red('ERROR:'), 'Not a PR build, PR branch is undefined.');
+function getPrBuildVar(getter) {
+  if (isPullRequestBuild()) {
+    log(red('ERROR:'), 'Not a PR build, value is undefined.');
     return '';
   }
-  return serviceFunctionMap['ciPullRequestBranch']();
-}
-
-/**
- * Returns the commit SHA being tested by the PR build.
- * @return {string}
- */
-function ciPullRequestSha() {
-  if (!isPullRequestBuild()) {
-    log(red('ERROR:'), 'Not a PR build, PR SHA is undefined.');
-    return '';
-  }
-  return serviceFunctionMap['ciPullRequestSha']();
+  return getter();
 }
 
 module.exports = {
-  ciPullRequestBranch,
-  ciPullRequestSha,
   isCiBuild,
   isPullRequestBuild,
   isPushBuild,
+
+  isTravisBuild: testBuildType('travis'),
+  isGithubActionsBuild: testBuildType('github_actions'),
+  isCircleciBuild: testBuildType('circleci'),
+
+  ciPullRequestBranch: getPrBuildVar(pullRequestBranch),
+  ciPullRequestSha: getPrBuildVar(pullRequestSha),
 };
