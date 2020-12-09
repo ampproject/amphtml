@@ -35,8 +35,8 @@ import {
 } from './service/core-services';
 import {
   installExtensionsService,
-} from './service/extensions-impl';
   stubLegacyElements,
+} from './service/extensions-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {registerExtendedTemplate} from './service/template-impl';
@@ -204,6 +204,7 @@ function adoptShared(global, callback) {
     }
   }
 
+  console.log(`${IS_ESM ? 'module' :'nomodule'}`, preregisteredExtensions.length);
   // Handle high priority extensions now, and if necessary issue
   // requests for new extensions (used for experimental version
   // locking).
