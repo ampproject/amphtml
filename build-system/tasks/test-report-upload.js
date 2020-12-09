@@ -26,12 +26,13 @@ const fs = require('fs').promises;
 const log = require('fancy-log');
 const path = require('path');
 const {
-  travisBuildNumber,
-  travisBuildUrl,
-  travisJobNumber,
-  travisJobUrl,
-  travisCommitSha,
-} = require('../common/travis');
+  ciBuildNumber,
+  ciBuildUrl,
+  ciJobNumber,
+  ciJobUrl,
+  ciCommitSha,
+} = require('../common/ci');
+
 const {cyan, green, red, yellow} = require('ansi-colors');
 
 const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
@@ -62,12 +63,12 @@ async function getReport(testType) {
  * @return {Object.<string,Object>} Object containing the build, job, and test results.
  */
 function addJobAndBuildInfo(testType, reportJson) {
-  const buildNumber = travisBuildNumber();
-  const commitSha = travisCommitSha();
-  const jobNumber = travisJobNumber();
+  const buildNumber = ciBuildNumber();
+  const commitSha = ciCommitSha();
+  const jobNumber = ciJobNumber();
 
   if (!buildNumber || !commitSha || !jobNumber) {
-    throw new ReferenceError('Travis fields are not defined.');
+    throw new ReferenceError('CI fields are not defined.');
   }
 
   return {
@@ -75,12 +76,12 @@ function addJobAndBuildInfo(testType, reportJson) {
     build: {
       buildNumber,
       commitSha,
-      url: travisBuildUrl(),
+      url: ciBuildUrl(),
     },
     job: {
       jobNumber,
       testSuiteType: testType,
-      url: travisJobUrl(),
+      url: ciJobUrl(),
     },
   };
 }
@@ -89,7 +90,7 @@ function addJobAndBuildInfo(testType, reportJson) {
  * Sends a single report to the API endpoint for storage.
  * @param {('unit' | 'integration' | 'e2e')} testType The type of the tests whose result we want to report.
  */
-async function sendTravisKarmaReport(testType) {
+async function sendCiKarmaReport(testType) {
   const body = await getReport(testType);
 
   if (!body) {
@@ -128,7 +129,7 @@ async function testReportUpload() {
   const filenames = await fs.readdir('result-reports/');
   const testTypes = filenames.map((filename) => path.parse(filename).name);
 
-  await Promise.all(testTypes.map(sendTravisKarmaReport));
+  await Promise.all(testTypes.map(sendCiKarmaReport));
 }
 
 module.exports = {

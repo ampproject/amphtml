@@ -18,9 +18,10 @@
 const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const requestPromise = require('request-promise');
+const {ciJobUrl} = require('../common/ci');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../common/git');
-const {travisJobUrl, isTravisPullRequestBuild} = require('../common/travis');
+const {isPullRequestBuild, isTravisBuild} = require('../common/ci');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -70,7 +71,7 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
-  if (type !== null && isTravisPullRequestBuild()) {
+  if (type !== null && isTravisBuild() && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
 
     try {
@@ -78,7 +79,8 @@ async function postReport(type, action) {
         method: 'POST',
         uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
         body: JSON.stringify({
-          travisJobUrl: travisJobUrl(),
+          // TODO(rsimha): Change the name of this field.
+          travisJobUrl: ciJobUrl(),
         }),
         headers: {
           'Content-Type': 'application/json',
