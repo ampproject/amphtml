@@ -36,6 +36,6 @@ For semantics of configuration, see [Adblade's documentation](https://www.adblad
 
 Supported parameters:
 
-- `data-cid`
-- `data-width`
-- `data-height`
+-   `data-cid`
+-   `data-width`
+-   `data-height`

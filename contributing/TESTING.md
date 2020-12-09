@@ -20,22 +20,22 @@ This document provides details for testing and building your AMP code.
 
 **Contents**
 
-- [Testing commands](#testing-commands)
-- [Manual testing](#manual-testing)
-  - [Serve Mode](#serve-mode)
-  - [Examples](#examples)
-  - [Document proxy](#document-proxy)
-  - [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
-  - [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
-  - [Chrome extension](#chrome-extension)
-- [Visual Diff Tests](#visual-diff-tests)
-  - [Failing Tests](#failing-tests)
-  - [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
-- [Isolated Component Testing](#isolated-component-testing)
-- [Testing on devices](#testing-on-devices)
-  - [Testing with ngrok](#testing-with-ngrok)
-  - [Testing with Firebase](#testing-with-firebase)
-- [End-to-end Tests](#end-to-end-tests)
+-   [Testing commands](#testing-commands)
+-   [Manual testing](#manual-testing)
+    -   [Serve Mode](#serve-mode)
+    -   [Examples](#examples)
+    -   [Document proxy](#document-proxy)
+    -   [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
+    -   [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
+    -   [Chrome extension](#chrome-extension)
+-   [Visual Diff Tests](#visual-diff-tests)
+    -   [Failing Tests](#failing-tests)
+    -   [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
+-   [Isolated Component Testing](#isolated-component-testing)
+-   [Testing on devices](#testing-on-devices)
+    -   [Testing with ngrok](#testing-with-ngrok)
+    -   [Testing with Firebase](#testing-with-firebase)
+-   [End-to-end Tests](#end-to-end-tests)
 
 ## Testing commands
 
@@ -152,11 +152,11 @@ For manual testing build AMP and start the Node.js server by running `gulp`.
 
 There are 5 serving modes:
 
-- DEFAULT mode serves unminified AMP. Use this during normal development by simply running `gulp`.
-- COMPILED mode serves minified AMP. This is closer to what is served in production on the stable channel. Serve this mode by running `gulp --compiled`.
-- CDN mode serves stable channel binaries. Local changes are not served in this mode. Serve CDN mode by running `gulp serve --cdn`.
-- RTV mode serves the bundle from the given RTV number (a 15 digit number). E.g. `001907161745080`. Serve RTV mode by running `gulp serve --rtv <rtv_number>`
-- ESM mode serves the esm (module) binaries. First run `gulp dist --fortesting --esm` and then serve esm mode by running `gulp serve --new_server --esm`. _This mode is new, and under active development._
+-   DEFAULT mode serves unminified AMP. Use this during normal development by simply running `gulp`.
+-   COMPILED mode serves minified AMP. This is closer to what is served in production on the stable channel. Serve this mode by running `gulp --compiled`.
+-   CDN mode serves stable channel binaries. Local changes are not served in this mode. Serve CDN mode by running `gulp serve --cdn`.
+-   RTV mode serves the bundle from the given RTV number (a 15 digit number). E.g. `001907161745080`. Serve RTV mode by running `gulp serve --rtv <rtv_number>`
+-   ESM mode serves the esm (module) binaries. First run `gulp dist --fortesting --esm` and then serve esm mode by running `gulp serve --new_server --esm`. _This mode is new, and under active development._
 
 To switch serving mode during runtime, go to http://localhost:8000/serve_mode=MODE and set `MODE` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
 
@@ -194,8 +194,8 @@ A4A can be run either of these two modes:
 
 The following forms are supported:
 
-- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.html
-- proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
+-   local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.html
+-   proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
 
 When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
@@ -208,9 +208,9 @@ Notice that all documents are assumed to have a "fake" signature. Thus, this fun
 
 Additionally, the following query parameters can be provided:
 
-- `width` - the width of the `amp-ad` (default "300")
-- `height` - the height of the `amp-ad` (default "250")
-- `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
+-   `width` - the width of the `amp-ad` (default "300")
+-   `height` - the height of the `amp-ad` (default "250")
+-   `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 ### In-a-box envelope (/inabox/)
 
@@ -218,14 +218,14 @@ If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope 
 
 The following forms are supported:
 
-- local document: http://localhost:8000/inabox/examples/animations.amp.html
-- proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
+-   local document: http://localhost:8000/inabox/examples/animations.amp.html
+-   proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
 
 Additionally, the following query parameters can be provided:
 
-- `width` - the width of the `iframe` (default "300")
-- `height` - the height of the `iframe` (default "250")
-- `offset` - the offset to push the `iframe` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
+-   `width` - the width of the `iframe` (default "300")
+-   `height` - the height of the `iframe` (default "250")
+-   `offset` - the offset to push the `iframe` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 ### Chrome extension
 
@@ -237,10 +237,10 @@ In addition to building the AMP runtime and running `gulp [unit|integration]`, t
 
 The technology stack used is:
 
-- [Percy](https://percy.io/), a visual regression testing service for webpages
-- [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
-- [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
-- [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome/Chromium browser in headless mode
+-   [Percy](https://percy.io/), a visual regression testing service for webpages
+-   [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
+-   [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
+-   [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome/Chromium browser in headless mode
 
 The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
 
@@ -256,12 +256,12 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 Visual diff tests are defined in the [`visual-tests`](../test/visual-diff/visual-tests), see file for the configurations of each test. When running, the visual diff test runner does the following for each test case:
 
-- Navgates to the defined page using a headless Chrome browser
-- Waits for the page to finish loading, both by verifying idle network connections and lack of loader animations
-- If defined, waits until the appropriate CSS selectors appear/disappear from the page
-- If defined, waits an arbitrary amount of time (e.g., for components that have time-delayed mutations)
-- If defined, executes any custom interaction test code
-- Uploads a snapshot of the page's DOM (converted to an HTML string) to the Percy service
+-   Navgates to the defined page using a headless Chrome browser
+-   Waits for the page to finish loading, both by verifying idle network connections and lack of loader animations
+-   If defined, waits until the appropriate CSS selectors appear/disappear from the page
+-   If defined, waits an arbitrary amount of time (e.g., for components that have time-delayed mutations)
+-   If defined, executes any custom interaction test code
+-   Uploads a snapshot of the page's DOM (converted to an HTML string) to the Percy service
 
 When all snapshots finish uploading, Percy will process the visual diffs and report back to GitHub as a pull request status. Percy renders the snapshots in their own browsers and take a screenshot. If the new screenshot differs from the previously approved screenshot you will get a visual highlighting of where that difference lies.
 
@@ -283,35 +283,35 @@ Once the environment variable is set up, you can run the AMP visual diff tests. 
 
 To start, create the page and register it in the configuration file for visual diff tests:
 
-- Create an AMP document that will be tested under `examples/visual-tests`.
-- Add an entry in the [`test/visual-diff/visual-tests`](../test/visual-diff/visual-tests) JSON5 file. Documentation for the various settings are in that file.
-  - Must set fields: `url`, `name`
-  - You will also likely want to set `loading_complete_css` and maybe also `loading_incomplete_css`
-  - Only set `viewport` if your page looks different on mobile vs. desktop, and you intend to create a separate config for each
-    - The `viewport` setting wraps the entire DOM snapshot inside an `<iframe>` before uploading to Percy. Beware of weird iframe behaviors! 🐉
-  - Do not set `enable_percy_javascript` without consulting `@ampproject/wg-infra`
-  - Point `interactive_tests` to a JavaScript file if you would like to add interactions to the page. See examples of existing interactive tests to learn how to write those
-- (For past examples of pull requests that add visual diff tests, see [#17047](https://github.com/ampproject/amphtml/pull/17047), [#17110](https://github.com/ampproject/amphtml/pull/17110))
+-   Create an AMP document that will be tested under `examples/visual-tests`.
+-   Add an entry in the [`test/visual-diff/visual-tests`](../test/visual-diff/visual-tests) JSON5 file. Documentation for the various settings are in that file.
+    -   Must set fields: `url`, `name`
+    -   You will also likely want to set `loading_complete_css` and maybe also `loading_incomplete_css`
+    -   Only set `viewport` if your page looks different on mobile vs. desktop, and you intend to create a separate config for each
+        -   The `viewport` setting wraps the entire DOM snapshot inside an `<iframe>` before uploading to Percy. Beware of weird iframe behaviors! 🐉
+    -   Do not set `enable_percy_javascript` without consulting `@ampproject/wg-infra`
+    -   Point `interactive_tests` to a JavaScript file if you would like to add interactions to the page. See examples of existing interactive tests to learn how to write those
+-   (For past examples of pull requests that add visual diff tests, see [#17047](https://github.com/ampproject/amphtml/pull/17047), [#17110](https://github.com/ampproject/amphtml/pull/17110))
 
 Now, verify your test by executing it:
 
-- Build the AMP runtime in minified mode:
-  ```sh
-  gulp dist --fortesting
-  ```
-  - You can verify that your page looks as intented by running `gulp serve --compiled` and opening it in a browser
-- Execute the visual diff tests:
-  ```sh
-  gulp visual-diff --nobuild
-  ```
-  - Add `--grep="<regular expression>"` to the command to execute a subset of the tests. e.g., `gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
-  - Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp dist --fortesting` on each execution. This is time consuming, so only drop it if you are changing the runtime/extension code and not just the test files
-  - To see debugging info during Percy runs, you can add `--chrome_debug`, `--webserver_debug`, or `--debug` for both.
-- When the test finishes executing it will print a URL to Percy where you can inspect the results. It should take about a minute to finish processing.
-- Inspect the build on Percy. If you are not happy with the results, fix your page or code, and repeat. If all is well, approve it. This creates a new baseline on Percy, against which all following builds will be compared.
-- After approving your test, repeat the `gulp visual-diff` command at least 5 more times. If any of the subsequent runs fails with a visual changes, this means that your test is flaky.
-  - Flakiness is usually caused by bad `loading_complete_css` configurations
-  - To find what CSS selector appear _exclusively_ after the page settles into the expected result, download the _baseline_ and _new_ source for the snapshots that Percy used in the build that flaked, and compare them using a text diff application
+-   Build the AMP runtime in minified mode:
+    ```sh
+    gulp dist --fortesting
+    ```
+    -   You can verify that your page looks as intented by running `gulp serve --compiled` and opening it in a browser
+-   Execute the visual diff tests:
+    ```sh
+    gulp visual-diff --nobuild
+    ```
+    -   Add `--grep="<regular expression>"` to the command to execute a subset of the tests. e.g., `gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
+    -   Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp dist --fortesting` on each execution. This is time consuming, so only drop it if you are changing the runtime/extension code and not just the test files
+    -   To see debugging info during Percy runs, you can add `--chrome_debug`, `--webserver_debug`, or `--debug` for both.
+-   When the test finishes executing it will print a URL to Percy where you can inspect the results. It should take about a minute to finish processing.
+-   Inspect the build on Percy. If you are not happy with the results, fix your page or code, and repeat. If all is well, approve it. This creates a new baseline on Percy, against which all following builds will be compared.
+-   After approving your test, repeat the `gulp visual-diff` command at least 5 more times. If any of the subsequent runs fails with a visual changes, this means that your test is flaky.
+    -   Flakiness is usually caused by bad `loading_complete_css` configurations
+    -   To find what CSS selector appear _exclusively_ after the page settles into the expected result, download the _baseline_ and _new_ source for the snapshots that Percy used in the build that flaked, and compare them using a text diff application
 
 ## Isolated Component Testing
 
@@ -362,13 +362,13 @@ gulp firebase
 firebase deploy
 ```
 
-- When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
+-   When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
 
-* "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
-* "What do you want to use as your public directory?" enter `firebase`.
-* "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
-  - Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
-* "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
+*   "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
+*   "What do you want to use as your public directory?" enter `firebase`.
+*   "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
+    -   Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
+*   "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
 
 `gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`). When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
 

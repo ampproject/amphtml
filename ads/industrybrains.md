@@ -36,6 +36,6 @@ For configuration semantics, see [Industrybrains documentation](https://www.indu
 
 Supported parameters:
 
-- `data-cid`
-- `data-width`
-- `data-height`
+-   `data-cid`
+-   `data-width`
+-   `data-height`

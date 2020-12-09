@@ -8,28 +8,28 @@ Including the [`amp-lightbox-gallery` extension script](https://amp.dev/document
 
 Otherwise, it's applied only on documents that contain either of the following:
 
-- **a.** an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag
-- **b.** ...or a `@type` field declared in [JSON+LD schema](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/discovery#use-schema.org-for-most-search-engines)
-  that's any of the following:
-  - `Article`
-  - `NewsArticle`
-  - `BlogPosting`
-  - `LiveBlogPosting`
-  - `DiscussionForumPosting`
+-   **a.** an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag
+-   **b.** ...or a `@type` field declared in [JSON+LD schema](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/discovery#use-schema.org-for-most-search-engines)
+    that's any of the following:
+    -   `Article`
+    -   `NewsArticle`
+    -   `BlogPosting`
+    -   `LiveBlogPosting`
+    -   `DiscussionForumPosting`
 
 ## Excluded images
 
 Images are clickable by default and should not be automatically lightboxed in any of the following cases:
 
-- the image or any of its ancestors has an [`on="tap: ..."` action](./amp-actions-and-events.md)
-- any of its ancestors is `a[href]`, `amp-selector [option]` or `button`
+-   the image or any of its ancestors has an [`on="tap: ..."` action](./amp-actions-and-events.md)
+-   any of its ancestors is `a[href]`, `amp-selector [option]` or `button`
 
 They're also excluded when they're inside any of the following:
 
-- `amp-script`
-- `amp-story`
-- `amp-lightbox`
-- `amp-carousel` will likely be treated specially in the future, but as of now, it's excluded.
+-   `amp-script`
+-   `amp-story`
+-   `amp-lightbox`
+-   `amp-carousel` will likely be treated specially in the future, but as of now, it's excluded.
 
 ## Disabling treatment explicitly
 

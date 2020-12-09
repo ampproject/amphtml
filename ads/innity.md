@@ -35,9 +35,9 @@ For semantics of configuration, please reach out to your account manager.
 
 ### Required parameters
 
-- `data-pub`: Publisher ID
-- `data-zone`: Zone ID
+-   `data-pub`: Publisher ID
+-   `data-zone`: Zone ID
 
 ### Optional parameters
 
-- `data-channel`: Channel code
+-   `data-channel`: Channel code

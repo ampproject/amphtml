@@ -35,4 +35,4 @@ limitations under the License.
 
 ### Required parameters
 
-- `data-widgetId`: Widget ID
+-   `data-widgetId`: Widget ID

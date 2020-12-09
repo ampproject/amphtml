@@ -34,4 +34,4 @@ For further configuration details, please contact mobile@ligatus.com
 
 Supported parameters:
 
-- `src`
+-   `src`

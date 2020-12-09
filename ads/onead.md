@@ -36,9 +36,9 @@ limitations under the License.
 
 Supported parameters:
 
-- `data-playmode`
-- `data-uid`
-- `data-pid` (optional)
-- `data-host` (optional)
+-   `data-playmode`
+-   `data-uid`
+-   `data-pid` (optional)
+-   `data-host` (optional)
 
 For configuration details, please contact [OneAD](https://www.onead.com.tw/)

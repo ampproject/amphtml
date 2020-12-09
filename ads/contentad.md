@@ -42,6 +42,6 @@ For configuration semantics, please see [Content.ad AMP Widget](http://help.cont
 
 Supported parameters:
 
-- `data-id`: Ad Widget GUID
-- `data-d`: Ad Widget Domain ID
-- `data-wid`: Ad Widget ID
+-   `data-id`: Ad Widget GUID
+-   `data-d`: Ad Widget Domain ID
+-   `data-wid`: Ad Widget ID

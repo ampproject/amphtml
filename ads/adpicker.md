@@ -29,4 +29,4 @@ For details on the configuration semantics, visit [adpicker.net](https://adpicke
 
 ### Required parameters
 
-- `data-ph`: the placement id
+-   `data-ph`: the placement id

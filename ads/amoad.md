@@ -50,7 +50,7 @@ For configuration details and to generate your tags, please contact [AMoAd](http
 
 Supported parameters:
 
-- `width`
-- `height`
-- `data-sid`
-- `data-ad-type`
+-   `width`
+-   `height`
+-   `data-sid`
+-   `data-ad-type`

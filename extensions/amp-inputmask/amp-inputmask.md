@@ -38,9 +38,9 @@ from typing incorrect characters.
 
 ### Supported elements
 
-- `input[type=text]`
-- `input[type=tel]`
-- `input[type=search]`
+-   `input[type=text]`
+-   `input[type=tel]`
+-   `input[type=search]`
 
 ## Attributes
 
@@ -150,10 +150,10 @@ left side. For example, North American phone numbers are sometimes stored as
 
 Specifies how the form will submit the input value.
 
-- **raw** (default): Outputs the value as-is with all special characters.
-- **alphanumeric**: Only outputs alphanumeric characters in the mask. The form
-  will add a `type="hidden"` input with the masked input's `name` or `id`
-  attribute with `-unmasked` appended.
+-   **raw** (default): Outputs the value as-is with all special characters.
+-   **alphanumeric**: Only outputs alphanumeric characters in the mask. The form
+    will add a `type="hidden"` input with the masked input's `name` or `id`
+    attribute with `-unmasked` appended.
 
 In the example below the `mask-output` output attribute is set to `raw`.
 

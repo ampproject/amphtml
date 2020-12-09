@@ -36,12 +36,12 @@ For more information, see [Glomex's documentation](https://docs.glomex.com/publi
 
 ### Optional parameters
 
-- `data-playlist-id`
-- `data-placement`
-- `data-playlist-index`
-- `data-article-id`
-- `data-article-category`
+-   `data-playlist-id`
+-   `data-placement`
+-   `data-playlist-index`
+-   `data-article-id`
+-   `data-article-category`
 
 ### Required parameters
 
-- `data-integration-id`
+-   `data-integration-id`

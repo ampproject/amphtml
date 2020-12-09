@@ -36,6 +36,6 @@ For details on the configuration semantics, please see [Adman documentation](htt
 
 ### Required parameters
 
-- `data-ws` - Ad unit unique id
-- `data-s` - Ad unit size
-- `data-host` - SSL enabled Adman service domain
+-   `data-ws` - Ad unit unique id
+-   `data-s` - Ad unit size
+-   `data-host` - SSL enabled Adman service domain

@@ -36,12 +36,12 @@ The Original documentation/source for the table and summary below can be found [
 
 Summary:
 
-- ✅ no browser does double execution (provided [the Safari hack](https://gist.github.com/samthor/64b114e4a4f539915a95b91ffd340acc))
-- ✅ modern Chrome and Firefox never fetch more than necessary
-- ⚠ Safari <11 may or may not double fetch (even with the hack); it does not on small test pages, but in real complex pages it does (it seems deterministic, but not clear what's the exact trigger)
-- ⚠ Safari 11+ may still double fetch in some cases (see https://bugs.webkit.org/show_bug.cgi?id=194337)
-- ❌ pre-2018 browsers do double fetches
-- ❌❌ latest Edge does triple fetch (2x module + 1x nomodule)
+-   ✅ no browser does double execution (provided [the Safari hack](https://gist.github.com/samthor/64b114e4a4f539915a95b91ffd340acc))
+-   ✅ modern Chrome and Firefox never fetch more than necessary
+-   ⚠ Safari <11 may or may not double fetch (even with the hack); it does not on small test pages, but in real complex pages it does (it seems deterministic, but not clear what's the exact trigger)
+-   ⚠ Safari 11+ may still double fetch in some cases (see https://bugs.webkit.org/show_bug.cgi?id=194337)
+-   ❌ pre-2018 browsers do double fetches
+-   ❌❌ latest Edge does triple fetch (2x module + 1x nomodule)
 
 The AMP Project recommends applying the module/nomodule pattern for Google Chrome, Microsoft Edge >= 79, Safari >= 11, and Firefox >= 60.
 
@@ -55,23 +55,23 @@ We use the [babel preset-env plugin](https://babeljs.io/blog/2020/03/16/7.9.0) w
 
 At a high level we now avoid compiling the following in the AMP "module" output:
 
-- classes
-- arrow functions
-- async/await
-- Object and Array spreads
-- Array destructuring
+-   classes
+-   arrow functions
+-   async/await
+-   Object and Array spreads
+-   Array destructuring
 
 We Also remove the following polyfills:
 
-- document.contains
-- DOMTokenList
-- window.fetch
-- Math.sign
-- Object.assign
-- Object.values
-- Promises
-- Array.includes
-- CSS.escape()
+-   document.contains
+-   DOMTokenList
+-   window.fetch
+-   Math.sign
+-   Object.assign
+-   Object.values
+-   Promises
+-   Array.includes
+-   CSS.escape()
 
 ## Report a bug
 

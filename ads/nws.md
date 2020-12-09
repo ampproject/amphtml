@@ -37,4 +37,4 @@ For configuration semantics, please [contact Newsroom AI](https://www.nws.ai).
 
 Supported parameters:
 
-- `src`
+-   `src`

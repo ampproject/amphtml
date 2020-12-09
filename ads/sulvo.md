@@ -49,4 +49,4 @@ For further information, please contact [Sulvo](https://sulvo.com/).
 
 ### Required parameters
 
-- `data-ad`: Ad ID provided by Sulvo.
+-   `data-ad`: Ad ID provided by Sulvo.

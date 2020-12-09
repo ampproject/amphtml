@@ -35,9 +35,9 @@ For more information, see [Giraff's documentation](https://www.giraff.io/help).
 
 ### Optional parameters
 
-- `data-widget-id`
-- `data-server-name`
+-   `data-widget-id`
+-   `data-server-name`
 
 ### Required parameters
 
-- `data-block-name`
+-   `data-block-name`

@@ -160,8 +160,8 @@ Allows the `amp-date-countdown` component to calculate the time difference based
 on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays
 `1210 hours` left.
 
-- Supported values: `days`, `hours`, `minutes`, `seconds`
-- Default: `days`
+-   Supported values: `days`, `hours`, `minutes`, `seconds`
+-   Default: `days`
 
 ### data-count-up (optional)
 

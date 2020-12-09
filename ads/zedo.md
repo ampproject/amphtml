@@ -41,15 +41,15 @@ For semantics of configuration, please contact support@zedo.com.
 
 ### Required parameters
 
-- `data-super-id`
-- `data-network`
-- `data-placement-id`
-- `data-channel`
-- `data-publisher`
-- `data-dim`
+-   `data-super-id`
+-   `data-network`
+-   `data-placement-id`
+-   `data-channel`
+-   `data-publisher`
+-   `data-dim`
 
 ### Optional parameters
 
-- `data-charset`
-- `data-callback`
-- `data-renderer`
+-   `data-charset`
+-   `data-callback`
+-   `data-renderer`

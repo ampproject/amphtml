@@ -24,4 +24,4 @@ limitations under the License.
 
 ### Required parameters
 
-- `data-sid`
+-   `data-sid`

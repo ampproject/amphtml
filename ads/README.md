@@ -4,24 +4,24 @@ This guide provides details for ad networks to create an `amp-ad` integration fo
 
 **Table of contents**
 
-- [Overview](#overview)
-- [Constraints](#constraints)
-- [The iframe sandbox](#the-iframe-sandbox)
-  - [Available information](#available-information)
-  - [Available APIs](#available-apis)
-  - [Exceptions to available APIs and information](#exceptions-to-available-apis-and-information)
-  - [Ad viewability](#ad-viewability)
-  - [Ad resizing](#ad-resizing)
-  - [Support for multi-size ad requests](#support-for-multi-size-ad-requests)
-  - [Optimizing ad performance](#optimizing-ad-performance)
-  - [Ad markup](#ad-markup)
-  - [1st party cookies](#1st-party-cookies)
-- [Developer guidelines for a pull request](#developer-guidelines-for-a-pull-request)
-  - [Files to change](#files-to-change)
-  - [Verify your examples](#verify-your-examples)
-  - [Tests](#tests)
-  - [Other tips](#other-tips)
-- [Developer announcements for ads related API changes ](#developer-announcements-for-ads-related-API-changes)
+-   [Overview](#overview)
+-   [Constraints](#constraints)
+-   [The iframe sandbox](#the-iframe-sandbox)
+    -   [Available information](#available-information)
+    -   [Available APIs](#available-apis)
+    -   [Exceptions to available APIs and information](#exceptions-to-available-apis-and-information)
+    -   [Ad viewability](#ad-viewability)
+    -   [Ad resizing](#ad-resizing)
+    -   [Support for multi-size ad requests](#support-for-multi-size-ad-requests)
+    -   [Optimizing ad performance](#optimizing-ad-performance)
+    -   [Ad markup](#ad-markup)
+    -   [1st party cookies](#1st-party-cookies)
+-   [Developer guidelines for a pull request](#developer-guidelines-for-a-pull-request)
+    -   [Files to change](#files-to-change)
+    -   [Verify your examples](#verify-your-examples)
+    -   [Tests](#tests)
+    -   [Other tips](#other-tips)
+-   [Developer announcements for ads related API changes ](#developer-announcements-for-ads-related-API-changes)
 
 ## Overview
 
@@ -33,15 +33,15 @@ If you are an ad technology provider looking to integrate with AMP HTML, please 
 
 Below is a summary of constraints placed on external resources, such as ads in AMP HTML:
 
-- Because AMP pages are served on HTTPS and ads cannot be proxied, ads must be served over HTTPS.
-- The size of an ad unit must be static. It must be knowable without fetching the ad and it cannot change at runtime except through [iframe resizing](#ad-resizing).
-- If placing the ad requires running JavaScript (assumed to be true for 100% of ads served through networks), the ad must be placed on an origin different from the AMP document itself. Reasons include:
-  - Improved security.
-  - Takes synchronous HTTP requests made by the ad out of the critical rendering path of the primary page.
-  - Allows browsers to run the ad in a different process from the primary page (even better security and prevents JS inside the ad to block the main page UI thread).
-  - Prevents ads doing less than optimal things to measure user behavior and other interference with the primary page.
-- The AMP Runtime may at any moment decide that there are too many iframes on a page and that memory is low. In that case, the AMP Runtime unloads ads that were previously loaded and are no longer visible. It may later load new ads in the same slot if the user scrolls them back into view.
-- The AMP Runtime may decide to set an ad that is currently not visible to `display: none` to reduce browser layout and compositing cost.
+-   Because AMP pages are served on HTTPS and ads cannot be proxied, ads must be served over HTTPS.
+-   The size of an ad unit must be static. It must be knowable without fetching the ad and it cannot change at runtime except through [iframe resizing](#ad-resizing).
+-   If placing the ad requires running JavaScript (assumed to be true for 100% of ads served through networks), the ad must be placed on an origin different from the AMP document itself. Reasons include:
+    -   Improved security.
+    -   Takes synchronous HTTP requests made by the ad out of the critical rendering path of the primary page.
+    -   Allows browsers to run the ad in a different process from the primary page (even better security and prevents JS inside the ad to block the main page UI thread).
+    -   Prevents ads doing less than optimal things to measure user behavior and other interference with the primary page.
+-   The AMP Runtime may at any moment decide that there are too many iframes on a page and that memory is low. In that case, the AMP Runtime unloads ads that were previously loaded and are no longer visible. It may later load new ads in the same slot if the user scrolls them back into view.
+-   The AMP Runtime may decide to set an ad that is currently not visible to `display: none` to reduce browser layout and compositing cost.
 
 ## The iframe sandbox
 
@@ -186,9 +186,9 @@ window.context
 
 Here are some factors that affect whether the resize will be executed:
 
-- Whether the resize is triggered by the user action;
-- Whether the resize is requested for a currently active ad;
-- Whether the resize is requested for an ad below the viewport or above the viewport.
+-   Whether the resize is triggered by the user action;
+-   Whether the resize is requested for a currently active ad;
+-   Whether the resize is requested for an ad below the viewport or above the viewport.
 
 #### Specifying an overflow element
 
@@ -330,12 +330,12 @@ Please read through [DEVELOPING.md](../contributing/DEVELOPING.md) before contri
 
 If you're adding support for a new third-party ad service, changes to the following files are expected:
 
-- `/ads/yournetwork.js`: Implement the main logic here. This is the code that's invoked in the third-party iframe once loaded.
-- `/ads/yournetwork.md`: Documentation detailing yourr ad service for publishers to read.
-- `/ads/_config.js`: Add service specific configuration here.
-- `/3p/integration.js`: Register your service here.
-- `/extensions/amp-ad/amp-ad.md`: Add a link that points to your publisher doc.
-- `/examples/ads.amp.html`: Add publisher examples here. Since a real ad isn't guaranteed to fill, a consistently displayed fake ad is highly recommended here to help AMP developers confidently identify new bugs.
+-   `/ads/yournetwork.js`: Implement the main logic here. This is the code that's invoked in the third-party iframe once loaded.
+-   `/ads/yournetwork.md`: Documentation detailing yourr ad service for publishers to read.
+-   `/ads/_config.js`: Add service specific configuration here.
+-   `/3p/integration.js`: Register your service here.
+-   `/extensions/amp-ad/amp-ad.md`: Add a link that points to your publisher doc.
+-   `/examples/ads.amp.html`: Add publisher examples here. Since a real ad isn't guaranteed to fill, a consistently displayed fake ad is highly recommended here to help AMP developers confidently identify new bugs.
 
 ### Verify your examples
 
@@ -366,12 +366,12 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ### Other tips
 
-- Add **cc ampproject/wg-monetization** in all pull request's descriptions.
-- It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
-- Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
-- [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
-  1. Using a different email address in the git commit.
-  2. Not providing the exact company name in the PR thread.
+-   Add **cc ampproject/wg-monetization** in all pull request's descriptions.
+-   It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
+-   Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
+-   [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
+    1. Using a different email address in the git commit.
+    2. Not providing the exact company name in the PR thread.
 
 ## Developer announcements for ads related API changes
 

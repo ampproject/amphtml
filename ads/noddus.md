@@ -34,4 +34,4 @@ For details on the configuration semantics, see [Noddus documentation](https://w
 
 ### Required parameters
 
-- `data-token` - Publishers placement token
+-   `data-token` - Publishers placement token

@@ -8,9 +8,9 @@ Languages will fall back to their more general variants, and ultimately to the `
 
 For example, the language code `en-GB` will check the following languages (in this order):
 
-- `en-GB` (English, Great Britain)
-- `en` (English)
-- `default` (Default)
+-   `en-GB` (English, Great Britain)
+-   `en` (English)
+-   `default` (Default)
 
 The `default` language code is a fallback used in the case that the publisher-specified language code does not exist. It uses a minimal amount of English strings, so that the document can be displayed mostly in its primary language. Any labels that describe otherwise familiar or intelligible iconography can be dropped entirely. For example, since sharing icons show the sharing network's logo (e.g. the Twitter logo), the "Twitter" string is redundant and can be left out of the `default` language.
 

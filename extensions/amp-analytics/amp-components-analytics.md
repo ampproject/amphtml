@@ -20,9 +20,9 @@ limitations under the License.
 
 Third-party content providers are encouraged to create their own AMP components. To collect analytics for those components, use the AMP analytics APIs described in this document.
 
-- To collect custom events that the AMP component triggers programmatically in its own code, use the [CustomEventReporter API](#CustomEventReporter-API).
+-   To collect custom events that the AMP component triggers programmatically in its own code, use the [CustomEventReporter API](#CustomEventReporter-API).
 
-- To collect the `visible` or `hidden` analytics events defined by the [amp-analytics spec](amp-analytics.md#Triggers) that are triggered through user interaction, use the [useAnalyticsInSandbox API](#useAnalyticsInSandbox-API).
+-   To collect the `visible` or `hidden` analytics events defined by the [amp-analytics spec](amp-analytics.md#Triggers) that are triggered through user interaction, use the [useAnalyticsInSandbox API](#useAnalyticsInSandbox-API).
 
 The two APIs can be used individually or together.
 

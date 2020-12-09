@@ -36,6 +36,6 @@ Yahoo Native Ads only requires a configured section code to run. Please work wit
 
 ### Required parameters
 
-- `data-code` : Unique section code that represents your site and placement
-- `data-key` : Unique API key that was issued for your site
-- `data-url` : Url that your API key and section code are valid to run on
+-   `data-code` : Unique section code that represents your site and placement
+-   `data-key` : Unique API key that was issued for your site
+-   `data-url` : Url that your API key and section code are valid to run on

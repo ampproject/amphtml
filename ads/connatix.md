@@ -35,4 +35,4 @@ For configuration semantics, contact contact@connatix.com.
 
 ### Required parameters
 
-- `data-connatix`
+-   `data-connatix`

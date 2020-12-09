@@ -55,11 +55,11 @@ No explicit configuration is needed for a given sortable amp-ad, though each sit
 
 ### Required parameters
 
-- `data-name`: The name of the ad unit.
-- `data-site`: The site/domain this ad will be served on (effectively an account id)
-- `width` + `height`: Required for all `<amp-ad>` units. Specifies the ad size.
-- `type`: Always set to "sortable"
+-   `data-name`: The name of the ad unit.
+-   `data-site`: The site/domain this ad will be served on (effectively an account id)
+-   `width` + `height`: Required for all `<amp-ad>` units. Specifies the ad size.
+-   `type`: Always set to "sortable"
 
 ### Optional parameters
 
-- `data-reponsive`: When set to true indicates that the ad slot has multiple potential sizes.
+-   `data-reponsive`: When set to true indicates that the ad slot has multiple potential sizes.

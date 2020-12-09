@@ -28,10 +28,10 @@ Please visit our [website](https://mox.tv) for more information about us.
 
 #### Required parameters:
 
-- `data-z` — Ad zone unique id
-- `data-w` — Ad unit width
-- `data-h` — Ad unit height
+-   `data-z` — Ad zone unique id
+-   `data-w` — Ad unit width
+-   `data-h` — Ad unit height
 
 #### Optional parameters:
 
-- `data-u` — URL of invocation script
+-   `data-u` — URL of invocation script

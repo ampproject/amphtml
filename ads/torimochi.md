@@ -37,11 +37,11 @@ Supported parameters:
 
 ### Required parameters
 
-- `data-adtype`
-- `data-area`
-- `data-wid`
+-   `data-adtype`
+-   `data-area`
+-   `data-wid`
 
 ### Optional parameters
 
-- `data-tcid`
-- `data-extra`
+-   `data-tcid`
+-   `data-extra`

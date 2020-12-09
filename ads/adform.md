@@ -51,7 +51,7 @@ information on how to get required ad tag or placement IDs.
 
 Only one of the mentioned parameters should be used at the same time.
 
-- `data-bn`
-- `data-mid`
-- `src`: must use https protocol and must be from one of the
-  allowed Adform hosts.
+-   `data-bn`
+-   `data-mid`
+-   `src`: must use https protocol and must be from one of the
+    allowed Adform hosts.

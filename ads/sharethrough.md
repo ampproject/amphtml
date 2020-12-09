@@ -37,4 +37,4 @@ For semantics of configuration, please [contact Sharethrough](mailto:pubsupport@
 
 ### Required parameters
 
-- `data-pkey`: (String, non-empty) The unique identifier for your placement
+-   `data-pkey`: (String, non-empty) The unique identifier for your placement

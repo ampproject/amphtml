@@ -190,10 +190,10 @@ The ad server should return a json object containing a record for each slot in t
 slot id in `data-slot`. The record format is defined by your template. For the examples above,
 the record contains three fields:
 
-- src - string to go into the source parameter of the image to be displayed. This can be a
-  web reference (in which case it must be `https:` or a `data:` URI including the base64-encoded image.
-- href - URL to which the user is to be directed when he clicks on the ad
-- info - A string with additional info about the ad that was served, mmaybe for use with analytics
+-   src - string to go into the source parameter of the image to be displayed. This can be a
+    web reference (in which case it must be `https:` or a `data:` URI including the base64-encoded image.
+-   href - URL to which the user is to be directed when he clicks on the ad
+-   info - A string with additional info about the ad that was served, mmaybe for use with analytics
 
 Here is an example response, assuming two slots named simply 1 and 2:
 

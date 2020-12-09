@@ -50,6 +50,6 @@ information on how to get the required placement IDs and [optional] keyvalue cas
 
 ### Supported parameters
 
-- `placement`: mandatory
-- `optin`
-- `keyvalue`: Fill in the keyvalues as written in the example.
+-   `placement`: mandatory
+-   `optin`
+-   `keyvalue`: Fill in the keyvalues as written in the example.

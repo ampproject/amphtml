@@ -50,12 +50,12 @@ use `amp-subscriptions`.
 
 The proposed solution gives control to the Publisher over the following decisions and flows:
 
-- Create and maintain users
-- Control of metering (allow for a certain number of free views)
-- Responsibility for the login flow
-- Responsibility for authenticating the user
-- Responsibility for access rules and authorization
-- Flexibility over access parameters on a per-document basis
+-   Create and maintain users
+-   Control of metering (allow for a certain number of free views)
+-   Responsibility for the login flow
+-   Responsibility for authenticating the user
+-   Responsibility for access rules and authorization
+-   Flexibility over access parameters on a per-document basis
 
 The solution comprises the following components:
 
@@ -313,8 +313,8 @@ Here’s an example that shows either login link or the complete content based o
 
 Here:
 
-- _subscriber_ is a boolean field in the authorization response returned by the Authorization endpoint. This section is hidden by default, which is optional.
-- This example elects to show full content optimistically.
+-   _subscriber_ is a boolean field in the authorization response returned by the Authorization endpoint. This section is hidden by default, which is optional.
+-   This example elects to show full content optimistically.
 
 Here’s another example that shows the disclaimer to the Reader about the state of metering:
 
@@ -352,18 +352,18 @@ https://publisher.com/amp-access.json?
 
 The response is a free-form JSON object: it can contain any properties and values with few limitations. The limitations are:
 
-- The property names have to conform to the restrictions defined by the `amp-access` expressions grammar (see [Appendix A][1]). This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
-- The property values can only be one of the types: string, number, boolean.
-- Values can also be nested as objects with values of the same types: string, number, boolean.
-- The total size of the serialized authorization response cannot exceed 500 bytes.
-- Please ensure that the response does not include any personally identifiable information (PII) or personal data.
+-   The property names have to conform to the restrictions defined by the `amp-access` expressions grammar (see [Appendix A][1]). This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
+-   The property values can only be one of the types: string, number, boolean.
+-   Values can also be nested as objects with values of the same types: string, number, boolean.
+-   The total size of the serialized authorization response cannot exceed 500 bytes.
+-   Please ensure that the response does not include any personally identifiable information (PII) or personal data.
 
 Here’s a small list of possible ideas for properties that can be returned from the Authorization endpoint:
 
-- Metering info: maximum allowed number of views and current number of views.
-- Whether the Reader is logged in or a subscriber.
-- A more detailed type of the subscription: basic, premium
-- Geo: country, region, custom publication region
+-   Metering info: maximum allowed number of views and current number of views.
+-   Whether the Reader is logged in or a subscriber.
+-   A more detailed type of the subscription: basic, premium
+-   Geo: country, region, custom publication region
 
 Here’s an example of the response when the Reader is not a subscriber and is metered at 10 articles/month and has viewed 6 articles already:
 
@@ -423,8 +423,8 @@ The Pingback endpoint is called when the Reader has started viewing the document
 
 The publisher may choose to use the pingback:
 
-- to count down the number of free views of the page
-- to map the AMP Reader ID to the Publisher’s identity, since as a credentialed CORS endpoint, the Pingback may contain Publisher cookies
+-   to count down the number of free views of the page
+-   to map the AMP Reader ID to the Publisher’s identity, since as a credentialed CORS endpoint, the Pingback may contain Publisher cookies
 
 The request format is:
 
@@ -549,27 +549,27 @@ As usual, the Reader ID should be included in the call to Login Page and can be 
 
 ## AMP Glossary
 
-- **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by Google AMP Cache.
-- **AMP Validator** - the computer program that performs a static analysis of an HTML document and returns success or failure depending on whether the document conforms to the AMP format.
-- **AMP Runtime** - the JavaScript runtime that executes AMP Document.
-- **Google AMP Cache** - the proxying cache for AMP documents.
-- **AMP Viewer** - the Web or native application that displays/embeds AMP Documents.
-- **Publisher.com** - the site of an AMP publisher.
-- **CORS endpoint** - cross-origin HTTPS endpoint. See [https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) for more info. See [CORS Origin Security][9] for how such requests can be secured.
-- **Reader** - the actual person viewing AMP documents.
-- **AMP Prerendering** - AMP Viewers may take advantage of prerendering, which renders a hidden document before it can be shown. This adds a significant performance boost. But it is important to take into account the fact that the document prerendering does not constitute a view since the Reader may never actually see the document.
+-   **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by Google AMP Cache.
+-   **AMP Validator** - the computer program that performs a static analysis of an HTML document and returns success or failure depending on whether the document conforms to the AMP format.
+-   **AMP Runtime** - the JavaScript runtime that executes AMP Document.
+-   **Google AMP Cache** - the proxying cache for AMP documents.
+-   **AMP Viewer** - the Web or native application that displays/embeds AMP Documents.
+-   **Publisher.com** - the site of an AMP publisher.
+-   **CORS endpoint** - cross-origin HTTPS endpoint. See [https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) for more info. See [CORS Origin Security][9] for how such requests can be secured.
+-   **Reader** - the actual person viewing AMP documents.
+-   **AMP Prerendering** - AMP Viewers may take advantage of prerendering, which renders a hidden document before it can be shown. This adds a significant performance boost. But it is important to take into account the fact that the document prerendering does not constitute a view since the Reader may never actually see the document.
 
 ## Revisions
 
-- 2016-Sep-02: "noPingback" configuration property and optional pingback.
-- 2016-Mar-03: Resend pingback after login (v0.5).
-- 2016-Feb-19: Corrected samples to remove `{}` from URL var substitutions.
-- 2016-Feb-15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
-- 2016-Feb-11: Authorization request timeout in [Authorization Endpoint][4].
-- 2016-Feb-11: Nested field references such as `object.field` are now allowed.
-- 2016-Feb-09: [First-click-free][13] and [Metering][12] sections.
-- 2016-Feb-03: Spec for "source origin" security added to the [CORS Origin security][9].
-- 2016-Feb-01: "return" query parameter for Login Page can be customized using RETURN_URL URL substitution.
+-   2016-Sep-02: "noPingback" configuration property and optional pingback.
+-   2016-Mar-03: Resend pingback after login (v0.5).
+-   2016-Feb-19: Corrected samples to remove `{}` from URL var substitutions.
+-   2016-Feb-15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
+-   2016-Feb-11: Authorization request timeout in [Authorization Endpoint][4].
+-   2016-Feb-11: Nested field references such as `object.field` are now allowed.
+-   2016-Feb-09: [First-click-free][13] and [Metering][12] sections.
+-   2016-Feb-03: Spec for "source origin" security added to the [CORS Origin security][9].
+-   2016-Feb-01: "return" query parameter for Login Page can be customized using RETURN_URL URL substitution.
 
 ## Appendix A: “amp-access” expression grammar
 

@@ -73,19 +73,19 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Supported parameters via `json` attribute
 
-- `accId` Account Id (mandatory)
-- `adUnit` AdUnitId (mandatory)
-- `sizes` Array of sizes (mandatory)
-- `locLat` Geo-location latitude
-- `locLon` Geo-location longitude
-- `locSrc` Geo-location source
-- `pageURL` Set custom page URL
-- `targetings` key-value pairs
-- `extraParams` key-value pairs to be passed to PubMatic SSP
+-   `accId` Account Id (mandatory)
+-   `adUnit` AdUnitId (mandatory)
+-   `sizes` Array of sizes (mandatory)
+-   `locLat` Geo-location latitude
+-   `locLon` Geo-location longitude
+-   `locSrc` Geo-location source
+-   `pageURL` Set custom page URL
+-   `targetings` key-value pairs
+-   `extraParams` key-value pairs to be passed to PubMatic SSP
 
 ### Unsupported Ad Formats
 
-- Interstitials
-- Expandables. Work is in progress
-- Flash
-- Creatives served over HTTP
+-   Interstitials
+-   Expandables. Work is in progress
+-   Flash
+-   Creatives served over HTTP

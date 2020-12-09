@@ -35,5 +35,5 @@ For details on the configuration semantics, please see [AdSpirit's documentation
 
 Supported parameters:
 
-- `data-asm-params`
-- `data-asm-host`
+-   `data-asm-params`
+-   `data-asm-host`

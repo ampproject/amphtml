@@ -36,4 +36,4 @@ For configuration details and to generate your tags, please contact support@obli
 
 Supported parameters:
 
-- `data-block-key`
+-   `data-block-key`

@@ -71,4 +71,4 @@ For more information, please [contact Zucks](https://zucks.co.jp/contact/).
 
 Supported parameters:
 
-- `data-frame-id`
+-   `data-frame-id`

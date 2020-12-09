@@ -29,9 +29,9 @@ limitations under the License.
 
 As a publisher, you can use the `<amp-consent>` component to implement user controls. The component allows you to:
 
-- Determine if the user should be asked to interact with the control.
-- Capture the user’s consent decision.
-- Makes the user’s setting available to elements on the AMP page to modify the page’s behavior.
+-   Determine if the user should be asked to interact with the control.
+-   Capture the user’s consent decision.
+-   Makes the user’s setting available to elements on the AMP page to modify the page’s behavior.
 
 If you are a vendor that wants to customize your component's behavior based on amp-consent, or need to collect more advanced consent information you can read more [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md).
 
@@ -180,8 +180,8 @@ The consent decisions collected from user via this prompt UI will be stored in `
 
 Two important tips when configuring `amp-geo`:
 
-- All geo groups should be mutually exclusive. The behavior is undetermined if a user falls into multiple geo override.
-- Provide an `geoGroupUnknown` override for users that are failed be be identified by `<amp-geo>`.
+-   All geo groups should be mutually exclusive. The behavior is undetermined if a user falls into multiple geo override.
+-   Provide an `geoGroupUnknown` override for users that are failed be be identified by `<amp-geo>`.
 
 Take the following config as an example:
 
@@ -350,11 +350,11 @@ There are three types of user actions that are associated with the consent promp
 To enable the user to choose a consent state and hide the prompt UI, add an `on` attribute to a button with the
 following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
-- `accept`: publisher instructs AMP to remember the accept decision to the consent, unblocks components waiting for the consent, and hides the prompt UI.
+-   `accept`: publisher instructs AMP to remember the accept decision to the consent, unblocks components waiting for the consent, and hides the prompt UI.
 
-- `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
+-   `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
 
-- `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
+-   `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
 
 ### Post-prompt UI (optional)
 
@@ -398,9 +398,9 @@ The consent information (from the response or from user action on client side) w
 
 A couple of implications with this behavior:
 
-- When stored user consent no longer applies, the change will be synced through `checkConsentHref` response. But the change will be applied one-time off due to the client cache.
-- When a user travels, `<amp-consent>` will use the stored consent. It's up to the `checkConsentHref` response to erase stored value using `expireCache: true` and `consentRequired: false`.
-- If a promptUI is used to collect user consent. Using `expireCache: true` will prompt consent dialog and block users from content on their following visits.
+-   When stored user consent no longer applies, the change will be synced through `checkConsentHref` response. But the change will be applied one-time off due to the client cache.
+-   When a user travels, `<amp-consent>` will use the stored consent. It's up to the `checkConsentHref` response to erase stored value using `expireCache: true` and `consentRequired: false`.
+-   If a promptUI is used to collect user consent. Using `expireCache: true` will prompt consent dialog and block users from content on their following visits.
 
 ### Basic blocking behaviors
 
@@ -435,9 +435,9 @@ _Example: Blocking the analytics until user respond to consent_
 
 AMP may support more advanced pre-defined blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved only for the following supported pre-defined attributes:
 
-- `_till_responded` : Unblock the component until the user has responded to the consent prompt, or the consent prompt has been skipped.
-- `_till_accepted` : [Default basic blocking behavior](#basic-blocking-behaviors), expect that when `_till_accepted` is explicitly added, individual components cannot override the blocking behavior.
-- `_auto_reject` : Always reject the consent automatically if consent is required but unknown. The reject consent decision will not be stored. It is recommended not to specify a consent prompt UI when auto rejecting consent for every components.
+-   `_till_responded` : Unblock the component until the user has responded to the consent prompt, or the consent prompt has been skipped.
+-   `_till_accepted` : [Default basic blocking behavior](#basic-blocking-behaviors), expect that when `_till_accepted` is explicitly added, individual components cannot override the blocking behavior.
+-   `_auto_reject` : Always reject the consent automatically if consent is required but unknown. The reject consent decision will not be stored. It is recommended not to specify a consent prompt UI when auto rejecting consent for every components.
 
 When one of the pre-defined attributes is used, AMP assumes that the publisher takes final control on the consent blocking behaviors. Individual components cannot override the blocking behaviors brought by pre-defined consent policy, they can however still customize components' behaviors after having been unblocked.
 
@@ -495,8 +495,8 @@ When used as a single value, `timeout` equals the timeout value in second.
 
 When used as an object. `timeout` object supports two attributes
 
-- `seconds`: timeout value in second
-- `fallbackAction` (optional): the fallback action at timeout if no user action is taken and no state has been stored. The fallback actions supported are `reject` and `dismiss`. Default action is `dismiss` if not configured. Note the consent state changed due to fallback action at timeout will not be stored on client side.
+-   `seconds`: timeout value in second
+-   `fallbackAction` (optional): the fallback action at timeout if no user action is taken and no state has been stored. The fallback actions supported are `reject` and `dismiss`. Default action is `dismiss` if not configured. Note the consent state changed due to fallback action at timeout will not be stored on client side.
 
 ```html
 "default": { "waitFor": { "my-consent": [] }, "timeout": { "seconds": 2,
@@ -612,26 +612,26 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 ## Related resources
 
-- Blog post: [New functionality to help manage user choice in AMP pages](https://www.ampproject.org/latest/blog/new-functionality-to-help-manage-user-choice-in-amp-pages/)
-- Blog post: [Dynamic geo-personalization](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/)
-- [`<amp-geo>` documentation](https://amp.dev/documentation/components/amp-geo)
-- [DoubleClick/ AdSense documentation ](https://support.google.com/dfp_premium/answer/7678538#amp-pages)
-- [New feature discussion for amp-consent](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345)
+-   Blog post: [New functionality to help manage user choice in AMP pages](https://www.ampproject.org/latest/blog/new-functionality-to-help-manage-user-choice-in-amp-pages/)
+-   Blog post: [Dynamic geo-personalization](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/)
+-   [`<amp-geo>` documentation](https://amp.dev/documentation/components/amp-geo)
+-   [DoubleClick/ AdSense documentation ](https://support.google.com/dfp_premium/answer/7678538#amp-pages)
+-   [New feature discussion for amp-consent](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345)
 
 ## Supported Consent Management Platforms
 
-- AppConsent : [Website](https://appconsent.io/en) - [Documentation](./cmps/appconsent.md)
-- ConsentManager : [Website](https://www.consentmanager.net/) - [Documentation](https://help.consentmanager.net/books/cmp/page/using-the-cmp-with-amp-websites)
-- Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
-- iubenda : [Website](https://www.iubenda.com/) - [Documentation](./cmps/iubenda.md)
-- LiveRamp : [Website](https://liveramp.com/our-platform/preference-consent-management/) - [Documentation](./cmps/liveramp.md)
-- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
-- Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
-- OneTrust: [Website](https://www.onetrust.com/) - [Documentation](./cmps/onetrust.md)
-- opencmp : [Documentation](./cmps/opencmp.md)
-- Quantcast : [Website](https://www.quantcast.com) - [Documentation](https://help.quantcast.com/hc/en-us/categories/360002940873-Quantcast-Choice)
-- Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
-- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
-- Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
+-   AppConsent : [Website](https://appconsent.io/en) - [Documentation](./cmps/appconsent.md)
+-   ConsentManager : [Website](https://www.consentmanager.net/) - [Documentation](https://help.consentmanager.net/books/cmp/page/using-the-cmp-with-amp-websites)
+-   Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
+-   iubenda : [Website](https://www.iubenda.com/) - [Documentation](./cmps/iubenda.md)
+-   LiveRamp : [Website](https://liveramp.com/our-platform/preference-consent-management/) - [Documentation](./cmps/liveramp.md)
+-   Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
+-   Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
+-   OneTrust: [Website](https://www.onetrust.com/) - [Documentation](./cmps/onetrust.md)
+-   opencmp : [Documentation](./cmps/opencmp.md)
+-   Quantcast : [Website](https://www.quantcast.com) - [Documentation](https://help.quantcast.com/hc/en-us/categories/360002940873-Quantcast-Choice)
+-   Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
+-   SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
+-   Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
 
-- Your Integrated platform here!
+-   Your Integrated platform here!

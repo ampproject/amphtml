@@ -31,5 +31,5 @@ For details on the configuration semantics, please contact [Strossle](https://st
 
 ### Required parameters
 
-- `data-widgetid` - past your unique widget id here
-- `height` - widget height
+-   `data-widgetid` - past your unique widget id here
+-   `height` - widget height

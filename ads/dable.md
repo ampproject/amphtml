@@ -37,9 +37,9 @@ For configuration details and to generate your tags, please contact https://admi
 
 ### Required parameters
 
-- `data-widget-id`
+-   `data-widget-id`
 
 ### Optional parameters
 
-- `data-item-id`
-- `data-service-name`
+-   `data-item-id`
+-   `data-service-name`

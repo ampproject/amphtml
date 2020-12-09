@@ -39,18 +39,18 @@ To generate tags, please visit https://svc.ezoic.com/publisher.php?login
 
 Supported parameters:
 
-- `data-slot`: the slot name corresponding to the ad position
+-   `data-slot`: the slot name corresponding to the ad position
 
 Supported via `json` attribute:
 
-- `targeting`
-- `extras`
+-   `targeting`
+-   `extras`
 
 ## Consent Support
 
 Ezoic amp-ad adhere to a user's consent in the following ways:
 
-- `CONSENT_POLICY_STATE.SUFFICIENT`: Ezoic amp-ad will display a personalized ad to the user.
-- `CONSENT_POLICY_STATE.INSUFFICIENT`: Ezoic amp-ad will display a non-personalized ad to the user.
-- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Ezoic amp-ad will display a personalized ad to the user.
-- `CONSENT_POLICY_STATE.UNKNOWN`: Ezoic amp-ad will not display an ad.
+-   `CONSENT_POLICY_STATE.SUFFICIENT`: Ezoic amp-ad will display a personalized ad to the user.
+-   `CONSENT_POLICY_STATE.INSUFFICIENT`: Ezoic amp-ad will display a non-personalized ad to the user.
+-   `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Ezoic amp-ad will display a personalized ad to the user.
+-   `CONSENT_POLICY_STATE.UNKNOWN`: Ezoic amp-ad will not display an ad.

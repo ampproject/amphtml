@@ -22,9 +22,9 @@ displays an image of a cat inside an AMP document. This extended component
 loads one of a set of 3 different pre-built cat images, so that the user
 doesn't need to host the images on their server. Each image has a cat name:
 
-- Oscar
-- Chloe
-- Bella
+-   Oscar
+-   Chloe
+-   Bella
 
 Common usage of this extended component might look like:
 
@@ -344,11 +344,11 @@ generate mixed-mode warnings when displayed from the AMP Cache.
 
 Only one of:
 
-- `value`
-- `value_casei`
-- `value_regex`
-- `value_regex_casei`
-- `value_url`
+-   `value`
+-   `value_casei`
+-   `value_regex`
+-   `value_regex_casei`
+-   `value_url`
 
 may be specified for a single attribute. However, multiple values may be specified
 for `value` and `value_casei` as seen in the example above.

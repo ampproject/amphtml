@@ -34,4 +34,4 @@ For configuration details and to generate your tags, please contact email: [bypl
 
 Required parameters:
 
-- `data-vast-url`
+-   `data-vast-url`

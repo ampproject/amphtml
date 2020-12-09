@@ -35,5 +35,5 @@ For details on the configuration semantics, please contact the ad network.
 
 Supported parameters:
 
-- `data-client`: ad server client
-- `data-zid`: ad zone id
+-   `data-client`: ad server client
+-   `data-zid`: ad zone id

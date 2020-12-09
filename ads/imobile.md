@@ -36,6 +36,6 @@ For configuration details and to generate your tags, please contact inquiry@i-mo
 
 Supported parameters:
 
-- `data-pid`
-- `data-asid`
-- `data-adtype`
+-   `data-pid`
+-   `data-asid`
+-   `data-adtype`

@@ -35,4 +35,4 @@ For details on the configuration, please contact AdsLoom.
 
 ### Required parameters
 
-- `widget-id`: Widget ID
+-   `widget-id`: Widget ID

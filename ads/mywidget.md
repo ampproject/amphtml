@@ -37,4 +37,4 @@ For semantics of configuration, please see [myWidget documentation](https://widg
 
 ### Required parameters
 
-- `data-cid`
+-   `data-cid`

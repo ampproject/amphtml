@@ -29,11 +29,11 @@ For semantics of configuration, please see [Yandex's documentation](https://yand
 
 ### Required parameters
 
-- `data-block-id`
+-   `data-block-id`
 
 ### Optional parameters
 
-- `data-data`
-- `data-html-access-allowed`
-- `data-on-render`
-- `data-on-error`
+-   `data-data`
+-   `data-html-access-allowed`
+-   `data-on-render`
+-   `data-on-error`

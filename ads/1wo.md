@@ -20,10 +20,10 @@ Provides support for [1wo](https://welcome.1worldonline.com/) widgets.
 
 ### Required parameters
 
-- `src`
-- `data-owo-code`
-- `data-owo-type`
-- `data-owo-mode`
+-   `src`
+-   `data-owo-code`
+-   `data-owo-type`
+-   `data-owo-mode`
 
 ## Example
 

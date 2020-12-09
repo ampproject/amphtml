@@ -34,5 +34,5 @@ limitations under the License.
 
 Supported parameters:
 
-- `data-unitid`
-- `data-tagname`
+-   `data-unitid`
+-   `data-tagname`

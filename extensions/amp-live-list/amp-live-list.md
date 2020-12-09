@@ -150,9 +150,9 @@ The `amp-live-list` component has 3 sections. We'll refer to these sections as
 must be a direct child of the `amp-live-list` component. The 3 reference points
 are:
 
-- `update` (mandatory)
-- `items` (mandatory)
-- `pagination` (optional)
+-   `update` (mandatory)
+-   `items` (mandatory)
+-   `pagination` (optional)
 
 For more details, see the ["Reference Points"](#reference-points) section below.
 

@@ -35,5 +35,5 @@ A fake ad type that is used for local development and testing.
 
 ### Required parameters
 
-- `src` : The URL of the target creative to be displayed.
-- `data-bootstrap-script` : The URL of a bootstraping JS code to be loaded in iframe s.
+-   `src` : The URL of the target creative to be displayed.
+-   `data-bootstrap-script` : The URL of a bootstraping JS code to be loaded in iframe s.

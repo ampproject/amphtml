@@ -240,10 +240,10 @@ The visibility of arrows can also be controlled via styling, and a media query c
 
 ## Styling
 
-- You may use the `amp-carousel` element selector to style it freely.
-- You may use the `.amp-carousel-slide` class selector to target carousel items.
-- The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
+-   You may use the `amp-carousel` element selector to style it freely.
+-   You may use the `.amp-carousel-slide` class selector to target carousel items.
+-   The visual state of an `amp-carousel` button when it's disabled is hidden.
+-   By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 
 _Example: Default `.amp-carousel-button` inlined SVG_
 

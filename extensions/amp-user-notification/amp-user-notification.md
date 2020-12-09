@@ -76,22 +76,22 @@ When notification is dismissed:
 
 ### JSON Fields
 
-- `elementId` (string): The HTML ID used on the `amp-user-notification` element.
-- `ampUserId` (string): This ID is passed to both the `data-show-if-href` GET request
-  (as a query string field) and the `data-dismiss-href` POST request (as a json field).
-  The ID will be the same for this user going forward, but no other requests
-  in AMP send the same ID.
-  You can use the ID on your side to lookup/store whether the user has
-  dismissed the notification before.
-- `showNotification` (boolean): Indicates whether the notification should be shown. If `false`, the promise associated to the element is resolved right away.
+-   `elementId` (string): The HTML ID used on the `amp-user-notification` element.
+-   `ampUserId` (string): This ID is passed to both the `data-show-if-href` GET request
+    (as a query string field) and the `data-dismiss-href` POST request (as a json field).
+    The ID will be the same for this user going forward, but no other requests
+    in AMP send the same ID.
+    You can use the ID on your side to lookup/store whether the user has
+    dismissed the notification before.
+-   `showNotification` (boolean): Indicates whether the notification should be shown. If `false`, the promise associated to the element is resolved right away.
 
 ### Delaying Client ID generation until the notification is acknowledged
 
 Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
-- [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
-- [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
-- [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
+-   [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
+-   [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
+-   [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
 
 ## Attributes
 

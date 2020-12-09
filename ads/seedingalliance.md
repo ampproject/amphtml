@@ -41,4 +41,4 @@ Before starting any Seeding Alliance AMP setup, please reach out to your account
 Supported parameters:
 ​
 
-- `url`: Domain or URL from your Project
+-   `url`: Domain or URL from your Project

@@ -34,6 +34,6 @@ Access your sona poral. After creating or updating the client, copy the snippet 
 
 ### Required parameters
 
-- `data-json`: sona configuration in JSON format
-- `width` + `height`: Required for all `<amp-ad>` units. Specifies the ad size.
-- `type`: set to "sona"
+-   `data-json`: sona configuration in JSON format
+-   `width` + `height`: Required for all `<amp-ad>` units. Specifies the ad size.
+-   `type`: set to "sona"

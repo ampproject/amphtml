@@ -24,19 +24,19 @@ Each [amp-ad](https://amp.dev/documentation/components/amp-ad/) element that use
 
 **Attributes**
 
-- `<amp-ad>`: Required. IX `<amp-ad>` tags require the `width`, `height`, and `type="doubleclick"` parameters.</br>
-  **Note**: IX leverages AMP through Google Ad Manager (GAM, formerly DoubleClick for Publishers).
+-   `<amp-ad>`: Required. IX `<amp-ad>` tags require the `width`, `height`, and `type="doubleclick"` parameters.</br>
+    **Note**: IX leverages AMP through Google Ad Manager (GAM, formerly DoubleClick for Publishers).
 
-- `data-slot`: Required. Data attributes to serve ads.
+-   `data-slot`: Required. Data attributes to serve ads.
 
-- `data-multi-size`: Optional. A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. The `width` and `height` attributes are always included as one of the valid sizes, unless overridden by `data-override-width` and `data-override-height` attributes which change the size of creatives eligible for the slot. For details refer to the [Multi-size Ad documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/multi-size.md).
+-   `data-multi-size`: Optional. A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. The `width` and `height` attributes are always included as one of the valid sizes, unless overridden by `data-override-width` and `data-override-height` attributes which change the size of creatives eligible for the slot. For details refer to the [Multi-size Ad documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/multi-size.md).
 
-- `data-multi-size-validation`: Optional. If set to false, this allows secondary sizes specified in the `data-multi-size` attribute to be less than 2/3rds of the corresponding primary size. By default, this is assumed to be true.
+-   `data-multi-size-validation`: Optional. If set to false, this allows secondary sizes specified in the `data-multi-size` attribute to be less than 2/3rds of the corresponding primary size. By default, this is assumed to be true.
 
-- `rtc-config`: JSON configuration data which handles the communication with AMP RTC.
-  - `vendors` : Required object. The key is `IndexExchange` and the value is the `SITE_ID`.</br>
-    **Note:** Refer to the materials provided by your account team for your specific SITE_ID details. We recommend one SITE_ID per domain, per unique slot and size. To use more than one SITE_ID, contact your IX Representative.
-  - `timeoutMillis`: Optional integer. Defines the timeout in milliseconds for each individual RTC callout. The configured timeout must be greater than 0 and less than 1000ms. If omitted, the timeout value defaults to 1000ms.
+-   `rtc-config`: JSON configuration data which handles the communication with AMP RTC.
+    -   `vendors` : Required object. The key is `IndexExchange` and the value is the `SITE_ID`.</br>
+        **Note:** Refer to the materials provided by your account team for your specific SITE_ID details. We recommend one SITE_ID per domain, per unique slot and size. To use more than one SITE_ID, contact your IX Representative.
+    -   `timeoutMillis`: Optional integer. Defines the timeout in milliseconds for each individual RTC callout. The configured timeout must be greater than 0 and less than 1000ms. If omitted, the timeout value defaults to 1000ms.
 
 ### Example: RTC Specification on an amp-ad
 

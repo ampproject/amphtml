@@ -43,5 +43,5 @@ The ad size is based on the setup of your Criteo zone. The `width` and `height` 
 
 Supported parameters:
 
-- `data-tagtype`: identifies the used Criteo technology. Must be "passback". Required.
-- `data-zone`: your Criteo zone identifier. Required.
+-   `data-tagtype`: identifies the used Criteo technology. Must be "passback". Required.
+-   `data-zone`: your Criteo zone identifier. Required.

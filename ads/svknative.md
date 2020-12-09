@@ -34,4 +34,4 @@ For details on the configuration semantics, please contact your SVK Native perso
 
 ### Required parameters
 
-- `data-widgetid` - insert your WidgetId
+-   `data-widgetid` - insert your WidgetId

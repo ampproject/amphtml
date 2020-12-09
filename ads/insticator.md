@@ -37,5 +37,5 @@ For details on the configuration semantics, please contact [Insticator](https://
 
 ### Required parameters
 
-- `data-site-id`: ID of the site your Insticator Embed lives in
-- `data-embed-id`: ID of your Insticator Embed
+-   `data-site-id`: ID of the site your Insticator Embed lives in
+-   `data-embed-id`: ID of your Insticator Embed

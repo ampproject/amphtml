@@ -37,6 +37,6 @@ For configuration semantics, contact care@timesadcenter.com.
 
 Supported parameters:
 
-- `data-clmb_slot`: Ad slot
-- `data-clmb_position` : Ad position
-- `data-clmb_section` : Ad sections
+-   `data-clmb_slot`: Ad slot
+-   `data-clmb_position` : Ad position
+-   `data-clmb_section` : Ad sections

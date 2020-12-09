@@ -53,7 +53,7 @@ For details on the configuration semantics, please contact the ad network or ref
 
 Supported parameters:
 
-- `sp`: sizepos (the ad size and position code)
-- `mpo`: multipoint (an extraction parameter based on site)
-- `mpt`: mediapoint tag (the box where the ad will be shown)
-- `cid`: customer id
+-   `sp`: sizepos (the ad size and position code)
+-   `mpo`: multipoint (an extraction parameter based on site)
+-   `mpt`: mediapoint tag (the box where the ad will be shown)
+-   `cid`: customer id

@@ -29,4 +29,4 @@ For details on configuration, see [Pressboard documentation](http://help.pressbo
 
 ### Required parameters
 
-- `data-media` - Media ID
+-   `data-media` - Media ID

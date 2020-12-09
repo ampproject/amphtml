@@ -36,4 +36,4 @@ For semantics of configuration, please see [MADS documentation](http://wiki.mads
 
 Supported parameters:
 
-- `data-adrequest`: MADS ad request parameters
+-   `data-adrequest`: MADS ad request parameters

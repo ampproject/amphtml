@@ -28,4 +28,4 @@ For details on the configuration semantics, please visit [www.sekindo.com](http:
 
 ### Required parameters
 
-- `data-spaceId` - Ad unit unique id
+-   `data-spaceId` - Ad unit unique id

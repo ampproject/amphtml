@@ -39,11 +39,11 @@ For configuration details and to generate your tags, contact compass-support@mic
 
 Supported parameters:
 
-- `width`
-- `height`
-- `data-spot`
-- `data-url`
-- `data-referrer`
-- `data-ifa`
-- `data-appid`
-- `data-geo`
+-   `width`
+-   `height`
+-   `data-spot`
+-   `data-url`
+-   `data-referrer`
+-   `data-ifa`
+-   `data-appid`
+-   `data-geo`

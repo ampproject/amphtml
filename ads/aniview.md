@@ -35,22 +35,22 @@ For additional details and support contact support@aniview.com.
 
 ### Required parameters
 
-- `data-publisherid`: the publisher or network id
-- `data-channelid`: the channel id
+-   `data-publisherid`: the publisher or network id
+-   `data-channelid`: the channel id
 
 ### Optional parameters
 
-- `data-ref1`: ref1 extra AV\_ parameters
-- `data-loop`: set false to disable loop. Default is true
-- `data-vastretry`: vastretry configuration
-- `data-errorlimit`: errorlimit configuration
-- `data-maximp`: Max number of impressions.
-- `data-maxrun`: Max number of waterfall runs.
-- `data-preloader`: String of the preloader json object.
-- `data-customcss`: Custom css string.
-- `data-customlogo`: String of the customlogo json object.
-- `data-passbackurl`: passbackurl.
-- `data-av_gdpr`: '1' or '0'.
-- `data-av_consent`: Consent string.
-- `data-av_url`: Current url.
-- `data-av_subid`: Subid string.
+-   `data-ref1`: ref1 extra AV\_ parameters
+-   `data-loop`: set false to disable loop. Default is true
+-   `data-vastretry`: vastretry configuration
+-   `data-errorlimit`: errorlimit configuration
+-   `data-maximp`: Max number of impressions.
+-   `data-maxrun`: Max number of waterfall runs.
+-   `data-preloader`: String of the preloader json object.
+-   `data-customcss`: Custom css string.
+-   `data-customlogo`: String of the customlogo json object.
+-   `data-passbackurl`: passbackurl.
+-   `data-av_gdpr`: '1' or '0'.
+-   `data-av_consent`: Consent string.
+-   `data-av_url`: Current url.
+-   `data-av_subid`: Subid string.

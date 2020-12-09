@@ -36,7 +36,7 @@ For configuration details, please contact https://www.excite.co.jp/guide/wisteri
 
 Supported parameters:
 
-- data-site-id (required)
-- data-template-number (required)
-- height (optional)
-- width (optional)
+-   data-site-id (required)
+-   data-template-number (required)
+-   height (optional)
+-   width (optional)

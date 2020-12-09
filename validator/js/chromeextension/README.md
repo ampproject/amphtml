@@ -22,8 +22,8 @@ This is the source code to the publicly available [AMP Validator](https://chrome
 
 The following tools are required to build the extension:
 
-- [Bower](https://bower.io/)
-- [Polybuild](https://github.com/PolymerLabs/polybuild)
+-   [Bower](https://bower.io/)
+-   [Polybuild](https://github.com/PolymerLabs/polybuild)
 
 Once these tools are installed, run `./build_extension.sh`.
 

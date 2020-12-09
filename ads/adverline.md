@@ -38,10 +38,10 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-id`: site ID
-- `data-plc`: format ID (unique per page)
+-   `data-id`: site ID
+-   `data-plc`: format ID (unique per page)
 
 ### Optional parameters
 
-- `data-section`: tag list, separated by commas
-- `data-s`: dynamic sizing, allowed values: fixed, all, small (default), big
+-   `data-section`: tag list, separated by commas
+-   `data-s`: dynamic sizing, allowed values: fixed, all, small (default), big

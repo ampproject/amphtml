@@ -30,4 +30,4 @@ For details on the configuration semantics, see [Admanmedia documentation](http:
 
 ### Required parameters
 
-- `data-id` - Ad unit unique id
+-   `data-id` - Ad unit unique id

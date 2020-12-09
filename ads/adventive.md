@@ -36,4 +36,4 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-src`: provided ad url
+-   `data-src`: provided ad url

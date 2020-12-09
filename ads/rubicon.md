@@ -71,13 +71,13 @@ By default the ad size is based on the `width` and `height` attributes of the `a
 
 #### Smart Tag
 
-- `data-method`
-- `data-account`
-- `data-site`
-- `data-zone`
-- `data-size`
+-   `data-method`
+-   `data-account`
+-   `data-site`
+-   `data-zone`
+-   `data-size`
 
 ##### First Party Data & Keywords
 
-- `data-kw`
-- `json` - for visitor and inventory data
+-   `data-kw`
+-   `json` - for visitor and inventory data

@@ -34,9 +34,9 @@ Provides support for AMP integration with [PromoteIQ](https://www.promoteiq.com/
 
 ### Required parameters
 
-- `data-src`: Publisher specific PromoteIQ CDN file.
-- `data-input`: JSON stringified inputs.
-- `data-sfcallback`: Stringified publisher rendering function.
+-   `data-src`: Publisher specific PromoteIQ CDN file.
+-   `data-input`: JSON stringified inputs.
+-   `data-sfcallback`: Stringified publisher rendering function.
 
 # Support
 

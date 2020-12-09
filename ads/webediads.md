@@ -77,10 +77,10 @@ For details on the configuration semantics, please contact the ad network or ref
 
 All parameters are mandatory, only "query" can be empty.
 
-- `data-site` (String, non-empty)
-- `data-page` (String, non-empty)
-- `data-position` (String, non-empty)
-- `data-query` (String)
-  - `key` are separated with `&`
-  - `value` are separted with `|`
-  - **Example**: `key1=value1|value2|value3&key2=value4&key3=value5|value6`
+-   `data-site` (String, non-empty)
+-   `data-page` (String, non-empty)
+-   `data-position` (String, non-empty)
+-   `data-query` (String)
+    -   `key` are separated with `&`
+    -   `value` are separted with `|`
+    -   **Example**: `key1=value1|value2|value3&key2=value4&key3=value5|value6`

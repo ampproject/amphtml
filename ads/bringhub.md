@@ -35,6 +35,6 @@ limitations under the License.
 
 ### Optional parameters
 
-- `htmlURL`: The URL of the standard html version of the page. Defaults to `global.context.canonicalURL`.
-- `ampURL`: The URL of the AMP version of the page. Defaults to `global.context.sourceUrl`.
-- `articleSelector`: The CSS Selector of the article body on the page. Contact your Bringhub Account Manager for requirements.
+-   `htmlURL`: The URL of the standard html version of the page. Defaults to `global.context.canonicalURL`.
+-   `ampURL`: The URL of the AMP version of the page. Defaults to `global.context.sourceUrl`.
+-   `articleSelector`: The CSS Selector of the article body on the page. Contact your Bringhub Account Manager for requirements.

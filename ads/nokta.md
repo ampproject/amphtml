@@ -38,6 +38,6 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-category`: Site category for ad unit.
-- `data-site`: Site descriptor for ad.
-- `data-zone`: Zone id to show related ad.
+-   `data-category`: Site category for ad unit.
+-   `data-site`: Site descriptor for ad.
+-   `data-zone`: Zone id to show related ad.

@@ -65,9 +65,9 @@ For AMPHTML ads, the `close-button` attribute is required. This attribute causes
 a header to render at the top of your lightbox. The header contains a close
 button and a label that displays "Ad". Requirement of this header is needed to:
 
-- Set a consistent and predictable user experience for AMPHTML ads.
-- Ensure that an exit point for the lightbox always exists, otherwise the
-  creative could effectively hijack the host document content via a lightbox.
+-   Set a consistent and predictable user experience for AMPHTML ads.
+-   Ensure that an exit point for the lightbox always exists, otherwise the
+    creative could effectively hijack the host document content via a lightbox.
 
 The `close-button` attribute is required and only allowed in AMPHTML ads. In
 regular AMP documents, you can render a close button wherever you need it as
