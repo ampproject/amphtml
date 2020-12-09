@@ -40,9 +40,9 @@ For configuration semantics, please see [e-planning's documentation](https://www
 
 Supported parameters:
 
-- `data-epl_si`: Site ID
-- `data-epl_sv`: Default adserver
-- `data-epl_isv`: Default CDN
-- `data-epl_sec`: Section
-- `data-epl_kvs`: Data keywords
-- `data-epl_e`: Space name
+-   `data-epl_si`: Site ID
+-   `data-epl_sv`: Default adserver
+-   `data-epl_isv`: Default CDN
+-   `data-epl_sec`: Section
+-   `data-epl_kvs`: Data keywords
+-   `data-epl_e`: Space name

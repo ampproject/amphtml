@@ -34,8 +34,8 @@ limitations under the License.
 
 ### Required parameters
 
-- `width`
-- `height`
-- `data-blade_player_type`
-- `data-blade_player_id`
-- `data-blade_api_key`
+-   `width`
+-   `height`
+-   `data-blade_player_type`
+-   `data-blade_player_id`
+-   `data-blade_api_key`

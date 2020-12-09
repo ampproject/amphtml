@@ -39,5 +39,5 @@ For semantics of configuration and examples, sign-in and see the [ADITION docume
 
 Supported parameters:
 
-- `data-version`
-- `data-wp_id`
+-   `data-version`
+-   `data-wp_id`
