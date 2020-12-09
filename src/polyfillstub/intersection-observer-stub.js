@@ -26,12 +26,8 @@
 import {Services} from '../services';
 
 const UPGRADERS = '_upgraders';
-
-/** @type {IntersectionObserver} */
-let NativeIntersectionObserver;
-
-/** @type {IntersectionObserver} */
-let PolyfilledIntersectionObserver;
+const NATIVE = 'AMP__NATIVE_INOB';
+const STUB = 'AMP_STUB_INOB';
 
 /**
  * @param {!Window} win
@@ -42,18 +38,20 @@ export function shouldLoadPolyfill(win) {
   return (
     !win.IntersectionObserver ||
     !win.IntersectionObserverEntry ||
-    !!PolyfilledIntersectionObserver ||
+    !!win[STUB] ||
     !supportsDocumentRoot(win)
   );
 }
 
-/** @type {!IntersectionObserver} */
-function IntersectionObserverDispatcher(ioCallback, opts) {
-  if (opts && opts.root && opts.root.nodeType === 9) {
-    return new PolyfilledIntersectionObserver(ioCallback, opts);
-  } else {
-    return new NativeIntersectionObserver(ioCallback, opts);
-  }
+/** @type {!function(typeof IntersectionObserver, typeof IntersectionObserver): typeof IntersectionObserver} */
+function getIntersectionObserverDispatcher(Native, Polyfill) {
+  return function (ioCallback, opts) {
+    if (opts && opts.root && opts.root.nodeType === 9) {
+      return new Polyfill(ioCallback, opts);
+    } else {
+      return new Native(ioCallback, opts);
+    }
+  };
 }
 
 /**
@@ -64,14 +62,17 @@ function IntersectionObserverDispatcher(ioCallback, opts) {
  * @param {!Window} win
  */
 export function installStub(win) {
-  PolyfilledIntersectionObserver = IntersectionObserverStub;
+  win[STUB] = IntersectionObserverStub;
   if (!win.IntersectionObserver) {
     win.IntersectionObserver = IntersectionObserverStub;
     return;
   }
 
-  NativeIntersectionObserver = win.IntersectionObserver;
-  win.IntersectionObserver = IntersectionObserverDispatcher;
+  win[NATIVE] = win.IntersectionObserver;
+  win.IntersectionObserver = getIntersectionObserverDispatcher(
+    win.IntersectionObserver,
+    IntersectionObserverStub
+  );
 }
 
 /**
@@ -106,20 +107,23 @@ export function scheduleUpgradeIfNeeded(win) {
 export function upgradePolyfill(win, installer) {
   // Can't use the IntersectionObserverStub here directly since it's a separate
   // instance deployed in v0.js vs the polyfill extension.
-  const Stub = /** @type {typeof IntersectionObserverStub} */ (PolyfilledIntersectionObserver);
+  const Stub = /** @type {typeof IntersectionObserverStub} */ (win[STUB]);
   if (Stub) {
     delete win.IntersectionObserver;
     delete win.IntersectionObserverEntry;
     installer();
-    if (NativeIntersectionObserver) {
-      PolyfilledIntersectionObserver = win.IntersectionObserver;
-      win.IntersectionObserver = IntersectionObserverDispatcher;
+    const Polyfill = win.IntersectionObserver;
+    if (win[NATIVE]) {
+      win.IntersectionObserver = getIntersectionObserverDispatcher(
+        win[NATIVE],
+        Polyfill
+      );
     }
 
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
-      microtask.then(() => upgrader(PolyfilledIntersectionObserver));
+      microtask.then(() => upgrader(Polyfill));
     };
     if (upgraders.length > 0) {
       /** @type {!Array} */ (upgraders).forEach(upgrade);
