@@ -499,7 +499,6 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
         .querySelector('.i-amphtml-story-dev-tools-device-chips')
         .appendChild(deviceSpecs.chip);
     }).then(() => {
-      deviceSpecs.player.load();
       deviceSpecs.player
         .getElement()
         .addEventListener('storyNavigation', (event) => {
@@ -509,6 +508,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
             }
           });
         });
+      deviceSpecs.player.load();
     });
     this.devices_.push(deviceSpecs);
     this.updateDevicesInHash_();
