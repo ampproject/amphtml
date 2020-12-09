@@ -15,11 +15,11 @@
  */
 
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
-import {Layout} from '../../../src/layout';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
 import {CommonSignals} from '../../../src/common-signals';
+import {Layout} from '../../../src/layout';
+import {dev, user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';
