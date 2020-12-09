@@ -21,7 +21,7 @@ const TIMEOUT = 10000;
 // Skip Edge, which throws "Permission denied" errors when inspecting
 // element properties in the testing iframe (Edge 17, Windows 10).
 describe
-  .configure()
+  .configure({enableIe: true})
   .skipEdge()
   .run('amp-bind', function () {
     this.timeout(TIMEOUT);
@@ -40,6 +40,7 @@ describe
       <p class="before_class" [class]="c" [text]="t">before_text</p>
     `,
         extensions: ['amp-bind'],
+        enableIe: true,
       },
       (env) => {
         let browser;
