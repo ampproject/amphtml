@@ -74,11 +74,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   updatePosition_() {
-    return this.mutateElement(() => {
+    return this.mutateElement(() =>
       setStyles(this.image_, {
         transform: `scale(${this.zoom_}) translate(${this.x_}, ${this.y_})`,
-      });
-    });
+      })
+    );
   }
 
   /** @override */
