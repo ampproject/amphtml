@@ -73,7 +73,7 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     await env.ampdoc.whenReady();
     expect(buildStub).to.be.calledOnce;
     await new Promise(setTimeout);
-    expect(schedulePassSpy).to.not.be.called;
+    schedulePassSpy.resetHistory();
     resolveBuild();
     await new Promise(setTimeout);
     expect(schedulePassSpy).to.be.calledOnce;

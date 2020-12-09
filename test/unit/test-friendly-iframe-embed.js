@@ -184,6 +184,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
+      getParent: () => env.ampdoc,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
@@ -268,6 +269,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
+      getParent: () => env.ampdoc,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
@@ -398,6 +400,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
+      getParent: () => env.ampdoc,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
@@ -452,6 +455,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
+      getParent: () => env.ampdoc,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
