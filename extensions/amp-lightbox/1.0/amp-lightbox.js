@@ -29,6 +29,14 @@ const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
 class AmpLightbox extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {boolean} */
+    this.open_ = false;
+  }
+
   /** @override */
   init() {
     this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
@@ -44,7 +52,9 @@ class AmpLightbox extends PreactBaseElement {
    * @private
    */
   beforeOpen_() {
+    this.open_ = true;
     toggle(this.element, true);
+    this.element.setAttribute('open', '');
   }
 
   /**
@@ -52,7 +62,19 @@ class AmpLightbox extends PreactBaseElement {
    * @private
    */
   afterClose_() {
+    this.open_ = false;
     toggle(this.element, false);
+    this.element.removeAttribute('open');
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const open = this.element.hasAttribute('open');
+    if (open === this.open_) {
+      return;
+    }
+    this.open_ = open;
+    open ? this.api().open() : this.api().close();
   }
 
   /** @override */
@@ -79,9 +101,6 @@ AmpLightbox['props'] = {
 
 /** @override */
 AmpLightbox['passthrough'] = true;
-
-/** @override */
-AmpLightbox['layoutSizeDefined'] = true;
 
 /** @override */
 AmpLightbox['shadowCss'] = COMPONENT_CSS;
