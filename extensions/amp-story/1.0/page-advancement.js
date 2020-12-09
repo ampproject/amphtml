@@ -18,11 +18,14 @@ import {
   Action,
   EmbeddedComponentState,
   InteractiveComponentDef,
+  PlayerActionLinkDef,
+  PlayerActionLinkState,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
+import {PLAYER_ACTION_LINK_SELECTOR} from './amp-story-player-action-link';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
@@ -655,6 +658,22 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * Check if click is on a Player Action link.
+   * @param {!Element} target
+   * @private
+   * @return {boolean}
+   */
+  isHandledByPlayerActionLink_(target) {
+    const clickedOnLink = matches(target, PLAYER_ACTION_LINK_SELECTOR);
+
+    const playerActionLinkState = this.storeService_.get(
+      StateProperty.PLAYER_ACTION_LINK_STATE
+    );
+
+    return playerActionLinkState != null || clickedOnLink;
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -668,7 +687,7 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
       event.preventDefault();
-      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+      const embedComponent = /** @type {player-action} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
       ));
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
@@ -689,6 +708,19 @@ export class ManualAdvancement extends AdvancementConfig {
       } else {
         this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
       }
+      return;
+    }
+
+    if (this.isHandledByPlayerActionLink_(target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const playerActionLink = /** @type {PlayerActionLinkDef} */ (this.storeService_.get(
+        StateProperty.PLAYER_ACTION_LINK_STATE
+      ));
+      this.storeService_.dispatch(Action.TOGGLE_PLAYER_ACTION_LINK, {
+        playerActionId: target.getAttribute('player-action'),
+        state: playerActionLink.state || PlayerActionLinkState.CLICKED,
+      });
       return;
     }
 

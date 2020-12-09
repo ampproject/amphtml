@@ -76,6 +76,19 @@ export const EmbeddedComponentState = {
  */
 export let InteractiveComponentDef;
 
+export const PlayerActionLinkState = {
+  NOT_CLICKED: 0, // Link is present in page and has not been clicked, or has been unclicked.
+  CLICKED: 1, // Link has been clicked.
+};
+
+/**
+ * @typedef {{
+ *    element: !Element,
+ *    state: !EmbeddedComponentState,
+ * }}
+ */
+export let PlayerActionLinkDef;
+
 /**
  * @typedef {{
  *    option: ?../../amp-story-interactive/0.1/amp-story-interactive-abstract.OptionConfigType,
@@ -165,6 +178,7 @@ export const StateProperty = {
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
   PAUSED_STATE: 'pausedState',
+  PLAYER_ACTION_LINK_STATE: 'playerActionLinkState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
@@ -216,6 +230,7 @@ export const Action = {
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
+  TOGGLE_PLAYER_ACTION_LINK: 'togglePlayerActionComponent',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_SIDEBAR: 'toggleSidebar',
@@ -392,6 +407,14 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAUSED_STATE]: !!data,
+      });
+    // Triggers a Player Action.
+    case Action.TOGGLE_PLAYER_ACTION_LINK:
+      data = /** @type {PlayerActionLinkDef} */ (data);
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAUSED_STATE]: !!data,
+        [StateProperty.PLAYER_ACTION_LINK_STATE]: data,
       });
     case Action.TOGGLE_RTL:
       return /** @type {!State} */ ({

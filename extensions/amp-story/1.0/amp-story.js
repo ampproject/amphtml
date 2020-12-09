@@ -732,6 +732,10 @@ export class AmpStory extends AMP.BaseElement {
       this.onNoPreviousPage_();
     });
 
+    this.element.addEventListener(EventType.ADD_TO_CART_PLAYER_ACTION, () => {
+      this.onAddToCartPlayerAction_();
+    });
+
     this.advancement_.addOnTapNavigationListener((direction) => {
       this.performTapNavigation_(direction);
     });
@@ -1378,6 +1382,17 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
       this.ampStoryHint_.showFirstPageHintOverlay();
     }
+  }
+
+  /**
+   * Handles EventType.ADD_TO_CART_PLAYER_ACTION events.
+   * @private
+   */
+  onAddToCartPlayerAction_() {
+    this.viewerMessagingHandler_.send(
+      'addToCart',
+      dict({'productId': this.element.getAttribute('player-action')})
+    );
   }
 
   /**

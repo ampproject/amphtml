@@ -580,6 +580,10 @@ export class AmpStoryPlayer {
             this.onSelectDocument_(/** @type {!Object} */ (data));
           });
 
+          messaging.registerHandler('addToCartPlayerAction', (event, data) => {
+            this.onAddToCartPlayerAction_(/** @type {!Object} */ (data));
+          });
+
           messaging.sendRequest(
             'onDocumentState',
             dict({'state': STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE}),
@@ -1085,6 +1089,7 @@ export class AmpStoryPlayer {
     this.messagingPromises_[detachedStory.iframeIdx].then((messaging) => {
       messaging.unregisterHandler('documentStateUpdate');
       messaging.unregisterHandler('selectDocument');
+      messaging.unregisterHandler('addToCartPlayerAction');
       messaging.unregisterHandler('touchstart');
       messaging.unregisterHandler('touchmove');
       messaging.unregisterHandler('touchend');
@@ -1444,6 +1449,21 @@ export class AmpStoryPlayer {
     } else if (data.previous) {
       this.previous_();
     }
+  }
+
+  /**
+   * React to addToCartPlayerAction events.
+   * @param {!Object} data
+   * @private
+   */
+  onAddToCartPlayerAction_(data) {
+    this.element_.dispatchEvent(
+      createCustomEvent(
+        this.win_,
+        'addToCartPlayerAction',
+        dict({'productId': data.productId})
+      )
+    );
   }
 
   /**
