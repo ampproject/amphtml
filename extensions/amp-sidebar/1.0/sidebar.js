@@ -44,7 +44,7 @@ const ANIMATION_STYLES_SIDEBAR_LEFT_INIT = {'transform': 'translateX(-100%)'};
 const ANIMATION_STYLES_SIDEBAR_RIGHT_INIT = {'transform': 'translateX(100%)'};
 const ANIMATION_STYLES_MASK_INIT = {'opacity': '0'};
 const ANIMATION_STYLES_SIDEBAR_FINAL = {'transform': ''};
-const ANIMATION_STYLES_MASK_FINAL = {'opacity': '1'};
+const ANIMATION_STYLES_MASK_FINAL = {'opacity': ''};
 
 /**
  * @param {T} current
@@ -228,7 +228,7 @@ function SidebarWithRef(
         <div
           ref={maskRef}
           onClick={() => close()}
-          className={`${classes.maskClass}`}
+          className={classes.maskClass}
         ></div>
       </>
     )
