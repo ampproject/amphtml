@@ -64,7 +64,6 @@ function LightboxWithRef(
     animateIn = 'fade-in',
     closeButtonAriaLabel,
     children,
-    initialOpen,
     onBeforeOpen,
     onAfterClose,
     enableAnimation,
@@ -76,8 +75,8 @@ function LightboxWithRef(
   // To open, we mount and render the contents (invisible), then animate the display (visible).
   // To close, it's the reverse.
   // `mounted` mounts the component. `visible` plays the animation.
-  const [mounted, setMounted] = useState(initialOpen);
-  const [visible, setVisible] = useState(initialOpen);
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
   const classes = useStyles();
   const lightboxRef = useRef();
 
