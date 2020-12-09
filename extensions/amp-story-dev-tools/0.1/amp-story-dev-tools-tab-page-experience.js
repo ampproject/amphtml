@@ -47,11 +47,11 @@ export class AmpStoryDevToolsTabPageExperience extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.element.textContent = '';
     const iframe = htmlFor(this.element)`<iframe frameborder="0">`;
     applySandbox(iframe);
     iframe.src =
-      'https://amp.dev/page-experience/?url=' + escape(this.storyUrl_);
+      'https://amp.dev/page-experience/?url=' +
+      encodeURIComponent(this.storyUrl_);
     this.element.appendChild(iframe);
   }
 }
