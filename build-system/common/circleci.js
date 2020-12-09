@@ -44,7 +44,25 @@ function isCircleciPushBuild() {
   return !process.env.CIRCLE_PULL_REQUEST;
 }
 
+/**
+ * Returns the name of the branch being tested by the ongoing CircleCI PR build.
+ * @return {string}
+ */
+function circleciPullRequestBranch() {
+  return process.env['CIRCLE_BRANCH'];
+}
+
+/**
+ * Returns the commit SHA being tested by the ongoing CircleCI PR build.
+ * @return {string}
+ */
+function circleciPullRequestSha() {
+  return process.env['CIRCLE_SHA1'];
+}
+
 module.exports = {
+  circleciPullRequestBranch,
+  circleciPullRequestSha,
   isCircleciBuild,
   isCircleciPullRequestBuild,
   isCircleciPushBuild,
