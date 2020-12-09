@@ -42,6 +42,8 @@ const ANIMATION_PRESETS = {
   ],
 };
 
+const DEFAULT_CLOSE_LABEL = 'Close the modal';
+
 /**
  * @param {T} current
  * @return {{current: T}}
@@ -62,7 +64,7 @@ function LightboxWithRef(
   {
     id,
     animateIn = 'fade-in',
-    closeButtonAriaLabel,
+    closeButtonAriaLabel = DEFAULT_CLOSE_LABEL,
     children,
     onBeforeOpen,
     onAfterClose,
