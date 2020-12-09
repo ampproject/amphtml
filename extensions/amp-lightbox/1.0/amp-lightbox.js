@@ -33,7 +33,6 @@ class AmpLightbox extends PreactBaseElement {
   init() {
     this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
-    this.element.setAttribute('class', 'amp-lightbox');
     return dict({
       'initialOpen': false,
       'onBeforeOpen': this.beforeOpen_.bind(this),
