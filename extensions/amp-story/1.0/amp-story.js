@@ -1390,7 +1390,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   onAddToCartPlayerAction_() {
     this.viewerMessagingHandler_.send(
-      'addToCart',
+      'addToCartPlayerAction',
       dict({'productId': this.element.getAttribute('player-action')})
     );
   }

@@ -64,4 +64,8 @@
     <h1>My Shopping Cart</h1>
     <div> The cart currently contains: X items.</div>
   </body>
+  <script type="text/javascript">
+    const playerEl = document.querySelector('amp-story-player');
+    playerEl.addEventListener('addToCartPlayerAction', (event) => {console.log(event.productId)});
+  </script>
 </html>
