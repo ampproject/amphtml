@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust, DEFAULT_ACTION} from '../../../src/action-constants';
 import {CSS as COMPONENT_CSS} from './lightbox.jss';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Lightbox} from './lightbox';
@@ -39,6 +39,11 @@ class AmpLightbox extends PreactBaseElement {
 
   /** @override */
   init() {
+    this.registerApiAction(
+      DEFAULT_ACTION,
+      (api) => api.open(),
+      ActionTrust.LOW
+    );
     this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
     return dict({

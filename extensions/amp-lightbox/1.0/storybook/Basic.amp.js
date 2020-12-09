@@ -47,7 +47,7 @@ export const Default = () => {
         <button on="tap:lightbox.close">Close</button>
       </amp-lightbox>
       <div class="buttons">
-        <button on="tap:lightbox.open">Open</button>
+        <button on="tap:lightbox">Open</button>
       </div>
     </div>
   );
