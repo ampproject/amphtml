@@ -55,24 +55,16 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   layoutCallback() {
     const ampImgEl = this.element_.querySelector('amp-img');
     return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => {
-        return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
-      })
+      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
       .then(
         () => {
           this.image_ = dev().assertElement(this.element.querySelector('img'));
-          // Override default styles of layout="fill" so image is centered but not clipped.
+          // Remove layout="fill" classes so image is not clipped.
           this.image_.classList = '';
           // Fill image to 100% height of viewport.
           // TODO(#31515): Handle base zoom of aspect ratio wider than image
           setStyles(this.image_, {height: '100%'});
-          // Centers image in amp-img wrapper.
-          setStyles(ampImgEl, {
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          });
-          this.updatePosition_();
+          return this.updatePosition_();
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
@@ -80,9 +72,12 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       );
   }
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   updatePosition_() {
-    this.mutateElement(() => {
+    return this.mutateElement(() => {
       setStyles(this.image_, {
         transform: `scale(${this.zoom_}) translate(${this.x_}, ${this.y_})`,
       });
