@@ -46,7 +46,7 @@ export function shouldLoadPolyfill(win) {
 /**
  * @param {typeof IntersectionObserver} Native
  * @param {typeof IntersectionObserver} Polyfill
- * @returns {typeof IntersectionObserver}
+ * @return {typeof IntersectionObserver}
  */
 function getIntersectionObserverDispatcher(Native, Polyfill) {
   return function (ioCallback, opts) {
