@@ -38,27 +38,22 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} */
     this.image_ = null;
 
-    this.x_ = element.getAttribute('x');
-    this.y_ = element.getAttribute('y');
-    this.zoom_ = parseFloat(element.getAttribute('zoom') || 1);
+    /** @private {?string} */
+    this.x_ = element.getAttribute('x') || '0%';
+
+    /** @private {?string} */
+    this.y_ = element.getAttribute('y') || '0%';
+
+    /** @private {?string} */
+    this.zoom_ = element.getAttribute('zoom') || '1';
   }
 
   /** @override */
-  buildCallback() {
-    console.log(this.x_);
-    console.log(this.y_);
-    console.log(this.zoom_);
-  }
+  buildCallback() {}
 
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element_.querySelector('amp-img');
-    setStyles(ampImgEl, {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    });
-
     return whenUpgradedToCustomElement(ampImgEl)
       .then(() => {
         return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
@@ -66,15 +61,32 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       .then(
         () => {
           this.image_ = dev().assertElement(this.element.querySelector('img'));
+          // Override default styles of layout="fill" so image is centered but not clipped.
           this.image_.classList = '';
-          this.image_.width > this.image_.height
-            ? (this.image_.style.height = '100%')
-            : (this.image_.style.width = '100%');
+          // Fill image to 100% height of viewport.
+          // TODO(#31515): Handle base zoom of aspect ratio wider than image
+          setStyles(this.image_, {height: '100%'});
+          // Centers image in amp-img wrapper.
+          setStyles(ampImgEl, {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          });
+          this.updatePosition_();
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
         }
       );
+  }
+
+  /** @private */
+  updatePosition_() {
+    this.mutateElement(() => {
+      setStyles(this.image_, {
+        transform: `scale(${this.zoom_}) translate(${this.x_}, ${this.y_})`,
+      });
+    });
   }
 
   /** @override */
