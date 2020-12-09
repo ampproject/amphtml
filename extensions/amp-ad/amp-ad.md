@@ -459,6 +459,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
+- [VAdServer](../../ads/vadserver.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
 - [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
