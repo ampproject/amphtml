@@ -40,7 +40,7 @@ const {
 } = require('../../common/git');
 const {buildRuntime, installPackages} = require('../../common/utils');
 const {execScriptAsync} = require('../../common/exec');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
 const {waitUntilUsed} = require('tcp-port-used');
 
@@ -117,7 +117,7 @@ function maybeOverridePercyEnvironmentVariables() {
  * as baselines for future builds.
  */
 function setPercyBranch() {
-  if (!process.env['PERCY_BRANCH'] && (!argv.master || !isTravisBuild())) {
+  if (!process.env['PERCY_BRANCH'] && (!argv.master || !isCiBuild())) {
     const userName = gitCommitterEmail();
     const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
@@ -130,12 +130,12 @@ function setPercyBranch() {
  * This will let Percy determine which build to use as the baseline for this new
  * build.
  *
- * Only does something on Travis, and for non-master branches, since master
+ * Only does something during CI, and for non-master branches, since master
  * builds are always built on top of the previous commit (we use the squash and
  * merge method for pull requests.)
  */
 function setPercyTargetCommit() {
-  if (isTravisBuild() && !argv.master) {
+  if (isCiBuild() && !argv.master) {
     process.env['PERCY_TARGET_COMMIT'] = gitCiMasterBaseline();
   }
 }
@@ -278,7 +278,7 @@ async function resetPage(page, viewport = null) {
 }
 
 /**
- * Adds a test error and logs it if running locally (not on Travis).
+ * Adds a test error and logs it if running locally (not as part of CI).
  *
  * @param {!Array<!JsonObject>} testErrors array of testError objects.
  * @param {string} name full name of the test.
@@ -289,7 +289,7 @@ async function resetPage(page, viewport = null) {
  */
 function addTestError(testErrors, name, message, error, consoleMessages) {
   const testError = {name, message, error, consoleMessages};
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     logTestError(testError);
   }
   testErrors.push(testError);
@@ -638,16 +638,10 @@ async function snapshotWebpages(browser, webpages) {
   }
 
   await Promise.all(pagePromises);
-  if (isTravisBuild() && testErrors.length > 0) {
+  if (isCiBuild() && testErrors.length > 0) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
-    log(
-      'info',
-      colors.yellow('Tests warnings and errors:'),
-      'expand this section'
-    );
-    console./*OK*/ log('travis_fold:start:visual_tests\n');
+    log('info', colors.yellow('Tests warnings and errors:'));
     testErrors.forEach(logTestError);
-    console./*OK*/ log('travis_fold:end:visual_tests');
     return false;
   }
   return true;
