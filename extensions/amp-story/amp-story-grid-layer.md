@@ -311,9 +311,9 @@ The `thirds` template divides the screen into three equally-sized rows, and allo
 
 Named Areas:
 
-- `upper-third`
-- `middle-third`
-- `lower-third`
+-   `upper-third`
+-   `middle-third`
+-   `lower-third`
 
 <amp-img alt="Horizontal template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" width="145" height="255">
   <noscript>

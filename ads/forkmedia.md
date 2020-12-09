@@ -35,5 +35,5 @@ For details on the configuration semantics, please contact Fork Media.
 
 ### Required parameters
 
-- `data-product`
-- `data-html-access-allowed`
+-   `data-product`
+-   `data-html-access-allowed`

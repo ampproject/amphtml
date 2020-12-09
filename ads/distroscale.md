@@ -32,4 +32,4 @@ For configuration semantics, please [contact DistroScale](http://www.distroscale
 
 ### Required parameters
 
-- `data-pid`: Partner ID
+-   `data-pid`: Partner ID

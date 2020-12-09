@@ -35,8 +35,8 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-pid`
+-   `data-pid`
 
 ### Optional parameters
 
-- `data-ffc`
+-   `data-ffc`

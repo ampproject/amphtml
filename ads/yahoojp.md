@@ -29,4 +29,4 @@ For configuration details and to generate your tags, please contact http://marke
 
 Supported parameters:
 
-- `data-yadsid`
+-   `data-yadsid`

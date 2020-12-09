@@ -36,4 +36,4 @@ Before starting any Remixd AMP setup, please reach out to your account manager f
 
 ### Optional parameters
 
-- `data-url`: The amp page source URL.
+-   `data-url`: The amp page source URL.

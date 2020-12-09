@@ -29,7 +29,7 @@ For semantics configuration, please [contact Yieldmo](https://yieldmo.com/#conta
 
 Supported parameters:
 
-- `data-ymid`
+-   `data-ymid`
 
 ## Multi-size Ad
 

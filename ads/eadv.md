@@ -35,5 +35,5 @@ For details on the configuration semantics, please contact the ad network or ref
 
 Supported parameters:
 
-- `data-x`
-- `data-u`
+-   `data-x`
+-   `data-u`

@@ -35,5 +35,5 @@ For configuration details and to generate your tags, contact http://www.opt.ne.j
 
 Supported parameters:
 
-- `data-aid`
-- `data-slot-id`
+-   `data-aid`
+-   `data-slot-id`

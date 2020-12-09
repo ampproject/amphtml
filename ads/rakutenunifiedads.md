@@ -41,21 +41,21 @@ limitations under the License.
 
 ### Required parameters
 
-- `data-id` : Your adspot id
-- `type` : fixed value `rakutenunifiedads`
+-   `data-id` : Your adspot id
+-   `type` : fixed value `rakutenunifiedads`
 
 ### Optional parameters
 
-- `data-env` : Environment of server for Not production. e.g. `dev`, `stg`, `tst`
-- `data-genre` : Genre object
-- `data-ifa` : IFA string
-- `data-targeting` : Targeting object
-- `data-iscode` : ID type. 'true': `data-id` works as code
+-   `data-env` : Environment of server for Not production. e.g. `dev`, `stg`, `tst`
+-   `data-genre` : Genre object
+-   `data-ifa` : IFA string
+-   `data-targeting` : Targeting object
+-   `data-iscode` : ID type. 'true': `data-id` works as code
 
 ### Set id as adSpot code
 
-- `data-id` : Your code with `data-iscode`
-- `data-iscode` : ID type. 'true': id works as code
+-   `data-id` : Your code with `data-iscode`
+-   `data-iscode` : ID type. 'true': id works as code
 
 ```html
 <amp-ad

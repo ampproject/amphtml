@@ -35,8 +35,8 @@ For additional info, see AdPlugg's [AMP Ad Help](https://www.adplugg.com/support
 
 ### Required parameters
 
-- `data-access-code`: your AdPlugg access code.
+-   `data-access-code`: your AdPlugg access code.
 
 ### Optional parameters
 
-- `data-zone`: your AdPlugg zone machine name. Recommended.
+-   `data-zone`: your AdPlugg zone machine name. Recommended.

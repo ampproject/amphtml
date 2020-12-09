@@ -36,12 +36,12 @@ Your site must be an active member of the [SHE Media Partner Network](http://www
 
 ### Required parameters
 
-- `data-slot-type` - SHE Media slot type.
-- `data-boomerang-path` - Boomerang path.
+-   `data-slot-type` - SHE Media slot type.
+-   `data-boomerang-path` - Boomerang path.
 
 ### Optional parameters
 
-- `json` - Boomerang configuration key values can be passed using the `boomerangConfig` property. Custom targeting key values can be passed to Boomerang using the `targeting` property.
+-   `json` - Boomerang configuration key values can be passed using the `boomerangConfig` property. Custom targeting key values can be passed to Boomerang using the `targeting` property.
 
 ### Support
 

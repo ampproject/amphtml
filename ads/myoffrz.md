@@ -33,8 +33,8 @@ limitations under the License.
 
 Supported parameters:
 
-- `data-config`
+-   `data-config`
 
 Optional parameters:
 
-- `data-script`
+-   `data-script`

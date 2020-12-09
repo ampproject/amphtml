@@ -43,4 +43,4 @@ For details on the configuration semantics, please contact [Recreativ](https://r
 
 ### Required parameters
 
-- `data-bn`
+-   `data-bn`

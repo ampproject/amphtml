@@ -36,8 +36,8 @@ For configuration details, please contact https://advertising.yahoo.com/contact.
 
 Supported parameters:
 
-- `height`
-- `width`
-- `data-sid`
-- `data-site`
-- `data-sa`
+-   `height`
+-   `width`
+-   `data-sid`
+-   `data-site`
+-   `data-sa`

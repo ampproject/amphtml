@@ -58,11 +58,11 @@ around the edges. Below are instructions for Linux Ubuntu 14.
 
 Install these packages using apt-get:
 
-- `npm`
-- `openjdk-7-jre`
-- `protobuf-compiler`
-- `python3`
-- `python3-pip`
+-   `npm`
+-   `openjdk-7-jre`
+-   `protobuf-compiler`
+-   `python3`
+-   `python3-pip`
 
 Then `pip3 install protobuf`.
 
@@ -75,24 +75,24 @@ In addition, install Node.js v4.4.2. E.g.,
 
 Dependencies:
 
-- npm
-- [homebrew](https://brew.sh/)
-- python 3 (e.g. [these instructions](https://docs.python-guide.org/starting/install3/osx/))
+-   npm
+-   [homebrew](https://brew.sh/)
+-   python 3 (e.g. [these instructions](https://docs.python-guide.org/starting/install3/osx/))
 
-  - protobuf
+    -   protobuf
 
-    ```sh
-    pip3 install --user protobuf
-    ```
+        ```sh
+        pip3 install --user protobuf
+        ```
 
-  - openjdk-7-jre
+    -   openjdk-7-jre
 
-    Install openjdk, then symlink the system Java wrappers to find it:
+        Install openjdk, then symlink the system Java wrappers to find it:
 
-    ```sh
-    brew install openjdk
-    sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
-    ```
+        ```sh
+        brew install openjdk
+        sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+        ```
 
 ### Usage
 
@@ -119,9 +119,9 @@ testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'am
 
 _Note: This is for building the validator from source. If you are simply running validator tests for extensions, see the Installation steps instead._
 
-- Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
-- Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
-- If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
+-   Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
+-   Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
+-   If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
 
 To verify that you have the necessary prerequisites, run and verify:
 

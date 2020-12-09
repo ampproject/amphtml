@@ -28,4 +28,4 @@ For configuration details and to generate your tags, please contact https://www.
 
 #### Required parameters
 
-- `data-mediaid`: For loading JavaScript for each media.
+-   `data-mediaid`: For loading JavaScript for each media.

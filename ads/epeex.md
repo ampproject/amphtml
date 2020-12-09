@@ -35,11 +35,11 @@ For semantics of configuration, please contact info@epeex.com.
 
 ### Required parameters
 
-- `data-account`
-- `data-channel`
+-   `data-account`
+-   `data-channel`
 
 ### Optional parameters
 
-- `data-htmlurl`
-- `data-ampurl`
-- `data-testmode`
+-   `data-htmlurl`
+-   `data-ampurl`
+-   `data-testmode`

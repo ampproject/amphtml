@@ -87,11 +87,11 @@ Optionally, you can specify a caption for each element in the lightbox. These
 fields are automatically read and displayed by the `<amp-lightbox-gallery>` in
 the following order of priority:
 
-- `figcaption` (if the lightboxed element is the child of a figure)
-- `aria-describedby`
-- `alt`
-- `aria-label`
-- `aria-labelledby`
+-   `figcaption` (if the lightboxed element is the child of a figure)
+-   `aria-describedby`
+-   `alt`
+-   `aria-label`
+-   `aria-labelledby`
 
 In the following example, `<amp-lightbox-gallery>` displays the `figcaption`
 value as its description, showing "Toront's CN tower was ....".

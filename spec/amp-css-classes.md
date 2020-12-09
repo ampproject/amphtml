@@ -22,9 +22,9 @@ This document describes AMP CSS classes prefixed with `amp-`. These classes allo
 
 AMP provides the following CSS classes that are set on the document's `body` to assist with some typical desktop and mobile cases:
 
-- `amp-mode-touch`: This class is set when AMP detects touch input.
-- `amp-mode-mouse`: This class is set when AMP detects mouse input.
-- `amp-mode-keyboard-active`: This class is set when AMP detects that the keyboard is active.
+-   `amp-mode-touch`: This class is set when AMP detects touch input.
+-   `amp-mode-mouse`: This class is set when AMP detects mouse input.
+-   `amp-mode-keyboard-active`: This class is set when AMP detects that the keyboard is active.
 
 ## Component-specific classes
 

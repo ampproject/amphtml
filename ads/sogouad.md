@@ -49,12 +49,12 @@ For details on the configuration semantics, please contact the ad network or ref
 
 Responsive mode:
 
-- `data-slot`: slot id of Sogou ads
-- `data-w`: always be 20
-- `data-h`: slot's height info from Sogou ads
+-   `data-slot`: slot id of Sogou ads
+-   `data-w`: always be 20
+-   `data-h`: slot's height info from Sogou ads
 
 Fixed-height mode:
 
-- `data-slot`: slot id of Sogou ads
-- `data-w`: always be 100%
-- `data-h` slot's height info from Sogou ads
+-   `data-slot`: slot id of Sogou ads
+-   `data-w`: always be 100%
+-   `data-h` slot's height info from Sogou ads

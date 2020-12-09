@@ -38,4 +38,4 @@ For details on the configuration semantics, visit the [ibillboard website](http:
 
 ### Supported parameters
 
-- `src`: Must use **https** protocol and must be from one of the allowed iBillboard hosts.
+-   `src`: Must use **https** protocol and must be from one of the allowed iBillboard hosts.

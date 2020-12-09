@@ -62,10 +62,10 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `adhost`: OAS cname. Must start with HTTPS.
-- `sitepage`: Sitepage configured for this ad spot.
-- `pos`: Position for the this ad spot.
+-   `adhost`: OAS cname. Must start with HTTPS.
+-   `sitepage`: Sitepage configured for this ad spot.
+-   `pos`: Position for the this ad spot.
 
 ### Optional parameters
 
-- `query`: Query parameter to be sent with request. Keywords and keynames, taxonomy etc.
+-   `query`: Query parameter to be sent with request. Keywords and keynames, taxonomy etc.

@@ -36,6 +36,6 @@ For configuration semantics, [contact Kargo](http://www.kargo.com/contact/).
 
 Supported parameters:
 
-- `data-site`
-- `data-slot`
-- `data-options`
+-   `data-site`
+-   `data-slot`
+-   `data-options`

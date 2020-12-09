@@ -110,11 +110,11 @@ Uses available space but respecting aspect ratio by given `width` and `height` (
 
 If avaiable, the following consent data will always be send to our adserver:
 
-- `window.context.consentSharedData.consentString` as IAB consent string
+-   `window.context.consentSharedData.consentString` as IAB consent string
 
 Otherwise following (optional) tag attributes will be send to our adserver:
 
-- `data-gdpr` as "GDPR applies" state
-- `data-gdpr_consent` as IAB consent string
+-   `data-gdpr` as "GDPR applies" state
+-   `data-gdpr_consent` as IAB consent string
 
 If none of above values are given, we try to fetch users consent data via TCF API (if avaiable).

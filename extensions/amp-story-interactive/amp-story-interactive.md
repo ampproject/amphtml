@@ -132,10 +132,10 @@ Results can feed its state from quizzes if all categories also specify `option-{
 All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
 To fetch the data for an interactive element, the necessary fields are:
 
-- <div id="interactiveId"></div> `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
-- `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
-- `endpoint`: the attribute `element.getAttribute("endpoint")`
-- `ampId`: client ID that identifies the session, optional
+-   <div id="interactiveId"></div> `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
+-   `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
+-   `endpoint`: the attribute `element.getAttribute("endpoint")`
+-   `ampId`: client ID that identifies the session, optional
 
 Then, the requests and responses are:
 
@@ -266,10 +266,10 @@ View and play with `amp-story-interactive` elements and styles in this [Codepen 
 
 Style all `amp-story-interactive` elements with CSS variables and attributes. Override default variables by assigning a class to the element.
 
-- `--interactive-accent-color`: The accent color of the component.
-- `--interactive-prompt-text-color`: Color of the top text where applicable (elements with prompts or results with thresholds).
-- `--interactive-prompt-background`: Background of the top text where applicable (elements with prompts or results with thresholds but no images). Can be a color (including transparent) or CSS gradient.
-- `--interactive-prompt-alignment`: Alignment of the prompt where applicable (elements with prompts). Will default to center if the component has the transparent style or if it's a binary poll, otherwise it will default to initial.
+-   `--interactive-accent-color`: The accent color of the component.
+-   `--interactive-prompt-text-color`: Color of the top text where applicable (elements with prompts or results with thresholds).
+-   `--interactive-prompt-background`: Background of the top text where applicable (elements with prompts or results with thresholds but no images). Can be a color (including transparent) or CSS gradient.
+-   `--interactive-prompt-alignment`: Alignment of the prompt where applicable (elements with prompts). Will default to center if the component has the transparent style or if it's a binary poll, otherwise it will default to initial.
 
 ### Themes
 
@@ -320,9 +320,9 @@ Enhance interactivity by adding an animation to the element when entering the pa
 
 The `amp-story-interactive` component elements support [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics/). Report a selected option by adding the `story-interactive` event to your configuration:
 
-- `storyInteractiveId`: the element id
-- `storyInteractiveResponse`: the option selected
-- `storyInteractiveType`: the enum InteractiveType
+-   `storyInteractiveId`: the element id
+-   `storyInteractiveResponse`: the option selected
+-   `storyInteractiveType`: the enum InteractiveType
 
 ```html
 <amp-analytics id="my-analytics">

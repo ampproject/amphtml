@@ -59,16 +59,16 @@ For semantics of configuration, please see [Plista's documentation](https://goo.
 
 Supported parameters:
 
-- `data-countrycode`
-- `data-publickey`
-- `data-widgetname`
-- `data-geo`
-- `data-urlprefix`
-- `data-categories`
+-   `data-countrycode`
+-   `data-publickey`
+-   `data-widgetname`
+-   `data-geo`
+-   `data-urlprefix`
+-   `data-categories`
 
 Supported via `json` attribute:
 
-- `item`
+-   `item`
 
 ## Layout
 

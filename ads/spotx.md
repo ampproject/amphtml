@@ -50,6 +50,6 @@ The SpotX `amp-ad` integration has many of the same capabilities and options as 
 
 ### Required parameters
 
-- `data-spotx_channel_id`
-- `width`
-- `height`
+-   `data-spotx_channel_id`
+-   `width`
+-   `height`

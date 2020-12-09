@@ -46,17 +46,17 @@ For details on the configuration semantics, please contact the FreeWheel support
 Supported parameters:  
 All parameters are optional, unless otherwise stated
 
-- `data-zone` [required]
-- `data-blurDisplay`
-- `data-timeline`
-- `data-soundButton`
-- `data-defaultMute`
-- `data-onOver`
-- `data-closeAction`
-- `data-errorAction`
-- `data-pauseRatio`
-- `data-label`
-- `data-vastUrlParams`
-- `data-gdpr`
-- `data-gdpr_consent`
-- `data-useCMP`
+-   `data-zone` [required]
+-   `data-blurDisplay`
+-   `data-timeline`
+-   `data-soundButton`
+-   `data-defaultMute`
+-   `data-onOver`
+-   `data-closeAction`
+-   `data-errorAction`
+-   `data-pauseRatio`
+-   `data-label`
+-   `data-vastUrlParams`
+-   `data-gdpr`
+-   `data-gdpr_consent`
+-   `data-useCMP`

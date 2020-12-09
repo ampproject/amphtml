@@ -35,5 +35,5 @@ For configuration details and to generate your tags, please contact [Polymorphic
 
 Supported parameters:
 
-- `data-adunit`: adUnitId
-- `data-params`: parameters
+-   `data-adunit`: adUnitId
+-   `data-params`: parameters

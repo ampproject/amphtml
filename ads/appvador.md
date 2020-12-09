@@ -34,10 +34,10 @@ For configuration semantics, contact [AppVador](http://www.appvador.com/).
 
 ### Required Parameters
 
-- `data-id`
+-   `data-id`
 
 ### Optional parameters
 
-- `data-options`
-- `data-js-type`
-- `data-custom-script-src`
+-   `data-options`
+-   `data-js-type`
+-   `data-custom-script-src`

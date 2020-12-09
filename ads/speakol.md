@@ -35,4 +35,4 @@ For configuration details and to generate your tags, please refer to [your publi
 
 parameters:
 
-- `data-widgetid`: widget id. Required.
+-   `data-widgetid`: widget id. Required.

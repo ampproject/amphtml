@@ -50,15 +50,15 @@ For semantics of configuration, please see [Revcontent's documentation](https://
 
 Supported parameters:
 
-- `data-id`
-- `data-revcontent`
-- `data-env`
-- `data-wrapper`
-- `data-endpoint`
-- `data-ssl`
-- `data-testing`
-- `data-loadscript`
-- `data-sub-ids`
+-   `data-id`
+-   `data-revcontent`
+-   `data-env`
+-   `data-wrapper`
+-   `data-endpoint`
+-   `data-ssl`
+-   `data-testing`
+-   `data-loadscript`
+-   `data-sub-ids`
 
 ## Auto-sizing of Ads
 

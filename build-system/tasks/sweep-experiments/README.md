@@ -196,41 +196,41 @@ The summary commit may list HTML files that contain references to an experiment 
 
 These should be handled manually:
 
-- **Turned on via `amp-experiment-opt-in`**
+-   **Turned on via `amp-experiment-opt-in`**
 
-  Experiments may be turned using a `<meta>` tag, so it should be removed:
+    Experiments may be turned using a `<meta>` tag, so it should be removed:
 
-  ```diff
-  - <meta name="amp-experiments-opt-in" content="my-experiment">
-  ```
+    ```diff
+    - <meta name="amp-experiments-opt-in" content="my-experiment">
+    ```
 
-  If other experiments are opted-into, only some entries should be removed:
+    If other experiments are opted-into, only some entries should be removed:
 
-  ```diff
-    <meta
-      name="amp-experiments-opt-in"
-  -   content="some-other-experiment,my-removed-experiment"
-  +   content="some-other-experiment"
-    >
-  ```
+    ```diff
+      <meta
+        name="amp-experiments-opt-in"
+    -   content="some-other-experiment,my-removed-experiment"
+    +   content="some-other-experiment"
+      >
+    ```
 
-- **Toggled via `<script>` snippet**
+-   **Toggled via `<script>` snippet**
 
-  Some HTML files include a `<script>` tag that toggles the experiment. In which case, their execution block should be removed:
+    Some HTML files include a `<script>` tag that toggles the experiment. In which case, their execution block should be removed:
 
-  ```diff
-  - <script>
-  -   (self.AMP = self.AMP || []).push(function(AMP) {
-  -     AMP.toggleExperiment('my-experiment', true);
-  -   });
-  - </script>
-  ```
+    ```diff
+    - <script>
+    -   (self.AMP = self.AMP || []).push(function(AMP) {
+    -     AMP.toggleExperiment('my-experiment', true);
+    -   });
+    - </script>
+    ```
 
-- **Benign references**
+-   **Benign references**
 
-  Some HTML files reference the experiment name if it's homonymous with an unrelated attribute, like when an experiment is named after a new extension. In this case, **there's nothing to remove:**
+    Some HTML files reference the experiment name if it's homonymous with an unrelated attribute, like when an experiment is named after a new extension. In this case, **there's nothing to remove:**
 
-  ```diff
-  <!-- Experiment is called the same as amp-my-extension: -->
-  <script custom-element="amp-my-extension" ...></script>
-  ```
+    ```diff
+    <!-- Experiment is called the same as amp-my-extension: -->
+    <script custom-element="amp-my-extension" ...></script>
+    ```

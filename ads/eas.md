@@ -52,8 +52,8 @@ Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
 
 ### Required parameters
 
-- `data-eas-domain`: Specify your ad-server domain (e.g., `eas3.emediate.se`); If you're using a custom domain-name (like, `eas.somesite.com`) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
+-   `data-eas-domain`: Specify your ad-server domain (e.g., `eas3.emediate.se`); If you're using a custom domain-name (like, `eas.somesite.com`) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
 
 ### Optional parameters
 
-- `data-eas-[parameter]`: Any ad-request parameter, like 'cu'.
+-   `data-eas-[parameter]`: Any ad-request parameter, like 'cu'.

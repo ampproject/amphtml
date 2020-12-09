@@ -79,22 +79,22 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `sectionId`: ID of this section in ad server.
-- `slot`: ID of ad slot in ad server.
-- `pubnetwork`: ID of the publisher that in ad server.
+-   `sectionId`: ID of this section in ad server.
+-   `slot`: ID of ad slot in ad server.
+-   `pubnetwork`: ID of the publisher that in ad server.
 
 ### Optional parameters
 
-- `instance`: ID of section instance in case we multiple times used the same section on the same page. Can contain only letters and numbers.Strictly required to use the same section multiple times per page.
-- `click3rd`: 3rd party click watcher.
-- `adServerUrl`
-- `cacheSafe`
-- `pageIdModifier`
-- `custom`: Custom targeting properties. You may use 3 types for its properties: `{String}`, `{Number}` and `{Array}`. The following array usage example translates into: `arrayKey=value1&arrayKey=1&stringKey=stringValue...`
+-   `instance`: ID of section instance in case we multiple times used the same section on the same page. Can contain only letters and numbers.Strictly required to use the same section multiple times per page.
+-   `click3rd`: 3rd party click watcher.
+-   `adServerUrl`
+-   `cacheSafe`
+-   `pageIdModifier`
+-   `custom`: Custom targeting properties. You may use 3 types for its properties: `{String}`, `{Number}` and `{Array}`. The following array usage example translates into: `arrayKey=value1&arrayKey=1&stringKey=stringValue...`
 
-  ```text
-  {
-      arrayKey: [ "value1", 1 ],
-      stringKey: 'stringValue'
-  }
-  ```
+    ```text
+    {
+        arrayKey: [ "value1", 1 ],
+        stringKey: 'stringValue'
+    }
+    ```

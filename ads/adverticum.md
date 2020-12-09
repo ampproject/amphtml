@@ -35,11 +35,11 @@ For details on the configuration semantics, please contact the Adverticum suppor
 
 ### Required parameters
 
-- `data-goa3zone`: The zoneID, which can be found at the Adverticum AdServer.
+-   `data-goa3zone`: The zoneID, which can be found at the Adverticum AdServer.
 
 ### Optional parameters
 
-- `data-costumetargetstring:`: The value must be Base64Encoded.
+-   `data-costumetargetstring:`: The value must be Base64Encoded.
 
 ## Support and contact
 

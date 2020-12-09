@@ -61,13 +61,13 @@ These configurations are relevant for both `<amp-ad />` and `<amp-embed />`.
 
 ### Required parameters
 
-- `data-widgetIds`: Widget Id/s Provided by Account Manager.
+-   `data-widgetIds`: Widget Id/s Provided by Account Manager.
 
 ### Optional parameters
 
-- `data-htmlURL`: The URL of the standard html version of the page.
-- `data-ampURL`: The URL of the AMP version of the page.
-- `data-styleFile`: Provide publisher an option to pass CSS file in order to inherit the design for the AMP displayed widget. **Consult with Account Manager regarding CSS options**.
+-   `data-htmlURL`: The URL of the standard html version of the page.
+-   `data-ampURL`: The URL of the AMP version of the page.
+-   `data-styleFile`: Provide publisher an option to pass CSS file in order to inherit the design for the AMP displayed widget. **Consult with Account Manager regarding CSS options**.
 
 ### User Consent
 
@@ -75,10 +75,10 @@ The widget will check for user consent to decide whether personalized or non-per
 
 The following rules will be applied:
 
-- CONSENT_POLICY_STATE.SUFFICIENT - Show personalized recommendations
-- CONSENT_POLICY_STATE.INSUFFICIENT - Show non-personalized recommendations only
-- CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED - Show personalized recommendations
-- CONSENT_POLICY_STATE.UNKNOWN - Show non-personalized recommendations only
+-   CONSENT_POLICY_STATE.SUFFICIENT - Show personalized recommendations
+-   CONSENT_POLICY_STATE.INSUFFICIENT - Show non-personalized recommendations only
+-   CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED - Show personalized recommendations
+-   CONSENT_POLICY_STATE.UNKNOWN - Show non-personalized recommendations only
 
 ## Troubleshooting
 

@@ -53,9 +53,9 @@ Specifies the URL for a GIF image.
 In an AMP email, the `src`must point to an absolute URL. Use of `amp-anim` in
 email doesn't allow the following attributes:
 
-- `srcset`
-- `object-fit`
-- `object-position`
+-   `srcset`
+-   `object-fit`
+-   `object-position`
 
 [/filter]
 

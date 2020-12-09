@@ -38,10 +38,10 @@ classes: `amp-referrer-www-google-com`, `amp-referrer-google-com`, and
 
 We currently have a few special cases:
 
-- When the user came through a Twitter `t.co` short link, we instead use
-  `twitter.com` as the referrer.
-- When the string "Pinterest" is present in the User Agent string and
-  there is no referrer, we use `www.pinterest.com` as the referrer.
+-   When the user came through a Twitter `t.co` short link, we instead use
+    `twitter.com` as the referrer.
+-   When the string "Pinterest" is present in the User Agent string and
+    there is no referrer, we use `www.pinterest.com` as the referrer.
 
 **amp-viewer**
 

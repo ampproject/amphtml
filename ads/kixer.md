@@ -28,4 +28,4 @@ For ad slot setup, please [contact Kixer](http://kixer.com).
 
 Supported parameters:
 
-- `data-adslot`
+-   `data-adslot`

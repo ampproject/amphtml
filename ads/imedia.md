@@ -35,10 +35,10 @@ For configuration semantics, see [Imedia's documentation](https://iimedia.sbeta.
 
 Required parameters:
 
-- `data-id`
-- `data-positions`: JSON value
+-   `data-id`
+-   `data-positions`: JSON value
 
 Required JSON fields:
 
-- `id`: unique element id
-- `zoneId`: advertisement identificator
+-   `id`: unique element id
+-   `zoneId`: advertisement identificator

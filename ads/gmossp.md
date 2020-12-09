@@ -28,4 +28,4 @@ For configuration details and to generate your tags, please contact dev@ml.gmo-a
 
 Supported parameters:
 
-- `data-id`
+-   `data-id`

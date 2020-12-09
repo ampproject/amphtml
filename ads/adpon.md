@@ -26,4 +26,4 @@ limitations under the License.
 
 Supported parameters:
 
-- `data-fid`
+-   `data-fid`

@@ -35,4 +35,4 @@ Before starting any Nativo AMP setup, please reach out to your account manager f
 
 ### Optional parameters
 
-- `data-premium`: Switches to premium.
+-   `data-premium`: Switches to premium.

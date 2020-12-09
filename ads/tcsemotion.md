@@ -21,9 +21,9 @@ information on how to get zone id and other details
 
 ### Required parameters
 
-- `data-zone`: the id of the zone provided by adserver
-- `data-delhost`: target domain url
+-   `data-zone`: the id of the zone provided by adserver
+-   `data-delhost`: target domain url
 
 ### Optional parameters
 
-- `data-hb`: enable this field to true when you are using header bidding
+-   `data-hb`: enable this field to true when you are using header bidding

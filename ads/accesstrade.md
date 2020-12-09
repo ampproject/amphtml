@@ -35,5 +35,5 @@ For configuration details and to generate your tags, please contact https://memb
 
 Supported parameters:
 
-- `data-atops`
-- `data-atrotid`
+-   `data-atops`
+-   `data-atrotid`

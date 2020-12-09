@@ -50,10 +50,10 @@ Check if your ad network permits use of flying carpets when implementing the
 
 The following requirements are imposed on `amp-fx-flying-carpet` positioning:
 
-- It should be positioned so that it doesn't obscure the first viewport
-  (outside of top 75%).
-- It should be positioned so that its top can reach or be above the top of the
-  last viewport when scrolled.
+-   It should be positioned so that it doesn't obscure the first viewport
+    (outside of top 75%).
+-   It should be positioned so that its top can reach or be above the top of the
+    last viewport when scrolled.
 
 ## Attributes
 

@@ -10,7 +10,11 @@
     },
     {
       "files": "*.md",
-      "options": {"parser": "markdown", "embeddedLanguageFormatting": "off"}
+      "options": {
+        "parser": "markdown",
+        "embeddedLanguageFormatting": "off",
+        "tabWidth": 4
+      }
     },
     {
       "files": [".prettierrc", ".renovaterc.json", "*.json"],

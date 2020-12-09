@@ -37,5 +37,5 @@ For configuration semantics, please see [AdSpeed documentation](https://www.adsp
 
 Supported parameters:
 
-- `data-zone`: the zone ID
-- `data-client`: the publisher ID
+-   `data-zone`: the zone ID
+-   `data-client`: the publisher ID

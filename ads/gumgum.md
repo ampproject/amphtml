@@ -37,5 +37,5 @@ For parameters, configuration or any questions, contact [GumGum](http://gumgum.c
 
 ### Required parameters
 
-- `data-zone`: GumGum Zone ID
-- `data-slot`: GumGum Slot Ad ID
+-   `data-zone`: GumGum Zone ID
+-   `data-slot`: GumGum Slot Ad ID

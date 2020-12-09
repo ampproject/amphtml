@@ -37,9 +37,9 @@ For further information, please contact [SunMedia](http://sunmedia.tv/#contact).
 
 ### Required parameters
 
-- `data-cid`: Client ID provided by SunMedia
+-   `data-cid`: Client ID provided by SunMedia
 
 ### Optional parameters
 
-- `data-cskp`: Indicates skip button enabled
-- `data-crst`: Indicates restart option enabled
+-   `data-cskp`: Indicates skip button enabled
+-   `data-crst`: Indicates restart option enabled

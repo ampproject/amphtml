@@ -37,12 +37,12 @@ For details on the configuration semantics, please contact Postquare or refer to
 
 ### Required parameters
 
-- `widgetIds`: Widget ids
-- `websiteId`: Website Id
-- `publisherId`: Publisher Id
+-   `widgetIds`: Widget ids
+-   `websiteId`: Website Id
+-   `publisherId`: Publisher Id
 
 ### Optional parameters
 
-- `url`: Current none amp version URL
-- `ampUrl`: Current AMP page URL
-- `styleCSS`: Additional style
+-   `url`: Current none amp version URL
+-   `ampUrl`: Current AMP page URL
+-   `styleCSS`: Additional style

@@ -35,18 +35,18 @@ For configuration and implementation details, please contact Mixpo support: `sup
 
 Required Attributes:
 
-- `data-guid`
-- `data-subdomain`
+-   `data-guid`
+-   `data-subdomain`
 
 Additional Supported Attributes:
 
-- `data-embedv`
-- `data-clicktag`
-- `data-customtarget`
-- `data-dynclickthrough`
-- `data-viewtracking`
-- `data-customcss`
-- `data-local`
-- `data-enablemraid`
-- `data-jsplayer`
-- `data-loader`
+-   `data-embedv`
+-   `data-clicktag`
+-   `data-customtarget`
+-   `data-dynclickthrough`
+-   `data-viewtracking`
+-   `data-customcss`
+-   `data-local`
+-   `data-enablemraid`
+-   `data-jsplayer`
+-   `data-loader`

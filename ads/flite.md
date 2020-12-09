@@ -35,5 +35,5 @@ For configuration and implementation details, please [contact Flite Support](htt
 
 Supported parameters:
 
-- `data-guid`
-- `data-mixins`
+-   `data-guid`
+-   `data-mixins`

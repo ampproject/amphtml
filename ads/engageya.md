@@ -39,12 +39,12 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-widgetIds`: Widget ids
-- `data-websiteId`: Website Id
-- `data-publisherId`: Publisher Id
+-   `data-widgetIds`: Widget ids
+-   `data-websiteId`: Website Id
+-   `data-publisherId`: Publisher Id
 
 ### Optional parameters
 
-- `data-url`: Current none amp version URL
-- `data-ampUrl`: Current AMP page URL
-- `data-styleCSS`: Additional style
+-   `data-url`: Current none amp version URL
+-   `data-ampUrl`: Current AMP page URL
+-   `data-styleCSS`: Additional style

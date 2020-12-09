@@ -241,8 +241,8 @@ Navigation targets can be associated with click-tracking URLs in the config.
 Before navigation, `amp-ad-exit` attempts to use the following to ping the
 tracking URLs:
 
-- `navigator.sendBeacon`, if available
-- image request
+-   `navigator.sendBeacon`, if available
+-   image request
 
 You can override this behavior with a `"transport"` object on the config, such as in this example:
 

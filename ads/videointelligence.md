@@ -36,11 +36,11 @@ For configuration information, please check [docs.vi.ai/](https://docs.vi.ai/gen
 
 ### Required parameters
 
-- `data-publisher-id`
-- `data-channel-id`
+-   `data-publisher-id`
+-   `data-channel-id`
 
 ### Optional parameters
 
-- `data-placement-id`
-- `data-iab-category`
-- `data-language`
+-   `data-placement-id`
+-   `data-iab-category`
+-   `data-language`

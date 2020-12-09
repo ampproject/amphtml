@@ -36,12 +36,12 @@ For semantics of configuration, please see [ad network documentation](http://doc
 
 Required parameters:
 
-- data-widget_id: the id of the widget
-- data-access_key: the access key
+-   data-widget_id: the id of the widget
+-   data-access_key: the access key
 
 Optional parameters
 
-- data-mode: how to embed the widget. Possible values are "iframe" or "inline" (default: "iframe")
+-   data-mode: how to embed the widget. Possible values are "iframe" or "inline" (default: "iframe")
 
 ## Support
 

@@ -36,6 +36,6 @@ For semantics of configuration, please see Rambler SSP documentation.
 
 Supported parameters:
 
-- `data-begun-auto-pad`
-- `data-begun-block-id`
-- `data-custom-css`
+-   `data-begun-auto-pad`
+-   `data-begun-block-id`
+-   `data-custom-css`

@@ -34,6 +34,6 @@ For semantics of configuration, please see [Sklik.czdocumentation](https://napov
 
 Supported parameters:
 
-- `width`
-- `height`
-- `json`
+-   `width`
+-   `height`
+-   `json`

@@ -35,8 +35,8 @@ Please visit the [MANTIS® Ad Network website](https://www.mantisadnetwork.com) 
 
 Supported parameters:
 
-- `data-property`
-- `data-zone`
+-   `data-property`
+-   `data-zone`
 
 ### Content Recommendation
 
@@ -56,5 +56,5 @@ Depending on your page design, you may need to play with the `"heights="` parame
 
 Supported parameters:
 
-- `data-property`
-- `data-css` (Overrides the default CSS embedded by the script)
+-   `data-property`
+-   `data-css` (Overrides the default CSS embedded by the script)

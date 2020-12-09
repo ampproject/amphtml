@@ -34,4 +34,4 @@ For configuration details and to generate your tags, please contact [Realclick](
 
 Supported parameters:
 
-- `data-mcode`
+-   `data-mcode`

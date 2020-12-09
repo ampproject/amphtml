@@ -61,10 +61,10 @@ Required parameters:
 
 ### `data-position`
 
-- Object must have required keys `id`, `width`, `height`, `zoneId` (Watch out for uppercase "I" in "id").
-- Every position MUST have unique `id`, if you duplicate some id, Ad may be used from another position.
-- Attributes `width` and `height` are from AMP specification, and they will set fixed border around Ad.
-- Attributes `data-width` and `data-height` are used to fetch SSP Ads on the server (They can different).
+-   Object must have required keys `id`, `width`, `height`, `zoneId` (Watch out for uppercase "I" in "id").
+-   Every position MUST have unique `id`, if you duplicate some id, Ad may be used from another position.
+-   Attributes `width` and `height` are from AMP specification, and they will set fixed border around Ad.
+-   Attributes `data-width` and `data-height` are used to fetch SSP Ads on the server (They can different).
 
 ## Contact
 

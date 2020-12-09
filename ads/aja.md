@@ -38,5 +38,5 @@ You have to contact our account manager to create ad spot at first.
 
 Required parameters:
 
-- asi
-  - `data-asi`
+-   asi
+    -   `data-asi`

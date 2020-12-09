@@ -34,6 +34,6 @@ For configuration details and to generate your tags, please contact us at [Relap
 
 Supported parameters:
 
-- `data-slot-id`
-- `data-name-ad-unit`
-- `data-requirements`
+-   `data-slot-id`
+-   `data-name-ad-unit`
+-   `data-requirements`

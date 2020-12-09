@@ -30,4 +30,4 @@ For details on the configuration semantics, please contact support@meg.com
 
 Supported parameters:
 
-- `data-code`: unique ad code given by Meg.com
+-   `data-code`: unique ad code given by Meg.com

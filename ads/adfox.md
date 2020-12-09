@@ -35,5 +35,5 @@ For details on the configuration semantics, please see [AdFox's documentation](h
 
 ### Required parameters
 
-- `data-owner-id`
-- `data-adfox-params`
+-   `data-owner-id`
+-   `data-adfox-params`

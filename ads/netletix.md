@@ -37,15 +37,15 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-nxkey`: string, non-empty
-- `data-nxunit`: string, non-empty
-- `data-nxwidth`: string, non-empty
-- `data-nxheight`: string, non-empty
+-   `data-nxkey`: string, non-empty
+-   `data-nxunit`: string, non-empty
+-   `data-nxwidth`: string, non-empty
+-   `data-nxheight`: string, non-empty
 
 ### Optional parameters
 
-- `data-nxasync`: string, non-empty
-- `data-nxv`: string, non-empty
-- `data-nxsite`: string, non-empty
-- `data-nxid`: string, non-empty
-- `data-nxscript`: string, non-empty
+-   `data-nxasync`: string, non-empty
+-   `data-nxv`: string, non-empty
+-   `data-nxsite`: string, non-empty
+-   `data-nxid`: string, non-empty
+-   `data-nxscript`: string, non-empty

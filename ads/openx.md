@@ -18,8 +18,8 @@ limitations under the License.
 
 ## Examples
 
-- All OpenX `<amp-ad>` tags require the `width`, `height`, and `type="openx"` parameters.
-- Secure tags (HTTPS) are required for AMP.
+-   All OpenX `<amp-ad>` tags require the `width`, `height`, and `type="openx"` parameters.
+-   Secure tags (HTTPS) are required for AMP.
 
 ### OpenX Ad Server
 
@@ -27,14 +27,14 @@ Display an OpenX Ad Unit.
 
 **Required**:
 
-- `data-auid` - The ad unit ID to display
-- `data-host` - SSL-enabled OpenX delivery domain
+-   `data-auid` - The ad unit ID to display
+-   `data-host` - SSL-enabled OpenX delivery domain
 
 **Optional**:
 
-- `json` - Additional json options.
+-   `json` - Additional json options.
 
-  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).
+    -   `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).
 
 ```html
 <amp-ad
@@ -57,16 +57,16 @@ OpenX header bidding. Parameters noted in the DoubleClick amp-ad [documentation]
 
 **Required**:
 
-- `data-host` - SSL-enabled OpenX delivery domain
-- `data-nc` - Network code '-' sitename
-- `data-auid` - Open X Ad unit id to display
-- `data-dfp-slot` - The DoubleClick slot
+-   `data-host` - SSL-enabled OpenX delivery domain
+-   `data-nc` - Network code '-' sitename
+-   `data-auid` - Open X Ad unit id to display
+-   `data-dfp-slot` - The DoubleClick slot
 
 **Optional**:
 
-- `json` - Additional json options.
+-   `json` - Additional json options.
 
-  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html). Also note that OpenX bidder limits these keys by the **white listed keys** set on your publisher settings.
+    -   `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html). Also note that OpenX bidder limits these keys by the **white listed keys** set on your publisher settings.
 
 ```html
 <amp-ad
@@ -89,11 +89,11 @@ parameter conversion apply here as for bidder.
 
 **Required**:
 
-- `data-dfp-slot` - The DoubleClick slot
+-   `data-dfp-slot` - The DoubleClick slot
 
 **Optional**:
 
-- `json` - Additional json options. Only the "dfp" is currently respected.
+-   `json` - Additional json options. Only the "dfp" is currently respected.
 
 ```html
 <amp-ad

@@ -53,7 +53,7 @@ information on how to get required movie tag or placement IDs.
 
 Only one of the mentioned parameters should be used at the same time.
 
-- `data-sid`
-- `data-mid`
-- `src`: must use https protocol and must be from one of the
-  allowed OnNetwork hosts.
+-   `data-sid`
+-   `data-mid`
+-   `src`: must use https protocol and must be from one of the
+    allowed OnNetwork hosts.

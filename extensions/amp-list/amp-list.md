@@ -38,8 +38,8 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 
 You can specify a template in one of two ways:
 
-- a `template` attribute that references an ID of an existing templating element.
-- a templating element nested directly inside the `amp-list` element.
+-   a `template` attribute that references an ID of an existing templating element.
+-   a templating element nested directly inside the `amp-list` element.
 
 [tip type="note"]
 When using `<amp-list>` in tandem with another templating AMP component, such as `<amp-form>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](../amp-mustache/amp-mustache.md).
@@ -155,9 +155,9 @@ In `<amp-list>`, you can use the [`items`](#items-optional) attribute to render 
 
 Optionally, the `<amp-list>` component can contain an element with the `overflow` attribute. Add an element with the AMP `overflow` attribute to `amp-list` if the AMP framework is unable to size it as requested. If you include a child element of `amp-list` with the `overflow` attribute, it will appear if one of the following conditions are met:
 
-- The bottom of `amp-list` is below the viewport.
+-   The bottom of `amp-list` is below the viewport.
 
-- The bottom of `amp-list` is within 15% of the height of the entire page and within 1000px of the end of the page.
+-   The bottom of `amp-list` is within 15% of the height of the entire page and within 1000px of the end of the page.
 
 If `amp-list` is outside the viewport, it will be automatically expanded.
 
@@ -205,8 +205,8 @@ AMP applies the following CSS to elements with the `overflow` attribute:
 
 Optionally, `<amp-list>` supports a placeholder and/or fallback.
 
-- A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
-- A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
+-   A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
+-   A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
 
 Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders). Note that a child element cannot be both a placeholder and a fallback.
 
@@ -520,8 +520,8 @@ The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supp
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
-- Supported values: `omit`, `include`
-- Default: `omit`
+-   Supported values: `omit`, `include`
+-   Default: `omit`
 
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
@@ -545,9 +545,9 @@ Here's an example that specifies including credentials to display personalized c
 Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response.
 By defaut `<amp-list>` expects an array, the `single-item` attribute may be used to load data from an object.
 
-- The default value is `"items"`. The expected response: `{items: [...]}`.
-- If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
-- Nested navigation is permitted (e.g., `"field1.field2"`). The expected response is: `{field1: {field2: [...]}}`.
+-   The default value is `"items"`. The expected response: `{items: [...]}`.
+-   If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
+-   Nested navigation is permitted (e.g., `"field1.field2"`). The expected response is: `{field1: {field2: [...]}}`.
 
 When `items="items"` is specified (which, is the default) the response must be a JSON object that contains an array property called `"items"`:
 
@@ -602,9 +602,9 @@ For pages using `<amp-list>` that also use `amp-bind`, controls whether or not t
 
 We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
-- `binding="no"`: Never block render **(fastest)**.
-- `binding="refresh"`: Don't block render on initial load **(faster)**.
-- `binding="always"`: Always block render **(slow)**.
+-   `binding="no"`: Never block render **(fastest)**.
+-   `binding="refresh"`: Don't block render on initial load **(faster)**.
+-   `binding="always"`: Always block render **(slow)**.
 
 If `binding` attribute is not provided, default is `always`.
 
@@ -645,16 +645,16 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
-- `[src]`
-- `[state]`
-- `[is-layout-container]`
-- `auto-resize`
-- `credentials`
-- `data-amp-bind-src`
-- `load-more`
-- `load-more-bookmark`
-- `reset-on-refresh`
-- `xssi-prefix`
+-   `[src]`
+-   `[state]`
+-   `[is-layout-container]`
+-   `auto-resize`
+-   `credentials`
+-   `data-amp-bind-src`
+-   `load-more`
+-   `load-more-bookmark`
+-   `reset-on-refresh`
+-   `xssi-prefix`
 
 [/filter] <!-- formats="email" -->
 

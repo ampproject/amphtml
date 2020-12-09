@@ -62,22 +62,22 @@ For a full-page example, see
 
 Use of `amp-app-banner` must meet the following requirements:
 
-- Don't include [`amp-ad/amp-embed`](../amp-ad/amp-ad.md),
-  [`amp-sticky-ad`](../amp-sticky-ad/amp-sticky-ad.md), or
-  [`amp-iframe`](../amp-iframe/amp-iframe.md) as
-  descendants.
+-   Don't include [`amp-ad/amp-embed`](../amp-ad/amp-ad.md),
+    [`amp-sticky-ad`](../amp-sticky-ad/amp-sticky-ad.md), or
+    [`amp-iframe`](../amp-iframe/amp-iframe.md) as
+    descendants.
 
-- [`height`](https://www.w3schools.com/tags/att_height.asp) can't exceed
-  `100px`.
+-   [`height`](https://www.w3schools.com/tags/att_height.asp) can't exceed
+    `100px`.
 
-- Must be a direct child of the
-  [`<body>`](https://www.w3schools.com/tags/tag_body.asp) tag.
+-   Must be a direct child of the
+    [`<body>`](https://www.w3schools.com/tags/tag_body.asp) tag.
 
-- The Android manifest
-  [`href`](https://www.w3schools.com/tags/att_link_href.asp) attribute must be
-  served over `https`.
+-   The Android manifest
+    [`href`](https://www.w3schools.com/tags/att_link_href.asp) attribute must be
+    served over `https`.
 
-- Don't include more than one `amp-app-banner` on a single page.
+-   Don't include more than one `amp-app-banner` on a single page.
 
 ### Specify data sources
 
@@ -90,27 +90,27 @@ platforms. iOS uses a
 tag in the head of the document, while Android uses a
 [`<link rel="manifest">`](https://www.w3schools.com/tags/tag_link.asp) tag.
 
-- On iOS, the AMP runtime parses the `<meta>` tag content attribute to extract
-  the App ID and `app-argument`. These are usually used for deep link URIs,
-  such as app-protocols like `whatsapp://` or `medium://`.
+-   On iOS, the AMP runtime parses the `<meta>` tag content attribute to extract
+    the App ID and `app-argument`. These are usually used for deep link URIs,
+    such as app-protocols like `whatsapp://` or `medium://`.
 
-  - The `<meta>` tag must have the
-    [`name`](https://www.w3schools.com/tags/att_meta_name.asp) and
-    [`content`](https://www.w3schools.com/tags/att_meta_content.asp)
-    attributes.
+    -   The `<meta>` tag must have the
+        [`name`](https://www.w3schools.com/tags/att_meta_name.asp) and
+        [`content`](https://www.w3schools.com/tags/att_meta_content.asp)
+        attributes.
 
-  - The value of the `content` attribute must contain `app-id=`.
+    -   The value of the `content` attribute must contain `app-id=`.
 
-- On Android, the AMP runtime makes an XHR request to fetch the
-  `manifest.json` file. The runtime parses the
-  content to extract `app_id` from `related_applications` and calculates the
-  app store URL as well as open-in-app URL, which has the following form:
-  `android-app://${appId}/${protocol}/${host}${pathname}`
+-   On Android, the AMP runtime makes an XHR request to fetch the
+    `manifest.json` file. The runtime parses the
+    content to extract `app_id` from `related_applications` and calculates the
+    app store URL as well as open-in-app URL, which has the following form:
+    `android-app://${appId}/${protocol}/${host}${pathname}`
 
-  - The `<link>` tag must have the
-    [`"rel='manifest'"`](https://www.w3schools.com/tags/tag_link.asp)
-    attribute and value, as well as the
-    [`href`](https://www.w3schools.com/tags/att_link_href.asp) attribute.
+    -   The `<link>` tag must have the
+        [`"rel='manifest'"`](https://www.w3schools.com/tags/tag_link.asp)
+        attribute and value, as well as the
+        [`href`](https://www.w3schools.com/tags/att_link_href.asp) attribute.
 
 [tip type="note"]
 The protocol, host, and pathname are calculated from the canonical URL of the

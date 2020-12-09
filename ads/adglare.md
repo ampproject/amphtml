@@ -37,9 +37,9 @@ For more information, read AdGlare's blog article about [AMP Ad Tags](https://ww
 
 ### Required parameters
 
-- `data-host`
-- `data-zid`
+-   `data-host`
+-   `data-zid`
 
 ### Optional parameters
 
-- `data-keywords`
+-   `data-keywords`

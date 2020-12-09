@@ -35,5 +35,5 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-slot`
-- `data-domain`
+-   `data-slot`
+-   `data-domain`

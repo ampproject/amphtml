@@ -36,6 +36,6 @@ For details on the configuration semantics, please contact the ad network or ref
 
 Supported parameters:
 
-- `data-pid`
-- `data-zid`
-- `data-custom3`
+-   `data-pid`
+-   `data-zid`
+-   `data-custom3`
