@@ -15,7 +15,7 @@
  */
  
 amp-story-panning-media amp-img {
-  /* Child img gets 100% height. This centers the image.*/
+  /* Child img gets 100% height. This centers the image. */
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
