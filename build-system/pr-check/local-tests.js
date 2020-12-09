@@ -17,7 +17,7 @@
 
 /**
  * @fileoverview
- *This script runs the unit and integration tests on a local Travis VM.
+ * This script runs the unit and integration tests locally on a VM.
  * This is run during the CI stage = test; job = local tests.
  */
 
@@ -31,7 +31,7 @@ const {
   timedExecOrThrow: timedExecOrThrowBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
+const {isPullRequestBuild} = require('../common/ci');
 
 const FILENAME = 'local-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -41,7 +41,7 @@ const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  if (!isTravisPullRequestBuild()) {
+  if (!isPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 

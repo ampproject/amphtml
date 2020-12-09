@@ -31,12 +31,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-access-iframe',
-    name: 'AMP Access iframe prototype (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/13287',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -52,14 +46,6 @@ export const EXPERIMENTS = [
     id: 'amp-base-carousel',
     name: 'AMP extension for a basic, flexible, carousel',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
-  },
-  {
-    id: 'amp-google-vrview-image',
-    name: 'AMP VR Viewer for images via Google VRView',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-google-vrview-image/amp-google-vrview-image.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
     id: 'amp-sidebar-v2',
@@ -88,12 +74,6 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
-  },
-  {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz items (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/6106',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
     id: 'amp-action-macro',
