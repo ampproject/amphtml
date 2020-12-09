@@ -16,6 +16,7 @@
 
 import {CommonSignals} from './common-signals';
 import {FIE_EMBED_PROP} from './iframe-helper';
+import {FIE_RESOURCES_EXP} from './experiments/fie-resources-exp';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {VisibilityState} from './visibility-state';
@@ -27,6 +28,7 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
+import {getExperimentBranch} from './experiments';
 import {installAmpdocServicesForEmbed} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -486,9 +488,18 @@ export class FriendlyIframeEmbed {
         this.win./*OK*/ innerHeight
       );
     }
+    const fieResourcesOn =
+      this.ampdoc &&
+      this.ampdoc.getParent() &&
+      getExperimentBranch(this.ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
+        FIE_RESOURCES_EXP.experiment;
     Promise.all([
       this.whenReady(),
-      whenContentIniLoad(this.iframe, this.win, rect),
+      whenContentIniLoad(
+        fieResourcesOn ? this.ampdoc : this.iframe,
+        this.win,
+        rect
+      ),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });

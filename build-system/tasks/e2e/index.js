@@ -197,7 +197,7 @@ async function runWatch_() {
   });
 
   // return non-resolving promise to gulp.
-  return new Promise();
+  return new Promise(() => {});
 }
 
 /**
