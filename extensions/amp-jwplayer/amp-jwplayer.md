@@ -87,6 +87,7 @@ Requires [`amp-video-docking` component](https://amp.dev/documentation/component
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
+
 ## Validation
 
 See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/validator-amp-jwplayer.protoascii) in the AMP validator specification.

@@ -349,6 +349,7 @@ const adConfig = jsonConfiguration({
 
   'broadstreetads': {
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
+    renderStartImplemented: true,
   },
 
   'byplay': {},
@@ -474,6 +475,10 @@ const adConfig = jsonConfiguration({
   },
 
   'fake': {},
+
+  'fake-delayed': {
+    renderStartImplemented: true,
+  },
 
   'felmat': {
     prefetch: 'https://t.felmat.net/js/fmamp.js',
@@ -757,6 +762,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'myoffrz': {
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
@@ -899,6 +908,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'pulse': {
+    prefetch: 'https://static.pulse.mail.ru/pulse-widget-amp.js',
+    renderStartImplemented: true,
+  },
+
   'pulsepoint': {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
@@ -948,6 +962,11 @@ const adConfig = jsonConfiguration({
   'relappro': {
     prefetch: 'https://cdn.relappro.com/adservices/amp/relappro.amp.min.js',
     preconnect: 'https://tags.relappro.com',
+    renderStartImplemented: true,
+  },
+
+  'remixd': {
+    preconnect: 'https://tags.remixd.com',
     renderStartImplemented: true,
   },
 
@@ -1199,6 +1218,10 @@ const adConfig = jsonConfiguration({
 
   'viralize': {
     renderStartImplemented: true,
+  },
+
+  'vlyby': {
+    prefetch: 'https://cdn.vlyby.com/amp/qad/qad-outer2.js',
   },
 
   'vmfive': {

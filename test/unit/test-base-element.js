@@ -81,18 +81,6 @@ describes.realWin('BaseElement', {amp: true}, (env) => {
     expect(target.getAttribute('data-test3')).to.equal('123');
   });
 
-  it('propagateDataset', () => {
-    const target = doc.createElement('div');
-    target.dataset.foo = 'abc';
-
-    element.propagateDataset(target);
-    expect(target.hasAttribute('data-foo')).to.be.false;
-
-    customElement.dataset.bar = '123';
-    element.propagateDataset(target);
-    expect(target.hasAttribute('data-bar', '123')).to.be.true;
-  });
-
   it('should register action', () => {
     const handler = () => {};
     element.registerAction('method1', handler);

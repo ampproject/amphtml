@@ -26,7 +26,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
   const TAG = 'OriginExperiments';
   // Token enables experiment "foo" for origin "https://origin.com".
   const token =
-    'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY'; // eslint-disable-line max-len
+    'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY';
 
   let ampdoc;
   let isPkcsAvailable;

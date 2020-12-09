@@ -29,11 +29,11 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {debounce} from '../../../src/utils/rate-limit';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
@@ -188,6 +188,20 @@ export class AmpSidebar extends AMP.BaseElement {
             this.user().error(TAG, 'Failed to instantiate toolbar', e);
           }
         });
+
+        if (toolbarElements.length) {
+          this.getViewport().onResize(
+            debounce(
+              this.win,
+              () => {
+                this.toolbars_.forEach((toolbar) => {
+                  toolbar.onLayoutChange();
+                });
+              },
+              100
+            )
+          );
+        }
       });
 
     if (this.isIos_) {
@@ -558,9 +572,6 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   setupGestures_(element) {
-    if (!isExperimentOn(this.win, 'amp-sidebar-swipe-to-dismiss')) {
-      return;
-    }
     // stop propagation of swipe event inside amp-viewer
     const gestures = Gestures.get(
       dev().assertElement(element),

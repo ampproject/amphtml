@@ -44,7 +44,6 @@ import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
-import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 
@@ -210,7 +209,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iniPromise_) {
       return this.iniPromise_;
     }
-    toggle(this.element, false);
 
     this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
@@ -253,6 +251,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
+    this.iniPromise_.then(() => {
+      this./*OK*/ collapse();
+    });
     return this.iniPromise_;
   }
 

@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {includes, startsWith} from './string';
+import {includes} from './string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -55,7 +55,7 @@ export function waitForChild(parent, checkFunc, callback) {
   }
   /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
-  if (win.MutationObserver) {
+  if (IS_ESM || win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -239,7 +239,6 @@ export function rootNodeFor(node) {
  * @return {boolean}
  */
 export function isShadowRoot(value) {
-  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
   if (!value) {
     return false;
   }
@@ -527,7 +526,7 @@ function scopedQuerySelectionFallback(root, selector) {
  * @return {?Element}
  */
 export function scopedQuerySelector(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
@@ -544,7 +543,7 @@ export function scopedQuerySelector(root, selector) {
  * @return {!NodeList<!Element>}
  */
 export function scopedQuerySelectorAll(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelectorAll(
       prependSelectorsWith(selector, ':scope')
     );
@@ -758,7 +757,7 @@ export function isAmpElement(element) {
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
   return (
-    startsWith(tag, 'AMP-') &&
+    tag.startsWith('AMP-') &&
     // Some "amp-*" elements are not really AMP elements. :smh:
     !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
   );
@@ -928,6 +927,21 @@ export function toggleAttribute(element, name, forced) {
 }
 
 /**
+ * Parses a string as a boolean value using the expanded rules for DOM boolean
+ * attributes:
+ * - a `null` or `undefined` returns `null`;
+ * - an empty string returns `true`;
+ * - a "false" string returns `false`;
+ * - otherwise, `true` is returned.
+ *
+ * @param {?string|undefined} s
+ * @return {boolean|undefined}
+ */
+export function parseBooleanAttribute(s) {
+  return s == null ? undefined : s !== 'false';
+}
+
+/**
  * @param {!Window} win
  * @return {number} The width of the vertical scrollbar, in pixels.
  */
@@ -936,4 +950,20 @@ export function getVerticalScrollbarWidth(win) {
   const windowWidth = win./*OK*/ innerWidth;
   const documentWidth = documentElement./*OK*/ clientWidth;
   return windowWidth - documentWidth;
+}
+
+/**
+ * Dispatches a custom event.
+ *
+ * @param {!Node} node
+ * @param {string} name
+ * @param {!Object=} opt_data Event data.
+ */
+export function dispatchCustomEvent(node, name, opt_data) {
+  const data = opt_data || {};
+  // Constructors of events need to come from the correct window. Sigh.
+  const event = node.ownerDocument.createEvent('Event');
+  event.data = data;
+  event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
+  node.dispatchEvent(event);
 }

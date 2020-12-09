@@ -198,6 +198,10 @@ Specifies the key to the data array within the JSON response. Nested keys can be
 
 Whether the <code>amp-autocomplete</code> should autosuggest on the full user input or only a triggered substring of the user input. By default when the attribute is absent, suggestions will be based on the full user input. The attribute cannot have an empty value but must take a single character token, i.e. <code>@</code> which activates the autocomplete behavior. For example, if <code>inline="@"</code> then user input of <code>hello</code> will not retrieve suggestions but a user input of <code>hello @abc</code> might trigger options filtered on the substring <code>abc</code>. Currently triggered substrings are delimited on whitespace characters, however this is subject to change in the future.
 
+### `prefetch`
+
+Include the `prefetch` attribute to prefetch remote data to improve responsiveness for users. Requires `src` to be specified.
+
 ## Events
 
 ### `select`
@@ -206,7 +210,41 @@ Whether the <code>amp-autocomplete</code> should autosuggest on the full user in
 via click, tap, keyboard navigation or accepting typeahead. It also fires the
 `select` event if a user keyboard navigates to an item and Tabs away from the
 input field. `event` contains the `value` attribute value of the selected
-element.
+element which is its textual representation (e.g., value of data-value).
+
+`event` may also contain the entire object in the `valueAsObject` field, if
+the suggestion template contains `data-json={{objToJson}}`. This causes
+the rendered element to have a `data-json` data attribute with a JSON string
+representation of the corresponding object, which is then made available in
+the `valueAsObject` field of the `event`.
+
+Example:
+
+```html
+<amp-autocomplete
+  filter="substring"
+  id="myAutocomplete"
+  on="select:AMP.setState({chosenFruit: event.valueAsObject})"
+>
+  <input />
+  <script type="application/json">
+    {
+      "items": [
+        {"fruit": "apple", "color": "red"},
+        {"fruit": "banana", "color": "yellow"}
+      ]
+    }
+  </script>
+  <template type="amp-mustache">
+    <div data-value="{{fruit}}" data-json="{{objToJson}}">
+      {{color}} {{fruit}}
+    </div>
+  </template>
+</amp-autocomplete>
+<p [text]="'Your fruit: ' + chosenFruit.color + ', ' + chosenFruit.fruit">
+  No fruit selected
+</p>
+```
 
 ## Validation
 

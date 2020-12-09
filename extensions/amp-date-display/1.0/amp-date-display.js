@@ -14,58 +14,27 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {AsyncRender} from './async-render';
 import {DateDisplay} from './date-display';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {RenderDomTree} from './render-dom-tree';
 import {Services} from '../../../src/services';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+import {parseDate} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
 
 class AmpDateDisplay extends PreactBaseElement {
-  /** @override */
-  init() {
-    const templates = Services.templatesFor(this.win);
-    let rendered = false;
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-    return dict({
-      /**
-       * @param {!JsonObject} data
-       * @param {*} children
-       * @return {*}
-       */
-      'render': (data, children) => {
-        // We only render once in AMP mode, but React mode may rerender
-        // serveral times.
-        if (rendered) {
-          return children;
-        }
-        rendered = true;
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
-        const host = this.element;
-        const domPromise = templates
-          .findAndRenderTemplate(host, data)
-          .then((rendered) => {
-            const container = document.createElement('div');
-            container.appendChild(rendered);
-
-            return <RenderDomTree dom={container} host={host} />;
-          });
-
-        return (
-          <>
-            {children}
-            <AsyncRender>{domPromise}</AsyncRender>
-          </>
-        );
-      },
-    });
+    /** @private {?Element} */
+    this.template_ = null;
   }
 
   /** @override */
@@ -74,7 +43,46 @@ class AmpDateDisplay extends PreactBaseElement {
       isExperimentOn(this.win, 'amp-date-display-bento'),
       'expected amp-date-display-bento experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  checkPropsPostMutations() {
+    const templates =
+      this.templates_ || (this.templates_ = Services.templatesFor(this.win));
+    const template = templates.maybeFindTemplate(this.element);
+    if (template != this.template_) {
+      this.template_ = template;
+      if (template) {
+        // Only overwrite `render` when template is ready to minimize FOUC.
+        templates.whenReady(template).then(() => {
+          if (template != this.template_) {
+            // A new template has been set while the old one was initializing.
+            return;
+          }
+          this.mutateProps(
+            dict({
+              'render': (data) => {
+                return templates
+                  .renderTemplateAsString(dev().assertElement(template), data)
+                  .then((html) => dict({'__html': html}));
+              },
+            })
+          );
+        });
+      } else {
+        this.mutateProps(dict({'render': null}));
+      }
+    }
+  }
+
+  /** @override */
+  isReady(props) {
+    if (this.template_ && !('render' in props)) {
+      // The template is specified, but not available yet.
+      return false;
+    }
+    return true;
   }
 }
 
@@ -82,17 +90,59 @@ class AmpDateDisplay extends PreactBaseElement {
 AmpDateDisplay['Component'] = DateDisplay;
 
 /** @override */
-AmpDateDisplay['passthrough'] = true;
+AmpDateDisplay['props'] = {
+  'datetime': {
+    attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
+    parseAttrs: parseDateAttrs,
+  },
+  'displayIn': {attr: 'display-in'},
+  'locale': {attr: 'locale'},
+};
 
 /** @override */
-AmpDateDisplay['props'] = {
-  'displayIn': {attr: 'display-in'},
-  'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
-  'locale': {attr: 'locale'},
-  'datetime': {attr: 'datetime'},
-  'timestampMs': {attr: 'timestamp-ms', type: 'number'},
-  'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
-};
+AmpDateDisplay['layoutSizeDefined'] = true;
+
+/** @override */
+AmpDateDisplay['lightDomTag'] = 'div';
+
+/** @override */
+AmpDateDisplay['usesTemplate'] = true;
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ * @visibleForTesting
+ */
+export function parseDateAttrs(element) {
+  const epoch = userAssert(
+    parseEpoch(element),
+    'One of datetime, timestamp-ms, or timestamp-seconds is required'
+  );
+
+  const offsetSeconds =
+    (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
+  return epoch + offsetSeconds;
+}
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ */
+function parseEpoch(element) {
+  const datetime = element.getAttribute('datetime');
+  if (datetime) {
+    return userAssert(parseDate(datetime), 'Invalid date: %s', datetime);
+  }
+  const timestampMs = element.getAttribute('timestamp-ms');
+  if (timestampMs) {
+    return Number(timestampMs);
+  }
+  const timestampSeconds = element.getAttribute('timestamp-seconds');
+  if (timestampSeconds) {
+    return Number(timestampSeconds) * 1000;
+  }
+  return null;
+}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpDateDisplay);

@@ -15,7 +15,6 @@
  */
 
 import {FakeWindow} from '../../testing/fake-dom';
-import {Services} from '../../src/services';
 import {
   getElementService,
   getElementServiceForDoc,
@@ -423,10 +422,7 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
     embedWin.frameElement = frameElement;
     setParentWindow(embedWin, win);
 
-    Services.ampdocServiceFor(win).installFieDoc(
-      'https://example.org',
-      embedWin
-    );
+    env.ampdocService.installFieDoc('https://example.org', embedWin);
 
     nodeInEmbedWin = {
       nodeType: Node.ELEMENT_NODE,

@@ -15,10 +15,10 @@
  */
 'use strict';
 const fs = require('fs-extra');
-const {transformCss} = require('../jsify-css');
+const {transformCssFile} = require('../jsify-css');
 
 async function createGoldenCss() {
-  const result = await transformCss(
+  const result = await transformCssFile(
     './build-system/tasks/create-golden-css/css/main.css',
     {
       normalizeWhitespace: false,

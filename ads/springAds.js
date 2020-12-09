@@ -21,11 +21,11 @@ import {parseJson} from '../src/json';
  * @param context
  */
 
-const initSlotList = function (context) {
+const initSlotList = (context) => {
   context.master.availableSlots = context.master.availableSlots || {};
 };
 
-const registerSlot = function (slot) {
+const registerSlot = (slot) => {
   context.master.availableSlots[slot.slotName] = slot;
 };
 
@@ -34,7 +34,7 @@ export function springAds(global, data) {
   computeInMasterFrame(
     global,
     'springAds',
-    function () {
+    () => {
       initSlotList(context);
     },
     () => {}
@@ -50,21 +50,13 @@ export function springAds(global, data) {
       'https://www.asadcdn.com/adlib/pages/' + sitename + '_amp.js'
     );
   } else {
-    computeInMasterFrame(
+    registerSlot({
       global,
-      'springAds',
-      function () {
-        registerSlot({
-          window,
-          document,
-          context,
-          slotName: data['adslot'],
-        });
-        if (context.master.ASCDP) {
-          context.master.ASCDP.adS.renderAd(data.adslot);
-        }
-      },
-      () => {}
-    );
+      document,
+      context,
+      slotName: data['adslot'],
+    });
+    const adlib = window.ASCDP || context.master.ASCDP || '';
+    adlib && adlib.adS.renderAd(data.adslot);
   }
 }

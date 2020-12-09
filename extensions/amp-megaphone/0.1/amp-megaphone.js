@@ -35,7 +35,6 @@ import {isLayoutSizeFixed} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
@@ -186,8 +185,7 @@ class AmpMegaphone extends AMP.BaseElement {
     if (
       !eventData ||
       !(
-        isObject(eventData) ||
-        startsWith(/** @type {string} */ (eventData), '{')
+        isObject(eventData) || /** @type {string} */ (eventData).startsWith('{')
       )
     ) {
       return;

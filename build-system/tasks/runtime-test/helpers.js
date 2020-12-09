@@ -18,10 +18,10 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const log = require('fancy-log');
-const opn = require('opn');
 const path = require('path');
 const {green, yellow, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
+const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestRunComplete} = require('../report-test-status');
 const {Server} = require('karma');
 
@@ -72,7 +72,7 @@ function getAdTypes() {
  * Prints help messages for args if tests are being run for local development.
  */
 function maybePrintArgvMessages() {
-  if (argv.nohelp || isTravisBuild()) {
+  if (argv.nohelp || isCiBuild()) {
     return;
   }
 
@@ -149,16 +149,6 @@ function maybePrintArgvMessages() {
   });
 }
 
-function maybePrintCoverageMessage() {
-  if (!argv.coverage || isTravisBuild()) {
-    return;
-  }
-
-  const url = 'file://' + path.resolve('test/coverage/index.html');
-  log(green('INFO:'), 'Generated code coverage report at', cyan(url));
-  opn(url, {wait: false});
-}
-
 /**
  * @param {Object} browser
  * @private
@@ -211,7 +201,7 @@ async function createKarmaServer(
   });
 
   const karmaServer = new Server(configBatch, (exitCode) => {
-    maybePrintCoverageMessage();
+    maybePrintCoverageMessage('test/coverage/index.html');
     resolver(exitCode);
   });
 

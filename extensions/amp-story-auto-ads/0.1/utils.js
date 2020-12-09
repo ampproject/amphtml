@@ -42,16 +42,6 @@ export function getUniqueId(win) {
 }
 
 /**
- * Finds all meta tags starting with `amp4ads-vars-`.
- * @param {Document} doc
- * @return {!IArrayLike}
- */
-export function getA4AMetaTags(doc) {
-  const selector = 'meta[name^=amp4ads-vars-]';
-  return doc.querySelectorAll(selector);
-}
-
-/**
  * Returns document from given iframe, or null if non FIE.
  * @param {HTMLIFrameElement} iframe
  * @return {!Document}

@@ -16,7 +16,6 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|
 |    This test demonstrates that an LTS version of an extension may not be used with the standard
 |    runtime.
 |  -->
@@ -31,13 +30,11 @@ FAIL
 |    <!-- Valid: First script is non-LTS runtime -->
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <!-- Invalid: LTS extension is included. Produces error. -->
-|    <script async custom-element='amp-ad'
+|    <script async custom-element='amp-ad' src='https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js'></script>
 >>   ^~~~~~~~~
-feature_tests/lts_extension_without_lts_runtime.html:33:2 'amp-ad' must use the non-LTS version to correspond with the first script in the page, which does not use LTS. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
-|       src='https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js'></script>
+feature_tests/lts_extension_without_lts_runtime.html:32:2 The script version for 'amp-ad' is a LTS version which mismatches with the first script on the page using the standard version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |    <!-- Valid: Non-LTS extension is included and used. No error or warning. -->
-|    <script async custom-element='amp-font'
-|       src='https://cdn.ampproject.org/v0/amp-font-0.1.js'></script>
+|    <script async custom-element='amp-font' src='https://cdn.ampproject.org/v0/amp-font-0.1.js'></script>
 |  </head>
 |  <body>
 |    <amp-font

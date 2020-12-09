@@ -202,6 +202,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target: otherTarget,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(root.getRootVisibility()).to.equal(0);
@@ -212,11 +213,13 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target: otherTarget,
         intersectionRatio: 0.5,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
       {
         target: win.document.documentElement,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(root.getRootVisibility()).to.equal(0.3);
@@ -227,9 +230,34 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target: win.document.documentElement,
         intersectionRatio: 0,
         intersectionRect: layoutRectLtwh(0, 0, 0, 0),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(root.getRootVisibility()).to.equal(0);
+  });
+
+  it('should switch visibility on window resize for inabox', () => {
+    win.__AMP_MODE = {runtime: 'inabox'};
+    root = new VisibilityManagerForDoc(ampdoc);
+
+    // Check observer is correctly set.
+    const inOb = root.intersectionObserver_;
+    expect(inOb).to.be.instanceOf(IntersectionObserverStub);
+    expect(inOb.elements).to.contain(win.document.documentElement);
+
+    inOb.callback([
+      {
+        target: win.document.documentElement,
+        intersectionRatio: 1,
+        intersectionRect: layoutRectLtwh(0, 0, 0, 0),
+        boundingClientRect: layoutRectLtwh(1, 1, 100, 0),
+      },
+    ]);
+
+    expect(root.getRootVisibility()).to.equal(0);
+    const resizeEvent = new Event('resize');
+    ampdoc.win.eventListeners.fire(resizeEvent);
+    expect(root.getRootVisibility()).to.equal(1);
   });
 
   it('should switch root model to no-visibility on dispose', () => {
@@ -525,6 +553,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(0.3);
@@ -569,6 +598,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(0.3);
@@ -579,6 +609,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: -0.01,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(0);
@@ -588,6 +619,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: -1000,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(0);
@@ -598,6 +630,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 1.01,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(1);
@@ -607,9 +640,53 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 1000,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model.getVisibility_()).to.equal(1);
+  });
+
+  it('should protect from zero size element', () => {
+    const target = win.document.createElement('div');
+    root.listenElement(target, {}, null, null, eventResolver);
+    expect(root.models_).to.have.length(1);
+    const model = root.models_[0];
+
+    const inOb = root.getIntersectionObserver_();
+    expect(model.getVisibility_()).to.equal(0);
+
+    // Valid element size
+    inOb.callback([
+      {
+        target,
+        intersectionRatio: 1,
+        intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 10, 10),
+      },
+    ]);
+    expect(model.getVisibility_()).to.equal(1);
+
+    // zero element size.
+    inOb.callback([
+      {
+        target,
+        intersectionRatio: 1,
+        intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 0, 10),
+      },
+    ]);
+    expect(model.getVisibility_()).to.equal(0);
+
+    // zero element size, high resolution screen.
+    inOb.callback([
+      {
+        target,
+        intersectionRatio: 0.8,
+        intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 10, 0.452),
+      },
+    ]);
+    expect(model.getVisibility_()).to.equal(0);
   });
 
   it('should listen on a element with different specs', () => {
@@ -637,6 +714,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
     expect(model1.getVisibility_()).to.equal(0.3);
@@ -712,6 +790,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
         target,
         intersectionRatio: 0.3,
         intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+        boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
       },
     ]);
 
@@ -740,29 +819,29 @@ describes.realWin(
   (env) => {
     let parentWin;
     let win;
-    let ampdoc;
     let embed;
     let clock;
     let viewer;
     let viewport;
+    let parentAmpdoc;
     let parentRoot;
     let root;
     let inob;
 
     beforeEach(() => {
       parentWin = env.parentWin;
+      parentAmpdoc = env.parentAmpdoc;
       win = env.win;
-      ampdoc = env.ampdoc;
       embed = env.embed;
-      embed.host = ampdoc.win.document.createElement('amp-host');
+      embed.host = parentAmpdoc.win.document.createElement('amp-host');
       clock = env.sandbox.useFakeTimers();
       clock.tick(1);
 
       viewport = parentWin.__AMP_SERVICES.viewport.obj;
       viewer = parentWin.__AMP_SERVICES.viewer.obj;
-      env.sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
+      env.sandbox.stub(parentAmpdoc, 'getFirstVisibleTime').returns(1);
 
-      parentRoot = new VisibilityManagerForDoc(ampdoc);
+      parentRoot = new VisibilityManagerForDoc(parentAmpdoc);
       parentWin.IntersectionObserver = IntersectionObserverStub;
       parentWin.IntersectionObserverEntry = function () {};
       parentWin.IntersectionObserverEntry.prototype.intersectionRatio = 1;
@@ -800,7 +879,7 @@ describes.realWin(
       root = new VisibilityManagerForEmbed(parentRoot, embed);
 
       expect(root.parent).to.equal(parentRoot);
-      expect(root.ampdoc).to.equal(ampdoc);
+      expect(root.ampdoc).to.equal(parentAmpdoc);
       expect(root.getStartTime()).to.equal(embed.getStartTime());
       expect(root.isBackgrounded()).to.be.true;
       expect(root.isBackgroundedAtStart()).to.be.true;
@@ -811,7 +890,7 @@ describes.realWin(
 
     it('should initialize correctly in foreground', () => {
       expect(root.parent).to.equal(parentRoot);
-      expect(root.ampdoc).to.equal(ampdoc);
+      expect(root.ampdoc).to.equal(parentAmpdoc);
       expect(root.getStartTime()).to.equal(embed.getStartTime());
       expect(root.isBackgrounded()).to.be.false;
       expect(root.isBackgroundedAtStart()).to.be.false;
@@ -895,6 +974,7 @@ describes.realWin(
           target: embed.host,
           intersectionRatio: 0.5,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0.5);
@@ -907,6 +987,7 @@ describes.realWin(
           target: otherTarget,
           intersectionRatio: 0.45,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0.5);
@@ -933,6 +1014,7 @@ describes.realWin(
           target: embed.host,
           intersectionRatio: 0,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0);
@@ -945,6 +1027,7 @@ describes.realWin(
           target: otherTarget,
           intersectionRatio: 0.55,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0);
@@ -957,6 +1040,7 @@ describes.realWin(
           target: embed.host,
           intersectionRatio: 0.7,
           intersectionRect: layoutRectLtwh(0, 0, 1, 1),
+          boundingClientRect: layoutRectLtwh(1, 1, 1, 1),
         },
       ]);
       expect(root.getRootVisibility()).to.equal(0.7);

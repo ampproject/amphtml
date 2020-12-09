@@ -32,7 +32,6 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
@@ -703,7 +702,7 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_('');
-    } else if (startsWith(invocation.method, 'login-')) {
+    } else if (invocation.method.startsWith('login-')) {
       if (invocation.event) {
         invocation.event.preventDefault();
       }

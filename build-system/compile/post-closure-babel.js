@@ -30,7 +30,7 @@ const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
  */
 async function terserMinify(code) {
   const minified = await terser.minify(code, {
-    mangle: false,
+    mangle: true,
     compress: {
       defaults: false,
       unused: true,

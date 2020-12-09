@@ -16,8 +16,8 @@
 'use strict';
 
 /**
- * @fileoverview Provides functions that extract various kinds of GitHub Actions
- * state.
+ * @fileoverview Provides various kinds of GitHub Actions state. Reference:
+ * https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
  */
 
 /**
@@ -28,6 +28,24 @@ function isGithubActionsBuild() {
   return !!process.env.GITHUB_ACTIONS;
 }
 
+/**
+ * Returns true if this is a PR build.
+ * @return {boolean}
+ */
+function isGithubActionsPullRequestBuild() {
+  return process.env.GITHUB_EVENT_NAME === 'pull_request';
+}
+
+/**
+ * Returns true if this is a Push build.
+ * @return {boolean}
+ */
+function isGithubActionsPushBuild() {
+  return process.env.GITHUB_EVENT_NAME === 'push';
+}
+
 module.exports = {
   isGithubActionsBuild,
+  isGithubActionsPullRequestBuild,
+  isGithubActionsPushBuild,
 };

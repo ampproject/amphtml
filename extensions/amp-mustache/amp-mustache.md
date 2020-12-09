@@ -90,7 +90,7 @@ that among other things, you can't use `amp-mustache` to:
 - Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
 
-The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `col`, `colgroup`, `code`, `del`, `div`, `em`, `hr`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
+The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `amp-list`, `b`, `br`, `caption`, `col`, `colgroup`, `code`, `del`, `div`, `em`, `h1`, `h2`, `h3`, `hr`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
 
 ### Sanitization
 
@@ -178,8 +178,6 @@ When using `amp-mustache` to calculate attribute values, quote escaping can be a
 ```
 
 Using HTML character codes in the `{{foo}}` or `{{bar}}` variables won't work since Mustache will HTML escape `&` characters (e.g. `&quot;` -> `&amp;quot;`). One workaround is to use facsimile characters e.g. &prime; (`&prime;`) and &Prime; (`&Prime;`).
-
-There's an [open proposal](https://github.com/ampproject/amphtml/issues/8395) to perform this substitution in `amp-mustache` instead. Please comment on the issue if you'd like to support it.
 
 ### HTML entities
 

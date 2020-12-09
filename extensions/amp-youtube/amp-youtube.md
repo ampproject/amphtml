@@ -111,14 +111,16 @@ Requires [`amp-video-docking`](../amp-video-docking/amp-video-docking.md) compon
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
-<ul>
-  <li>Supported values: `omit`, `include`</li>
-  <li>Default: `include`</li>
-</ul>
+- Supported values: `omit`, `include`
+- Default: `include`
 
 If you want to use the [YouTube player in privacy-enhanced mode](http://www.google.com/support/youtube/bin/answer.py?answer=141046), pass the value of `omit`.
 
 Usually YouTube sets its cookies when the player is loaded. In privacy-enhanced mode cookies are set when the user has clicked on the player.
+
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"YouTube video"`.
 
 ### common attributes
 

@@ -32,7 +32,7 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
@@ -42,7 +42,7 @@ const {writeSourcemaps} = require('./helpers');
 const queue = [];
 let inProgress = 0;
 
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isCiBuild()
   ? 10
   : parseInt(argv.closure_concurrency, 10) || cpus().length;
 
@@ -180,30 +180,7 @@ function compile(
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
-    if (options.includeOnlyESMLevelPolyfills) {
-      const polyfills = fs.readdirSync('src/polyfills');
-      const polyfillsShadowList = polyfills.filter((p) => {
-        // custom-elements polyfill must be included.
-        // install intersection-observer to esm build as iOS safari 11.1 to
-        // 12.1 do not have InObs.
-        return !['custom-elements.js', 'intersection-observer.js'].includes(p);
-      });
-      srcs.push(
-        '!build/fake-module/src/polyfills.js',
-        '!build/fake-module/src/polyfills/**/*.js',
-        '!build/fake-polyfills/src/polyfills.js',
-        'src/polyfills/custom-elements.js',
-        'src/polyfills/intersection-observer.js',
-        'build/fake-polyfills/**/*.js'
-      );
-      polyfillsShadowList.forEach((polyfillFile) => {
-        srcs.push(`!src/polyfills/${polyfillFile}`);
-        fs.writeFileSync(
-          'build/fake-polyfills/src/polyfills/' + polyfillFile,
-          'export function install() {}'
-        );
-      });
-    } else if (options.includePolyfills) {
+    if (options.includePolyfills) {
       srcs.push(
         '!build/fake-module/src/polyfills.js',
         '!build/fake-module/src/polyfills/**/*.js',
@@ -271,7 +248,7 @@ function compile(
       dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
-      warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
+      warning_level: options.verboseLogging ? 'VERBOSE' : 'QUIET',
       // These arrays are filled in below.
       jscomp_error: [],
       jscomp_warning: [],
