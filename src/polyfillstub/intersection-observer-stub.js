@@ -43,7 +43,11 @@ export function shouldLoadPolyfill(win) {
   );
 }
 
-/** @type {!function(typeof IntersectionObserver, typeof IntersectionObserver): typeof IntersectionObserver} */
+/**
+ * @param {typeof IntersectionObserver} Native
+ * @param {typeof IntersectionObserver} Polyfill
+ * @returns {typeof IntersectionObserver}
+ */
 function getIntersectionObserverDispatcher(Native, Polyfill) {
   return function (ioCallback, opts) {
     if (opts && opts.root && opts.root.nodeType === 9) {
