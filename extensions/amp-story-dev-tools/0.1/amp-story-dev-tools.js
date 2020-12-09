@@ -220,6 +220,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       DevToolsTab.LOGS
     );
     Object.values(this.tabContents_).forEach((tabContent) => {
+      tabContent.setAttribute('layout', 'container');
       toggle(tabContent, false);
       container.appendChild(tabContent);
     });
