@@ -110,3 +110,147 @@
     opacity: .4;
   }
 }
+
+/* Disclaimer icon rules */
+.i-amphtml-story-interactive-disclaimer {
+  --material-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration: 0.2s;
+  --half-duration: calc(var(--duration) * 0.5);
+  position: absolute;
+  right: 0px;
+  top: 20px;
+  border-radius: 14px;
+  transform: translateY(-100%);
+  border: none;
+  padding: 0px;
+  outline: none;
+  font-family: inherit;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  pointer-events: initial;
+}
+
+.i-amphtml-story-interactive-disclaimer:before {
+  content: "";
+  background: var(--interactive-accent-color);
+  border-radius: 14px;
+  width: 28px;
+  height: 28px;
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  box-shadow: 0px 4px 4px 0px #00000040;
+  transition: opacity var(--duration) var(--material-easing);
+}
+
+.i-amphtml-story-interactive-disclaimer[active]:before {
+  opacity: 0;
+}
+
+.i-amphtml-story-interactive-disclaimer-icon {
+  width: 20px;
+  height: 20px;
+  margin: 4px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity calc(var(--duration) * 0.25) var(--material-easing)
+    calc(var(--duration) * 0.75);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  transform: scale(14, 4.5);
+  transform-origin: bottom right;
+  pointer-events: all;
+}
+
+.i-amphtml-story-interactive-disclaimer[active]
+  .i-amphtml-story-interactive-disclaimer-icon {
+  transition: opacity calc(var(--duration) * 0.25) var(--material-easing);
+}
+
+.i-amphtml-story-interactive-disclaimer[active] {
+  cursor: initial;
+}
+
+.i-amphtml-story-interactive-disclaimer-content {
+  width: 280px;
+  height: 90px;
+  background: white;
+  transition: transform var(--duration) ease-in-out,
+    border-radius var(--duration) cubic-bezier(0.99, -0.15, 0.78, 1);
+  transform: scale(0.0714, 0.2222);
+  transform-origin: bottom right;
+  border-radius: 50%;
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  box-shadow: 0px 4px 4px 0px #00000040;
+}
+
+.i-amphtml-story-interactive-disclaimer[active]
+  .i-amphtml-story-interactive-disclaimer-content {
+  transform: scale(1, 1);
+  transform-origin: bottom right;
+  border-radius: 10px;
+  transition: transform var(--duration) ease-in-out,
+    border-radius var(--duration) cubic-bezier(0.09, 0.4, 0, 1);
+}
+
+.i-amphtml-story-interactive-disclaimer[active]
+  .i-amphtml-story-interactive-disclaimer-icon {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.i-amphtml-story-interactive-disclaimer-bubble {
+  width: 280px;
+  height: 80px;
+  overflow: hidden;
+  padding: 10px;
+  text-align: initial;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity var(--half-duration) var(--material-easing);
+  pointer-events: none;
+}
+
+.i-amphtml-story-interactive-disclaimer[active]
+  .i-amphtml-story-interactive-disclaimer-bubble {
+  opacity: 1;
+  transition: opacity var(--half-duration) var(--material-easing)
+    var(--half-duration);
+  pointer-events: initial;
+}
+
+.i-amphtml-story-interactive-disclaimer[active]
+  .i-amphtml-story-interactive-disclaimer-bubble
+  div {
+  opacity: 1;
+}
+
+.i-amphtml-story-interactive-disclaimer-url {
+  color: #5f6368;
+  padding-bottom: 4px;
+}
+
+.i-amphtml-story-interactive-disclaimer-link {
+  color: #005af0;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.i-amphtml-story-interactive-disclaimer-close {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  cursor: pointer;
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" class="i-amphtml-story-interactive-disclaimer-close"><rect x="0.787868" y="1.83337" width="1.47851" height="13.2636" rx="0.739255" transform="rotate(-45 0.787868 1.83337)" fill="#9AA0A6" stroke="#9AA0A6" stroke-width="0.3"/><rect x="10.1669" y="0.787868" width="1.47851" height="13.2636" rx="0.739255" transform="rotate(45 10.1669 0.787868)" fill="#9AA0A6" stroke="#9AA0A6" stroke-width="0.3"/></svg>');
+  width: 20px;
+  height: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+}
