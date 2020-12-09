@@ -1216,6 +1216,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'vidoomy': {},
+
   'viralize': {
     renderStartImplemented: true,
   },
@@ -1357,7 +1359,7 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'sulvo': {},
+  'sulvo': {}
 });
 
 export {adConfig};

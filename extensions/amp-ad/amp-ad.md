@@ -462,6 +462,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [ValueCommerce](../../ads/valuecommerce.md)
 - [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
+- [Vidoomy](../../ads/vidoomy.md)
 - [Viralize](../../ads/viralize.md)
 - [UAS](../../ads/uas.md)
 - [ucfunnel](../../ads/ucfunnel.md)

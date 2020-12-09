@@ -286,6 +286,7 @@ import {valuecommerce} from '../ads/valuecommerce';
 import {vdoai} from '../ads/vdoai';
 import {videointelligence} from '../ads/videointelligence';
 import {videonow} from '../ads/videonow';
+import {vidoomy} from '../ads/vidoomy';
 import {viralize} from '../ads/viralize';
 import {vlyby} from '../ads/vlyby';
 import {vmfive} from '../ads/vmfive';
@@ -612,6 +613,7 @@ register('valuecommerce', valuecommerce);
 register('vdoai', vdoai);
 register('videointelligence', videointelligence);
 register('videonow', videonow);
+register('vidoomy', vidoomy);
 register('viqeoplayer', viqeoplayer);
 register('viralize', viralize);
 register('vlyby', vlyby);
@@ -640,6 +642,7 @@ register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 register('speakol', speakol);
+
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
