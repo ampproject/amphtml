@@ -26,7 +26,7 @@ limitations under the License.
 
 ## Usage
 
-Use `amp-izlesene` to display an [Izlesene](https://www.izlesene.com) vido.
+Use `amp-izlesene` to display an [Izlesene](https://www.izlesene.com) video.
 
 With responsive layout the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
