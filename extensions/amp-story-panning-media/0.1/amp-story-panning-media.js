@@ -33,9 +33,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.element_ = element;
 
     /** @private {?Element} */
-    this.container_ = null;
-
-    /** @private {?Element} */
     this.image_ = null;
 
     /** @private {?string} */
