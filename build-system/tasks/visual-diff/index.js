@@ -35,7 +35,7 @@ const {
 const {
   gitBranchName,
   gitCommitterEmail,
-  gitTravisMasterBaseline,
+  gitCiMasterBaseline,
   shortSha,
 } = require('../../common/git');
 const {buildRuntime, installPackages} = require('../../common/utils');
@@ -136,7 +136,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (isTravisBuild() && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitTravisMasterBaseline();
+    process.env['PERCY_TARGET_COMMIT'] = gitCiMasterBaseline();
   }
 }
 

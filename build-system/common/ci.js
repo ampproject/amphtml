@@ -15,12 +15,19 @@
  */
 'use strict';
 
+const log = require('fancy-log');
+const {red} = require('ansi-colors');
+
 const {
+  circleciPullRequestBranch,
+  circleciPullRequestSha,
   isCircleciBuild,
   isCircleciPullRequestBuild,
   isCircleciPushBuild,
 } = require('./circleci');
 const {
+  githubActionsPullRequestBranch,
+  githubActionsPullRequestSha,
   isGithubActionsBuild,
   isGithubActionsPullRequestBuild,
   isGithubActionsPushBuild,
@@ -29,6 +36,8 @@ const {
   isTravisBuild,
   isTravisPullRequestBuild,
   isTravisPushBuild,
+  travisPullRequestBranch,
+  travisPullRequestSha,
 } = require('./travis');
 
 /**
@@ -40,20 +49,28 @@ const {
  */
 const serviceFunctionMap = isTravisBuild()
   ? {
+      'ciPullRequestBranch': travisPullRequestBranch,
+      'ciPullRequestSha': travisPullRequestSha,
       'isPullRequestBuild': isTravisPullRequestBuild,
       'isPushBuild': isTravisPushBuild,
     }
   : isGithubActionsBuild()
   ? {
+      'ciPullRequestBranch': githubActionsPullRequestBranch,
+      'ciPullRequestSha': githubActionsPullRequestSha,
       'isPullRequestBuild': isGithubActionsPullRequestBuild,
       'isPushBuild': isGithubActionsPushBuild,
     }
   : isCircleciBuild()
   ? {
+      'ciPullRequestBranch': circleciPullRequestBranch,
+      'ciPullRequestSha': circleciPullRequestSha,
       'isPullRequestBuild': isCircleciPullRequestBuild,
       'isPushBuild': isCircleciPushBuild,
     }
   : {
+      'ciPullRequestBranch': () => '',
+      'ciPullRequestSha': () => '',
       'isPullRequestBuild': () => false,
       'isPushBuild': () => false,
     };
@@ -85,7 +102,33 @@ function isPushBuild() {
   return serviceFunctionMap['isPushBuild']();
 }
 
+/**
+ * Returns the name of the PR branch.
+ * @return {string}
+ */
+function ciPullRequestBranch() {
+  if (!isPullRequestBuild()) {
+    log(red('ERROR:'), 'Not a PR build, PR branch is undefined.');
+    return '';
+  }
+  return serviceFunctionMap['ciPullRequestBranch']();
+}
+
+/**
+ * Returns the commit SHA being tested by the PR build.
+ * @return {string}
+ */
+function ciPullRequestSha() {
+  if (!isPullRequestBuild()) {
+    log(red('ERROR:'), 'Not a PR build, PR SHA is undefined.');
+    return '';
+  }
+  return serviceFunctionMap['ciPullRequestSha']();
+}
+
 module.exports = {
+  ciPullRequestBranch,
+  ciPullRequestSha,
   isCiBuild,
   isPullRequestBuild,
   isPushBuild,
