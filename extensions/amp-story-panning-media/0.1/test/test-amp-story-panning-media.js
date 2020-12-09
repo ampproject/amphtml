@@ -28,22 +28,48 @@ describes.realWin(
   (env) => {
     let win;
     let element;
+    let panningMedia;
 
-    beforeEach(() => {
-      win = env.win;
+    function appendAmpImg(parent, path) {
+      const ampImg = createElementWithAttributes(win.document, 'amp-img', {
+        'src': path,
+        'width': '4000',
+        'height': '3059',
+      });
+      parent.appendChild(ampImg);
+    }
+
+    async function createAmpStoryPanningMedia(imagePath) {
+      const pageEl = win.document.createElement('amp-story-page');
+      pageEl.id = 'page1';
       element = createElementWithAttributes(
         win.document,
         'amp-story-panning-media',
         {
-          layout: 'fill',
+          'layout': 'fill',
+          'x': '50%',
+          'y': '50%',
+          'zoom': '1',
         }
       );
-      win.document.body.appendChild(element);
+      if (imagePath) {
+        appendAmpImg(element, imagePath);
+      }
+      pageEl.appendChild(element);
+      win.document.body.appendChild(pageEl);
+
+      panningMedia = await element.getImpl();
+    }
+
+    beforeEach(() => {
+      win = env.win;
     });
 
-    it('should contain "hello world" when built', async () => {
-      await element.whenBuilt();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+    it('should build', async () => {
+      await createAmpStoryPanningMedia('/examples/img/conservatory-coords.jpg');
+      expect(() => {
+        panningMedia.layoutCallback();
+      }).to.not.throw();
     });
   }
 );
