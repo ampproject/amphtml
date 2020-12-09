@@ -42,6 +42,7 @@ import {getMode} from '../../src/mode';
 import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
+import { PlayerActionLinkState } from '../../extensions/amp-story/1.0/amp-story-store-service';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -1457,6 +1458,7 @@ export class AmpStoryPlayer {
    * @private
    */
   onAddToCartPlayerAction_(data) {
+    this.playerActionLinkState_ = PlayerActionLinkState.CLICKED;
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,

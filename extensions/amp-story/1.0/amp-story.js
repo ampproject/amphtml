@@ -692,7 +692,7 @@ export class AmpStory extends AMP.BaseElement {
       (show) => {
         this.element.classList.toggle('i-amphtml-story-no-audio-ui', !show);
       },
-      true /** callToInitialize */
+      true /** callToInitialize */ 
     );
 
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
