@@ -22,7 +22,7 @@ const {
   gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMaster,
-  gitTravisMasterBaseline,
+  gitCiMasterBaseline,
   shortSha,
 } = require('../common/git');
 const {
@@ -66,7 +66,7 @@ function printChangeSummary(fileName) {
   if (isTravisBuild()) {
     console.log(
       `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
-        `in this build: ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+        `in this build: ${colors.cyan(shortSha(gitCiMasterBaseline()))}`
     );
     commitSha = travisPullRequestSha();
   } else {
