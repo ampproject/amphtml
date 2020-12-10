@@ -54,23 +54,21 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const ampImgEl = this.element_.querySelector('amp-img');
+    const ampImgEl = dev().assertElement(
+      this.element_.querySelector('amp-img')
+    );
     return whenUpgradedToCustomElement(ampImgEl)
       .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
-      .then(
-        () => {
-          this.image_ = dev().assertElement(this.element.querySelector('img'));
-          // Remove layout="fill" classes so image is not clipped.
-          this.image_.classList = '';
-          // Fill image to 100% height of viewport.
-          // TODO(#31515): Handle base zoom of aspect ratio wider than image
-          setStyles(this.image_, {height: '100%'});
-          return this.updatePosition_();
-        },
-        () => {
-          user().error(TAG, 'Failed to load the amp-img.');
-        }
-      );
+      .then(() => {
+        this.image_ = dev().assertElement(this.element.querySelector('img'));
+        // Remove layout="fill" classes so image is not clipped.
+        this.image_.classList = '';
+        // Fill image to 100% height of viewport.
+        // TODO(#31515): Handle base zoom of aspect ratio wider than image
+        setStyles(this.image_, {height: '100%'});
+        return this.updatePosition_();
+      })
+      .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
 
   /**

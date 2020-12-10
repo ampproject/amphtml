@@ -70,11 +70,9 @@ describes.realWin(
 
     it('should throw if nested amp-img is missing', async () => {
       await createAmpStoryPanningMedia();
-      expect(() => {
-        allowConsoleError(() => {
-          panningMedia.layoutCallback();
-        });
-      }).to.throw();
+      return expect(() => panningMedia.layoutCallback()).to.throw(
+        'Element expected: null'
+      );
     });
 
     it('sets transform of image element from attributes', async () => {
