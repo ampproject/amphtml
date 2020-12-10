@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
 import {
   AmpStoryDevToolsTabLogs,
   createTabLogsElement,
 } from './amp-story-dev-tools-tab-logs';
+import {
+  AmpStoryDevToolsTabPageExperience,
+  createTabPageExperienceElement,
+} from './amp-story-dev-tools-tab-page-experience';
 import {
   AmpStoryDevToolsTabPreview,
   createTabPreviewElement,
@@ -209,15 +212,12 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       this.storyUrl_,
       this.hashParams_['devices']
     );
-    this.tabContents_[DevToolsTab.PAGE_EXPERIENCE] = createTabElement(
-      this.win,
-      this.storyUrl_,
+    this.tabContents_[
       DevToolsTab.PAGE_EXPERIENCE
-    );
+    ] = createTabPageExperienceElement(this.win, this.storyUrl_);
     this.tabContents_[DevToolsTab.LOGS] = createTabLogsElement(
       this.win,
-      this.storyUrl_,
-      DevToolsTab.LOGS
+      this.storyUrl_
     );
     Object.values(this.tabContents_).forEach((tabContent) => {
       tabContent.setAttribute('layout', 'container');
@@ -264,8 +264,11 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
 AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
   AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
-  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab);
   AMP.registerElement('amp-story-dev-tools-tab-logs', AmpStoryDevToolsTabLogs);
+  AMP.registerElement(
+    'amp-story-dev-tools-tab-page-experience',
+    AmpStoryDevToolsTabPageExperience
+  );
   AMP.registerElement(
     'amp-story-dev-tools-tab-preview',
     AmpStoryDevToolsTabPreview
