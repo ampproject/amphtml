@@ -110,8 +110,11 @@ function applyContainerStyle(container, data) {
  * @param {HTMLElement} adElement
  */
 function requestOptimalSize(win, adElement) {
-  const {height, width} = adElement.getBoundingClientRect();
-  if (height !== win.innerHeight) {
+  // Review notes: The forbidden properties are requested once, and are used to request a resize of the main page.
+  // If a reflow is necessary is therefore still under AMP control.
+  // Marked REVIEW in case there is a utility function that does the same.
+  const {height, width} = adElement./*REVIEW*/getBoundingClientRect();
+  if (height !== win./*REVIEW*/innerHeight) {
     win.context.requestResize(width, height, true);
   }
 }
