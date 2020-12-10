@@ -155,6 +155,8 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     /** @private */
     this.mouseStartX_ = 0;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -257,6 +259,13 @@ export class AmpPanZoom extends AMP.BaseElement {
       layout == Layout.FILL ||
       layout == Layout.RESPONSIVE
     );
+  }
+
+  /** @private */
+  onResize_() {
+    if (this.resetOnResize_) {
+      this.resetContentDimensions_();
+    }
   }
 
   /**
@@ -467,6 +476,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.unlistenMouseDown_ = listen(this.element, 'mousedown', (e) =>
       this.onMouseDown_(e)
     );
+    Services.resizeObserver(this.win).observe(this.element, this.onResize_);
   }
 
   /**
@@ -489,6 +499,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.unlisten_(this.unlistenMouseDown_);
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);
+    Services.resizeObserver(this.win).unobserve(this.element, this.onResize_);
   }
 
   /**

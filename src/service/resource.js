@@ -642,6 +642,15 @@ export class Resource {
   }
 
   /**
+   * Returns a previously measured layout size.
+   * @return {!../layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    const {width, height} = this.layoutBox_;
+    return {width, height};
+  }
+
+  /**
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.

@@ -122,6 +122,8 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.loadPromise_ = null;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -150,7 +152,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   onMeasureChanged() {
-    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // TODO(#19259): Tracks a more generic way to do this. Remove once
     // we have something better.
     const isScaled = closestAncestorElementBySelector(
       this.element,
@@ -231,6 +233,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   unlayoutCallback() {
     this.cleanupGestures_();
     this.loadPromise_ = null;
+    Services.resizeObserver(this.win).unobserve(this.element, this.onResize_);
     return true;
   }
 
@@ -319,6 +322,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.setSourceDimensions_(ampImg);
     this.srcset_ = srcsetFromElement(ampImg);
 
+    Services.resizeObserver(this.win).observe(this.element, this.onResize_);
+
     return this.mutateElement(() => {
       setStyles(dev().assertElement(this.image_), {
         top: 0,
@@ -332,6 +337,21 @@ export class AmpImageViewer extends AMP.BaseElement {
         ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
       });
     });
+  }
+
+  /** @private */
+  onResize_() {
+    // TODO(#19259): Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+      this.element,
+      '[i-amphtml-scale-animation]'
+    );
+    if (isScaled) {
+      return;
+    }
+
+    this.resetImageDimensions_();
   }
 
   /**

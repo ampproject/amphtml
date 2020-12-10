@@ -434,9 +434,10 @@ export class BaseElement {
    * receiving additional callbacks, it has to opt in to do so using
    * {@link isRelayoutNeeded} method.
    *
+   * @param {!./layout-rect.LayoutSizeDef} unusedSize
    * @return {!Promise}
    */
-  layoutCallback() {
+  layoutCallback(unusedSize) {
     return Promise.resolve();
   }
 
@@ -938,16 +939,19 @@ export class BaseElement {
    * more expensive style reads should now be cheap.
    * This may currently not work with extended elements. Please file
    * an issue if that is required.
+   * @param {!./layout-rect.LayoutSizeDef} unusedSize
    * @public
    */
-  onLayoutMeasure() {}
+  onLayoutMeasure(unusedSize) {}
 
   /**
    * Called only when the measurements of an amp-element changes. This
    * would not trigger for every measurement invalidation caused by a mutation.
+   * @param {!./layout-rect.LayoutSizeDef} unusedSize
    * @public
+   * TODO(#31540): remove once resize observer is launched.
    */
-  onMeasureChanged() {}
+  onMeasureChanged(unusedSize) {}
 
   /**
    * @return {./log.Log}

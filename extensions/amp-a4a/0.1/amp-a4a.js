@@ -553,7 +553,7 @@ export class AmpA4A extends AMP.BaseElement {
     // so do so explicitly.
     const resource = this.getResource();
     if (resource.hasBeenMeasured() && !resource.isMeasureRequested()) {
-      this.onLayoutMeasure();
+      this.onLayoutMeasure(resource.getLayoutSize());
     }
   }
 

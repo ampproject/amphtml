@@ -581,8 +581,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  onLayoutMeasure() {
-    super.onLayoutMeasure();
+  onLayoutMeasure(size) {
+    super.onLayoutMeasure(size);
     this.responsiveState_ && this.responsiveState_.alignToViewport();
   }
 

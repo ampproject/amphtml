@@ -15,6 +15,17 @@
  */
 
 /**
+ * The structure that contains the size for an element. The exact
+ * interpretation of the size depends on the use case.
+ *
+ * @typedef {{
+ *   width: number,
+ *   height: number,
+ * }}
+ */
+export let LayoutSizeDef;
+
+/**
  * The structure that combines position and size for an element. The exact
  * interpretation of position and size depends on the use case.
  *

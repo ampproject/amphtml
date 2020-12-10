@@ -569,9 +569,12 @@ function createBaseCustomElementClass(win) {
     onMeasure(sizeChanged = false) {
       devAssert(this.isBuilt());
       try {
-        this.implementation_.onLayoutMeasure();
-        if (sizeChanged) {
-          this.implementation_.onMeasureChanged();
+        const size = {width: this.layoutWidth_, height: this.layoutHeight_};
+        this.implementation_.onLayoutMeasure(size);
+        if (!RESIZE_OBSERVER) {
+          if (sizeChanged) {
+            this.implementation_.onMeasureChanged(size);
+          }
         }
       } catch (e) {
         reportError(e, this);

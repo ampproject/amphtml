@@ -453,6 +453,17 @@ export class Services {
   }
 
   /**
+   * @param {!Window} window
+   * @return {?./service/resize-observer.ResizeObserverImpl}
+   */
+  static resizeObserver(window) {
+    return /** @type {?./service/resize-observer.ResizeObserverImpl} */ (getServiceInEmbedWin(
+      window,
+      'resizeObserver'
+    ));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/resources-interface.ResourcesInterface}
    */

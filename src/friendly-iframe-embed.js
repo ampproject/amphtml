@@ -34,8 +34,12 @@ import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
+import {
+  installResizeObserverInEmbedWindow,
+  installTimerInEmbedWindow,
+} from './service/timer-impl';
 import {installStylesForDoc} from './style-installer';
-import {installTimerInEmbedWindow} from './service/timer-impl';
+
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
@@ -796,6 +800,7 @@ export class Installers {
    */
   static installStandardServicesInEmbed(ampdoc) {
     installTimerInEmbedWindow(ampdoc.win);
+    installResizeObserverInEmbedWindow(ampdoc.win);
     installAmpdocServicesForEmbed(ampdoc);
   }
 }

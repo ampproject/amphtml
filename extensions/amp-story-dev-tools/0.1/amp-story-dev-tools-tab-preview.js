@@ -15,6 +15,7 @@
  */
 
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
+import {Services} from '../../../src/services';
 import {
   addAttributeAfterTimeout,
   removeAfterTimeout,
@@ -356,6 +357,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
     /** @private {!Element} container for the device previews */
     this.devicesContainer_ = null;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -390,6 +393,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.element.addEventListener('click', (e) => this.handleTap_(e.target));
+    Services.resizeObserver(this.win).observe(this.element, this.onResize_);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    Services.resizeObserver(this.win).unobserve(this.element, this.onResize_);
   }
 
   /**
@@ -624,6 +633,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
   /** @override */
   onMeasureChanged() {
+    this.repositionDevices_();
+  }
+
+  /** @private */
+  onResize_() {
     this.repositionDevices_();
   }
 

@@ -40,6 +40,7 @@ import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installPlatformService} from './platform-impl';
 import {installPreconnectService} from '../preconnect';
+import {installResizeObserver} from './resize-observer';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
@@ -74,6 +75,7 @@ export function installRuntimeServices(global) {
   installPlatformService(global);
   installTemplatesService(global);
   installTimerService(global);
+  installResizeObserver(global);
   installVsyncService(global);
   installXhrService(global);
   installInputService(global);

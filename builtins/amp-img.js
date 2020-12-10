@@ -69,6 +69,8 @@ export class AmpImg extends BaseElement {
      * @private {number}
      * */
     this.sizesWidth_ = 0;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -108,8 +110,8 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  onMeasureChanged() {
-    this.maybeGenerateSizes_(/* sync */ false);
+  onMeasureChanged(size) {
+    this.maybeGenerateSizes_(size.width, /* sync */ false);
   }
 
   /** @override */
@@ -146,8 +148,10 @@ export class AmpImg extends BaseElement {
   /**
    * Create the actual image element and set up instance variables.
    * Called lazily in the first `#layoutCallback`.
+   * @param {number} width
+   * @private
    */
-  initialize_() {
+  initialize_(width) {
     if (this.img_) {
       return;
     }
@@ -179,7 +183,7 @@ export class AmpImg extends BaseElement {
     }
 
     // It is important to call this before setting `srcset` attribute.
-    this.maybeGenerateSizes_(/* sync setAttribute */ true);
+    this.maybeGenerateSizes_(width, /* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.propagateDataset(this.img_);
     if (!IS_ESM) {
@@ -189,16 +193,27 @@ export class AmpImg extends BaseElement {
     propagateObjectFitStyles(this.element, this.img_);
 
     this.element.appendChild(this.img_);
+
+    Services.resizeObserver(this.win).observe(this.element, this.onResize_);
+  }
+
+  /**
+   * @param {!LayoutSizeDef} size
+   * @private
+   */
+  onResize_(size) {
+    this.maybeGenerateSizes_(size.width, /* sync */ true);
   }
 
   /**
    * This function automatically generates sizes for amp-imgs without
    * the sizes attribute.
+   * @param {number} width
    * @param {boolean} sync Whether to immediately make the change or schedule
    *     via mutateElement.
    * @private
    */
-  maybeGenerateSizes_(sync) {
+  maybeGenerateSizes_(width, sync) {
     if (!this.img_) {
       return;
     }
@@ -214,7 +229,6 @@ export class AmpImg extends BaseElement {
       return;
     }
 
-    const width = this.element.getLayoutWidth();
     if (!this.shouldSetSizes_(width)) {
       return;
     }
@@ -231,6 +245,8 @@ export class AmpImg extends BaseElement {
 
     const generatedSizes = entry + defaultSize;
 
+    // TODO(#31540): once ResizeObserver is launched, the vsync will be no
+    // longer needed here.
     if (sync) {
       this.img_.setAttribute('sizes', generatedSizes);
     } else {
@@ -267,8 +283,8 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    this.initialize_();
+  layoutCallback(size) {
+    this.initialize_(size.width);
     const img = dev().assertElement(this.img_);
     this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
@@ -299,6 +315,8 @@ export class AmpImg extends BaseElement {
       removeElement(img);
       this.img_ = null;
     }
+
+    Services.resizeObserver(this.win).unobserve(this.element, this.onResize_);
 
     return true;
   }

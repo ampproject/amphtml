@@ -1,3 +1,4 @@
 {
-  "WITHIN_VIEWPORT_INOB": false
+  "WITHIN_VIEWPORT_INOB": false,
+  "RESIZE_OBSERVER": false
 }

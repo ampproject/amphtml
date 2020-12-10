@@ -1227,6 +1227,10 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-iframe/0.1/amp-iframe.js',
     ],
   },
+  'onMeasureChanged': {
+    message: measurementApiDeprecated,
+    allowlist: ['src/custom-element.js'],
+  },
 };
 
 // Terms that must appear in a source file.
