@@ -1848,9 +1848,7 @@ export class AmpA4A extends AMP.BaseElement {
   preinstallCallback_(embedWin, ampdoc) {
     const parentAmpdoc = this.getAmpDoc();
     installUrlReplacementsForEmbed(
-      // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
-      ampdoc || parentAmpdoc,
-      embedWin,
+      ampdoc,
       new A4AVariableSource(parentAmpdoc, embedWin)
     );
   }
