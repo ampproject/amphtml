@@ -25,8 +25,10 @@ import {install as installObjectAssign} from '../polyfills/object-assign';
 import {install as installObjectValues} from '../polyfills/object-values';
 import {install as installStringStartsWith} from '../polyfills/string-starts-with';
 
-installArrayIncludes(self);
-installMathSign(self);
-installObjectAssign(self);
-installObjectValues(self);
-installStringStartsWith(self);
+if (!IS_ESM) {
+  installArrayIncludes(self);
+  installObjectAssign(self);
+  installObjectValues(self);
+  installMathSign(self);
+  installStringStartsWith(self);
+}
