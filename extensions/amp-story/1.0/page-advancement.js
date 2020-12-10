@@ -667,6 +667,7 @@ export class ManualAdvancement extends AdvancementConfig {
     const playerLink = closest(target, (element) =>
       matches(element, PLAYER_ACTION_LINK_SELECTOR)
     );
+    console.log(!!playerLink);
     return !!playerLink;
   }
 
@@ -712,7 +713,7 @@ export class ManualAdvancement extends AdvancementConfig {
       const playerLink = closest(target, (element) =>
         matches(element, PLAYER_ACTION_LINK_SELECTOR)
       );
-      // TODO: check when a link also has an href
+      // TODO: check when a link also has an href - then override href bc it's a player-action?
       event.preventDefault();
       event.stopPropagation();
       const playerActionLink = /** @type {PlayerActionLinkDef} */ (this.storeService_.get(

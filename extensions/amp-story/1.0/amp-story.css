@@ -407,6 +407,11 @@ amp-story-grid-layer a * {
   pointer-events: none !important;
 }
 
+/** Ensure clicks on player-action links are captured. */
+a[player-action] {
+  pointer-events: all;
+}
+
 /** Apply click shield on embedded components on initial load. */
 amp-story-grid-layer .i-amphtml-embedded-component::after {
   content: "" !important;
