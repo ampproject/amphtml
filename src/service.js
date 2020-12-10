@@ -58,19 +58,11 @@ export class Disposable {
 
 /**
  * Installs a service override on amp-doc level.
- * @param {!Window} embedWin
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} id
  * @param {!Object} service The service.
  */
-export function installServiceInEmbedScope(embedWin, id, service) {
-  // TODO(#22733): completely remove this method once ampdoc-fie launches.
-  const topWin = getTopWindow(embedWin);
-  devAssert(
-    embedWin != topWin,
-    'Service override can only be installed in embed window: %s',
-    id
-  );
-  const ampdoc = getAmpdoc(embedWin.document);
+export function installServiceInEmbedDoc(ampdoc, id, service) {
   registerServiceInternal(
     getAmpdocServiceHolder(ampdoc),
     ampdoc,
@@ -78,6 +70,22 @@ export function installServiceInEmbedScope(embedWin, id, service) {
     function () {
       return service;
     },
+    /* override */ true
+  );
+}
+
+/**
+ * Installs a service override in the scope of an embedded window.
+ * @param {!Window} embedWin
+ * @param {string} id
+ * @param {function(new:Object, !Window)} constructor
+ */
+export function registerServiceBuilderInEmbedWin(embedWin, id, constructor) {
+  registerServiceInternal(
+    embedWin,
+    embedWin,
+    id,
+    constructor,
     /* override */ true
   );
 }
@@ -143,6 +151,18 @@ export function rejectServicePromiseForDoc(nodeOrDoc, id, error) {
  */
 export function getService(win, id) {
   win = getTopWindow(win);
+  return getServiceInternal(win, id);
+}
+
+/**
+ * Returns a service for the given id and window (a per-window singleton). But
+ * it looks in the immediate window scope, not the top-level window.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @template T
+ * @return {T}
+ */
+export function getServiceInEmbedWin(win, id) {
   return getServiceInternal(win, id);
 }
 

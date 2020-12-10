@@ -23,6 +23,7 @@ import {
   getService,
   getServiceForDoc,
   getServiceForDocOrNull,
+  getServiceInEmbedWin,
   getServicePromise,
   getServicePromiseForDoc,
   getServicePromiseOrNull,
@@ -30,6 +31,7 @@ import {
   isDisposable,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
+  registerServiceBuilderInEmbedWin,
   rejectServicePromiseForDoc,
   resetServiceForTesting,
   setParentWindow,
@@ -576,6 +578,23 @@ describe('service', () => {
         // The service is NOT also registered on the embed window.
         expect(childWin.__AMP_SERVICES && childWin.__AMP_SERVICES['c']).to.not
           .exist;
+      });
+
+      it('should override services on embedded window', () => {
+        const topService = {};
+        const embedService = {};
+        registerServiceBuilder(windowApi, 'A', function () {
+          return topService;
+        });
+        registerServiceBuilderInEmbedWin(childWin, 'A', function () {
+          return embedService;
+        });
+
+        expect(getService(windowApi, 'A')).to.equal(topService);
+        expect(getService(childWin, 'A')).to.equal(topService);
+
+        expect(getServiceInEmbedWin(windowApi, 'A')).to.equal(topService);
+        expect(getServiceInEmbedWin(childWin, 'A')).to.equal(embedService);
       });
 
       it('should dispose disposable services', () => {
