@@ -35,7 +35,7 @@ import {
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
 import {
-  installServiceInEmbedScope,
+  installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
 } from '../service';
 
@@ -1149,12 +1149,11 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Window} embedWin
  * @param {!VariableSource} varSource
  */
-export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  installServiceInEmbedScope(
-    embedWin,
+export function installUrlReplacementsForEmbed(ampdoc, varSource) {
+  installServiceInEmbedDoc(
+    ampdoc,
     'url-replace',
     new UrlReplacements(ampdoc, varSource)
   );
