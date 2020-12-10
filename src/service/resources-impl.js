@@ -226,8 +226,8 @@ export class ResourcesImpl {
 
     if (
       getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
-        INTERSECT_RESOURCES_EXP.experiment &&
-      !isAmp4Email(this.win.document)
+        INTERSECT_RESOURCES_EXP.experiment ||
+      isAmp4Email(this.win.document)
     ) {
       const iframed = isIframed(this.win);
 
@@ -262,12 +262,12 @@ export class ResourcesImpl {
         this.maybeChangeHeight_ = true;
       }
 
-      // Unfortunately, a viewport size change invalidates all premeasurements.
-      if (this.relayoutAll_ && this.intersectionObserver_) {
-        this.resources_.forEach((resource) =>
-          resource.invalidatePremeasurementAndRequestMeasure()
-        );
-      }
+      // // Unfortunately, a viewport size change invalidates all premeasurements.
+      // if (this.relayoutAll_ && this.intersectionObserver_) {
+      //   this.resources_.forEach((resource) =>
+      //     resource.invalidatePremeasurementAndRequestMeasure()
+      //   );
+      // }
 
       this.schedulePass();
     });
