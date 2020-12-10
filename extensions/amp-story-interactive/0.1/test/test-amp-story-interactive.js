@@ -334,5 +334,18 @@ describes.realWin(
         type: InteractiveType.QUIZ,
       });
     });
+
+    it('should set the url of the disclaimer to the backend url', async () => {
+      addConfigToInteractive(ampStoryInteractive);
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      await ampStoryInteractive.getOptionElements()[0].click();
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      expect(ampStoryInteractive.getOptionElements()[0]).to.have.class(
+        'i-amphtml-story-interactive-option-selected'
+      );
+    });
   }
 );

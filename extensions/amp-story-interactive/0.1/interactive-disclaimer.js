@@ -171,6 +171,19 @@ function closeDisclaimer(interactive, disclaimerEl) {
 }
 
 /**
+ * Close the disclaimer if it's open.
+ * @param {!AmpStoryInteractive} interactive
+ * @param {?Element} disclaimerEl
+ * @return {!Promise}
+ */
+export function tryCloseDisclaimer(interactive, disclaimerEl) {
+  if (disclaimerEl && disclaimerEl.hasAttribute('active')) {
+    return closeDisclaimer(interactive, disclaimerEl);
+  }
+  return Promise.resolve();
+}
+
+/**
  * Returns the corresponding backend specs, or none.
  * @param {string} backendUrl
  * @return {?Object<string, !Object>} specs of the backend, or none if doesn't match.
