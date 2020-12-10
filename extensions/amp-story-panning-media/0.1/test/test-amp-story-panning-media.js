@@ -71,5 +71,14 @@ describes.realWin(
         panningMedia.layoutCallback();
       }).to.not.throw();
     });
+
+    it('should throw if nested amp-img is missing', async () => {
+      await createAmpStoryPanningMedia();
+      expect(() => {
+        allowConsoleError(() => {
+          panningMedia.layoutCallback();
+        });
+      }).to.throw();
+    });
   }
 );
