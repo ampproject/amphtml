@@ -25,9 +25,12 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-scroll {
   white-space: nowrap !important;
 }
 
+amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
+  position: static;
+}
+
 .amp-scrollable-carousel-slide {
   display: inline-block !important;
-  width: 100% !important;
   /*
    * Puts a space between items, for browsers that do not support the
    * properties below.

@@ -40,12 +40,12 @@ For configuration details, please email support@sas.com.
 
 ### Required parameters
 
-- `data-customer-name`
+-   `data-customer-name`
 
 ### Optional parameters
 
-- `data-size`
-- `data-site`
-- `data-area`
-- `data-tags`
-- `data-multi-size`
+-   `data-size`
+-   `data-site`
+-   `data-area`
+-   `data-tags`
+-   `data-multi-size`

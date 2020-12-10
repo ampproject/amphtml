@@ -50,4 +50,4 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-widget`
+-   `data-widget`
