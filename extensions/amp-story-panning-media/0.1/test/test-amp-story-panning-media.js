@@ -39,7 +39,7 @@ describes.realWin(
       parent.appendChild(ampImg);
     }
 
-    async function createAmpStoryPanningMedia(imagePath) {
+    async function createAmpStoryPanningMedia(imagePath, positionValues = {}) {
       const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
       element = createElementWithAttributes(
@@ -47,9 +47,7 @@ describes.realWin(
         'amp-story-panning-media',
         {
           'layout': 'fill',
-          'x': '50%',
-          'y': '50%',
-          'zoom': '1',
+          ...positionValues,
         }
       );
       if (imagePath) {
@@ -79,6 +77,18 @@ describes.realWin(
           panningMedia.layoutCallback();
         });
       }).to.throw();
+    });
+
+    it('sets transform of image element from attributes', async () => {
+      const positionValues = {x: '50%', y: '50%', zoom: '2'};
+      await createAmpStoryPanningMedia(
+        '/examples/img/conservatory-coords.jpg',
+        positionValues
+      );
+      await panningMedia.layoutCallback();
+      expect(panningMedia.image_.style.transform).to.equal(
+        `scale(${positionValues.zoom}) translate(${positionValues.x}, ${positionValues.y})`
+      );
     });
   }
 );

@@ -36,17 +36,21 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.image_ = null;
 
     /** @private {?string} */
-    this.x_ = element.getAttribute('x') || '0%';
+    this.x_ = null;
 
     /** @private {?string} */
-    this.y_ = element.getAttribute('y') || '0%';
+    this.y_ = null;
 
     /** @private {?string} */
-    this.zoom_ = element.getAttribute('zoom') || '1';
+    this.zoom_ = null;
   }
 
   /** @override */
-  buildCallback() {}
+  buildCallback() {
+    this.x_ = this.element_.getAttribute('x') || '0%';
+    this.y_ = this.element_.getAttribute('y') || '0%';
+    this.zoom_ = this.element_.getAttribute('zoom') || '1';
+  }
 
   /** @override */
   layoutCallback() {
