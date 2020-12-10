@@ -22,7 +22,7 @@ const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
 const {installPackages} = require('../../common/utils');
-const {isTravisPullRequestBuild} = require('../../common/travis');
+const {isPullRequestBuild} = require('../../common/ci');
 const {writeFileSync} = require('fs-extra');
 
 const ENV_PORTS = {
@@ -73,7 +73,7 @@ function launchEnv(env) {
 function buildEnv(env) {
   const configDir = envConfigDir(env);
 
-  if (env === 'amp' && isTravisPullRequestBuild()) {
+  if (env === 'amp' && isPullRequestBuild()) {
     // Allows PR deploys to reference built binaries.
     writeFileSync(
       `${configDir}/preview.js`,

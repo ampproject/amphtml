@@ -25,27 +25,20 @@ const {
   gitCiMasterBaseline,
   shortSha,
 } = require('../common/git');
-const {
-  isTravisBuild,
-  travisBuildNumber,
-  travisPullRequestSha,
-} = require('../common/travis');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
+const {isCiBuild, ciBuildNumber, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const BUILD_OUTPUT_FILE = isTravisBuild()
-  ? `amp_build_${travisBuildNumber()}.zip`
-  : '';
-const DIST_OUTPUT_FILE = isTravisBuild()
-  ? `amp_dist_${travisBuildNumber()}.zip`
-  : '';
-const ESM_DIST_OUTPUT_FILE = isTravisBuild()
-  ? `amp_esm_dist_${travisBuildNumber()}.zip`
+const BUILD_OUTPUT_FILE = isCiBuild() ? `amp_build_${ciBuildNumber()}.zip` : '';
+const DIST_OUTPUT_FILE = isCiBuild() ? `amp_dist_${ciBuildNumber()}.zip` : '';
+const ESM_DIST_OUTPUT_FILE = isCiBuild()
+  ? `amp_esm_dist_${ciBuildNumber()}.zip`
   : '';
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
+// TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
@@ -63,12 +56,12 @@ function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   let commitSha;
 
-  if (isTravisBuild()) {
+  if (isCiBuild()) {
     console.log(
       `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
         `in this build: ${colors.cyan(shortSha(gitCiMasterBaseline()))}`
     );
-    commitSha = travisPullRequestSha();
+    commitSha = ciPullRequestSha();
   } else {
     commitSha = gitCommitHash();
   }

@@ -21,8 +21,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const globby = require('globby');
 
-const {isCiBuild} = require('../common/ci');
-const {isGithubActionsBuild} = require('../common/github-actions');
+const {isCiBuild, isGithubActionsBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
 

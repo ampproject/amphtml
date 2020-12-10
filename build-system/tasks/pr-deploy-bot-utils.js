@@ -19,10 +19,10 @@ const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
 const request = require('request-promise');
+const {ciBuildNumber} = require('../common/ci');
 const {cyan, green} = require('ansi-colors');
 const {gitCommitHash} = require('../common/git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
-const {travisBuildNumber} = require('../common/travis');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
 
@@ -42,7 +42,7 @@ async function walk(dest) {
 }
 
 function getBaseUrl() {
-  return `${hostNamePrefix}/amp_dist_${travisBuildNumber()}`;
+  return `${hostNamePrefix}/amp_dist_${ciBuildNumber()}`;
 }
 
 async function replace(filePath) {
@@ -71,9 +71,10 @@ async function replaceUrls(dir) {
 
 async function signalDistUpload(result) {
   const sha = gitCommitHash();
-  const travisBuild = travisBuildNumber();
+  const ciBuild = ciBuildNumber();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${result}`;
+  // TODO(rsimha, ampproject/amp-github-apps#1110): Update this URL.
+  const url = `${baseUrl}travisbuilds/${ciBuild}/headshas/${sha}/${result}`;
 
   await request.post(url);
   log(
