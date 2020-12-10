@@ -364,7 +364,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.rootEl_.appendChild(buildInteractiveDisclaimer(this.element));
+    this.disclaimerEl_ = buildInteractiveDisclaimer(this);
+    this.rootEl_.appendChild(this.disclaimerEl_);
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
