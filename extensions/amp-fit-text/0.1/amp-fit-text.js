@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {px, setStyle, setStyles} from '../../../src/style';
+import {throttle} from '../../../src/utils/rate-limit';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
@@ -123,11 +124,16 @@ class AmpFitText extends AMP.BaseElement {
   layoutCallback() {
     if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
       const observer = new this.win.ResizeObserver(() =>
-        this.mutateElement(() => {
-          this.updateMeasurerContent_();
-          this.updateFontSize_();
-        })
+        throttle(
+          this.win,
+          this.mutateElement(() => {
+            this.updateMeasurerContent_();
+            this.updateFontSize_();
+          }),
+          200
+        )
       );
+
       observer.observe(this.content_);
       observer.observe(this.measurer_);
       this.resizeObserverUnlistener_ = function () {

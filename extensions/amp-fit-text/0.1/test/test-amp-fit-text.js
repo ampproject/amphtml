@@ -15,7 +15,6 @@
  */
 
 import {calculateFontSize_, updateOverflow_} from '../amp-fit-text';
-import {macroTask} from '../../../../testing/yield';
 import {spy} from 'fetch-mock';
 
 describes.realWin(
