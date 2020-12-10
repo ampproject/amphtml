@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-amp-story-panning-media amp-img {
-  /* Child img gets 100% height. This centers the image. */
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+amp-story-dev-tools-tab-page-experience {
+  margin: 0px 10% !important;
+  padding-bottom: var(--i-amphtml-story-dev-tools-vertical-spacing);
+  flex: 1 !important;
+}
+
+amp-story-dev-tools-tab-page-experience iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 10px !important;
 }
