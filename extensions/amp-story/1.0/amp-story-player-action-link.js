@@ -22,4 +22,4 @@
  * Links that are Player Action links.
  * @const {string}
  */ 
-export const PLAYER_ACTION__LINK_SELECTOR = 'a[player-action]';
+export const PLAYER_ACTION_LINK_SELECTOR = 'a[player-action]';

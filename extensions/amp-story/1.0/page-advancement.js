@@ -665,6 +665,7 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByPlayerActionLink_(target) {
     const clickedOnLink = matches(target, PLAYER_ACTION_LINK_SELECTOR);
+    console.log(clickedOnLink);
 
     const playerActionLinkState = this.storeService_.get(
       StateProperty.PLAYER_ACTION_LINK_STATE
@@ -712,6 +713,7 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     if (this.isHandledByPlayerActionLink_(target)) {
+      // debugger;
       event.preventDefault();
       event.stopPropagation();
       const playerActionLink = /** @type {PlayerActionLinkDef} */ (this.storeService_.get(
