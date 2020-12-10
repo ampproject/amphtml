@@ -375,11 +375,7 @@ export class FriendlyIframeEmbed {
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
     if (this.ampdoc) {
-      // TODO(ccordry): wait for renderComplete after no signing launch.
-      const readyPromise = this.spec.skipHtmlMerge
-        ? this.whenRenderComplete()
-        : this.whenReady();
-      readyPromise.then(() => this.ampdoc.setReady());
+      this.whenRenderComplete().then(() => this.ampdoc.setReady());
     }
 
     this.win.addEventListener('resize', () => this.handleResize_());
@@ -490,6 +486,13 @@ export class FriendlyIframeEmbed {
     } else {
       this.signals_.signal(CommonSignals.RENDER_START);
     }
+
+    // TODO(ccordry): remove when no-signing launched.
+    if (!this.spec.skipHtmlMerge) {
+      // When not streaming renderStart signal is good enough.
+      this.renderComplete_.resolve();
+    }
+
     // Common signal RENDER_START indicates time to toggle visibility
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
