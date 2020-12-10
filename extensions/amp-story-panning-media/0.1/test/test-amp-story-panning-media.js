@@ -65,9 +65,7 @@ describes.realWin(
 
     it('should build', async () => {
       await createAmpStoryPanningMedia('/examples/img/conservatory-coords.jpg');
-      expect(() => {
-        panningMedia.layoutCallback();
-      }).to.not.throw();
+      return expect(() => panningMedia.layoutCallback()).to.not.throw();
     });
 
     it('should throw if nested amp-img is missing', async () => {
