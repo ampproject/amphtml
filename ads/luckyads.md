@@ -20,8 +20,8 @@ Provides support for [LuckyAds](https://luckyads.pro/) widgets.
 
 ### Required parameters
 
-- `src`
-- `data-la-block`
+-   `src`
+-   `data-la-block`
 
 ## Example
 

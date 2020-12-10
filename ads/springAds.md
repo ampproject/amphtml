@@ -60,5 +60,5 @@ for further information regarding this implementation, please contact adtechnolo
 
 ## Optional features
 
-- Loading placeholder for ads, see [Placeholders in amp-ad](https://amp.dev/documentation/components/amp-ad#placeholder).
-- No ad fallback for ads, see [No ad in amp-ad](https://amp.dev/documentation/components/amp-ad#no-ad-available).
+-   Loading placeholder for ads, see [Placeholders in amp-ad](https://amp.dev/documentation/components/amp-ad#placeholder).
+-   No ad fallback for ads, see [No ad in amp-ad](https://amp.dev/documentation/components/amp-ad#no-ad-available).

@@ -36,4 +36,4 @@ For details on the configuration semantics, please contact [Rambler](https://adm
 
 ### Required parameters
 
-- `src`
+-   `src`

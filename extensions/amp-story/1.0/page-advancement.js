@@ -47,12 +47,21 @@ const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 const TOP_REGION = 0.8;
 
 /**
- * Protected edges of the screen in pixels. When tapped on these areas, we will
+ * Protected edges of the screen as a percent of page width. When tapped on these areas, we will
  * always perform navigation. Even if a clickable element is there.
  * @const {number}
  * @private
  */
-const PROTECTED_SCREEN_EDGE_PX = 48;
+const PROTECTED_SCREEN_EDGE_PERCENT = 12;
+
+/**
+ * Minimum protected edges of the screen in pixels.
+ * If PROTECTED_SCREEN_EDGE_PERCENT results in a protected edge value less than MINIMUM_PROTECTED_SCREEN_EDGE_PX,
+ * we will use MINIMUM_PROTECTED_SCREEN_EDGE_PX.
+ * @const {number}
+ * @private
+ */
+const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
 
 /**
  * Maximum percent of screen that can be occupied by a single link
@@ -472,7 +481,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInStoryPageSideEdge_(event, this.element_.getLayoutBox())
+          !this.isInStoryPageSideEdge_(event, this.getStoryPageRect_())
         ) {
           shouldHandleEvent = false;
           return true;
@@ -565,9 +574,16 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInStoryPageSideEdge_(event, pageRect) {
+    const sideEdgeWidthFromPercent =
+      pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
+    const sideEdgeLimit = Math.max(
+      sideEdgeWidthFromPercent,
+      MINIMUM_PROTECTED_SCREEN_EDGE_PX
+    );
+
     return (
-      event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
+      event.clientX <= pageRect.x + sideEdgeLimit ||
+      event.clientX >= pageRect.x + pageRect.width - sideEdgeLimit
     );
   }
 
@@ -647,18 +663,7 @@ export class ManualAdvancement extends AdvancementConfig {
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
 
-    // Can use LayoutBox for mobile since the story page occupies entire screen.
-    // Desktop UI needs to use the getBoundingClientRect.
-    let pageRect;
-    if (
-      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
-    ) {
-      pageRect = this.element_.getLayoutBox();
-    } else {
-      pageRect = this.element_
-        .querySelector('amp-story-page[active]')
-        ./*OK*/ getBoundingClientRect();
-    }
+    const pageRect = this.getStoryPageRect_();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
@@ -717,6 +722,25 @@ export class ManualAdvancement extends AdvancementConfig {
     };
 
     this.onTapNavigation(this.getTapDirection_(page));
+  }
+
+  /**
+   * Calculates the pageRect based on the UIType.
+   * We can an use LayoutBox for mobile since the story page occupies entire screen.
+   * Desktop UI needs the most recent value from the getBoundingClientRect function.
+   * @return {DOMRect | LayoutBox}
+   * @private
+   */
+  getStoryPageRect_() {
+    if (
+      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
+    ) {
+      return this.element_.getLayoutBox();
+    } else {
+      return this.element_
+        .querySelector('amp-story-page[active]')
+        ./*OK*/ getBoundingClientRect();
+    }
   }
 
   /**

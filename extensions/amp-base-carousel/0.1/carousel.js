@@ -405,17 +405,20 @@ export class Carousel {
     const atEnd = index === endIndex;
     const passingStart = newIndex < 0;
     const passingEnd = newIndex > endIndex;
+    const forwardWithinLastWindow =
+      delta > 0 && this.inLastWindow_(index) && this.inLastWindow_(newIndex);
 
     let slideIndex;
     if (this.isLooping()) {
       slideIndex = mod(newIndex, endIndex + 1);
     } else if (!allowWrap) {
-      slideIndex = clamp(newIndex, 0, endIndex);
-    } else if (
-      delta > 0 &&
-      this.inLastWindow_(index) &&
-      this.inLastWindow_(newIndex)
-    ) {
+      // We only need to bail out if both indices are in the
+      // the last window. If we didn't bail, we would attempt
+      // to scroll the container, when it shouldn't.
+      slideIndex = forwardWithinLastWindow
+        ? index
+        : clamp(newIndex, 0, endIndex);
+    } else if (forwardWithinLastWindow) {
       slideIndex = 0;
     } else if ((passingStart && atStart) || (passingEnd && !atEnd)) {
       slideIndex = endIndex;
@@ -1042,10 +1045,14 @@ export class Carousel {
       // If an item is at the start of the group, it gets an aligned.
       const shouldSnap = mod(slideIndex, this.snapBy_) === 0;
 
-      // If it's a slide, make sure to set the alignment of the element
+      // If it is type=slides, make sure to set the alignment of the element
       // with the content and not the wrapping div.
-      const element = child.children.length ? child.children[0] : child;
-      setStyles(element, {
+      const snapElement =
+        child.firstChild &&
+        child.classList.contains('i-amphtml-carousel-wrapper')
+          ? child.firstChild
+          : child;
+      setStyles(snapElement, {
         'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
         'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
       });
@@ -1340,7 +1347,7 @@ export class Carousel {
   /**
    * Checks if a given index is in the last window of items. For example, if
    * showing two slides at a time with the slides [a, b, c, d], both slide
-   * b and c are in the last window.
+   * c and d are in the last window.
    * @param {number} index The index to check.
    * @return {boolean} True if the slide is in the last window, false
    *    otherwise.

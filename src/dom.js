@@ -55,7 +55,7 @@ export function waitForChild(parent, checkFunc, callback) {
   }
   /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
-  if (win.MutationObserver) {
+  if (IS_ESM || win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -526,7 +526,7 @@ function scopedQuerySelectionFallback(root, selector) {
  * @return {?Element}
  */
 export function scopedQuerySelector(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
@@ -543,7 +543,7 @@ export function scopedQuerySelector(root, selector) {
  * @return {!NodeList<!Element>}
  */
 export function scopedQuerySelectorAll(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelectorAll(
       prependSelectorsWith(selector, ':scope')
     );

@@ -50,6 +50,7 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -155,6 +156,15 @@ const PTT_EXP_BRANCHES = {
   EXPERIMENT: '21068094',
 };
 
+/** @const {string} */
+const IDLE_CWV_EXP = 'dfp-render-on-idle-cwv-exp';
+
+/** @const @enum{string} */
+const IDLE_CWV_EXP_BRANCHES = {
+  CONTROL: '20208860',
+  EXPERIMENT: '20208859',
+};
+
 /**
  * Required size to be sent with fluid requests.
  * @const {string}
@@ -223,6 +233,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.win);
+
+    /** @private @const {?../../../src/service/performance-impl.Performance} */
+    this.performance_ = Services.performanceForOrNull(this.win);
 
     /** @private {?string} */
     this.qqid_ = null;
@@ -365,7 +378,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // holdback branch sends non-numeric value.
       return false;
     }
-    return vpRange || 12;
+
+    if (vpRange) {
+      return vpRange;
+    }
+
+    let fallbackRange = 12;
+    if (!this.performance_) {
+      return fallbackRange;
+    }
+
+    const idleCwvExpSelectedBranch = getExperimentBranch(
+      this.win,
+      IDLE_CWV_EXP
+    );
+    if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.CONTROL) {
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-control');
+    } else if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.EXPERIMENT) {
+      fallbackRange = 3;
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-exp');
+    }
+    return fallbackRange;
   }
 
   /** @override */
@@ -446,6 +479,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: Object.values(PTT_EXP_BRANCHES),
       },
+      {
+        experimentId: IDLE_CWV_EXP,
+        isTrafficEligible: () => {
+          return (
+            !!this.performance_ &&
+            !this.element.getAttribute('data-loading-strategy')
+          );
+        },
+        branches: Object.values(IDLE_CWV_EXP_BRANCHES),
+      },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
@@ -460,9 +503,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win,
       INTERSECT_RESOURCES_EXP.id
     );
-
     if (intersectResourcesExpId) {
       this.experimentIds.push(intersectResourcesExpId);
+    }
+
+    const fieResourcesExpId = getExperimentBranch(
+      this.win,
+      FIE_RESOURCES_EXP.id
+    );
+    if (fieResourcesExpId) {
+      this.experimentIds.push(fieResourcesExpId);
     }
 
     const ssrExpIds = this.getSsrExpIds_();

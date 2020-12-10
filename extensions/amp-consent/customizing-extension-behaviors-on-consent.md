@@ -34,11 +34,11 @@ AMP provides the consent state information for vendors to customize their behavi
 
 The state has the following valid values.
 
-- `null` : no `<amp-consent>` is included
-- `CONSENT_POLICY_STATE.UNKNOWN` : The consent state is unknown
-- `CONSENT_POLICY_STATE.SUFFICIENT` : The consent is accepted
-- `CONSENT_POLICY_STATE.INSUFFICIENT` : The consent is rejected
-- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
+-   `null` : no `<amp-consent>` is included
+-   `CONSENT_POLICY_STATE.UNKNOWN` : The consent state is unknown
+-   `CONSENT_POLICY_STATE.SUFFICIENT` : The consent is accepted
+-   `CONSENT_POLICY_STATE.INSUFFICIENT` : The consent is rejected
+-   `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
 
 #### If you integrate with AMP as a first party AMP extension
 
@@ -83,6 +83,7 @@ Similar to the consent string, AMP will always pass the local stored consent met
 {
   "consentStringType": {enum} [CONSENT_STRING_TYPE.TCF_V1, CONSENT_STRING_TYPE.TCF_V2, CONSENT_STRING_TYPE.US_PRIVACY_STRING] (optional),
   "gdprApplies": {boolean} (optional),
-  "additionalConsent": {string} (optional)
+  "additionalConsent": {string} (optional),
+  "purposeOne": {boolean} (optional)
 }
 ```
