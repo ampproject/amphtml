@@ -313,6 +313,36 @@ describes.fakeWin('upgradePolyfill', {}, (env) => {
     );
   });
 
+  it('should auto-upgrade any stub post install even when native InOb present and continue returning Native for non docroot.', async () => {
+    const {win} = env;
+    function NativeInOb(_ioCallback, opts) {
+      if (opts && opts.root && opts.root.nodeType === 9) {
+        throw new Error('May not have root:document');
+      }
+    }
+    win.IntersectionObserver = NativeInOb;
+    const docRoot = {root: {nodeType: 9}};
+
+    install(win);
+    expect(new win.IntersectionObserver(() => {})).instanceOf(NativeInOb);
+    expect(new win.IntersectionObserver(() => {}, docRoot)).instanceOf(
+      IntersectionObserverStub
+    );
+    upgradePolyfill(win, function () {
+      win.IntersectionObserver = NativeIntersectionObserver; // Native is the wrong name, its really Polyfilled.
+      win.IntersectionObserverEntry = NativeIntersectionObserverEntry;
+    });
+
+    const el = win.document.createElement('div');
+    const io = new IntersectionObserverStub(() => {}, docRoot);
+    io.observe(el);
+    await nextMicroTask();
+
+    expect(NativeIntersectionObserver.prototype.observe).to.be.calledOnce;
+    expect(NativeIntersectionObserver.prototype.observe).to.be.calledWith(el);
+    expect(new win.IntersectionObserver(() => {})).instanceOf(NativeInOb);
+  });
+
   it('should run installer even when native is available', () => {
     const {win} = env;
     win.IntersectionObserver = NativeIntersectionObserver;

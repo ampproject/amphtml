@@ -26,8 +26,8 @@
 import {Services} from '../services';
 
 const UPGRADERS = '_upgraders';
-const NATIVE = 'AMP__NATIVE_INOB';
-const STUB = 'AMP_STUB_INOB';
+const NATIVE = '_native';
+const STUB = '_stub';
 
 /**
  * @param {!Window} win
