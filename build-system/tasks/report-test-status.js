@@ -71,6 +71,7 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
+  // TODO(rsimha, ampproject/amp-github-apps#1111) Remove Travis special-case.
   if (type !== null && isTravisBuild() && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
 
