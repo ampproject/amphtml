@@ -142,7 +142,7 @@ import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
 import {fakeDelayed} from '../ads/_fakedelayed_';
-import {feedad} from "../ads/feedad";
+import {feedad} from '../ads/feedad';
 import {felmat} from '../ads/felmat';
 import {firstimpression} from '../ads/firstimpression';
 import {flite} from '../ads/flite';
