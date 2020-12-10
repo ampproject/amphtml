@@ -125,13 +125,8 @@ export function buildInteractiveDisclaimer(interactive) {
  * @param {!Element} disclaimerEl
  */
 function openDisclaimer(interactive, disclaimerEl) {
-  const contentEl = disclaimerEl.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-content'
-  );
-
   interactive.mutateElement(() => {
     disclaimerEl.setAttribute('active', '');
-    setStyle(contentEl, 'transform', 'scale(1, 1)');
   });
 }
 
@@ -142,28 +137,9 @@ function openDisclaimer(interactive, disclaimerEl) {
  * @return {!Promise}
  */
 function closeDisclaimer(interactive, disclaimerEl) {
-  const bubbleEl = disclaimerEl.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-bubble'
-  );
-  const iconEl = disclaimerEl.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-icon'
-  );
-  const contentEl = disclaimerEl.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-content'
-  );
-
-  const scale = {x: 1, y: 1};
-  return interactive.measureMutateElement(
-    () => {
-      scale.x = bubbleEl.offsetWidth / iconEl.offsetWidth;
-      scale.y = bubbleEl.offsetHeight / iconEl.offsetHeight;
-    },
-    () => {
-      disclaimerEl.removeAttribute('active');
-      setStyle(contentEl, 'transform', `scale(${1 / scale.x}, ${1 / scale.y})`);
-      setStyle(iconEl, 'transform', `scale(${scale.x}, ${scale.y})`);
-    }
-  );
+  return interactive.mutateElement(() => {
+    disclaimerEl.removeAttribute('active');
+  });
 }
 
 /**
