@@ -26,10 +26,6 @@ import {setStyle} from '../../../src/style';
 
 /** @const {!Object<string, !Object>} */
 const BACKENDS = {
-  'webstoriesinteractivity.googleapis.com': {
-    learnMoreUrl: 'https://policies.google.com/terms',
-    entityName: 'Google',
-  },
   'webstoriesinteractivity-beta.web.app': {
     learnMoreUrl: 'https://policies.google.com/terms',
     entityName: 'Google Firebase',
@@ -84,7 +80,7 @@ export function buildInteractiveDisclaimer(interactive) {
   );
 
   // Fill information
-  const backendSpecs = getBackendSpecs(backendUrl);
+  const backendSpecs = getBackendSpecs(backendUrl, BACKENDS);
   interactive
     .mutateElement(() => {
       if (backendSpecs) {
@@ -98,8 +94,8 @@ export function buildInteractiveDisclaimer(interactive) {
         urlEl.textContent = backendUrl;
         linkEl.remove();
       }
+      return closeDisclaimer(interactive, disclaimer);
     })
-    .then(() => closeDisclaimer(interactive, disclaimer))
     .then(() =>
       disclaimer
         .querySelector('.i-amphtml-story-interactive-disclaimer-content')
@@ -184,12 +180,13 @@ export function tryCloseDisclaimer(interactive, disclaimerEl) {
 }
 
 /**
- * Returns the corresponding backend specs, or none.
+ * Returns the corresponding backend specs (as an array of url and specs), or undefined.
  * @param {string} backendUrl
- * @return {?Object<string, !Object>} specs of the backend, or none if doesn't match.
+ * @param {!Object<string, !Object<string, string>>} backendsList
+ * @return {?Array<string|Object<string, string>>} array that contains: base url of backend, {learnMoreUrl, entity}.
  */
-function getBackendSpecs(backendUrl) {
-  return Object.entries(BACKENDS).find((element) => {
+export function getBackendSpecs(backendUrl, backendsList) {
+  return Object.entries(backendsList).find((element) => {
     return element[0] === backendUrl.substring(0, element[0].length);
   });
 }
