@@ -684,7 +684,7 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
       event.preventDefault();
-      const embedComponent = /** @type {player-action} */ (this.storeService_.get(
+      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
       ));
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
@@ -712,7 +712,7 @@ export class ManualAdvancement extends AdvancementConfig {
       const playerLink = closest(target, (element) =>
         matches(element, PLAYER_ACTION_LINK_SELECTOR)
       );
-      // TODO: check when a link also has an href - then override href bc it's a player-action?
+      // TODO: check when a link also has an href - then override href bc it's a player-action.
       event.preventDefault();
       event.stopPropagation();
       const viewer = Services.viewerForDoc(this.ampdoc_);
