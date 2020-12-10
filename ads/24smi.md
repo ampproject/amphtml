@@ -35,4 +35,4 @@ For details on the configuration semantics, please contact [24smi](https://partn
 
 ### Required parameters
 
-- `src`
+-   `src`

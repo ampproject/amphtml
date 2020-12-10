@@ -661,15 +661,11 @@ describes.realWin(
 
     it('should handle layout measures (orientation changes)', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
-      const getLayoutWidthStub = env.sandbox.stub(
-        ampSlideScroll,
-        'getLayoutWidth'
-      );
       const impl = ampSlideScroll.implementation_;
+      const offsetWidthStub = env.sandbox.stub(ampSlideScroll, 'offsetWidth');
 
-      getLayoutWidthStub.returns(200);
+      offsetWidthStub.value(200);
       impl.onLayoutMeasure();
-      expect(getLayoutWidthStub).to.have.been.calledOnce;
       expect(impl.slideWidth_).to.equal(200);
 
       // Show the first slide, make sure the scroll position is correct.
@@ -677,9 +673,8 @@ describes.realWin(
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(200);
 
       // Now do a layout measure letting the component know it changed size.
-      getLayoutWidthStub.returns(400);
+      offsetWidthStub.value(400);
       impl.onLayoutMeasure();
-      expect(getLayoutWidthStub).to.have.callCount(2);
       expect(impl.slideWidth_).to.equal(400);
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(200);
 

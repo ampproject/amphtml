@@ -20,38 +20,37 @@
  */
 
 const {
-  isTravisBuild,
-  isTravisPullRequestBuild,
-  travisPullRequestBranch,
-  travisPullRequestSha,
-} = require('./travis');
+  isCiBuild,
+  isPullRequestBuild,
+  ciPullRequestBranch,
+  ciPullRequestSha,
+} = require('./ci');
 const {getStdout} = require('./exec');
 
 /**
- * Returns the commit at which the current branch was forked off of master.
- * On Travis, there is an additional merge commit, so we must pick the first of
+ * Returns the commit at which the current PR branch was forked off of master.
+ * During CI, there is an additional merge commit, so we must pick the first of
  * the boundary commits (prefixed with a -) returned by git rev-list.
  * On local branches, this is merge base of the current branch off of master.
  * @return {string}
  */
 function gitBranchCreationPoint() {
-  if (isTravisBuild()) {
-    const traviPrSha = travisPullRequestSha();
+  if (isPullRequestBuild()) {
+    const prSha = ciPullRequestSha();
     return getStdout(
-      `git rev-list --boundary ${traviPrSha}...master | grep "^-" | head -n 1 | cut -c2-`
+      `git rev-list --boundary ${prSha}...master | grep "^-" | head -n 1 | cut -c2-`
     ).trim();
   }
   return gitMergeBaseLocalMaster();
 }
 
 /**
- * Returns the `master` parent of the merge commit (current HEAD) on Travis.
- * Note: This is not the same as origin/master (a moving target), since new
- * commits can be merged while a Travis build is in progress.
- * See https://travis-ci.community/t/origin-master-moving-forward-between-build-stages/4189/6
+ * Returns the `master` parent of the merge commit (current HEAD) during CI
+ * builds. This is not the same as origin/master (a moving target), since
+ * new commits can be merged while a CI build is in progress.
  * @return {string}
  */
-function gitTravisMasterBaseline() {
+function gitCiMasterBaseline() {
   return getStdout('git merge-base origin/master HEAD').trim();
 }
 
@@ -144,8 +143,8 @@ function gitDiffFileMaster(file) {
  * @return {string}
  */
 function gitBranchName() {
-  return isTravisPullRequestBuild()
-    ? travisPullRequestBranch()
+  return isPullRequestBuild()
+    ? ciPullRequestBranch()
     : getStdout('git rev-parse --abbrev-ref HEAD').trim();
 }
 
@@ -154,8 +153,8 @@ function gitBranchName() {
  * @return {string}
  */
 function gitCommitHash() {
-  if (isTravisPullRequestBuild()) {
-    return travisPullRequestSha();
+  if (isPullRequestBuild()) {
+    return ciPullRequestSha();
   }
   return getStdout('git rev-parse --verify HEAD').trim();
 }
@@ -238,8 +237,8 @@ function gitMergeBaseLocalMaster() {
  * @return {string}
  */
 function gitMasterBaseline() {
-  if (isTravisBuild()) {
-    return gitTravisMasterBaseline();
+  if (isCiBuild()) {
+    return gitCiMasterBaseline();
   }
   return gitMergeBaseLocalMaster();
 }
@@ -271,6 +270,6 @@ module.exports = {
   gitDiffNameOnlyMaster,
   gitDiffPath,
   gitDiffStatMaster,
-  gitTravisMasterBaseline,
+  gitCiMasterBaseline,
   shortSha,
 };

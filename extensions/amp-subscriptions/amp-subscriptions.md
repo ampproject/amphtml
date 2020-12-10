@@ -32,13 +32,13 @@ The `amp-subscriptions` component implements subscription-style access/paywall r
 
 1. The AMP Page is loaded in the AMP viewer with some sections obscured using [attributes][11].
 2. The AMP Runtime calls the [Authorization endpoint][3] of all configured services.
-   1. If all services fail to respond, the [fallback entitlement][8] will be used.
+    1. If all services fail to respond, the [fallback entitlement][8] will be used.
 3. The AMP Runtime uses the response to either hide or show different sections as defined by the [Attributes][11].
 4. After the document has been shown to the Reader, AMP Runtime calls the Pingback endpoint that can be used by the Publisher to update the countdown meter (number of free views used).
 5. The Publisher can place specific [Actions][12] in the AMP document in order to:
-   1. Launch their own [Login page][4] to authenticate the Reader and associate the Reader’s identity in their system with the [AMP Reader ID][1]
-   2. Launch their own [Subscribe page][5] to allow the Reader to purchase a new subscription
-   3. Launch login or subscribe actions from [Vendor Services][7].
+    1. Launch their own [Login page][4] to authenticate the Reader and associate the Reader’s identity in their system with the [AMP Reader ID][1]
+    2. Launch their own [Subscribe page][5] to allow the Reader to purchase a new subscription
+    3. Launch login or subscribe actions from [Vendor Services][7].
 
 ### Relationship to `amp-access`
 
@@ -424,9 +424,9 @@ In the "iframe" mode authorization and pingback are provided by messaging to a p
 In iframe mode the `authorzationUrl` and `pingbackUrl` are deleted
 and replaced by:
 
-- "iframeSrc" - publisher supplied iframe
-- "iframeVars - AMP variables to be sent to the iframe
-- "type" - must be "iframe"
+-   "iframeSrc" - publisher supplied iframe
+-   "iframeVars - AMP variables to be sent to the iframe
+-   "type" - must be "iframe"
 
 The "local" service is configured in "iframe" mode as follows:
 
@@ -457,17 +457,17 @@ The "local" service is configured in "iframe" mode as follows:
 
 The properties in the "local" service are (remote mode):
 
-- "type" - optional type, defaults to "remote"
-- "authorizationUrl" - the authorization endpoint URL.
-- "pingbackUrl" - the pingback endpoint URL.
-- "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
+-   "type" - optional type, defaults to "remote"
+-   "authorizationUrl" - the authorization endpoint URL.
+-   "pingbackUrl" - the pingback endpoint URL.
+-   "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
 
 In iframe mode the `authorizationUrl` and `pingbackUrl` are deleted
 and replaced by:
 
-- "iframeSrc" - publisher supplied iframe
-- "iframeVars - AMP variables to be sent to the iframe
-- "type" - must be "iframe"
+-   "iframeSrc" - publisher supplied iframe
+-   "iframeVars - AMP variables to be sent to the iframe
+-   "type" - must be "iframe"
 
 See [amp-access-iframe](../amp-access/0.1/iframe-api/README.md) for details of the messaging protocol.
 
@@ -494,7 +494,7 @@ See the vendor service's documentation for details.
 
 #### Available vendor services
 
-- [amp-subscriptions-google](../amp-subscriptions-google/amp-subscriptions-google.md)
+-   [amp-subscriptions-google](../amp-subscriptions-google/amp-subscriptions-google.md)
 
 ### Service score factors
 
@@ -598,8 +598,8 @@ In order to present the Reader with specific experiences, the Publisher provides
 
 Available values:
 
-- `login`: this will trigger the [Login page][4] of the selected service.
-- `subscribe`: this will trigger the [Subscribe page][5] of the selected service.
+-   `login`: this will trigger the [Login page][4] of the selected service.
+-   `subscribe`: this will trigger the [Subscribe page][5] of the selected service.
 
 For example, this button will execute the "subscribe" action:
 
@@ -617,8 +617,8 @@ In the markup the actions can be delegated to other services for them to execute
 
 Available values:
 
-- `local`: this will force the `local` service to be used for a particular action.
-- `{serviceId}` (e.g. `subscribe.google.com`): this will force the service with ID `serviceId` to be used for a particular action.
+-   `local`: this will force the `local` service to be used for a particular action.
+-   `{serviceId}` (e.g. `subscribe.google.com`): this will force the service with ID `serviceId` to be used for a particular action.
 
 For example, this button will surface the subscribe page from the `subscribe.google.com` service, regardless of the [service score factors][9]:
 
@@ -651,8 +651,8 @@ The premium sections are shown/hidden automatically based on the authorization/e
 
 Available values:
 
-- `content`: this is used to encapsulate the premium content.
-- `content-not-granted`: this is used to will force the `local` service to be used for a particular action.
+-   `content`: this is used to encapsulate the premium content.
+-   `content-not-granted`: this is used to will force the `local` service to be used for a particular action.
 
 For instance, you should include the premium article contents in the `content` section and any fallback content in the `content-not-granted` section:
 
@@ -789,20 +789,20 @@ Example action configuration:
 The `login` action flow is as follows:
 
 1. A request is made to the specified URL of the following format:
-   ```http
-   https://pub.com/amp-login?
-     rid=READER_ID
-     &url=SOURCE_URL
-     &return=RETURN_URL
-   ```
-   **Note:** the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not specified.
+    ```http
+    https://pub.com/amp-login?
+      rid=READER_ID
+      &url=SOURCE_URL
+      &return=RETURN_URL
+    ```
+    **Note:** the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not specified.
 2. The Login page will be opened as a normal web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open).
 3. Once the Publisher has authenticated the Reader, the Publisher should associate the Publisher cookies with the [AMP Reader ID][1] as described in the [Combining the AMP Reader ID with Publisher Cookies][14] section.
 4. Once the Login page completes its work, it must redirect back to the specified “Return URL” with the following format:
-   ```text
-   RETURN_URL#success=true|false
-   ```
-   Notice the use of a URL hash parameter `success`. The value is either `true` or `false` depending on whether the login succeeds or is abandoned. Ideally the Login page, when possible, will send the signal in cases of both success or failure.
+    ```text
+    RETURN_URL#success=true|false
+    ```
+    Notice the use of a URL hash parameter `success`. The value is either `true` or `false` depending on whether the login succeeds or is abandoned. Ideally the Login page, when possible, will send the signal in cases of both success or failure.
 5. If the `success=true` signal is returned, the AMP Runtime will repeat calls to the Authorization and Pingback endpoints to update the document’s state and report the "view" with the new access profile.
 
 The `login` action will be triggered when the Reader clicks on a button with the `subscriptions-action="login"` attribute. For example:
@@ -818,19 +818,19 @@ The `login` action will be triggered when the Reader clicks on a button with the
 The `subscribe` flow is as follows:
 
 1. A request is made to the specified URL of the following format:
-   ```http
-   https://pub.com/amp-subscribe?
-     rid=READER_ID
-     &url=SOURCE_URL
-     &return=RETURN_URL
-   ```
-   **Note:** the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not specified.
+    ```http
+    https://pub.com/amp-subscribe?
+      rid=READER_ID
+      &url=SOURCE_URL
+      &return=RETURN_URL
+    ```
+    **Note:** the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not specified.
 2. The Subscribe page will be opened as a normal web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open).
 3. Once the Subscribe page completes its work, it must redirect back to the specified “Return URL” with the following format:
-   ```text
-   RETURN_URL#success=true|false
-   ```
-   Notice the use of a URL hash parameter `success`. The value is either `true` or `false` depending on whether the login succeeds or is abandoned. Ideally the Subscribe page, when possible, will send the signal in cases of both success or failure.
+    ```text
+    RETURN_URL#success=true|false
+    ```
+    Notice the use of a URL hash parameter `success`. The value is either `true` or `false` depending on whether the login succeeds or is abandoned. Ideally the Subscribe page, when possible, will send the signal in cases of both success or failure.
 4. If the `success=true` signal is returned, the AMP Runtime will repeat calls to the Authorization and Pingback endpoints to update the document’s state and report the "view" with the new access profile.
 
 The `subscribe` action will be triggered when the Reader clicks on a button with the `subscriptions-action="subscribe"` attribute. For example:
@@ -847,83 +847,83 @@ The `amp-subscriptions` component triggers the following analytics signals:
 
 1. `subscriptions-started`
 
-- Triggered when `amp-subscriptions` is initialized.
-- Data: none.
+-   Triggered when `amp-subscriptions` is initialized.
+-   Data: none.
 
 2. `subscriptions-service-registered`
 
-- Triggered when `amp-subscriptions` is able to resolve the instance of the service. A service is free to initialize itself at anytime on the page.
-- Data: `serviceId` of the selected service.
+-   Triggered when `amp-subscriptions` is able to resolve the instance of the service. A service is free to initialize itself at anytime on the page.
+-   Data: `serviceId` of the selected service.
 
 3. `subscriptions-service-activated`
 
-- Triggered when a configured service is selected and activated for use. See [service score factors][9].
-- Data: `serviceId` of the selected service.
+-   Triggered when a configured service is selected and activated for use. See [service score factors][9].
+-   Data: `serviceId` of the selected service.
 
 4. `subscriptions-entitlement-resolved`
 
-- Triggered when the entitlement fetch for a service is complete.
-- Data: `serviceId` and `action` of the selected service.
+-   Triggered when the entitlement fetch for a service is complete.
+-   Data: `serviceId` and `action` of the selected service.
 
 5. `subscriptions-access-granted`
 
-- Triggered when the entitlement from the selected service grants access to the document.
-- Data: `serviceId` of the selected service.
+-   Triggered when the entitlement from the selected service grants access to the document.
+-   Data: `serviceId` of the selected service.
 
 6. `subscriptions-paywall-activated`
 
-- Triggered when the entitlement from the selected service does not grant access to the document.
-- Data: `serviceId` of the selected service.
+-   Triggered when the entitlement from the selected service does not grant access to the document.
+-   Data: `serviceId` of the selected service.
 
 7. `subscriptions-access-denied`
 
-- Triggered when the entitlement from the selected service denies access to the document.
-- Data: `serviceId` of the selected service.
+-   Triggered when the entitlement from the selected service denies access to the document.
+-   Data: `serviceId` of the selected service.
 
 8. `subscriptions-service-re-authorized`
 
-- Triggered when re-authorization of a service is complete. A service can request re-authorization after any action is performed e.g., `login`. A new entitlement is fetched for the service after re-authorization is complete.
-- Data: `serviceId` of the selected service.
+-   Triggered when re-authorization of a service is complete. A service can request re-authorization after any action is performed e.g., `login`. A new entitlement is fetched for the service after re-authorization is complete.
+-   Data: `serviceId` of the selected service.
 
 9. `subscriptions-action-delegated`
 
-- Triggered just before a delegated service action is handed off to the other service. See `[subscription-service][15]`.
-- Data: `serviceId` and the delegated `action` of the selected service.
+-   Triggered just before a delegated service action is handed off to the other service. See `[subscription-service][15]`.
+-   Data: `serviceId` and the delegated `action` of the selected service.
 
 10. `subscriptions-action-ActionName-started`
 
-- Triggered when the execution of action `ActionName` starts.
-- Data: none.
+-   Triggered when the execution of action `ActionName` starts.
+-   Data: none.
 
 11. `subscriptions-action-ActionName-failed`
 
-- Triggered when the execution of action `ActionName` fails due to any reason.
-- Data: none.
+-   Triggered when the execution of action `ActionName` fails due to any reason.
+-   Data: none.
 
 12. `subscriptions-action-ActionName-success`
 
-- Triggered when the execution result of action `ActionName` is reported as a success.
-- Data: none.
+-   Triggered when the execution result of action `ActionName` is reported as a success.
+-   Data: none.
 
 13. `subscriptions-action-ActionName-rejected`
 
-- Triggered when the execution result of action `ActionName` is reported as a failure.
-- Data: none.
+-   Triggered when the execution result of action `ActionName` is reported as a failure.
+-   Data: none.
 
 14. `subscriptions-link-requested`
 
-- Triggered when a subscription account linking request is initiated by the selected service.
-- Data: `serviceId` of the selected service.
+-   Triggered when a subscription account linking request is initiated by the selected service.
+-   Data: `serviceId` of the selected service.
 
 15. `subscriptions-link-complete`
 
-- Triggered when subscription account linking has been completed by the selected service.
-- Data: `serviceId` of the selected service.
+-   Triggered when subscription account linking has been completed by the selected service.
+-   Data: `serviceId` of the selected service.
 
 16. `subscriptions-link-canceled`
 
-- Triggered when a subscription account linking request initiated by the selected service has been cancelled.
-- Data: `serviceId` of the selected service.
+-   Triggered when a subscription account linking request initiated by the selected service has been cancelled.
+-   Data: `serviceId` of the selected service.
 
 [1]: #amp-reader-id
 [2]: #local-service
