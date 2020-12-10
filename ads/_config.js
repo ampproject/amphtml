@@ -917,13 +917,18 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'pulse': {
+    prefetch: 'https://static.pulse.mail.ru/pulse-widget-amp.js',
+    renderStartImplemented: true,
+  },
+
   'pulsepoint': {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
   },
 
   'purch': {
-    prefetch: 'https://ads.servebom.com/serve/creative_amp.js',
+    prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
     renderStartImplemented: true,
   },
 

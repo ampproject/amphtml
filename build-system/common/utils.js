@@ -25,7 +25,7 @@ const {doDist} = require('../tasks/dist');
 const {execOrDie} = require('./exec');
 const {gitDiffNameOnlyMaster} = require('./git');
 const {green, cyan, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('./travis');
+const {isCiBuild} = require('./ci');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
 
@@ -52,7 +52,7 @@ async function buildRuntime(opt_compiled = false) {
  * @param {string} message
  */
 function logOnSameLine(message) {
-  if (!isTravisBuild() && process.stdout.isTTY) {
+  if (!isCiBuild() && process.stdout.isTTY) {
     process.stdout.moveCursor(0, -1);
     process.stdout.cursorTo(0);
     process.stdout.clearLine();
@@ -81,7 +81,7 @@ function getFilesChanged(globs) {
  * @return {!Array<string>}
  */
 function logFiles(files) {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(green('INFO: ') + 'Checking the following files:');
     for (const file of files) {
       log(cyan(file));

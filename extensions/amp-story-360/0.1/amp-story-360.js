@@ -697,9 +697,7 @@ export class AmpStory360 extends AMP.BaseElement {
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
     return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => {
-        return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
-      })
+      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
@@ -721,9 +719,7 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   setupAmpVideoRenderer_() {
     return whenUpgradedToCustomElement(dev().assertElement(this.ampVideoEl_))
-      .then(() => {
-        return this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END);
-      })
+      .then(() => this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END))
       .then(() => {
         const alreadyHasData =
           dev().assertElement(this.ampVideoEl_.querySelector('video'))
@@ -780,6 +776,14 @@ export class AmpStory360 extends AMP.BaseElement {
     if (this.isPlaying_) {
       this.animate_();
     }
+    this.markAsLoaded_();
+  }
+
+  /** @private */
+  markAsLoaded_() {
+    this.mutateElement(() => {
+      this.element.classList.add('i-amphtml-story-360-loaded');
+    });
   }
 
   /** @private */

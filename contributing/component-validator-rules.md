@@ -22,9 +22,9 @@ displays an image of a cat inside an AMP document. This extended component
 loads one of a set of 3 different pre-built cat images, so that the user
 doesn't need to host the images on their server. Each image has a cat name:
 
-- Oscar
-- Chloe
-- Bella
+-   Oscar
+-   Chloe
+-   Bella
 
 Common usage of this extended component might look like:
 
@@ -113,6 +113,7 @@ tags: {  # <amp-cat>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -266,6 +267,7 @@ tags.
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -342,11 +344,11 @@ generate mixed-mode warnings when displayed from the AMP Cache.
 
 Only one of:
 
-- `value`
-- `value_casei`
-- `value_regex`
-- `value_regex_casei`
-- `value_url`
+-   `value`
+-   `value_casei`
+-   `value_regex`
+-   `value_regex_casei`
+-   `value_url`
 
 may be specified for a single attribute. However, multiple values may be specified
 for `value` and `value_casei` as seen in the example above.
@@ -398,6 +400,7 @@ tags: {  # <amp-cat>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

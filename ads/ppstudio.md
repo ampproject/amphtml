@@ -35,9 +35,9 @@ For configuration semantics, contact [TenMax](https://www.tenmax.io/en/).
 
 ### Required parameters
 
-- `data-crid`
-- `data-width`
-- `data-height`
-- `data-holderScript`
+-   `data-crid`
+-   `data-width`
+-   `data-height`
+-   `data-holderScript`
 
 ### Optional parameters

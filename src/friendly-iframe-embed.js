@@ -16,8 +16,10 @@
 
 import {CommonSignals} from './common-signals';
 import {FIE_EMBED_PROP} from './iframe-helper';
+import {FIE_RESOURCES_EXP} from './experiments/fie-resources-exp';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {VisibilityState} from './visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {dev, devAssert, rethrowAsync, userAssert} from './log';
 import {
@@ -26,6 +28,7 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
+import {getExperimentBranch} from './experiments';
 import {installAmpdocServicesForEmbed} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -378,6 +381,7 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
+    // TODO(#31246): remove when the fie-resources experiment is cleaned up.
     this.removeResources_();
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
@@ -434,6 +438,24 @@ export class FriendlyIframeEmbed {
   }
 
   /**
+   * Pause the embed.
+   */
+  pause() {
+    if (this.ampdoc) {
+      this.ampdoc.overrideVisibilityState(VisibilityState.PAUSED);
+    }
+  }
+
+  /**
+   * Resume the embed.
+   */
+  resume() {
+    if (this.ampdoc) {
+      this.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+    }
+  }
+
+  /**
    * @private
    * @restricted
    */
@@ -466,9 +488,18 @@ export class FriendlyIframeEmbed {
         this.win./*OK*/ innerHeight
       );
     }
+    const fieResourcesOn =
+      this.ampdoc &&
+      this.ampdoc.getParent() &&
+      getExperimentBranch(this.ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
+        FIE_RESOURCES_EXP.experiment;
     Promise.all([
       this.whenReady(),
-      whenContentIniLoad(this.iframe, this.win, rect),
+      whenContentIniLoad(
+        fieResourcesOn ? this.ampdoc : this.iframe,
+        this.win,
+        rect
+      ),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
