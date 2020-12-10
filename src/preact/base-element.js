@@ -222,6 +222,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...childrenInit,
       ...passthroughInit,
       ...templatesInit,
+      ...this.getAdditionalMutationObserverInitProperties(),
     });
 
     this.mediaQueryProps_ = hasMediaQueryProps(Ctor)
@@ -374,6 +375,16 @@ export class PreactBaseElement extends AMP.BaseElement {
   mutationObserverCallback() {}
 
   /**
+   * A callback that allows the user to specify additional init properties
+   * to the Mutation Observer.
+   * @protected
+   * @return {!MutationObserverInit}
+   */
+  getAdditionalMutationObserverInitProperties() {
+    return {};
+  }
+
+  /**
    * A callback called immediately after mutations have been observed on a
    * component's defined props. The implementation can verify if any
    * additional properties need to be mutated via `mutateProps()` API.
@@ -406,7 +417,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    */
   checkMutations_(records) {
     const Ctor = this.constructor;
-    this.mutationObserverCallback();
+    this.mutationObserverCallback(records);
     const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
     if (rerender) {
       this.checkPropsPostMutations();

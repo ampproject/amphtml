@@ -134,17 +134,6 @@ class AmpSocialShare extends PreactBaseElement {
       `amp-social-share-${this.element.getAttribute('type')}`
     );
 
-    const mu = new MutationObserver((mutations) => {
-      const typeConfig = updateTypeConfig(this.element, mutations);
-      if (typeConfig) {
-        this.renderWithHrefAndTarget_(typeConfig);
-      }
-    });
-    mu.observe(this.element, {
-      attributes: true,
-      attributeOldValue: true,
-    });
-
     this.renderWithHrefAndTarget_(typeConfig);
     const responsive =
       this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
@@ -154,6 +143,19 @@ class AmpSocialShare extends PreactBaseElement {
       'color': 'currentColor',
       'background': 'inherit',
     });
+  }
+
+  /** @override */
+  mutationObserverCallback(mutations) {
+    const typeConfig = updateTypeConfig(this.element, mutations);
+    if (typeConfig) {
+      this.renderWithHrefAndTarget_(typeConfig);
+    }
+  }
+
+  /** @override */
+  getAdditionalMutationObserverInitProperties() {
+    return {attributeOldValue: true};
   }
 
   /** @override */
@@ -191,6 +193,7 @@ class AmpSocialShare extends PreactBaseElement {
       .then((expandedUrl) => {
         const {search} = Services.urlForDoc(this.element).parse(expandedUrl);
         const target = this.element.getAttribute('data-target') || '_blank';
+        console.log(search);
 
         if (customEndpoint) {
           this.mutateProps(
