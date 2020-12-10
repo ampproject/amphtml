@@ -313,7 +313,7 @@ describes.fakeWin('upgradePolyfill', {}, (env) => {
     );
   });
 
-  it('should auto-upgrade any stub post install even when native InOb present and continue returning Native for non docroot.', async () => {
+  it('should choose best InOb possible before and after upgrade, as well as upgrade rootdoc stubs.', async () => {
     const {win} = env;
     function NativeInOb(_ioCallback, opts) {
       if (opts && opts.root && opts.root.nodeType === 9) {
