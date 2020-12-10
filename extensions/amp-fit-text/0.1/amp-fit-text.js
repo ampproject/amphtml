@@ -21,6 +21,7 @@ import {throttle} from '../../../src/utils/rate-limit';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
+const RESIZE_THROTTLE_MS = 300;
 
 class AmpFitText extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -123,14 +124,15 @@ class AmpFitText extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
-      const observer = new this.win.ResizeObserver(() =>
+      const observer = new this.win.ResizeObserver(
         throttle(
           this.win,
-          this.mutateElement(() => {
-            this.updateMeasurerContent_();
-            this.updateFontSize_();
-          }),
-          200
+          () =>
+            this.mutateElement(() => {
+              this.updateMeasurerContent_();
+              this.updateFontSize_();
+            }),
+          RESIZE_THROTTLE_MS
         )
       );
 
