@@ -163,7 +163,6 @@ function closeDisclaimer(interactive, disclaimerEl) {
       scale.y = bubbleEl.offsetHeight / iconEl.offsetHeight;
     },
     () => {
-      console.log(scale);
       disclaimerEl.removeAttribute('active');
       setStyle(contentEl, 'transform', `scale(${1 / scale.x}, ${1 / scale.y})`);
       setStyle(iconEl, 'transform', `scale(${scale.x}, ${scale.y})`);

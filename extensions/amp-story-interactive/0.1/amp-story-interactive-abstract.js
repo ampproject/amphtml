@@ -38,6 +38,7 @@ import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {emojiConfetti} from './interactive-confetti';
+import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
@@ -265,6 +266,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         dev().assertElement(this.rootEl_),
         CSS + concreteCSS
       );
+      if (isExperimentOn(this.win, 'amp-story-interactive-disclaimer')) {
+        this.disclaimerEl_ = buildInteractiveDisclaimer(this);
+        this.rootEl_.appendChild(this.disclaimerEl_);
+      }
       return Promise.resolve();
     });
   }
@@ -364,8 +369,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.disclaimerEl_ = buildInteractiveDisclaimer(this);
-    this.rootEl_.appendChild(this.disclaimerEl_);
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
