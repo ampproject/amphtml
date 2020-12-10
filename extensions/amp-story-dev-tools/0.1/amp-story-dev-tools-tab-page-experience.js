@@ -14,30 +14,44 @@
  * limitations under the License.
  */
 
+import {applySandbox} from '../../../src/3p-frame';
+import {htmlFor} from '../../../src/static-template';
+
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.
  * @param {!Window} win
  * @param {string} storyUrl
- * @param {string} name
  * @return {!Element} the layout
  */
-export function createTabElement(win, storyUrl, name) {
-  const element = win.document.createElement('amp-story-dev-tools-tab');
-  element.setAttribute('story-url', storyUrl);
-  const innerTitle = win.document.createElement('h1');
-  innerTitle.textContent = name;
-  element.appendChild(innerTitle);
+export function createTabPageExperienceElement(win, storyUrl) {
+  const element = win.document.createElement(
+    'amp-story-dev-tools-tab-page-experience'
+  );
+  element.setAttribute('data-story-url', storyUrl);
   return element;
 }
 
-export class AmpStoryDevToolsTab extends AMP.BaseElement {
+export class AmpStoryDevToolsTabPageExperience extends AMP.BaseElement {
   /** @param {!Element} element */
   constructor(element) {
     super(element);
 
-    this.element.classList.add('i-amphtml-story-dev-tools-tab');
+    /** @private  {string} */
+    this.storyUrl_ = '';
+  }
 
-    /** @protected  {string} */
-    this.storyUrl_ = element.getAttribute('story-url');
+  /** @override */
+  buildCallback() {
+    this.storyUrl_ = this.element.getAttribute('data-story-url');
+  }
+
+  /** @override */
+  layoutCallback() {
+    const iframe = htmlFor(this.element)`<iframe frameborder="0">`;
+    applySandbox(iframe);
+    iframe.src =
+      'https://amp.dev/page-experience/?url=' +
+      encodeURIComponent(this.storyUrl_);
+    this.element.appendChild(iframe);
   }
 }
