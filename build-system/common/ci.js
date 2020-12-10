@@ -27,7 +27,7 @@
 /**
  * Shorthand to extract an environment variable.
  * @param {string} key
- * @return {string}
+ * @return {string|undefined}
  */
 function env(key) {
   return process.env[key];

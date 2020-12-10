@@ -38,7 +38,7 @@ const ESM_DIST_OUTPUT_FILE = isCiBuild()
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
-// TODO(rsimha): Update storage details.
+// TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';

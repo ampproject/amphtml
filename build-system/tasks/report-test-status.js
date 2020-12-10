@@ -79,7 +79,7 @@ async function postReport(type, action) {
         method: 'POST',
         uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
         body: JSON.stringify({
-          // TODO(rsimha): Change the name of this field.
+          // TODO(rsimha, ampproject/amp-github-apps#1111): Change the name of this field.
           travisJobUrl: ciJobUrl(),
         }),
         headers: {

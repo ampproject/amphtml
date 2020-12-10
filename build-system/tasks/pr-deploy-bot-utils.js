@@ -73,7 +73,7 @@ async function signalDistUpload(result) {
   const sha = gitCommitHash();
   const ciBuild = ciBuildNumber();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  // TODO(rsimha): Update this URL.
+  // TODO(rsimha, ampproject/amp-github-apps#1110): Update this URL.
   const url = `${baseUrl}travisbuilds/${ciBuild}/headshas/${sha}/${result}`;
 
   await request.post(url);
