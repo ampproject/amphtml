@@ -193,7 +193,6 @@ class AmpSocialShare extends PreactBaseElement {
       .then((expandedUrl) => {
         const {search} = Services.urlForDoc(this.element).parse(expandedUrl);
         const target = this.element.getAttribute('data-target') || '_blank';
-        console.log(search);
 
         if (customEndpoint) {
           this.mutateProps(
