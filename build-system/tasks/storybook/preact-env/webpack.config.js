@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   resolveLoader: {
@@ -64,4 +65,11 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      // Replaced by minify-replace (babel) in the usual build pipeline
+      // build-system/babel-config/helpers.js#getReplacePlugin
+      IS_ESM: false,
+    }),
+  ],
 };
