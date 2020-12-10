@@ -24,6 +24,7 @@ import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
+import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
@@ -32,12 +33,19 @@ const TAG = 'amp-social-share';
 
 /**
  * @private
- * @param {string} type
- * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
- * @param {!../../../src/service/platform-impl.Platform} platform
+ * @param {!Element} element
  * @return {!JsonObject|undefined}
  */
-const getTypeConfigOrUndefined = (type, viewer, platform) => {
+const getTypeConfigOrUndefined = (element) => {
+  const viewer = Services.viewerForDoc(element);
+  const platform = Services.platformFor(
+    toWin(element.ownerDocument.defaultView)
+  );
+  const type = userAssert(
+    element.getAttribute('type'),
+    'The type attribute is required. %s',
+    element
+  );
   if (type === 'system') {
     // navigator.share unavailable
     if (!systemShareSupported(viewer, platform)) {
@@ -71,24 +79,72 @@ const systemShareSupported = (viewer, platform) => {
   return 'share' in navigator && !isChromeWebview;
 };
 
+/**
+ * @private
+ * @param {!Element} element
+ * @param {Array<MutationRecord>} mutations
+ * @return {!JsonObject|undefined}
+ */
+const updateTypeConfig = (element, mutations) => {
+  let typeOldValue;
+  let mutatedEligibleAttribute;
+
+  // Check all mutations since we want to catch any 'data-param-*' attributes
+  mutations.forEach((mutation) => {
+    if (
+      ['type', 'data-target', 'data-share-endpoint'].includes(
+        mutation.attributeName
+      ) ||
+      (mutation.attributeName && mutation.attributeName.includes('data-param-'))
+    ) {
+      mutatedEligibleAttribute = true;
+      typeOldValue = mutation.attributeName === 'type' && mutation.oldValue;
+    }
+  });
+
+  // If no matching attribute changes exit and do nothing
+  if (!mutatedEligibleAttribute) {
+    return;
+  }
+
+  // If 'type' attribute was changed, remove the class of the old 'type'
+  if (typeOldValue) {
+    element.classList.remove(`amp-social-share-${typeOldValue}`);
+  }
+
+  const typeConfig = getTypeConfigOrUndefined(element);
+  if (!typeConfig) {
+    toggle(element, false);
+    return;
+  }
+  element.classList.add(`amp-social-share-${element.getAttribute('type')}`);
+  return typeConfig;
+};
+
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
-    const viewer = Services.viewerForDoc(this.element);
-    const platform = Services.platformFor(window);
-    const type = userAssert(
-      this.element.getAttribute('type'),
-      'The type attribute is required. %s',
-      this.element
-    );
-    const typeConfig = getTypeConfigOrUndefined(type, viewer, platform);
+    const typeConfig = getTypeConfigOrUndefined(this.element);
     // Hide/ignore component if typeConfig is undefined
     if (!typeConfig) {
       toggle(this.element, false);
       return;
     }
+    this.element.classList.add(
+      `amp-social-share-${this.element.getAttribute('type')}`
+    );
 
-    this.element.classList.add(`amp-social-share-${type}`);
+    const mu = new MutationObserver((mutations) => {
+      const typeConfig = updateTypeConfig(this.element, mutations);
+      if (typeConfig) {
+        this.renderWithHrefAndTarget_(typeConfig);
+      }
+    });
+    mu.observe(this.element, {
+      attributes: true,
+      attributeOldValue: true,
+    });
+
     this.renderWithHrefAndTarget_(typeConfig);
     const responsive =
       this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
@@ -140,12 +196,14 @@ class AmpSocialShare extends PreactBaseElement {
           this.mutateProps(
             dict({
               'endpoint': expandedUrl,
+              'params': null,
               'target': target,
             })
           );
         } else {
           this.mutateProps(
             dict({
+              'endpoint': null,
               'params': parseQueryString(search),
               'target': target,
             })
