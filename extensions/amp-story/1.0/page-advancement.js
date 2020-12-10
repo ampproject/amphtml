@@ -19,7 +19,6 @@ import {
   EmbeddedComponentState,
   InteractiveComponentDef,
   PlayerActionLinkDef,
-  PlayerActionLinkState,
   StateProperty,
   UIType,
   getStoreService,
@@ -31,6 +30,7 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, timeStrToMillis} from './utils';
@@ -667,7 +667,6 @@ export class ManualAdvancement extends AdvancementConfig {
     const playerLink = closest(target, (element) =>
       matches(element, PLAYER_ACTION_LINK_SELECTOR)
     );
-    console.log(!!playerLink);
     return !!playerLink;
   }
 
@@ -716,13 +715,12 @@ export class ManualAdvancement extends AdvancementConfig {
       // TODO: check when a link also has an href - then override href bc it's a player-action?
       event.preventDefault();
       event.stopPropagation();
-      const playerActionLink = /** @type {PlayerActionLinkDef} */ (this.storeService_.get(
-        StateProperty.PLAYER_ACTION_LINK_STATE
-      ));
-      this.storeService_.dispatch(Action.TOGGLE_PLAYER_ACTION_LINK, {
-        playerActionId: playerLink.getAttribute('player-action'),
-        state: playerActionLink.state || PlayerActionLinkState.CLICKED,
-      });
+      const viewer = Services.viewerForDoc(this.ampdoc_);
+      viewer.sendMessage(
+        'addToCartPlayerAction',
+        dict({'productId': playerLink.getAttribute('player-action')}),
+        false
+      );
       return;
     }
 

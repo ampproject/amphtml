@@ -66,6 +66,6 @@
   </body>
   <script type="text/javascript">
     const playerEl = document.querySelector('amp-story-player');
-    playerEl.addEventListener('addToCartPlayerAction', (event) => {console.log(event.productId)});
+    playerEl.addEventListener('addToCartPlayerAction', (event) => {console.log(event.detail.productId)});
   </script>
 </html>
