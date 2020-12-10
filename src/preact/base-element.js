@@ -222,7 +222,6 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...childrenInit,
       ...passthroughInit,
       ...templatesInit,
-      ...this.getAdditionalMutationObserverInitProperties(),
     });
 
     this.mediaQueryProps_ = hasMediaQueryProps(Ctor)
@@ -373,16 +372,6 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @protected
    */
   mutationObserverCallback() {}
-
-  /**
-   * A callback that allows the user to specify additional init properties
-   * to the Mutation Observer.
-   * @protected
-   * @return {!MutationObserverInit}
-   */
-  getAdditionalMutationObserverInitProperties() {
-    return {};
-  }
 
   /**
    * A callback called immediately after mutations have been observed on a

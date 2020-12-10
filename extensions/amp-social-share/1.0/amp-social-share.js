@@ -83,10 +83,11 @@ const systemShareSupported = (viewer, platform) => {
  * @private
  * @param {!Element} element
  * @param {Array<MutationRecord>} mutations
+ * @param {string} prevTypeValue
  * @return {!JsonObject|undefined}
  */
-const updateTypeConfig = (element, mutations) => {
-  let typeOldValue;
+const updateTypeConfig = (element, mutations, prevTypeValue) => {
+  let typeUpdated;
   let mutatedEligibleAttribute;
 
   // Check all mutations since we want to catch any 'data-param-*' attributes
@@ -98,7 +99,7 @@ const updateTypeConfig = (element, mutations) => {
       (mutation.attributeName && mutation.attributeName.includes('data-param-'))
     ) {
       mutatedEligibleAttribute = true;
-      typeOldValue = mutation.attributeName === 'type' && mutation.oldValue;
+      typeUpdated = typeUpdated || mutation.attributeName === 'type';
     }
   });
 
@@ -108,8 +109,8 @@ const updateTypeConfig = (element, mutations) => {
   }
 
   // If 'type' attribute was changed, remove the class of the old 'type'
-  if (typeOldValue) {
-    element.classList.remove(`amp-social-share-${typeOldValue}`);
+  if (typeUpdated) {
+    element.classList.remove(`amp-social-share-${prevTypeValue}`);
   }
 
   const typeConfig = getTypeConfigOrUndefined(element);
@@ -122,6 +123,14 @@ const updateTypeConfig = (element, mutations) => {
 };
 
 class AmpSocialShare extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?string} */
+    this.ampSocialShareType_ = null;
+  }
+
   /** @override */
   init() {
     const typeConfig = getTypeConfigOrUndefined(this.element);
@@ -130,9 +139,8 @@ class AmpSocialShare extends PreactBaseElement {
       toggle(this.element, false);
       return;
     }
-    this.element.classList.add(
-      `amp-social-share-${this.element.getAttribute('type')}`
-    );
+    this.ampSocialShareType_ = this.element.getAttribute('type');
+    this.element.classList.add(`amp-social-share-${this.ampSocialShareType_}`);
 
     this.renderWithHrefAndTarget_(typeConfig);
     const responsive =
@@ -147,15 +155,15 @@ class AmpSocialShare extends PreactBaseElement {
 
   /** @override */
   mutationObserverCallback(mutations) {
-    const typeConfig = updateTypeConfig(this.element, mutations);
+    const typeConfig = updateTypeConfig(
+      this.element,
+      mutations,
+      this.ampSocialShareType_
+    );
     if (typeConfig) {
+      this.ampSocialShareType_ = this.element.getAttribute('type');
       this.renderWithHrefAndTarget_(typeConfig);
     }
-  }
-
-  /** @override */
-  getAdditionalMutationObserverInitProperties() {
-    return {attributeOldValue: true};
   }
 
   /** @override */
