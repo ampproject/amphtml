@@ -1184,14 +1184,10 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
   },
-  "process\\.env(\\.TRAVIS|\\[\\'TRAVIS)": {
+  "process\\.env(\\.|\\[\\')(TRAVIS|GITHUB_ACTIONS|CIRCLECI)": {
     message:
-      'Do not directly use process.env.TRAVIS. Instead, add a ' +
-      'function to build-system/common/travis.js',
-    allowlist: [
-      'build-system/common/check-package-manager.js',
-      'build-system/common/travis.js',
-    ],
+      'Do not directly use CI-specific environment vars. Instead, add a ' +
+      'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
   '\\.getLayoutWidth': {

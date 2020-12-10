@@ -18,7 +18,7 @@
 /**
  * @fileoverview
  * This script runs the unit and integration tests against minified code
- * on a local Travis VM.
+ * on a local CI service VM.
  * This is run during the CI stage = test; job = dist tests.
  */
 
@@ -32,7 +32,7 @@ const {
   timedExecOrThrow: timedExecOrThrowBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
+const {isPullRequestBuild} = require('../common/ci');
 
 const FILENAME = 'dist-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -42,7 +42,7 @@ const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  if (!isTravisPullRequestBuild()) {
+  if (!isPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
