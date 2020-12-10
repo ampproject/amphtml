@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from './common-signals';
+import {Deferred} from './utils/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {FIE_RESOURCES_EXP} from './experiments/fie-resources-exp';
 import {Services} from './services';
@@ -368,10 +369,17 @@ export class FriendlyIframeEmbed {
       ? this.host.signals()
       : new Signals();
 
+    /** @private @const {!Deferred} */
+    this.renderComplete_ = new Deferred();
+
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
     if (this.ampdoc) {
-      this.whenReady().then(() => this.ampdoc.setReady());
+      // TODO(ccordry): wait for renderComplete after no signing launch.
+      const readyPromise = this.spec.skipHtmlMerge
+        ? this.whenRenderComplete()
+        : this.whenReady();
+      readyPromise.then(() => this.ampdoc.setReady());
     }
 
     this.win.addEventListener('resize', () => this.handleResize_());
@@ -435,6 +443,23 @@ export class FriendlyIframeEmbed {
    */
   whenIniLoaded() {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
+  }
+
+  /**
+   * Returns a promise that will resolve when all elements have been
+   * transferred into live aembedd DOM.
+   * @return {!Promise}
+   */
+  whenRenderComplete() {
+    return this.renderComplete_.promise;
+  }
+
+  /**
+   * Signal that indicates that all DOM elements have been tranferred to live
+   * embed DOM.
+   */
+  renderCompleted() {
+    this.renderComplete_.resolve();
   }
 
   /**
