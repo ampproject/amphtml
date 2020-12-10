@@ -35,6 +35,7 @@ import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
+import {PlayerActionLinkState} from '../../extensions/amp-story/1.0/amp-story-store-service';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
@@ -42,7 +43,6 @@ import {getMode} from '../../src/mode';
 import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
-import { PlayerActionLinkState } from '../../extensions/amp-story/1.0/amp-story-store-service';
 
 /** @enum {string} */
 const LoadStateClass = {

@@ -632,7 +632,8 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
-      [StateProperty.PLAYER_ACTION_LINK_STATE]: PlayerActionLinkState.NOT_CLICKED,
+      [StateProperty.PLAYER_ACTION_LINK_STATE]:
+        PlayerActionLinkState.NOT_CLICKED,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SIDEBAR_STATE]: false,

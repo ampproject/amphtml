@@ -664,14 +664,10 @@ export class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    */
   isHandledByPlayerActionLink_(target) {
-    const clickedOnLink = matches(target, PLAYER_ACTION_LINK_SELECTOR);
-    console.log(clickedOnLink);
-
-    const playerActionLinkState = this.storeService_.get(
-      StateProperty.PLAYER_ACTION_LINK_STATE
+    const playerLink = closest(target, (element) =>
+      matches(element, PLAYER_ACTION_LINK_SELECTOR)
     );
-
-    return playerActionLinkState != null || clickedOnLink;
+    return !!playerLink;
   }
 
   /**
@@ -713,14 +709,17 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     if (this.isHandledByPlayerActionLink_(target)) {
-      // debugger;
+      const playerLink = closest(target, (element) =>
+        matches(element, PLAYER_ACTION_LINK_SELECTOR)
+      );
+      // TODO: check when a link also has an href
       event.preventDefault();
       event.stopPropagation();
       const playerActionLink = /** @type {PlayerActionLinkDef} */ (this.storeService_.get(
         StateProperty.PLAYER_ACTION_LINK_STATE
       ));
       this.storeService_.dispatch(Action.TOGGLE_PLAYER_ACTION_LINK, {
-        playerActionId: target.getAttribute('player-action'),
+        playerActionId: playerLink.getAttribute('player-action'),
         state: playerActionLink.state || PlayerActionLinkState.CLICKED,
       });
       return;
