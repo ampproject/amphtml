@@ -447,6 +447,39 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     );
   });
 
+  it('should signal fie doc ready during install when not streaming', async () => {
+    const setReadySpy = env.sandbox.spy(AmpDocFie.prototype, 'setReady');
+    await installFriendlyIframeEmbed(
+      iframe,
+      document.body,
+      {
+        url: 'https://acme.test/url1',
+        html: '<amp-test></amp-test>',
+        extensionIds: ['amp-test'],
+      },
+      preinstallCallback
+    );
+    expect(setReadySpy).to.be.called;
+  });
+
+  it('should wait complete streaming before signaling fie doc ready', async () => {
+    const setReadySpy = env.sandbox.spy(AmpDocFie.prototype, 'setReady');
+    const fie = await installFriendlyIframeEmbed(
+      iframe,
+      document.body,
+      {
+        url: 'https://acme.test/url1',
+        html: '<amp-test></amp-test>',
+        extensionIds: ['amp-test'],
+        skipHtmlMerge: true,
+      },
+      preinstallCallback
+    );
+    expect(setReadySpy).not.to.be.called;
+    await fie.renderCompleted();
+    expect(setReadySpy).to.be.called;
+  });
+
   it('should dispose ampdoc', () => {
     // AmpDoc is created.
     const ampdocSignals = new Signals();
