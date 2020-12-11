@@ -93,7 +93,6 @@ export class AmpStoryPlayerViewportObserver {
       SCROLL_THROTTLE_MS
     );
 
-    // TODO(Enriqe): pause elements when scrolling away from viewport.
     this.win_.addEventListener('scroll', this.scrollHandler_);
 
     this.checkIfVisibleFallback_(this.element_);

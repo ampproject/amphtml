@@ -235,7 +235,7 @@ export class AmpStoryPlayer {
     this.currentStoryLoadDeferred_ = null;
 
     /** @private {!Deferred} */
-    this.prerenderStoriesDeferred_ = new Deferred();
+    this.prerenderFirstStoryDeferred_ = new Deferred();
 
     /** @private {!Deferred} */
     this.visibleDeferred_ = new Deferred();
@@ -428,7 +428,7 @@ export class AmpStoryPlayer {
         story,
         iframe,
         idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER,
-        idx === 0 /** isFirstStory */
+        idx === 0 /** hasPriorityLoading */
       );
     }
   }
@@ -691,25 +691,27 @@ export class AmpStoryPlayer {
         story,
         iframe,
         VisibilityState.PRERENDER,
-        idx === 0 /** isFirstStory */
-      ).then(() => this.prerenderStoriesDeferred_.resolve());
+        idx === 0 /** hasPriorityLoading */
+      ).then(() => this.prerenderFirstStoryDeferred_.resolve());
     }
 
     // Unblock layoutCallback when there are no stories initially.
     if (this.stories_.length === 0) {
-      this.prerenderStoriesDeferred_.resolve();
+      this.prerenderFirstStoryDeferred_.resolve();
     }
   }
 
   /** @private */
   initializeVisibleIO_() {
-    const cb = () => {
-      this.prerenderStoriesDeferred_.promise.then(() =>
+    const visibleCb = () => {
+      this.prerenderFirstStoryDeferred_.promise.then(() =>
         this.visibleDeferred_.resolve()
       );
     };
 
-    new AmpStoryPlayerViewportObserver(this.win_, this.element_, cb.bind(this));
+    new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
+      visibleCb()
+    );
   }
 
   /**
@@ -1083,7 +1085,7 @@ export class AmpStoryPlayer {
       story,
       iframeEl,
       VisibilityState.VISIBLE,
-      true /** isFirstStory */
+      true /** hasPriorityLoading */
     ).then(() => {
       this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
       this.updateIframePosition_(iframeIdx, IframePosition.CURRENT);
@@ -1142,7 +1144,7 @@ export class AmpStoryPlayer {
       nextStory,
       nextIframe,
       visibilityState,
-      visibilityState === VisibilityState.VISIBLE /** isFirstStory */
+      visibilityState === VisibilityState.VISIBLE /** hasPriorityLoading */
     );
     this.updateIframePosition_(
       nextStory.iframeIdx,
@@ -1157,11 +1159,11 @@ export class AmpStoryPlayer {
    * @param {!StoryDef} story
    * @param {!Element} iframe
    * @param {!VisibilityState} visibilityState
-   * @param {boolean} isFirstStory
+   * @param {boolean} hasPriorityLoading
    * @return {!Promise}
    * @private
    */
-  updateIframeSrc_(story, iframe, visibilityState, isFirstStory) {
+  updateIframeSrc_(story, iframe, visibilityState, hasPriorityLoading) {
     return this.maybeGetCacheUrl_(story.href)
       .then((storyUrl) => {
         if (this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)) {
@@ -1169,7 +1171,7 @@ export class AmpStoryPlayer {
         }
 
         let navigationPromise;
-        if (isFirstStory) {
+        if (hasPriorityLoading) {
           if (this.currentStoryLoadDeferred_) {
             // Cancel previous story load promise.
             this.currentStoryLoadDeferred_.reject(
