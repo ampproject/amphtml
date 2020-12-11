@@ -24,13 +24,12 @@ amp-lightbox {
   color: white;
 }
 
-amp-lightbox::part(c),
 amp-lightbox::part(lightbox) {
-  /* Note: background types can be applied/inherited by all of these 
-  because in amp-lightbox > c > [part=lightbox]:
+  /* Note: background should be applied/inherited by all elements
+   in amp-lightbox > c > [part=lightbox] because:
      - amp-lightbox does not show a background due to visibility: hidden
      - c does not paint a background due to display: contents 
-     - and therefore only [part] visibly applies the background value */
+     - therefore only [part] visibly applies the background value */
   background: inherit;
   color: inherit;
 }

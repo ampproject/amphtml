@@ -97,7 +97,7 @@ const TEMPLATES_MUTATION_INIT = {
 
 /** @const {!JsonObject<string, string>} */
 const SHADOW_CONTAINER_ATTRS = dict({
-  'style': 'display: contents;',
+  'style': 'display: contents; background: inherit;',
   'part': 'c',
 });
 
