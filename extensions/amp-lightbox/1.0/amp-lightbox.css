@@ -20,11 +20,17 @@ amp-lightbox {
   position: fixed;
   visibility: hidden;
   box-sizing: border-box;
-  background-color: rgb(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.9);
   color: white;
 }
 
+amp-lightbox::part(c),
 amp-lightbox::part(lightbox) {
-  background-color: inherit;
+  /* Note: background types can be applied/inherited by all of these 
+  because in amp-lightbox > c > [part=lightbox]:
+     - amp-lightbox does not show a background due to visibility: hidden
+     - c does not paint a background due to display: contents 
+     - and therefore only [part] visibly applies the background value */
+  background: inherit;
   color: inherit;
 }
