@@ -82,7 +82,7 @@ const systemShareSupported = (viewer, platform) => {
 /**
  * @private
  * @param {!Element} element
- * @param {Array<MutationRecord>} mutations
+ * @param {!Array<MutationRecord>} mutations
  * @param {string} prevTypeValue
  * @return {!JsonObject|undefined}
  */
@@ -93,9 +93,9 @@ const updateTypeConfig = (element, mutations, prevTypeValue) => {
   // Check all mutations since we want to catch any 'data-param-*' attributes
   mutations.forEach((mutation) => {
     if (
-      ['type', 'data-target', 'data-share-endpoint'].includes(
-        mutation.attributeName
-      ) ||
+      mutation.attributeName === 'type' ||
+      mutation.attributeName === 'data-target' ||
+      mutation.attributeName === 'data-share-endpoint' ||
       (mutation.attributeName && mutation.attributeName.includes('data-param-'))
     ) {
       mutatedEligibleAttribute = true;
