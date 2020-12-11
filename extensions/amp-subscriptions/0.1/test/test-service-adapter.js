@@ -23,7 +23,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let win;
     let ampdoc;
     let subscriptionService;

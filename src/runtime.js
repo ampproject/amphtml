@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
@@ -40,7 +39,9 @@ import {
 } from './service/extensions-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {registerExtendedTemplate} from './service/template-impl';
 import {reportErrorForWin} from './error';
+import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
@@ -111,7 +112,7 @@ function adoptShared(global, callback) {
      * @param {function(!Object)} installer
      * @const
      */
-    global.AMP.extension = function(unusedName, unusedVersion, installer) {
+    global.AMP.extension = function (unusedName, unusedVersion, installer) {
       installer(global.AMP);
     };
   }
@@ -120,8 +121,6 @@ function adoptShared(global, callback) {
   global.AMP.config = config;
 
   global.AMP.BaseElement = BaseElement;
-
-  global.AMP.BaseTemplate = BaseTemplate;
 
   /**
    * Registers an extended element and installs its styles.
@@ -134,9 +133,9 @@ function adoptShared(global, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {typeof BaseTemplate} implementationClass
+   * @param {typeof ./base-template.BaseTemplate} implementationClass
    */
-  global.AMP.registerTemplate = function(name, implementationClass) {
+  global.AMP.registerTemplate = function (name, implementationClass) {
     registerExtendedTemplate(global, name, implementationClass);
   };
 
@@ -196,7 +195,7 @@ function adoptShared(global, callback) {
     // "intermediate" dependency that needs to be loaded before they
     // can execute.
     if (!(typeof fnOrStruct == 'function') && fnOrStruct.i) {
-      preloadDeps(extensions, fnOrStruct).then(function() {
+      preloadDeps(extensions, fnOrStruct).then(function () {
         return startRegisterOrChunk(global, fnOrStruct, register);
       });
     } else {
@@ -229,7 +228,7 @@ function adoptShared(global, callback) {
      * Registers a new custom element.
      * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
      */
-    global.AMP.push = function(fnOrStruct) {
+    global.AMP.push = function (fnOrStruct) {
       if (maybeLoadCorrectVersion(global, fnOrStruct)) {
         return;
       }
@@ -268,6 +267,9 @@ function adoptShared(global, callback) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
   }
 
+  // Some deferred polyfills.
+  scheduleInObUpgradeIfNeeded(global);
+
   return iniPromise;
 }
 
@@ -281,7 +283,7 @@ function preloadDeps(extensions, fnOrStruct) {
   // for an array if intermediate dependencies that needs to be
   // resolved first before executing this current extension.
   if (Array.isArray(fnOrStruct.i)) {
-    const promises = fnOrStruct.i.map(dep => {
+    const promises = fnOrStruct.i.map((dep) => {
       return extensions.preloadExtension(dep);
     });
     return Promise.all(promises);
@@ -326,7 +328,7 @@ function startRegisterOrChunk(global, fnOrStruct, register) {
  * @return {!Promise}
  */
 export function adopt(global) {
-  return adoptShared(global, global => {
+  return adoptShared(global, (global) => {
     // Shared runtimes variables between both multi-doc and single-doc pages
     adoptServicesAndResources(global);
 
@@ -344,7 +346,7 @@ export function adopt(global) {
  * @return {!Promise}
  */
 export function adoptWithMultidocDeps(global) {
-  return adoptShared(global, global => {
+  return adoptShared(global, (global) => {
     // Shared runtimes variables between both multi-doc and single-doc pages
     adoptServicesAndResources(global);
 
@@ -447,16 +449,12 @@ export function adoptShadowMode(global) {
  * If they are different, returns false, and initiates a load
  * of the respective extension via a versioned URL.
  *
- * This is currently guarded by the 'version-locking' experiment.
- * With this active, all scripts in a given page are guaranteed
- * to have the same AMP release version.
- *
  * @param {!Window} win
  * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
-  if (!isExperimentOn(win, 'version-locking')) {
+  if (getMode().localDev && isExperimentOn(win, 'disable-version-locking')) {
     return false;
   }
   if (typeof fnOrStruct == 'function') {

@@ -17,10 +17,7 @@
 import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
+import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 
@@ -61,7 +58,7 @@ export function renderCreativeIntoFriendlyFrame(
 
   const fontsArray = [];
   if (creativeMetadata.customStylesheets) {
-    creativeMetadata.customStylesheets.forEach(s => {
+    creativeMetadata.customStylesheets.forEach((s) => {
       const href = s['href'];
       if (href) {
         fontsArray.push(href);
@@ -82,14 +79,11 @@ export function renderCreativeIntoFriendlyFrame(
     (embedWin, ampdoc) => {
       const parentAmpdoc = element.getAmpDoc();
       installUrlReplacementsForEmbed(
-        // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
-        ampdoc || parentAmpdoc,
-        embedWin,
+        ampdoc,
         new A4AVariableSource(parentAmpdoc, embedWin)
       );
     }
-  ).then(friendlyIframeEmbed => {
-    setFriendlyIframeEmbedVisible(friendlyIframeEmbed, element.isInViewport());
+  ).then((friendlyIframeEmbed) => {
     // Ensure visibility hidden has been removed (set by boilerplate).
     const frameDoc =
       friendlyIframeEmbed.iframe.contentDocument ||

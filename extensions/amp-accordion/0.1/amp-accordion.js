@@ -22,11 +22,12 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
-import {closest, tryFocus} from '../../../src/dom';
+import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   numeric,
   px,
@@ -40,6 +41,10 @@ const MAX_TRANSITION_DURATION = 500; // ms
 const MIN_TRANSITION_DURATION = 200; // ms
 const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
+
+const isDisplayLockingEnabledForAccordion = (win) =>
+  isExperimentOn(win, 'amp-accordion-display-locking') &&
+  win.document.body.onbeforematch !== undefined;
 
 class AmpAccordion extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -74,6 +79,11 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
@@ -100,24 +110,34 @@ class AmpAccordion extends AMP.BaseElement {
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
-      const content = sectionComponents[1];
+      const {0: header, 1: content} = sectionComponents;
       content.classList.add('i-amphtml-accordion-content');
+
+      // Ensure each accordion has a unique id, helping screen readers
+      // understand the relationship between the pieces of content.
       let contentId = content.getAttribute('id');
       if (!contentId) {
-        // To ensure that we pass Accessibility audits -
-        // we need to make sure that each accordion has a unique ID.
-        // In case the accordion doesn't have an ID we use a
-        // random number to ensure uniqueness.
         contentId = this.prefix_ + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
       }
+      let headerId = header.getAttribute('id');
+      if (!headerId) {
+        headerId = this.prefix_ + '_AMP_header_' + index;
+        header.setAttribute('id', headerId);
+      }
 
-      this.registerAction('toggle', i => this.handleAction_(i));
-      this.registerAction('expand', i => this.handleAction_(i));
-      this.registerAction('collapse', i => this.handleAction_(i));
+      this.registerAction('toggle', (i) => this.handleAction_(i));
+      this.registerAction('expand', (i) => this.handleAction_(i));
+      this.registerAction('collapse', (i) => this.handleAction_(i));
+      /** If the element is in an email document, allow its `open` and `close` actions. */
+      this.action_.addToAllowlist(
+        TAG,
+        ['toggle', 'expand', 'collapse'],
+        ['email']
+      );
 
       // Listen for mutations on the 'data-expand' attribute.
-      const expandObserver = new this.win.MutationObserver(mutations => {
+      const expandObserver = new this.win.MutationObserver((mutations) => {
         // [data-expand] mutations can only be triggered by AMP.setState which
         // requires "default" trust.
         this.toggleExpandMutations_(mutations, ActionTrust.DEFAULT);
@@ -140,18 +160,17 @@ class AmpAccordion extends AMP.BaseElement {
         // for details.
       });
 
-      const header = sectionComponents[0];
+      const isExpanded = section.hasAttribute('expanded');
       header.classList.add('i-amphtml-accordion-header');
       header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
-      header.setAttribute(
-        'aria-expanded',
-        section.hasAttribute('expanded').toString()
-      );
+      header.setAttribute('aria-expanded', String(isExpanded));
       if (!header.hasAttribute('tabindex')) {
         header.setAttribute('tabindex', 0);
       }
       this.headers_.push(header);
+      content.setAttribute('aria-labelledby', headerId);
+      content.setAttribute('role', 'region');
 
       userAssert(
         this.action_.hasAction(header, 'tap', section) == false,
@@ -160,6 +179,13 @@ class AmpAccordion extends AMP.BaseElement {
 
       header.addEventListener('click', this.clickHandler_.bind(this));
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
+
+      if (isDisplayLockingEnabledForAccordion(this.win)) {
+        this.element.classList.add('i-amphtml-display-locking');
+        content.addEventListener('beforematch', () => {
+          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
+        });
+      }
     });
   }
 
@@ -268,7 +294,7 @@ class AmpAccordion extends AMP.BaseElement {
     );
     this.action_.trigger(section, name, event, trust);
 
-    this.element.dispatchCustomEvent(name);
+    dispatchCustomEvent(this.element, name);
   }
 
   /**
@@ -305,7 +331,7 @@ class AmpAccordion extends AMP.BaseElement {
         header.setAttribute('aria-expanded', 'true');
         this.animateExpand_(section, trust);
         if (this.element.hasAttribute('expand-single-section')) {
-          this.sections_.forEach(sectionIter => {
+          this.sections_.forEach((sectionIter) => {
             if (sectionIter != section) {
               this.animateCollapse_(sectionIter, trust);
               sectionIter.children[0].setAttribute('aria-expanded', 'false');
@@ -326,7 +352,7 @@ class AmpAccordion extends AMP.BaseElement {
           // if expand-single-section is set, only allow one <section> to be
           // expanded at a time
           if (this.element.hasAttribute('expand-single-section')) {
-            this.sections_.forEach(sectionIter => {
+            this.sections_.forEach((sectionIter) => {
               if (sectionIter != section) {
                 if (sectionIter.hasAttribute('expanded')) {
                   this.triggerEvent_('collapse', sectionIter, trust);
@@ -375,7 +401,6 @@ class AmpAccordion extends AMP.BaseElement {
           'opacity': '0',
         });
         if (!section.hasAttribute('expanded')) {
-          this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
         }
       }
@@ -427,6 +452,7 @@ class AmpAccordion extends AMP.BaseElement {
         );
         return animation.start(duration).thenAlways(() => {
           this.mutateElement(() => {
+            this.triggerEvent_('expand', section, trust);
             setStyles(section, {
               'overflow': '',
               'height': '',
@@ -543,7 +569,7 @@ class AmpAccordion extends AMP.BaseElement {
   shouldHandleClick_(event) {
     const target = dev().assertElement(event.target);
     const header = dev().assertElement(event.currentTarget);
-    const hasAnchor = !!closest(target, e => e.tagName == 'A', header);
+    const hasAnchor = !!closest(target, (e) => e.tagName == 'A', header);
     const hasTapAction = this.action_.hasAction(target, 'tap', header);
     return !hasAnchor && !hasTapAction;
   }
@@ -603,7 +629,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @param {!ActionTrust} trust
    */
   toggleExpandMutations_(mutations, trust) {
-    mutations.forEach(mutation => {
+    mutations.forEach((mutation) => {
       const sectionEl = dev().assertElement(mutation.target);
       const toExpand = sectionEl.hasAttribute('data-expand');
       const isExpanded = sectionEl.hasAttribute('expanded');
@@ -622,6 +648,6 @@ class AmpAccordion extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAccordion, CSS);
 });

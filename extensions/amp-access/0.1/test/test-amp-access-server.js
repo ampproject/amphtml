@@ -19,7 +19,7 @@ import * as lolex from 'lolex';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
 
-describes.realWin('AccessServerAdapter', {amp: true}, env => {
+describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
   let win;
   let document;
   let ampdoc;
@@ -140,10 +140,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
       it('should fallback to client auth when not on proxy', () => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
-        clientAdapterMock
-          .expects('authorize')
-          .returns(p)
-          .once();
+        clientAdapterMock.expects('authorize').returns(p).once();
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -152,10 +149,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
       it('should fallback to client auth w/o server state', () => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
-        clientAdapterMock
-          .expects('authorize')
-          .returns(p)
-          .once();
+        clientAdapterMock.expects('authorize').returns(p).once();
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -200,7 +194,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           .callsFake(() => {
             return Promise.resolve();
           });
-        return adapter.authorize().then(response => {
+        return adapter.authorize().then((response) => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');
           expect(replaceSectionsStub).to.be.calledOnce;
@@ -245,7 +239,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           () => {
             throw new Error('must never happen');
           },
-          error => {
+          (error) => {
             expect(error).to.match(/intentional/);
           }
         );
@@ -295,7 +289,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             () => {
               throw new Error('must never happen');
             },
-            error => {
+            (error) => {
               expect(error).to.match(/timeout/);
             }
           );
@@ -331,10 +325,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
 
     describe('pingback', () => {
       it('should always send client pingback', () => {
-        clientAdapterMock
-          .expects('pingback')
-          .returns(Promise.resolve())
-          .once();
+        clientAdapterMock.expects('pingback').returns(Promise.resolve()).once();
         adapter.pingback();
       });
     });

@@ -16,12 +16,18 @@
 'use strict';
 
 const connect = require('gulp-connect');
+const debounce = require('debounce');
 const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
-const watch = require('gulp-watch');
+const open = require('opn');
+const path = require('path');
+const {
+  buildNewServer,
+  SERVER_TRANSFORM_PATH,
+} = require('../server/typescript-compile');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
@@ -29,17 +35,25 @@ const {
   preBuildExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green, red} = require('ansi-colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
+const {watchDebounceDelay} = require('./helpers');
+const {watch} = require('gulp');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+
+const HOST = argv.host || 'localhost';
+const PORT = argv.port || 8000;
 
 // Used for logging.
 let url = null;
 let quiet = !!argv.quiet;
 
 // Used for live reload.
-const serverFiles = globby.sync(['build-system/server/**']);
+const serverFiles = globby.sync([
+  'build-system/server/**',
+  `!${SERVER_TRANSFORM_PATH}/dist/**`,
+]);
 
 // Used to enable / disable lazy building.
 let lazyBuild = false;
@@ -83,15 +97,15 @@ async function startServer(
   }
 
   let started;
-  const startedPromise = new Promise(resolve => {
+  const startedPromise = new Promise((resolve) => {
     started = resolve;
   });
   setServeMode(modeOptions);
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
-    host: argv.host || 'localhost',
-    port: argv.port || 8000,
+    host: HOST,
+    port: PORT,
     https: argv.https,
     preferHttp1: true,
     silent: true,
@@ -102,6 +116,11 @@ async function startServer(
   await startedPromise;
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
+  if (argv.coverage == 'live') {
+    const covUrl = `${url}/coverage`;
+    log(green('Collecting live code coverage at'), cyan(covUrl));
+    await Promise.all([open(covUrl), open(url)]);
+  }
   logServeMode();
 }
 
@@ -110,15 +129,15 @@ async function startServer(
  * live-reload.
  */
 function resetServerFiles() {
-  for (const serverFile in serverFiles) {
-    delete require.cache[serverFiles[serverFile]];
+  for (const serverFile of serverFiles) {
+    delete require.cache[path.resolve(serverFile)];
   }
 }
 
 /**
  * Stops the currently running server
  */
-function stopServer() {
+async function stopServer() {
   if (url) {
     connect.serverClose();
     log(green('Stopped server at'), cyan(url));
@@ -129,8 +148,15 @@ function stopServer() {
 /**
  * Closes the existing server and restarts it
  */
-function restartServer() {
-  stopServer();
+async function restartServer() {
+  if (argv.new_server) {
+    try {
+      buildNewServer();
+    } catch {
+      log(red('ERROR:'), 'Could not build', cyan('AMP Dev Server'));
+      return;
+    }
+  }
   resetServerFiles();
   startServer();
 }
@@ -156,7 +182,13 @@ async function serve() {
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  watch(serverFiles, restartServer);
+  const watchFunc = async () => {
+    await restartServer();
+  };
+  watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
+  if (argv.new_server) {
+    buildNewServer();
+  }
   await startServer({}, {lazyBuild}, {});
   if (lazyBuild) {
     await performPreBuildSteps();
@@ -168,17 +200,26 @@ module.exports = {
   doServe,
   startServer,
   stopServer,
+  HOST,
+  PORT,
 };
+
+/* eslint "google-camelcase/google-camelcase": 0 */
 
 serve.description = 'Starts a webserver at the project root directory';
 serve.flags = {
-  'host': '  Hostname or IP address to bind to (default: localhost)',
-  'port': '  Specifies alternative port (default: 8000)',
-  'https': '  Use HTTPS server',
-  'quiet': "  Run in quiet mode and don't log HTTP requests",
-  'cache': '  Make local resources cacheable by the browser',
-  'no_caching_extensions': '  Disable caching for extensions',
-  'compiled': '  Serve minified JS',
-  'cdn': '  Serve current prod JS',
-  'rtv': '  Serve JS from the RTV provided',
+  host: '  Hostname or IP address to bind to (default: localhost)',
+  port: '  Specifies alternative port (default: 8000)',
+  https: '  Use HTTPS server',
+  quiet: "  Run in quiet mode and don't log HTTP requests",
+  cache: '  Make local resources cacheable by the browser',
+  no_caching_extensions: '  Disable caching for extensions',
+  new_server: '  Use new server transforms',
+  compiled: '  Serve minified JS',
+  esm: '  Serve ESM JS (requires the use of --new_server)',
+  cdn: '  Serve current prod JS',
+  rtv: '  Serve JS from the RTV provided',
+  coverage:
+    '  Serve instrumented code to collect coverage info; use ' +
+    '--coverage=live to auto-report coverage on page unload',
 };

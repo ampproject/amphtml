@@ -18,12 +18,9 @@ import * as lolex from 'lolex';
 import {htmlFor} from '../../../../../src/static-template';
 import {poll} from '../../../../../testing/iframe';
 
-const config = describe
-  .configure()
-  .ifChrome()
-  .skipSinglePass();
+const config = describe.configure().ifChrome();
 
-config.run('amp-date-picker', function() {
+config.run('amp-date-picker', function () {
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];
@@ -39,7 +36,7 @@ config.run('amp-date-picker', function() {
       body: '',
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       let document;
       let clock;

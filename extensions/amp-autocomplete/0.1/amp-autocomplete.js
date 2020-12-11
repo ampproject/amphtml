@@ -33,8 +33,9 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {includes, startsWith} from '../../../src/string';
-import {isArray, isEnumValue, toArray} from '../../../src/types';
+import {includes} from '../../../src/string';
+import {isAmp4Email} from '../../../src/format';
+import {isArray, isEnumValue} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
@@ -45,6 +46,15 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {toggle} from '../../../src/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
+
+/**
+ * @typedef {{
+ *   selectedObject: ?JsonObject,
+ *   selectedText: ?string
+ * }}
+ */
+// eslint-disable-next-line no-unused-vars
+let SelectionValues;
 
 const TAG = 'amp-autocomplete';
 
@@ -101,10 +111,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.minChars_ = 1;
 
     /**
-     * The value of the "max-entries" attribute on <autocomplete>.
+     * The value of the "max-items" attribute on <autocomplete>.
      * @private {?number}
      */
-    this.maxEntries_ = null;
+    this.maxItems_ = null;
 
     /**
      * If the "suggest-first" attribute is present on <autocomplete>.
@@ -210,11 +220,30 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.viewport_ = null;
 
     /** @private {boolean} */
-    this.interacted_ = false;
+    this.hasFetchedInitialData_ = false;
+
+    /**
+     * To ensure that we provide an accessible experience,
+    * the suggestion container must have a unique ID.
+     * In case the autocomplete doesn't have an ID we use a
+     * random number to ensure uniqueness.
+     @private {number|string}
+     */
+    this.containerId_ = element.id
+      ? element.id
+      : Math.floor(Math.random() * 100) + '_AMP_content_';
   }
 
   /** @override */
   buildCallback() {
+    const doc = this.element.ownerDocument;
+    const isEmail = doc && isAmp4Email(doc);
+    userAssert(
+      !isEmail ||
+        doc.documentElement.hasAttribute('data-amp-autocomplete-opt-in'),
+      '<amp-autocomplete> is not currently available in AMP4Email.'
+    );
+
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 
@@ -248,7 +277,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.inputElement_.setAttribute('dir', 'auto');
     this.inputElement_.setAttribute('aria-autocomplete', 'both');
-    this.inputElement_.setAttribute('role', 'combobox');
+    this.inputElement_.setAttribute('role', 'textbox');
+    this.inputElement_.setAttribute('aria-controls', this.containerId_);
+    if (this.inputElement_.tagName === 'INPUT') {
+      this.element.setAttribute('role', 'combobox');
+      this.inputElement_.setAttribute('aria-multiline', 'false');
+    }
+    this.element.setAttribute('aria-haspopup', 'listbox');
+    this.element.setAttribute('aria-expanded', 'false');
+    this.element.setAttribute('aria-owns', this.containerId_);
 
     const form = this.getFormOrNull_();
     if (form && form.hasAttribute('autocomplete')) {
@@ -276,40 +313,69 @@ export class AmpAutocomplete extends AMP.BaseElement {
         !this.element.hasAttribute('filter'),
         `${TAG} does not support client-side filter when server-side render is required.`
       );
-      this.filter_ = FilterType.NONE;
-    } else {
-      this.filter_ = userAssert(
-        this.element.getAttribute('filter'),
-        '%s requires "filter" attribute. %s',
-        TAG,
-        this.element
-      );
-      userAssert(
-        isEnumValue(FilterType, this.filter_),
-        'Unexpected filter: %s. %s',
-        this.filter_,
-        this.element
-      );
     }
+    this.filter_ = this.element.getAttribute('filter') || FilterType.NONE;
+    userAssert(
+      isEnumValue(FilterType, this.filter_),
+      'Unexpected filter: %s. %s',
+      this.filter_,
+      this.element
+    );
 
     // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
       ? parseInt(this.element.getAttribute('min-characters'), 10)
       : 1;
-    this.maxEntries_ = this.element.hasAttribute('max-entries')
-      ? parseInt(this.element.getAttribute('max-entries'), 10)
-      : null;
+    if (this.element.hasAttribute('max-entries')) {
+      user().warn(TAG, '"max-items" attribute is preferred to "max-entries"');
+    }
+    const maxItems =
+      this.element.getAttribute('max-items') ||
+      this.element.getAttribute('max-entries');
+    this.maxItems_ = maxItems ? parseInt(maxItems, 10) : null;
     this.shouldSuggestFirst_ = this.binding_.shouldSuggestFirst();
     this.highlightUserEntry_ = this.element.hasAttribute(
       'highlight-user-entry'
     );
 
-    // Set accessibility attributes
-    this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
 
+    this.initializeListeners_();
+
     return Promise.resolve();
+  }
+
+  /**
+   * Initializes listeners for keydown, mousedown, focus, etc. events.
+   * @private
+   */
+  initializeListeners_() {
+    this.inputElement_.addEventListener(
+      'touchstart',
+      () => {
+        this.checkFirstInteractionAndMaybeFetchData_();
+      },
+      {passive: true}
+    );
+    this.inputElement_.addEventListener('input', () => {
+      this.inputHandler_();
+    });
+    this.inputElement_.addEventListener('keydown', (e) => {
+      this.keyDownHandler_(e);
+    });
+    this.inputElement_.addEventListener('focus', () => {
+      this.checkFirstInteractionAndMaybeFetchData_().then(() => {
+        const display = this.binding_.shouldShowOnFocus();
+        this.toggleResultsHandler_(display);
+      });
+    });
+    this.inputElement_.addEventListener('blur', () => {
+      this.toggleResultsHandler_(false);
+    });
+    this.container_.addEventListener('mousedown', (e) => {
+      this.selectHandler_(e);
+    });
   }
 
   /**
@@ -353,7 +419,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   getInlineData_(script) {
-    const json = tryParseJson(script.textContent, error => {
+    const json = tryParseJson(script.textContent, (error) => {
       throw error;
     });
     const itemsExpr = this.element.getAttribute('items') || 'items';
@@ -385,7 +451,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.element,
         policy,
         /* refresh */ false
-      ).then(request => {
+      ).then((request) => {
         request.xhrUrl = setupInput(this.win, request.xhrUrl, request.fetchOpt);
         request.fetchOpt = setupAMPCors(
           this.win,
@@ -397,6 +463,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         const attributes = dict({
           'ampAutocompleteAttributes': {
             'items': itemsExpr,
+            'maxItems': this.maxItems_,
           },
         });
         return this.getSsrTemplateHelper().ssr(
@@ -456,6 +523,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       container.classList.add('i-amphtml-autocomplete-results-up');
     }
     container.setAttribute('role', 'listbox');
+    container.setAttribute('id', this.containerId_);
     toggle(container, false);
     return container;
   }
@@ -465,32 +533,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Disable autofill in browsers.
     this.inputElement_.setAttribute('autocomplete', 'off');
 
-    // Register event handlers.
-    this.inputElement_.addEventListener(
-      'touchstart',
-      () => {
-        this.checkFirstInteractionAndMaybeFetchData_();
-      },
-      {passive: true}
-    );
-    this.inputElement_.addEventListener('input', () => {
-      this.inputHandler_();
-    });
-    this.inputElement_.addEventListener('keydown', e => {
-      this.keyDownHandler_(e);
-    });
-    this.inputElement_.addEventListener('focus', () => {
-      this.checkFirstInteractionAndMaybeFetchData_().then(() => {
-        const display = this.binding_.shouldShowOnFocus();
-        this.toggleResultsHandler_(display);
-      });
-    });
-    this.inputElement_.addEventListener('blur', () => {
-      this.toggleResultsHandler_(false);
-    });
-    this.container_.addEventListener('mousedown', e => {
-      this.selectHandler_(e);
-    });
+    if (this.element.hasAttribute('prefetch')) {
+      this.checkFirstInteractionAndMaybeFetchData_();
+    }
 
     return this.autocomplete_(this.sourceData_, this.userInput_);
   }
@@ -502,12 +547,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (typeof src === 'string') {
+      this.srcBase_ = src;
       return this.getRemoteData_().then(
-        remoteData => {
+        (remoteData) => {
           this.sourceData_ = remoteData || [];
           this.autocomplete_(this.sourceData_, this.userInput_);
         },
-        e => {
+        (e) => {
           this.displayFallback_(e);
         }
       );
@@ -565,7 +611,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   inputHandler_() {
     if (
-      this.binding_.shouldAutocomplete(dev().assertElement(this.inputElement_))
+      this.binding_.shouldAutocomplete(
+        /** @type {!HTMLInputElement} */ (dev().assertElement(
+          this.inputElement_
+        ))
+      )
     ) {
       return this.maybeFetchAndAutocomplete_();
     }
@@ -585,7 +635,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const isFirstInteraction =
       this.userInput_.length === 0 && this.inputElement_.value.length === 1;
     this.userInput_ = this.binding_.getUserInputForUpdate(
-      dev().assertElement(this.inputElement_)
+      /** @type {!HTMLInputElement} */ (dev().assertElement(this.inputElement_))
     );
 
     // Fetch if autocomplete data is dynamic.
@@ -594,7 +644,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.isSsr_ || this.queryKey_
         ? this.getRemoteData_()
         : Promise.resolve(this.sourceData_);
-    return maybeFetch.then(data => {
+    return maybeFetch.then((data) => {
       this.sourceData_ = data;
       return this.mutateElement(() => {
         this.autocomplete_(this.sourceData_, this.userInput_).then(() => {
@@ -628,9 +678,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectHandler_(event) {
+    const element = dev().assertElement(event.target);
+    const selectedElement = this.getItemElement_(element);
+    const {selectedObject, selectedText} = this.updateAndGetElementSelections_(
+      selectedElement
+    );
     return this.mutateElement(() => {
-      const element = dev().assertElement(event.target);
-      this.selectItem_(this.getItemElement_(element));
+      this.selectItem_(selectedText, selectedObject);
     });
   }
 
@@ -644,9 +698,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   autocomplete_(data, opt_input = '') {
     this.clearAllItems_();
-    if (opt_input.length < this.minChars_ || !data) {
+    if (!data || opt_input.length < this.minChars_) {
       return Promise.resolve();
-    } else if (this.isSsr_) {
+    }
+    if (this.isSsr_) {
       return hasOwn(data, 'html')
         ? this.renderResults_(
             data,
@@ -654,9 +709,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
             opt_input
           )
         : Promise.resolve();
-    } else {
-      return this.filterDataAndRenderResults_(data, opt_input);
     }
+    return this.filterDataAndRenderResults_(data, opt_input);
   }
 
   /**
@@ -672,8 +726,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     const filteredData = this.filterData_(sourceData, input);
+    const dataWithConverter = filteredData.map((item) => {
+      let itemWithConverter = item;
+      // Add a function that converts the object itself to a JSON string,
+      // to make it available in mustache templates.
+      // We add a function instead of the already stringified representation
+      // so that we only convert these objects when data-json is present in the DOM.
+      if (typeof item === 'object') {
+        itemWithConverter = {...item, objToJson: () => JSON.stringify(item)};
+      }
+      return itemWithConverter;
+    });
     return this.renderResults_(
-      filteredData,
+      dataWithConverter,
       dev().assertElement(this.container_),
       input
     );
@@ -693,11 +758,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.hasTemplate_) {
       renderPromise = this.getSsrTemplateHelper()
         .applySsrOrCsrTemplate(this.element, filteredData)
-        .then(rendered => {
-          const elements = isArray(rendered)
-            ? rendered
-            : toArray(rendered.children);
-          elements.forEach(child => {
+        .then((rendered) => {
+          const elements = isArray(rendered) ? rendered : [rendered];
+          elements.forEach((child) => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
             } else if (!child.hasAttribute('data-value')) {
@@ -713,7 +776,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           });
         });
     } else {
-      filteredData.forEach(item => {
+      filteredData.forEach((item) => {
         userAssert(
           typeof item === 'string',
           '%s data must provide template for non-string items. %s',
@@ -738,13 +801,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
   filterData_(data, input) {
     // Server-side filtering.
     if (this.filter_ === FilterType.NONE) {
-      return this.truncateToMaxEntries_(data);
+      return this.truncateToMaxItems_(data);
     }
 
     // Client-side filtering.
     input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
-    const filteredData = data.filter(item => {
+    const filteredData = data.filter((item) => {
       if (typeof item === 'object') {
         item = getValueForExpr(/** @type {!JsonObject} */ (item), itemsExpr);
       }
@@ -760,7 +823,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.SUBSTRING:
           return includes(item, input);
         case FilterType.PREFIX:
-          return startsWith(item, input);
+          return item.startsWith(input);
         case FilterType.TOKEN_PREFIX:
           return this.tokenPrefixMatch_(item, input);
         case FilterType.FUZZY:
@@ -776,7 +839,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       }
     });
 
-    return this.truncateToMaxEntries_(filteredData);
+    return this.truncateToMaxItems_(filteredData);
   }
 
   /**
@@ -835,8 +898,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return (
       match &&
       (lastInputToken === '' ||
-        remainingItemTokens.some(itemToken => {
-          return startsWith(itemToken, lastInputToken);
+        remainingItemTokens.some((itemToken) => {
+          return itemToken.startsWith(lastInputToken);
         }))
     );
   }
@@ -862,7 +925,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   mapFromTokensArray_(tokens) {
     const tokensMap = map();
-    tokens.forEach(token => {
+    tokens.forEach((token) => {
       const count = hasOwn(tokensMap, token)
         ? ownProperty(tokensMap, token) + 1
         : 1;
@@ -872,14 +935,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Truncate the given data to a maximum length of the max-entries attribute.
+   * Truncate the given data to a maximum length of the max-items attribute.
    * @param {!Array<!JsonObject|string>} data
    * @return {!Array<!JsonObject|string>}
    * @private
    */
-  truncateToMaxEntries_(data) {
-    if (this.maxEntries_ && this.maxEntries_ < data.length) {
-      data = data.slice(0, this.maxEntries_);
+  truncateToMaxItems_(data) {
+    if (this.maxItems_ && this.maxItems_ < data.length) {
+      data = data.slice(0, this.maxItems_);
     }
     return data;
   }
@@ -938,16 +1001,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   checkFirstInteractionAndMaybeFetchData_() {
-    if (this.interacted_ || !this.element.hasAttribute('src')) {
+    if (this.hasFetchedInitialData_ || !this.element.hasAttribute('src')) {
       return Promise.resolve();
     }
-    this.interacted_ = true;
+    this.hasFetchedInitialData_ = true;
     return this.getRemoteData_().then(
-      remoteData => {
+      (remoteData) => {
         this.sourceData_ = remoteData;
         this.autocomplete_(this.sourceData_);
       },
-      e => {
+      (e) => {
         this.displayFallback_(e);
       }
     );
@@ -1008,23 +1071,35 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Writes the selected value into the input field.
-   * @param {?Element} element
+   * Updates the input value field with the textual representation of the selected element
+   * and returns an object containing both the textual representation of the selected element
+   * as well as its object representation, if available.
+   * @param {?Element} element Element selected by the user
+   * @return {!SelectionValues}
    * @private
    */
-  selectItem_(element) {
+  updateAndGetElementSelections_(element) {
     if (element === null || element.hasAttribute('data-disabled')) {
-      return;
+      return /** @type {!SelectionValues} */ ({
+        selectedObject: null,
+        selectedText: null,
+      });
     }
-    const selectedValue =
-      element.getAttribute('data-value') || element.textContent;
 
-    this.fireSelectEvent_(selectedValue);
-    this.clearAllItems_();
-    this.toggleResults_(false);
+    const selectedText = this.getSelectedTextValue_(element);
+    this.setInputValue_(selectedText);
+    const selectedObject = this.getSelectedObjectValue_(element);
+    return /** @type {!SelectionValues} */ ({selectedObject, selectedText});
+  }
 
+  /**
+   * Updates the input value with the provided textual representation of the selected element.
+   * @param {string} selectedText textual representation of the selected element
+   * @private
+   */
+  setInputValue_(selectedText) {
     this.inputElement_.value = this.binding_.getUserInputForUpdateWithSelection(
-      selectedValue,
+      selectedText,
       this.inputElement_,
       this.userInput_
     );
@@ -1032,18 +1107,80 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Triggers a 'select' event with the given value as the value emitted.
-   * @param {string} value
+   * Gets the textual representation of the selected element.
+   * @param {!Element} element
+   * @return {string}
    * @private
    */
-  fireSelectEvent_(value) {
-    const name = 'select';
+  getSelectedTextValue_(element) {
+    return element.getAttribute('data-value') || element.textContent || '';
+  }
+
+  /**
+   * Returns the object representation of the selected element.
+   * @param {!Element} element
+   * @return {?JsonObject}
+   * @private
+   */
+  getSelectedObjectValue_(element) {
+    if (!element.hasAttribute('data-json')) {
+      return null;
+    }
+
+    return tryParseJson(element.getAttribute('data-json'), (error) => {
+      throw error;
+    });
+  }
+
+  /**
+   * Finish item selection with the selected value.
+   * @param {?string} selectedText Textual representation of the selected value
+   * @param {?JsonObject} selectedObject Object representation of the selected value
+   * @private
+   */
+  selectItem_(selectedText, selectedObject) {
+    if (selectedText === null) {
+      return;
+    }
+    this.fireSelectAndChangeEvents_(selectedText, selectedObject);
+    this.clearAllItems_();
+    this.toggleResults_(false);
+  }
+
+  /**
+   * Triggers select event on amp-autocomplete element and change events (bind
+   * and native, for amp-script) on child input/textarea with the given value
+   * as the value emitted.
+   * @param {string} selectedText Textual representation of the selected value
+   * @param {?JsonObject} selectedObject Object representation of the selected value
+   * @private
+   */
+  fireSelectAndChangeEvents_(selectedText, selectedObject) {
+    const selectName = 'select';
+    const eventValue = /** @type {!JsonObject} */ ({
+      value: selectedText,
+      ...(selectedObject && {valueAsObject: selectedObject}),
+    });
     const selectEvent = createCustomEvent(
       this.win,
-      `amp-autocomplete.${name}`,
-      /** @type {!JsonObject} */ ({value})
+      `amp-autocomplete.${selectName}`,
+      eventValue
     );
-    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
+    this.action_.trigger(
+      this.element,
+      selectName,
+      selectEvent,
+      ActionTrust.HIGH
+    );
+
+    // Ensure native change listeners are triggered
+    const nativeChangeEvent = createCustomEvent(
+      this.win,
+      'change',
+      eventValue,
+      {bubbles: true}
+    );
+    this.inputElement_.dispatchEvent(nativeChangeEvent);
   }
 
   /**
@@ -1073,7 +1210,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const newValue = newActiveElement.getAttribute('data-value');
 
     this.binding_.displayActiveItemInInput(
-      dev().assertElement(this.inputElement_),
+      /** @type {!HTMLInputElement} */ (dev().assertElement(
+        this.inputElement_
+      )),
       newValue,
       this.userInput_
     );
@@ -1135,7 +1274,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   displayUserInput_() {
     this.binding_.resetInputOnWrapAround(
       this.userInput_,
-      dev().assertElement(this.inputElement_)
+      /** @type {!HTMLInputElement} */ (dev().assertElement(this.inputElement_))
     );
     this.resetActiveElement_();
   }
@@ -1209,12 +1348,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
           event.preventDefault();
         }
         this.binding_.removeSelectionHighlighting(this.inputElement_);
-        return this.mutateElement(() => {
-          if (this.areResultsDisplayed_() && !!this.activeElement_) {
-            this.selectItem_(this.activeElement_);
+        if (this.areResultsDisplayed_() && this.activeElement_) {
+          const {
+            selectedObject,
+            selectedText,
+          } = this.updateAndGetElementSelections_(this.activeElement_);
+          return this.mutateElement(() => {
+            this.selectItem_(selectedText, selectedObject);
             this.resetActiveElement_();
-            return Promise.resolve();
-          }
+          });
+        }
+        return this.mutateElement(() => {
           this.toggleResults_(false);
         });
       case Keys.ESCAPE:
@@ -1229,7 +1373,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
-          this.selectItem_(this.activeElement_);
+          const {
+            selectedObject,
+            selectedText,
+          } = this.updateAndGetElementSelections_(this.activeElement_);
+          return this.mutateElement(() => {
+            this.selectItem_(selectedText, selectedObject);
+          });
         }
         return Promise.resolve();
       case Keys.BACKSPACE:
@@ -1267,6 +1417,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAutocomplete, CSS);
 });

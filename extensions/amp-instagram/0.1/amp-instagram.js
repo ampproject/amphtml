@@ -42,7 +42,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
@@ -209,8 +208,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (
       !eventData ||
       !(
-        isObject(eventData) ||
-        startsWith(/** @type {string} */ (eventData), '{')
+        isObject(eventData) || /** @type {string} */ (eventData).startsWith('{')
       )
     ) {
       return; // Doesn't look like JSON.
@@ -223,7 +221,7 @@ class AmpInstagram extends AMP.BaseElement {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/ offsetHeight !== height) {
-          this./*OK*/ changeHeight(height);
+          this.forceChangeHeight(height);
         }
       });
     }
@@ -248,6 +246,6 @@ class AmpInstagram extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-instagram', '0.1', AMP => {
+AMP.extension('amp-instagram', '0.1', (AMP) => {
   AMP.registerElement('amp-instagram', AmpInstagram, CSS);
 });

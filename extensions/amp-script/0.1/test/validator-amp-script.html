@@ -35,6 +35,10 @@
     </div>
   </amp-script>
 
+  <!-- Valid: 'nodom' attribute. -->
+  <amp-script nodom layout=container src="https://example.com/foo.js">
+  </amp-script>
+
   <!-- Invalid: 'src' attribute with non-HTTPS protocol. -->
   <amp-script layout=container src="http://example.com/foo.js">
   </amp-script>
@@ -86,6 +90,12 @@
 
   <!-- Invalid: 'development' attribute. -->
   <amp-script layout=container src="https://example.com/foo.js" development></amp-script>
+
+  <!-- Invalid: 'data-ampdevmode' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode></amp-script>
+
+  <!-- Invalid: 'data-ampdevmode' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode="false"></amp-script>
 
   <!-- Invalid: Local script without 'target' or 'id' attributes. -->
   <script type=text/plain>

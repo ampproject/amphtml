@@ -26,6 +26,7 @@ function documentContainsPolyfill(node) {
   // Per spec, "contains" method is inclusionary
   // i.e. `node.contains(node) == true`. However, we still need to test
   // equality to the document itself.
+  // eslint-disable-next-line local/no-invalid-this
   return node == this || this.documentElement.contains(node);
 }
 

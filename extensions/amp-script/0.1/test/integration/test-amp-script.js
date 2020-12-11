@@ -25,9 +25,8 @@ function poll(description, condition, opt_onError) {
 
 describe
   .configure()
-  .skipSinglePass()
   .skipFirefox()
-  .run('amp-script', function() {
+  .run('amp-script', function () {
     this.timeout(TIMEOUT);
 
     let browser, doc, element;
@@ -35,24 +34,22 @@ describe
     describes.integration(
       'container ',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert Hello World!</button>
         <button id="long">Long task</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
-      env => {
+      (env) => {
         beforeEach(() => {
           browser = new BrowserController(env.win);
           doc = env.win.document;
           element = doc.querySelector('amp-script');
         });
 
-        it('should say "hello world"', function*() {
+        it('should say "hello world"', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -72,7 +69,7 @@ describe
           });
         });
 
-        it('should terminate without gesture', function*() {
+        it('should terminate without gesture', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -93,7 +90,7 @@ describe
           });
         });
 
-        it('should start long task', function*() {
+        it('should start long task', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -122,7 +119,6 @@ describe
     describes.integration(
       'sanitizer',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <p>Number of mutations: <span id="mutationCount">0</span></p>
@@ -130,17 +126,16 @@ describe
         <button id="img">Insert img</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
-      env => {
+      (env) => {
         beforeEach(() => {
           browser = new BrowserController(env.win);
           doc = env.win.document;
           element = doc.querySelector('amp-script');
         });
 
-        it('should sanitize <script> injection', function*() {
+        it('should sanitize <script> injection', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -163,7 +158,7 @@ describe
           expect(scripts.length).to.equal(0);
         });
 
-        it('should sanitize <img> injection', function*() {
+        it('should sanitize <img> injection', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -191,24 +186,22 @@ describe
     describes.integration(
       'defined-layout',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=fixed width=300 height=200
           src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
-      env => {
+      (env) => {
         beforeEach(() => {
           browser = new BrowserController(env.win);
           doc = env.win.document;
           element = doc.querySelector('amp-script');
         });
 
-        it('should allow mutation without gesture', function*() {
+        it('should allow mutation without gesture', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );

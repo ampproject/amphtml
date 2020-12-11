@@ -18,10 +18,15 @@ import * as analytics from '../../../../../src/analytics';
 import {poll} from '../../../../../testing/iframe';
 
 // TODO(cathyxz, #16822): This suite is flaky.
-describe.configure().skip('amp-lightbox-gallery', function() {
+describe.configure().skip('amp-lightbox-gallery', function () {
   this.timeout(10000);
   const extensions = ['amp-lightbox-gallery'];
   const body = `
+  <style amp-custom>
+    .amp-lightbox-gallery-caption{
+      color: red;
+    }
+  </style>
   <figure>
   <amp-img id="img0"
       src="/examples/img/sample.jpg"
@@ -40,7 +45,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
       body,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       let triggerAnalyticsEventSpy;
 
@@ -124,7 +129,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         });
       });
 
-      it('should display text description', () => {
+      it('should display text description with applied style', () => {
         openLightbox(win.document).then(() => {
           const descBoxQuery = win.document.getElementsByClassName(
             'i-amphtml-lbg-desc-box'
@@ -142,6 +147,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
           expect(descriptionText.classList.contains('i-amphtml-lbg-desc-text'))
             .to.be.true;
           expect(descriptionText.textContent).to.equal('This is a figcaption.');
+          expect(descriptionText.style).to.have.property('color', 'red');
         });
       });
 
@@ -204,7 +210,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
       multipleImagesBody,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       let triggerAnalyticsEventSpy;
 

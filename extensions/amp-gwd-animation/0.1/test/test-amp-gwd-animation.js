@@ -25,7 +25,7 @@ import {
 import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
 import {Services} from '../../../../src/services';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {getExistingServiceForDocInEmbedScope} from '../../../../src/service';
+import {getServiceForDocOrNull} from '../../../../src/service';
 
 describes.sandboxed('AMP GWD Animation', {}, () => {
   /**
@@ -78,24 +78,19 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             extensions: ['amp-gwd-animation'],
           },
         },
-        env => {
+        (env) => {
           let ampdoc;
           let element;
           let impl;
           let page1Elem;
-          let embed;
           let win;
           let doc;
           let runtime;
 
           beforeEach(() => {
             ampdoc = env.ampdoc;
-            embed = env.embed;
-            win = variant.ampdoc == 'fie' ? embed.win : ampdoc.win;
-            doc =
-              variant.ampdoc == 'fie'
-                ? embed.win.document
-                : ampdoc.getRootNode();
+            win = ampdoc.win;
+            doc = ampdoc.getRootNode();
 
             // Create a test amp-carousel GWD page deck.
             doc.body.innerHTML = `<amp-carousel id="pagedeck"
@@ -117,13 +112,10 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               'timeline-event-prefix': 'tl_',
               'layout': 'nodisplay',
             };
-            return createGwdAnimationElement(doc, config).then(el => {
+            return createGwdAnimationElement(doc, config).then((el) => {
               element = el;
               impl = element.implementation_;
-              runtime = getExistingServiceForDocInEmbedScope(
-                element,
-                GWD_SERVICE_NAME
-              );
+              runtime = getServiceForDocOrNull(element, GWD_SERVICE_NAME);
               page1Elem = doc.getElementById('page1');
             });
           });
@@ -372,7 +364,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             // this time to pass makes the test flaky. Stub setTimeout to
             // execute the callback synchronously.
             const origSetTimeout = win.setTimeout;
-            win.setTimeout = func => func();
+            win.setTimeout = (func) => func();
 
             // Test a valid gotoAndPause invocation. Verify animation was
             // switched to the label and has been paused.
@@ -485,7 +477,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               'tl_event-2',
             ]);
             expect(
-              triggeredEvents.map(event => event.detail.eventName)
+              triggeredEvents.map((event) => event.detail.eventName)
             ).to.deep.equal(['event-1', 'event-2']);
           });
 

@@ -15,8 +15,9 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {GOOGLE_ACTIVEVIEW_ERROR_TAG} from './requests';
 import {Observable} from '../../../src/observable';
-import {devAssert} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /**
@@ -28,10 +29,28 @@ export class VisibilityModel {
   /**
    * @param {!JsonObject} spec
    * @param {function():number} calcVisibility
+   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcLayoutBoxTemp
+   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcBoundingClientRectTemp
+   * @param {?../../../src/service/viewport/viewport-impl.ViewportImpl} viewportTemp
    */
-  constructor(spec, calcVisibility) {
+  constructor(
+    spec,
+    calcVisibility,
+    calcLayoutBoxTemp = null,
+    calcBoundingClientRectTemp = null,
+    viewportTemp = null
+  ) {
     /** @const @private */
     this.calcVisibility_ = calcVisibility;
+
+    // TODO(#29618): Remove after ampim investigation
+    this.calcLayoutBoxTemp_ = calcLayoutBoxTemp;
+
+    this.calcBoundingClientRectTemp_ = calcBoundingClientRectTemp;
+
+    this.viewportTemp_ = viewportTemp;
+
+    this.errorInfoTemp_ = dict({});
 
     /**
      * Spec parameters.
@@ -207,7 +226,7 @@ export class VisibilityModel {
       clearTimeout(this.scheduleRepeatId_);
       this.scheduleRepeatId_ = null;
     }
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
@@ -300,6 +319,20 @@ export class VisibilityModel {
       'minVisiblePercentage': this.minVisiblePercentage_ * 100,
       'maxVisiblePercentage': this.maxVisiblePercentage_ * 100,
     });
+  }
+
+  /**
+   * TODO(#29618): Remove after ampim investigation
+   * Return object
+   * {
+   *   'layoutBoxAtMaxRatio': AMP calculated layout box at max intersect ratio
+   *   'boundingClientRectAtMaxRatio': InOb calculated clientRect at max intersect ratio
+   *   'viewportSizeAtMaxRatio': viewport size at max intersect ratio
+   * }
+   * @return {!JsonObject}
+   */
+  getErrorInfoTemp() {
+    return this.errorInfoTemp_;
   }
 
   /**
@@ -437,6 +470,30 @@ export class VisibilityModel {
         this.minVisiblePercentage_ > 0
           ? Math.min(this.minVisiblePercentage_, visibility)
           : visibility;
+
+      // TODO(#29618): Remove after ampim investigation
+      if (visibility > this.maxVisiblePercentage_) {
+        try {
+          if (this.calcLayoutBoxTemp_) {
+            this.errorInfoTemp_[
+              'layoutBoxAtMaxRatio'
+            ] = this.calcLayoutBoxTemp_();
+          }
+          if (this.calcBoundingClientRectTemp_) {
+            this.errorInfoTemp_[
+              'boundingClientRectAtMaxRatio'
+            ] = this.calcBoundingClientRectTemp_();
+          }
+          if (this.viewportTemp_) {
+            this.errorInfoTemp_[
+              'viewportSizeAtMaxRatio'
+            ] = this.viewportTemp_.getSize();
+          }
+        } catch (e) {
+          dev().error(GOOGLE_ACTIVEVIEW_ERROR_TAG, e);
+        }
+      }
+
       this.maxVisiblePercentage_ = Math.max(
         this.maxVisiblePercentage_,
         visibility

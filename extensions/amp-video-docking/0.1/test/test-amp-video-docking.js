@@ -17,7 +17,7 @@ import {
   Actions,
   BASE_CLASS_NAME,
   DOCKED_TO_CORNER_SIZING_RATIO,
-  Direction,
+  DockTargetType,
   MARGIN_AREA_WIDTH_PERC,
   MARGIN_MAX,
   MIN_WIDTH,
@@ -27,13 +27,14 @@ import {
   PLACEHOLDER_ICON_SMALL_MARGIN,
   PLACEHOLDER_ICON_SMALL_WIDTH,
   REVERT_TO_INLINE_RATIO,
-  RelativeX,
-  RelativeY,
   VideoDocking,
+  getPosterImageSrc,
 } from '../amp-video-docking';
 import {Deferred, tryResolve} from '../../../../src/utils/promise';
+import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
@@ -41,7 +42,7 @@ const noop = () => {};
 
 const slotId = 'my-slot-element';
 
-describes.realWin('video docking', {amp: true}, env => {
+describes.realWin('video docking', {amp: true}, (env) => {
   let ampdoc;
   let manager;
   let viewport;
@@ -52,8 +53,8 @@ describes.realWin('video docking', {amp: true}, env => {
 
   const viewportSize = {width: 0, height: 0};
 
-  function createAmpElementMock(tag = 'div') {
-    const element = env.win.document.createElement(tag);
+  function createAmpElementMock(tag = 'div', attrs = {}) {
+    const element = createElementWithAttributes(env.win.document, tag, attrs);
     const defaultLayoutRect = layoutRectLtwh(0, 0, 0, 0);
     Object.assign(element, {
       getIntersectionChangeEntry: noop,
@@ -62,7 +63,7 @@ describes.realWin('video docking', {amp: true}, env => {
     return {
       element,
       getLayoutBox: () => defaultLayoutRect,
-      mutateElement: cb => tryResolve(cb),
+      mutateElement: (cb) => tryResolve(cb),
       applyFillContent: env.sandbox.spy(),
     };
   }
@@ -91,13 +92,12 @@ describes.realWin('video docking', {amp: true}, env => {
     return video;
   }
 
-  function stubLayoutBox(impl, rect, ratio = 0) {
+  function stubLayoutBox(impl, rect) {
     impl.getLayoutBox = () => rect;
     impl.getPageLayoutBox = impl.getLayoutBox;
     impl.element.getLayoutBox = impl.getLayoutBox;
     impl.element.getPageLayoutBox = impl.getLayoutBox;
     impl.element.getIntersectionChangeEntry = () => ({
-      intersectionRatio: ratio,
       intersectionRect: rect,
     });
   }
@@ -113,7 +113,6 @@ describes.realWin('video docking', {amp: true}, env => {
 
   function mockAreaWidth(width) {
     viewportSize.width = width;
-    env.sandbox.stub(docking, 'getRightEdge_').returns(width);
     return width;
   }
 
@@ -123,12 +122,17 @@ describes.realWin('video docking', {amp: true}, env => {
 
   function mockAreaHeight(height) {
     viewportSize.height = height;
-    env.sandbox.stub(docking, 'getBottomEdge_').returns(height);
     return height;
   }
 
-  function placeElementLtwh(ampEl, left, top, width, height, ratio = 0) {
-    stubLayoutBox(ampEl, layoutRectLtwh(left, top, width, height), ratio);
+  function placeElementLtwh(ampEl, left, top, width, height) {
+    stubLayoutBox(ampEl, layoutRectLtwh(left, top, width, height));
+  }
+
+  function placeRatio(ampEl, width, height, ratio) {
+    const visibleHeight = ratio * height;
+    placeElementLtwh(ampEl, 0, visibleHeight - height, width, height);
+    mockAreaHeight(height);
   }
 
   function setScrollDirection(direction) {
@@ -220,18 +224,16 @@ describes.realWin('video docking', {amp: true}, env => {
     beforeEach(() => {
       html = htmlFor(env.win.document);
       video = createVideo();
-      internalElement = html`
-        <video></video>
-      `;
+      internalElement = html` <video></video> `;
 
       video.element.appendChild(internalElement);
 
       env.sandbox.stub(env.win, 'requestAnimationFrame').callsArg(0);
 
-      getComputedStyle = el => env.win.getComputedStyle(el);
+      getComputedStyle = (el) => env.win.getComputedStyle(el);
 
-      bodyLayerElement = s => elementExists(env.win.document.body, s);
-      videoLayerElement = s => elementExists(video.element, s);
+      bodyLayerElement = (s) => elementExists(env.win.document.body, s);
+      videoLayerElement = (s) => elementExists(video.element, s);
     });
 
     it('delegates controls positioning', async () => {
@@ -310,13 +312,14 @@ describes.realWin('video docking', {amp: true}, env => {
 
       const expectedTransform = transformMatrix(x, y, scale);
 
-      [internalElement, overlay, shadow].forEach(el => {
-        const computedStyle = getComputedStyle(el);
-        expect(computedStyle['transform']).to.equal(expectedTransform);
-        expect(computedStyle['width']).to.equal(width + 'px');
-        expect(computedStyle['min-width']).to.equal(width + 'px');
-        expect(computedStyle['height']).to.equal(height + 'px');
-        expect(computedStyle['min-height']).to.equal(height + 'px');
+      [internalElement, overlay, shadow].forEach((el) => {
+        expect(getComputedStyle(el)).to.include({
+          'transform': expectedTransform,
+          'width': width + 'px',
+          'min-width': width + 'px',
+          'height': height + 'px',
+          'min-height': height + 'px',
+        });
       });
     });
 
@@ -326,7 +329,7 @@ describes.realWin('video docking', {amp: true}, env => {
       stubControls();
       enableComputedStyle(video.element);
 
-      env.sandbox.stub(docking, 'getPosterImageSrc_').returns(posterSrc);
+      video.element.setAttribute('poster', posterSrc);
 
       const x = 30;
       const y = 60;
@@ -421,7 +424,7 @@ describes.realWin('video docking', {amp: true}, env => {
           videoLayerElement('.amp-video-docked-placeholder-background'),
           videoLayerElement('.amp-video-docked-placeholder-icon'),
           bodyLayerElement('.amp-video-docked-shadow'),
-        ].forEach(el => {
+        ].forEach((el) => {
           const style = getComputedStyle(el);
 
           expect(style['transitionDuration']).to.equal(durationSecondsStr);
@@ -464,7 +467,7 @@ describes.realWin('video docking', {amp: true}, env => {
           transitionDurationMs,
           // Expecting relative placement to apply icon styling but direction
           // is irrelevant in this case.
-          RelativeX.RIGHT
+          DirectionX.RIGHT
         );
 
         expect(
@@ -474,12 +477,12 @@ describes.realWin('video docking', {amp: true}, env => {
 
       [
         {
-          relativeX: RelativeX.RIGHT,
+          relativeX: DirectionX.RIGHT,
           relativeXTextual: 'right',
           expectedIconX: width - iconWidth - iconMargin * 2,
         },
         {
-          relativeX: RelativeX.LEFT,
+          relativeX: DirectionX.LEFT,
           relativeXTextual: 'left',
           expectedIconX: -width + iconWidth + iconMargin * 2,
         },
@@ -522,12 +525,12 @@ describes.realWin('video docking', {amp: true}, env => {
 
     [
       {
-        relativeX: RelativeX.RIGHT,
+        relativeX: DirectionX.RIGHT,
         directionTextual: 'left to right',
         hasAmpRtl: false,
       },
       {
-        relativeX: RelativeX.LEFT,
+        relativeX: DirectionX.LEFT,
         directionTextual: 'right to left',
         hasAmpRtl: true,
       },
@@ -584,24 +587,20 @@ describes.realWin('video docking', {amp: true}, env => {
     });
   });
 
-  describe('getPosterImageSrc_', () => {
+  describe('getPosterImageSrc', () => {
     let html;
     beforeEach(() => {
       html = htmlFor(env.win.document);
     });
 
     it('uses `poster` attr', () => {
-      const el = html`
-        <amp-video poster="foo.png"></amp-video>
-      `;
-      expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      const el = html` <amp-video poster="foo.png"></amp-video> `;
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
     });
 
     it('uses `data-poster` attr', () => {
-      const el = html`
-        <amp-video data-poster="foo.png"></amp-video>
-      `;
-      expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      const el = html` <amp-video data-poster="foo.png"></amp-video> `;
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
     });
 
     it('uses `placeholder` amp-img', () => {
@@ -611,7 +610,7 @@ describes.realWin('video docking', {amp: true}, env => {
         </amp-video>
       `;
 
-      expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
     });
 
     it('uses amp-img in a `placeholder`', () => {
@@ -623,7 +622,7 @@ describes.realWin('video docking', {amp: true}, env => {
         </amp-video>
       `;
 
-      expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
     });
 
     it('uses `placeholder` img', () => {
@@ -633,7 +632,7 @@ describes.realWin('video docking', {amp: true}, env => {
         </amp-video>
       `;
 
-      expect(docking.getPosterImageSrc_(el)).to.equal('foo.png');
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
     });
   });
 
@@ -654,56 +653,15 @@ describes.realWin('video docking', {amp: true}, env => {
     });
   });
 
-  describe('getTargetArea_', () => {
-    it('delegates for slot', () => {
-      const fromPos = env.sandbox
-        .stub(docking, 'getTargetAreaFromPos_')
-        .returns('foo');
-
-      const fromSlot = env.sandbox
-        .stub(docking, 'getTargetAreaFromSlot_')
-        .returns('bar');
-
-      const video = {};
-      const target = {nodeType: /* ELEMENT */ 1};
-
-      expect(docking.getTargetArea_(video, target)).to.equal('bar');
-
-      expect(fromPos).to.not.have.been.called;
-      expect(fromSlot.withArgs(video, target)).to.have.been.calledOnce;
-    });
-
-    it('delegates for corner', () => {
-      const fromPos = env.sandbox
-        .stub(docking, 'getTargetAreaFromPos_')
-        .returns('foo');
-
-      const fromSlot = env.sandbox
-        .stub(docking, 'getTargetAreaFromSlot_')
-        .returns('bar');
-
-      const posX = RelativeX.LEFT;
-      const posY = RelativeY.BOTTOM;
-
-      const video = {};
-      const target = {posX, posY};
-
-      expect(docking.getTargetArea_(video, target)).to.equal('foo');
-
-      expect(fromPos.withArgs(video, posX, posY)).to.have.been.calledOnce;
-      expect(fromSlot).to.not.have.been.called;
-    });
-  });
-
-  describe('getTargetAreaFromPos_', () => {
+  describe.skip('getTargetAreaFromPos_', () => {
     [
       {
-        posX: RelativeX.RIGHT,
+        posX: DirectionX.RIGHT,
         posXTextual: 'right',
         expectedXFn: (vw, margin, width) => vw - margin - width,
       },
       {
-        posX: RelativeX.LEFT,
+        posX: DirectionX.LEFT,
         posXTextual: 'left',
         expectedXFn: (unusedVw, margin, unusedWidth) => margin,
       },
@@ -733,7 +691,7 @@ describes.realWin('video docking', {amp: true}, env => {
         const {width, height} = docking.getTargetAreaFromPos_(
           video,
           posX,
-          RelativeY.TOP
+          DirectionY.TOP
         );
 
         expect(width, 'width').to.equal(expectedWidth);
@@ -755,7 +713,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
         const expectedX = expectedXFn(vw, expectedMargin, expectedWidth);
 
-        const pos = docking.getTargetAreaFromPos_(video, posX, RelativeY.TOP);
+        const pos = docking.getTargetAreaFromPos_(video, posX, DirectionY.TOP);
 
         expect(pos.x, 'x').to.equal(expectedX);
         expect(pos.y, 'y').to.equal(expectedY);
@@ -776,7 +734,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
         const expectedX = expectedXFn(vw, expectedMargin, expectedWidth);
 
-        const pos = docking.getTargetAreaFromPos_(video, posX, RelativeY.TOP);
+        const pos = docking.getTargetAreaFromPos_(video, posX, DirectionY.TOP);
 
         expect(pos.x, 'x').to.equal(expectedX);
         expect(pos.y, 'y').to.equal(expectedY);
@@ -784,7 +742,7 @@ describes.realWin('video docking', {amp: true}, env => {
     });
   });
 
-  describe('getTargetAreaFromSlot_', () => {
+  describe.skip('getTargetAreaFromSlot_', () => {
     it('returns valid dimensions for same aspect ratio as component', () => {
       const video = createVideo();
       const slot = createAmpElementMock('amp-layout');
@@ -926,19 +884,13 @@ describes.realWin('video docking', {amp: true}, env => {
     const targetWidth = 440;
     const targetHeight = 264;
 
-    const target = {};
-
-    let targetAreaStub;
+    const target = {
+      rect: layoutRectLtwh(targetX, targetY, targetWidth, targetHeight),
+    };
 
     beforeEach(() => {
       video = createVideo();
       placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
-
-      targetAreaStub = env.sandbox.stub(docking, 'getTargetArea_');
-
-      targetAreaStub.returns(
-        layoutRectLtwh(targetX, targetY, targetWidth, targetHeight)
-      );
 
       env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
     });
@@ -963,13 +915,13 @@ describes.realWin('video docking', {amp: true}, env => {
 
     [
       {
-        expectedRelativeX: RelativeX.RIGHT,
+        expectedRelativeX: DirectionX.RIGHT,
         placementTextual: 'right',
         videoX: 0,
         targetX: 10,
       },
       {
-        expectedRelativeX: RelativeX.LEFT,
+        expectedRelativeX: DirectionX.LEFT,
         placementTextual: 'left',
         videoX: 10,
         targetX: 0,
@@ -983,8 +935,11 @@ describes.realWin('video docking', {amp: true}, env => {
 
           placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
 
-          targetAreaStub.returns(
-            layoutRectLtwh(targetX, targetY, targetWidth, targetHeight)
+          target.rect = layoutRectLtwh(
+            targetX,
+            targetY,
+            targetWidth,
+            targetHeight
           );
 
           expect(docking.getDims_(video, target, step).relativeX).to.equal(
@@ -1002,12 +957,12 @@ describes.realWin('video docking', {amp: true}, env => {
 
     const target = {};
     const step = 1;
-    const targetDims = {x: 20, y: 10, scale: 0.5, relativeX: RelativeX.RIGHT};
+    const targetDims = {x: 20, y: 10, scale: 0.5, relativeX: DirectionX.RIGHT};
 
     beforeEach(() => {
       video = createVideo();
 
-      placeElementLtwh(video, 0, 0, 400, 300, /* ratio */ 1);
+      placeElementLtwh(video, 0, 0, 400, 300);
 
       setCurrentlyDocked = env.sandbox.stub(docking, 'setCurrentlyDocked_');
       placeAt = env.sandbox
@@ -1071,9 +1026,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
   describe('setCurrentlyDocked_', () => {
     const video = {foo: 'bar'};
-    const target = {tacos: 'sí'};
-
-    const targetArea = layoutRectLtwh(0, 0, 50, 50);
+    const target = {rect: layoutRectLtwh(0, 0, 50, 50)};
 
     const step = 1;
 
@@ -1081,11 +1034,6 @@ describes.realWin('video docking', {amp: true}, env => {
 
     beforeEach(() => {
       trigger = env.sandbox.stub(docking, 'trigger_');
-
-      env.sandbox
-        .stub(docking, 'getTargetArea_')
-        .withArgs(video, target)
-        .returns(targetArea);
     });
 
     it('triggers action', () => {
@@ -1116,14 +1064,19 @@ describes.realWin('video docking', {amp: true}, env => {
       expect(trigger.withArgs(Actions.DOCK)).to.have.been.calledThrice;
     });
 
-    it('retriggers action when targets change', () => {
+    it('retriggers action when target rects change', () => {
       stubControls();
 
-      docking.setCurrentlyDocked_(video, target, step);
-      docking.setCurrentlyDocked_(video, {posX: 'a'}, step);
-      docking.setCurrentlyDocked_(video, {nodeType: /* ELEMENT */ 1}, step);
-      docking.setCurrentlyDocked_(video, {posX: 'b'}, step);
-      docking.setCurrentlyDocked_(video, {posX: 'b'}, step);
+      const a = {rect: layoutRectLtwh(1, 0, 0, 0)};
+      const b = {rect: layoutRectLtwh(2, 0, 0, 0)};
+      const c = {rect: layoutRectLtwh(3, 0, 0, 0)};
+      const d = {rect: layoutRectLtwh(4, 0, 0, 0)};
+
+      docking.setCurrentlyDocked_(video, a, step);
+      docking.setCurrentlyDocked_(video, b, step);
+      docking.setCurrentlyDocked_(video, c, step);
+      docking.setCurrentlyDocked_(video, d, step);
+      docking.setCurrentlyDocked_(video, d, step);
 
       expect(trigger.withArgs(Actions.DOCK).callCount).to.equal(4);
     });
@@ -1133,7 +1086,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
       docking.setCurrentlyDocked_(video, target, step);
 
-      expect(setVideo.withArgs(video, targetArea)).to.have.been.calledOnce;
+      expect(setVideo.withArgs(video, target.rect)).to.have.been.calledOnce;
     });
   });
 
@@ -1144,12 +1097,12 @@ describes.realWin('video docking', {amp: true}, env => {
     let placeAt;
     let maybeUpdateStaleYAfterScroll;
 
-    const targetDims = {x: 20, y: 10, scale: 0.5, relativeX: RelativeX.RIGHT};
+    const targetDims = {x: 20, y: 10, scale: 0.5, relativeX: DirectionX.RIGHT};
 
     beforeEach(() => {
       video = createVideo();
 
-      placeElementLtwh(video, 0, 0, 400, 300, /* ratio */ 1);
+      placeElementLtwh(video, 0, 0, 400, 300);
 
       trigger = env.sandbox.stub(docking, 'trigger_');
       resetOnUndock = env.sandbox.stub(docking, 'resetOnUndock_');
@@ -1243,7 +1196,7 @@ describes.realWin('video docking', {amp: true}, env => {
     const inlinePercVis = `${REVERT_TO_INLINE_RATIO * 100}% visible`;
 
     it(`pauses video when < ${inlinePercVis}`, async () => {
-      placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
+      placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
 
       await docking.undock_(video);
 
@@ -1251,7 +1204,7 @@ describes.realWin('video docking', {amp: true}, env => {
     });
 
     it(`doesn't pause video when >= ${inlinePercVis}`, async () => {
-      placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO);
+      placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO);
 
       await docking.undock_(video);
 
@@ -1261,8 +1214,7 @@ describes.realWin('video docking', {amp: true}, env => {
     describe('Chrome freeze when out-of-view workaround', () => {
       it(`shows component controls early when < ${inlinePercVis}`, () => {
         const {promise, resolve} = new Deferred();
-
-        placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
+        placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
 
         placeAt.returns(promise);
 
@@ -1276,7 +1228,7 @@ describes.realWin('video docking', {amp: true}, env => {
       });
 
       it(`shows component controls late when >= ${inlinePercVis}`, () => {
-        placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO);
+        placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO);
 
         const {promise, resolve} = new Deferred();
 
@@ -1319,7 +1271,7 @@ describes.realWin('video docking', {amp: true}, env => {
           .stub(docking, 'calculateTransitionDuration_')
           .returns(expectedTransitionDurationMs);
 
-        placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO);
+        placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO);
 
         await docking.undock_(video);
 
@@ -1379,16 +1331,17 @@ describes.realWin('video docking', {amp: true}, env => {
       },
     },
     (name, {useSlot, topBoundary}) => {
-      const targetType = useSlot ? 'slot element' : 'corner';
+      const DocktargetType = useSlot ? 'slot element' : 'corner';
 
-      function maybeCreateSlotElementLtwh(left, top, width, height, ratio = 0) {
+      function maybeCreateSlotElementLtwh(left, top, width, height) {
         if (!useSlot) {
           return;
         }
-        const impl = createAmpElementMock('amp-layout');
-        impl.element.id = slotId;
-        impl.element.setAttribute('layout', 'fill');
-        stubLayoutBox(impl, layoutRectLtwh(left, top, width, height), ratio);
+        const impl = createAmpElementMock('amp-layout', {
+          id: slotId,
+          layout: 'fill',
+        });
+        stubLayoutBox(impl, layoutRectLtwh(left, top, width, height));
         env.win.document.body.appendChild(impl.element);
 
         querySelectorStub.withArgs('#' + slotId).returns(impl.element);
@@ -1403,8 +1356,8 @@ describes.realWin('video docking', {amp: true}, env => {
       });
 
       describe('getTargetFor_', () => {
-        it(`should use a ${targetType} as target`, () => {
-          maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+        it(`should use ${DocktargetType} as target type`, () => {
+          maybeCreateSlotElementLtwh(190, topBoundary, 200, 150);
 
           const video = createVideo();
 
@@ -1413,7 +1366,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
           placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
 
-          setScrollDirection(Direction.UP);
+          setScrollDirection(DirectionY.TOP);
 
           setValidAreaWidth();
           setValidAreaHeight(videoHeight);
@@ -1421,15 +1374,13 @@ describes.realWin('video docking', {amp: true}, env => {
           const target = docking.getTargetFor_(video);
 
           expect(target).to.not.be.null;
+          expect(target.rect).to.not.be.null;
 
           if (useSlot) {
-            expect(target.nodeType).to.equal(/* ELEMENT */ 1);
-            expect(target.posX).to.be.undefined;
-            expect(target.posY).to.be.undefined;
+            expect(target.type).to.equal(DockTargetType.SLOT);
           } else {
-            expect(target.nodeType).to.be.undefined;
-            expect(target.posX).to.not.be.undefined;
-            expect(target.posY).to.not.be.undefined;
+            expect(target.type).to.equal(DockTargetType.CORNER);
+            expect(target.directionX).to.not.be.undefined;
           }
         });
       });
@@ -1446,7 +1397,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
           placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
 
-          setScrollDirection(Direction.UP);
+          setScrollDirection(DirectionY.TOP);
 
           mockInvalidAreaWidth();
           setValidAreaHeight(videoHeight);
@@ -1465,7 +1416,7 @@ describes.realWin('video docking', {amp: true}, env => {
           const videoWidth = 300;
           const videoHeight = 400;
 
-          setScrollDirection(Direction.UP);
+          setScrollDirection(DirectionY.TOP);
 
           setValidAreaWidth();
           setValidAreaHeight(videoHeight);
@@ -1488,7 +1439,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
           placeElementLtwh(video, 0, -100, 0, 0);
 
-          setScrollDirection(Direction.UP);
+          setScrollDirection(DirectionY.TOP);
 
           setValidAreaWidth();
           setValidAreaHeight();
@@ -1510,7 +1461,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
           docking.currentlyDocked_ = {video: createVideo()};
 
-          setScrollDirection(Direction.UP);
+          setScrollDirection(DirectionY.TOP);
 
           docking.updateOnPositionChange_(video);
 
@@ -1523,7 +1474,7 @@ describes.realWin('video docking', {amp: true}, env => {
           const dock = stubDockInTransferLayerStep();
           const video = createVideo();
 
-          setScrollDirection(Direction.UP);
+          setScrollDirection(DirectionY.TOP);
 
           const videoWidth = 400;
           const videoHeight = 300;
@@ -1531,16 +1482,7 @@ describes.realWin('video docking', {amp: true}, env => {
           setValidAreaWidth();
           setValidAreaHeight(videoHeight * 2);
 
-          placeElementLtwh(
-            video,
-            0,
-            -250,
-            videoWidth,
-            videoHeight,
-            /* ratio */ 1 / 3
-          );
-
-          env.sandbox.stub(docking, 'getTopEdge_').returns(topBoundary);
+          placeElementLtwh(video, 0, -250, videoWidth, videoHeight);
 
           docking.updateOnPositionChange_(video);
 
@@ -1558,7 +1500,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
           setValidAreaWidth();
           setValidAreaHeight(videoHeight);
-          setScrollDirection(Direction.UP);
+          setScrollDirection(DirectionY.TOP);
           placeElementLtwh(video, 0, topBoundary + 1, videoWidth, videoHeight);
 
           docking.updateOnPositionChange_(video);
@@ -1574,11 +1516,17 @@ describes.realWin('video docking', {amp: true}, env => {
           const actions = {trigger: env.sandbox.spy()};
           env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
-          const slot = maybeCreateSlotElementLtwh(0, 0, 0, 0);
+          const slot = maybeCreateSlotElementLtwh(23, 17, 100, 100);
           const video = createVideo();
           const action = '🌮';
 
-          docking.currentlyDocked_ = {video, target: slot || {}};
+          docking.currentlyDocked_ = {
+            video,
+            target: {
+              type: useSlot ? DockTargetType.SLOT : DockTargetType.CORNER,
+            },
+          };
+
           docking.trigger_(action);
 
           expect(

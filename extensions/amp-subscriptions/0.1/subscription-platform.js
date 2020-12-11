@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-
 /**
  * This interface is intended to be implemented by Subscription platforms to
  * provide method of getting entitlements.
@@ -71,10 +69,10 @@ export class SubscriptionPlatform {
 
   /**
    * Performs the pingback to the subscription platform.
-   * @param {!./entitlement.Entitlement} unusedSelectedPlatform
+   * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} unusedEntitlement
    * @return {!Promise|undefined}
    */
-  pingback(unusedSelectedPlatform) {}
+  pingback(unusedEntitlement) {}
 
   /**
    * Tells if the platform supports a score factor
@@ -86,9 +84,10 @@ export class SubscriptionPlatform {
   /**
    * Executes action for the local platform.
    * @param {string} unusedAction
+   * @param {?string} unusedSourceId
    * @return {!Promise<boolean>}
    */
-  executeAction(unusedAction) {}
+  executeAction(unusedAction, unusedSourceId) {}
 
   /**
    * Returns the base score configured for the platform.
@@ -103,14 +102,4 @@ export class SubscriptionPlatform {
    * @param {?JsonObject} unusedOptions
    */
   decorateUI(unusedElement, unusedAction, unusedOptions) {}
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
 }

@@ -34,4 +34,4 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Direct URL call:
 
-- `src` - Src value from script tag provided by the ad network.
+-   `src` - Src value from script tag provided by the ad network.

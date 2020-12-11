@@ -133,7 +133,7 @@ export class FormVerifier {
   clearVerificationErrors_() {
     const {elements} = this.form_;
     if (elements) {
-      iterateCursor(elements, e => {
+      iterateCursor(elements, (e) => {
         e.setCustomValidity('');
       });
     }
@@ -174,12 +174,12 @@ export class AsyncVerifier extends FormVerifier {
       () => {
         return [];
       },
-      error => {
+      (error) => {
         return getResponseErrorData_(/** @type {!Error} */ (error));
       }
     );
 
-    return this.addToResolver_(xhrConsumeErrors).then(errors =>
+    return this.addToResolver_(xhrConsumeErrors).then((errors) =>
       this.applyErrors_(errors)
     );
   }
@@ -243,11 +243,11 @@ export class AsyncVerifier extends FormVerifier {
     }
 
     // Create a list of form elements that had an error, but are now fixed.
-    const isFixed = previousError =>
-      errors.every(error => previousError.name !== error.name);
+    const isFixed = (previousError) =>
+      errors.every((error) => previousError.name !== error.name);
     const fixedElements = previousErrors
       .filter(isFixed)
-      .map(e => this.form_./*OK*/ querySelector(`[name="${e.name}"]`));
+      .map((e) => this.form_./*OK*/ querySelector(`[name="${e.name}"]`));
 
     return /** @type {!UpdatedErrorsDef} */ ({
       updatedElements: errorElements.concat(fixedElements),
@@ -268,7 +268,7 @@ function getResponseErrorData_(error) {
   }
 
   return response.json().then(
-    json => json.verifyErrors || [],
+    (json) => json.verifyErrors || [],
     () => []
   );
 }

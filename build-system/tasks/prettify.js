@@ -32,7 +32,7 @@ const tempy = require('tempy');
 const {exec} = require('../common/exec');
 const {getFilesToCheck, logOnSameLine} = require('../common/utils');
 const {green, cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
@@ -82,17 +82,17 @@ function printErrorWithSuggestedFixes(file) {
  * @return {!Promise}
  */
 function runPrettify(filesToCheck) {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(green('Starting checks...'));
   }
   return new Promise((resolve, reject) => {
-    const onData = data => {
-      if (!isTravisBuild()) {
+    const onData = (data) => {
+      if (!isCiBuild()) {
         logOnSameLine(green('Checked: ') + path.relative(rootDir, data.path));
       }
     };
 
-    const rejectWithReason = reasonText => {
+    const rejectWithReason = (reasonText) => {
       const reason = new Error(reasonText);
       reason.showStack = false;
       reject(reason);
@@ -124,7 +124,7 @@ function runPrettify(filesToCheck) {
       );
     };
 
-    const onError = error => {
+    const onError = (error) => {
       if (error.message.startsWith(header)) {
         const filesWithErrors = error.message
           .replace(header, '')
@@ -132,7 +132,7 @@ function runPrettify(filesToCheck) {
           .split('\n');
         const reason = 'Found formatting errors in one or more files';
         logOnSameLine(red('ERROR: ') + reason);
-        filesWithErrors.forEach(file => {
+        filesWithErrors.forEach((file) => {
           printErrorWithSuggestedFixes(file);
         });
         printFixMessages();
@@ -148,7 +148,7 @@ function runPrettify(filesToCheck) {
     };
 
     const onFinish = () => {
-      if (!isTravisBuild()) {
+      if (!isCiBuild()) {
         logOnSameLine('Checked ' + cyan(filesToCheck.length) + ' file(s)');
       }
       resolve();
@@ -160,7 +160,7 @@ function runPrettify(filesToCheck) {
         .pipe(prettier())
         .on('data', onData)
         .on('error', onError)
-        .pipe(gulp.dest(file => file.base))
+        .pipe(gulp.dest((file) => file.base))
         .on('finish', onFinish);
     } else {
       return gulp

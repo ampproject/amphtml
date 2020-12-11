@@ -33,7 +33,7 @@ describes.fakeWin(
       location: '#first',
     },
   },
-  env => {
+  (env) => {
     let clock;
     let bindingMock;
     let onStateUpdated;
@@ -45,7 +45,7 @@ describes.fakeWin(
 
       const binding = {
         cleanup: () => {},
-        setOnStateUpdated: callback => {
+        setOnStateUpdated: (callback) => {
           onStateUpdated = callback;
         },
         push: () => {},
@@ -77,7 +77,7 @@ describes.fakeWin(
         .expects('push')
         .returns(Promise.resolve({stackIndex: 11}))
         .once();
-      return history.push(onPop).then(unusedHistoryId => {
+      return history.push(onPop).then((unusedHistoryId) => {
         expect(history.stackIndex_).to.equal(11);
         expect(history.stackOnPop_.length).to.equal(12);
         expect(history.stackOnPop_[11]).to.equal(onPop);
@@ -96,7 +96,7 @@ describes.fakeWin(
         .withExactArgs(11)
         .returns(Promise.resolve({stackIndex: 10}))
         .once();
-      return history.push(onPop).then(historyId => {
+      return history.push(onPop).then((historyId) => {
         expect(historyId).to.equal(11);
         expect(history.stackOnPop_.length).to.equal(12);
         expect(history.stackOnPop_[11]).to.equal(onPop);
@@ -122,7 +122,7 @@ describes.fakeWin(
         .withExactArgs(11)
         .returns(Promise.resolve({stackIndex: 10}))
         .once();
-      return history.push(onPop).then(stackIndex => {
+      return history.push(onPop).then((stackIndex) => {
         expect(onPop).to.have.not.been.called;
         return history.pop(stackIndex).then(() => {
           expect(history.stackIndex_).to.equal(10);
@@ -147,7 +147,7 @@ describes.fakeWin(
         .withExactArgs(11)
         .returns(Promise.resolve({stackIndex: 10, title}))
         .once();
-      return history.push(onPop).then(stackIndex => {
+      return history.push(onPop).then((stackIndex) => {
         expect(onPop).to.have.not.been.called;
         return history.pop(stackIndex).then(() => {
           expect(history.stackIndex_).to.equal(10);
@@ -176,7 +176,7 @@ describes.fakeWin(
         .withExactArgs(replaceState)
         .returns(Promise.resolve())
         .once();
-      return history.push(onPop, pushState).then(historyId => {
+      return history.push(onPop, pushState).then((historyId) => {
         expect(historyId).to.equal(11);
         expect(history.stackOnPop_.length).to.equal(12);
         expect(history.stackOnPop_[11]).to.equal(onPop);
@@ -203,7 +203,7 @@ describes.fakeWin(
         .expects('get')
         .returns(Promise.resolve({...state, stackIndex: 11}))
         .once();
-      return history.push(onPop, state).then(historyId => {
+      return history.push(onPop, state).then((historyId) => {
         expect(historyId).to.equal(11);
         expect(history.stackOnPop_.length).to.equal(12);
         expect(history.stackOnPop_[11]).to.equal(onPop);
@@ -247,7 +247,7 @@ describes.fakeWin(
         .withExactArgs(11)
         .returns(Promise.resolve({...popState, stackIndex: 10}))
         .once();
-      return history.push(onPop).then(historyId => {
+      return history.push(onPop).then((historyId) => {
         expect(historyId).to.equal(11);
         expect(history.stackOnPop_.length).to.equal(12);
         expect(history.stackOnPop_[11]).to.equal(onPop);
@@ -269,13 +269,29 @@ describes.fakeWin(
       });
     });
 
+    it('should call pop if stack is empty and passed true', () => {
+      bindingMock
+        .expects('pop')
+        .once()
+        .returns(Promise.resolve({stackIndex: 0}));
+
+      return history.goBack(true);
+    });
+
+    it('should not call pop() if stack is empty and passed a falsy arg', async () => {
+      bindingMock.expects('pop').never();
+
+      await history.goBack();
+      await history.goBack(false);
+    });
+
     it('should get fragment', () => {
       bindingMock
         .expects('getFragment')
         .withExactArgs()
         .returns(Promise.resolve('fragment'))
         .once();
-      return history.getFragment().then(fragment => {
+      return history.getFragment().then((fragment) => {
         expect(fragment).to.be.equal('fragment');
       });
     });
@@ -299,7 +315,7 @@ describes.sandboxed('History install', {}, () => {
   beforeEach(() => {
     viewer = {
       isOvertakeHistory: () => false,
-      onMessage: () => function() {},
+      onMessage: () => function () {},
     };
 
     installTimerService(window);
@@ -344,7 +360,7 @@ describes.sandboxed('History install', {}, () => {
   });
 });
 
-describes.sandboxed('HistoryBindingNatural', {}, env => {
+describes.sandboxed('HistoryBindingNatural', {}, (env) => {
   let clock;
   let onStateUpdated;
   let history;
@@ -445,7 +461,7 @@ describes.sandboxed('HistoryBindingNatural', {}, env => {
 
   it('should push new state in the window.history and notify', () => {
     const title = 'title';
-    return history.push({title}).then(historyState => {
+    return history.push({title}).then((historyState) => {
       expect(history.stackIndex_).to.equal(historyState.stackIndex);
       expect(history.stackIndex_).to.equal(window.history.length - 1);
       expect(history.unsupportedState_['AMP.History']).to.equal(
@@ -462,7 +478,7 @@ describes.sandboxed('HistoryBindingNatural', {}, env => {
 
   it('should pop a state from the window.history and notify', () => {
     const title = 'title';
-    return history.push({title}).then(historyState => {
+    return history.push({title}).then((historyState) => {
       expect(onStateUpdated).to.be.calledOnce;
       expect(onStateUpdated).to.be.calledWithMatch({
         stackIndex: window.history.length - 1,
@@ -474,8 +490,8 @@ describes.sandboxed('HistoryBindingNatural', {}, env => {
       );
       const popPromise = history.pop(historyState.stackIndex);
 
-      return histPromise.then(unusedHist => {
-        return popPromise.then(pop => {
+      return histPromise.then((unusedHist) => {
+        return popPromise.then((pop) => {
           expect(pop.stackIndex).to.equal(window.history.length - 2);
           expect(history.stackIndex_).to.equal(window.history.length - 2);
           expect(history.unsupportedState_['AMP.History']).to.equal(
@@ -491,8 +507,8 @@ describes.sandboxed('HistoryBindingNatural', {}, env => {
   });
 
   it('should restore previous state after pop and notify', () => {
-    return history.push({title: 'foo'}).then(first => {
-      return history.push({title: 'bar'}).then(second => {
+    return history.push({title: 'foo'}).then((first) => {
+      return history.push({title: 'bar'}).then((second) => {
         expect(onStateUpdated).to.have.callCount(2);
 
         const histPromise = listenOncePromise(window, 'popstate').then(() =>
@@ -500,8 +516,8 @@ describes.sandboxed('HistoryBindingNatural', {}, env => {
         );
         const popPromise = history.pop(second.stackIndex);
 
-        return histPromise.then(unusedHist => {
-          return popPromise.then(pop => {
+        return histPromise.then((unusedHist) => {
+          return popPromise.then((pop) => {
             expect(pop.stackIndex).to.equal(first.stackIndex);
             expect(history.stackIndex_).to.equal(first.stackIndex);
             expect(history.unsupportedState_['AMP.History']).to.equal(
@@ -521,13 +537,13 @@ describes.sandboxed('HistoryBindingNatural', {}, env => {
 
   it('should get current state', () => {
     const title = 'title';
-    return history.push({title}).then(historyState => {
+    return history.push({title}).then((historyState) => {
       expect(history.unsupportedState_).to.deep.include({
         'AMP.History': historyState.stackIndex,
         title,
       });
 
-      return history.get().then(current => {
+      return history.get().then((current) => {
         expect(current).to.deep.include({
           'AMP.History': historyState.stackIndex,
           title,
@@ -539,7 +555,7 @@ describes.sandboxed('HistoryBindingNatural', {}, env => {
   it('should replace current state', () => {
     const pushTitle = 'pushTitle';
     const replaceTitle = 'replaceTitle';
-    return history.push({title: pushTitle}).then(historyState => {
+    return history.push({title: pushTitle}).then((historyState) => {
       expect(history.unsupportedState_).to.deep.include({
         'AMP.History': historyState.stackIndex,
         title: pushTitle,
@@ -629,7 +645,7 @@ describes.sandboxed('HistoryBindingNatural', {}, env => {
   });
 });
 
-describes.sandboxed('HistoryBindingVirtual', {}, env => {
+describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
   let history;
   let viewer;
   let capabilityStub;
@@ -665,7 +681,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
 
   describe('`pushHistory` API', () => {
     it('viewer does not support responses', () => {
-      return history.push().then(state => {
+      return history.push().then((state) => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
         expect(
           viewer.sendMessageAwaitResponse
@@ -685,7 +701,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         .withArgs('pushHistory', {stackIndex: 1, title})
         .returns(Promise.resolve({stackIndex: 1, title}));
 
-      return history.push({title}).then(state => {
+      return history.push({title}).then((state) => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
         expect(
           viewer.sendMessageAwaitResponse
@@ -705,7 +721,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         .withArgs('pushHistory', {stackIndex: 1, title})
         .returns(Promise.resolve(true));
 
-      return history.push({title}).then(state => {
+      return history.push({title}).then((state) => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
         expect(
           viewer.sendMessageAwaitResponse
@@ -722,7 +738,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
 
   describe('`popHistory` API', () => {
     it('viewer does not support responses', () => {
-      return history.pop(0).then(state => {
+      return history.pop(0).then((state) => {
         expect(state.stackIndex).to.equal(-1);
         expect(history.stackIndex_).to.equal(-1);
 
@@ -736,7 +752,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
         .returns(Promise.resolve({stackIndex: -123, title: 'title'}));
 
-      return history.pop(0).then(state => {
+      return history.pop(0).then((state) => {
         expect(state).to.deep.equal({stackIndex: -123, title: 'title'});
         expect(history.stackIndex_).to.equal(-123);
 
@@ -753,7 +769,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
         .returns(Promise.resolve(true));
 
-      return history.pop(0).then(state => {
+      return history.pop(0).then((state) => {
         expect(state).to.deep.equal({stackIndex: -1});
         expect(history.stackIndex_).to.equal(-1);
 
@@ -772,7 +788,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         title: 'title',
       });
 
-      return history.replace({title: 'title'}).then(state => {
+      return history.replace({title: 'title'}).then((state) => {
         expect(history.stackIndex_).to.equal(0);
         expect(state).to.deep.equal({stackIndex: 0, title: 'title'});
 
@@ -785,16 +801,18 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
         .returns(Promise.resolve({stackIndex: 123, title: 'different'}));
 
-      return history.replace({stackIndex: 123, title: 'title'}).then(state => {
-        expect(history.stackIndex_).to.equal(123);
-        expect(state).to.deep.equal({stackIndex: 123, title: 'different'});
+      return history
+        .replace({stackIndex: 123, title: 'title'})
+        .then((state) => {
+          expect(history.stackIndex_).to.equal(123);
+          expect(state).to.deep.equal({stackIndex: 123, title: 'different'});
 
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({
-          stackIndex: 123,
-          title: 'different',
+          expect(onStateUpdated).to.be.calledOnce;
+          expect(onStateUpdated).to.be.calledWithMatch({
+            stackIndex: 123,
+            title: 'different',
+          });
         });
-      });
     });
 
     it('handles bad viewer responses', () => {
@@ -802,16 +820,18 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
         .returns(Promise.resolve(true));
 
-      return history.replace({stackIndex: 123, title: 'title'}).then(state => {
-        expect(history.stackIndex_).to.equal(123);
-        expect(state).to.deep.equal({stackIndex: 123, title: 'title'});
+      return history
+        .replace({stackIndex: 123, title: 'title'})
+        .then((state) => {
+          expect(history.stackIndex_).to.equal(123);
+          expect(state).to.deep.equal({stackIndex: 123, title: 'title'});
 
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({
-          stackIndex: 123,
-          title: 'title',
+          expect(onStateUpdated).to.be.calledOnce;
+          expect(onStateUpdated).to.be.calledWithMatch({
+            stackIndex: 123,
+            title: 'title',
+          });
         });
-      });
     });
 
     it('supports full URL replacement', () => {
@@ -839,7 +859,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
           url: '/page#fr1',
           fragment: 'fr2',
         })
-        .then(state => {
+        .then((state) => {
           expect(state).to.deep.equal({
             fragment: 'fr2',
             stackIndex: 123,
@@ -862,7 +882,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
 
       return history
         .replace({stackIndex: 123, title: 'title', url: '/page'})
-        .then(state => {
+        .then((state) => {
           expect(state).to.deep.equal({stackIndex: 0});
 
           expect(viewer.sendMessageAwaitResponse).to.not.be.called;
@@ -878,7 +898,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         .withArgs('pushHistory', {stackIndex: 1, title})
         .returns(Promise.resolve({stackIndex: 1, title}));
 
-      return history.push({title}).then(state => {
+      return history.push({title}).then((state) => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
         expect(
           viewer.sendMessageAwaitResponse
@@ -928,7 +948,7 @@ describes.fakeWin(
       location: '#first',
     },
   },
-  env => {
+  (env) => {
     let clock;
     let history;
 
@@ -1001,7 +1021,7 @@ describes.fakeWin(
     });
   }
 );
-describes.fakeWin('Get and update fragment', {}, env => {
+describes.fakeWin('Get and update fragment', {}, (env) => {
   let history;
   let viewer;
   let viewerMock;
@@ -1031,7 +1051,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
       new AmpDocSingle(env.win),
       new HistoryBindingNatural_(env.win)
     );
-    return history.getFragment().then(fragment => {
+    return history.getFragment().then((fragment) => {
       expect(fragment).to.be.equal('foo');
     });
   });
@@ -1094,7 +1114,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         .withExactArgs('getFragment', undefined, true)
         .once()
         .returns(Promise.resolve('from-viewer'));
-      return history.getFragment().then(fragment => {
+      return history.getFragment().then((fragment) => {
         expect(fragment).to.equal('from-viewer');
       });
     }
@@ -1113,7 +1133,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         .withExactArgs('fragment')
         .once()
         .returns(false);
-      return history.getFragment().then(fragment => {
+      return history.getFragment().then((fragment) => {
         expect(fragment).to.equal('');
       });
     }
@@ -1137,7 +1157,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         .withExactArgs('getFragment', undefined, true)
         .once()
         .returns(Promise.resolve());
-      return history.getFragment().then(fragment => {
+      return history.getFragment().then((fragment) => {
         expect(fragment).to.equal('');
       });
     }
@@ -1157,7 +1177,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
         .once()
         .returns(true);
       let called = false;
-      viewer.sendMessageAwaitResponse = function(action, data) {
+      viewer.sendMessageAwaitResponse = function (action, data) {
         expect(action).to.equal('replaceHistory');
         expect(data.fragment).to.equal('fragment');
         called = true;

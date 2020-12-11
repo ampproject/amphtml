@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const identity = a => a;
+const identity = (a) => a;
 
 /**
  * Takes a set of HTML fragments and concatenates them.

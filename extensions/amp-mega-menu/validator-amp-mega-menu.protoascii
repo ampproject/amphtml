@@ -28,7 +28,7 @@ tags: {  # <amp-mega-menu>
   tag_name: "AMP-MEGA-MENU"
   requires_extension: "amp-mega-menu"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-mega-menu"
+  spec_url: "https://amp.dev/documentation/components/amp-mega-menu/"
   descendant_tag_list: "amp-mega-menu-allowed-descendants"
   # We want to support both of the cases below:
   # <amp-mega-menu> > <nav> > ... and
@@ -53,6 +53,7 @@ tags: {  # <amp-mega-menu> <nav>
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU > NAV"
+  descriptive_name: "amp-mega-menu > nav"
   siblings_disallowed: true
   child_tags: {
     mandatory_num_child_tags: 1
@@ -67,6 +68,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU > AMP-LIST"
+  descriptive_name: "amp-mega-menu > amp-list"
   # Include mandatory amp-list attrs so that <amp-mega-menu> > <nav>
   # does not match to this tag.
   attrs: {
@@ -89,6 +91,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU > AMP-LIST > TEMPLATE"
+  descriptive_name: "amp-mega-menu > amp-list > template"
   mandatory_parent: "AMP-LIST"
   child_tags: {
     mandatory_num_child_tags: 1
@@ -102,6 +105,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU NAV > UL/OL"
+  descriptive_name: "amp-mega-menu nav > ul/ol"
   mandatory_parent: "NAV"
   child_tags: {
     mandatory_min_num_child_tags: 1
@@ -115,6 +119,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU NAV > UL/OL > LI"
+  descriptive_name: "amp-mega-menu nav > ul/ol > li"
   child_tags: {
     mandatory_min_num_child_tags: 1
     child_tag_name_oneof: "A"
@@ -142,6 +147,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU item-heading"
+  descriptive_name: "amp-mega-menu item-heading"
   attrs: {
     name: "role"
     value: "button"
@@ -151,6 +157,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU item-content"
+  descriptive_name: "amp-mega-menu item-content"
   # Disallow role=menu until supported by implementation.
   attrs: {
     name: "role"
@@ -159,7 +166,7 @@ tags: {
   }
 }
 descendant_tag_list {
-  # Purposefully being restrictive when whitelisting child components;
+  # Purposefully being restrictive when allowlisting child components;
   # On demand, add more components to this list after manual testing.
   name: "amp-mega-menu-allowed-descendants"
   tag: "A"
@@ -196,6 +203,7 @@ descendant_tag_list {
   tag: "P"
   tag: "PATH"
   tag: "SECTION"
+  tag: "SELECT"
   tag: "SPAN"
   tag: "STRIKE"
   tag: "STRONG"
@@ -212,4 +220,5 @@ descendant_tag_list {
   tag: "TR"
   tag: "U"
   tag: "UL"
+  tag: "USE"
 }

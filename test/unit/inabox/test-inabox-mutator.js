@@ -16,7 +16,7 @@
 import {InaboxMutator} from '../../../src/inabox/inabox-mutator';
 import {Services} from '../../../src/services';
 
-describes.realWin('inabox-mutator', {amp: true}, env => {
+describes.realWin('inabox-mutator', {amp: true}, (env) => {
   let mutator;
   let resource;
   let element;
@@ -26,7 +26,7 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     element = env.win.document.createElement('div');
 
     const resources = Services.resourcesForDoc(env.ampdoc);
-    env.sandbox.stub(resources, 'getResourceForElement').callsFake(el => {
+    env.sandbox.stub(resources, 'getResourceForElement').callsFake((el) => {
       expect(el).to.equal(element);
       return resource;
     });
@@ -42,9 +42,9 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     };
   });
 
-  it('changeSize', async () => {
+  it('forceChangeSize', async () => {
     const callback = env.sandbox.spy();
-    mutator.changeSize(element, 12, 34, callback, {
+    mutator.forceChangeSize(element, 12, 34, callback, {
       top: 4,
       right: 5,
       bottom: 6,
@@ -62,8 +62,8 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     expect(schedulePassStub).to.be.calledOnce;
   });
 
-  it('attemptChangeSize', async () => {
-    const resultPromise = mutator.attemptChangeSize(element, 12, 34, {
+  it('requestChangeSize', async () => {
+    const resultPromise = mutator.requestChangeSize(element, 12, 34, {
       top: 4,
       right: 5,
       bottom: 6,

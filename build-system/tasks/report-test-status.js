@@ -18,9 +18,10 @@
 const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const requestPromise = require('request-promise');
+const {ciJobUrl} = require('../common/ci');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../common/git');
-const {travisJobUrl, isTravisPullRequestBuild} = require('../common/travis');
+const {isPullRequestBuild, isTravisBuild} = require('../common/ci');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -29,17 +30,12 @@ const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
 
 const IS_LOCAL_CHANGES = !!argv.local_changes;
-const IS_SAUCELABS = !!argv.saucelabs;
-const IS_SAUCELABS_STABLE = !!argv.saucelabs && !!argv.stable;
-const IS_SAUCELABS_BETA = !!argv.saucelabs && !!argv.beta;
-const IS_SINGLE_PASS = !!argv.single_pass;
+const IS_DIST = !!argv.compiled;
+const IS_ESM = !!argv.esm;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  [
-    'integration',
-    ['local', 'single-pass', 'saucelabs-beta', 'saucelabs-stable'],
-  ],
-  ['unit', ['local', 'local-changes', 'saucelabs']],
+  ['integration', ['local', 'minified', 'esm']],
+  ['unit', ['local', 'local-changes']],
   ['e2e', ['local']],
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -64,64 +60,59 @@ function inferTestType() {
 
   if (IS_LOCAL_CHANGES) {
     return `${type}/local-changes`;
+  } else if (IS_DIST) {
+    if (IS_ESM) {
+      return `${type}/esm`;
+    }
+    return `${type}/minified`;
+  } else {
+    return `${type}/local`;
   }
-
-  if (IS_SAUCELABS_BETA) {
-    return `${type}/saucelabs-beta`;
-  } else if (IS_SAUCELABS_STABLE) {
-    return `${type}/saucelabs-stable`;
-  } else if (IS_SAUCELABS) {
-    return `${type}/saucelabs`;
-  }
-
-  if (IS_SINGLE_PASS) {
-    return `${type}/single-pass`;
-  }
-
-  return `${type}/local`;
 }
 
-function postReport(type, action) {
-  if (type !== null && isTravisPullRequestBuild()) {
+async function postReport(type, action) {
+  // TODO(rsimha, ampproject/amp-github-apps#1111) Remove Travis special-case.
+  if (type !== null && isTravisBuild() && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
-    return requestPromise({
-      method: 'POST',
-      uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
-      body: JSON.stringify({
-        travisJobUrl: travisJobUrl(),
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // Do not use `json: true` because the response is a string, not JSON.
-    })
-      .then(body => {
+
+    try {
+      const body = await requestPromise({
+        method: 'POST',
+        uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
+        body: JSON.stringify({
+          // TODO(rsimha, ampproject/amp-github-apps#1111): Change the name of this field.
+          travisJobUrl: ciJobUrl(),
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Do not use `json: true` because the response is a string, not JSON.
+      });
+
+      log(
+        green('INFO:'),
+        'reported',
+        cyan(`${type}/${action}`),
+        'to the test-status GitHub App'
+      );
+
+      if (body.length > 0) {
         log(
           green('INFO:'),
-          'reported',
-          cyan(`${type}/${action}`),
-          'to the test-status GitHub App'
+          'response from test-status was',
+          cyan(body.substr(0, 100))
         );
-        if (body.length > 0) {
-          log(
-            green('INFO:'),
-            'response from test-status was',
-            cyan(body.substr(0, 100))
-          );
-        }
-      })
-      .catch(error => {
-        log(
-          yellow('WARNING:'),
-          'failed to report',
-          cyan(`${type}/${action}`),
-          'to the test-status GitHub App:\n',
-          error.message.substr(0, 100)
-        );
-        return;
-      });
+      }
+    } catch (error) {
+      log(
+        yellow('WARNING:'),
+        'failed to report',
+        cyan(`${type}/${action}`),
+        'to the test-status GitHub App:\n',
+        error.message.substr(0, 100)
+      );
+    }
   }
-  return Promise.resolve();
 }
 
 function reportTestErrored() {
@@ -143,7 +134,9 @@ function reportTestStarted() {
 async function reportAllExpectedTests(buildTargets) {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
-    const action = testTypeBuildTargets.some(target => buildTargets.has(target))
+    const action = testTypeBuildTargets.some((target) =>
+      buildTargets.has(target)
+    )
       ? 'queued'
       : 'skipped';
     for (const subType of subTypes) {

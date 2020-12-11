@@ -41,12 +41,25 @@ export class DenakopNetworkConfig {
    * True if responsive is enabled for auto-ads
    */
   isResponsiveEnabled() {
-    return false;
+    return true;
   }
 
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
+    const accountId = this.autoAmpAdsElement_.getAttribute('data-account-id');
+    if (accountId) {
+      return buildUrl(
+        'https://v3.denakop.com/ad-request',
+        {
+          'a': accountId,
+          'v': 'amp',
+          'u': docInfo.canonicalUrl,
+        },
+        /* maxLength */ 4096
+      );
+    }
+
     const publisherId = this.autoAmpAdsElement_.getAttribute(
       'data-publisher-id'
     );
@@ -57,8 +70,6 @@ export class DenakopNetworkConfig {
         'p': publisherId,
         't': tagId,
         'u': docInfo.canonicalUrl,
-        'w': window.screen.width,
-        'h': window.screen.height,
       },
       /* maxLength */ 4096
     );
@@ -67,7 +78,6 @@ export class DenakopNetworkConfig {
   /** @override */
   getAttributes() {
     const attributes = dict({
-      'layout': 'fixed',
       'data-multi-size-validation': 'false',
       'type': 'doubleclick',
       'data-ad': 'denakop',
@@ -83,10 +93,10 @@ export class DenakopNetworkConfig {
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [
-        {adCount: 3, spacing: viewportHeight * 2},
-        {adCount: 6, spacing: viewportHeight * 3},
+        {adCount: 4, spacing: viewportHeight * 2},
+        {adCount: 8, spacing: viewportHeight * 3},
       ],
-      maxAdCount: 8,
+      maxAdCount: 20,
     };
   }
 

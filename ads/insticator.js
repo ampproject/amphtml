@@ -66,7 +66,7 @@ function createAdsAndEmbed(siteId, embedId) {
   'Insticator' in a ||
     (a.Insticator = {
       ad: {
-        loadAd: function(b) {
+        loadAd: function (b) {
           a.Insticator.ad.q.push(b);
         },
         q: [],
@@ -76,7 +76,7 @@ function createAdsAndEmbed(siteId, embedId) {
       version: '4.0',
       q: [],
       amp: null, // this will get set to window.context which is the AMP API so we can access from our ads code
-      load: function(t, o) {
+      load: function (t, o) {
         a.Insticator.amp = window.context; // set the Insticator object property amp to window.context which is the AMP API so we can access from our ads code
         a.Insticator.q.push({t, o});
       },

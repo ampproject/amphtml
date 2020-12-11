@@ -88,15 +88,19 @@ export class AmpRecaptchaService {
 
     /** @private {Object} */
     this.executeMap_ = {};
+
+    /** @private {boolean} */
+    this.global_;
   }
 
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
    * @param {string} sitekey
+   * @param {boolean} global
    * @return {Promise}
    */
-  register(sitekey) {
+  register(sitekey, global = false) {
     if (!this.sitekey_) {
       this.sitekey_ = sitekey;
     } else if (this.sitekey_ !== sitekey) {
@@ -104,6 +108,16 @@ export class AmpRecaptchaService {
         new Error(
           'You must supply the same sitekey ' +
             'to all amp-recaptcha-input elements.'
+        )
+      );
+    }
+    if (this.global_ === undefined) {
+      this.global_ = global;
+    } else if (this.global_ !== global) {
+      return Promise.reject(
+        new Error(
+          'You must supply the data-global attribute ' +
+            'to all or none of the amp-recaptcha-input elements.'
         )
       );
     }
@@ -171,7 +185,7 @@ export class AmpRecaptchaService {
    * @return {?Promise}
    */
   initialize_() {
-    return this.createRecaptchaFrame_().then(iframe => {
+    return this.createRecaptchaFrame_().then((iframe) => {
       this.iframe_ = iframe;
 
       this.unlisteners_ = [
@@ -201,7 +215,7 @@ export class AmpRecaptchaService {
   dispose_() {
     if (this.iframe_) {
       removeElement(this.iframe_);
-      this.unlisteners_.forEach(unlistener => unlistener());
+      this.unlisteners_.forEach((unlistener) => unlistener());
       this.iframe_ = null;
       this.iframeLoadPromise_ = null;
       this.recaptchaApiReady_ = new Deferred();
@@ -219,7 +233,7 @@ export class AmpRecaptchaService {
   createRecaptchaFrame_() {
     const iframe = this.win_.document.createElement('iframe');
 
-    return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
+    return this.getRecaptchaFrameSrc_().then((recaptchaFrameSrc) => {
       this.recaptchaFrameOrigin_ = getSourceOrigin(recaptchaFrameSrc);
       iframe.src = recaptchaFrameSrc;
       iframe.setAttribute('scrolling', 'no');
@@ -230,13 +244,14 @@ export class AmpRecaptchaService {
           dict({
             'sitekey': this.sitekey_,
             'sentinel': 'amp-recaptcha',
+            'global': this.global_,
           })
         )
       );
       iframe.classList.add('i-amphtml-recaptcha-iframe');
       setStyle(iframe, 'border', 'none');
       /** @this {!Element} */
-      iframe.onload = function() {
+      iframe.onload = function () {
         // Chrome does not reflect the iframe readystate.
         this.readyState = 'complete';
       };
@@ -277,7 +292,7 @@ export class AmpRecaptchaService {
       // TODO: win location href curls domain MAY need to be the same
       return ampToolboxCacheUrl
         .createCurlsSubdomain(winLocation.href)
-        .then(curlsSubdomain => {
+        .then((curlsSubdomain) => {
           return (
             '//' +
             curlsSubdomain +
@@ -309,7 +324,7 @@ export class AmpRecaptchaService {
       );
     }
 
-    return curlsSubdomainPromise.then(curlsSubdomain => {
+    return curlsSubdomainPromise.then((curlsSubdomain) => {
       const recaptchaFrameSrc =
         'https://' +
         curlsSubdomain +

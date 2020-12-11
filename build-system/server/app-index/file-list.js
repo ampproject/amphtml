@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 const documentModes = require('./document-modes');
 const {AmpState, ampStateKey, containsExpr} = require('./amphtml-helpers');
@@ -26,7 +25,7 @@ const {KeyValueOptions} = require('./form');
 const examplesPathRegex = /^\/examples\//;
 const htmlDocRegex = /\.html$/;
 
-const endpoint = q => appendQueryParamsToUrl('/dashboard/api/listing', q);
+const endpoint = (q) => appendQueryParamsToUrl('/dashboard/api/listing', q);
 
 const selectModeStateId = 'documentMode';
 const selectModeStateKey = 'selectModePrefix';
@@ -112,9 +111,7 @@ const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
 
 const FileListHeading = ({basepath, selectModePrefix}) => html`
   <div class="file-list-heading">
-    <h3 class="code" id="basepath">
-      ${basepath}
-    </h3>
+    <h3 class="code" id="basepath">${basepath}</h3>
     ${FileListSearchInput({basepath})}
     <div class="file-list-right-section">
       ${AmpState(selectModeStateId, {
@@ -126,11 +123,9 @@ const FileListHeading = ({basepath, selectModePrefix}) => html`
   </div>
 `;
 
-const wrapFileList = rendered => html`
+const wrapFileList = (rendered) => html`
   <div class="file-list-container">
-    <div class="wrap">
-      ${rendered}
-    </div>
+    <div class="wrap">${rendered}</div>
   </div>
 `;
 
@@ -157,7 +152,7 @@ const FileList = ({basepath, fileSet, selectModePrefix}) =>
 
           <div placeholder>
             <div role="list">
-              ${joinFragments(fileSet, name =>
+              ${joinFragments(fileSet, (name) =>
                 PlaceholderFileListItem({
                   name,
                   href: maybePrefixExampleDocHref(

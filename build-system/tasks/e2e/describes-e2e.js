@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 // import to install chromedriver and geckodriver
-require('chromedriver'); // eslint-disable-line no-unused-vars
-require('geckodriver'); // eslint-disable-line no-unused-vars
+require('chromedriver');
+require('geckodriver');
 
+const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
+const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
@@ -26,12 +28,17 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
+  getCoverageObject,
+  mergeClientCoverage,
+} = require('istanbul-middleware/lib/core');
+const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
+const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
 const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -40,6 +47,7 @@ const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
@@ -232,7 +240,7 @@ let TestSpec;
 /**
  * An end2end test using Selenium Web Driver or Puppeteer
  */
-const endtoend = describeEnv(spec => new EndToEndFixture(spec));
+const endtoend = describeEnv((spec) => new EndToEndFixture(spec));
 
 /**
  * Maps an environment enum value to a `describes.repeated` variant object.
@@ -324,10 +332,35 @@ class ItConfig {
       return this.it.skip(name, fn);
     }
 
-    this.it(name, function() {
+    this.it(name, function () {
       return fn.apply(this, arguments);
     });
   }
+}
+
+/**
+ * Extracts code coverage data from the page and aggregates it with other tests.
+ * @param {!Object} env e2e driver environment.
+ * @return {Promise<void>}
+ */
+async function updateCoverage(env) {
+  const coverage = await env.controller.evaluate(() => window.__coverage__);
+  if (coverage) {
+    mergeClientCoverage(coverage);
+  }
+}
+
+/**
+ * Reports code coverage data to an aggregating endpoint.
+ * @return {Promise<void>}
+ */
+async function reportCoverage() {
+  const coverage = getCoverageObject();
+  await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
+    method: 'POST',
+    body: JSON.stringify(coverage),
+    headers: {'Content-type': 'application/json'},
+  });
 }
 
 /**
@@ -345,7 +378,7 @@ function describeEnv(factory) {
    * @param {function(string, function())} describeFunc
    * @return {function()}
    */
-  const templateFunc = function(suiteName, spec, fn, describeFunc) {
+  const templateFunc = function (suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
     let environments = spec.environments || 'ampdoc-preset';
     if (typeof environments === 'string') {
@@ -355,7 +388,7 @@ function describeEnv(factory) {
       throw new Error('Invalid environment preset: ' + spec.environments);
     }
     const variants = Object.create(null);
-    environments.forEach(environment => {
+    environments.forEach((environment) => {
       const o = EnvironmentVariantMap[environment];
       variants[o.name] = o.value;
     });
@@ -369,9 +402,9 @@ function describeEnv(factory) {
       const allowedBrowsers = getAllowedBrowsers();
 
       spec.browsers
-        .filter(x => allowedBrowsers.has(x))
-        .forEach(browserName => {
-          describe(browserName, function() {
+        .filter((x) => allowedBrowsers.has(x))
+        .forEach((browserName) => {
+          describe(browserName, function () {
             createVariantDescribe(browserName);
           });
         });
@@ -381,7 +414,7 @@ function describeEnv(factory) {
       const {engine, browsers} = getConfig();
 
       const allowedBrowsers = browsers
-        ? new Set(browsers.split(',').map(x => x.trim()))
+        ? new Set(browsers.split(',').map((x) => x.trim()))
         : supportedBrowsers;
 
       if (engine === EngineType.PUPPETEER) {
@@ -405,34 +438,38 @@ function describeEnv(factory) {
 
     function createVariantDescribe(browserName) {
       for (const name in variants) {
-        it.configure = function() {
+        it.configure = function () {
           return new ItConfig(it, variants[name]);
         };
 
-        describe(name ? ` ${name} ` : SUB, function() {
+        describe(name ? ` ${name} ` : SUB, function () {
           doTemplate.call(this, name, variants[name], browserName);
         });
       }
     }
 
-    return describeFunc(suiteName, function() {
+    return describeFunc(suiteName, function () {
       createBrowserDescribe();
     });
 
     function doTemplate(name, variant, browserName) {
       const env = Object.create(variant);
       this.timeout(TEST_TIMEOUT);
-      beforeEach(async function() {
+      beforeEach(async function () {
         this.timeout(SETUP_TIMEOUT);
         await fixture.setup(env, browserName, SETUP_RETRIES);
 
         // don't install for CI
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           installRepl(global, env);
         }
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
+        if (argv.coverage) {
+          await updateCoverage(env);
+        }
+
         // If there is an async expect error, throw it in the final state.
         const lastExpectError = getLastExpectError();
         if (lastExpectError) {
@@ -445,12 +482,18 @@ function describeEnv(factory) {
           delete env[key];
         }
 
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           uninstallRepl();
         }
       });
 
-      describe(SUB, function() {
+      after(async () => {
+        if (argv.coverage) {
+          await reportCoverage();
+        }
+      });
+
+      describe(SUB, function () {
         fn.call(this, env);
       });
     }
@@ -462,7 +505,7 @@ function describeEnv(factory) {
    * @param {function(!Object)} fn
    * @return {function()}
    */
-  const mainFunc = function(name, spec, fn) {
+  const mainFunc = function (name, spec, fn) {
     return templateFunc(name, spec, fn, describe);
   };
 
@@ -472,11 +515,11 @@ function describeEnv(factory) {
    * @param {function(!Object)} fn
    * @return {function()}
    */
-  mainFunc.only = function(name, spec, fn) {
+  mainFunc.only = function (name, spec, fn) {
     return templateFunc(name, spec, fn, describe./*OK*/ only);
   };
 
-  mainFunc.skip = function(name, variants, fn) {
+  mainFunc.skip = function (name, variants, fn) {
     return templateFunc(name, variants, fn, describe.skip);
   };
 
@@ -510,6 +553,12 @@ class EndToEndFixture {
 
     try {
       await setUpTest(env, this.spec);
+      // Set env props that require the fixture to be set up.
+      if (env.environment === AmpdocEnvironment.VIEWER_DEMO) {
+        env.receivedMessages = await controller.evaluate(() => {
+          return window.parent.viewer.receivedMessages;
+        });
+      }
     } catch (ex) {
       if (retries > 0) {
         await this.setup(env, browserName, --retries);
@@ -595,7 +644,7 @@ async function toggleExperiments(ampDriver, testUrl, experiments) {
  * @template T
  */
 function intersect(a, b) {
-  return new Set(Array.from(a).filter(aItem => b.has(aItem)));
+  return new Set(Array.from(a).filter((aItem) => b.has(aItem)));
 }
 
 module.exports = {

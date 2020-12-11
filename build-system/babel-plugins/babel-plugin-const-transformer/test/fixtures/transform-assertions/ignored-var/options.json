@@ -1,3 +1,3 @@
 {
-  "plugins": ["../../../../../babel-plugin-const-transformer"]
+  "plugins": ["../../../.."]
 }

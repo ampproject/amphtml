@@ -16,7 +16,6 @@
 
 import {doubleclick} from '../ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '../3p/3p';
-import {startsWith} from '../src/string';
 
 const {hasOwnProperty} = Object.prototype;
 
@@ -52,9 +51,9 @@ export function openx(global, data) {
   // conversion rules are explained in openx.md.
   if (data.dfpSlot) {
     // Anything starting with 'dfp' gets promoted.
-    openxData.forEach(openxKey => {
+    openxData.forEach((openxKey) => {
       if (openxKey in dfpData && openxKey !== 'dfp') {
-        if (startsWith(openxKey, 'dfp')) {
+        if (openxKey.startsWith('dfp')) {
           // Remove 'dfp' prefix, lowercase the first letter.
           let fixKey = openxKey.substring(3);
           fixKey = fixKey.substring(0, 1).toLowerCase() + fixKey.substring(1);
@@ -156,10 +155,10 @@ function advanceImplementation(global, jssdk, dfpData, data) {
  */
 function setCustomVars(oxRequest, customVars) {
   const customVarKeys = Object.keys(customVars);
-  customVarKeys.forEach(customVarKey => {
+  customVarKeys.forEach((customVarKey) => {
     const customVarValue = customVars[customVarKey];
     if (Array.isArray(customVarValue)) {
-      customVarValue.forEach(value => {
+      /** @type {!Array} */ (customVarValue).forEach((value) => {
         oxRequest.addVariable(customVarKey, value);
       });
     } else {
@@ -174,11 +173,11 @@ function setCustomVars(oxRequest, customVars) {
  */
 function filterCustomVar(customVars) {
   const filterPattern = /^[A-Za-z0-9._]{1,20}$/;
-  const filteredKeys = Object.keys(customVars).filter(key =>
+  const filteredKeys = Object.keys(customVars).filter((key) =>
     filterPattern.test(key)
   );
   const filteredCustomVar = {};
-  filteredKeys.forEach(key => {
+  filteredKeys.forEach((key) => {
     filteredCustomVar[key.toLowerCase()] = customVars[key];
   });
   return filteredCustomVar;

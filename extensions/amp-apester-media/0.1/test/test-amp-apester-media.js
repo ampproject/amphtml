@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-apester-media'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let xhrMock;
     let changeSizeSpy;
@@ -81,7 +81,10 @@ describes.realWin(
           ? playlistResponse
           : regularResponse;
 
-      changeSizeSpy = env.sandbox.spy(media.implementation_, 'changeHeight');
+      changeSizeSpy = env.sandbox.spy(
+        media.implementation_,
+        'forceChangeHeight'
+      );
       attemptChangeSizeSpy = env.sandbox.spy(
         media.implementation_,
         'attemptChangeHeight'
@@ -120,7 +123,7 @@ describes.realWin(
     it('renders', () => {
       return getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-      }).then(ape => {
+      }).then((ape) => {
         const iframe = ape.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).not.to.be.null;
@@ -143,7 +146,7 @@ describes.realWin(
       return getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
         'aria-label': 'scintilating video',
-      }).then(ape => {
+      }).then((ape) => {
         const placeholder = ape.querySelector('div[placeholder]');
         expect(placeholder).to.not.be.null;
         expect(placeholder.getAttribute('aria-label')).to.equal(
@@ -154,7 +157,7 @@ describes.realWin(
     it('render playlist', () => {
       return getApester({
         'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
-      }).then(ape => {
+      }).then((ape) => {
         const iframe = ape.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).not.to.be.null;
@@ -177,7 +180,7 @@ describes.realWin(
           width: '500',
         },
         true
-      ).then(ape => {
+      ).then((ape) => {
         const iframe = ape.querySelector('iframe');
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
@@ -186,7 +189,7 @@ describes.realWin(
     it('removes iframe after unlayoutCallback', () => {
       return getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-      }).then(ape => {
+      }).then((ape) => {
         const iframe = ape.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).not.to.be.null;

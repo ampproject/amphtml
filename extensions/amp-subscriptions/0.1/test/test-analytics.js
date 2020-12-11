@@ -31,7 +31,7 @@ const INT_VARS = {
   'status': ActionStatus.SUCCESS,
 };
 
-describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
+describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
   let analytics;
   let ampdoc;
 

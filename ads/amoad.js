@@ -36,7 +36,7 @@ export function amoad(global, data) {
   global.amoadOption = {ampData: data};
 
   const d = global.document.createElement('div');
-  Object.keys(attrs).forEach(k => {
+  Object.keys(attrs).forEach((k) => {
     d.setAttribute(k, attrs[k]);
   });
   global.document.getElementById('c').appendChild(d);

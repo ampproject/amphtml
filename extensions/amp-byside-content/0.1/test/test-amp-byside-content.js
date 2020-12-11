@@ -25,7 +25,7 @@ describes.realWin(
     },
     ampAdCss: true,
   },
-  env => {
+  (env) => {
     let win, doc, urlMock;
 
     beforeEach(() => {
@@ -70,7 +70,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.getAttribute('frameborder')).to.equal('0');
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      expect(iframe.fakeSrc).to.satisfy(src => {
+      expect(iframe.fakeSrc).to.satisfy((src) => {
         return src.startsWith(elem.implementation_.baseUrl_);
       });
     }
@@ -79,7 +79,7 @@ describes.realWin(
       return getElement({
         'data-webcare-id': 'D6604AE5D0',
         'data-label': 'amp-simple',
-      }).then(elem => {
+      }).then((elem) => {
         testIframe(elem);
       });
     });
@@ -108,7 +108,7 @@ describes.realWin(
       return getElement({
         'data-webcare-id': 'D6604AE5D0',
         'data-label': 'placeholder-label',
-      }).then(elem => {
+      }).then((elem) => {
         expect(elem.implementation_.origin_).to.equal(
           'https://webcare.byside.com'
         );
@@ -122,7 +122,7 @@ describes.realWin(
         'data-webcare-id': 'D6604AE5D0',
         'data-label': 'placeholder-label',
         'data-webcare-zone': webcareZone,
-      }).then(elem => {
+      }).then((elem) => {
         expect(elem.implementation_.origin_).to.equal(
           'https://' + webcareZone + '.byside.com'
         );
@@ -133,7 +133,7 @@ describes.realWin(
       return getElement({
         'data-webcare-id': 'D6604AE5D0',
         'data-label': 'placeholder-label',
-      }).then(elem => {
+      }).then((elem) => {
         const loader = elem.querySelector(
           '.i-amphtml-byside-content-loading-animation'
         );
@@ -147,16 +147,16 @@ describes.realWin(
         'data-label': 'placeholder-label',
       };
 
-      return getElement(attributes, true, elem => {
+      return getElement(attributes, true, (elem) => {
         const placeholder = elem.querySelector('[placeholder]');
         const iframe = elem.querySelector('iframe');
         expect(iframe).to.be.null;
         expect(placeholder).to.not.have.display('none');
-      }).then(elem => {
+      }).then((elem) => {
         const placeholder = elem.querySelector('[placeholder]');
         elem.getVsync = () => {
           return {
-            mutate: fn => fn(),
+            mutate: (fn) => fn(),
           };
         };
 
@@ -177,7 +177,7 @@ describes.realWin(
         'data-label': 'placeholder-label',
       };
 
-      return getElement(attributes, false).then(elem => {
+      return getElement(attributes, false).then((elem) => {
         const iframe = elem.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.getAttribute('sandbox')).to.equal(sandbox);
@@ -190,7 +190,7 @@ describes.realWin(
         'data-label': 'placeholder-label',
       };
 
-      return getElement(attributes, false).then(elem => {
+      return getElement(attributes, false).then((elem) => {
         const iframe = elem.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.getAttribute('scrolling')).to.equal('no');

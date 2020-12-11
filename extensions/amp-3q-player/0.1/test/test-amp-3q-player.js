@@ -17,6 +17,7 @@
 import '../amp-3q-player';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(
@@ -26,7 +27,7 @@ describes.realWin(
       extensions: ['amp-3q-player'],
     },
   },
-  function(env) {
+  function (env) {
     let win;
     let doc;
     let timer;
@@ -38,7 +39,10 @@ describes.realWin(
     });
 
     async function get3QElement(playoutId) {
-      const player = doc.createElement('amp-3q-player');
+      const player = createElementWithAttributes(doc, 'amp-3q-player', {
+        width: 300,
+        height: 200,
+      });
       if (playoutId) {
         player.setAttribute('data-id', playoutId);
       }

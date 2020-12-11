@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {BaseTemplate} from '../../../src/base-template';
 import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {
@@ -24,9 +25,6 @@ import {user} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
-
-const BaseTemplate =
-  /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -114,21 +112,38 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   setHtml(html) {
-    return this.serializeHtml_(html);
+    const wrapped = `<div>${html}</div>`;
+    const serialized = this.serializeHtml_(wrapped);
+    return this.unwrapChildren(serialized);
   }
 
   /** @override */
   render(data) {
+    const html = this.render_(data);
+    return this.serializeHtml_(html);
+  }
+
+  /** @override */
+  renderAsString(data) {
+    const html = this.render_(data);
+    return sanitizeHtml(html, this.win.document);
+  }
+
+  /**
+   * @param {!JsonObject|string} data
+   * @return {string}
+   * @private
+   */
+  render_(data) {
     let mustacheData = data;
     if (typeof data === 'object') {
       mustacheData = {...data, ...this.nestedTemplates_};
     }
-    const html = mustache.render(
+    return mustache.render(
       this.template_,
       mustacheData,
       /* partials */ undefined
     );
-    return this.serializeHtml_(html);
   }
 
   /**
@@ -142,10 +157,10 @@ export class AmpMustache extends BaseTemplate {
     const root = doc.createElement('div');
     const sanitized = sanitizeHtml(html, doc);
     root./*OK*/ innerHTML = sanitized;
-    return this.unwrap(root);
+    return this.tryUnwrap(root);
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerTemplate(TAG, AmpMustache);
 });

@@ -53,9 +53,9 @@ describe('Logging', () => {
       },
       location: {hash: ''},
       setTimeout: timeoutSpy,
-      __AMP_REPORT_ERROR: error => error,
+      __AMP_REPORT_ERROR: (error) => error,
     };
-    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
+    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
   });
 
   afterEach(() => {
@@ -163,7 +163,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -179,7 +179,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -194,7 +194,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -209,7 +209,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -223,28 +223,28 @@ describe('Logging', () => {
 
   describe('UserLog', () => {
     it('should be WARN by default', () => {
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.WARN);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.WARN);
     });
 
     it('should be enabled in development mode', () => {
       mode.development = true;
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log=1', () => {
       mode.log = '1';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log>1', () => {
       mode.log = '2';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
 
       mode.log = '3';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
 
       mode.log = '4';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with USER suffix', () => {
@@ -254,27 +254,27 @@ describe('Logging', () => {
 
   describe('DevLog', () => {
     it('should be disabled by default', () => {
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should NOT be enabled in development mode', () => {
       mode.development = true;
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should NOT be enabled with log=1', () => {
       mode.log = '1';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
       mode.log = '2';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.INFO);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
       mode.log = '3';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with no suffix', () => {
@@ -290,7 +290,7 @@ describe('Logging', () => {
     });
 
     it('should fail', () => {
-      expect(function() {
+      expect(function () {
         log.assert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -322,7 +322,7 @@ describe('Logging', () => {
     });
 
     it('should fail direct dev', () => {
-      expect(function() {
+      expect(function () {
         devAssert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -336,7 +336,7 @@ describe('Logging', () => {
     });
 
     it('should fail direct user', () => {
-      expect(function() {
+      expect(function () {
         userAssert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -350,16 +350,16 @@ describe('Logging', () => {
     });
 
     it('should substitute', () => {
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s', 'XYZ');
       }).to.throw(/should fail XYZ/);
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s %s', 'XYZ', 'YYY');
       }).to.throw(/should fail XYZ YYY/);
       const div = document.createElement('div');
       div.id = 'abc';
       div.textContent = 'foo';
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s', div);
       }).to.throw(/should fail div#abc/);
 
@@ -583,9 +583,9 @@ describe('Logging', () => {
     let log;
     let reportedError;
 
-    beforeEach(function() {
+    beforeEach(function () {
       log = new Log(win, RETURNS_OFF);
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
     });
@@ -816,7 +816,7 @@ describe('Logging', () => {
     let log;
 
     // Promise.resolve would be nicer, but it won't resolve sync'ly.
-    const syncResolve = v => ({then: cb => cb(v)});
+    const syncResolve = (v) => ({then: (cb) => cb(v)});
 
     function mockExternalMessages(messageTemplates) {
       win.fetch = () =>

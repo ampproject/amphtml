@@ -27,11 +27,10 @@ import {
 import {installIframeMessagingClient} from '../../../src/inabox/inabox-iframe-messaging-client';
 import {installPlatformService} from '../../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {toggleExperiment} from '../../../src/experiments';
 
 const NOOP = () => {};
 
-describes.fakeWin('inabox-viewport', {amp: {}}, env => {
+describes.fakeWin('inabox-viewport', {amp: {}}, (env) => {
   let win;
   let binding;
   let bindingFriendly;
@@ -92,12 +91,10 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     };
     win.frameElement = iframeElement;
 
-    toggleExperiment(win, 'inabox-viewport-friendly', false);
     installIframeMessagingClient(win);
     installPlatformService(win);
     binding = new ViewportBindingInabox(win);
     env.sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
-    toggleExperiment(win, 'inabox-viewport-friendly', true);
     bindingFriendly = new ViewportBindingInabox(win);
     measureSpy = env.sandbox.spy();
     element = {
@@ -110,7 +107,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       .stub(Services.resourcesForDoc(win.document), 'get')
       .returns([element]);
     env.sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolve();
       })
     );
@@ -142,7 +139,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           topWindowObservable.add(() => callback({viewportRect, targetRect}));
         });
 
-      positionCallback = data => {
+      positionCallback = (data) => {
         viewportRect = data.viewportRect;
         targetRect = data.targetRect;
         topWindowObservable.fire();
@@ -264,7 +261,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(prepareContainer).to.be.calledOnce;
       expect(prepareContainer).to.be.calledBefore(makeRequest);
 
-      allResourcesMock.forEach(resource => {
+      allResourcesMock.forEach((resource) => {
         expect(resource.measure).to.have.been.calledOnce;
       });
     });
@@ -289,7 +286,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     });
   });
 
-  it('should update box rect when expanding/collapsing', function*() {
+  it('should update box rect when expanding/collapsing', function* () {
     const boxRect = {
       left: 20,
       top: 10,
@@ -320,7 +317,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(updateBoxRectStub).to.be.calledWith(boxRect);
   });
 
-  it('should update box rect when collapsing', function*() {
+  it('should update box rect when collapsing', function* () {
     const boxRect = {
       left: 20,
       top: 10,
@@ -351,7 +348,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(updateBoxRectStub).to.be.calledWith(boxRect);
   });
 
-  it('should update box rect when expanding/collapsing - friendly iframe case', function*() {
+  it('should update box rect when expanding/collapsing - friendly iframe case', function* () {
     const boxRect = {
       left: 20,
       top: 10,
@@ -399,7 +396,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   // TODO(zhouyx, #12476): Make this test work with sinon 4.0.
-  it.skip('should center the fixed container properly', function*() {
+  it.skip('should center the fixed container properly', function* () {
     const w = 120;
     const h = 90;
 
@@ -421,7 +418,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(el.style['margin-top']).to.equal(`-${h / 2}px`);
   });
 
-  it('should undo styling when the fixed container is reset', function*() {
+  it('should undo styling when the fixed container is reset', function* () {
     const el = document.createElement('div');
 
     yield resetBodyForOverlay(win, el);
@@ -449,7 +446,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       undefined,
       true
     );
-    return binding.getRootClientRectAsync().then(rect => {
+    return binding.getRootClientRectAsync().then((rect) => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
       expect(requestSpy).to.be.calledOnce;
     });
@@ -459,7 +456,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     env.sandbox
       .stub(PositionObserver.prototype, 'getTargetRect')
       .returns(layoutRectLtwh(10, 20, 100, 100));
-    return bindingFriendly.getRootClientRectAsync().then(rect => {
+    return bindingFriendly.getRootClientRectAsync().then((rect) => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
     });
   });

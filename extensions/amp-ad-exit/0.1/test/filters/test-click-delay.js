@@ -45,7 +45,7 @@ describe('click-delay', () => {
       {config: DEFAULT_CONFIG, win: {performance: {}}},
       {config: DEFAULT_CONFIG, win: {performance: {timing: {}}}},
     ];
-    tests.forEach(test => {
+    tests.forEach((test) => {
       it(
         `should properly handle ${JSON.stringify(test.config)} and win ` +
           `${JSON.stringify(test.win)}`,

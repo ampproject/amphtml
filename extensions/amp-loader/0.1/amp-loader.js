@@ -321,9 +321,7 @@ class LoaderBuilder {
     const html = htmlFor(this.element_);
     return html`
       <div class="i-amphtml-new-loader-ad-logo">
-        <span class="i-amphtml-new-loader-ad-label">
-          Ad
-        </span>
+        <span class="i-amphtml-new-loader-ad-label"> Ad </span>
       </div>
     `;
   }
@@ -439,9 +437,9 @@ export class LoaderService {
   }
 }
 
-AMP.extension('amp-loader', '0.1', AMP => {
+AMP.extension('amp-loader', '0.1', (AMP) => {
   AMP.registerServiceForDoc('loader', LoaderService);
-  Services.extensionsFor(AMP.win).addDocFactory(ampDoc => {
+  Services.extensionsFor(AMP.win).addDocFactory((ampDoc) => {
     installStylesForDoc(ampDoc, CSS, () => {}, false, 'amp-loader');
   });
 });

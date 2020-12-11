@@ -20,10 +20,10 @@ const expression = [
   'CallExpression[callee.name=/registerService.*/]',
 ].join(',');
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    [expression]: function(node) {
-      node.arguments.forEach(arg => {
+    [expression]: function (node) {
+      node.arguments.forEach((arg) => {
         if (arg.type === 'ArrowFunctionExpression') {
           // TODO(erwinm): add fixer method.
           context.report({

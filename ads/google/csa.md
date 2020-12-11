@@ -27,7 +27,7 @@ Javascript object you would pass in the ad request of a standard CSA request.
 <amp-ad
   height="300"
   type="csa"
-  data-afs-page-options='{"pubId": "partner-pub-id", "query": "flowers"}'
+  data-afs-page-options='{"pubId": "partner-pub-id", "query": "flowers", "styleId": "123456789"}'
   data-afs-adblock-options='{"width": "auto", "number": 2}'
 >
 </amp-ad>
@@ -47,7 +47,7 @@ Javascript object you would pass in the ad request of a standard CSA request.
 <amp-ad
   height="300"
   type="csa"
-  data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp", "query": "flowers"}'
+  data-afsh-page-options='{"pubId": "partner-vert-pla-pubid-pdp", "query": "flowers", "styleId": "123456789"}'
   data-afsh-adblock-options='{"width": "auto", "height": 300}'
 >
 </amp-ad>
@@ -83,16 +83,10 @@ attributes.
 
 ## Requirements
 
-- Each amp-ad tag contains one adblock. Only one **data-afs-adblock-options**
-  and/or one **data-afsh-adblock-options** attribute can be specified in the tag.
-- Above the fold ads are required to have a minimum height of 300 pixels.
-- When requesting ads above the fold:
-- You must use the maxTop parameter instead of the number parameter to specify the number of ads.
-- You can only request one ad ("maxTop": 1) in an ad unit that is above the fold.
-- You must use a fallback div to show alternate content when no ads are returned. If no ads are returned the ad will not be collapsed because it is above the fold.
-
-<!-- TODO(#19207): Address missing demo -->
-<!--
-## Demos
-Please visit [google-ads-amp-demos.com](http://google-ads-amp-demos.com/) for demos and additional requirements when implementing these ads.
--->
+-   Each amp-ad tag contains one adblock. Only one **data-afs-adblock-options**
+    and/or one **data-afsh-adblock-options** attribute can be specified in the tag.
+-   Above the fold ads are required to have a minimum height of 300 pixels.
+-   When requesting ads above the fold:
+-   You must use the maxTop parameter instead of the number parameter to specify the number of ads.
+-   You can only request one ad ("maxTop": 1) in an ad unit that is above the fold.
+-   You must use a fallback div to show alternate content when no ads are returned. If no ads are returned the ad will not be collapsed because it is above the fold.

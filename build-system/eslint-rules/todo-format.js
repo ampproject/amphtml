@@ -15,11 +15,11 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    Program: function(node) {
+    Program: function (node) {
       if (node.comments) {
-        node.comments.forEach(function(comment) {
+        node.comments.forEach(function (comment) {
           if (
             /TODO/.test(comment.value) &&
             !/TODO\(@?\w+,\s*#\d{1,}\)/.test(comment.value)

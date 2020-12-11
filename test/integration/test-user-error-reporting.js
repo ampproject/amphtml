@@ -16,12 +16,10 @@
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 
-const t = describe
-  .configure()
-  .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
-  .skipEdge();
+// TODO(zhouyx, #11459): Unskip the test on Safari and Firefox.
+const t = describe.configure().skipSafari().skipFirefox().skipEdge();
 
-t.run('user-error', function() {
+t.run('user-error', function () {
   describes.integration(
     'user-error integration test',
     {
@@ -48,10 +46,14 @@ t.run('user-error', function() {
             referrerpolicy="fail-referrer">
             `,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should ping correct host with amp-pixel user().assert err', () => {
@@ -88,10 +90,14 @@ t.run('user-error', function() {
       </script>
     </amp-analytics>`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-img');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should ping correct host with amp-img user().error err', () => {
@@ -129,10 +135,14 @@ t.run('user-error', function() {
       </script>
     </amp-analytics>`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-ad');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should ping correct host with 3p error message', () => {

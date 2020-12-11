@@ -27,7 +27,7 @@ export function fluct(global, data) {
   writeScript(
     global,
     `https://cdn-fluct.sh.adingo.jp/f.js?G=${encodeURIComponent(data['g'])}`,
-    function() {
+    function () {
       adingoFluct.showAd(data['u']);
     }
   );

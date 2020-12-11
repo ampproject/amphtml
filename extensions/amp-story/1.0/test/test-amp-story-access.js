@@ -22,7 +22,7 @@ import {
 import {AmpStoryAccess, Type} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-access', {amp: true}, env => {
+describes.realWin('amp-story-access', {amp: true}, (env) => {
   let win;
   let accessConfigurationEl;
   let defaultConfig;
@@ -30,14 +30,14 @@ describes.realWin('amp-story-access', {amp: true}, env => {
   let storyAccess;
   let storyEl;
 
-  const setConfig = config => {
+  const setConfig = (config) => {
     accessConfigurationEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
@@ -79,7 +79,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     expect(buttonInDrawerEl).to.exist;
   });
 
-  it('should display the access blocking paywall on state update', done => {
+  it('should display the access blocking paywall on state update', (done) => {
     storyAccess.buildCallback();
 
     storeService.dispatch(Action.TOGGLE_ACCESS, true);
@@ -92,7 +92,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     });
   });
 
-  it('should show the access notification on state update', done => {
+  it('should show the access notification on state update', (done) => {
     storyAccess.element.setAttribute('type', Type.NOTIFICATION);
     storyAccess.buildCallback();
 
@@ -109,16 +109,16 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     });
   });
 
-  it('should whitelist the default <amp-access> actions', () => {
+  it('should allowlist the default <amp-access> actions', () => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({tagOrTarget: 'SCRIPT', method: 'login'});
   });
 
-  it('should whitelist the typed <amp-access> actions', () => {
+  it('should allowlist the typed <amp-access> actions', () => {
     defaultConfig.login = {
       typefoo: 'https://example.com',
       typebar: 'https://example.com',
@@ -128,7 +128,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'SCRIPT',
@@ -140,7 +140,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     });
   });
 
-  it('should whitelist the namespaced and default <amp-access> actions', () => {
+  it('should allowlist the namespaced and default <amp-access> actions', () => {
     defaultConfig.namespace = 'foo';
     setConfig(defaultConfig);
 
@@ -148,7 +148,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     // Both namespaced and default actions are allowed.
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({tagOrTarget: 'SCRIPT', method: 'login'});
     expect(actions).to.deep.contain({
@@ -157,7 +157,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     });
   });
 
-  it('should whitelist namespaced and typed <amp-access> actions', () => {
+  it('should allowlist namespaced and typed <amp-access> actions', () => {
     const config = [
       {
         namespace: 'namespace1',
@@ -176,7 +176,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'SCRIPT',

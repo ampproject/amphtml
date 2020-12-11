@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-ooyala-player'],
     },
   },
-  function(env) {
+  function (env) {
     let win, doc;
 
     beforeEach(() => {
@@ -40,6 +40,7 @@ describes.realWin(
       opt_placeholder
     ) {
       const player = doc.createElement('amp-ooyala-player');
+      player.setAttribute('layout', 'fixed');
       if (embedCode) {
         player.setAttribute('data-embedcode', embedCode);
       }
@@ -74,7 +75,7 @@ describes.realWin(
         'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
         '6440813504804d76ba35c8c787a4b33c',
         '5zb2wxOlZcNCe_HVT3a6cawW298X'
-      ).then(player => {
+      ).then((player) => {
         const playerIframe = player.querySelector('iframe');
         expect(playerIframe).to.not.be.null;
         expect(playerIframe.src).to.equal(
@@ -91,7 +92,7 @@ describes.realWin(
         '6440813504804d76ba35c8c787a4b33c',
         '5zb2wxOlZcNCe_HVT3a6cawW298X',
         'V4'
-      ).then(player => {
+      ).then((player) => {
         const playerIframe = player.querySelector('iframe');
         expect(playerIframe).to.not.be.null;
         expect(playerIframe.src).to.equal(

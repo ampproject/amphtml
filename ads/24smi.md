@@ -25,9 +25,8 @@ Provides support for [24smi](https://partner.24smi.info/) widgets.
   width="250"
   height="250"
   type="24smi"
-  src="https://jsn.24smi.net/c/2/11232.js"
->
-</amp-embed>
+  data-blockid="11232"
+></amp-embed>
 ```
 
 ## Configuration
@@ -36,4 +35,4 @@ For details on the configuration semantics, please contact [24smi](https://partn
 
 ### Required parameters
 
-- `src`
+-   `src`

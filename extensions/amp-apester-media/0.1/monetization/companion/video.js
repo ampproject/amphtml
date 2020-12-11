@@ -112,7 +112,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     position === 'below' ? apesterElement.nextSibling : apesterElement;
   apesterElement.parentNode.insertBefore(ampBladeAd, relativeElement);
 
-  Services.mutatorForDoc(apesterElement).attemptChangeSize(
+  Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampBladeAd,
     size.height,
     /* newWidth */ undefined
@@ -148,12 +148,12 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
     'param1': interactionId,
     'param2': publisherId,
     'param6': campaignId,
-    'page_url': pageUrl, // eslint-disable-line google-camelcase/google-camelcase
+    'page_url': pageUrl,
   });
 
   if (consentObj['gdpr']) {
     macros['gdpr'] = consentObj['gdpr'];
-    macros['user_consent'] = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
+    macros['user_consent'] = consentObj['user_consent'];
     macros['param4'] = consentObj['gdprString'];
   }
 

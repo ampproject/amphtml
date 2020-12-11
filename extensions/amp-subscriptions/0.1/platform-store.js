@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  DEFAULT_SCORE_CONFIG,
-  SubscriptionsScoreFactor,
-} from './score-factors.js';
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants.js';
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
@@ -38,6 +35,9 @@ const TAG = 'amp-subscriptions';
  */
 let PlatformWeightDef;
 
+/**
+ * Manages platforms. Has a list of platforms it instantiates and manages.
+ */
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
@@ -65,7 +65,7 @@ export class PlatformStore {
      * {!Object<string, !Deferred<!./entitlement.Entitlement>>}
      */
     this.entitlementDeferredMap_ = {};
-    expectedServiceIds.forEach(serviceId => {
+    expectedServiceIds.forEach((serviceId) => {
       this.entitlementDeferredMap_[serviceId] = new Deferred();
     });
 
@@ -129,7 +129,7 @@ export class PlatformStore {
   }
 
   /**
-   *Calls a callback for when a platform is resolved.
+   * Calls a callback for when a platform is resolved.
    * @param {string} serviceId
    * @param {!Function} callback
    */
@@ -138,7 +138,7 @@ export class PlatformStore {
     if (platform) {
       callback(platform);
     } else {
-      this.onPlatformResolvedCallbacks_.add(e => {
+      this.onPlatformResolvedCallbacks_.add((e) => {
         if (e.serviceId === serviceId) {
           callback(this.getPlatform(serviceId));
         }
@@ -261,12 +261,12 @@ export class PlatformStore {
   getScoreFactorStates() {
     const states = dict({});
     return Promise.all(
-      this.serviceIds_.map(platformId => {
+      this.serviceIds_.map((platformId) => {
         states[platformId] = dict();
         return Promise.all(
-          Object.values(SubscriptionsScoreFactor).map(scoreFactor =>
+          Object.values(SubscriptionsScoreFactor).map((scoreFactor) =>
             this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
-              factorValue => {
+              (factorValue) => {
                 states[platformId][scoreFactor] = factorValue;
               }
             )
@@ -316,7 +316,7 @@ export class PlatformStore {
       this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
-      this.onChange(e => {
+      this.onChange((e) => {
         const {entitlement} = e;
         if (entitlement.granted) {
           this.grantStatusPromise_.resolve(true);
@@ -507,7 +507,7 @@ export class PlatformStore {
    */
   getAllPlatformWeights_() {
     // Get weights for all of the platforms.
-    return this.getAvailablePlatforms().map(platform => {
+    return this.getAvailablePlatforms().map((platform) => {
       return {
         platform,
         weight: this.calculatePlatformWeight_(platform),
@@ -573,7 +573,7 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatformForFactor_(factor) {
-    const platformWeights = this.getAvailablePlatforms().map(platform => {
+    const platformWeights = this.getAvailablePlatforms().map((platform) => {
       const factorValue = platform.getSupportedScoreFactor(factor);
       const weight = typeof factorValue == 'number' ? factorValue : 0;
       return {platform, weight};

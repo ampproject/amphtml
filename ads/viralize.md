@@ -35,8 +35,8 @@ For further configuration details, please contact [Viralize](https://viralize.co
 
 ## Required parameters
 
-- `data-zid`: Id of the unit.
+-   `data-zid`: Id of the unit.
 
 ## Optional parameters
 
-- `data-extra`: JSON object representing any other query parameter that could be passed to the unit.
+-   `data-extra`: JSON object representing any other query parameter that could be passed to the unit.

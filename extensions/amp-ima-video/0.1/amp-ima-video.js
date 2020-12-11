@@ -22,6 +22,7 @@ import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
+  dispatchCustomEvent,
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
@@ -106,7 +107,7 @@ class AmpImaVideo extends AMP.BaseElement {
     );
     if (childElements.length > 0) {
       const children = [];
-      childElements.forEach(child => {
+      childElements.forEach((child) => {
         // Save the first source and first track to preconnect.
         if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
           this.preconnectSource_ = child.src;
@@ -171,7 +172,7 @@ class AmpImaVideo extends AMP.BaseElement {
     const consentPromise = consentPolicyId
       ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
-    return consentPromise.then(initialConsentState => {
+    return consentPromise.then((initialConsentState) => {
       const iframe = getIframe(
         win,
         element,
@@ -179,6 +180,7 @@ class AmpImaVideo extends AMP.BaseElement {
         {initialConsentState},
         {allowFullscreen: true}
       );
+      iframe.title = this.element.title || 'IMA video';
 
       this.applyFillContent(iframe);
 
@@ -192,7 +194,7 @@ class AmpImaVideo extends AMP.BaseElement {
       this.playerReadyPromise_ = deferred.promise;
       this.playerReadyResolver_ = deferred.resolve;
 
-      this.unlistenMessage_ = listen(this.win, 'message', e =>
+      this.unlistenMessage_ = listen(this.win, 'message', (e) =>
         this.handlePlayerMessage_(/** @type {!Event} */ (e))
       );
 
@@ -203,11 +205,6 @@ class AmpImaVideo extends AMP.BaseElement {
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -244,18 +241,20 @@ class AmpImaVideo extends AMP.BaseElement {
    * @private
    */
   sendCommand_(command, opt_args) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
+    if (this.playerReadyPromise_) {
       this.playerReadyPromise_.then(() => {
-        this.iframe_.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'event': 'command',
-              'func': command,
-              'args': opt_args || '',
-            })
-          ),
-          '*'
-        );
+        if (this.iframe_ && this.iframe_.contentWindow) {
+          this.iframe_.contentWindow./*OK*/ postMessage(
+            JSON.stringify(
+              dict({
+                'event': 'command',
+                'func': command,
+                'args': opt_args || '',
+              })
+            ),
+            '*'
+          );
+        }
       });
     }
     // If we have an unlistener for this command, call it.
@@ -283,12 +282,12 @@ class AmpImaVideo extends AMP.BaseElement {
       if (videoEvent == VideoEvents.LOAD) {
         this.playerReadyResolver_(this.iframe_);
       }
-      this.element.dispatchCustomEvent(videoEvent);
+      dispatchCustomEvent(this.element, videoEvent);
       return;
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
-      this.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(this.element, VideoEvents.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {
@@ -395,6 +394,6 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpImaVideo);
 });

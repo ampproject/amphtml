@@ -26,6 +26,7 @@ import {tryResolve} from '../src/utils/promise';
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
 const TAG = '<amp-video-iframe>';
+const DOCS_URL = 'https://go.amp.dev/c/amp-video-iframe';
 const __AMP__ = '__AMP__VIDEO_IFRAME__';
 
 /**
@@ -56,7 +57,7 @@ let JwplayerPartialInterfaceDef;
  */
 function userAssert(shouldBeTrueish, ...args) {
   if (!shouldBeTrueish) {
-    throw new Error(args.join(' '));
+    throw new Error(`[${TAG}] ${args.join(' ')} ${DOCS_URL}`);
   }
   return shouldBeTrueish;
 }
@@ -109,7 +110,7 @@ export class AmpVideoIntegration {
 
     /** @private @const {function()} */
     this.listenToOnce_ = once(() => {
-      listenTo(this.win_, e => this.onMessage_(e));
+      listenTo(this.win_, (e) => this.onMessage_(e));
     });
 
     /** @private {boolean} */
@@ -184,42 +185,65 @@ export class AmpVideoIntegration {
     if (!(method in this.methods_)) {
       return;
     }
-    this.methods_[method].call();
+    this.methods_[method]();
   }
 
   /**
    * @param {string} type
-   * @param {*} obj
+   * @param {*=} opt_obj
    * @param {function()=} opt_initializer For VideoJS, this optionally takes a
-   *    reference to the `videojs` function. If not provided, this reference
-   *    will be taken from the `window` object.
+   * reference to the `videojs` function. If not provided, this reference
+   * will be taken from the `window` object.
    */
-  listenTo(type, obj, opt_initializer) {
+  listenTo(type, opt_obj, opt_initializer) {
     userAssert(
       !this.usedListenToHelper_,
-      '%s `listenTo` is meant to be used once per page.',
-      TAG
+      '`listenTo` is meant to be used once per page.'
     );
     const types = {
       'jwplayer': () => {
         userAssert(
           !opt_initializer,
-          '%s jwplayer integration does not take an initializer',
-          TAG
+          "listenTo('jwplayer', opt_instance) does not take an initializer."
         );
-        this.listenToJwPlayer_(obj);
+        this.listenToJwPlayer_(this.getJwplayer_(opt_obj));
       },
       'videojs': () => {
-        this.listenToVideoJs_(obj, opt_initializer);
+        this.listenToVideoJs_(
+          userAssert(
+            opt_obj,
+            "listenTo('videojs', element) expects a second argument"
+          ),
+          opt_initializer
+        );
       },
     };
     userAssert(
       types[type.toLowerCase()],
-      `%s Invalid listener type [${type}]. ` +
-        `Valid types are [${Object.keys(types).join(', ')}]`,
-      TAG
+      `Invalid listener type [${type}].`,
+      `Valid types are [${Object.keys(types).join(', ')}]`
     )(); // notice the call here ;)
     this.usedListenToHelper_ = true;
+  }
+
+  /**
+   * Checks comformity for opt_player, or obtains global singleton instance.
+   * @param {?JwplayerPartialInterfaceDef=} opt_player
+   * @return {!JwplayerPartialInterfaceDef}
+   */
+  getJwplayer_(opt_player) {
+    if (opt_player) {
+      userAssert(
+        opt_player.on,
+        "listenTo('jwplayer', myjwplayer) takes a jwplayer instance as ",
+        'second argument'
+      );
+      return opt_player;
+    }
+    return userAssert(
+      this.win_.jwplayer,
+      "listenTo('jwplayer') expects a global jwplayer() in window."
+    )(); // notice the call here ;)
   }
 
   /**
@@ -227,14 +251,14 @@ export class AmpVideoIntegration {
    * @private
    */
   listenToJwPlayer_(player) {
-    ['error', 'setupError'].forEach(e => {
+    ['error', 'setupError'].forEach((e) => {
       player.on(e, () => {
         userAssert.apply(null, [false].concat(arguments));
         this.postEvent('error');
       });
     });
 
-    ['adSkipped', 'adComplete', 'adError'].forEach(e => {
+    ['adSkipped', 'adComplete', 'adError'].forEach((e) => {
       player.on(e, () => this.postEvent('ad_end'));
     });
 
@@ -246,11 +270,11 @@ export class AmpVideoIntegration {
       'pause': 'pause',
     };
 
-    Object.keys(redispatchAs).forEach(e => {
+    Object.keys(redispatchAs).forEach((e) => {
       player.on(e, () => this.postEvent(redispatchAs[e]));
     });
 
-    player.on('volume', e => this.onVolumeChange_(e.volume));
+    player.on('volume', (e) => this.onVolumeChange_(e.volume));
 
     this.method('play', () => player.play());
     this.method('pause', () => player.pause());
@@ -274,7 +298,7 @@ export class AmpVideoIntegration {
     player.ready(() => {
       const canplay = 'canplay';
 
-      ['playing', 'pause', 'ended'].forEach(e => {
+      ['playing', 'pause', 'ended'].forEach((e) => {
         player.on(e, () => this.postEvent(e));
       });
 
@@ -402,7 +426,7 @@ export class AmpVideoIntegration {
  * @param {function(!JsonObject)} onMessage
  */
 function listenTo(win, onMessage) {
-  listen(win, 'message', e => {
+  listen(win, 'message', (e) => {
     const message = tryParseJson(getData(e));
     if (!message) {
       // only process valid JSON.
@@ -421,7 +445,7 @@ function listenTo(win, onMessage) {
 export function adopt(global) {
   userAssert(
     !global[__AMP__],
-    '%s video-iframe-integration-v0.js should only be included once.'
+    'video-iframe-integration-v0.js should only be included once.'
   );
 
   global[__AMP__] = true;
@@ -437,7 +461,7 @@ export function adopt(global) {
   const callbacks = (global.AmpVideoIframe = global.AmpVideoIframe || []);
 
   // Rewrite push to execute callbacks are added after adoption.
-  callbacks.push = callback => callback(integration);
+  callbacks.push = (callback) => callback(integration);
 
   // Execute callbacks created before adoption.
   callbacks.forEach(callbacks.push);

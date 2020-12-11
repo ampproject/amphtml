@@ -77,20 +77,20 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    */
   init() {
     devAssert(!this.players_);
-    this.players_ = this.requests_.map(request => {
+    this.players_ = this.requests_.map((request) => {
       // Apply vars.
       if (request.vars) {
         setStyles(request.target, assertDoesNotContainDisplay(request.vars));
       }
       const player = request.target.animate(
         /** @type {!Array<Object>} */ (request.keyframes),
-        request.timing
+        /** @type {KeyframeAnimationOptions} */ (request.timing)
       );
       player.pause();
       return player;
     });
     this.runningCount_ = this.players_.length;
-    this.players_.forEach(player => {
+    this.players_.forEach((player) => {
       player.onfinish = () => {
         this.runningCount_--;
         if (this.runningCount_ == 0) {
@@ -118,7 +118,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   pause() {
     devAssert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
-    this.players_.forEach(player => {
+    this.players_.forEach((player) => {
       if (player.playState == WebAnimationPlayState.RUNNING) {
         player.pause();
       }
@@ -136,7 +136,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.runningCount_ = 0;
-    this.players_.forEach(player => {
+    this.players_.forEach((player) => {
       /**
        * TODO(gharbiw):
        * The playState on Safari and Edge sometimes gets stuck on
@@ -162,7 +162,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   reverse() {
     devAssert(this.players_);
     // TODO(nainar) there is no reverse call on WorkletAnimation
-    this.players_.forEach(player => {
+    this.players_.forEach((player) => {
       player.reverse();
     });
   }
@@ -174,7 +174,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   seekTo(time) {
     devAssert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
-    this.players_.forEach(player => {
+    this.players_.forEach((player) => {
       player.pause();
       player.currentTime = time;
     });
@@ -203,7 +203,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     const players = this.players_;
     this.players_ = null;
     this.setPlayState_(WebAnimationPlayState.FINISHED);
-    players.forEach(player => {
+    players.forEach((player) => {
       player.finish();
     });
   }
@@ -216,7 +216,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.IDLE);
-    this.players_.forEach(player => {
+    this.players_.forEach((player) => {
       player.cancel();
     });
   }

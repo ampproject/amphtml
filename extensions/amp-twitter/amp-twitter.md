@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Displays a Twitter tweet.
+  text: Displays a Twitter Tweet or Moment.
 ---
 
 <!---
@@ -24,25 +24,6 @@ limitations under the License.
 -->
 
 # amp-twitter
-
-Displays a Twitter Tweet or Moment.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-twitter/">Annotated code example for amp-twitter</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Behavior
 
@@ -150,6 +131,10 @@ For details on the available arguments, see the "Timelines" section in <a href="
     <td width="40%"><strong>data-* (optional)</strong></td>
     <td>You can specify options for the Tweet, Moment, or Timeline appearance by setting <code>data-</code> attributes. For example, <code>data-cards="hidden"</code> deactivates Twitter cards.
 For details on the available options, see Twitter's docs <a href="https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference">for tweets</a>, <a href="https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0">for moments</a> and <a href="https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference">for timelines</a>.</td>
+  </tr>
+   <tr>
+    <td width="40%"><strong>title (optional)</strong></td>
+    <td>Define a <code>title</code> attribute for the component. The default is <code>Twitter</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>

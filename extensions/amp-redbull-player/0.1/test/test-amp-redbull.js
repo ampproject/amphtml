@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-redbull-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     beforeEach(() => {
       win = env.win;

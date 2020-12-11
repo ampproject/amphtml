@@ -20,7 +20,7 @@ describes.endtoend(
     testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {
@@ -53,7 +53,7 @@ describes.endtoend(
     testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
     environments: ['viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

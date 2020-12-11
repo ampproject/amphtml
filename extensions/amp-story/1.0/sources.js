@@ -49,7 +49,7 @@ export class Sources {
    * @private
    */
   applyTracksToElement_(element) {
-    Array.prototype.forEach.call(this.trackEls_, trackEl => {
+    Array.prototype.forEach.call(this.trackEls_, (trackEl) => {
       const track = document.createElement('track');
       track.id = trackEl.id;
       track.kind = trackEl.kind;
@@ -80,9 +80,12 @@ export class Sources {
       element.setAttribute('src', this.srcAttr_);
     }
 
-    Array.prototype.forEach.call(this.srcEls_, srcEl =>
+    Array.prototype.forEach.call(this.srcEls_, (srcEl) =>
       element.appendChild(srcEl)
     );
+    if (element.changedSources) {
+      element.changedSources();
+    }
 
     if (this.trackEls_.length > 0) {
       // Wait for "loadedmetadata" before adding tracks.
@@ -122,10 +125,10 @@ export class Sources {
     }
 
     const srcEls = toArray(elementToUse.querySelectorAll('source'));
-    srcEls.forEach(srcEl => removeElement(srcEl));
+    srcEls.forEach((srcEl) => removeElement(srcEl));
 
     const trackEls = toArray(elementToUse.querySelectorAll('track'));
-    trackEls.forEach(trackEl => removeElement(trackEl));
+    trackEls.forEach((trackEl) => removeElement(trackEl));
 
     // If the src attribute is present, browsers will follow it and ignore the
     // HTMLSourceElements. To ensure this behavior, drop the sources if the src

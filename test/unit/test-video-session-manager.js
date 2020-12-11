@@ -16,7 +16,7 @@
 
 import {VideoSessionManager} from '../../src/service/video-session-manager';
 
-describes.sandboxed('VideoSessionManager', {}, env => {
+describes.sandboxed('VideoSessionManager', {}, (env) => {
   let manager;
 
   beforeEach(() => {

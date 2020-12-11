@@ -22,7 +22,7 @@ import {
 
 const NOOP = () => {};
 
-describes.realWin('video-iframe-integration', {amp: false}, env => {
+describes.realWin('video-iframe-integration', {amp: false}, (env) => {
   function pushToGlobal(global, callback) {
     (global.AmpVideoIframe = global.AmpVideoIframe || []).push(callback);
   }
@@ -90,7 +90,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
           'hidecontrols',
         ];
 
-        validMethods.forEach(method => {
+        validMethods.forEach((method) => {
           const spy = env.sandbox.spy();
           integration.method(method, spy);
           integration.onMessage_({event: 'method', method});
@@ -107,7 +107,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
         const invalidMethods = 'tacos al pastor'.split(' ');
 
-        invalidMethods.forEach(method => {
+        invalidMethods.forEach((method) => {
           const spy = env.sandbox.spy();
           expect(() => integration.method(method, spy)).to.throw(
             /Invalid method/
@@ -209,18 +209,25 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
           integration.listenTo('jwplayer', player);
 
-          expectedEvents.forEach(event => {
+          expectedEvents.forEach((event) => {
             expect(player.on.withArgs(event, env.sandbox.match.any)).to.have
               .been.calledOnce;
           });
 
-          expectedMethods.forEach(method => {
+          expectedMethods.forEach((method) => {
             expect(methodSpy.withArgs(method, env.sandbox.match.any)).to.have
               .been.calledOnce;
           });
 
           expect(listenToOnce.callCount).to.equal(expectedMethods.length);
         });
+      });
+
+      it('uses global jwplayer() to get instance when not passed in', () => {
+        const instance = {on: env.sandbox.spy()};
+        env.win.jwplayer = env.sandbox.stub().returns(instance);
+        new AmpVideoIntegration(env.win).listenTo('jwplayer');
+        expect(instance.on).to.have.been.called;
       });
 
       function mockVideoJsPlayer() {
@@ -262,7 +269,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
             /* initializer */ () => player
           );
 
-          expectedMethods.forEach(method => {
+          expectedMethods.forEach((method) => {
             expect(methodSpy.withArgs(method, env.sandbox.match.any)).to.have
               .been.calledOnce;
           });
@@ -289,7 +296,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
           it('fails if no initializer provided or Video.JS not present', () => {
             const win = {};
-            expect(() => getVideoJs(win)).to.throw;
+            expect(() => getVideoJs(win)).to.throw();
           });
         });
       });

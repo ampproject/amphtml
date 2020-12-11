@@ -227,7 +227,7 @@ export function findSentences(win, node, sentences) {
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
   /** @type {!CircularBuffer<!TextPosAndIdxDef>} */
   const buf = new CircularBuffer(
-    sentences.map(sen => sen.length).reduce((x, y) => Math.max(x, y))
+    sentences.map((sen) => sen.length).reduce((x, y) => Math.max(x, y))
   );
 
   // First, create a matcher for the first sentence to find only the first
