@@ -468,7 +468,7 @@ export class AccessService {
     try {
       on = this.evaluator_.evaluate(expr, response);
       if (on) {
-        this.renderTemplates_(element, response).then(() =>
+        return this.renderTemplates_(element, response).then(() =>
           this.applyAuthorizationAttrs_(element, on)
         );
       }
