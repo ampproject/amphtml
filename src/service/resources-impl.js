@@ -234,14 +234,19 @@ export class ResourcesImpl {
       // Classic IntersectionObserver doesn't support viewport tracking and
       // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
       // supports it via {root: document}, which throws on other browsers.
-      const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
-        ? /** @type {*} */ (this.win.document)
-        : null);
-      this.intersectionObserver_ = new IntersectionObserver(
-        (e) => this.intersect(e),
-        // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
-        {root, rootMargin: '250% 31.25%'}
-      );
+      try {
+        const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() &&
+        iframed
+          ? /** @type {*} */ (this.win.document)
+          : null);
+        this.intersectionObserver_ = new IntersectionObserver(
+          (e) => this.intersect(e),
+          // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
+          {root, rootMargin: '250% 31.25%'}
+        );
+      } catch (e) {
+        dev().warn(TAG_, 'Falling back to classic Resources:', e);
+      }
 
       // Wait for intersection callback instead of measuring all elements
       // during the first pass.
