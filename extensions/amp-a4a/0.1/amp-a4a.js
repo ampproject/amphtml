@@ -1492,10 +1492,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<boolean>}
    */
   getBlockRtc_() {
-    if (
-      !this.element.hasAttribute('block-rtc') ||
-      !this.element.getAttribute('block-rtc')
-    ) {
+    if (!this.element.getAttribute('block-rtc')) {
       return Promise.resolve(false);
     }
     return Services.geoForDocOrNull(this.element).then((geoService) => {

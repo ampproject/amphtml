@@ -398,7 +398,7 @@ Next, let's take an example where the page consent-state is `UNKNOWN`. The callo
 
 ### Blocking RTC
 
-The `block-rtc` provides a way to utilize the `<amp-geo>` component to detect user's geo location to decide if a RTC callout should be prevented. The value of `block-rtc` should be a comma dilimated string of geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). If no `<amp-geo>` element is found or no valid value for this attribute, then the RTC callout will occur as normal.
+The `block-rtc` provides a way to utilize the `<amp-geo>` component to detect user's geo location to decide if a RTC callout should be prevented. The value of `block-rtc` should be a comma delimited string of geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). If no `<amp-geo>` element is found or no valid value for this attribute, then the RTC callout will occur as normal.
 
 ```html
 <amp-ad
