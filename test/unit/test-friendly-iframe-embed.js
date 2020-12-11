@@ -422,7 +422,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .once();
 
     env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderStarted')
       .returns(Promise.resolve());
 
     const embed = await installFriendlyIframeEmbed(
@@ -525,7 +525,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .once();
 
     env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderStarted')
       .returns(Promise.resolve());
 
     const embedPromise = installFriendlyIframeEmbed(

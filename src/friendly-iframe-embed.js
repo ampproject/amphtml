@@ -373,7 +373,10 @@ export class FriendlyIframeEmbed {
     this.renderComplete_ = new Deferred();
 
     /** @private @const {!Promise} */
-    this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
+    this.winLoadedPromise_ = Promise.all([
+      loadedPromise,
+      this.whenRenderStarted(),
+    ]);
     if (this.ampdoc) {
       this.whenRenderComplete().then(() => this.ampdoc.setReady());
     }
@@ -418,7 +421,7 @@ export class FriendlyIframeEmbed {
    * Notice that this signal coincides with the embed's `render-start`.
    * @return {!Promise}
    */
-  whenReady() {
+  whenRenderStarted() {
     return this.signals_.whenSignal(CommonSignals.RENDER_START);
   }
 
@@ -522,7 +525,7 @@ export class FriendlyIframeEmbed {
       getExperimentBranch(this.ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
         FIE_RESOURCES_EXP.experiment;
     Promise.all([
-      this.whenReady(),
+      this.whenRenderStarted(),
       whenContentIniLoad(
         fieResourcesOn ? this.ampdoc : this.iframe,
         this.win,
