@@ -301,9 +301,9 @@ function createBaseCustomElementClass(win) {
       return this.upgradeState_ == UpgradeState.UPGRADED;
     }
 
-    /** @return {!Promise} */
+    /** @return {!Promise<!Object>} */
     whenUpgraded() {
-      return this.signals_.whenSignal(CommonSignals.UPGRADED);
+      return this.signals_.whenSignal(CommonSignals.UPGRADED).then(() => {});
     }
 
     /**

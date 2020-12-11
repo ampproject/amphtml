@@ -41,7 +41,7 @@ import {
 import {createRef, hydrate, render} from './index';
 import {dashToCamelCase} from '../string';
 import {devAssert} from '../log';
-import {dict, hasOwn} from '../utils/object';
+import {dict, hasOwn, map} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
@@ -161,8 +161,29 @@ export class PreactBaseElement extends AMP.BaseElement {
       notify: () => this.mutateElement(() => {}),
     };
 
+    /** @private {?API_TYPE} */
+    this.apiWrapper_ = null;
+
     /** @private {{current: ?API_TYPE}} */
     this.ref_ = createRef();
+
+    /** @param {?API_TYPE} ref */
+    this.refSetter_ = (ref) => {
+      // The API shape **must** be consistent.
+      if (this.apiWrapper_) {
+        this.checkApiWrapper_(ref);
+      } else {
+        this.initApiWrapper_(ref);
+      }
+      if (this.deferredApi_) {
+        this.deferredApi_.resolve(ref);
+        this.deferredApi_ = null;
+      }
+      this.ref_.current = ref;
+    };
+
+    /** @type {?Deferred<!API_TYPE>} */
+    this.deferredApi_ = null;
 
     /** @private {?Array} */
     this.contextValues_ = null;
@@ -552,7 +573,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const props = collectProps(
       Ctor,
       this.element,
-      this.ref_,
+      this.refSetter_,
       this.defaultProps_,
       this.mediaQueryProps_
     );
@@ -617,6 +638,89 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
     return this.defaultProps_[prop];
   }
+
+  /**
+   * Returns reference to upgraded imperative API object, as in React's
+   * useImperativeHandle.
+   * @return {!Promise<!API_TYPE>}
+   */
+  getImpl() {
+    const api = this.apiWrapper_;
+    if (api) {
+      return Promise.resolve(api);
+    }
+    if (!this.deferredApi_) {
+      this.deferredApi_ = new Deferred();
+    }
+    return this.deferredApi_.promise;
+  }
+
+  /**
+   * Creates a wrapper around a Preact ref. The API surface exposed by this ref
+   * **must** be consistent accross all rerenders.
+   *
+   * This wrapper is necessary because every time React rerenders, it creates
+   * (depending on deps checking) a new imperative handle and sets that to
+   * `ref.current`. So if we ever returned `ref.current` directly, it could go
+   * stale by the time its actually used.
+   *
+   * @param {!API_TYPE} ref
+   */
+  initApiWrapper_(ref) {
+    const api = map();
+    const keys = Object.keys(ref);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      Object.defineProperty(api, key, {
+        get() {
+          return this.ref_.current[key];
+        },
+
+        set(v) {
+          this.ref_.current[key] = v;
+        },
+      });
+    }
+    this.apiWrapper_ = api;
+  }
+
+  /**
+   * Verifies that every Preact render exposes the same API surface (the same
+   * keys are always exposed, keys are not added nor removed).
+   *
+   * @param {!API_TYPE} ref
+   */
+  checkApiWrapper_(ref) {
+    if (!getMode().localDev) {
+      return;
+    }
+    const api = this.apiWrapper_;
+    const newKeys = Object.keys(ref);
+    for (const i = 0; i < newKeys.length; i++) {
+      const key = newKeys[i];
+      devAssert(hasOwn(api, key), `Expected ${key} to be exposed on API`);
+    }
+    const oldKeys = Object.keys(api);
+    for (const i = 0; i < oldKeys.length; i++) {
+      const key = oldKeys[i];
+      devAssert(hasOwn(ref, key), `Expected ${key} to be exposed on API`);
+    }
+  }
+}
+
+/**
+ * Returns the upgraded imperative API object, once Preact has actually mounted.
+ *
+ * This technically works with both Bento and Legacy components, returning the
+ * BaseElement instance in the later case.
+ *
+ * @param {!Element} el
+ * @return {!Promise<!Object>}
+ */
+export function whenUpgraded(el) {
+  return customElements.whenDefined(el.localName).then(() => {
+    return el.getImpl();
+  });
 }
 
 // Ideally, these would be Static Class Fields. But Closure can't even.
