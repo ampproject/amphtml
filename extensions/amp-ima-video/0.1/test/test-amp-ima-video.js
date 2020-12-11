@@ -1251,6 +1251,64 @@ describes.realWin(
       ).to.eql('none');
     });
 
+    // Case when autoplay signal is sent before play signal is sent.
+    it('hides controls before visible', () => {
+      const div = doc.createElement('div');
+      div.setAttribute('id', 'c');
+      doc.body.appendChild(div);
+
+      imaVideoObj.imaVideo(win, {
+        width: 640,
+        height: 360,
+        src: srcUrl,
+        tag: adTagUrl,
+      });
+      imaVideoObj.adsActive = false;
+
+      imaVideoObj.hideControls();
+      expect(
+        imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+      ).to.eql('none');
+      expect(imaVideoObj.getPropertiesForTesting().hideControlsQueued).to.be
+        .true;
+
+      imaVideoObj.playVideo();
+      expect(
+        imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+      ).to.eql('none');
+      expect(imaVideoObj.getPropertiesForTesting().hideControlsQueued).to.be
+        .false;
+    });
+
+    it('always shows ads controls', () => {
+      const div = doc.createElement('div');
+      div.setAttribute('id', 'c');
+      doc.body.appendChild(div);
+
+      imaVideoObj.imaVideo(win, {
+        width: 640,
+        height: 360,
+        src: srcUrl,
+        tag: adTagUrl,
+      });
+      imaVideoObj.adsActive = false;
+
+      imaVideoObj.hideControls();
+      expect(
+        imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+      ).to.eql('none');
+      expect(imaVideoObj.getPropertiesForTesting().hideControlsQueued).to.be
+        .true;
+
+      // Fake the ad starting to play
+      imaVideoObj.showAdControls();
+      expect(
+        imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+      ).to.eql('flex');
+      expect(imaVideoObj.getPropertiesForTesting().hideControlsQueued).to.be
+        .true;
+    });
+
     const hoverEventsToTest = ['click', 'mousemove'];
     hoverEventsToTest.forEach((hoverEvent) => {
       it(
