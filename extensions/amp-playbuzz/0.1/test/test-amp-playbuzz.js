@@ -15,7 +15,6 @@
  */
 
 import '../amp-playbuzz';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-playbuzz',
@@ -30,7 +29,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'amp-playbuzz', true);
     });
 
     function createOptionalParams(

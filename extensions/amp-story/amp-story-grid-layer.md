@@ -58,7 +58,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
     <td>
       <ul>
         <li><code>&lt;amp-audio></code></li>
-        <li><code>&lt;amp-google-vrview-image></code></li>
         <li><code>&lt;amp-img></code></li>
         <li><code>&lt;amp-video></code></li>
         <li><code>&lt;source></code></li>
@@ -312,9 +311,9 @@ The `thirds` template divides the screen into three equally-sized rows, and allo
 
 Named Areas:
 
-- `upper-third`
-- `middle-third`
-- `lower-third`
+-   `upper-third`
+-   `middle-third`
+-   `lower-third`
 
 <amp-img alt="Horizontal template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" width="145" height="255">
   <noscript>

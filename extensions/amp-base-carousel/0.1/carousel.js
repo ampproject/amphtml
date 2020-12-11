@@ -1045,10 +1045,14 @@ export class Carousel {
       // If an item is at the start of the group, it gets an aligned.
       const shouldSnap = mod(slideIndex, this.snapBy_) === 0;
 
-      // If it's a slide, make sure to set the alignment of the element
+      // If it is type=slides, make sure to set the alignment of the element
       // with the content and not the wrapping div.
-      const element = child.children.length ? child.children[0] : child;
-      setStyles(element, {
+      const snapElement =
+        child.firstChild &&
+        child.classList.contains('i-amphtml-carousel-wrapper')
+          ? child.firstChild
+          : child;
+      setStyles(snapElement, {
         'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
         'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
       });

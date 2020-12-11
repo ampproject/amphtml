@@ -746,6 +746,12 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       expect(resource1.isMeasureRequested()).true;
     });
 
+    it('should schedule a pass after resize event', () => {
+      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+      resources.viewport_.changeObservable_.fire({relayoutAll_: false});
+      expect(schedulePassStub).calledOnce;
+    });
+
     it('should applySizesAndMediaQuery on relayout', () => {
       resources.relayoutAll_ = true;
 

@@ -373,6 +373,8 @@ describes.realWin(
       mockGlobal.google.ima.AdEvent = {};
       mockGlobal.google.ima.AdEvent.Type = {
         AD_PROGRESS: 'adprogress',
+        PAUSED: 'paused',
+        RESUMED: 'resumed',
         CONTENT_PAUSE_REQUESTED: 'cpr',
         CONTENT_RESUME_REQUESTED: 'crr',
       };
@@ -404,6 +406,8 @@ describes.realWin(
       );
       expect(addEventListenerSpy).to.be.calledWith('aderror');
       expect(addEventListenerSpy).to.be.calledWith('adprogress');
+      expect(addEventListenerSpy).to.be.calledWith('paused');
+      expect(addEventListenerSpy).to.be.calledWith('resumed');
       expect(addEventListenerSpy).to.be.calledWith('cpr');
       expect(addEventListenerSpy).to.be.calledWith('crr');
       expect(setVolumeSpy).to.be.calledWith(0);
@@ -629,6 +633,49 @@ describes.realWin(
       expect(addEventListenerSpy).to.have.been.calledWith('ended');
       // TODO - Fix when I can spy on internals.
       //expect(playVideoSpy).to.have.been.called;
+    });
+
+    it('changes controls when ad pauses and resumes', () => {
+      // set up test
+      const div = doc.createElement('div');
+      div.setAttribute('id', 'c');
+      doc.body.appendChild(div);
+      imaVideoObj.imaVideo(win, {
+        width: 640,
+        height: 360,
+        src: srcUrl,
+        tag: adTagUrl,
+      });
+      const videoMock = getVideoPlayerMock();
+      //const playVideoSpy = env.sandbox.spy(imaVideoObj, 'playVideo');
+      imaVideoObj.setVideoPlayerForTesting(videoMock);
+      imaVideoObj.setContentCompleteForTesting(false);
+
+      // start ad
+      imaVideoObj.onContentResumeRequested();
+
+      // verify original
+      const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+      const playPauseDiv = controlsDiv.querySelector('#ima-play-pause');
+      expect(playPauseDiv).to.not.be.null;
+      expect(playPauseDiv.style.display).not.to.eql('none');
+      expect(playPauseDiv.innerHTML).equal(
+        imaVideoObj.getPropertiesForTesting().icons['pause']
+      );
+
+      // run test
+      imaVideoObj.onAdPaused();
+      expect(playPauseDiv.style.display).not.to.eql('none');
+      expect(playPauseDiv.innerHTML).equal(
+        imaVideoObj.getPropertiesForTesting().icons['play']
+      );
+
+      // run test
+      imaVideoObj.onAdResumed();
+      expect(playPauseDiv.style.display).not.to.eql('none');
+      expect(playPauseDiv.innerHTML).equal(
+        imaVideoObj.getPropertiesForTesting().icons['pause']
+      );
     });
 
     it('resumes content with content complete', () => {

@@ -24,39 +24,39 @@ If you're already familiar with Git/GitHub/etc. or you just want to know what co
 
 If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) we have created for new contributors.
 
-- [How to get help](#how-to-get-help)
-- [Intro to Git and GitHub](#intro-to-git-and-github)
-- [Set up your GitHub account and Git](#set-up-your-github-account-and-git)
-- [Get a copy of the amphtml code](#get-a-copy-of-the-amphtml-code)
-  - [Understanding repositories](#understanding-repositories)
-  - [Creating your GitHub fork and your local repository](#creating-your-github-fork-and-your-local-repository)
-- [Set up aliases for the remote Git repositories](#set-up-aliases-for-the-remote-git-repositories)
-- [Building AMP and starting a local server](#building-amp-and-starting-a-local-server)
-- [Create a Git branch](#create-a-git-branch)
-- [Pull the latest changes from the amphtml repository](#pull-the-latest-changes-from-the-amphtml-repository)
-- [Edit files and commit them](#edit-files-and-commit-them)
-  - [Code quality and style](#code-quality-and-style)
-- [Testing your changes](#testing-your-changes)
-  - [Running tests locally](#running-tests-locally)
-  - [Running all the Travis CI checks locally](#running-all-the-travis-ci-checks-locally)
-  - [Adding tests for your change](#adding-tests-for-your-change)
-- [Push your changes to your GitHub fork](#push-your-changes-to-your-github-fork)
-- [Send a Pull Request (i.e. request a code review)](#send-a-pull-request-ie-request-a-code-review)
-- [Respond to Pull Request comments](#respond-to-pull-request-comments)
-- [Delete your branch](#delete-your-branch)
-- [See your changes in production](#see-your-changes-in-production)
-- [⚡⚡⚡... (Next steps)](#-next-steps)
-- [Other resources](#other-resources)
+-   [How to get help](#how-to-get-help)
+-   [Intro to Git and GitHub](#intro-to-git-and-github)
+-   [Set up your GitHub account and Git](#set-up-your-github-account-and-git)
+-   [Get a copy of the amphtml code](#get-a-copy-of-the-amphtml-code)
+    -   [Understanding repositories](#understanding-repositories)
+    -   [Creating your GitHub fork and your local repository](#creating-your-github-fork-and-your-local-repository)
+-   [Set up aliases for the remote Git repositories](#set-up-aliases-for-the-remote-git-repositories)
+-   [Building AMP and starting a local server](#building-amp-and-starting-a-local-server)
+-   [Create a Git branch](#create-a-git-branch)
+-   [Pull the latest changes from the amphtml repository](#pull-the-latest-changes-from-the-amphtml-repository)
+-   [Edit files and commit them](#edit-files-and-commit-them)
+    -   [Code quality and style](#code-quality-and-style)
+-   [Testing your changes](#testing-your-changes)
+    -   [Running tests locally](#running-tests-locally)
+    -   [Running all the Travis CI checks locally](#running-all-the-travis-ci-checks-locally)
+    -   [Adding tests for your change](#adding-tests-for-your-change)
+-   [Push your changes to your GitHub fork](#push-your-changes-to-your-github-fork)
+-   [Send a Pull Request (i.e. request a code review)](#send-a-pull-request-ie-request-a-code-review)
+-   [Respond to Pull Request comments](#respond-to-pull-request-comments)
+-   [Delete your branch](#delete-your-branch)
+-   [See your changes in production](#see-your-changes-in-production)
+-   [⚡⚡⚡... (Next steps)](#-next-steps)
+-   [Other resources](#other-resources)
 
 # How to get help
 
 If you have a question or are unsure about something while following this end-to-end guide, you can get help from the AMP open source community in many ways:
 
-- If you are tackling a [Good First Issue](https://github.com/ampproject/amphtml/labels/good%20first%20issue) or other GitHub issue you can ask a question as a comment on the issue directly. This works particularly well if the question is about how to make progress on that specific issue.
+-   If you are tackling a [Good First Issue](https://github.com/ampproject/amphtml/labels/good%20first%20issue) or other GitHub issue you can ask a question as a comment on the issue directly. This works particularly well if the question is about how to make progress on that specific issue.
 
-- The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in AMP to find help. You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.). We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.
+-   The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in AMP to find help. You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.). We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.
 
-- You can also ask questions on [amphtml-discuss@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-discuss).
+-   You can also ask questions on [amphtml-discuss@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-discuss).
 
 # Intro to Git and GitHub
 
@@ -64,9 +64,9 @@ People who have never used Git or GitHub before can find them intimidating--even
 
 Despite the similarity in names, Git & GitHub are different:
 
-- Git is a version control system. You'll install the Git client locally and run Git commands to grab code from a Git repository, make changes and submit code. You don't need to use GitHub to use Git, but the AMP's Git repository happens to be hosted on GitHub.
+-   Git is a version control system. You'll install the Git client locally and run Git commands to grab code from a Git repository, make changes and submit code. You don't need to use GitHub to use Git, but the AMP's Git repository happens to be hosted on GitHub.
 
-- GitHub hosts Git repositories and provides other tools that make managing projects easier (like a GUI for code reviews, bug tracking, etc.).
+-   GitHub hosts Git repositories and provides other tools that make managing projects easier (like a GUI for code reviews, bug tracking, etc.).
 
 To contribute to AMP you'll use Git to grab a copy of the code from the [amphtml Git repository on GitHub](https://github.com/ampproject/amphtml), make changes locally and push your changes back up to your own Git repository on GitHub so you can get your code changes reviewed and merged into the amphtml codebase.
 
@@ -84,19 +84,19 @@ One of the central concepts of Git is the _repository_, where files are stored a
 
 The process of getting the amphtml code, making changes, getting your changes reviewed and then having your changes become a part of AMP involves _three_ repositories:
 
-- The first repository is the **amphtml repository** mentioned above. When you want to fix a bug or add a feature to AMP your goal is to get your code to become part of this repository (_merged_ in Git terms). The amphtml repository is an example of a _remote_ repository because it's stored in a server that your Git client connects to.
+-   The first repository is the **amphtml repository** mentioned above. When you want to fix a bug or add a feature to AMP your goal is to get your code to become part of this repository (_merged_ in Git terms). The amphtml repository is an example of a _remote_ repository because it's stored in a server that your Git client connects to.
 
-- You'll create a **_fork_ of the amphtml repository** on GitHub before you make your first change. This creates your own complete copy of all of the files from the amphtml repository which gives you a place to put your changes without affecting other people's work. Since your fork is on GitHub's servers this is also a _remote_ repository. Once you create your fork you'll be able to browse a copy of all of the files on the Web UI at `https://github.com/<your username>/amphtml`.
+-   You'll create a **_fork_ of the amphtml repository** on GitHub before you make your first change. This creates your own complete copy of all of the files from the amphtml repository which gives you a place to put your changes without affecting other people's work. Since your fork is on GitHub's servers this is also a _remote_ repository. Once you create your fork you'll be able to browse a copy of all of the files on the Web UI at `https://github.com/<your username>/amphtml`.
 
-- In general you won't be making changes directly on your fork on GitHub since GitHub provides very limited edit and build capabilities. Instead you'll create a copy of your fork in a **_local_ repository** which will download all of the amphtml files to your computer. This is where you'll typically be building AMP, making changes, testing them out, etc.
+-   In general you won't be making changes directly on your fork on GitHub since GitHub provides very limited edit and build capabilities. Instead you'll create a copy of your fork in a **_local_ repository** which will download all of the amphtml files to your computer. This is where you'll typically be building AMP, making changes, testing them out, etc.
 
 If you are new to Git it may seem surprising that there are three different repositories involved but each one serves its purpose. Here's how they interact in a typical scenario:
 
-- You'll make changes on your computer (your local repository).
+-   You'll make changes on your computer (your local repository).
 
-- When you're done you'll push these changes to your fork on GitHub so that others can see your changes and review them before they become part of the amphtml repository.
+-   When you're done you'll push these changes to your fork on GitHub so that others can see your changes and review them before they become part of the amphtml repository.
 
-- When the changes have been approved by someone with permission to do so, that person will handle merging your changes from your GitHub fork to the amphtml repository.
+-   When the changes have been approved by someone with permission to do so, that person will handle merging your changes from your GitHub fork to the amphtml repository.
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase. If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository. Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
@@ -106,19 +106,19 @@ One thing that might put your mind at ease: if you aren't in a [role](https://gi
 
 To create your fork on GitHub and your local copy of that fork:
 
-- Create a fork of the amphtml repository on GitHub by going to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and clicking the "Fork" button near the top. Your GitHub fork will now be visible at `https://github.com/<your username>/amphtml`. During local development, this will be referred to by `git` as `origin`.
+-   Create a fork of the amphtml repository on GitHub by going to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and clicking the "Fork" button near the top. Your GitHub fork will now be visible at `https://github.com/<your username>/amphtml`. During local development, this will be referred to by `git` as `origin`.
 
-- Create your local copy (or _clone_) of your fork:
+-   Create your local copy (or _clone_) of your fork:
 
-  - go to a local directory on your computer where you want to put a copy of the code, e.g. `~/src/ampproject`
+    -   go to a local directory on your computer where you want to put a copy of the code, e.g. `~/src/ampproject`
 
-  - run the `git clone` command using the address for your remote repository (your GitHub fork):
+    -   run the `git clone` command using the address for your remote repository (your GitHub fork):
 
-    ```sh
-    git clone git@github.com:<your username>/amphtml.git
-    ```
+        ```sh
+        git clone git@github.com:<your username>/amphtml.git
+        ```
 
-    (Note that this is the SSH address for your GitHub fork since we assume you've set up SSH for your account as we recommended. You can always find the SSH and HTTPS addresses of your GitHub fork by clicking the "Clone or download" button on your GitHub fork page.)
+        (Note that this is the SSH address for your GitHub fork since we assume you've set up SSH for your account as we recommended. You can always find the SSH and HTTPS addresses of your GitHub fork by clicking the "Clone or download" button on your GitHub fork page.)
 
 After running the command you'll see something like `Receiving objects` and a progress indicator; this is actually downloading all of the files in the repository to your computer.
 
@@ -161,39 +161,39 @@ git branch -u upstream/master master
 
 Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the NPM package manager, Closure Compiler, and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.
 
-- Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). If you're on Mac or Linux, an easy way to install Node.js is with `nvm`: [here](https://github.com/creationix/nvm).
+-   Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). If you're on Mac or Linux, an easy way to install Node.js is with `nvm`: [here](https://github.com/creationix/nvm).
 
-  ```sh
-  nvm install --lts
-  ```
+    ```sh
+    nvm install --lts
+    ```
 
-- Closure Compiler is automatically installed by NPM, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
+-   Closure Compiler is automatically installed by NPM, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
 
-  - Note: If you are using Mac OS and have multiple versions of Java installed, make sure you are using Java 8 by adding this to `~/.bashrc`:
+    -   Note: If you are using Mac OS and have multiple versions of Java installed, make sure you are using Java 8 by adding this to `~/.bashrc`:
 
-  ```sh
-  export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
-  ```
+    ```sh
+    export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+    ```
 
-- If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
+-   If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
 
-  ```sh
-  npm uninstall --global gulp
-  ```
+    ```sh
+    npm uninstall --global gulp
+    ```
 
-- Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
+-   Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
 
-  ```sh
-  npm install --global gulp-cli
-  ```
+    ```sh
+    npm install --global gulp-cli
+    ```
 
-  An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
+    An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
 
-- In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
-  ```
-  npm install
-  ```
-  You should see a progress indicator and some messages scrolling by. You may see some warnings about optional dependencies, which are generally safe to ignore.
+-   In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
+    ```
+    npm install
+    ```
+    You should see a progress indicator and some messages scrolling by. You may see some warnings about optional dependencies, which are generally safe to ignore.
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
@@ -207,23 +207,23 @@ You can browse the [http://localhost:8000/examples](http://localhost:8000/exampl
 
 Note that by default each of the pages in the /examples directory uses the unminified AMP JavaScript from your local server. You can also change which JS to load from local server by hitting the `/serve_mode=<mode>` endpoint:
 
-- [http://localhost:8000/serve_mode=default](http://localhost:8000/serve_mode=default)
+-   [http://localhost:8000/serve_mode=default](http://localhost:8000/serve_mode=default)
 
-  This is the default. Unminified AMP JavaScript is served from the local server. For local development you will usually want to serve unminified JS to test your changes.
+    This is the default. Unminified AMP JavaScript is served from the local server. For local development you will usually want to serve unminified JS to test your changes.
 
-- [http://localhost:8000/serve_mode=compiled](http://localhost:8000/serve_mode=compiled)
+-   [http://localhost:8000/serve_mode=compiled](http://localhost:8000/serve_mode=compiled)
 
-  Minified AMP JavaScript is served from the local server. This is only available after running `gulp dist --fortesting`.
+    Minified AMP JavaScript is served from the local server. This is only available after running `gulp dist --fortesting`.
 
-- [http://localhost:8000/serve_mode=cdn](http://localhost:8000/serve_mode=cdn)
+-   [http://localhost:8000/serve_mode=cdn](http://localhost:8000/serve_mode=cdn)
 
-  Minified AMP JavaScript is served from `cdn.ampproject.org`.
+    Minified AMP JavaScript is served from `cdn.ampproject.org`.
 
-- http://localhost:8000/serve_mode=<RTV_NUMBER>
+-   http://localhost:8000/serve_mode=<RTV_NUMBER>
 
-  E.g. http://localhost:8000/serve_mode=001907161745080
+    E.g. http://localhost:8000/serve_mode=001907161745080
 
-  Minified AMP JavaScript is served from `cdn.ampproject.org/rtv/<RTV_NUMBER>`, the RTV build from the given RTV number.
+    Minified AMP JavaScript is served from `cdn.ampproject.org/rtv/<RTV_NUMBER>`, the RTV build from the given RTV number.
 
 When you're ready to make changes, you'll want to follow the steps below for creating a branch, testing and sending your changes for review.
 
@@ -295,18 +295,18 @@ If there are changes that conflict with changes on your branch (e.g. someone mod
 
 The common workflow for making changes to files in Git is:
 
-- Edit some files using your favorite editor
+-   Edit some files using your favorite editor
 
-- If your code requires a new dependency, run `npm install [--save-dev] <packagename>`, which will automatically update `package.json` and `package-lock.json`
+-   If your code requires a new dependency, run `npm install [--save-dev] <packagename>`, which will automatically update `package.json` and `package-lock.json`
 
-  - If it is a build-time dependency, use the `--save-dev` flag
-  - If it is a runtime dependency, add it to `build-system/compile/sources.js`
+    -   If it is a build-time dependency, use the `--save-dev` flag
+    -   If it is a runtime dependency, add it to `build-system/compile/sources.js`
 
-- If you manually edited `package.json`, run `npm install` to install the dependency and generate an updated `package-lock.json` file
+-   If you manually edited `package.json`, run `npm install` to install the dependency and generate an updated `package-lock.json` file
 
-- Tell Git that you care about these changes by _staging_ them using the `git add` command
+-   Tell Git that you care about these changes by _staging_ them using the `git add` command
 
-- Create a checkpoint (called a _commit_) that bundles together the changes you've staged by using the `git commit` command
+-   Create a checkpoint (called a _commit_) that bundles together the changes you've staged by using the `git commit` command
 
 Git commits bundle together related changes into a logical unit. (If you're familiar with some other source control systems this terminology may make you think that when you create a commit you're "checking in" your code to the amphtml repository; that's _not_ what a Git commit is.)
 
@@ -354,18 +354,18 @@ Note that you _can_ add changes into an existing commit but that opens up some a
 
 AMP uses the following tools for code quality and style:
 
-- [Eslint](https://eslint.org/) is used to ensure the code quality of JS files.
-  - Default rules can be found in [.eslintrc.js](../.eslintrc.js) files across the repo.
-  - Custom rules can be found in [build-system/eslint-rules/](../build-system/eslint-rules/index.js).
-- [Prettier](https://prettier.io/) is used to standardize the code style and formatting of JS files and several non-JS files.
-  - Default and file-specific rules can be found in [.prettierrc](../.prettierrc).
+-   [Eslint](https://eslint.org/) is used to ensure the code quality of JS files.
+    -   Default rules can be found in [.eslintrc.js](../.eslintrc.js) files across the repo.
+    -   Custom rules can be found in [build-system/eslint-rules/](../build-system/eslint-rules/index.js).
+-   [Prettier](https://prettier.io/) is used to standardize the code style and formatting of JS files and several non-JS files.
+    -   Default and file-specific rules can be found in [.prettierrc](../.prettierrc).
 
 To easily ensure code quality and style during development, here are some recommendations:
 
-- Use a code editor with Eslint and Prettier support.
-- [Here](https://eslint.org/docs/user-guide/integrations#editors) is a list of editors with Eslint extension support.
-- [Here](https://prettier.io/docs/en/editors.html) is a list of editors with Prettier extension support.
-- Set your editor to automatically format your code on save.
+-   Use a code editor with Eslint and Prettier support.
+-   [Here](https://eslint.org/docs/user-guide/integrations#editors) is a list of editors with Eslint extension support.
+-   [Here](https://prettier.io/docs/en/editors.html) is a list of editors with Prettier extension support.
+-   Set your editor to automatically format your code on save.
 
 ### Workflow for Visual Studio Code
 
@@ -373,14 +373,14 @@ Several AMP developers use [Visual Studio Code](https://code.visualstudio.com/).
 
 #### To automatically fix JS files on save
 
-- Install the [Eslint plugin](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
-- The `eslint.autoFixOnSave` setting is already enabled for the project in [.vscode/settings.json](../.vscode/settings.json), and will cause all JS files to automatically get formatted on save.
+-   Install the [Eslint plugin](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
+-   The `eslint.autoFixOnSave` setting is already enabled for the project in [.vscode/settings.json](../.vscode/settings.json), and will cause all JS files to automatically get formatted on save.
 
 #### To automatically fix non-JS files on save
 
-- Install the [Prettier plugin](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
-- Install the [JSON5 syntax plugin](https://marketplace.visualstudio.com/items?itemName=mrmlnc.vscode-json5). (Used by `OWNERS` files. VS Code does not natively support it.)
-- Language and file level settings are already enabled for the project in [.vscode/settings.json](../.vscode/settings.json), and will cause several non-JS files to automatically get formatted on save.
+-   Install the [Prettier plugin](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
+-   Install the [JSON5 syntax plugin](https://marketplace.visualstudio.com/items?itemName=mrmlnc.vscode-json5). (Used by `OWNERS` files. VS Code does not natively support it.)
+-   Language and file level settings are already enabled for the project in [.vscode/settings.json](../.vscode/settings.json), and will cause several non-JS files to automatically get formatted on save.
 
 ### Manually fixing code
 
@@ -426,10 +426,10 @@ gulp pr-check
 
 Notes:
 
-- This will force a clean build and run all the PR checks one by one.
-- Just like on Travis, a failing check will prevent subsequent checks from being run.
-- The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
-- Unit and integration tests will be run on local Chrome.
+-   This will force a clean build and run all the PR checks one by one.
+-   Just like on Travis, a failing check will prevent subsequent checks from being run.
+-   The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
+-   Unit and integration tests will be run on local Chrome.
 
 ## Adding tests
 
@@ -451,8 +451,8 @@ gulp unit --files=extensions/amp-story/1.0/test/test-amp-story-embedded-componen
 
 Testing tips:
 
-- Use Mocha's [`.only()`](https://mochajs.org/#exclusive-tests) feature to exclusively run certain test-cases or suites.
-- Add `--watch` to your `gulp unit` command to automatically re-run tests on code changes.
+-   Use Mocha's [`.only()`](https://mochajs.org/#exclusive-tests) feature to exclusively run certain test-cases or suites.
+-   Add `--watch` to your `gulp unit` command to automatically re-run tests on code changes.
 
 For more help, see [How to get help](#how-to-get-help).
 
@@ -532,13 +532,13 @@ When you're done click "Create pull request." This will bring you to your Pull R
 
 On the Pull Request page you can see that a few checks are running:
 
-- The tests are being run on [Travis](https://travis-ci.com/ampproject/amphtml/pull_requests)
+-   The tests are being run on [Travis](https://travis-ci.com/ampproject/amphtml/pull_requests)
 
-- The system is verifying that you have signed a CLA (Contributor License Agreement). If this is your first time submitting a Pull Request for AMP on GitHub you'll need to sign a CLA. (Make sure the email address you use to sign the CLA is the same one that you configured Git with.) See details in the [Contributing code](../CONTRIBUTING.md#contributing-code) documentation.
+-   The system is verifying that you have signed a CLA (Contributor License Agreement). If this is your first time submitting a Pull Request for AMP on GitHub you'll need to sign a CLA. (Make sure the email address you use to sign the CLA is the same one that you configured Git with.) See details in the [Contributing code](../CONTRIBUTING.md#contributing-code) documentation.
 
-- Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
+-   Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
 
-- Visual diff tests that are run on Travis are being analyzed by [Percy](http://percy.io/ampproject/amphtml).
+-   Visual diff tests that are run on Travis are being analyzed by [Percy](http://percy.io/ampproject/amphtml).
 
 If you don't hear back from your reviewer within 2 business days, feel free to ping the pull request by adding a comment.
 
@@ -601,10 +601,10 @@ If you're looking for ideas on your next contribution feel free to reach out to 
 
 This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP open source project. If you find yourself wanting to know more there are a lot of resources available. Here are a few:
 
-- The ["Building an AMP Extension" guide](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md) provides step-by-step instructions for a common type of code contribution to AMP. Even if your project involves modifying an existing AMP component, this guide will give you an overview of how AMP components work.
-- GitHub has a lot of helpful introductory material, including:
-  - a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
-  - the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))
-  - a [Training & Guides video series](https://www.youtube.com/user/GitHubGuides)
-- The official [Git docs](https://git-scm.com/doc) have a lot of information including the [reference docs](https://git-scm.com/docs) and an online version of [Pro Git](https://git-scm.com/book/en/v2).
-- You may see discussions about the difference between rebasing and merging in Git, and we glossed over the details in this guide. If you're curious about the difference the Atlassian [Merging vs. Rebasing](https://www.atlassian.com/git/tutorials/merging-vs-rebasing) tutorial has a good explanation.
+-   The ["Building an AMP Extension" guide](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md) provides step-by-step instructions for a common type of code contribution to AMP. Even if your project involves modifying an existing AMP component, this guide will give you an overview of how AMP components work.
+-   GitHub has a lot of helpful introductory material, including:
+    -   a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
+    -   the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))
+    -   a [Training & Guides video series](https://www.youtube.com/user/GitHubGuides)
+-   The official [Git docs](https://git-scm.com/doc) have a lot of information including the [reference docs](https://git-scm.com/docs) and an online version of [Pro Git](https://git-scm.com/book/en/v2).
+-   You may see discussions about the difference between rebasing and merging in Git, and we glossed over the details in this guide. If you're curious about the difference the Atlassian [Merging vs. Rebasing](https://www.atlassian.com/git/tutorials/merging-vs-rebasing) tutorial has a good explanation.

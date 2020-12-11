@@ -43,13 +43,13 @@ supported by the AMP component library.
 
 `amp-video-iframe` has several important differences from vanilla iframes and `amp-iframe`.
 
-- By default, an `amp-video-iframe` is sandboxed (see [details](#sandbox)).
+-   By default, an `amp-video-iframe` is sandboxed (see [details](#sandbox)).
 
-- `amp-video-iframe` implements all [Video Features](../../spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
+-   `amp-video-iframe` implements all [Video Features](../../spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
 
-- `amp-video-iframe` must only request resources via HTTPS.
+-   `amp-video-iframe` must only request resources via HTTPS.
 
-- `amp-video-iframe` is not scrollable.
+-   `amp-video-iframe` is not scrollable.
 
 In short, `amp-video-iframe` plugs AMP video features into an embedded document that hosts a video player.
 
@@ -61,9 +61,9 @@ Advertising use cases should use [`amp-ad`](https://amp.dev/documentation/compon
 
 The reasons for this policy are that:
 
-- `amp-video-iframe` enforces sandboxing and the sandbox is also applied to child iframes. This means landing pages may be broken, even if the ad itself appears to work.
+-   `amp-video-iframe` enforces sandboxing and the sandbox is also applied to child iframes. This means landing pages may be broken, even if the ad itself appears to work.
 
-- `amp-video-iframe` has no controlled resize mechanism.
+-   `amp-video-iframe` has no controlled resize mechanism.
 
 ## Attributes
 
@@ -294,10 +294,10 @@ If you don't use any of the [video frameworks supported by default](#readymade-i
 
 These are the communication methods available:
 
-- [`method`](#method) to control playback.
-- [`postEvent`](#postEvent) to inform the host document about playback events.
-- [`getIntersection`](#getIntersection) to get video's viewability on the host document.
-- [`getMetadata`](#getMetadata) to get information about the host document.
+-   [`method`](#method) to control playback.
+-   [`postEvent`](#postEvent) to inform the host document about playback events.
+-   [`getIntersection`](#getIntersection) to get video's viewability on the host document.
+-   [`getMetadata`](#getMetadata) to get information about the host document.
 
 If you use a supported framework, it's possible to have more fine-grained control over the default implementation by using these same methods.
 
@@ -313,29 +313,29 @@ ampIntegration.method('play', function () {
 
 These are methods that should be implemented:
 
-- `play`
-- `pause`
-- `mute`
-- `unmute`
-- `showcontrols`
-- `hidecontrols`
-- `fullscreenenter`
-- `fullscreenexit`
+-   `play`
+-   `pause`
+-   `mute`
+-   `unmute`
+-   `showcontrols`
+-   `hidecontrols`
+-   `fullscreenenter`
+-   `fullscreenexit`
 
 You can choose to only implement this interface partially, with a few caveats:
 
-- `play` and `pause` are required for either/both of playback [actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/) or autoplay.
+-   `play` and `pause` are required for either/both of playback [actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/) or autoplay.
 
-- `mute` and `unmute` are required for autoplay.
+-   `mute` and `unmute` are required for autoplay.
 
-- `showcontrols` and `hidecontrols` are required for the best possible UX. For
-  example, when minimizing the video to the corner, a custom controls overlay is
-  shown. If you don't provide methods to hide and show controls, two sets of
-  controls could be displayed at the same time, which is a poor user experience.
+-   `showcontrols` and `hidecontrols` are required for the best possible UX. For
+    example, when minimizing the video to the corner, a custom controls overlay is
+    shown. If you don't provide methods to hide and show controls, two sets of
+    controls could be displayed at the same time, which is a poor user experience.
 
-- `fullscreenenter` and `fullscreenexit` are required for best possible UX. For
-  example, for `rotate-to-fullscreen` or the fullscreen button on minimized
-  video.
+-   `fullscreenenter` and `fullscreenexit` are required for best possible UX. For
+    example, for `rotate-to-fullscreen` or the fullscreen button on minimized
+    video.
 
 #### <a name="postEvent"></a> `postEvent(name)`
 

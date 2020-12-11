@@ -52,13 +52,13 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `sectionId`: ID of this section in inventory system.
-- `slot`: ID of slot that will be showed in this ad block.
-- `pubnetwork-lib`: Filepath of ad library.
+-   `sectionId`: ID of this section in inventory system.
+-   `slot`: ID of slot that will be showed in this ad block.
+-   `pubnetwork-lib`: Filepath of ad library.
 
 ### Optional parameters
 
-- `custom`: usage example
+-   `custom`: usage example
 
 ```text
 {

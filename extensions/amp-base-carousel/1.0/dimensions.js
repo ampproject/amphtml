@@ -33,6 +33,14 @@ export const Alignment = {
 };
 
 /**
+ * @enum {string}
+ */
+export const Orientation = {
+  HORIZONTAL: 'horizontal',
+  VERTICAL: 'vertical',
+};
+
+/**
  * @typedef {{
  *   start: number,
  *   end: number,
@@ -57,9 +65,9 @@ export function getDimension(axis, el) {
   } = el./*OK*/ getBoundingClientRect();
 
   return {
-    start: axis == Axis.X ? left : top,
-    end: axis == Axis.X ? right : bottom,
-    length: axis == Axis.X ? width : height,
+    start: Math.round(axis == Axis.X ? left : top),
+    end: Math.round(axis == Axis.X ? right : bottom),
+    length: Math.round(axis == Axis.X ? width : height),
   };
 }
 
@@ -230,7 +238,7 @@ export function scrollContainerToElement(
   const scrollOffset = startAligned
     ? getStart(axis, container)
     : getCenter(axis, container);
-  const delta = snapOffset - scrollOffset - offset * length;
+  const delta = Math.round(snapOffset - scrollOffset - offset * length);
 
   updateScrollPosition(axis, container, delta);
   return !!delta;

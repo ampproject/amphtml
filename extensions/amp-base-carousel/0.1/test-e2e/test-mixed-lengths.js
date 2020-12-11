@@ -76,7 +76,7 @@ describes.endtoend(
         .run('should snap on the center point', async () => {
           const el = await getScrollingElement(controller);
           const slides = await getSlides(controller);
-          const scrollAmount = 1 + (slideOneWidth + slideTwoWidth) / 2;
+          const scrollAmount = 1 + slideOneWidth / 2;
 
           await controller.scrollBy(el, {left: scrollAmount});
           await expect(controller.getElementRect(slides[1])).to.include({

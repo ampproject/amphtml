@@ -35,8 +35,8 @@ For configuration semantics, see [Admixer documentation](http://docs.admixer.net
 
 ### Required parameters
 
-- `data-zone`
+-   `data-zone`
 
 ### Optional parameters
 
-- `data-sizes`
+-   `data-sizes`
