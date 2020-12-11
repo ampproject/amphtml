@@ -36,6 +36,6 @@ For configuration details, please contact http://www.popin.cc/discovery/#contact
 
 Supported parameters:
 
-- `height`
-- `width`
-- `data-mediaid`
+-   `height`
+-   `width`
+-   `data-mediaid`

@@ -64,6 +64,12 @@ Type attribute value: `baiduanalytics`
 
 Adds support for Baidu Analytics. More details for adding Baidu Analytics support can be found at [tongji.baidu.com/](http://tongji.baidu.com/web/help/article?id=268&type=0).
 
+### Black Crow AI
+
+Type attribute value: `blackcrowai`
+
+Adds support for Black Crow AI. You are required to fill out the `site_name` variable which is assigned to you by your account manager. If you wish to send scores to Google, please also include your GA account ID (i.e. `UA-123401-1`).
+
 ### BlueConic
 
 Type attribute value: `blueconic`
@@ -184,10 +190,10 @@ Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de
 
 Additionally, the following variables must be defined:
 
-- `st`: offer ID
-- `co`: comment
-- `cp`: code
-- `url`: HTTPS location of `amp-analytics-infonline.html`
+-   `st`: offer ID
+-   `co`: comment
+-   `cp`: code
+-   `url`: HTTPS location of `amp-analytics-infonline.html`
 
 More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/).
 
@@ -199,11 +205,11 @@ Adds support for the [anonymous INFOnline](https://www.infonline.de). Requires a
 
 Additionally, the following variables must be defined:
 
-- `st`: offer ID
-- `co`: comment
-- `cp`: code
-- `url`: HTTPS location of `infonline-anonymous.html`
-- `dn`: The relay domain name
+-   `st`: offer ID
+-   `co`: comment
+-   `cp`: code
+-   `url`: HTTPS location of `infonline-anonymous.html`
+-   `dn`: The relay domain name
 
 More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
 
@@ -217,8 +223,8 @@ Type attribute value: `keen`
 
 Adds support for Keen. Additionally, the following `vars` must be defined:
 
-- `projectId`: your project id
-- `writeKey`: your write key
+-   `projectId`: your project id
+-   `writeKey`: your write key
 
 Use `extraUrlParams` to add more data. Configuration details can be found at [keen.io/docs/api](https://keen.io/docs/api/).
 
@@ -334,12 +340,12 @@ Additionally, the following variables must be defined:
 
 In the `vars` section:
 
-- `s`: offer
-- `cp`: category path
+-   `s`: offer
+-   `cp`: category path
 
 In the `requests` section:
 
-- `url`: HTTPS location of `amp-analytics-oewa.html`
+-   `url`: HTTPS location of `amp-analytics-oewa.html`
 
 [tip type="note"]
 **NOTE –** There is a variation named `oewadirect` that does not use the iframe-ping solution and has a better client detection by using `AMP CLIENT_ID`. This is currently EXPERIMENTAL, and prohibited by the OEWA because it does not use `oewa2.js`.
@@ -361,8 +367,8 @@ Type attribute value: `permutive`
 
 Adds support for Permutive event collection. Additionally, the following `vars` must be defined:
 
-- `namespace`: your Permutive AMP namespace
-- `key`: your Permutive public API key
+-   `namespace`: your Permutive AMP namespace
+-   `key`: your Permutive public API key
 
 Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](http://support.permutive.com).
 
@@ -386,7 +392,7 @@ Adds support for Pinpoll. Configuration details can be found at [pinpoll.com](ht
 
 Type attribute value: `pressboard`
 
-Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp).
+Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca] `http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp`.
 
 ### Quantcast Measurement
 

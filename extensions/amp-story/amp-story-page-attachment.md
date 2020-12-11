@@ -108,8 +108,6 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
   <li><code>&lt;amp-gist></code></li>
   <li><code>&lt;amp-gist></code></li>
   <li><code>&lt;amp-google-document-embed></code></li>
-  <li><code>&lt;amp-google-vrview-image></code></li>
-  <li><code>&lt;amp-google-vrview-image></code></li>
   <li><code>&lt;amp-hulu></code></li>
   <li><code>&lt;amp-ima-video></code></li>
   <li><code>&lt;amp-image-slider></code></li>

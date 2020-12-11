@@ -29,12 +29,13 @@ import {
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {getFriendlyIframeEmbedOptional} from '../../src/iframe-helper';
-import {installExtensionsService} from '../../src/service/extensions-impl';
 import {
-  installServiceInEmbedScope,
+  getServiceInEmbedWin,
   registerServiceBuilder,
+  registerServiceBuilderInEmbedWin,
   setParentWindow,
 } from '../../src/service';
+import {installExtensionsService} from '../../src/service/extensions-impl';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
@@ -184,6 +185,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
+      getParent: () => env.ampdoc,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
@@ -268,6 +270,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
+      getParent: () => env.ampdoc,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
@@ -366,7 +369,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     expect(customElementsDefineStub).to.be.calledWith('amp-test');
   });
 
-  it.skip('should install and dispose services', () => {
+  it('should install and dispose services', () => {
     const disposeSpy = env.sandbox.spy();
     const embedService = {
       dispose: disposeSpy,
@@ -379,11 +382,13 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         html: '<amp-test></amp-test>',
       },
       (embedWin) => {
-        installServiceInEmbedScope(embedWin, 'c', embedService);
+        registerServiceBuilderInEmbedWin(embedWin, 'c', function () {
+          return embedService;
+        });
       }
     );
     return embedPromise.then((embed) => {
-      expect(embed.win.__AMP_SERVICES['c'].obj).to.equal(embedService);
+      expect(getServiceInEmbedWin(embed.win, 'c')).to.equal(embedService);
       expect(disposeSpy).to.not.be.called;
       embed.destroy();
       expect(disposeSpy).to.be.calledOnce;
@@ -398,6 +403,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
+      getParent: () => env.ampdoc,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
@@ -452,6 +458,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       get win() {
         return childWinForAmpDoc;
       },
+      getParent: () => env.ampdoc,
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
