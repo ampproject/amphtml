@@ -644,7 +644,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * useImperativeHandle.
    * @return {!Promise<!API_TYPE>}
    */
-  getImpl() {
+  getApi() {
     const api = this.apiWrapper_;
     if (api) {
       return Promise.resolve(api);
@@ -718,9 +718,10 @@ export class PreactBaseElement extends AMP.BaseElement {
  * @return {!Promise<!Object>}
  */
 export function whenUpgraded(el) {
-  return customElements.whenDefined(el.localName).then(() => {
-    return el.getImpl();
-  });
+  return customElements
+    .whenDefined(el.localName)
+    .then(() => el.getImpl())
+    .then((impl) => impl.getApi());
 }
 
 // Ideally, these would be Static Class Fields. But Closure can't even.
