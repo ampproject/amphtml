@@ -223,13 +223,13 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .returns(Promise.resolve())
       .once();
 
-    let readyResolver = null;
-    const readyPromise = new Promise((resolve) => {
-      readyResolver = resolve;
+    let renderCompleteResolver = null;
+    const renderCompletePromise = new Promise((resolve) => {
+      renderCompleteResolver = resolve;
     });
     env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
-      .callsFake(() => readyPromise);
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderComplete')
+      .callsFake(() => renderCompletePromise);
 
     const embedPromise = installFriendlyIframeEmbed(
       iframe,
@@ -247,8 +247,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
         expect(ampdoc.setReady).to.not.be.called;
-        readyResolver();
-        return readyPromise;
+        renderCompleteResolver();
+        return renderCompletePromise;
       })
       .then(() => {
         expect(ampdoc.setReady).to.be.calledOnce;
@@ -310,13 +310,13 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .returns(Promise.resolve())
       .once();
 
-    let readyResolver = null;
-    const readyPromise = new Promise((resolve) => {
-      readyResolver = resolve;
+    let renderCompleteResolver = null;
+    const renderCompletePromise = new Promise((resolve) => {
+      renderCompleteResolver = resolve;
     });
     env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
-      .callsFake(() => readyPromise);
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderComplete')
+      .callsFake(() => renderCompletePromise);
 
     const embedPromise = installFriendlyIframeEmbed(
       iframe,
@@ -335,8 +335,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
         expect(ampdoc.setReady).to.not.be.called;
-        readyResolver();
-        return readyPromise;
+        renderCompleteResolver();
+        return renderCompletePromise;
       })
       .then(() => {
         expect(ampdoc.setReady).to.be.calledOnce;

@@ -443,7 +443,7 @@ export class FriendlyIframeEmbed {
 
   /**
    * Returns a promise that will resolve when all elements have been
-   * transferred into live aembedd DOM.
+   * transferred into live embed DOM.
    * @return {!Promise}
    */
   whenRenderComplete() {
