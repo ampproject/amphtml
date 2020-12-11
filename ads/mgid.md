@@ -38,11 +38,11 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-publisher`
-- `data-widget`
-- `data-container`
+-   `data-publisher`
+-   `data-widget`
+-   `data-container`
 
 ### Optional parameters
 
-- `data-url`
-- `data-options`
+-   `data-url`
+-   `data-options`

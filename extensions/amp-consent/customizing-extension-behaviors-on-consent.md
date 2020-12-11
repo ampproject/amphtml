@@ -34,11 +34,11 @@ AMP provides the consent state information for vendors to customize their behavi
 
 The state has the following valid values.
 
-- `null` : no `<amp-consent>` is included
-- `CONSENT_POLICY_STATE.UNKNOWN` : The consent state is unknown
-- `CONSENT_POLICY_STATE.SUFFICIENT` : The consent is accepted
-- `CONSENT_POLICY_STATE.INSUFFICIENT` : The consent is rejected
-- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
+-   `null` : no `<amp-consent>` is included
+-   `CONSENT_POLICY_STATE.UNKNOWN` : The consent state is unknown
+-   `CONSENT_POLICY_STATE.SUFFICIENT` : The consent is accepted
+-   `CONSENT_POLICY_STATE.INSUFFICIENT` : The consent is rejected
+-   `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
 
 #### If you integrate with AMP as a first party AMP extension
 

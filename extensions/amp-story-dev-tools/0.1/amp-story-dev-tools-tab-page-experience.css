@@ -13,21 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-/**
- * @fileoverview Provides functions that extract various kinds of GitHub Actions
- * state.
- */
-
-/**
- * Returns true if this is a GitHub Actions build.
- * @return {boolean}
- */
-function isGithubActionsBuild() {
-  return !!process.env.GITHUB_ACTIONS;
+amp-story-dev-tools-tab-page-experience {
+  margin: 0px 10% !important;
+  padding-bottom: var(--i-amphtml-story-dev-tools-vertical-spacing);
+  flex: 1 !important;
 }
 
-module.exports = {
-  isGithubActionsBuild,
-};
+amp-story-dev-tools-tab-page-experience iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 10px !important;
+}

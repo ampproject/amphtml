@@ -40,10 +40,10 @@ information on how to get the required ad tag.
 
 Required:
 
-- `data-zone`: Adserver zone ID
-- `data-sitepath`: Sitepath of your page
+-   `data-zone`: Adserver zone ID
+-   `data-sitepath`: Sitepath of your page
 
 Optional:
 
-- `data-keywords`: Comma delimited
-- `data-channels`: Comma delimited
+-   `data-keywords`: Comma delimited
+-   `data-channels`: Comma delimited
