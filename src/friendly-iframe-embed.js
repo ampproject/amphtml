@@ -414,7 +414,7 @@ export class FriendlyIframeEmbed {
    * Notice that this signal coincides with the embed's `render-start`.
    * @return {!Promise}
    */
-  whenReady() {
+  whenReady2() {
     return this.signals_.whenSignal(CommonSignals.RENDER_START);
   }
 
