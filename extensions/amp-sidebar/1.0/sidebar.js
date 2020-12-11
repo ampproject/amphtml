@@ -65,8 +65,8 @@ function safelySetStyles(element, styles) {
 }
 
 /**
- * @param {!AccordionDef.Props} props //TODO: will update
- * @param ref
+ * @param {!SidebarDef.Props} props
+ * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function SidebarWithRef(
@@ -113,11 +113,12 @@ function SidebarWithRef(
 
   useImperativeHandle(
     ref,
-    () => ({
-      open,
-      close,
-      toggle,
-    }),
+    () =>
+      /** @type {!SidebarDef.SidebarApi} */ ({
+        open,
+        close,
+        toggle,
+      }),
     [open, close, toggle]
   );
 

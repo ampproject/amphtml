@@ -34,15 +34,30 @@ function SidebarWithActions(props) {
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
   return (
-    <section>
-      <Sidebar ref={ref} {...props} />
+    <>
+      <Sidebar ref={ref} {...props}>
+        <div style={{margin: 8}}>
+          <span>
+            Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+            aeque inermis reprehendunt.
+          </span>
+          <ul>
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+          </ul>
+          <button onClick={() => ref.current.toggle()}>toggle</button>
+          <button onClick={() => ref.current.open()}>open</button>
+          <button onClick={() => ref.current.close()}>close</button>
+        </div>
+      </Sidebar>
       <div style={{marginTop: 8}}>
         <br />
         <button onClick={() => ref.current.toggle()}>toggle</button>
         <button onClick={() => ref.current.open()}>open</button>
         <button onClick={() => ref.current.close()}>close</button>
       </div>
-    </section>
+    </>
   );
 }
 
@@ -51,19 +66,7 @@ export const _default = () => {
   const side = select('type', sideConfigurations, sideConfigurations[0]);
   return (
     <main>
-      <SidebarWithActions side={side}>
-        Content
-        <br />
-        Very Wide content -------------------------------!
-        <ul>
-          <li>1</li>
-          <li>2</li>
-          <li>3</li>
-        </ul>
-      </SidebarWithActions>
-      <div style="background-color: yellow; margin-top: 15px">
-        Background Stripe
-      </div>
+      <SidebarWithActions side={side} />
     </main>
   );
 };
