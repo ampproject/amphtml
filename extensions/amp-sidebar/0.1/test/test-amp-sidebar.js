@@ -82,6 +82,9 @@ describes.realWin(
       if (options.side) {
         ampSidebar.setAttribute('side', options.side);
       }
+      if (options.disableSwipe) {
+        ampSidebar.setAttribute('data-disable-swipe-close', '');
+      }
       if (options.closeText) {
         ampSidebar.setAttribute(
           'data-close-button-aria-label',
@@ -682,6 +685,13 @@ describes.realWin(
             env.sandbox.match.any,
             /* trust */ 456
           );
+        });
+      });
+
+      it('should disable swipe to close when attribute specified', () => {
+        return getAmpSidebar({disableSwipe: true}).then((sidebarElement) => {
+          const impl = sidebarElement.implementation_;
+          expect(impl.disableSwipeClose_).to.be.true;
         });
       });
     });
