@@ -62,13 +62,13 @@ function useValueRef(current) {
  */
 function LightboxWithRef(
   {
-    id,
     animateIn = 'fade-in',
     closeButtonAriaLabel = DEFAULT_CLOSE_LABEL,
     children,
     onBeforeOpen,
     onAfterClose,
     enableAnimation,
+    style,
     ...rest
   },
   ref
@@ -164,15 +164,15 @@ function LightboxWithRef(
   return (
     mounted && (
       <ContainWrapper
-        id={id}
         ref={(r) => {
           lightboxRef.current = r;
         }}
-        style={{visibility: 'hidden'}}
         size={true}
         layout={true}
         paint={true}
-        className={classes.lightboxContainWrapper}
+        part="lightbox"
+        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper}`}
+        wrapperStyle={{...style, visibility: 'hidden'}}
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {
