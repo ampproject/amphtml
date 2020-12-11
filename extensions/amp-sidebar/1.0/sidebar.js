@@ -84,9 +84,8 @@ function SidebarWithRef(
   // To open, we mount and render the contents (invisible), then animate the display (visible).
   // To close, it's the reverse.
   // `mounted` mounts the component. `opened` plays the animation.
-  const initialOpen = false;
-  const [mounted, setMounted] = useState(initialOpen);
-  const [opened, setOpened] = useState(initialOpen);
+  const [mounted, setMounted] = useState(false);
+  const [opened, setOpened] = useState(false);
   const classes = useStyles();
   const sidebarRef = useRef();
   const maskRef = useRef();
