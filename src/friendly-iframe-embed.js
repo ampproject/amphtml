@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from './common-signals';
+import {Deferred} from './utils/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {FIE_RESOURCES_EXP} from './experiments/fie-resources-exp';
 import {Services} from './services';
@@ -368,10 +369,16 @@ export class FriendlyIframeEmbed {
       ? this.host.signals()
       : new Signals();
 
+    /** @private @const {!Deferred} */
+    this.renderComplete_ = new Deferred();
+
     /** @private @const {!Promise} */
-    this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
+    this.winLoadedPromise_ = Promise.all([
+      loadedPromise,
+      this.whenRenderStarted(),
+    ]);
     if (this.ampdoc) {
-      this.whenReady().then(() => this.ampdoc.setReady());
+      this.whenRenderComplete().then(() => this.ampdoc.setReady());
     }
 
     this.win.addEventListener('resize', () => this.handleResize_());
@@ -414,7 +421,7 @@ export class FriendlyIframeEmbed {
    * Notice that this signal coincides with the embed's `render-start`.
    * @return {!Promise}
    */
-  whenReady() {
+  whenRenderStarted() {
     return this.signals_.whenSignal(CommonSignals.RENDER_START);
   }
 
@@ -435,6 +442,23 @@ export class FriendlyIframeEmbed {
    */
   whenIniLoaded() {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
+  }
+
+  /**
+   * Returns a promise that will resolve when all elements have been
+   * transferred into live embed DOM.
+   * @return {!Promise}
+   */
+  whenRenderComplete() {
+    return this.renderComplete_.promise;
+  }
+
+  /**
+   * Signal that indicates that all DOM elements have been tranferred to live
+   * embed DOM.
+   */
+  renderCompleted() {
+    this.renderComplete_.resolve();
   }
 
   /**
@@ -465,6 +489,13 @@ export class FriendlyIframeEmbed {
     } else {
       this.signals_.signal(CommonSignals.RENDER_START);
     }
+
+    // TODO(ccordry): remove when no-signing launched.
+    if (!this.spec.skipHtmlMerge) {
+      // When not streaming renderStart signal is good enough.
+      this.renderComplete_.resolve();
+    }
+
     // Common signal RENDER_START indicates time to toggle visibility
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
@@ -494,7 +525,7 @@ export class FriendlyIframeEmbed {
       getExperimentBranch(this.ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
         FIE_RESOURCES_EXP.experiment;
     Promise.all([
-      this.whenReady(),
+      this.whenRenderStarted(),
       whenContentIniLoad(
         fieResourcesOn ? this.ampdoc : this.iframe,
         this.win,

@@ -16,6 +16,7 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -70,7 +71,6 @@ import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {whenWithinViewport} from './within-viewport';
 
@@ -1717,16 +1717,20 @@ export class AmpA4A extends AMP.BaseElement {
     this.applyFillContent(this.iframe);
 
     let body = '';
+    const transferComplete = new Deferred();
     // If srcdoc is not supported, streaming is also not supported so we
     // can go ahead and write the ad content body.
     if (!isSrcdocSupported()) {
       body = head.ownerDocument.body./*OK */ outerHTML;
+      transferComplete.resolve();
     } else {
       // Once skeleton doc has be written to srcdoc we start transferring
       // body chunks.
       listenOnce(this.iframe, 'load', () => {
         const fieBody = this.iframe.contentDocument.body;
-        this.transferDomBody_(devAssert(fieBody));
+        this.transferDomBody_(devAssert(fieBody)).then(
+          transferComplete.resolve
+        );
       });
     }
 
@@ -1740,12 +1744,22 @@ export class AmpA4A extends AMP.BaseElement {
     // it accessible here.
     const extensionIds = extensions.map((extension) => extension.extensionId);
 
-    return this.installFriendlyIframeEmbed_(
+    const fieInstallPromise = this.installFriendlyIframeEmbed_(
       secureDoc,
       extensionIds,
       fonts,
       true // skipHtmlMerge
-    ).then((friendlyIframeEmbed) => {
+    );
+
+    // Tell the FIE it is done after transferring.
+    Promise.all([fieInstallPromise, transferComplete.promise]).then(
+      (values) => {
+        const friendlyIframeEmbed = values[0];
+        friendlyIframeEmbed.renderCompleted();
+      }
+    );
+
+    return fieInstallPromise.then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.makeFieVisible_(
         friendlyIframeEmbed,
