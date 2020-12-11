@@ -468,9 +468,12 @@ export class AccessService {
     try {
       on = this.evaluator_.evaluate(expr, response);
       if (on) {
-        return this.renderTemplates_(element, response).then(() =>
-          this.applyAuthorizationAttrs_(element, on)
-        );
+        const renderTemplate = this.renderTemplates_(element, response);
+        if (renderTemplate) {
+          return renderTemplate.then(() =>
+            this.applyAuthorizationAttrs_(element, on)
+          );
+        }
       }
     } catch (err) {
       // If the access expression yields an error it is likely due to publisher error.
