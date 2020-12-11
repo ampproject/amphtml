@@ -20,8 +20,7 @@ const browserifyPersistFs = require('browserify-persist-fs');
 const crypto = require('crypto');
 const fs = require('fs');
 const globby = require('globby');
-
-const {isCiBuild, isGithubActionsBuild} = require('../common/ci');
+const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
 
@@ -112,11 +111,7 @@ module.exports = {
     persistentCache,
   },
 
-  reporters: [
-    // TODO(rsimha): Figure out why super-dots doesn't work on GH actions.
-    isGithubActionsBuild() ? 'dots' : 'super-dots',
-    'karmaSimpleReporter',
-  ],
+  reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
     nbDotsPerLine: 100000,

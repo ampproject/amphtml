@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Set Up Environment
         if: ${{ matrix.platform == 'macos-latest' || matrix.platform == 'ubuntu-latest'}}
         run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}

@@ -119,6 +119,7 @@ const forbiddenTerms = {
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
+      'build-system/pr-check/cross-browser-tests.js',
       'build-system/pr-check/dist-bundle-size.js',
       'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/module-dist-bundle-size.js',
