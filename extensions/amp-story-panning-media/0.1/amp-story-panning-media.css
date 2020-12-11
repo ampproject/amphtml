@@ -20,3 +20,7 @@ amp-story-panning-media amp-img {
   justify-content: center !important;
   align-items: center !important;
 }
+
+amp-story-panning-media amp-img img {
+  transition: .3s;
+}

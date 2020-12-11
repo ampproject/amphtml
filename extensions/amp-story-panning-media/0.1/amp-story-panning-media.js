@@ -17,6 +17,9 @@
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
+import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+import {Services} from '../../../src/services';
+import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
@@ -43,6 +46,12 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?string} */
     this.zoom_ = null;
+
+    /** @private {Array<Element>} */
+    this.siblings_ = [];
+
+    /** @private {?boolean} */
+    this.isOnActivePage_ = null;
   }
 
   /** @override */
@@ -50,6 +59,23 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.x_ = this.element_.getAttribute('x') || '0%';
     this.y_ = this.element_.getAttribute('y') || '0%';
     this.zoom_ = this.element_.getAttribute('zoom') || '1';
+
+    // Gets components with same children.
+    document.querySelectorAll('amp-story-panning-media').forEach((el) => {
+      this.siblings_.push(el);
+    });
+
+    // Initialize all services before proceeding
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+        this.storeService_ = storeService;
+        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
+          this.isOnActivePage_ = currPageId === this.getPageId_();
+          this.update_();
+        });
+        storeService.subscribe(StateProperty.PAGE_SIZE, () => this.update_());
+      }),
+    ]).then(() => Promise.resolve());
   }
 
   /** @override */
@@ -66,21 +92,50 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         // Fill image to 100% height of viewport.
         // TODO(#31515): Handle base zoom of aspect ratio wider than image
         setStyles(this.image_, {height: '100%'});
-        return this.updatePosition_();
+        return this.updateTransform(this.x_, this.y_, this.z_);
       })
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
 
+  /** @private */
+  update_() {
+    if (this.isOnActivePage_) {
+      this.siblings_.forEach((sibling) => {
+        sibling.getImpl().then((impl) => {
+          console.log(impl);
+          impl.updateTransform(this.x_, this.y_, this.z_);
+        });
+      });
+    }
+  }
+
   /**
+   * @param {string} x
+   * @param {string} y
+   * @param {string} zoom
    * @return {!Promise}
    * @private
    */
-  updatePosition_() {
+  updateTransform(x, y, zoom) {
     return this.mutateElement(() =>
       setStyles(this.image_, {
-        transform: `scale(${this.zoom_}) translate(${this.x_}, ${this.y_})`,
+        transform: `scale(${zoom}) translate(${x}, ${y})`,
       })
     );
+  }
+
+  /**
+   * @private
+   * @return {string} the page id
+   */
+  getPageId_() {
+    if (this.pageId_ == null) {
+      this.pageId_ = closest(
+        dev().assertElement(this.element),
+        (el) => el.tagName.toLowerCase() === 'amp-story-page'
+      ).getAttribute('id');
+    }
+    return this.pageId_;
   }
 
   /** @override */
