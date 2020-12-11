@@ -482,7 +482,7 @@ export class AmpAnimation extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const polyfillPromise = installWebAnimationsIfNecessary(ampdoc);
     const readyPromise = this.embed_
-      ? this.embed_.whenReady()
+      ? this.embed_.whenRenderCompleted()
       : ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
