@@ -68,7 +68,6 @@ function LightboxWithRef(
     onBeforeOpen,
     onAfterClose,
     enableAnimation,
-    style,
     ...rest
   },
   ref
@@ -172,7 +171,7 @@ function LightboxWithRef(
         paint={true}
         part="lightbox"
         wrapperClassName={`${classes.defaultStyles} ${classes.wrapper}`}
-        wrapperStyle={{...style, visibility: 'hidden'}}
+        wrapperStyle={{visibility: 'hidden'}}
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {
