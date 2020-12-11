@@ -795,7 +795,7 @@ export class Installers {
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
   static installStandardServicesInEmbed(ampdoc) {
-    installAmpdocServicesForEmbed(ampdoc);
     installTimerInEmbedWindow(ampdoc.win);
+    installAmpdocServicesForEmbed(ampdoc);
   }
 }
