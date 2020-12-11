@@ -37,4 +37,4 @@ For configuration semantics, please [contact TripleLift](http://triplelift.com).
 
 Supported parameters:
 
-- `src`
+-   `src`
