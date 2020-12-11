@@ -665,11 +665,6 @@ export class Carousel {
       this.scrollContainer_.setAttribute('horizontal', this.axis_ === Axis.X);
       this.scrollContainer_.setAttribute('loop', this.isLooping());
       this.scrollContainer_.setAttribute('snap', this.snap_);
-
-      // Explicitly set loop since it we ultimately decide if it should loop
-      // and some CSS styling relies on amp-base-carousel[loop=...]
-      this.element_.setAttribute('loop', this.isLooping());
-
       // TODO(sparhami) Do not use CSS custom property
       setImportantStyles(this.scrollContainer_, {
         '--visible-count': this.visibleCount_,

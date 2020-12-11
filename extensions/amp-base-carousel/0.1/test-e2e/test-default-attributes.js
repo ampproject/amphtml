@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {getCarouselById} from './helpers';
-
 describes.endtoend(
   'AMP carousel test default attributes',
   {
@@ -25,28 +23,34 @@ describes.endtoend(
   },
   async function (env) {
     let controller;
-    let carousel;
+    let scrollContainer;
     let loop;
 
     beforeEach(async () => {
       controller = env.controller;
     });
 
+    function getScrollContainerByCarouselId(id) {
+      return controller.findElement(
+        `amp-base-carousel#${id} .i-amphtml-carousel-scroll`
+      );
+    }
+
     it('should add loop="false" when loop is omitted (carousel-1)', async () => {
-      carousel = await getCarouselById(controller, 'carousel-1');
-      loop = await controller.getElementAttribute(carousel, 'loop');
+      scrollContainer = await getScrollContainerByCarouselId('carousel-1');
+      loop = await controller.getElementAttribute(scrollContainer, 'loop');
       await expect(loop).to.be.equal('false');
     });
 
     it('should keep loop="true" when valid (carousel-2)', async () => {
-      carousel = await getCarouselById(controller, 'carousel-2');
-      loop = await controller.getElementAttribute(carousel, 'loop');
+      scrollContainer = await getScrollContainerByCarouselId('carousel-2');
+      loop = await controller.getElementAttribute(scrollContainer, 'loop');
       await expect(loop).to.equal('true');
     });
 
     it('should set loop to "false" when invalid (carousel-3)', async () => {
-      carousel = await getCarouselById(controller, 'carousel-3');
-      loop = await controller.getElementAttribute(carousel, 'loop');
+      scrollContainer = await getScrollContainerByCarouselId('carousel-3');
+      loop = await controller.getElementAttribute(scrollContainer, 'loop');
       await expect(loop).to.equal('false');
     });
   }

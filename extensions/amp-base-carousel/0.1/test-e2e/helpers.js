@@ -39,10 +39,6 @@ export async function waitForCarouselImg(controller, n) {
   return await waitForImgLoad(controller, el);
 }
 
-export function getCarouselById(controller, id) {
-  return controller.findElement(`${TAG_NAME}#${id}`);
-}
-
 export function getSlides(controller) {
   return controller.findElements(`${TAG_NAME} .${SLOTTED_CLASS}`);
 }
