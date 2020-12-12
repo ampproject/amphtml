@@ -297,7 +297,7 @@ The Entitlement response returned by the authorization endpoint must conform to 
   <tr>
     <td class="col-fourty"><code>data</code></td>
     <td>&lt;object&gt;</td>
-    <td>Free-form data which can be used for template rendering, e.g. messaging related to metering or article count. See <a href="#customising-content">Customising Content</a> for more details.</td>
+    <td>Free-form data which can be used for template rendering, e.g. messaging related to metering or article count. See <a href="#using-scores-to-customise-content">Customising Content</a> for more details.</td>
   </tr>
 </table>
 
