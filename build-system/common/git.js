@@ -38,7 +38,7 @@ function gitBranchCreationPoint() {
   if (isPullRequestBuild()) {
     const prSha = ciPullRequestSha();
     return getStdout(
-      `git rev-list --boundary ${prSha}...master | grep "^-" | head -n 1 | cut -c2-`
+      `git rev-list --boundary ${prSha}...origin/master | grep "^-" | head -n 1 | cut -c2-`
     ).trim();
   }
   return gitMergeBaseLocalMaster();
