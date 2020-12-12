@@ -13,7 +13,7 @@ try the following:
 
 1. Open your browser's developer/error tools console, and resolve
    any errors or warnings that appear.
-2. Run the document through [AMPBench](https://ampbench.appspot.com/) and
+2. Run the document through [an AMP document validator](https://search.google.com/test/amp) and
    resolve any unexpected errors or warnings.
 
 If you still have a problem after following these steps, check the table below.
