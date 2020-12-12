@@ -85,7 +85,7 @@ describes.realWin(
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve();
-        }, 300);
+        }, 90);
       });
       // Verify that layoutCallback calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;
@@ -99,7 +99,7 @@ describes.realWin(
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve();
-        }, 300);
+        }, 90);
       });
       // Verify that the ResizeObserver calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;

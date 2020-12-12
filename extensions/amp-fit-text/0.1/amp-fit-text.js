@@ -21,7 +21,7 @@ import {throttle} from '../../../src/utils/rate-limit';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
-const RESIZE_THROTTLE_MS = 300;
+const RESIZE_THROTTLE_MS = 100;
 
 class AmpFitText extends AMP.BaseElement {
   /** @param {!AmpElement} element */
