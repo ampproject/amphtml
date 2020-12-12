@@ -1393,7 +1393,7 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
   <tr>
     <td class="col-thirty">Invalid binding</td>
     <td class="col-fourty"><em>Binding to [foo] on &lt;P> is not allowed</em>.</td>
-    <td class="col-thirty">Use only <a href="#element-specific-attributes">white-listed bindings</a>.</td>
+    <td class="col-thirty">Use only <a href="#element-specific-attributes">allow-listed bindings</a>.</td>
   </tr>
   <tr>
     <td>Syntax error</td>
