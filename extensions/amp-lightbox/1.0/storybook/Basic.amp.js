@@ -36,7 +36,7 @@ export const Default = () => {
   ]);
   const enableAnimation = boolean('enable animation', true);
   return (
-    <main>
+    <div style="height: 300px;">
       <amp-lightbox
         id="lightbox"
         layout="nodisplay"
@@ -46,10 +46,10 @@ export const Default = () => {
         <p>Test</p>
         <button on="tap:lightbox.close">Close</button>
       </amp-lightbox>
-      <div class="buttons" style={{marginTop: 8}}>
-        <button on="tap:lightbox.open">Open</button>
+      <div class="buttons">
+        <button on="tap:lightbox">Open</button>
       </div>
-    </main>
+    </div>
   );
 };
 
