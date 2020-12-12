@@ -36,12 +36,13 @@ Yahoo Native Ads requires a unique section code to run. Please reach out to your
 
 ### Required parameters
 
-- `data-code` : A unique section code that represents your site and placement.
-- `data-url` : The URL of the site your section code is allowed to run on.
+-   `data-code` : A unique section code that represents your site and placement.
+-   `data-url` : The URL of the site your section code is allowed to run on.
 
 ### Optional parameters
-- `data-key` : The API key assigned to your site. Used for legacy integrations.
-- `data-api-key` : The API key assigned to your site. Used for legacy integrations.
-- `data-enabled-ad-feedback` : If defined, a feedback indicator will be shown on eligable ad placements.
-- `data-image-type` : The preferred image rendering "square", "rectangle" or "thumbnail".
-- `json` : You can use this field to define your entire config, if desired (ex: `json='{ "imageType": "square" }'`)
+
+-   `data-key` : The API key assigned to your site. Used for legacy integrations.
+-   `data-api-key` : The API key assigned to your site. Used for legacy integrations.
+-   `data-enabled-ad-feedback` : If defined, a feedback indicator will be shown on eligable ad placements.
+-   `data-image-type` : The preferred image rendering "square", "rectangle" or "thumbnail".
+-   `json` : You can use this field to define your entire config, if desired (ex: `json='{ "imageType": "square" }'`)
