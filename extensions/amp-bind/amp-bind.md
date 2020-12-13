@@ -542,7 +542,7 @@ Using `AMP.pushState()` sets the current state to the most recent pushed state.
 
 -   Expressions may only access the containing document's [state](#state).
 -   Expressions **do not** have access to `window` or `document`. `global` references the top-level state.
--   Only `amp-bind` [allowed-listed functions](#allowed-listed functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
+-   Only `amp-bind` [allowlisted functions](#allowlisted-functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
     -   Custom functions, classes and loops are disallowed.
 -   Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
 -   A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
@@ -579,7 +579,7 @@ The following are all valid expressions:
 
 Find the full expression grammar and implementation in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
 
-### Allowed-listed functions
+### Allowlisted functions
 
 #### [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods)
 
@@ -1393,7 +1393,7 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
   <tr>
     <td class="col-thirty">Invalid binding</td>
     <td class="col-fourty"><em>Binding to [foo] on &lt;P> is not allowed</em>.</td>
-    <td class="col-thirty">Use only <a href="#element-specific-attributes">white-listed bindings</a>.</td>
+    <td class="col-thirty">Use only <a href="#element-specific-attributes">allow-listed bindings</a>.</td>
   </tr>
   <tr>
     <td>Syntax error</td>

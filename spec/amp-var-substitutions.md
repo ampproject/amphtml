@@ -70,7 +70,7 @@ The following table lists the features that enable variable substitutions, as we
       <ul>
         <li>Page’s source origin</li>
         <li>Page’s canonical origin</li>
-        <li>An origin white listed via the <code>amp-link-variable-allowed-origin</code> <code>meta</code> tag</li>
+        <li>An origin allowlisted via the <code>amp-link-variable-allowed-origin</code> <code>meta</code> tag</li>
       </ul>
     </td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
@@ -131,13 +131,13 @@ If you need to append dynamic parameters to the href, specify the parameters by 
 >
 ```
 
-### White listed domains for link substitution
+### Allow listed domains for link substitution
 
 Link substitutions are restricted and will only be fulfilled for URLs matching:
 
 -   The page’s source origin
 -   The page’s canonical origin
--   A white listed origin
+-   An allowlisted origin
 
 To allowlist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
 
