@@ -312,7 +312,7 @@ For ad networks that support loading via a single script tag, this form is suppo
 </amp-ad>
 ```
 
-Note, that the network still needs to be white-listed and provide a prefix to valid URLs. AMP may add similar support for ad networks that support loading via an iframe tag.
+Note, that the network still needs to be allow-listed and provide a prefix to valid URLs. AMP may add similar support for ad networks that support loading via an iframe tag.
 
 Technically, the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that knows how to render the ad given the parameters to the tag.
 

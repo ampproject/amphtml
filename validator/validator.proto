@@ -762,7 +762,7 @@ message DocCssSpec {
   optional string max_bytes_spec_url = 8;
 
   // Declaration allow-lists were added when style attribute validation was
-  // implementented. Therefore older style tags do not enforce an allow list
+  // implementented. Therefore older style tags do not enforce an allowlist
   // of declarations. If true, all declarations are allowed in style tags,
   // regardless of the contents of the `declaration` list.
   optional bool allow_all_declaration_in_style_tag = 10 [default = false];

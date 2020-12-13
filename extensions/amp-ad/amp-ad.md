@@ -196,7 +196,7 @@ Attributes starting with `data-vars–` are reserved for
 
 Use this attribute to load a script tag for the specified ad network. This can
 be used for ad networks that require exactly a single script tag to be inserted
-in the page. The `src` value must have a prefix that is white-listed for the
+in the page. The `src` value must have a prefix that is allow-listed for the
 specified ad network, and the value must use `https` protocol.
 
 ### `json` (optional)
