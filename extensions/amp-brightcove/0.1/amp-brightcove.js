@@ -86,8 +86,8 @@ class AmpBrightcove extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /**@private {string} */
-    this.playerId_ = '';
+    /**@private {?string} */
+    this.playerId_ = null;
 
     /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = null;
@@ -129,13 +129,20 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {Promise[]}
    */
-  getConsentState() {
-    const consentPolicyId = super.getConsentPolicy();
-    return consentPolicyId
-      ? getConsentPolicyState(this.element, consentPolicyId)
+  getConsents_() {
+    const consentPolicy = super.getConsentPolicy();
+    const consentPromise = consentPolicy
+      ? getConsentPolicyState(this.element, consentPolicy)
       : Promise.resolve(null);
+    const consentStringPromise = consentPolicy
+      ? getConsentPolicyInfo(this.element, consentPolicy)
+      : Promise.resolve();
+    const sharedDataPromise = consentPolicy
+      ? getConsentPolicySharedData(this.element, consentPolicy)
+      : Promise.resolve();
+    return [consentPromise, sharedDataPromise, consentStringPromise];
   }
 
   /**
@@ -300,20 +307,7 @@ class AmpBrightcove extends AMP.BaseElement {
       el.getAttribute('data-player-id') ||
       'default';
 
-    const consentPromise = this.getConsentState();
-    const consentPolicyId = super.getConsentPolicy();
-    const consentStringPromise = consentPolicyId
-      ? getConsentPolicyInfo(this.element, consentPolicyId)
-      : Promise.resolve();
-    const sharedDataPromise = consentPolicyId
-      ? getConsentPolicySharedData(this.element, consentPolicyId)
-      : Promise.resolve();
-
-    return Promise.all([
-      consentPromise,
-      sharedDataPromise,
-      consentStringPromise,
-    ]).then((consents) => {
+    return Promise.all(this.getConsents_()).then((consents) => {
       const consentData = dict({
         'initialConsentState': consents[0],
         'consentSharedData': consents[1],
