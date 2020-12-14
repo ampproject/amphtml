@@ -87,8 +87,8 @@ export class PlatformStore {
     /** @private {?Deferred<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
-    /** @private {!Array<string>} */
-    this.failedPlatforms_ = [];
+    /** @private {!Set<string>} */
+    this.failedPlatforms_ = new Set();
 
     /** @private @const {!./entitlement.Entitlement} */
     this.fallbackEntitlement_ = fallbackEntitlement;
@@ -206,8 +206,8 @@ export class PlatformStore {
       deferred.resolve(entitlement);
     }
     // Remove this serviceId as a failed platform now
-    if (this.failedPlatforms_.indexOf(serviceId) != -1) {
-      this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
+    if (this.failedPlatforms_.has(serviceId)) {
+      this.failedPlatforms_.delete(serviceId);
     }
     // Call all onChange callbacks.
     if (entitlement.granted) {
@@ -601,10 +601,10 @@ export class PlatformStore {
         'Local platform has failed to resolve,  ' +
           'using fallback entitlement.'
       );
-    } else if (this.failedPlatforms_.indexOf(serviceId) == -1) {
+    } else if (!this.failedPlatforms_.has(serviceId)) {
       const entitlement = Entitlement.empty(serviceId);
       this.resolveEntitlement(serviceId, entitlement);
-      this.failedPlatforms_.push(serviceId);
+      this.failedPlatforms_.add(serviceId);
     }
   }
 

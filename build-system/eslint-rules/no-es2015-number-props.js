@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const INVALID_PROPS = [
+const INVALID_PROPS = new Set([
   'EPSILON',
   'MAX_SAFE_INTEGER',
   'MIN_SAFE_INTEGER',
@@ -25,10 +25,10 @@ const INVALID_PROPS = [
   'isSafeInteger',
   'parseFloat',
   'parseInt',
-];
+]);
 
 function isInvalidProperty(property) {
-  return INVALID_PROPS.indexOf(property) != -1;
+  return INVALID_PROPS.has(property);
 }
 
 module.exports = function (context) {

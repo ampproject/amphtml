@@ -98,7 +98,7 @@ export class ViewerTracker {
     const unlistenSet = [];
     return new Promise((resolve, reject) => {
       // 1. Document becomes invisible again: cancel.
-      unlistenSet.push(
+      unlistenSet.add(
         this.ampdoc_.onVisibilityChanged(() => {
           if (!this.ampdoc_.isVisible()) {
             reject(cancellation());

@@ -876,7 +876,7 @@ export class ResourcesImpl {
 
       // Find minimum top position and run all mutates.
       let minTop = -1;
-      const scrollAdjSet = [];
+      const scrollAdjSet = new Set();
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
@@ -976,7 +976,7 @@ export class ResourcesImpl {
             // These requests will be executed in the next animation cycle and
             // adjust the scroll position.
             aboveVpHeightChange = aboveVpHeightChange + heightDiff;
-            scrollAdjSet.push(request);
+            scrollAdjSet.add(request);
           } else {
             // Defer till next cycle.
             this.requestsChangeSize_.push(request);
@@ -1077,7 +1077,7 @@ export class ResourcesImpl {
       }
 
       // Execute scroll-adjusting resize requests, if any.
-      if (scrollAdjSet.length > 0) {
+      if (scrollAdjSet.size > 0) {
         this.vsync_.run(
           {
             measure: (state) => {

@@ -643,7 +643,7 @@ register('speakol', speakol);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
-const defaultAllowedTypesInCustomFrame = [
+const defaultAllowedTypesInCustomFrame = new Set([
   // Entries must be reasonably safe and not allow overriding the injected
   // JS URL.
   // Each custom iframe can override this through the second argument to
@@ -652,8 +652,8 @@ const defaultAllowedTypesInCustomFrame = [
   'twitter',
   'doubleclick',
   'yieldbot',
-  '_ping_',
-];
+  '_ping_'
+]);
 
 /**
  * Initialize 3p frame.
@@ -802,7 +802,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (window.location.hostname == 'ads.localhost') {
     return;
   }
-  if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
+  if (defaultAllowedTypesInCustomFrame.has(type)) {
     return;
   }
   userAssert(

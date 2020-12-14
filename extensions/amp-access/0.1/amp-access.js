@@ -635,7 +635,7 @@ export class AccessService {
     const unlistenSet = [];
     return new Promise((resolve, reject) => {
       // 1. Document becomes invisible again: cancel.
-      unlistenSet.push(
+      unlistenSet.add(
         this.ampdoc.onVisibilityChanged(() => {
           if (!this.ampdoc.isVisible()) {
             reject(cancellation());
