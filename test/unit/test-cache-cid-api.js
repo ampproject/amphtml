@@ -19,7 +19,7 @@ import {CacheCidApi} from '../../src/service/cache-cid-api';
 import {installTimerService} from '../../src/service/timer-impl';
 import {mockServiceForDoc, stubService} from '../../testing/test-helper';
 
-describes.realWin('cacheCidApi', {amp: true}, env => {
+describes.realWin('cacheCidApi', {amp: true}, (env) => {
   let ampdoc;
   let api;
   let viewerMock;
@@ -66,7 +66,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
     });
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -86,7 +86,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
             },
           })
         );
-        return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(
             'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
               'rvvfkCif_N9oYLdZEB976uJDhYgL'
@@ -116,7 +116,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
             },
           })
         );
-        return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(null);
           expect(fetchJsonStub).to.be.calledWith(
             'https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
@@ -153,7 +153,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
             },
           })
         );
-        return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(
             'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
               'rvvfkCif_N9oYLdZEB976uJDhYgL'
@@ -165,6 +165,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
       });
 
       it('should fail if the request times out', () => {
+        expectAsyncConsoleError(/fetchCidTimeout​​​/);
         fetchJsonStub.callsFake(() => {
           return new Promise((resolve, unused) => {
             clock.setTimeout(resolve, 35000, {
@@ -178,7 +179,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
         });
         const response = api
           .getScopedCid('AMP_ECID_GOOGLE')
-          .then(cid => {
+          .then((cid) => {
             expect(cid).to.equal(null);
             expect(fetchJsonStub).to.be.calledWith(
               'https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',

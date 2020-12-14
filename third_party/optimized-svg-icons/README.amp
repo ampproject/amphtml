@@ -10,5 +10,8 @@ Created a derived css file from the index.html, contained in
 amp-social-share-svgs.css. To be imported into the ampproject to provide in-line
 svg icons through css.
 
+Created a derived JS file from the index.html, contained in social-share-svgs.js.
+To be imported into the ampproject to provide svg icons through JSX.
+
 Gist created verbatim from source for referencing files:
 https://gist.github.com/anonymous/920164b2cafcdade77a2

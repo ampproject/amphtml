@@ -1,7 +1,7 @@
 ---
 $category@: presentation
 formats:
-  - websites
+  - stories
 teaser:
   text: Dynamically inserts ads into a Story.
 ---
@@ -25,17 +25,6 @@ limitations under the License.
 # amp-story-auto-ads
 
 Dynamically inserts ads into a Story.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-</table>
 
 # Getting Started
 
@@ -69,11 +58,11 @@ looks like the following:
   <amp-story-auto-ads>
     <script type="application/json">
       {
-         "ad-attributes": {
-           "type": "doubleclick",
-           "data-slot": "/30497360/a4a/amp_story_dfp_example"
-         }
-       }
+        "ad-attributes": {
+          "type": "doubleclick",
+          "data-slot": "/30497360/a4a/amp_story_dfp_example"
+        }
+      }
     </script>
   </amp-story-auto-ads>
   ...
@@ -112,7 +101,7 @@ A common use case is to pass targeting data or RTC configuration to the underlyi
         "rtc-config": {
           "urls": ["https://rtcEndpoint.biz/"]
         },
-        json: {
+        "json": {
           "targeting": {
             "loc": "usa",
             "animal": "cat"

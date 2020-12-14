@@ -44,7 +44,7 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
   const sSizes = s.split(',');
   userAssert(sSizes.length > 0, 'sizes has to have at least one size');
   const sizes = [];
-  sSizes.forEach(sSize => {
+  sSizes.forEach((sSize) => {
     sSize = sSize.replace(/\s+/g, ' ').trim();
     if (sSize.length == 0) {
       return;

@@ -15,7 +15,6 @@
  */
 
 import '../amp-bind';
-import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
 import {UrlReplacementPolicy} from '../../../../src/batched-json';
@@ -28,7 +27,7 @@ describes.realWin(
       extensions: ['amp-bind:0.1'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampdoc;
 
@@ -63,10 +62,6 @@ describes.realWin(
       element = getAmpState();
       ampState = element.implementation_;
 
-      env.sandbox
-        .stub(xhrUtils, 'getViewerAuthTokenIfAvailable')
-        .returns(Promise.resolve());
-
       // TODO(choumx): Remove stubbing of private function fetch_() once
       // batchFetchJsonFor() is easily stub-able.
       env.sandbox
@@ -96,14 +91,13 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(
         /* ampdoc */ env.sandbox.match.any,
         UrlReplacementPolicy.ALL,
-        /* refresh */ env.sandbox.match.falsy,
-        /* token */ env.sandbox.match.falsy
+        /* refresh */ env.sandbox.match.falsy
       );
 
       expect(bind.setState).calledWithMatch(
@@ -127,7 +121,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(actions.trigger).to.have.been.calledWithExactly(
         element,
@@ -166,7 +160,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // One call from build(), one call from "refresh" action.
       expect(ampState.fetch_).to.have.been.calledTwice;
@@ -183,7 +177,7 @@ describes.realWin(
       );
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.not.have.been.called;
     });
@@ -205,7 +199,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
@@ -243,41 +237,12 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.called;
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
         {skipEval: false, skipAmpState: true}
-      );
-    });
-
-    it('should use token with [crossorigin="amp-viewer-auth-token-via-post"]`', async () => {
-      xhrUtils.getViewerAuthTokenIfAvailable.returns(
-        Promise.resolve('idToken')
-      );
-
-      element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      element.build();
-
-      whenFirstVisiblePromiseResolve();
-      await whenFirstVisiblePromise;
-
-      // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      expect(ampState.fetch_).to.have.been.calledOnce;
-      expect(ampState.fetch_).to.have.been.calledWithExactly(
-        /* ampdoc */ env.sandbox.match.any,
-        UrlReplacementPolicy.ALL,
-        /* refresh */ env.sandbox.match.falsy,
-        'idToken'
-      );
-
-      expect(bind.setState).calledWithMatch(
-        {myAmpState: {remote: 'data'}},
-        {skipEval: true, skipAmpState: false}
       );
     });
   }

@@ -142,11 +142,13 @@ export class ViewportInterface extends Disposable {
   /**
    * Returns the rect of the element within the document.
    * Note that this function should be called in vsync measure. Please consider
-   * using `getLayoutRectAsync` instead.
+   * using `getClientRectAsync` instead.
    * @param {!Element} el
+   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
+   *    premeasured ClientRect instead of calling getBoundingClientRect.
    * @return {!../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(el) {}
+  getLayoutRect(el, opt_premeasuredRect) {}
 
   /**
    * Returns the clientRect of the element.
@@ -297,6 +299,7 @@ export class ViewportInterface extends Disposable {
 
   /**
    * Updates the fixed layer.
+   * @return {!Promise}
    */
   updateFixedLayer() {}
 
@@ -314,5 +317,11 @@ export class ViewportInterface extends Disposable {
    * @param {!Element} element
    */
   removeFromFixedLayer(element) {}
+
+  /**
+   * Create fixed layer from constructor (invoked by viewer integration)
+   * @param {typeof ../fixed-layer.FixedLayer} constructor
+   */
+  createFixedLayer(constructor) {}
 }
 /* eslint-enable no-unused-vars */

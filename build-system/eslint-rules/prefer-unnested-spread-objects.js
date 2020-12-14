@@ -63,7 +63,7 @@ module.exports = {
 
           fix(fixer) {
             const {properties, parent} = node;
-            const texts = properties.map(prop => sourceCode.getText(prop));
+            const texts = properties.map((prop) => sourceCode.getText(prop));
 
             if (texts.length > 0) {
               return fixer.replaceText(node.parent, texts.join(','));

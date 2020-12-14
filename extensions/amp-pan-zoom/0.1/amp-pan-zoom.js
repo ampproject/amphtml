@@ -32,6 +32,7 @@ import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
 import {px, scale, setStyles, translate} from '../../../src/style';
@@ -181,7 +182,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.initialY_ = this.getNumberAttributeOr_('initial-y', 0);
     this.resetOnResize_ = this.element.hasAttribute('reset-on-resize');
     this.disableDoubleTap_ = this.element.hasAttribute('disable-double-tap');
-    this.registerAction('transform', invocation => {
+    this.registerAction('transform', (invocation) => {
       const {args} = invocation;
       if (!args) {
         return;
@@ -406,9 +407,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   setContentBoxOffsets_() {
     const contentBox = layoutRectFromDomRect(
-      dev()
-        .assertElement(this.content_)
-        ./*OK*/ getBoundingClientRect()
+      dev().assertElement(this.content_)./*OK*/ getBoundingClientRect()
     );
     // Set content positions to offset from element box
     this.contentBox_.top = contentBox.top - this.elementBox_.top;
@@ -465,7 +464,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   setupEvents_() {
     this.setupGestures_();
-    this.unlistenMouseDown_ = listen(this.element, 'mousedown', e =>
+    this.unlistenMouseDown_ = listen(this.element, 'mousedown', (e) =>
       this.onMouseDown_(e)
     );
   }
@@ -512,10 +511,10 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.mouseStartX_ = clientX;
     this.mouseStartY_ = clientY;
 
-    this.unlistenMouseMove_ = listen(this.element, 'mousemove', e =>
+    this.unlistenMouseMove_ = listen(this.element, 'mousemove', (e) =>
       this.onMouseMove_(e)
     );
-    this.unlistenMouseUp_ = listen(this.win, 'mouseup', e =>
+    this.unlistenMouseUp_ = listen(this.win, 'mouseup', (e) =>
       this.onMouseUp_(e)
     );
   }
@@ -567,17 +566,17 @@ export class AmpPanZoom extends AMP.BaseElement {
       }
     });
 
-    this.gestures_.onGesture(PinchRecognizer, e => this.handlePinch(e.data));
+    this.gestures_.onGesture(PinchRecognizer, (e) => this.handlePinch(e.data));
 
     // Having a doubletap gesture results in a 200ms delay in tap gestures in
     // order to differentiate the two gestures. Some users may choose to disable
     // it to avoid the 200ms tap delay.
     if (!this.disableDoubleTap_) {
-      this.gestures_.onGesture(DoubletapRecognizer, e =>
+      this.gestures_.onGesture(DoubletapRecognizer, (e) =>
         this.handleDoubleTap(e.data)
       );
       // Override all taps to enable tap events on content
-      this.gestures_.onGesture(TapRecognizer, e => this.handleTap_(e.data));
+      this.gestures_.onGesture(TapRecognizer, (e) => this.handleTap_(e.data));
     }
   }
 
@@ -643,8 +642,9 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   registerPanningGesture_() {
     // Movable.
-    this.unlistenOnSwipePan_ = this.gestures_.onGesture(SwipeXYRecognizer, e =>
-      this.handleSwipe(e.data)
+    this.unlistenOnSwipePan_ = this.gestures_.onGesture(
+      SwipeXYRecognizer,
+      (e) => this.handleSwipe(e.data)
     );
   }
 
@@ -774,7 +774,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       })
     );
     this.action_.trigger(this.element, 'transformEnd', event, ActionTrust.HIGH);
-    this.element.dispatchCustomEvent('transformEnd');
+    dispatchCustomEvent(this.element, 'transformEnd');
   }
 
   /**
@@ -956,7 +956,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       const yFunc = numeric(this.posY_, newPosY);
       return Animation.animate(
         dev().assertElement(this.content_),
-        time => {
+        (time) => {
           this.scale_ = scaleFunc(time);
           this.posX_ = xFunc(time);
           this.posY_ = yFunc(time);
@@ -999,6 +999,6 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpPanZoom, CSS);
 });

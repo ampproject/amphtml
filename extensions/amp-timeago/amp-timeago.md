@@ -4,7 +4,7 @@ formats:
   - websites
   - email
 teaser:
-  text: Provides fuzzy timestamps by formatting dates as "time ago" (for example, 3 hours ago).
+  text: Provides fuzzy timestamps by formatting dates as time ago (for example, 3 hours ago).
 ---
 
 <!--
@@ -25,27 +25,6 @@ limitations under the License.
 
 # amp-timeago
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides fuzzy timestamps that you can use on your AMP pages, based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, fixed-height, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-timeago/">amp-timeago example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Usage
 
 Use the amp-timago component to count up to, or away from, a specified date and time.
@@ -63,8 +42,9 @@ Example:
   height="20"
   datetime="2017-04-11T00:37:33.809Z"
   locale="en"
-  >Saturday 11 April 2017 00.37</amp-timeago
 >
+  Saturday 11 April 2017 00.37
+</amp-timeago>
 ```
 
 [/example]
@@ -77,50 +57,50 @@ The `amp-timeago` component requires a placeholder in the text node. The calcula
 
 The required `datetime` attribute sets the date and time. The value must be an [ISO datetime](https://www.w3.org/QA/Tips/iso-date).
 
-- Express time in UTC (Coordinated Universal Time): `2017-03-10T01:00:00Z`
-- Express in local time with a time zone offset: `2017-03-09T20:00:00-05:00`
+-   Express time in UTC (Coordinated Universal Time): `2017-03-10T01:00:00Z`
+-   Express in local time with a time zone offset: `2017-03-09T20:00:00-05:00`
 
 ### `locale` (optional)
 
 The local default is `en`. Add the `locale` attribute and specify one of the following values to chance the local.
 
-- `ar` (Arabic)
-- `be` (Belarusian)
-- `bg` (Bulgarian)
-- `ca` (Catalan)
-- `da` (Danish)
-- `de` (German)
-- `el` (Greek)
-- `en` (English)
-- `enShort` (English - short)
-- `es` (Spanish)
-- `eu` (Basque)
-- `fi` (Finnish)
-- `fr` (French)
-- `he` (Hebrew)
-- `hu` (Hungarian)
-- `inBG` (Bangla)
-- `inHI` (Hindi)
-- `inID` (Malay)
-- `it` (Italian)
-- `ja` (Japanese)
-- `ko` (Korean)
-- `ml` (Malayalam)
-- `nbNO` (Norwegian Bokmål)
-- `nl` (Dutch)
-- `nnNO` (Norwegian Nynorsk)
-- `pl` (Polish)
-- `ptBR` (Portuguese)
-- `ro` (Romanian)
-- `ru` (Russian)
-- `sv` (Swedish)
-- `ta` (Tamil)
-- `th` (Thai)
-- `tr` (Turkish)
-- `uk` (Ukrainian)
-- `vi` (Vietnamese)
-- `zhCN` (Chinese)
-- `zhTW` (Taiwanese)
+-   `ar` (Arabic)
+-   `be` (Belarusian)
+-   `bg` (Bulgarian)
+-   `ca` (Catalan)
+-   `da` (Danish)
+-   `de` (German)
+-   `el` (Greek)
+-   `en` (English)
+-   `enShort` (English - short)
+-   `es` (Spanish)
+-   `eu` (Basque)
+-   `fi` (Finnish)
+-   `fr` (French)
+-   `he` (Hebrew)
+-   `hu` (Hungarian)
+-   `inBG` (Bangla)
+-   `inHI` (Hindi)
+-   `inID` (Malay)
+-   `it` (Italian)
+-   `ja` (Japanese)
+-   `ko` (Korean)
+-   `ml` (Malayalam)
+-   `nbNO` (Norwegian Bokmål)
+-   `nl` (Dutch)
+-   `nnNO` (Norwegian Nynorsk)
+-   `pl` (Polish)
+-   `ptBR` (Portuguese)
+-   `ro` (Romanian)
+-   `ru` (Russian)
+-   `sv` (Swedish)
+-   `ta` (Tamil)
+-   `th` (Thai)
+-   `tr` (Turkish)
+-   `uk` (Ukrainian)
+-   `vi` (Vietnamese)
+-   `zhCN` (Chinese)
+-   `zhTW` (Taiwanese)
 
 ### `cutoff`
 

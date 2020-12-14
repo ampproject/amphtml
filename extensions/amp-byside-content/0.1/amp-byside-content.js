@@ -111,7 +111,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     /** @const {function()} */
     this.boundUpdateSize_ = debounce(
       this.win,
-      data => {
+      (data) => {
         this.updateSize_(/** @type {Object} */ (data));
       },
       100
@@ -200,7 +200,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.applyFillContent(iframe);
 
     return this.composeSrcUrl_()
-      .then(src => {
+      .then((src) => {
         this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
         iframe.src = this.iframeSrc_;
 
@@ -391,7 +391,7 @@ export class AmpBysideContent extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 
     if (this.iframe_) {
@@ -403,6 +403,6 @@ export class AmpBysideContent extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-byside-content', '0.1', AMP => {
+AMP.extension('amp-byside-content', '0.1', (AMP) => {
   AMP.registerElement('amp-byside-content', AmpBysideContent, CSS);
 });

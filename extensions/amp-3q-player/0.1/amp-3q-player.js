@@ -130,11 +130,6 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   pauseCallback() {
     if (this.iframe_) {
       this.pause();
@@ -154,8 +149,8 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(getData(event));
-    if (data === undefined) {
-      return;
+    if (data == null) {
+      return; // we only process valid json
     }
 
     const eventType = data['data'];
@@ -294,6 +289,6 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3QPlayer);
 });

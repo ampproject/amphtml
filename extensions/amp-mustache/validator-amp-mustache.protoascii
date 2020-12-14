@@ -36,9 +36,8 @@ tags: {  # amp-mustache
 }
 tags: {  # amp-mustache
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
-  spec_name: "SCRIPT[custom-template=amp-mustache] (AMP4ADS/ACTIONS)"
+  spec_name: "SCRIPT[custom-template=amp-mustache] (AMP4ADS)"
   extension_spec: {
     name: "amp-mustache"
     extension_type: CUSTOM_TEMPLATE
@@ -67,7 +66,6 @@ tags: {  # amp-mustache
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "SCRIPT type=text/plain"
   disallowed_ancestor: "TEMPLATE"
@@ -80,10 +78,10 @@ tags: {
   attrs: {
     name: "id"
     add_value_to_set: TEMPLATE_IDS
-    # When updating this blacklisted_value_regex, also update elsewhere in this
+    # When updating this disallowed_value_regex, also update elsewhere in this
     # file, and in mandatory-id-attr and $GLOBAL_ATTRS in
     # validator-main.protoascii, and validator-amp-script.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -216,7 +214,7 @@ tags: {
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -243,10 +241,10 @@ tags: {
   attrs: {
     name: "id"
     add_value_to_set: TEMPLATE_IDS
-    # When updating this blacklisted_value_regex, also update elsewhere in this
+    # When updating this disallowed_value_regex, also update elsewhere in this
     # file, and in mandatory-id-attr and $GLOBAL_ATTRS in
     # validator-main.protoascii, and validator-amp-script.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -379,7 +377,7 @@ tags: {
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -389,7 +387,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TEMPLATE"
   mandatory_ancestor: "BODY"
   # <template> tags may not be nested inside other <template> tags.
@@ -408,10 +405,10 @@ tags: {
   attrs: {
     name: "id"
     add_value_to_set: TEMPLATE_IDS
-    # When updating this blacklisted_value_regex, also update elsewhere in this
+    # When updating this disallowed_value_regex, also update elsewhere in this
     # file, and in mandatory-id-attr and $GLOBAL_ATTRS in
     # validator-main.protoascii, and validator-amp-script.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -561,10 +558,10 @@ tags: {
   attrs: {
     name: "id"
     add_value_to_set: TEMPLATE_IDS
-    # When updating this blacklisted_value_regex, also update elsewhere in this
+    # When updating this disallowed_value_regex, also update elsewhere in this
     # file, and in mandatory-id-attr and $GLOBAL_ATTRS in
     # validator-main.protoascii, and validator-amp-script.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"

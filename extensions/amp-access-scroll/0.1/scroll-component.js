@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,38 @@
  */
 
 import {Services} from '../../../src/services';
+import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {createElementWithAttributes} from '../../../src/dom';
+import {devAssert} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 
 /** @abstract */
 export class ScrollComponent {
-  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} doc */
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
+   */
   constructor(doc) {
     /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.doc_ = doc;
 
     /** @protected @property {?function(Window):undefined} */
     this.setWindow_ = null;
+
+    /** @protected {?Element} */
+    this.root_ = null;
+
     /** @protected {?HTMLIFrameElement} */
     this.frame_ = null;
 
+    /** @protected {ScrollComponent.HorizontalLayout} */
+    this.layout_ = {
+      'width': null,
+      'left': null,
+      'right': null,
+    };
+
     /** @type {Promise<Window>} */
-    this.window = new Promise(resolve => {
+    this.window = new Promise((resolve) => {
       /** @protected */
       this.setWindow_ = resolve;
     });
@@ -51,19 +67,19 @@ export class ScrollComponent {
       attrs
     );
     if (Array.isArray(children)) {
-      children.forEach(c => e.appendChild(c));
+      children.forEach((c) => e.appendChild(c));
     }
     return e;
   }
 
   /**
    * Add element to doc and promote to fixed layer.
-   * @param {!Element} el
    * @protected
    * */
-  mount_(el) {
-    this.doc_.getBody().appendChild(el);
-    Services.viewportForDoc(this.doc_).addToFixedLayer(el);
+  mount() {
+    const root = devAssert(this.root_);
+    this.doc_.getBody().appendChild(root);
+    Services.viewportForDoc(this.doc_).addToFixedLayer(root);
   }
 
   /**
@@ -71,7 +87,70 @@ export class ScrollComponent {
    * @param {function():undefined} mutator
    * @protected
    */
-  mutate_(mutator) {
+  mutate(mutator) {
     Services.vsyncFor(this.doc_.win).mutate(mutator);
   }
+
+  /**
+   *
+   * @param {string} className
+   * @param {boolean} condition
+   * @protected
+   */
+  toggleClass(className, condition) {
+    const classes = devAssert(this.root_).classList;
+    if (condition) {
+      classes.add(className);
+    } else {
+      classes.remove(className);
+    }
+  }
+
+  /**
+   * @param {Object} updates
+   * @return {boolean} true if changed
+   * @protected
+   */
+  updateHorizontalLayout(updates) {
+    let changed = false;
+    // only update styles already set in the layout, updates in place
+    Object.keys(this.layout_).forEach((key) => {
+      if (!hasOwn(updates, key)) {
+        return;
+      }
+      const size = this.cssSize(updates[key]);
+      if (this.layout_[key] !== size) {
+        this.layout_[key] = size;
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  /**
+   * This method should only be called inside of a mutate() callback.
+   *
+   * @protected
+   */
+  renderHorizontalLayout() {
+    setStyles(devAssert(this.root_), assertDoesNotContainDisplay(this.layout_));
+  }
+
+  /**
+   * @param {string|number} size
+   * @return {string}
+   */
+  cssSize(size) {
+    return typeof size === 'number' ? px(size) : size;
+  }
 }
+
+/**
+ * Anything affecting vertical layout (height, top, bottom) is ommitted.
+ * @typedef {{
+ *    width: ?string,
+ *    left: ?string,
+ *    right: ?string
+ * }}
+ */
+ScrollComponent.HorizontalLayout;

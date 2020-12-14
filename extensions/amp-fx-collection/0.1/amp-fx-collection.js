@@ -62,7 +62,7 @@ export class AmpFxCollection {
    */
   scan_() {
     const elements = this.ampdoc_.getRootNode().querySelectorAll('[amp-fx]');
-    iterateCursor(elements, element => {
+    iterateCursor(elements, (element) => {
       if (this.seen_.includes(element)) {
         return;
       }
@@ -85,7 +85,7 @@ export class AmpFxCollection {
     devAssert(!this.seen_.includes(element));
     devAssert(this.ampdoc_.isVisible());
 
-    getFxTypes(element).forEach(type => {
+    getFxTypes(element).forEach((type) => {
       this.install_(element, type);
     });
 
@@ -107,6 +107,6 @@ export class AmpFxCollection {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc(TAG, AmpFxCollection);
 });

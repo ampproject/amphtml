@@ -31,8 +31,8 @@ For further information on RTC please see the [RTC Publisher Implementation Guid
 
 To specify a Doubleclick `amp-ad` integration with Yieldbot, include the vendor `"yieldbot"` in your `rtc-config` tag attributed as shown in the example below. This particular example shows that the Yieldbot demand configuration for the respective Doubleclick slot, `/2476204/medium-rectangle` where:
 
-- `"YB_PSN": "1234"`, Yieldbot publisher number
-- `"YB_SLOT": "medrec"`, Yieldbot slot name
+-   `"YB_PSN": "1234"`, Yieldbot publisher number
+-   `"YB_SLOT": "medrec"`, Yieldbot slot name
 
 ```html
 <amp-ad
@@ -58,15 +58,15 @@ To specify a Doubleclick `amp-ad` integration with Yieldbot, include the vendor 
 
 For integration testing, the Yieldbot Platform can be set to always return a bid for requested slots.
 
-- **Enable** integration testing mode:
-  - http://i.yldbt.com/integration/start
-- **Disable** integration testing mode:
-  - http://i.yldbt.com/integration/stop
+-   **Enable** integration testing mode:
+    -   http://i.yldbt.com/integration/start
+-   **Disable** integration testing mode:
+    -   http://i.yldbt.com/integration/stop
 
 When Yieldbot testing mode is enabled, a cookie (`__ybot_test`) on the domain `.yldbt.com` tells the Yieldbot ad server to always return a bid and when creative is requested, return a static integration testing creative.
 
 **_Note:_**
 
-- No ad serving metrics are impacted when integration testing mode is enabled.
-- The `__ybot_test` cookie expires in 24 hours.
-- It is good practice to action the "Stop testing" Url when testing is complete to return to normal ad delivery.
+-   No ad serving metrics are impacted when integration testing mode is enabled.
+-   The `__ybot_test` cookie expires in 24 hours.
+-   It is good practice to action the "Stop testing" Url when testing is complete to return to normal ad delivery.

@@ -24,7 +24,7 @@ describes.endtoend(
     environments: ['single', 'viewer-demo'],
     initialRect: {width: 800, height: 800},
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

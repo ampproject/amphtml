@@ -27,13 +27,13 @@
 // const args = [1, 2, 3, ...array];
 // bar(...args);
 // ```
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    'ArrayExpression > SpreadElement': function(node) {
+    'ArrayExpression > SpreadElement': function (node) {
       context.report({node, message: 'Iterator spreading is not allowed.'});
     },
 
-    'CallExpression > SpreadElement': function(node) {
+    'CallExpression > SpreadElement': function (node) {
       context.report({node, message: 'Iterator spreading is not allowed.'});
     },
   };

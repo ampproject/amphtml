@@ -17,7 +17,7 @@
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 const {execScriptAsync, exec} = require('./exec');
-const {isTravisBuild} = require('./travis');
+const {isCiBuild} = require('./ci');
 
 const {green, cyan} = colors;
 
@@ -26,13 +26,13 @@ const killSuffix = process.platform == 'win32' ? '>NUL' : '';
 
 /**
  * Creates an async child process that handles Ctrl + C and immediately cancels
- * the ongoing `gulp watch | build | dist` task.
+ * the ongoing `gulp` task.
  *
  * @param {string} command
  * @return {number}
  */
-exports.createCtrlcHandler = function(command) {
-  if (!isTravisBuild()) {
+exports.createCtrlcHandler = function (command) {
+  if (!isCiBuild()) {
     log(
       green('Running'),
       cyan(command) + green('. Press'),
@@ -66,7 +66,7 @@ exports.createCtrlcHandler = function(command) {
  *
  * @param {string} handlerProcess
  */
-exports.exitCtrlcHandler = function(handlerProcess) {
+exports.exitCtrlcHandler = function (handlerProcess) {
   const exitCmd = killCmd + ' ' + handlerProcess + ' ' + killSuffix;
   exec(exitCmd);
 };

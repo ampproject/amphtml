@@ -67,9 +67,9 @@ const roughNestedLength = '["xx"]'.length;
  * @param {string} path
  * @return {string}
  */
-const relativeToRoot = path => `${__dirname}/../../../${path}`;
+const relativeToRoot = (path) => `${__dirname}/../../../${path}`;
 
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   let messages;
   let nextMessageId;
   let messagesPath;
@@ -127,7 +127,7 @@ module.exports = function({types: t}) {
    * @return {../log-module-metadata.LogMethodMetadataDef}
    */
   function getTransformableCalleeMeta({callee}) {
-    if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
+    if (assertAliases.some((name) => t.isIdentifier(callee, {name}))) {
       return transformableMethods.assert;
     }
     // is method().call().
@@ -137,7 +137,9 @@ module.exports = function({types: t}) {
     // is either dev() or user() object.
     const singletonCallee = callee.object.callee;
     if (
-      !singletonFunctions.some(name => t.isIdentifier(singletonCallee, {name}))
+      !singletonFunctions.some((name) =>
+        t.isIdentifier(singletonCallee, {name})
+      )
     ) {
       return;
     }

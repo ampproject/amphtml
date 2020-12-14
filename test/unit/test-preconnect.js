@@ -23,7 +23,7 @@ import {
   setPreconnectFeaturesForTesting,
 } from '../../src/preconnect';
 
-describes.sandboxed('preconnect', {}, env => {
+describes.sandboxed('preconnect', {}, (env) => {
   let ampdoc;
   let iframeClock;
   let clock;
@@ -39,7 +39,7 @@ describes.sandboxed('preconnect', {}, env => {
   const javascriptUrlPrefix = 'javascript';
 
   function getPreconnectIframe(detectFeatures = false) {
-    return createIframePromise().then(iframe => {
+    return createIframePromise().then((iframe) => {
       iframeClock = lolex.install({target: iframe.win});
       if (detectFeatures) {
         setPreconnectFeaturesForTesting(null);
@@ -84,7 +84,7 @@ describes.sandboxed('preconnect', {}, env => {
 
   it('should preconnect', () => {
     isSafari = false;
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
       preconnect.url(ampdoc, 'https://a.preconnect.com/foo/bar');
       preconnect.url(ampdoc, 'https://a.preconnect.com/other');
@@ -118,7 +118,7 @@ describes.sandboxed('preconnect', {}, env => {
     });
   });
 
-  it('should preconnect to origins', async function() {
+  it('should preconnect to origins', async function () {
     isSafari = false;
     const iframe = await getPreconnectIframe();
     sandbox.stub(Services, 'documentInfoForDoc').returns({
@@ -136,7 +136,7 @@ describes.sandboxed('preconnect', {}, env => {
   it('should preconnect with known support', () => {
     isSafari = false;
     preconnectSupported = true;
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
       preconnect.url(ampdoc, 'https://a.preconnect.com/foo/bar');
       preconnect.url(ampdoc, 'https://a.preconnect.com/other');
@@ -169,7 +169,7 @@ describes.sandboxed('preconnect', {}, env => {
 
   it('should preconnect with polyfill', () => {
     isSafari = true;
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       clock.tick(1485531293690);
       const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
       const send = sandbox.spy(XMLHttpRequest.prototype, 'send');
@@ -207,7 +207,7 @@ describes.sandboxed('preconnect', {}, env => {
   });
 
   it('should cleanup', () => {
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       preconnect.url(ampdoc, 'https://c.preconnect.com/foo/bar');
       return visiblePromise.then(() => {
         expect(
@@ -235,7 +235,7 @@ describes.sandboxed('preconnect', {}, env => {
   });
 
   it('should preconnect to 2 different origins', () => {
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       preconnect.url(ampdoc, 'https://d.preconnect.com/foo/bar');
       // Different origin
       preconnect.url(ampdoc, 'https://e.preconnect.com/other');
@@ -257,7 +257,7 @@ describes.sandboxed('preconnect', {}, env => {
   });
 
   it('should timeout preconnects', () => {
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       preconnect.url(ampdoc, 'https://x.preconnect.com/foo/bar');
       return visiblePromise.then(() => {
         expect(
@@ -287,7 +287,7 @@ describes.sandboxed('preconnect', {}, env => {
   });
 
   it('should timeout preconnects longer with active connect', () => {
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       preconnect.url(
         ampdoc,
         'https://y.preconnect.com/foo/bar',
@@ -326,7 +326,7 @@ describes.sandboxed('preconnect', {}, env => {
     .run('should add links if feature if detected', () => {
       // Don't stub preload support allow the test to run through the browser
       // default regardless of support or not.
-      return getPreconnectIframe(/* detectFeatures */ true).then(iframe => {
+      return getPreconnectIframe(/* detectFeatures */ true).then((iframe) => {
         preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar', 'script');
         preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar');
         preconnect.preload(ampdoc, 'https://a.prefetch.com/other', 'style');
@@ -351,7 +351,7 @@ describes.sandboxed('preconnect', {}, env => {
 
   it('should preload', () => {
     preloadSupported = true;
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar', 'script');
       preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar');
       preconnect.preload(ampdoc, 'https://a.prefetch.com/other', 'style');

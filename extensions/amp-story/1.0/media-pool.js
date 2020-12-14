@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 import {
   BlessTask,
   ELEMENT_BLESSED_PROPERTY_NAME,
@@ -35,7 +34,6 @@ import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode, matches} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';
 
@@ -194,19 +192,6 @@ export class MediaPool {
      */
     this.blessed_ = false;
 
-    /**
-     * The default source to use for pool-created audio sources,
-     * @private @const {!Object<!MediaType, string>}
-     */
-    this.defaultSources_ = {
-      [MediaType.AUDIO]: isExperimentOn(win, 'disable-amp-story-default-media')
-        ? ''
-        : BLANK_AUDIO_SRC,
-      [MediaType.VIDEO]: isExperimentOn(win, 'disable-amp-story-default-media')
-        ? ''
-        : BLANK_VIDEO_SRC,
-    };
-
     /** @private {?Array<!AmpElement>} */
     this.ampElementsToBless_ = null;
 
@@ -246,7 +231,7 @@ export class MediaPool {
   initializeMediaPool_(maxCounts) {
     let poolIdCounter = 0;
 
-    this.forEachMediaType_(key => {
+    this.forEachMediaType_((key) => {
       const type = MediaType[key];
       const count = maxCounts[type] || 0;
 
@@ -271,21 +256,15 @@ export class MediaPool {
       // comparison with the itervar below, so we have to roll it by hand.
       for (let i = count; i > 0; i--) {
         // Use seed element at end of set to prevent wasting it.
-        const mediaEl =
-          /** @type {!PoolBoundElementDef} */ (i == 1
-            ? mediaElSeed
-            : mediaElSeed.cloneNode(/* deep */ true));
+        const mediaEl = /** @type {!PoolBoundElementDef} */ (i == 1
+          ? mediaElSeed
+          : mediaElSeed.cloneNode(/* deep */ true));
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
-        const sources = this.getDefaultSource_(type);
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
+        // In Firefox, cloneNode() does not properly copy the muted property
+        // that was set in the seed. We need to set it again here.
+        mediaEl.muted = true;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
-        this.enqueueMediaElementTask_(
-          mediaEl,
-          new UpdateSourcesTask(this.win_, sources)
-        );
-        // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
-        // is returned.  If so, we should adjust the pool size/distribution
-        // between media types.
         this.unallocated[type].push(mediaEl);
       }
     });
@@ -308,18 +287,11 @@ export class MediaPool {
   }
 
   /**
-   * @param {!MediaType} mediaType The media type whose source should be
-   *     retrieved.
-   * @return {!Sources} The default source for the specified type of media.
+   * @return {!Sources} The default source, empty.
+   * @private
    */
-  getDefaultSource_(mediaType) {
-    const sourceStr = this.defaultSources_[mediaType];
-    if (sourceStr === undefined) {
-      dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
-      return new Sources();
-    }
-
-    return new Sources(sourceStr);
+  getDefaultSource_() {
+    return new Sources();
   }
 
   /**
@@ -402,7 +374,7 @@ export class MediaPool {
     }
 
     const allocatedEls = this.allocated[mediaType];
-    const index = findIndex(allocatedEls, poolMediaEl => {
+    const index = findIndex(allocatedEls, (poolMediaEl) => {
       return poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] === domMediaEl.id;
     });
 
@@ -544,13 +516,14 @@ export class MediaPool {
       new SwapIntoDomTask(placeholderEl)
     ).then(
       () => {
-        this.maybeResetAmpMedia_(ampMediaForPoolEl);
-        this.maybeResetAmpMedia_(ampMediaForDomEl);
         this.enqueueMediaElementTask_(
           poolMediaEl,
           new UpdateSourcesTask(this.win_, sources)
         );
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
+        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
+          this.maybeResetAmpMedia_(ampMediaForPoolEl);
+          this.maybeResetAmpMedia_(ampMediaForDomEl);
+        });
       },
       () => {
         this.forceDeallocateMediaElement_(poolMediaEl);
@@ -572,7 +545,7 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then(impl => {
+    componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
       }
@@ -586,13 +559,12 @@ export class MediaPool {
    *     has been reset.
    */
   resetPoolMediaElementSource_(poolMediaEl) {
-    const mediaType = this.getMediaType_(poolMediaEl);
-    const defaultSources = this.getDefaultSource_(mediaType);
+    const defaultSources = this.getDefaultSource_();
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new UpdateSourcesTask(this.win_, defaultSources)
-    );
+    ).then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()));
   }
 
   /**
@@ -637,10 +609,10 @@ export class MediaPool {
    * @private
    */
   forEachMediaElement_(callbackFn) {
-    [this.allocated, this.unallocated].forEach(mediaSet => {
-      this.forEachMediaType_(key => {
+    [this.allocated, this.unallocated].forEach((mediaSet) => {
+      this.forEachMediaType_((key) => {
         const type = MediaType[key];
-        const els = mediaSet[type];
+        const els = /** @type {!Array} */ (mediaSet[type]);
         if (!els) {
           return;
         }
@@ -654,7 +626,7 @@ export class MediaPool {
    * a media element that can be used in its stead for playback.
    * @param {!DomElementDef} domMediaEl The media element, found in the
    *     DOM, whose content should be loaded.
-   * @return {Promise<!PoolBoundElementDef>} A media element from the pool that
+   * @return {Promise<!PoolBoundElementDef|undefined>} A media element from the pool that
    *     can be used to replace the specified element.
    */
   loadInternal_(domMediaEl) {
@@ -797,7 +769,7 @@ export class MediaPool {
    *     element has been successfully played.
    */
   play(domMediaEl) {
-    return this.loadInternal_(domMediaEl).then(poolMediaEl => {
+    return this.loadInternal_(domMediaEl).then((poolMediaEl) => {
       if (!poolMediaEl) {
         return Promise.resolve();
       }
@@ -929,7 +901,7 @@ export class MediaPool {
 
     this.ampElementsToBless_ = null; // GC
 
-    this.forEachMediaElement_(mediaEl => {
+    this.forEachMediaElement_((mediaEl) => {
       blessPromises.push(this.bless_(mediaEl));
     });
 
@@ -937,7 +909,7 @@ export class MediaPool {
       () => {
         this.blessed_ = true;
       },
-      reason => {
+      (reason) => {
         dev().expectedError('AMP-STORY', 'Blessing all media failed: ', reason);
       }
     );
@@ -959,7 +931,7 @@ export class MediaPool {
     const executionFn = () => {
       task
         .execute(mediaEl)
-        .catch(reason => dev().error('AMP-STORY', reason))
+        .catch((reason) => dev().error('AMP-STORY', reason))
         .then(() => {
           // Run regardless of success or failure of task execution.
           queue.shift();
@@ -1017,7 +989,7 @@ export class MediaPool {
     instances[newId] = new MediaPool(
       toWin(root.getElement().ownerDocument.defaultView),
       root.getMaxMediaElementCounts(),
-      element => root.getElementDistance(element)
+      (element) => root.getElementDistance(element)
     );
 
     return instances[newId];

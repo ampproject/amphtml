@@ -25,11 +25,10 @@ import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {htmlFor} from '../../src/static-template';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
-import {setParentWindow} from '../../src/service';
 import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
-describes.sandboxed('StandardActions', {}, env => {
+describes.sandboxed('StandardActions', {}, (env) => {
   let standardActions;
   let mutateElementStub;
   let scrollStub;
@@ -47,10 +46,16 @@ describes.sandboxed('StandardActions', {}, env => {
     return element;
   }
 
-  function stubMutate(methodName) {
+  function stubMutate() {
     return env.sandbox
-      .stub(standardActions.mutator_, methodName)
+      .stub(standardActions.mutator_, 'mutateElement')
       .callsFake((unusedElement, mutator) => mutator());
+  }
+  function stubMutateNoop() {
+    standardActions.mutator_.mutateElement.restore();
+    return env.sandbox
+      .stub(standardActions.mutator_, 'mutateElement')
+      .callsFake(() => {});
   }
 
   function expectElementMutatedAsync(element) {
@@ -63,12 +68,8 @@ describes.sandboxed('StandardActions', {}, env => {
     expect(element).to.have.attribute('hidden');
   }
 
-  function expectElementToHaveBeenShown(element, sync = false) {
-    if (sync) {
-      expect(mutateElementStub).to.not.have.been.called;
-    } else {
-      expectElementMutatedAsync(element);
-    }
+  function expectElementToHaveBeenShown(element) {
+    expectElementMutatedAsync(element);
     expect(element).to.not.have.attribute('hidden');
     expect(element.hasAttribute('hidden')).to.be.false;
   }
@@ -114,7 +115,7 @@ describes.sandboxed('StandardActions', {}, env => {
     ampdoc = new AmpDocSingle(window);
     env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
     standardActions = new StandardActions(ampdoc);
-    mutateElementStub = stubMutate('mutateElement');
+    mutateElementStub = stubMutate();
     scrollStub = env.sandbox.stub(
       standardActions.viewport_,
       'animateScrollIntoView'
@@ -128,19 +129,13 @@ describes.sandboxed('StandardActions', {}, env => {
     });
 
     it('returns element (direct)', () => {
-      const el = html`
-        <input autofocus />
-      `;
+      const el = html` <input autofocus /> `;
       expect(getAutofocusElementForShowAction(el)).to.equal(el);
     });
 
     it('returns element (wrapped)', () => {
-      const el = html`
-        <input autofocus />
-      `;
-      const wrapper = html`
-        <div><div></div></div>
-      `;
+      const el = html` <input autofocus /> `;
+      const wrapper = html` <div><div></div></div> `;
       wrapper.firstElementChild.appendChild(el);
       expect(getAutofocusElementForShowAction(wrapper)).to.equal(el);
     });
@@ -218,33 +213,31 @@ describes.sandboxed('StandardActions', {}, env => {
           </div>
         `;
         standardActions.handleShow_(trustedInvocation({node}));
-        expectElementToHaveBeenShown(node, /* sync */ false);
+        expectElementToHaveBeenShown(node);
       });
 
       it('executes asynchronously when no autofocus (direct)', () => {
-        const node = html`
-          <input />
-        `;
+        const node = html` <input /> `;
         standardActions.handleShow_(trustedInvocation({node}));
-        expectElementToHaveBeenShown(node, /* sync */ false);
+        expectElementToHaveBeenShown(node);
       });
 
       it('executes synchronously when autofocus (wrapped)', () => {
+        mutateElementStub = stubMutateNoop();
         const node = html`
           <div>
             <div><input autofocus /></div>
           </div>
         `;
         standardActions.handleShow_(trustedInvocation({node}));
-        expectElementToHaveBeenShown(node, /* sync */ true);
+        expectElementToHaveBeenShown(node);
       });
 
       it('executes synchronously when autofocus (direct)', () => {
-        const node = html`
-          <input autofocus />
-        `;
+        mutateElementStub = stubMutateNoop();
+        const node = html` <input autofocus /> `;
         standardActions.handleShow_(trustedInvocation({node}));
-        expectElementToHaveBeenShown(node, /* sync */ true);
+        expectElementToHaveBeenShown(node);
       });
     });
 
@@ -260,37 +253,31 @@ describes.sandboxed('StandardActions', {}, env => {
         });
 
         it('focuses [autofocus] element synchronously (direct)', () => {
-          const node = html`
-            <input autofocus />
-          `;
+          mutateElementStub = stubMutateNoop();
+          const node = html` <input autofocus /> `;
           node.focus = env.sandbox.spy();
 
           standardActions.handleShow_(trustedInvocation({node}));
 
-          expect(mutateElementStub).to.not.have.been.called;
+          expectElementToHaveBeenShown(node);
           expect(node.focus).to.have.been.calledOnce;
         });
 
         it('focuses [autofocus] element synchronously (wrapped)', () => {
-          const wrapper = html`
-            <div><div></div></div>
-          `;
-          const node = html`
-            <input autofocus />
-          `;
+          mutateElementStub = stubMutateNoop();
+          const wrapper = html` <div><div></div></div> `;
+          const node = html` <input autofocus /> `;
           node.focus = env.sandbox.spy();
 
           wrapper.firstElementChild.appendChild(node);
           standardActions.handleShow_(trustedInvocation({node: wrapper}));
 
-          expect(mutateElementStub).to.not.have.been.called;
+          expectElementToHaveBeenShown(wrapper);
           expect(node.focus).to.have.been.calledOnce;
         });
 
         it('does not focus element', () => {
-          const node = html`
-            <input />
-          `;
+          const node = html` <input /> `;
           node.focus = env.sandbox.spy();
 
           standardActions.handleShow_(trustedInvocation({node}));
@@ -303,9 +290,7 @@ describes.sandboxed('StandardActions', {}, env => {
       it('focuses [autofocus] element asynchronously (direct)', () => {
         stubPlatformIsIos(false);
 
-        const node = html`
-          <input autofocus />
-        `;
+        const node = html` <input autofocus /> `;
         node.focus = env.sandbox.spy();
 
         standardActions.handleShow_(trustedInvocation({node}));
@@ -317,12 +302,8 @@ describes.sandboxed('StandardActions', {}, env => {
       it('focuses [autofocus] element asynchronously (wrapped)', () => {
         stubPlatformIsIos(false);
 
-        const wrapper = html`
-          <div><div></div></div>
-        `;
-        const node = html`
-          <input autofocus />
-        `;
+        const wrapper = html` <div><div></div></div> `;
+        const node = html` <input autofocus /> `;
         node.focus = env.sandbox.spy();
 
         wrapper.firstElementChild.appendChild(node);
@@ -333,9 +314,7 @@ describes.sandboxed('StandardActions', {}, env => {
       });
 
       it('does not focus element', () => {
-        const node = html`
-          <input />
-        `;
+        const node = html` <input /> `;
         node.focus = env.sandbox.spy();
 
         standardActions.handleShow_(trustedInvocation({node}));
@@ -680,7 +659,7 @@ describes.sandboxed('StandardActions', {}, env => {
         }
       );
 
-      it('should check throwIfCannotNavigate() for AMP elements', function*() {
+      it('should check throwIfCannotNavigate() for AMP elements', function* () {
         const userError = env.sandbox.stub(user(), 'error');
 
         invocation.caller.tagName = 'AMP-FOO';
@@ -812,10 +791,15 @@ describes.sandboxed('StandardActions', {}, env => {
       const goBackStub = env.sandbox.stub(history, 'goBack');
       invocation.method = 'goBack';
       standardActions.handleAmpTarget_(invocation);
-      expect(goBackStub).to.be.calledOnce;
+      expect(goBackStub).to.be.calledWithExactly(false);
+      goBackStub.resetHistory();
+
+      invocation.args = {navigate: true};
+      standardActions.handleAmpTarget_(invocation);
+      expect(goBackStub).to.be.calledWith(true);
     });
 
-    it('should implement optoutOfCid', function*() {
+    it('should implement optoutOfCid', function* () {
       const cid = cidServiceForDocForTesting(ampdoc);
       const optoutStub = env.sandbox.stub(cid, 'optOut');
       invocation.method = 'optoutOfCid';
@@ -842,7 +826,7 @@ describes.sandboxed('StandardActions', {}, env => {
       };
       invocation.node = element;
 
-      return standardActions.handleAmpTarget_(invocation).then(result => {
+      return standardActions.handleAmpTarget_(invocation).then((result) => {
         expect(result).to.equal('set-state-complete');
         expect(bind.invoke).to.be.calledOnce;
         expect(bind.invoke).to.be.calledWith(invocation);
@@ -867,7 +851,7 @@ describes.sandboxed('StandardActions', {}, env => {
       };
       invocation.node = element;
 
-      return standardActions.handleAmpTarget_(invocation).then(result => {
+      return standardActions.handleAmpTarget_(invocation).then((result) => {
         expect(result).to.equal('push-state-complete');
         expect(bind.invoke).to.be.calledOnce;
         expect(bind.invoke).to.be.calledWith(invocation);
@@ -908,51 +892,6 @@ describes.sandboxed('StandardActions', {}, env => {
       invocation.node = element;
       expect(scrollStub).to.be.calledWith(invocation);
       expect(result).to.eql('scrollToResponsePromise');
-    });
-  });
-
-  describes.fakeWin('installInEmbedWindow', {}, env => {
-    let embedWin;
-    let embedActions;
-
-    beforeEach(() => {
-      embedWin = env.win;
-      setParentWindow(embedWin, window);
-
-      embedActions = {
-        addGlobalTarget: env.sandbox.spy(),
-        addGlobalMethodHandler: env.sandbox.spy(),
-      };
-      const embedElement = embedWin.document.documentElement;
-      env.sandbox
-        .stub(Services, 'actionServiceForDoc')
-        .withArgs(embedElement)
-        .returns(embedActions);
-    });
-
-    it('should configured the embedded actions service', () => {
-      StandardActions.installInEmbedWindow(embedWin, ampdoc);
-
-      const {
-        addGlobalTarget: target,
-        addGlobalMethodHandler: handler,
-      } = embedActions;
-
-      // Global targets.
-      expect(target).to.be.calledOnce;
-      expect(target).to.be.calledWith('AMP', env.sandbox.match.func);
-
-      // Global actions.
-      expect(handler).to.have.callCount(6);
-      expect(handler).to.be.calledWith('hide', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('show', env.sandbox.match.func);
-      expect(handler).to.be.calledWith(
-        'toggleVisibility',
-        env.sandbox.match.func
-      );
-      expect(handler).to.be.calledWith('scrollTo', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('focus', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('toggleClass', env.sandbox.match.func);
     });
   });
 });

@@ -53,7 +53,7 @@ function isMainPageFromUrl(url) {
  * @return {string}
  */
 function formatBasepath(basepath) {
-  return basepath.replace(/[^\/]$/, lastChar => `${lastChar}/`);
+  return basepath.replace(/[^\/]$/, (lastChar) => `${lastChar}/`);
 }
 
 module.exports = {

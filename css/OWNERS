@@ -5,13 +5,15 @@
   rules: [
     {
       owners: [
-        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'ampproject/wg-components'},
+        {name: 'ampproject/wg-bento'},
+        {name: 'ampproject/wg-performance'},
         {name: 'aghassemi', requestReviews: false},
         {name: 'camelburrito', requestReviews: false},
       ],
     },
     {
-      pattern: '{amp-story-*}.css',
+      pattern: 'amp-story-*.css',
       owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
     },
   ],

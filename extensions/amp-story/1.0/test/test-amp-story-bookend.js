@@ -27,13 +27,12 @@ import {Services} from '../../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {TextBoxComponent} from '../bookend/components/text-box';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {registerServiceBuilder} from '../../../../src/service';
 import {user} from '../../../../src/log';
 
 const location =
   'https://www.testorigin.com/amp-stories/example/path/google.com';
 
-describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
+describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
   let win;
   let doc;
   let storyElem;
@@ -128,6 +127,10 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
     storyElem = doc.createElement('amp-story');
     storyElem.appendChild(doc.createElement('amp-story-page'));
     doc.body.appendChild(storyElem);
@@ -138,11 +141,6 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
 
     requestService = new AmpStoryRequestService(win, storyElem);
     env.sandbox.stub(Services, 'storyRequestService').returns(requestService);
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
-      return localizationService;
-    });
 
     bookend = new AmpStoryBookend(bookendElem);
     bookend.buildCallback();
@@ -550,7 +548,7 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
       const ctaLinks = bookend.bookendEl_.querySelector(
         '.i-amphtml-story-bookend-cta-link-wrapper'
       );
-      ctaLinks.children[0].onclick = function(e) {
+      ctaLinks.children[0].onclick = function (e) {
         e.preventDefault(); // Make the test not actually navigate.
       };
       ctaLinks.children[0].click();
@@ -637,7 +635,7 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
       const ctaLinks = bookend.bookendEl_.querySelector(
         '.i-amphtml-story-bookend-cta-link-wrapper'
       );
-      ctaLinks.children[0].onclick = function(e) {
+      ctaLinks.children[0].onclick = function (e) {
         e.preventDefault(); // Make the test not actually navigate.
       };
       ctaLinks.children[0].click();

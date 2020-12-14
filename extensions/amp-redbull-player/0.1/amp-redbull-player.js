@@ -25,8 +25,12 @@ import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
@@ -66,7 +70,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
      * @return {undefined}
      * @private
      */
-    this.boundOnMessage_ = e => this.onMessage_(e);
+    this.boundOnMessage_ = (e) => this.onMessage_(e);
   }
 
   /** @override */
@@ -184,6 +188,10 @@ class AmpRedBullPlayer extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     if (data['id'] === `redbull-amp-video-tracking-${this.tagId_}`) {
       const type = ANALYTICS_EVENT_TYPE_PREFIX + data['type'];
       this.dispatchCustomAnalyticsEvent_(type, data);
@@ -195,7 +203,8 @@ class AmpRedBullPlayer extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars) {
-    this.element.dispatchCustomEvent(
+    dispatchCustomEvent(
+      this.element,
       VideoEvents.CUSTOM_TICK,
       dict({
         'eventType': `video-custom-tracking-${this.tagId_}`,
@@ -298,6 +307,6 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpRedBullPlayer);
 });

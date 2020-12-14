@@ -89,6 +89,11 @@ export class AmpMegaMenu extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
   }
@@ -145,8 +150,8 @@ export class AmpMegaMenu extends AMP.BaseElement {
     this.items_ = toArray(scopedQuerySelectorAll(this.element, 'nav > * > li'));
     // first filter out items that have already been registered.
     this.items_
-      .filter(item => !item.classList.contains('i-amphtml-mega-menu-item'))
-      .forEach(item => {
+      .filter((item) => !item.classList.contains('i-amphtml-mega-menu-item'))
+      .forEach((item) => {
         // if item has only one child, then use that as the heading element.
         if (item.childElementCount == 1) {
           const heading = dev().assertElement(item.firstElementChild);
@@ -181,8 +186,8 @@ export class AmpMegaMenu extends AMP.BaseElement {
     if (!heading.hasAttribute('tabindex')) {
       heading.setAttribute('tabindex', 0);
     }
-    heading.addEventListener('click', e => this.handleHeadingClick_(e));
-    heading.addEventListener('keydown', e => this.handleHeadingKeyDown_(e));
+    heading.addEventListener('click', (e) => this.handleHeadingClick_(e));
+    heading.addEventListener('keydown', (e) => this.handleHeadingKeyDown_(e));
 
     // Skip if item does not have a submenu or its heading already has tap action.
     if (!content || this.action_.hasAction(heading, 'tap', item)) {
@@ -269,7 +274,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   shouldHandleClick_(event) {
     const target = dev().assertElement(event.target);
     const currentTarget = dev().assertElement(event.currentTarget);
-    const hasAnchor = !!closest(target, e => e.tagName == 'A', currentTarget);
+    const hasAnchor = !!closest(target, (e) => e.tagName == 'A', currentTarget);
     if (hasAnchor) {
       return false;
     }
@@ -432,6 +437,6 @@ export class AmpMegaMenu extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpMegaMenu, CSS);
 });

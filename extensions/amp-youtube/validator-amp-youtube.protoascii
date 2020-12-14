@@ -16,7 +16,6 @@
 
 tags: {  # amp-youtube
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-youtube"
@@ -29,7 +28,6 @@ tags: {  # amp-youtube
 }
 tags: {  # <amp-youtube>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-YOUTUBE"
   requires_extension: "amp-youtube"
   attrs: { name: "autoplay" }

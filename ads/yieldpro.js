@@ -47,15 +47,14 @@ export function yieldpro(global, data) {
   computeInMasterFrame(
     global,
     'yieldpro-request',
-    done => {
+    (done) => {
       let success = false;
-      const masterWin = this;
-      if (!masterWin.showadAMPAdapter) {
-        masterWin.showadAMPAdapter = {
+      if (!global.showadAMPAdapter) {
+        global.showadAMPAdapter = {
           registerSlot: () => {},
         };
-        loadScript(this, scriptUrl, () => {
-          if (masterWin.showadAMPAdapter.inited) {
+        loadScript(global, scriptUrl, () => {
+          if (global.showadAMPAdapter.inited) {
             success = true;
           }
           done(success);
@@ -64,7 +63,7 @@ export function yieldpro(global, data) {
         done(true);
       }
     },
-    success => {
+    (success) => {
       if (success) {
         global.showadAMPAdapter = global.context.master.showadAMPAdapter;
         global.showadAMPAdapter.registerSlot(data, global);

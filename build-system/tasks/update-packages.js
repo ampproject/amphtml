@@ -15,13 +15,13 @@
  */
 'use strict';
 
+const checkDependencies = require('check-dependencies');
 const colors = require('ansi-colors');
+const del = require('del');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {exec, execOrDie, getStderr} = require('../common/exec');
-const {isTravisBuild} = require('../common/travis');
-
-const yarnExecutable = 'npx yarn';
+const {execOrDie} = require('../common/exec');
+const {isCiBuild} = require('../common/ci');
 
 /**
  * Writes the given contents to the patched file if updated
@@ -31,14 +31,14 @@ const yarnExecutable = 'npx yarn';
 function writeIfUpdated(patchedName, file) {
   if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
     fs.writeFileSync(patchedName, file);
-    if (!isTravisBuild()) {
+    if (!isCiBuild()) {
       log(colors.green('Patched'), colors.cyan(patchedName));
     }
   }
 }
 
 /**
- * Patches Web Animations API by wrapping its body into `install` function.
+ * Patches Web Animations polyfill by wrapping its body into `install` function.
  * This gives us an option to call polyfill directly on the main window
  * or a friendly iframe.
  */
@@ -50,7 +50,7 @@ function patchWebAnimations() {
     .readFileSync('node_modules/web-animations-js/web-animations.min.js')
     .toString();
   // Replace |requestAnimationFrame| with |window|.
-  file = file.replace(/requestAnimationFrame/g, function(a, b) {
+  file = file.replace(/requestAnimationFrame/g, function (a, b) {
     if (file.charAt(b - 1) == '.') {
       return a;
     }
@@ -77,27 +77,58 @@ function patchWebAnimations() {
 }
 
 /**
- * Does a yarn check on node_modules, and if it is outdated, runs yarn.
+ * Patches Intersection Observer polyfill by wrapping its body into `install`
+ * function.
+ * This gives us an option to control when and how the polyfill is installed.
+ * The polyfill can only be installed on the root context.
  */
-function runYarnCheck() {
-  const integrityCmd = yarnExecutable + ' check --integrity';
-  if (getStderr(integrityCmd).trim() != '') {
+function patchIntersectionObserver() {
+  // Copies intersection-observer into a new file that has an export.
+  const patchedName =
+    'node_modules/intersection-observer/intersection-observer.install.js';
+  let file = fs
+    .readFileSync('node_modules/intersection-observer/intersection-observer.js')
+    .toString();
+
+  // Wrap the contents inside the install function.
+  file = `export function installIntersectionObserver() {\n${file}\n}\n`;
+  writeIfUpdated(patchedName, file);
+}
+
+/**
+ * Deletes the map file for rrule, which breaks closure compiler.
+ * TODO(rsimha): Remove this workaround after a fix is merged for
+ * https://github.com/google/closure-compiler/issues/3720.
+ */
+function removeRruleSourcemap() {
+  const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
+  if (fs.existsSync(rruleMapFile)) {
+    del.sync(rruleMapFile);
+    if (!isCiBuild()) {
+      log(colors.green('Deleted'), colors.cyan(rruleMapFile));
+    }
+  }
+}
+
+/**
+ * Checks if all packages are current, and if not, runs `npm install`.
+ */
+function runNpmCheck() {
+  const results = checkDependencies.sync({
+    verbose: true,
+    log: () => {},
+    error: console.log,
+  });
+  if (!results.depsWereOk) {
     log(
       colors.yellow('WARNING:'),
       'The packages in',
       colors.cyan('node_modules'),
       'do not match',
-      colors.cyan('package.json.')
+      colors.cyan('package.json') + '.'
     );
-    const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
-    exec(verifyTreeCmd);
-    log('Running', colors.cyan('yarn'), 'to update packages...');
-    /**
-     * NOTE: executing yarn with --production=false prevents having
-     * NODE_ENV=production variable set which forces yarn to not install
-     * devDependencies. This usually breaks gulp for example.
-     */
-    execOrDie(`${yarnExecutable} install --production=false`); // Stop execution when Ctrl + C is detected.
+    log('Running', colors.cyan('npm install'), 'to update packages...');
+    execOrDie('npm install');
   } else {
     log(
       colors.green('All packages in'),
@@ -111,20 +142,22 @@ function runYarnCheck() {
  * Used as a pre-requisite by several gulp tasks.
  */
 function maybeUpdatePackages() {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     updatePackages();
   }
 }
 
 /**
  * Installs custom lint rules, updates node_modules (for local dev), and patches
- * web-animations-js if necessary.
+ * polyfills if necessary.
  */
 async function updatePackages() {
-  if (!isTravisBuild()) {
-    runYarnCheck();
+  if (!isCiBuild()) {
+    runNpmCheck();
   }
   patchWebAnimations();
+  patchIntersectionObserver();
+  removeRruleSourcemap();
 }
 
 module.exports = {
@@ -133,4 +166,4 @@ module.exports = {
 };
 
 updatePackages.description =
-  'Runs yarn if node_modules is out of date, and applies custom patches';
+  'Runs npm install if node_modules is out of date, and applies custom patches';

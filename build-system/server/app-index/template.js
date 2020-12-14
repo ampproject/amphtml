@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 'use strict';
 
@@ -28,9 +27,7 @@ const {SettingsModal, SettingsOpenButton} = require('./settings');
 
 const HeaderLink = ({name, href, divider}) => html`
   <li class="${divider ? 'divider' : ''}">
-    <a target="_blank" rel="noopener noreferrer" href="${href}">
-      ${name}
-    </a>
+    <a target="_blank" rel="noopener noreferrer" href="${href}"> ${name} </a>
   </li>
 `;
 
@@ -53,10 +50,7 @@ const Header = ({isMainPage, links}) => html`
   </header>
 `;
 
-const HeaderBackToMainLink = () =>
-  html`
-    <a href="/">← Back to main</a>
-  `;
+const HeaderBackToMainLink = () => html` <a href="/">← Back to main</a> `;
 
 const ProxyFormOptional = ({isMainPage}) => (isMainPage ? ProxyForm() : '');
 

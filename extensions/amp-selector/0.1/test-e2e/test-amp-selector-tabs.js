@@ -18,10 +18,10 @@ describes.endtoend(
   'amp-selector',
   {
     testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-selector/amp-selector-tabs.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-selector/0.1/amp-selector-tabs.html',
     environments: ['single', 'viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(() => {

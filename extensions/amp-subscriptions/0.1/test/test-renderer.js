@@ -32,7 +32,7 @@ describes.realWin(
   {
     amp: {},
   },
-  env => {
+  (env) => {
     let win, doc;
     let unrelated;
     let section, action, dialog;
@@ -71,7 +71,7 @@ describes.realWin(
   {
     amp: {},
   },
-  env => {
+  (env) => {
     let win, doc;
     let ampdoc;
     let renderer;
@@ -176,7 +176,7 @@ describes.realWin(
         dialog1,
         dialog2,
       ];
-      elements.forEach(element => {
+      elements.forEach((element) => {
         doc.body.appendChild(element);
       });
       renderer = new Renderer(ampdoc);
@@ -184,7 +184,7 @@ describes.realWin(
 
     function displayed(array) {
       expect(isDisplayed(unrelated)).to.be.true;
-      elements.forEach(element => {
+      elements.forEach((element) => {
         const shouldBeDisplayed = array.includes(element);
         expect(isDisplayed(element)).to.equal(
           shouldBeDisplayed,

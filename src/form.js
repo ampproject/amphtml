@@ -68,7 +68,7 @@ export function getFormAsObject(form) {
     }
 
     if (multiple) {
-      iterateCursor(options, option => {
+      iterateCursor(options, (option) => {
         if (option.selected) {
           data[name].push(option.value);
         }
@@ -93,7 +93,7 @@ export function getFormAsObject(form) {
   // e.g. We want to remove empty <select multiple name=x> but
   // there could also be an <input name=x>. At the end we know if an empty name
   // can be deleted.
-  Object.keys(data).forEach(key => {
+  Object.keys(data).forEach((key) => {
     if (data[key].length == 0) {
       delete data[key];
     }

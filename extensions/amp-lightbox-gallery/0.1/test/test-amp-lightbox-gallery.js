@@ -27,7 +27,7 @@ describes.realWin(
       extensions: [TAG],
     },
   },
-  env => {
+  (env) => {
     let win, doc, gallery;
 
     beforeEach(() => {
@@ -38,9 +38,9 @@ describes.realWin(
       });
     });
 
-    describe('basic functionality', function() {
+    describe('basic functionality', function () {
       this.timeout(5000);
-      it('should contain a container on build', done => {
+      it('should contain a container on build', (done) => {
         gallery.build().then(() => {
           const container = doc.getElementsByClassName('i-amphtml-lbg');
           expect(container.length).to.equal(1);

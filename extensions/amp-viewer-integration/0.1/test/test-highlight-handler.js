@@ -28,7 +28,7 @@ describes.fakeWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     it('get a param', () => {
       // URL encoded '{"s":["amp","highlight"]}'.
       env.win.location =
@@ -121,7 +121,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let root = null;
     let docreadyCb = null;
     beforeEach(() => {
@@ -136,7 +136,7 @@ describes.realWin(
       root.appendChild(div1);
 
       env.sandbox.stub(docready, 'whenDocumentReady').returns({
-        then: cb => {
+        then: (cb) => {
           docreadyCb = cb;
         },
       });
@@ -196,8 +196,8 @@ describes.realWin(
 
       const viewerOrigin = 'http://localhost:9876';
       const port = new WindowPortEmulator(window, viewerOrigin);
-      port.addEventListener = function() {};
-      port.postMessage = function() {};
+      port.addEventListener = function () {};
+      port.postMessage = function () {};
       const messaging = new Messaging(env.win, port);
 
       handler.setupMessaging(messaging);

@@ -24,7 +24,6 @@ import {dev} from './log';
 import {htmlFor} from './static-template';
 import {parseUrlDeprecated} from './url';
 import {registerServiceBuilder} from './service';
-import {startsWith} from './string';
 import {whenDocumentComplete} from './document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
@@ -112,6 +111,13 @@ export class PreconnectService {
   /**
    * Preconnects to a URL. Always also does a dns-prefetch because
    * browser support for that is better.
+   *
+   * It is safe to call this method during prerender with any value,
+   * because no action will be performed until the doc is visible.
+   *
+   * It is safe to call this method with non-HTTP(s) URLs as other URLs
+   * are skipped.
+   *
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {boolean=} opt_alsoConnecting Set this flag if you also just
@@ -193,6 +199,12 @@ export class PreconnectService {
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
+   * It is safe to call this method during prerender with any value,
+   * because no action will be performed until the doc is visible.
+   *
+   * It is safe to call this method with non-HTTP(s) URLs as other URLs
+   * are skipped.
+   *
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {string=} opt_preloadAs
@@ -254,7 +266,7 @@ export class PreconnectService {
    * @return {boolean}
    */
   isInterestingUrl_(url) {
-    if (startsWith(url, 'https:') || startsWith(url, 'http:')) {
+    if (url.startsWith('https:') || url.startsWith('http:')) {
       return true;
     }
     return false;

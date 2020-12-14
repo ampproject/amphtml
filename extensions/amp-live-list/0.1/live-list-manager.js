@@ -20,7 +20,6 @@ import {addParamToUrl} from '../../../src/url';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
@@ -83,7 +82,7 @@ export class LiveListManager {
       // then make sure to stop polling if doc is not visible.
       this.interval_ = Math.min.apply(Math, this.intervals_);
 
-      const initialUpdateTimes = Object.keys(this.liveLists_).map(key =>
+      const initialUpdateTimes = Object.keys(this.liveLists_).map((key) =>
         this.liveLists_[key].getUpdateTime()
       );
       this.latestUpdateTime_ = Math.max.apply(Math, initialUpdateTimes);
@@ -134,7 +133,7 @@ export class LiveListManager {
    * @private
    */
   hasActiveLiveLists_() {
-    return Object.keys(this.liveLists_).some(key => {
+    return Object.keys(this.liveLists_).some((key) => {
       return this.liveLists_[key].isEnabled();
     });
   }
@@ -213,11 +212,11 @@ export class LiveListManager {
    * @private
    */
   getCustomSlots_(doc) {
-    const liveListsWithCustomSlots = Object.keys(this.liveLists_).filter(id =>
+    const liveListsWithCustomSlots = Object.keys(this.liveLists_).filter((id) =>
       this.liveLists_[id].hasCustomSlot()
     );
 
-    return liveListsWithCustomSlots.map(id => {
+    return liveListsWithCustomSlots.map((id) => {
       const customSlotId = this.liveLists_[id].element[
         AMP_LIVE_LIST_CUSTOM_SLOT_ID
       ];
@@ -299,7 +298,7 @@ export class LiveListManager {
   setupVisibilityHandler_() {
     // Polling should always be stopped when document is no longer visible.
     this.ampdoc.onVisibilityChanged(() => {
-      if (this.ampdoc.isVisible()) {
+      if (this.ampdoc.isVisible() && this.hasActiveLiveLists_()) {
         // We use immediate so that the user starts getting updates
         // right away when they've switched back to the page.
         this.poller_.start(/** immediate */ true);
@@ -316,7 +315,7 @@ export class LiveListManager {
     const extensions = toArray(
       doc.querySelectorAll('script[custom-element], script[custom-template]')
     );
-    extensions.forEach(script => {
+    extensions.forEach((script) => {
       const extensionName =
         script.getAttribute('custom-element') ||
         script.getAttribute('custom-template');
@@ -358,5 +357,5 @@ function isDocTransformed(root) {
   }
   const {documentElement} = root.ownerDocument;
   const transformed = documentElement.getAttribute('transformed');
-  return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
+  return Boolean(transformed) && transformed.startsWith(TRANSFORMED_PREFIX);
 }

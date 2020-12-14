@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpReachPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -41,6 +42,11 @@ class AmpReachPlayer extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  buildCallback() {
+    setIsMediaComponent(this.element);
   }
 
   /** @override */
@@ -71,6 +77,6 @@ class AmpReachPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-reach-player', '0.1', AMP => {
+AMP.extension('amp-reach-player', '0.1', (AMP) => {
   AMP.registerElement('amp-reach-player', AmpReachPlayer);
 });

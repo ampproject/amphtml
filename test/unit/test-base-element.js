@@ -23,7 +23,7 @@ import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 
-describes.realWin('BaseElement', {amp: true}, env => {
+describes.realWin('BaseElement', {amp: true}, (env) => {
   let win, doc;
   let customElement;
   let element;
@@ -33,7 +33,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     doc = win.document;
     win.customElements.define(
       'amp-test-element',
-      createAmpElementForTesting(win, 'amp-test-element', BaseElement)
+      createAmpElementForTesting(win, BaseElement)
     );
     customElement = doc.createElement('amp-test-element');
     element = new BaseElement(customElement);
@@ -79,18 +79,6 @@ describes.realWin('BaseElement', {amp: true}, env => {
     element.propagateAttributes(['data-test2', 'data-test3'], target);
     expect(target.getAttribute('data-test2')).to.equal('xyz');
     expect(target.getAttribute('data-test3')).to.equal('123');
-  });
-
-  it('propagateDataset', () => {
-    const target = doc.createElement('div');
-    target.dataset.foo = 'abc';
-
-    element.propagateDataset(target);
-    expect(target.hasAttribute('data-foo')).to.be.false;
-
-    customElement.dataset.bar = '123';
-    element.propagateDataset(target);
-    expect(target.hasAttribute('data-bar', '123')).to.be.true;
   });
 
   it('should register action', () => {
@@ -163,7 +151,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     element.executeAction(
       {
         method: 'foo',
-        satisfiesTrust: t => t == minTrust,
+        satisfiesTrust: (t) => t == minTrust,
       },
       null,
       false

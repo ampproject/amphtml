@@ -22,20 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-mraid"></a> `amp-mraid`
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Supports interaction with the <a href="https://www.iab.com/guidelines/mobile-rich-media-ad-interface-definitions-mraid/">MRAID</a> host API within Ad webviews in mobile apps.</td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">&lt;/script></code></td>
-  </tr>
-</table>
+# amp-mraid
 
 ## Overview
 

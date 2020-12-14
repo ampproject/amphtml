@@ -22,11 +22,11 @@ import {Services} from '../../src/services';
 import {bytesToString} from '../../src/utils/bytes';
 import {user} from '../../src/log';
 
-describes.fakeWin('OriginExperiments', {amp: true}, env => {
+describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
   const TAG = 'OriginExperiments';
   // Token enables experiment "foo" for origin "https://origin.com".
   const token =
-    'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY'; // eslint-disable-line max-len
+    'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY';
 
   let ampdoc;
   let isPkcsAvailable;
@@ -52,14 +52,14 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
     win.document.head.appendChild(meta);
   }
 
-  it('should return false if no token is found', function*() {
+  it('should return false if no token is found', function* () {
     const experiments = originExperiments.getExperiments();
     expect(experiments).to.eventually.deep.equal([]);
     yield experiments;
     expect(error).to.not.be.called;
   });
 
-  it('should return false if crypto is unavailable', function*() {
+  it('should return false if crypto is unavailable', function* () {
     isPkcsAvailable.returns(false);
 
     const experiments = originExperiments.getExperiments();
@@ -67,7 +67,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
     expect(error).calledWithMatch(TAG, 'Crypto is unavailable');
   });
 
-  it('should return false for missing token', function*() {
+  it('should return false for missing token', function* () {
     setupMetaTagWith('');
 
     const experiments = originExperiments.getExperiments();
@@ -76,7 +76,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
     expect(error).calledWithMatch(TAG, 'Missing content for experiment token');
   });
 
-  it('should return false if origin does not match', function*() {
+  it('should return false if origin does not match', function* () {
     setupMetaTagWith(token);
     win.location.href = 'https://not-origin.com';
 
@@ -86,10 +86,10 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
     expect(error).calledWithMatch(TAG, 'Failed to verify experiment token');
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   it.configure().skipSafari(
     'should return true for valid token with matching origin',
-    function*() {
+    function* () {
       setupMetaTagWith(token);
       win.location.href = 'https://origin.com';
 
@@ -100,10 +100,10 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
     }
   );
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   it.configure().skipSafari(
     'should return false if experiment is not in config',
-    function*() {
+    function* () {
       setupMetaTagWith(token);
       win.location.href = 'https://origin.com';
 
@@ -115,7 +115,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
   );
 });
 
-describes.fakeWin('TokenMaster', {amp: true}, env => {
+describes.fakeWin('TokenMaster', {amp: true}, (env) => {
   let tokenMaster;
 
   let publicKey;
@@ -127,7 +127,7 @@ describes.fakeWin('TokenMaster', {amp: true}, env => {
   let tokenWithBadConfigLength;
   let tokenWithBadSignature;
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -138,7 +138,7 @@ describes.fakeWin('TokenMaster', {amp: true}, env => {
         const url = Services.urlForDoc(env.ampdoc.getHeadNode());
         tokenMaster = new TokenMaster(crypto, url);
 
-        return tokenMaster.generateKeys().then(keyPair => {
+        return tokenMaster.generateKeys().then((keyPair) => {
           ({publicKey, privateKey} = keyPair);
 
           const config = {
@@ -156,7 +156,7 @@ describes.fakeWin('TokenMaster', {amp: true}, env => {
             tokenMaster.generateToken(0, config, privateKey),
             tokenMaster.generateToken(42, config, privateKey),
             tokenMaster.generateToken(0, expired, privateKey),
-          ]).then(results => {
+          ]).then((results) => {
             token = results[0];
             tokenWithBadVersion = results[1];
             tokenWithExpiredExperiment = results[2];

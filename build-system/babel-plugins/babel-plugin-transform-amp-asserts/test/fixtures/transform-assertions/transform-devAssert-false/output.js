@@ -13,6 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-  throw new Error('static assertion failure');
-})();
+devAssert(false);

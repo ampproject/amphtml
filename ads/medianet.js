@@ -66,10 +66,10 @@ export function medianet(global, data) {
  */
 function getCallbacksObject() {
   return {
-    renderStartCb: opt_data => {
+    renderStartCb: (opt_data) => {
       global.context.renderStart(opt_data);
     },
-    reportRenderedEntityIdentifierCb: ampId => {
+    reportRenderedEntityIdentifierCb: (ampId) => {
       global.context.reportRenderedEntityIdentifier(ampId);
     },
     noContentAvailableCb: () => {
@@ -165,7 +165,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
 
     global.advBidxc = global.context.master.advBidxc;
     if (global.advBidxc && typeof global.advBidxc.renderAmpAd === 'function') {
-      global.addEventListener('message', event => {
+      global.addEventListener('message', (event) => {
         global.advBidxc.renderAmpAd(event, global);
       });
     }
@@ -201,7 +201,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
   computeInMasterFrame(
     global,
     'medianet-hb-load',
-    done => {
+    (done) => {
       /*eslint "google-camelcase/google-camelcase": 0*/
       global.advBidxc_requrl = publisherUrl;
       global.advBidxc_refurl = referrerUrl;

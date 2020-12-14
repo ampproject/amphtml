@@ -31,7 +31,7 @@ shell page as following:
 
 <!-- Wait for API to initialize -->
 <script>
-  (window.AMP = window.AMP || []).push(function(AMP) {
+  (window.AMP = window.AMP || []).push(function (AMP) {
     // AMP APIs can be used now via "AMP" object.
   });
 </script>
@@ -46,7 +46,7 @@ There are currently two ways how one can attach a shadow doc: using a `Document`
 Using the fully loaded `Document` object:
 
 ```javascript
-fetchDocumentViaXhr(url).then(fetchedDoc => {
+fetchDocumentViaXhr(url).then((fetchedDoc) => {
   const shadowDoc = AMP.attachShadowDoc(hostElement, fetchedDoc, url, options);
 });
 ```
@@ -55,11 +55,11 @@ Using the streaming API:
 
 ```javascript
 const shadowDoc = AMP.attachShadowDocAsStream(hostElement, url, options);
-fetch(url).then(response => {
+fetch(url).then((response) => {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   function readChunk() {
-    return reader.read().then(chunk => {
+    return reader.read().then((chunk) => {
       const text = decoder.decode(chunk.value || new Uint8Array(), {
         stream: !chunk.done,
       });
@@ -87,17 +87,17 @@ The `options` argument is optional and can provide configuration parameters for 
 
 Both `AMP.attachShadowDoc` and `AMP.attachShadowDocAsStream` return a `ShadowDoc` object that provides numerous ways for interracting with attached AMP documents. This object exposes the following methods and properties:
 
-- `shadowDoc.writer` - the writer that can be used to stream the AMP document. Only available for `attachShadowDocAsStream`.
-- `shadowDoc.url` - the URL used in the `attachShadowDoc` or `attachShadowDocAsStream`.
-- `shadowDoc.title` - the title of the AMP document.
-- `shadowDoc.canonicalUrl` - the canonical URL of the AMP document.
-- `shadowDoc.ampdoc` - the instance of the AMP document.
-- `shadowDoc.ampdoc.whenReady()` - returns a promise when the AMP document has been fully rendered.
-- `shadowDoc.setVisibilityState()` - changes the visibility state of the AMP document.
-- `shadowDoc.postMessage()` and `shadowDoc.onMessage()` - can be used to message with the AMP document.
-- `shadowDoc.close()` - closes the AMP document, frees the resources, and returns a promise that resolves when cleanup is complete.
-- `shadowDoc.getState(expr)` - Get an `amp-bind` state from the AMP document using a JSON expression string, e.g. `foo.bar`
-- `shadowDoc.setState(state)` - Deep merge an object into the AMP document's global `amp-bind` state. `state` can be passed as either an `Object` or an expression string matching the syntax used by `amp-bind` in `on="AMP.setState()` attributes.
+-   `shadowDoc.writer` - the writer that can be used to stream the AMP document. Only available for `attachShadowDocAsStream`.
+-   `shadowDoc.url` - the URL used in the `attachShadowDoc` or `attachShadowDocAsStream`.
+-   `shadowDoc.title` - the title of the AMP document.
+-   `shadowDoc.canonicalUrl` - the canonical URL of the AMP document.
+-   `shadowDoc.ampdoc` - the instance of the AMP document.
+-   `shadowDoc.ampdoc.whenReady()` - returns a promise when the AMP document has been fully rendered.
+-   `shadowDoc.setVisibilityState()` - changes the visibility state of the AMP document.
+-   `shadowDoc.postMessage()` and `shadowDoc.onMessage()` - can be used to message with the AMP document.
+-   `shadowDoc.close()` - closes the AMP document, frees the resources, and returns a promise that resolves when cleanup is complete.
+-   `shadowDoc.getState(expr)` - Get an `amp-bind` state from the AMP document using a JSON expression string, e.g. `foo.bar`
+-   `shadowDoc.setState(state)` - Deep merge an object into the AMP document's global `amp-bind` state. `state` can be passed as either an `Object` or an expression string matching the syntax used by `amp-bind` in `on="AMP.setState()` attributes.
 
 ## Shadow DOM API and polyfills
 

@@ -26,10 +26,8 @@ import {dict} from '../utils/object';
 import {escapeCssSelectorIdent} from '../css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {isLocalhostOrigin} from '../url';
+import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -90,22 +88,18 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
 export class Navigation {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const {!Document|!ShadowRoot} */
-    this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getRootNode();
 
     /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
@@ -137,11 +131,10 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ =
-      /** @type {!Element|!ShadowRoot} */ (this.rootNode_.nodeType ==
-      Node.DOCUMENT_NODE
-        ? this.rootNode_.documentElement
-        : this.rootNode_);
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (this.rootNode_
+      .nodeType == Node.DOCUMENT_NODE
+      ? this.rootNode_.documentElement
+      : this.rootNode_);
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -149,8 +142,20 @@ export class Navigation {
     this.rootNode_.addEventListener(EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
-    shouldAppendExtraParams(this.ampdoc).then(res => {
+    shouldAppendExtraParams(this.ampdoc).then((res) => {
       this.appendExtraParams_ = res;
+    });
+
+    /** @private {boolean} */
+    this.isTrustedViewer_ = false;
+    /** @private {boolean} */
+    this.isLocalViewer_ = false;
+    Promise.all([
+      this.viewer_.isTrustedViewer(),
+      this.viewer_.getViewerOrigin(),
+    ]).then((values) => {
+      this.isTrustedViewer_ = values[0];
+      this.isLocalViewer_ = isLocalhostOrigin(values[1]);
     });
 
     /**
@@ -185,19 +190,6 @@ export class Navigation {
       'click',
       maybeExpandUrlParams.bind(null, ampdoc),
       /* capture */ true
-    );
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      TAG,
-      new Navigation(ampdoc, embedWin.document)
     );
   }
 
@@ -253,14 +245,10 @@ export class Navigation {
    * @param {!{
    *   target: (string|undefined),
    *   opener: (boolean|undefined),
-   * }=} opt_options
+   * }=} options
    */
-  navigateTo(
-    win,
-    url,
-    opt_requestedBy,
-    {target = '_top', opener = false} = {}
-  ) {
+  navigateTo(win, url, opt_requestedBy, options = {}) {
+    const {target = '_top', opener = false} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
@@ -273,8 +261,9 @@ export class Navigation {
       `Target '${target}' not supported.`
     );
 
-    // Resolve navigateTos relative to the source URL, not the proxy URL.
-    url = urlService.getSourceUrl(url);
+    // If we're on cache, resolve relative URLs to the publisher (non-cache) origin.
+    const sourceUrl = urlService.getSourceUrl(win.location);
+    url = urlService.resolveRelativeUrl(url, sourceUrl);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
@@ -337,7 +326,7 @@ export class Navigation {
       return meta
         .getAttribute('content')
         .split(',')
-        .map(s => s.trim());
+        .map((s) => s.trim());
     }
     return [];
   }
@@ -411,7 +400,7 @@ export class Navigation {
    * @private
    */
   handleContextMenuClick_(element, e) {
-    // TODO(wg-runtime): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
+    // TODO(wg-performance): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
     this.expandVarsForAnchor_(element);
     this.applyAnchorMutators_(element, e);
   }
@@ -422,7 +411,7 @@ export class Navigation {
    * @param {!Event} e
    */
   applyAnchorMutators_(element, e) {
-    this.anchorMutators_.forEach(anchorMutator => {
+    this.anchorMutators_.forEach((anchorMutator) => {
       anchorMutator(element, e);
     });
   }
@@ -433,7 +422,7 @@ export class Navigation {
    * @return {string}
    */
   applyNavigateToMutators_(url) {
-    this.navigateToMutators_.forEach(mutator => {
+    this.navigateToMutators_.forEach((mutator) => {
       url = mutator(url);
     });
     return url;
@@ -515,7 +504,7 @@ export class Navigation {
     const relations = element
       .getAttribute('rel')
       .split(' ')
-      .map(s => s.trim());
+      .map((s) => s.trim());
     if (!relations.includes('amphtml')) {
       return false;
     }
@@ -566,6 +555,10 @@ export class Navigation {
         viewer.isEmbedded()
       ) {
         this.removeViewerQueryBeforeNavigation_(win, fromLocation, target);
+      }
+
+      if (this.viewerInterceptsNavigation(to, 'intercept_click')) {
+        e.preventDefault();
       }
     }
   }
@@ -625,7 +618,7 @@ export class Navigation {
     // confusing behavior e.g. when pressing "tab" button.
     // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
     // @see https://github.com/ampproject/amphtml/issues/18671
-    if (Services.platformFor(this.ampdoc.win).isIe()) {
+    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
       const id = toLocation.hash.substring(1);
       const elementWithId = this.ampdoc.getElementById(id);
       if (elementWithId) {
@@ -739,6 +732,47 @@ export class Navigation {
       getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
     return this.parseUrl_(baseHref);
   }
+
+  /**
+   * Requests navigation through a Viewer to the given destination.
+   *
+   * This function only proceeds if:
+   * 1. The viewer supports the 'interceptNavigation' capability.
+   * 2. The contained AMP doc has 'opted in' via including the 'allow-navigation-interception'
+   * attribute on the <html> tag.
+   * 3. The viewer is trusted or from localhost.
+   *
+   * @param {string} url A URL.
+   * @param {string} requestedBy Informational string about the entity that
+   *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
+   */
+  viewerInterceptsNavigation(url, requestedBy) {
+    const viewerHasCapability = this.viewer_.hasCapability(
+      'interceptNavigation'
+    );
+    const docOptedIn = this.ampdoc
+      .getRootNode()
+      .documentElement.hasAttribute('allow-navigation-interception');
+
+    if (
+      !viewerHasCapability ||
+      !docOptedIn ||
+      !(this.isTrustedViewer_ || this.isLocalViewer_)
+    ) {
+      return false;
+    }
+
+    this.viewer_.sendMessage(
+      'navigateTo',
+      dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      })
+    );
+    return true;
+  }
 }
 
 /**
@@ -773,11 +807,10 @@ function maybeExpandUrlParams(ampdoc, e) {
   const newHref = Services.urlReplacementsForDoc(target).expandUrlSync(
     hrefToExpand,
     vars,
-    undefined,
-    /* opt_whitelist */ {
+    /* opt_allowlist */ {
       // For now we only allow to replace the click location vars
       // and nothing else.
-      // NOTE: Addition to this whitelist requires additional review.
+      // NOTE: Addition to this allowlist requires additional review.
       'CLICK_X': true,
       'CLICK_Y': true,
     }

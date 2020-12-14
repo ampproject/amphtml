@@ -20,16 +20,15 @@ import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
-import {childElementByTag} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
+import {dev, userAssert} from '../../../src/log';
+import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
+import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
-import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-animation';
 
@@ -42,6 +41,9 @@ export class AmpAnimation extends AMP.BaseElement {
     this.triggerOnVisibility_ = false;
 
     /** @private {boolean} */
+    this.isIntersecting_ = false;
+
+    /** @private {boolean} */
     this.visible_ = false;
 
     /** @private {boolean} */
@@ -49,6 +51,9 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.triggered_ = false;
+
+    /** @private {!Array<!UnlistenDef>} */
+    this.cleanups_ = [];
 
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.embed_ = null;
@@ -80,25 +85,7 @@ export class AmpAnimation extends AMP.BaseElement {
       );
     }
 
-    // TODO(dvoytenko): Remove once we support direct parent visibility.
-    if (trigger == 'visibility') {
-      userAssert(
-        this.element.parentNode == this.element.ownerDocument.body ||
-          this.element.parentNode == ampdoc.getBody(),
-        '%s is only allowed as a direct child of <body> element when trigger' +
-          ' is visibility. This restriction will be removed soon.',
-        TAG
-      );
-    }
-
-    // Parse config.
-    const scriptElement = userAssert(
-      childElementByTag(this.element, 'script'),
-      '"<script type=application/json>" must be present'
-    );
-    this.configJson_ = tryParseJson(scriptElement.textContent, error => {
-      throw user().createError('failed to parse animation script', error);
-    });
+    this.configJson_ = getChildJsonConfig(this.element);
 
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`
@@ -129,28 +116,27 @@ export class AmpAnimation extends AMP.BaseElement {
     );
 
     // Visibility.
+    this.cleanups_.push(
+      ampdoc.onVisibilityChanged(() => {
+        this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
+      })
+    );
+    const io = new ampdoc.win.IntersectionObserver((records) => {
+      this.isIntersecting_ = records[records.length - 1].isIntersecting;
+      this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
+    });
+    io.observe(dev().assertElement(this.element.parentElement));
+    this.cleanups_.push(() => io.disconnect());
+
+    // Resize.
+    this.cleanups_.push(listen(this.win, 'resize', () => this.onResize_()));
+
+    // TODO(#22733): remove when ampdoc-fie is launched.
     const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
     const embed = frameElement
       ? getFriendlyIframeEmbedOptional(frameElement)
       : null;
-    if (embed) {
-      this.embed_ = embed;
-      this.setVisible_(embed.isVisible());
-      embed.onVisibilityChanged(() => {
-        this.setVisible_(embed.isVisible());
-      });
-      listen(this.embed_.win, 'resize', () => this.onResize_());
-    } else {
-      this.setVisible_(ampdoc.isVisible());
-      ampdoc.onVisibilityChanged(() => {
-        this.setVisible_(ampdoc.isVisible());
-      });
-      this.getViewport().onResize(e => {
-        if (e.relayoutAll) {
-          this.onResize_();
-        }
-      });
-    }
+    this.embed_ = embed;
 
     // Actions.
     this.registerDefaultAction(
@@ -194,6 +180,13 @@ export class AmpAnimation extends AMP.BaseElement {
       this.cancelAction_.bind(this),
       ActionTrust.LOW
     );
+  }
+
+  /** @override */
+  detachedCallback() {
+    const cleanups = this.cleanups_.slice(0);
+    this.cleanups_.length = 0;
+    cleanups.forEach((cleanup) => cleanup());
   }
 
   /**
@@ -304,10 +297,6 @@ export class AmpAnimation extends AMP.BaseElement {
    * @private
    */
   seekToAction_(invocation) {
-    // The animation will be triggered (in paused state) and seek will happen
-    // regardless of visibility
-    this.triggered_ = true;
-
     let positionObserverData = null;
     if (invocation.event) {
       const detail = getDetail(/** @type {!Event} */ (invocation.event));
@@ -317,6 +306,9 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     return this.createRunnerIfNeeded_(null, positionObserverData).then(() => {
+      // The animation will be triggered (in paused state) and seek will happen
+      // regardless of visibility
+      this.triggered_ = true;
       this.pause_();
       this.pausedByAction_ = true;
       // time based seek
@@ -440,7 +432,7 @@ export class AmpAnimation extends AMP.BaseElement {
       this.runnerPromise_ = this.createRunner_(
         opt_args,
         opt_positionObserverData
-      ).then(runner => {
+      ).then((runner) => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
@@ -483,19 +475,18 @@ export class AmpAnimation extends AMP.BaseElement {
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (this
       .configJson_);
-    const args =
-      /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args || null);
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args ||
+      null);
 
     // Ensure polyfill is installed.
-    installWebAnimationsIfNecessary(this.win);
-
     const ampdoc = this.getAmpDoc();
+    const polyfillPromise = installWebAnimationsIfNecessary(ampdoc);
     const readyPromise = this.embed_
       ? this.embed_.whenReady()
       : ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
-    return readyPromise.then(() => {
+    return Promise.all([polyfillPromise, readyPromise]).then(() => {
       const builder = new Builder(
         hostWin,
         this.getRootNode_(),
@@ -535,7 +526,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerElement(TAG, AmpAnimation);
   AMP.registerServiceForDoc('web-animation', WebAnimationService);
 });

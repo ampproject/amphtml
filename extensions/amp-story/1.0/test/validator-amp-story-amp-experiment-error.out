@@ -48,7 +48,7 @@ FAIL
 |          <!-- Invalid: bare script not allowed as a child of amp-story-grid-layer -->
 |          <script type="application/json">
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:48:8 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags)
+amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:48:8 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |            {
 |              "background-color-test": {
 |                "variants": {
@@ -63,7 +63,7 @@ amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:48:8 Custom Jav
 |        <!-- Invalid: amp-experiment not allowed as a child of amp-story-page -->
 |        <amp-experiment>
 >>       ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:61:6 Tag 'amp-experiment' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment']. (see https://amp.dev/documentation/components/amp-story)
+amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:61:6 Tag 'amp-experiment' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-animation', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment']. (see https://amp.dev/documentation/components/amp-story)
 |            <script type="application/json">
 |              {
 |                "background-color-test": {

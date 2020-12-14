@@ -20,7 +20,7 @@ import {generateSentinel} from '../../src/3p-frame.js';
 describe
   .configure()
   .skipFirefox()
-  .run('iframe-helper', function() {
+  .run('iframe-helper', function () {
     const iframeSrc =
       'http://iframe.localhost:' +
       location.port +
@@ -38,7 +38,7 @@ describe
     }
 
     beforeEach(() => {
-      return createIframePromise().then(c => {
+      return createIframePromise().then((c) => {
         container = c;
         const i = c.doc.createElement('iframe');
         i.src = iframeSrc;
@@ -70,7 +70,7 @@ describe
     it('should listen to iframe messages from non-3P frame', () => {
       let unlisten;
       let calls = 0;
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         unlisten = IframeHelper.listenFor(
           testIframe,
           'send-intersections',
@@ -83,7 +83,7 @@ describe
       }).then(() => {
         const total = calls;
         unlisten();
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve, 50);
         }).then(() => {
           expect(calls).to.equal(total);
@@ -94,7 +94,7 @@ describe
     it('should listen to iframe messages from 3P frame', () => {
       let unlisten;
       let calls = 0;
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
         testIframe.src = iframeSrc + '#amp-3p-sentinel=' + sentinel;
         testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
@@ -111,7 +111,7 @@ describe
       }).then(() => {
         const total = calls;
         unlisten();
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve, 50);
         }).then(() => {
           expect(calls).to.equal(total);
@@ -122,7 +122,7 @@ describe
     it('should listen to iframe messages from nested 3P frame', () => {
       let unlisten;
       let calls = 0;
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
         // Note that we're using a different document here which will load the
         // usual iframe-intersection.html within a nested iframe.
@@ -142,7 +142,7 @@ describe
       }).then(() => {
         const total = calls;
         unlisten();
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve, 50);
         }).then(() => {
           expect(calls).to.equal(total);
@@ -153,11 +153,11 @@ describe
     // TODO(dvoytenko, #12499): Make this work with latest mocha / karma.
     it.skip('should un-listen and resolve promise after first hit', () => {
       let calls = 0;
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         IframeHelper.listenForOncePromise(testIframe, [
           'no-msg',
           'send-intersections',
-        ]).then(obj => {
+        ]).then((obj) => {
           expect(obj.message).to.equal('send-intersections');
           calls++;
           resolve();
@@ -165,7 +165,7 @@ describe
         insert(testIframe);
       }).then(() => {
         const total = calls;
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve, 50);
         }).then(() => {
           expect(calls).to.equal(total);
@@ -181,7 +181,7 @@ describe
       let otherCalls = 0;
       let other;
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         IframeHelper.listenFor(testIframe, 'send-intersections', () => {
           calls++;
           resolve();
@@ -197,7 +197,7 @@ describe
         const total = calls;
         const otherTotal = otherCalls;
         testIframe.parentElement.removeChild(testIframe);
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve, 50);
         }).then(() => {
           expect(calls).to.equal(total);
@@ -206,8 +206,7 @@ describe
       });
     });
 
-    // TODO(wg-runtime, #25587): Results in a cross-origin frame error.
-    it.skip('should set sentinel on postMessage data', () => {
+    it('should set sentinel on postMessage data', () => {
       insert(testIframe);
       const postMessageSpy = window.sandbox /*OK*/
         .spy(testIframe.contentWindow, 'postMessage');
@@ -223,82 +222,5 @@ describe
       // breaks loose.
       postMessageSpy /*OK*/
         .restore();
-    });
-
-    describe('pausable iframes', () => {
-      let iframe, featurePolicy;
-
-      class FeaturePolicyFake {
-        constructor() {
-          this.features_ = [];
-          this.allowed_ = {};
-        }
-
-        features() {
-          return this.features_;
-        }
-
-        allowedFeatures() {
-          return Object.keys(this.allowed_);
-        }
-
-        allowsFeature(feature) {
-          return (this.allowed_[feature] || []).indexOf("'none'") == -1;
-        }
-
-        getAllowlistForFeature(feature) {
-          return this.allowed_[feature] || [];
-        }
-      }
-
-      beforeEach(() => {
-        featurePolicy = new FeaturePolicyFake();
-        featurePolicy.features_.push('execution-while-not-rendered');
-        iframe = document.createElement('div');
-        iframe.featurePolicy = featurePolicy;
-      });
-
-      it('should configure pausable with no "allow"', () => {
-        IframeHelper.makePausable(iframe);
-        expect(iframe.getAttribute('allow')).to.equal(
-          "execution-while-not-rendered 'none';"
-        );
-      });
-
-      it('should configure pausable with an existing "allow"', () => {
-        iframe.setAttribute('allow', "sync-xhr 'none'");
-        IframeHelper.makePausable(iframe);
-        expect(iframe.getAttribute('allow')).to.equal(
-          "execution-while-not-rendered 'none';sync-xhr 'none'"
-        );
-      });
-
-      it('should be pausable', () => {
-        featurePolicy.allowed_['execution-while-not-rendered'] = "'none'";
-        expect(IframeHelper.isPausable(iframe)).to.be.true;
-      });
-
-      it('should be unpausable b/c feature is allowed', () => {
-        featurePolicy.allowed_['execution-while-not-rendered'] = "'*'";
-        expect(IframeHelper.isPausable(iframe)).to.be.false;
-      });
-
-      it('should be unpausable b/c feature is not supported', () => {
-        featurePolicy.features_ = [];
-        featurePolicy.allowed_['execution-while-not-rendered'] = "'none'";
-        expect(IframeHelper.isPausable(iframe)).to.be.false;
-      });
-
-      it('should be unpausable b/c feature policies are not supported', () => {
-        iframe.featurePolicy = null;
-        expect(IframeHelper.isPausable(iframe)).to.be.false;
-      });
-
-      it('should pause/resume', () => {
-        IframeHelper.setPaused(iframe, true);
-        expect(iframe).to.have.attribute('hidden');
-        IframeHelper.setPaused(iframe, false);
-        expect(iframe).to.not.have.attribute('hidden');
-      });
     });
   });

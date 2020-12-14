@@ -19,7 +19,7 @@ import {Services} from '../../src/services';
 import {Vsync} from '../../src/service/vsync-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 
-describes.fakeWin('vsync', {}, env => {
+describes.fakeWin('vsync', {}, (env) => {
   let win, doc;
   let clock;
   let contextNode;
@@ -72,10 +72,9 @@ describes.fakeWin('vsync', {}, env => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should generate a frame and run callbacks', () => {
+    it('should generate a frame and run callbacks', () => {
       let result = '';
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         vsync.run({
           measure: () => {
             result += 'me1';
@@ -118,7 +117,7 @@ describes.fakeWin('vsync', {}, env => {
     // TODO(choumx, #12476): Make this test work with sinon 4.0.
     it.skip('should tolerate errors in measures and mutates', () => {
       let result = '';
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         vsync.run({
           measure: () => {
             result += 'me1';
@@ -171,10 +170,9 @@ describes.fakeWin('vsync', {}, env => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should schedule nested vsyncs', () => {
+    it('should schedule nested vsyncs', () => {
       let result = '';
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         vsync.run({
           measure: () => {
             result += 'me1';
@@ -207,8 +205,7 @@ describes.fakeWin('vsync', {}, env => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from runPromise that executes "run"', () => {
+    it('should return a promise from runPromise that executes "run"', () => {
       const measureSpy = env.sandbox.spy();
       const mutateSpy = env.sandbox.spy();
       return vsync
@@ -219,8 +216,7 @@ describes.fakeWin('vsync', {}, env => {
         });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from measurePromise that runs measurer', () => {
+    it('should return a promise from measurePromise that runs measurer', () => {
       let measured = false;
       return vsync
         .measurePromise(() => {
@@ -231,8 +227,7 @@ describes.fakeWin('vsync', {}, env => {
         });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from mutatePromisethat runs mutator', () => {
+    it('should return a promise from mutatePromisethat runs mutator', () => {
       const mutator = env.sandbox.spy();
       return vsync.mutatePromise(mutator).then(() => {
         expect(mutator).to.be.calledOnce;
@@ -241,7 +236,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should schedule via animation frames when doc is visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(true);
 
       let result = '';
@@ -267,7 +262,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should schedule via timer frames when doc is not visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
       let result = '';
@@ -291,7 +286,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should run via backup timer if rAF somehow doesnt fire', () => {
       let rafHandler;
-      vsync.raf_ = function() {
+      vsync.raf_ = function () {
         // intentionally empty
       };
       isVisibleStub.returns(true);
@@ -326,7 +321,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should re-schedule when doc goes invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(true);
 
       let result = '';
@@ -357,7 +352,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should re-schedule when doc goes visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
       let result = '';
@@ -387,7 +382,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should NOT re-schedule when no tasks pending', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(true);
 
       expect(vsync.tasks_).to.have.length(0);
@@ -406,7 +401,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should run anim task when visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(true);
 
       let result = '';
@@ -426,7 +421,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should create and run anim task when visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(true);
 
       let result = '';
@@ -447,7 +442,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should NOT run anim task when invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
       let result = ''; // eslint-disable-line no-unused-vars
@@ -464,7 +459,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should create but NOT run anim task when invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
       let result = ''; // eslint-disable-line no-unused-vars
@@ -490,11 +485,11 @@ describes.fakeWin('vsync', {}, env => {
           () => {
             return 'SUCCESS';
           },
-          error => {
+          (error) => {
             return 'ERROR: ' + error;
           }
         )
-        .then(response => {
+        .then((response) => {
           expect(response).to.match(/^ERROR/);
           expect(mutatorSpy).to.have.not.been.called;
         });
@@ -566,7 +561,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should schedule via animation frames when doc is visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(true);
 
       let result = '';
@@ -589,7 +584,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should schedule via timer frames when doc is not visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
       let result = '';
@@ -613,7 +608,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should re-schedule when doc goes invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
 
       let result = '';
       vsync.run({
@@ -642,7 +637,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should re-schedule when doc goes visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
       let result = '';
@@ -671,7 +666,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should NOT re-schedule when no tasks pending', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
 
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
@@ -688,7 +683,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should run anim task when visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
 
       let result = '';
       const res = vsync.runAnim(contextNode, {
@@ -707,7 +702,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should create and run anim task when visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
 
       let result = '';
       const task = vsync.createAnimTask(contextNode, {
@@ -727,7 +722,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should NOT run anim task when invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
       let result = ''; // eslint-disable-line no-unused-vars
@@ -744,7 +739,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should create but NOT run anim task when invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => (rafHandler = handler);
+      vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
       let result = ''; // eslint-disable-line no-unused-vars
@@ -770,11 +765,11 @@ describes.fakeWin('vsync', {}, env => {
           () => {
             return 'SUCCESS';
           },
-          error => {
+          (error) => {
             return 'ERROR: ' + error;
           }
         )
-        .then(response => {
+        .then((response) => {
           expect(response).to.match(/^ERROR/);
           expect(mutatorSpy).to.have.not.been.called;
         });

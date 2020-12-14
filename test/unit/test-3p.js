@@ -182,12 +182,12 @@ describe('3p', () => {
             {
               type: 'TEST',
               foo: true,
-              'not-whitelisted': true,
+              'not-allowed': true,
             },
             [],
             ['foo']
           );
-        }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+        }).to.throw(/Unknown attribute for TEST: not-allowed./);
       });
     });
 
@@ -219,7 +219,7 @@ describe('3p', () => {
     let called = 0;
     nextTick(
       {
-        setTimeout: fn => {
+        setTimeout: (fn) => {
           fn();
         },
       },
@@ -258,13 +258,13 @@ describe('3p', () => {
     };
     let done;
     let workCalls = 0;
-    const work = d => {
+    const work = (d) => {
       workCalls++;
       done = d;
     };
     let progress = '';
-    const frame = id => {
-      return result => {
+    const frame = (id) => {
+      return (result) => {
         progress += result + id;
       };
     };
@@ -291,7 +291,7 @@ describe('3p', () => {
       expect(s.src).to.equal(url);
     });
 
-    it('should handle onSuccess callback', done => {
+    it('should handle onSuccess callback', (done) => {
       loadScript(
         window,
         'http://localhost:9876/test/unit/test-3p.js',
@@ -304,7 +304,7 @@ describe('3p', () => {
       );
     });
 
-    it('should handle onFailure callback', done => {
+    it('should handle onFailure callback', (done) => {
       loadScript(
         window,
         'http://localhost:9876/404',

@@ -35,7 +35,7 @@ describe
 
     let iframe;
 
-    beforeEach(done => {
+    beforeEach((done) => {
       iframe = createIframeWithMessageStub(window);
       document.body.appendChild(iframe);
       iframe.onload = () => {
@@ -46,14 +46,14 @@ describe
     it('should get message from fragment and post back to parent window', () => {
       iframe.postMessageToParent(data1);
       return expectPostMessage(iframe.contentWindow, window, data1)
-        .then(receivedMessage => {
+        .then((receivedMessage) => {
           expect(receivedMessage).to.jsonEqual(data1);
         })
         .then(() => {
           iframe.postMessageToParent(data2);
           return expectPostMessage(iframe.contentWindow, window, data2);
         })
-        .then(receivedMessage => {
+        .then((receivedMessage) => {
           expect(receivedMessage).to.jsonEqual(data2);
         });
     });

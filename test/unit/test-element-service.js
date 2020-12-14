@@ -15,7 +15,6 @@
  */
 
 import {FakeWindow} from '../../testing/fake-dom';
-import {Services} from '../../src/services';
 import {
   getElementService,
   getElementServiceForDoc,
@@ -25,7 +24,7 @@ import {
   isExtensionScriptInNode,
 } from '../../src/element-service';
 import {
-  installServiceInEmbedScope,
+  installServiceInEmbedDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
@@ -52,7 +51,7 @@ describe('getElementServiceIfAvailable()', () => {
 
     win = {
       document: doc,
-      setInterval: callback => {
+      setInterval: (callback) => {
         setIntervalCallback = callback;
       },
       clearInterval: () => {},
@@ -71,7 +70,7 @@ describe('getElementServiceIfAvailable()', () => {
     doc.body = null; // Body not available
     let resolvedService;
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1').then(
-      service => {
+      (service) => {
         resolvedService = service;
         return service;
       }
@@ -86,7 +85,7 @@ describe('getElementServiceIfAvailable()', () => {
         setIntervalCallback();
         return p1;
       })
-      .then(service => {
+      .then((service) => {
         expect(resolvedService).to.be.null;
         expect(service).to.be.null;
       });
@@ -100,7 +99,7 @@ describe('getElementServiceIfAvailable()', () => {
         expect(setIntervalCallback).to.be.undefined;
         return p1;
       })
-      .then(service => {
+      .then((service) => {
         expect(service).to.be.null;
       });
   });
@@ -109,7 +108,7 @@ describe('getElementServiceIfAvailable()', () => {
     doc.body = null; // Body not available
     let resolvedService;
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1').then(
-      service => {
+      (service) => {
         resolvedService = service;
         return service;
       }
@@ -121,14 +120,14 @@ describe('getElementServiceIfAvailable()', () => {
 
         // Resolve body.
         markElementScheduledForTesting(win, 'element-1');
-        registerServiceBuilder(win, 'e1', function() {
+        registerServiceBuilder(win, 'e1', function () {
           return {str: 'fake1'};
         });
         doc.body = {};
         setIntervalCallback();
         return p1;
       })
-      .then(service => {
+      .then((service) => {
         expect(resolvedService).to.deep.equal({str: 'fake1'});
         expect(service).to.deep.equal({str: 'fake1'});
       });
@@ -141,12 +140,12 @@ describe('getElementServiceIfAvailable()', () => {
     return Promise.resolve()
       .then(() => {
         expect(setIntervalCallback).to.be.undefined;
-        registerServiceBuilder(win, 'e1', function() {
+        registerServiceBuilder(win, 'e1', function () {
           return {str: 'fake1'};
         });
         return p1;
       })
-      .then(service => {
+      .then((service) => {
         expect(service).to.deep.equal({str: 'fake1'});
       });
   });
@@ -159,7 +158,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let ampdoc;
 
     beforeEach(() => {
@@ -176,13 +175,13 @@ describes.realWin(
         const p1 = getElementService(env.win, 'e1', 'element-1');
         const p2 = getElementService(env.win, 'e1', 'element-1');
 
-        registerServiceBuilder(env.win, 'e1', function() {
+        registerServiceBuilder(env.win, 'e1', function () {
           return {str: 'from e1'};
         });
 
-        return p1.then(s1 => {
+        return p1.then((s1) => {
           expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then(s2 => {
+          return p2.then((s2) => {
             expect(s1).to.equal(s2);
           });
         });
@@ -199,11 +198,11 @@ describes.realWin(
             () => {
               return 'SUCCESS';
             },
-            error => {
+            (error) => {
               return 'ERROR ' + error;
             }
           )
-          .then(result => {
+          .then((result) => {
             expect(result).to.match(
               /Service e1 was requested to be provided through element-bar/
             );
@@ -216,12 +215,12 @@ describes.realWin(
         markElementScheduledForTesting(env.win, 'element-1');
         const p1 = getElementServiceIfAvailable(env.win, 'e1', 'element-1');
         const p2 = getElementServiceIfAvailable(env.win, 'e2', 'not-available');
-        registerServiceBuilder(env.win, 'e1', function() {
+        registerServiceBuilder(env.win, 'e1', function () {
           return {str: 'from e1'};
         });
-        return p1.then(s1 => {
+        return p1.then((s1) => {
           expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then(s2 => {
+          return p2.then((s2) => {
             expect(s2).to.be.null;
           });
         });
@@ -234,13 +233,13 @@ describes.realWin(
         const p1 = getElementServiceForDoc(ampdoc, 'e1', 'element-1');
         const p2 = getElementServiceForDoc(ampdoc, 'e1', 'element-1');
 
-        registerServiceBuilder(env.win, 'e1', function() {
+        registerServiceBuilder(env.win, 'e1', function () {
           return {str: 'from e1'};
         });
 
-        return p1.then(s1 => {
+        return p1.then((s1) => {
           expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then(s2 => {
+          return p2.then((s2) => {
             expect(s1).to.equal(s2);
           });
         });
@@ -257,11 +256,11 @@ describes.realWin(
             () => {
               return 'SUCCESS';
             },
-            error => {
+            (error) => {
               return 'ERROR ' + error;
             }
           )
-          .then(result => {
+          .then((result) => {
             expect(result).to.match(
               /Service e1 was requested to be provided through element-bar/
             );
@@ -282,12 +281,12 @@ describes.realWin(
           'e2',
           'not-available'
         );
-        registerServiceBuilder(env.win, 'e1', function() {
+        registerServiceBuilder(env.win, 'e1', function () {
           return {str: 'from e1'};
         });
-        return p1.then(s1 => {
+        return p1.then((s1) => {
           expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then(s2 => {
+          return p2.then((s2) => {
             expect(s2).to.be.null;
           });
         });
@@ -295,7 +294,7 @@ describes.realWin(
 
       it('should wait for body when not available', () => {
         let bodyResolver;
-        ampdoc.bodyPromise_ = new Promise(resolve => {
+        ampdoc.bodyPromise_ = new Promise((resolve) => {
           bodyResolver = resolve;
         });
         let resolvedService;
@@ -303,7 +302,7 @@ describes.realWin(
           ampdoc,
           'e1',
           'element-1'
-        ).then(service => {
+        ).then((service) => {
           resolvedService = service;
           return service;
         });
@@ -315,7 +314,7 @@ describes.realWin(
             bodyResolver();
             return p1;
           })
-          .then(service => {
+          .then((service) => {
             expect(resolvedService).to.be.null;
             expect(service).to.be.null;
           });
@@ -331,14 +330,14 @@ describes.realWin(
           .then(() => {
             return p1;
           })
-          .then(service => {
+          .then((service) => {
             expect(service).to.be.null;
           });
       });
 
       it('should wait for body when available', () => {
         let bodyResolver;
-        ampdoc.bodyPromise_ = new Promise(resolve => {
+        ampdoc.bodyPromise_ = new Promise((resolve) => {
           bodyResolver = resolve;
         });
         let resolvedService;
@@ -346,7 +345,7 @@ describes.realWin(
           ampdoc,
           'e1',
           'element-1'
-        ).then(service => {
+        ).then((service) => {
           resolvedService = service;
           return service;
         });
@@ -356,13 +355,13 @@ describes.realWin(
 
             // Resolve body.
             markElementScheduledForTesting(env.win, 'element-1');
-            registerServiceBuilder(env.win, 'e1', function() {
+            registerServiceBuilder(env.win, 'e1', function () {
               return {str: 'fake1'};
             });
             bodyResolver();
             return p1;
           })
-          .then(service => {
+          .then((service) => {
             expect(resolvedService).to.deep.equal({str: 'fake1'});
             expect(service).to.deep.equal({str: 'fake1'});
           });
@@ -377,12 +376,12 @@ describes.realWin(
         );
         return Promise.resolve()
           .then(() => {
-            registerServiceBuilder(env.win, 'e1', function() {
+            registerServiceBuilder(env.win, 'e1', function () {
               return {str: 'fake1'};
             });
             return p1;
           })
-          .then(service => {
+          .then((service) => {
             expect(service).to.deep.equal({str: 'fake1'});
           });
       });
@@ -396,7 +395,7 @@ describes.realWin(
         );
         ampdoc.getHeadNode().appendChild(extension);
         return isExtensionScriptInNode(ampdoc, 'amp-form').then(
-          ampFormInstalled => {
+          (ampFormInstalled) => {
             expect(ampFormInstalled).to.equal(true);
           }
         );
@@ -405,13 +404,14 @@ describes.realWin(
   }
 );
 
-describes.fakeWin('in embed scope', {amp: true}, env => {
+describes.fakeWin('in embed scope', {amp: true}, (env) => {
   let win;
   let embedWin;
   let nodeInEmbedWin;
   let nodeInTopWin;
   let frameElement;
   let service;
+  let embedAmpDoc;
 
   beforeEach(() => {
     win = env.win;
@@ -423,7 +423,7 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     embedWin.frameElement = frameElement;
     setParentWindow(embedWin, win);
 
-    Services.ampdocServiceFor(win).installFieDoc(
+    embedAmpDoc = env.ampdocService.installFieDoc(
       'https://example.org',
       embedWin
     );
@@ -443,12 +443,12 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
   });
 
   it('should return existing service', () => {
-    installServiceInEmbedScope(embedWin, 'foo', service);
+    installServiceInEmbedDoc(embedAmpDoc, 'foo', service);
     return getElementServiceIfAvailableForDocInEmbedScope(
       nodeInEmbedWin,
       'foo',
       'amp-foo'
-    ).then(returned => {
+    ).then((returned) => {
       expect(returned).to.equal(service);
     });
   });
@@ -460,8 +460,8 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
       'foo',
       'amp-foo'
     );
-    installServiceInEmbedScope(embedWin, 'foo', service);
-    return promise.then(returned => {
+    installServiceInEmbedDoc(embedAmpDoc, 'foo', service);
+    return promise.then((returned) => {
       expect(returned).to.equal(service);
     });
   });
@@ -471,7 +471,7 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     registerServiceBuilderForDoc(
       nodeInTopWin,
       'foo',
-      function() {
+      function () {
         return service;
       },
       /* opt_instantiate */ true
@@ -480,7 +480,7 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
       nodeInTopWin,
       'foo',
       'amp-foo'
-    ).then(returned => {
+    ).then((returned) => {
       expect(returned).to.equal(service);
     });
   });
@@ -490,7 +490,7 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     registerServiceBuilderForDoc(
       nodeInTopWin,
       'foo',
-      function() {
+      function () {
         return service;
       },
       /* opt_instantiate */ true
@@ -499,7 +499,7 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
       nodeInEmbedWin,
       'foo',
       'amp-foo'
-    ).then(returned => {
+    ).then((returned) => {
       expect(returned).to.be.null;
     });
   });

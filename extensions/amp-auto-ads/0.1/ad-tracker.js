@@ -119,7 +119,7 @@ export class AdTracker {
       return Promise.resolve(false);
     }
     return this.getDistanceFromAd_(yPosition, this.ads_[adIndex]).then(
-      distance => {
+      (distance) => {
         if (distance < this.minAdSpacing_) {
           return true;
         }
@@ -136,7 +136,7 @@ export class AdTracker {
    * @private
    */
   getDistanceFromAd_(yPosition, ad) {
-    return getElementLayoutBox(ad).then(box => {
+    return getElementLayoutBox(ad).then((box) => {
       if (yPosition >= box.top && yPosition <= box.bottom) {
         return 0;
       } else {
@@ -172,7 +172,7 @@ export class AdTracker {
 export function getExistingAds(ampdoc) {
   return [].slice
     .call(ampdoc.getRootNode().querySelectorAll('AMP-AD'))
-    .filter(ad => {
+    .filter((ad) => {
       // Filters out AMP-STICKY-AD.
       if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
         return false;
@@ -203,22 +203,24 @@ export function getAdConstraintsFromConfigObj(ampdoc, configObj) {
     return null;
   }
 
-  const subsequentMinSpacing = (obj['subsequentMinSpacing'] || []).map(item => {
-    const adCount = item['adCount'];
-    if (adCount == null) {
-      user().warn(TAG, 'No subsequentMinSpacing adCount specified');
-      return null;
+  const subsequentMinSpacing = (obj['subsequentMinSpacing'] || []).map(
+    (item) => {
+      const adCount = item['adCount'];
+      if (adCount == null) {
+        user().warn(TAG, 'No subsequentMinSpacing adCount specified');
+        return null;
+      }
+      const spacing = getValueFromString(item['spacing'], viewportHeight);
+      if (spacing == null) {
+        user().warn(TAG, 'Invalid subsequent min spacing');
+        return null;
+      }
+      return {
+        adCount,
+        spacing,
+      };
     }
-    const spacing = getValueFromString(item['spacing'], viewportHeight);
-    if (spacing == null) {
-      user().warn(TAG, 'Invalid subsequent min spacing');
-      return null;
-    }
-    return {
-      adCount,
-      spacing,
-    };
-  });
+  );
 
   if (subsequentMinSpacing.indexOf(null) != -1) {
     return null;

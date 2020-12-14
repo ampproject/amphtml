@@ -30,6 +30,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -172,7 +173,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       return;
     }
     const data = objOrParseJson(eventData);
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
 
@@ -191,7 +192,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
   }
@@ -225,7 +226,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     const iframe = createFrameFor(this, this.iframeSource_());
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event =>
+    this.unlistenMessage_ = listen(this.win, 'message', (event) =>
       this.handleMinuteMediaPlayerMessage_(event)
     );
 
@@ -233,7 +234,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -467,6 +468,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpMinuteMediaPlayer);
 });

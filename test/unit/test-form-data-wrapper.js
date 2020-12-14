@@ -21,7 +21,7 @@ import {
 import {Services} from '../../src/services';
 import {fromIterator} from '../../src/utils/array';
 
-describes.realWin('FormDataWrapper', {}, env => {
+describes.realWin('FormDataWrapper', {}, (env) => {
   describe('entries', () => {
     let nativeEntries;
     let nativeDelete;
@@ -61,7 +61,7 @@ describes.realWin('FormDataWrapper', {}, env => {
       });
     }
 
-    scenarios.forEach(scenario => {
+    scenarios.forEach((scenario) => {
       describe(scenario.description, () => {
         beforeEach(scenario.beforeEach);
 

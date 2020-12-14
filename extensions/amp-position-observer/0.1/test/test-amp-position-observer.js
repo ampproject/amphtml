@@ -24,7 +24,7 @@ import {RelativePositions, layoutRectLtwh} from '../../../../src/layout-rect';
  * - moves the container in the viewport and tests enter, exit, progress values,
  *   with various ratio and margin configurations
  */
-describes.sandboxed('amp-position-observer', {}, env => {
+describes.sandboxed('amp-position-observer', {}, (env) => {
   let impl;
   let enterSpy;
   let exitSpy;

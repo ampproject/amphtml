@@ -29,6 +29,7 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
+  dispatchCustomEvent,
   getDataParamsFromAttributes,
   isFullscreenElement,
   removeElement,
@@ -124,7 +125,7 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @return {*} TODO(#23582): Specify return type
      * @private
      */
-    this.boundOnMessage_ = e => this.onMessage_(e);
+    this.boundOnMessage_ = (e) => this.onMessage_(e);
   }
 
   /** @override */
@@ -134,26 +135,17 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const {element} = this;
-
-    // TODO(alanorozco): On integration tests, `getLayoutBox` will return a
-    // cached default value, which makes this assertion fail. Move to
-    // `describes.integration` to see if that fixes it.
-    const isIntegrationTest = element.hasAttribute(
-      'i-amphtml-integration-test'
-    );
-
-    this.user().assert(
-      isIntegrationTest || !looksLikeTrackingIframe(element),
-      '<amp-video-iframe> does not allow tracking iframes. ' +
-        'Please use amp-analytics instead.'
-    );
-
-    installVideoManagerForDoc(element);
+    installVideoManagerForDoc(this.element);
   }
 
   /** @override */
   layoutCallback() {
+    this.user().assert(
+      !looksLikeTrackingIframe(this.element),
+      '<amp-video-iframe> does not allow tracking iframes. ' +
+        'Please use amp-analytics instead.'
+    );
+
     const name = JSON.stringify(this.getMetadata_());
 
     this.iframe_ = disableScrollingOnIframe(
@@ -199,7 +191,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   onReady_() {
     const {element} = this;
     Services.videoManagerForDoc(element).register(this);
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents.LOAD);
   }
 
   /** @override */
@@ -298,6 +290,10 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     const messageId = data['id'];
     const methodReceived = data['method'];
 
@@ -332,7 +328,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
-      this.element.dispatchCustomEvent(eventReceived);
+      dispatchCustomEvent(this.element, eventReceived);
       return;
     }
   }
@@ -350,7 +346,8 @@ class AmpVideoIframe extends AMP.BaseElement {
       ANALYTICS_EVENT_TYPE_PREFIX
     );
 
-    this.element.dispatchCustomEvent(
+    dispatchCustomEvent(
+      this.element,
       VideoEvents.CUSTOM_TICK,
       dict({
         'eventType': eventType,
@@ -402,7 +399,7 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    const {promise} = this.readyDeferred_;
+    const promise = this.readyDeferred_ && this.readyDeferred_.promise;
     if (!promise) {
       return;
     }
@@ -520,6 +517,6 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVideoIframe);
 });

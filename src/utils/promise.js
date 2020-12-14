@@ -71,7 +71,7 @@ export class Deferred {
  * @template T
  */
 export function tryResolve(fn) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     resolve(fn());
   });
 }
@@ -98,7 +98,7 @@ export function some(promises, count = 1) {
     const values = [];
     const reasons = [];
 
-    const onFulfilled = value => {
+    const onFulfilled = (value) => {
       if (values.length < count) {
         values.push(value);
       }
@@ -106,7 +106,7 @@ export function some(promises, count = 1) {
         resolve(values);
       }
     };
-    const onRejected = reason => {
+    const onRejected = (reason) => {
       if (reasons.length <= extra) {
         reasons.push(reason);
       }
@@ -160,12 +160,12 @@ export class LastAddedResolver {
   add(promise) {
     const countAtAdd = ++this.count_;
     Promise.resolve(promise).then(
-      result => {
+      (result) => {
         if (this.count_ === countAtAdd) {
           this.resolve_(result);
         }
       },
-      error => {
+      (error) => {
         // Don't follow behavior of Promise.all and Promise.race error so that
         // this will only reject when most recently added promise fails.
         if (this.count_ === countAtAdd) {

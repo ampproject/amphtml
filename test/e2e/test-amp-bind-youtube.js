@@ -20,7 +20,7 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-youtube.html',
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

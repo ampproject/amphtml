@@ -22,7 +22,6 @@ describes.integration(
     body: `
       <!-- unminified src for local-tests.js -->
       <script async src="/dist/amp-shadow.js"></script>
-      <!-- minified src for single-pass-tests.js -->
       <script async src="/dist/shadow-v0.js"></script>
       <div id="host"></div>
       <script>
@@ -45,7 +44,7 @@ describes.integration(
       </script>
     `,
   },
-  env => {
+  (env) => {
     let docController;
     let shadowDoc;
 

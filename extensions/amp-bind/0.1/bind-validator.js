@@ -16,7 +16,6 @@
 
 import {hasOwn, ownProperty} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
-import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
@@ -35,7 +34,7 @@ let PropertyRulesDef;
  */
 const GLOBAL_PROPERTY_RULES = {
   'class': {
-    blacklistedValueRegex: '(^|\\W)i-amphtml-',
+    denylistedValueRegex: '(^|\\W)i-amphtml-',
   },
   'hidden': null,
   'text': null,
@@ -139,10 +138,10 @@ export class BindValidator {
         }
       }
     }
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const {blacklistedValueRegex} = rules;
-    if (value && blacklistedValueRegex) {
-      const re = new RegExp(blacklistedValueRegex, 'i');
+    // @see validator/js/engine/validator.ParsedTagSpec.validateAttributes()
+    const {denylistedValueRegex} = rules;
+    if (value && denylistedValueRegex) {
+      const re = new RegExp(denylistedValueRegex, 'i');
       if (re.test(value)) {
         return false;
       }
@@ -159,7 +158,7 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.js#validateUrlAndProtocol()
+    // @see validator/js/engine/validator.js#validateUrlAndProtocol()
     if (url) {
       if (/__amp_source_origin/.test(url)) {
         return false;
@@ -191,7 +190,7 @@ export class BindValidator {
    */
   rulesForTagAndProperty_(tag, property) {
     // Allow binding to all ARIA attributes.
-    if (startsWith(property, 'aria-')) {
+    if (property.startsWith('aria-')) {
       return null;
     }
     // Disallow URL property bindings if configured as such.
@@ -203,7 +202,7 @@ export class BindValidator {
       return /** @type {PropertyRulesDef} */ (globalRules);
     }
     const ampPropertyRules = ownProperty(AMP_PROPERTY_RULES, property);
-    if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
+    if (tag.startsWith('AMP-') && ampPropertyRules !== undefined) {
       return /** @type {PropertyRulesDef} */ (ampPropertyRules);
     }
     const tagRules = ownProperty(ELEMENT_RULES, tag);
@@ -284,6 +283,7 @@ function createElementRules_() {
     },
     'AMP-IFRAME': {
       'src': null,
+      'title': null,
     },
     'AMP-IMG': {
       'alt': null,
@@ -352,13 +352,24 @@ function createElementRules_() {
     },
     'A': {
       'href': {
+        // This should be kept in sync with validator-main.protoascii.
         'allowedProtocols': {
           'ftp': true,
+          'geo': true,
           'http': true,
           'https': true,
           'mailto': true,
+          'maps': true,
+          // 3rd Party Protocols
+          'bip': true,
+          'bbmi': true,
+          'chrome': true,
+          'itms-services': true,
+          'facetime': true,
+          'fb-me': true,
           'fb-messenger': true,
           'intent': true,
+          'line': true,
           'skype': true,
           'sms': true,
           'snapchat': true,
@@ -367,6 +378,9 @@ function createElementRules_() {
           'threema': true,
           'twitter': true,
           'viber': true,
+          'webcal': true,
+          'web+mastodon': true,
+          'wh': true,
           'whatsapp': true,
         },
       },
@@ -412,7 +426,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
+        denylistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
       },
       'value': null,
       'width': null,
@@ -429,6 +443,7 @@ function createElementRules_() {
     },
     'SECTION': {
       'data-expand': null,
+      'expanded': null,
     },
     'SELECT': {
       'autofocus': null,

@@ -18,7 +18,7 @@
 // Global cache of typedefName: typedefLocation.
 const typedefs = new Map();
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
     Program() {
       // When relinting a file, remove all typedefs that it declared.
@@ -40,7 +40,7 @@ module.exports = function(context) {
         return;
       }
 
-      const typedefComment = node.leadingComments.find(comment => {
+      const typedefComment = node.leadingComments.find((comment) => {
         return comment.type === 'Block' && /@typedef/.test(comment.value);
       });
 

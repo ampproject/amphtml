@@ -32,7 +32,7 @@ import {Purifier} from '@ampproject/purifier';
 
 const purifier = new Purifier(document);
 const _unescapedValue = Mustache.Writer.prototype.unescapedValue;
-Mustache.Writer.prototype.unescapedValue = function(token, context) {
+Mustache.Writer.prototype.unescapedValue = function (token, context) {
   const result = _unescapedValue(token, context);
   return purifier.purifyTagsForTripleMustache(result);
 };
@@ -70,9 +70,9 @@ _Optional_
 A function that, if provided, will be called for every sanitized attribute in
 the output to change its value. It accepts the following attributes:
 
-- `tagName` - name of tag containing the attribute
-- `attrName` - name of attribute
-- `attrValue` - current attribute value
+-   `tagName` - name of tag containing the attribute
+-   `attrName` - name of attribute
+-   `attrValue` - current attribute value
 
 The returned value of this function is used as the new attribute value.
 

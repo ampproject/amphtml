@@ -18,9 +18,33 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
-const {gitDiffNameOnlyMaster} = require('../common/git');
+const path = require('path');
+const {clean} = require('../tasks/clean');
+const {doBuild} = require('../tasks/build');
+const {doDist} = require('../tasks/dist');
+const {execOrDie} = require('./exec');
+const {gitDiffNameOnlyMaster} = require('./git');
 const {green, cyan, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('./ci');
+
+const ROOT_DIR = path.resolve(__dirname, '../../');
+
+/**
+ * Performs a clean build of the AMP runtime in testing mode.
+ * Used by `gulp e2e|integration|visual_diff`.
+ *
+ * @param {boolean} opt_compiled pass true to build the compiled runtime
+ *   (`gulp dist` instead of `gulp build`). Otherwise uses the value of
+ *   --compiled to determine which build to generate.
+ */
+async function buildRuntime(opt_compiled = false) {
+  await clean();
+  if (argv.compiled || opt_compiled === true) {
+    await doDist({fortesting: true});
+  } else {
+    await doBuild({fortesting: true});
+  }
+}
 
 /**
  * Logs a message on the same line to indicate progress
@@ -28,7 +52,7 @@ const {isTravisBuild} = require('../common/travis');
  * @param {string} message
  */
 function logOnSameLine(message) {
-  if (!isTravisBuild() && process.stdout.isTTY) {
+  if (!isCiBuild() && process.stdout.isTTY) {
     process.stdout.moveCursor(0, -1);
     process.stdout.cursorTo(0);
     process.stdout.clearLine();
@@ -45,7 +69,7 @@ function logOnSameLine(message) {
  */
 function getFilesChanged(globs) {
   const allFiles = globby.sync(globs, {dot: true});
-  return gitDiffNameOnlyMaster().filter(changedFile => {
+  return gitDiffNameOnlyMaster().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
 }
@@ -57,13 +81,32 @@ function getFilesChanged(globs) {
  * @return {!Array<string>}
  */
 function logFiles(files) {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(green('INFO: ') + 'Checking the following files:');
     for (const file of files) {
       log(cyan(file));
     }
   }
   return files;
+}
+
+/**
+ * Extracts the list of files from argv.files.
+ *
+ * @return {Array<string>}
+ */
+function getFilesFromArgv() {
+  // TODO: https://github.com/ampproject/amphtml/issues/30223
+  // Switch from globby to a lib that supports Windows.
+  const toPosix = (str) => str.replace(/\\\\?/g, '/');
+  return argv.files
+    ? globby.sync(
+        argv.files
+          .split(',')
+          .map((s) => s.trim())
+          .map(toPosix)
+      )
+    : [];
 }
 
 /**
@@ -76,7 +119,7 @@ function logFiles(files) {
  */
 function getFilesToCheck(globs, options = {}) {
   if (argv.files) {
-    return logFiles(globby.sync(argv.files.split(',')));
+    return logFiles(getFilesFromArgv());
   }
   if (argv.local_changes) {
     const filesChanged = getFilesChanged(globs);
@@ -117,9 +160,27 @@ function usesFilesOrLocalChanges(taskName) {
   return validUsage;
 }
 
+/**
+ * Runs 'npm install' to install packages in a given directory.
+ *
+ * @param {string} dir
+ */
+function installPackages(dir) {
+  log(
+    'Running',
+    cyan('npm install'),
+    'to install packages in',
+    cyan(path.relative(ROOT_DIR, dir)) + '...'
+  );
+  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore'});
+}
+
 module.exports = {
+  buildRuntime,
   getFilesChanged,
+  getFilesFromArgv,
   getFilesToCheck,
+  installPackages,
   logOnSameLine,
   usesFilesOrLocalChanges,
 };

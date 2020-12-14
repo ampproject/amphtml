@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,12 +50,12 @@ export class Relay {
       return;
     }
 
-    this.listeners_.forEach(listener => listener(data));
+    this.listeners_.forEach((listener) => listener(data));
 
     // send message to all other frames in the relay
     this.frames_
-      .filter(f => f !== e.source)
-      .forEach(f => {
+      .filter((f) => f !== e.source)
+      .forEach((f) => {
         f./* OK */ postMessage(data, this.origin_);
       });
   }
@@ -66,7 +66,7 @@ export class Relay {
    */
   register(frame, messageListener) {
     messageListener && this.listeners_.push(messageListener);
-    Promise.resolve(frame).then(frame => {
+    Promise.resolve(frame).then((frame) => {
       if (this.frames_.indexOf(frame) === -1) {
         this.frames_.push(frame);
       }

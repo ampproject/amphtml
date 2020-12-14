@@ -15,13 +15,13 @@
  */
 import {InaboxResources} from '../../../src/inabox/inabox-resources';
 
-describes.realWin('inabox-resources', {amp: true}, env => {
+describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;
   let resources;
 
   beforeEach(() => {
     win = env.win;
-
+    win.IntersectionObserver = null;
     resources = new InaboxResources(env.ampdoc);
   });
 
@@ -40,9 +40,11 @@ describes.realWin('inabox-resources', {amp: true}, env => {
     const resource2 = resources.getResourceForElement(element2);
     expect(resource1.getId()).to.not.equal(resource2.getId());
 
-    expect(() => {
-      resources.getResourceForElement(element3);
-    }).to.throw(/Missing resource prop on/);
+    allowConsoleError(() => {
+      expect(() => {
+        resources.getResourceForElement(element3);
+      }).to.throw(/Missing resource prop on/);
+    });
 
     resources.remove(element1);
     expect(resources.get()).to.have.length(1);
@@ -62,7 +64,7 @@ describes.realWin('inabox-resources', {amp: true}, env => {
     const buildStub = env.sandbox.stub(resource1, 'build');
     let resolveBuild;
     buildStub.returns(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolveBuild = resolve;
       })
     );
@@ -71,9 +73,45 @@ describes.realWin('inabox-resources', {amp: true}, env => {
     await env.ampdoc.whenReady();
     expect(buildStub).to.be.calledOnce;
     await new Promise(setTimeout);
-    expect(schedulePassSpy).to.not.be.called;
+    schedulePassSpy.resetHistory();
     resolveBuild();
     await new Promise(setTimeout);
     expect(schedulePassSpy).to.be.calledOnce;
+  });
+
+  it('should pause and resume resources on doc visibility', () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
+    resources.add(element1);
+    resources.add(element2);
+
+    env.sandbox.stub(element1, 'pauseCallback');
+    env.sandbox.stub(element1, 'resumeCallback');
+    env.sandbox.stub(element2, 'pauseCallback');
+    env.sandbox.stub(element2, 'resumeCallback');
+
+    env.ampdoc.overrideVisibilityState('paused');
+    expect(element1.pauseCallback).to.be.calledOnce;
+    expect(element2.pauseCallback).to.be.calledOnce;
+
+    env.ampdoc.overrideVisibilityState('visible');
+    expect(element1.resumeCallback).to.be.calledOnce;
+    expect(element2.resumeCallback).to.be.calledOnce;
+  });
+
+  it('should unload all resources on dispose', async () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
+    resources.add(element1);
+    resources.add(element2);
+
+    const resource1 = resources.get()[0];
+    const resource2 = resources.get()[1];
+    env.sandbox.stub(resource1, 'unload');
+    env.sandbox.stub(resource2, 'unload');
+
+    resources.dispose();
+    expect(resource1.unload).to.be.calledOnce;
+    expect(resource2.unload).to.be.calledOnce;
   });
 });

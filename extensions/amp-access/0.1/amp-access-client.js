@@ -125,7 +125,7 @@ export class AccessClientAdapter {
       this.authorizationUrl_,
       /* useAuthData */ false
     );
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       dev().fine(TAG, 'Authorization URL: ', url);
       return this.timer_
         .timeoutPromise(
@@ -134,7 +134,7 @@ export class AccessClientAdapter {
             credentials: 'include',
           })
         )
-        .then(res => res.json());
+        .then((res) => res.json());
     });
   }
 
@@ -149,7 +149,7 @@ export class AccessClientAdapter {
       devAssert(this.pingbackUrl_),
       /* useAuthData */ true
     );
-    return promise.then(url => {
+    return promise.then((url) => {
       dev().fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',

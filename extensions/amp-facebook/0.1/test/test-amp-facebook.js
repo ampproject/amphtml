@@ -27,7 +27,7 @@ describes.realWin(
       canonicalUrl: 'https://foo.bar/baz',
     },
   },
-  function(env) {
+  function (env) {
     this.timeout(5000);
 
     const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
@@ -247,7 +247,7 @@ describes.realWin(
         },
         allowExternalResources: true,
       },
-      function(env) {
+      function (env) {
         beforeEach(() => {
           win = env.win;
           doc = win.document;
@@ -263,7 +263,7 @@ describes.realWin(
           const ampFB = await getAmpFacebook(fbPostHref);
           return new Promise((resolve, unusedReject) => {
             const {firstChild: iframe, implementation_: impl} = ampFB;
-            impl.changeHeight = newHeight => {
+            impl.forceChangeHeight = (newHeight) => {
               expect(newHeight).to.equal(666);
               resolve(ampFB);
             };

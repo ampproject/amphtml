@@ -18,6 +18,7 @@ import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
+import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -36,18 +37,9 @@ import {isArray, toWin} from './types';
  *
  * The complete lifecycle of a custom DOM element is:
  *
- *           ||
- *           || createdCallback
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT UPGRADED> <NOT ATTACHED>
+ *    State: <NOT BUILT> <NOT UPGRADED>
  *           ||
  *           || upgrade
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT ATTACHED>
- *           ||
- *           || firstAttachedCallback
  *           ||
  *           \/
  *    State: <NOT BUILT>
@@ -70,7 +62,6 @@ import {isArray, toWin} from './types';
  *           ||                         ||
  *           ||                 =========
  *           ||
- *           || viewportCallback
  *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
@@ -135,9 +126,6 @@ export class BaseElement {
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {boolean} */
-    this.inViewport_ = false;
 
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
@@ -291,13 +279,6 @@ export class BaseElement {
   }
 
   /**
-   * @return {boolean}
-   */
-  isInViewport() {
-    return this.inViewport_;
-  }
-
-  /**
    * This method is called when the element is added to DOM for the first time
    * and before `buildCallback` to give the element a chance to redirect its
    * implementation to another `BaseElement` implementation. The returned
@@ -313,23 +294,6 @@ export class BaseElement {
   upgradeCallback() {
     // Subclasses may override.
     return null;
-  }
-
-  /**
-   * Called when the element is first created. Note that for element created
-   * using createElement this may be before any children are added.
-   */
-  createdCallback() {
-    // Subclasses may override.
-  }
-
-  /**
-   * Override in subclass to adjust the element when it is being added to the
-   * DOM. Could e.g. be used to insert a fallback. Should not typically start
-   * loading a resource.
-   */
-  firstAttachedCallback() {
-    // Subclasses may override.
   }
 
   /**
@@ -357,6 +321,16 @@ export class BaseElement {
    * @param {boolean=} opt_onLayout
    */
   preconnectCallback(opt_onLayout) {
+    // Subclasses may override.
+  }
+
+  /**
+   * Override in subclass to adjust the element when it is being added to
+   * the DOM. Could e.g. be used to add a listener. Notice, that this
+   * callback is called immediately after `buildCallback()` if the element
+   * is attached to the DOM.
+   */
+  attachedCallback() {
     // Subclasses may override.
   }
 
@@ -478,13 +452,6 @@ export class BaseElement {
   firstLayoutCompleted() {
     this.togglePlaceholder(false);
   }
-
-  /**
-   * Instructs the resource that it has either entered or exited the visible
-   * viewport. Intended to be implemented by actual components.
-   * @param {boolean} unusedInViewport
-   */
-  viewportCallback(unusedInViewport) {}
 
   /**
    * Requests the element to stop its activity when the document goes into
@@ -646,27 +613,6 @@ export class BaseElement {
   }
 
   /**
-   * Utility method to propagate all data attributes from this element
-   * to the target element. (For use with arbitrary data attributes.)
-   * Removes any data attributes that are missing on this element from
-   * the target element.
-   * @param {!Element} targetElement
-   */
-  propagateDataset(targetElement) {
-    for (const key in targetElement.dataset) {
-      if (!(key in this.element.dataset)) {
-        delete targetElement.dataset[key];
-      }
-    }
-
-    for (const key in this.element.dataset) {
-      if (targetElement.dataset[key] !== this.element.dataset[key]) {
-        targetElement.dataset[key] = this.element.dataset[key];
-      }
-    }
-  }
-
-  /**
    * Utility method that forwards the given list of non-bubbling events
    * from the given element to this element as custom events with the same name.
    * @param  {string|!Array<string>} events
@@ -675,13 +621,13 @@ export class BaseElement {
    * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
-      listen(element, eventType, event => {
-        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+    const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
+      listen(element, eventType, (event) => {
+        dispatchCustomEvent(this.element, eventType, getData(event) || {});
       })
     );
 
-    return () => unlisteners.forEach(unlisten => unlisten());
+    return () => unlisteners.forEach((unlisten) => unlisten());
   }
 
   /**
@@ -722,24 +668,13 @@ export class BaseElement {
   }
 
   /**
-   * Hides or shows the loading indicator. This function must only
-   * be called inside a mutate context.
+   * Hides or shows the loading indicator.
    * @param {boolean} state
-   * @param {boolean=} opt_force
+   * @param {boolean=} force
    * @public @final
    */
-  toggleLoading(state, opt_force) {
-    this.element.toggleLoading(state, {force: !!opt_force});
-  }
-
-  /**
-   * Returns whether the loading indicator is reused again after the first
-   * render.
-   * @return {boolean}
-   * @public
-   */
-  isLoadingReused() {
-    return false;
+  toggleLoading(state, force = false) {
+    this.element.toggleLoading(state, force);
   }
 
   /**
@@ -817,21 +752,6 @@ export class BaseElement {
   }
 
   /**
-   * Requests the runtime to update the height of this element to the specified
-   * value. The runtime will schedule this request and attempt to process it
-   * as soon as possible.
-   * @param {number} newHeight
-   * @public
-   */
-  changeHeight(newHeight) {
-    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
-      this.element,
-      newHeight,
-      /* newWidth */ undefined
-    );
-  }
-
-  /**
    * Collapses the element, setting it to `display: none`, and notifies its
    * owner (if there is one) through {@link collapsedCallback} that the element
    * is no longer visible.
@@ -851,10 +771,25 @@ export class BaseElement {
   }
 
   /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible.
+   * @param {number} newHeight
+   * @public
+   */
+  forceChangeHeight(newHeight) {
+    Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
+  }
+
+  /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * as soon as possible. However, unlike in {@link forceChangeHeight}, the runtime
    * may refuse to make a change in which case it will show the element's
    * overflow element if provided, which is supposed to provide the reader with
    * the necessary user action. (The overflow element is shown only if the
@@ -865,7 +800,7 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
       this.element,
       newHeight,
       /* newWidth */ undefined
@@ -889,7 +824,7 @@ export class BaseElement {
    * @public
    */
   attemptChangeSize(newHeight, newWidth, opt_event) {
-    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
       this.element,
       newHeight,
       newWidth,
@@ -952,6 +887,21 @@ export class BaseElement {
   }
 
   /**
+   * Runs the specified mutation on the element. Will not cause remeasurements.
+   * Only use this function when the mutations will not affect any resource sizes.
+   *
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(mutator) {
+    return Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+      this.element,
+      mutator,
+      /* skipRemeasure */ true
+    );
+  }
+
+  /**
    * Called every time an owned AmpElement collapses itself.
    * See {@link collapse}.
    * @param {!AmpElement} unusedElement Child element that was collapsed.
@@ -967,15 +917,6 @@ export class BaseElement {
    */
   expand() {
     Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
-  }
-
-  /**
-   * Called every time an owned AmpElement expands itself.
-   * See {@link expand}.
-   * @param {!AmpElement} unusedElement Child element that was expanded.
-   */
-  expandedCallback(unusedElement) {
-    // Subclasses may override.
   }
 
   /**

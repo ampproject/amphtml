@@ -21,7 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function lentainform(global, data) {
-  validateData(data, ['publisher', 'widget', 'container'], ['url']);
+  validateData(data, ['publisher', 'widget', 'container'], ['url', 'options']);
 
   const scriptRoot = document.createElement('div');
   scriptRoot.id = data.container;
@@ -40,9 +40,10 @@ export function lentainform(global, data) {
   global.uniqId = (
     '00000' + Math.round(Math.random() * 100000).toString(16)
   ).slice(-5);
+  window['ampOptions' + data.widget + '_' + global.uniqId] = data.options;
 
-  global.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
+  global.context.observeIntersection(function (changes) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       window['intersectionRect' + data.widget + '_' + global.uniqId] =
         c.intersectionRect;
       window['boundingClientRect' + data.widget + '_' + global.uniqId] =

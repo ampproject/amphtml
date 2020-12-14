@@ -271,11 +271,11 @@ The AMP Cache removes any resource hints in the original document.
 _Condition_
 Any `<link>` tag present with attribute `rel` equal to any of the following:
 
-- `dns-prefetch`
-- `preconnect`
-- `prefetch`
-- `preload`
-- `prerender`
+-   `dns-prefetch`
+-   `preconnect`
+-   `prefetch`
+-   `preload`
+-   `prerender`
 
 <details>
 <summary>example</summary>
@@ -286,29 +286,29 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 
 </details>
 
-#### Remove non-whitelisted `<meta>` tags
+#### Remove non-allowlisted `<meta>` tags
 
 _Condition_:
 Remove any `<meta>` tags except for those that:
 
-- have attribute `charset`
-- do not have attributes `content`, `itemprop`, `name` and `property`
-- have attribute `http-equiv` where attribute value is not one of:
-  - `content-security-policy`
-  - `refresh`
-  - `x-dns-prefetch-control`
-- have attribute `name` with case-insensitive prefix `amp-`
-- have attribute `name` with case-insensitive prefix `amp4ads-`
-- have attribute `name` with case-insensitive prefix `dc.`
-- have attribute `name` with case-insensitive prefix `i-amphtml-`
-- have attribute `name` with case-insensitive prefix `twitter:`
-- have attribute `name=apple-itunes-app`
-- have attribute `name=referrer` [note: this may be inserted by AMP Cache]
-- have attribute `name=robots` [note: this is inserted by AMP Cache]
-- have attribute `name=viewport`
-- have attribute `property` with case-insensitive prefix "al:"
-- have attribute `property` with case-insensitive prefix "fb:"
-- have attribute `property` with case-insensitive prefix "og:"
+-   have attribute `charset`
+-   do not have attributes `content`, `itemprop`, `name` and `property`
+-   have attribute `http-equiv` where attribute value is not one of:
+    -   `content-security-policy`
+    -   `refresh`
+    -   `x-dns-prefetch-control`
+-   have attribute `name` with case-insensitive prefix `amp-`
+-   have attribute `name` with case-insensitive prefix `amp4ads-`
+-   have attribute `name` with case-insensitive prefix `dc.`
+-   have attribute `name` with case-insensitive prefix `i-amphtml-`
+-   have attribute `name` with case-insensitive prefix `twitter:`
+-   have attribute `name=apple-itunes-app`
+-   have attribute `name=referrer` [note: this may be inserted by AMP Cache]
+-   have attribute `name=robots` [note: this is inserted by AMP Cache]
+-   have attribute `name=viewport`
+-   have attribute `property` with case-insensitive prefix "al:"
+-   have attribute `property` with case-insensitive prefix "fb:"
+-   have attribute `property` with case-insensitive prefix "og:"
 
 <details>
 <summary>example</summary>
@@ -406,15 +406,14 @@ If a custom-element `<script>` tag is included in `<head>` but not used in `<bod
 _Condition_:
 Remove unused custom-element extensions with the following exceptions:
 
-- Do not remove any custom-element extensions if `<amp-live-list>` is present within the document
-- Do not remove any of the following custom-element extensions:
-- amp-access
-- amp-access-laterpay
-- amp-analytics
-- amp-auto-ads
-- amp-dynamic-css-classes
-- amp-form
-- amp-share-tracking
+-   Do not remove any custom-element extensions if `<amp-live-list>` is present within the document
+-   Do not remove any of the following custom-element extensions:
+-   amp-access
+-   amp-access-laterpay
+-   amp-analytics
+-   amp-auto-ads
+-   amp-dynamic-css-classes
+-   amp-form
 
 <details>
 <summary>example</summary>
@@ -432,8 +431,8 @@ Remove whitespace in `<head>` except for tags that should preserve whitespace.
 _Condition_:
 Remove whitespace except for within these tags:
 
-- `<script>`
-- `<style>`
+-   `<script>`
+-   `<style>`
 
 <details>
 <summary>example</summary>

@@ -1,9 +1,7 @@
 language: node_js
 dist: xenial
 node_js:
-  - 'lts/*'
-python:
-  - '2.7'
+  - '14'
 notifications:
   email:
     recipients:
@@ -14,12 +12,16 @@ before_install:
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
-  - pip install --user protobuf
+  # Ensure python v2 and v3 are available, and "python" defaults to v3 (docs.travis-ci.com/user/reference/xenial/#python-support)
+  - pyenv global 3.6.7 2.7.15
+  - python3 --version
+  - python2 --version
+  - python --version
+  # Xenial's version of python-protobuf is outdated (github.com/ampproject/amphtml/pull/22528)
+  - pip3 install --user protobuf
 branches:
   only:
     - master
-    - release
-    - canary
     - /^amp-release-.*$/
 addons:
   apt:
@@ -47,9 +49,9 @@ stages:
 jobs:
   include:
     - stage: build
-      name: 'Build'
+      name: 'Unminified Build'
       script:
-        - unbuffer node build-system/pr-check/build.js
+        - unbuffer node build-system/pr-check/unminified-build.js
     - stage: build
       name: 'Checks'
       script:
@@ -59,61 +61,53 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: 'Dist, Bundle Size'
+      name: 'Nomodule Build'
       script:
-        - unbuffer node build-system/pr-check/dist-bundle-size.js
+        - unbuffer node build-system/pr-check/nomodule-build.js
+    - stage: build
+      name: 'Module Build'
+      script:
+        - unbuffer node build-system/pr-check/module-build.js
     - stage: test
-      name: 'Single Pass Tests'
+      name: 'Bundle Size'
       script:
-        - unbuffer node build-system/pr-check/single-pass-tests.js
+        - unbuffer node build-system/pr-check/bundle-size.js
     - stage: test
       name: 'Visual Diff Tests'
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
-      env:
-        - CACHE_NAME=VISUALDIFFJOB
     - stage: test
       name: 'Local Tests'
       script:
         - unbuffer node build-system/pr-check/local-tests.js
     - stage: test
-      name: 'Remote (Sauce Labs) Tests'
+      name: 'Dist Tests'
       script:
-        - unbuffer node build-system/pr-check/remote-tests.js
-      after_script:
-        - build-system/sauce_connect/stop_sauce_connect.sh
-        - ps -ef
+        - unbuffer node build-system/pr-check/dist-tests.js
     - stage: test
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
-      env:
-        - CACHE_NAME=E2EJOB
+    - stage: test
+      name: 'ESM Tests'
+      script:
+        - unbuffer node build-system/pr-check/esm-tests.js
     - stage: experiment
       name: 'Experiment A Tests'
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
-      cache: false
     - stage: experiment
       name: 'Experiment B Tests'
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
-      cache: false
     - stage: experiment
       name: 'Experiment C Tests'
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
-      cache: false
-before_cache:
-  # do not store cache for pr builds or experiment stage builds
-  - if [[ $TRAVIS_EVENT_TYPE == pull_request ]] || [[ $TRAVIS_BUILD_STAGE_NAME == experiment ]]; then exit $TRAVIS_TEST_RESULT ; fi
-cache:
-  directories:
-    - node_modules
-    - build-system/tasks/e2e/node_modules
-    - build-system/tasks/visual-diff/node_modules
-    - sauce_connect
-    - validator/node_modules
-    - validator/nodejs/node_modules
-    - validator/webui/node_modules
-  yarn: true
+    - stage: experiment
+      name: 'Performance Tests'
+      script:
+        - unbuffer node build-system/pr-check/performance-tests.js
+  allow_failures:
+    - script: unbuffer node build-system/pr-check/performance-tests.js # See #28148
+  fast_finish: true

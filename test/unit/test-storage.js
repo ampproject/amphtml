@@ -23,7 +23,7 @@ import {
 } from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
 
-describes.sandboxed('Storage', {}, env => {
+describes.sandboxed('Storage', {}, (env) => {
   let storage;
   let binding;
   let bindingMock;
@@ -32,8 +32,9 @@ describes.sandboxed('Storage', {}, env => {
   let windowApi;
   let ampdoc;
   let viewerBroadcastHandler;
+  let clock;
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -41,7 +42,7 @@ describes.sandboxed('Storage', {}, env => {
       beforeEach(() => {
         viewerBroadcastHandler = undefined;
         viewer = {
-          onBroadcast: handler => {
+          onBroadcast: (handler) => {
             viewerBroadcastHandler = handler;
           },
           broadcast: () => {},
@@ -68,7 +69,7 @@ describes.sandboxed('Storage', {}, env => {
         const list = [];
         for (const k in keyValues) {
           list.push(
-            storage.get(k).then(value => {
+            storage.get(k).then((value) => {
               const expectedValue = keyValues[k];
               expect(value).to.equal(expectedValue, `For "${k}"`);
             })
@@ -91,7 +92,7 @@ describes.sandboxed('Storage', {}, env => {
           .then(() => {
             return storage.storePromise_;
           })
-          .then(store => {
+          .then((store) => {
             expect(store.maxValues_).to.equal(8);
           });
       });
@@ -107,7 +108,7 @@ describes.sandboxed('Storage', {}, env => {
           .then(() => {
             return storage.storePromise_;
           })
-          .then(store => {
+          .then((store) => {
             expect(store.obj.__proto__).to.be.undefined;
             expect(store.values_.__proto__).to.be.undefined;
           });
@@ -127,7 +128,7 @@ describes.sandboxed('Storage', {}, env => {
           .then(() => {
             return storage.storePromise_;
           })
-          .then(store => {
+          .then((store) => {
             expect(store.obj.__proto__).to.be.undefined;
             expect(store.values_.__proto__).to.be.undefined;
           });
@@ -144,13 +145,13 @@ describes.sandboxed('Storage', {}, env => {
           .once();
         expect(storage.storePromise_).to.not.exist;
         const promise = storage.get('key1');
-        return promise.then(value => {
+        return promise.then((value) => {
           expect(value).to.equal('value1');
           const store1Promise = storage.storePromise_;
           expect(store1Promise).to.exist;
 
           // Repeat.
-          return storage.get('key2').then(value2 => {
+          return storage.get('key2').then((value2) => {
             expect(value2).to.equal('value2');
             expect(storage.storePromise_).to.equal(store1Promise);
           });
@@ -165,13 +166,13 @@ describes.sandboxed('Storage', {}, env => {
           .once();
         expect(storage.storePromise_).to.not.exist;
         const promise = storage.get('key1');
-        return promise.then(value => {
+        return promise.then((value) => {
           expect(value).to.be.undefined;
           const store1Promise = storage.storePromise_;
           expect(store1Promise).to.exist;
 
           // Repeat.
-          return storage.get('key2').then(value2 => {
+          return storage.get('key2').then((value2) => {
             expect(value2).to.be.undefined;
             expect(storage.storePromise_).to.equal(store1Promise);
           });
@@ -179,6 +180,7 @@ describes.sandboxed('Storage', {}, env => {
       });
 
       it('should recover from binding failure', () => {
+        expectAsyncConsoleError(/Failed to load store/);
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
@@ -186,13 +188,14 @@ describes.sandboxed('Storage', {}, env => {
           .once();
         expect(storage.storePromise_).to.not.exist;
         const promise = storage.get('key1');
-        return promise.then(value => {
+        return promise.then((value) => {
           expect(value).to.be.undefined;
           expect(storage.storePromise_).to.exist;
         });
       });
 
       it('should recover from binding error', () => {
+        expectAsyncConsoleError(/Failed to load store/);
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
@@ -200,7 +203,7 @@ describes.sandboxed('Storage', {}, env => {
           .once();
         expect(storage.storePromise_).to.not.exist;
         const promise = storage.get('key1');
-        return promise.then(value => {
+        return promise.then((value) => {
           expect(value).to.be.undefined;
           expect(storage.storePromise_).to.exist;
         });
@@ -219,7 +222,7 @@ describes.sandboxed('Storage', {}, env => {
           .expects('saveBlob')
           .withExactArgs(
             'https://acme.com',
-            env.sandbox.match(arg => {
+            env.sandbox.match((arg) => {
               const store2 = new Store(JSON.parse(atob(arg)));
               return (
                 store2.get('key1') !== undefined &&
@@ -232,7 +235,7 @@ describes.sandboxed('Storage', {}, env => {
         viewerMock
           .expects('broadcast')
           .withExactArgs(
-            env.sandbox.match(arg => {
+            env.sandbox.match((arg) => {
               return (
                 arg['type'] == 'amp-storage-reset' &&
                 arg['origin'] == 'https://acme.com'
@@ -273,7 +276,7 @@ describes.sandboxed('Storage', {}, env => {
           .expects('saveBlob')
           .withExactArgs(
             'https://acme.com',
-            env.sandbox.match(arg => {
+            env.sandbox.match((arg) => {
               const store2 = new Store(JSON.parse(atob(arg)));
               return store2.get('key1') === undefined;
             })
@@ -283,7 +286,7 @@ describes.sandboxed('Storage', {}, env => {
         viewerMock
           .expects('broadcast')
           .withExactArgs(
-            env.sandbox.match(arg => {
+            env.sandbox.match((arg) => {
               return (
                 arg['type'] == 'amp-storage-reset' &&
                 arg['origin'] == 'https://acme.com'
@@ -311,6 +314,47 @@ describes.sandboxed('Storage', {}, env => {
           });
       });
 
+      it('should get unexpired value based on duration', async () => {
+        clock = env.sandbox.useFakeTimers();
+        const store1 = new Store({});
+        store1.set('key1', 'value1');
+        expect(store1.values_).to.deep.equal({
+          'key1': {v: 'value1', t: 0},
+        });
+
+        bindingMock
+          .expects('loadBlob')
+          .withExactArgs('https://acme.com')
+          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .once();
+        bindingMock
+          .expects('saveBlob')
+          .withExactArgs(
+            'https://acme.com',
+            env.sandbox.match((arg) => {
+              const store2 = new Store(JSON.parse(atob(arg)));
+              return store2.get('key1') === undefined;
+            })
+          )
+          .returns(Promise.resolve())
+          .twice();
+        viewerMock
+          .expects('broadcast')
+          .withExactArgs(
+            env.sandbox.match((arg) => {
+              return (
+                arg['type'] == 'amp-storage-reset' &&
+                arg['origin'] == 'https://acme.com'
+              );
+            })
+          )
+          .once();
+
+        expect(await storage.get('key1', 10)).to.equal('value1');
+        clock.tick(100);
+        expect(await storage.get('key1', 5)).to.be.undefined;
+      });
+
       it('should react to reset messages', () => {
         const store1 = new Store({});
         store1.set('key1', 'value1');
@@ -319,7 +363,7 @@ describes.sandboxed('Storage', {}, env => {
           .withExactArgs('https://acme.com')
           .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
           .twice();
-        return storage.get('key1').then(value => {
+        return storage.get('key1').then((value) => {
           expect(value).to.equal('value1');
           const store1Promise = storage.storePromise_;
           expect(store1Promise).to.exist;
@@ -330,7 +374,7 @@ describes.sandboxed('Storage', {}, env => {
             'origin': 'https://acme.com',
           });
           expect(storage.storePromise_).to.not.exist;
-          return storage.get('key1').then(value => {
+          return storage.get('key1').then((value) => {
             expect(value).to.equal('value1');
             expect(storage.storePromise_).to.exist;
           });
@@ -345,7 +389,7 @@ describes.sandboxed('Storage', {}, env => {
           .withExactArgs('https://acme.com')
           .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
           .twice();
-        return storage.get('key1').then(value => {
+        return storage.get('key1').then((value) => {
           expect(value).to.equal('value1');
           const store1Promise = storage.storePromise_;
           expect(store1Promise).to.exist;
@@ -361,7 +405,7 @@ describes.sandboxed('Storage', {}, env => {
     });
 });
 
-describes.sandboxed('Store', {}, env => {
+describes.sandboxed('Store', {}, (env) => {
   let clock;
   let store;
 
@@ -475,7 +519,7 @@ describes.sandboxed('Store', {}, env => {
   });
 });
 
-describes.sandboxed('LocalStorageBinding', {}, env => {
+describes.sandboxed('LocalStorageBinding', {}, (env) => {
   let windowApi;
   let localStorageMock;
   let binding;
@@ -499,7 +543,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
     expect(errorSpy).to.have.not.been.called;
 
     delete windowApi.localStorage;
-    new LocalStorageBinding(windowApi);
+    allowConsoleError(() => new LocalStorageBinding(windowApi));
     expect(errorSpy).to.be.calledOnce;
     expect(errorSpy.args[0][1].message).to.match(/localStorage not supported/);
   });
@@ -510,7 +554,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
       .withExactArgs('amp-store:https://acme.com')
       .returns('BLOB1')
       .once();
-    return binding.loadBlob('https://acme.com').then(blob => {
+    return binding.loadBlob('https://acme.com').then((blob) => {
       expect(blob).to.equal('BLOB1');
     });
   });
@@ -521,7 +565,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
       .withExactArgs('amp-store:https://acme.com')
       .returns(undefined)
       .once();
-    return binding.loadBlob('https://acme.com').then(blob => {
+    return binding.loadBlob('https://acme.com').then((blob) => {
       expect(blob).to.not.exist;
     });
   });
@@ -539,7 +583,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
         () => 'SUCCESS',
         () => 'ERROR'
       )
-      .then(res => {
+      .then((res) => {
         expect(res).to.equal('ERROR');
       });
   });
@@ -554,20 +598,18 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
     return binding
       .loadBlob('https://acme.com')
       .then(
-        res => `SUCCESS ${res}`,
+        (res) => `SUCCESS ${res}`,
         () => 'ERROR'
       )
-      .then(res => {
+      .then((res) => {
         // Resolves with null
         expect(res).to.equal('SUCCESS null');
       });
   });
 
   it('should bypass loading from localStorage if getItem throws', () => {
-    localStorageMock
-      .expects('getItem')
-      .throws(new Error('unknown'))
-      .once();
+    expectAsyncConsoleError(/localStorage not supported/);
+    localStorageMock.expects('getItem').throws(new Error('unknown')).once();
     binding = new LocalStorageBinding(windowApi);
     localStorageMock.expects('getItem').never();
     return binding
@@ -576,7 +618,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
         () => 'SUCCESS',
         () => 'ERROR'
       )
-      .then(res => {
+      .then((res) => {
         expect(res).to.equal('SUCCESS');
       });
   });
@@ -601,7 +643,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
         () => 'SUCCESS',
         () => 'ERROR'
       )
-      .then(res => {
+      .then((res) => {
         expect(res).to.equal('ERROR');
       });
   });
@@ -620,18 +662,16 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
         () => 'SUCCESS',
         () => 'ERROR'
       )
-      .then(res => {
+      .then((res) => {
         expect(res).to.equal('SUCCESS');
       });
   });
 
   it('should bypass saving to localStorage if getItem throws', () => {
+    expectAsyncConsoleError(/localStorage not supported/);
     const setItemSpy = env.sandbox.spy(windowApi.localStorage, 'setItem');
 
-    localStorageMock
-      .expects('getItem')
-      .throws(new Error('unknown'))
-      .once();
+    localStorageMock.expects('getItem').throws(new Error('unknown')).once();
     binding = new LocalStorageBinding(windowApi);
     // Never reaches setItem
     return binding
@@ -640,14 +680,14 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
         () => 'SUCCESS',
         () => 'ERROR'
       )
-      .then(res => {
+      .then((res) => {
         expect(setItemSpy).to.have.not.been.called;
         expect(res).to.equal('SUCCESS');
       });
   });
 });
 
-describes.sandboxed('ViewerStorageBinding', {}, env => {
+describes.sandboxed('ViewerStorageBinding', {}, (env) => {
   let viewer;
   let viewerMock;
   let binding;
@@ -665,13 +705,13 @@ describes.sandboxed('ViewerStorageBinding', {}, env => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'loadStore',
-        env.sandbox.match(arg => {
+        env.sandbox.match((arg) => {
           return arg['origin'] == 'https://acme.com';
         })
       )
       .returns(Promise.resolve({'blob': 'BLOB1'}))
       .once();
-    return binding.loadBlob('https://acme.com').then(blob => {
+    return binding.loadBlob('https://acme.com').then((blob) => {
       expect(blob).to.equal('BLOB1');
     });
   });
@@ -681,13 +721,13 @@ describes.sandboxed('ViewerStorageBinding', {}, env => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'loadStore',
-        env.sandbox.match(arg => {
+        env.sandbox.match((arg) => {
           return arg['origin'] == 'https://acme.com';
         })
       )
       .returns(Promise.resolve({}))
       .once();
-    return binding.loadBlob('https://acme.com').then(blob => {
+    return binding.loadBlob('https://acme.com').then((blob) => {
       expect(blob).to.not.exist;
     });
   });
@@ -697,7 +737,7 @@ describes.sandboxed('ViewerStorageBinding', {}, env => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'loadStore',
-        env.sandbox.match(arg => {
+        env.sandbox.match((arg) => {
           return arg['origin'] == 'https://acme.com';
         })
       )
@@ -709,7 +749,7 @@ describes.sandboxed('ViewerStorageBinding', {}, env => {
         () => 'SUCCESS',
         () => 'ERROR'
       )
-      .then(res => {
+      .then((res) => {
         expect(res).to.equal('ERROR');
       });
   });
@@ -719,7 +759,7 @@ describes.sandboxed('ViewerStorageBinding', {}, env => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'saveStore',
-        env.sandbox.match(arg => {
+        env.sandbox.match((arg) => {
           return arg['origin'] == 'https://acme.com' && arg['blob'] == 'BLOB1';
         })
       )
@@ -743,7 +783,7 @@ describes.sandboxed('ViewerStorageBinding', {}, env => {
         () => 'SUCCESS',
         () => 'ERROR'
       )
-      .then(res => {
+      .then((res) => {
         expect(res).to.equal('ERROR');
       });
   });
