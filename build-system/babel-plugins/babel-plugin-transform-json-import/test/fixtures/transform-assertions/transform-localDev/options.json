@@ -1,0 +1,4 @@
+{
+  "plugins": [["../../../..", {"localDev": true}]],
+  "sourceType": "module"
+}
