@@ -103,7 +103,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
       : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, opt_nocache ? null : cache);
+  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
 }
 
 /**
