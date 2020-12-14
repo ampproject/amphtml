@@ -32,7 +32,7 @@ const {resolve, dirname, join, relative} = require('path').posix;
 // const key = JSON.parse('{"imported": "json"}');
 // ```
 module.exports = function ({types: t, template}, options) {
-  const {localDev = false} = options;
+  const {freeze = true} = options;
 
   return {
     manipulateOptions(opts, parserOpts) {
@@ -80,7 +80,7 @@ module.exports = function ({types: t, template}, options) {
           );
         }
 
-        if (localDev) {
+        if (freeze) {
           path.replaceWith(
             template.statement
               .ast`const ${specifier} = JSON.parse('${JSON.stringify(

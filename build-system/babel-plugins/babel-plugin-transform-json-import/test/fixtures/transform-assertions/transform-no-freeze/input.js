@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const key = JSON.parse("{\"plugins\":[\"../../../..\"],\"sourceType\":\"module\"}", function (key, val) {
-  if (typeof val === 'object') Object.freeze(val);
-  return val;
-});
-const string = JSON.parse("{\"plugins\":[\"../../../..\"],\"sourceType\":\"module\"}", function (key, val) {
-  if (typeof val === 'object') Object.freeze(val);
-  return val;
-});
+
+import key from './options.json' assert { type: 'json' };
+import string from './options.json' assert { "type": 'json' };
+

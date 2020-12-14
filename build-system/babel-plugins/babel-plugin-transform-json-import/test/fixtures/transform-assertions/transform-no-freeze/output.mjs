@@ -13,11 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const key = JSON.parse("{\"plugins\":[\"../../../..\"],\"sourceType\":\"module\"}", function (key, val) {
-  if (typeof val === 'object') Object.freeze(val);
-  return val;
-});
-const string = JSON.parse("{\"plugins\":[\"../../../..\"],\"sourceType\":\"module\"}", function (key, val) {
-  if (typeof val === 'object') Object.freeze(val);
-  return val;
-});
+const key = JSON.parse("{\"plugins\":[[\"../../../..\",{\"freeze\":false}]],\"sourceType\":\"module\"}");
+const string = JSON.parse("{\"plugins\":[[\"../../../..\",{\"freeze\":false}]],\"sourceType\":\"module\"}");

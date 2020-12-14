@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const key = JSON.parse("{\"plugins\":[[\"../../../..\",{\"localDev\":true}]],\"sourceType\":\"module\"}", function (key, val) {
+const key = JSON.parse("{\"plugins\":[[\"../../../..\",{\"freeze\":true}]],\"sourceType\":\"module\"}", function (key, val) {
   if (typeof val === 'object') Object.freeze(val);
   return val;
 });
-const string = JSON.parse("{\"plugins\":[[\"../../../..\",{\"localDev\":true}]],\"sourceType\":\"module\"}", function (key, val) {
+const string = JSON.parse("{\"plugins\":[[\"../../../..\",{\"freeze\":true}]],\"sourceType\":\"module\"}", function (key, val) {
   if (typeof val === 'object') Object.freeze(val);
   return val;
 });
