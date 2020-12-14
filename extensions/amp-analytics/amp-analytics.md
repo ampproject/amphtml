@@ -827,17 +827,25 @@ using the `visibilitySpec`.
 }
 ```
 
-Notice that selector can be used to only specify a single element, not a
-collection. The element can be either an
-[AMP extended element](../../spec/amp-tag-addendum.md#amp-specific-tags)
-or a document root.
-
 The element visibility trigger waits for the signal specified by the `waitFor`
 property in `visibilitySpec` before tracking element visibility. If `waitFor` is
 not specified, it waits for element's [`ini-load`](#ini-load) signal. See
 `waitFor` docs for more details. If `reportWhen` is specified, the trigger waits
 for that signal before sending the event. This is useful, for example, in
 sending analytics events when the page is closed.
+
+`selector` can either be a single selector string (shown above) or an array of selector strings (shown below). If `selector` is a string, then it will be used to only specify a single element or a document root. If `selector` is an array of strings, each selector will specify all the elements in the doc that share the selector and have the `data-vars-*` attribute (useful for identifying elements).
+
+```json
+"triggers": {
+  "defaultPageview": {
+    "on": "visible",
+    "request": "adViewWithId",
+    "selector": ["amp-ad", "#myImg.red"],
+    "visibilitySpec": {/* optional visibility spec */}
+  }
+}
+```
 
 ###### `"on": "hidden"` trigger
 
