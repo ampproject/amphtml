@@ -118,6 +118,7 @@
   color: black !important;
   bottom: calc(100% - 1.5em) !important;
   right: 0 !important;
+  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-container:not(.i-amphtml-story-interactive-active) .i-amphtml-story-interactive-disclaimer {
