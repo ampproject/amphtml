@@ -43,7 +43,6 @@ export class Url {
 
     /** @private @const {!HTMLAnchorElement} */
     this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
-    this.anchor_.href = '';
 
     /** @private @const {?LruCache} */
     this.cache_ = IS_ESM ? null : new LruCache(100);
