@@ -467,17 +467,19 @@ export class AccessService {
     let on = false;
     try {
       on = this.evaluator_.evaluate(expr, response);
-      if (on) {
-        const renderTemplate = this.renderTemplates_(element, response);
-        if (renderTemplate) {
-          return renderTemplate.then(() =>
-            this.applyAuthorizationAttrs_(element, on)
-          );
-        }
-      }
     } catch (err) {
-      // If the access expression yields an error it is likely due to publisher error.
+      // If evaluating the expression yields an error
+      // it is most likely an invalid expression (publisher error).
       user().error(TAG, err);
+    }
+
+    if (on) {
+      const renderTemplate = this.renderTemplates_(element, response);
+      if (renderTemplate) {
+        return renderTemplate.then(() =>
+          this.applyAuthorizationAttrs_(element, on)
+        );
+      }
     }
 
     return this.applyAuthorizationAttrs_(element, on);
