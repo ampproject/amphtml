@@ -505,11 +505,11 @@ within this `<amp-list>`. There are three valid protocols for the `src` attribut
 1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
 2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](#initialization-from-amp-state) for more details.
 3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](#using-amp-script-as-a-data-source) for more details.
-[/filter]<!-- formats="websites, stories" -->
+   [/filter]<!-- formats="websites, stories" -->
 
 [filter formats="email"]
 
-The URL of the remote endpoint that returns the JSON for amp-list to render. This must refer to a CORS HTTP service and Insecure HTTP is not supported. 
+The URL of the remote endpoint that returns the JSON for amp-list to render. This must refer to a CORS HTTP service and Insecure HTTP is not supported.
 
 [/filter]<!-- formats="email" -->
 
