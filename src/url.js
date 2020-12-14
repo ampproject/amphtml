@@ -96,13 +96,12 @@ export function getWinOrigin(win) {
  * @return {!Location}
  */
 export function parseUrlDeprecated(url, opt_nocache) {
-  if (IS_ESM) {
-    return /** @type {!Location} */ (new URL(url));
-  }
-
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
+    a.href = '';
+    cache = IS_ESM
+      ? null
+      : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
   return parseUrlWithA(a, url, opt_nocache ? null : cache);
@@ -122,7 +121,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
  */
 export function parseUrlWithA(a, url, opt_cache) {
   if (IS_ESM) {
-    return /** @type {!Location} */ (new URL(url));
+    return /** @type {!Location} */ (new URL(url, a.href));
   }
 
   if (opt_cache && opt_cache.has(url)) {

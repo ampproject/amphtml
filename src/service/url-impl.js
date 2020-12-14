@@ -41,10 +41,9 @@ export class Url {
     const root = ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
-    /** @private @const {?HTMLAnchorElement} */
-    this.anchor_ = IS_ESM
-      ? null
-      : /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
+    /** @private @const {!HTMLAnchorElement} */
+    this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
+    this.anchor_.href = '';
 
     /** @private @const {?LruCache} */
     this.cache_ = IS_ESM ? null : new LruCache(100);
@@ -58,9 +57,6 @@ export class Url {
    * @return {!Location}
    */
   parse(url, opt_nocache) {
-    if (IS_ESM) {
-      return /** @type {!Location} */ new URL(url);
-    }
     return parseUrlWithA(this.anchor_, url, opt_nocache ? null : this.cache_);
   }
 
