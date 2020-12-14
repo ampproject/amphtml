@@ -63,6 +63,7 @@ function getPreClosureConfig() {
       {replaceCallArguments: false},
     ],
     './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
+    './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
