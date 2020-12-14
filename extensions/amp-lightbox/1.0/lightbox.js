@@ -19,8 +19,8 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {
-  useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
@@ -106,12 +106,13 @@ function LightboxWithRef(
     [onBeforeOpenRef]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = lightboxRef.current;
-    if (element == undefined) {
+    if (!element) {
       return;
     }
     let animation;
+    setStyle(element, 'visibility', visible ? 'hidden' : 'visible');
 
     // "Make Visible" Animation
     if (visible) {
@@ -171,7 +172,6 @@ function LightboxWithRef(
         paint={true}
         part="lightbox"
         wrapperClassName={`${classes.defaultStyles} ${classes.wrapper}`}
-        wrapperStyle={{visibility: 'hidden'}}
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {

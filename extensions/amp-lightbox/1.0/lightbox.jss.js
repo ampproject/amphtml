@@ -46,7 +46,6 @@ const wrapper = {
   height: '100%',
   position: 'fixed',
   boxSizing: 'border-box',
-  visibility: 'hidden',
 };
 
 // User overridable styles
