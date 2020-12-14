@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {closest} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
-import {setStyle} from '../../../src/style';
 
 /**
  * Disclaimers will retrieve the information from the lookup dictionary below.
@@ -40,21 +38,21 @@ const BACKENDS = {
 function buildDisclaimerLayout(element) {
   const html = htmlFor(element);
   return html`<div class="i-amphtml-story-interactive-disclaimer">
-    <div class="i-amphtml-story-interactive-disclaimer-content">
-      <div class="i-amphtml-story-interactive-disclaimer-icon"></div>
-      <div class="i-amphtml-story-interactive-disclaimer-bubble">
-        <div>
-          <span>Your response will be sent to </span>
-          <span class="i-amphtml-story-interactive-disclaimer-entity"></span>
-        </div>
-        <div class="i-amphtml-story-interactive-disclaimer-url"></div>
-        <div>
-          <a target="_blank" class="i-amphtml-story-interactive-disclaimer-link"
-            >Learn more</a
-          >
-        </div>
-        <button class="i-amphtml-story-interactive-disclaimer-close"></button>
+    <button class="i-amphtml-story-interactive-disclaimer-alert">
+      <div class="i-amphtml-story-interactive-disclaimer-alert-icon"></div>
+    </button>
+    <div class="i-amphtml-story-interactive-disclaimer-bubble">
+      <div>
+        <span>Your response will be sent to </span>
+        <span class="i-amphtml-story-interactive-disclaimer-entity"></span>
       </div>
+      <div class="i-amphtml-story-interactive-disclaimer-url"></div>
+      <div>
+        <a target="_blank" class="i-amphtml-story-interactive-disclaimer-link"
+          >Learn more</a
+        >
+      </div>
+      <button class="i-amphtml-story-interactive-disclaimer-close"></button>
     </div>
   </div>`;
 }
@@ -81,38 +79,34 @@ export function buildInteractiveDisclaimer(interactive) {
 
   // Fill information
   const backendSpecs = getBackendSpecs(backendUrl, BACKENDS);
-  interactive
-    .mutateElement(() => {
-      if (backendSpecs) {
-        entityEl.textContent = backendSpecs[1].entityName;
-        urlEl.textContent = backendSpecs[0];
-        backendSpecs[1].learnMoreUrl
-          ? (linkEl.href = backendSpecs[1].learnMoreUrl)
-          : linkEl.remove();
-      } else {
-        entityEl.remove();
-        urlEl.textContent = backendUrl;
-        linkEl.remove();
-      }
-      return closeDisclaimer(interactive, disclaimer);
-    })
-    .then(() =>
-      disclaimer
-        .querySelector('.i-amphtml-story-interactive-disclaimer-content')
-        .classList.add('i-amphtml-story-interactive-disclaimer-content-inplace')
-    );
+  interactive.mutateElement(() => {
+    if (backendSpecs) {
+      entityEl.textContent = backendSpecs[1].entityName;
+      urlEl.textContent = backendSpecs[0];
+      backendSpecs[1].learnMoreUrl
+        ? (linkEl.href = backendSpecs[1].learnMoreUrl)
+        : linkEl.remove();
+    } else {
+      entityEl.remove();
+      urlEl.textContent = backendUrl;
+      linkEl.remove();
+    }
+    return closeDisclaimer(interactive, disclaimer);
+  });
 
   // Add click listener to open or close the dialog.
   disclaimer.addEventListener('click', (event) => {
-    const closeClicked = closest(
-      event.target,
-      (e) =>
-        e.classList.contains('i-amphtml-story-interactive-disclaimer-close'),
-      interactive
-    );
-    if (closeClicked) {
+    if (
+      event.target.classList.contains(
+        'i-amphtml-story-interactive-disclaimer-close'
+      )
+    ) {
       closeDisclaimer(interactive, disclaimer);
-    } else if (!disclaimer.hasAttribute('active')) {
+    } else if (
+      event.target.classList.contains(
+        'i-amphtml-story-interactive-disclaimer-alert'
+      )
+    ) {
       openDisclaimer(interactive, disclaimer);
     }
   });
