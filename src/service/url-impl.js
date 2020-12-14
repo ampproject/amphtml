@@ -53,6 +53,7 @@ export class Url {
    *
    * @param {string} url
    * @param {boolean=} opt_nocache
+   *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
    * @return {!Location}
    */
   parse(url, opt_nocache) {
