@@ -112,6 +112,7 @@ function LightboxWithRef(
       return;
     }
     let animation;
+    // Set pre-animation visibility state, to be flipped post-animation.
     setStyle(element, 'visibility', visible ? 'hidden' : 'visible');
 
     // "Make Visible" Animation
