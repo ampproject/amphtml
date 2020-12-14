@@ -61,9 +61,11 @@ describes.endtoend(
         controller.getElementProperty(lightbox, 'clientWidth')
       ).to.equal(width);
 
-      const backingImage = await controller.findElement('#image img');
+      const backingImageOrLoader = await controller.findElement(
+        '#image img, #image .i-amphtml-loader-background'
+      );
       await expect(
-        controller.getElementProperty(backingImage, 'clientWidth')
+        controller.getElementProperty(backingImageOrLoader, 'clientWidth')
       ).to.equal(641);
     });
 
