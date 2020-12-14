@@ -52,7 +52,6 @@ class AmpSidebar extends PreactBaseElement {
    * @private
    */
   beforeOpen_() {
-    console.log('beforeOpen');
     this.open_ = true;
     toggle(this.element, true);
     this.element.setAttribute('open', '');
