@@ -116,10 +116,14 @@ export class AmpAnimation extends AMP.BaseElement {
         this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
       })
     );
-    const io = new ampdoc.win.IntersectionObserver((records) => {
-      this.isIntersecting_ = records[records.length - 1].isIntersecting;
-      this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
-    });
+    const io = new ampdoc.win.IntersectionObserver(
+      (records) => {
+        const {isIntersecting} = records[records.length - 1];
+        this.isIntersecting_ = isIntersecting;
+        this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
+      },
+      {threshold: 0.001}
+    );
     io.observe(dev().assertElement(this.element.parentElement));
     this.cleanups_.push(() => io.disconnect());
 
