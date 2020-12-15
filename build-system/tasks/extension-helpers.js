@@ -178,6 +178,9 @@ function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
+  if (argv.core_runtime_only) {
+    return (extensionsToBuild = []);
+  }
   extensionsToBuild = DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
@@ -197,8 +200,7 @@ function getExtensionsToBuild(preBuild = false) {
     !preBuild &&
     !argv.noextensions &&
     !argv.extensions &&
-    !argv.extensions_from &&
-    !argv.core_runtime_only
+    !argv.extensions_from
   ) {
     const allExtensions = [];
     for (const extension in extensions) {
