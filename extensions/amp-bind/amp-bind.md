@@ -848,7 +848,7 @@ A macro can also call other macros <i>defined before itself</i>. A macro cannot 
 
 ## Bindings
 
-A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). Use the alternative,[XML-compatible](#xml-compatibility) syntax if developing in XML.
+A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). Use the alternative,[XML-compatible](#react-and-xml-compatibility) syntax if developing in XML.
 
 When the **state** changes, expressions tied to that state are evaluated. The element properties **bound** to the **state** are updated with the new expression results.
 
@@ -1393,7 +1393,7 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
   <tr>
     <td class="col-thirty">Invalid binding</td>
     <td class="col-fourty"><em>Binding to [foo] on &lt;P> is not allowed</em>.</td>
-    <td class="col-thirty">Use only <a href="#element-specific-attributes">allow-listed bindings</a>.</td>
+    <td class="col-thirty">Use only <a href="#amp-component-specific-attributes">allowlisted bindings</a>.</td>
   </tr>
   <tr>
     <td>Syntax error</td>

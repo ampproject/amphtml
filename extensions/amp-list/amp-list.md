@@ -149,7 +149,7 @@ Would most predictably be applied and rendered if instead provided as follows:
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-list>` elements) on an AMP page. For example, if your `<amp-list>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
-In `<amp-list>`, you can use the [`items`](#items-optional) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
+In `<amp-list>`, you can use the [`items`](#items) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
 
 ### Specifying an overflow
 
