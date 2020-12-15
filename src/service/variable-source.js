@@ -271,7 +271,7 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    */
@@ -285,7 +285,7 @@ export class VariableSource {
 
   /**
    * @param {!Array<string>} keys
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    * @private
