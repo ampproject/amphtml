@@ -483,7 +483,6 @@ const adConfig = jsonConfiguration({
   'feedad': {
     clientIdScope: '__fa_amp',
     prefetch: 'https://web.feedad.com/sdk/feedad-async.js',
-    preconnect: 'https://web.feedad.com',
     renderStartImplemented: true,
     fullWidthHeightRatio: 16 / 9,
     consentHandlingOverride: true,
