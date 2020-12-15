@@ -26,6 +26,7 @@ import {dict} from '../utils/object';
 import {escapeCssSelectorIdent} from '../css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
+import {isExperimentOn} from '../experiments';
 import {isLocalhostOrigin} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
@@ -548,6 +549,10 @@ export class Navigation {
       const platform = Services.platformFor(win);
       const viewer = Services.viewerForDoc(element);
       if (
+        isExperimentOn(
+          this.ampdoc.win,
+          'remove-viewer-query-params-on-navigate'
+        ) &&
         fromLocation.search &&
         platform.isSafari() &&
         platform.getMajorVersion() >= 13 &&
