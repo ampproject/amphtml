@@ -35,8 +35,8 @@ export default {
 
 export const Default = () => {
   const topInset = boolean('top indicator inset?', false);
-  const bottomInset = boolean('bottom indicator inset?', false);
-  const autoAdvance = boolean('auto advance', true);
+  const bottomInset = boolean('bottom indicator inset?', true);
+  const autoAdvance = boolean('auto advance', false);
   const autoAdvanceCount = text('auto advance count', 1);
   const autoAdvanceInterval = text('auto advance interval', 1000);
   const autoAdvanceLoops = text('auto advance loops', 3);
@@ -51,7 +51,7 @@ export const Default = () => {
     <amp-inline-gallery style={{maxWidth: '360px'}} layout="container">
       <amp-inline-gallery-pagination
         inset={topInset}
-        layout="fixed-height"
+        layout={topInset ? 'nodisplay' : 'fixed-height'}
         height="24"
       />
       <amp-base-carousel
@@ -102,7 +102,7 @@ export const Default = () => {
       </amp-base-carousel>
       <amp-inline-gallery-pagination
         inset={bottomInset}
-        layout="fixed-height"
+        layout={bottomInset ? 'nodisplay' : 'fixed-height'}
         height="24"
       />
       <amp-inline-gallery-thumbnails
