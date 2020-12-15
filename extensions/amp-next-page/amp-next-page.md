@@ -147,7 +147,7 @@ The `<amp-next-page>` component renders the recommendation box if one of the fol
 
 -   The user reaches the end of the page before the next page had loaded.
 -   The next page fails to load.
--   If the [`max-pages`](https://amp.dev/documentation/components/amp-next-page/#max-pages+(optional)) attribute is specified and the number of displayed pages is met.
+-   If the [`max-pages`](<https://amp.dev/documentation/components/amp-next-page/#max-pages+(optional)>) attribute is specified and the number of displayed pages is met.
 
 The recommendation box contains links to the remaining pages. The default recommendation box renders the specified `image` and `title` used in the JSON configuration. It can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section.
 

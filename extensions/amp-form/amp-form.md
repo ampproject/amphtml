@@ -194,7 +194,7 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### To render a successful response with data binding
 
--   Use the [on attribute](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) to bind the form _submit-success_ attribute to [`AMP.setState()`](https://amp.dev/documentation/components/amp-bind#updating-state-with-amp.setstate()).
+-   Use the [on attribute](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) to bind the form _submit-success_ attribute to [`AMP.setState()`](<https://amp.dev/documentation/components/amp-bind#updating-state-with-amp.setstate()>).
 -   Use the `event` property to capture the response data.
 -   Add the state attribute to the desired element to bind the form response.
 

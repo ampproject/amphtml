@@ -169,7 +169,7 @@ You can use `amp-script` to add an `amp-img` or `amp-layout` component to the DO
 
 If you invoke `AMP.setState()` from `amp-script` after a user gesture, bindings can cause mutations to the DOM. Otherwise, state will be set, but binding will not occur (similar to [`amp-state` initialization](https://amp.dev/documentation/examples/components/amp-bind/?referrer=ampbyexample.com#initializing-state)). For more information, see [the section on user gestures](#user-gestures).
 
-`AMP.setState()` works as described in the [`<amp-bind>` documentation](https://amp.dev/documentation/components/amp-bind/#updating-state-variables-with-amp.setstate()), merging an object literal into the specified state. This example shows how it can affect the DOM:
+`AMP.setState()` works as described in the [`<amp-bind>` documentation](<https://amp.dev/documentation/components/amp-bind/#updating-state-variables-with-amp.setstate()>), merging an object literal into the specified state. This example shows how it can affect the DOM:
 
 ```html
 <script id="myscript" type="text/plain" target="amp-script">
