@@ -37,26 +37,28 @@ before allowing buttons to be activated. */
   visibility: 'visible',
 };
 
-const lightboxContainWrapper = {
-  zIndex: 1000,
+const wrapper = {
   top: 0,
   bottom: 0,
   left: 0,
   right: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.9)',
-  color: '#fff',
   width: '100%',
   height: '100%',
   position: 'fixed',
-  opacity: 0,
-  alignItems: 'center',
-  justifyContent: 'right',
-  display: 'block',
+  boxSizing: 'border-box',
+};
+
+// User overridable styles
+const defaultStyles = {
+  zIndex: 1000,
+  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  color: '#fff',
 };
 
 const JSS = {
   closeButton,
-  lightboxContainWrapper,
+  wrapper,
+  defaultStyles,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

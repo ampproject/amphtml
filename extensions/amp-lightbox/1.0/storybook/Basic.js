@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Lightbox} from '../lightbox';
-import {boolean, select, withKnobs} from '@storybook/addon-knobs';
+import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 import {useRef} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -49,15 +49,20 @@ export const _default = () => {
     'fly-in-bottom',
   ]);
   const enableAnimation = boolean('enable animation', true);
+  const backgroundColor = text('background color', '');
+  const color = text('font color', '');
   return (
     <div>
       <LightboxWithActions
         id="lightbox"
         animateIn={animateIn}
+        style={{backgroundColor, color}}
         enableAnimation={enableAnimation}
       >
-        Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
-        aeque inermis reprehendunt.
+        <p>
+          Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
+          aeque inermis reprehendunt.
+        </p>
       </LightboxWithActions>
     </div>
   );
