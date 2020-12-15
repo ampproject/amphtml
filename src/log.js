@@ -19,7 +19,7 @@ import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
 import {urls} from './config';
-const self = {};
+
 const noop = () => {};
 
 /**
