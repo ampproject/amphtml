@@ -21,7 +21,7 @@ const fs = require('fs');
 // node version v14.15.1
 // package.json must contain top level "type": "module" for dynamic module import
 
-const dir = '/Users/artezan/amphtml/extensions/amp-story-auto-ads/0.1/_locales/';
+const dir = '/Users/artezan/amphtml/extensions/amp-story/1.0/_locales/';
 // 1. loop thru directory
 fs.readdirSync(dir).forEach(async (file) => {
   if (file.match(/\.js$/) !== null && file !== 'index.js') {
@@ -30,7 +30,7 @@ fs.readdirSync(dir).forEach(async (file) => {
     const obj = await import(dir + file);
 
     // 3. JSON.stringify()
-    const jsonStr = JSON.stringify(obj);
+    const jsonStr = JSON.stringify(obj.default);
 
     // 4. write new file .json with result from 3).
     fs.writeFile(dir + jsonName, jsonStr, (err, data) => {
@@ -53,7 +53,7 @@ fs.readdirSync(dir).forEach(async (file) => {
 //   // 3. JSON.stringify()
 //   // 4. write new file .json with result from 3).
 //   const jsonName = filePath.replace('.js', '.json');
-//   const json = JSON.stringify(obj);
+//   const json = JSON.stringify(obj.default);
 //   fs.writeFile(jsonName, json, (err, data) => {
 //     if (err) {
 //       console.log(err);
