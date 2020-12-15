@@ -9,7 +9,6 @@ If you operate a software-as-a-service tool for publishers to better understand 
 Before you can add your analytics service to AMP HTML runtime, you may need to:
 
 -   Identify the kinds of [variables](analytics-vars.md) and [requests](amp-analytics.md#requests) you'll need in an AMP HTML document for your analytics service.
--   Determine if the batching plugin function is required to construct the final url if using requests with batching behavior.
 -   Identify the triggers that result in analytics requests being sent from a page that would be relevant for your service.
 -   Consider if and how you will [track users across](https://github.com/ampproject/amphtml/blob/master/spec/amp-managing-user-state.md) first-party and third-party AMP contexts.
 -   Determine how your analytics dashboard handles AMP traffic.
@@ -34,7 +33,6 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
     1. A test in the [extensions/amp-analytics/0.1/test/vendor-requests.json
        ](../../extensions/amp-analytics/0.1/test/vendor-requests.json) file.
     1. Add your analytics service to the supported vendors list in the [extensions/amp-analytics/0.1/analytics-vendors-list.md](./analytics-vendors-list.md) file. Include the type, description, and link to your usage documentation.
-1. If a new batch plugin if required. Please refer to [Add Batch Plugin](#add-batch-plugin) for instructions.
 1. Test the new example you put in [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html) to ensure the hits from the example are working as expected. For example, the data needed is being collected and displayed in your analytics dashboard.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
 1. Update your service's usage documentation and inform your customers.
