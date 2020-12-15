@@ -38,7 +38,7 @@ component's visual area. If the user scrolls back, the video reverts to its orig
 -   The video can be flicked to be dismissed from its docked position.
 -   Multiple videos on the same page can be docked, but only one at a time will be docked and fixed.
 
-### <a id="support"></a> Support
+### Support
 
 This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
 Currently, the supported players are:
@@ -60,7 +60,7 @@ Note that the video won't be docked unless it's playing _manually_. This means:
 -   If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
 -   If the video is paused while scrolling, it will not be docked.
 
-### <a id="target"></a> Docking target
+### Docking target
 
 On scroll, the video will minimize to an automatically calculated corner or to a custom defined position.
 
@@ -107,7 +107,7 @@ These can, for example, trigger an [`amp-animation`](https://amp.dev/documentati
 
 ### Event source
 
-Depending on the [docking target](#target), the corresponding event will be triggered from different source elements:
+Depending on the [docking target](#docking-target), the corresponding event will be triggered from different source elements:
 
 -   **From the video element itself**, when the video is docked to a corner.
 -   **From the slot element**, when the video is docked to the slot element.

@@ -242,7 +242,7 @@ with an existing element in the form, an error is emitted.
 When `amp-date-picker` loads, the input element's value is used to display the
 initially selected start date.
 
-Specify the `startDate` property via the [`src` attribute](#src-optional) to set
+Specify the `startDate` property via the [`src` attribute](#src) to set
 an initial end date dynamically.
 
 ```html
