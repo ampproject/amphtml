@@ -332,6 +332,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [E-Planning](../../ads/eplanning.md)
 -   [Empower](../../ads/empower.md)
 -   [Ezoic](../../ads/ezoic.md)
+-   [FeedAd](../../ads/feedad.md)
 -   [Felmat](../../ads/felmat.md)
 -   [FlexOneELEPHANT](../../ads/f1e.md)
 -   [FlexOneHARRIER](../../ads/f1h.md)
