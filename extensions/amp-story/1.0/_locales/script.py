@@ -1,3 +1,7 @@
+import glob
+import os
+import re
+
 dict = {
 'AMP_STORY_ACTIVATE_BUTTON_TEXT': '83',
 'AMP_STORY_AUDIO_MUTE_BUTTON_LABEL': '66',
@@ -88,21 +92,46 @@ dict = {
 
 # filepath = '/Users/artezan/amphtml/extensions/amp-story/1.0/_locales/en.js'
 # inputFile = open(filepath, "r").read()
-import glob
-import os
-import re
 
 path = '/Users/artezan/amphtml/extensions/amp-story/1.0/_locales'
 
 for filename in glob.glob(os.path.join(path, '*.js')):
   inputFile = open(filename, 'r').read()
 
-  # Replace the target string
+  ## 1. Remove everything and inclusive of `const strings = `
+  match = re.search(r'(?s)(.*?const strings =)', inputFile)
+  inputFile = inputFile.replace(match.group(), '')
+
+  ## 2. Remove everything after `};`
+  match = re.search(r'(?s)};(.*)', inputFile)
+  inputFile = inputFile.replace(match.group(), '}')
+
+  ## 3. Replace outer single quotes with double (https://stackoverflow.com/questions/32031353/replace-single-quotes-with-double-with-exclusion-of-some-elements/32529140)
+  p = re.compile(ur'(?:(?<!\w)\'((?:.|\n)+?\'?)(?:(?<!s)\'(?!\w)|(?<=s)\'(?!([^\']|\w\'\w)+\'(?!\w))))')
+  subst = u"\"\g<1>\""
+  inputFile = re.sub(p, subst, inputFile)
+
+  # 4. Add double quotes to keys
+  inputFile = inputFile.replace('string:', '\"string\":')
+  inputFile = inputFile.replace('description:', '\"description\":')
+
+  ## 5. Join strings separated by a `+` and a newline
+  pattern = re.compile(r'(\" \+\n)[^.\"]*\"', re.MULTILINE)
+  matches = re.finditer(pattern, inputFile)
+  for match in matches:
+    inputFile = inputFile.replace(match.group(), '')
+
+  # 6. Replace the dynamic keys with strings
   for key, value in dict.items():
     keyToReplace = '[LocalizedStringId.%s]' % key
-    inputFile = inputFile.replace(keyToReplace, "\'%s\'" % value)
+    inputFile = inputFile.replace(keyToReplace, "\"%s\"" % value)
 
-  file = open(filename, "w")
+  # 7. Save the file
+  file = open(filepath, "w")
   file.write(inputFile)
+
+  # 8. Rename to .json
+  base = os.path.splitext(filepath)[0]
+  os.rename(filepath, base + '.json')
 
 

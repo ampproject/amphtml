@@ -21,7 +21,7 @@ const fs = require('fs');
 // node version v14.15.1
 // package.json must contain top level "type": "module" for dynamic module import
 
-const dir = '/Users/artezan/amphtml/extensions/amp-story/1.0/_locales/';
+const dir = '/Users/artezan/amphtml/extensions/amp-story-auto-ads/0.1/_locales/';
 // 1. loop thru directory
 fs.readdirSync(dir).forEach(async (file) => {
   if (file.match(/\.js$/) !== null && file !== 'index.js') {

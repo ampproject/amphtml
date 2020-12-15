@@ -97,51 +97,37 @@ inputFile = open(filepath, "r").read()
 ## 1. Remove everything and inclusive of `const strings = `
 match = re.search(r'(?s)(.*?const strings =)', inputFile)
 inputFile = inputFile.replace(match.group(), '')
-# print(match.group())
 
-## 2. Remove everything after `};` TODO: start right after `}`
+## 2. Remove everything after `};`
 match = re.search(r'(?s)};(.*)', inputFile)
 inputFile = inputFile.replace(match.group(), '}')
-# print(match.group())
 
 
+## 3. Replace outer single quotes with double (https://stackoverflow.com/questions/32031353/replace-single-quotes-with-double-with-exclusion-of-some-elements/32529140)
 p = re.compile(ur'(?:(?<!\w)\'((?:.|\n)+?\'?)(?:(?<!s)\'(?!\w)|(?<=s)\'(?!([^\']|\w\'\w)+\'(?!\w))))')
 subst = u"\"\g<1>\""
 inputFile = re.sub(p, subst, inputFile)
 
+# 4. Add double quotes to keys
 inputFile = inputFile.replace('string:', '\"string\":')
 inputFile = inputFile.replace('description:', '\"description\":')
 
-## 3. Join strings separated by a `+` and a newline
+## 5. Join strings separated by a `+` and a newline
 pattern = re.compile(r'(\" \+\n)[^.\"]*\"', re.MULTILINE)
 matches = re.finditer(pattern, inputFile)
 for match in matches:
   inputFile = inputFile.replace(match.group(), '')
 
-## Some use double quotes and a combination of single quotes. Match those too.
-# pattern = re.compile(r'(\" \+\n)[^.\"]*\"', re.MULTILINE)
-# matches = re.finditer(pattern, inputFile)
-# for match in matches:
-#   inputFile = inputFile.replace(match.group(), '')
-
-# pattern = re.compile(r'(\" \+\n)[^.\"]*\'', re.MULTILINE)
-# matches = re.finditer(pattern, inputFile)
-# for match in matches:
-#   inputFile = inputFile.replace(match.group(), '')
-
-# pattern = re.compile(r'(\' \+\n)[^.\"]*\"', re.MULTILINE)
-# matches = re.finditer(pattern, inputFile)
-# for match in matches:
-#   inputFile = inputFile.replace(match.group(), '')
-
-# Replace the target string
+# 6. Replace the dynamic keys with strings
 for key, value in dict.items():
   keyToReplace = '[LocalizedStringId.%s]' % key
   inputFile = inputFile.replace(keyToReplace, "\"%s\"" % value)
 
+# 7. Save the file
 file = open(filepath, "w")
 file.write(inputFile)
 
+# 8. Rename to .json
 base = os.path.splitext(filepath)[0]
 os.rename(filepath, base + '.json')
 
