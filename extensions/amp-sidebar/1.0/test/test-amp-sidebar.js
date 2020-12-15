@@ -121,6 +121,24 @@ describes.realWin(
         expect(container.children.length).to.equal(0);
       });
 
+      it('should open and close when "open" attribute is set', async () => {
+        // sidebar is initially closed
+        expect(element).to.not.have.attribute('open');
+        expect(container.children.length).to.equal(0);
+
+        element.setAttribute('open', '');
+        await waitForOpen(element, true);
+
+        expect(element).to.have.attribute('open');
+        expect(container.children.length).to.not.equal(0);
+
+        element.removeAttribute('open');
+        await waitForOpen(element, false);
+
+        expect(element).to.not.have.attribute('open');
+        expect(container.children.length).to.equal(0);
+      });
+
       it('should close when the mask is clicked', async () => {
         element.enqueAction(invocation('open'));
         await waitForOpen(element, true);
@@ -274,7 +292,6 @@ describes.realWin(
       let container;
       let openButton;
       let closeButton;
-      let toggleButton;
       let animateStub;
 
       beforeEach(async () => {
@@ -310,7 +327,6 @@ describes.realWin(
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
-        toggleButton = fullHtml.querySelector('#toggle');
       });
 
       it('should not animate on build', () => {
@@ -362,7 +378,7 @@ describes.realWin(
         // once for mask, once for sidebar
         expect(animateStub).to.be.calledTwice;
 
-        // Still displayed while animating
+        // still displayed while animating
         expect(element).to.have.attribute('open');
         expect(container.children.length).to.not.equal(0);
 
