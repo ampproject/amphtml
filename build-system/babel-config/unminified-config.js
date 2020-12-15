@@ -45,6 +45,7 @@ function getUnminifiedConfig() {
   const unminifiedPlugins = [
     argv.coverage ? 'babel-plugin-istanbul' : null,
     replacePlugin,
+    './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
