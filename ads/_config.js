@@ -480,6 +480,14 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'feedad': {
+    clientIdScope: '__fa_amp',
+    prefetch: 'https://web.feedad.com/sdk/feedad-async.js',
+    renderStartImplemented: true,
+    fullWidthHeightRatio: 16 / 9,
+    consentHandlingOverride: true,
+  },
+
   'felmat': {
     prefetch: 'https://t.felmat.net/js/fmamp.js',
     renderStartImplemented: true,
