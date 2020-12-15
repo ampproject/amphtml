@@ -46,6 +46,7 @@ import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {isLayoutSizeDefined} from '../layout';
+import {sequentialIdGenerator} from '../utils/id-generator';
 
 /**
  * The following combinations are allowed.
@@ -125,6 +126,8 @@ const UNSLOTTED_GROUP = 'unslotted';
 
 /** @return {boolean} */
 const MATCH_ANY = () => true;
+
+const childIdGenerator = sequentialIdGenerator();
 
 /**
  * Wraps a Preact Component in a BaseElement class.
@@ -857,7 +860,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
             : createSlot(
                 childElement,
                 childElement.getAttribute('slot') ||
-                  `i-amphtml-${name}-${list.length}`,
+                  `i-amphtml-${name}-${childIdGenerator()}`,
                 parsedSlotProps
               )
         );
