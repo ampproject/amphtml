@@ -245,9 +245,15 @@ function Autoplay({
   play,
   pause,
 }) {
+  const {playable} = useAmpContext();
   const classes = useAutoplayStyles();
 
   useEffect(() => {
+    if (!playable) {
+      pause();
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[entries.length - 1].isIntersecting) {
@@ -267,7 +273,7 @@ function Autoplay({
     return () => {
       observer.disconnect();
     };
-  }, [wrapperRef, play, pause]);
+  }, [wrapperRef, play, pause, playable]);
 
   return (
     <>

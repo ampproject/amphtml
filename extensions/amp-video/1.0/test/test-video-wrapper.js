@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {VideoWrapper} from '../video-wrapper';
+import {WithAmpContext} from '../../../../src/preact/context';
 import {forwardRef} from '../../../../src/preact/compat';
 import {mount} from 'enzyme';
 import {omit} from '../../../../src/utils/object';
@@ -266,6 +267,17 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       await wrapper.find(TestPlayer).invoke('onCanPlay')();
       expect(play).to.not.have.been.called;
       expect(pause).to.have.been.calledOnce;
+    });
+
+    it('should not play when not playable', async () => {
+      const wrapper = mount(
+        <WithAmpContext playable={false}>
+          <VideoWrapper component={TestPlayer} controls autoplay />
+        </WithAmpContext>
+      );
+      intersectionObserverCallback([{isIntersecting: true}]);
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
+      expect(play).to.not.have.been.called;
     });
   });
 });
