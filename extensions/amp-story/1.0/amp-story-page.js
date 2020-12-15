@@ -357,6 +357,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.setPageDescription_();
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
+    !this.isAutoAdvance() && this.addVideoLoopAttribute_();
   }
 
   /** @private */
@@ -1829,6 +1830,28 @@ export class AmpStoryPage extends AMP.BaseElement {
             .then((ampImg) => ampImg.propagateAttributes('alt', childImgNode));
       }
     });
+  }
+
+  /**
+   * Adds loop attribute to amp-video elements if not present.
+   * @private
+   */
+  addVideoLoopAttribute_() {
+    toArray(this.element.querySelectorAll('amp-video')).forEach(
+      (ampVideoNode) => {
+        if (!ampVideoNode.getAttribute('loop')) {
+          ampVideoNode.setAttribute('loop', '');
+          // If the child video element is in the dom, propogate the attribute to it.
+          const childVideoNode = ampVideoNode.querySelector('video');
+          childVideoNode &&
+            ampVideoNode
+              .getImpl()
+              .then((ampVideo) =>
+                ampVideo.propagateAttributes('loop', childVideoNode)
+              );
+        }
+      }
+    );
   }
 
   /**
