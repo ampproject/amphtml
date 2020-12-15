@@ -41,7 +41,7 @@ the user.
 To close `amp-user-notification`, add an `on` attribute to a button with the
 following value scheme `on="event:idOfUserNotificationElement.dismiss"`
 (see example below). This user action also triggers the `GET` to the
-`data-dismiss-href` URL. Be very mindful of the browser caching the `GET` response; see details below in the [`data-show-if-href`](<#data-show-if-href-(optional)>) section. (We recommend
+`data-dismiss-href` URL. Be very mindful of the browser caching the `GET` response; see details below in the [`data-show-if-href`](#data-show-if-href-(optional)) section. (We recommend
 adding a unique value to the `GET` url like a timestamp as a query string field).
 
 When multiple `amp-user-notification` elements are on a page, only one is shown

@@ -22,7 +22,7 @@ The `amp-video-iframe` playback interface supports the following methods, which 
 -   `fullscreenenter`
 -   `fullscreenexit`
 
-`amp-video-iframe` can also [send custom namespaced analytics signals](<https://amp.dev/documentation/components/amp-video-iframe/#postanalyticsevent(eventtype[,-vars])>).
+`amp-video-iframe` can also [send custom namespaced analytics signals](https://amp.dev/documentation/components/amp-video-iframe/#postanalyticsevent(eventtype[,-vars])).
 
 (If there is a feature missing from this list that a custom player requires, we are happy to work on extending it as necessary.)
 
@@ -37,7 +37,7 @@ Once you host your integration document, you may provide a code sample for docum
 ### When _should_ I build a vendor-specific player?
 
 If the API you require for communication includes methods that are **_not_** part of the `amp-video-iframe` playback interface, you might want to build your own player. (Please note that most custom analytics signals are not considered in this case,
-since `amp-video-iframe` [also has plumbing for that.](<https://amp.dev/documentation/components/amp-video-iframe/#postanalyticsevent(eventtype[,-vars])>))
+since `amp-video-iframe` [also has plumbing for that.](https://amp.dev/documentation/components/amp-video-iframe/#postanalyticsevent(eventtype[,-vars])))
 
 For example, these are some of the features that justify specific players:
 
