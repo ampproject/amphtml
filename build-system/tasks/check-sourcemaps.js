@@ -144,11 +144,11 @@ function checkSourcemapMappings(sourcemapJson, map) {
   // Zeroth sub-array corresponds to ';' and has no mappings.
   // See https://www.npmjs.com/package/sourcemap-codec#usage
   const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
-  const [, sourceIndex, sourceCodeLine] = firstLineMapping;
+  const [, sourceIndex, sourceCodeLine, sourceCodeColumn] = firstLineMapping;
 
   const firstLineFile = sourcemapJson.sources[sourceIndex];
   const contents = fs.readFileSync(firstLineFile, 'utf8').split('\n');
-  const firstLineCode = contents[sourceCodeLine];
+  const firstLineCode = contents[sourceCodeLine].slice(sourceCodeColumn);
   const helpMessage =
     'If this change is intentional, update the mapping related constants in ' +
     cyan('build-system/tasks/check-sourcemaps.js') +
