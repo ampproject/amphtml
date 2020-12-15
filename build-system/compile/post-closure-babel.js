@@ -40,7 +40,7 @@ async function terserMinify(code) {
       comments: /\/*/,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
-      preamble: '\n',
+      preamble: ';',
     },
     sourceMap: true,
   });
