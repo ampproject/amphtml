@@ -32,7 +32,6 @@ function getPostClosureConfig() {
     './build-system/babel-plugins/babel-plugin-const-transformer',
     './build-system/babel-plugins/babel-plugin-transform-remove-directives',
     './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
-    './build-system/babel-plugins/babel-plugin-transform-block-scoping',
   ];
   return {
     compact: false,
