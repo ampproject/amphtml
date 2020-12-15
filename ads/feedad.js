@@ -76,7 +76,6 @@ export function feedad(global, data) {
         container.appendChild(ad);
         global.context.renderStart();
         global.context.reportRenderedEntityIdentifier('FeedAd');
-        requestOptimalSize(global, ad);
         return response.promise;
       })
       .catch(() => {
@@ -100,18 +99,5 @@ function applyContainerStyle(container, data) {
   setStyle(container, 'alignItems', 'center');
   if (data.background) {
     setStyle(container, 'backgroundColor', data.background);
-  }
-}
-
-/**
- * Requests a resize if the AMP container bounds do not match the ad.
- *
- * @param {Window} win
- * @param {HTMLElement} adElement
- */
-function requestOptimalSize(win, adElement) {
-  const {height, width} = adElement.getBoundingClientRect();
-  if (height !== win.innerHeight) {
-    win.context.requestResize(width, height, true);
   }
 }
