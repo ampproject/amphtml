@@ -53,13 +53,14 @@ describes.realWin(
         .then(() => ft);
     }
 
-    it('renders', async () => {
+    it('renders', () => {
       const text = 'Lorem ipsum';
-      const ft = await getFitText(text);
-      const content = ft.querySelector('.i-amphtml-fit-text-content');
-      expect(content).to.not.be.null;
-      expect(ft.textContent).to.equal(text);
-      await ft.implementation_.unlayoutCallback();
+      return getFitText(text).then((ft) => {
+        const content = ft.querySelector('.i-amphtml-fit-text-content');
+        expect(content).to.not.equal(null);
+        expect(content.textContent).to.equal(text);
+        expect(ft.textContent).to.equal(text);
+      });
     });
 
     it('supports update of textContent', async () => {
@@ -70,7 +71,6 @@ describes.realWin(
       await ft.implementation_.mutateElement(() => {});
       const content = ft.querySelector('.i-amphtml-fit-text-content');
       expect(content.textContent).to.equal(newText);
-      await ft.implementation_.unlayoutCallback();
     });
 
     it('re-calculates font size if a resize is detected by the measurer', async () => {
@@ -81,6 +81,9 @@ describes.realWin(
         ft.implementation_,
         'updateFontSize_'
       );
+
+      // Wait for the resizeObserver recognize the changes
+      // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve();
@@ -95,6 +98,8 @@ describes.realWin(
       ft.style.width = '50px';
       ft.style.height = '100px';
 
+      // Wait for the resizeObserver recognize the changes
+      // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve();
@@ -102,7 +107,6 @@ describes.realWin(
       });
       // Verify that the ResizeObserver calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;
-      await ft.implementation_.unlayoutCallback();
     });
   }
 );

@@ -43,7 +43,7 @@ class AmpFitText extends AMP.BaseElement {
     /** @private {number} */
     this.maxFontSize_ = -1;
 
-    /** @private {?unlistenDef} */
+    /** @private {?UnlistenDef} */
     this.resizeObserverUnlistener_ = null;
 
     /**
