@@ -30,6 +30,7 @@ import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-paginatio
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
+import {px, setStyle} from '../../../src/style';
 import {setProp} from '../../../src/context';
 import {useContext, useLayoutEffect} from '../../../src/preact';
 import {userAssert} from '../../../src/log';
@@ -40,9 +41,37 @@ const TAG = 'amp-inline-gallery';
 class AmpInlineGallery extends PreactBaseElement {
   /** @override */
   init() {
+    this.carousel = this.element.parentElement.querySelector(
+      'amp-base-carousel'
+    );
+    const observer = new this.win.ResizeObserver(() => {
+      // If carousel resizes, update height variable.
+      setStyle(
+        this.element,
+        '--i-amphtml-carousel-height',
+        px(this.carousel.offsetHeight)
+      );
+    });
+    observer.observe(this.carousel);
+
     return dict({
       'children': <ContextExporter shimDomElement={this.element} />,
     });
+  }
+
+  /** @override */
+  mutationObserverCallback(entries) {
+    if (!this.carousel) {
+      return;
+    }
+    if (entries.every((entry) => entry.attributeName === 'style')) {
+      return;
+    }
+    setStyle(
+      this.element,
+      '--i-amphtml-carousel-top',
+      px(this.carousel.offsetTop)
+    );
   }
 
   /** @override */
