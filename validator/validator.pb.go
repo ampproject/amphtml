@@ -3060,7 +3060,7 @@ type DocCssSpec struct {
 	// If provided, a URL linking to a section / sentence in the AMP HTML spec.
 	MaxBytesSpecUrl *string `protobuf:"bytes,8,opt,name=max_bytes_spec_url,json=maxBytesSpecUrl" json:"max_bytes_spec_url,omitempty"`
 	// Declaration allow-lists were added when style attribute validation was
-	// implementented. Therefore older style tags do not enforce an allow list
+	// implementented. Therefore older style tags do not enforce an allowlist
 	// of declarations. If true, all declarations are allowed in style tags,
 	// regardless of the contents of the `declaration` list.
 	AllowAllDeclarationInStyleTag *bool `protobuf:"varint,10,opt,name=allow_all_declaration_in_style_tag,json=allowAllDeclarationInStyleTag,def=0" json:"allow_all_declaration_in_style_tag,omitempty"`
