@@ -127,7 +127,7 @@ export class LocalizationService {
   /**
    * @param {string} languageCode The language code to associate with the
    *     specified localized string bundle.
-   * @param {!../localized-strings.LocalizedStringBundleDef} localizedStringBundle
+   * @param {!Object} localizedStringBundle
    *     The localized string bundle to register.
    * @return {!LocalizationService} For chaining.
    */
