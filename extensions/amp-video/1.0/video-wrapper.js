@@ -29,6 +29,7 @@ import {dict} from '../../../src/utils/object';
 import {fillContentOverlay, fillStretch} from './video-wrapper.css';
 import {forwardRef} from '../../../src/preact/compat';
 import {once} from '../../../src/utils/function';
+import {useAmpContext} from '../../../src/preact/context';
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
@@ -89,6 +90,7 @@ function VideoWrapperWithRef(
   ref
 ) {
   useResourcesNotify();
+  const {playable} = useAmpContext();
 
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying] = useState(false);
@@ -130,6 +132,13 @@ function VideoWrapperWithRef(
       // (Tricky because we don't want to clear a different active session.)
     };
   }, [mediasession, playing, metadata, play, pause]);
+
+  // Pause if the video goes into a "paused" context.
+  useEffect(() => {
+    if (!playable) {
+      pause();
+    }
+  }, [playable, pause]);
 
   // We'd like this to be as close as possible to the HTMLMediaElement
   // interface, preferrably as an extension/superset.
