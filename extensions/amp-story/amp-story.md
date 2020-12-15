@@ -347,7 +347,7 @@ In most implementations for live blogs, content is either pushed by the server t
 
 This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work.
 
-Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](<#live-story-disabled-(optional)>) attribute.
+Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](<#data-poll-interval-(optional)>) attribute.
 
 #### Stop polling
 
@@ -357,7 +357,7 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 -   Specify an `id` on the `<amp-story>` element.
 -   Add the `live-story` attribute to the `<amp-story>` element.
--   [Optional] Add the [`data-poll-interval`](<#live-story-disabled-(optional)>) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
+-   [Optional] Add the [`data-poll-interval`](<#data-poll-interval-(optional)>) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
 -   [Optional] When finishing the live broadcast, add the [`live-story-disabled`](<#live-story-disabled-(optional)>) attribute to the `<amp-story>` element to disable the polling.
 -   On each `<amp-story-page>`:
     -   Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
