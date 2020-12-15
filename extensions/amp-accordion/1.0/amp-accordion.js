@@ -79,6 +79,7 @@ class AmpAccordion extends PreactBaseElement {
     mu.observe(element, {
       attributeFilter: ['expanded', 'id'],
       subtree: true,
+      childList: true,
     });
 
     const {'children': children} = getState(element, mu);
