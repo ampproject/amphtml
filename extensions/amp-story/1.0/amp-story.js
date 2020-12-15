@@ -461,6 +461,8 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
+    this.addVideoLoopAttribute_();
+
     if (this.maybeLoadStoryDevTools_()) {
       return;
     }
@@ -2885,6 +2887,28 @@ export class AmpStory extends AMP.BaseElement {
       'amp-story-dev-tools'
     );
     return true;
+  }
+
+  /**
+   * Adds loop attribute to amp-video elements if not present.
+   * @private
+   */
+  addVideoLoopAttribute_() {
+    toArray(this.element.querySelectorAll('amp-video')).forEach(
+      (ampVideoNode) => {
+        if (!ampVideoNode.getAttribute('loop')) {
+          ampVideoNode.setAttribute('loop', '');
+          // If the child video element is in the dom, propogate the attribute to it.
+          const childVideoNode = ampVideoNode.querySelector('video');
+          childVideoNode &&
+            ampVideoNode
+              .getImpl()
+              .then((ampVideo) =>
+                ampVideo.propagateAttributes('loop', childVideoNode)
+              );
+        }
+      }
+    );
   }
 }
 
