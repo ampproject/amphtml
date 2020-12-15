@@ -525,7 +525,7 @@ export class FriendlyIframeEmbed {
       getExperimentBranch(this.ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
         FIE_RESOURCES_EXP.experiment;
     Promise.all([
-      this.whenRenderStarted(),
+      this.whenRenderComplete(),
       whenContentIniLoad(
         fieResourcesOn ? this.ampdoc : this.iframe,
         this.win,
