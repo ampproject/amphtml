@@ -150,7 +150,7 @@ class AmpBrightcove extends AMP.BaseElement {
    * @return {!Promise}
    */
   layoutCallback() {
-    this.getIframeSrc_().then((src) => {
+    return this.getIframeSrc_().then((src) => {
       this.iframe_ = createFrameFor(this, src);
 
       this.unlistenMessage_ = listen(this.win, 'message', (e) =>
