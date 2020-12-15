@@ -341,6 +341,23 @@ describes.realWin(
       );
     });
 
+    it('should pick up new children', async () => {
+      const newSection = document.createElement('section');
+      newSection.setAttribute('expanded', '');
+      newSection.appendChild(document.createElement('h2'));
+      newSection.appendChild(document.createElement('div'));
+      element.appendChild(newSection);
+
+      await waitForExpanded(newSection, true);
+
+      expect(newSection.firstElementChild.className).to.include(
+        'i-amphtml-accordion-header'
+      );
+      expect(newSection.lastElementChild.className).to.include(
+        'i-amphtml-accordion-content'
+      );
+    });
+
     describe('fire events on expand and collapse', () => {
       beforeEach(async () => {
         element = html`
