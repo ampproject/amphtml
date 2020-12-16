@@ -200,6 +200,7 @@ class AmpSocialShare extends AMP.BaseElement {
       devAssert(navigator.share);
       const dataStr = href.substr(href.indexOf('?'));
       const data = parseQueryString(dataStr);
+      // Spreading data into an object since Chrome uses the Object prototype.
       navigator.share({...data}).catch((e) => {
         user().warn(TAG, e.message, dataStr);
       });
