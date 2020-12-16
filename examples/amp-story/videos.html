@@ -31,7 +31,7 @@
 
       <amp-story-page id="page-1" auto-advance-after="video1">
         <amp-story-grid-layer template="fill">
-					<amp-video autoplay loop
+					<amp-video autoplay
 						id="video1"
             width="400"
             height="750"
@@ -40,7 +40,17 @@
             <source src="./video/stamp.mp4" type="video/mp4">
           </amp-video>
 				</amp-story-grid-layer>
-				<amp-story-grid-layer><span class="page-num">1</span></amp-story-grid-layer>
+        <amp-story-grid-layer><span class="page-num">1</span></amp-story-grid-layer>
+        <amp-story-page-attachment data-title="Lorem ipsum" layout="nodisplay">
+					<amp-video autoplay
+						id="video1"
+            width="400"
+            height="750"
+            poster="img-city1.jpeg#1"
+            layout="fill">
+            <source src="./video/stamp.mp4" type="video/mp4">
+          </amp-video>
+        </amp-story-page-attachment>            
       </amp-story-page>
 
       <amp-story-page id="page-2">
@@ -298,6 +308,15 @@
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer><span class="page-num">20</span></amp-story-grid-layer>
+        <amp-story-page-attachment data-title="Lorem ipsum" layout="nodisplay">
+          <amp-video autoplay
+            width="400"
+            height="750"
+            poster="./img/poster.jpg"
+            layout="fill">
+            <source src="./video/stamp-animation.mp4" type="video/mp4">
+          </amp-video>
+        </amp-story-page-attachment>        
       </amp-story-page>       
 
     </amp-story>
