@@ -55,10 +55,10 @@ The `data-id` attribute specifies the appropriate `sdnPlayoutId` from 3Q SDN.
 If the `autoplay` attribute is present, and the browser supports autoplay, the
 following behaviors are enabled:
 
-- The video automatically mutes before autoplay starts.
-- When the user scrolls the video out of view, the video pauses.
-- When the user scrolls the video into view, the video resumes.
-- The video unmutes when the user taps it.
+-   The video automatically mutes before autoplay starts.
+-   When the user scrolls the video out of view, the video pauses.
+-   When the user scrolls the video into view, the video resumes.
+-   The video unmutes when the user taps it.
 
 If the user interacts with the video and then scrolls it into or out of view,
 the state of the video remains the same. For example, if the user pauses the

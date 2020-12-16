@@ -28,4 +28,4 @@ For additional detials and support, see [baidu ad union website](http://union.ba
 
 ### Required Parameters
 
-- `data-cproid` - baidu union ad id
+-   `data-cproid` - baidu union ad id

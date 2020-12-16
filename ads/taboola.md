@@ -41,14 +41,14 @@ For details on the configuration semantics, please contact the ad network or ref
 
 Supported parameters:
 
-- `data-publisher`
-- `data-placement`
-- `data-mode`
-- `data-article`
-- `data-video`
-- `data-photo`
-- `data-home`
-- `data-category`
-- `data-others`
-- `data-url`
-- `data-referrer`
+-   `data-publisher`
+-   `data-placement`
+-   `data-mode`
+-   `data-article`
+-   `data-video`
+-   `data-photo`
+-   `data-home`
+-   `data-category`
+-   `data-others`
+-   `data-url`
+-   `data-referrer`

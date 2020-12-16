@@ -38,10 +38,10 @@ For configuration and implementation details, please contact the Fusion support 
 
 Supported parameters:
 
-- `data-ad-server`
-- `data-media-zone`
-- `data-layout`
-- `data-space`
-- `data-parameters`
+-   `data-ad-server`
+-   `data-media-zone`
+-   `data-layout`
+-   `data-space`
+-   `data-parameters`
 
 Parameters should be passed as `key&value` pairs `&` separated. Missing value equals `true`. So `...&isMobile&...` from the example above stands for `...&isMobile=true&...`.
