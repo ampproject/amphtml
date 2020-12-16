@@ -183,6 +183,63 @@ describes.realWin(
         expect(sidebarChildren.lastElementChild.children.length).to.equal(3);
       });
 
+      it('should render with default colors', async () => {
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: maskElement,
+        } = container;
+
+        expect(win.getComputedStyle(sidebarElement).color).to.equal(
+          'rgb(0, 0, 0)'
+        );
+        expect(win.getComputedStyle(sidebarElement).backgroundColor).to.equal(
+          'rgb(239, 239, 239)'
+        );
+        expect(win.getComputedStyle(maskElement).backgroundColor).to.equal(
+          'rgba(0, 0, 0, 0.5)'
+        );
+      });
+
+      it('should allow custom colors', async () => {
+        const style = html`
+          <style>
+            amp-sidebar {
+              color: rgb(1, 1, 1);
+              background-color: rgb(2, 2, 2);
+            }
+            amp-sidebar::part(mask) {
+              background-color: rgb(3, 3, 3);
+            }
+          </style>
+        `;
+        fullHtml.appendChild(style);
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: maskElement,
+        } = container;
+
+        expect(win.getComputedStyle(sidebarElement).color).to.equal(
+          'rgb(1, 1, 1)'
+        );
+        expect(win.getComputedStyle(sidebarElement).backgroundColor).to.equal(
+          'rgb(2, 2, 2)'
+        );
+        expect(win.getComputedStyle(maskElement).backgroundColor).to.equal(
+          'rgb(3, 3, 3)'
+        );
+      });
+
       describe('programatic access to imperative API', () => {
         it('open', async () => {
           // sidebar is initially closed

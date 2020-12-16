@@ -74,6 +74,48 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       expect(contentElement.textContent).to.equal('Content');
     });
 
+    it('should render with default colors', () => {
+      openButton.getDOMNode().click();
+      wrapper.update();
+
+      const sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      const maskElement = sidebarElement.nextSibling;
+
+      expect(sidebarElement.className.includes('default')).to.be.true;
+      expect(maskElement.className.includes('default')).to.be.true;
+      expect(sidebarElement.style.color).to.equal('');
+      expect(sidebarElement.style.backgroundColor).to.equal('');
+      expect(maskElement.style.backgroundColor).to.equal('');
+    });
+
+    it('should allow custom colors', () => {
+      wrapper = mount(
+        <>
+          <Sidebar
+            ref={ref}
+            side="left"
+            style={{color: 'rgb(1, 1, 1)', backgroundColor: 'rgb(2, 2, 2)'}}
+            maskStyle={{backgroundColor: 'rgb(3, 3, 3)'}}
+          >
+            <div>Content</div>
+          </Sidebar>
+          <button id="toggle" onClick={() => ref.current.toggle()}></button>
+          <button id="open" onClick={() => ref.current.open()}></button>
+          <button id="close" onClick={() => ref.current.close()}></button>
+        </>
+      );
+      openButton = wrapper.find('#open');
+      openButton.getDOMNode().click();
+      wrapper.update();
+
+      const sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      const maskElement = sidebarElement.nextSibling;
+
+      expect(sidebarElement.style.color).to.equal('rgb(1, 1, 1)');
+      expect(sidebarElement.style.backgroundColor).to.equal('rgb(2, 2, 2)');
+      expect(maskElement.style.backgroundColor).to.equal('rgb(3, 3, 3)');
+    });
+
     it('should allow for the sidebar on the right side', () => {
       ref = Preact.createRef();
       wrapper = mount(
