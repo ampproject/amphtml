@@ -24,7 +24,7 @@ function getEslintConfig() {
   const presetEnv = [
     '@babel/preset-env',
     {
-      bugfixes: true,
+      shippedProposals: true,
       modules: false,
       targets: {esmodules: true},
     },
