@@ -36,7 +36,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen, listenOnce} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   propagateObjectFitStyles,
@@ -562,7 +562,6 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   installEventHandlers_() {
-    console.log('install event handlers', this.video_);
     const video = dev().assertElement(this.video_);
     video.addEventListener('error', (e) => this.handleMediaError_(e));
 
@@ -672,15 +671,15 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   createPosterForAndroidBug_() {
-    if (!Services.platformFor(this.win).isAndroid()) {
+    const {element} = this;
+    const src = element.getAttribute('poster');
+    if (!Services.platformFor(this.win).isAndroid() || !src) {
       return;
     }
-    const {element} = this;
     if (element.querySelector('i-amphtml-poster')) {
       return;
     }
     const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
-    const src = element.getAttribute('poster');
     setInitialDisplay(poster, 'block');
     setStyles(poster, {
       'background-image': `url(${src})`,
@@ -806,16 +805,14 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
-    // After the intended video is loaded, listen for first timeupdate to remove placeholder. #31358.
-    listenOnce(this.element, VideoEvents.LOAD, () => {
-      listenOnce(
-        this.video_,
-        'timeupdate',
-        () => {
-          this.removePosterForAndroidBug_();
-        },
-        {capture: true}
-      );
+    const correctVideoLoaded = this.isManagedByPool_()
+      ? listenOncePromise(this.element, VideoEvents.LOAD).then(() =>
+          listenOncePromise(this.video_, 'timeupdate', {capture: true})
+        )
+      : Promise.resolve();
+    // After the intended video is loaded, listen for first timeupdate to remove placeholder. Context #31358.
+    correctVideoLoaded.then(() => {
+      this.removePosterForAndroidBug_();
     });
   }
 
