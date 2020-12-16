@@ -254,7 +254,7 @@ describe('parseUrlDeprecated', () => {
 
   it('should parse relative', () => {
     expect(parseUrlDeprecated('chilaquiles/rojos')).to.include({
-      pathname: `/chilaquiles/rojos`,
+      pathname: '/chilaquiles/rojos',
     });
   });
 });
