@@ -32,6 +32,7 @@ const {
   getPreClosureConfig,
   getTestConfig,
   getUnminifiedConfig,
+  getEslintConfig,
 } = require('./build-system/babel-config');
 const {cyan, yellow} = require('ansi-colors');
 
@@ -45,6 +46,7 @@ const babelTransforms = new Map([
   ['pre-closure', getPreClosureConfig()],
   ['test', getTestConfig()],
   ['unminified', getUnminifiedConfig()],
+  ['@babel/eslint-parser', getEslintConfig()],
 ]);
 
 /**

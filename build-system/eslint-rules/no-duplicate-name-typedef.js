@@ -36,11 +36,8 @@ module.exports = function (context) {
     },
 
     VariableDeclaration(node) {
-      if (!node.leadingComments) {
-        return;
-      }
-
-      const typedefComment = node.leadingComments.find((comment) => {
+      const leadingComments = context.getCommentsBefore(node);
+      const typedefComment = leadingComments.find((comment) => {
         return comment.type === 'Block' && /@typedef/.test(comment.value);
       });
 
