@@ -1046,7 +1046,7 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     getIntersectionChangeEntry() {
-      const box = this.implementation_.getIntersectionElementLayoutBox();
+      const box = this.implementation_.getLayoutBox();
       const owner = this.getOwner();
       const viewportBox = this.implementation_.getViewport().getRect();
       // TODO(jridgewell, #4826): We may need to make this recursive.

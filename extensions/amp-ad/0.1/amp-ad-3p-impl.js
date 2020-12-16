@@ -333,9 +333,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /**
    * @override
    */
-  getIntersectionElementLayoutBox() {
+  getLayoutBox() {
     if (!this.xOriginIframeHandler_ || !this.xOriginIframeHandler_.iframe) {
-      return super.getIntersectionElementLayoutBox();
+      return super.getLayoutBox();
     }
     const box = this.getLayoutBox();
     if (!this.iframeLayoutBox_) {

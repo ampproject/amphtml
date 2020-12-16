@@ -924,12 +924,12 @@ describes.realWin(
         stub.returns(box);
 
         impl.onLayoutMeasure();
-        const intersection = impl.getIntersectionElementLayoutBox();
+        const intersection = impl.getLayoutBox();
         // Simulate a fixed position element "moving" 100px by scrolling down
         // the page.
         box.top += 100;
         box.bottom += 100;
-        const newIntersection = impl.getIntersectionElementLayoutBox();
+        const newIntersection = impl.getLayoutBox();
         expect(newIntersection).not.to.deep.equal(intersection);
         expect(newIntersection.top).to.equal(intersection.top + 100);
         expect(newIntersection.width).to.equal(300);

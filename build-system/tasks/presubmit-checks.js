@@ -1217,17 +1217,6 @@ const forbiddenTermsSrcInclusive = {
       'ads/google/a4a/utils.js',
     ],
   },
-  '\\.getIntersectionElementLayoutBox': {
-    message: measurementApiDeprecated,
-    allowlist: [
-      'src/custom-element.js',
-      'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
-      'extensions/amp-iframe/0.1/amp-iframe.js',
-    ],
-  },
 };
 
 // Terms that must appear in a source file.

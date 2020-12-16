@@ -594,7 +594,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   shouldInitializePromiseChain_() {
-    const slotRect = this.getIntersectionElementLayoutBox();
+    const slotRect = this.getLayoutBox();
     const fixedSizeZeroHeightOrWidth =
       this.getLayout() != Layout.FLUID &&
       (slotRect.height == 0 || slotRect.width == 0);

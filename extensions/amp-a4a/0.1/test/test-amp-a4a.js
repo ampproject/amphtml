@@ -78,7 +78,7 @@ if (NO_SIGNING_RTV) {
       doc.body.appendChild(element);
       a4a = new AmpA4A(element);
       // Make the ad think it has size.
-      env.sandbox.stub(a4a, 'getIntersectionElementLayoutBox').returns({
+      env.sandbox.stub(a4a, 'getLayoutBox').returns({
         height: 250,
         width: 300,
       });

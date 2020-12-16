@@ -454,18 +454,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       impl.size_ = {width: 200, height: 50};
       impl.iframe = impl.win.document.createElement('iframe');
       // Temporary fix for local test failure.
-      env.sandbox
-        .stub(impl, 'getIntersectionElementLayoutBox')
-        .callsFake(() => {
-          return {
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            width: 320,
-            height: 50,
-          };
-        });
+      env.sandbox.stub(impl, 'getLayoutBox').callsFake(() => {
+        return {
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: 320,
+          height: 50,
+        };
+      });
     });
 
     [true, false].forEach((exp) => {
@@ -631,18 +629,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
       // Temporary fix for local test failure.
-      window.sandbox
-        .stub(impl, 'getIntersectionElementLayoutBox')
-        .callsFake(() => {
-          return {
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            width: 320,
-            height: 50,
-          };
-        });
+      window.sandbox.stub(impl, 'getLayoutBox').callsFake(() => {
+        return {
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: 320,
+          height: 50,
+        };
+      });
 
       // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
       // to fix failures when this is run after 'gulp build', without a 'dist'.

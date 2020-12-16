@@ -730,7 +730,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       : width && height
       ? // width/height could be 'auto' in which case we fallback to measured.
         {width, height}
-      : this.getIntersectionElementLayoutBox();
+      : this.getLayoutBox();
     this.jsonTargeting = tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey = this.generateAdKey_(
       `${this.initialSize_.width}x${this.initialSize_.height}`
@@ -1101,7 +1101,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Returns the width and height of the slot as defined by the width and height
    * attributes, or the dimensions as computed by
-   * getIntersectionElementLayoutBox.
+   * getLayoutBox.
    * @return {!LayoutRectOrDimsDef}
    */
   getSlotSize() {
@@ -1109,7 +1109,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
-        this.getIntersectionElementLayoutBox();
+        this.getLayoutBox();
   }
 
   /**

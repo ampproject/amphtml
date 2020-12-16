@@ -348,9 +348,9 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /** @override */
-  getIntersectionElementLayoutBox() {
+  getLayoutBox() {
     if (!this.iframe_) {
-      return super.getIntersectionElementLayoutBox();
+      return super.getLayoutBox();
     }
     const box = this.getLayoutBox();
     if (!this.iframeLayoutBox_) {

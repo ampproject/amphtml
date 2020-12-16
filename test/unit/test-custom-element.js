@@ -35,7 +35,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       let resources;
       let resourcesMock;
       let clock;
-      let testElementGetInsersectionElementLayoutBox;
+      let testElementGetLayoutBox;
       let container;
       let ElementClass, StubElementClass;
 
@@ -70,8 +70,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         firstLayoutCompleted() {
           testElementFirstLayoutCompleted();
         }
-        getIntersectionElementLayoutBox() {
-          testElementGetInsersectionElementLayoutBox();
+        getLayoutBox() {
+          testElementGetLayoutBox();
           return {top: 10, left: 10, width: 11, height: 1};
         }
         unlayoutCallback() {
@@ -128,7 +128,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         testElementCreatePlaceholderCallback = env.sandbox.spy();
         testElementLayoutCallback = env.sandbox.spy();
         testElementFirstLayoutCompleted = env.sandbox.spy();
-        testElementGetInsersectionElementLayoutBox = env.sandbox.spy();
+        testElementGetLayoutBox = env.sandbox.spy();
         testElementUnlayoutCallback = env.sandbox.spy();
         testElementPauseCallback = env.sandbox.spy();
         testElementResumeCallback = env.sandbox.spy();
@@ -315,7 +315,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.appendChild(element);
         element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
         element.getIntersectionChangeEntry();
-        expect(testElementGetInsersectionElementLayoutBox).to.be.calledOnce;
+        expect(testElementGetLayoutBox).to.be.calledOnce;
       });
 
       it('Element - updateLayoutBox', () => {

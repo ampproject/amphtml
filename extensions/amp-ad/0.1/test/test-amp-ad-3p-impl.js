@@ -438,7 +438,7 @@ describes.realWin(
       });
     });
 
-    describe('#getIntersectionElementLayoutBox', () => {
+    describe('#getLayoutBox', () => {
       it('should not cache intersection box', () => {
         return ad3p.layoutCallback().then(() => {
           const iframe = ad3p.element.querySelector('iframe');
@@ -462,13 +462,13 @@ describes.realWin(
           stub.returns(box);
 
           ad3p.onLayoutMeasure();
-          const intersection = ad3p.getIntersectionElementLayoutBox();
+          const intersection = ad3p.getLayoutBox();
 
           // Simulate a fixed position element "moving" 100px by scrolling down
           // the page.
           box.top += 100;
           box.bottom += 100;
-          const newIntersection = ad3p.getIntersectionElementLayoutBox();
+          const newIntersection = ad3p.getLayoutBox();
           expect(newIntersection).not.to.deep.equal(intersection);
           expect(newIntersection.top).to.equal(intersection.top + 100);
           expect(newIntersection.width).to.equal(300);
