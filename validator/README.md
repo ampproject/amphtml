@@ -72,33 +72,6 @@ In addition, install Node.js v4.4.2. E.g.,
 [by using NVM](https://github.com/creationix/nvm).
 
 ### OSX
-<<<<<<<
-=======
-
-Dependencies:
-
--   npm
--   [homebrew](https://brew.sh/)
--   python 3 (e.g. [these instructions](https://docs.python-guide.org/starting/install3/osx/))
-
-    -   protobuf
-
-        ```sh
-        pip3 install --user protobuf
-        ```
-
-    -   openjdk-7-jre
-
-        Install openjdk, then symlink the system Java wrappers to find it:
-
-        ```sh
-        brew install openjdk
-        sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
-        ```
-
-### Usage
-
->>>>>>>
 
 Dependencies:
 
