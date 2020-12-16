@@ -200,7 +200,9 @@ class AmpSocialShare extends AMP.BaseElement {
       devAssert(navigator.share);
       const dataStr = href.substr(href.indexOf('?'));
       const data = parseQueryString(dataStr);
-      navigator.share(data).catch((e) => {
+      // Spreading data into an Object since Chrome uses the Object prototype.
+      // TODO:(crbug.com/1123689): Remove this workaround once WebKit fix is released.
+      navigator.share({...data}).catch((e) => {
         user().warn(TAG, e.message, dataStr);
       });
     } else {
