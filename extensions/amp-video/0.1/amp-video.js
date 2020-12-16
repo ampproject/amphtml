@@ -562,6 +562,7 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   installEventHandlers_() {
+    console.log('install event handlers', this.video_);
     const video = dev().assertElement(this.video_);
     video.addEventListener('error', (e) => this.handleMediaError_(e));
 
@@ -802,15 +803,15 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   firstLayoutCompleted() {
+    if (!this.hideBlurryPlaceholder_()) {
+      this.togglePlaceholder(false);
+    }
     // After the intended video is loaded, listen for first timeupdate to remove placeholder. #31358.
     listenOnce(this.element, VideoEvents.LOAD, () => {
       listenOnce(
         this.video_,
         'timeupdate',
         () => {
-          if (!this.hideBlurryPlaceholder_()) {
-            this.togglePlaceholder(false);
-          }
           this.removePosterForAndroidBug_();
         },
         {capture: true}
