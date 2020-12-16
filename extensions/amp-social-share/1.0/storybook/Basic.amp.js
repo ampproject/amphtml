@@ -25,7 +25,7 @@ export default {
 
   parameters: {
     extensions: [{name: 'amp-social-share', version: '1.0'}],
-    experiments: ['amp-social-share-bento'],
+    experiments: ['bento'],
   },
 };
 

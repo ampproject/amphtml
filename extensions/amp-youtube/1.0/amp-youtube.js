@@ -16,11 +16,23 @@
 
 import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {Youtube} from './youtube';
+import {isExperimentOn} from '../../../src/experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-youtube';
 
-class AmpYoutube extends VideoBaseElement {}
+class AmpYoutube extends VideoBaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-youtube'),
+      'expected global "bento" or specific "bento-youtube" experiment to be enabled'
+    );
+    return super.isLayoutSupported(layout);
+  }
+}
 
 /** @override */
 AmpYoutube['Component'] = Youtube;

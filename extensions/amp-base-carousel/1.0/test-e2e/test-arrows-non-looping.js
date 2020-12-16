@@ -32,7 +32,7 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/non-looping.amp.html',
-    experiments: ['amp-base-carousel-bento'],
+    experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
   },

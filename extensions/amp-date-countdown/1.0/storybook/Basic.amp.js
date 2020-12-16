@@ -28,7 +28,7 @@ export default {
       {name: 'amp-date-countdown', version: '1.0'},
       {name: 'amp-mustache', version: '0.2'},
     ],
-    experiments: ['amp-date-countdown-bento'],
+    experiments: ['bento'],
   },
 };
 

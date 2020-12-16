@@ -97,7 +97,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      toggleExperiment(win, 'amp-base-carousel-bento', true, true);
+      toggleExperiment(win, 'bento-carousel', true, true);
       element = createElementWithAttributes(win.document, 'amp-base-carousel', {
         'layout': 'fixed',
         'width': '300px',
@@ -106,7 +106,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-base-carousel-bento', false, true);
+      toggleExperiment(win, 'bento-carousel', false, true);
     });
 
     it('should render slides and arrows when built', async () => {

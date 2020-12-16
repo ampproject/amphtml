@@ -40,7 +40,7 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'amp-selector-bento', true, true);
+      toggleExperiment(win, 'bento-selector', true, true);
       element = html`
         <amp-selector multiple layout="container">
           <ul>

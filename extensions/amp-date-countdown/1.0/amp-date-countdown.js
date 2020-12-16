@@ -44,8 +44,9 @@ class AmpDateCountdown extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-date-countdown-bento'),
-      'expected amp-date-countdown-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-date-countdown'),
+      'expected global "bento" or specific "bento-date-countdown" experiment to be enabled'
     );
     return isLayoutSizeDefined(layout);
   }

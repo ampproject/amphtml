@@ -23,7 +23,7 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-lightbox/1.0/amp-lightbox.html',
     environments: ['single', 'viewer-demo'],
-    experiments: ['amp-lightbox-bento', 'intersect-resources'],
+    experiments: ['bento'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
   async (env) => {
