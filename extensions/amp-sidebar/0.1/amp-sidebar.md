@@ -336,6 +336,10 @@ This attribute is present on child `<nav toolbar="(media-query)" toolbar-target=
 
 This attribute is present on child `<nav toolbar="(media-query)" toolbar-target="elementID">`, and accepts an id of an element on the page. The `toolbar-target` attribute will place the toolbar into the specified id of the element on the page, without the default toolbar styling. See the [Toolbar](#toolbar) section for more information on using toolbars.
 
+##### data-disable-swipe-close
+
+Including this attribute on `amp-sidebar` disables swipe to close. When using a mobile device or other touch enabled device, swiping to close the sidebar will be disabled.
+
 ##### common attributes<a name="common"></a>
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
