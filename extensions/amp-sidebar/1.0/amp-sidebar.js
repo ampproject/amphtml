@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
 import {CSS as COMPONENT_CSS} from './sidebar.jss';
+import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './sidebar';
 import {dict} from '../../../src/utils/object';
@@ -102,5 +102,5 @@ AmpSidebar['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSidebar);
+  AMP.registerElement(TAG, AmpSidebar, CSS);
 });
