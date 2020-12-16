@@ -82,6 +82,9 @@ describes.realWin(
       if (options.side) {
         ampSidebar.setAttribute('side', options.side);
       }
+      if (options.disableSwipe) {
+        ampSidebar.setAttribute('data-disable-swipe-close', '');
+      }
       if (options.closeText) {
         ampSidebar.setAttribute(
           'data-close-button-aria-label',
@@ -682,6 +685,37 @@ describes.realWin(
             env.sandbox.match.any,
             /* trust */ 456
           );
+        });
+      });
+
+      it('should disable swipe to close when attribute specified', () => {
+        return getAmpSidebar({disableSwipe: true}).then((sidebarElement) => {
+          const impl = sidebarElement.implementation_;
+          expect(impl.disableSwipeClose_).to.be.true;
+        });
+      });
+
+      it('should not allow swipe on input range (slider) element', () => {
+        return getAmpSidebar().then((sidebarElement) => {
+          const impl = sidebarElement.implementation_;
+
+          const swipeMoveStub = env.sandbox.stub(
+            impl.swipeToDismiss_,
+            'swipeMove'
+          );
+
+          // Do not trigger swipeMove when swiping on an input range element
+          const slider = document.createElement('input');
+          slider.setAttribute('type', 'range');
+          const fakeEvent = {target: slider};
+          impl.handleSwipe_({}, fakeEvent);
+          expect(swipeMoveStub).to.not.be.called;
+
+          // Call swipeMove when swiping on any other type of element
+          const input = document.createElement('input');
+          const fakeEvent2 = {target: input};
+          impl.handleSwipe_({}, fakeEvent2);
+          expect(swipeMoveStub).to.be.called.calledOnce;
         });
       });
     });
