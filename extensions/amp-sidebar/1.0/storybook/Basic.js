@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Sidebar} from '../sidebar';
-import {select, withKnobs} from '@storybook/addon-knobs';
+import {color, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -63,9 +63,17 @@ function SidebarWithActions(props) {
 export const _default = () => {
   const sideConfigurations = ['left', 'right', undefined];
   const side = select('type', sideConfigurations, sideConfigurations[0]);
+  const foregroundColor = color('color');
+  const backgroundColor = color('background');
+  const maskBackgroundColor = color('mask color');
+
   return (
     <main>
-      <SidebarWithActions side={side} />
+      <SidebarWithActions
+        side={side}
+        style={{color: foregroundColor, backgroundColor}}
+        maskStyle={{backgroundColor: maskBackgroundColor}}
+      />
     </main>
   );
 };

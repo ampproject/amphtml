@@ -25,6 +25,7 @@ var SidebarDef = {};
  *   side: (string|undefined),
  *   onBeforeOpen: (function|undefined),
  *   onAfterClose: (function|undefined),
+ *   maskStyle: (?Object|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */

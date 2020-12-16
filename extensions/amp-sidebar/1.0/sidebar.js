@@ -75,6 +75,7 @@ function SidebarWithRef(
     side = 'left',
     onBeforeOpen,
     onAfterClose,
+    maskStyle,
     children,
     ...rest
   },
@@ -216,9 +217,10 @@ function SidebarWithRef(
           size={false}
           layout={true}
           paint={true}
-          className={`${classes.sidebarClass} ${
-            side === 'left' ? classes.left : classes.right
-          }`}
+          part="sidebar"
+          wrapperClassName={`${classes.sidebarClass} ${
+            classes.defaultSidebarStyles
+          } ${side === 'left' ? classes.left : classes.right}`}
           role="menu"
           tabindex="-1"
           {...rest}
@@ -228,7 +230,9 @@ function SidebarWithRef(
         <div
           ref={maskRef}
           onClick={() => close()}
-          className={classes.maskClass}
+          part="mask"
+          style={maskStyle}
+          className={`${classes.maskClass} ${classes.defaultMaskStyles}`}
         ></div>
       </>
     )

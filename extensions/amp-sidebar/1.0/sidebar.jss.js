@@ -22,12 +22,17 @@ const sidebarClass = {
   maxHeight: '100vh !important',
   height: '100vh',
   maxWidth: '80vw',
-  backgroundColor: '#efefef',
   minWidth: '45px !important',
   outline: 'none',
   overflowX: 'hidden !important',
   overflowY: 'auto !important',
   zIndex: 2147483647,
+};
+
+// User overridable styles
+const defaultSidebarStyles = {
+  color: '#000000',
+  backgroundColor: '#efefef',
 };
 
 const left = {
@@ -46,13 +51,19 @@ const maskClass = {
   height: '100vh !important',
   /* Prevent someone from making this a full-sceen image */
   backgroundImage: 'none !important',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
   zIndex: 2147483646,
+};
+
+// User overridable styles
+const defaultMaskStyles = {
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
 };
 
 const JSS = {
   sidebarClass,
+  defaultSidebarStyles,
   maskClass,
+  defaultMaskStyles,
   left,
   right,
 };

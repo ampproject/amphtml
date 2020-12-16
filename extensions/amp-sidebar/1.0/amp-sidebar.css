@@ -13,3 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+amp-sidebar {
+  color: black;
+  background-color: #efefef;
+}
+
+amp-sidebar::part(sidebar) {
+  color: inherit;
+  background-color: inherit;
+}

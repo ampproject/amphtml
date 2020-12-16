@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {select, withKnobs} from '@storybook/addon-knobs';
+import {color, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -32,8 +32,22 @@ export default {
 export const _default = () => {
   const sideConfigurations = ['left', 'right', undefined];
   const side = select('type', sideConfigurations, sideConfigurations[0]);
+  const foregroundColor = color('color');
+  const backgroundColor = color('background');
+  const maskBackgroundColor = color('mask color');
   return (
     <main>
+      <style>
+        {`
+          amp-sidebar {
+              color: ${foregroundColor};
+              background-color: ${backgroundColor};
+          }
+          amp-sidebar::part(mask) {
+              background-color: ${maskBackgroundColor};
+          }
+          `}
+      </style>
       <amp-sidebar id="sidebar" side={side}>
         <div style={{margin: 8}}>
           <span>
