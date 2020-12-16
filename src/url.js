@@ -97,7 +97,7 @@ export function getWinOrigin(win) {
  */
 export function parseUrlDeprecated(url, opt_nocache) {
   if (IS_ESM) {
-    return /** @type {!Location} */ (new URL(url));
+    return /** @type {!Location} */ (new URL(url, location.href));
   }
 
   if (!a) {
