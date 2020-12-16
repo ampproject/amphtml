@@ -15,6 +15,7 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
+import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {Deferred} from '../utils/promise';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
@@ -233,6 +234,12 @@ export class AmpStoryPlayer {
     /** @private {?Deferred} */
     this.currentStoryLoadDeferred_ = null;
 
+    /** @private {!Deferred} */
+    this.prerenderFirstStoryDeferred_ = new Deferred();
+
+    /** @private {!Deferred} */
+    this.visibleDeferred_ = new Deferred();
+
     this.attachCallbacksToElement_();
 
     /** @private {!PageScroller} */
@@ -417,11 +424,11 @@ export class AmpStoryPlayer {
     this.iframePool_.addStoryIdx(idx);
 
     if (this.isLaidOut_) {
-      this.layoutIframe_(
+      this.updateIframeSrc_(
         story,
         iframe,
-        // In case it is the first story, it becomes immediately visibile
-        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER
+        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER,
+        idx === 0 /** hasPriorityLoading */
       );
     }
   }
@@ -673,6 +680,40 @@ export class AmpStoryPlayer {
     };
   }
 
+  /** @private */
+  prerenderStories_() {
+    for (let idx = 0; idx < this.stories_.length && idx < MAX_IFRAMES; idx++) {
+      const story = this.stories_[idx];
+      const {iframeIdx} = story;
+      const iframe = this.iframes_[iframeIdx];
+
+      this.updateIframeSrc_(
+        story,
+        iframe,
+        VisibilityState.PRERENDER,
+        idx === 0 /** hasPriorityLoading */
+      ).then(() => this.prerenderFirstStoryDeferred_.resolve());
+    }
+
+    // Unblock layoutCallback when there are no stories initially.
+    if (this.stories_.length === 0) {
+      this.prerenderFirstStoryDeferred_.resolve();
+    }
+  }
+
+  /** @private */
+  initializeVisibleIO_() {
+    const visibleCb = () => {
+      this.prerenderFirstStoryDeferred_.promise.then(() =>
+        this.visibleDeferred_.resolve()
+      );
+    };
+
+    new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
+      visibleCb()
+    );
+  }
+
   /**
    * @public
    */
@@ -680,17 +721,17 @@ export class AmpStoryPlayer {
     if (this.isLaidOut_) {
       return;
     }
+    this.prerenderStories_();
+    this.initializeVisibleIO_();
 
-    for (let idx = 0; idx < this.stories_.length && idx < MAX_IFRAMES; idx++) {
-      const story = this.stories_[idx];
-      const {iframeIdx} = story;
-      const iframe = this.iframes_[iframeIdx];
-      this.layoutIframe_(
-        story,
-        iframe,
-        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER
-      );
-    }
+    this.visibleDeferred_.promise.then(() => {
+      if (this.stories_.length > 0) {
+        this.updateVisibilityState_(
+          0 /** iframeIdx */,
+          VisibilityState.VISIBLE
+        );
+      }
+    });
 
     this.isLaidOut_ = true;
   }
@@ -1040,7 +1081,12 @@ export class AmpStoryPlayer {
     const {iframeIdx} = story;
     const iframeEl = this.iframes_[iframeIdx];
 
-    this.layoutIframe_(story, iframeEl, VisibilityState.VISIBLE).then(() => {
+    this.updateIframeSrc_(
+      story,
+      iframeEl,
+      VisibilityState.VISIBLE,
+      true /** hasPriorityLoading */
+    ).then(() => {
       this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
       this.updateIframePosition_(iframeIdx, IframePosition.CURRENT);
       tryFocus(iframeEl);
@@ -1094,7 +1140,12 @@ export class AmpStoryPlayer {
     detachedStory.iframeIdx = -1;
 
     const nextIframe = this.iframes_[nextStory.iframeIdx];
-    this.layoutIframe_(nextStory, nextIframe, visibilityState);
+    this.updateIframeSrc_(
+      nextStory,
+      nextIframe,
+      visibilityState,
+      visibilityState === VisibilityState.VISIBLE /** hasPriorityLoading */
+    );
     this.updateIframePosition_(
       nextStory.iframeIdx,
       reverse ? IframePosition.PREVIOUS : IframePosition.NEXT
@@ -1103,13 +1154,16 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Updates the iframe src. It waits for first story before setting it to
+   * neighboring stories
    * @param {!StoryDef} story
    * @param {!Element} iframe
    * @param {!VisibilityState} visibilityState
+   * @param {boolean} hasPriorityLoading
    * @return {!Promise}
    * @private
    */
-  layoutIframe_(story, iframe, visibilityState) {
+  updateIframeSrc_(story, iframe, visibilityState, hasPriorityLoading) {
     return this.maybeGetCacheUrl_(story.href)
       .then((storyUrl) => {
         if (this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)) {
@@ -1117,11 +1171,11 @@ export class AmpStoryPlayer {
         }
 
         let navigationPromise;
-        if (visibilityState === VisibilityState.VISIBLE) {
+        if (hasPriorityLoading) {
           if (this.currentStoryLoadDeferred_) {
-            // Reject previous navigation promise.
+            // Cancel previous story load promise.
             this.currentStoryLoadDeferred_.reject(
-              'Cancelling previous story load.'
+              'Cancelling previous story load promise.'
             );
           }
           navigationPromise = Promise.resolve();

@@ -128,7 +128,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
-        '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+        '?amp_js_v=0.1#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
@@ -148,20 +148,21 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         existingQuery +
         '&amp_js_v=0.1' +
         existingHash +
-        '&visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+        '&visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
   it('should set first story as visible', async () => {
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
     buildStoryPlayer(3);
     await manager.loadPlayers();
     await nextTick();
 
-    const storyIframes = playerEl.querySelectorAll('iframe');
-    expect(storyIframes[0].getAttribute('src')).to.include(
-      '#visibilityState=visible'
-    );
+    expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
+      'state': 'visible',
+    });
   });
 
   it('should prerender next story after first one is loaded', async () => {
@@ -425,7 +426,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_CACHE_URL +
-          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+          '?amp_js_v=0.1#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
@@ -440,7 +441,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_ORIGIN_URL +
-          '#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+          '#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
