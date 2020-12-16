@@ -124,7 +124,7 @@ module.exports = {
         }
 
         const {init} = node;
-        if (context.getCommentsBefore(init).length > 0) {
+        if (context.getCommentsInside(node).length > 0) {
           return;
         }
 
@@ -161,7 +161,7 @@ module.exports = {
             const decl = declarations[j];
             const {id, init} = decl;
 
-            if (!init || context.getCommentsBefore(init).length > 0) {
+            if (!init || context.getCommentsInside(decl).length > 0) {
               continue;
             }
 

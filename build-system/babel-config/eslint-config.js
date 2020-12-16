@@ -21,8 +21,18 @@
  * @return {!Object}
  */
 function getEslintConfig() {
+  const presetEnv = [
+    '@babel/preset-env',
+    {
+      bugfixes: true,
+      modules: false,
+      targets: {esmodules: true},
+    },
+  ];
+
   return {
     compact: false,
+    presets: [presetEnv],
     plugins: [enableSyntax],
   };
 }
@@ -30,7 +40,7 @@ function getEslintConfig() {
 function enableSyntax() {
   return {
     manipulateOptions(opts, parserOpts) {
-      parserOpts.plugins.push('importAssertions');
+      parserOpts.plugins.push('jsx', 'importAssertions');
     },
   };
 }
