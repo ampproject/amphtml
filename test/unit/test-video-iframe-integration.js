@@ -146,27 +146,6 @@ describes.realWin('video-iframe-integration', {amp: false}, (env) => {
       });
     });
 
-    describe('#getIntersection', () => {
-      it('should request and receive intersection', () => {
-        const integration = new AmpVideoIntegration();
-        const postToParent = env.sandbox.spy(integration, 'postToParent_');
-
-        const callback = env.sandbox.spy();
-
-        const id = integration.getIntersectionForTesting_(callback);
-
-        expect(
-          postToParent.withArgs(env.sandbox.match({method: 'getIntersection'}))
-        ).to.have.been.calledOnce;
-
-        const mockedIntersection = {tacos: 'al pastor'};
-
-        integration.onMessage_({id, args: mockedIntersection});
-
-        expect(callback.withArgs(mockedIntersection)).to.have.been.calledOnce;
-      });
-    });
-
     describe('#listenTo', () => {
       describe('jwplayer', () => {
         it('registers all events and methods', () => {

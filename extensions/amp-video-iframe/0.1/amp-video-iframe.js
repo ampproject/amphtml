@@ -15,10 +15,6 @@
  */
 import {Deferred} from '../../../src/utils/promise';
 import {
-  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoEvents,
-} from '../../../src/video-interface';
-import {
   SandboxOptions,
   createFrameFor,
   isJsonOrObj,
@@ -26,6 +22,7 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
@@ -294,18 +291,6 @@ class AmpVideoIframe extends AMP.BaseElement {
       return; // we only process valid json
     }
 
-    const messageId = data['id'];
-    const methodReceived = data['method'];
-
-    if (methodReceived) {
-      if (methodReceived == 'getIntersection') {
-        this.postIntersection_(messageId);
-        return;
-      }
-      userAssert(false, 'Unknown method `%s`.', methodReceived);
-      return;
-    }
-
     const eventReceived = data['event'];
     const isCanPlayEvent = eventReceived == 'canplay';
 
@@ -352,31 +337,6 @@ class AmpVideoIframe extends AMP.BaseElement {
       dict({
         'eventType': eventType,
         'vars': vars,
-      })
-    );
-  }
-
-  /**
-   * @param {number} messageId
-   * @private
-   */
-  postIntersection_(messageId) {
-    const {time, intersectionRatio} = this.element.getIntersectionChangeEntry();
-
-    // Only post ratio > 0 when in autoplay range to prevent internal autoplay
-    // implementations that differ from ours.
-    const postedRatio =
-      intersectionRatio < MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
-        ? 0
-        : intersectionRatio;
-
-    this.postMessage_(
-      dict({
-        'id': messageId,
-        'args': {
-          'intersectionRatio': postedRatio,
-          'time': time,
-        },
       })
     );
   }

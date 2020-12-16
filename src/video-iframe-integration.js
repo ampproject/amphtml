@@ -399,26 +399,6 @@ export class AmpVideoIntegration {
     }
     return id;
   }
-
-  /**
-   * Gets the video's intersection with the document's viewport.
-   * @param {function(!JsonObject)} callback
-   */
-  getIntersection(callback) {
-    this.listenToOnce_();
-    this.getIntersectionForTesting_(callback);
-  }
-
-  /**
-   * Returns message id for testing. Private as message id is an implementation
-   * detail that others should not rely on.
-   * @param {function(!JsonObject)} callback
-   * @return {*} TODO(#23582): Specify return type
-   * @private
-   */
-  getIntersectionForTesting_(callback) {
-    return this.postToParent_(dict({'method': 'getIntersection'}), callback);
-  }
 }
 
 /**
