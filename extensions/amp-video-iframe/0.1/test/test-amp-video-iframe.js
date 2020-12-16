@@ -25,10 +25,6 @@ import {
 import {listenOncePromise} from '../../../../src/event-helper';
 import {tryParseJson} from '../../../../src/json';
 
-function getIntersectionMessage(id) {
-  return {data: {id, method: 'getIntersection'}};
-}
-
 describes.realWin(
   'amp-video-iframe',
   {
@@ -105,14 +101,6 @@ describes.realWin(
         videoIframe.implementation_,
         'postMessage_'
       );
-    }
-
-    function stubIntersectionEntry(element, time, intersectionRatio) {
-      const entry = {time, intersectionRatio};
-      env.sandbox
-        ./*OK*/ stub(element, 'getIntersectionChangeEntry')
-        .returns(entry);
-      return entry;
     }
 
     describe('#layoutCallback', () => {
@@ -262,64 +250,6 @@ describes.realWin(
           videoIframe.implementation_.onMessage_({data: {event}});
           expect(spy).to.have.been.calledOnce;
         }
-      });
-
-      it('should return intersection ratio if in autoplay range', async () => {
-        const id = 1234;
-        const time = 1.234;
-        const intersectionRatio = 2 / 3;
-
-        const videoIframe = createVideoIframe();
-
-        await layoutAndLoad(videoIframe);
-
-        const postMessage = stubPostMessage(videoIframe);
-
-        acceptMockedMessages(videoIframe);
-
-        const message = getIntersectionMessage(id);
-
-        const expectedResponseMessage = {
-          id,
-          args: stubIntersectionEntry(videoIframe, time, intersectionRatio),
-        };
-
-        videoIframe.implementation_.onMessage_(message);
-
-        expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
-          .to.have.been.calledOnce;
-      });
-
-      it('should return 0 if not in autoplay range', async () => {
-        const id = 1234;
-        const time = 1.234;
-        const intersectionRatio = 1 / 3;
-        const reportedRatioShouldBe = 0;
-
-        const videoIframe = createVideoIframe();
-
-        await layoutAndLoad(videoIframe);
-
-        const postMessage = stubPostMessage(videoIframe);
-
-        stubIntersectionEntry(videoIframe, time, intersectionRatio);
-
-        acceptMockedMessages(videoIframe);
-
-        const message = getIntersectionMessage(id);
-
-        const expectedResponseMessage = {
-          id,
-          args: {
-            time,
-            intersectionRatio: reportedRatioShouldBe,
-          },
-        };
-
-        videoIframe.implementation_.onMessage_(message);
-
-        expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
-          .to.have.been.calledOnce;
       });
 
       [
