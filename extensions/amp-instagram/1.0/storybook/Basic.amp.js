@@ -20,11 +20,12 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-instagram',
+  title: 'amp-instagram-1_0',
   decorators: [withA11y, withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-instagram', version: '1.0'}],
+    experiments: ['bento'],
   },
 };
 

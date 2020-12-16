@@ -58,7 +58,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      toggleExperiment(win, 'amp-timeago-bento', true);
+      toggleExperiment(win, 'bento-timeago', true);
 
       element = win.document.createElement('amp-timeago');
       element.setAttribute('layout', 'fixed');
@@ -67,7 +67,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-timeago-bento', false);
+      toggleExperiment(win, 'bento-timeago', false);
     });
 
     it('should render display 2 days ago when built', async () => {

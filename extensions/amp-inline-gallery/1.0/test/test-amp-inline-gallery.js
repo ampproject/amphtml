@@ -38,8 +38,8 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'amp-inline-gallery-bento', true, true);
-      toggleExperiment(win, 'amp-base-carousel-bento', true, true);
+      toggleExperiment(win, 'bento-inline-gallery', true, true);
+      toggleExperiment(win, 'bento-carousel', true, true);
       carousel = createElementWithAttributes(
         win.document,
         'amp-base-carousel',
@@ -92,8 +92,8 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-inline-gallery-bento', false, true);
-      toggleExperiment(win, 'amp-base-carousel-bento', false, true);
+      toggleExperiment(win, 'bento-inline-gallery', false, true);
+      toggleExperiment(win, 'bento-carousel', false, true);
     });
 
     function newSlide(id) {

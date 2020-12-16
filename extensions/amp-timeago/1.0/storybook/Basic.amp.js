@@ -20,12 +20,12 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-timeago',
+  title: 'amp-timeago-1_0',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-timeago', version: '1.0'}],
-    experiments: ['amp-timeago-bento'],
+    experiments: ['bento'],
   },
 };
 

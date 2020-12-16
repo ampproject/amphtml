@@ -63,7 +63,7 @@ describes.realWin(
       beforeEach(async () => {
         win = env.win;
         html = htmlFor(win.document);
-        toggleExperiment(win, 'amp-sidebar-bento', true, true);
+        toggleExperiment(win, 'bento-sidebar', true, true);
         // disable animations for synchronous testing
         animateFunction = Element.prototype.animate;
         Element.prototype.animate = null;
@@ -297,7 +297,7 @@ describes.realWin(
       beforeEach(async () => {
         win = env.win;
         html = htmlFor(win.document);
-        toggleExperiment(win, 'amp-sidebar-bento', true, true);
+        toggleExperiment(win, 'bento-sidebar', true, true);
         fullHtml = html`
           <div>
             <amp-sidebar id="sidebar" side="left">

@@ -108,8 +108,9 @@ class AmpSelector extends PreactBaseElement {
   /** @override */
   isLayoutSupported(unusedLayout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-selector-bento'),
-      'expected amp-selector-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-selector'),
+      'expected global "bento" or specific "bento-selector" experiment to be enabled'
     );
     return true;
   }

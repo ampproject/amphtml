@@ -28,7 +28,7 @@ export default {
       {name: 'amp-bind', version: '0.1'},
       {name: 'amp-accordion', version: '1.0'},
     ],
-    experiments: ['amp-accordion-bento'],
+    experiments: ['bento'],
   },
 };
 

@@ -42,7 +42,7 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'amp-accordion-bento', true, true);
+      toggleExperiment(win, 'bento-accordion', true, true);
       toggleExperiment(win, 'amp-accordion-display-locking', true, true);
       element = html`
         <amp-accordion layout="fixed" width="300" height="200">

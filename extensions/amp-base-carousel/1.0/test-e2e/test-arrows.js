@@ -30,7 +30,7 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/custom-arrows.amp.html',
-    experiments: ['amp-base-carousel-bento'],
+    experiments: ['bento-carousel'],
     environments: ['single', 'viewer-demo'],
   },
   async function (env) {

@@ -56,7 +56,7 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       doc.title = 'Test Title';
-      toggleExperiment(win, 'amp-social-share-bento', true);
+      toggleExperiment(win, 'bento-social-share', true);
     });
 
     it('renders custom endpoint when not using a pre-configured type', async () => {

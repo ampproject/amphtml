@@ -31,7 +31,7 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/advance.amp.html',
-    experiments: ['amp-base-carousel-bento'],
+    experiments: ['bento-carousel'],
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
