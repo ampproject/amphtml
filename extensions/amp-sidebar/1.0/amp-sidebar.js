@@ -80,8 +80,9 @@ class AmpSidebar extends PreactBaseElement {
   /** @override */
   isLayoutSupported(unusedLayout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-sidebar-bento'),
-      'expected amp-sidbar-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-sidebar'),
+      'expected "bento" or "bento-sidbar" experiment to be enabled'
     );
     return true;
   }
