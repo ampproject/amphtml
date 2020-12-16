@@ -22,7 +22,7 @@ import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'amp-sidebar',
+  title: 'amp-sidebar-0_1',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {

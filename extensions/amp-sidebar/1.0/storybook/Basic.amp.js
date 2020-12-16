@@ -15,27 +15,26 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Sidebar} from '../sidebar';
 import {select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
+import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'Sidebar',
-  component: Sidebar,
-  decorators: [withA11y, withKnobs],
+  title: 'amp-sidebar-1_0',
+  decorators: [withKnobs, withA11y, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-sidebar', version: '1.0'}],
+    experiments: ['amp-sidebar-bento'],
+  },
 };
 
-/**
- * @param {!Object} props
- * @return {*}
- */
-function SidebarWithActions(props) {
-  // TODO(#30447): replace imperative calls with "button" knobs when the
-  // Storybook 6.1 is released.
-  const ref = Preact.useRef();
+export const _default = () => {
+  const sideConfigurations = ['left', 'right', undefined];
+  const side = select('type', sideConfigurations, sideConfigurations[0]);
   return (
-    <>
-      <Sidebar ref={ref} {...props}>
+    <main>
+      <amp-sidebar id="sidebar" side={side}>
         <div style={{margin: 8}}>
           <span>
             Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
@@ -46,26 +45,16 @@ function SidebarWithActions(props) {
             <li>2</li>
             <li>3</li>
           </ul>
-          <button onClick={() => ref.current.toggle()}>toggle</button>
-          <button onClick={() => ref.current.open()}>open</button>
-          <button onClick={() => ref.current.close()}>close</button>
+          <button on="tap:sidebar.toggle()">toggle</button>
+          <button on="tap:sidebar.open()">open</button>
+          <button on="tap:sidebar.close()">close</button>
         </div>
-      </Sidebar>
-      <div style={{marginTop: 8}}>
-        <button onClick={() => ref.current.toggle()}>toggle</button>
-        <button onClick={() => ref.current.open()}>open</button>
-        <button onClick={() => ref.current.close()}>close</button>
+      </amp-sidebar>
+      <div class="buttons" style={{margin: 8}}>
+        <button on="tap:sidebar.toggle()">toggle</button>
+        <button on="tap:sidebar.open()">open</button>
+        <button on="tap:sidebar.close()">close</button>
       </div>
-    </>
-  );
-}
-
-export const _default = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('type', sideConfigurations, sideConfigurations[0]);
-  return (
-    <main>
-      <SidebarWithActions side={side} />
     </main>
   );
 };
