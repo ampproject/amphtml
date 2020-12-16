@@ -54,7 +54,7 @@ module.exports = function (context) {
   return {
     MethodDefinition: function (node) {
       if (
-        hasPrivateAnnotation(node.leadingComments) &&
+        hasPrivateAnnotation(context.getCommentsBefore(node)) &&
         !hasTrailingUnderscore(node.key.name)
       ) {
         context.report({
@@ -66,7 +66,7 @@ module.exports = function (context) {
     AssignmentExpression: function (node) {
       if (
         node.parent.type == 'ExpressionStatement' &&
-        hasPrivateAnnotation(node.parent.leadingComments) &&
+        hasPrivateAnnotation(context.getCommentsBefore(node.parent)) &&
         isThisMemberExpression(node.left) &&
         !hasTrailingUnderscore(node.left.property.name)
       ) {
