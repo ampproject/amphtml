@@ -740,6 +740,7 @@ AMP.extension('amp-sidebar', '0.1', (AMP) => {
  */
 function excludeFromSwipeClose(element) {
   return (
-    element.nodeName === 'INPUT' && element.getAttribute('type') === 'range'
+    element.nodeName.toLowerCase() === 'input' &&
+    element.getAttribute('type') === 'range'
   );
 }
