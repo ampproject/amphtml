@@ -19,14 +19,22 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver.
  */
 
-import {IntersectionObserverStub} from '../polyfillstub/intersection-observer-stub';
+import {
+  installStub,
+  shouldLoadPolyfill,
+} from '../polyfillstub/intersection-observer-stub';
 
 /**
+ * Installs the IntersectionObserver polyfill. There are a few different modes of operation.
+ * - No native support: immediately register a Stub and upgrade lazily once the full polyfill loads.
+ * - Partial InOb support: choose between the lazily upgrading Stub and the native InOb on a per-instance basis.
+ * - Full InOb support: Don't install anything.
+ *
  * @param {!Window} win
  */
 export function install(win) {
-  if (!win.IntersectionObserver) {
-    win.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (IntersectionObserverStub);
+  if (shouldLoadPolyfill(win)) {
+    installStub(win);
   }
   fixEntry(win);
 }
