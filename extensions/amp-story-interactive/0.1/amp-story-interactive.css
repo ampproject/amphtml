@@ -139,6 +139,7 @@
   box-shadow: 0 .2em .2em 0 #00000040 !important;
   padding: .25em !important;
   cursor: pointer !important;
+  font-size: inherit !important;
 }
 
 .i-amphtml-story-interactive-disclaimer[active]
@@ -163,12 +164,11 @@
   padding: 1em !important;
   text-align: initial !important;
   box-sizing: border-box !important;
-  pointer-events: none !important;
   font-size: 1em !important;
   background: white;
   border-radius: 1em;
   box-shadow: 0px .2em .2em 0px #00000040 !important;
-  pointer-events: initial !important;
+  pointer-events: all !important;
 }
 
 .i-amphtml-story-interactive-disclaimer:not([active])

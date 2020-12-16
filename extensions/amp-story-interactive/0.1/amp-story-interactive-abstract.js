@@ -174,6 +174,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?Element} */
     this.rootEl_ = null;
 
+    /** @public {../../../src/service/localizationService} */
+    this.localizationService = Services.localizationForDoc(this.element);
+
     /** @protected {?../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
 

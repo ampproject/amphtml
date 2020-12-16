@@ -188,6 +188,11 @@ const strings = {
     string: 'Play video',
     description: 'Label for a button to play the video visible on the page.',
   },
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE]: {
+    string: 'Your response will be sent to ',
+    description:
+      'Text that explains where the response will be sent on quizzes and polls disclaimers, ending with space',
+  },
   [LocalizedStringId.AMP_STORY_INTERACTIVE_RESULTS_SCORE]: {
     string: 'SCORE:',
     description:

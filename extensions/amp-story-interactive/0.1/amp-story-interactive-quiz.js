@@ -91,13 +91,12 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     this.attachPrompt_(root);
 
     // Localize the answer choice options
-    const localizationService = Services.localizationForDoc(this.element);
     this.localizedAnswerChoices_ = [
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
-    ].map((choice) => localizationService.getLocalizedString(choice));
+    ].map((choice) => this.localizationService.getLocalizedString(choice));
     const optionContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-quiz-option-container'
     );

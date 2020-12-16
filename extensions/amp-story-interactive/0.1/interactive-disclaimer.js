@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {htmlFor} from '../../../src/static-template';
 
 /**
@@ -38,12 +39,17 @@ const BACKENDS = {
 function buildDisclaimerLayout(element) {
   const html = htmlFor(element);
   return html`<div class="i-amphtml-story-interactive-disclaimer">
-    <button class="i-amphtml-story-interactive-disclaimer-alert">
+    <button
+      class="i-amphtml-story-interactive-disclaimer-alert"
+      aria-label="Open disclaimer"
+    >
       <div class="i-amphtml-story-interactive-disclaimer-alert-icon"></div>
     </button>
     <div class="i-amphtml-story-interactive-disclaimer-bubble">
       <div>
-        <span>Your response will be sent to </span>
+        <span class="i-amphtml-story-interactive-disclaimer-note"
+          >Your response will be sent to
+        </span>
         <span class="i-amphtml-story-interactive-disclaimer-entity"></span>
       </div>
       <div class="i-amphtml-story-interactive-disclaimer-url"></div>
@@ -52,7 +58,10 @@ function buildDisclaimerLayout(element) {
           >Learn more</a
         >
       </div>
-      <button class="i-amphtml-story-interactive-disclaimer-close"></button>
+      <button
+        class="i-amphtml-story-interactive-disclaimer-close"
+        aria-label="Close disclaimer"
+      ></button>
     </div>
   </div>`;
 }
@@ -76,6 +85,9 @@ export function buildInteractiveDisclaimer(interactive) {
   const entityEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-entity'
   );
+  const noteEl = disclaimer.querySelector(
+    '.i-amphtml-story-interactive-disclaimer-note'
+  );
 
   // Fill information
   const backendSpecs = getBackendSpecs(backendUrl, BACKENDS);
@@ -91,6 +103,9 @@ export function buildInteractiveDisclaimer(interactive) {
       urlEl.textContent = backendUrl;
       linkEl.remove();
     }
+    noteEl.textContent = interactive.localizationService.getLocalizedString(
+      LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+    );
     return closeDisclaimer(interactive, disclaimer);
   });
 

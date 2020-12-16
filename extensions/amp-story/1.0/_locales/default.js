@@ -80,6 +80,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
     string: 'Updated',
   },
+  [LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE]: {
+    string: 'Your response will be sent to ',
+  },
   [LocalizedStringId.AMP_STORY_INTERACTIVE_RESULTS_SCORE]: {
     string: 'SCORE:',
   },
