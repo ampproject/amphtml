@@ -36,7 +36,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
+import {listen, listenOnce} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   propagateObjectFitStyles,
@@ -685,6 +685,7 @@ class AmpVideo extends AMP.BaseElement {
       'background-image': `url(${src})`,
       'background-size': 'cover',
       'background-position': 'center',
+      'z-index': '-1',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
     this.applyFillContent(poster);
@@ -801,10 +802,20 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   firstLayoutCompleted() {
-    if (!this.hideBlurryPlaceholder_()) {
-      this.togglePlaceholder(false);
-    }
-    this.removePosterForAndroidBug_();
+    // After the intended video is loaded, listen for first timeupdate to remove placeholder. #31358.
+    listenOnce(this.element, VideoEvents.LOAD, () => {
+      listenOnce(
+        this.video_,
+        'timeupdate',
+        () => {
+          if (!this.hideBlurryPlaceholder_()) {
+            this.togglePlaceholder(false);
+          }
+          this.removePosterForAndroidBug_();
+        },
+        {capture: true}
+      );
+    });
   }
 
   /**
