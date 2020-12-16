@@ -16,7 +16,7 @@
 'use strict';
 
 /**
- * Gets the config for babel transforms run during `gulp [unit|integration]`.
+ * Gets the config for babel transforms run during `gulp lint`.
  *
  * @return {!Object}
  */
