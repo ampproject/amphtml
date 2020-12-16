@@ -728,6 +728,14 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean}
+   * @private
+   */
+  containsPoolVideo_() {
+    return this.video_.classList.contains('i-amphtml-pool-media');
+  }
+
+  /**
    * @override
    */
   showControls() {
@@ -805,15 +813,16 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
-    const correctVideoLoaded = this.isManagedByPool_()
-      ? listenOncePromise(this.element, VideoEvents.LOAD).then(() =>
-          listenOncePromise(this.video_, 'timeupdate', {capture: true})
-        )
-      : Promise.resolve();
+    const correctVideoLoadedPromise =
+      this.isManagedByPool_() && !this.containsPoolVideo_()
+        ? listenOncePromise(this.element, VideoEvents.LOAD)
+        : Promise.resolve();
     // After the intended video is loaded, listen for first timeupdate to remove placeholder. Context #31358.
-    correctVideoLoaded.then(() => {
-      this.removePosterForAndroidBug_();
-    });
+    correctVideoLoadedPromise
+      .then(() => listenOncePromise(this.video_, 'timeupdate', {capture: true}))
+      .then(() => {
+        this.removePosterForAndroidBug_();
+      });
   }
 
   /**
