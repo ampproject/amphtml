@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/** @enum {number} */
+const IframePosition = {
+  PREVIOUS: -1,
+  CURRENT: 0,
+  NEXT: 1,
+};
+
+/** @const {number} */
+const MAX_IFRAMES = 2;
+
 /**
  * Manages the iframes used to host the stories inside the player. It keeps
  * track of the iframes hosting stories, and what stories have an iframe.
@@ -77,31 +87,59 @@ export class IframePool {
   }
 
   /**
-   * Finds adjacent iframe indices given an index.
-   * Examples of resulting adjacent arrays:
+   * Finds adjacent iframes given an story, starting in N and going to N+1.
+   * Following a DFS order.
+   *
+   * It will only allow up to MAX_IFRAMES to be loaded. Those that can be loaded
+   * will have the `shouldLoad` property as `true`. The rest should only be
+   * positioned.
+   *
+   * Examples of traversal:
+   * idx
+   * 1 -> [2] [0] [1] [] []
    * 0 -> [0] [1] [2] [] []
-   * 1 -> [0] [1] [2] [] []
-   * 4 -> [] [] [0] [1] [2]
-   * 1 -> [0] [1]
+   * 4 -> [] [] [2] [1] [0]
+   * 0 -> [0] [1]
+   * 1 -> [1] [0]
    * @param {number} storyIdx
    * @param {number} maxIdx
-   * @return {!Array<number>}
+   * @return {!Array<!Object>}
    */
-  findAdjacent(storyIdx, maxIdx) {
+  findAdjacentDFS(storyIdx, maxIdx) {
     const adjacent = [];
+    let iframesToLoad = MAX_IFRAMES;
 
-    // If index is at rightmost part of the array, adjacent iframes will all be
-    // at the left.
-    let cursor = storyIdx + 1 > maxIdx ? storyIdx - 2 : storyIdx - 1;
-
-    // Place current story index first to prioritize loading over adjacent ones.
-    adjacent.push(storyIdx);
+    const neighborsQueue = [storyIdx, storyIdx + 1, storyIdx - 1];
     while (adjacent.length < this.iframePool_.length) {
-      if (cursor < 0 || cursor === storyIdx) {
-        ++cursor;
+      const cursorIdx = neighborsQueue.shift();
+
+      if (cursorIdx > maxIdx || cursorIdx < 0) {
         continue;
       }
-      adjacent.push(cursor++);
+
+      adjacent.push({
+        storyIdx: cursorIdx,
+        shouldLoad: iframesToLoad > 0,
+        position:
+          cursorIdx === storyIdx
+            ? IframePosition.CURRENT
+            : cursorIdx > storyIdx
+            ? IframePosition.NEXT
+            : IframePosition.PREVIOUS,
+      });
+      --iframesToLoad;
+
+      if (cursorIdx > storyIdx && cursorIdx + 1 <= maxIdx) {
+        // Add neighbors to the right of the story to the queue.
+        neighborsQueue.push(cursorIdx + 1);
+        continue;
+      }
+
+      if (cursorIdx < storyIdx && cursorIdx - 1 >= 0) {
+        // Add neighbors to the left of the story to the queue.
+        neighborsQueue.push(cursorIdx - 1);
+        continue;
+      }
     }
 
     return adjacent;
