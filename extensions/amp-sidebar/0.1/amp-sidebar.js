@@ -67,9 +67,6 @@ const SidebarEvents = {
   CLOSE: 'sidebarClose',
 };
 
-/** @private @const {Object<string, Object<string, Array<string>>>} */
-const EXCLUDE_FROM_SWIPE_CLOSE = {'input': {'type': ['range']}};
-
 /**
  * @extends {AMP.BaseElement}
  */
@@ -592,8 +589,11 @@ export class AmpSidebar extends AMP.BaseElement {
       /* shouldNotPreventDefault */ true,
       /* shouldStopPropagation */ true
     );
-    gestures.onGesture(SwipeXRecognizer, (e) => {
-      const {data, event} = e;
+    // The onGesture method has a recognizer and a handler argument
+    // The handler takes a gesture object as an argument which
+    // includes data and event properties
+    gestures.onGesture(SwipeXRecognizer, (gesture) => {
+      const {data, event} = gesture;
       this.handleSwipe_(data, event);
     });
   }
@@ -735,17 +735,11 @@ AMP.extension('amp-sidebar', '0.1', (AMP) => {
 });
 
 /**
- * @param {Element} element
+ * @param {!Element} element
  * @return {boolean}
  */
 function excludeFromSwipeClose(element) {
-  const excludeData = EXCLUDE_FROM_SWIPE_CLOSE[element.localName];
-  if (excludeData) {
-    for (const k in excludeData) {
-      if (excludeData[k].includes(element[k])) {
-        return true;
-      }
-    }
-  }
-  return false;
+  return (
+    element.nodeName === 'INPUT' && element.getAttribute('type') === 'range'
+  );
 }
