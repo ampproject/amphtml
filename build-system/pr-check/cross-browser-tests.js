@@ -26,6 +26,7 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {red, cyan, bold, yellow} = require('ansi-colors');
+const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runNpmChecks} = require('./npm-checks');
 
 /**
@@ -101,6 +102,7 @@ async function main() {
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
+    await reportAllExpectedTests(buildTargets);
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
