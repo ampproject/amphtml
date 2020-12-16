@@ -39,20 +39,31 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-inline-gallery';
 
 class AmpInlineGallery extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.carousel_ = null;
+
+    /** @private {?ResizeObserver} */
+    this.resizeObserver_ = null;
+  }
+
   /** @override */
   init() {
-    this.carousel = this.element.parentElement.querySelector(
+    this.carousel_ = this.element.parentElement.querySelector(
       'amp-base-carousel'
     );
-    const observer = new this.win.ResizeObserver(() => {
+    this.resizeObserver_ = new this.win.ResizeObserver(() => {
       // If carousel resizes, update height variable.
       setStyle(
         this.element,
         '--i-amphtml-carousel-height',
-        px(this.carousel.offsetHeight)
+        px(this.carousel_.offsetHeight)
       );
     });
-    observer.observe(this.carousel);
+    this.resizeObserver_.observe(this.carousel_);
 
     return dict({
       'children': <ContextExporter shimDomElement={this.element} />,
@@ -61,8 +72,15 @@ class AmpInlineGallery extends PreactBaseElement {
 
   /** @override */
   mutationObserverCallback(entries) {
-    if (!this.carousel) {
-      return;
+    if (this.carousel_ && this.carousel_.parentElement !== this.element) {
+      // Originally observed element has been detached.
+      this.resizeObserver_.unobserve(this.carousel_);
+      this.carousel_ = this.element.parentElement.querySelector(
+        'amp-base-carousel'
+      );
+      if (this.carousel_) {
+        this.resizeObserver_.observe(this.carousel_);
+      }
     }
     if (entries.every((entry) => entry.attributeName === 'style')) {
       return;
@@ -70,7 +88,7 @@ class AmpInlineGallery extends PreactBaseElement {
     setStyle(
       this.element,
       '--i-amphtml-carousel-top',
-      px(this.carousel.offsetTop)
+      px(this.carousel_.offsetTop)
     );
   }
 
