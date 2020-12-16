@@ -27,7 +27,7 @@ class AmpVideo extends VideoBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-video'),
-      'expected "bento" or "bento-video" experiment to be enabled'
+      'expected global "bento" or specific "bento-video" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }

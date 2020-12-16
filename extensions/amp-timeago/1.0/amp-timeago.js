@@ -29,7 +29,7 @@ class AmpTimeago extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-timeago'),
-      'expected "bento" or "bento-timeago" experiment to be enabled'
+      'expected global "bento" or specific "bento-timeago" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }

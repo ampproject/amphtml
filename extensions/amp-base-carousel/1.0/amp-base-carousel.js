@@ -66,7 +66,7 @@ class AmpBaseCarousel extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-carousel'),
-      'expected "bento" or "bento-carousel" experiment to be enabled'
+      'expected global "bento" or specific "bento-carousel" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }

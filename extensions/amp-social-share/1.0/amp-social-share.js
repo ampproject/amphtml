@@ -171,7 +171,7 @@ class AmpSocialShare extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-social-share'),
-      'expected "bento" or "bento-social-share" experiment to be enabled'
+      'expected global "bento" or specific "bento-social-share" experiment to be enabled'
     );
     return true;
   }

@@ -29,7 +29,7 @@ class AmpInstagram extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-instagram'),
-      'expected "bento" or "bento-instagram" experiment to be enabled'
+      'expected global "bento" or specific "bento-instagram" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }

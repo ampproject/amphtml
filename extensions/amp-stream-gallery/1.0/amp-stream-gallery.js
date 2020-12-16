@@ -30,7 +30,7 @@ class AmpStreamGallery extends PreactBaseElement {
   isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'bento-stream-gallery'),
-      'expected "bento" or "bento-stream-gallery" experiment to be enabled'
+      'expected global "bento" or specific "bento-stream-gallery" experiment to be enabled'
     );
     return isLayoutSizeDefined(layout);
   }

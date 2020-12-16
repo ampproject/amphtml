@@ -28,7 +28,7 @@ class AmpYoutube extends VideoBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-youtube'),
-      'expected "bento" or "bento-youtube" experiment to be enabled'
+      'expected global "bento" or specific "bento-youtube" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }

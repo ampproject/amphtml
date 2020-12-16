@@ -87,7 +87,7 @@ class AmpLightbox extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-lightbox'),
-      'expected "bento" or "bento-lightbox" experiment to be enabled'
+      'expected global "bento" or specific "bento-lightbox" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }

@@ -94,7 +94,7 @@ class AmpAccordion extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-accordion'),
-      'expected "bento" or "bento-accordion" experiment to be enabled'
+      'expected global "bento" or specific "bento-accordion" experiment to be enabled'
     );
     return true;
   }

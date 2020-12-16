@@ -110,7 +110,7 @@ class AmpSelector extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-selector'),
-      'expected "bento" or "bento-selector" experiment to be enabled'
+      'expected global "bento" or specific "bento-selector" experiment to be enabled'
     );
     return true;
   }

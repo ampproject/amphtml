@@ -82,7 +82,7 @@ class AmpSidebar extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-sidebar'),
-      'expected "bento" or "bento-sidbar" experiment to be enabled'
+      'expected global "bento" or specific "bento-sidbar" experiment to be enabled'
     );
     return true;
   }

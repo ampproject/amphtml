@@ -33,7 +33,7 @@ export class AmpInlineGalleryThumbnails extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-inline-gallery'),
-      'expected "bento" or "bento-inline-gallery" experiment to be enabled'
+      'expected global "bento" or specific "bento-inline-gallery" experiment to be enabled'
     );
     return layout == Layout.FIXED_HEIGHT;
   }
