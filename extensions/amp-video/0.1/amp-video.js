@@ -813,6 +813,9 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
+    if (!Services.platformFor(this.win).isAndroid()) {
+      return;
+    }
     const correctVideoLoadedPromise =
       this.isManagedByPool_() && !this.containsPoolVideo_()
         ? listenOncePromise(this.element, VideoEvents.LOAD)
