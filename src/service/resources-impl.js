@@ -226,6 +226,7 @@ export class ResourcesImpl {
     divertIntersectResources(this.win);
 
     if (
+      isExperimentOn(this.win, 'bento') ||
       getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
         INTERSECT_RESOURCES_EXP.experiment ||
       isAmp4Email(this.win.document)

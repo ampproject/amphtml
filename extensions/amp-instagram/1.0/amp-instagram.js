@@ -17,11 +17,23 @@
 import {Instagram} from './instagram';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-instagram';
 
 class AmpInstagram extends PreactBaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-instagram'),
+      'expected global "bento" or specific "bento-instagram" experiment to be enabled'
+    );
+    return super.isLayoutSupported(layout);
+  }
+
   /** @override */
   init() {
     return dict({

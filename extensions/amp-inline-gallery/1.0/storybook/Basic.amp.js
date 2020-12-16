@@ -29,7 +29,7 @@ export default {
       {name: 'amp-base-carousel', version: '1.0'},
     ],
 
-    experiments: ['amp-inline-gallery-bento', 'amp-base-carousel-bento'],
+    experiments: ['bento'],
   },
 };
 
