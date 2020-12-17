@@ -29,7 +29,9 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {parseQueryString} from '../../../src/url';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -86,6 +88,9 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     /** @private {?boolean} */
     this.isFirstPage_ = null;
 
+    /** @private {?boolean} */
+    this.isLoadedPage_ = null;
+
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
   }
@@ -104,6 +109,21 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     return this.isFirstPage_;
   }
 
+  /**
+   * Returns true if the page is in the hashString
+   * @return {boolean}
+   */
+  isLoadedPage() {
+    if (this.isLoadedPage_ === null) {
+      const hashId = parseQueryString(this.win.location.href)['page'];
+      const identSelector = `amp-story-page#${escapeCssSelectorIdent(
+        hashId
+      )} amp-story-grid-layer`;
+      this.isLoadedPage_ = hashId && matches(this.element, identSelector);
+    }
+    return this.isLoadedPage_;
+  }
+
   /** @override */
   buildCallback() {
     super.buildCallback();
@@ -115,7 +135,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
-    return this.isFirstPage();
+    return this.isFirstPage() || this.isLoadedPage();
   }
 
   /** @private */
