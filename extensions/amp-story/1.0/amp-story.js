@@ -92,6 +92,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
+import {cssEscape} from '../../../third_party/css-escape/css-escape';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -410,8 +411,17 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
-    const pageEl = this.element.querySelector('amp-story-page');
-    pageEl && pageEl.setAttribute('active', '');
+    let page = this.element.querySelector('amp-story-page');
+    const maybePageId = parseQueryString(this.win.location.hash)['page'];
+    const maybePage =
+      maybePageId &&
+      this.element.querySelector(
+        `amp-story-page#${escapeCssSelectorIdent(maybePageId)}`
+      );
+    if (maybePage) {
+      page = maybePage;
+    }
+    page && page.setAttribute('active', '');
 
     this.initializeStyles_();
     this.initializeListeners_();
@@ -1036,9 +1046,9 @@ export class AmpStory extends AMP.BaseElement {
     // page is built. Other pages will only build if the document becomes
     // visible.
     if (!this.getAmpDoc().hasBeenVisible()) {
-      return whenUpgradedToCustomElement(firstPageEl).then(() => {
-        return firstPageEl.whenBuilt();
-      });
+      return whenUpgradedToCustomElement(firstPageEl).then(() =>
+        firstPageEl.whenBuilt()
+      );
     }
 
     // Will resolve when all pages are built.
