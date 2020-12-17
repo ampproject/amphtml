@@ -224,7 +224,7 @@ function BaseCarouselWithRef(
       // Can no longer advance backwards.
       return true;
     }
-    if (!mixedLength && currentSlide + visibleCount + dir > length) {
+    if (currentSlide + visibleCount + dir > length) {
       // Can no longer advance forwards.
       return true;
     }
