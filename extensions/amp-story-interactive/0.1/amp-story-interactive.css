@@ -113,7 +113,6 @@
 
 /* Disclaimer CSS rules */
 .i-amphtml-story-interactive-disclaimer {
-  --i-amphtml-story-interactive-disclaimer-animation-duration: 0.15s !important;
   position: absolute !important;
   color: black !important;
   bottom: calc(100% - 1.75em) !important;
