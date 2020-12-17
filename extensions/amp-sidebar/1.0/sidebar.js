@@ -42,9 +42,9 @@ const ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT = [
 
 const ANIMATION_STYLES_SIDEBAR_LEFT_INIT = {'transform': 'translateX(-100%)'};
 const ANIMATION_STYLES_SIDEBAR_RIGHT_INIT = {'transform': 'translateX(100%)'};
-const ANIMATION_STYLES_MASK_INIT = {'opacity': '0'};
+const ANIMATION_STYLES_BACKDROP_INIT = {'opacity': '0'};
 const ANIMATION_STYLES_SIDEBAR_FINAL = {'transform': ''};
-const ANIMATION_STYLES_MASK_FINAL = {'opacity': ''};
+const ANIMATION_STYLES_BACKDROP_FINAL = {'opacity': ''};
 
 /**
  * @param {T} current
@@ -75,7 +75,8 @@ function SidebarWithRef(
     side = 'left',
     onBeforeOpen,
     onAfterClose,
-    maskStyle,
+    backdropStyle,
+    backdropClassName,
     children,
     ...rest
   },
@@ -89,7 +90,7 @@ function SidebarWithRef(
   const [opened, setOpened] = useState(false);
   const classes = useStyles();
   const sidebarRef = useRef();
-  const maskRef = useRef();
+  const backdropRef = useRef();
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
@@ -124,20 +125,20 @@ function SidebarWithRef(
 
   useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
-    const maskElement = maskRef.current;
-    if (!sidebarElement || !maskElement) {
+    const backdropElement = backdropRef.current;
+    if (!sidebarElement || !backdropElement) {
       return;
     }
 
     let sidebarAnimation;
-    let maskAnimation;
+    let backdropAnimation;
     // "Make Visible" Animation
     if (opened) {
       const postVisibleAnim = () => {
         safelySetStyles(sidebarElement, ANIMATION_STYLES_SIDEBAR_FINAL);
-        safelySetStyles(maskElement, ANIMATION_STYLES_MASK_FINAL);
+        safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_FINAL);
       };
-      if (!sidebarElement.animate || !maskElement.animate) {
+      if (!sidebarElement.animate || !backdropElement.animate) {
         postVisibleAnim();
         return;
       }
@@ -148,7 +149,7 @@ function SidebarWithRef(
           ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
           : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
       );
-      safelySetStyles(maskElement, ANIMATION_STYLES_MASK_INIT);
+      safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
       sidebarAnimation = sidebarElement.animate(
         side === 'left'
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
@@ -160,7 +161,7 @@ function SidebarWithRef(
         }
       );
       sidebarAnimation.onfinish = postVisibleAnim;
-      maskAnimation = maskElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
+      backdropAnimation = backdropElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
         duration: ANIMATION_DURATION,
         fill: 'both',
         easing: ANIMATION_EASE_IN,
@@ -172,10 +173,10 @@ function SidebarWithRef(
           onAfterCloseRef.current();
         }
         sidebarAnimation = null;
-        maskAnimation = null;
+        backdropAnimation = null;
         setMounted(false);
       };
-      if (!sidebarElement.animate || !maskElement.animate) {
+      if (!sidebarElement.animate || !backdropElement.animate) {
         postInvisibleAnim();
         return;
       }
@@ -191,7 +192,7 @@ function SidebarWithRef(
         }
       );
       sidebarAnimation.onfinish = postInvisibleAnim;
-      maskAnimation = maskElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
+      backdropAnimation = backdropElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
@@ -202,8 +203,8 @@ function SidebarWithRef(
       if (sidebarAnimation) {
         sidebarAnimation.cancel();
       }
-      if (maskAnimation) {
-        maskAnimation.cancel();
+      if (backdropAnimation) {
+        backdropAnimation.cancel();
       }
     };
   }, [opened, onAfterCloseRef, side]);
@@ -228,11 +229,13 @@ function SidebarWithRef(
           {children}
         </ContainWrapper>
         <div
-          ref={maskRef}
+          ref={backdropRef}
           onClick={() => close()}
-          part="mask"
-          style={maskStyle}
-          className={`${classes.maskClass} ${classes.defaultMaskStyles}`}
+          part="backdrop"
+          style={backdropStyle}
+          className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
+            classes.defaultBackdropStyles
+          }`}
         ></div>
       </>
     )

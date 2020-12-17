@@ -31,10 +31,10 @@ export default {
 
 export const _default = () => {
   const sideConfigurations = ['left', 'right', undefined];
-  const side = select('type', sideConfigurations, sideConfigurations[0]);
+  const side = select('side', sideConfigurations, sideConfigurations[0]);
   const foregroundColor = color('color');
   const backgroundColor = color('background');
-  const maskBackgroundColor = color('mask color');
+  const backdropColor = color('backdrop color');
   return (
     <main>
       <style>
@@ -43,8 +43,8 @@ export const _default = () => {
               color: ${foregroundColor};
               background-color: ${backgroundColor};
           }
-          amp-sidebar::part(mask) {
-              background-color: ${maskBackgroundColor};
+          amp-sidebar::part(backdrop) {
+              background-color: ${backdropColor};
           }
           `}
       </style>

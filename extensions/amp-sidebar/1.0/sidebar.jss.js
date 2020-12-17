@@ -26,6 +26,7 @@ const sidebarClass = {
   outline: 'none',
   overflowX: 'hidden !important',
   overflowY: 'auto !important',
+  boxSizing: 'border-box !important',
   zIndex: 2147483647,
 };
 
@@ -43,7 +44,7 @@ const right = {
   right: 0,
 };
 
-const maskClass = {
+const backdropClass = {
   position: 'fixed !important',
   top: '0 !important',
   left: '0 !important',
@@ -55,15 +56,15 @@ const maskClass = {
 };
 
 // User overridable styles
-const defaultMaskStyles = {
+const defaultBackdropStyles = {
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
 };
 
 const JSS = {
   sidebarClass,
   defaultSidebarStyles,
-  maskClass,
-  defaultMaskStyles,
+  backdropClass,
+  defaultBackdropStyles,
   left,
   right,
 };

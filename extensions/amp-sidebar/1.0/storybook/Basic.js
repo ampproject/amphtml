@@ -62,17 +62,17 @@ function SidebarWithActions(props) {
 
 export const _default = () => {
   const sideConfigurations = ['left', 'right', undefined];
-  const side = select('type', sideConfigurations, sideConfigurations[0]);
+  const side = select('side', sideConfigurations, sideConfigurations[0]);
   const foregroundColor = color('color');
   const backgroundColor = color('background');
-  const maskBackgroundColor = color('mask color');
+  const backdropColor = color('backdrop color');
 
   return (
     <main>
       <SidebarWithActions
         side={side}
         style={{color: foregroundColor, backgroundColor}}
-        maskStyle={{backgroundColor: maskBackgroundColor}}
+        backdropStyle={{backgroundColor: backdropColor}}
       />
     </main>
   );
