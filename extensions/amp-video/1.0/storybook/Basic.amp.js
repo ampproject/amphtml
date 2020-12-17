@@ -107,38 +107,6 @@ const Spacer = ({height}) => {
   );
 };
 
-export const InsideAccordion = () => {
-  const width = number('width', 320);
-  const height = number('height', 180);
-
-  return (
-    <amp-accordion expand-single-section>
-      <section expanded>
-        <h2>Controls</h2>
-        <div>
-          <amp-video controls loop width={width} height={height}>
-            <source
-              type="video/mp4"
-              src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
-            ></source>
-          </amp-video>
-        </div>
-      </section>
-      <section>
-        <h2>Autoplay</h2>
-        <div>
-          <amp-video autoplay loop width={width} height={height}>
-            <source
-              type="video/mp4"
-              src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
-            ></source>
-          </amp-video>
-        </div>
-      </section>
-    </amp-accordion>
-  );
-};
-
 export const Default = () => {
   const amount = number('Amount', 1, {}, 'Page');
   const spacerHeight = text('Space', '80vh', 'Page');
@@ -185,5 +153,37 @@ export const Actions = () => {
         <ActionButton on="tap:player.fullscreen">Fullscreen</ActionButton>
       </div>
     </div>
+  );
+};
+
+export const InsideAccordion = () => {
+  const width = number('width', 320);
+  const height = number('height', 180);
+
+  return (
+    <amp-accordion expand-single-section>
+      <section expanded>
+        <h2>Controls</h2>
+        <div>
+          <amp-video controls loop width={width} height={height}>
+            <source
+              type="video/mp4"
+              src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            ></source>
+          </amp-video>
+        </div>
+      </section>
+      <section>
+        <h2>Autoplay</h2>
+        <div>
+          <amp-video autoplay loop width={width} height={height}>
+            <source
+              type="video/mp4"
+              src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            ></source>
+          </amp-video>
+        </div>
+      </section>
+    </amp-accordion>
   );
 };
