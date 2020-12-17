@@ -467,6 +467,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
             INTERACTIVE_ACTIVE_CLASS,
             currPageId === this.getPageId_()
           );
+          this.toggleTabbableElements_(currPageId === this.getPageId_());
         });
         tryCloseDisclaimer(this, this.disclaimerEl_);
       },
@@ -808,5 +809,15 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       type: this.interactiveType_,
     };
     this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
+  }
+
+  /**
+   * Toggles the tabbable elements (buttons, links, etc) to only reach them when page is active.
+   * @param {boolean} toggle
+   */
+  toggleTabbableElements_(toggle) {
+    this.rootEl_.querySelectorAll('button, a').forEach((el) => {
+      el.setAttribute('tabindex', toggle ? 0 : -1);
+    });
   }
 }
