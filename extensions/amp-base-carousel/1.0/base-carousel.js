@@ -117,6 +117,7 @@ function BaseCarouselWithRef(
   const currentSlideRef = useRef(currentSlide);
 
   useLayoutEffect(() => {
+    // noop if !_thumbnails || !carouselContext.
     setCurrentSlide(globalCurrentSlide);
   }, [globalCurrentSlide, setCurrentSlide]);
 
