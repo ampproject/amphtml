@@ -212,10 +212,24 @@ function BaseCarouselWithRef(
     }
   }, [_thumbnails, childrenArray, setSlides, slides]);
 
-  const disableForDir = (dir) =>
-    !loop &&
-    (currentSlide + dir < 0 ||
-      (!mixedLength && currentSlide + visibleCount + dir > length));
+  const disableForDir = (dir) => {
+    if (_thumbnails) {
+      console.log(currentSlide, dir);
+    }
+    if (loop) {
+      // Arrows always available when looping.
+      return false;
+    }
+    if (currentSlide + dir < 0) {
+      // Can no longer advance backwards.
+      return true;
+    }
+    if (!mixedLength && currentSlide + visibleCount + dir > length) {
+      // Can no longer advance forwards.
+      return true;
+    }
+    return false;
+  };
 
   const interaction = useRef(Interaction.NONE);
   const hideControls = useMemo(() => {
