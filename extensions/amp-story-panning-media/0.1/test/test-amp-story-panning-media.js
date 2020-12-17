@@ -64,7 +64,9 @@ describes.realWin(
     });
 
     it('should build', async () => {
-      await createAmpStoryPanningMedia('/examples/img/conservatory-coords.jpg');
+      await createAmpStoryPanningMedia(
+        '/examples/amp-story/img/conservatory-coords.jpg'
+      );
       return expect(() => panningMedia.layoutCallback()).to.not.throw();
     });
 
