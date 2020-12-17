@@ -23,7 +23,10 @@ export default {
   title: 'amp-video-1_0',
   decorators: [withA11y, withKnobs, withAmp],
   parameters: {
-    extensions: [{name: 'amp-video', version: '1.0'}],
+    extensions: [
+      {name: 'amp-video', version: '1.0'},
+      {name: 'amp-accordion', version: '1.0'},
+    ],
     experiments: ['bento'],
   },
 };
@@ -101,6 +104,38 @@ const Spacer = ({height}) => {
         backgroundSize: '100% 10px',
       }}
     ></div>
+  );
+};
+
+export const InsideAccordion = () => {
+  const width = number('width', 320);
+  const height = number('height', 180);
+
+  return (
+    <amp-accordion expand-single-section>
+      <section expanded>
+        <h2>Controls</h2>
+        <div>
+          <amp-video controls loop width={width} height={height}>
+            <source
+              type="video/mp4"
+              src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            ></source>
+          </amp-video>
+        </div>
+      </section>
+      <section>
+        <h2>Autoplay</h2>
+        <div>
+          <amp-video autoplay loop width={width} height={height}>
+            <source
+              type="video/mp4"
+              src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            ></source>
+          </amp-video>
+        </div>
+      </section>
+    </amp-accordion>
   );
 };
 
