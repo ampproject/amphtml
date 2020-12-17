@@ -116,7 +116,7 @@
   --i-amphtml-story-interactive-disclaimer-animation-duration: 0.15s !important;
   position: absolute !important;
   color: black !important;
-  bottom: calc(100% - 1.5em) !important;
+  bottom: calc(100% - 1.75em) !important;
   right: 0 !important;
   z-index: 1 !important;
 }

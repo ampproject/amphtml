@@ -27,6 +27,7 @@ import {
   AmpStoryVariableService,
   AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '../../../../src/utils/object';
@@ -172,6 +173,10 @@ describes.realWin(
       storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
+      });
+      const localizationService = new LocalizationService(win);
+      registerServiceBuilder(win, 'localization', function () {
+        return localizationService;
       });
 
       storyEl = win.document.createElement('amp-story');
