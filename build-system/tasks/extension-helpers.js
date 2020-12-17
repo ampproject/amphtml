@@ -178,10 +178,7 @@ function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
-  if (argv.core_runtime_only) {
-    return (extensionsToBuild = []);
-  }
-  extensionsToBuild = DEFAULT_EXTENSION_SET;
+  extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
       log(red('ERROR:'), 'Missing list of extensions.');
@@ -200,7 +197,8 @@ function getExtensionsToBuild(preBuild = false) {
     !preBuild &&
     !argv.noextensions &&
     !argv.extensions &&
-    !argv.extensions_from
+    !argv.extensions_from &&
+    !argv.core_runtime_only
   ) {
     const allExtensions = [];
     for (const extension in extensions) {
