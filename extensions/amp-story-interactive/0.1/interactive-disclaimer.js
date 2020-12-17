@@ -27,7 +27,7 @@ import {htmlFor} from '../../../src/static-template';
 const BACKENDS = {
   'webstoriesinteractivity-beta.web.app': {
     learnMoreUrl: 'https://policies.google.com/terms',
-    entityName: 'Google Firebase',
+    entityName: 'AMP',
   },
 };
 
@@ -42,9 +42,7 @@ function buildDisclaimerLayout(element) {
     <button
       class="i-amphtml-story-interactive-disclaimer-alert"
       aria-label="Open disclaimer"
-    >
-      <div class="i-amphtml-story-interactive-disclaimer-alert-icon"></div>
-    </button>
+    ></button>
     <div class="i-amphtml-story-interactive-disclaimer-bubble">
       <div>
         <span class="i-amphtml-story-interactive-disclaimer-note"

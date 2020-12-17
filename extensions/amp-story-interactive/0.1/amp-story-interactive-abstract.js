@@ -175,7 +175,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     this.rootEl_ = null;
 
     /** @public {../../../src/service/localizationService} */
-    this.localizationService = Services.localizationForDoc(this.element);
+    this.localizationService = null;
 
     /** @protected {?../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
@@ -263,6 +263,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       }),
       Services.storyAnalyticsServiceForOrNull(this.win).then((service) => {
         this.analyticsService_ = service;
+      }),
+      Services.localizationServiceForOrNull(this.element).then((service) => {
+        this.localizationService = service;
       }),
     ]).then(() => {
       this.rootEl_ = this.buildComponent();
