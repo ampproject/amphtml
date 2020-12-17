@@ -102,7 +102,9 @@ async function main() {
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    await reportAllExpectedTests(buildTargets);
+    if (process.platform == 'linux') {
+      await reportAllExpectedTests(buildTargets); // Only once is sufficient.
+    }
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
