@@ -20,7 +20,6 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
 
