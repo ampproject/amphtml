@@ -17,10 +17,7 @@
 amp-inline-gallery-pagination[inset] {
   display: block !important;
   height: 20px; /* Default height. */
-  width: calc(100%-36px); /* Pagination has padding of 18px. */
+  width: 100%;
   position: absolute;
-  top: calc(
-    var(--i-amphtml-carousel-top, 0) + var(--i-amphtml-carousel-height, 100%) -
-      20px
-  );
+  bottom: 0;
 }

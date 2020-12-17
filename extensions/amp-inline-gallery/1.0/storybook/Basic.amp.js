@@ -49,11 +49,9 @@ export const Default = () => {
   );
   return (
     <amp-inline-gallery style={{maxWidth: '360px'}} layout="container">
-      <amp-inline-gallery-pagination
-        inset={topInset}
-        layout={topInset ? 'nodisplay' : 'fixed-height'}
-        height="24"
-      />
+      {!topInset && (
+        <amp-inline-gallery-pagination layout="fixed-height" height="24" />
+      )}
       <amp-base-carousel
         auto-advance={autoAdvance}
         auto-advance-count={autoAdvanceCount}
@@ -63,6 +61,7 @@ export const Default = () => {
         width="360"
         height="240"
       >
+        {topInset && <amp-inline-gallery-pagination layout="nodisplay" inset />}
         <amp-img
           width="360"
           height="240"
@@ -99,12 +98,13 @@ export const Default = () => {
           src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
           data-thumbnail-src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
         ></amp-img>
+        {bottomInset && (
+          <amp-inline-gallery-pagination layout="nodisplay" inset />
+        )}
       </amp-base-carousel>
-      <amp-inline-gallery-pagination
-        inset={bottomInset}
-        layout={bottomInset ? 'nodisplay' : 'fixed-height'}
-        height="24"
-      />
+      {!bottomInset && (
+        <amp-inline-gallery-pagination layout="fixed-height" height="24" />
+      )}
       <amp-inline-gallery-thumbnails
         aspectRatio={aspectRatio}
         loop={loop}

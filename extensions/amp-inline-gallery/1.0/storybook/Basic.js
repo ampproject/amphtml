@@ -50,7 +50,7 @@ export const _default = () => {
   return (
     <>
       <InlineGallery style={{width}}>
-        <Pagination inset={topInset} style={{height: paginationHeight}} />
+        {!topInset && <Pagination style={{height: paginationHeight}} />}
         <BaseCarousel
           style={{height}}
           autoAdvanceCount={autoAdvanceCount}
@@ -58,6 +58,12 @@ export const _default = () => {
           autoAdvanceLoops={autoAdvanceLoops}
           autoAdvance={autoAdvance}
           orientation={orientation}
+          pagination={
+            <>
+              {topInset && <Pagination inset />}
+              {bottomInset && <Pagination inset />}
+            </>
+          }
         >
           <img
             src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
@@ -84,7 +90,7 @@ export const _default = () => {
             thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
           />
         </BaseCarousel>
-        <Pagination inset={bottomInset} />
+        {!bottomInset && <Pagination inset={bottomInset} />}
         <Thumbnails
           aspectRatio={aspectRatio}
           loop={loop}

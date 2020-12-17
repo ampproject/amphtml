@@ -30,7 +30,6 @@ import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-paginatio
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setStyle} from '../../../src/style';
 import {setProp} from '../../../src/context';
 import {useContext, useLayoutEffect} from '../../../src/preact';
 import {userAssert} from '../../../src/log';
@@ -39,58 +38,11 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-inline-gallery';
 
 class AmpInlineGallery extends PreactBaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {?Element} */
-    this.carousel_ = null;
-
-    /** @private {?ResizeObserver} */
-    this.resizeObserver_ = null;
-  }
-
   /** @override */
   init() {
-    this.carousel_ = this.element.parentElement.querySelector(
-      'amp-base-carousel'
-    );
-    this.resizeObserver_ = new this.win.ResizeObserver((entries) => {
-      const last = entries[entries.length - 1];
-      // If carousel resizes, update height variable.
-      setStyle(
-        this.element,
-        '--i-amphtml-carousel-height',
-        px(last.contentRect.height)
-      );
-    });
-    this.resizeObserver_.observe(this.carousel_);
-
     return dict({
       'children': <ContextExporter shimDomElement={this.element} />,
     });
-  }
-
-  /** @override */
-  mutationObserverCallback(entries) {
-    if (this.carousel_ && this.carousel_.parentElement !== this.element) {
-      // Originally observed element has been detached.
-      this.resizeObserver_.unobserve(this.carousel_);
-      this.carousel_ = this.element.parentElement.querySelector(
-        'amp-base-carousel'
-      );
-      if (this.carousel_) {
-        this.resizeObserver_.observe(this.carousel_);
-      }
-    }
-    if (entries.every((entry) => entry.attributeName === 'style')) {
-      return;
-    }
-    setStyle(
-      this.element,
-      '--i-amphtml-carousel-top',
-      px(this.carousel_.offsetTop)
-    );
   }
 
   /** @override */
