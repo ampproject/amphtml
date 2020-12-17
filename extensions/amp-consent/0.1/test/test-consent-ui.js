@@ -30,6 +30,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -216,6 +217,39 @@ describes.realWin(
         consentUI.disableScroll_();
         consentUI.hide();
         expect(consentUI.scrollEnabled_).to.be.true;
+      });
+
+      describe('amp-consent-transform-exp', () => {
+        beforeEach(() => {
+          toggleExperiment(win, 'amp-consent-transform-exp', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(win, 'amp-consent-transform-exp', false);
+        });
+
+        it('should set the correct transform on parent', async () => {
+          const config = dict({
+            'promptUISrc': 'https://promptUISrc',
+          });
+          consentUI = new ConsentUI(mockInstance, config);
+
+          consentUI.show(false);
+          consentUI.handleIframeMessages_({
+            source: consentUI.ui_.contentWindow,
+            data: {
+              type: 'consent-ui',
+              action: 'ready',
+              initialHeight: '80vh',
+            },
+          });
+          await macroTask();
+          expect(
+            consentUI.parent_.style.getPropertyValue(
+              '--i-amphtml-consent-iframe-tranform'
+            )
+          ).to.equal('translate3d(0px, calc(100% - 80vh), 0px)');
+        });
       });
     });
 
