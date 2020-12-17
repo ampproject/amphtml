@@ -20,7 +20,6 @@ import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
 import {isArray, isObject} from '../../types';
 import {isCancellation} from '../../error';
-import {registerServiceBuilderForDoc} from '../../service';
 import {tryParseJson} from '../../json';
 
 /** @type {string} */
@@ -639,12 +638,4 @@ export class RealTimeConfigManager {
     return true;
   }
 }
-
-/**
- * @param {!../ampdoc-impl.AmpDoc} ampdoc
- */
-export function installRealTimeConfigServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'real-time-config', function (doc) {
-    return new RealTimeConfigManager(doc);
-  });
-}
+AMP.RealTimeConfigManager = RealTimeConfigManager;

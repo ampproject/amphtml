@@ -54,7 +54,6 @@ import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
 } from '../../../src/friendly-iframe-embed';
-import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
@@ -2248,24 +2247,27 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
-    if (this.element.getAttribute('rtc-config')) {
-      installRealTimeConfigServiceForDoc(this.getAmpDoc());
+    if (!!AMP.RealTimeConfigManager) {
       try {
-        return Services.realTimeConfigForDoc(
+        return new AMP.RealTimeConfigManager(
           this.getAmpDoc()
-        ).then((realTimeConfig) =>
-          realTimeConfig.maybeExecuteRealTimeConfig(
-            this.element,
-            this.getCustomRealTimeConfigMacros_(),
-            consentState,
-            consentString,
-            consentMetadata,
-            this.verifyStillCurrent()
-          )
+        ).maybeExecuteRealTimeConfig(
+          this.element,
+          this.getCustomRealTimeConfigMacros_(),
+          consentState,
+          consentString,
+          consentMetadata,
+          this.verifyStillCurrent()
         );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
+    } else if (this.element.getAttribute('rtc-config')) {
+      user().error(
+        TAG,
+        'RTC not supported for ad network ' +
+          `${this.element.getAttribute('type')}`
+      );
     }
   }
 
