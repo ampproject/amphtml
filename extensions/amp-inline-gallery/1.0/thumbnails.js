@@ -88,7 +88,7 @@ export function Thumbnails({
               onClick={() => setCurrentSlide(i)}
               loading="lazy"
               role="button"
-              src={thumbnailSrc || ''}
+              src={thumbnailSrc || false}
               style={{
                 height: px(height),
                 width: aspectRatio ? px(aspectRatio * height) : '',
