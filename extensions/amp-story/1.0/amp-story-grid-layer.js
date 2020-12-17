@@ -113,7 +113,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    * Returns true if the page is in the hashString
    * @return {boolean}
    */
-  isLoadedPage() {
+  isPrerenderActivePage() {
     if (this.isLoadedPage_ === null) {
       const hashId = parseQueryString(this.win.location.href)['page'];
       const identSelector = `amp-story-page#${escapeCssSelectorIdent(
@@ -135,7 +135,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
-    return this.isFirstPage() || this.isLoadedPage();
+    return this.isFirstPage() || this.isPrerenderActivePage();
   }
 
   /** @private */
