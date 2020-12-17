@@ -107,10 +107,19 @@ function BaseCarouselWithRef(
   const [currentSlideState, setCurrentSlideState] = useState(
     Math.min(Math.max(defaultSlide, 0), length)
   );
-  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
-  const currentSlideRef = useRef(currentSlide);
-  const setCurrentSlide =
+  const globalCurrentSlide = carouselContext.currentSlide ?? currentSlideState;
+  const setGlobalCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
+  const currentSlide = _thumbnails ? currentSlideState : globalCurrentSlide;
+  const setCurrentSlide = _thumbnails
+    ? setCurrentSlideState
+    : setGlobalCurrentSlide;
+  const currentSlideRef = useRef(currentSlide);
+
+  useLayoutEffect(() => {
+    setCurrentSlide(globalCurrentSlide);
+  }, [globalCurrentSlide, setCurrentSlide]);
+
   const {slides, setSlides} = carouselContext;
 
   const scrollRef = useRef(null);
