@@ -206,7 +206,8 @@ function ciJobUrl() {
   return isTravis
     ? env('TRAVIS_JOB_WEB_URL')
     : isGithubActions
-    ? `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/runs/${env('GITHUB_RUN_NUMBER')}` // prettier-ignore
+    ? // TODO(rsimha): Try to reverse engineer the GH Actions job URL from the build URL.
+      `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
     ? env('CIRCLE_BUILD_URL') // TODO(rsimha): Test and modify if necessary.
     : '';
