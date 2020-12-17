@@ -55,12 +55,13 @@ class AmpInlineGallery extends PreactBaseElement {
     this.carousel_ = this.element.parentElement.querySelector(
       'amp-base-carousel'
     );
-    this.resizeObserver_ = new this.win.ResizeObserver(() => {
+    this.resizeObserver_ = new this.win.ResizeObserver((entries) => {
+      const last = entries[entries.length - 1];
       // If carousel resizes, update height variable.
       setStyle(
         this.element,
         '--i-amphtml-carousel-height',
-        px(this.carousel_.offsetHeight)
+        px(last.contentRect.height)
       );
     });
     this.resizeObserver_.observe(this.carousel_);
