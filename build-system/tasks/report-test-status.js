@@ -144,7 +144,6 @@ function reportTestStarted() {
 }
 
 async function reportAllExpectedTests(buildTargets) {
-  log(green('INFO:'), 'Using commit hash:', cyan(gitCommitHash()));
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
     const action = testTypeBuildTargets.some((target) =>
