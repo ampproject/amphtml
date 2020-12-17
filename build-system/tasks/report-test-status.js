@@ -85,7 +85,7 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
-  if (type !== null && isPullRequestBuild()) {
+  if (type && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
 
     try {
