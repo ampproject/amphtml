@@ -175,10 +175,6 @@ export class PreactBaseElement extends AMP.BaseElement {
       } else {
         this.initApiWrapper_(ref);
       }
-      if (this.deferredApi_) {
-        this.deferredApi_.resolve(ref);
-        this.deferredApi_ = null;
-      }
       this.ref_.current = ref;
     };
 
@@ -682,6 +678,10 @@ export class PreactBaseElement extends AMP.BaseElement {
       });
     }
     this.apiWrapper_ = api;
+    if (this.deferredApi_) {
+      this.deferredApi_.resolve(api);
+      this.deferredApi_ = null;
+    }
   }
 
   /**
