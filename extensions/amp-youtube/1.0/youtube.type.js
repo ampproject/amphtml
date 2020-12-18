@@ -24,7 +24,6 @@
  *   liveChannelid: (string|undefined),
  *   params: Object,
  *   credentials: (string|undefined),
- *   onLoad: function(!Event),
  * }}
  */
 var YoutubeProps;

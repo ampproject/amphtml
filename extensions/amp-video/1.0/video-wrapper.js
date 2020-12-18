@@ -40,7 +40,6 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -116,9 +115,7 @@ function VideoWrapperWithRef(
   }, [readyDeferred]);
 
   const pause = useCallback(() => {
-    readyDeferred.promise.then(() => {
-      playerRef.current.pause();
-    });
+    readyDeferred.promise.then(() => playerRef.current.pause());
   }, [readyDeferred]);
 
   const requestFullscreen = useCallback(() => {
