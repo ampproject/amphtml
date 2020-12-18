@@ -108,7 +108,7 @@ function ciPullRequestBranch() {
   return isTravis
     ? env('TRAVIS_PULL_REQUEST_BRANCH')
     : isGithubActions
-    ? env('GITHUB_HEAD_REF') // TODO(rsimha): Truncate if necessary.
+    ? env('GITHUB_HEAD_REF')
     : isCircleci
     ? env('CIRCLE_BRANCH')
     : '';
@@ -122,7 +122,7 @@ function ciPullRequestSha() {
   return isTravis
     ? env('TRAVIS_PULL_REQUEST_SHA')
     : isGithubActions
-    ? env('GITHUB_SHA')
+    ? require(env('GITHUB_EVENT_PATH')).pull_request.head.sha
     : isCircleci
     ? env('CIRCLE_SHA1')
     : '';
@@ -136,7 +136,7 @@ function ciPushBranch() {
   return isTravis
     ? env('TRAVIS_BRANCH')
     : isGithubActions
-    ? env('GITHUB_REF') // TODO(rsimha): Truncate if necessary.
+    ? env('GITHUB_REF')
     : isCircleci
     ? env('CIRCLE_BRANCH')
     : '';
@@ -206,7 +206,8 @@ function ciJobUrl() {
   return isTravis
     ? env('TRAVIS_JOB_WEB_URL')
     : isGithubActions
-    ? `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/runs/${env('GITHUB_RUN_NUMBER')}` // prettier-ignore
+    ? // TODO(rsimha): Try to reverse engineer the GH Actions job URL from the build URL.
+      `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
     ? env('CIRCLE_BUILD_URL') // TODO(rsimha): Test and modify if necessary.
     : '';
