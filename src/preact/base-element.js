@@ -167,15 +167,15 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {{current: ?API_TYPE}} */
     this.ref_ = createRef();
 
-    /** @param {?API_TYPE} ref */
-    this.refSetter_ = (ref) => {
+    /** @param {?API_TYPE} current */
+    this.refSetter_ = (current) => {
       // The API shape **must** be consistent.
       if (this.apiWrapper_) {
-        this.checkApiWrapper_(ref);
+        this.checkApiWrapper_(current);
       } else {
-        this.initApiWrapper_(ref);
+        this.initApiWrapper_(current);
       }
-      this.ref_.current = ref;
+      this.ref_.current = current;
     };
 
     /** @type {?Deferred<!API_TYPE>} */
@@ -660,20 +660,21 @@ export class PreactBaseElement extends AMP.BaseElement {
    * `ref.current`. So if we ever returned `ref.current` directly, it could go
    * stale by the time its actually used.
    *
-   * @param {!API_TYPE} ref
+   * @param {!API_TYPE} current
    */
-  initApiWrapper_(ref) {
+  initApiWrapper_(current) {
     const api = map();
-    const keys = Object.keys(ref);
+    const keys = Object.keys(current);
+    const ref = this.ref_;
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       Object.defineProperty(api, key, {
         get() {
-          return this.ref_.current[key];
+          return ref.current[key];
         },
 
         set(v) {
-          this.ref_.current[key] = v;
+          ref.current[key] = v;
         },
       });
     }
@@ -688,22 +689,22 @@ export class PreactBaseElement extends AMP.BaseElement {
    * Verifies that every Preact render exposes the same API surface (the same
    * keys are always exposed, keys are not added nor removed).
    *
-   * @param {!API_TYPE} ref
+   * @param {!API_TYPE} current
    */
-  checkApiWrapper_(ref) {
+  checkApiWrapper_(current) {
     if (!getMode().localDev) {
       return;
     }
     const api = this.apiWrapper_;
-    const newKeys = Object.keys(ref);
-    for (const i = 0; i < newKeys.length; i++) {
+    const newKeys = Object.keys(current);
+    for (let i = 0; i < newKeys.length; i++) {
       const key = newKeys[i];
       devAssert(hasOwn(api, key), `Expected ${key} to be exposed on API`);
     }
     const oldKeys = Object.keys(api);
-    for (const i = 0; i < oldKeys.length; i++) {
+    for (let i = 0; i < oldKeys.length; i++) {
       const key = oldKeys[i];
-      devAssert(hasOwn(ref, key), `Expected ${key} to be exposed on API`);
+      devAssert(hasOwn(current, key), `Expected ${key} to be exposed on API`);
     }
   }
 }
@@ -723,6 +724,8 @@ export function whenUpgraded(el) {
     .then(() => el.getImpl())
     .then((impl) => impl.getApi());
 }
+
+self.Bento = {whenUpgraded};
 
 // Ideally, these would be Static Class Fields. But Closure can't even.
 
