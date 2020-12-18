@@ -142,12 +142,8 @@ export const InsideAccordion = () => {
             controls={true}
             loop={true}
             style={{width, height}}
-            sources={[
-              <source
-                type="video/mp4"
-                src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
-              />,
-            ]}
+            src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            poster="https://amp.dev/static/inline-examples/images/kitten-playing.png"
           />
         </AccordionContent>
       </AccordionSection>
@@ -161,6 +157,8 @@ export const InsideAccordion = () => {
             autoplay={true}
             loop={true}
             style={{width, height}}
+            src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            poster="https://amp.dev/static/inline-examples/images/kitten-playing.png"
             sources={[
               <source
                 type="video/mp4"

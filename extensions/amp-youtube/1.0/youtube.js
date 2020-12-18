@@ -17,6 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
+import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
@@ -67,7 +68,6 @@ export function Youtube({
   liveChannelid,
   params = {},
   credentials,
-  style,
   ...rest
 }) {
   const datasourceExists =
@@ -146,23 +146,15 @@ export function Youtube({
     }
   };
 
-  const makeMethodMessage = (method) => {
-    return JSON.stringify(
-      dict({
-        'event': 'command',
-        'func': methods[method],
-      })
-    );
-  };
-
   return (
-    <VideoIframe
+    <VideoWrapper
+      {...rest}
+      component={VideoIframe}
       autoplay={autoplay}
       src={src}
-      style={style}
       onMessage={onMessage}
       makeMethodMessage={makeMethodMessage}
-      onLoad={(event) => {
+      onIframeLoad={(event) => {
         const {currentTarget} = event;
         dispatchCustomEvent(currentTarget, 'canplay');
         currentTarget.contentWindow./*OK*/ postMessage(
@@ -173,11 +165,9 @@ export function Youtube({
           ),
           '*'
         );
-        dispatchCustomEvent(currentTarget, VideoEvents.LOAD);
       }}
       sandbox="allow-scripts allow-same-origin allow-presentation"
-      {...rest}
-    ></VideoIframe>
+    ></VideoWrapper>
   );
 }
 
@@ -221,4 +211,17 @@ function dispatchCustomEvent(currentTarget, name, opt_data) {
     cancelable: true,
   });
   currentTarget.dispatchEvent(event);
+}
+
+/**
+ * @param {string} method
+ * @return {!Object|string}
+ */
+function makeMethodMessage(method) {
+  return JSON.stringify(
+    dict({
+      'event': 'command',
+      'func': methods[method],
+    })
+  );
 }

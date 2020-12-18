@@ -159,24 +159,20 @@ export const Actions = () => {
 export const InsideAccordion = () => {
   const width = number('width', 320);
   const height = number('height', 180);
+  const autoplay = boolean('autoplay', false);
 
   return (
     <amp-accordion expand-single-section>
       <section expanded>
-        <h2>Controls</h2>
+        <h2>Video</h2>
         <div>
-          <amp-video controls loop width={width} height={height}>
-            <source
-              type="video/mp4"
-              src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
-            ></source>
-          </amp-video>
-        </div>
-      </section>
-      <section>
-        <h2>Autoplay</h2>
-        <div>
-          <amp-video autoplay loop width={width} height={height}>
+          <amp-video
+            autoplay={autoplay}
+            controls
+            loop
+            width={width}
+            height={height}
+          >
             <source
               type="video/mp4"
               src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"

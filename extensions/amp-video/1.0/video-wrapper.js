@@ -29,7 +29,7 @@ import {dict} from '../../../src/utils/object';
 import {fillContentOverlay, fillStretch} from './video-wrapper.css';
 import {forwardRef} from '../../../src/preact/compat';
 import {once} from '../../../src/utils/function';
-import {useAmpContext} from '../../../src/preact/context';
+import {useAmpContext, useLoad} from '../../../src/preact/context';
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
@@ -40,6 +40,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -77,6 +78,8 @@ const getMetadata = (player, props) =>
 function VideoWrapperWithRef(
   {
     component: Component = 'video',
+    loading,
+    unloadOnPause = false,
     autoplay = false,
     controls = false,
     loop = false,
@@ -84,13 +87,17 @@ function VideoWrapperWithRef(
     mediasession = true,
     className,
     style,
+    src,
     sources,
+    poster,
+    onLoad,
     ...rest
   },
   ref
 ) {
   useResourcesNotify();
   const {playable} = useAmpContext();
+  const load = useLoad(loading, unloadOnPause);
 
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying] = useState(false);
@@ -109,7 +116,9 @@ function VideoWrapperWithRef(
   }, [readyDeferred]);
 
   const pause = useCallback(() => {
-    readyDeferred.promise.then(() => playerRef.current.pause());
+    readyDeferred.promise.then(() => {
+      playerRef.current.pause();
+    });
   }, [readyDeferred]);
 
   const requestFullscreen = useCallback(() => {
@@ -150,9 +159,15 @@ function VideoWrapperWithRef(
       pause,
       requestFullscreen,
       get currentTime() {
+        if (!playerRef.current) {
+          return 0;
+        }
         return playerRef.current.currentTime;
       },
       get duration() {
+        if (!playerRef.current) {
+          return NaN;
+        }
         return playerRef.current.duration;
       },
       get autoplay() {
@@ -195,26 +210,36 @@ function VideoWrapperWithRef(
       layout
       paint
     >
-      <Component
-        {...rest}
-        ref={playerRef}
-        muted={muted}
-        loop={loop}
-        controls={controls && (!autoplay || hasUserInteracted)}
-        onCanPlay={readyDeferred.resolve}
-        onLoadedMetadata={() => {
-          if (mediasession) {
-            readyDeferred.promise.then(() => {
-              setMetadata(getMetadata(playerRef.current, rest));
-            });
-          }
-        }}
-        onPlaying={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        style={fillStretch}
-      >
-        {sources}
-      </Component>
+      {load && (
+        <Component
+          {...rest}
+          ref={playerRef}
+          loading={loading}
+          muted={muted}
+          loop={loop}
+          controls={controls && (!autoplay || hasUserInteracted)}
+          onCanPlay={() => {
+            readyDeferred.resolve();
+            if (onLoad) {
+              onLoad();
+            }
+          }}
+          onLoadedMetadata={() => {
+            if (mediasession) {
+              readyDeferred.promise.then(() => {
+                setMetadata(getMetadata(playerRef.current, rest));
+              });
+            }
+          }}
+          onPlaying={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          style={fillStretch}
+          src={src}
+          poster={poster}
+        >
+          {sources}
+        </Component>
+      )}
       {autoplay && !hasUserInteracted && (
         <Autoplay
           metadata={metadata}
