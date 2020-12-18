@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {color, select, withKnobs} from '@storybook/addon-knobs';
+import {color, number, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -34,7 +34,18 @@ export const _default = () => {
   const side = select('side', sideConfigurations, sideConfigurations[0]);
   const foregroundColor = color('color');
   const backgroundColor = color('background');
+  const height = text('height', null);
+  const width = text('width', null);
+  const padding = text('padding', null);
+  const border = text('border', null);
+  const top = text('top', null);
+  const maxHeight = text('max-height', null);
+  const maxWidth = text('max-width', null);
+  const minWidth = text('min-width', null);
+  const outline = text('outline', null);
+  const zIndex = number('z-index', 2147483647);
   const backdropColor = color('backdrop color');
+
   return (
     <main>
       <style>
@@ -42,13 +53,23 @@ export const _default = () => {
           amp-sidebar {
               color: ${foregroundColor};
               background-color: ${backgroundColor};
+              height: ${height};
+              width: ${width};
+              padding: ${padding};
+              border: ${border};
+              top: ${top};
+              max-height: ${maxHeight} !important;
+              max-width: ${maxWidth} !important;
+              min-width: ${minWidth} !important;
+              outline: ${outline};
+              z-index: ${zIndex};
           }
           amp-sidebar::part(backdrop) {
               background-color: ${backdropColor};
           }
           `}
       </style>
-      <amp-sidebar id="sidebar" side={side}>
+      <amp-sidebar layout="nodisplay" id="sidebar" side={side}>
         <div style={{margin: 8}}>
           <span>
             Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at

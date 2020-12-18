@@ -18,22 +18,22 @@ import {createUseStyles} from 'react-jss';
 
 const sidebarClass = {
   position: 'fixed !important',
-  top: 0,
-  maxHeight: '100vh !important',
-  height: '100vh',
-  maxWidth: '80vw',
-  minWidth: '45px !important',
-  outline: 'none',
   overflowX: 'hidden !important',
   overflowY: 'auto !important',
   boxSizing: 'border-box !important',
-  zIndex: 2147483647,
 };
 
 // User overridable styles
 const defaultSidebarStyles = {
   color: '#000000',
   backgroundColor: '#efefef',
+  height: '100vh',
+  top: 0,
+  maxHeight: '100vh',
+  maxWidth: '80vw',
+  minWidth: '45px',
+  outline: 'none',
+  zIndex: 2147483647,
 };
 
 const left = {

@@ -17,9 +17,44 @@
 amp-sidebar {
   color: black;
   background-color: #efefef;
+  height: 100vh;
+  --story-page-vh: 1vh;
+  top: 0;
+  max-height: 100vh !important;
+  max-width: 80vw !important;
+  min-width: 45px !important;
+  outline: none;
+  z-index: 2147483647;
 }
 
+amp-sidebar::part(c),
 amp-sidebar::part(sidebar) {
+  /* Inherit values specified on amp-sidebar */
   color: inherit;
   background-color: inherit;
+  height: inherit;
+  --story-page-vh: inherit;
+  top: inherit;
+  max-height: inherit;
+  max-width: inherit;
+  min-width: inherit;
+  outline: inherit;
+  z-index: inherit;
+
+  /* Use unspecified default values from amp-sidebar element */
+  width: inherit;
+  padding: inherit;
+  border: inherit;
+
+  /* Children of amp-sidebar should be visible */
+  visibility: visible !important;
+}
+
+/** 
+ * Hide the amp-sidebar and remove from the flow of the page so user applied
+ * styling is not shown directly on amp-sidebar element.
+ */
+amp-sidebar {
+  visibility: hidden !important;
+  position: fixed !important;
 }
