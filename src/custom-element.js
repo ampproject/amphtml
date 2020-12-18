@@ -303,7 +303,7 @@ function createBaseCustomElementClass(win) {
 
     /** @return {!Promise<!Object>} */
     whenUpgraded() {
-      return this.signals_.whenSignal(CommonSignals.UPGRADED).then(() => {});
+      return this.signals_.whenSignal(CommonSignals.UPGRADED);
     }
 
     /**
@@ -1072,6 +1072,14 @@ function createBaseCustomElementClass(win) {
     getImpl(waitForBuild = true) {
       const waitFor = waitForBuild ? this.whenBuilt() : this.whenUpgraded();
       return waitFor.then(() => this.implementation_);
+    }
+
+    /**
+     * Returns reference to upgraded implementation, where imperative APIs are placed.
+     * @return {!Promise<!./base-element.BaseElement>}
+     */
+    getApi() {
+      return this.getImpl();
     }
 
     /**
