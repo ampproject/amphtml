@@ -167,13 +167,15 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {{current: ?API_TYPE}} */
     this.ref_ = createRef();
 
-    /** @param {?API_TYPE} current */
+    /** @param {?API_TYPE|null} current */
     this.refSetter_ = (current) => {
       // The API shape **must** be consistent.
-      if (this.apiWrapper_) {
-        this.checkApiWrapper_(current);
-      } else {
-        this.initApiWrapper_(current);
+      if (current !== null) {
+        if (this.apiWrapper_) {
+          this.checkApiWrapper_(current);
+        } else {
+          this.initApiWrapper_(current);
+        }
       }
       this.ref_.current = current;
     };
@@ -653,7 +655,7 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /**
    * Creates a wrapper around a Preact ref. The API surface exposed by this ref
-   * **must** be consistent accross all rerenders.
+   * **should** be consistent accross all rerenders.
    *
    * This wrapper is necessary because every time React rerenders, it creates
    * (depending on deps checking) a new imperative handle and sets that to
@@ -668,15 +670,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const ref = this.ref_;
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      Object.defineProperty(api, key, {
-        get() {
-          return ref.current[key];
-        },
-
-        set(v) {
-          ref.current[key] = v;
-        },
-      });
+      wrapRefProperty(ref, api, key);
     }
     this.apiWrapper_ = api;
     if (this.deferredApi_) {
@@ -686,27 +680,47 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
-   * Verifies that every Preact render exposes the same API surface (the same
-   * keys are always exposed, keys are not added nor removed).
+   * Verifies that every Preact render exposes the same API surface as the previous render.
+   * If it does not, the API wrapper is syncrhonized.
    *
    * @param {!API_TYPE} current
    */
   checkApiWrapper_(current) {
-    if (!getMode().localDev) {
-      return;
-    }
     const api = this.apiWrapper_;
     const newKeys = Object.keys(current);
     for (let i = 0; i < newKeys.length; i++) {
       const key = newKeys[i];
-      devAssert(hasOwn(api, key), `Expected ${key} to be exposed on API`);
+      if (!hasOwn(api, key)) {
+        wrapRefProperty(this.ref_, api, key);
+      }
     }
     const oldKeys = Object.keys(api);
     for (let i = 0; i < oldKeys.length; i++) {
       const key = oldKeys[i];
-      devAssert(hasOwn(current, key), `Expected ${key} to be exposed on API`);
+      if (!hasOwn(current, key)) {
+        delete api[key];
+      }
     }
   }
+}
+
+/**
+ * @param {!{current: *}} ref
+ * @param {!Object} api
+ * @param {string} key
+ */
+function wrapRefProperty(ref, api, key) {
+  Object.defineProperty(api, key, {
+    configurable: true,
+
+    get() {
+      return ref.current[key];
+    },
+
+    set(v) {
+      ref.current[key] = v;
+    },
+  });
 }
 
 /**
@@ -719,13 +733,11 @@ export class PreactBaseElement extends AMP.BaseElement {
  * @return {!Promise<!Object>}
  */
 export function whenUpgraded(el) {
-  return customElements
+  return el.ownerDocument.defaultView.customElements
     .whenDefined(el.localName)
     .then(() => el.getImpl())
     .then((impl) => impl.getApi());
 }
-
-self.Bento = {whenUpgraded};
 
 // Ideally, these would be Static Class Fields. But Closure can't even.
 
