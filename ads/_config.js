@@ -1307,6 +1307,8 @@ const adConfig = jsonConfiguration({
       'https://rfetch.yektanet.net',
       'https://scrapper.yektanet.com',
       'https://ua.yektanet.com',
+      'https://bfetch.yektanet.com',
+      'https://mostatil.cdn.yektanet.com',
     ],
     renderStartImplemented: true,
   },
