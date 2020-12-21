@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CtaTypes} from './story-ad-localization';
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {
@@ -104,22 +103,6 @@ export function getStoryAdMetadataFromElement(adElement) {
     [A4AVarNames.CTA_TYPE]: ctaType,
     [A4AVarNames.CTA_URL]: ctaUrl,
   };
-}
-
-/**
- * Localizes CTA text if it is chosen from our predefined types.a
- * @param {string} ctaType
- * @param {!./story-ad-localization.StoryAdLocalization} localizationService
- * @return {string|null}
- */
-export function localizeCtaText(ctaType, localizationService) {
-  // CTA picked from predefined choices.
-  if (CtaTypes[ctaType]) {
-    const ctaLocalizedStringId = CtaTypes[ctaType];
-    return localizationService.getLocalizedString(ctaLocalizedStringId);
-  }
-  // Custom CTA text - Should already be localized.
-  return ctaType;
 }
 
 /**

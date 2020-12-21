@@ -1,0 +1,41 @@
+{
+  "2": {"string": "Tryck på Nästa"},
+  "3": {"string": "Tryck på Tillbaka"},
+  "4": {"string": "Det gick inte att kopiera länken till urklipp :("},
+  "5": {"string": "Länken har kopierats."},
+  "6": {"string": "E-post"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Kopiera länken"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "Sms"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Gör fönstret högre och bredare om du vill kunna läsa bildinlägg"
+  },
+  "19": {
+    "string": "Du måste aktivera experimentet med amp-story om du vill kunna läsa bildinlägg."
+  },
+  "20": {"string": "Sidan visas bäst i stående format"},
+  "21": {"string": "Det verkar som om webbläsaren inte har stöd för detta."},
+  "22": {"string": "Godkänn"},
+  "23": {"string": "Avvisa"},
+  "25": {"string": "Visa på den ursprungliga webbplatsen:"},
+  "26": {"string": "Mer om AMP-resultat"},
+  "27": {"string": "Fortsätt ändå"},
+  "28": {"string": "Ändra inställningar för datasekretess"},
+  "29": {"string": "Sekretessinställningar"},
+  "30": {"string": "Mer läsning"},
+  "31": {"string": "Ljud av"},
+  "32": {"string": "Ljud på"},
+  "33": {"string": "Sidan har inget ljud"},
+  "34": {"string": "Spela upp video"},
+  "35": {"string": "Svep uppåt"},
+  "36": {"string": "Utöka tweet"},
+  "37": {"string": "Gör fönstret högre om du vill kunna läsa bildinlägg"},
+  "38": {"string": "Gör fönstret bredare om du vill kunna läsa bildinlägg"},
+  "63": {"string": "Line"}
+}

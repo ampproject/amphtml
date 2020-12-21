@@ -1,0 +1,41 @@
+{
+  "2": {"string": "Tryk på Næste"},
+  "3": {"string": "Tryk på Tilbage"},
+  "4": {"string": "Linket kunne ikke kopieres til udklipsholderen :("},
+  "5": {"string": "Linket blev kopieret"},
+  "6": {"string": "Mail"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Hent link"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "Sms"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {"string": "Gør vinduet højere og bredere for at se denne oplevelse"},
+  "19": {
+    "string": "Du skal aktivere AMP-historieeksperimentet for at se dette indhold."
+  },
+  "20": {"string": "Denne side fungerer bedst i stående format"},
+  "21": {
+    "string": "Det ser desværre ud til, at din browser ikke understøtter denne oplevelse"
+  },
+  "22": {"string": "Acceptér"},
+  "23": {"string": "Afvis"},
+  "25": {"string": "Se på oprindeligt domæne:"},
+  "26": {"string": "Mere om AMP-resultater"},
+  "27": {"string": "Fortsæt alligevel"},
+  "28": {"string": "Skift privatlivsindstillinger for data"},
+  "29": {"string": "Privatlivsindstillinger"},
+  "30": {"string": "Forslag til læsning"},
+  "31": {"string": "Lyden er slået fra"},
+  "32": {"string": "Lyden er slået til"},
+  "33": {"string": "Denne side har ingen lyd"},
+  "34": {"string": "Afspil video"},
+  "35": {"string": "Stryg opad"},
+  "36": {"string": "Udvid tweet"},
+  "37": {"string": "Gør vinduet højere for at se denne oplevelse"},
+  "38": {"string": "Gør vinduet bredere for at se denne oplevelse"},
+  "63": {"string": "Line"}
+}

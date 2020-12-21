@@ -1,0 +1,41 @@
+{
+  "2": {"string": "Valitse Seuraava"},
+  "3": {"string": "Valitse Takaisin"},
+  "4": {"string": "Linkkiä ei voitu kopioida leikepöydälle :("},
+  "5": {"string": "Linkki kopioitu"},
+  "6": {"string": "Sähköposti"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Hae linkki"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "Tekstiviesti"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Lisää ikkunan korkeutta ja leveyttä, jos haluat katsella tätä"
+  },
+  "19": {
+    "string": "AMP-tarinakokeilu on otettava käyttöön tämän sisällön näkemiseksi."
+  },
+  "20": {"string": "Sivu toimii parhaiten muotokuvatilassa"},
+  "21": {"string": "Valitettavasti selaimesi ei tue tätä ominaisuutta"},
+  "22": {"string": "Hyväksy"},
+  "23": {"string": "Hylkää"},
+  "25": {"string": "Näytä alkuperäisessä verkkotunnuksessa:"},
+  "26": {"string": "Lisätietoja AMP-tuloksista"},
+  "27": {"string": "Jatka silti"},
+  "28": {"string": "Muuta tietosuoja-asetuksia"},
+  "29": {"string": "Tietosuoja-asetukset"},
+  "30": {"string": "Lisää luettavaa"},
+  "31": {"string": "Äänet pois käytöstä"},
+  "32": {"string": "Äänet käytössä"},
+  "33": {"string": "Sivulla ei ole ääntä"},
+  "34": {"string": "Toista video"},
+  "35": {"string": "Pyyhkäise ylös"},
+  "36": {"string": "Laajenna twiitti"},
+  "37": {"string": "Lisää ikkunan korkeutta, jos haluat katsella tätä"},
+  "38": {"string": "Lisää ikkunan leveyttä, jos haluat katsella tätä"},
+  "63": {"string": "Line"}
+}

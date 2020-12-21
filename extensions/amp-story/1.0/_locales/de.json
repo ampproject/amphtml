@@ -1,0 +1,47 @@
+{
+  "2": {"string": "Auf \"Weiter\" tippen"},
+  "3": {"string": "Auf \"Zurück\" tippen"},
+  "4": {"string": "Der Link konnte nicht in die Zwischenablage kopiert werden"},
+  "5": {"string": "Link kopiert."},
+  "6": {"string": "E-Mail"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Link abrufen"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Maximiere die Höhe und Breite deines Fensters, um diese Funktion nutzen zu können"
+  },
+  "19": {
+    "string": "Wenn du diesen Inhalt aufrufen möchtest, musst du den amp-story-Test aktivieren."
+  },
+  "20": {"string": "Diese Seite lässt sich am besten im Hochformat ansehen"},
+  "21": {
+    "string": "Dein aktueller Browser unterstützt diese Funktion leider nicht."
+  },
+  "22": {"string": "Annehmen"},
+  "23": {"string": "Ablehnen"},
+  "25": {"string": "In ursprünglicher Domain ansehen:"},
+  "26": {"string": "Weitere Informationen zu AMP-Ergebnissen"},
+  "27": {"string": "Trotzdem fortfahren"},
+  "28": {"string": "Datenschutzeinstellungen ändern"},
+  "29": {"string": "Datenschutzeinstellungen"},
+  "30": {"string": "Weitere Artikel"},
+  "31": {"string": "Ton aus"},
+  "32": {"string": "Ton an"},
+  "33": {"string": "Diese Seite hat keinen Ton"},
+  "34": {"string": "Video abspielen"},
+  "35": {"string": "Nach oben wischen"},
+  "36": {"string": "Tweet maximieren"},
+  "37": {
+    "string": "Maximiere die Höhe deines Fensters, um diese Funktion nutzen zu können"
+  },
+  "38": {
+    "string": "Maximiere die Breite deines Fensters, um diese Funktion nutzen zu können"
+  },
+  "63": {"string": "Line"}
+}

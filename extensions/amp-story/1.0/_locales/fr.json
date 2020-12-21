@@ -1,0 +1,45 @@
+{
+  "2": {"string": "Appuyer sur Suivant"},
+  "3": {"string": "Appuyer sur Retour"},
+  "4": {"string": "Impossible de copier le lien dans le presse-papiers :("},
+  "5": {"string": "Lien copié."},
+  "6": {"string": "E-mail"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Obtenir le lien"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Modifiez la hauteur et la largeur de la fenêtre pour voir cette expérience"
+  },
+  "19": {
+    "string": "Vous devez activer l'expérience story AMP pour voir ce contenu."
+  },
+  "20": {"string": "La page s'affiche mieux en mode Portrait"},
+  "21": {
+    "string": "Nous sommes désolés, mais votre navigateur n'est pas compatible avec cette expérience"
+  },
+  "22": {"string": "Accepter"},
+  "23": {"string": "Refuser"},
+  "25": {"string": "Afficher sur le domaine d'origine :"},
+  "26": {"string": "En savoir plus sur les résultats AMP"},
+  "27": {"string": "Continuer quand même"},
+  "28": {"string": "Modifier les paramètres de confidentialité des données"},
+  "29": {"string": "Paramètres de confidentialité"},
+  "30": {"string": "Autres articles à lire"},
+  "31": {"string": "Son désactivé"},
+  "32": {"string": "Son activé"},
+  "33": {"string": "Cette page n'a pas de son"},
+  "34": {"string": "Regarder la vidéo"},
+  "35": {"string": "Balayer l'écran vers le haut"},
+  "36": {"string": "Développer le tweet"},
+  "37": {
+    "string": "Augmentez la hauteur de votre fenêtre pour voir cette expérience"
+  },
+  "38": {"string": "Élargissez la fenêtre pour voir cette expérience"},
+  "63": {"string": "Line"}
+}

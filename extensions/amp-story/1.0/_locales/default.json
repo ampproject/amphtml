@@ -1,0 +1,41 @@
+{
+  "4": {"string": ":("},
+  "18": {
+    "string": "Expand both the height and width of your window to view this experience"
+  },
+  "19": {
+    "string": "You must enable the amp-story experiment to view this content."
+  },
+  "20": {"string": "The page is best viewed in portrait mode"},
+  "21": {
+    "string": "We're sorry, it looks like your browser doesn't support this experience"
+  },
+  "22": {"string": "Accept"},
+  "23": {"string": "Decline"},
+  "25": {"string": "View on original domain:"},
+  "26": {"string": "More about AMP results"},
+  "27": {"string": "Continue Anyway"},
+  "28": {"string": "Change data privacy settings"},
+  "29": {"string": "Privacy settings"},
+  "30": {"string": "More to read"},
+  "31": {"string": "Sound off"},
+  "32": {"string": "Sound on"},
+  "33": {"string": "This page has no sound"},
+  "37": {"string": "Expand the height of your window to view this experience"},
+  "38": {"string": "Expand the width of your window to view this experience"},
+  "64": {"string": "Updated"},
+  "71": {"string": "A"},
+  "72": {"string": "B"},
+  "73": {"string": "C"},
+  "74": {"string": "D"},
+  "75": {"string": "Tip 1 of 2"},
+  "76": {"string": "Tap to go to the next screen"},
+  "77": {"string": "Next"},
+  "78": {"string": "Tip 2 of 2"},
+  "79": {"string": "Swipe to go to the next story"},
+  "80": {"string": "Got it"},
+  "81": {"string": "Tip"},
+  "84": {"string": "SCORE:"},
+  "85": {"string": "Pause"},
+  "86": {"string": "Play"}
+}
