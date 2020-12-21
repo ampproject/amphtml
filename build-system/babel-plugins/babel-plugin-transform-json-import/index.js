@@ -15,7 +15,7 @@
  */
 
 const {readFileSync} = require('fs');
-const {resolve, dirname, join, relative} = require('path').posix;
+const {resolve, dirname, join, relative} = require('path');
 
 // Transforms JSON imports into a `JSON.parse` call:
 //
@@ -65,7 +65,7 @@ module.exports = function ({types: t, template}, options) {
 
         const specifier = specifiers[0].local;
         const jsonPath = relative(
-          join(__dirname, '../../../'),
+          join(__dirname, '..', '..', '..'),
           resolve(dirname(this.file.opts.filename), source.value)
         );
         let json;
