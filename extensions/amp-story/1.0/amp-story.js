@@ -410,12 +410,15 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
-    const page = this.element.querySelector(
-      `amp-story-page#${escapeCssSelectorIdent(
-        this.getInitialPageId_(this.element.querySelector(`amp-story-page`))
-      )}`
-    );
-    page && page.setAttribute('active', '');
+    const firstPage = this.element.querySelector(`amp-story-page`);
+    const activePage = firstPage
+      ? this.element.querySelector(
+          `amp-story-page#${escapeCssSelectorIdent(
+            this.getInitialPageId_(firstPage)
+          )}`
+        )
+      : null;
+    activePage && activePage.setAttribute('active', '');
 
     this.initializeStyles_();
     this.initializeListeners_();
