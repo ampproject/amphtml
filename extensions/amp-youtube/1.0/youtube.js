@@ -19,8 +19,8 @@ import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
-import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 
 // Correct PlayerStates taken from
@@ -56,6 +56,9 @@ const PlayerFlags = {
   // Config to tell YouTube to hide annotations by default
   HIDE_ANNOTATION: 3,
 };
+
+/** @const {!../../../src/dom.CustomEventOptionsDef} */
+const VIDEO_EVENT_OPTIONS = {bubbles: false, cancelable: false};
 
 /**
  * @param {!YoutubeProps} props
@@ -118,7 +121,7 @@ export function Youtube({
       return;
     }
     if (data.event == 'initialDelivery') {
-      dispatchCustomEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
       return;
     }
     const {info} = data;
@@ -138,10 +141,10 @@ export function Youtube({
       );
     }
     if (data.event == 'infoDelivery' && playerState != undefined) {
-      dispatchCustomEvent(currentTarget, PlayerStates[playerState.toString()]);
+      dispatchVideoEvent(currentTarget, PlayerStates[playerState.toString()]);
     }
     if (data.event == 'infoDelivery' && info['muted']) {
-      dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
+      dispatchVideoEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
       return;
     }
   };
@@ -156,7 +159,7 @@ export function Youtube({
       makeMethodMessage={makeMethodMessage}
       onIframeLoad={(event) => {
         const {currentTarget} = event;
-        dispatchCustomEvent(currentTarget, 'canplay');
+        dispatchVideoEvent(currentTarget, 'canplay');
         currentTarget.contentWindow./*OK*/ postMessage(
           JSON.stringify(
             dict({
@@ -196,21 +199,11 @@ function getEmbedUrl(credentials, videoid, liveChannelid) {
 }
 
 /**
- * Dispatches a custom event.
- *
- * @param {HTMLIFrameElement} currentTarget
+ * @param {!HTMLIFrameElement} currentTarget
  * @param {string} name
- * @param {!Object=} opt_data Event data.
- * @final
  */
-function dispatchCustomEvent(currentTarget, name, opt_data) {
-  const {ownerDocument} = currentTarget;
-  const win = ownerDocument.defaultView || ownerDocument.parentWindow;
-  const event = createCustomEvent(win, name, opt_data, {
-    bubbles: true,
-    cancelable: true,
-  });
-  currentTarget.dispatchEvent(event);
+function dispatchVideoEvent(currentTarget, name) {
+  dispatchCustomEvent(currentTarget, name, null, VIDEO_EVENT_OPTIONS);
 }
 
 /**

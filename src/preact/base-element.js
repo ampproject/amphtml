@@ -448,6 +448,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.loadDeferred_) {
       this.loadDeferred_.reject(opt_reason || new Error('load error'));
       this.loadDeferred_ = null;
+      dispatchCustomEvent(this.element, 'error', null, {bubbles: false});
     }
   }
 

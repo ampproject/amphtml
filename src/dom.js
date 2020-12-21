@@ -47,7 +47,7 @@ export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
  *   cancelable: (boolean|undefined),
  * }}
  */
-let CustomEventOptionsDef;
+export let CustomEventOptionsDef;
 
 /** @const {!CustomEventOptionsDef} */
 const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
