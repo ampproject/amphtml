@@ -119,6 +119,7 @@ const forbiddenTerms = {
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
+      'build-system/pr-check/cross-browser-tests.js',
       'build-system/pr-check/dist-bundle-size.js',
       'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/module-dist-bundle-size.js',
@@ -1184,14 +1185,10 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
   },
-  "process\\.env(\\.TRAVIS|\\[\\'TRAVIS)": {
+  "process\\.env(\\.|\\[\\')(TRAVIS|GITHUB_ACTIONS|CIRCLECI)": {
     message:
-      'Do not directly use process.env.TRAVIS. Instead, add a ' +
-      'function to build-system/common/travis.js',
-    allowlist: [
-      'build-system/common/check-package-manager.js',
-      'build-system/common/travis.js',
-    ],
+      'Do not directly use CI-specific environment vars. Instead, add a ' +
+      'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
   '\\.getLayoutWidth': {

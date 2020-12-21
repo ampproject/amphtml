@@ -29,12 +29,13 @@ import {
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {getFriendlyIframeEmbedOptional} from '../../src/iframe-helper';
-import {installExtensionsService} from '../../src/service/extensions-impl';
 import {
-  installServiceInEmbedScope,
+  getServiceInEmbedWin,
   registerServiceBuilder,
+  registerServiceBuilderInEmbedWin,
   setParentWindow,
 } from '../../src/service';
+import {installExtensionsService} from '../../src/service/extensions-impl';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
@@ -223,13 +224,13 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .returns(Promise.resolve())
       .once();
 
-    let readyResolver = null;
-    const readyPromise = new Promise((resolve) => {
-      readyResolver = resolve;
+    let renderCompleteResolver = null;
+    const renderCompletePromise = new Promise((resolve) => {
+      renderCompleteResolver = resolve;
     });
     env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
-      .callsFake(() => readyPromise);
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderComplete')
+      .callsFake(() => renderCompletePromise);
 
     const embedPromise = installFriendlyIframeEmbed(
       iframe,
@@ -247,8 +248,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
         expect(ampdoc.setReady).to.not.be.called;
-        readyResolver();
-        return readyPromise;
+        renderCompleteResolver();
+        return renderCompletePromise;
       })
       .then(() => {
         expect(ampdoc.setReady).to.be.calledOnce;
@@ -310,13 +311,13 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .returns(Promise.resolve())
       .once();
 
-    let readyResolver = null;
-    const readyPromise = new Promise((resolve) => {
-      readyResolver = resolve;
+    let renderCompleteResolver = null;
+    const renderCompletePromise = new Promise((resolve) => {
+      renderCompleteResolver = resolve;
     });
     env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
-      .callsFake(() => readyPromise);
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderComplete')
+      .callsFake(() => renderCompletePromise);
 
     const embedPromise = installFriendlyIframeEmbed(
       iframe,
@@ -335,8 +336,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
         expect(ampdoc.setReady).to.not.be.called;
-        readyResolver();
-        return readyPromise;
+        renderCompleteResolver();
+        return renderCompletePromise;
       })
       .then(() => {
         expect(ampdoc.setReady).to.be.calledOnce;
@@ -368,7 +369,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     expect(customElementsDefineStub).to.be.calledWith('amp-test');
   });
 
-  it.skip('should install and dispose services', () => {
+  it('should install and dispose services', () => {
     const disposeSpy = env.sandbox.spy();
     const embedService = {
       dispose: disposeSpy,
@@ -381,11 +382,13 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         html: '<amp-test></amp-test>',
       },
       (embedWin) => {
-        installServiceInEmbedScope(embedWin, 'c', embedService);
+        registerServiceBuilderInEmbedWin(embedWin, 'c', function () {
+          return embedService;
+        });
       }
     );
     return embedPromise.then((embed) => {
-      expect(embed.win.__AMP_SERVICES['c'].obj).to.equal(embedService);
+      expect(getServiceInEmbedWin(embed.win, 'c')).to.equal(embedService);
       expect(disposeSpy).to.not.be.called;
       embed.destroy();
       expect(disposeSpy).to.be.calledOnce;
@@ -422,7 +425,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .once();
 
     env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderStarted')
       .returns(Promise.resolve());
 
     const embed = await installFriendlyIframeEmbed(
@@ -445,6 +448,39 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     expect(ampdoc.overrideVisibilityState).to.be.calledTwice.calledWith(
       'visible'
     );
+  });
+
+  it('should signal fie doc ready during install when not streaming', async () => {
+    const setReadySpy = env.sandbox.spy(AmpDocFie.prototype, 'setReady');
+    await installFriendlyIframeEmbed(
+      iframe,
+      document.body,
+      {
+        url: 'https://acme.test/url1',
+        html: '<amp-test></amp-test>',
+        extensionIds: ['amp-test'],
+      },
+      preinstallCallback
+    );
+    expect(setReadySpy).to.be.called;
+  });
+
+  it('should wait complete streaming before signaling fie doc ready', async () => {
+    const setReadySpy = env.sandbox.spy(AmpDocFie.prototype, 'setReady');
+    const fie = await installFriendlyIframeEmbed(
+      iframe,
+      document.body,
+      {
+        url: 'https://acme.test/url1',
+        html: '<amp-test></amp-test>',
+        extensionIds: ['amp-test'],
+        skipHtmlMerge: true,
+      },
+      preinstallCallback
+    );
+    expect(setReadySpy).not.to.be.called;
+    await fie.renderCompleted();
+    expect(setReadySpy).to.be.called;
   });
 
   it('should dispose ampdoc', () => {
@@ -492,7 +528,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .once();
 
     env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderStarted')
       .returns(Promise.resolve());
 
     const embedPromise = installFriendlyIframeEmbed(

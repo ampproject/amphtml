@@ -28,7 +28,6 @@ const {createKarmaServer, getAdTypes} = require('./helpers');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isCiBuild} = require('../../common/ci');
-const {isGithubActionsBuild} = require('../../common/github-actions');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
@@ -128,7 +127,7 @@ function getFiles(testType) {
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
-      if (isGithubActionsBuild()) {
+      if (argv.firefox || argv.safari || argv.edge) {
         return files.concat(testConfig.unitTestCrossBrowserPaths);
       }
       if (argv.local_changes) {

@@ -37,7 +37,7 @@ For semantics of configuration, please see Relap's documentation. Currently supp
 
 Supported parameters:
 
-- `data-token`
-- `data-url`
-- `data-anchorid`
-- `data-version`
+-   `data-token`
+-   `data-url`
+-   `data-anchorid`
+-   `data-version`

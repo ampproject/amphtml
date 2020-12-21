@@ -37,12 +37,12 @@ For details on the configuration semantics, please see [AdButler's documentation
 
 ### Required parameters
 
-- `width`
-- `height`
-- `data-account`
-- `data-zone`
+-   `width`
+-   `height`
+-   `data-account`
+-   `data-zone`
 
 ### Optional parameters
 
-- `data-place`
-- `data-keyword`
+-   `data-place`
+-   `data-keyword`

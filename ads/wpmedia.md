@@ -44,13 +44,13 @@ limitations under the License.
 
 ### Required parameter
 
-- `data-slot`
-- `data-bunch`
+-   `data-slot`
+-   `data-bunch`
 
 ### Optional parameters
 
-- `data-slots`
-- `data-sn`
+-   `data-slots`
+-   `data-sn`
 
 ## Configuration
 

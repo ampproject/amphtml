@@ -41,7 +41,7 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'amp-stream-gallery-bento', true, true);
+      toggleExperiment(win, 'bento-stream-gallery', true, true);
       element = createElementWithAttributes(
         win.document,
         'amp-stream-gallery',
@@ -61,7 +61,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-stream-gallery-bento', false, true);
+      toggleExperiment(win, 'bento-stream-gallery', false, true);
     });
 
     function newSlide(id) {

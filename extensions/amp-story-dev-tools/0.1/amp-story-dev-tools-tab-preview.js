@@ -440,8 +440,6 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       width: device.width + 'px',
       height: device.height + 'px',
     });
-    const playerImpl = new AmpStoryPlayer(this.win, devicePlayer);
-    playerImpl.load();
     setStyles(
       deviceLayout.querySelector('.i-amphtml-story-dev-tools-device-screen'),
       {
@@ -450,7 +448,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
           : 'fit-content',
       }
     );
-    device.player = devicePlayer;
+    device.player = new AmpStoryPlayer(this.win, devicePlayer);
     return deviceLayout;
   }
 
@@ -500,6 +498,17 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       this.element
         .querySelector('.i-amphtml-story-dev-tools-device-chips')
         .appendChild(deviceSpecs.chip);
+    }).then(() => {
+      deviceSpecs.player
+        .getElement()
+        .addEventListener('storyNavigation', (event) => {
+          this.devices_.forEach((d) => {
+            if (d != deviceSpecs) {
+              d.player.show(null, event.detail.pageId);
+            }
+          });
+        });
+      deviceSpecs.player.load();
     });
     this.devices_.push(deviceSpecs);
     this.updateDevicesInHash_();

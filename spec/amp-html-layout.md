@@ -63,8 +63,8 @@ Depending on the value of the `layout` attribute, AMP component elements must ha
 
 In a few cases, if `width` or `height` are not specified, the AMP runtime can default these values as follows:
 
-- `amp-pixel`: Both `width` and `height` are defaulted to 0.
-- `amp-audio`: The default `width` and `height` are inferred from browser.
+-   `amp-pixel`: Both `width` and `height` are defaulted to 0.
+-   `amp-audio`: The default `width` and `height` are inferred from browser.
 
 ### `layout`
 

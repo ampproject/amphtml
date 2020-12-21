@@ -38,11 +38,11 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-tag`
-- `data-key`
+-   `data-tag`
+-   `data-key`
 
 ### Optional parameters
 
-- `data-plc`
-- `data-opts`
-- `data-params`
+-   `data-plc`
+-   `data-opts`
+-   `data-params`

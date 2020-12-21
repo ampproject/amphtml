@@ -96,7 +96,7 @@ if (NO_SIGNING_RTV) {
       const fie = doc.body.querySelector('iframe[srcdoc]');
       expect(fie.getAttribute('sandbox')).to.equal(
         'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
-          'allow-same-origin allow-top-navigation'
+          'allow-same-origin allow-scripts allow-top-navigation'
       );
       const cspMeta = fie.contentDocument.querySelector(
         'meta[http-equiv=Content-Security-Policy]'
@@ -134,18 +134,6 @@ if (NO_SIGNING_RTV) {
       expect(fie.getAttribute('sandbox')).to.equal(
         'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
           'allow-same-origin allow-top-navigation'
-      );
-    });
-
-    it('should add allow-scripts to sandbox in Safari', async () => {
-      env.sandbox.stub(Services.platformFor(env.win), 'isSafari').returns(true);
-      await a4a.buildCallback();
-      a4a.onLayoutMeasure();
-      await a4a.layoutCallback();
-      const fie = doc.body.querySelector('iframe[srcdoc]');
-      expect(fie.getAttribute('sandbox')).to.equal(
-        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
-          'allow-same-origin allow-top-navigation allow-scripts'
       );
     });
 

@@ -38,6 +38,6 @@ For details on the configuration semantics, please contact the ad network or ref
 
 Supported parameters:
 
-- `data-publisher-name`
-- `data-script-name`
-- `data-pos-id`
+-   `data-publisher-name`
+-   `data-script-name`
+-   `data-pos-id`

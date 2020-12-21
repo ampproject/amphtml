@@ -40,11 +40,11 @@ These configurations are relevant for both `<amp-ad />` and `<amp-embed />`.
 
 ### Required parameters
 
-- `data-siteId`: Site ID provided by Whopa InFeed Team.
+-   `data-siteId`: Site ID provided by Whopa InFeed Team.
 
 ### Optional parameters
 
-- `data-template`: The Template of Widget.
+-   `data-template`: The Template of Widget.
 
 **Resolution**
 
