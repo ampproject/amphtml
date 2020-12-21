@@ -1288,8 +1288,11 @@ export class AutoFullscreenManager {
    * @param {!../video-interface.VideoOrBaseElementDef} a
    * @param {!../video-interface.VideoOrBaseElementDef} b
    * @return {number}
+   *
    */
   compareEntries_(a, b) {
+    // QQQQ: Is it okay that this uses outdated intersectionRatio + bCR?
+    // How important is it to get this exactly right? What does it even do.
     const {
       intersectionRatio: ratioA,
       boundingClientRect: rectA,

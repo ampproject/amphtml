@@ -383,7 +383,6 @@ class AmpVideoIframe extends AMP.BaseElement {
         })
       );
       intersectionObserver.disconnect();
-      intersectionObserver = null;
     });
     intersectionObserver.observe(this.element);
   }
