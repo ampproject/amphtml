@@ -594,7 +594,7 @@ export class VideoDocking {
     }
 
     const {element} = video;
-    // TODO: after dima merge migrate to the new blockingGetPageLayout.
+    // TODO: after dima merge migrate to the new async getPageLayout API.
     const pageLayoutBox = element.getPageLayoutBox();
     if (!isSizedRect(pageLayoutBox)) {
       return null;

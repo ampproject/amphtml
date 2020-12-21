@@ -131,6 +131,7 @@ export class LegacyAdIntersectionObserverHost {
       this.fireInOb_ = new IntersectionObserver((entries) => {
         const lastEntry = entries[entries.length - 1];
         this.sendElementIntersection_(lastEntry);
+        this.fireInOb_.unobserve(lastEntry.target); // A fire event should only send a single InOb event.
       });
 
       this.intersectionObserver_.observe(this.baseElement_.element);
@@ -140,7 +141,7 @@ export class LegacyAdIntersectionObserverHost {
 
   /**
    * Triggered when the ad either enters or exits the visible viewport.
-   * @param {!IntersectionObserverEntry} entry entry handed over by the IntersectionObserver.
+   * @param {!IntersectionObserverEntry} entry handed over by the IntersectionObserver.
    */
   onViewportCallback_(entry) {
     const inViewport = entry.intersectionRatio != 0;
