@@ -145,6 +145,9 @@ export class LegacyAdIntersectionObserverHost {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+    /** @private {?IntersectionObserver} */
+    this.fireInOb_ = null;
+
     /** @private {boolean} */
     this.inViewport_ = false;
 
@@ -181,7 +184,11 @@ export class LegacyAdIntersectionObserverHost {
    * Fires element intersection
    */
   fire() {
-    this.sendElementIntersection_();
+    if (!this.fireInOb_) {
+      return;
+    }
+    this.fireInOb_.unobserve(this.baseElement_.element);
+    this.fireInOb_.observe(this.baseElement_.element);
   }
 
   /**
@@ -208,8 +215,13 @@ export class LegacyAdIntersectionObserverHost {
     if (!this.intersectionObserver_) {
       this.intersectionObserver_ = new IntersectionObserver((entries) => {
         const lastEntry = entries[entries.length - 1];
-        this.onViewportCallback_(lastEntry.intersectionRatio != 0);
+        this.onViewportCallback_(lastEntry);
       });
+      this.fireInOb_ = new IntersectionObserver((entries) => {
+        const lastEntry = entries[entries.length - 1];
+        this.sendElementIntersection_(lastEntry);
+      });
+
       this.intersectionObserver_.observe(this.baseElement_.element);
     }
     this.fire();
@@ -217,15 +229,18 @@ export class LegacyAdIntersectionObserverHost {
 
   /**
    * Triggered when the ad either enters or exits the visible viewport.
-   * @param {boolean} inViewport true if the element is in viewport.
+   * @param {!IntersectionObserverEntry} entry entry handed over by the IntersectionObserver.
    */
-  onViewportCallback_(inViewport) {
+  onViewportCallback_(entry) {
+    const inViewport = entry.intersectionRatio != 0;
     if (this.inViewport_ == inViewport) {
       return;
     }
     this.inViewport_ = inViewport;
+
     // Lets the ad know that it became visible or no longer is.
-    this.fire();
+    this.sendElementIntersection_(entry);
+
     // And update the ad about its position in the viewport while
     // it is visible.
     if (inViewport) {
@@ -247,13 +262,11 @@ export class LegacyAdIntersectionObserverHost {
    * Sends 'intersection' message to ad/iframe with intersection change records
    * if this has been activated and we measured the layout box of the iframe
    * at least once.
+   * @param {!IntersectionObserverEntry} entry - handed over by the IntersectionObserver.
    * @private
    */
-  sendElementIntersection_() {
-    if (!this.intersectionObserver_) {
-      return;
-    }
-    const change = this.baseElement_.element.getIntersectionChangeEntry();
+  sendElementIntersection_(entry) {
+    const change = entry;
     if (
       this.pendingChanges_.length > 0 &&
       this.pendingChanges_[this.pendingChanges_.length - 1].time == change.time
@@ -294,6 +307,10 @@ export class LegacyAdIntersectionObserverHost {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.disconnect();
       this.intersectionObserver_ = null;
+    }
+    if (this.fireInOb_) {
+      this.fireInOb_.disconnect();
+      this.fireInOb_ = null;
     }
     this.timer_.cancel(this.flushTimeout_);
     this.unlistenOnOutViewport_();
