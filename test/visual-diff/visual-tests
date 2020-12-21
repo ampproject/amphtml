@@ -684,6 +684,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
       ],
+      "loading_complete_delay_ms": 500
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&tab=page-experience",
@@ -692,6 +693,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
       ],
+      "loading_complete_delay_ms": 500
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&tab=logs",
@@ -700,6 +702,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
       ],
+      "loading_complete_delay_ms": 500
     },
     {
       "flaky": true,
