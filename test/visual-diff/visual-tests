@@ -702,7 +702,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
       ],
-      "loading_complete_delay_ms": 500
+      "loading_complete_delay_ms": 1000
     },
     {
       "flaky": true,
