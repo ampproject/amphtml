@@ -217,6 +217,29 @@ describes.realWin(
         consentUI.hide();
         expect(consentUI.scrollEnabled_).to.be.true;
       });
+
+      it('should set the correct transform on parent', async () => {
+        const config = dict({
+          'promptUISrc': 'https://promptUISrc',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+
+        consentUI.show(false);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+          },
+        });
+        await macroTask();
+        expect(
+          consentUI.parent_.style.getPropertyValue(
+            '--i-amphtml-consent-iframe-tranform'
+          )
+        ).to.equal('translate3d(0px, calc(100% - 80vh), 0px)');
+      });
     });
 
     describe('placeholder', () => {
