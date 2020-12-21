@@ -76,6 +76,7 @@ export function Thumbnails({
       controls={pointerFine ? 'always' : 'never'}
       loop={loop}
       ref={ref}
+      outsetArrows={true}
       _thumbnails={true}
       {...rest}
     >
