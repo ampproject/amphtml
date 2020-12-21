@@ -384,17 +384,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if a child of the first page.
-   * @return {boolean}
-   */
-  isFirstPage() {
-    if (this.isFirstPage_ === null) {
-      this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
-    }
-    return this.isFirstPage_;
-  }
-
-  /**
    * Returns true if the page should be prerendered (for being an active page or first page)
    * @return {boolean}
    */
@@ -407,7 +396,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (hashId) {
       selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
     }
-    this.isActivePage_ = matches(this.element, selector);
+    this.isActivePage_ =
+      toArray(this.win.document.querySelectorAll(selector)).pop() ===
+      this.element;
     return this.isActivePage_;
   }
 
@@ -594,7 +585,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
     if (
-      !this.isFirstPage() ||
+      !this.isPrerenderActivePage() ||
       (this.layoutBox_ &&
         this.layoutBox_.width === layoutBox.width &&
         this.layoutBox_.height === layoutBox.height)

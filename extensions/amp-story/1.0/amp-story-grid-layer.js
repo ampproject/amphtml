@@ -32,6 +32,7 @@ import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {parseQueryString} from '../../../src/url';
+import {toArray} from '../../../src/types';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -93,7 +94,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Returns true if the page is in the hashString
+   * Returns true if the page should be prerendered (for being an active page or first page)
    * @return {boolean}
    */
   isPrerenderActivePage() {
@@ -101,13 +102,13 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       return this.isActivePage_;
     }
     const hashId = parseQueryString(this.win.location.href)['page'];
-    let selector = 'amp-story-page:first-of-type amp-story-grid-layer';
+    let selector = 'amp-story-page:first-of-type';
     if (hashId) {
-      selector += `, amp-story-page#${escapeCssSelectorIdent(
-        hashId
-      )} amp-story-grid-layer`;
+      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
     }
-    this.isActivePage_ = matches(this.element, selector);
+    this.isActivePage_ =
+      toArray(this.win.document.querySelectorAll(selector)).pop() ===
+      this.element.parentElement;
     return this.isActivePage_;
   }
 
