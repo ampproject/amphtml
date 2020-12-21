@@ -56,7 +56,6 @@ import {
   addAttributesToElement,
   closestAncestorElementBySelector,
   iterateCursor,
-  matches,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
@@ -244,9 +243,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       (isActive) => this.toggleLoadingSpinner_(!!isActive),
       100
     );
-
-    /** @private {?boolean}  */
-    this.isFirstPage_ = null;
 
     /** @private {?boolean}  */
     this.isActivePage_ = null;

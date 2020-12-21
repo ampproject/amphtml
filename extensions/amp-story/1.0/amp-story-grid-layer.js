@@ -29,8 +29,8 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
+import {closest, scopedQuerySelectorAll} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {parseQueryString} from '../../../src/url';
 import {toArray} from '../../../src/types';
 
@@ -106,9 +106,13 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     if (hashId) {
       selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
     }
+    const parentPage = closest(
+      this.element,
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
+    );
     this.isActivePage_ =
       toArray(this.win.document.querySelectorAll(selector)).pop() ===
-      this.element.parentElement;
+      parentPage;
     return this.isActivePage_;
   }
 
