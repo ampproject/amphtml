@@ -50,38 +50,47 @@ export const Default = () => {
   const outsetArrows = boolean('outset arrows', true);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
-    <amp-stream-gallery
-      width="735"
-      height="225"
-      layout="responsive"
-      extra-space={extraSpace}
-      inset-arrow-visibility={insetArrowVisibility}
-      loop={loop}
-      min-item-width={minItemWidth}
-      max-item-width={maxItemWidth}
-      min-visible-count={minVisibleCount}
-      max-visible-count={maxVisibleCount}
-      outset-arrows={outsetArrows}
-      peek={peek}
-      slide-align={slideAlign}
-      snap={snap}
-    >
-      {Array.from({length: slideCount}, (x, i) => {
-        const v = colorIncrement * (i + 1);
-        return (
-          <amp-layout width="245" height="225" layout="flex-item">
-            <svg viewBox="0 0 440 225">
-              <rect
-                style={{fill: `rgb(${v}, 100, 100)`}}
-                width="440"
-                height="225"
-              />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-          </amp-layout>
-        );
-      })}
-    </amp-stream-gallery>
+    <>
+      <amp-stream-gallery
+        id="carousel"
+        width="735"
+        height="225"
+        layout="responsive"
+        extra-space={extraSpace}
+        inset-arrow-visibility={insetArrowVisibility}
+        loop={loop}
+        min-item-width={minItemWidth}
+        max-item-width={maxItemWidth}
+        min-visible-count={minVisibleCount}
+        max-visible-count={maxVisibleCount}
+        outset-arrows={outsetArrows}
+        peek={peek}
+        slide-align={slideAlign}
+        snap={snap}
+      >
+        {Array.from({length: slideCount}, (x, i) => {
+          const v = colorIncrement * (i + 1);
+          return (
+            <amp-layout width="245" height="225" layout="flex-item">
+              <svg viewBox="0 0 440 225">
+                <rect
+                  style={{fill: `rgb(${v}, 100, 100)`}}
+                  width="440"
+                  height="225"
+                />
+                Sorry, your browser does not support inline SVG.
+              </svg>
+            </amp-layout>
+          );
+        })}
+      </amp-stream-gallery>
+
+      <div class="buttons" style={{marginTop: 8}}>
+        <button on="tap:carousel.goToSlide(index=3)">goToSlide(index=3)</button>
+        <button on="tap:carousel.next">Next</button>
+        <button on="tap:carousel.prev">Prev</button>
+      </div>
+    </>
   );
 };
 
