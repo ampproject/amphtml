@@ -23,10 +23,7 @@ import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service';
 
 /**
  * Populates the quiz with some number of prompts and some number of options.
