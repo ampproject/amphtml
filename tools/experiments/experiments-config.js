@@ -251,9 +251,4 @@ export const EXPERIMENTS = [
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
   },
-  {
-    id: 'amp-consent-transform-exp',
-    name: 'To test that transform does not get removed by viewer',
-    spec: 'https://github.com/ampproject/amphtml/issues/31580',
-  },
 ];

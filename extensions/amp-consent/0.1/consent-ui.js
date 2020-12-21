@@ -32,7 +32,6 @@ import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
@@ -181,11 +180,6 @@ export class ConsentUI {
 
     /** @private {?Promise<string>} */
     this.promptUISrcPromise_ = null;
-
-    this.isTransformExperimentOn_ = isExperimentOn(
-      this.win_,
-      'amp-consent-transform-exp'
-    );
 
     this.init_(config, opt_postPromptUI);
   }
@@ -713,17 +707,10 @@ export class ConsentUI {
         height: this.initialHeight_,
       });
     }
-    if (this.isTransformExperimentOn_) {
-      setImportantStyles(this.parent_, {
-        '--i-amphtml-consent-iframe-tranform': `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
-        '--i-amphtml-modal-height': `${this.initialHeight_}`,
-      });
-    } else {
-      setImportantStyles(this.parent_, {
-        transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
-        '--i-amphtml-modal-height': `${this.initialHeight_}`,
-      });
-    }
+    setImportantStyles(this.parent_, {
+      '--i-amphtml-consent-iframe-tranform': `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
+      '--i-amphtml-modal-height': `${this.initialHeight_}`,
+    });
 
     // Border is default with modal enabled and option with non-modal
     if (this.borderEnabled_ || this.modalEnabled_) {
