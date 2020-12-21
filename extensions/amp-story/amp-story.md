@@ -1,11 +1,9 @@
---optional--
+---
 $category@: presentation
 formats:
-
--   stories
-    teaser:
-    text: A rich, visual storytelling format.
-
+  - stories
+teaser:
+  text: A rich, visual storytelling format.
 ---
 
 <!--
