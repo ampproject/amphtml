@@ -1,0 +1,45 @@
+{
+  "2": {"string": "Koppintson a Tovább elemre"},
+  "3": {"string": "Koppintson a Vissza elemre"},
+  "4": {"string": "Nem sikerült a linket a vágólapra másolni :("},
+  "5": {"string": "Link vágólapra másolva"},
+  "6": {"string": "E-mail"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Link mutatása"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "A sztori megtekintéséhez növelje az ablak magasságát és szélességét is"
+  },
+  "19": {
+    "string": "A tartalom megtekintéséhez engedélyeznie kell az AMP-sztori kísérletet."
+  },
+  "20": {
+    "string": "A legjobb élmény érdekében álló tájolással tekintse meg az oldalt"
+  },
+  "21": {
+    "string": "Sajnos úgy tűnik, a böngészője nem támogatja ezt a funkciót"
+  },
+  "22": {"string": "Elfogadás"},
+  "23": {"string": "Elutasítás"},
+  "25": {"string": "Megtekintés az eredeti domainen:"},
+  "26": {"string": "További információ az AMP-találatokról"},
+  "27": {"string": "Folytatás ettől függetlenül"},
+  "28": {"string": "Adatvédelmi beállítások módosítása"},
+  "29": {"string": "Adatvédelmi beállítások"},
+  "30": {"string": "További információ"},
+  "31": {"string": "Hang kikapcsolva"},
+  "32": {"string": "Hang bekapcsolva"},
+  "33": {"string": "Ennek az oldalnak nincs hangja"},
+  "34": {"string": "Videó lejátszása"},
+  "35": {"string": "Csúsztatás felfelé"},
+  "36": {"string": "Twitter-üzenet kibontása"},
+  "37": {"string": "A sztori megtekintéséhez növelje az ablak magasságát"},
+  "38": {"string": "A sztori megtekintéséhez növelje az ablak szélességét"},
+  "63": {"string": "Line"}
+}

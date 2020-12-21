@@ -1,0 +1,45 @@
+{
+  "2": {"string": "Presiona Siguiente"},
+  "3": {"string": "Presiona Atrás"},
+  "4": {"string": "No se pudo copiar el vínculo en el portapapeles :("},
+  "5": {"string": "Se copió el vínculo."},
+  "6": {"string": "Correo electrónico"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Obtener vínculo"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Expande el ancho y la altura de la ventana para ver esta experiencia"
+  },
+  "19": {
+    "string": "Debes habilitar el experimento de historia en formato AMP para ver este contenido."
+  },
+  "20": {
+    "string": "La página está optimizada para verse en orientación vertical."
+  },
+  "21": {
+    "string": "Parece que el navegador no es compatible con esta experiencia"
+  },
+  "22": {"string": "Aceptar"},
+  "23": {"string": "Rechazar"},
+  "25": {"string": "Ver en el dominio original:"},
+  "26": {"string": "Más información sobre los resultados de AMP"},
+  "27": {"string": "Continuar de todos modos"},
+  "28": {"string": "Cambiar la configuración de privacidad de los datos"},
+  "29": {"string": "Configuración de privacidad"},
+  "30": {"string": "Más para leer"},
+  "31": {"string": "Sonido desactivado"},
+  "32": {"string": "Sonido activado"},
+  "33": {"string": "Esta página no tiene sonido"},
+  "34": {"string": "Reproducir video"},
+  "35": {"string": "Deslizar el dedo hacia arriba"},
+  "36": {"string": "Expandir tweet"},
+  "37": {"string": "Expande la altura de la ventana para ver esta experiencia"},
+  "38": {"string": "Expande el ancho de la ventana para ver esta experiencia"},
+  "63": {"string": "Line"}
+}

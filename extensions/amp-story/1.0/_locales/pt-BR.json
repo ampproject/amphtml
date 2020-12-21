@@ -1,0 +1,45 @@
+{
+  "2": {"string": "Toque em \"Próxima\""},
+  "3": {"string": "Toque em \"Voltar\""},
+  "4": {
+    "string": "Não foi possível copiar o link para a área de transferência :("
+  },
+  "5": {"string": "Link copiado"},
+  "6": {"string": "E-mail"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Copiar link"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Aumente a altura e largura da janela para ver esta experiência"
+  },
+  "19": {
+    "string": "Você precisa ativar o experimento amp-story para ver este conteúdo."
+  },
+  "20": {"string": "Melhor visualização da página no modo retrato"},
+  "21": {
+    "string": "Parece que o navegador não é compatível com esta experiência"
+  },
+  "22": {"string": "Aceitar"},
+  "23": {"string": "Recusar"},
+  "25": {"string": "Ver no domínio original:"},
+  "26": {"string": "Mais sobre resultados de AMP"},
+  "27": {"string": "Continuar mesmo assim"},
+  "28": {"string": "Alterar as configurações de privacidade de dados"},
+  "29": {"string": "Configurações de privacidade"},
+  "30": {"string": "Leituras sugeridas"},
+  "31": {"string": "Som desativado"},
+  "32": {"string": "Som ativado"},
+  "33": {"string": "Esta página não tem som"},
+  "34": {"string": "Assistir vídeo"},
+  "35": {"string": "Deslizar para cima"},
+  "36": {"string": "Expandir tweet"},
+  "37": {"string": "Aumente a altura da janela para ver esta experiência"},
+  "38": {"string": "Aumente a largura da janela para ver esta experiência"},
+  "63": {"string": "Line"}
+}

@@ -1,0 +1,45 @@
+{
+  "2": {"string": "Toca Següent"},
+  "3": {"string": "Toca Enrere"},
+  "4": {"string": "No s'ha pogut copiar l'enllaç al porta-retalls :("},
+  "5": {"string": "S'ha copiat l'enllaç"},
+  "6": {"string": "Correu electrònic"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Obtén l'enllaç"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Amplia l'alçada i l'amplada de la finestra per veure aquesta experiència"
+  },
+  "19": {
+    "string": "Has d'activar l'experiment d'història AMP per veure aquest contingut."
+  },
+  "20": {"string": "La pàgina es veu millor en mode vertical"},
+  "21": {"string": "Sembla que el teu navegador no admet aquesta experiència"},
+  "22": {"string": "Accepta"},
+  "23": {"string": "Rebutja"},
+  "25": {"string": "Mostra al domini original:"},
+  "26": {"string": "Més informació sobre els resultats AMP"},
+  "27": {"string": "Continua igualment"},
+  "28": {"string": "Canvia la configuració de privadesa de les dades"},
+  "29": {"string": "Configuració de privadesa"},
+  "30": {"string": "Articles relacionats"},
+  "31": {"string": "So desactivat"},
+  "32": {"string": "So activat"},
+  "33": {"string": "Aquesta pàgina no té so"},
+  "34": {"string": "Reprodueix el vídeo"},
+  "35": {"string": "Llisca cap amunt"},
+  "36": {"string": "Desplega el tuit"},
+  "37": {
+    "string": "Amplia l'alçada de la finestra per veure aquesta experiència"
+  },
+  "38": {
+    "string": "Amplia l'amplada de la finestra per veure aquesta experiència"
+  },
+  "63": {"string": "Line"}
+}

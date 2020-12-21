@@ -1,0 +1,47 @@
+{
+  "2": {"string": "Sonraki'ye dokunun"},
+  "3": {"string": "Geri'ye dokunun"},
+  "4": {"string": "Bağlantı panoya kopyalanamadı :("},
+  "5": {"string": "Bağlantı kopyalandı!"},
+  "6": {"string": "E-posta"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Bağlantıyı Al"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Bu deneyimi görebilmek için pencerenizin hem yüksekliğini hem de genişliğini artırın"
+  },
+  "19": {
+    "string": "Bu içeriği görebilmek için amp hikayesi deneyimini etkinleştirmeniz gerekir."
+  },
+  "20": {"string": "Sayfa en iyi dikey modda görüntülenir"},
+  "21": {
+    "string": "Maalesef tarayıcınız bu deneyimi desteklemiyor gibi görünüyor"
+  },
+  "22": {"string": "Kabul et"},
+  "23": {"string": "Reddet"},
+  "25": {"string": "Orijinal alanda görüntüle:"},
+  "26": {"string": "AMP sonuçları hakkında daha fazla bilgi"},
+  "27": {"string": "Yine de Devam Et"},
+  "28": {"string": "Veri gizlilik ayarlarını değiştir"},
+  "29": {"string": "Gizlilik ayarları"},
+  "30": {"string": "Okuyabileceğiniz diğer makaleler"},
+  "31": {"string": "Ses kapalı"},
+  "32": {"string": "Ses açık"},
+  "33": {"string": "Bu sayfada ses yok"},
+  "34": {"string": "Videoyu oynat"},
+  "35": {"string": "Yukarı kaydır"},
+  "36": {"string": "Tweet'i genişlet"},
+  "37": {
+    "string": "Bu deneyimi görebilmek için pencerenizin yüksekliğini artırın"
+  },
+  "38": {
+    "string": "Bu deneyimi görebilmek için pencerenizin genişliğini artırın"
+  },
+  "63": {"string": "Line"}
+}
