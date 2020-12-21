@@ -249,7 +249,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.isFirstPage_ = null;
 
     /** @private {?boolean}  */
-    this.isLoadedPage_ = null;
+    this.isActivePage_ = null;
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
@@ -395,18 +395,20 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if the page is in the hashString
+   * Returns true if the page should be prerendered for being an active page
    * @return {boolean}
    */
   isPrerenderActivePage() {
-    if (this.isLoadedPage_ === null) {
+    if (this.isActivePage_ === null) {
       const hashId = parseQueryString(this.win.location.href)['page'];
-      const identSelector = `amp-story-page#${escapeCssSelectorIdent(hashId)}`;
-      console.log(parseQueryString(this.win.location.href));
-      this.isLoadedPage_ = hashId && matches(this.element, identSelector);
+      const pageFromHashSelector = `amp-story-page#${escapeCssSelectorIdent(
+        hashId
+      )}`;
+      this.isActivePage_ = hashId
+        ? matches(this.element, pageFromHashSelector)
+        : this.isFirstPage();
     }
-    console.log(this.isLoadedPage_);
-    return this.isLoadedPage_;
+    return this.isActivePage_;
   }
 
   /**
@@ -843,7 +845,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.isFirstPage() || this.isPrerenderActivePage();
+    return this.isPrerenderActivePage();
   }
 
   /**

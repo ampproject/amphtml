@@ -89,7 +89,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.isFirstPage_ = null;
 
     /** @private {?boolean} */
-    this.isLoadedPage_ = null;
+    this.isActivePage_ = null;
 
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
@@ -114,14 +114,16 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    * @return {boolean}
    */
   isPrerenderActivePage() {
-    if (this.isLoadedPage_ === null) {
+    if (this.isActivePage_ === null) {
       const hashId = parseQueryString(this.win.location.href)['page'];
       const identSelector = `amp-story-page#${escapeCssSelectorIdent(
         hashId
       )} amp-story-grid-layer`;
-      this.isLoadedPage_ = hashId && matches(this.element, identSelector);
+      this.isActivePage_ = hashId
+        ? matches(this.element, identSelector)
+        : this.isFirstPage();
     }
-    return this.isLoadedPage_;
+    return this.isActivePage_;
   }
 
   /** @override */
@@ -135,7 +137,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
-    return this.isFirstPage() || this.isPrerenderActivePage();
+    return this.isPrerenderActivePage();
   }
 
   /** @private */
