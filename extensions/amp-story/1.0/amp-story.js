@@ -1040,9 +1040,9 @@ export class AmpStory extends AMP.BaseElement {
     // page is built. Other pages will only build if the document becomes
     // visible.
     if (!this.getAmpDoc().hasBeenVisible()) {
-      return whenUpgradedToCustomElement(firstPageEl).then(() =>
-        firstPageEl.whenBuilt()
-      );
+      return whenUpgradedToCustomElement(firstPageEl).then(() => {
+        return firstPageEl.whenBuilt();
+      });
     }
 
     // Will resolve when all pages are built.
