@@ -37,8 +37,8 @@ const OUTSET_ARROWS_WIDTH = 100;
  * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function StreamGalleryWithRef(
-  {
+function StreamGalleryWithRef(props, ref) {
+  const {
     arrowPrev: customArrowPrev,
     arrowNext: customArrowNext,
     children,
@@ -53,9 +53,7 @@ function StreamGalleryWithRef(
     peek = 0,
     slideAlign = 'start',
     ...rest
-  },
-  ref
-) {
+  } = props;
   const classes = useStyles();
   const carouselRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
