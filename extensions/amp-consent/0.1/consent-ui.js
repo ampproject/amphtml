@@ -708,9 +708,10 @@ export class ConsentUI {
       });
     }
     setImportantStyles(this.parent_, {
-      transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
+      '--i-amphtml-consent-iframe-tranform': `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
       '--i-amphtml-modal-height': `${this.initialHeight_}`,
     });
+
     // Border is default with modal enabled and option with non-modal
     if (this.borderEnabled_ || this.modalEnabled_) {
       const {classList} = this.parent_;
