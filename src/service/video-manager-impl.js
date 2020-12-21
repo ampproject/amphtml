@@ -101,6 +101,9 @@ export class VideoManager {
     /** @private @const */
     this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
+    /** @private {!Map<!Element, IntersectionObserverEntry>} */
+    this.intersectionCache_ = new Map();
+
     /**
      * @private
      * @const
@@ -191,10 +194,12 @@ export class VideoManager {
       const viewportCallback = (
         /** @type {!Array<!IntersectionObserverEntry>} */ records
       ) =>
-        records.forEach(({target, isIntersecting}) => {
+        records.forEach((entry) => {
+          const {isIntersecting, target} = entry;
           this.getEntry_(target).updateVisibility(
             /* isVisible */ isIntersecting
           );
+          this.intersectionCache_.set(target, entry);
         });
       this.viewportObserver_ = createViewportObserver(
         viewportCallback,
@@ -1222,8 +1227,7 @@ export class AutoFullscreenManager {
     const viewport = this.getViewport_();
 
     return this.onceOrientationChanges_().then(() => {
-      const {boundingClientRect} = element.getIntersectionChangeEntry();
-      const {top, bottom} = boundingClientRect;
+      const {top, bottom} = element.getBoundingClientRect();
       const vh = viewport.getSize().height;
       const fullyVisible = top >= 0 && bottom <= vh;
       if (fullyVisible) {
@@ -1270,9 +1274,8 @@ export class AutoFullscreenManager {
       .filter(this.boundIncludeOnlyPlaying_)
       .sort(this.boundCompareEntries_)[0];
 
-    if (selected) {
-      const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
-      if (intersectionRatio >= MIN_VISIBILITY_RATIO_FOR_AUTOPLAY) {
+    if (selected && this.intersectionCache_.has(selected)) {
+      if (this.intersectionCache_.get(selected).isIntersecting) {
         this.currentlyCentered_ = selected;
       }
     }
@@ -1290,11 +1293,11 @@ export class AutoFullscreenManager {
     const {
       intersectionRatio: ratioA,
       boundingClientRect: rectA,
-    } = a.element.getIntersectionChangeEntry();
+    } = this.intersectionCache_.get(a.element);
     const {
       intersectionRatio: ratioB,
       boundingClientRect: rectB,
-    } = b.element.getIntersectionChangeEntry();
+    } = this.intersectionCache_.get(b.element);
 
     // Prioritize by how visible they are, with a tolerance of 10%
     const ratioTolerance = 0.1;

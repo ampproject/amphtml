@@ -594,6 +594,7 @@ export class VideoDocking {
     }
 
     const {element} = video;
+    // TODO: after dima merge migrate to the new blockingGetPageLayout.
     const {intersectionRect} = element.getIntersectionChangeEntry();
     if (!isSizedRect(intersectionRect)) {
       return null;

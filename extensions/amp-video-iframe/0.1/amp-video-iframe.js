@@ -357,28 +357,35 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 
   /**
+   * Creates an IntersectionObserver to fire a single intersection event.
+   *
    * @param {number} messageId
    * @private
    */
   postIntersection_(messageId) {
-    const {time, intersectionRatio} = this.element.getIntersectionChangeEntry();
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      const lastEntry = entries[entries.length - 1];
+      const {time, intersectionRatio} = lastEntry;
+      // Only post ratio > 0 when in autoplay range to prevent internal autoplay
+      // implementations that differ from ours.
+      const postedRatio =
+        intersectionRatio < MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
+          ? 0
+          : intersectionRatio;
 
-    // Only post ratio > 0 when in autoplay range to prevent internal autoplay
-    // implementations that differ from ours.
-    const postedRatio =
-      intersectionRatio < MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
-        ? 0
-        : intersectionRatio;
-
-    this.postMessage_(
-      dict({
-        'id': messageId,
-        'args': {
-          'intersectionRatio': postedRatio,
-          'time': time,
-        },
-      })
-    );
+      this.postMessage_(
+        dict({
+          'id': messageId,
+          'args': {
+            'intersectionRatio': postedRatio,
+            'time': time,
+          },
+        })
+      );
+      intersectionObserver.disconnect();
+      intersectionObserver = null;
+    });
+    intersectionObserver.observe(this.element);
   }
 
   /**
