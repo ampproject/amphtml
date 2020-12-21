@@ -395,19 +395,19 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if the page should be prerendered for being an active page
+   * Returns true if the page should be prerendered (for being an active page or first page)
    * @return {boolean}
    */
   isPrerenderActivePage() {
-    if (this.isActivePage_ === null) {
-      const hashId = parseQueryString(this.win.location.href)['page'];
-      const pageFromHashSelector = `amp-story-page#${escapeCssSelectorIdent(
-        hashId
-      )}`;
-      this.isActivePage_ = hashId
-        ? matches(this.element, pageFromHashSelector)
-        : this.isFirstPage();
+    if (this.isActivePage_ != null) {
+      return this.isActivePage_;
     }
+    const hashId = parseQueryString(this.win.location.href)['page'];
+    let selector = 'amp-story-page:first-of-type';
+    if (hashId) {
+      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
+    }
+    this.isActivePage_ = matches(this.element, selector);
     return this.isActivePage_;
   }
 

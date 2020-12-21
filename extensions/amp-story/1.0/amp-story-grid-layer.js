@@ -86,9 +86,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     super(element);
 
     /** @private {?boolean} */
-    this.isFirstPage_ = null;
-
-    /** @private {?boolean} */
     this.isActivePage_ = null;
 
     /** @private {?{horiz: number, vert: number}} */
@@ -96,33 +93,21 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Returns true if a child of the first page.
-   * @return {boolean}
-   */
-  isFirstPage() {
-    if (this.isFirstPage_ === null) {
-      this.isFirstPage_ = matches(
-        this.element,
-        'amp-story-page:first-of-type amp-story-grid-layer'
-      );
-    }
-    return this.isFirstPage_;
-  }
-
-  /**
    * Returns true if the page is in the hashString
    * @return {boolean}
    */
   isPrerenderActivePage() {
-    if (this.isActivePage_ === null) {
-      const hashId = parseQueryString(this.win.location.href)['page'];
-      const identSelector = `amp-story-page#${escapeCssSelectorIdent(
+    if (this.isActivePage_ != null) {
+      return this.isActivePage_;
+    }
+    const hashId = parseQueryString(this.win.location.href)['page'];
+    let selector = 'amp-story-page:first-of-type amp-story-grid-layer';
+    if (hashId) {
+      selector += `, amp-story-page#${escapeCssSelectorIdent(
         hashId
       )} amp-story-grid-layer`;
-      this.isActivePage_ = hashId
-        ? matches(this.element, identSelector)
-        : this.isFirstPage();
     }
+    this.isActivePage_ = matches(this.element, selector);
     return this.isActivePage_;
   }
 

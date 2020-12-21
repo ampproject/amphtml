@@ -410,15 +410,10 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
-    const firstPage = this.element.querySelector(`amp-story-page`);
-    const activePage = firstPage
-      ? this.element.querySelector(
-          `amp-story-page#${escapeCssSelectorIdent(
-            this.getInitialPageId_(firstPage)
-          )}`
-        )
-      : null;
-    activePage && activePage.setAttribute('active', '');
+    const page = this.element.querySelector(
+      `amp-story-page#${escapeCssSelectorIdent(this.getInitialPageId_())}`
+    );
+    page && page.setAttribute('active', '');
 
     this.initializeStyles_();
     this.initializeListeners_();
@@ -963,11 +958,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
-    const firstPageEl = user().assertElement(
-      this.element.querySelector('amp-story-page'),
-      'Story must have at least one page.'
-    );
-    const initialPageId = this.getInitialPageId_(firstPageEl);
+    const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
     this.initializeSidebar_();
@@ -1039,12 +1030,15 @@ export class AmpStory extends AMP.BaseElement {
 
     this.maybeLoadStoryEducation_();
 
-    // Story is being prerendered: resolve the layoutCallback when the first
+    // Story is being prerendered: resolve the layoutCallback when the active
     // page is built. Other pages will only build if the document becomes
     // visible.
+    const initialPageEl = this.element.querySelector(
+      `amp-story-page#${escapeCssSelectorIdent(initialPageId)}`
+    );
     if (!this.getAmpDoc().hasBeenVisible()) {
-      return whenUpgradedToCustomElement(firstPageEl).then(() => {
-        return firstPageEl.whenBuilt();
+      return whenUpgradedToCustomElement(initialPageEl).then(() => {
+        return initialPageEl.whenBuilt();
       });
     }
 
@@ -1084,11 +1078,10 @@ export class AmpStory extends AMP.BaseElement {
    * Retrieves the initial pageId to begin the story with. In order, the
    * initial page for a story should be either a valid page ID in the URL
    * fragment, the page ID in the history, or the first page of the story.
-   * @param {!Element} firstPageEl
    * @return {string}
    * @private
    */
-  getInitialPageId_(firstPageEl) {
+  getInitialPageId_() {
     const maybePageId = parseQueryString(this.win.location.hash)['page'];
     if (maybePageId && this.isActualPage_(maybePageId)) {
       return maybePageId;
@@ -1103,6 +1096,10 @@ export class AmpStory extends AMP.BaseElement {
       return historyPage;
     }
 
+    const firstPageEl = user().assertElement(
+      this.element.querySelector('amp-story-page'),
+      'Story must have at least one page.'
+    );
     return firstPageEl.id;
   }
 
