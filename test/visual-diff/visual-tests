@@ -700,9 +700,8 @@
       "name": "amp-story-dev-tools: logs loading and running",
       "viewport": {"width": 1080, "height": 720},
       "loading_complete_selectors": [
-        ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
+        ".i-amphtml-story-dev-tools-log-status-title"
       ],
-      "loading_complete_delay_ms": 1000
     },
     {
       "flaky": true,
