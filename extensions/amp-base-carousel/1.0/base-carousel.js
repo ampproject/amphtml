@@ -213,9 +213,6 @@ function BaseCarouselWithRef(
   }, [_thumbnails, childrenArray, setSlides, slides]);
 
   const disableForDir = (dir) => {
-    if (_thumbnails) {
-      console.log(currentSlide, dir);
-    }
     if (loop) {
       // Arrows always available when looping.
       return false;
