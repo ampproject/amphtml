@@ -34,25 +34,22 @@ const OUTSET_ARROWS_WIDTH = 100;
  * @param {!StreamGalleryDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function StreamGallery(props) {
-  const {
-    arrowPrev: customArrowPrev,
-    arrowNext: customArrowNext,
-    children,
-    className,
-    extraSpace,
-    insetArrowVisibility,
-    loop,
-    maxItemWidth = Number.MAX_VALUE,
-    minItemWidth = 1,
-    maxVisibleCount = Number.MAX_VALUE,
-    minVisibleCount = 1,
-    outsetArrows,
-    peek = 0,
-    slideAlign = 'start',
-    snap,
-    ...rest
-  } = props;
+export function StreamGallery({
+  arrowPrev: customArrowPrev,
+  arrowNext: customArrowNext,
+  children,
+  className,
+  extraSpace,
+  insetArrowVisibility,
+  maxItemWidth = Number.MAX_VALUE,
+  minItemWidth = 1,
+  maxVisibleCount = Number.MAX_VALUE,
+  minVisibleCount = 1,
+  outsetArrows,
+  peek = 0,
+  slideAlign = 'start',
+  ...rest
+}) {
   const classes = useStyles();
   const ref = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
@@ -122,9 +119,7 @@ export function StreamGallery(props) {
         extraSpace === 'around' ? classes.extraSpace : ''
       }`}
       controls={insetArrowVisibility}
-      loop={loop}
       outsetArrows={outsetArrows}
-      snap={snap}
       snapAlign={slideAlign}
       ref={ref}
       visibleCount={visibleCount}
