@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
