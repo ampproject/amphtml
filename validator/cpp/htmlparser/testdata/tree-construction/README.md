@@ -51,12 +51,12 @@ by a dump of the tree of the parsed DOM. Each node must be represented
 by a single line. Each line must start with "| ", followed by two spaces
 per parent node that the node has before the root document node.
 
--   Element nodes must be represented by a "`<`" then the *tag name
-    string* "`>`", and all the attributes must be given, sorted
-    lexicographically by UTF-16 code unit according to their *attribute
-    name string*, on subsequent lines, as if they were children of the
+-   Element nodes must be represented by a "`<`" then the _tag name
+    string_ "`>`", and all the attributes must be given, sorted
+    lexicographically by UTF-16 code unit according to their _attribute
+    name string_, on subsequent lines, as if they were children of the
     element node.
--   Attribute nodes must have the *attribute name string*, then an "="
+-   Attribute nodes must have the _attribute name string_, then an "="
     sign, then the attribute value in double quotes (").
 -   Text nodes must be the string, in double quotes. Newlines aren't
     escaped.
