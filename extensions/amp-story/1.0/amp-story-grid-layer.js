@@ -29,10 +29,9 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {closest, scopedQuerySelectorAll} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {parseQueryString} from '../../../src/url';
-import {toArray} from '../../../src/types';
+import {scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
