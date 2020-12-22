@@ -35,7 +35,7 @@ inline void WriteToBuffer(const std::string& str, std::stringbuf* buf) {
 // In valid HTML, they can't contains both types of quotes.
 inline void WriteQuoted(const std::string& str, std::stringbuf* buf) {
   char quote = '"';
-  if (str.find("\"") != std::string::npos) {
+  if (str.find('\"') != std::string::npos) {
     quote = '\'';
   }
 
