@@ -271,7 +271,7 @@ export class LegacyAdIntersectionObserverHost {
     const change = {
       time: entry.time,
       rootBounds: entry.rootBounds,
-      boundingClientRect: entry.boundingClientRec,
+      boundingClientRect: entry.boundingClientRect,
       intersectionRect: entry.intersectionRect,
       intersectionRatio: entry.intersectionRatio,
     };
