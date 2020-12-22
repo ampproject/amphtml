@@ -541,7 +541,7 @@ export class Resource {
   }
 
   /**
-   * Yields when the resource has bee measured.
+   * Yields when the resource has been measured.
    * @return {!Promise}
    */
   ensureMeasured() {

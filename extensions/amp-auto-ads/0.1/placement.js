@@ -159,7 +159,7 @@ export class Placement {
    */
   getEstimatedPosition() {
     return measurePageLayoutBox(this.anchorElement_).then((layoutBox) =>
-      this.getEstimatedPositionFromAchorLayout_(layoutBox)
+      this.getEstimatedPositionFromAnchorLayout_(layoutBox)
     );
   }
 
@@ -168,7 +168,7 @@ export class Placement {
    * @return {number}
    * @private
    */
-  getEstimatedPositionFromAchorLayout_(anchorLayout) {
+  getEstimatedPositionFromAnchorLayout_(anchorLayout) {
     // TODO: This should really take account of margins and padding too.
     switch (this.position_) {
       case Position.BEFORE:
