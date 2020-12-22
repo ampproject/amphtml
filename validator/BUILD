@@ -14,3 +14,27 @@ cc_proto_library(
     name = "validator_cc_proto",
     deps = [":validator-proto"],
 )
+
+# <validator rules protoascii>
+# The validator rules, stored in a series of .protoascii files.
+# This set of rules is what is released to cdn.ampproject.org/v0/validator.js
+genrule(
+    name = "validator-all-protoascii-gen",
+    srcs = [
+        "validator-main.protoascii",
+        "validator-css.protoascii",
+        "@amphtml-extensions//:validator-extensions-protoascii",
+    ],
+    outs = ["validator.protoascii"],
+    cmd = ("cat $(SRCS) > $(OUTS)"),
+)
+# </validator rules all protoascii>
+
+filegroup(
+    name = "testdata_files",
+    srcs = glob([
+        "testdata/*/*.html",
+        "testdata/*/*.out",
+        "testdata/*/*.out.cpponly",
+    ]),
+)

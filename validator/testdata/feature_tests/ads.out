@@ -172,6 +172,7 @@ PASS
 |          <option>purch</option>
 |          <option>capirs</option>
 |          <option>relap</option>
+|          <option>remixd</option>
 |          <option>revcontent</option>
 |          <option>rubicon</option>
 |          <option>sharethrough</option>
@@ -381,7 +382,7 @@ PASS
 |        data-sizes="300x250">
 |    </amp-ad>
 |
-|    <h2>Ad Up Technology</h2>
+|    <h2>AdUp Technology</h2>
 |    <amp-ad width="500" height="250"
 |        type="aduptech"
 |        layout="fixed"
@@ -1076,6 +1077,14 @@ PASS
 |        data-token="D3UMgQWBqleq1tPW"
 |        data-url="http://bigpicture.ru"
 |        data-anchorid="i0xMMY1MoliiZWVl">
+|    </amp-ad>
+|
+|    <h2>Remixd</h2>
+|    <amp-ad width="375" height="120"
+|        type="remixd"
+|        layout="responsive"
+|        data-version="5"
+|        data-url="https://www.remixd.com/player/test/amp/index.html">
 |    </amp-ad>
 |
 |    <h2>Revcontent Responsive Tag</h2>

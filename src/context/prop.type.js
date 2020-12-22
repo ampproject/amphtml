@@ -66,7 +66,7 @@ ContextProp.prototype.deps;
  *
  * @type {boolean|function(!Array<T>):boolean}
  */
-ContextProp.prototype.needsParent;
+ContextProp.prototype.recursive;
 
 /**
  * Computes the property value. This callback is passed the following

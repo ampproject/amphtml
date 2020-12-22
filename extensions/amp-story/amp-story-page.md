@@ -24,6 +24,8 @@ limitations under the License.
 
 # amp-story-page
 
+## Usage
+
 The `<amp-story-page>` component represents the content to display on a single page of a story.
 
 <figure class="centered-fig">
@@ -40,8 +42,6 @@ The `<amp-story-page>` component represents the content to display on a single p
   </noscript>
   </amp-anim>
 </figure>
-
-## Example
 
 ```html
 <amp-story-page id="cover">
@@ -70,6 +70,10 @@ The `<amp-story-page>` component represents the content to display on a single p
 </amp-story-page>
 ```
 
+## Valid children
+
+The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
+
 ## Attributes
 
 ### id [required]
@@ -80,8 +84,8 @@ A unique identifier for the page. Can be used for styling the page and its desce
 
 Specifies when to auto-advance to the next page. If omitted, the page will not automatically advance. The value for `auto-advance-after` must be either:
 
-- A positive amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time) to wait before automatically advancing to the next page
-- An ID of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface video whose completion will trigger the auto-advance
+-   A positive amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time) to wait before automatically advancing to the next page
+-   An ID of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface video whose completion will trigger the auto-advance
 
 For example:
 
@@ -101,7 +105,3 @@ For example:
   background-audio="./media/switzerland.mp3"
 ></amp-story-page>
 ```
-
-## Children (of amp-story-page)
-
-The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).

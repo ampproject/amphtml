@@ -15,7 +15,6 @@
 #
 tags: {  # amp-live-list
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   mandatory_parent: "HEAD"
   unique_warning: true
@@ -29,7 +28,6 @@ tags: {  # amp-live-list
 }
 tags: {  # <amp-live-list>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-LIVE-LIST"
   requires_extension: "amp-live-list"
   attrs: {
@@ -71,7 +69,6 @@ tags: {  # <amp-live-list>
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [update]"
   descriptive_name : "amp-live-list [update]"
@@ -83,7 +80,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-LIVE-LIST [items]"
   descriptive_name : "amp-live-list [items]"
@@ -98,7 +94,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [pagination]"
   descriptive_name : "amp-live-list [pagination]"
@@ -110,7 +105,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [items] item"
   descriptive_name : "amp-live-list [items] item"

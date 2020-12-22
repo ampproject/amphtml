@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Animation} from '../animation';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {
@@ -31,7 +32,6 @@ import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {getMode} from '../mode';
-import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
 
 const TAG = 'FixedLayer';
@@ -236,9 +236,6 @@ export class FixedLayer {
    * @visibleForTesting
    */
   observeHiddenMutations() {
-    if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
-      return;
-    }
     this.initHiddenObserver_();
   }
 
@@ -887,6 +884,36 @@ export class FixedLayer {
         }
       }
     }
+  }
+
+  /**
+   * @param {number} paddingTop
+   * @param {number} lastPaddingTop
+   * @param {number} duration
+   * @param {string} curve
+   * @param {boolean} transient
+   * @return {!Promise}
+   */
+  animateFixedElements(paddingTop, lastPaddingTop, duration, curve, transient) {
+    this.updatePaddingTop(paddingTop, transient);
+    if (duration <= 0) {
+      return Promise.resolve();
+    }
+    // Add transit effect on position fixed element
+    const tr = (time) => {
+      return lastPaddingTop - paddingTop + (paddingTop - lastPaddingTop) * time;
+    };
+    return Animation.animate(
+      this.ampdoc.getRootNode(),
+      (time) => {
+        const p = tr(time);
+        this.transformMutate(`translateY(${p}px)`);
+      },
+      duration,
+      curve
+    ).thenAlways(() => {
+      this.transformMutate(null);
+    });
   }
 }
 

@@ -24,9 +24,7 @@ import {clamp} from '../../../src/utils/math';
 import {dev, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
+import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 
@@ -54,9 +52,6 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {!Array<!UnlistenDef>} */
     this.cleanups_ = [];
-
-    /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
-    this.embed_ = null;
 
     /** @private {?JsonObject} */
     this.configJson_ = null;
@@ -121,22 +116,19 @@ export class AmpAnimation extends AMP.BaseElement {
         this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
       })
     );
-    const io = new ampdoc.win.IntersectionObserver((records) => {
-      this.isIntersecting_ = records[records.length - 1].isIntersecting;
-      this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
-    });
+    const io = new ampdoc.win.IntersectionObserver(
+      (records) => {
+        const {isIntersecting} = records[records.length - 1];
+        this.isIntersecting_ = isIntersecting;
+        this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
+      },
+      {threshold: 0.001}
+    );
     io.observe(dev().assertElement(this.element.parentElement));
     this.cleanups_.push(() => io.disconnect());
 
     // Resize.
     this.cleanups_.push(listen(this.win, 'resize', () => this.onResize_()));
-
-    // TODO(#22733): remove when ampdoc-fie is launched.
-    const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
-    const embed = frameElement
-      ? getFriendlyIframeEmbedOptional(frameElement)
-      : null;
-    this.embed_ = embed;
 
     // Actions.
     this.registerDefaultAction(
@@ -479,15 +471,12 @@ export class AmpAnimation extends AMP.BaseElement {
       null);
 
     // Ensure polyfill is installed.
-    installWebAnimationsIfNecessary(this.win);
-
     const ampdoc = this.getAmpDoc();
-    const readyPromise = this.embed_
-      ? this.embed_.whenReady()
-      : ampdoc.whenReady();
-    const hostWin = this.embed_ ? this.embed_.win : this.win;
-    const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
-    return readyPromise.then(() => {
+    const polyfillPromise = installWebAnimationsIfNecessary(ampdoc);
+    const readyPromise = ampdoc.whenReady();
+    const hostWin = this.win;
+    const baseUrl = ampdoc.getUrl();
+    return Promise.all([polyfillPromise, readyPromise]).then(() => {
       const builder = new Builder(
         hostWin,
         this.getRootNode_(),
@@ -504,9 +493,7 @@ export class AmpAnimation extends AMP.BaseElement {
    * @private
    */
   getRootNode_() {
-    return this.embed_
-      ? this.embed_.win.document
-      : this.getAmpDoc().getRootNode();
+    return this.getAmpDoc().getRootNode();
   }
 
   /** @private */

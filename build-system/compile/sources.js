@@ -30,7 +30,6 @@ const COMMON_GLOBS = [
   'third_party/inputmask/**/*.js',
   'third_party/mustache/**/*.js',
   'third_party/react-dates/bundle.js',
-  'third_party/optimized-svg-icons/social-share-svgs.js',
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
@@ -43,7 +42,7 @@ const COMMON_GLOBS = [
   'node_modules/intersection-observer/intersection-observer.install.js',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
-  'node_modules/rrule/dist/es5/rrule.min.js',
+  'node_modules/rrule/dist/es5/rrule.js',
   'node_modules/web-animations-js/package.json',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/package.json',
@@ -55,11 +54,13 @@ const COMMON_GLOBS = [
   'node_modules/@ampproject/viewer-messaging/package.json',
   'node_modules/@ampproject/viewer-messaging/messaging.js',
   'node_modules/@ampproject/worker-dom/package.json',
-  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
+  'node_modules/@ampproject/worker-dom/dist/amp-production/main.mjs',
   'node_modules/preact/package.json',
   'node_modules/preact/dist/*.js',
   'node_modules/preact/hooks/package.json',
   'node_modules/preact/hooks/dist/*.js',
+  'node_modules/preact/compat/package.json',
+  'node_modules/preact/compat/dist/*.js',
 ];
 
 /**
@@ -118,18 +119,20 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-access/**/*.js',
   // Needed for AmpStoryVariableService
   'extensions/amp-story/**/*.js',
+  // Needed for story ad inabox
+  'extensions/amp-story-auto-ads/**/*.js',
   // Needed for SubscriptionsService
   'extensions/amp-subscriptions/**/*.js',
   // Needed to access UserNotificationManager from other extensions
   'extensions/amp-user-notification/**/*.js',
+  // Needed for video components in Bento.
+  'extensions/amp-video/1.0/**/*.js',
   // Needed for VideoService
   'extensions/amp-video-service/**/*.js',
   // Needed to access ConsentPolicyManager from other extensions
   'extensions/amp-consent/**/*.js',
   // Needed to access AmpGeo type for service locator
   'extensions/amp-geo/**/*.js',
-  // Needed for AmpViewerAssistanceService
-  'extensions/amp-viewer-assistance/**/*.js',
   // Needed for amp-smartlinks dep on amp-skimlinks
   'extensions/amp-skimlinks/0.1/**/*.js',
   'src/*.js',
@@ -150,7 +153,6 @@ const CLOSURE_SRC_GLOBS = [
  */
 const THIRD_PARTY_TRANSFORM_GLOBS = [
   // JSX syntax should undergo usual transforms
-  'third_party/optimized-svg-icons/social-share-svgs.js',
 ];
 
 module.exports = {

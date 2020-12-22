@@ -32,6 +32,7 @@ import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
 import {px, scale, setStyles, translate} from '../../../src/style';
@@ -773,7 +774,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       })
     );
     this.action_.trigger(this.element, 'transformEnd', event, ActionTrust.HIGH);
-    this.element.dispatchCustomEvent('transformEnd');
+    dispatchCustomEvent(this.element, 'transformEnd');
   }
 
   /**

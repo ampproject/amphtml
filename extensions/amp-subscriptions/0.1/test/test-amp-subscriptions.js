@@ -969,18 +969,23 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
       };
+      let resolver;
+      subscriptionService.viewTrackerPromise_ = new Promise((resolve) => {
+        resolver = resolve;
+      });
       const entitlement = Entitlement.parseFromJson(entitlementData);
-      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      const platform = new SubscriptionPlatform();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
-      subscriptionService.platformStore_.resolvePlatform(
-        'local',
-        new SubscriptionPlatform()
-      );
+      subscriptionService.platformStore_.resolvePlatform('local', platform);
+      platform.isPingbackEnabled = () => true;
       const entitlementStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
         .callsFake(() => Promise.resolve(entitlement));
 
-      await subscriptionService.performPingback_();
+      const pingBackPromise = subscriptionService.performPingback_();
+      expect(entitlementStub).to.not.be.called;
+      resolver();
+      await pingBackPromise;
       expect(entitlementStub).to.be.called;
     });
 
@@ -1003,6 +1008,37 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       await subscriptionService.performPingback_();
       expect(pingbackStub).to.be.calledWith(entitlement);
+    });
+
+    it('should send pingback with all platforms that are enabled', async () => {
+      const entitlementData = {
+        source: 'local',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      };
+      const entitlement = Entitlement.parseFromJson(entitlementData);
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      const platform1 = new SubscriptionPlatform();
+      platform1.isPingbackEnabled = () => true;
+      const platform2 = new SubscriptionPlatform();
+      platform2.isPingbackEnabled = () => false;
+      const platform3 = new SubscriptionPlatform();
+      platform3.isPingbackEnabled = () => true;
+      subscriptionService.platformStore_.resolvePlatform('local', platform1);
+      subscriptionService.platformStore_.resolvePlatform('p2', platform2);
+      subscriptionService.platformStore_.resolvePlatform('p3', platform3);
+      env.sandbox
+        .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+        .callsFake(() => Promise.resolve(entitlement));
+      const pingbackStub1 = env.sandbox.stub(platform1, 'pingback');
+      const pingbackStub2 = env.sandbox.stub(platform2, 'pingback');
+      const pingbackStub3 = env.sandbox.stub(platform3, 'pingback');
+
+      await subscriptionService.performPingback_();
+      expect(pingbackStub1).to.be.calledWith(entitlement);
+      expect(pingbackStub2).to.be.not.be.called;
+      expect(pingbackStub3).to.be.calledWith(entitlement);
     });
 
     it('should send pingback with all entitlements if "pingbackAllEntitlements" is set', async () => {

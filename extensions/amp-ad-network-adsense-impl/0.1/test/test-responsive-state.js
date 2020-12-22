@@ -406,48 +406,6 @@ describes.realWin(
         expect(result).to.be.null;
       });
 
-      it('Fall back to container width state for full-width responsive user on desktop site', async () => {
-        const element = createElementWithNoStub({
-          'data-ad-client': AD_CLIENT_ID,
-          'data-auto-format': [ADSENSE_RSPV_TAG],
-          'data-full-width': '',
-          'height': '500px',
-          'width': '100vw',
-        });
-        const viewport = Services.viewportForDoc(element);
-        env.sandbox
-          .stub(viewport, 'getSize')
-          .returns({width: 1024, height: 500});
-
-        const mockContainerWith = '960';
-        const vsyncMock = Services.vsyncFor(
-          toWin(element.ownerDocument.defaultView)
-        );
-        env.sandbox.stub(vsyncMock, 'runPromise').returns({
-          then: () => {
-            element.setAttribute('height', ADSENSE_RSPV_ALLOWED_HEIGHT);
-            element.setAttribute('width', mockContainerWith);
-            element.removeAttribute('data-full-width');
-            element.removeAttribute('data-auto-format');
-            return ResponsiveState.createContainerWidthState(element);
-          },
-        });
-
-        const result = await ResponsiveState.maybeUpgradeToResponsive(
-          element,
-          AD_CLIENT_ID
-        );
-
-        expect(result).to.not.be.null;
-        expect(result.isValidElement()).to.be.true;
-        expect(element.getAttribute('height')).to.be.equal(
-          `${ADSENSE_RSPV_ALLOWED_HEIGHT}`
-        );
-        expect(element.getAttribute('width')).to.be.equal(mockContainerWith);
-        expect(element).to.not.have.attribute('data-full-width');
-        expect(element).to.not.have.attribute('data-auto-format');
-      });
-
       it('returns a valid responsive state and upgrades element when the ad unit is not responsive and ad size optimization is enabled', async () => {
         forceExperimentBranch(
           win,
@@ -476,6 +434,51 @@ describes.realWin(
         expect(element.getAttribute('data-auto-format')).to.be.equal('rspv');
       });
     });
+
+    describe('convertToContainerWidth', () => {
+      it('Fall back to container width state for full-width responsive user on desktop site', async () => {
+        const element = createElementWithNoStub({
+          'data-ad-client': AD_CLIENT_ID,
+          'data-auto-format': [ADSENSE_RSPV_TAG],
+          'data-full-width': '',
+          'height': '500px',
+          'width': '100vw',
+        });
+        const viewport = Services.viewportForDoc(element);
+        env.sandbox
+          .stub(viewport, 'getSize')
+          .returns({width: 1024, height: 500});
+
+        const mockContainerWith = '960';
+        const vsyncMock = Services.vsyncFor(
+          toWin(element.ownerDocument.defaultView)
+        );
+        env.sandbox.stub(vsyncMock, 'runPromise').returns({
+          then: () => {
+            element.setAttribute('height', ADSENSE_RSPV_ALLOWED_HEIGHT);
+            element.setAttribute('width', mockContainerWith);
+            element.removeAttribute('data-full-width');
+            element.removeAttribute('data-auto-format');
+            return ResponsiveState.createContainerWidthState(element);
+          },
+        });
+
+        const result = await ResponsiveState.convertToContainerWidth(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.not.be.null;
+        expect(result.isValidElement()).to.be.true;
+        expect(element.getAttribute('height')).to.be.equal(
+          `${ADSENSE_RSPV_ALLOWED_HEIGHT}`
+        );
+        expect(element.getAttribute('width')).to.be.equal(mockContainerWith);
+        expect(element).to.not.have.attribute('data-full-width');
+        expect(element).to.not.have.attribute('data-auto-format');
+      });
+    });
+
     describe('maybeAttachSettingsListener', () => {
       describe('sets up a listener that', () => {
         let promise;

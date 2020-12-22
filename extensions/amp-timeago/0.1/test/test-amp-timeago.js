@@ -64,7 +64,7 @@ describes.realWin(
       element.textContent = date.toString();
       element.build();
       await timeout(1000);
-      element.viewportCallback(true);
+      (await element.getImpl(true)).viewportCallback_(true);
       const timeElement = element.querySelector('time');
       expect(timeElement.textContent).to.equal('11 seconds ago');
     });

@@ -29,4 +29,4 @@ For testing purposes you can use `data-scriptid="91"`.
 
 ### Required parameters
 
-- `data-scriptid`
+-   `data-scriptid`

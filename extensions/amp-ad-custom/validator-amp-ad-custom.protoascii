@@ -16,7 +16,6 @@
 tags: {  # amp-ad-custom
   html_format: AMP  # AMP only as ads are not allowed inside AMP Ads
   tag_name: "SCRIPT"
-  spec_name: "amp-ad-custom extension .js script"
   extension_spec: {
     name: "amp-ad-custom"
     version: "0.1"

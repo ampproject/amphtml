@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   resolveLoader: {
@@ -27,6 +28,10 @@ module.exports = {
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat',
+    },
   },
   module: {
     rules: [
@@ -54,6 +59,17 @@ module.exports = {
           ],
         },
       },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      // Replaced by minify-replace (babel) in the usual build pipeline
+      // build-system/babel-config/helpers.js#getReplacePlugin
+      IS_ESM: false,
+    }),
+  ],
 };

@@ -32,7 +32,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `${name}`
+# \${name}
 
 <!--
   If the component is relevant for more than one format and operates differently between these
@@ -96,8 +96,8 @@ What is allowed, what isn't.
 
 Description of attribute. Use cases for this attribute.
 
-- `attribute-value-option-one` (default): `attribute-option-one-value` does this to `${name}`.
-- `attribute-value-option-two`: `attribute-option-two-value` does this to `${name}`.
+-   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `${name}`.
+-   `attribute-value-option-two`: `attribute-option-two-value` does this to `${name}`.
 
 ### `optional-attribute-name` (optional)
 

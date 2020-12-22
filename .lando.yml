@@ -28,53 +28,50 @@ services:
   appserver:
     type: node
     install_dependencies_as_root:
-      - curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
       - apt-get update && apt-get install -y openjdk-8-jdk && apt-get install -y ant && apt-get clean
       - apt-get install -y openjdk-7-jre protobuf-compiler python2.7 python-protobuf
     build:
-      - yarn global add gulp-cli
-      - yarn
+      - npm install --global gulp-cli
+      - npm install
     run_as_root:
       - echo "127.0.0.1 amphtml.lndo.site" >> /etc/hosts
-    command: cd /app && yarn gulp serve --port=80 --host=0.0.0.0
+    command: cd /app && gulp serve --port=80 --host=0.0.0.0
 
 tooling:
-  yarn:
-    service: appserver
   gulp:
     service: appserver
-    cmd: 'yarn gulp'
+    cmd: 'gulp'
   watch:
     service: appserver
-    cmd: 'yarn gulp build --watch'
+    cmd: 'gulp build --watch'
     description: 'Builds unminified code, watches for changes in files, re-builds when detected'
   watch-minified:
     service: appserver
-    cmd: 'yarn gulp dist --watch'
+    cmd: 'gulp dist --watch'
     description: 'Builds minified code, watches for changes in files, re-builds when detected'
   lint:
     service: appserver
-    cmd: 'yarn gulp lint'
+    cmd: 'gulp lint'
     description: 'Validates against Google Closure Linter'
   check-types:
     service: appserver
-    cmd: 'yarn gulp check-types'
+    cmd: 'gulp check-types'
     description: 'Check source code for JS type errors'
   dist:
     service: appserver
-    cmd: 'yarn gulp dist'
+    cmd: 'gulp dist'
     description: 'Build production binaries'
   unit:
     service: appserver
-    cmd: 'yarn gulp unit'
+    cmd: 'gulp unit'
     description: 'Run unit tests'
   integration:
     service: appserver
-    cmd: 'yarn gulp integration'
+    cmd: 'gulp integration'
     description: 'Run integration tests'
   e2e:
     service: appserver
-    cmd: 'yarn gulp e2e'
+    cmd: 'gulp e2e'
     description: 'Runs e2e tests'
 
 proxy:

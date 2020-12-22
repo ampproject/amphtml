@@ -37,31 +37,31 @@ on mobile devices.
 
 [filter formats="websites, ads"]
 
-- An `amp-accordion` accepts one or more `<section>` elements as its direct
-  children.
-- Each `<section>` must contain exactly two direct children.
-- The first child in a `<section>` is the heading for that section of the
-  `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
-  `<header>`.
-- The second child in a `<section>` is the expandable/collapsible content. It
-  can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
-- A click or tap on a `<section>` heading expands or collapses the section.
-- An `amp-accordion` with a defined `id` preserves the collapsed or expanded
-  state of each section while the user remains on your domain.
+-   An `amp-accordion` accepts one or more `<section>` elements as its direct
+    children.
+-   Each `<section>` must contain exactly two direct children.
+-   The first child in a `<section>` is the heading for that section of the
+    `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
+    `<header>`.
+-   The second child in a `<section>` is the expandable/collapsible content. It
+    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
+-   A click or tap on a `<section>` heading expands or collapses the section.
+-   An `amp-accordion` with a defined `id` preserves the collapsed or expanded
+    state of each section while the user remains on your domain.
 
 [/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
-- An `amp-accordion` accepts one or more `<section>` elements as its direct
-  children.
-- Each `<section>` must contain exactly two direct children.
-- The first child in a `<section>` is the heading for that section of the
-  `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
-  `<header>`.
-- The second child in a `<section>` is the expandable/collapsible content. It
-  can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-html.md).
-- A click or tap on a `<section>` heading expands or collapses the section.
+-   An `amp-accordion` accepts one or more `<section>` elements as its direct
+    children.
+-   Each `<section>` must contain exactly two direct children.
+-   The first child in a `<section>` is the heading for that section of the
+    `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
+    `<header>`.
+-   The second child in a `<section>` is the expandable/collapsible content. It
+    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-html.md).
+-   A click or tap on a `<section>` heading expands or collapses the section.
 
 [/filter]
 
@@ -72,7 +72,9 @@ The example below contains an `amp-accordion` with three sections. The
 [filter formats="websites, ads"]Include the `disable-session-state` attribute
 to preserve the collapsed/expanded state.[/filter]
 
-````html
+[example preview="top-frame" playground="true"]
+
+```html
 <amp-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
   <section>
     <h2>Section 1</h2>
@@ -89,7 +91,9 @@ to preserve the collapsed/expanded state.[/filter]
       height="256"></amp-img>
   </section>
 </amp-accordion>
+```
 
+[/example]
 
 ## Attributes
 
@@ -97,6 +101,8 @@ to preserve the collapsed/expanded state.[/filter]
 
 Include the `animate` attribute in `<amp-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion animate>
@@ -117,7 +123,9 @@ animation when the content is expanded and "roll up" animation when collapsed.
     ></amp-img>
   </section>
 </amp-accordion>
-````
+```
+
+[/example]
 
 [filter formats="websites"]
 
@@ -137,6 +145,8 @@ Apply the `expanded` attribute to a nested `<section>` to expand that section wh
 Apply the `expand-single-section` attribute to `amp-accordion` to specify that
 only one `<section>` can expand at a time. If the user clicks or taps on a
 collapsed `<section>`, any currently expanded `<section>` collapses.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion expand-single-section>
@@ -159,12 +169,16 @@ collapsed `<section>`, any currently expanded `<section>` collapses.
 </amp-accordion>
 ```
 
+[/example]
+
 ### [data-expand]
 
 Bind the `[data-expand]` attribute to a `<section>` to expand or collapse that
 section. An expanded section collapses if the expression evaluates as false. A
 collapsed section expands if the expression evaluates as anything other than
 false.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion>
@@ -188,6 +202,8 @@ false.
 <button on="tap:AMP.setState({sectionOne: false})">Collapse section 1</button>
 ```
 
+[/example]
+
 [filter formats="websites"]
 
 ## Actions
@@ -198,6 +214,8 @@ The `toggle` action switches the `expanded` and `collapsed` states of
 `amp-accordion` sections. When called with no arguments, it toggles all sections
 of the accordion. To specify a specific section, add the `section` argument and
 use its corresponding `id` as the value.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion id="myAccordion">
@@ -219,6 +237,8 @@ use its corresponding `id` as the value.
   Toggle Section 1
 </button>
 ```
+
+[/example]
 
 ### expand
 
@@ -260,6 +280,8 @@ The `expand` event triggers the targeted `amp-accordion` section to change from
 the collapsed state to the expanded state. Call `expand` on an already expanded
 section to trigger the `expand` event.
 
+[example preview="top-frame" playground="true"]
+
 ```html
 <amp-accordion id="myAccordion">
   <section id="section1" on="expand:myAccordion.expand(section='section2')">
@@ -273,11 +295,15 @@ section to trigger the `expand` event.
 </amp-accordion>
 ```
 
+[/example]
+
 ### collapse
 
 The `collapse` event triggers the targeted `amp-accordion` section to change
 from the expanded state to the collapsed state. Call `collapse` on an already
 collapsed section to trigger the event.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion id="myAccordion">
@@ -292,6 +318,8 @@ collapsed section to trigger the event.
 </amp-accordion>
 ```
 
+[/example]
+
 ## Styling
 
 The `amp-accordion` element selector styles an `amp-accordion` according to your
@@ -305,21 +333,29 @@ amp-accordion {
 
 Keep the following points in mind when you style an amp-accordion:
 
-- `amp-accordion` elements are always `display: block`.
-- `float` cannot style a `<section>`, heading, nor content elements.
-- An expanded section applies the `expanded` attribute to the `<section>`
-  element.
-- The content element is clear-fixed with `overflow: hidden` and hence cannot
-  have scrollbars.
-- Margins of the `<amp-accordion>`, `<section>`, heading, and content elements
-  are set to `0`, but can be overridden in custom styles.
-- Both the header and content elements are `position: relative`.
+-   `amp-accordion` elements are always `display: block`.
+-   `float` cannot style a `<section>`, heading, nor content elements.
+-   An expanded section applies the `expanded` attribute to the `<section>`
+    element.
+-   The content element is clear-fixed with `overflow: hidden` and hence cannot
+    have scrollbars.
+-   Margins of the `<amp-accordion>`, `<section>`, heading, and content elements
+    are set to `0`, but can be overridden in custom styles.
+-   Both the header and content elements are `position: relative`.
 
 ## Accessibility
 
-- `amp-accordion` automatically adds the following [ARIA attributes](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA):
-- `aria-controls`: Applied to the header element of each `amp-accordion` section.
-- `aria-expanded (state)`: Applied to the header element of each `amp-accordion` section.
+`amp-accordion` automatically adds the following [ARIA attributes](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA):
+
+-   `aria-controls`: Applied to the header element of each `amp-accordion` section.
+-   `aria-expanded (state)`: Applied to the header element of each `amp-accordion` section.
+-   `aria-labelledby`: Applied to the content element of each `amp-accordion` section.
+
+`amp-accordion` also automatically adds the following accessibility attributes:
+
+-   `tabindex`: Applied to the header element of each `amp-accordion` section.
+-   `role=button`: Applied to the header element of each `amp-accordion` section.
+-   `role=region`: Applied to the content element of each `amp-accordion` section.
 
 ## Validation
 

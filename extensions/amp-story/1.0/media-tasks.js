@@ -373,6 +373,11 @@ export class UpdateSourcesTask extends MediaTask {
     this.newSources_.applyToElement(this.win_, mediaEl);
     return Promise.resolve();
   }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
+  }
 }
 
 /**

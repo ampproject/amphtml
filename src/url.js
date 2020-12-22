@@ -16,7 +16,7 @@
 
 import {LruCache} from './utils/lru-cache';
 import {dict, hasOwn} from './utils/object';
-import {endsWith, startsWith} from './string';
+import {endsWith} from './string';
 import {getMode} from './mode';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
@@ -36,8 +36,6 @@ const SERVING_TYPE_PREFIX = dict({
   'a': true,
   // Ad
   'ad': true,
-  // Actions viewer
-  'action': true,
 });
 
 /**
@@ -581,7 +579,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  * @param {string} relativeUrlString
  * @param {string|!Location} baseUrl
  * @return {string}
- * @private Visible for testing.
+ * @private @visibleForTesting
  */
 export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
@@ -591,17 +589,17 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   const relativeUrl = parseUrlDeprecated(relativeUrlString);
 
   // Absolute URL.
-  if (startsWith(relativeUrlString.toLowerCase(), relativeUrl.protocol)) {
+  if (relativeUrlString.toLowerCase().startsWith(relativeUrl.protocol)) {
     return relativeUrl.href;
   }
 
   // Protocol-relative URL.
-  if (startsWith(relativeUrlString, '//')) {
+  if (relativeUrlString.startsWith('//')) {
     return baseUrl.protocol + relativeUrlString;
   }
 
   // Absolute path.
-  if (startsWith(relativeUrlString, '/')) {
+  if (relativeUrlString.startsWith('/')) {
     return baseUrl.origin + relativeUrlString;
   }
 

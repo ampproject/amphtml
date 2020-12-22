@@ -378,7 +378,7 @@ function preventAsyncErrorThrows() {
 before(function () {
   // This is a more robust version of `this.skip()`. See #17245.
   this.skipTest = function () {
-    if (this._runnable.title != '"before all" hook') {
+    if (!this._runnable.title.startsWith('"before all" hook')) {
       throw new Error('skipTest() can only be called from within before()');
     }
     this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.
@@ -402,9 +402,8 @@ function beforeTest() {
   activateChunkingForTesting();
   window.__AMP_MODE = undefined;
   window.context = undefined;
-  window.AMP_CONFIG = {
-    canary: 'testSentinel',
-  };
+  // eslint-disable-next-line no-undef
+  window.AMP_CONFIG = require('../build-system/global-configs/prod-config.json');
   window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
@@ -427,10 +426,7 @@ afterEach(function () {
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
-  const cleanupTagNames = ['link', 'meta'];
-  if (!Services.platformFor(window).isSafari()) {
-    cleanupTagNames.push('iframe');
-  }
+  const cleanupTagNames = ['link', 'meta', 'iframe'];
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
   for (let i = 0; i < cleanup.length; i++) {
     try {

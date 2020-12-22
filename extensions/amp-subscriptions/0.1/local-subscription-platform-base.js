@@ -240,8 +240,6 @@ export class LocalSubscriptionBasePlatform {
 
   /**
    * @override
-   * @param {?./entitlement.Entitlement} unusedEntitlement
-   * @return {!Promise|undefined}
    */
   pingback(unusedEntitlement) {}
 
