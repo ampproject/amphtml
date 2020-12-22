@@ -49,10 +49,11 @@ export const Default = () => {
   );
   return (
     <amp-inline-gallery style={{maxWidth: '360px'}} layout="container">
-      <amp-inline-gallery-pagination 
-        layout={topInset ? "nodisplay" : "fixed-height"} 
-        height={topInset ? undefined : "24"} 
-        inset={topInset}/>
+      <amp-inline-gallery-pagination
+        layout={topInset ? 'nodisplay' : 'fixed-height'}
+        height={topInset ? undefined : '24'}
+        inset={topInset}
+      />
       <amp-inline-gallery-thumbnails
         aspectRatio={aspectRatio}
         loop={loop}
@@ -105,10 +106,11 @@ export const Default = () => {
           data-thumbnail-src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
         ></amp-img>
       </amp-base-carousel>
-      <amp-inline-gallery-pagination 
-        layout={bottomInset ? "nodisplay" : "fixed-height"} 
-        height={bottomInset ? undefined : "24"} 
-        inset={bottomInset}/>
+      <amp-inline-gallery-pagination
+        layout={bottomInset ? 'nodisplay' : 'fixed-height'}
+        height={bottomInset ? undefined : '24'}
+        inset={bottomInset}
+      />
     </amp-inline-gallery>
   );
 };
