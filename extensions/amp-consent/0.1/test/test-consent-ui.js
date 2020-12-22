@@ -218,7 +218,7 @@ describes.realWin(
         expect(consentUI.scrollEnabled_).to.be.true;
       });
 
-      it('should set the correct transform on parent', async () => {
+      it('should set the iframe transform class on parent', async () => {
         const config = dict({
           'promptUISrc': 'https://promptUISrc',
         });
@@ -235,10 +235,11 @@ describes.realWin(
         });
         await macroTask();
         expect(
-          consentUI.parent_.style.getPropertyValue(
-            '--i-amphtml-consent-iframe-tranform'
-          )
-        ).to.equal('translate3d(0px, calc(100% - 80vh), 0px)');
+          consentUI.parent_.style.getPropertyValue('--i-amphtml-modal-height')
+        ).to.equal('80vh');
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.iframeTransform)
+        ).to.be.true;
       });
     });
 
