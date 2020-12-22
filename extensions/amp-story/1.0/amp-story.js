@@ -415,7 +415,7 @@ export class AmpStory extends AMP.BaseElement {
       const page = this.element.querySelector(
         `amp-story-page#${escapeCssSelectorIdent(pageId)}`
       );
-      page && page.setAttribute('active', '');
+      page.setAttribute('active', '');
     }
 
     this.initializeStyles_();
@@ -1081,7 +1081,7 @@ export class AmpStory extends AMP.BaseElement {
    * Retrieves the initial pageId to begin the story with. In order, the
    * initial page for a story should be either a valid page ID in the URL
    * fragment, the page ID in the history, or the first page of the story.
-   * @return {string}
+   * @return {?string}
    * @private
    */
   getInitialPageId_() {
