@@ -318,7 +318,6 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   beforeEach(() => {
     clock = window.sandbox.useFakeTimers();
-    // sendIntersectionSpy = window.sandbox.spy();
     onScrollSpy = window.sandbox.spy();
     onChangeSpy = window.sandbox.spy();
     testIframe = getIframe(iframeSrc);
