@@ -96,9 +96,9 @@ function StreamGalleryWithRef(props, ref) {
     ref,
     () =>
       /** @type {!BaseCarouselDef.CarouselApi} */ ({
-        goToSlide: carouselRef.current.goToSlide,
-        next: carouselRef.current.next,
-        prev: carouselRef.current.prev,
+        goToSlide: (index) => carouselRef.current.goToSlide(index),
+        next: () => carouselRef.current.next(),
+        prev: () => carouselRef.current.prev(),
       }),
     []
   );
