@@ -410,10 +410,13 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
-    const page = this.element.querySelector(
-      `amp-story-page#${escapeCssSelectorIdent(this.getInitialPageId_())}`
-    );
-    page && page.setAttribute('active', '');
+    const pageId = this.getInitialPageId_();
+    if (pageId) {
+      const page = this.element.querySelector(
+        `amp-story-page#${escapeCssSelectorIdent(pageId)}`
+      );
+      page && page.setAttribute('active', '');
+    }
 
     this.initializeStyles_();
     this.initializeListeners_();
@@ -1096,11 +1099,8 @@ export class AmpStory extends AMP.BaseElement {
       return historyPage;
     }
 
-    const firstPageEl = user().assertElement(
-      this.element.querySelector('amp-story-page'),
-      'Story must have at least one page.'
-    );
-    return firstPageEl.id;
+    const firstPageEl = this.element.querySelector('amp-story-page');
+    return firstPageEl ? firstPageEl.id : null;
   }
 
   /**
