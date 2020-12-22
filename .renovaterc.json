@@ -95,7 +95,8 @@
     {
       "packagePatterns": ["renovate"],
       "depTypeList": ["devDependencies"],
-      "groupName": "Renovate Bot"
+      "groupName": "Renovate Bot",
+      "updateTypes": ["major"]
     },
 
     {
