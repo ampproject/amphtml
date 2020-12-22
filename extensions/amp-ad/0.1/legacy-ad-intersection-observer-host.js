@@ -267,7 +267,15 @@ export class LegacyAdIntersectionObserverHost {
    * @private
    */
   sendElementIntersection_(entry) {
-    const change = entry;
+    // TODO(#31707): IntersectionObserverEntries cannot be serialized.
+    const change = {
+      time: entry.time,
+      rootBounds: entry.rootBounds,
+      boundingClientRect: entry.boundingClientRec,
+      intersectionRect: entry.intersectionRect,
+      intersectionRatio: entry.intersectionRatio,
+    };
+
     if (
       this.pendingChanges_.length > 0 &&
       this.pendingChanges_[this.pendingChanges_.length - 1].time == change.time
