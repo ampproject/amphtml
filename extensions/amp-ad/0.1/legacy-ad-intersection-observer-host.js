@@ -217,19 +217,20 @@ export class LegacyAdIntersectionObserverHost {
         const lastEntry = entries[entries.length - 1];
         this.onViewportCallback_(lastEntry);
       });
+      this.intersectionObserver_.observe(this.baseElement_.element);
+    }
+    if (!this.fireInOb_) {
       this.fireInOb_ = new IntersectionObserver((entries) => {
         const lastEntry = entries[entries.length - 1];
         this.sendElementIntersection_(lastEntry);
       });
-
-      this.intersectionObserver_.observe(this.baseElement_.element);
     }
     this.fire();
   }
 
   /**
    * Triggered when the ad either enters or exits the visible viewport.
-   * @param {!IntersectionObserverEntry} entry entry handed over by the IntersectionObserver.
+   * @param {!IntersectionObserverEntry} entry handed over by the IntersectionObserver.
    */
   onViewportCallback_(entry) {
     const inViewport = entry.intersectionRatio != 0;
