@@ -185,7 +185,7 @@ describe('amp-ad 3P', () => {
           return (
             lastIO != null &&
             lastIO.boundingClientRect.top == 1000 &&
-            lastIO.intersectionRatio == 1
+            lastIO.intersectionRatio > 0
           );
         });
         await new Promise((resolve) => {
