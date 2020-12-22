@@ -106,13 +106,9 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     if (hashId) {
       selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
     }
-    const parentPage = closest(
-      this.element,
-      (el) => el.tagName.toLowerCase() === 'amp-story-page'
-    );
+    const selectorNodes = this.win.document.querySelectorAll(selector);
     this.isActivePage_ =
-      toArray(this.win.document.querySelectorAll(selector)).pop() ===
-      parentPage;
+      selectorNodes[selectorNodes.length - 1] === this.element.parentElement;
     return this.isActivePage_;
   }
 

@@ -392,9 +392,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (hashId) {
       selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
     }
+    const selectorNodes = this.win.document.querySelectorAll(selector);
     this.isActivePage_ =
-      toArray(this.win.document.querySelectorAll(selector)).pop() ===
-      this.element;
+      selectorNodes[selectorNodes.length - 1] === this.element;
     return this.isActivePage_;
   }
 
