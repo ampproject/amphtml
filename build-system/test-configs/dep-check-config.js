@@ -247,6 +247,7 @@ exports.rules = [
       // Bento AMP Youtube
       'extensions/amp-youtube/1.0/amp-youtube.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-iframe.js',
+      'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-wrapper.js',
 
       // Amp geo in group enum
       'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',

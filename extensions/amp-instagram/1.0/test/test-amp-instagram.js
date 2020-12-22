@@ -15,19 +15,15 @@
  */
 
 import '../amp-instagram';
-import {
-  createElementWithAttributes,
-  waitForChildPromise,
-} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
-
-import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.realWin(
   'amp-instagram-v1.0',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-instagram:1.0'],
     },
   },
@@ -36,16 +32,19 @@ describes.realWin(
     let element;
 
     const waitForRender = async () => {
-      await whenCalled(env.sandbox.spy(element, 'attachShadow'));
+      await element.build();
+      const loadPromise = element.layoutCallback();
       const shadow = element.shadowRoot;
-      await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelector('iframe');
-      });
+      await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
+      await loadPromise;
     };
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      toggleExperiment(win, 'bento-instagram', true, true);
+      // Override global window here because Preact uses global `createElement`.
+      doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
     it('renders', async () => {
@@ -59,9 +58,9 @@ describes.realWin(
       doc.body.appendChild(element);
       await waitForRender();
 
-      expect(
-        element.shadowRoot.querySelector('iframe').getAttribute('src')
-      ).to.equal('https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12');
+      expect(element.shadowRoot.querySelector('iframe').src).to.equal(
+        'https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12'
+      );
     });
 
     it('renders with caption', async () => {
@@ -76,14 +75,12 @@ describes.realWin(
       doc.body.appendChild(element);
       await waitForRender();
 
-      expect(
-        element.shadowRoot.querySelector('iframe').getAttribute('src')
-      ).to.equal(
+      expect(element.shadowRoot.querySelector('iframe').src).to.equal(
         'https://www.instagram.com/p/B8QaZW4AQY_/embed/captioned/?cr=1&v=12'
       );
     });
 
-    it("Container's height is changed", async () => {
+    it("container's height is changed", async () => {
       const initialHeight = 300;
       element = createElementWithAttributes(win.document, 'amp-instagram', {
         'data-shortcode': 'B8QaZW4AQY_',
@@ -94,7 +91,11 @@ describes.realWin(
       });
       doc.body.appendChild(element);
       await waitForRender();
-      const {offsetHeight} = element;
+
+      const forceChangeHeightStub = env.sandbox.stub(
+        element.implementation_,
+        'forceChangeHeight'
+      );
 
       const mockEvent = new CustomEvent('message');
       mockEvent.origin = 'https://www.instagram.com';
@@ -109,10 +110,7 @@ describes.realWin(
       ).contentWindow;
       win.dispatchEvent(mockEvent);
 
-      await waitFor(
-        () => element.offsetHeight != offsetHeight,
-        'Height is not changed'
-      );
+      expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
   }
 );

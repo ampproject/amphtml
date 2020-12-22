@@ -90,12 +90,13 @@ export function useAmpContext() {
  * Whether the calling component should currently be in the loaded state.
  *
  * @param {!Loading|string} loadingProp
+ * @param {boolean} unloadOnPause
  * @return {boolean}
  */
-export function useLoad(loadingProp) {
+export function useLoad(loadingProp, unloadOnPause = false) {
   const loadingRef = useRef(false);
 
-  const {loading: loadingContext, renderable} = useAmpContext();
+  const {loading: loadingContext, renderable, playable} = useAmpContext();
 
   const loading = loadingReducer(loadingProp, loadingContext);
 
@@ -103,6 +104,9 @@ export function useLoad(loadingProp) {
   const load =
     // Explicit instruction to unload.
     loading == Loading.UNLOAD
+      ? false
+      : // Must be unloaded to pause.
+      unloadOnPause && !playable
       ? false
       : // Explicit instruction to load.
       loading == Loading.EAGER

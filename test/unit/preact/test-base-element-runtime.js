@@ -125,6 +125,10 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should load when requested', async () => {
+      const loadEventSpy = env.sandbox.spy();
+      const errorEventSpy = env.sandbox.spy();
+      element.addEventListener('load', loadEventSpy);
+      element.addEventListener('error', errorEventSpy);
       loader.callsFake((load, props) => {
         if (load) {
           props.onLoad();
@@ -135,9 +139,16 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       await element.layoutCallback();
       expect(lastLoad).to.be.true;
       expect(loader).to.be.calledWith(true);
+      expect(loadEventSpy).to.be.calledOnce;
+      expect(loadEventSpy.firstCall.firstArg).to.contain({bubbles: false});
+      expect(errorEventSpy).to.not.be.called;
     });
 
     it('should handle load failure', async () => {
+      const loadEventSpy = env.sandbox.spy();
+      const errorEventSpy = env.sandbox.spy();
+      element.addEventListener('load', loadEventSpy);
+      element.addEventListener('error', errorEventSpy);
       loader.callsFake((load, props) => {
         if (load) {
           props.onLoadError();
@@ -148,6 +159,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       await expect(element.layoutCallback()).to.be.eventually.rejected;
       expect(lastLoad).to.be.true;
       expect(loader).to.be.calledWith(true);
+      expect(errorEventSpy).to.be.calledOnce;
+      expect(errorEventSpy.firstCall.firstArg).to.contain({bubbles: false});
+      expect(loadEventSpy).to.not.be.called;
     });
   });
 

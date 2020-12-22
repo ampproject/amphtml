@@ -23,7 +23,10 @@ export default {
   title: 'amp-video-1_0',
   decorators: [withA11y, withKnobs, withAmp],
   parameters: {
-    extensions: [{name: 'amp-video', version: '1.0'}],
+    extensions: [
+      {name: 'amp-video', version: '1.0'},
+      {name: 'amp-accordion', version: '1.0'},
+    ],
     experiments: ['bento'],
   },
 };
@@ -150,5 +153,33 @@ export const Actions = () => {
         <ActionButton on="tap:player.fullscreen">Fullscreen</ActionButton>
       </div>
     </div>
+  );
+};
+
+export const InsideAccordion = () => {
+  const width = number('width', 320);
+  const height = number('height', 180);
+  const autoplay = boolean('autoplay', false);
+
+  return (
+    <amp-accordion expand-single-section>
+      <section expanded>
+        <h2>Video</h2>
+        <div>
+          <amp-video
+            autoplay={autoplay}
+            controls
+            loop
+            width={width}
+            height={height}
+          >
+            <source
+              type="video/mp4"
+              src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            ></source>
+          </amp-video>
+        </div>
+      </section>
+    </amp-accordion>
   );
 };

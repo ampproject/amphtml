@@ -20,15 +20,11 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-instagram-1_0',
+  title: 'amp-instagram-0_1',
   decorators: [withA11y, withKnobs, withAmp],
 
   parameters: {
-    extensions: [
-      {name: 'amp-instagram', version: '1.0'},
-      {name: 'amp-accordion', version: '1.0'},
-    ],
-    experiments: ['bento'],
+    extensions: [{name: 'amp-instagram', version: '0.1'}],
   },
 };
 
@@ -47,25 +43,5 @@ export const _default = () => {
       height={height}
       layout={layout}
     ></amp-instagram>
-  );
-};
-
-export const InsideAccordion = () => {
-  const shortcode = text('shortcode', 'B8QaZW4AQY_');
-  const width = number('width', 300);
-  const height = number('height', 200);
-  return (
-    <amp-accordion expand-single-section>
-      <section expanded>
-        <h2>Post</h2>
-        <div>
-          <amp-instagram
-            data-shortcode={shortcode}
-            width={width}
-            height={height}
-          ></amp-instagram>
-        </div>
-      </section>
-    </amp-accordion>
   );
 };

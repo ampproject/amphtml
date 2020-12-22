@@ -39,17 +39,15 @@ AmpYoutube['Component'] = Youtube;
 
 /** @override */
 AmpYoutube['props'] = {
-  'autoplay': {attr: 'autoplay'},
-  'loop': {attr: 'loop'},
+  'autoplay': {attr: 'autoplay', type: 'boolean'},
+  'loop': {attr: 'loop', type: 'boolean'},
+  'controls': {attr: 'controls', type: 'boolean'},
   'videoid': {attr: 'data-videoid'},
   'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock'},
   'credentials': {attr: 'credentials'},
   'params': {attrPrefix: 'data-param-'},
 };
-
-/** @override */
-AmpYoutube['layoutSizeDefined'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpYoutube);

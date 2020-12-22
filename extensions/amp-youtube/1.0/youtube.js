@@ -17,9 +17,10 @@
 import * as Preact from '../../../src/preact';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
+import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
-import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 
 // Correct PlayerStates taken from
@@ -56,6 +57,9 @@ const PlayerFlags = {
   HIDE_ANNOTATION: 3,
 };
 
+/** @const {!../../../src/dom.CustomEventOptionsDef} */
+const VIDEO_EVENT_OPTIONS = {bubbles: false, cancelable: false};
+
 /**
  * @param {!YoutubeProps} props
  * @return {PreactDef.Renderable}
@@ -67,7 +71,6 @@ export function Youtube({
   liveChannelid,
   params = {},
   credentials,
-  style,
   ...rest
 }) {
   const datasourceExists =
@@ -118,7 +121,7 @@ export function Youtube({
       return;
     }
     if (data.event == 'initialDelivery') {
-      dispatchCustomEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
       return;
     }
     const {info} = data;
@@ -138,33 +141,25 @@ export function Youtube({
       );
     }
     if (data.event == 'infoDelivery' && playerState != undefined) {
-      dispatchCustomEvent(currentTarget, PlayerStates[playerState.toString()]);
+      dispatchVideoEvent(currentTarget, PlayerStates[playerState.toString()]);
     }
     if (data.event == 'infoDelivery' && info['muted']) {
-      dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
+      dispatchVideoEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
       return;
     }
   };
 
-  const makeMethodMessage = (method) => {
-    return JSON.stringify(
-      dict({
-        'event': 'command',
-        'func': methods[method],
-      })
-    );
-  };
-
   return (
-    <VideoIframe
+    <VideoWrapper
+      {...rest}
+      component={VideoIframe}
       autoplay={autoplay}
       src={src}
-      style={style}
       onMessage={onMessage}
       makeMethodMessage={makeMethodMessage}
-      onLoad={(event) => {
+      onIframeLoad={(event) => {
         const {currentTarget} = event;
-        dispatchCustomEvent(currentTarget, 'canplay');
+        dispatchVideoEvent(currentTarget, 'canplay');
         currentTarget.contentWindow./*OK*/ postMessage(
           JSON.stringify(
             dict({
@@ -173,11 +168,9 @@ export function Youtube({
           ),
           '*'
         );
-        dispatchCustomEvent(currentTarget, VideoEvents.LOAD);
       }}
       sandbox="allow-scripts allow-same-origin allow-presentation"
-      {...rest}
-    ></VideoIframe>
+    ></VideoWrapper>
   );
 }
 
@@ -206,19 +199,22 @@ function getEmbedUrl(credentials, videoid, liveChannelid) {
 }
 
 /**
- * Dispatches a custom event.
- *
- * @param {HTMLIFrameElement} currentTarget
+ * @param {!HTMLIFrameElement} currentTarget
  * @param {string} name
- * @param {!Object=} opt_data Event data.
- * @final
  */
-function dispatchCustomEvent(currentTarget, name, opt_data) {
-  const {ownerDocument} = currentTarget;
-  const win = ownerDocument.defaultView || ownerDocument.parentWindow;
-  const event = createCustomEvent(win, name, opt_data, {
-    bubbles: true,
-    cancelable: true,
-  });
-  currentTarget.dispatchEvent(event);
+function dispatchVideoEvent(currentTarget, name) {
+  dispatchCustomEvent(currentTarget, name, null, VIDEO_EVENT_OPTIONS);
+}
+
+/**
+ * @param {string} method
+ * @return {!Object|string}
+ */
+function makeMethodMessage(method) {
+  return JSON.stringify(
+    dict({
+      'event': 'command',
+      'func': methods[method],
+    })
+  );
 }

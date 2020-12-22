@@ -16,12 +16,22 @@
 
 import * as Preact from '../../../../src/preact';
 import {Youtube} from '../youtube';
+import {dispatchCustomEvent} from '../../../../src/dom';
 import {mount} from 'enzyme';
 
-describes.sandboxed('YouTube preact component v1.0', {}, () => {
+describes.realWin('YouTube preact component v1.0', {}, (env) => {
+  let window, document;
+  let container;
+
+  beforeEach(() => {
+    window = env.win;
+    document = window.document;
+
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
   it('Normal render', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
     const wrapper = mount(
       <Youtube
         videoid="IAvf-rkzNck"
@@ -30,7 +40,7 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
           'height': 500,
         }}
       />,
-      {attachTo: el}
+      {attachTo: container}
     );
 
     const iframe = wrapper.find('iframe');
@@ -38,13 +48,15 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
     expect(iframe.prop('src')).to.equal(
       'https://www.youtube.com/embed/IAvf-rkzNck?enablejsapi=1&amp=1&playsinline=1'
     );
-    expect(wrapper.find('iframe').prop('style').width).to.equal(600);
-    expect(wrapper.find('iframe').prop('style').height).to.equal(500);
+
+    // Style propagated to container, but not iframe.
+    expect(wrapper.prop('style').width).to.equal(600);
+    expect(wrapper.prop('style').height).to.equal(500);
+    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
+    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
   });
 
   it('Pass correct param attributes to the iframe src', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
     const wrapper = mount(
       <Youtube
         videoid="IAvf-rkzNck"
@@ -56,7 +68,7 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
         }}
         params={{'myparam': 'hello world', 'loop': '1'}}
       />,
-      {attachTo: el}
+      {attachTo: container}
     );
 
     const iframe = wrapper.find('iframe');
@@ -71,8 +83,6 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
   });
 
   it('Keep data param: loop in iframe src for playlists', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
     const wrapper = mount(
       <Youtube
         videoid="IAvf-rkzNck"
@@ -84,7 +94,7 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
         }}
         params={{'playlist': 'IAvf-rkzNck', 'loop': '1'}}
       />,
-      {attachTo: el}
+      {attachTo: container}
     );
 
     const iframe = wrapper.find('iframe');
@@ -93,8 +103,6 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
   });
 
   it('Uses privacy-enhanced mode', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
     const wrapper = mount(
       <Youtube
         videoid="IAvf-rkzNck"
@@ -106,7 +114,7 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
         }}
         credentials="omit"
       />,
-      {attachTo: el}
+      {attachTo: container}
     );
 
     const iframe = wrapper.find('iframe');
@@ -114,5 +122,37 @@ describes.sandboxed('YouTube preact component v1.0', {}, () => {
     expect(iframe.prop('src')).to.equal(
       'https://www.youtube-nocookie.com/embed/IAvf-rkzNck?enablejsapi=1&amp=1&playsinline=1&iv_load_policy=3'
     );
+  });
+
+  it('should trigger onCanPlay when youtube iframe is loaded', () => {
+    const wrapper = mount(
+      <Youtube
+        videoid="IAvf-rkzNck"
+        autoplay
+        loop
+        style={{
+          'width': 600,
+          'height': 500,
+        }}
+        credentials="omit"
+      />,
+      {attachTo: container}
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    const onCanPlaySpy = env.sandbox.spy();
+    iframe.addEventListener('canplay', onCanPlaySpy);
+    const postMessageSpy = env.sandbox.stub(
+      iframe.contentWindow,
+      'postMessage'
+    );
+
+    dispatchCustomEvent(iframe, 'load', {bubbles: false});
+    expect(onCanPlaySpy).to.be.calledOnce;
+    expect(onCanPlaySpy.firstCall.firstArg).to.contain({bubbles: false});
+    expect(postMessageSpy).to.be.calledOnce;
+    expect(JSON.parse(postMessageSpy.firstCall.firstArg)).to.deep.equal({
+      event: 'listening',
+    });
   });
 });

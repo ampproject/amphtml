@@ -22,7 +22,13 @@ import {
   AccordionSection,
 } from '../accordion';
 import {mount} from 'enzyme';
+import {useAmpContext} from '../../../../src/preact/context';
 import {waitFor} from '../../../../testing/test-helper';
+
+const ContextReader = (props) => {
+  const {renderable} = useAmpContext();
+  return <div data-renderable={String(renderable)} {...props} />;
+};
 
 describes.sandboxed('Accordion preact component', {}, (env) => {
   describe('standalone accordion section', () => {
@@ -105,6 +111,40 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       expect(dom).to.not.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('false');
       expect(content.className.includes('content-hidden')).to.be.true;
+    });
+
+    it('should propagate renderable/playable context when expanded', () => {
+      const wrapper = mount(
+        <AccordionSection expanded>
+          <AccordionHeader>
+            <h1>header1</h1>
+          </AccordionHeader>
+          <AccordionContent>
+            <ContextReader id="content" />
+          </AccordionContent>
+        </AccordionSection>
+      );
+      const dom = wrapper.getDOMNode();
+      expect(
+        dom.querySelector('#content').getAttribute('data-renderable')
+      ).to.equal('true');
+    });
+
+    it('should propagate renderable/playable context when collapsed', () => {
+      const wrapper = mount(
+        <AccordionSection>
+          <AccordionHeader>
+            <h1>header1</h1>
+          </AccordionHeader>
+          <AccordionContent>
+            <ContextReader id="content" />
+          </AccordionContent>
+        </AccordionSection>
+      );
+      const dom = wrapper.getDOMNode();
+      expect(
+        dom.querySelector('#content').getAttribute('data-renderable')
+      ).to.equal('false');
     });
   });
 

@@ -24,8 +24,34 @@ function dispatchMessage(window, opt_event) {
   window.dispatchEvent(Object.assign(event, opt_event));
 }
 
-describes.sandboxed('VideoIframe Preact component', {}, (env) => {
-  beforeEach(() => {});
+describes.realWin('VideoIframe Preact component', {}, (env) => {
+  let window;
+  let document;
+
+  beforeEach(() => {
+    window = env.win;
+    document = window.document;
+  });
+
+  it('calls `onIframeLoad` once loaded', async () => {
+    const onIframeLoad = env.sandbox.spy();
+    const onCanPlay = env.sandbox.spy();
+    const makeMethodMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframe
+        src="about:blank"
+        makeMethodMessage={makeMethodMessage}
+        onIframeLoad={onIframeLoad}
+        onCanPlay={onCanPlay}
+      />,
+      {attachTo: document.body}
+    );
+
+    await videoIframe.find('iframe').invoke('onCanPlay')();
+
+    expect(onCanPlay).to.be.calledOnce;
+    expect(onIframeLoad).to.be.calledOnce;
+  });
 
   it('unmutes per lack of `muted` prop', async () => {
     const makeMethodMessage = env.sandbox.spy();

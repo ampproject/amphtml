@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 import * as Preact from '../../../../src/preact';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from '../../../amp-accordion/1.0/accordion';
 import {VideoIframe} from '../video-iframe';
 import {VideoWrapper} from '../video-wrapper';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
@@ -104,5 +110,34 @@ export const UsingVideoIframe = () => {
       style={{width, height}}
       src={src}
     />
+  );
+};
+
+export const InsideAccordion = () => {
+  const width = text('width', '640px');
+  const height = text('height', '360px');
+  const autoplay = boolean('autoplay', false);
+  const controls = boolean('controls', true);
+  const src = text(
+    'src',
+    'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html'
+  );
+  return (
+    <Accordion expandSingleSection>
+      <AccordionSection key={1} expanded>
+        <AccordionHeader>
+          <h2>Controls</h2>
+        </AccordionHeader>
+        <AccordionContent>
+          <AmpVideoIframeLike
+            controls={controls}
+            autoplay={autoplay}
+            loop={true}
+            style={{width, height}}
+            src={src}
+          />
+        </AccordionContent>
+      </AccordionSection>
+    </Accordion>
   );
 };
