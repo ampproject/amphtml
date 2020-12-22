@@ -222,9 +222,6 @@ function ScrollerWithRef(
   };
 
   const handleScroll = () => {
-    if (_thumbnails) {
-      return;
-    }
     if (ignoreProgrammaticScrollRef.current) {
       ignoreProgrammaticScrollRef.current = false;
       return;
