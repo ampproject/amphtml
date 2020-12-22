@@ -23,6 +23,7 @@ import {
 } from '../experiments/intersect-resources-exp';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
+
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
@@ -225,9 +226,10 @@ export class ResourcesImpl {
     divertIntersectResources(this.win);
 
     if (
+      isExperimentOn(this.win, 'bento') ||
       getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
-        INTERSECT_RESOURCES_EXP.experiment &&
-      !isAmp4Email(this.win.document)
+        INTERSECT_RESOURCES_EXP.experiment ||
+      isAmp4Email(this.win.document)
     ) {
       const iframed = isIframed(this.win);
 

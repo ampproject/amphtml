@@ -60,9 +60,9 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-ad-type` - type of the ad
-- `data-site-key` - unique key attached to a website
+-   `data-ad-type` - type of the ad
+-   `data-site-key` - unique key attached to a website
 
 ### Optional parameters
 
-- `data-params` - additional config parameters
+-   `data-params` - additional config parameters

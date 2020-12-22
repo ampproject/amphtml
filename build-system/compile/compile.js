@@ -271,27 +271,47 @@ function compile(
 
     // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
     // for a full list of closure's default error / warning levels.
+    // NOTE: We do not use jscomp_warning because they are silenced by closure
+    // unless there are accompanying errors. Pick a side and use either one of
+    // jscomp_error or jscomp_off.
     if (options.typeCheckOnly) {
       compilerOptions.checks_only = true;
-
-      // Don't modify compilation_level to a lower level since
-      // it won't do strict type checking if its whitespace only.
+      // WARNING: compilation_level=WHITESPACE_ONLY will disable type-checking.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
+      // These aren't type-check errors by default, but should be.
       compilerOptions.jscomp_error.push(
         'accessControls',
+        'checkDebuggerStatement',
         'conformanceViolations',
         'checkTypes',
         'const',
         'constantProperty',
         'globalThis',
-        'misplacedTypeAnnotation'
+        'misplacedTypeAnnotation',
+        'missingProperties',
+        'strictMissingProperties',
+        'visibility'
       );
-      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
+      // These are type-check errors / warnings by default, but cannot be.
+      compilerOptions.jscomp_off.push(
+        'moduleLoad', // Breaks type-only modules: google/closure-compiler#3041
+        'unknownDefines' // Closure complains about VERSION
+      );
       compilerOptions.conformance_configs =
         'build-system/test-configs/conformance-config.textproto';
     } else {
-      compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
-      compilerOptions.jscomp_off.push('unknownDefines');
+      // These aren't compilation errors by default, but should be.
+      compilerOptions.jscomp_error.push(
+        'missingProperties',
+        'strictMissingProperties',
+        'visibility'
+      );
+      // Thse are compilation errors / warnings by default, but cannot be.
+      compilerOptions.jscomp_off.push(
+        'accessControls', // Silences spurious JSC_BAD_PRIVATE_GLOBAL_ACCESS
+        'moduleLoad', // Breaks type-only modules: google/closure-compiler#3041
+        'unknownDefines' // Closure complains about VERSION
+      );
     }
 
     if (compilerOptions.define.length == 0) {

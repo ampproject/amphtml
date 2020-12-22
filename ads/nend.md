@@ -34,4 +34,4 @@ For configuration details and to generate your tags, please contact https://www.
 
 Supported parameters:
 
-- `data-nend_params`
+-   `data-nend_params`

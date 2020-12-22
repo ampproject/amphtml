@@ -25,7 +25,7 @@ export default {
 
   parameters: {
     extensions: [{name: 'amp-accordion', version: '1.0'}],
-    experiments: ['amp-accordion-bento'],
+    experiments: ['bento'],
   },
 };
 

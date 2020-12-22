@@ -38,16 +38,16 @@ For semantics of configuration, please see [ad network documentation](https://su
 
 Supported parameters:
 
-- data-ad-channel
-- data-ad-client
-- data-ad-slot
-- data-ad-host
-- data-adtest
-- data-auto-format
-- data-full-width
-- data-tag-origin
-- data-language
-- data-matched-content-ui-type
-- data-matched-content-rows-num
-- data-matched-content-columns-num
-- data-npa-on-unknown-consent
+-   data-ad-channel
+-   data-ad-client
+-   data-ad-slot
+-   data-ad-host
+-   data-adtest
+-   data-auto-format
+-   data-full-width
+-   data-tag-origin
+-   data-language
+-   data-matched-content-ui-type
+-   data-matched-content-rows-num
+-   data-matched-content-columns-num
+-   data-npa-on-unknown-consent

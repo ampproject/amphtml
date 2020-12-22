@@ -37,5 +37,5 @@ For semantics of configuration, please see Geniee SSP documentation or [contact 
 
 Supported parameters:
 
-- `data-vid`
-- `data-zid`
+-   `data-vid`
+-   `data-zid`
