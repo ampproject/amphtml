@@ -92,7 +92,6 @@ function BaseCarouselWithRef(
     onTouchStart,
     orientation = Orientation.HORIZONTAL,
     outsetArrows,
-    pagination,
     snap = true,
     snapAlign = Alignment.START,
     snapBy = 1,
@@ -324,7 +323,6 @@ function BaseCarouselWithRef(
           rtl={rtl}
         />
       )}
-      {pagination}
     </ContainWrapper>
   );
 }

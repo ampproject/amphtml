@@ -101,13 +101,6 @@ AmpBaseCarousel['children'] = {
     selector: '[slot="next-arrow"]',
     single: true,
   },
-  'pagination': {
-    name: 'pagination',
-    selector: 'amp-inline-gallery-pagination[inset]',
-    // Note: All must be selected so they do not count as slides,
-    // however only one is visible since they are positioned atop one another.
-    single: false,
-  },
   'children': {
     name: 'children',
     props: {

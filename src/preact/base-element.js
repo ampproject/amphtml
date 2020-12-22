@@ -216,7 +216,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.observer = new MutationObserver(this.checkMutations_.bind(this));
     const childrenInit = Ctor['children'] ? CHILDREN_MUTATION_INIT : null;
     const passthroughInit =
-      Ctor['passthrough'] || Ctor['passthroughNonEmpty'] || Ctor['detached']
+      Ctor['passthrough'] || Ctor['passthroughNonEmpty']
         ? PASSTHROUGH_MUTATION_INIT
         : null;
     const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
