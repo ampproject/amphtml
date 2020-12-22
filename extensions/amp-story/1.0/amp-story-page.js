@@ -245,7 +245,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     /** @private {?boolean}  */
-    this.isActivePage_ = null;
+    this.isPrerenderActivePage_ = null;
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
@@ -384,8 +384,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {boolean}
    */
   isPrerenderActivePage() {
-    if (this.isActivePage_ != null) {
-      return this.isActivePage_;
+    if (this.isPrerenderActivePage_ != null) {
+      return this.isPrerenderActivePage_;
     }
     const hashId = parseQueryString(this.win.location.href)['page'];
     let selector = 'amp-story-page:first-of-type';
@@ -393,9 +393,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
     }
     const selectorNodes = this.win.document.querySelectorAll(selector);
-    this.isActivePage_ =
+    this.isPrerenderActivePage_ =
       selectorNodes[selectorNodes.length - 1] === this.element;
-    return this.isActivePage_;
+    return this.isPrerenderActivePage_;
   }
 
   /**
