@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
+import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {getStyle, setStyles} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
 import {throttle} from '../../../src/utils/rate-limit';
@@ -282,15 +283,11 @@ export class SafeframeHostApi {
    * Returns the initialGeometry to assign to the name of the safeframe
    * for rendering. This needs to be done differently than all the other
    * geometry updates, because we don't actually have access to the
-   * rendered safeframe yet. Note that we are using getPageLayoutBox,
-   * which is not guaranteed to be perfectly accurate as it is from
-   * the last measure of the element. This is fine for our use case
-   * here, as even if the position is slightly off, we'll send the right
-   * size.
+   * rendered safeframe yet.
    * @return {string}
    */
   getInitialGeometry() {
-    const ampAdBox = this.baseInstance_.getPageLayoutBox();
+    const ampAdBox = getPageLayoutBoxBlocking(this.baseInstance_.element);
     const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
     const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
     const iframeBox = /** @type {!../../../src/layout-rect.LayoutRectDef} */ ({

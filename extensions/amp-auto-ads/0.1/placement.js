@@ -28,7 +28,7 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getElementLayoutBox} from './utils';
+import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -158,9 +158,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return getElementLayoutBox(this.anchorElement_).then((layoutBox) => {
-      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-    });
+    return measurePageLayoutBox(this.anchorElement_).then((layoutBox) =>
+      this.getEstimatedPositionFromAnchorLayout_(layoutBox)
+    );
   }
 
   /**
@@ -168,7 +168,7 @@ export class Placement {
    * @return {number}
    * @private
    */
-  getEstimatedPositionFromAchorLayout_(anchorLayout) {
+  getEstimatedPositionFromAnchorLayout_(anchorLayout) {
     // TODO: This should really take account of margins and padding too.
     switch (this.position_) {
       case Position.BEFORE:

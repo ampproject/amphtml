@@ -1204,17 +1204,8 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/base-element.js',
       'src/custom-element.js',
-      'src/iframe-attributes.js',
-      'src/ini-load.js',
-      'src/service/mutator-impl.js',
       'src/service/resource.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/safeframe-host.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils.js',
-      'extensions/amp-auto-ads/0.1/utils.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js',
-      'extensions/amp-video-docking/0.1/math.js',
-      'ads/google/a4a/utils.js',
     ],
   },
   '\\.getIntersectionElementLayoutBox': {

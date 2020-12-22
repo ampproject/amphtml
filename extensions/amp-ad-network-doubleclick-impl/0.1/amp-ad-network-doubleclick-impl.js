@@ -107,6 +107,7 @@ import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
+import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
@@ -665,7 +666,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ifi_ =
       (this.isRefreshing && this.ifi_) || this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd
-      ? this.element.getPageLayoutBox()
+      ? getPageLayoutBoxBlocking(this.element)
       : null;
     let msz = null;
     let psz = null;
@@ -984,7 +985,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
-      ELEMENT_POS: () => this.element.getPageLayoutBox().top,
+      ELEMENT_POS: () => getPageLayoutBoxBlocking(this.element).top,
       SCROLL_TOP: () =>
         Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
       PAGE_HEIGHT: () =>
@@ -1543,7 +1544,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       } else {
         // Must center creative within the viewport
         const viewportWidth = this.getViewport().getRect().width;
-        const pageLayoutBox = this.element.getPageLayoutBox();
+        const pageLayoutBox = getPageLayoutBoxBlocking(this.element);
         const whitespace = (viewportWidth - newWidth) / 2;
         if (isRtl) {
           style['margin-right'] = getMarginStr(

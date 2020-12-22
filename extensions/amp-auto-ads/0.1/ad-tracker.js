@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {endsWith} from '../../../src/string';
-import {getElementLayoutBox} from './utils';
+import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 import {user} from '../../../src/log';
 
 /** @const */
@@ -136,7 +136,7 @@ export class AdTracker {
    * @private
    */
   getDistanceFromAd_(yPosition, ad) {
-    return getElementLayoutBox(ad).then((box) => {
+    return measurePageLayoutBox(ad).then((box) => {
       if (yPosition >= box.top && yPosition <= box.bottom) {
         return 0;
       } else {
