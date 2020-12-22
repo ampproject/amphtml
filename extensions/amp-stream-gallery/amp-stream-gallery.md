@@ -245,4 +245,4 @@ location, you can use the following HTML:
 
 ## Validation
 
-See [amp-stream-gallery rules](validator-amp-stream-gallery.protoascii) in the AMP validator specification.
+See `[amp-stream-gallery rules](validator-amp-stream-gallery.protoascii)` in the AMP validator specification.
