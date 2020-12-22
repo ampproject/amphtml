@@ -96,7 +96,8 @@
       "packagePatterns": ["renovate"],
       "depTypeList": ["devDependencies"],
       "groupName": "Renovate Bot",
-      "updateTypes": ["major"]
+      "updateTypes": ["major", "minor"],
+      "extends": ["schedule:weekly"]
     },
 
     {
