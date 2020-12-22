@@ -71,8 +71,6 @@ function noopMethods(
   pageLayoutBox = {
     top: 11.1,
     left: 12.1,
-    right: 0,
-    bottom: 0,
     width: 0,
     height: 0,
   }
@@ -82,7 +80,11 @@ function noopMethods(
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
   sandbox.stub(impl, 'getAmpDoc').returns(ampdoc);
-  sandbox.stub(impl, 'getPageLayoutBox').returns(pageLayoutBox);
+  sandbox.stub(impl.element, 'offsetParent').value(null);
+  sandbox.stub(impl.element, 'offsetTop').value(pageLayoutBox.top);
+  sandbox.stub(impl.element, 'offsetLeft').value(pageLayoutBox.left);
+  sandbox.stub(impl.element, 'offsetWidth').value(pageLayoutBox.width);
+  sandbox.stub(impl.element, 'offsetHeight').value(pageLayoutBox.height);
 }
 
 describe('Google A4A utils', () => {

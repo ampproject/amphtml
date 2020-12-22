@@ -401,10 +401,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         env.sandbox.stub(impl, 'getViewport').callsFake(() => ({
           getRect: () => ({width: 400}),
         }));
-        env.sandbox.stub(impl.element, 'getPageLayoutBox').callsFake(() => ({
-          left: 25,
-          right: 25,
-        }));
+        env.sandbox.stub(impl.element, 'offsetLeft').value(25);
+        env.sandbox.stub(impl.element, 'offsetTop').value(25);
         const dirStr = testCase.direction == 'ltr' ? 'Left' : 'Right';
         impl.flexibleAdSlotData_ = {
           parentWidth: testCase.parentWidth,
@@ -643,19 +641,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
             height: 50,
           };
         });
-
-      // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
-      // to fix failures when this is run after 'gulp build', without a 'dist'.
-      window.sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
-        return {
-          top: 11,
-          left: 12,
-          right: 0,
-          bottom: 0,
-          width: 0,
-          height: 0,
-        };
-      });
     });
 
     afterEach(() => {
@@ -1286,16 +1271,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       env.sandbox
         .stub(impl, 'shouldInitializePromiseChain_')
         .callsFake(() => true);
-      env.sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
-        return {
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: 200,
-          height: 50,
-        };
-      });
       env.sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
         impl.element.style.height = `${height}px`;
         impl.element.style.width = `${width}px`;
@@ -2170,9 +2145,6 @@ describes.realWin(
       it('should change safeframeApi value', () => {
         impl.safeframeApi_ = mockSafeFrameApi;
         impl.isRefreshing = true;
-        env.sandbox
-          .stub(impl, 'getPageLayoutBox')
-          .returns({width: 411, height: 1500, left: 0, right: 0});
         impl.getAdditionalContextMetadata(/* isSafeFrame= */ true);
         expect(impl.safeframeApi_).to.not.equal(mockSafeFrameApi);
         // We just want to make sure the value's changed and is not null.
