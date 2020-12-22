@@ -81,6 +81,10 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       }
 
       function setupElementFunctions(div) {
+        div.getAmpDoc = function () {
+          return Services.ampdoc(window.document);
+        };
+
         const {innerWidth: width, innerHeight: height} = window;
         div.getIntersectionChangeEntry = function () {
           return {
@@ -111,17 +115,11 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
             },
           };
         };
-        div.getPageLayoutBox = function () {
-          return {
-            left: 0,
-            top: 0,
-            width: 100,
-            height: 200,
-          };
-        };
-        div.getAmpDoc = function () {
-          return Services.ampdoc(window.document);
-        };
+        env.sandbox.stub(div, 'offsetParent').value(null);
+        env.sandbox.stub(div, 'offsetTop').value(0);
+        env.sandbox.stub(div, 'offsetLeft').value(0);
+        env.sandbox.stub(div, 'offsetWidth').value(100);
+        env.sandbox.stub(div, 'offsetHeight').value(200);
       }
 
       it('add attributes', () => {
@@ -148,7 +146,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         });
       });
 
-      // TODO(bradfrizzell) break this out into a test-iframe-attributes
       it('should create an iframe', () => {
         mockMode({
           localDev: true,
@@ -214,7 +211,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
             'sourceUrl': locationHref,
             'pageViewId': docInfo.pageViewId,
             'clientId': 'cidValue',
-            'initialLayoutRect': div.getPageLayoutBox(),
+            'initialLayoutRect': {height: 200, left: 0, top: 0, width: 100},
             'location': {'href': locationHref},
             'tagName': 'MY-ELEMENT',
             'mode': {
@@ -540,14 +537,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
             right: 0,
             x: 0,
             y: 0,
-          };
-        };
-        div.getPageLayoutBox = function () {
-          return {
-            left: 0,
-            top: 0,
-            width: 100,
-            height: 200,
           };
         };
         div.getAmpDoc = function () {

@@ -29,6 +29,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {parseJson} from '../../../src/json';
@@ -196,7 +197,7 @@ export function isReportingEnabled(ampElement) {
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
   const {element: adElement, win} = a4a;
-  const slotRect = a4a.getPageLayoutBox();
+  const slotRect = getPageLayoutBoxBlocking(adElement);
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
   let eids = adElement.getAttribute(EXPERIMENT_ATTRIBUTE);
