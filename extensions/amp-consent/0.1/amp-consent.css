@@ -144,7 +144,6 @@ amp-consent.i-amphtml-consent-ui-modal.i-amphtml-consent-ui-border-enabled {
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
   transition: transform 0.5s ease-out !important;
   /* Initial height transform will be set through styles */
-  transform: var(--i-amphtml-consent-iframe-tranform) !important;
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
