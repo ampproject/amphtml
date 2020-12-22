@@ -46,14 +46,14 @@ For details on the configuration semantics, please contact the ad network or ref
 
 For DSP/SSP clients
 
-- `data-source`
+-   `data-source`
 
 For HBMP clients
 
-- `data-hbmp-site-id`
-- `data-hbmp-pub-id`
-- `data-hbmp-unit-id`
+-   `data-hbmp-site-id`
+-   `data-hbmp-pub-id`
+-   `data-hbmp-unit-id`
 
 ### Optional parameters
 
-- `data-floor`
+-   `data-floor`
