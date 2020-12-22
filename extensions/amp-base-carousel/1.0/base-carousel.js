@@ -107,10 +107,20 @@ function BaseCarouselWithRef(
   const [currentSlideState, setCurrentSlideState] = useState(
     Math.min(Math.max(defaultSlide, 0), length)
   );
-  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
-  const currentSlideRef = useRef(currentSlide);
-  const setCurrentSlide =
+  const globalCurrentSlide = carouselContext.currentSlide ?? currentSlideState;
+  const setGlobalCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
+  const currentSlide = _thumbnails ? currentSlideState : globalCurrentSlide;
+  const setCurrentSlide = _thumbnails
+    ? setCurrentSlideState
+    : setGlobalCurrentSlide;
+  const currentSlideRef = useRef(currentSlide);
+
+  useLayoutEffect(() => {
+    // noop if !_thumbnails || !carouselContext.
+    setCurrentSlide(globalCurrentSlide);
+  }, [globalCurrentSlide, setCurrentSlide]);
+
   const {slides, setSlides} = carouselContext;
 
   const scrollRef = useRef(null);
@@ -202,10 +212,21 @@ function BaseCarouselWithRef(
     }
   }, [_thumbnails, childrenArray, setSlides, slides]);
 
-  const disableForDir = (dir) =>
-    !loop &&
-    (currentSlide + dir < 0 ||
-      (!mixedLength && currentSlide + visibleCount + dir > length));
+  const disableForDir = (dir) => {
+    if (loop) {
+      // Arrows always available when looping.
+      return false;
+    }
+    if (currentSlide + dir < 0) {
+      // Can no longer advance backwards.
+      return true;
+    }
+    if (currentSlide + visibleCount + dir > length) {
+      // Can no longer advance forwards.
+      return true;
+    }
+    return false;
+  };
 
   const interaction = useRef(Interaction.NONE);
   const hideControls = useMemo(() => {
