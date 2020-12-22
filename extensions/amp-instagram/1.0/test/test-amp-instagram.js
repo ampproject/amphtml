@@ -16,6 +16,7 @@
 
 import '../amp-instagram';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -42,6 +43,8 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       toggleExperiment(win, 'bento-instagram', true, true);
+      // Override global window here because Preact uses global `createElement`.
+      doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
     it('renders', async () => {

@@ -636,7 +636,6 @@ class RealWinFixture {
 
         if (!spec.allowExternalResources) {
           doNotLoadExternalResourcesInTest(win, env.sandbox);
-          doNotLoadExternalResourcesInTest(window, env.sandbox);
         }
 
         // Install AMP CSS if requested.
