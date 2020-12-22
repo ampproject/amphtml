@@ -194,6 +194,9 @@ export class Resource {
     /** @private {?../layout-rect.LayoutRectDef} */
     this.initialLayoutBox_ = null;
 
+    /** @private {IntersectionOberverEntry} */
+    this.initialIntersection_ = null;
+
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
@@ -454,9 +457,35 @@ export class Resource {
    * Should only be used in IntersectionObserver mode.
    * @param {!ClientRect} clientRect
    */
-  premeasure(clientRect) {
+  premeasure_(clientRect) {
     devAssert(this.intersect_);
     this.premeasuredRect_ = clientRect;
+  }
+
+  /**
+   * Informs a resource that it was just measured via intersection event.
+   *
+   * @param {IntersectionObserverEntry} entry
+   */
+  intersects(entry) {
+    // Strangely, JSC is missing x/y from typedefs of boundingClientRect
+    // despite it being a DOMRectReadOnly (ClientRect) by spec.
+    this.premeasure_(/** @type {!ClientRect} */ (entry.boundingClientRect));
+    if (!this.initialIntersection_) {
+      this.initialIntersection_ = entry;
+    }
+  }
+
+  /**
+   * Returns the value of the first IntersectionObserver entry for this Resource.
+   * Null if the Resource is unmeasured. Therefore this value is useless prior to measure
+   * and should likely not be used outside of `layoutCallback`.
+   *
+   * @deprecated
+   * @return {IntersectionObserverEntry}
+   */
+  getInitialIntersection() {
+    return this.initialIntersection_;
   }
 
   /** Removes the premeasured rect, likely forcing a manual measure. */

@@ -1219,6 +1219,10 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-iframe/0.1/amp-iframe.js',
     ],
   },
+  '\\.getInitialIntersection': {
+    message: measurementApiDeprecated,
+    allowlist: ['src/iframe-attributes.js'],
+  },
 };
 
 // Terms that must appear in a source file.

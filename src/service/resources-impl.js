@@ -337,12 +337,8 @@ export class ResourcesImpl {
     this.intersectionObserverCallbackFired_ = true;
 
     entries.forEach((entry) => {
-      const {boundingClientRect, target} = entry;
-
-      const r = Resource.forElement(target);
-      // Strangely, JSC is missing x/y from typedefs of boundingClientRect
-      // despite it being a DOMRectReadOnly (ClientRect) by spec.
-      r.premeasure(/** @type {!ClientRect} */ (boundingClientRect));
+      const r = Resource.forElement(entry.target);
+      r.intersects(entry);
     });
 
     this.schedulePass();
