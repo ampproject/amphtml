@@ -574,6 +574,12 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInStoryPageSideEdge_(event, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
     const sideEdgeWidthFromPercent =
       pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
     const sideEdgeLimit = Math.max(
