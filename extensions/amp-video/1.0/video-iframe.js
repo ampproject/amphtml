@@ -77,7 +77,7 @@ function VideoIframeWithRef(
 
   const readyDeferred = useMemo(() => new Deferred(), []);
 
-  // Only use the first instance of `makeMethodUsage` to avoid resetting this
+  // Only use the first instance of `makeMethodMessage` to avoid resetting this
   // callback all the time.
   const makeMethodMessageRef = useRef(makeMethodMessageProp);
   const postMethodMessage = useCallback(

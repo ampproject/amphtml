@@ -34,6 +34,7 @@ export function Instagram({
   title,
   requestResize,
   loading,
+  onLoad,
   ...rest
 }) {
   const load = useLoad(loading, /* unlayoutOnPause */ true);
@@ -87,11 +88,12 @@ export function Instagram({
             (captioned ? 'captioned/' : '') +
             '?cr=1&v=12'
           }
+          loading={loading}
+          onLoad={onLoad}
           scrolling="no"
           frameborder="0"
           allowtransparency
           title={title}
-          loading={loading}
           style={{
             width: '100%',
             height: '100%',
