@@ -36,7 +36,12 @@ import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray, toWin} from '../../../src/types';
-import {useImperativeHandle, useLayoutEffect} from '../../../src/preact';
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+} from '../../../src/preact';
+import {useSlotContext} from '../../../src/preact/slot';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
@@ -261,6 +266,9 @@ function ContentShimWithRef(
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;
+  const contentRef = useRef();
+  contentRef.current = contentElement;
+  useSlotContext(contentRef);
   useImperativeHandle(ref, () => contentElement, [contentElement]);
   useLayoutEffect(() => {
     if (!contentElement) {

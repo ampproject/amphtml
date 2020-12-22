@@ -15,17 +15,16 @@
  */
 
 import '../amp-youtube';
-import {
-  createElementWithAttributes,
-  waitForChildPromise,
-} from '../../../../src/dom';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {createElementWithAttributes} from '../../../../src/dom';
+
+import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
+import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-youtube-v1.0',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-youtube:1.0'],
     },
   },
@@ -34,16 +33,19 @@ describes.realWin(
     let element;
 
     const waitForRender = async () => {
-      await whenCalled(env.sandbox.spy(element, 'attachShadow'));
+      await element.build();
+      const loadPromise = element.layoutCallback();
       const shadow = element.shadowRoot;
-      await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelector('iframe');
-      });
+      await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
+      await loadPromise;
     };
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      toggleExperiment(env.win, 'bento-youtube', true, true);
+      // Override global window here because Preact uses global `createElement`.
+      doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
     it('renders', async () => {
@@ -57,9 +59,7 @@ describes.realWin(
       doc.body.appendChild(element);
       await waitForRender();
 
-      expect(
-        element.shadowRoot.querySelector('iframe').getAttribute('src')
-      ).to.equal(
+      expect(element.shadowRoot.querySelector('iframe').src).to.equal(
         'https://www.youtube.com/embed/IAvf-rkzNck?enablejsapi=1&amp=1&playsinline=1'
       );
     });

@@ -15,15 +15,15 @@
  */
 
 import '../amp-video';
+import {dispatchCustomEvent} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
-import {waitForChildPromise} from '../../../../src/dom';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {toggleExperiment} from '../../../../src/experiments';
+import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-video-v1.0',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-video:1.0'],
       canonicalUrl: 'https://canonicalexample.com/',
     },
@@ -33,15 +33,18 @@ describes.realWin(
     let element;
 
     const waitForRender = async () => {
-      await whenCalled(env.sandbox.spy(element, 'attachShadow'));
+      await element.build();
+      const loadPromise = element.layoutCallback();
       const shadow = element.shadowRoot;
-      await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelector('video');
-      });
+      await waitFor(() => shadow.querySelector('video'), 'video mounted');
+      const video = shadow.querySelector('video');
+      dispatchCustomEvent(video, 'canplay', null, {bubbles: false});
+      await loadPromise;
     };
 
     beforeEach(() => {
       html = htmlFor(env.win.document);
+      toggleExperiment(env.win, 'bento-video', true, true);
     });
 
     it('renders video element', async () => {

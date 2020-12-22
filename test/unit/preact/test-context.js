@@ -25,7 +25,7 @@ import {mount} from 'enzyme';
 describes.sandboxed('preact/context', {}, () => {
   function Component(props) {
     const context = useAmpContext();
-    const load = useLoad(props.loading);
+    const load = useLoad(props.loading, props.unloadOnPause);
     return <ContextReader {...context} load={load} />;
   }
 
@@ -72,6 +72,20 @@ describes.sandboxed('preact/context', {}, () => {
       playable: false,
       loading: 'auto',
       load: true,
+    });
+  });
+
+  it('should disable loading when not playable and unloadOnPause', () => {
+    const wrapper = mount(
+      <WithAmpContext playable={false}>
+        <Component unloadOnPause={true} />
+      </WithAmpContext>
+    );
+    expect(wrapper.find(ContextReader).props()).to.contain({
+      renderable: true,
+      playable: false,
+      loading: 'auto',
+      load: false,
     });
   });
 

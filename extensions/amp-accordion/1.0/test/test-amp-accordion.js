@@ -16,7 +16,9 @@
 import '../amp-accordion';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
+import {CanRender} from '../../../../src/contextprops';
 import {htmlFor} from '../../../../src/static-template';
+import {subscribe, unsubscribe} from '../../../../src/context';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -37,6 +39,16 @@ describes.realWin(
         el.hasAttribute('expanded') === expanded &&
         el.firstElementChild.getAttribute('aria-expanded') === String(expanded);
       await waitFor(isExpandedOrNot, 'element expanded updated');
+    }
+
+    function readContextProp(element, prop) {
+      return new Promise((resolve) => {
+        const handler = (value) => {
+          resolve(value);
+          unsubscribe(element, [prop], handler);
+        };
+        subscribe(element, [prop], handler);
+      });
     }
 
     beforeEach(async () => {
@@ -83,6 +95,18 @@ describes.realWin(
         sections[2].firstElementChild.getAttribute('aria-expanded')
       ).to.equal('false');
       expect(sections[2].lastElementChild).to.have.display('none');
+    });
+
+    it('should propagate renderable context', async () => {
+      const sections = element.children;
+      const renderables = await Promise.all([
+        readContextProp(sections[0].lastElementChild, CanRender),
+        readContextProp(sections[1].lastElementChild, CanRender),
+        readContextProp(sections[2].lastElementChild, CanRender),
+      ]);
+      expect(renderables[0]).to.be.true;
+      expect(renderables[1]).to.be.false;
+      expect(renderables[2]).to.be.false;
     });
 
     it('should have amp specific classes for CSS', () => {

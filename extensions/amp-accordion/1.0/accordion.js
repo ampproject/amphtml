@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {WithAmpContext} from '../../../src/preact/context';
 import {animateCollapse, animateExpand} from './animations';
 import {forwardRef} from '../../../src/preact/compat';
 import {omit} from '../../../src/utils/object';
@@ -490,17 +491,19 @@ export function AccordionContent({
   }, [expanded, animate]);
 
   return (
-    <Comp
-      {...rest}
-      ref={ref}
-      className={`${className} ${classes.sectionChild} ${
-        expanded ? '' : hiddenClass
-      }`}
-      id={contentId}
-      aria-labelledby={headerId}
-      role={role}
-    >
-      {children}
-    </Comp>
+    <WithAmpContext renderable={expanded}>
+      <Comp
+        {...rest}
+        ref={ref}
+        className={`${className} ${classes.sectionChild} ${
+          expanded ? '' : hiddenClass
+        }`}
+        id={contentId}
+        aria-labelledby={headerId}
+        role={role}
+      >
+        {children}
+      </Comp>
+    </WithAmpContext>
   );
 }
