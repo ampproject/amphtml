@@ -520,7 +520,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
     if (
       this.isInStoryPageSideEdge_(event, pageRect) ||
-      this.isTooLargeOnPage_(target, pageRect)
+      this.isTooLargeOnPage_(event, target, pageRect)
     ) {
       event.preventDefault();
       return false;
@@ -596,12 +596,19 @@ export class ManualAdvancement extends AdvancementConfig {
   /**
    * Checks if click target is too large on the page and preventing navigation.
    * If yes, the link is ignored & logged.
+   * @param {!Event} event
    * @param {!Element} target
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isTooLargeOnPage_(target, pageRect) {
+  isTooLargeOnPage_(event, target, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
     const targetRect = target./*OK*/ getBoundingClientRect();
     if (
       (targetRect.height * targetRect.width) /
