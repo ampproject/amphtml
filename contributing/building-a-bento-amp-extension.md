@@ -439,7 +439,7 @@ HTML-native `img` tag which will be out of AMP resource management.
 Consider showing a loading indicator if your element is expected to take
 a long time to load (for example, loading a GIF, video or iframe). AMP
 has a built-in mechanism to show a loading indicator simply by
-whitelisting your element to show it. You can do that inside layout.js
+allowlisting your element to show it. You can do that inside layout.js
 file in the `LOADING_ELEMENTS_` object.
 
 ```javascript
@@ -449,55 +449,6 @@ export const LOADING_ELEMENTS_ = {
   'AMP-MY-ELEMENT': true,
 }
 ```
-
-### Destroying heavyweight resources
-
-To stay good to our promise of lowering resources usage especially on
-mobile, elements that create and load heavyweight resources (e.g.
-iframes, video, very large images, an expensive timer or computation...)
-need to be destroyed when they are no longer needed.
-
-AMP signals to your element that it needs to do that with
-[unlayoutCallback](#unlayoutcallback). AMP calls this when the
-document becomes inactive; like when the user swipes away from the
-document to another one or when they switch tabs.
-
-This might be also be called in special cases like if your element is
-used as an amp-carousel cell and it was swiped away to become outside
-the viewport. This will only happen if your element sets
-`unlayoutOnPause`. Carousel by default only pauses the elements that
-are outside its viewport.
-
-Here's an example of how `amp-instagram` destroys the iframe it has
-embedded when `unlayoutCallback` is called.
-
-```javascript
-/** @override */
-unlayoutCallback() {
-  if (this.iframe_) {
-    removeElement(this.iframe_);
-    this.iframe_ = null;
-    this.iframePromise_ = null;
-    setStyles(this.placeholderWrapper_, {
-      'display': '',
-    });
-  }
-  return true; // Call layoutCallback again.
-}
-```
-
-Note if your element unlayoutCallback destroys the resources, it
-probably wants to return true in order to signal to AMP the need to call
-`layoutCallback` again once the document is active. Otherwise your
-element will never be re-laid out.
-
-### vsync, mutateElement, and requestChangeSize
-
-AMP provides multiple utilities to optimize many mutations and measuring
-for better performance. These include vsync service with a mutate and
-measure utility method that will synchronize all measuring happening in
-short period of time together and then do all the mutating in a
-requestAnimationFrame or similar cycles.
 
 ### Loading external resources
 
@@ -512,10 +463,10 @@ extension PR for examples of 3p integration.
 Read about [Inclusion of third party software, embeds and services into
 AMP](https://github.com/ampproject/amphtml/blob/master/3p/README.md).
 
-For contrast, take a look at amp-instagram which does NOT require an SDK
+For contrast, take a look at `amp-instagram` which does NOT require an SDK
 to be loaded in order to embed a post, instead it provides an
-iframe-based embedding allowing amp-instagram extension to use a normal
-iframe with no 3p integration needed, similarly, amp-youtube and others.
+iframe-based embedding allowing `amp-instagram` extension to use a normal
+iframe with no 3p integration needed, similarly, `amp-youtube` and others.
 
 ## Layouts supported in your element
 
