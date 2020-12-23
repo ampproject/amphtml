@@ -273,6 +273,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Adman](../../ads/adman.md)
 -   [AdmanMedia](../../ads/admanmedia.md)
 -   [Admixer](../../ads/admixer.md)
+-   [Adnuntius](../../ads/adnuntius.md)
 -   [AdOcean](../../ads/adocean.md)
 -   [Adop](../../ads/adop.md)
 -   [AdPicker](../../ads/adpicker.md)
