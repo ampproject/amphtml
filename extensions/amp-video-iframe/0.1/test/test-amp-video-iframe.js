@@ -106,11 +106,13 @@ describes.realWin(
       );
     }
 
-    function stubIntersectionEntry(element, time, intersectionRatio) {
+    function stubPostIntersection(videoIframe, time, intersectionRatio) {
       const entry = {time, intersectionRatio};
       env.sandbox
-        ./*OK*/ stub(element, 'getIntersectionChangeEntry')
-        .returns(entry);
+        .stub(videoIframe.implementation_, 'postIntersection_')
+        .callsFake((id) => {
+          videoIframe.implementation_.intersectionCallback_(id, [entry]);
+        });
       return entry;
     }
 
@@ -290,7 +292,7 @@ describes.realWin(
 
         const expectedResponseMessage = {
           id,
-          args: stubIntersectionEntry(videoIframe, time, intersectionRatio),
+          args: stubPostIntersection(videoIframe, time, intersectionRatio),
         };
 
         videoIframe.implementation_.onMessage_(message);
@@ -311,7 +313,7 @@ describes.realWin(
 
         const postMessage = stubPostMessage(videoIframe);
 
-        stubIntersectionEntry(videoIframe, time, intersectionRatio);
+        stubPostIntersection(videoIframe, time, intersectionRatio);
 
         acceptMockedMessages(videoIframe);
 
