@@ -268,13 +268,7 @@ Element styles are loaded when the element script itself is included in
 an AMP doc. You tell AMP which CSS belongs to this element when
 registering the element (see below).
 
-Class names prefixed with `i-amphtml` are considered private. Publishers
-are not allowed to use them for customization (enforced by AMP validator).
-
-Class names prefixed with `amp-` are public css classes that can be customized
-by publishers. All such classes should be documented in the component-specific
-`.md` file. All CSS classes in component stylesheets should be prefixed with
-either `i-amphtml-` or `amp-`.
+TODO: Discuss JSS and when to use it.
 
 ## Register element with AMP
 
@@ -293,22 +287,20 @@ AMP.extension('amp-carousel', '0.1', (AMP) => {
 AMP provides a framework for [elements to fire their own
 events](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md)
 to allow users of that element to listen and react to the events. For
-example, amp-form extension fires a few events on &lt;form&gt; elements
-like `submit-success`. This allow publishers to listen to that event
-and react to it, for example, by launching a lightbox to display a
-message.
+example, the `amp-base-carousel` extension fires a `slideChange` event.
+This allow publishers to listen to that event and react to it, for example, by updating an `amp-selector` state to match the current slide being shown.
 
 The other part of the event-system in AMP is actions. When listening to
 an event on an element usually you'd like to trigger an action (possibly
 on other elements). For example, in the example above, the publisher is
-executing the `open` action on `lightbox`.
+executing the `toggle` action on `amp-selector`.
 
 The syntax for using this on elements is as follow:
 
 ```html
-<form
-  on="submit-success:my-success-lightbox.open;submit-error:my-error-lightbox.open"
-></form>
+<amp-base-carousel
+  on="slideChange:my-selector.toggle(index=e.index, value=true)"
+></amp-base-carousel>
 ```
 
 To fire events on your element use AMP's action service and the
@@ -316,107 +308,43 @@ To fire events on your element use AMP's action service and the
 
 ```javascript
 actionServiceForDoc(doc.documentElement).trigger(
-  this.form_,
-  'submit-success',
-  null
+  this.element_,
+  'slideChange',
+  createCustomEvent(
+    win,
+    `amp-base-carousel.${name}`,
+    dict({'index': index})
+  ),
+  ActionTrust.DEFAULT
 );
 ```
 
-And to expose actions use `registerAction` method that your element
-inherits from `BaseElement`.
+And to expose actions use `registerApiAction` method that your element
+inherits from `PreactBaseElement`. Note, this should correspond directly with the API exposed in the corresponding Preact compnent via `useImperativeHandle`, and the component should be defined using a `forwardRef` accordingly.
 
 ```javascript
-this.registerAction('close', this.close.bind(this));
+this.registerApiAction('close', this.close.bind(this));
 ```
 
 Your element could also choose to override the `activate` method
 inherited from BaseElement that would define the default action for your
-element. For example amp-lightbox overrides activate to define the open
+element. For example `amp-lightbox` overrides `activate` to define the `open`
 default case.
 
 Make sure your element documentation documents the events and actions it
-exposes.
-
-## Sub-elements ownership
-
-AMP elements are usually discovered and scheduled by the AMP runtime
-automatically and managed through Resources. In some cases an AMP
-element might want to control and own when its sub-elements get
-scheduled and not leave that to the AMP runtime. An example to this is
-the &lt;amp-carousel&gt; component, where it wants to schedule
-preloading/pre-rendering or layouting of its cells based on the window
-the user is in.
-
-AMP provides a way for an element to control this by setting the owner
-on the element you want to control. In the carousel example, the component loops
-over all its elements and sets itself as the owner of these elements.
-The AMP runtime will not manage scheduling layouting for elements that have
-owners.
-
-```javascript
-this.cells_ = this.getRealChildren();
-
-this.cells_.forEach((cell) => {
-  Services.ownersForDoc(this.element).setOwner(cell, this.element);
-  cell.style.display = 'inline-block';
-  this.container_.appendChild(cell);
-});
-```
-
-An element can then later call `schedulePreload` or `scheduleLayout` to
-schedule preload or layout respectively. For example, &lt;amp-carousel
-type=slider&gt; (Slider instance of amp-carousel) calls
-`schedulePreload` for the next/previous slide when the user moves
-forward/backward in the slides and then calls `scheduleLayout` for the
-current slide when the user moves to it.
-
-```javascript
-const owners = Services.ownersForDoc(this.element);
-owners.scheduleLayout(this.element, newSlide);
-this.setControlsState();
-owners.schedulePause(this.element, oldSlide);
-owners.schedulePreload(this.element, nextSlide);
-```
-
-It's important to understand that the parent/owner element is
-responsible for managing all of its children (except for placeholders,
-see below). This means you need to make sure your element updates
-whether the child is in viewport and when to schedule different phases
-for the element.
-
-### Nested sub-elements
-
-Your element should anticipate its sub-elements to nest some more
-amp-elements and schedule preload or layout for these as well, otherwise
-the element will never be preloaded or laid out. This is true to all
-nested amp-elements that are not placeholders. AMP runtime will schedule
-nested amp-elements that are placeholders.
-
-<!-- prettier-ignore-start -->
-```html
-<amp-carousel> ← Parent element
-  <amp-figure> ← Parent needs to schedule this element
-    <amp-img placeholder></amp-img> ← AMP will schedule this when amp-figure is scheduled
-    <amp-img></amp-img> ← Parent needs to schedule this element
-    <amp-fit-text></amp-fit-text> ← Parent needs to schedule this element
-  </amp-figure>
-</amp-carousel>
-```
-<!-- prettier-ignore-end -->
+exposes both in its own documentation and in [`AMP Actions and Events`](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md).
 
 ## Allowing proper validations
 
 One of AMP's features is that a document can be checked against
-validation rules to confirm it's AMP-valid. When you implement your
-element, AMP validator needs to be updated to add rules for your element
-to keep documents using your element valid. In order to do that you need
+validation rules to confirm it's AMP-valid. While your Bento component can be used in non-AMP contexts, it should also smoothly integrate with AMP documents. When you implement your element, the AMP validator needs to be updated to add rules for your element to keep documents using your element valid. In order to do that you need
 to file an issue on the GitHub repo select "Related to: Validator" and
 mention what rules the validator needs to validate. This usually
 includes
 
 -   Your element tag-name
 -   Required attributes for the element
--   Specific values that an attribute accept (e.g. `myattr="TYPE1|TYPE2"`)
+-   Specific values that an attribute accepts (e.g. `myattr="TYPE1|TYPE2"`)
 -   Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts supported in your element](#layouts-supported-in-your-element))
 -   If there are restrictions where your element can or can't appear (e.g. disallowed_ancestory, mandatory_parent...)
 
