@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const viewport = {
+const VIEWPORT = {
   HEIGHT: 768,
   WIDTH: 1024,
 };
@@ -32,7 +32,7 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-story-player/pre-rendering.html',
-    initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
+    initialRect: {width: VIEWPORT.WIDTH, height: VIEWPORT.HEIGHT},
     environments: ['single'],
   },
   (env) => {
