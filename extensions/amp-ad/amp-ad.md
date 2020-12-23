@@ -289,6 +289,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [AdStir](../../ads/adstir.md)
 -   [AdStyle](../../ads/adstyle.md)
 -   [AdTech](../../ads/adtech.md)
+-   [Adtelligent](../../ads/adtelligent.md)
 -   [AdThrive](../../ads/adthrive.md)
 -   [AdUnity](../../ads/adunity.md)
 -   [AdUp Technology](../../ads/aduptech.md)
