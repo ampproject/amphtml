@@ -26,6 +26,7 @@ import {
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {InlineGallery} from './inline-gallery';
 import {Layout} from '../../../src/layout';
+import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -68,7 +69,11 @@ AmpInlineGallery['props'] = {
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpInlineGallery);
-  AMP.registerElement(PAGINATION_TAG, AmpInlineGalleryPagination);
+  AMP.registerElement(
+    PAGINATION_TAG,
+    AmpInlineGalleryPagination,
+    PAGINATION_CSS
+  );
   AMP.registerElement(THUMBNAILS_TAG, AmpInlineGalleryThumbnails);
 });
 
