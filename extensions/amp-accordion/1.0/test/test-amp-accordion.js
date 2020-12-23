@@ -42,7 +42,7 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'amp-accordion-bento', true, true);
+      toggleExperiment(win, 'bento-accordion', true, true);
       toggleExperiment(win, 'amp-accordion-display-locking', true, true);
       element = html`
         <amp-accordion layout="fixed" width="300" height="200">
@@ -338,6 +338,23 @@ describes.realWin(
       );
       expect(header2.getAttribute('id')).to.equal(
         content2.getAttribute('aria-labelledby')
+      );
+    });
+
+    it('should pick up new children', async () => {
+      const newSection = document.createElement('section');
+      newSection.setAttribute('expanded', '');
+      newSection.appendChild(document.createElement('h2'));
+      newSection.appendChild(document.createElement('div'));
+      element.appendChild(newSection);
+
+      await waitForExpanded(newSection, true);
+
+      expect(newSection.firstElementChild.className).to.include(
+        'i-amphtml-accordion-header'
+      );
+      expect(newSection.lastElementChild.className).to.include(
+        'i-amphtml-accordion-content'
       );
     });
 

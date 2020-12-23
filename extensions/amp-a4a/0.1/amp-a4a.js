@@ -16,6 +16,7 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
@@ -56,7 +57,6 @@ import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
 } from '../../../src/friendly-iframe-embed';
-import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
@@ -72,7 +72,6 @@ import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {whenWithinViewport} from './within-viewport';
 
@@ -1763,16 +1762,20 @@ export class AmpA4A extends AMP.BaseElement {
     this.applyFillContent(this.iframe);
 
     let body = '';
+    const transferComplete = new Deferred();
     // If srcdoc is not supported, streaming is also not supported so we
     // can go ahead and write the ad content body.
     if (!isSrcdocSupported()) {
       body = head.ownerDocument.body./*OK */ outerHTML;
+      transferComplete.resolve();
     } else {
       // Once skeleton doc has be written to srcdoc we start transferring
       // body chunks.
       listenOnce(this.iframe, 'load', () => {
         const fieBody = this.iframe.contentDocument.body;
-        this.transferDomBody_(devAssert(fieBody));
+        this.transferDomBody_(devAssert(fieBody)).then(
+          transferComplete.resolve
+        );
       });
     }
 
@@ -1786,12 +1789,22 @@ export class AmpA4A extends AMP.BaseElement {
     // it accessible here.
     const extensionIds = extensions.map((extension) => extension.extensionId);
 
-    return this.installFriendlyIframeEmbed_(
+    const fieInstallPromise = this.installFriendlyIframeEmbed_(
       secureDoc,
       extensionIds,
       fonts,
       true // skipHtmlMerge
-    ).then((friendlyIframeEmbed) => {
+    );
+
+    // Tell the FIE it is done after transferring.
+    Promise.all([fieInstallPromise, transferComplete.promise]).then(
+      (values) => {
+        const friendlyIframeEmbed = values[0];
+        friendlyIframeEmbed.renderCompleted();
+      }
+    );
+
+    return fieInstallPromise.then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.makeFieVisible_(
         friendlyIframeEmbed,
@@ -2303,29 +2316,32 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
-    if (this.element.getAttribute('rtc-config')) {
-      installRealTimeConfigServiceForDoc(this.getAmpDoc());
+    if (!!AMP.RealTimeConfigManager) {
       return this.getBlockRtc_().then((shouldBlock) => {
         if (shouldBlock) {
           return;
         }
         try {
-          return Services.realTimeConfigForDoc(
+          return new AMP.RealTimeConfigManager(
             this.getAmpDoc()
-          ).then((realTimeConfig) =>
-            realTimeConfig.maybeExecuteRealTimeConfig(
-              this.element,
-              this.getCustomRealTimeConfigMacros_(),
-              consentState,
-              consentString,
-              consentMetadata,
-              this.verifyStillCurrent()
-            )
+          ).maybeExecuteRealTimeConfig(
+            this.element,
+            this.getCustomRealTimeConfigMacros_(),
+            consentState,
+            consentString,
+            consentMetadata,
+            this.verifyStillCurrent()
           );
         } catch (err) {
           user().error(TAG, 'Could not perform Real Time Config.', err);
         }
       });
+    } else if (this.element.getAttribute('rtc-config')) {
+      user().error(
+        TAG,
+        'RTC not supported for ad network ' +
+          `${this.element.getAttribute('type')}`
+      );
     }
   }
 

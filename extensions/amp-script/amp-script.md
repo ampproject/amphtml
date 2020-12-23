@@ -106,7 +106,7 @@ You can also include your JavaScript inline, in a `script` tag. You must:
 ```
 
 [tip type="default"]
-For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
+For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#calculating-the-script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
 [/tip]
 
 ### How does it work?
@@ -443,15 +443,15 @@ The total of all scripts used by a page cannot exceed 150,000 bytes. See [Size o
 
 **Script hash not found.**
 
-For local scripts and cross-origin scripts, you need to add a [script hash](#script-hash) for security.
+For local scripts and cross-origin scripts, you need to add a [script hash](#calculating-the-script-hash) for security.
 
 **(...) must have "sha384-(...)" in meta[name="amp-script-src"]**
 
-Again, you need the [script hash](#script-hash). Simply copy the value in this error into your `<meta>` tag.
+Again, you need the [script hash](#calculating-the-script-hash). Simply copy the value in this error into your `<meta>` tag.
 
 **JavaScript size and script hash requirements are disabled in development mode.**
 
-If your `<amp-script>` includes the `data-ampdevmode` attribute, AMP won't check your [script hash](#script-hash) or the size of your code.
+If your `<amp-script>` includes the `data-ampdevmode` attribute, AMP won't check your [script hash](#calculating-the-script-hash) or the size of your code.
 
 **Blocked (...) attempts to modify (...)**
 

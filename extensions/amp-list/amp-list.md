@@ -149,7 +149,7 @@ Would most predictably be applied and rendered if instead provided as follows:
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-list>` elements) on an AMP page. For example, if your `<amp-list>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
-In `<amp-list>`, you can use the [`items`](#items-optional) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
+In `<amp-list>`, you can use the [`items`](#items) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
 
 ### Specifying an overflow
 
@@ -497,12 +497,21 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 
 ### `src` (required)
 
+[filter formats="websites, stories"]
+
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. There are three valid protocols for the `src` attribute.
 
 1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
 2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](#initialization-from-amp-state) for more details.
 3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](#using-amp-script-as-a-data-source) for more details.
+   [/filter]<!-- formats="websites, stories" -->
+
+[filter formats="email"]
+
+The URL of the remote endpoint that returns the JSON for amp-list to render. This must refer to a CORS HTTP service and Insecure HTTP is not supported.
+
+[/filter]<!-- formats="email" -->
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.

@@ -1,0 +1,45 @@
+{
+  "2": {"string": "Atingeți Înainte"},
+  "3": {"string": "Atingeți Înapoi"},
+  "4": {"string": "Linkul nu a putut fi copiat în clipboard :("},
+  "5": {"string": "Linkul a fost copiat!"},
+  "6": {"string": "E-mail"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Obțineți linkul"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Extindeți înălțimea și lățimea ferestrei pentru a viziona această experiență"
+  },
+  "19": {
+    "string": "Trebuie să activați experimentul pentru subiectul AMP ca să vizionați acest conținut."
+  },
+  "20": {"string": "Pagina poate fi vizionată cel mai bine în modul portret"},
+  "21": {"string": "Se pare că browserul nu acceptă această experiență"},
+  "22": {"string": "Accept"},
+  "23": {"string": "Refuz"},
+  "25": {"string": "Vedeți pe domeniul inițial:"},
+  "26": {"string": "Mai multe despre rezultatele AMP"},
+  "27": {"string": "Continuă oricum"},
+  "28": {"string": "Schimbați setările de confidențialitate ale datelor"},
+  "29": {"string": "Setări de confidențialitate"},
+  "30": {"string": "Mai multe de citit"},
+  "31": {"string": "Sunetul este dezactivat"},
+  "32": {"string": "Sunetul este activat"},
+  "33": {"string": "Pagina nu are sunet"},
+  "34": {"string": "Redați videoclipul"},
+  "35": {"string": "Glisați în sus"},
+  "36": {"string": "Extindeți tweetul"},
+  "37": {
+    "string": "Extindeți înălțimea ferestrei pentru a viziona această experiență"
+  },
+  "38": {
+    "string": "Extindeți lățimea ferestrei pentru a viziona această experiență"
+  },
+  "63": {"string": "Line"}
+}
