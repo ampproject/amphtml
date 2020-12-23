@@ -6,6 +6,13 @@
     <link rel="canonical" href="amps.html" />
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
     <script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"></script>
+    <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script>
+      (self.AMP = self.AMP || []).push(function(AMP) {
+        AMP.toggleExperiment('tcf-post-message-proxy-api', true);
+      });
+    </script>
     <style amp-custom>
       body {
         max-width: 527px;
@@ -122,10 +129,8 @@
           -ms-animation: none;
           animation: none;
         }
-      </style>
+        </style>
     </noscript>
-    <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
     <h3>Image that is blocked by both consent</h3>
@@ -146,7 +151,7 @@
       <script type="application/json">
         {
           "postPromptUI": "postPromptUI",
-          "exposes": ["tcfPostMessageApi"]
+          "exposesTcfApi": true
         }
       </script>
       <div id="ui1">

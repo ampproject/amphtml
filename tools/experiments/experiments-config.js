@@ -275,4 +275,9 @@ export const EXPERIMENTS = [
     name: 'Responsive layouts implemented via aspect-ratio CSS',
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
+  {
+    id: 'tcf-post-message-proxy-api',
+    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
+    spec: 'https://github.com/ampproject/amphtml/issues/30385',
+  },
 ];

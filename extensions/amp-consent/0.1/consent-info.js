@@ -16,9 +16,9 @@
 
 import {CONSENT_STRING_TYPE} from '../../../src/consent-state';
 import {deepEquals} from '../../../src/json';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {hasOwn, map} from '../../../src/utils/object';
-import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isEnumValue, isObject} from '../../../src/types';
 
 const TAG = 'amp-consent';
 
@@ -61,14 +61,6 @@ export const CONSENT_ITEM_STATE = {
   // TODO(@zhouyx): Seperate UI state from consent state. Add consent
   // requirement state ui_state = {pending, active, complete} consent_state =
   // {unknown, accepted, rejected}
-};
-
-/**
- * @enum {string}
- * @visibleForTesting
- */
-export const EXPOSED_CONSENT_API = {
-  TCF_POST_MESSAGE: 'tcfPostMessageApi',
 };
 
 /**
@@ -447,27 +439,4 @@ export function assertMetadataValues(metadata) {
       errorFields[i]
     );
   }
-}
-
-/**
- * Validates the type of the `exposes` field,
- * as well as the values.
- * @param {!JsonObject} config
- * @return {!Array<EXPOSED_CONSENT_API>}
- */
-export function validateExposesApi(config) {
-  const exposesApis = [];
-  if (config['exposes']) {
-    const apiList = config['exposes'];
-    userAssert(isArray(apiList), `${TAG}: "exposes" expects array`);
-    for (let i = 0; i < apiList.length; i++) {
-      switch (apiList[i]) {
-        case EXPOSED_CONSENT_API.TCF_POST_MESSAGE:
-          exposesApis.push(EXPOSED_CONSENT_API.TCF_POST_MESSAGE);
-        default:
-          continue;
-      }
-    }
-  }
-  return exposesApis;
 }

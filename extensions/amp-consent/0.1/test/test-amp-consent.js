@@ -31,6 +31,7 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 import {removeSearch} from '../../../../src/url';
+import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
@@ -69,8 +70,6 @@ describes.realWin(
         'https://invalid.response.com/': '{"consentRequired": 3}',
         'https://xssi-prefix/': 'while(1){"consentRequired": false}',
         'https://example.test/': '{}',
-        'https://expose1/':
-          '{"consentRequired": true, "exposes": ["tcfPostMessageApi"]}',
       };
 
       xhrServiceMock = {
@@ -838,51 +837,31 @@ describes.realWin(
     describe('exposes api', () => {
       let ampConsent;
       let consentElement;
-      let tcfPostMessageSpy;
+
+      beforeEach(() => {
+        toggleExperiment(win, 'tcf-post-message-proxy-api', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'tcf-post-message-proxy-api', false);
+      });
 
       describe('config', () => {
-        afterEach(async () => {
-          doc.body.appendChild(consentElement);
-          ampConsent = new AmpConsent(consentElement);
-          tcfPostMessageSpy = env.sandbox.stub(
-            ampConsent,
-            'setUpTcfPostMessageProxy_'
-          );
-          await ampConsent.buildCallback();
-          await macroTask();
-          expect(tcfPostMessageSpy).to.be.calledOnce;
-        });
-
-        it('shoud use only server exposes', () => {
-          consentElement = createConsentElement(
-            doc,
-            dict({
-              'consentInstanceId': 'abc',
-              'checkConsentHref': 'https://expose1',
-            })
-          );
-        });
-
-        it('shoud use only inline exposes', () => {
+        it('shoud expose if in config', async () => {
           consentElement = createConsentElement(
             doc,
             dict({
               'consentInstanceId': 'abc',
               'checkConsentHref': 'https://response1',
-              'exposes': ['tcfPostMessageApi'],
+              'exposesTcfApi': true,
             })
           );
-        });
-
-        it('shoud use both server and inline exposes', () => {
-          consentElement = createConsentElement(
-            doc,
-            dict({
-              'consentInstanceId': 'abc',
-              'checkConsentHref': 'https://expose1',
-              'exposes': ['tcfPostMessageApi'],
-            })
-          );
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const {frames} = win;
+          expect(frames[0].name).to.be.equal('__tcfapiLocator');
         });
       });
 
@@ -903,7 +882,7 @@ describes.realWin(
             dict({
               'consentInstanceId': 'abc',
               'checkConsentHref': 'https://server-test-2/',
-              'exposes': ['tcfPostMessageApi'],
+              'exposesTcfApi': true,
             })
           );
           doc.body.appendChild(consentElement);
@@ -933,8 +912,8 @@ describes.realWin(
           const frames = doc.querySelectorAll('iframe');
           for (let i = 0; i < frames.length; i++) {
             if (frames[i].name === '__tcfapiLocator') {
-              expect(frames[i].getAttribute('aria-hidden')).to.be.true;
-              expect(frames[i].getAttribute('hidden')).to.be.true;
+              expect(frames[i].hasAttribute('aria-hidden')).to.be.true;
+              expect(frames[i].hasAttribute('hidden')).to.be.true;
             }
           }
         });
@@ -942,7 +921,6 @@ describes.realWin(
         it('installs window level event listener', async () => {
           listenerSpy = env.sandbox.stub(ampConsent, 'isValidTcfApiCall_');
           event.data = msg;
-          event.source = iframe.contentWindow;
           await ampConsent.buildCallback();
           await macroTask();
           win.dispatchEvent(event);
@@ -950,39 +928,21 @@ describes.realWin(
           expect(listenerSpy.args[0][0]).to.deep.equals(msg.__tcfapiCall);
         });
 
-        // TODO (micajuineho): Currently, only checks by reusing code in amp-consent.
-        // Would be better to check that the switch statement never gets called.
-        it('only allows messages from iframes found on the page', async () => {
-          listenerSpy = env.sandbox.stub(ampConsent, 'isValidTcfApiCall_');
-          const detatchedIframe = doc.createElement('iframe');
-          event.data = msg;
-          event.source = detatchedIframe.contentWindow;
-          await ampConsent.buildCallback();
-          await macroTask();
-          win.dispatchEvent(event);
-          expect(listenerSpy).to.be.calledOnce;
-          const attachtedFrames = ampConsent
-            .getAmpDoc()
-            .getRootNode()
-            .querySelectorAll('iframe');
-          for (let i = 0; i < attachtedFrames.length; i++) {
-            expect(attachtedFrames[i]).to.not.deep.equals(listenerSpy.args[0][0].source);
-          }
-        });
-
         it('validates __tcfapiCall post message', async () => {
           const errorSpy = env.sandbox.stub(user(), 'error');
-          expect(ampConsent.isValidTcfApiCall_(msg.__tcfapiCall.command)).to.be
-            .false;
+          msg.__tcfapiCall = 'bad';
+          expect(ampConsent.isValidTcfApiCall_(msg.__tcfapiCall)).to.be.false;
           expect(errorSpy.args[0][1]).to.match(
-            /"tcfapiCall" is not an object: cmd/
+            /"tcfapiCall" is not an object: bad/
           );
           errorSpy.resetHistory();
 
-          msg.__tcfapiCall.command = 'bad';
+          msg.__tcfapiCall = {
+            'command': 'bad',
+          };
           expect(ampConsent.isValidTcfApiCall_(msg.__tcfapiCall)).to.be.false;
           expect(errorSpy.args[0][1]).to.match(
-            /Unsupported command found in "tcfapiCall": ping/
+            /Unsupported command found in "tcfapiCall": bad/
           );
           errorSpy.resetHistory();
 
