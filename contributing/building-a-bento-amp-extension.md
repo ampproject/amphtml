@@ -638,45 +638,24 @@ const EXPERIMENTS = [
 ];
 ```
 
-And then protecting your code with a check `isExperimentOn(win, 'amp-my-element')` and only execute your code when it is on.
+Then protect your code with a check for the component-specific flag `isExperimentOn(win, 'bento-my-element')`, or the global flag which enables all Bento components `isExperimentOn(win, 'bento')`, and only execute your code when it is on.
 
 ```javascript
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const */
-const EXPERIMENT = 'amp-my-element';
-
-/** @const */
 const TAG = 'amp-my-element';
 
-Class AmpMyElement extends AMP.BaseElement {
-
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    // declare instance variables with type annotations.
-  }
-
+Class AmpMyElement extends AMP.PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-my-element'),
+      'expected global "bento" or specific "bento-my-element" experiment to be enabled'
+    );
     return layout == LAYOUT.FIXED;
-  }
-
-  /** @override */
-  buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-my-element'),
-        `Experiment ${EXPERIMENT} is not turned on.`);
-    // get attributes, assertions of values, assign instance variables.
-    // build lightweight dom and append to this.element.
-  }
-
-  /** @override */
-  layoutCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-my-element'),
-        `Experiment ${EXPERIMENT} is not turned on.`);
-    // actually load your resource or render more expensive resources.
   }
 }
 
@@ -693,7 +672,7 @@ enable your experiment.
 
 If you are testing on your localhost, use the command `AMP.toggleExperiment(id, true/false)` to enable the experiment.
 
-File a github issue to cleanup your experiment. Assign it to yourself as a reminder to remove your experiment and code checks. Removal of your experiment happens after the extension has been thoroughly tested and all issues have been addressed.
+File a GitHub issue to cleanup your experiment. Assign it to yourself as a reminder to remove your experiment and code checks. Removal of your experiment happens after the extension has been thoroughly tested and all issues have been addressed.
 
 ## Documenting your element
 
@@ -706,17 +685,17 @@ Create a .md file that serves as the main documentation for your element. This d
 -   Attributes to specify (optional and required)
 -   Validation
 
-For samples of element documentation, see: [amp-list](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [amp-carousel](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md)
+For samples of element documentation, see: [amp-accordion](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-accordion.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [amp-stream-gallery](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-stream-gallery.md)
+
+Note that for Bento upgrades of existing AMP extensions, a `Migration notes` section is required to detail any differences between the newer Bento and prior versions.
 
 ## Example of using your extension
 
 This greatly helps users to understand and demonstrate how
 your element works, and provides an easy start-point for them to
-experiment with it. This is basically where you actually build an AMP
-HTML document and use your element in it by creating a file in the
-`examples/` directory, usually with the `my-element.amp.html` file
-name. Browse that directory to see examples for other elements and
-extensions.
+experiment with it. This is basically where you actually build AMP
+HTML and non-AMP HTML documents and use your element in it by creating a file in the local `storybook/` directory, usually with the `Basic.amp.js` file
+name. There should also be a file which uses the component in a Preact environment with the `Basic.js` file name. Browse `storybook/` directories in other extensions directories to see examples for other elements and extensions.
 
 Also consider contributing an example to
 [amp.dev](https://amp.dev/) on
@@ -752,6 +731,8 @@ is ready to be released, `latestVersion` can be changed to 0.2.
 If your extension is still in experiments breaking changes usually are
 fine so you can just update the same version.
 
+Note that Bento upgrades to existing AMP components should go by one major version, meaning it should create a 1.0 directory next to an existing 0.1 or 0.2.
+
 ## Unit tests
 
 Make sure you write good coverage for your code. We require unit tests
@@ -766,6 +747,20 @@ to only run your extensions' tests.
 
 ```shell
 $ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+```
+
+## Linting and formatting
+
+The following command should be run to validates JS files against the ESLint linter.
+
+```shell
+$ gulp lint --local_changes
+```
+
+The following command should be run to validate non-JS files using Prettier.
+
+```shell
+$ gulp prettify --local_changes
 ```
 
 ## Type checking
