@@ -65,4 +65,31 @@ Example - AdSense Ad
 
 #### Attributes
 
+##### always-serve-npa
+
+`always-serve-npa` provides a way to utilize the `<amp-geo>` component to detect user's geo location to decide if a non-personalized ad should be requested from AdSense, regardless of the [user's consent decision](#AMP-Consent-integration). The value of `always-serve-npa` should be a comma delimited string of geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). If no value is found or an empty string is provided, then a NPA will always be requested, regardless of the location.
+
+```html
+<amp-ad
+  width="300"
+  height="200"
+  type="adsense"
+  always-serve-npa="geoGroup1,geoGroup2"
+  data-ad-client="ca-pub-8125901705757971"
+  data-ad-slot="7783467241"
+>
+</amp-ad>
+
+<amp-geo>
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+        "geoGroup1": [ "preset-eea", "unknown" ],
+        "geoGroup2": [ "preset-us-ca" ]
+      }
+    }
+  </script>
+</amp-geo>
+```
+
 TODO: Add attributes

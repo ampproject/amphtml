@@ -280,7 +280,7 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
         env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup() {
-              return false;
+              return GEO_IN_GROUP.NOT_IN;
             },
           })
         );

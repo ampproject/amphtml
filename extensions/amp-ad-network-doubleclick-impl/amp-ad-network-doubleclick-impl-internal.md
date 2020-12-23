@@ -99,6 +99,11 @@ limitations under the License.
     <td>Integration with AMP Consent extension.</td>
     <td>Launched</td>
   </tr>
+  <tr>
+    <td><a href="always-serve-npa.md">Always Serve NPA</a></td>
+    <td>Utilizes <code>&lt;amp-geo></code> to detect user's geo location to decide if a non-personalized ad should be requested regardless of user consent.</td>
+    <td>Beta</td>
+  </tr>
 </table>
 
 #### Examples
