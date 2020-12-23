@@ -41,54 +41,60 @@ describes.endtoend(
 
     beforeEach(async () => {
       controller = env.controller;
+
+      await timeout(500);
+
       player = await controller.findElement(
         'amp-story-player.i-amphtml-story-player-loaded'
       );
       await expect(player);
     });
 
-    it('first story is displayed', async () => {
+    it('first story should be playing video', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
 
       await controller.switchToShadowRoot(shadowHost);
 
-      const iframes = await controller.findElements(
-        'iframe.story-player-iframe'
+      const iframe = await controller.findElement('iframe.story-player-iframe');
+
+      await controller.switchToShadowRoot(iframe);
+      await controller.switchToFrame(iframe);
+
+      const firstStoryVideo = await controller.findElement('#story1 video');
+      const isVideoPaused = await controller.getElementProperty(
+        firstStoryVideo,
+        'paused'
       );
 
-      const transform = await controller.getElementCssValue(
-        iframes[0],
-        'transform'
-      );
-
-      await expect(transform).to.eql(
-        'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1)'
-      );
+      await timeout(500);
+      await expect(isVideoPaused).to.eql(false);
     });
 
-    it('clicking on the last page of the story navigates to the next one', async () => {
+    it('navigating to next story pauses the previous one', async () => {
+      // Navigate to next story.
       await controller.click(player);
-      await controller.click(player);
-      await controller.click(player);
+
+      await timeout(500);
 
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
-
       await controller.switchToShadowRoot(shadowHost);
 
-      const iframes = await controller.findElements(
-        'iframe.story-player-iframe'
+      const iframe = await controller.findElement('iframe.story-player-iframe');
+      await controller.switchToShadowRoot(iframe);
+      await controller.switchToFrame(iframe);
+
+      const firstStoryVideo = await controller.findElement('#story1 video');
+      const isVideoPaused = await controller.getElementProperty(
+        firstStoryVideo,
+        'paused'
       );
 
-      const transform = await controller.getElementCssValue(
-        iframes[1],
-        'transform'
-      );
-
-      await expect(transform).to.eql('matrix(1, 0, 0, 1, 360, 0)');
+      await timeout(500);
+      await expect(isVideoPaused).to.eql(true);
     });
   }
 );
