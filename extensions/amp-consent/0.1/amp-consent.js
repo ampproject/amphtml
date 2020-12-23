@@ -17,14 +17,12 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentMetadataDef,
-  EXPOSED_CONSENT_API,
   TCF_POST_MESSAGE_API_COMMANDS,
   assertMetadataValues,
   constructMetadata,
   convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
-  validateExposesApi,
 } from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {
@@ -117,6 +115,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
+
+    /** @private @const {!Function} */
+    this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
   }
 
   /** @override */
@@ -452,7 +453,7 @@ export class AmpConsent extends AMP.BaseElement {
   init_() {
     this.passSharedData_();
     this.syncRemoteConsentState_();
-    this.exposeApis_();
+    this.maybeSetUpTcfPostMessageProxy_();
 
     this.getConsentRequiredPromise_()
       .then((isConsentRequired) => {
@@ -564,30 +565,6 @@ export class AmpConsent extends AMP.BaseElement {
         this.validateMetadata_(opt_responseMetadata)
       );
     }
-  }
-
-  /**
-   * Check if `exposes` API has been set from CMP and merge with inline.
-   * Expose the proper APIs, if applicable.
-   */
-  exposeApis_() {
-    this.getConsentRemote_().then((response) => {
-      const remoteExposes = response ? validateExposesApi(response) : [];
-      const inlineExposes = validateExposesApi(this.consentConfig_);
-      const mergedExposes = remoteExposes.concat(inlineExposes);
-      const uniqueExposes = [];
-      for (let i = 0; i < mergedExposes.length; i++) {
-        if (uniqueExposes.indexOf(mergedExposes[i]) === -1) {
-          uniqueExposes.push(mergedExposes[i]);
-          switch (mergedExposes[i]) {
-            case EXPOSED_CONSENT_API.TCF_POST_MESSAGE:
-              this.setUpTcfPostMessageProxy_();
-            default:
-              continue;
-          }
-        }
-      }
-    });
   }
 
   /**
@@ -786,13 +763,34 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Set up the __tfcApiLocator window and listeners.
+   * Maybe set up the __tfcApiLocator window and listeners.
    *
-   * Window is a dummy iframe that signals to 3p iframes
+   * The window is a dummy iframe that signals to 3p iframes
    * that the document supports the tcfPostMessage API.
+   */
+  maybeSetUpTcfPostMessageProxy_() {
+    if (!this.consentConfig_['exposesTcfApi']) {
+      return;
+    }
+    // Check if __tcfApiLocator API already exists (dirty AMP)
+    if (!this.win.frames[TCF_API_LOCATOR]) {
+      // Add window listener for 3p iframe PostMessages
+      this.win.addEventListener('message', this.boundHandleIframeMessages_);
+
+      // Set up the __tcfApiLocator window to singal PostMessage support
+      const iframe = this.element.ownerDocument.createElement('iframe');
+      iframe.setAttribute('name', TCF_API_LOCATOR);
+      toggle(iframe, false);
+      iframe.setAttribute('aria-hidden', true);
+      this.element.appendChild(dev().assertElement(iframe));
+    }
+  }
+
+  /**
+   * Listen to iframe messages and handle events.
    *
    * The listeners will listen for post messages from 3p
-   * iframes that have the follow structure:
+   * iframes that have the following structure:
    * {
    *  "__tcfapiCall": {
    *    "command": cmd,
@@ -801,51 +799,30 @@ export class AmpConsent extends AMP.BaseElement {
    *    "callId": id,
    *  }
    * }
+   *
+   * @param {!Event} event
    */
-  setUpTcfPostMessageProxy_() {
-    // Check if __tcfApiLocator API already exists (dirty AMP)
-    if (!this.win.frames[TCF_API_LOCATOR]) {
-      // Add window listener for 3p iframe PostMessages
-      this.win.addEventListener('message', (event) => {
-        const data = getData(event);
+  handleIframeMessages_(event) {
+    const data = getData(event);
 
-        if (
-          !data ||
-          !data['__tcfapiCall'] ||
-          !this.isValidTcfApiCall_(data['__tcfapiCall'])
-        ) {
-          return;
-        }
+    if (
+      !data ||
+      !data['__tcfapiCall'] ||
+      !this.isValidTcfApiCall_(data['__tcfapiCall'])
+    ) {
+      return;
+    }
 
-        const payload = data.__tcfapiCall;
-
-        // Ensure the message came from a valid source.
-        const iframes = this.getAmpDoc()
-          .getRootNode()
-          .querySelectorAll('iframe');
-
-        for (let i = 0; i < iframes.length; i++) {
-          if (iframes[i].contentWindow === event.source) {
-            const cmd = payload.command;
-            // TODO (micajuineho): implement command methods
-            switch (cmd) {
-              case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
-              case TCF_POST_MESSAGE_API_COMMANDS.PING:
-              case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
-              case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
-              default:
-                return;
-            }
-          }
-        }
-      });
-
-      // Set up the __tcfApiLocator window to singal PostMessage support
-      const iframe = this.element.ownerDocument.createElement('iframe');
-      iframe.setAttribute('name', TCF_API_LOCATOR);
-      toggle(iframe, false);
-      iframe.setAttribute('aria-hidden', true);
-      this.element.appendChild(dev().assertElement(iframe));
+    const payload = data.__tcfapiCall;
+    const cmd = payload.command;
+    // TODO (micajuineho): implement command methods
+    switch (cmd) {
+      case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
+      case TCF_POST_MESSAGE_API_COMMANDS.PING:
+      case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
+      case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
+      default:
+        return;
     }
   }
 }

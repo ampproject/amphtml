@@ -16,7 +16,6 @@
 
 import {
   CONSENT_ITEM_STATE,
-  EXPOSED_CONSENT_API,
   METADATA_STORAGE_KEY,
   composeMetadataStoreValue,
   composeStoreValue,
@@ -26,7 +25,6 @@ import {
   getStoredConsentInfo,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
-  validateExposesApi,
 } from '../consent-info';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
 import {dict} from '../../../../src/utils/object';
@@ -451,27 +449,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'additionalConsent': '1~1.35.41.101',
         'gdprApplies': true,
       });
-    });
-  });
-
-  describe('exposes validation', () => {
-    it('validates types', () => {
-      let exposes = EXPOSED_CONSENT_API.TCF_POST_MESSAGE;
-      expect(() => validateExposesApi({exposes})).to.throw(
-        /amp-consent: "exposes" expects array/
-      );
-
-      exposes = [EXPOSED_CONSENT_API.TCF_POST_MESSAGE];
-      expect(validateExposesApi({exposes})).to.be.deep.equals([
-        EXPOSED_CONSENT_API.TCF_POST_MESSAGE,
-      ]);
-    });
-
-    it('removes invalid values', () => {
-      const exposes = [EXPOSED_CONSENT_API.TCF_POST_MESSAGE, 'invalidValue'];
-      expect(validateExposesApi({exposes})).to.be.deep.equals([
-        EXPOSED_CONSENT_API.TCF_POST_MESSAGE,
-      ]);
     });
   });
 });
