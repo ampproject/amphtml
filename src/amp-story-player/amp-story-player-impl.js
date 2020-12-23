@@ -368,7 +368,6 @@ export class AmpStoryPlayer {
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
     this.initializeCircularWrapping_();
-    this.signalReady_();
     this.isBuilt_ = true;
   }
 
@@ -725,15 +724,20 @@ export class AmpStoryPlayer {
     this.initializeVisibleIO_();
 
     this.visibleDeferred_.promise.then(() => {
-      if (this.stories_.length > 0) {
-        this.updateVisibilityState_(
-          0 /** iframeIdx */,
-          VisibilityState.VISIBLE
-        );
+      if (this.stories_.length === 0) {
+        this.signalReady_();
+        this.isLaidOut_ = true;
+        return;
       }
-    });
 
-    this.isLaidOut_ = true;
+      this.updateVisibilityState_(
+        0 /** iframeIdx */,
+        VisibilityState.VISIBLE
+      ).then(() => {
+        this.signalReady_();
+        this.isLaidOut_ = true;
+      });
+    });
   }
 
   /**
