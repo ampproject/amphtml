@@ -355,6 +355,8 @@ Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-
 
 ### Pre-rendering and placeholders
 
+TO REVIEW
+
 Another enabling feature of instant-web in AMP is support for
 prerendering in a way that does not consume loads of data and does not
 waste too much of the user's device resources. AMP does this by strictly
@@ -470,6 +472,8 @@ iframe with no 3p integration needed, similarly, `amp-youtube` and others.
 
 ## Layouts supported in your element
 
+TO REVIEW
+
 AMP defines different layouts that elements can choose whether or not to
 support Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
@@ -479,6 +483,8 @@ and [Layout
 Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout).
 
 ### What layout should your element support?
+
+TO REVIEW
 
 After understanding each layout type, if it makes sense, support all of
 them. Otherwise choose what makes sense to your element. A popular
@@ -497,10 +503,10 @@ class AmpPixel extends BaseElement {
 }
 ```
 
-While `amp-carousel` supports all size-defined layouts.
+While `amp-base-carousel` supports all size-defined layouts.
 
 ```javascript
-class AmpSlides extends AMP.BaseElement {
+class AmpBaseCarousel extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
@@ -678,6 +684,8 @@ $ gulp check-types
 ```
 
 ## Example PRs
+
+TO UPDATE
 
 -   Adding new ad-provider
     -   [Teads](https://github.com/ampproject/amphtml/commit/654ade680d796527345af8ff298a41a7532ee074)
