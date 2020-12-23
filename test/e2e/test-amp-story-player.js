@@ -19,19 +19,11 @@ const VIEWPORT = {
   WIDTH: 1024,
 };
 
-/**
- * @param {number} ms
- * @return {!Promise}
- */
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 describes.endtoend(
   'player prerendering',
   {
     testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-player/pre-rendering.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-story-player/basic.html',
     initialRect: {width: VIEWPORT.WIDTH, height: VIEWPORT.HEIGHT},
     environments: ['single'],
   },
@@ -47,137 +39,18 @@ describes.endtoend(
       await expect(player);
     });
 
-    it('player builds the iframe when below the fold', async () => {
+    it('loads first story in page load', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
 
       await controller.switchToShadowRoot(shadowHost);
 
-      const iframe = await controller.findElement('iframe');
-
-      await expect(iframe);
-    });
-
-    it('when player is far from viewport, no stories are loaded in the iframes', async () => {
-      const shadowHost = await controller.findElement(
-        'div.i-amphtml-story-player-shadow-root-intermediary'
-      );
-
-      await controller.switchToShadowRoot(shadowHost);
-
-      const iframe = await controller.findElement('iframe');
-      const iframeSrc = await controller.getElementAttribute(iframe, 'src');
-
-      await expect(iframeSrc).to.not.exist;
-    });
-
-    it('when player comes close to the viewport, iframe loads first story in prerender', async () => {
-      const doc = await controller.getDocumentElement();
-      const playerRect = await controller.getElementRect(player);
-
-      await controller./*OK*/ scrollTo(doc, {top: playerRect.top - 1000});
-
-      const shadowHost = await controller.findElement(
-        'div.i-amphtml-story-player-shadow-root-intermediary'
-      );
-
-      await controller.switchToShadowRoot(shadowHost);
-
-      const iframe = await controller.findElement('iframe');
-      const iframeSrc = await controller.getElementAttribute(iframe, 'src');
+      const iframes = await controller.findElement('iframe');
+      const iframeSrc = await controller.getElementAttribute(iframes, 'src');
 
       await expect(iframeSrc).to.eql(
         'http://localhost:8000/examples/amp-story/ampconf.html#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A8000&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
-      );
-    });
-
-    it('when player comes close to the viewport, only one iframe is loaded', async () => {
-      const doc = await controller.getDocumentElement();
-      const playerRect = await controller.getElementRect(player);
-
-      await controller./*OK*/ scrollTo(doc, {top: playerRect.top - 1000});
-
-      const shadowHost = await controller.findElement(
-        'div.i-amphtml-story-player-shadow-root-intermediary'
-      );
-
-      await controller.switchToShadowRoot(shadowHost);
-
-      const iframes = await controller.findElements('iframe');
-      const iframeSrc = await controller.getElementAttribute(iframes[1], 'src');
-
-      await expect(iframeSrc).to.not.exist;
-    });
-
-    it('when player becomes visible, first story starts playing', async () => {
-      const doc = await controller.getDocumentElement();
-      const playerRect = await controller.getElementRect(player);
-
-      await controller./*OK*/ scrollTo(doc, {top: playerRect.top});
-      const shadowHost = await controller.findElement(
-        'div.i-amphtml-story-player-shadow-root-intermediary'
-      );
-
-      await controller.switchToShadowRoot(shadowHost);
-
-      const iframe = await controller.findElement('iframe.story-player-iframe');
-
-      await controller.switchToShadowRoot(iframe);
-      await controller.switchToFrame(iframe);
-
-      const storyEl = await controller.findElement(
-        'amp-story.i-amphtml-story-loaded'
-      );
-
-      await expect(storyEl).to.exist;
-    });
-
-    it('when player becomes visible, second story starts preloading', async () => {
-      const doc = await controller.getDocumentElement();
-      const playerRect = await controller.getElementRect(player);
-
-      await controller./*OK*/ scrollTo(doc, {top: playerRect.top});
-      const shadowHost = await controller.findElement(
-        'div.i-amphtml-story-player-shadow-root-intermediary'
-      );
-
-      await controller.switchToShadowRoot(shadowHost);
-
-      // Wait for first story iframe to load.
-      await timeout(5000);
-
-      const iframes = await controller.findElements(
-        'iframe.story-player-iframe'
-      );
-      const iframeSrc = await controller.getElementAttribute(iframes[1], 'src');
-
-      await expect(iframeSrc).to.eql(
-        'http://localhost:8000/examples/amp-story/amp-story-animation.html#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A8000&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
-      );
-    });
-
-    it('when player becomes visible, third story starts preloading', async () => {
-      const doc = await controller.getDocumentElement();
-      const playerRect = await controller.getElementRect(player);
-
-      await controller./*OK*/ scrollTo(doc, {top: playerRect.top});
-      const shadowHost = await controller.findElement(
-        'div.i-amphtml-story-player-shadow-root-intermediary'
-      );
-
-      await controller.switchToShadowRoot(shadowHost);
-
-      // Wait for first story iframe to load.
-      await timeout(5000);
-
-      const iframes = await controller.findElements(
-        'iframe.story-player-iframe'
-      );
-      const iframeSrc = await controller.getElementAttribute(iframes[2], 'src');
-
-      await expect(iframeSrc).to.eql(
-        'http://localhost:8000/examples/amp-story/attachment.html#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A8000&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
   }

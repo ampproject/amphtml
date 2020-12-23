@@ -133,7 +133,7 @@ describes.endtoend(
       await expect(storyEl).to.exist;
     });
 
-    it('when player becomes visible, second story starts preloading', async () => {
+    it('when player becomes visible and first story finishes loading, second story starts preloading', async () => {
       const doc = await controller.getDocumentElement();
       const playerRect = await controller.getElementRect(player);
 
@@ -157,7 +157,7 @@ describes.endtoend(
       );
     });
 
-    it('when player becomes visible, third story starts preloading', async () => {
+    it('when player becomes visible and first story finishes loading, third story starts preloading', async () => {
       const doc = await controller.getDocumentElement();
       const playerRect = await controller.getElementRect(player);
 
