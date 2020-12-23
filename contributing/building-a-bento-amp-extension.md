@@ -1,11 +1,19 @@
-# Building an AMP Extension
+# Building a Bento AMP Extension
 
 AMP can be extended to allow more functionality and components through
 building open source extensions (aka custom elements). For example, AMP
-provides `amp-carousel`, `amp-sidebar` and `amp-access` as
-extensions. If you'd like to add an extension to support your company
+provides `amp-accordion`, `amp-base-carousel` and `amp-sidebar` as
+extensions.
+
+Bento AMP is a project that allows you to take AMP components and use them in otherwise non-AMP pages. Many of these Bento-enabled AMP components also build
+upon a Preact form under the hood that is also usable in isolation in React development contexts, but this is not a requirement. The only requirement of
+a Bento component is that it can be fully functional on non-AMP pages.
+
+If you'd like to add an extension to support your company
 video player, rich embed or just a general UI component like a star
-rating viewer, you'd do this by building an extension.
+rating viewer, you'd do this by building an extension. Alternatively, if
+you'd like to upgrade an existing AMP extension to be compatible with
+non-AMP pages, you'd do this by building an extension in the Bento paradigm.
 
 -   [Getting started](#getting-started)
 -   [Naming](#naming)
