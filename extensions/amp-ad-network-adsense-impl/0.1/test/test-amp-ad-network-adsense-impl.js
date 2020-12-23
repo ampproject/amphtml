@@ -869,6 +869,27 @@ describes.realWin(
           .then((url) => {
             expect(url).to.not.match(/(\?|&)npa=(&|$)/);
           }));
+      it('should include npa=1 if `serveNpaSignal` is found, regardless of consent', () =>
+        impl
+          .getAdUrl(
+            {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+            undefined,
+            true
+          )
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
+
+      it('should include npa=1 if `serveNpaSignal` is false & insufficient consent', () =>
+        impl
+          .getAdUrl(
+            {consentState: CONSENT_POLICY_STATE.INSUFFICIENT},
+            undefined,
+            false
+          )
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
 
       it('should include gdpr_consent, if TC String is provided', () =>
         impl.getAdUrl({consentString: 'tcstring'}).then((url) => {

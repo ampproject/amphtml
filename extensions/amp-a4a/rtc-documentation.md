@@ -396,6 +396,43 @@ Let's first take an example where the page consent-state is `SUFFICIENT`. This i
 
 Next, let's take an example where the page consent-state is `UNKNOWN`. The callout to vendorA is set to allow consent-state `INSUFFICIENT`, so it will not be sent. The callouts to vendorB and vendorC do not have individual `sendRegardlessOfConsentState` settings, so the top-level setting of `true` applies to them, and they will each be sent. In the `urls` array, the first URL has an individual setting of `UNKNOWN`, which is the current state, so it will be sent. Lastly, the final url does not have an individual setting, so the top-level setting of `true` applies to it, and it will be sent.
 
+### Blocking RTC
+
+The `block-rtc` provides a way to utilize the `<amp-geo>` component to detect user's geo location to decide if a RTC callout should be prevented. The value of `block-rtc` should be a comma delimited string of geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). If no `<amp-geo>` element is found or no valid value for this attribute, then the RTC callout will occur as normal.
+
+```html
+<amp-ad
+  width="300"
+  height="200"
+  type="network-foo"
+  data-slot="/1234/5678"
+  block-rtc="geoGroup1,geoGroup2"
+  rtc-config='{
+            "vendors": {
+              "vendorA": {"SLOT_ID": "1"},
+              "vendorB": {"PAGE_ID": "2"},
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}
+              },
+            "urls": [
+              "https://www.AmpPublisher.biz/targetingA",
+              "https://www.AmpPublisher.biz/targetingB"
+            ],
+            "sendRegardlessOfConsentState": true}'
+>
+</amp-ad>
+
+<amp-geo>
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+        "geoGroup1": [ "preset-eea", "unknown" ],
+        "geoGroup2": [ "preset-us-ca" ]
+      }
+    }
+  </script>
+</amp-geo>
+```
+
 ### URL Macro Substitution
 
 RTC supports macro substitution for building callout URLs. These macros can be specified by vendors, and by Fast Fetch implementations.

@@ -39,6 +39,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaPromise,
   googleAdUrl,
   googleBlockParameters,
   googlePageParameters,
@@ -358,6 +359,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.inZIndexHoldBack_ = false;
+
+    /**
+     * A signal from publishers to serve NPA through ad url.
+     * @private {boolean}
+     */
+    this.serveNpaSignal_ = false;
   }
 
   /**
@@ -641,7 +648,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         : null,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        this.serveNpaSignal_
           ? 1
           : null,
       'gdfp_req': '1',
@@ -747,10 +755,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
+    this.serveNpaSignal_ = !!opt_serveNpaSignal;
     const consentTuple = opt_consentTuple || {};
     if (
       consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -818,6 +827,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
+  }
+
+  /** @override */
+  getServeNpaSignal() {
+    return getServeNpaPromise(this.element);
   }
 
   /**

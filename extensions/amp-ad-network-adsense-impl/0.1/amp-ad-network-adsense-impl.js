@@ -37,6 +37,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaPromise,
   googleAdUrl,
   isCdnProxy,
   isReportingEnabled,
@@ -287,7 +288,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentTuple) {
+  getAdUrl(consentTuple, opt_unusedRtcResponsesPromise, opt_serveNpaSignal) {
     let consentState = undefined;
     let consentString = undefined;
     let gdprApplies = undefined;
@@ -364,7 +365,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'iu': slotname,
       'npa':
         consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        !!opt_serveNpaSignal
           ? 1
           : null,
       'adtest': adTestOn ? 'on' : null,
@@ -428,6 +430,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         experimentIds
       );
     });
+  }
+
+  /** @override */
+  getServeNpaSignal() {
+    return getServeNpaPromise(this.element);
   }
 
   /** @override */
