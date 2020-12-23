@@ -55,11 +55,6 @@ amp-ad[sticky] {
   align-items: center;
 }
 
-amp-ad[amp-story] iframe {
-  width: 100%;
-  height: 100%;
-}
-
 amp-ad[type='adsense'],
 amp-ad[type='doubleclick'] {
   direction: ltr;

@@ -30,7 +30,7 @@ import {getExperimentBranch} from '../../../src/experiments';
 
 import {getAdContainer} from '../../../src/ad-helper';
 import {listen} from '../../../src/event-helper';
-import {setStyle} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
 
 const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
 const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;
@@ -371,8 +371,10 @@ export class AmpAdUIHandler {
    * @param {number} newWidth
    */
   setSize_(element, newHeight, newWidth) {
-    setStyle(element, 'height', newHeight, 'px');
-    setStyle(element, 'width', newWidth, 'px');
+    setStyles(element, {
+      'height': `${newHeight}px`,
+      'width': `${newWidth}px`,
+    });
   }
 
   /**
