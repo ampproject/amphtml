@@ -107,7 +107,7 @@ Either `"around"` or undefined. This determines how extra space is allocated aft
 Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines if and when prev/next navigational arrows are displayed. Note: When `outset-arrows` is `true`, the arrows are shown `"always"`.
 
 -   `always`: Arrows are always displayed.
--   `auto`: Arrows are displayed when a mouse has interacted with the carousel, and
+-   `auto`: Arrows are displayed when the carousel has most recently received interaction via mouse, and not displayed when the carousel has most recently received interaction via touch. On first load for touch devices, arrows are displayed until first interaction.
 -   `never`: Arrows are never displayed.
 
 #### loop
