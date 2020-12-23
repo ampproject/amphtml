@@ -723,20 +723,17 @@ export class AmpStoryPlayer {
     this.prerenderStories_();
     this.initializeVisibleIO_();
 
+    this.prerenderFirstStoryDeferred_.promise.then(() => {
+      this.signalReady_();
+      this.isLaidOut_ = true;
+    });
+
     this.visibleDeferred_.promise.then(() => {
       if (this.stories_.length === 0) {
-        this.signalReady_();
-        this.isLaidOut_ = true;
         return;
       }
 
-      this.updateVisibilityState_(
-        0 /** iframeIdx */,
-        VisibilityState.VISIBLE
-      ).then(() => {
-        this.signalReady_();
-        this.isLaidOut_ = true;
-      });
+      this.updateVisibilityState_(0 /** iframeIdx */, VisibilityState.VISIBLE);
     });
   }
 
