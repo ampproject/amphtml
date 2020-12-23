@@ -369,7 +369,8 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
     insert(testIframe);
     const postMessageSpy = window.sandbox /*OK*/
       .spy(testIframe.contentWindow, 'postMessage');
-    ioInstance.sendElementIntersection_();
+    ioInstance.fire();
+    clock.tick(0);
     expect(postMessageSpy).to.have.not.been.called;
     expect(ioInstance.pendingChanges_).to.have.length(0);
   });
