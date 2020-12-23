@@ -18,7 +18,7 @@ non-AMP pages, you'd do this by building an extension in the Bento paradigm.
 -   [Getting started](#getting-started)
 -   [Naming](#naming)
 -   [Directory structure](#directory-structure)
--   [Extend AMP.BaseElement](#extend-ampbaseelement)
+-   [Extend AMP.BaseElement](#extend-amppreactbaseelement)
 -   [Element styling](#element-styling)
 -   [Register element with AMP](#register-element-with-amp)
 -   [Actions and events](#actions-and-events)
@@ -37,15 +37,14 @@ non-AMP pages, you'd do this by building an extension in the Bento paradigm.
 
 ## Getting started
 
-This document describes how to create a new AMP extension, which is one of the most common ways of adding a new feature to AMP.
+This document describes how to create a new Bento AMP extension, which is one of the most common ways of adding a new feature to AMP.
 
-Before diving into the details on creating a new AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
+Before diving into the details on creating a new Bento AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
 
 ## Naming
 
-All AMP extensions (and built-in elements) have their tag names prefixed
-with `amp-`. Make sure to choose an accurate and clear name for your
-extension.
+All Bento AMP extensions have their tag names prefixed with `amp-`.
+Make sure to choose an accurate and clear name for your extension.
 
 Extensions that embed a third-party service must follow the [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
 
@@ -57,8 +56,11 @@ The directory structure is below:
 ```sh
 /extensions/amp-my-element/
 ├── 0.1/
-|   ├── test/
-|   |   ├── test-amp-my-element.js       # Element's unit test suite (req'd)
+|   ├── storybook/                       # Element's manual sample playground (req'd)
+|   |   ├── Basic.js                     # Preact usage examples
+|   |   ├── Basic.amp.js                 # AMP usage examples
+|   ├── test/                            # Element's unit test suite (req'd)
+|   |   ├── test-amp-my-element.js
 |   |   └── More test JS files (optional)
 |   ├── amp-my-element.js                # Element's implementation (req'd)
 |   ├── amp-my-element.css               # Custom CSS (optional)
@@ -71,22 +73,30 @@ The directory structure is below:
 
 In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
 
-## Extend AMP.BaseElement
+## Extend AMP.PreactBaseElement
 
 Almost all AMP extensions extend AMP.BaseElement, which provides some
 hookups and callbacks for you to override in order to implement and
-customize your element behavior. These callbacks are explained below in
-the BaseElement Callbacks section, and are also explained inline in the
-[BaseElement](https://github.com/ampproject/amphtml/blob/master/src/base-element.js#L26)
+customize your element behavior. These callbacks are explained in
+the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md), and are also explained inline in the
+[BaseElement](https://github.com/ampproject/amphtml/blob/master/src/base-element.js)
 class.
 
-### Element class
+All Bento AMP extensions extend AMP.PreactBaseElement, which builds upon
+BaseElement to extricate the component implementation from the aforementioned
+callbacks. Bento AMP extensions differ from AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment
+in a fully AMP document.
+
+The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the AMP/Preact Bridge section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the PreactBaseElement Callbacks section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
+
+### Element and Component classes
 
 The following shows the overall structure of your element implementation
 file (extensions/amp-my-element/0.1/amp-my-element.js).
 
 ```js
-import {func1, func2} from '../src/module';
+import {func1, func2} from '../../../src/module';
+import {MyElement} from './my-element'; // Preact component.
 import {CSS} from '../../../build/amp-my-element-0.1.css';
 // more ES2015-style import statements.
 
@@ -96,171 +106,133 @@ const EXPERIMENT = 'amp-my-element';
 /** @const */
 const TAG = 'amp-my-element';
 
-class AmpMyElement extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    // Declare instance variables with type annotations.
+class AmpMyElement extends AMP.PreactBaseElement {
+  /** @override */
+  init() {
+    // Perform any additional processing of prop values that are not
+    // straightforward attribute passthroughs.
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout == LAYOUT.FIXED;
   }
-
-  /** @override */
-  buildCallback() {
-    // Get attributes, assertions of values, assign instance variables.
-    // Build lightweight DOM and append to this.element.
-  }
-
-  /** @override */
-  layoutCallback() {
-    // Actually load your resource or render more expensive resources.
-  }
 }
+
+AmpMyElement['Component'] = MyElement;            // Component definition.
+
+AmpMyElement['props'] = {  // Map DOM attributes to Preact Component props.
+  'attrName1': {attr: 'attr-name-1'},
+  'attrName2': {attr: 'attr-name-2', type: 'number'},
+};
 
 AMP.extension('amp-my-element', '0.1', (AMP) => {
   AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 });
 ```
 
-### BaseElement callbacks
+Accordingly, the following shows the corresponding overall structure of your Preact functional component implementation file (extensions/amp-my-element/0.1/my-element.js).
 
-#### upgradeCallback
+```js
+import * as Preact from '../../../src/preact';
+import {func1, func2} from '../../../src/module';
+// more ES2015-style import statements.
 
--   **Default**: Does nothing
+export function MyElement({attrName1, attrName2, ...rest}) {
+  // Assign state variables or other behaviors using Preact
+  // lifecycle hooks such as useRef, useState, useEffect, etc.
+  const [foo, useFoo] = useState(null);
+
+  // Render component via JSX syntax.
+  return (
+    <div>Hello world</div>
+  );
+}
+```
+
+### PreactBaseElement callbacks
+
+#### checkPropsPostMutations
+
+-   **Default**: Optional.
 -   **Override**: Rarely.
--   **[Vsync](https://github.com/ampproject/amphtml/blob/master/src/service/vsync-impl.js) Context**: None
--   **Usage**: If your extension provides different implementations
-    depending on a late runtime condition (e.g. type attribute on the
-    element, platform)
--   **Example Usage**: amp-ad, amp-app-banner
+-   **Usage**: A callback called immediately after mutations have been observed on a component's defined props. This can verify if any additional properties need to be mutated via `mutateProps()` API.
+-   **Example Usage**: amp-date-display
 
-#### buildCallback
+#### isReady
 
--   **Default**: Does nothing
--   **Override**: Almost always
--   **Vsync Context**: Mutate
--   **Usage**: If your element has UI elements this is where you should
-    create your DOM structure and append it to the element. You can also
-    read the attributes (e.g. width, height…) the user provided on your
-    element in this callback.
--   **Warning**: Don't load remote resources during the buildCallback. This
-    not only circumvents the AMP resources manager, but it will also lead to
-    higher data charges for users because all these resources will be loaded
-    before layouting needs to happen.
--   **Warning 2**: Do the least needed work here, and don't build DOM that
-    is not needed at this point.
-
-#### preconnectCallback
-
--   **Default**: Does nothing.
--   **Vsync Context**: None (Neither mutate nor measure)
--   **Override**: Sometimes, if your element will be loading remote
-    resources.
--   **Usage**: Use to instruct AMP which hosts to preconnect to, and which
-    resources to preload/prefetch; this allows AMP to delegate to the browser
-    to get a performance boost by preconnecting, preloading and prefetching
-    resources via preconnect service.
--   **Example Usage**: [Instagram uses this to
-    preconnect](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/amp-instagram.js)
-    to instagram hosts.
-
-#### createPlaceholderCallback
-
--   **Default**: Does nothing.
--   **Vsync Context**: Mutate
--   **Override**: Sometimes. If your component provides a way to dynamically
-    create a lightweight placeholder. This gets called only if the element
-    doesn't already have a publisher-provided placeholder (through [the
-    placeholder
-    attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder)).
--   **Usage**: Create placeholder DOM and return it. For example,
-    amp-instagram uses this to create a placeholder dynamically by creating
-    an amp-img placeholder instead of loading the iframe, leaving the iframe
-    loading to layoutCallback.
--   **Warning**: Only use amp-elements for creating placeholders that
-    require external resource loading. This allows runtime to create this
-    early but still defer the resource loading and management to AMP
-    resources manager. Don't create or load heavyweight resources (e.g.
-    iframe…).
--   **Example Usage**: amp-instagram.
-
-#### onLayoutMeasure
-
--   **Default**: Does nothing.
--   **Vsync Context**: Measure.
+-   **Default**: Optional.
 -   **Override**: Rarely.
--   **Usage**: Use to measure layouts for your element.
--   **Example Usage**: amp-iframe
+-   **Usage**: States whether the element is ready for rendering. Used if there are additional processing requirements before the Component can be rendered, such as providing rendering templates or defining critical asynchronous props.
+-   **Example Usage**: amp-date-countdown, amp-date-display
 
-#### layoutCallback
+#### init
 
--   **Default**: Does nothing.
--   **Vsync Context**: Mutate
+-   **Default**: Optional.
+-   **Override**: Sometimes, if additional processing is needed in the DOM.
+-   **Usage**: If your extension 'props' definition is not sufficient, or when registering AMP actions and events.
+-   **Example Usage**: amp-base-carousel, amp-lightbox
+
+#### mutationObserverCallback
+
+-   **Default**: Optional.
+-   **Override**: Sometimes, if additional processing is needed to make the DOM mutable.
+-   **Usage**: A callback called immediately after mutations have been observed on a component. This differs from `checkPropsPostMutations` in that it is called in all cases of mutation, not just the subset of attributes configured in the extension 'props' definition.
+-   **Example Usage**: amp-base-carousel, amp-sidebar
+
+#### updatePropsForRendering
+
+-   **Default**: Optional.
+-   **Override**: Sometimes, if additional processing is needed in the DOM.
+-   **Usage**: A callback called to compute props before rendering is run. The properties computed here are ephemeral and thus should not be persisted via a `mutateProps()` method.
+-   **Example Usage**: amp-timeago
+
+### AMP/Preact Bridge
+
+#### PreactBaseElement['Component']
+
+-   **Default**: Required.
+-   **Override**: Always.
+-   **Usage**: Define the corresponding Preact functional component.
+-   **Example Usage**: amp-fit-text, amp-timeago
+
+#### PreactBaseElement['props']
+
+-   **Default**: Optional.
 -   **Override**: Almost always.
--   **Usage**: Use this to actually render the final version of your
-    element. If the element should load a video, this is where you load the
-    video. This needs to return a promise that resolves when the element is
-    considered "laid out" - usually this means load event has fired but can
-    be different from element to element. Note that load events usually are
-    fired very early so if there's another event that your element can
-    listen to that have a better meaning of ready-ness, use that to resolve
-    your promise instead - for example: [amp-youtube](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/amp-youtube.js) uses the
-    playerready event that the underlying YT Player
-    iframe sends to resolve the layoutCallback promise.
+-   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes. These will update and re-render the component on DOM mutation.
+-   **Example Usage**: amp-base-carousel, amp-lightbox
 
-#### firstLayoutCompleted
+#### PreactBaseElement['staticProps']
 
--   **Default**: Hide element's placeholder.
--   **Vsync Context**: Mutate
--   **Override**: Sometimes. If you'd like to override default behavior and
-    not hide the placeholder when the element is considered first laid out.
-    Sometimes you wanna control when to hide the placeholder.
--   **Example Usage**: amp-anim
+-   **Default**: Optional.
+-   **Override**: Almost always.
+-   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes. These will not update or re-render the component on DOM mutation. Can be used in lieu of init().
+-   **Example Usage**: n/a
 
-#### pauseCallback
+#### PreactBaseElement['className']
 
--   **Default**: Does nothing.
--   **Vsync Context**: Mutate
--   **Called**: When you swipe away from a document in a viewer. Called on
-    children of lightbox when you close a lightbox instance, called on
-    carousel children when the slide is not the active slide. And possibly
-    other places.
--   **Override**: Sometimes. Most likely if you're building a player.
--   **Usage**: Use to pause video, slideshow auto-advance...etc
--   **Example Usage**: amp-video, amp-youtube
+#### PreactBaseElement['layoutSizeDefined']
 
-#### resumeCallback
+#### PreactBaseElement['lightDomTag']
 
--   **Default**: Does nothing.
--   **Vsync Context**: Mutate
--   **Override**: Sometimes.
--   **Usage**: Use to restart the slideshow auto-advance.
--   **Note**: This is not used widely yet because it's not possible to
-    resume video playback for example on mobile.
+#### PreactBaseElement['loadable']
 
-#### unlayoutOnPause
+#### PreactBaseElement['shadowCss']
 
--   **Default**: Returns false.
--   **Vsync Context**: Mutate
--   **Override**: If your element doesn't provide a pausing mechanism,
-    instead override this to unlayout the element when AMP tries to pause
-    it.
--   **Return**: True if you want unlayoutCallback to be called when paused.
--   **Usage Example**: amp-brightcove
+#### PreactBaseElement['usesTemplate']
 
-#### unlayoutCallback
+#### PreactBaseElement['useContexts']
 
--   **Default**: Does nothing.
--   **Vsync Context**: Mutate
--   **Override**: Sometimes.
--   **Usage**: Use to remove and unload heavyweight resources like iframes,
-    video, audio and others that your element has created.
--   **Return**: **True** if your element need to re-layout.
--   **Usage Example**: amp-iframe
+#### Ways to process children (mutually exclusive)
+
+##### PreactBaseElement['passthrough']
+
+##### PreactBaseElement['passthroughNonEmpty']
+
+##### PreactBaseElement['children']
+
+##### PreactBaseElement['detached']
 
 ## Element styling
 
