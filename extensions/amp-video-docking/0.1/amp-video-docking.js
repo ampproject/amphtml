@@ -594,11 +594,12 @@ export class VideoDocking {
     }
 
     const {element} = video;
-    const {intersectionRect} = element.getIntersectionChangeEntry();
-    if (!isSizedRect(intersectionRect)) {
+    // TODO: after dima merge migrate to the new async getPageLayout API.
+    const pageLayoutBox = element.getPageLayoutBox();
+    if (!isSizedRect(pageLayoutBox)) {
       return null;
     }
-    if (intersectionRect.top > this.getTopBoundary_()) {
+    if (pageLayoutBox.top > this.getTopBoundary_()) {
       return null;
     }
     return this.getUsableTarget_(video);

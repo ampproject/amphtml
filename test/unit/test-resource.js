@@ -112,7 +112,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
 
     it('should be ready for layout if measured before build', () => {
-      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
+      resource.intersects({left: 0, top: 0, width: 100, height: 100});
       resource.measure(/* usePremeasuredRect */ true);
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
       elementMock.expects('build').returns(Promise.resolve()).once();
@@ -125,7 +125,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     it('should remeasure if measured before upgrade and isFixed', () => {
       // First measure
       element.isAlwaysFixed = () => false;
-      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
+      resource.intersects({left: 0, top: 0, width: 100, height: 100});
       resource.measure(/* usePremeasuredRect */ true);
 
       // Now adjust implementation to be alwaysFixed and call build.

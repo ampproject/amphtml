@@ -738,7 +738,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     });
 
     it('should invalidate premeasurements after resize event', () => {
-      resource1.premeasure({});
+      resource1.intersects({});
       expect(resource1.hasBeenPremeasured()).true;
       expect(resource1.isMeasureRequested()).false;
       resources.viewport_.changeObservable_.fire({relayoutAll_: true});

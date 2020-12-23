@@ -17,7 +17,6 @@
 import {MessageType} from '../3p-frame-messaging';
 import {SubscriptionApi} from '../iframe-helper';
 import {dict} from './object';
-import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -65,26 +64,6 @@ export const DEFAULT_THRESHOLD = [
  *  }}
  */
 let ElementIntersectionStateDef;
-
-/** @const @private */
-const INIT_TIME = Date.now();
-
-/**
- * A function to get the element's current IntersectionObserverEntry
- * regardless of the intersetion ratio. Only available when element is not
- * nested in a container iframe.
- * @param {!../layout-rect.LayoutRectDef} element element's rect
- * @param {?../layout-rect.LayoutRectDef} owner element's owner rect
- * @param {!../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
- * @return {!IntersectionObserverEntry} A change entry.
- */
-export function getIntersectionChangeEntry(element, owner, hostViewport) {
-  const intersection =
-    rectIntersection(element, owner, hostViewport) ||
-    layoutRectLtwh(0, 0, 0, 0);
-  const ratio = intersectionRatio(intersection, element);
-  return calculateChangeEntry(element, hostViewport, intersection, ratio);
-}
 
 /**
  * A class to help amp-iframe and amp-ad nested iframe listen to intersection
@@ -155,61 +134,6 @@ export function intersectionRatio(smaller, larger) {
 
   // Check for a divide by zero
   return largerBoxArea === 0 ? 0 : smallerBoxArea / largerBoxArea;
-}
-
-/**
- * Helper function to calculate the IntersectionObserver change entry.
- * @param {!../layout-rect.LayoutRectDef} element element's rect
- * @param {?../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
- * @param {!../layout-rect.LayoutRectDef} intersection
- * @param {number} ratio
- * @return {!IntersectionObserverEntry}}
- */
-function calculateChangeEntry(element, hostViewport, intersection, ratio) {
-  // If element not in an iframe.
-  // adjust all LayoutRect to hostViewport Origin.
-  let boundingClientRect = element;
-  let rootBounds = hostViewport;
-  // If no hostViewport is provided, element is inside an non-scrollable iframe.
-  // Every Layoutrect has already adjust their origin according to iframe
-  // rect origin. LayoutRect position is relative to iframe origin,
-  // thus relative to iframe's viewport origin because the viewport is at the
-  // iframe origin. No need to adjust position here.
-
-  if (hostViewport) {
-    // If element not in an iframe.
-    // adjust all LayoutRect to hostViewport Origin.
-    rootBounds = /** @type {!../layout-rect.LayoutRectDef} */ (rootBounds);
-    intersection = moveLayoutRect(
-      intersection,
-      -hostViewport.left,
-      -hostViewport.top
-    );
-    // The element is relative to (0, 0), while the viewport moves. So, we must
-    // adjust.
-    boundingClientRect = moveLayoutRect(
-      boundingClientRect,
-      -hostViewport.left,
-      -hostViewport.top
-    );
-    // Now, move the viewport to (0, 0)
-    rootBounds = moveLayoutRect(
-      rootBounds,
-      -hostViewport.left,
-      -hostViewport.top
-    );
-  }
-
-  return /** @type {!IntersectionObserverEntry} */ ({
-    time:
-      typeof performance !== 'undefined' && performance.now
-        ? performance.now()
-        : Date.now() - INIT_TIME,
-    rootBounds,
-    boundingClientRect,
-    intersectionRect: intersection,
-    intersectionRatio: ratio,
-  });
 }
 
 /**
