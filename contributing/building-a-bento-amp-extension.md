@@ -212,27 +212,49 @@ export function MyElement({attrName1, attrName2, ...rest}) {
 
 #### PreactBaseElement['className']
 
+TODO
+
 #### PreactBaseElement['layoutSizeDefined']
+
+TODO
 
 #### PreactBaseElement['lightDomTag']
 
+TODO
+
 #### PreactBaseElement['loadable']
+
+TODO
 
 #### PreactBaseElement['shadowCss']
 
+TODO
+
 #### PreactBaseElement['usesTemplate']
 
+TODO
+
 #### PreactBaseElement['useContexts']
+
+TODO
 
 #### Ways to process children (mutually exclusive)
 
 ##### PreactBaseElement['passthrough']
 
+TODO
+
 ##### PreactBaseElement['passthroughNonEmpty']
+
+TODO
 
 ##### PreactBaseElement['children']
 
+TODO
+
 ##### PreactBaseElement['detached']
+
+TODO
 
 ## Element styling
 
