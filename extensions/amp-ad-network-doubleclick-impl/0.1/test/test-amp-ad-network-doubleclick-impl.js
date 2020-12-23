@@ -1023,6 +1023,39 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           expect(url).to.not.match(/(\?|&)npa=(&|$)/);
         }));
 
+    it('should save opt_serveNpaSignal', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+          undefined,
+          true
+        )
+        .then(() => {
+          expect(impl.serveNpaSignal_).to.be.true;
+        }));
+
+    it('should include npa=1 if `serveNpaSignal` is found, regardless of consent', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+          undefined,
+          true
+        )
+        .then((url) => {
+          expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        }));
+
+    it('should include npa=1 if `serveNpaSignal` is false & insufficient consent', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.INSUFFICIENT},
+          undefined,
+          false
+        )
+        .then((url) => {
+          expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        }));
+
     it('should include gdpr_consent, if TC String is provided', () =>
       impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
         expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
@@ -1085,6 +1118,23 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       expect(
         impl.getPageParameters({
           consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
+        }).npa
+      ).to.equal(1);
+    });
+
+    it('should include npa=1 when `serveNpaSignal_` is true', () => {
+      const element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: 320,
+        width: 50,
+        'data-slot': '/1234/abc/def',
+        'always-serve-npa': 'gdpr',
+      });
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.serveNpaSignal_ = true;
+      expect(
+        impl.getPageParameters({
+          consentState: CONSENT_POLICY_STATE.SUFFICIENT,
         }).npa
       ).to.equal(1);
     });
