@@ -27,6 +27,26 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function CarouselWithActions(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <StreamGallery ref={ref} {...props} />
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current.goToSlide(3)}>goToSlide(3)</button>
+        <button onClick={() => ref.current.next()}>next</button>
+        <button onClick={() => ref.current.prev()}>prev</button>
+      </div>
+    </section>
+  );
+}
+
 export const _default = () => {
   const width = number('width', 735);
   const height = number('height', 225);
@@ -48,7 +68,7 @@ export const _default = () => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <>
-      <StreamGallery
+      <CarouselWithActions
         extraSpace={extraSpace ? 'around' : ''}
         insetArrowVisibility={insetArrowVisibility}
         loop={loop}
@@ -74,7 +94,7 @@ export const _default = () => {
             ></div>
           );
         })}
-      </StreamGallery>
+      </CarouselWithActions>
     </>
   );
 };
