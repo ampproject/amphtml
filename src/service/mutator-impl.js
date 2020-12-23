@@ -397,7 +397,7 @@ export class MutatorImpl {
     opt_callback
   ) {
     resource.resetPendingChangeSize();
-    const layoutBox = resource.getPageLayoutBox();
+    const layoutBox = resource.getLayoutBox();
     if (
       (newHeight === undefined || newHeight == layoutBox.height) &&
       (newWidth === undefined || newWidth == layoutBox.width) &&

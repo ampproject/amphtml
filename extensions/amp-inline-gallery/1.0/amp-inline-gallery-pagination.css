@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-/** @externs */
-
-/** @typedef {{
- *   shortcode: string,
- *   captioned: (boolean|undefined),
- *   title: (string|undefined),
- *   requestResize: (function(number):*|undefined),
- *   loading: (string|undefined),
- *   onLoad: (function(!Event)|undefind),
- * }}
- */
-var InstagramPropsDef;
+amp-inline-gallery-pagination[inset] {
+  display: block !important;
+  height: 20px; /* Default height. */
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}

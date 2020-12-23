@@ -13,16 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/** @externs */
-
-/** @typedef {{
- *   shortcode: string,
- *   captioned: (boolean|undefined),
- *   title: (string|undefined),
- *   requestResize: (function(number):*|undefined),
- *   loading: (string|undefined),
- *   onLoad: (function(!Event)|undefind),
- * }}
- */
-var InstagramPropsDef;

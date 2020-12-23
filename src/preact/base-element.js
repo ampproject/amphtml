@@ -34,10 +34,10 @@ import {cancellation} from '../error';
 import {
   childElementByTag,
   createElementWithAttributes,
+  dispatchCustomEvent,
   matches,
   parseBooleanAttribute,
 } from '../dom';
-import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
 import {dashToCamelCase} from '../string';
 import {devAssert} from '../log';
@@ -111,6 +111,8 @@ const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
  */
 const SIZE_DEFINED_STYLE = {
   'position': 'absolute',
+  'top': '0',
+  'left': '0',
   'width': '100%',
   'height': '100%',
 };
@@ -434,6 +436,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.loadDeferred_) {
       this.loadDeferred_.resolve();
       this.loadDeferred_ = null;
+      dispatchCustomEvent(this.element, 'load', null, {bubbles: false});
     }
   }
 
@@ -445,6 +448,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.loadDeferred_) {
       this.loadDeferred_.reject(opt_reason || new Error('load error'));
       this.loadDeferred_ = null;
+      dispatchCustomEvent(this.element, 'error', null, {bubbles: false});
     }
   }
 
@@ -590,13 +594,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.
     if (!isShadow && !isDetached) {
-      this.mutateElement(() => {
-        this.element.dispatchEvent(
-          createCustomEvent(this.win, AmpEvents.DOM_UPDATE, /* detail */ null, {
-            bubbles: true,
-          })
-        );
-      });
+      this.mutateElement(() =>
+        dispatchCustomEvent(this.element, AmpEvents.DOM_UPDATE, null)
+      );
     }
 
     if (this.renderDeferred_) {
