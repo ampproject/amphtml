@@ -16,9 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {AnimationTemplate} from './template';
-import {storiesOf} from '@storybook/preact';
+import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 const CONTAINER_STYLE = {
   position: 'absolute',
@@ -41,43 +40,51 @@ const DROP_STYLE = {
   transform: 'translateY(-20vh)',
 };
 
-// eslint-disable-next-line
-storiesOf('Animation', module)
-  .addDecorator(withKnobs)
-  .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-animation', version: 0.1}]})
-  .add('random', () => {
-    const spec = {
-      selector: '.drop',
-      '--delay': 'rand(0.1s, 5s)',
-      delay: 'var(--delay)',
-      direction: 'normal',
-      subtargets: [
-        {
-          index: 0,
-          direction: 'reverse',
-        },
-        {
-          selector: '.antigrav',
-          direction: 'reverse',
-          '--delay': '0s',
-        },
-      ],
-      keyframes: {
-        transform: 'translateY(120vh)',
+export default {
+  title: 'Animation',
+  decorators: [withKnobs, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-animation', version: 0.1}],
+  },
+};
+
+export const Random = () => {
+  const spec = {
+    selector: '.drop',
+    '--delay': 'rand(0.1s, 5s)',
+    delay: 'var(--delay)',
+    direction: 'normal',
+    subtargets: [
+      {
+        index: 0,
+        direction: 'reverse',
       },
-    };
-    return (
-      <AnimationTemplate spec={spec}>
-        <div style={CONTAINER_STYLE}>
-          <div class="drop" style={DROP_STYLE}></div>
-          <div class="drop" style={DROP_STYLE}></div>
-          <div class="drop antigrav" style={DROP_STYLE}></div>
-          <div class="drop" style={DROP_STYLE}></div>
-          <div class="drop" style={DROP_STYLE}></div>
-          <div class="drop" style={DROP_STYLE}></div>
-          <div class="drop" style={DROP_STYLE}></div>
-        </div>
-      </AnimationTemplate>
-    );
-  });
+      {
+        selector: '.antigrav',
+        direction: 'reverse',
+        '--delay': '0s',
+      },
+    ],
+    keyframes: {
+      transform: 'translateY(120vh)',
+    },
+  };
+  return (
+    <AnimationTemplate spec={spec}>
+      <div style={CONTAINER_STYLE}>
+        <div class="drop" style={DROP_STYLE}></div>
+        <div class="drop" style={DROP_STYLE}></div>
+        <div class="drop antigrav" style={DROP_STYLE}></div>
+        <div class="drop" style={DROP_STYLE}></div>
+        <div class="drop" style={DROP_STYLE}></div>
+        <div class="drop" style={DROP_STYLE}></div>
+        <div class="drop" style={DROP_STYLE}></div>
+      </div>
+    </AnimationTemplate>
+  );
+};
+
+Random.story = {
+  name: 'random',
+};

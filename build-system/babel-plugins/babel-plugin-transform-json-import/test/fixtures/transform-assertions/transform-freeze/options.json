@@ -1,0 +1,4 @@
+{
+  "plugins": [["../../../..", {"freeze": true}]],
+  "sourceType": "module"
+}

@@ -117,6 +117,7 @@
 }
 
 .i-amphtml-layout-fill,
+.i-amphtml-layout-fill.i-amphtml-notbuilt,
 [layout=fill]:not(.i-amphtml-layout-fill)
 {
   display: block;
@@ -152,6 +153,16 @@
 
 i-amphtml-sizer {
   display: block !important;
+}
+
+/*
+ * Disable `i-amphtml-sizer` when aspect ratio is supported by both the
+ * borwser and the optimizer.
+ */
+@supports (aspect-ratio: 1 / 1) {
+  i-amphtml-sizer.i-amphtml-disable-for-ar {
+    display: none !important;
+  }
 }
 
 .i-amphtml-fill-content,
@@ -264,12 +275,32 @@ i-amphtml-sizer {
  * [width][height][sizes] and [width][height][heights] imply layout=responsive
  * before the element has resolved.
  */
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > *,
 [layout]:not([layout=container]):not(.i-amphtml-element) > *,
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > *,
 [width][height][heights]:not([layout]):not(.i-amphtml-element) > *
 {
   display: none;
+}
+
+/**
+ * We special case the native <img> inside an SSR'd <amp-img>. We allow this to
+ * display using `block` defined by .i-amphtml-fill-content.
+ *
+ * As more elements get SSR, we'll need to add their special cases here.
+ */
+amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
+{
+  display: block;
+}
+
+/** Hide all text node children of non-container elements. */
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container),
+[layout]:not([layout='container']):not(.i-amphtml-element),
+[width][height][sizes]:not([layout]):not(.i-amphtml-element),
+[width][height][heights]:not([layout]):not(.i-amphtml-element) {
+  color: transparent !important;
+  line-height: 0 !important;
 }
 
 .i-amphtml-ghost {
@@ -393,9 +424,11 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   z-index: 2;
   visibility: hidden;
   /* display:initial overrides display:none from the "hide all children of
-     non-container elements" rule. This avoids a minor content jump after
+     non-container elements" rule. Similarly, line-height:normal overrides
+     line-height:0 for text node children. This avoids a minor content jump after
      element build since overflows increase the height of their parents. */
   display: initial;
+  line-height: normal;
 }
 
 .i-amphtml-element > [overflow].amp-visible {
@@ -426,7 +459,7 @@ amp-pixel {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics, amp-story-auto-ads {
+amp-analytics, amp-story-auto-ads, amp-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;
@@ -487,11 +520,11 @@ amp-accordion > section {
 }
 
 /* Collapse content by default. */
-amp-accordion > section > :last-child {
+amp-accordion:not(.i-amphtml-built) > section > :last-child {
   display: none !important;
 }
 
 /* Expand content when needed. */
-amp-accordion > section[expanded] > :last-child {
+amp-accordion:not(.i-amphtml-built) > section[expanded] > :last-child {
   display: block !important;
 }

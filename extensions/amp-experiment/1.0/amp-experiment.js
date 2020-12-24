@@ -77,9 +77,7 @@ export class AmpExperiment extends AMP.BaseElement {
             Promise.resolve(this.getEmptyExperimentToVariant_(config))
           );
 
-          return Promise.reject(
-            'Experiment amp-experiment-1.0 is not enabled.'
-          );
+          return;
         }
 
         const ampdoc = this.getAmpDoc();

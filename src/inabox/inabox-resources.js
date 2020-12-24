@@ -20,27 +20,13 @@ import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';
 import {Services} from '../services';
+import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
+import {getMode} from '../mode';
 import {registerServiceBuilderForDoc} from '../service';
 
 const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;
-
-/**
- * Only a few components require viewportCallback.
- * Allow them to observe intersections explicitly.
- * @private @const {!Array<string>}
- */
-const receivesViewportCallback = ['AMP-CAROUSEL'];
-
-/** @param {!IntersectionObserverEntry} entry */
-function triggerViewportCallbackFromIntersection(entry) {
-  const {target, isIntersecting} = entry;
-  if (!target.viewportCallback) {
-    return;
-  }
-  target.viewportCallback(isIntersecting);
-}
 
 /**
  * @implements {../service/resources-interface.ResourcesInterface}
@@ -78,10 +64,29 @@ export class InaboxResources {
 
     const input = Services.inputFor(this.win);
     input.setupInputModeClasses(ampdoc);
+
+    // TODO(#31246): launch the visibility logic in inabox as well.
+    if (getMode(this.win).runtime != 'inabox') {
+      ampdoc.onVisibilityChanged(() => {
+        switch (ampdoc.getVisibilityState()) {
+          case VisibilityState.PAUSED:
+            this.resources_.forEach((r) => r.pause());
+            break;
+          case VisibilityState.VISIBLE:
+            this.resources_.forEach((r) => r.resume());
+            this./*OK*/ schedulePass();
+            break;
+        }
+      });
+    }
+
+    this.ampdoc_.whenReady().then(() => this./*OK*/ schedulePass(1));
   }
 
   /** @override */
   dispose() {
+    this.resources_.forEach((r) => r.unload());
+    this.resources_.length = 0;
     if (this.inViewportObserver_) {
       this.inViewportObserver_.disconnect();
       this.inViewportObserver_ = null;
@@ -117,7 +122,6 @@ export class InaboxResources {
   add(element) {
     const resource = new Resource(++this.resourceIdCounter_, element, this);
     this.resources_.push(resource);
-    this.maybeObserveInViewport_(element);
     dev().fine(TAG, 'resource added:', resource.debugid);
   }
 
@@ -198,6 +202,7 @@ export class InaboxResources {
    * @private
    */
   doPass_() {
+    const now = Date.now();
     dev().fine(TAG, 'doPass');
     // measure in a batch
     this.resources_.forEach((resource) => {
@@ -212,6 +217,7 @@ export class InaboxResources {
         resource.getState() === ResourceState.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
+        resource.layoutScheduled(now);
         resource.startLayout();
       }
     });
@@ -219,45 +225,6 @@ export class InaboxResources {
     this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
-  }
-
-  /**
-   * Instantiates an IntersectionObserver (if available) that triggers
-   * viewportCallbacks.
-   * @return {?IntersectionObserver}
-   * @private
-   */
-  maybeInitInViewportObserver_() {
-    const {IntersectionObserver} = this.win;
-    if (!IntersectionObserver) {
-      return null;
-    }
-    if (this.inViewportObserver_ === null) {
-      this.inViewportObserver_ = new IntersectionObserver((entries) =>
-        entries.forEach(triggerViewportCallbackFromIntersection)
-      );
-    }
-    return this.inViewportObserver_;
-  }
-
-  /**
-   * Observes an element so it will receive viewportCallbacks when allowed.
-   * @param {!Element} element
-   * @private
-   */
-  maybeObserveInViewport_(element) {
-    if (!receivesViewportCallback.includes(element.tagName)) {
-      return;
-    }
-    const observer = this.maybeInitInViewportObserver_();
-    if (observer) {
-      observer.observe(element);
-    }
-  }
-
-  /** @override */
-  getSlowElementRatio() {
-    return 0;
   }
 }
 

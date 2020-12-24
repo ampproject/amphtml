@@ -62,6 +62,10 @@ t.run('amp-story-affiliate link', () => {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it.skip('should not send any analytics event on expand', async () => {
         browser.click('#blink-1');
         browser.click('h1');

@@ -177,9 +177,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {string} */
     this.currentLightboxGroupId_ = 'default';
 
-    /** @private {?Element} */
-    this.sourceElement_ = null;
-
     /**
      * @private {boolean}
      */
@@ -277,11 +274,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   cloneLightboxableElement_(element) {
+    const fallback = element.getFallback();
+    const shouldCloneFallback =
+      element.classList.contains('amp-notsupported') && !!fallback;
+    if (shouldCloneFallback) {
+      element = fallback;
+    }
     const deepClone = !element.classList.contains('i-amphtml-element');
     const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
     clonedNode.removeAttribute('i-amphtml-layout');
+    clonedNode.removeAttribute('fallback');
     return clonedNode;
   }
   /**
@@ -729,7 +733,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   openLightboxGallery_(element, expandDescription) {
-    this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox') || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
     this.hasVerticalScrollbarWidth_ = getVerticalScrollbarWidth(this.win) > 0;
@@ -748,11 +751,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.isActive_ = true;
 
         const owners = Services.ownersForDoc(this.element);
-        owners.updateInViewport(
-          this.element,
-          dev().assertElement(this.container_),
-          true
-        );
         owners.scheduleLayout(
           this.element,
           dev().assertElement(this.container_)
@@ -831,33 +829,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   shouldAnimateOut_() {
     const target = this.getCurrentElement_().sourceElement;
-    if (!this.transitionTargetIsInViewport_(target)) {
-      return false;
-    }
-    if (!this.elementTypeCanBeAnimated_(target)) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   *
-   * @param {!Element} target
-   * @return {boolean}
-   * @private
-   */
-  transitionTargetIsInViewport_(target) {
-    if (target == this.sourceElement_) {
-      return true;
-    }
-    if (target.isInViewport()) {
-      return true;
-    }
-    const parentCarousel = this.getSourceElementParentCarousel_(target);
-    if (parentCarousel && parentCarousel.isInViewport()) {
-      return true;
-    }
-    return false;
+    return this.elementTypeCanBeAnimated_(target);
   }
 
   /**

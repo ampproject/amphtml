@@ -463,43 +463,6 @@ describe('Resources', () => {
     // The other task is not updated.
     expect(task2.priority).to.equal(LayoutPriority.ADS);
   });
-
-  describe('slow element ratio (ser)', () => {
-    const slowTask = {resource: {isInViewport: () => true}};
-    const fastTask = {resource: {isInViewport: () => false}};
-
-    it('No layouts --> 0', () => {
-      resources.firstVisibleTime_ = 1;
-      expect(resources.getSlowElementRatio()).equal(0);
-    });
-
-    it('0 slow / 1 total --> 0', () => {
-      resources.firstVisibleTime_ = 1;
-      resources.taskComplete_(fastTask);
-      expect(resources.getSlowElementRatio()).equal(0);
-    });
-
-    it('ser is 0 if page was never visible', () => {
-      resources.firstVisibleTime_ = -1;
-      resources.taskComplete_(slowTask);
-      expect(resources.getSlowElementRatio()).equal(0);
-    });
-
-    it('1 slow / 1 total --> 1', () => {
-      resources.firstVisibleTime_ = 1;
-      resources.taskComplete_(slowTask);
-      expect(resources.getSlowElementRatio()).equal(1);
-    });
-
-    it('9 slow/ 10 total --> 0.9', () => {
-      resources.firstVisibleTime_ = 1;
-      for (let i = 0; i < 9; i++) {
-        resources.taskComplete_(slowTask);
-      }
-      resources.taskComplete_(fastTask);
-      expect(resources.getSlowElementRatio()).equal(0.9);
-    });
-  });
 });
 
 describes.fakeWin(
@@ -647,7 +610,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
 
     element.idleRenderOutsideViewport = () => true;
@@ -775,6 +737,21 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       expect(resource2.applySizesAndMediaQuery).to.not.be.called;
     });
 
+    it('should invalidate premeasurements after resize event', () => {
+      resource1.premeasure({});
+      expect(resource1.hasBeenPremeasured()).true;
+      expect(resource1.isMeasureRequested()).false;
+      resources.viewport_.changeObservable_.fire({relayoutAll_: true});
+      expect(resource1.hasBeenPremeasured()).false;
+      expect(resource1.isMeasureRequested()).true;
+    });
+
+    it('should schedule a pass after resize event', () => {
+      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+      resources.viewport_.changeObservable_.fire({relayoutAll_: false});
+      expect(schedulePassStub).calledOnce;
+    });
+
     it('should applySizesAndMediaQuery on relayout', () => {
       resources.relayoutAll_ = true;
 
@@ -842,31 +819,17 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource2.state_).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
-  it('should prerender only one screen with prerenderSize = 1', () => {
+  it('should prerender only one screen in visibilityState=prerender', () => {
     resources.visible_ = false;
     sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
-    resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 1009));
 
     resources.discoverWork_();
 
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
-  });
-
-  it('should NOT prerender anything with prerenderSize = 0', () => {
-    resources.visible_ = false;
-    sandbox
-      .stub(resources.ampdoc, 'getVisibilityState')
-      .returns(VisibilityState.PRERENDER);
-    resources.prerenderSize_ = 0;
-    viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
-
-    resources.discoverWork_();
-
-    expect(resources.queue_.getSize()).to.equal(0);
   });
 
   // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
@@ -1423,7 +1386,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       },
       pauseCallback() {},
       resumeCallback() {},
-      dispatchCustomEvent() {},
       applySizesAndMediaQuery() {},
       updateLayoutBox() {},
       getBoundingClientRect() {
@@ -1569,7 +1531,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
 
     resources.add(child1);
 
-    expect(resource1.requestMeasure).to.not.be.called;
+    expect(resource1.requestMeasure).to.be.calledOnce;
     expect(observer.observe).to.be.calledOnceWith(child1);
   });
 

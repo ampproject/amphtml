@@ -30,7 +30,6 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {htmlFor} from '../../src/static-template';
-import {setParentWindow} from '../../src/service';
 import {whenCalled} from '../../testing/test-helper.js';
 
 /**
@@ -518,29 +517,6 @@ describe('Action parseActionMap', () => {
   });
 });
 
-describes.sandboxed('Action adoptEmbedWindow', {}, () => {
-  let action;
-  let embedWin;
-
-  beforeEach(() => {
-    action = actionService();
-    embedWin = {
-      frameElement: document.createElement('div'),
-      document: document.implementation.createHTMLDocument(''),
-    };
-    setParentWindow(embedWin, action.ampdoc.win);
-  });
-
-  it('should create embedded action service', () => {
-    ActionService.installInEmbedWindow(embedWin, action.ampdoc);
-    const embedService =
-      embedWin.__AMP_SERVICES.action && embedWin.__AMP_SERVICES.action.obj;
-    expect(embedService).to.exist;
-    expect(embedService.ampdoc).to.equal(action.ampdoc);
-    expect(embedService.root_).to.equal(embedWin.document);
-  });
-});
-
 describes.sandboxed('Action findAction', {}, () => {
   let action;
 
@@ -777,7 +753,7 @@ describes.sandboxed('Action method', {}, (env) => {
     expect(inv.args['key1']).to.equal(11);
   });
 
-  it('should not allow invoke on non-AMP and non-whitelisted element', () => {
+  it('should not allow invoke on non-AMP and non-allowlisted element', () => {
     allowConsoleError(() => {
       expect(() => {
         action.invoke_(
@@ -898,7 +874,7 @@ describes.sandboxed('installActionHandler', {}, (env) => {
     action = actionService();
   });
 
-  it('should invoke on non-AMP but whitelisted element', () => {
+  it('should invoke on non-AMP but allowlisted element', () => {
     const handlerSpy = env.sandbox.spy();
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy);
@@ -1529,6 +1505,42 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
     );
   });
 
+  it('should trigger change event for <input type="file"> elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'file');
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+      element,
+      'change',
+      env.sandbox.match((e) => e.detail.files.length == 0)
+    );
+
+    element.setAttribute('multiple', '');
+    Object.defineProperty(element, 'files', {
+      value: {
+        0: new File(['foo'], 'foo.txt', {type: 'text/plain'}),
+        1: new File(['bar'], 'bar.txt', {type: 'text/plain'}),
+        length: 2,
+      },
+    });
+
+    handler({target: element});
+    expect(action.trigger).to.have.been.calledWith(
+      element,
+      'change',
+      env.sandbox.match({
+        detail: {
+          files: [
+            {name: 'foo.txt', size: 3, type: 'text/plain'},
+            {name: 'bar.txt', size: 3, type: 'text/plain'},
+          ],
+        },
+      })
+    );
+  });
+
   it('should trigger change event with details for <select> elements', () => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('select');
@@ -1651,7 +1663,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
 });
 
 describes.realWin(
-  'Action whitelisting',
+  'Action allowlisting',
   {
     amp: {
       ampdoc: 'single',
@@ -1683,7 +1695,7 @@ describes.realWin(
       target = createExecElement('foo', spy, getDefaultActionAlias);
     });
 
-    describe('with null action whitelist', () => {
+    describe('with null action allowlist', () => {
       beforeEach(() => {
         action = new ActionService(env.ampdoc, env.win.document);
       });
@@ -1701,10 +1713,10 @@ describes.realWin(
       });
     });
 
-    describe('with non-null action whitelist', () => {
+    describe('with non-null action allowlist', () => {
       beforeEach(() => {
         action = new ActionService(env.ampdoc, env.win.document);
-        action.setWhitelist([
+        action.setAllowlist([
           {tagOrTarget: 'AMP', method: 'pushState'},
           {tagOrTarget: 'AMP', method: 'setState'},
           {tagOrTarget: '*', method: 'show'},
@@ -1721,51 +1733,51 @@ describes.realWin(
         expect(spy).to.be.calledWithExactly(i);
       });
 
-      it('should allow whitelisted actions with wildcard target', () => {
+      it('should allow allowlisted actions with wildcard target', () => {
         const i = getActionInvocation(target, 'show', 'DIV');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
 
-      it('should not allow non-whitelisted actions', () => {
+      it('should not allow non-allowlisted actions', () => {
         const i = getActionInvocation(target, 'print', 'AMP');
         env.sandbox.stub(action, 'error_');
         expect(action.invoke_(i)).to.be.null;
         expect(action.error_).to.be.calledWithMatch(
-          /"AMP.print" is not whitelisted/
+          /"AMP.print" is not allowlisted/
         );
       });
 
-      it('should allow adding actions to the whitelist', () => {
+      it('should allow adding actions to the allowlist', () => {
         const i = getActionInvocation(target, 'print', 'AMP');
-        action.addToWhitelist('AMP', 'print');
+        action.addToAllowlist('AMP', 'print');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
 
-      it('should allow adding action lists to the whitelist', () => {
+      it('should allow adding action lists to the allowlist', () => {
         const i = getActionInvocation(target, 'print', 'AMP');
-        action.addToWhitelist('AMP', ['print']);
+        action.addToAllowlist('AMP', ['print']);
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
     });
 
-    it('should not allow any action with empty whitelist', () => {
+    it('should not allow any action with empty allowlist', () => {
       action = new ActionService(env.ampdoc, env.win.document);
-      action.setWhitelist([]);
+      action.setAllowlist([]);
       const i = getActionInvocation(target, 'print', 'AMP');
       env.sandbox.stub(action, 'error_');
       expect(action.invoke_(i)).to.be.null;
       expect(action.error_).to.be.calledWith(
-        '"AMP.print" is not whitelisted [].'
+        '"AMP.print" is not allowlisted [].'
       );
     });
 
-    it('should throw error with unparseable whitelist entries', () => {
+    it('should throw error with unparseable allowlist entries', () => {
       action = new ActionService(env.ampdoc, env.win.document);
       expect(() =>
-        action.setWhitelist([
+        action.setAllowlist([
           {tagOrTarget: 'AMP', method: 'pushState'},
           {invalidEntry: 'invalid'},
           {},
@@ -1775,9 +1787,9 @@ describes.realWin(
           {method: 'show'},
         ])
       ).to.throw(
-        'Action whitelist entries should be of shape { tagOrTarget: string, method: string }'
+        'Action allowlist entries should be of shape { tagOrTarget: string, method: string }'
       );
-      expect(action.whitelist_).to.be.null;
+      expect(action.allowlist_).to.be.null;
     });
 
     describe('email documents', () => {
@@ -1786,7 +1798,7 @@ describes.realWin(
         action = new ActionService(env.ampdoc, env.win.document);
       });
 
-      it('should supply default actions whitelist', () => {
+      it('should supply default actions allowlist', () => {
         const i = getActionInvocation(target, 'toggleClass', 'AMP');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
@@ -1797,7 +1809,7 @@ describes.realWin(
         env.sandbox.stub(action, 'error_');
         expect(action.invoke_(i)).to.be.null;
         expect(action.error_).to.be.calledWithMatch(
-          /"AMP.print" is not whitelisted/
+          /"AMP.print" is not allowlisted/
         );
       });
     });

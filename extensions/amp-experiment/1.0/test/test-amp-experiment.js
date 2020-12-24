@@ -104,17 +104,6 @@ describes.realWin(
       return stub;
     }
 
-    it('Rejects because experiment is not enabled', () => {
-      toggleExperiment(win, 'amp-experiment-1.0', false);
-
-      expectAsyncConsoleError(/Experiment/);
-      addConfigElement('script');
-      doc.body.appendChild(el);
-      return experiment
-        .buildCallback()
-        .should.eventually.be.rejectedWith(/Experiment/);
-    });
-
     it('should not throw on valid config', () => {
       expect(() => {
         addConfigElement('script');

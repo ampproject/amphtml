@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as cookie from '../../src/cookies';
 import * as lolex from 'lolex';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
@@ -34,6 +35,10 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {macroTask} from '../../testing/yield';
 import {parseUrlDeprecated} from '../../src/url';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../src/service';
 import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
@@ -126,6 +131,7 @@ describes.sandboxed('cid', {}, (env) => {
 
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(env.sandbox, ampdoc, 'storage', 'get');
+
     viewer = Services.viewerForDoc(ampdoc);
     env.sandbox.stub(ampdoc, 'whenFirstVisible').callsFake(function () {
       return whenFirstVisible;
@@ -159,7 +165,7 @@ describes.sandboxed('cid', {}, (env) => {
     window.localStorage.removeItem('amp-cid');
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -185,7 +191,7 @@ describes.sandboxed('cid', {}, (env) => {
       });
     });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -812,6 +818,9 @@ describes.realWin('cid', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let clock;
+  let storage;
+  let storageMock;
+  let storageValue;
   const hasConsent = Promise.resolve();
 
   beforeEach(() => {
@@ -823,13 +832,31 @@ describes.realWin('cid', {amp: true}, (env) => {
     });
     cid = cidServiceForDocForTesting(ampdoc);
     env.sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
+    storageValue = {};
+    storage = {
+      setNonBoolean: (name, value) => {
+        storageValue[name] = value;
+        return Promise.resolve();
+      },
+      get: (name) => {
+        return Promise.resolve(storageValue[name]);
+      },
+      isViewerStorage: () => false,
+    };
+    storageMock = env.sandbox.mock(storage);
+
+    resetServiceForTesting(win, 'storage');
+    registerServiceBuilder(win, 'storage', function () {
+      return Promise.resolve(storage);
+    });
   });
 
   afterEach(() => {
+    storageMock.verify();
     clock.uninstall();
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   it.configure().skipSafari(
     'should store CID in cookie when not in Viewer',
     function* () {
@@ -855,6 +882,119 @@ describes.realWin('cid', {amp: true}, (env) => {
       expect(fooCid).to.equal(fooCid2);
     }
   );
+
+  describe('CID backup', () => {
+    beforeEach(() => {
+      cid.isBackupCidExpOn = true;
+      env.sandbox
+        .stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
+    });
+
+    it('generates a new CID and backup', async () => {
+      setCookie(win, 'foo', '', 0);
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+        },
+        hasConsent
+      );
+      expect(fooCid).to.have.string('amp-');
+      expect(storageValue['amp-cid:foo']).to.equal(fooCid);
+    });
+
+    it('should find AMP generated CID in cookie and backup', async () => {
+      const cidString = 'amp-abc123';
+      win.document.cookie = `foo=${cidString};`;
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+        },
+        hasConsent
+      );
+      expect(fooCid).to.equal(cidString);
+      expect(storageValue['amp-cid:foo']).to.equal(fooCid);
+
+      const nonAmpCidString = 'xyz987';
+      win.document.cookie = `bar=${nonAmpCidString};`;
+      expect(
+        await cid.get(
+          {
+            scope: 'bar',
+            createCookieIfNotPresent: true,
+          },
+          hasConsent
+        )
+      ).to.equal(nonAmpCidString);
+      expect(storageValue['amp-cid:bar']).to.not.equal(nonAmpCidString);
+    });
+
+    it('only use backup when necessary and update accordingly', async () => {
+      storageValue['amp-cid:foo'] = 'amp-foo-bar';
+      const cidString = 'amp-abc123';
+      win.document.cookie = `foo=${cidString};`;
+      storageMock
+        .expects('setNonBoolean')
+        .withExactArgs('amp-cid:foo', cidString)
+        .once();
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+        },
+        hasConsent
+      );
+      expect(fooCid).to.equal(cidString);
+    });
+
+    it('should use CID backup', async () => {
+      const cidString = 'amp-abc123';
+      storageMock.expects('setNonBoolean').once();
+      setCookie(win, 'foo', '', 0);
+      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
+        win.document.cookie = `${name}=${value}`;
+      });
+      storageValue['amp-cid:foo'] = cidString;
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+        },
+        hasConsent
+      );
+
+      expect(fooCid).to.equal(cidString);
+      expect(getCookie(win, 'foo')).to.equal(cidString);
+    });
+
+    it('should not use or store CID backup if opt-out', async () => {
+      const cidString = 'amp-abc123';
+      setCookie(win, 'foo', '', 0);
+      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
+        win.document.cookie = `${name}=${value}`;
+      });
+      storageMock.expects('setNonBoolean').never();
+      // To check amp-cid-optout
+      storageMock.expects('get').once();
+      storageValue['amp-cid:foo'] = cidString;
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+          disableBackup: true,
+        },
+        hasConsent
+      );
+
+      expect(fooCid).to.not.equal(cidString);
+    });
+  });
 
   it('get method should return CID when in Viewer ', () => {
     env.sandbox
@@ -893,13 +1033,7 @@ describes.realWin('cid', {amp: true}, (env) => {
     stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
       Promise.resolve(true)
     );
-    const storageGetStub = stubServiceForDoc(
-      env.sandbox,
-      ampdoc,
-      'storage',
-      'get'
-    );
-    storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(false));
+    storage['amp-cid-optout'] = false;
     env.sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
@@ -915,7 +1049,7 @@ describes.realWin('cid', {amp: true}, (env) => {
     yield macroTask();
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -991,6 +1125,28 @@ describes.realWin('cid', {amp: true}, (env) => {
             expect(getCookie(win, '_ga')).to.be.null;
           });
       });
+
+      it(
+        'should not store CID in storage if opt-in,' +
+          ' since CID is stored on servers',
+        () => {
+          storageMock.expects('setNonBoolean').never();
+          cid.apiKeyMap_ = {'AMP_ECID_GOOGLE': 'cid-api-key'};
+          const getScopedCidStub = env.sandbox.stub(
+            cid.cidApi_,
+            'getScopedCid'
+          );
+          getScopedCidStub.returns(Promise.resolve('cid-from-api'));
+          return cid.get(
+            {
+              scope: 'AMP_ECID_GOOGLE',
+              cookieName: '_ga',
+              createCookieIfNotPresent: true,
+            },
+            hasConsent
+          );
+        }
+      );
     });
 
   describe('isScopeOptedIn', () => {
@@ -1028,7 +1184,7 @@ describes.realWin('cid', {amp: true}, (env) => {
       expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
     });
 
-    it('should not work if vendor not whitelisted', () => {
+    it('should not work if vendor not allowlisted', () => {
       ampdoc.win.document.head.innerHTML +=
         '<meta name="amp-google-client-id-api" content="abodeanalytics">';
       expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);

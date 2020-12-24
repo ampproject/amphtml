@@ -373,6 +373,11 @@ export class UpdateSourcesTask extends MediaTask {
     this.newSources_.applyToElement(this.win_, mediaEl);
     return Promise.resolve();
   }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
+  }
 }
 
 /**
@@ -405,6 +410,11 @@ export class SwapIntoDomTask extends MediaTask {
     );
     return Promise.resolve();
   }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
+  }
 }
 
 /**
@@ -428,5 +438,10 @@ export class SwapOutOfDomTask extends MediaTask {
     copyAttributes(mediaEl, this.placeholderEl_);
     mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
     return Promise.resolve();
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
   }
 }

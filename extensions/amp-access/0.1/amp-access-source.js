@@ -227,13 +227,6 @@ export class AccessSource {
       user().info(TAG, 'Forcing access type: SERVER');
       type = AccessType.SERVER;
     }
-    if (
-      type == AccessType.IFRAME &&
-      !isExperimentOn(this.ampdoc.win, 'amp-access-iframe')
-    ) {
-      user().error(TAG, 'Experiment "amp-access-iframe" is not enabled.');
-      type = AccessType.CLIENT;
-    }
     return type;
   }
 
@@ -278,7 +271,12 @@ export class AccessSource {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      /** vars */ undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**

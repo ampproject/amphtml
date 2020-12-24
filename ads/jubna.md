@@ -36,5 +36,5 @@ For details on the configuration semantics, please contact Jubna or refer to the
 
 ### Required parameters
 
-- `wid`: Widget ID
-- `pid`: Publisher ID || Uniquie ID of your account
+-   `wid`: Widget ID
+-   `pid`: Publisher ID || Uniquie ID of your account

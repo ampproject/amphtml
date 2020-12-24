@@ -20,7 +20,10 @@ import {BaseSlides} from './base-slides';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  dispatchCustomEvent,
+} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -29,7 +32,10 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
-import {startsWith} from '../../../src/string';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -128,10 +134,9 @@ export class AmpSlideScroll extends BaseSlides {
     // - iOS devices on version 10.3
     // - Non iOS devices with the flag turned off.
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = startsWith(
-      Services.platformFor(this.win).getIosVersionString(),
-      '10.3'
-    )
+    this.shouldDisableCssSnap_ = Services.platformFor(this.win)
+      .getIosVersionString()
+      .startsWith('10.3')
       ? true
       : this.isIos_
       ? false
@@ -148,7 +153,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.vsync_ = this.getVsync();
     this.action_ = Services.actionServiceForDoc(this.element);
     /** If the element is in an email document, allow its `goToSlide` action. */
-    this.action_.addToWhitelist(TAG, 'goToSlide', ['email']);
+    this.action_.addToAllowlist(TAG, 'goToSlide', ['email']);
 
     this.hasNativeSnapPoints_ =
       getStyle(this.element, 'scrollSnapType') != undefined;
@@ -306,11 +311,15 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   onLayoutMeasure() {
-    this.slideWidth_ = this.element.getLayoutWidth();
+    this.slideWidth_ = this.element./*OK*/ offsetWidth;
   }
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
     const isScaled = closestAncestorElementBySelector(
@@ -347,21 +356,9 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.slideIndex_ = null;
     return super.unlayoutCallback();
-  }
-
-  /** @override */
-  updateViewportState(inViewport) {
-    if (this.slideIndex_ !== null) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        this.slides_[
-          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
-        ],
-        inViewport
-      );
-    }
   }
 
   /** @override */
@@ -689,15 +686,6 @@ export class AmpSlideScroll extends BaseSlides {
     if (nextIndex != null && nextIndex !== prevIndex) {
       showIndexArr.push(nextIndex);
     }
-    if (this.slideIndex_ !== null) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        this.slides_[
-          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
-        ],
-        false
-      );
-    }
     const newSlideInView = this.slides_[newIndex];
 
     if (newSlideInView === undefined) {
@@ -709,11 +697,6 @@ export class AmpSlideScroll extends BaseSlides {
       );
       return false;
     }
-    Services.ownersForDoc(this.element).updateInViewport(
-      this.element,
-      newSlideInView,
-      true
-    );
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
@@ -768,7 +751,7 @@ export class AmpSlideScroll extends BaseSlides {
       );
       this.action_.trigger(this.element, name, event, opt_trust);
 
-      this.element.dispatchCustomEvent(name, {
+      dispatchCustomEvent(this.element, name, {
         index: newIndex,
         actionTrust: opt_trust,
       });

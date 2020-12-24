@@ -52,12 +52,10 @@ tags: {  # amp-geo (json)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-geo"
+  spec_url: "https://amp.dev/documentation/components/amp-geo/"
 }
-
-

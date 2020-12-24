@@ -30,7 +30,6 @@ import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
 import {makeBodyVisibleRecovery} from './style-installer';
-import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
 
@@ -195,7 +194,12 @@ export function reportError(error, opt_associatedElement) {
     }
 
     // Report to console.
-    if (self.console) {
+    if (
+      self.console &&
+      (isUserErrorMessage(error.message) ||
+        !error.expected ||
+        getMode().localDev)
+    ) {
       const output = console.error || console.log;
       if (error.messageArray) {
         output.apply(console, error.messageArray);
@@ -215,14 +219,7 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    onError['call'](
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      error
-    );
+    onError['call'](self, undefined, undefined, undefined, undefined, error);
   } catch (errorReportingError) {
     setTimeout(function () {
       throw errorReportingError;
@@ -248,10 +245,10 @@ export function isCancellation(errorOrMessage) {
     return false;
   }
   if (typeof errorOrMessage == 'string') {
-    return startsWith(errorOrMessage, CANCELLED);
+    return errorOrMessage.startsWith(CANCELLED);
   }
   if (typeof errorOrMessage.message == 'string') {
-    return startsWith(errorOrMessage.message, CANCELLED);
+    return errorOrMessage.message.startsWith(CANCELLED);
   }
   return false;
 }
@@ -273,10 +270,10 @@ export function isBlockedByConsent(errorOrMessage) {
     return false;
   }
   if (typeof errorOrMessage == 'string') {
-    return startsWith(errorOrMessage, BLOCK_BY_CONSENT);
+    return errorOrMessage.startsWith(BLOCK_BY_CONSENT);
   }
   if (typeof errorOrMessage.message == 'string') {
-    return startsWith(errorOrMessage.message, BLOCK_BY_CONSENT);
+    return errorOrMessage.message.startsWith(BLOCK_BY_CONSENT);
   }
   return false;
 }
@@ -311,8 +308,10 @@ export function installErrorReporting(win) {
  * @this {!Window|undefined}
  */
 function onError(message, filename, line, col, error) {
-  // Make an attempt to unhide the body.
-  if (this && this.document) {
+  // Make an attempt to unhide the body but don't if the error is actually expected.
+  // eslint-disable-next-line local/no-invalid-this
+  if (this && this.document && (!error || !error.expected)) {
+    // eslint-disable-next-line local/no-invalid-this
     makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
@@ -342,6 +341,7 @@ function onError(message, filename, line, col, error) {
     reportingBackoff(() => {
       try {
         return reportErrorToServerOrViewer(
+          // eslint-disable-next-line local/no-invalid-this
           this,
           /** @type {!JsonObject} */
           (data)
@@ -548,7 +548,10 @@ export function getErrorReportData(
   data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
-  if (IS_ESM) {
+  if (IS_SXG) {
+    runtime = 'sxg';
+    data['sxg'] = '1';
+  } else if (IS_ESM) {
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {
@@ -556,10 +559,6 @@ export function getErrorReportData(
     runtime = '3p';
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
-  }
-
-  if (getMode().singlePassType) {
-    data['spt'] = getMode().singlePassType;
   }
 
   data['rt'] = runtime;
@@ -699,8 +698,8 @@ export function detectJsEngineFromStack() {
   } catch (e) {
     const {stack} = e;
 
-    // Safari only mentions the method name.
-    if (startsWith(stack, 't@')) {
+    // Safari 12 and under only mentions the method name.
+    if (stack.startsWith('t@')) {
       return 'Safari';
     }
 
@@ -721,7 +720,7 @@ export function detectJsEngineFromStack() {
     }
 
     // Finally, chrome includes the error message in the stack.
-    if (startsWith(stack, 'Error: message')) {
+    if (stack.startsWith('Error: message')) {
       return 'Chrome';
     }
   }
@@ -741,7 +740,12 @@ export function reportErrorToAnalytics(error, win) {
       'errorName': error.name,
       'errorMessage': error.message,
     });
-    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+    triggerAnalyticsEvent(
+      getRootElement_(win),
+      'user-error',
+      vars,
+      /** enableDataVars */ false
+    );
   }
 }
 

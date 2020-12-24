@@ -53,6 +53,7 @@
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
+      <option>blackcrowai</option>
       <option>blueconic</option>
       <option>browsi</option>
       <option>burt</option>
@@ -69,6 +70,7 @@
       <option>euleriananalytics</option>
       <option>facebook-pixel</option>
       <option>gemius</option>
+      <option>gfksensic</option>
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
@@ -79,6 +81,7 @@
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
+      <option>mapp_intelligence</option>
       <option>marinsoftware</option>
       <option>mediametrie</option>
       <option>mediarithmics</option>
@@ -110,6 +113,7 @@
       <option>simplereach</option>
       <option>snowplow</option>
       <option>snowplow_v2</option>
+      <option>tail</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
@@ -339,6 +343,19 @@ For complete documentation and additional examples please see: https://marketing
     </script>
 </amp-analytics>
 <!-- Baidu stats example -->
+
+<!-- Black Crow AI example -->
+<amp-analytics type="blackcrowai">
+  <script type="application/json">
+    { 
+      "vars": {
+        "google_tracking_id": "YOUR-GA-Account-ID-like-UA-134511847-1",
+        "site_name": "YOUR-SITE-NAME-PROVIDED-BY-YOUR-BLACK-CROW"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- END Black Crow AI example -->
 
 <!-- BlueConic analytics tracking -->
 <amp-analytics type="blueconic" id="blueconic">
@@ -693,6 +710,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Gemius  example -->
 
+<!-- GfK Sensic tracking -->
+<amp-analytics type="gfksensic" id="gfk">
+<script type="application/json">
+{
+  "vars": {
+    "regionID": "demo",
+    "mediaID": "demomedia"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Sensic  example -->
+
 <amp-analytics type="googleanalytics" id="googleanalytics">
 <script type="application/json">
 {
@@ -905,6 +935,25 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Lotame example -->
+
+<!-- Mapp Intelligence tracking -->
+<amp-analytics type="mapp_intelligence" id="mapp_intelligence">
+  <script type="application/json">
+    {
+      "vars": {
+        "trackDomain": "analytics.webtrekk.net",
+        "trackId": "111111111111111"
+      },
+      "triggers": {
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Mapp Intelligence example -->
 
 <!-- Marin Software tracking.
   Configure tracker id (required)
@@ -1582,6 +1631,33 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
 
+<!-- Tail Analytics Example
+    Ensure you replace account with your account id.
+ -->
+<amp-analytics type="tail" id="tail">
+  <script type="application/json">
+    {
+      "vars": {
+        "account": "TT-0000-0"
+      },
+      "triggers": {
+        "click": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventValue": "value1",
+            "eventCategory": "category1",
+            "eventAction": "action1",
+            "eventLabel": "label1"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Tail Analytics example -->
+
 <!-- TEA Analytics Example
     Ensure you replace app_id with your appId.
     Ensure you replace channel with correct value.
@@ -1820,7 +1896,11 @@ For complete documentation and additional examples please see: https://marketing
     "pt": "publishTime",
     "ct": "1",
     "hid": "153",
-    "d":"m.ibeatdev.com"
+    "d":"m.ibeatdev.com",
+    "id":"123456",
+    "sec":"news",
+    "tgs":"modi,parliament",
+    "pc":"loggedin"
   }
 }
 </script>

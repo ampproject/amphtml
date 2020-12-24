@@ -24,7 +24,7 @@ const {
   timedExec,
 } = require('../pr-check/utils');
 const {determineBuildTargets} = require('../pr-check/build-targets');
-const {runYarnChecks} = require('../pr-check/yarn-checks');
+const {runNpmChecks} = require('../pr-check/npm-checks');
 
 const FILENAME = 'pr-check.js';
 
@@ -49,7 +49,7 @@ async function prCheck(cb) {
   };
 
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
+  if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
     return;
   }
@@ -119,11 +119,6 @@ async function prCheck(cb) {
     runCheck('gulp validator');
   }
 
-  // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
-  // if (buildTargets.has('VALIDATOR_JAVA')) {
-  //   runCheck('gulp validator-java');
-  // }
-
   if (buildTargets.has('VALIDATOR_WEBUI')) {
     runCheck('gulp validator-webui');
   }
@@ -135,8 +130,7 @@ module.exports = {
   prCheck,
 };
 
-prCheck.description =
-  'Runs a subset of the Travis CI checks against local changes.';
+prCheck.description = 'Runs a subset of the CI checks against local changes.';
 prCheck.flags = {
   'nobuild': '  Skips building the runtime via `gulp dist`.',
 };

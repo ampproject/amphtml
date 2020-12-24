@@ -189,7 +189,7 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_Y': () => event.clientY,
     };
     const replacements = Services.urlReplacementsForDoc(this.element);
-    const whitelist = {
+    const allowlist = {
       'RANDOM': true,
       'CLICK_X': true,
       'CLICK_Y': true,
@@ -266,11 +266,11 @@ export class AmpAdExit extends AMP.BaseElement {
             ? args[customVarName]
             : customVar.defaultValue;
         };
-        whitelist[customVarName] = true;
+        allowlist[customVarName] = true;
       }
     }
     return (url) =>
-      replacements.expandUrlSync(url, substitutionFunctions, whitelist);
+      replacements.expandUrlSync(url, substitutionFunctions, allowlist);
   }
 
   /**

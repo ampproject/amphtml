@@ -30,10 +30,9 @@ const {
   getDepCheckConfig,
   getPostClosureConfig,
   getPreClosureConfig,
-  getSinglePassDepsConfig,
-  getSinglePassPostConfig,
   getTestConfig,
   getUnminifiedConfig,
+  getEslintConfig,
 } = require('./build-system/babel-config');
 const {cyan, yellow} = require('ansi-colors');
 
@@ -45,10 +44,9 @@ const babelTransforms = new Map([
   ['dep-check', getDepCheckConfig()],
   ['post-closure', getPostClosureConfig()],
   ['pre-closure', getPreClosureConfig()],
-  ['single-pass-deps', getSinglePassDepsConfig()],
-  ['single-pass-post', getSinglePassPostConfig()],
   ['test', getTestConfig()],
   ['unminified', getUnminifiedConfig()],
+  ['@babel/eslint-parser', getEslintConfig()],
 ]);
 
 /**

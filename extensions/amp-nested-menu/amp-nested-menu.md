@@ -24,32 +24,30 @@ limitations under the License.
 
 # amp-nested-menu
 
-## Overview
+## Usage
 
 `<amp-nested-menu>` enables layered content organization within [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md). A sidebar with `<amp-nested-menu>` can be used jointly with [`<amp-mega-menu>`](../amp-mega-menu/amp-mega-menu.md) to create a responsive menu.
 
-## Usage
-
 The `<amp-nested-menu>` component must be placed inside `<amp-sidebar>`. The component may contain the following AMP elements:
 
-- [`<amp-img>`](../../builtins/amp-img.md)
-- [`<amp-list>`](../amp-list/amp-list.md)
-- [`<amp-accordion>`](../amp-accordion/amp-accordion.md)
+-   [`<amp-img>`](../../builtins/amp-img.md)
+-   [`<amp-list>`](../amp-list/amp-list.md)
+-   [`<amp-accordion>`](../amp-accordion/amp-accordion.md)
 
 ### Nested submenus
 
 `<amp-nested-menu>` supports nesting one or more layers of submenus. It uses the following attributes on its descendants as identifiers for the submenu functionality:
 
-- `amp-nested-submenu`: this identifies a hidden submenu container. When opened, the element slides in and takes the place of its parent menu (either `<amp-nested-menu>` or another submenu).
-- `amp-nested-submenu-open`: this identifies an element that opens a submenu on tap. It must be a sibling of the said submenu.
-- `amp-nested-submenu-close`: this identifies an element that closes the closest containing submenu. The element must be the descendant of a submenu.
+-   `amp-nested-submenu`: this identifies a hidden submenu container. When opened, the element slides in and takes the place of its parent menu (either `<amp-nested-menu>` or another submenu).
+-   `amp-nested-submenu-open`: this identifies an element that opens a submenu on tap. It must be a sibling of the said submenu.
+-   `amp-nested-submenu-close`: this identifies an element that closes the closest containing submenu. The element must be the descendant of a submenu.
 
 Only `<div>` tags may receive the `amp-nested-submenu` attribute. The submenu open/close attributes can be applied to any of the tags below:
 
-- `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`
-- `<button>`
-- `<span>`
-- `<div>`
+-   `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`
+-   `<button>`
+-   `<span>`
+-   `<div>`
 
 The following example demonstrates an `<amp-nested-menu>` with two levels of nested submenus.
 
@@ -154,25 +152,19 @@ Here is the JSON file used:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>side (optional)</strong></td>
-    <td>Optional attribute that indicates from which side the submenus open from, either `left` or `right`. Set to `right` by default, or `left` if the document is RTL.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### side (optional)
+
+Optional attribute that indicates from which side the submenus open from, either `left` or `right`. Set to `right` by default, or `left` if the document is RTL.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Actions
 
-<table>
-  <tr>
-    <td width="40%"><strong><code>reset</code></strong></td>
-    <td>Closes any open submenus and returns to the root menu. Use this in conjunction with sidebar's <code>sidebarClose</code> event to reset the menu after sidebar is closed.</td>
-  </tr>
-</table>
+### reset
+
+Closes any open submenus and returns to the root menu. Use this in conjunction with sidebar's `sidebarClose` event to reset the menu after sidebar is closed.
 
 ## Styling
 
@@ -188,10 +180,10 @@ Wrap every menu item in a `li` element to improve accessibility and keyboard sup
 
 The component supports arrow key navigation as follows:
 
-- `LEFT`: if a submenu is open, close it and return to the parent menu.
-- `RIGHT`: if a submenu open element has focus, open the corresponding submenu.
-- `UP/DOWN`: shift focus between items within a menu (this works only if all menu items are wrapped inside `li` elements under the same list).
-- `END/HOME`: shift focus to the first/last item within a menu (similar to `UP/DOWN`)
+-   `LEFT`: if a submenu is open, close it and return to the parent menu.
+-   `RIGHT`: if a submenu open element has focus, open the corresponding submenu.
+-   `UP/DOWN`: shift focus between items within a menu (this works only if all menu items are wrapped inside `li` elements under the same list).
+-   `END/HOME`: shift focus to the first/last item within a menu (similar to `UP/DOWN`)
 
 If `side=left`, then the functionalities of `LEFT` and `RIGHT` arrow keys are reversed.
 

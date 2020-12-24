@@ -315,7 +315,7 @@ FAIL
 |  <b style='align-self: foo'></b>
 |  <b style='alignment-baseline: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:315:0 The property 'alignment-baseline' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:315:0 The property 'alignment-baseline' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='all: foo'></b>
 |  <b style='animation-delay: foo'></b>
 |  <b style='animation-direction: foo'></b>
@@ -339,7 +339,7 @@ feature_tests/css_declarations.html:315:0 The property 'alignment-baseline' in a
 |  <b style='background: foo'></b>
 |  <b style='baseline-shift: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:337:0 The property 'baseline-shift' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:337:0 The property 'baseline-shift' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='border-bottom-color: foo'></b>
 |  <b style='border-bottom-left-radius: foo'></b>
 |  <b style='border-bottom-right-radius: foo'></b>
@@ -386,20 +386,20 @@ feature_tests/css_declarations.html:337:0 The property 'baseline-shift' in attri
 |  <b style='clip-path: foo'></b>
 |  <b style='clip-rule: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:382:0 The property 'clip-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:382:0 The property 'clip-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='clip: foo'></b>
 |  <b style='color-interpolation-filters: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:384:0 The property 'color-interpolation-filters' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:384:0 The property 'color-interpolation-filters' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='color-interpolation: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:385:0 The property 'color-interpolation' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:385:0 The property 'color-interpolation' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='color-profile: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:386:0 The property 'color-profile' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:386:0 The property 'color-profile' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='color-rendering: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:387:0 The property 'color-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:387:0 The property 'color-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='color: foo'></b>
 |  <b style='column-count: foo'></b>
 |  <b style='column-fill: foo'></b>
@@ -419,20 +419,20 @@ feature_tests/css_declarations.html:387:0 The property 'color-rendering' in attr
 |  <b style='display: foo'></b>
 |  <b style='dominant-baseline: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:405:0 The property 'dominant-baseline' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:405:0 The property 'dominant-baseline' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='empty-cells: foo'></b>
 |  <b style='enable-background: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:407:0 The property 'enable-background' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:407:0 The property 'enable-background' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='fill-opacity: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:408:0 The property 'fill-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:408:0 The property 'fill-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='fill-rule: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:409:0 The property 'fill-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:409:0 The property 'fill-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='fill: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:410:0 The property 'fill' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:410:0 The property 'fill' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='filter: foo'></b>
 |  <b style='flex-basis: foo'></b>
 |  <b style='flex-direction: foo'></b>
@@ -444,10 +444,10 @@ feature_tests/css_declarations.html:410:0 The property 'fill' in attribute 'styl
 |  <b style='float: foo'></b>
 |  <b style='flood-color: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:420:0 The property 'flood-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:420:0 The property 'flood-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='flood-opacity: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:421:0 The property 'flood-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:421:0 The property 'flood-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='font-family: foo'></b>
 |  <b style='font-feature-settings: foo'></b>
 |  <b style='font-kerning: foo'></b>
@@ -468,10 +468,10 @@ feature_tests/css_declarations.html:421:0 The property 'flood-opacity' in attrib
 |  <b style='font: foo'></b>
 |  <b style='glyph-orientation-horizontal: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:440:0 The property 'glyph-orientation-horizontal' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:440:0 The property 'glyph-orientation-horizontal' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='glyph-orientation-vertical: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:441:0 The property 'glyph-orientation-vertical' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:441:0 The property 'glyph-orientation-vertical' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='grid-area: foo'></b>
 |  <b style='grid-auto-columns: foo'></b>
 |  <b style='grid-auto-flow: foo'></b>
@@ -498,12 +498,12 @@ feature_tests/css_declarations.html:441:0 The property 'glyph-orientation-vertic
 |  <b style='justify-content: foo'></b>
 |  <b style='kerning: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:466:0 The property 'kerning' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:466:0 The property 'kerning' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='left: foo'></b>
 |  <b style='letter-spacing: foo'></b>
 |  <b style='lighting-color: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:469:0 The property 'lighting-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:469:0 The property 'lighting-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='line-break: foo'></b>
 |  <b style='line-height: foo'></b>
 |  <b style='list-style-image: foo'></b>
@@ -517,19 +517,19 @@ feature_tests/css_declarations.html:469:0 The property 'lighting-color' in attri
 |  <b style='margin: foo'></b>
 |  <b style='marker-end: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:481:0 The property 'marker-end' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:481:0 The property 'marker-end' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='marker-mid: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:482:0 The property 'marker-mid' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:482:0 The property 'marker-mid' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='marker-start: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:483:0 The property 'marker-start' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:483:0 The property 'marker-start' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='marker: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:484:0 The property 'marker' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:484:0 The property 'marker' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='mask: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:485:0 The property 'mask' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:485:0 The property 'mask' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='max-height: foo'></b>
 |  <b style='max-width: foo'></b>
 |  <b style='min-height: foo'></b>
@@ -567,44 +567,44 @@ feature_tests/css_declarations.html:485:0 The property 'mask' in attribute 'styl
 |  <b style='right: foo'></b>
 |  <b style='shape-rendering: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:521:0 The property 'shape-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:521:0 The property 'shape-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stop-color: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:522:0 The property 'stop-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:522:0 The property 'stop-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stop-opacity: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:523:0 The property 'stop-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:523:0 The property 'stop-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-dasharray: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:524:0 The property 'stroke-dasharray' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:524:0 The property 'stroke-dasharray' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-dashoffset: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:525:0 The property 'stroke-dashoffset' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:525:0 The property 'stroke-dashoffset' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-linecap: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:526:0 The property 'stroke-linecap' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:526:0 The property 'stroke-linecap' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-linejoin: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:527:0 The property 'stroke-linejoin' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:527:0 The property 'stroke-linejoin' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-miterlimit: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:528:0 The property 'stroke-miterlimit' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:528:0 The property 'stroke-miterlimit' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-opacity: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:529:0 The property 'stroke-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:529:0 The property 'stroke-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-width: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:530:0 The property 'stroke-width' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:530:0 The property 'stroke-width' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:531:0 The property 'stroke' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:531:0 The property 'stroke' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='tab-size: foo'></b>
 |  <b style='table-layout: foo'></b>
 |  <b style='text-align-last: foo'></b>
 |  <b style='text-align: foo'></b>
 |  <b style='text-anchor: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:536:0 The property 'text-anchor' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:536:0 The property 'text-anchor' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='text-combine-upright: foo'></b>
 |  <b style='text-decoration-color: foo'></b>
 |  <b style='text-decoration-line: foo'></b>
@@ -618,7 +618,7 @@ feature_tests/css_declarations.html:536:0 The property 'text-anchor' in attribut
 |  <b style='text-overflow: foo'></b>
 |  <b style='text-rendering: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:548:0 The property 'text-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:548:0 The property 'text-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='text-shadow: foo'></b>
 |  <b style='text-stroke-color: foo'></b>
 |  <b style='text-stroke-width: foo'></b>
@@ -646,16 +646,18 @@ feature_tests/css_declarations.html:548:0 The property 'text-rendering' in attri
 |  <b style='word-wrap: foo'></b>
 |  <b style='writing-mode: foo'></b>
 |  <b style='z-index: foo'></b>
+>> ^~~~~~~~~
+feature_tests/css_declarations.html:575:0 CSS syntax error in tag 'b' - the property 'z-index' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <!-- Made-up decls -->
 |  <b style='amplitude: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:577:0 The property 'amplitude' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:577:0 The property 'amplitude' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='barometric-pressure: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:578:0 The property 'barometric-pressure' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:578:0 The property 'barometric-pressure' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='degrees-celsius: foo'></b>
 >> ^~~~~~~~~
-feature_tests/css_declarations.html:579:0 The property 'degrees-celsius' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:579:0 The property 'degrees-celsius' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <!-- Vendor Prefix -->
 |  <b style="-webkit-user-select: foo;"></b>
 |
@@ -925,16 +927,18 @@ feature_tests/css_declarations.html:579:0 The property 'degrees-celsius' in attr
 |    <path style='word-wrap: foo'></path>
 |    <path style='writing-mode: foo'></path>
 |    <path style='z-index: foo'></path>
+>>   ^~~~~~~~~
+feature_tests/css_declarations.html:848:2 CSS syntax error in tag 'path' - the property 'z-index' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    <!-- Made-up decls -->
 |    <path style='amplitude: foo'></path>
 >>   ^~~~~~~~~
-feature_tests/css_declarations.html:850:2 The property 'amplitude' in attribute 'style' in tag 'path' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:850:2 The property 'amplitude' in attribute 'style' in tag 'path' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    <path style='barometric-pressure: foo'></path>
 >>   ^~~~~~~~~
-feature_tests/css_declarations.html:851:2 The property 'barometric-pressure' in attribute 'style' in tag 'path' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:851:2 The property 'barometric-pressure' in attribute 'style' in tag 'path' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    <path style='degrees-celsius: foo'></path>
 >>   ^~~~~~~~~
-feature_tests/css_declarations.html:852:2 The property 'degrees-celsius' in attribute 'style' in tag 'path' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/css_declarations.html:852:2 The property 'degrees-celsius' in attribute 'style' in tag 'path' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    <!-- Vendor Prefix -->
 |    <path style="-webkit-user-select: foo;"></b>
 |  </svg>

@@ -15,7 +15,6 @@
  */
 
 import {FakeWindow} from '../../testing/fake-dom';
-import {Services} from '../../src/services';
 import {
   getElementService,
   getElementServiceForDoc,
@@ -25,7 +24,7 @@ import {
   isExtensionScriptInNode,
 } from '../../src/element-service';
 import {
-  installServiceInEmbedScope,
+  installServiceInEmbedDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
@@ -412,6 +411,7 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
   let nodeInTopWin;
   let frameElement;
   let service;
+  let embedAmpDoc;
 
   beforeEach(() => {
     win = env.win;
@@ -423,7 +423,7 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
     embedWin.frameElement = frameElement;
     setParentWindow(embedWin, win);
 
-    Services.ampdocServiceFor(win).installFieDoc(
+    embedAmpDoc = env.ampdocService.installFieDoc(
       'https://example.org',
       embedWin
     );
@@ -443,7 +443,7 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
   });
 
   it('should return existing service', () => {
-    installServiceInEmbedScope(embedWin, 'foo', service);
+    installServiceInEmbedDoc(embedAmpDoc, 'foo', service);
     return getElementServiceIfAvailableForDocInEmbedScope(
       nodeInEmbedWin,
       'foo',
@@ -460,7 +460,7 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
       'foo',
       'amp-foo'
     );
-    installServiceInEmbedScope(embedWin, 'foo', service);
+    installServiceInEmbedDoc(embedAmpDoc, 'foo', service);
     return promise.then((returned) => {
       expect(returned).to.equal(service);
     });

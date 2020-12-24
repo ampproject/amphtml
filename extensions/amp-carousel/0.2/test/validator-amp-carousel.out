@@ -32,7 +32,7 @@ FAIL
 |    <!-- Invalid: Wrong delay attribute usage -->
 |    <amp-carousel layout="fixed" width=500 height=500 autoplay delay>
 >>   ^~~~~~~~~
-amp-carousel/0.2/test/validator-amp-carousel.html:32:2 The attribute 'delay' in tag 'AMP-CAROUSEL' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-carousel)
+amp-carousel/0.2/test/validator-amp-carousel.html:32:2 The attribute 'delay' in tag 'amp-carousel' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-carousel/)
 |    </amp-carousel>
 |    <!-- Valid: Correct delay attribute usage -->
 |    <amp-carousel layout="fixed" width=500 height=500 autoplay delay=5000>

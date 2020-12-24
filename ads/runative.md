@@ -42,14 +42,14 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-spot` - code spot
+-   `data-spot` - code spot
 
 ### Optional parameters
 
-- `data-ad-type` - types of ads: `img-left`, `img-right`, `label-over`, `label-under`
-- `data-keywords` - title of ad
-- `data-title` - title of ad
-- `data-cols` - number of cols 1 till 6
-- `data-rows` - number of rows 1 till 6
-- `data-title-position` - position of ad title (`left` or `right`)
-- `data-ads-by-position` - position of runative logo (`left` or `right`)
+-   `data-ad-type` - types of ads: `img-left`, `img-right`, `label-over`, `label-under`
+-   `data-keywords` - title of ad
+-   `data-title` - title of ad
+-   `data-cols` - number of cols 1 till 6
+-   `data-rows` - number of rows 1 till 6
+-   `data-title-position` - position of ad title (`left` or `right`)
+-   `data-ads-by-position` - position of runative logo (`left` or `right`)

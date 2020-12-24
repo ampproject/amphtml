@@ -293,7 +293,7 @@ function runSanitizerTests() {
       });
     });
 
-    it('should NOT output blacklisted values for class attributes', () => {
+    it('should NOT output denylisted values for class attributes', () => {
       allowConsoleError(() => {
         expect(sanitize('<p class="i-amphtml-">hello</p>')).to.be.equal(
           '<p>hello</p>'
@@ -331,10 +331,7 @@ function runSanitizerTests() {
       );
     });
 
-    // TODO(choumx): HTTPS-only URI attributes are not enforced consistently
-    // in the sanitizer yet. E.g. amp-video requires HTTPS, amp-img does not.
-    // Unskip when this is fixed.
-    it.skip('should not allow source::src with invalid protocol', () => {
+    it('should not allow source::src with invalid protocol', () => {
       expect(sanitize('<source src="http://www.foo.com">')).to.equal(
         '<source src="">'
       );
@@ -416,7 +413,7 @@ function runSanitizerTests() {
       });
     });
 
-    it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
+    it('should only allow allowlisted AMP elements in AMP4EMAIL', () => {
       html.setAttribute('amp4email', '');
       expect(sanitize('<amp-analytics>')).to.equal('');
       expect(sanitize('<amp-iframe>')).to.equal('');
@@ -469,7 +466,7 @@ function runSanitizerTests() {
       );
     });
 
-    it('should NOT output non-whitelisted markup', () => {
+    it('should NOT output non-allowlisted markup', () => {
       expect(sanitizeTagsForTripleMustache('a<style>b</style>c')).to.be.equal(
         'ac'
       );

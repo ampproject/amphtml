@@ -23,7 +23,7 @@ import {
 } from '../../../src/service/variable-source';
 import {user, userAssert} from '../../../src/log';
 
-const WHITELISTED_VARIABLES = [
+const ALLOWLISTED_VARIABLES = [
   'AMPDOC_HOST',
   'AMPDOC_HOSTNAME',
   'AMPDOC_URL',
@@ -46,8 +46,6 @@ const WHITELISTED_VARIABLES = [
   'SCREEN_WIDTH',
   'SCROLL_HEIGHT',
   'SCROLL_WIDTH',
-  'SHARE_TRACKING_INCOMING',
-  'SHARE_TRACKING_OUTGOING',
   'SOURCE_HOST',
   'SOURCE_HOSTNAME',
   'SOURCE_PATH',
@@ -86,10 +84,10 @@ export class A4AVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
-    // Initiate whitelisted varaibles first in case the resolver function needs
+    // Initiate allowed varaibles first in case the resolver function needs
     // to be overwritten.
-    for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
-      const varName = WHITELISTED_VARIABLES[v];
+    for (let v = 0; v < ALLOWLISTED_VARIABLES.length; v++) {
+      const varName = ALLOWLISTED_VARIABLES[v];
       const resolvers = this.globalVariableSource_.get(varName);
       this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
     }

@@ -24,51 +24,47 @@ limitations under the License.
 
 # amp-video-docking
 
-## Behavior
+## Usage
 
-The `amp-video-docking` extension allows videos to be minimized to a corner or
+The `amp-video-docking` component allows videos to be minimized to a corner or
 to a custom positioned element via the `dock` attribute.
 
 If this attribute is present and the video is playing manually, the video will
 be "docked" and float on a corner or a custom position when the user scrolls out of the video
 component's visual area. If the user scrolls back, the video reverts to its original static position.
 
-- The video can be docked to a default corner or to a custom fixed position.
-- The video can be dragged and repositioned by the user on a different corner.
-- The video can be flicked to be dismissed from its docked position.
-- Multiple videos on the same page can be docked, but only one at a time will be docked and fixed.
+-   The video can be docked to a default corner or to a custom fixed position.
+-   The video can be dragged and repositioned by the user on a different corner.
+-   The video can be flicked to be dismissed from its docked position.
+-   Multiple videos on the same page can be docked, but only one at a time will be docked and fixed.
 
-### <a id="support"></a> Support
+### Support
 
 This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
 Currently, the supported players are:
 
-- [`amp-brightcove`](https://amp.dev/documentation/components/amp-brightcove)
-- [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
-- [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
-- [`amp-ima-video`](https://amp.dev/documentation/components/amp-ima-video)
-- [`amp-video`](https://amp.dev/documentation/components/amp-video)
-- [`amp-video-iframe`](https://amp.dev/documentation/components/amp-video-iframe)
-- [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube)
+-   [`amp-brid-player`](https://amp.dev/documentation/components/amp-brid-player)
+-   [`amp-brightcove`](https://amp.dev/documentation/components/amp-brightcove)
+-   [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
+-   [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
+-   [`amp-ima-video`](https://amp.dev/documentation/components/amp-ima-video)
+-   [`amp-video`](https://amp.dev/documentation/components/amp-video)
+-   [`amp-video-iframe`](https://amp.dev/documentation/components/amp-video-iframe)
+-   [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube)
 
 ### Triggering conditions
 
 Note that the video won't be docked unless it's playing _manually_. This means:
 
-- If the video has `autoplay`, the feature will not be triggered unless the user clicks on the video first.
-- If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
-- If the video is paused while scrolling, it will not be docked.
+-   If the video has `autoplay`, the feature will not be triggered unless the user clicks on the video first.
+-   If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
+-   If the video is paused while scrolling, it will not be docked.
 
-## Attributes
-
-N/A. `amp-video-docking` does not define any custom elements. To use this extension, set the `dock` attribute on
-an [elligible video player component.](#support)
-
-## <a id="target"></a> Docking target
+### Docking target
 
 On scroll, the video will minimize to an automatically calculated corner or to a custom defined position.
 
-### Corner
+#### Corner
 
 When setting the `dock` attribute with an empty value, the video will dock to a corner defined by the extension:
 
@@ -78,7 +74,7 @@ When setting the `dock` attribute with an empty value, the video will dock to a 
 
 By default, the video will be minimized to the top-right corner. It will be sized at 30% of the viewport's width, no less than 180 pixels wide. If the document is [RTL](https://www.w3.org/International/questions/qa-html-dir), the video will dock to the top-left corner. When in this mode, users can drag the docked video to snap to either corner.
 
-### Custom position by "slot"
+#### Custom position by "slot"
 
 When setting the `dock` attribute to a non-empty value, the video will dock to the same position as a "slot element" referenced in the attribute value by [CSS selector.](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)
 
@@ -92,9 +88,14 @@ The slot element must always be an [`amp-layout`](https://amp.dev/documentation/
 
 In order for custom positioning to work properly, the slot element must be [`position: fixed`.](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
 
-### <a id="combined-targets"></a> Combining corner and custom position behavior
+#### <a id="combined-targets"></a> Combining corner and custom position behavior
 
 Custom positioning will be rejected when the element target is not visible. This means that corner targets or slot elements can be picked depending on layout by [CSS media queries.](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries) For an example where target types are combined and applied in different layout conditions, [see AMP by Example.](https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/)
+
+## Attributes
+
+N/A. `amp-video-docking` does not define any custom elements. To use this extension, set the `dock` attribute on
+an [elligible video player component.](#support)
 
 ## Events
 
@@ -106,12 +107,12 @@ These can, for example, trigger an [`amp-animation`](https://amp.dev/documentati
 
 ### Event source
 
-Depending on the [docking target](#target), the corresponding event will be triggered from different source elements:
+Depending on the [docking target](#docking-target), the corresponding event will be triggered from different source elements:
 
-- **From the video element itself**, when the video is docked to a corner.
-- **From the slot element**, when the video is docked to the slot element.
+-   **From the video element itself**, when the video is docked to a corner.
+-   **From the slot element**, when the video is docked to the slot element.
 
-You can set `dock`/`undock` action triggers on either the video or the slot to alter your layout differently when [combining target types.](#combined-targets)
+You can set `dock`/`undock` action triggers on either the video or the slot to alter your layout differently when combining target types.
 
 ## Styling
 
@@ -142,12 +143,12 @@ background can be overridden or removed.
 A controls group that contains a set of buttons. Only one of these elements are
 displayed at a time depending on the state of the video:
 
-- The **playback** set is displayed on most scenarios and contains play/pause,
-  mute/unmute and fullscreen buttons.
+-   The **playback** set is displayed on most scenarios and contains play/pause,
+    mute/unmute and fullscreen buttons.
 
-- The **scroll back** set only contains a button to scroll the document back
-  to the video's inline position. This is displayed during ad playback in order
-  to allow user interaction.
+-   The **scroll back** set only contains a button to scroll the document back
+    to the video's inline position. This is displayed during ad playback in order
+    to allow user interaction.
 
 The dismiss button is **not** part of a controls set and is always displayed.
 
@@ -214,3 +215,7 @@ Represents a layer displaying the `poster` or `placeholder` image of the video o
 Represents an animated icon for a UX affordance displayed on the empty component area.
 
 This element also gets the classname `amp-small` when rendered in small viewports (those under 420 pixels wide). It also gets the classname `amp-rtl` when animating from right to left.
+
+## Validation
+
+See [amp-video-docking rules](validator-amp-video-docking.protoascii) in the AMP validator specification.

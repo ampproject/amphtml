@@ -28,9 +28,9 @@ export const AnalyticsVariable = {
   BOOKEND_COMPONENT_POSITION: 'storyBookendComponentPosition',
   BOOKEND_COMPONENT_TYPE: 'storyBookendComponentType',
   BOOKEND_TARGET_HREF: 'storyBookendTargetHref',
-  STORY_REACTION_ID: 'storyReactionId',
-  STORY_REACTION_RESPONSE: 'storyReactionResponse',
-  STORY_REACTION_TYPE: 'storyReactionType',
+  STORY_INTERACTIVE_ID: 'storyInteractiveId',
+  STORY_INTERACTIVE_RESPONSE: 'storyInteractiveResponse',
+  STORY_INTERACTIVE_TYPE: 'storyInteractiveType',
   STORY_PAGE_ID: 'storyPageId',
   STORY_PAGE_INDEX: 'storyPageIndex',
   STORY_PAGE_COUNT: 'storyPageCount',
@@ -75,9 +75,9 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.BOOKEND_COMPONENT_POSITION]: null,
       [AnalyticsVariable.BOOKEND_COMPONENT_TYPE]: null,
       [AnalyticsVariable.BOOKEND_TARGET_HREF]: null,
-      [AnalyticsVariable.STORY_REACTION_ID]: null,
-      [AnalyticsVariable.STORY_REACTION_RESPONSE]: null,
-      [AnalyticsVariable.STORY_REACTION_TYPE]: null,
+      [AnalyticsVariable.STORY_INTERACTIVE_ID]: null,
+      [AnalyticsVariable.STORY_INTERACTIVE_RESPONSE]: null,
+      [AnalyticsVariable.STORY_INTERACTIVE_TYPE]: null,
       [AnalyticsVariable.STORY_PAGE_INDEX]: null,
       [AnalyticsVariable.STORY_PAGE_ID]: null,
       [AnalyticsVariable.STORY_PAGE_COUNT]: null,
@@ -120,8 +120,12 @@ export class AmpStoryVariableService {
         const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
           .length;
         if (numberOfPages > 0) {
-          this.variables_[AnalyticsVariable.STORY_PROGRESS] =
-            pageIndex / numberOfPages;
+          if (numberOfPages === 1) {
+            this.variables_[AnalyticsVariable.STORY_PROGRESS] = 0;
+          } else {
+            this.variables_[AnalyticsVariable.STORY_PROGRESS] =
+              pageIndex / (numberOfPages - 1);
+          }
         }
       },
       true /* callToInitialize */

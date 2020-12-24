@@ -41,12 +41,13 @@ export const STORAGE_KEY = {
 
 /**
  * Key values for retriving/storing metadata values within consent info
- * TODO(micajuineho)
- * GDPR_APPLIES: 'ga'
  * @enum {string}
  */
 export const METADATA_STORAGE_KEY = {
   CONSENT_STRING_TYPE: 'cst',
+  ADDITIONAL_CONSENT: 'ac',
+  GDPR_APPLIES: 'ga',
+  PURPOSE_ONE: 'po',
 };
 
 /**
@@ -77,6 +78,9 @@ export let ConsentInfoDef;
  * Used in ConsentInfoDef
  * @typedef {{
  *  consentStringType: (CONSENT_STRING_TYPE|undefined),
+ *  additionalConsent: (string|undefined),
+ *  gdprApplies: (boolean|undefined),
+ *  purposeOne: (boolean|undefined),
  * }}
  */
 export let ConsentMetadataDef;
@@ -271,11 +275,22 @@ export function constructConsentInfo(
  * Construct the consentMetadataDef object from values
  *
  * @param {CONSENT_STRING_TYPE=} opt_consentStringType
+ * @param {string=} opt_additionalConsent
+ * @param {boolean=} opt_gdprApplies
+ * @param {boolean=} opt_purposeOne
  * @return {!ConsentMetadataDef}
  */
-export function constructMetadata(opt_consentStringType) {
+export function constructMetadata(
+  opt_consentStringType,
+  opt_additionalConsent,
+  opt_gdprApplies,
+  opt_purposeOne
+) {
   return {
     'consentStringType': opt_consentStringType,
+    'additionalConsent': opt_additionalConsent,
+    'gdprApplies': opt_gdprApplies,
+    'purposeOne': opt_purposeOne,
   };
 }
 
@@ -343,7 +358,7 @@ export function getConsentStateValue(enumState) {
 
 /**
  * Converts ConsentMetadataDef to stroage value:
- * {'gdprApplies': true, 'consentStringType': 2} =>
+ * {'gdprApplies': true, 'additionalConsent': undefined, 'consentStringType': 2} =>
  * {'ga': true, 'cst': 2}
  *
  * @param {ConsentMetadataDef=} consentInfoMetadata
@@ -355,35 +370,77 @@ export function composeMetadataStoreValue(consentInfoMetadata) {
     storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE] =
       consentInfoMetadata['consentStringType'];
   }
+  if (consentInfoMetadata['additionalConsent']) {
+    storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT] =
+      consentInfoMetadata['additionalConsent'];
+  }
+  if (consentInfoMetadata['gdprApplies'] != undefined) {
+    storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES] =
+      consentInfoMetadata['gdprApplies'];
+  }
+  if (consentInfoMetadata['purposeOne'] != undefined) {
+    storageMetadata[METADATA_STORAGE_KEY.PURPOSE_ONE] =
+      consentInfoMetadata['purposeOne'];
+  }
   return storageMetadata;
 }
 
 /**
- * TODO(micajuineho) Converts stroage metadata to ConsentMetadataDef:
+ * Converts stroage metadata to ConsentMetadataDef:
  * {'ga': true, 'cst': 2} =>
- * {'gdprApplies': true, 'consentStringType': 2}
+ * {'gdprApplies': true, 'additionalConsnet': undefined, 'consentStringType': 2}
  *
  * @param {Object|null|undefined} storageMetadata
  * @return {ConsentMetadataDef}
  */
 export function convertStorageMetadata(storageMetadata) {
-  const consentStringType =
-    storageMetadata &&
-    storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE];
-  return constructMetadata(consentStringType);
+  if (!storageMetadata) {
+    return constructMetadata();
+  }
+  return constructMetadata(
+    storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE],
+    storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT],
+    storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES],
+    storageMetadata[METADATA_STORAGE_KEY.PURPOSE_ONE]
+  );
 }
 
 /**
- * Confirm that the metadata values are valid. Remove otherwise.
+ * Confirm that the metadata values are valid.
+ * Remove and provide user error otherwise.
  * @param {JsonObject} metadata
  */
 export function assertMetadataValues(metadata) {
   const consentStringType = metadata['consentStringType'];
+  const additionalConsent = metadata['additionalConsent'];
+  const gdprApplies = metadata['gdprApplies'];
+  const purposeOne = metadata['purposeOne'];
+  const errorFields = [];
+
   if (
     consentStringType &&
     !isEnumValue(CONSENT_STRING_TYPE, consentStringType)
   ) {
     delete metadata['consentStringType'];
-    user().error(TAG, 'CMP metadata consent string type is invalid.');
+    errorFields.push('consentStringType');
+  }
+  if (additionalConsent && typeof additionalConsent != 'string') {
+    delete metadata['additionalConsent'];
+    errorFields.push('additionalConsent');
+  }
+  if (gdprApplies && typeof gdprApplies != 'boolean') {
+    delete metadata['gdprApplies'];
+    errorFields.push('gdprApplies');
+  }
+  if (purposeOne && typeof purposeOne != 'boolean') {
+    delete metadata['purposeOne'];
+    errorFields.push('purposeOne');
+  }
+  for (let i = 0; i < errorFields.length; i++) {
+    user().error(
+      TAG,
+      'Consent metadata value "%s" is invalid.',
+      errorFields[i]
+    );
   }
 }

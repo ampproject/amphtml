@@ -28,7 +28,7 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getElementLayoutBox} from './utils';
+import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -74,7 +74,7 @@ const Position = {
  * extensions/amp-ad/.../validator-amp-ad.protoascii.
  * @const {!Array<string>}
  */
-const BLACKLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
+const DENYLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
 
 /**
  * @const {!Object<!Position, function(!Element, !Element)>}
@@ -158,9 +158,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return getElementLayoutBox(this.anchorElement_).then((layoutBox) => {
-      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-    });
+    return measurePageLayoutBox(this.anchorElement_).then((layoutBox) =>
+      this.getEstimatedPositionFromAnchorLayout_(layoutBox)
+    );
   }
 
   /**
@@ -168,7 +168,7 @@ export class Placement {
    * @return {number}
    * @private
    */
-  getEstimatedPositionFromAchorLayout_(anchorLayout) {
+  getEstimatedPositionFromAnchorLayout_(anchorLayout) {
     // TODO: This should really take account of margins and padding too.
     switch (this.position_) {
       case Position.BEFORE:
@@ -466,9 +466,9 @@ function isPositionValid(anchorElement, position) {
     return false;
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
-  return !BLACKLISTED_ANCESTOR_TAGS.some((tagName) => {
+  return !DENYLISTED_ANCESTOR_TAGS.some((tagName) => {
     if (closestAncestorElementBySelector(elementToCheck, tagName)) {
-      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      user().warn(TAG, 'Placement inside denylisted ancestor: ' + tagName);
       return true;
     }
     return false;

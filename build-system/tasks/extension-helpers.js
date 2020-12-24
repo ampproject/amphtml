@@ -18,7 +18,6 @@ const colors = require('ansi-colors');
 const debounce = require('debounce');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const watch = require('gulp-watch');
 const wrappers = require('../compile/compile-wrappers');
 const {
   extensionAliasBundles,
@@ -26,10 +25,11 @@ const {
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
+const {watch} = require('gulp');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -178,7 +178,7 @@ function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
-  extensionsToBuild = DEFAULT_EXTENSION_SET;
+  extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
       log(red('ERROR:'), 'Missing list of extensions.');
@@ -194,7 +194,11 @@ function getExtensionsToBuild(preBuild = false) {
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
   if (
-    !(preBuild || argv.noextensions || argv.extensions || argv.extensions_from)
+    !preBuild &&
+    !argv.noextensions &&
+    !argv.extensions &&
+    !argv.extensions_from &&
+    !argv.core_runtime_only
   ) {
     const allExtensions = [];
     for (const extension in extensions) {
@@ -213,7 +217,7 @@ function getExtensionsToBuild(preBuild = false) {
  * @param {boolean=} preBuild
  */
 function parseExtensionFlags(preBuild = false) {
-  if (isTravisBuild()) {
+  if (isCiBuild()) {
     return;
   }
 
@@ -221,7 +225,7 @@ function parseExtensionFlags(preBuild = false) {
   const coreRuntimeOnlyMessage =
     green('⤷ Use ') +
     cyan('--core_runtime_only ') +
-    green('to build just the core runtime.');
+    green('to build just the core runtime and skip other JS targets.');
   const noExtensionsMessage =
     green('⤷ Use ') +
     cyan('--noextensions ') +
@@ -241,7 +245,7 @@ function parseExtensionFlags(preBuild = false) {
     cyan('foo.amp.html') +
     green('.');
 
-  if (argv.core_runtime_only) {
+  if (argv.core_runtime_only && !(argv.extensions || argv.extensions_from)) {
     log(green('Building just the core runtime.'));
   } else if (preBuild) {
     log(
@@ -339,7 +343,7 @@ async function buildExtensions(options) {
     }
   }
   await Promise.all(results);
-  if (!options.compileOnlyCss && !argv.single_pass) {
+  if (!options.compileOnlyCss) {
     endBuildStep(
       options.minify ? 'Minified all' : 'Compiled all',
       'extensions',
@@ -393,7 +397,7 @@ function watchExtension(path, name, version, latestVersion, hasCss, options) {
       options.onWatchBuild(bundleComplete);
     }
   };
-  watch(path + '/**/*', debounce(watchFunc, watchDebounceDelay));
+  watch(`${path}/**/*`).on('change', debounce(watchFunc, watchDebounceDelay));
 }
 
 /**
@@ -454,9 +458,7 @@ async function buildExtension(
   if (name === 'amp-analytics') {
     await vendorConfigs(options);
   }
-  if (!argv.single_pass) {
-    await buildExtensionJs(path, name, version, latestVersion, options);
-  }
+  await buildExtensionJs(path, name, version, latestVersion, options);
 }
 
 /**
@@ -532,7 +534,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
       latestName: version === latestVersion ? `${name}-latest.js` : '',
-      esmPassCompilation: argv.esm || false,
+      esmPassCompilation: argv.esm || argv.sxg || false,
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -563,14 +565,79 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   }
 
   if (name === 'amp-script') {
-    // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to dist/ folder.
-    const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
-    const file = `dist/v0/amp-script-worker-${version}`;
-    // The "js" output is minified and transpiled to ES5.
-    fs.copyFileSync(dir + 'worker.js', `${file}.js`);
-    // The "mjs" output is unminified ES6 and has debugging flags enabled.
-    fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
+    copyWorkerDomResources(version);
   }
+}
+
+/**
+ * Copies the required resources from @ampproject/worker-dom and renames
+ * them accordingly.
+ *
+ * @param {string} version
+ */
+async function copyWorkerDomResources(version) {
+  const startTime = Date.now();
+  const workerDomDir = 'node_modules/@ampproject/worker-dom';
+  const targetDir = 'dist/v0';
+  const dir = `${workerDomDir}/dist`;
+  const workerFilesToDeploy = new Map([
+    ['amp-production/worker/worker.js', `amp-script-worker-${version}.js`],
+    [
+      'amp-production/worker/worker.nodom.js',
+      `amp-script-worker-nodom-${version}.js`,
+    ],
+    ['amp-production/worker/worker.mjs', `amp-script-worker-${version}.mjs`],
+    [
+      'amp-production/worker/worker.nodom.mjs',
+      `amp-script-worker-nodom-${version}.mjs`,
+    ],
+    [
+      'amp-production/worker/worker.js.map',
+      `amp-script-worker-${version}.js.map`,
+    ],
+    [
+      'amp-production/worker/worker.nodom.js.map',
+      `amp-script-worker-nodom-${version}.js.map`,
+    ],
+    [
+      'amp-production/worker/worker.mjs.map',
+      `amp-script-worker-${version}.mjs.map`,
+    ],
+    [
+      'amp-production/worker/worker.nodom.mjs.map',
+      `amp-script-worker-nodom-${version}.mjs.map`,
+    ],
+    ['amp-debug/worker/worker.js', `amp-script-worker-${version}.max.js`],
+    [
+      'amp-debug/worker/worker.nodom.js',
+      `amp-script-worker-nodom-${version}.max.js`,
+    ],
+    ['amp-debug/worker/worker.mjs', `amp-script-worker-${version}.max.mjs`],
+    [
+      'amp-debug/worker/worker.nodom.mjs',
+      `amp-script-worker-nodom-${version}.max.mjs`,
+    ],
+    [
+      'amp-debug/worker/worker.js.map',
+      `amp-script-worker-${version}.max.js.map`,
+    ],
+    [
+      'amp-debug/worker/worker.nodom.js.map',
+      `amp-script-worker-nodom-${version}.max.js.map`,
+    ],
+    [
+      'amp-debug/worker/worker.mjs.map',
+      `amp-script-worker-${version}.max.mjs.map`,
+    ],
+    [
+      'amp-debug/worker/worker.nodom.mjs.map',
+      `amp-script-worker-nodom-${version}.max.mjs.map`,
+    ],
+  ]);
+  for (const [src, dest] of workerFilesToDeploy) {
+    await fs.copy(`${dir}/${src}`, `${targetDir}/${dest}`);
+  }
+  endBuildStep('Copied', '@ampproject/worker-dom resources', startTime);
 }
 
 module.exports = {

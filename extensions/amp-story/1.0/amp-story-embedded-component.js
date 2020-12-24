@@ -32,7 +32,12 @@ import {EventType, dispatch} from './events';
 import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, closest, matches} from '../../../src/dom';
+import {
+  addAttributesToElement,
+  closest,
+  matches,
+  tryFocus,
+} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -54,6 +59,17 @@ const ActionIcon = {
 
 /** @private @const {number} */
 const TOOLTIP_CLOSE_ANIMATION_MS = 100;
+
+/** @const {string} */
+const DARK_THEME_CLASS = 'i-amphtml-story-tooltip-theme-dark';
+
+/**
+ * @enum {string}
+ */
+const TooltipTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
+};
 
 /**
  * Since we don't know the actual width of the content inside the iframe
@@ -241,7 +257,9 @@ function buildStringStyleForTweet(embedData) {
   return `{
     width: ${px(embedData.width)} !important;
     transform: ${embedData.transform} !important;
-    margin: 0 ${embedData.horizontalMargin}px !important;
+    margin: ${embedData.verticalMargin}px ${
+    embedData.horizontalMargin
+  }px !important;
     }`;
 }
 
@@ -295,6 +313,9 @@ function measureStylesForTwitter(state, pageRect, elRect) {
   state.scaleFactor =
     Math.min(elRect.width, MAX_TWEET_WIDTH_PX) / state.newWidth;
 
+  const shrinkedSize = elRect.height * state.scaleFactor;
+
+  state.verticalMargin = -1 * ((elRect.height - shrinkedSize) / 2);
   state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
 
   return state;
@@ -379,6 +400,7 @@ function updateStylesForTwitter(elId, state) {
     scaleFactor: state.scaleFactor,
     transform: `scale(${state.scaleFactor})`,
     horizontalMargin: state.horizontalMargin,
+    verticalMargin: state.verticalMargin,
   };
 }
 
@@ -720,11 +742,12 @@ export class AmpStoryEmbeddedComponent {
       this.clearTooltip_();
     }, TOOLTIP_CLOSE_ANIMATION_MS);
 
+    if (this.state_ === EmbeddedComponentState.EXPANDED) {
+      this.toggleExpandedView_(null);
+    }
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
-
-    this.toggleExpandedView_(null);
     this.tooltip_.removeEventListener(
       'click',
       this.expandComponentHandler_,
@@ -780,6 +803,11 @@ export class AmpStoryEmbeddedComponent {
       dev().assertElement(this.focusedStateOverlay_),
       () => {
         this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', false);
+        tryFocus(
+          dev().assertElement(
+            this.focusedStateOverlay_.querySelector('a.i-amphtml-story-tooltip')
+          )
+        );
       }
     );
   }
@@ -862,6 +890,11 @@ export class AmpStoryEmbeddedComponent {
       'Invalid embed config for target',
       component.element
     ));
+
+    const theme = this.triggeringTarget_.getAttribute('theme');
+    if (theme && TooltipTheme.DARK === theme.toLowerCase()) {
+      this.tooltip_.classList.add(DARK_THEME_CLASS);
+    }
 
     this.updateTooltipText_(component.element, embedConfig);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
@@ -1317,6 +1350,7 @@ export class AmpStoryEmbeddedComponent {
         this.expandComponentHandler_,
         true
       );
+      this.tooltip_.classList.remove(DARK_THEME_CLASS);
       this.tooltip_.removeAttribute('href');
     });
   }
@@ -1356,7 +1390,12 @@ export class AmpStoryEmbeddedComponent {
                     i-amphtml-story-tooltip-nav-button-right"
           ></button>
         </div>
-        <a class="i-amphtml-story-tooltip" target="_blank" ref="tooltip">
+        <a
+          class="i-amphtml-story-tooltip"
+          target="_blank"
+          ref="tooltip"
+          role="tooltip"
+        >
           <div class="i-amphtml-story-tooltip-custom-icon"></div>
           <p class="i-amphtml-tooltip-text" ref="text"></p>
           <div class="i-amphtml-tooltip-action-icon"></div>

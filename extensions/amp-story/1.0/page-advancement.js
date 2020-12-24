@@ -19,6 +19,7 @@ import {
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -29,11 +30,9 @@ import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
-import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
+import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
-import {listen, listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
-import {toArray} from '../../../src/types';
+import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -48,12 +47,29 @@ const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 const TOP_REGION = 0.8;
 
 /**
- * Protected edges of the screen in pixels. When tapped on these areas, we will
+ * Protected edges of the screen as a percent of page width. When tapped on these areas, we will
  * always perform navigation. Even if a clickable element is there.
  * @const {number}
  * @private
  */
-const PROTECTED_SCREEN_EDGE_PX = 48;
+const PROTECTED_SCREEN_EDGE_PERCENT = 12;
+
+/**
+ * Minimum protected edges of the screen in pixels.
+ * If PROTECTED_SCREEN_EDGE_PERCENT results in a protected edge value less than MINIMUM_PROTECTED_SCREEN_EDGE_PX,
+ * we will use MINIMUM_PROTECTED_SCREEN_EDGE_PX.
+ * @const {number}
+ * @private
+ */
+const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
+
+/**
+ * Maximum percent of screen that can be occupied by a single link
+ * before the link is considered navigation blocking and ignored.
+ * @const {number}
+ * @private
+ */
+const MAX_LINK_SCREEN_PERCENT = 0.8;
 
 const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
   interactiveElementsSelectors()
@@ -262,6 +278,12 @@ export class ManualAdvancement extends AdvancementConfig {
     /** @private {?number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
+    /** @private {boolean} Saving the paused state before pressing */
+    this.pausedState_ = false;
+
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = getAmpdoc(win.document);
+
     this.startListening_();
 
     if (element.ownerDocument.defaultView) {
@@ -317,6 +339,9 @@ export class ManualAdvancement extends AdvancementConfig {
       this.maybePerformNavigation_.bind(this),
       true
     );
+    this.ampdoc_.onVisibilityChanged(() => {
+      this.ampdoc_.isVisible() ? this.processTouchend_() : null;
+    });
   }
 
   /**
@@ -339,8 +364,10 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.touchstartTimestamp_ || !this.shouldHandleEvent_(event)) {
       return;
     }
-
     this.touchstartTimestamp_ = Date.now();
+    this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
+      StateProperty.PAUSED_STATE
+    ));
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
@@ -366,9 +393,21 @@ export class ManualAdvancement extends AdvancementConfig {
       event.preventDefault();
     }
 
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.processTouchend_();
+  }
+
+  /**
+   * Logic triggered by touchend events.
+   * @private
+   */
+  processTouchend_() {
+    if (!this.touchstartTimestamp_) {
+      return;
+    }
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, this.pausedState_);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
+    this.timeoutId_ = null;
     if (
       !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
       /** @type {InteractiveComponentDef} */ (this.storeService_.get(
@@ -441,8 +480,8 @@ export class ManualAdvancement extends AdvancementConfig {
         }
 
         if (
-          startsWith(tagName, 'amp-story-reaction-') &&
-          !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
+          tagName.startsWith('amp-story-interactive-') &&
+          !this.isInStoryPageSideEdge_(event, this.getStoryPageRect_())
         ) {
           shouldHandleEvent = false;
           return true;
@@ -479,7 +518,10 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (this.isInScreenSideEdge_(event, pageRect)) {
+    if (
+      this.isInStoryPageSideEdge_(event, pageRect) ||
+      this.isTooLargeOnPage_(event, target, pageRect)
+    ) {
       event.preventDefault();
       return false;
     }
@@ -525,17 +567,61 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Checks if click was inside of one of the side edges of the screen.
+   * Checks if click was inside of one of the side edges of the page.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isInScreenSideEdge_(event, pageRect) {
-    return (
-      event.clientX <= PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.width - PROTECTED_SCREEN_EDGE_PX
+  isInStoryPageSideEdge_(event, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
+    const sideEdgeWidthFromPercent =
+      pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
+    const sideEdgeLimit = Math.max(
+      sideEdgeWidthFromPercent,
+      MINIMUM_PROTECTED_SCREEN_EDGE_PX
     );
+
+    return (
+      event.clientX <= pageRect.x + sideEdgeLimit ||
+      event.clientX >= pageRect.x + pageRect.width - sideEdgeLimit
+    );
+  }
+
+  /**
+   * Checks if click target is too large on the page and preventing navigation.
+   * If yes, the link is ignored & logged.
+   * @param {!Event} event
+   * @param {!Element} target
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isTooLargeOnPage_(event, target, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
+    const targetRect = target./*OK*/ getBoundingClientRect();
+    if (
+      (targetRect.height * targetRect.width) /
+        (pageRect.width * pageRect.height) >=
+      MAX_LINK_SCREEN_PERCENT
+    ) {
+      user().error(
+        'AMP-STORY-PAGE',
+        'Link was too large; skipped for navigation. For more information, see https://github.com/ampproject/amphtml/issues/31108'
+      );
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -589,7 +675,8 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
-    const pageRect = this.element_.getLayoutBox();
+
+    const pageRect = this.getStoryPageRect_();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
@@ -648,6 +735,25 @@ export class ManualAdvancement extends AdvancementConfig {
     };
 
     this.onTapNavigation(this.getTapDirection_(page));
+  }
+
+  /**
+   * Calculates the pageRect based on the UIType.
+   * We can an use LayoutBox for mobile since the story page occupies entire screen.
+   * Desktop UI needs the most recent value from the getBoundingClientRect function.
+   * @return {DOMRect | LayoutBox}
+   * @private
+   */
+  getStoryPageRect_() {
+    if (
+      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
+    ) {
+      return this.element_.getLayoutBox();
+    } else {
+      return this.element_
+        .querySelector('amp-story-page[active]')
+        ./*OK*/ getBoundingClientRect();
+    }
   }
 
   /**
@@ -833,22 +939,16 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 export class MediaBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win
-   * @param {!Array<!Element>} elements
+   * @param {!Element} element
    */
-  constructor(win, elements) {
+  constructor(win, element) {
     super();
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(getAmpdoc(win.document));
-
-    /** @private @const {!Array<!Element>} */
-    this.elements_ = elements;
-
-    /** @private {?Element} */
-    this.element_ = this.getFirstPlayableElement_();
+    /** @private {!Element} */
+    this.element_ = element;
 
     /** @private {?Element} */
     this.mediaElement_ = null;
@@ -867,54 +967,6 @@ export class MediaBasedAdvancement extends AdvancementConfig {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
-
-    this.elements_.forEach((el) => {
-      listen(el, VideoEvents.VISIBILITY, () => this.onVideoVisibilityChange_());
-    });
-  }
-
-  /**
-   * Returns the first playable element, or null. An element is considered
-   * playable if it's either visible, or a hidden AMP-AUDIO.
-   * @return {?Element}
-   * @private
-   */
-  getFirstPlayableElement_() {
-    if (this.elements_.length === 1) {
-      return this.elements_[0];
-    }
-
-    for (let i = 0; i < this.elements_.length; i++) {
-      const element = this.elements_[i];
-      const resource = this.resources_.getResourceForElement(element);
-      if (isMediaDisplayed(element, resource)) {
-        return element;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * On video visibility change, resets the media based advancement to rely on
-   * the newly visible video, if needed.
-   * @private
-   */
-  onVideoVisibilityChange_() {
-    const element = this.getFirstPlayableElement_();
-    if (element === this.element_) {
-      return;
-    }
-    this.element_ = element;
-    this.mediaElement_ = null;
-    this.video_ = null;
-    // If the page-advancement is running, reset the event listeners so the
-    // progress bar reflects the advancement of the new video. If not running,
-    // the next call to `start()` will set the listeners on the new element.
-    if (this.isRunning()) {
-      this.stop();
-      this.start();
-    }
   }
 
   /**
@@ -954,13 +1006,6 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
-    // If no element is visible yet, keep isRunning true by stepping out after
-    // `super.start()`. When an element becomes visible, it will call `start()`
-    // again if isRunning is still true.
-    if (!this.element_) {
-      return;
-    }
-
     // Prevents race condition when checking for video interface classname.
     (this.element_.whenBuilt
       ? this.element_.whenBuilt()
@@ -998,6 +1043,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       'Media element was unspecified.'
     );
 
+    // Removes [loop] attribute if specified, so the 'ended' event can trigger.
+    this.mediaElement_.removeAttribute('loop');
+
     this.unlistenFns_.push(
       listenOnce(mediaElement, 'ended', () => this.onAdvance())
     );
@@ -1015,6 +1063,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     this.element_.getImpl().then((video) => {
       this.video_ = video;
     });
+
+    // Removes [loop] attribute if specified, so the 'ended' event can trigger.
+    this.element_.querySelector('video').removeAttribute('loop');
 
     this.unlistenFns_.push(
       listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
@@ -1075,45 +1126,43 @@ export class MediaBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
-   * @param {!Element} element
+   * @param {!Element} pageEl
    * @return {?AdvancementConfig} An AdvancementConfig, if media-element-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, element) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, pageEl) {
     try {
       // amp-video, amp-audio, as well as amp-story-page with a background audio
       // are eligible for media based auto advance.
-      const elements = toArray(
-        element.querySelectorAll(
-          `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+      let element = pageEl.querySelector(
+        `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
           amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
           amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
           amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
-        )
       );
       if (
         matches(
-          element,
+          pageEl,
           `amp-story-page[background-audio]#${escapeCssSelectorIdent(
             autoAdvanceStr
           )}`
         )
       ) {
-        elements.push(element);
+        element = pageEl;
       }
-      if (!elements.length) {
+      if (!element) {
         if (autoAdvanceStr) {
           user().warn(
             'AMP-STORY-PAGE',
-            `Element with ID ${element.id} has no media element ` +
+            `Element with ID ${pageEl.id} has no media element ` +
               'supported for automatic advancement.'
           );
         }
         return null;
       }
 
-      return new MediaBasedAdvancement(win, elements);
+      return new MediaBasedAdvancement(win, element);
     } catch (e) {
       return null;
     }

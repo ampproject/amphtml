@@ -17,11 +17,7 @@
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {hasOwn} from '../../../src/utils/object';
 import {parseLinker} from './linker';
-import {
-  parseQueryString,
-  parseUrlDeprecated,
-  removeParamsFromSearch,
-} from '../../../src/url';
+import {parseQueryString, removeParamsFromSearch} from '../../../src/url';
 
 import {user} from '../../../src/log';
 
@@ -69,15 +65,13 @@ export class LinkerReader {
    * @return {?Object<string, string>}
    */
   parseAndCleanQueryString_(name) {
-    const parsedUrl = parseUrlDeprecated(this.win_.location.href);
-    const params = parseQueryString(parsedUrl.search);
+    const params = parseQueryString(this.win_.location.search);
     if (!hasOwn(params, name)) {
       // Linker param not found.
       return null;
     }
     const value = params[name];
-
-    this.removeLinkerParam_(parsedUrl, name);
+    this.removeLinkerParam_(this.win_.location, name);
     return parseLinker(value);
   }
 
