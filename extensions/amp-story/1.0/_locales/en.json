@@ -249,6 +249,6 @@
   },
   "89": {
     "string": "Your response will be sent to ",
-    "description": "Text that explains where the response will be sent on quizzes and polls disclaimers, ending with space"
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
   }
 }
