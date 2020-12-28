@@ -21,6 +21,7 @@ import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
 import {getPageLayoutBoxBlocking} from './utils/page-layout-box';
 import {internalRuntimeVersion} from './internal-version';
+import {measureIntersection} from './utils/intersection';
 import {urls} from './config';
 
 /**
@@ -29,7 +30,7 @@ import {urls} from './config';
  * @param {!AmpElement} element
  * @param {string} sentinel
  * @param {!JsonObject=} attributes
- * @return {!JsonObject}
+ * @return {!Promise<!JsonObject>>}
  */
 export function getContextMetadata(
   parentWindow,
@@ -94,7 +95,6 @@ export function getContextMetadata(
           'height': layoutRect.height,
         }
       : null,
-    'initialIntersection': element.getIntersectionChangeEntry(),
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,
@@ -103,5 +103,9 @@ export function getContextMetadata(
   if (adSrc) {
     attributes['src'] = adSrc;
   }
-  return attributes;
+
+  return measureIntersection(element).then((initialIntersection) => {
+    attributes['initialIntersection'] = initialIntersection;
+    return attributes;
+  });
 }

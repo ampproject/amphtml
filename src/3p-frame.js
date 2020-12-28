@@ -39,7 +39,7 @@ const TAG = '3p-frame';
  * @param {!AmpElement} element
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @return {!JsonObject} Contains
+ * @return {!Promise<!JsonObject>>} Contains
  *     - type, width, height, src attributes of <amp-ad> tag. These have
  *       precedence over the data- attributes.
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
@@ -52,10 +52,15 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   let attributes = dict();
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
-  attributes = getContextMetadata(parentWindow, element, sentinel, attributes);
-  attributes['type'] = type;
-  Object.assign(attributes['_context'], opt_context);
-  return attributes;
+
+  return getContextMetadata(parentWindow, element, sentinel, attributes).then(
+    (contextMetadata) => {
+      attributes = contextMetadata;
+      attributes['type'] = type;
+      Object.assign(attributes['_context'], opt_context);
+      return attributes;
+    }
+  );
 }
 
 /**
@@ -69,7 +74,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  *   disallowCustom: (boolean|undefined),
  *   allowFullscreen: (boolean|undefined),
  * }=} options Options for the created iframe.
- * @return {!HTMLIFrameElement} The iframe.
+ * @return {!Promise<!HTMLIFrameElement>>} The iframe.
  */
 export function getIframe(
   parentWindow,

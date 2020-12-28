@@ -2041,13 +2041,15 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaIframeGet_(adUrl) {
     this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
-    return this.iframeRenderHelper_(
-      dict({
-        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        'name': JSON.stringify(
-          getContextMetadata(this.win, this.element, this.sentinel)
-        ),
-      })
+    return getContextMetadata(this.win, this.element, this.sentinel).then(
+      (contextMetadata) => {
+        return this.iframeRenderHelper_(
+          dict({
+            'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+            'name': JSON.stringify(contextMetadata),
+          })
+        );
+      }
     );
   }
 

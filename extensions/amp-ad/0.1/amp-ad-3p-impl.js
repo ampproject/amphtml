@@ -407,16 +407,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // because both happen inside a cross-domain iframe.  Separating them
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
-        const iframe = getIframe(
+        return getIframe(
           toWin(this.element.ownerDocument.defaultView),
           this.element,
           this.type_,
           opt_context,
           {disallowCustom: this.config.remoteHTMLDisabled}
-        );
-        iframe.title = this.element.title || 'Advertisement';
-        this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-        return this.xOriginIframeHandler_.init(iframe);
+        ).then((iframe) => {
+          iframe.title = this.element.title || 'Advertisement';
+          this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+          return this.xOriginIframeHandler_.init(iframe);
+        });
       })
       .then(() => {
         observeWithSharedInOb(this.element, (inViewport) =>
