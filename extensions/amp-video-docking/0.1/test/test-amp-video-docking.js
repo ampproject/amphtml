@@ -38,8 +38,6 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
-const noop = () => {};
-
 const slotId = 'my-slot-element';
 
 describes.realWin('video docking', {amp: true}, (env) => {
@@ -56,16 +54,13 @@ describes.realWin('video docking', {amp: true}, (env) => {
   function createAmpElementMock(tag = 'div', attrs = {}) {
     const element = createElementWithAttributes(env.win.document, tag, attrs);
     const defaultLayoutRect = layoutRectLtwh(0, 0, 0, 0);
-    Object.assign(element, {
-      getIntersectionChangeEntry: noop,
-      getLayoutBox: () => defaultLayoutRect,
-    });
-    return {
+    const impl = {
       element,
-      getLayoutBox: () => defaultLayoutRect,
       mutateElement: (cb) => tryResolve(cb),
       applyFillContent: env.sandbox.spy(),
     };
+    stubLayoutBox(impl, defaultLayoutRect);
+    return impl;
   }
 
   function createVideo() {
@@ -93,13 +88,14 @@ describes.realWin('video docking', {amp: true}, (env) => {
   }
 
   function stubLayoutBox(impl, rect) {
-    impl.getLayoutBox = () => rect;
-    impl.getPageLayoutBox = impl.getLayoutBox;
-    impl.element.getLayoutBox = impl.getLayoutBox;
-    impl.element.getPageLayoutBox = impl.getLayoutBox;
-    impl.element.getIntersectionChangeEntry = () => ({
-      intersectionRect: rect,
-    });
+    let stub = impl.element.__stubBoundingClientRect;
+    if (!stub) {
+      stub = impl.element.__stubBoundingClientRect = env.sandbox.stub(
+        impl.element,
+        'getBoundingClientRect'
+      );
+    }
+    stub.returns(rect);
   }
 
   function setValidAreaWidth() {
@@ -295,8 +291,8 @@ describes.realWin('video docking', {amp: true}, (env) => {
       enableComputedStyle(video.element);
       enableComputedStyle(overlay);
 
-      const width = 400;
-      const height = 300;
+      const expectedWidth = 400;
+      const expectedHeight = 300;
 
       const x = 30;
       const y = 60;
@@ -304,7 +300,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       const step = 1;
       const transitionDurationMs = 200;
 
-      placeElementLtwh(video, 0, 0, width, height);
+      placeElementLtwh(video, 0, 0, expectedWidth, expectedHeight);
 
       await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
@@ -313,13 +309,18 @@ describes.realWin('video docking', {amp: true}, (env) => {
       const expectedTransform = transformMatrix(x, y, scale);
 
       [internalElement, overlay, shadow].forEach((el) => {
-        expect(getComputedStyle(el)).to.include({
-          'transform': expectedTransform,
-          'width': width + 'px',
-          'min-width': width + 'px',
-          'height': height + 'px',
-          'min-height': height + 'px',
-        });
+        const {
+          transform,
+          width,
+          height,
+          minWidth,
+          minHeight,
+        } = getComputedStyle(el);
+        expect(transform).to.equal(expectedTransform);
+        expect(width).to.equal(expectedWidth + 'px');
+        expect(minWidth).to.equal(expectedWidth + 'px');
+        expect(height).to.equal(expectedHeight + 'px');
+        expect(minHeight).to.equal(expectedHeight + 'px');
       });
     });
 
@@ -900,7 +901,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       const {x, y, scale} = docking.getDims_(video, target, step);
 
       expect(x, 'x').to.equal(videoX);
-      expect(y, 'y').to.equal(videoY - scrollTop);
+      expect(y, 'y').to.equal(videoY);
       expect(scale, 'scale').to.equal(1);
     });
 
@@ -1018,7 +1019,13 @@ describes.realWin('video docking', {amp: true}, (env) => {
     it('does not enable docked controls if transferring layer', async () => {
       const {enable} = stubControls();
 
-      await docking.dock_(video, target, step, /* isTransferLayerStep */ true);
+      await docking.dock_(
+        video,
+        target,
+        step,
+        /* clientRect */ undefined,
+        /* isTransferLayerStep */ true
+      );
 
       expect(enable).to.not.have.been.called;
     });
@@ -1524,6 +1531,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
             video,
             target: {
               type: useSlot ? DockTargetType.SLOT : DockTargetType.CORNER,
+              slot: useSlot ? slot : undefined,
             },
           };
 
