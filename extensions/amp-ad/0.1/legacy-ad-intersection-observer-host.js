@@ -327,6 +327,10 @@ export class LegacyAdIntersectionObserverHost {
  * @return {!DOMRect}
  */
 function domRectToJson(domRect) {
+  if (domRect == null) {
+    return domRect;
+  }
+
   const {x, y, width, height, top, right, bottom, left} = domRect;
   return {x, y, width, height, top, right, bottom, left};
 }
