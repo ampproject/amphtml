@@ -727,6 +727,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
   /**
    * Return the number of spaces currently used by the devices on the screen.
+   * @private
    * @return {number}
    */
   getCurrentSpacesSum_() {
@@ -739,6 +740,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   /**
    * Disable the chips in the dialog based on whether they have the remaining space available
    * Must be called in a mutate context.
+   * @private
    */
   toggleDeviceChipsWithSpaceAvailable_() {
     const allChips = this.currentDialog_.querySelectorAll(
