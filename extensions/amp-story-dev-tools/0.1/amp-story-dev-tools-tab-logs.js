@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {loadScript} from '../../../src/validator-integration';
 import {urls} from '../../../src/config';
@@ -96,6 +97,11 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return this.buildLogsList_(this.errorList_);
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return false;
   }
 
   /**
@@ -197,18 +203,22 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
     const logsTabSelector = this.win.document.querySelector(
       '[data-tab="Logs"]'
     );
-    if (logsTabSelector) {
-      this.mutateElement(() => {
-        if (errorList.length) {
-          const errorNumberEl = htmlFor(
-            this.element
-          )`<span class="i-amphtml-story-dev-tools-log-status-number-failed">0</span>`;
-          errorNumberEl.textContent = errorList.length;
-          logsTabSelector.appendChild(errorNumberEl);
-        } else {
-          logsTabSelector.appendChild(buildStatusIcon(this.element, true));
-        }
-      });
+    if (!logsTabSelector) {
+      return;
     }
+    let statusIcon;
+    if (errorList.length) {
+      statusIcon = createElementWithAttributes(
+        this.element.ownerDocument,
+        'span',
+        {
+          'class': 'i-amphtml-story-dev-tools-log-status-number-failed',
+        }
+      );
+      statusIcon.textContent = errorList.length;
+    } else {
+      statusIcon = buildStatusIcon(this.element, true);
+    }
+    this.mutateElement(() => logsTabSelector.appendChild(statusIcon));
   }
 }
