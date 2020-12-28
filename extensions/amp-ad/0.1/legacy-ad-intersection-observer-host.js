@@ -267,14 +267,7 @@ export class LegacyAdIntersectionObserverHost {
    * @private
    */
   sendElementIntersection_(entry) {
-    // TODO(#31707): IntersectionObserverEntries cannot be serialized.
-    const change = {
-      time: entry.time,
-      rootBounds: entry.rootBounds,
-      boundingClientRect: entry.boundingClientRect,
-      intersectionRect: entry.intersectionRect,
-      intersectionRatio: entry.intersectionRatio,
-    };
+    const change = intersectionEntryToJson(entry);
 
     if (
       this.pendingChanges_.length > 0 &&
@@ -325,4 +318,31 @@ export class LegacyAdIntersectionObserverHost {
     this.unlistenOnOutViewport_();
     this.postMessageApi_.destroy();
   }
+}
+
+/**
+ * Convert a DOMRect to a regular object to make it serializable.
+ *
+ * @param {!DOMRect} domRect
+ * @return {!DOMRect}
+ */
+function domRectToJson(domRect) {
+  const {x, y, width, height, top, right, bottom, left} = domRect;
+  return {x, y, width, height, top, right, bottom, left};
+}
+
+/**
+ * Convert an IntersectionObserverEntry to a regular object to make it serializable.
+ *
+ * @param {!IntersectionObserverEntry} entry
+ * @return {!IntersectionObserverEntry}
+ */
+function intersectionEntryToJson(entry) {
+  return {
+    time: entry.time,
+    rootBounds: domRectToJson(entry.rootBounds),
+    boundingClientRect: domRectToJson(entry.boundingClientRect),
+    intersectionRect: domRectToJson(entry.intersectionRect),
+    intersectionRatio: entry.intersectionRatio,
+  };
 }
