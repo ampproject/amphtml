@@ -15,11 +15,11 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
-import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
@@ -37,6 +37,7 @@ import {
   devAssert,
   duplicateErrorIfNecessary,
   user,
+  userAssert,
 } from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -50,7 +51,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -61,14 +61,19 @@ import {installUrlReplacementsForEmbed} from '../../../src/service/url-replaceme
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
+import {padStart} from '../../../src/string';
 import {parseJson} from '../../../src/json';
 import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
+import {whenWithinViewport} from './within-viewport';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -177,15 +182,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
-};
-
-/**
- * @const @enum {string}
- */
-export const NO_SIGNING_EXP = {
-  id: 'a4a-no-signing',
-  control: '21066324',
-  experiment: '21066325',
 };
 
 /** @const @enum {string} */
@@ -331,13 +327,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.iframe = null;
 
-    /**
-     * TODO(keithwrightbos) - remove once resume behavior is verified.
-     * {boolean} whether most recent ad request was generated as part
-     *    of resume callback.
-     */
-    this.fromResumeCallback = false;
-
     /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
@@ -385,6 +374,9 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?function(!Element)}
      */
     this.transferDomBody_ = null;
+
+    /** @private {function(boolean)} */
+    this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
   }
 
   /** @override */
@@ -544,13 +536,20 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
+  pauseCallback() {
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.pause();
+    }
+  }
+
+  /** @override */
   resumeCallback() {
     // FIE that was not destroyed on unlayoutCallback does not require a new
     // ad request.
     if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.resume();
       return;
     }
-    this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
     const resource = this.getResource();
@@ -644,6 +643,28 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Resolves when underlying element is within the viewport range given or
+   * has been loaded already.
+   * @param {number|boolean} viewport derived from renderOutsideViewport.
+   * @return {!Promise}
+   * @protected
+   */
+  whenWithinViewport(viewport) {
+    devAssert(viewport !== false);
+    const resource = this.getResource();
+    if (WITHIN_VIEWPORT_INOB || getMode().localDev || getMode().test) {
+      // Resolve is already laid out or viewport is true.
+      if (!resource.isLayoutPending() || viewport === true) {
+        return Promise.resolve();
+      }
+      // Track when within the specified number of viewports.
+      const viewportNum = dev().assertNumber(viewport);
+      return whenWithinViewport(this.element, viewportNum);
+    }
+    return resource.whenWithinViewport(viewport);
+  }
+
+  /**
    * This is the entry point into the ad promise chain.
    *
    * Calling this function will initiate the following sequence of events: ad
@@ -689,7 +710,7 @@ export class AmpA4A extends AMP.BaseElement {
         // meeting the definition as opposed to waiting on the promise.
         const delay = this.delayAdRequestEnabled();
         if (delay) {
-          return this.getResource().whenWithinViewport(
+          return this.whenWithinViewport(
             typeof delay == 'number' ? delay : this.renderOutsideViewport()
           );
         }
@@ -746,9 +767,17 @@ export class AmpA4A extends AMP.BaseElement {
           ? consentMetadata['gdprApplies']
           : consentMetadata;
 
-        return /** @type {!Promise<?string>} */ (this.getAdUrl(
-          {consentState, consentString, gdprApplies},
-          this.tryExecuteRealTimeConfig_(consentState, consentString)
+        return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
+          (npaSignal) =>
+            this.getAdUrl(
+              {consentState, consentString, gdprApplies},
+              this.tryExecuteRealTimeConfig_(
+                consentState,
+                consentString,
+                /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
+              ),
+              npaSignal
+            )
         ));
       })
       // This block returns the (possibly empty) response to the XHR request.
@@ -870,10 +899,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    return (
-      getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-      NO_SIGNING_EXP.experiment
-    );
+    // eslint-disable-next-line no-undef
+    return !!NO_SIGNING_RTV;
   }
 
   /**
@@ -1252,7 +1279,9 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
-    return this.attemptToRenderCreative();
+    return this.attemptToRenderCreative().then(() => {
+      observeWithSharedInOb(this.element, this.boundViewportCallback_);
+    });
   }
 
   /**
@@ -1273,9 +1302,16 @@ export class AmpA4A extends AMP.BaseElement {
     }
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
-    return this.adPromise_
-      .then((creativeMetaData) => {
+
+    return Promise.all([
+      this.adPromise_,
+      this.uiHandler.getScrollPromiseForStickyAd(),
+    ])
+      .then((values) => {
         checkStillCurrent();
+
+        this.uiHandler.maybeInitStickyAd();
+        const creativeMetaData = values[0];
         if (this.isCollapsed_) {
           return Promise.resolve();
         }
@@ -1343,6 +1379,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.tearDownSlot();
     return true;
   }
@@ -1381,7 +1418,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
     this.transferDomBody_ = null;
-    this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
   }
@@ -1418,10 +1454,17 @@ export class AmpA4A extends AMP.BaseElement {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
+    if (this.uiHandler) {
+      this.uiHandler.cleanup();
+    }
   }
 
-  /** @override  */
-  viewportCallback(inViewport) {
+  // TODO: Rename to viewportCallback once BaseElement.viewportCallback has been removed.
+  /**
+   * @param {boolean}  inViewport
+   * @protected
+   */
+  viewportCallbackTemp(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -1432,10 +1475,50 @@ export class AmpA4A extends AMP.BaseElement {
    * by network.
    * @param {!ConsentTupleDef=} opt_ununsedConsentTuple
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
+   * @param {boolean=} opt_serveNpaSignal
    * @return {!Promise<string>|string}
    */
-  getAdUrl(opt_ununsedConsentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(
+    opt_ununsedConsentTuple,
+    opt_rtcResponsesPromise,
+    opt_serveNpaSignal
+  ) {
     throw new Error('getAdUrl not implemented!');
+  }
+
+  /**
+   * Checks if the `always-serve-npa` attribute is present and valid
+   * based on the geolocation.  To be implemented by network.
+   * @return {!Promise<boolean>}
+   */
+  getServeNpaSignal() {
+    return Promise.resolve(false);
+  }
+
+  /**
+   * Checks if the `block-rtc` attribute is present and valid
+   * based on the geolocation.
+   * @return {!Promise<boolean>}
+   */
+  getBlockRtc_() {
+    if (!this.element.getAttribute('block-rtc')) {
+      return Promise.resolve(false);
+    }
+    return Services.geoForDocOrNull(this.element).then((geoService) => {
+      userAssert(geoService, '%s: requires <amp-geo> to use `block-rtc`', TAG);
+      const blockRtcLocations = this.element.getAttribute('block-rtc');
+      const locations = blockRtcLocations.split(',');
+      for (let i = 0; i < locations.length; i++) {
+        const geoGroup = geoService.isInCountryGroup(locations[i]);
+        if (geoGroup === GEO_IN_GROUP.IN) {
+          return true;
+        } else if (geoGroup === GEO_IN_GROUP.NOT_DEFINED) {
+          user().warn('AMP-AD', `Geo group "${locations[i]}" was not defined.`);
+        }
+      }
+      // Not in any of the defined geo groups.
+      return false;
+    });
   }
 
   /**
@@ -1671,7 +1754,7 @@ export class AmpA4A extends AMP.BaseElement {
     const {height, width} = this.creativeSize_;
     const {extensions, fonts, head} = headData;
     this.iframe = createSecureFrame(
-      this.element.ownerDocument,
+      this.win,
       this.getIframeTitle(),
       height,
       width
@@ -1679,16 +1762,20 @@ export class AmpA4A extends AMP.BaseElement {
     this.applyFillContent(this.iframe);
 
     let body = '';
+    const transferComplete = new Deferred();
     // If srcdoc is not supported, streaming is also not supported so we
     // can go ahead and write the ad content body.
     if (!isSrcdocSupported()) {
       body = head.ownerDocument.body./*OK */ outerHTML;
+      transferComplete.resolve();
     } else {
       // Once skeleton doc has be written to srcdoc we start transferring
       // body chunks.
       listenOnce(this.iframe, 'load', () => {
         const fieBody = this.iframe.contentDocument.body;
-        this.transferDomBody_(devAssert(fieBody));
+        this.transferDomBody_(devAssert(fieBody)).then(
+          transferComplete.resolve
+        );
       });
     }
 
@@ -1702,12 +1789,22 @@ export class AmpA4A extends AMP.BaseElement {
     // it accessible here.
     const extensionIds = extensions.map((extension) => extension.extensionId);
 
-    return this.installFriendlyIframeEmbed_(
+    const fieInstallPromise = this.installFriendlyIframeEmbed_(
       secureDoc,
       extensionIds,
       fonts,
       true // skipHtmlMerge
-    ).then((friendlyIframeEmbed) => {
+    );
+
+    // Tell the FIE it is done after transferring.
+    Promise.all([fieInstallPromise, transferComplete.promise]).then(
+      (values) => {
+        const friendlyIframeEmbed = values[0];
+        friendlyIframeEmbed.renderCompleted();
+      }
+    );
+
+    return fieInstallPromise.then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.makeFieVisible_(
         friendlyIframeEmbed,
@@ -1810,9 +1907,7 @@ export class AmpA4A extends AMP.BaseElement {
   preinstallCallback_(embedWin, ampdoc) {
     const parentAmpdoc = this.getAmpDoc();
     installUrlReplacementsForEmbed(
-      // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
-      ampdoc || parentAmpdoc,
-      embedWin,
+      ampdoc,
       new A4AVariableSource(parentAmpdoc, embedWin)
     );
   }
@@ -2160,6 +2255,13 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} whether this is a sticky ad unit
+   */
+  isStickyAd() {
+    return false;
+  }
+
+  /**
    * Checks if the given lifecycle event has a corresponding amp-analytics event
    * and fires the analytics trigger if so.
    * @param {string} lifecycleStage
@@ -2206,22 +2308,34 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Attempts to execute Real Time Config, if the ad network has enabled it.
    * If it is not supported by the network, but the publisher has included
-   * the rtc-config attribute on the amp-ad element, warn.
+   * the rtc-config attribute on the amp-ad element, warn. Additionaly,
+   * if the publisher has included a valid `block-rtc` attribute, don't send.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState, consentString) {
+  tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
     if (!!AMP.RealTimeConfigManager) {
-      try {
-        return new AMP.RealTimeConfigManager(this).maybeExecuteRealTimeConfig(
-          this.getCustomRealTimeConfigMacros_(),
-          consentState,
-          consentString
-        );
-      } catch (err) {
-        user().error(TAG, 'Could not perform Real Time Config.', err);
-      }
+      return this.getBlockRtc_().then((shouldBlock) => {
+        if (shouldBlock) {
+          return;
+        }
+        try {
+          return new AMP.RealTimeConfigManager(
+            this.getAmpDoc()
+          ).maybeExecuteRealTimeConfig(
+            this.element,
+            this.getCustomRealTimeConfigMacros_(),
+            consentState,
+            consentString,
+            consentMetadata,
+            this.verifyStillCurrent()
+          );
+        } catch (err) {
+          user().error(TAG, 'Could not perform Real Time Config.', err);
+        }
+      });
     } else if (this.element.getAttribute('rtc-config')) {
       user().error(
         TAG,
@@ -2314,6 +2428,40 @@ export class AmpA4A extends AMP.BaseElement {
       return MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT;
     }
     return null;
+  }
+
+  /**
+   * Returns any enabled SSR experiments via the amp-usqp meta tag. These
+   * correspond to the proto field ids in cs/AmpTransformerParams.
+   *
+   * These experiments do not have a fully unique experiment id for each value,
+   * so we concatenate the key and value to generate a psuedo id. We assume
+   * that any experiment is either a boolean (so two branches), or an enum with
+   * 100 or less branches. So, the value is padded a leading 0 if necessary.
+   *
+   * @protected
+   * @return {!Array<string>}
+   */
+  getSsrExpIds_() {
+    const exps = [];
+    const meta = this.getAmpDoc().getMetaByName('amp-usqp');
+    if (meta) {
+      const keyValues = meta.split(',');
+      for (let i = 0; i < keyValues.length; i++) {
+        const kv = keyValues[i].split('=');
+        if (kv.length !== 2) {
+          continue;
+        }
+        // Reasonably assume that all important exps are either booleans, or
+        // enums with 100 or less branches.
+        const val = Number(kv[1]);
+        if (!isNaN(kv[0]) && val >= 0 && val < 100) {
+          const padded = padStart(kv[1], 2, '0');
+          exps.push(kv[0] + padded);
+        }
+      }
+    }
+    return exps;
   }
 }
 

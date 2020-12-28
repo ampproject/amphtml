@@ -26,6 +26,7 @@ import {
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -301,7 +302,7 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     if (params[2] == 'volume') {
       this.volume_ = parseFloat(params[3]);
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.volume_ <= 0));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.volume_ <= 0));
     }
 
     if (params[2] == 'currentTime') {

@@ -175,7 +175,7 @@ function getOverflowY(element) {
  *   overflowNodes: !Array<!Node>,
  * }} config
  */
-export function truncateText({container, overflowNodes} = {}) {
+export function truncateText({container, overflowNodes}) {
   clearTruncated(container);
 
   // If everything fits while the overflow button is hidden, we are done.

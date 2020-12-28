@@ -29,11 +29,11 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {debounce} from '../../../src/utils/rate-limit';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
@@ -135,6 +135,12 @@ export class AmpSidebar extends AMP.BaseElement {
       // The sidebar is already animated by swipe to dismiss, so skip animation.
       () => this.dismiss_(/*skipAnimation*/ true, ActionTrust.HIGH)
     );
+
+    /** @private {boolean} */
+    this.currentSwipeForThisElement_ = false;
+
+    /** @private {boolean} */
+    this.disableSwipeClose_ = false;
   }
 
   /** @override */
@@ -145,6 +151,8 @@ export class AmpSidebar extends AMP.BaseElement {
     element.classList.add('i-amphtml-scrollable');
 
     this.side_ = element.getAttribute('side');
+
+    this.disableSwipeClose_ = element.hasAttribute('data-disable-swipe-close');
 
     this.viewport_ = this.getViewport();
 
@@ -188,6 +196,20 @@ export class AmpSidebar extends AMP.BaseElement {
             this.user().error(TAG, 'Failed to instantiate toolbar', e);
           }
         });
+
+        if (toolbarElements.length) {
+          this.getViewport().onResize(
+            debounce(
+              this.win,
+              () => {
+                this.toolbars_.forEach((toolbar) => {
+                  toolbar.onLayoutChange();
+                });
+              },
+              100
+            )
+          );
+        }
       });
 
     if (this.isIos_) {
@@ -558,26 +580,30 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   setupGestures_(element) {
-    if (!isExperimentOn(this.win, 'amp-sidebar-swipe-to-dismiss')) {
+    if (this.disableSwipeClose_) {
       return;
     }
     // stop propagation of swipe event inside amp-viewer
     const gestures = Gestures.get(
       dev().assertElement(element),
-      /* shouldNotPreventDefault */ false,
+      /* shouldNotPreventDefault */ true,
       /* shouldStopPropagation */ true
     );
-    gestures.onGesture(SwipeXRecognizer, (e) => {
-      const {data} = e;
-      this.handleSwipe_(data);
+    // The onGesture method has a recognizer and a handler argument
+    // The handler takes a gesture object as an argument which
+    // includes data and event properties
+    gestures.onGesture(SwipeXRecognizer, (gesture) => {
+      const {data, event} = gesture;
+      this.handleSwipe_(data, event);
     });
   }
 
   /**
    * Handles a swipe gesture, updating the current swipe to dismiss state.
    * @param {!SwipeDef} data
+   * @param {Event|undefined} event
    */
-  handleSwipe_(data) {
+  handleSwipe_(data, event) {
     if (data.first) {
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.element),
@@ -590,11 +616,15 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     if (data.last) {
-      this.swipeToDismiss_.endSwipe(data);
+      this.currentSwipeForThisElement_ && this.swipeToDismiss_.endSwipe(data);
+      this.currentSwipeForThisElement_ = false;
       return;
     }
 
-    this.swipeToDismiss_.swipeMove(data);
+    if (event && event.target && !excludeFromSwipeClose(event.target)) {
+      this.currentSwipeForThisElement_ = true;
+      this.swipeToDismiss_.swipeMove(data);
+    }
   }
 
   /**
@@ -703,3 +733,14 @@ export class AmpSidebar extends AMP.BaseElement {
 AMP.extension('amp-sidebar', '0.1', (AMP) => {
   AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
 });
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function excludeFromSwipeClose(element) {
+  return (
+    element.nodeName.toLowerCase() === 'input' &&
+    element.getAttribute('type') === 'range'
+  );
+}

@@ -34,11 +34,11 @@ AMP provides the consent state information for vendors to customize their behavi
 
 The state has the following valid values.
 
-- `null` : no `<amp-consent>` is included
-- `CONSENT_POLICY_STATE.UNKNOWN` : The consent state is unknown
-- `CONSENT_POLICY_STATE.SUFFICIENT` : The consent is accepted
-- `CONSENT_POLICY_STATE.INSUFFICIENT` : The consent is rejected
-- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
+-   `null` : no `<amp-consent>` is included
+-   `CONSENT_POLICY_STATE.UNKNOWN` : The consent state is unknown
+-   `CONSENT_POLICY_STATE.SUFFICIENT` : The consent is accepted
+-   `CONSENT_POLICY_STATE.INSUFFICIENT` : The consent is rejected
+-   `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
 
 #### If you integrate with AMP as a first party AMP extension
 
@@ -63,7 +63,9 @@ AMP will always pass the local stored consent string if there's one. Update to t
 
 Use the `getConsentPolicyInfo` API. `getConsentPolicyInfo` returns a promise with the raw consent string value.
 
-Ways to get the consent string for ad/analytics vendors coming soon.
+#### If you integrate with AMP as an analytics vendor
+
+Get the value using `CONSENT_STRING` macro, or `${consentString}`. A request with the varaible will only be sent out after the consent policy has resolved and the stored consent string (if any) will be returned.
 
 ### On Related Information
 
@@ -81,6 +83,7 @@ Similar to the consent string, AMP will always pass the local stored consent met
 {
   "consentStringType": {enum} [CONSENT_STRING_TYPE.TCF_V1, CONSENT_STRING_TYPE.TCF_V2, CONSENT_STRING_TYPE.US_PRIVACY_STRING] (optional),
   "gdprApplies": {boolean} (optional),
-  "additionalConsent": {string} (optional)
+  "additionalConsent": {string} (optional),
+  "purposeOne": {boolean} (optional)
 }
 ```

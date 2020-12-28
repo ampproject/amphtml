@@ -22,30 +22,23 @@ const {
   gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMaster,
-  gitTravisMasterBaseline,
+  gitCiMasterBaseline,
   shortSha,
 } = require('../common/git');
-const {
-  isTravisBuild,
-  travisBuildNumber,
-  travisPullRequestSha,
-} = require('../common/travis');
-const {execOrDie, execWithError, exec} = require('../common/exec');
+const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
+const {isCiBuild, ciBuildNumber, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const BUILD_OUTPUT_FILE = isTravisBuild()
-  ? `amp_build_${travisBuildNumber()}.zip`
-  : '';
-const DIST_OUTPUT_FILE = isTravisBuild()
-  ? `amp_dist_${travisBuildNumber()}.zip`
-  : '';
-const ESM_DIST_OUTPUT_FILE = isTravisBuild()
-  ? `amp_esm_dist_${travisBuildNumber()}.zip`
+const BUILD_OUTPUT_FILE = isCiBuild() ? `amp_build_${ciBuildNumber()}.zip` : '';
+const DIST_OUTPUT_FILE = isCiBuild() ? `amp_dist_${ciBuildNumber()}.zip` : '';
+const ESM_DIST_OUTPUT_FILE = isCiBuild()
+  ? `amp_esm_dist_${ciBuildNumber()}.zip`
   : '';
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
+// TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
@@ -63,12 +56,12 @@ function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   let commitSha;
 
-  if (isTravisBuild()) {
+  if (isCiBuild()) {
     console.log(
       `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
-        `in this build: ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+        `in this build: ${colors.cyan(shortSha(gitCiMasterBaseline()))}`
     );
-    commitSha = travisPullRequestSha();
+    commitSha = ciPullRequestSha();
   } else {
     commitSha = gitCommitHash();
   }
@@ -163,42 +156,54 @@ function stopTimedJob(fileName, startTime) {
 }
 
 /**
- * Executes the provided command and times it. Errors, if any, are printed.
- * @param {string} cmd
- * @param {string} fileName
- * @return {!Object} Node process
+ * Wraps an exec helper in a timer. Returns the result of the helper.
+ * @param {!Function(string, string=): ?} execFn
+ * @return {!Function(string, string=): ?}
  */
-function timedExec(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  const p = exec(cmd);
-  stopTimer(cmd, fileName, startTime);
-  return p;
+function timedExecFn(execFn) {
+  return (cmd, fileName, ...rest) => {
+    const startTime = startTimer(cmd, fileName);
+    const p = execFn(cmd, ...rest);
+    stopTimer(cmd, fileName, startTime);
+    return p;
+  };
 }
 
 /**
- * Executes the provided command and times it. Errors, if any, are returned.
+ * Executes the provided command and times it. Errors, if any, are printed.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  * @return {!Object} Node process
  */
-function timedExecWithError(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  const p = execWithError(cmd);
-  stopTimer(cmd, fileName, startTime);
-  return p;
-}
+const timedExec = timedExecFn(exec);
+
+/**
+ * Executes the provided command and times it. Errors, if any, are returned.
+ * @function
+ * @param {string} cmd
+ * @param {string} fileName
+ * @return {!Object} Node process
+ */
+const timedExecWithError = timedExecFn(execWithError);
 
 /**
  * Executes the provided command and times it. The program terminates in case of
  * failure.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  */
-function timedExecOrDie(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  execOrDie(cmd);
-  stopTimer(cmd, fileName, startTime);
-}
+const timedExecOrDie = timedExecFn(execOrDie);
+
+/**
+ * Executes the provided command and times it. The program throws on error in
+ * case of failure.
+ * @function
+ * @param {string} cmd
+ * @param {string} fileName
+ */
+const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
  * Download output helper
@@ -227,7 +232,7 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
   );
   exec('echo travis_fold:start:unzip_results && echo');
   dirsToUnzip.forEach((dir) => {
-    execOrDie(`unzip ${outputFileName} '${dir.replace('/', '/*')}'`);
+    execOrDie(`unzip -o ${outputFileName} '${dir.replace('/', '/*')}'`);
   });
   exec('echo travis_fold:end:unzip_results');
 
@@ -371,6 +376,7 @@ module.exports = {
   timedExec,
   timedExecOrDie,
   timedExecWithError,
+  timedExecOrThrow,
   uploadBuildOutput,
   uploadDistOutput,
   uploadEsmDistOutput,

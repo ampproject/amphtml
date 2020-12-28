@@ -16,15 +16,12 @@
 
 /** @externs */
 
-// TODO(#29293): Make "locale" optional.
-
 /**
  * @typedef {{
- *   datetime: string,
- *   locale: string,
+ *   datetime: (!Date|number|string),
+ *   locale: (string|undefined),
  *   cutoff: (number|undefined),
- *   cutoffText: (string|undefined),
- *   containSize: (boolean|undefined),
+ *   placeholder: (string|!PreactDef.VNode|null|undefined),
  * }}
  */
 var TimeagoProps;

@@ -287,11 +287,14 @@ describes.realWin(
         });
 
         it('updates mute from state', () => {
-          const spy = env.sandbox.spy(impl.element, 'dispatchCustomEvent');
+          const mutedEventSpy = env.sandbox.spy();
+          const unmutedEventSpy = env.sandbox.spy();
+          impl.element.addEventListener(VideoEvents.MUTED, mutedEventSpy);
+          impl.element.addEventListener(VideoEvents.UNMUTED, unmutedEventSpy);
           mockMessage('mute', {mute: true});
-          expect(spy).calledWith(VideoEvents.MUTED);
+          expect(mutedEventSpy).to.be.calledOnce;
           mockMessage('mute', {mute: false});
-          expect(spy).calledWith(VideoEvents.UNMUTED);
+          expect(unmutedEventSpy).to.be.calledOnce;
         });
 
         it('updates played ranges from state', () => {

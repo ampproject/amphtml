@@ -35,5 +35,5 @@ For configuration details and to generate your tags, please refer to [your publi
 
 Supported parameters:
 
-- `data-app-id`
-- `data-ad-spot`
+-   `data-app-id`
+-   `data-ad-spot`

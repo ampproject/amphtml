@@ -17,7 +17,8 @@ import {createContext} from '../../../src/preact';
 
 const CarouselContext = createContext(
   /** @type {BaseCarouselDef.ContextProps} */ ({
-    setSlideCount: (unusedCount) => {},
+    slides: [],
+    setSlides: (unusedSlides) => {},
   })
 );
 export {CarouselContext};

@@ -87,11 +87,11 @@ Optionally, you can specify a caption for each element in the lightbox. These
 fields are automatically read and displayed by the `<amp-lightbox-gallery>` in
 the following order of priority:
 
-- `figcaption` (if the lightboxed element is the child of a figure)
-- `aria-describedby`
-- `alt`
-- `aria-label`
-- `aria-labelledby`
+-   `figcaption` (if the lightboxed element is the child of a figure)
+-   `aria-describedby`
+-   `alt`
+-   `aria-label`
+-   `aria-labelledby`
 
 In the following example, `<amp-lightbox-gallery>` displays the `figcaption`
 value as its description, showing "Toront's CN tower was ....".
@@ -162,6 +162,12 @@ If no thumbnail is specified, `<amp-img>` elements will be cropped per
 `object-fit: cover`, `<amp-video>` will use the image `src` specified in its
 `poster` attribute, and placeholder images will be used for lightboxed elements
 that have one.
+
+## Styling
+
+You can style the caption of a `amp-lightbox-gallery` component
+by targeting the `amp-lightbox-gallery-caption` class with standard CSS.
+Some of the properties that can be styled are `font-size` and `color`.
 
 ## Actions
 

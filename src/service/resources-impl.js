@@ -17,8 +17,13 @@
 import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
+import {
+  INTERSECT_RESOURCES_EXP,
+  divertIntersectResources,
+} from '../experiments/intersect-resources-exp';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
+
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
@@ -26,16 +31,13 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../experiments';
+import {getExperimentBranch, isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
+import {isAmp4Email} from '../format';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
@@ -55,13 +57,6 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
 const MAX_BUILD_CHUNK_SIZE = 10;
-
-/** @const {!{id: string, control: string, experiment: string}} */
-const RENDER_ON_IDLE_FIX_EXP = {
-  id: 'render-on-idle-fix',
-  control: '21066311',
-  experiment: '21066312',
-};
 
 /**
  * @implements {ResourcesInterface}
@@ -209,13 +204,7 @@ export class ResourcesImpl {
     this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
 
     /** @const @private {boolean} */
-    this.renderOnIdleFix_ = isExperimentOn(this.win, 'render-on-idle-fix');
-
-    /** @const @private {boolean} */
     this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
-
-    /** @private {boolean} */
-    this.divertedRenderOnIdleFixExperiment_ = false;
 
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
@@ -224,18 +213,6 @@ export class ResourcesImpl {
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.ampdoc.getVisibilityState()
     );
-
-    /**
-     * Number of resources that were laid out after entering viewport.
-     * @private {number}
-     */
-    this.slowLayoutCount_ = 0;
-
-    /**
-     * Total number of laid out resources.
-     * @private {number}
-     */
-    this.totalLayoutCount_ = 0;
 
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
@@ -246,7 +223,14 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    if (isExperimentOn(this.win, 'intersect-resources')) {
+    divertIntersectResources(this.win);
+
+    if (
+      isExperimentOn(this.win, 'bento') ||
+      getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
+        INTERSECT_RESOURCES_EXP.experiment ||
+      isAmp4Email(this.win.document)
+    ) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and
@@ -279,10 +263,15 @@ export class ResourcesImpl {
         this.relayoutAll_ = true;
         this.maybeChangeHeight_ = true;
       }
-      // With IntersectionObserver, we only need to handle viewport resize.
-      if (this.relayoutAll_ || !this.intersectionObserver_) {
-        this.schedulePass();
+
+      // Unfortunately, a viewport size change invalidates all premeasurements.
+      if (this.relayoutAll_ && this.intersectionObserver_) {
+        this.resources_.forEach((resource) =>
+          resource.invalidatePremeasurementAndRequestMeasure()
+        );
       }
+
+      this.schedulePass();
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
@@ -843,14 +832,6 @@ export class ResourcesImpl {
     }
   }
 
-  /** @override */
-  getSlowElementRatio() {
-    if (this.totalLayoutCount_ === 0) {
-      return 0;
-    }
-    return this.slowLayoutCount_ / this.totalLayoutCount_;
-  }
-
   /**
    * Returns `true` when there's mutate work currently batched.
    * @return {boolean}
@@ -1191,28 +1172,6 @@ export class ResourcesImpl {
   }
 
   /**
-   * Selects into an experiment for render-on-idle-fix.
-   * @private
-   */
-  divertRenderOnIdleFixExperiment_() {
-    if (this.divertedRenderOnIdleFixExperiment_) {
-      return;
-    }
-    this.divertedRenderOnIdleFixExperiment_ = true;
-    const experimentInfoList = /** @type {!Array<!../experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          RENDER_ON_IDLE_FIX_EXP.control,
-          RENDER_ON_IDLE_FIX_EXP.experiment,
-        ],
-      },
-    ]);
-    randomlySelectUnsetExperiments(this.win, experimentInfoList);
-  }
-
-  /**
    * Discovers work that needs to be done since the last pass. If viewport
    * has changed, it will try to build new elements, measure changed elements,
    * and schedule layouts and preloads within a reasonable distance of the
@@ -1293,7 +1252,7 @@ export class ResourcesImpl {
         const expediteFirstMeasure =
           !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
         const needsMeasure =
-          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
+          premeasured || requested || relayoutAll || expediteFirstMeasure;
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,
@@ -1378,7 +1337,7 @@ export class ResourcesImpl {
         expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
-    // Phase 3: Trigger "viewport enter/exit" events.
+    // Phase 3: Set inViewport status for resources.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
@@ -1479,17 +1438,12 @@ export class ResourcesImpl {
    * @private
    */
   isIdle_(now = Date.now()) {
-    this.divertRenderOnIdleFixExperiment_();
     const lastDequeueTime = this.exec_.getLastDequeueTime();
     return (
       this.exec_.getSize() == 0 &&
       this.queue_.getSize() == 0 &&
       now > lastDequeueTime + 5000 &&
-      (lastDequeueTime > 0 ||
-        // TODO(powerivq): add tests for this fix once ready to launch
-        !this.renderOnIdleFix_ ||
-        getExperimentBranch(this.win, RENDER_ON_IDLE_FIX_EXP.id) ===
-          RENDER_ON_IDLE_FIX_EXP.control)
+      lastDequeueTime > 0
     );
   }
 
@@ -1708,11 +1662,6 @@ export class ResourcesImpl {
    * @private
    */
   taskComplete_(task, success, opt_reason) {
-    this.totalLayoutCount_++;
-    if (task.resource.isInViewport() && this.firstVisibleTime_ >= 0) {
-      this.slowLayoutCount_++;
-    }
-
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
@@ -1972,7 +1921,10 @@ export class ResourcesImpl {
    * @private
    */
   cleanupTasks_(resource, opt_removePending) {
-    if (resource.getState() == ResourceState.NOT_LAID_OUT) {
+    if (
+      resource.getState() == ResourceState.NOT_LAID_OUT ||
+      resource.getState() == ResourceState.READY_FOR_LAYOUT
+    ) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
       // for layout again later on.

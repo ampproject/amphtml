@@ -40,6 +40,7 @@ async function terserMinify(code) {
       comments: /\/*/,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
+      preamble: ';',
     },
     sourceMap: true,
   });
@@ -70,24 +71,24 @@ exports.postClosureBabel = function () {
 
     const map = file.sourceMap;
 
-    debug(
-      CompilationLifecycles['closured-pre-babel'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-    const {code, map: babelMap} = babel.transformSync(file.contents, {
-      caller: {name: 'post-closure'},
-    });
-
-    debug(
-      CompilationLifecycles['closured-pre-terser'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-
     try {
+      debug(
+        CompilationLifecycles['closured-pre-babel'],
+        file.path,
+        file.contents,
+        file.sourceMap
+      );
+      const {code, map: babelMap} = babel.transformSync(file.contents, {
+        caller: {name: 'post-closure'},
+      });
+
+      debug(
+        CompilationLifecycles['closured-pre-terser'],
+        file.path,
+        file.contents,
+        file.sourceMap
+      );
+
       const {compressed, terserMap} = await terserMinify(code);
       file.contents = Buffer.from(compressed, 'utf-8');
       file.sourceMap = remapping(

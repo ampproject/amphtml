@@ -210,6 +210,11 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://mads.at.atwola.com', 'https://aka-cdn.adtechus.com'],
   },
 
+  'adtelligent': {
+    preconnect: ['https://s.adtelligent.com'],
+    renderStartImplemented: true,
+  },
+
   'adthrive': {
     prefetch: ['https://www.googletagservices.com/tag/js/gpt.js'],
     preconnect: [
@@ -349,6 +354,7 @@ const adConfig = jsonConfiguration({
 
   'broadstreetads': {
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
+    renderStartImplemented: true,
   },
 
   'byplay': {},
@@ -474,6 +480,18 @@ const adConfig = jsonConfiguration({
   },
 
   'fake': {},
+
+  'fake-delayed': {
+    renderStartImplemented: true,
+  },
+
+  'feedad': {
+    clientIdScope: '__fa_amp',
+    prefetch: 'https://web.feedad.com/sdk/feedad-async.js',
+    renderStartImplemented: true,
+    fullWidthHeightRatio: 16 / 9,
+    consentHandlingOverride: true,
+  },
 
   'felmat': {
     prefetch: 'https://t.felmat.net/js/fmamp.js',
@@ -651,6 +669,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'luckyads': {
+    renderStartImplemented: true,
+  },
+
   'macaw': {
     renderStartImplemented: true,
   },
@@ -750,6 +772,10 @@ const adConfig = jsonConfiguration({
   },
 
   'my6sense': {
+    renderStartImplemented: true,
+  },
+
+  'myoffrz': {
     renderStartImplemented: true,
   },
 
@@ -895,6 +921,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'pulse': {
+    prefetch: 'https://static.pulse.mail.ru/pulse-widget-amp.js',
+    renderStartImplemented: true,
+  },
+
   'pulsepoint': {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
@@ -944,6 +975,11 @@ const adConfig = jsonConfiguration({
   'relappro': {
     prefetch: 'https://cdn.relappro.com/adservices/amp/relappro.amp.min.js',
     preconnect: 'https://tags.relappro.com',
+    renderStartImplemented: true,
+  },
+
+  'remixd': {
+    preconnect: 'https://tags.remixd.com',
     renderStartImplemented: true,
   },
 
@@ -1197,6 +1233,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'vlyby': {
+    prefetch: 'https://cdn.vlyby.com/amp/qad/qad-outer2.js',
+  },
+
   'vmfive': {
     prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
     preconnect: ['https://vawpro.vm5apis.com', 'https://vahfront.vm5apis.com'],
@@ -1272,6 +1312,8 @@ const adConfig = jsonConfiguration({
       'https://rfetch.yektanet.net',
       'https://scrapper.yektanet.com',
       'https://ua.yektanet.com',
+      'https://bfetch.yektanet.com',
+      'https://mostatil.cdn.yektanet.com',
     ],
     renderStartImplemented: true,
   },

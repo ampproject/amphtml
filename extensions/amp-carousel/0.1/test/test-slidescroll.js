@@ -153,7 +153,6 @@ describes.realWin(
       return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
-        const updateInViewportSpy = env.sandbox.spy(owners, 'updateInViewport');
         const scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
         const schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
         const hideRestOfTheSlidesSpy = env.sandbox.spy(
@@ -164,7 +163,6 @@ describes.realWin(
         const analyticsEventSpy = env.sandbox.spy(impl, 'analyticsEvent_');
 
         expect(impl.showSlide_(-1)).to.be.false;
-        expect(updateInViewportSpy).to.not.have.been.called;
         expect(scheduleLayoutSpy).to.not.have.been.called;
         expect(schedulePreloadSpy).to.not.have.been.called;
         expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
@@ -172,7 +170,6 @@ describes.realWin(
         expect(analyticsEventSpy).to.not.have.been.called;
 
         expect(impl.showSlide_(5)).to.be.false;
-        expect(updateInViewportSpy).to.not.have.been.called;
         expect(scheduleLayoutSpy).to.not.have.been.called;
         expect(schedulePreloadSpy).to.not.have.been.called;
         expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
@@ -180,7 +177,6 @@ describes.realWin(
         expect(analyticsEventSpy).to.not.have.been.called;
 
         expect(impl.showSlide_(impl.slideIndex_)).to.be.false;
-        expect(updateInViewportSpy).to.not.have.been.called;
         expect(scheduleLayoutSpy).to.not.have.been.called;
         expect(schedulePreloadSpy).to.not.have.been.called;
         expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
@@ -188,17 +184,6 @@ describes.realWin(
         expect(analyticsEventSpy).to.not.have.been.called;
 
         expect(impl.showSlide_(1)).to.be.true;
-        expect(updateInViewportSpy).to.have.been.calledWith(
-          impl.element,
-          impl.slides_[0],
-          false
-        );
-        expect(updateInViewportSpy).to.have.been.calledWith(
-          impl.element,
-          impl.slides_[1],
-          true
-        );
-        expect(updateInViewportSpy).to.have.callCount(2);
         expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS)).to.be
           .true;
         expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS)).to.be
@@ -240,17 +225,6 @@ describes.realWin(
         expect(impl.slides_[2].getAttribute('aria-hidden')).to.equal('true');
 
         expect(impl.showSlide_(0)).to.be.true;
-        expect(updateInViewportSpy).to.have.been.calledWith(
-          impl.element,
-          impl.slides_[1],
-          false
-        );
-        expect(updateInViewportSpy).to.have.been.calledWith(
-          impl.element,
-          impl.slides_[0],
-          true
-        );
-        expect(updateInViewportSpy).to.have.callCount(4);
         expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS)).to.be
           .true;
         expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS)).to.be
@@ -285,17 +259,6 @@ describes.realWin(
         expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
 
         expect(impl.showSlide_(4)).to.be.true;
-        expect(updateInViewportSpy).to.have.been.calledWith(
-          impl.element,
-          impl.slides_[0],
-          false
-        );
-        expect(updateInViewportSpy).to.have.been.calledWith(
-          impl.element,
-          impl.slides_[4],
-          true
-        );
-        expect(updateInViewportSpy).to.have.callCount(6);
         expect(impl.slideWrappers_[3].classList.contains(SHOW_CLASS)).to.be
           .true;
         expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS)).to.be
@@ -444,6 +407,57 @@ describes.realWin(
         // Verify aria roles for the button
         expect(impl.nextButton_.getAttribute('role')).equal('button');
         expect(impl.prevButton_.getAttribute('role')).equal('button');
+      });
+    });
+
+    it('should properly style controls; focusable but not visible', () => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
+        const impl = ampSlideScroll.implementation_;
+
+        impl.showSlide_(0);
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+        expect(impl.prevButton_.tabIndex).to.equal(-1);
+        expect(impl.nextButton_.tabIndex).to.equal(0);
+        expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
+        expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+
+        impl.nextButton_.focus();
+        expect(doc.activeElement).to.equal(impl.nextButton_);
+
+        impl.showSlide_(4);
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(impl.prevButton_.tabIndex).to.equal(0);
+        expect(impl.nextButton_.tabIndex).to.equal(-1);
+        expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
+        expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+        expect(doc.activeElement).to.equal(impl.nextButton_);
+      });
+    });
+
+    it('should show focus outline and border on next and prev buttons', () => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
+        const impl = ampSlideScroll.implementation_;
+        impl.showSlide_(1);
+
+        impl.prevButton_.focus();
+        expect(doc.activeElement).to.equal(impl.prevButton_);
+        expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
+          'rgb(255, 255, 255) solid 1px'
+        );
+        expect(win.getComputedStyle(impl.prevButton_).border).to.equal(
+          '1px solid rgb(0, 0, 0)'
+        );
+
+        impl.nextButton_.focus();
+        expect(doc.activeElement).to.equal(impl.nextButton_);
+        expect(win.getComputedStyle(impl.nextButton_).outline).to.equal(
+          'rgb(255, 255, 255) solid 1px'
+        );
+        expect(win.getComputedStyle(impl.nextButton_).border).to.equal(
+          '1px solid rgb(0, 0, 0)'
+        );
       });
     });
 
@@ -647,15 +661,11 @@ describes.realWin(
 
     it('should handle layout measures (orientation changes)', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
-      const getLayoutWidthStub = env.sandbox.stub(
-        ampSlideScroll,
-        'getLayoutWidth'
-      );
       const impl = ampSlideScroll.implementation_;
+      const offsetWidthStub = env.sandbox.stub(ampSlideScroll, 'offsetWidth');
 
-      getLayoutWidthStub.returns(200);
+      offsetWidthStub.value(200);
       impl.onLayoutMeasure();
-      expect(getLayoutWidthStub).to.have.been.calledOnce;
       expect(impl.slideWidth_).to.equal(200);
 
       // Show the first slide, make sure the scroll position is correct.
@@ -663,23 +673,25 @@ describes.realWin(
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(200);
 
       // Now do a layout measure letting the component know it changed size.
-      getLayoutWidthStub.returns(400);
+      offsetWidthStub.value(400);
       impl.onLayoutMeasure();
-      expect(getLayoutWidthStub).to.have.callCount(2);
       expect(impl.slideWidth_).to.equal(400);
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(200);
 
       // Make sure the scroll position is correct after layoutCallback.
+      await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
       await impl.layoutCallback();
+      impl.showSlide_(1);
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(400);
     });
 
     it('should relayout the current slide on layoutCallback', () => {
-      return getAmpSlideScroll().then((ampSlideScroll) => {
+      return getAmpSlideScroll().then(async (ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
         const scheduleLayoutSpy_ = env.sandbox.spy(owners, 'scheduleLayout');
         impl.slideIndex_ = null;
+        await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
         impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
           impl.element,
@@ -687,6 +699,7 @@ describes.realWin(
         );
 
         impl.showSlide_(1);
+        await impl.unlayoutCallback(); // cannot call layoutCallback() twice without an unlayout in between.
         impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
           impl.element,
@@ -713,10 +726,6 @@ describes.realWin(
         return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const owners = Services.ownersForDoc(impl.element);
-          const updateInViewportSpy = env.sandbox.spy(
-            owners,
-            'updateInViewport'
-          );
           const scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
           const schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
           const hideRestOfTheSlidesSpy = env.sandbox.spy(
@@ -731,17 +740,6 @@ describes.realWin(
 
           impl.showSlide_(1);
 
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.slides_[0],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.slides_[1],
-            true
-          );
-          expect(updateInViewportSpy).to.have.callCount(2);
           expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS)).to.be
             .true;
           expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS)).to.be
@@ -775,15 +773,6 @@ describes.realWin(
 
           impl.showSlide_(0);
 
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.slides_[1],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.slides_[0],
-            true
-          );
-          expect(updateInViewportSpy).to.have.callCount(4);
           expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS)).to.be
             .true;
           expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS)).to.be
@@ -817,17 +806,6 @@ describes.realWin(
 
           impl.showSlide_(4);
 
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.slides_[0],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.slides_[4],
-            true
-          );
-          expect(updateInViewportSpy).to.have.callCount(6);
           expect(impl.slideWrappers_[3].classList.contains(SHOW_CLASS)).to.be
             .true;
           expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS)).to.be
@@ -865,10 +843,6 @@ describes.realWin(
         return getAmpSlideScroll(true, 2).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const owners = Services.ownersForDoc(impl.element);
-          const updateInViewportSpy = env.sandbox.spy(
-            owners,
-            'updateInViewport'
-          );
           const scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
           const schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
           const hideRestOfTheSlidesSpy = env.sandbox.spy(
@@ -882,17 +856,6 @@ describes.realWin(
 
           impl.showSlide_(1);
 
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.slides_[0],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.slides_[1],
-            true
-          );
-          expect(updateInViewportSpy).to.have.callCount(2);
           expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS)).to.be
             .true;
           expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS)).to.be
@@ -919,17 +882,6 @@ describes.realWin(
 
           impl.showSlide_(0);
 
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.slides_[1],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.slides_[0],
-            true
-          );
-          expect(updateInViewportSpy).to.have.callCount(4);
           expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS)).to.be
             .true;
           expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS)).to.be
@@ -1535,3 +1487,15 @@ describes.realWin(
     });
   }
 );
+
+/**
+ *
+ * @param {Element} element
+ * @returns {boolean}
+ */
+function isScreenReaderHidden(element) {
+  const computedStyle = getComputedStyle(element);
+  return (
+    computedStyle.visibility === 'hidden' || computedStyle.display === 'none'
+  );
+}

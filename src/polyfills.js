@@ -16,6 +16,7 @@
 
 /** @fileoverview */
 
+import {install as installAbortController} from './polyfills/abort-controller';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -29,6 +30,7 @@ import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
 import {install as installSetAdd} from './polyfills/set-add';
+import {install as installStringStartsWith} from './polyfills/string-starts-with';
 import {install as installWeakMapSet} from './polyfills/weakmap-set';
 
 if (!IS_ESM) {
@@ -41,6 +43,7 @@ if (!IS_ESM) {
   installMapSet(self);
   installWeakMapSet(self);
   installSetAdd(self);
+  installStringStartsWith(self);
 }
 
 // Polyfills that depend on DOM availability
@@ -55,5 +58,6 @@ if (self.document) {
   if (!IS_SXG) {
     installCustomElements(self, class {});
     installIntersectionObserver(self);
+    installAbortController(self);
   }
 }

@@ -19,9 +19,9 @@ import {
   InteractiveType,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-binary-poll-0.1.css';
+import {computedStyle, setStyle} from '../../../src/style';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
-import {setStyle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @const @enum {number} */
@@ -160,14 +160,17 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
     return this.measureMutateElement(
       () => {
         allTitles.forEach((e) => {
+          const lines = Math.round(
+            e./*OK*/ clientHeight /
+              parseFloat(
+                computedStyle(this.win, e)['line-height'].replace('px', '')
+              )
+          );
           if (e.textContent.length <= 3 && largestFontSize >= FontSize.EMOJI) {
             largestFontSize = FontSize.EMOJI;
-          } else if (
-            e./*OK*/ clientHeight <= 36 &&
-            largestFontSize >= FontSize.SINGLE_LINE
-          ) {
+          } else if (lines == 1 && largestFontSize >= FontSize.SINGLE_LINE) {
             largestFontSize = FontSize.SINGLE_LINE;
-          } else if (e./*OK*/ clientHeight > 36) {
+          } else if (lines == 2) {
             largestFontSize = FontSize.DOUBLE_LINE;
           }
         });
