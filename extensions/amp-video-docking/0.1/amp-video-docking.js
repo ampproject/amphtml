@@ -452,7 +452,7 @@ export class VideoDocking {
     const slot = this.getSlot_();
     if (slot) {
       // Match slot's top edge to tie transition to element.
-      return slot.getBoundingClientRect().top;
+      return slot./*OK*/ getBoundingClientRect().top;
     }
     return 0;
   }
@@ -596,7 +596,7 @@ export class VideoDocking {
     }
 
     const {element} = video;
-    const clientRect = element.getBoundingClientRect();
+    const clientRect = element./*OK*/ getBoundingClientRect();
     const intersectionRect = rectIntersection(clientRect, this.viewportRect_);
     if (!intersectionRect || !isSizedRect(intersectionRect)) {
       return null;
@@ -614,7 +614,7 @@ export class VideoDocking {
    */
   getScrollAdjustedRect_(element) {
     element = element.element || element;
-    return layoutRectFromDomRect(element.getBoundingClientRect());
+    return layoutRectFromDomRect(element./*OK*/ getBoundingClientRect());
   }
 
   /**
@@ -691,7 +691,7 @@ export class VideoDocking {
    * @private
    */
   isValidSize_(video) {
-    const {width, height} = video.element.getBoundingClientRect();
+    const {width, height} = video.element./*OK*/ getBoundingClientRect();
     if (width / height < 1 - FLOAT_TOLERANCE) {
       complainAboutPortrait(video.element);
       return false;
@@ -948,7 +948,7 @@ export class VideoDocking {
 
     const {element} = video;
     const {width, height} =
-      opt_clientRect || video.element.getBoundingClientRect();
+      opt_clientRect || video.element./*OK*/ getBoundingClientRect();
 
     this.placedAt_ = {x, y, scale};
 
@@ -1500,7 +1500,7 @@ export class VideoDocking {
   getCenterX_(offsetX) {
     const {target, step} = this.currentlyDocked_;
     const video = this.getDockedVideo_();
-    const {width} = video.element.getBoundingClientRect();
+    const {width} = video.element./*OK*/ getBoundingClientRect();
     const {x, scale} = this.getDims_(video, target, step);
     return x + offsetX + (width * scale) / 2;
   }
@@ -1702,7 +1702,7 @@ export class VideoDocking {
   getUsableTarget_(video) {
     const slot = this.getSlot_();
     const inlineRect = layoutRectFromDomRect(
-      video.element.getBoundingClientRect()
+      video.element./*OK*/ getBoundingClientRect()
     );
 
     if (slot) {
@@ -1710,7 +1710,7 @@ export class VideoDocking {
         type: DockTargetType.SLOT,
         rect: letterboxRect(
           inlineRect,
-          layoutRectFromDomRect(slot.getBoundingClientRect())
+          layoutRectFromDomRect(slot./*OK*/ getBoundingClientRect())
         ),
         slot,
       };
