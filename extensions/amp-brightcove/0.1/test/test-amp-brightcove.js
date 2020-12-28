@@ -111,7 +111,7 @@ describes.realWin(
       });
     });
 
-    it('should pass data-param-* attributes to the iframe src', async() => {
+    it('should pass data-param-* attributes to the iframe src', async () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
