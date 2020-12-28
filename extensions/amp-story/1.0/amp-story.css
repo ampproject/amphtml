@@ -366,13 +366,26 @@ amp-story-grid-layer {
   pointer-events: none !important;
 }
 
+/** Grid level */
+amp-story-page-layer {
+  box-sizing: border-box !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  z-index: 2 !important;
+  /** Make sure grid layer does not act as a click shield on elements underneath */
+  pointer-events: none !important;
+}
+
 /**
  * Click shield to make sure click events are never swallowed by videos on
  * Safari iOS 11.2, which would prevent the user from navigating through the
  * story.
  * See #14401
  */
- amp-story-grid-layer amp-video::after {
+amp-story-page amp-video::after {
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
@@ -385,8 +398,8 @@ amp-story-grid-layer {
  * Prevents pre-load placeholders from pushing content offscreen. 
  * Prevents preload placeholders from pushing content offscreen. 
  */
-.i-amphtml-story-grid-template-fill amp-img img,
-.i-amphtml-story-grid-template-fill amp-video video {
+.i-amphtml-story-layer-template-fill amp-img img,
+.i-amphtml-story-layer-template-fill amp-video video {
   position: absolute !important;
 }
 
@@ -398,17 +411,18 @@ amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound {
   display: none !important;
 }
 
-amp-story-grid-layer > * {
+amp-story-grid-layer > *,
+amp-story-page-layer > * {
   pointer-events: auto !important;
 }
 
 /** Ensure clicks inside anchor tags are handled by the tooltip. */
-amp-story-grid-layer a * {
+amp-story-page a * {
   pointer-events: none !important;
 }
 
 /** Apply click shield on embedded components on initial load. */
-amp-story-grid-layer .i-amphtml-embedded-component::after {
+amp-story-page .i-amphtml-embedded-component::after {
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
@@ -423,7 +437,9 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
 }
 
 .i-amphtml-expanded-mode amp-story-grid-layer,
-.i-amphtml-expanded-mode amp-story-grid-layer * {
+.i-amphtml-expanded-mode amp-story-grid-layer *,
+.i-amphtml-expanded-mode amp-story-page-layer,
+.i-amphtml-expanded-mode amp-story-page-layer * {
   contain: none !important;
   z-index: auto !important;
 }
@@ -433,13 +449,13 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-grid-template-with-full-bleed-animation {
+.i-amphtml-story-layer-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
   padding: 0 !important;
 }
 
-.i-amphtml-story-grid-template-fill > * {
+.i-amphtml-story-layer-template-fill > * {
   bottom: 0 !important;
   height: auto !important;
   left: 0 !important;
@@ -449,17 +465,17 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   width: auto !important;
 }
 
-.i-amphtml-story-grid-template-vertical {
+.i-amphtml-story-layer-template-vertical {
   grid-auto-flow: row !important;
   grid-template-columns: 100% !important;
 }
 
-.i-amphtml-story-grid-template-horizontal {
+.i-amphtml-story-layer-template-horizontal {
   grid-auto-flow: column !important;
   grid-template-rows: 100% !important;
 }
 
-.i-amphtml-story-grid-template-thirds {
+.i-amphtml-story-layer-template-thirds {
   height: 100% !important;
   grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
   grid-template-areas: "upper-third"
@@ -467,7 +483,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
                        "lower-third" !important;
 }
 
-.i-amphtml-story-grid-template-aspect {
+.i-amphtml-story-layer-template-aspect {
   margin: auto;
   width: var(--i-amphtml-story-layer-width, 100%);
   height: var(--i-amphtml-story-layer-height, 100%);

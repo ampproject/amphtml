@@ -1,0 +1,87 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <title>Page layer story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="page-layer.html">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Poppins', sans-serif;
+      }
+      amp-story-page {
+        background: black;
+      }
+      .lower-title {
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        text-align: center;
+        padding-bottom: calc(var(--i-amphtml-story-layer-height, 100%) * 0.1);
+        border: 5px solid #ffaa0077;
+      }
+      .lower-title span {
+        font-size: 0.2em;
+      }
+      .lower-title h1 {
+        line-height: 1em;
+        margin: 0;
+        margin-bottom: 0.2em;
+        font-size: 1em;
+      }
+
+      amp-story-page-layer[preset="preset-2021-background"] {
+        --i-amphtml-story-layer-scale: 1.142;
+        margin-left: calc((var(--story-page-vw, 100%) * 100 - var(--i-amphtml-story-layer-width, 100%) * var(--i-amphtml-story-layer-scale)) * 0.5);
+        width: calc(var(--i-amphtml-story-layer-width, 100%) * var(--i-amphtml-story-layer-scale)) !important;
+        height: calc(var(--i-amphtml-story-layer-height, 100%) * var(--i-amphtml-story-layer-scale)) !important;
+      }
+
+      [preset="preset-2021-blurred"] {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone>
+      <amp-story-page id="cover">
+        <amp-story-page-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" class="lower-title">
+          <span>This is a</span>
+          <h1>full-page</h1>
+          <span>story</span>
+        </amp-story-page-layer>
+      </amp-story-page>
+      <amp-story-page id="cover-2">
+        <amp-story-grid-layer template="fill" preset="preset-2021-blurred">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=100&q=100"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-page-layer template="fill" preset="preset-2021-background">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" class="lower-title">
+          <span>This is a</span>
+          <h1>full-page</h1>
+          <span>story with consistent background</span>
+        </amp-story-page-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

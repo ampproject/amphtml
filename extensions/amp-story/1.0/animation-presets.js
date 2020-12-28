@@ -73,7 +73,7 @@ const FULL_BLEED_ANIMATION_NAMES = [
  */
 const ANIMATION_CSS_CLASS_NAMES = {
   [FULL_BLEED_CATEGORY]:
-    'i-amphtml-story-grid-template-with-full-bleed-animation',
+    'i-amphtml-story-layer-template-with-full-bleed-animation',
 };
 
 /**
