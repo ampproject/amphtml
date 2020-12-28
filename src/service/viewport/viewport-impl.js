@@ -204,6 +204,14 @@ export class ViewportImpl {
         // Ignore errors.
       }
     }
+
+    // BF-cache navigation sometimes breaks clicks in an iframe on iOS. See
+    // https://github.com/ampproject/amphtml/issues/30838 for more details.
+    // The solution is to make a "fake" scrolling API call.
+    const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
+    if (isIframedIos) {
+      this.ampdoc.whenReady().then(() => win./*OK*/ scrollTo(-0.1, 0));
+    }
   }
 
   /** @override */
