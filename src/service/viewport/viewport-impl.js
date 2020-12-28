@@ -210,7 +210,7 @@ export class ViewportImpl {
     // The solution is to make a "fake" scrolling API call.
     const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
     if (isIframedIos) {
-      this.ampdoc.whenReady().then(() => win.scrollTo(-0.1, 0));
+      this.ampdoc.whenReady().then(() => win./*OK*/ scrollTo(-0.1, 0));
     }
   }
 
