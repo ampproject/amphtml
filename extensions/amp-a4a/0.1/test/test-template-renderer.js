@@ -62,12 +62,6 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};
-    containerElement.getPageLayoutBox = () => ({
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
-    });
     containerElement.getLayoutBox = () => ({
       left: 0,
       top: 0,
