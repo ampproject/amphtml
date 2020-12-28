@@ -75,8 +75,8 @@ describes.realWin(
       });
     }
 
-    it('renders', () => {
-      return getBrightcove({
+    it('renders', async () => {
+      getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
       }).then((bc) => {
@@ -97,8 +97,8 @@ describes.realWin(
       );
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getBrightcove({
+    it('removes iframe after unlayoutCallback', async () => {
+      getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
       }).then((bc) => {
@@ -111,8 +111,8 @@ describes.realWin(
       });
     });
 
-    it('should pass data-param-* attributes to the iframe src', () => {
-      return getBrightcove({
+    it('should pass data-param-* attributes to the iframe src', async() => {
+      getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-param-my-param': 'hello world',
@@ -123,8 +123,8 @@ describes.realWin(
       });
     });
 
-    it('should propagate mutated attributes', () => {
-      return getBrightcove({
+    it('should propagate mutated attributes', async () => {
+      getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
       }).then((bc) => {
@@ -162,8 +162,8 @@ describes.realWin(
       });
     });
 
-    it('should give precedence to playlist id', () => {
-      return getBrightcove({
+    it('should give precedence to playlist id', async () => {
+      getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-playlist-id': 'ref:test-playlist',
@@ -175,8 +175,8 @@ describes.realWin(
       });
     });
 
-    it('should allow both playlist and video id to be unset', () => {
-      return getBrightcove({
+    it('should allow both playlist and video id to be unset', async () => {
+      getBrightcove({
         'data-account': '1290862519001',
       }).then((bc) => {
         const iframe = bc.querySelector('iframe');
@@ -186,8 +186,8 @@ describes.realWin(
       });
     });
 
-    it('should pass referrer', () => {
-      return getBrightcove({
+    it('should pass referrer', async () => {
+      getBrightcove({
         'data-account': '1290862519001',
         'data-referrer': 'COUNTER',
       }).then((bc) => {
@@ -197,8 +197,8 @@ describes.realWin(
       });
     });
 
-    it('should force playsinline', () => {
-      return getBrightcove({
+    it('should force playsinline', async () => {
+      getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-param-playsinline': 'false',
@@ -209,8 +209,8 @@ describes.realWin(
       });
     });
 
-    it('should forward events', () => {
-      return getBrightcove({
+    it('should forward events', async () => {
+      getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
       }).then((bc) => {
@@ -287,7 +287,7 @@ describes.realWin(
       });
     });
 
-    it('should propagate consent state to iframe', () => {
+    it('should propagate consent state to iframe', async () => {
       env.sandbox
         .stub(consent, 'getConsentPolicyState')
         .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
@@ -295,7 +295,7 @@ describes.realWin(
         .stub(consent, 'getConsentPolicySharedData')
         .resolves({a: 1, b: 2});
 
-      return getBrightcove({
+      getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-block-on-consent': '_till_accepted',
