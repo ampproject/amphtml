@@ -328,8 +328,9 @@ class AmpBrightcove extends AMP.BaseElement {
       const customReferrer = el.getAttribute('data-referrer');
 
       if (customReferrer) {
-        el.setAttribute(
-          'data-param-referrer',
+        src = addParamToUrl(
+          src,
+          'referrer',
           this.urlReplacements_.expandUrlSync(customReferrer)
         );
       }

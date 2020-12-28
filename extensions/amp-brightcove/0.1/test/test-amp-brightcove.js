@@ -42,7 +42,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getBrightcove(attributes) {
+    async function getBrightcove(attributes, opt_beforeLayoutCallback) {
       const element = createElementWithAttributes(doc, 'amp-brightcove', {
         width: '111',
         height: '222',
@@ -50,6 +50,12 @@ describes.realWin(
       });
 
       doc.body.appendChild(element);
+
+      await element.build();
+
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(element);
+      }
 
       await whenUpgradedToCustomElement(element);
 
@@ -300,36 +306,16 @@ describes.realWin(
         'data-video-id': 'ref:amp-test-video',
         'data-block-on-consent': '_till_accepted',
       }).then((bc) => {
-        const newSrc = new Promise((resolve) => {
-          const cb = (mutations) => {
-            mutations.forEach((m) => {
-              if (m.type === 'childList') {
-                m.addedNodes.forEach((n) => {
-                  if (n.tagName === 'IFRAME') {
-                    resolve(n.src);
-                    observer.disconnect();
-                  }
-                });
-              }
-            });
-          };
+        const iframe = bc.querySelector('iframe');
 
-          const observer = new MutationObserver(cb);
-          observer.observe(bc, {
-            childList: true,
-          });
-        });
-
-        return Promise.all([
-          expect(newSrc).to.eventually.contain(
-            `ampInitialConsentState=${CONSENT_POLICY_STATE.SUFFICIENT}`
-          ),
-          expect(newSrc).to.eventually.contain(
-            `ampConsentSharedData=${encodeURIComponent(
-              JSON.stringify({a: 1, b: 2})
-            )}`
-          ),
-        ]);
+        expect(iframe.src).to.contain(
+          `ampInitialConsentState=${CONSENT_POLICY_STATE.SUFFICIENT}`
+        );
+        expect(iframe.src).to.contain(
+          `ampConsentSharedData=${encodeURIComponent(
+            JSON.stringify({a: 1, b: 2})
+          )}`
+        );
       });
     });
   }
