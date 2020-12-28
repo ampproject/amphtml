@@ -1205,7 +1205,6 @@ const forbiddenTermsSrcInclusive = {
       'src/base-element.js',
       'src/custom-element.js',
       'src/service/resource.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js',
     ],
   },
   '\\.getIntersectionElementLayoutBox': {
