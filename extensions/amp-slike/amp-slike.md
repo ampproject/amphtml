@@ -40,7 +40,7 @@ limitations under the License.
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layout.
 
 
 ```html
