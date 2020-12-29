@@ -91,6 +91,15 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = null;
+
+    /**@private {?number} */
+    this.consentState_ = null;
+
+    /**@private {?object} */
+    this.consentSharedData_ = null;
+
+    /**@private {?string} */
+    this.consentString_ = null;
   }
 
   /** @override */
@@ -142,7 +151,15 @@ class AmpBrightcove extends AMP.BaseElement {
     const sharedDataPromise = consentPolicy
       ? getConsentPolicySharedData(this.element, consentPolicy)
       : Promise.resolve();
-    return [consentPromise, sharedDataPromise, consentStringPromise];
+    return Promise.all([
+      consentPromise,
+      sharedDataPromise,
+      consentStringPromise,
+    ]).then((arr) => {
+      this.consentState_ = arr[0];
+      this.sharedData_ = arr[1];
+      this.consentString_ = arr[2];
+    });
   }
 
   /**
@@ -150,13 +167,11 @@ class AmpBrightcove extends AMP.BaseElement {
    * @return {!Promise}
    */
   layoutCallback() {
-    return this.getIframeSrc_().then((src) => {
-      this.iframe_ = createFrameFor(this, src);
-
+    return this.getConsents_().then(() => {
+      this.iframe_ = createFrameFor(this, this.getIframeSrc_());
       this.unlistenMessage_ = listen(this.win, 'message', (e) =>
         this.handlePlayerMessage_(e)
       );
-
       return this.loadPromise(this.iframe_).then(
         () => this.playerReadyPromise_
       );
@@ -286,9 +301,7 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /**
-   * Iframe src returns a promise as it waits for consent promises
-   *
-   * @return {!Promise<string>} iframe source url
+   * @return {string} iframe source url
    * @private
    */
   getIframeSrc_() {
@@ -307,61 +320,45 @@ class AmpBrightcove extends AMP.BaseElement {
       el.getAttribute('data-player-id') ||
       'default';
 
-    return Promise.all(this.getConsents_()).then((consents) => {
-      const consentData = dict({
-        'initialConsentState': consents[0],
-        'consentSharedData': consents[1],
-        'initialConsentValue': consents[2],
-      });
+    let src =
+      `https://players.brightcove.net/${encodeURIComponent(account)}` +
+      `/${encodeURIComponent(this.playerId_)}` +
+      `_${encodeURIComponent(embed)}/index.html` +
+      // These are encodeURIComponent'd in encodeId_().
+      (el.getAttribute('data-playlist-id')
+        ? '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
+        : el.getAttribute('data-video-id')
+        ? '?videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
+        : '');
 
-      let src =
-        `https://players.brightcove.net/${encodeURIComponent(account)}` +
-        `/${encodeURIComponent(this.playerId_)}` +
-        `_${encodeURIComponent(embed)}/index.html` +
-        // These are encodeURIComponent'd in encodeId_().
-        (el.getAttribute('data-playlist-id')
-          ? '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
-          : el.getAttribute('data-video-id')
-          ? '?videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
-          : '');
+    const customReferrer = el.getAttribute('data-referrer');
 
-      const customReferrer = el.getAttribute('data-referrer');
+    if (customReferrer) {
+      src = addParamToUrl(
+        src,
+        'referrer',
+        this.urlReplacements_.expandUrlSync(customReferrer)
+      );
+    }
 
-      if (customReferrer) {
-        src = addParamToUrl(
-          src,
-          'referrer',
-          this.urlReplacements_.expandUrlSync(customReferrer)
-        );
-      }
+    if (this.consentState_) {
+      src = addParamToUrl(src, 'ampInitialConsentState', this.consentState_);
+    }
+    if (this.consentSharedData_) {
+      src = addParamToUrl(
+        src,
+        'ampConsentSharedData',
+        JSON.stringify(this.consentSharedData_)
+      );
+    }
+    if (this.consentString_) {
+      src = addParamToUrl(src, 'ampInitialConsentValue', this.consentString_);
+    }
 
-      if (consentData['initialConsentState']) {
-        src = addParamToUrl(
-          src,
-          'ampInitialConsentState',
-          consentData['initialConsentState']
-        );
-      }
-      if (consentData['consentSharedData']) {
-        src = addParamToUrl(
-          src,
-          'ampConsentSharedData',
-          JSON.stringify(consentData['consentSharedData'])
-        );
-      }
-      if (consentData['initialConsentValue']) {
-        src = addParamToUrl(
-          src,
-          'ampInitialConsentValue',
-          consentData['initialConsentValue']
-        );
-      }
+    el.setAttribute('data-param-playsinline', 'true');
 
-      el.setAttribute('data-param-playsinline', 'true');
-
-      // Pass through data-param-* attributes as params for plugin use
-      return addParamsToUrl(src, getDataParamsFromAttributes(el));
-    });
+    // Pass through data-param-* attributes as params for plugin use
+    return addParamsToUrl(src, getDataParamsFromAttributes(el));
   }
 
   /** @override */
@@ -379,9 +376,7 @@ class AmpBrightcove extends AMP.BaseElement {
       videoId !== undefined
     ) {
       if (this.iframe_) {
-        this.getIframeSrc_().then((src) => {
-          this.iframe_.src = src;
-        });
+        this.iframe_.src = this.getIframeSrc_();
       }
     }
   }

@@ -42,7 +42,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getBrightcove(attributes, opt_beforeLayoutCallback) {
+    async function getBrightcove(attributes) {
       const element = createElementWithAttributes(doc, 'amp-brightcove', {
         width: '111',
         height: '222',
@@ -50,12 +50,6 @@ describes.realWin(
       });
 
       doc.body.appendChild(element);
-
-      await element.build();
-
-      if (opt_beforeLayoutCallback) {
-        opt_beforeLayoutCallback(element);
-      }
 
       await whenUpgradedToCustomElement(element);
 
@@ -300,6 +294,7 @@ describes.realWin(
       env.sandbox
         .stub(consent, 'getConsentPolicySharedData')
         .resolves({a: 1, b: 2});
+      env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('abc');
 
       getBrightcove({
         'data-account': '1290862519001',
@@ -316,6 +311,7 @@ describes.realWin(
             JSON.stringify({a: 1, b: 2})
           )}`
         );
+        expect(iframe.src).to.contain('ampInitialConsentValue=abc');
       });
     });
   }
