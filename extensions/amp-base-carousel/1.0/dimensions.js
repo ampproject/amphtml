@@ -178,8 +178,8 @@ export function findOverlappingIndex(
 
 /**
  * Gets the current scroll position for an element along a given axis.
- * @param {!Axis} axis The axis to set the scroll position for.
- * @param {!Element} el The Element to set the scroll position for.
+ * @param {!Axis} axis The axis to get the scroll position for.
+ * @param {!Element} el The Element to get the scroll position for.
  * @return {number} The scroll position.
  */
 export function getScrollPosition(axis, el) {
@@ -188,6 +188,20 @@ export function getScrollPosition(axis, el) {
   }
 
   return el./*OK*/ scrollTop;
+}
+
+/**
+ * Gets the scroll capacity for an element along a given axis.
+ * @param {!Axis} axis The axis to get the scroll capacity for.
+ * @param {!Element} el The Element to get the scroll capacity for.
+ * @return {number} The scroll capacity.
+ */
+export function getScrollEnd(axis, el) {
+  if (axis == Axis.X) {
+    return el./*OK*/ scrollWidth;
+  }
+
+  return el./*OK*/ scrollHeight;
 }
 
 /**
@@ -239,8 +253,11 @@ export function scrollContainerToElement(
     ? getStart(axis, container)
     : getCenter(axis, container);
   const delta = Math.round(snapOffset - scrollOffset - offset * length);
-  const oldPosition = getScrollPosition(axis, container);
   updateScrollPosition(axis, container, delta);
-  const newPosition = getScrollPosition(axis, container);
-  return oldPosition !== newPosition;
+
+  const {length: containerLength} = getDimension(axis, container);
+  const canScroll =
+    containerLength + getScrollPosition(axis, container) <
+    getScrollEnd(axis, container);
+  return !!delta && canScroll;
 }

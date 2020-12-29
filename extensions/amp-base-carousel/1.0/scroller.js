@@ -95,6 +95,7 @@ function ScrollerWithRef(
       // Smooth scrolling is preferred to `setRestingIndex` whenever possible.
       // Note: `setRestingIndex` will still be called on debounce by scroll handler.
       currentIndex.current = mod(currentIndex.current + by, children.length);
+      scrollOffset.current = 0;
       const didScroll = scrollContainerToElement(
         axis,
         alignment,
@@ -114,6 +115,7 @@ function ScrollerWithRef(
       advance,
       next: () => advance(advanceCount),
       prev: () => advance(-advanceCount),
+      node: containerRef.current,
     }),
     [advance, advanceCount]
   );
