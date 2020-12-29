@@ -19,7 +19,7 @@ import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
-const INSET_ARROW_VISIBILITY = ['auto', 'always', 'never'];
+const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'amp-stream-gallery-1_0',
@@ -35,10 +35,7 @@ export default {
 export const Default = () => {
   const slideCount = number('slide count', 15, {min: 3, max: 99});
   const extraSpace = boolean('extra space around?', true);
-  const insetArrowVisibility = select(
-    'inset arrow visibility',
-    INSET_ARROW_VISIBILITY
-  );
+  const controls = select('controls', CONTROLS);
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
   const slideAlign = select('slide align', ['start', 'center']);
@@ -56,8 +53,8 @@ export const Default = () => {
         width="735"
         height="225"
         layout="responsive"
+        controls={controls}
         extra-space={extraSpace}
-        inset-arrow-visibility={insetArrowVisibility}
         loop={loop}
         min-item-width={minItemWidth}
         max-item-width={maxItemWidth}
