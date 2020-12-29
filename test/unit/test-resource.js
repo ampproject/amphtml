@@ -245,10 +245,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
       resource.measure();
     }).to.not.throw();
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 100, 300, 100));
-    // pageLayoutBox == layoutBox
-    expect(resource.getPageLayoutBox()).to.eql(
-      layoutRectLtwh(0, 100, 300, 100)
-    );
   });
 
   it('should allow measure even when not built', () => {
@@ -431,9 +427,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
-    // layoutBox != pageLayoutBox
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
-    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
   it('should calculate fixed for fixed-style parent', () => {
@@ -460,9 +454,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
-    // layoutBox != pageLayoutBox
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
-    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
   describe('ensureMeasured', () => {

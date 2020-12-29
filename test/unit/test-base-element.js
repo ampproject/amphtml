@@ -179,15 +179,9 @@ describes.realWin('BaseElement', {amp: true}, (env) => {
       .withArgs(customElement)
       .returns(resource);
     const layoutBox = layoutRectLtwh(0, 50, 100, 200);
-    const pageLayoutBox = layoutRectLtwh(0, 0, 100, 200);
     env.sandbox.stub(resource, 'getLayoutBox').callsFake(() => layoutBox);
-    env.sandbox
-      .stub(resource, 'getPageLayoutBox')
-      .callsFake(() => pageLayoutBox);
     expect(element.getLayoutBox()).to.eql(layoutBox);
     expect(customElement.getLayoutBox()).to.eql(layoutBox);
-    expect(element.getPageLayoutBox()).to.eql(pageLayoutBox);
-    expect(customElement.getPageLayoutBox()).to.eql(pageLayoutBox);
   });
 
   it('should return true for inabox experiment renderOutsideViewport', () => {
