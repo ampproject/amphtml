@@ -27,7 +27,7 @@ amp-story-dev-tools-tab-logs {
   margin-bottom: 10px !important;
 }
 
-.i-amphtml-story-dev-tools-log-status-icon {
+.i-amphtml-story-dev-tools-log-status-title .i-amphtml-story-dev-tools-log-status-icon {
   margin-inline-end: 10px !important;
 }
 
@@ -79,4 +79,39 @@ amp-story-dev-tools-tab-logs {
 
 .i-amphtml-story-dev-tools-log-code-line:nth-child(2) {
   color: var(--i-amphtml-story-dev-tools-error-color) !important;
+}
+
+.i-amphtml-story-dev-tools-log-status-icon {
+  width: 20px !important;
+  height: 20px !important;
+  background-size: contain !important;
+  display: inherit !important;
+}
+
+.i-amphtml-story-dev-tools-log-status-icon-passed {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L4 11L5.4 9.6L8 12.2L14.6 5.6L16 7L8 15Z" fill="#2DE561"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-log-status-icon-failed {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path xmlns="http://www.w3.org/2000/svg" d="M9.99 0C4.47 0 0 4.48 0 10C0 15.52 4.47 20 9.99 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 9.99 0ZM11 10C11 10.55 10.55 11 10 11C9.45 11 9 10.55 9 10V6C9 5.45 9.45 5 10 5C10.55 5 11 5.45 11 6V10ZM11 14C11 14.55 10.55 15 10 15C9.45 15 9 14.55 9 14C9 13.45 9.45 13 10 13C10.55 13 11 13.45 11 14Z" fill="#FF5252"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector .i-amphtml-story-dev-tools-log-status-icon {
+  width: 16px !important;
+  height: 16px !important;
+  margin-inline-start: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector .i-amphtml-story-dev-tools-log-status-number-failed {
+  font-size: 10px !important;
+  background: var(--i-amphtml-story-dev-tools-error-color) !important;
+  color: black !important;
+  border-radius: 10px !important;
+  height: 16px !important;
+  width: 16px !important;
+  display: inherit !important;
+  margin-inline-start: 5px !important;
+  font-weight: bold !important;
+  display: initial !important;
+  padding: 1px !important;
 }
