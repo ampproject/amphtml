@@ -37,11 +37,11 @@ const SCALING_FACTOR_PRESET_ATTRIBUTE = 'scaling-factor';
 const SCALING_FACTOR_CSS_VAR = '--i-amphtml-story-layer-scale';
 
 const LAYER_PRESETS = {
-  'preset-2021-background': {
+  '2021-background': {
     [ASPECT_RATIO_PRESET_ATTRIBUTE]: '69:116',
     [SCALING_FACTOR_PRESET_ATTRIBUTE]: '1.142',
   },
-  'preset-2021-foreground': {
+  '2021-foreground': {
     [ASPECT_RATIO_PRESET_ATTRIBUTE]: '69:116',
   },
 };

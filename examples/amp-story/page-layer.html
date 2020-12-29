@@ -25,13 +25,14 @@
         align-items: center;
         justify-content: flex-end;
         text-align: center;
-        padding-bottom: calc(var(--i-amphtml-story-layer-height, 100%) * 0.1);
+        padding-bottom: 10vh;
       }
       .bordered {
         border: 5px solid #ffaa0011;
       }
-      .lower-title span {
+      .lower-title span, .lower-title a {
         font-size: 0.2em;
+        color: white;
       }
       .lower-title h1 {
         line-height: 1em;
@@ -39,18 +40,15 @@
         margin-bottom: 0.2em;
         font-size: 1em;
       }
-
       [blurred] {
         opacity: 0.5;
       }
-
       .top-logo {
         width: 1em;
         height: 1em;
         top: 0.4em;
         left: 0.3em;
       }
-
       .logo-desc {
         font-size: 0.3em;
         line-height: 1em;
@@ -61,7 +59,6 @@
         opacity: 0.4;
         width: 50%;
       }
-
       .small span {
         font-size: 0.3em;
         color: white;
@@ -77,7 +74,8 @@
             layout="responsive" width="69" height="116">
           </amp-img>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" class="lower-title">
+        <amp-story-page-layer preset="2021-foreground" class="lower-title">
+          <a href="#development=1&devices=iphone11native;pixel2;ipad" style="position: absolute; top: 20%;" data-tooltip-text="Open Dev Tools">Test this story with #development=1</a>
           <span>This is a</span>
           <h1>full-page</h1>
           <span>story</span>
@@ -89,12 +87,12 @@
             layout="responsive" width="69" height="116">
           </amp-img>
         </amp-story-page-layer>
-        <amp-story-page-layer template="fill" preset="preset-2021-background">
+        <amp-story-page-layer template="fill" preset="2021-background">
           <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
             layout="responsive" width="69" height="116">
           </amp-img>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" class="lower-title">
+        <amp-story-page-layer preset="2021-foreground" class="lower-title">
           <span>This is a</span>
           <h1>full-page</h1>
           <span>story with consistent background</span>
@@ -102,17 +100,17 @@
       </amp-story-page>
 
       <amp-story-page id="logo-top">
-        <amp-story-page-layer template="fill" preset="preset-2021-background">
+        <amp-story-page-layer template="fill" preset="2021-background">
           <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
             layout="responsive" width="69" height="116">
           </amp-img>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="top left">
+        <amp-story-page-layer preset="2021-foreground" anchor="top left">
           <amp-img layout="container" src="img/AMP-Brand-White-Icon.svg" class="top-logo" width="1" height="1">
           </amp-img>
           <span class="logo-desc">This icon is anchored to the top left</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" class="lower-title">
+        <amp-story-page-layer preset="2021-foreground" class="lower-title">
           <span>This is a</span>
           <h1>full-page</h1>
           <span>story with background and icon</span>
@@ -120,37 +118,37 @@
       </amp-story-page>
 
       <amp-story-page id="anchors">
-        <amp-story-page-layer template="fill" preset="preset-2021-background">
+        <amp-story-page-layer template="fill" preset="2021-background">
           <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
             layout="responsive" width="69" height="116">
           </amp-img>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="right" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" anchor="right" class="bordered small">
           <span style="position: absolute; right: 0; top: 45%">Right</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="left" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" anchor="left" class="bordered small">
           <span style="position: absolute; left: 0; top: 45%">Left</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="top" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" anchor="top" class="bordered small">
           <span style="position: absolute; left: 40%; top: 0">Top</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="bottom" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" anchor="bottom" class="bordered small">
           <span style="position: absolute; left: 40%; bottom: 0">Bottom</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" class="bordered small">
           <span style="position: absolute; left: 40%; top: 45%">Center</span>
-          <span style="position: absolute; left: 0; top: 65%; right:0; text-align: center">(test with #development=1)</span>
+          <span style="position: absolute; left: 0; top: 70%; right:0; text-align: center">(test with #development=1!)</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="top right" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" anchor="top right" class="bordered small">
           <span style="position: absolute; right: 0; top: 0">Top Right</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="top left" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" anchor="top left" class="bordered small">
           <span style="position: absolute; left: 0; top: 0">Top Left</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="bottom right" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" anchor="bottom right" class="bordered small">
           <span style="position: absolute; right: 0; bottom: 0">Bottom Right</span>
         </amp-story-page-layer>
-        <amp-story-page-layer preset="preset-2021-foreground" anchor="bottom left" class="bordered small">
+        <amp-story-page-layer preset="2021-foreground" anchor="bottom left" class="bordered small">
           <span style="position: absolute; left: 0; bottom: 0">Bottom Left</span>
         </amp-story-page-layer>
       </amp-story-page>
