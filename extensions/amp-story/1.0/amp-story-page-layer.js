@@ -29,19 +29,20 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {matches} from '../../../src/dom';
-import {px, setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
+
+const ASPECT_RATIO_PRESET_ATTRIBUTE = 'aspect-ratio';
+const SCALING_FACTOR_PRESET_ATTRIBUTE = 'scaling-factor';
+const SCALING_FACTOR_CSS_VAR = '--i-amphtml-story-layer-scale';
 
 const LAYER_PRESETS = {
   'preset-2021-background': {
-    'aspect-ratio': '69:116',
-    'scaling-factor': '1.142',
+    [ASPECT_RATIO_PRESET_ATTRIBUTE]: '69:116',
+    [SCALING_FACTOR_PRESET_ATTRIBUTE]: '1.142',
   },
   'preset-2021-foreground': {
-    'aspect-ratio': '69:116',
-    'scaling-factor': '1.142',
+    [ASPECT_RATIO_PRESET_ATTRIBUTE]: '69:116',
   },
 };
 
@@ -80,5 +81,12 @@ export class AmpStoryPageLayer extends AmpStoryBaseLayer {
     Object.entries(presetDetails).forEach((keyValue) =>
       this.element.setAttribute(keyValue[0], keyValue[1])
     );
+    if (this.element.hasAttribute(SCALING_FACTOR_PRESET_ATTRIBUTE)) {
+      setStyle(
+        this.element,
+        SCALING_FACTOR_CSS_VAR,
+        this.element.getAttribute(SCALING_FACTOR_PRESET_ATTRIBUTE)
+      );
+    }
   }
 }

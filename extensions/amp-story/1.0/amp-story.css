@@ -379,6 +379,29 @@ amp-story-page-layer {
   pointer-events: none !important;
 }
 
+amp-story-page-layer[aspect-ratio] {
+  margin-left: calc((var(--story-page-vw, 100%) * 100 - var(--i-amphtml-story-layer-width, 100%) * var(--i-amphtml-story-layer-scale, 1)) * 0.5);
+  width: calc(var(--i-amphtml-story-layer-width, 100%) * var(--i-amphtml-story-layer-scale, 1)) !important;
+  height: calc(var(--i-amphtml-story-layer-height, 100%) * var(--i-amphtml-story-layer-scale, 1)) !important;
+}
+
+amp-story-page-layer[anchor*="left"] {
+  margin-left: 0 !important;
+}
+
+amp-story-page-layer[anchor*="top"] {
+  margin-top: 0 !important;
+}
+
+amp-story-page-layer[anchor*="bottom"] {
+  margin-bottom: 0 !important;
+}
+
+amp-story-page-layer[anchor*="right"] {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+
 /**
  * Click shield to make sure click events are never swallowed by videos on
  * Safari iOS 11.2, which would prevent the user from navigating through the

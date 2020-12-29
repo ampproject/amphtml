@@ -16,7 +16,7 @@
         font-family: 'Poppins', sans-serif;
       }
       amp-story-page {
-        background: black;
+        background: linear-gradient(140deg, #002926, #2d1807 90%);
       }
       .lower-title {
         color: white;
@@ -26,7 +26,9 @@
         justify-content: flex-end;
         text-align: center;
         padding-bottom: calc(var(--i-amphtml-story-layer-height, 100%) * 0.1);
-        border: 5px solid #ffaa0077;
+      }
+      .bordered {
+        border: 5px solid #ffaa0011;
       }
       .lower-title span {
         font-size: 0.2em;
@@ -38,21 +40,37 @@
         font-size: 1em;
       }
 
-      amp-story-page-layer[preset="preset-2021-background"] {
-        --i-amphtml-story-layer-scale: 1.142;
-        margin-left: calc((var(--story-page-vw, 100%) * 100 - var(--i-amphtml-story-layer-width, 100%) * var(--i-amphtml-story-layer-scale)) * 0.5);
-        width: calc(var(--i-amphtml-story-layer-width, 100%) * var(--i-amphtml-story-layer-scale)) !important;
-        height: calc(var(--i-amphtml-story-layer-height, 100%) * var(--i-amphtml-story-layer-scale)) !important;
+      [blurred] {
+        opacity: 0.5;
       }
 
-      [preset="preset-2021-blurred"] {
-        opacity: 0.5;
+      .top-logo {
+        width: 1em;
+        height: 1em;
+        top: 0.4em;
+        left: 0.3em;
+      }
+
+      .logo-desc {
+        font-size: 0.3em;
+        line-height: 1em;
+        color: white;
+        position: absolute;
+        left: 5em;
+        top: 1.7em;
+        opacity: 0.4;
+        width: 50%;
+      }
+
+      .small span {
+        font-size: 0.3em;
+        color: white;
       }
     </style>
   </head>
 
   <body>
-    <amp-story standalone>
+    <amp-story standalone title="Page layer showcase">
       <amp-story-page id="cover">
         <amp-story-page-layer template="fill">
           <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
@@ -66,11 +84,11 @@
         </amp-story-page-layer>
       </amp-story-page>
       <amp-story-page id="cover-2">
-        <amp-story-grid-layer template="fill" preset="preset-2021-blurred">
-          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=100&q=100"
+        <amp-story-page-layer template="fill" blurred>
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=300&blur=30&q=50"
             layout="responsive" width="69" height="116">
           </amp-img>
-        </amp-story-grid-layer>
+        </amp-story-page-layer>
         <amp-story-page-layer template="fill" preset="preset-2021-background">
           <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
             layout="responsive" width="69" height="116">
@@ -80,6 +98,60 @@
           <span>This is a</span>
           <h1>full-page</h1>
           <span>story with consistent background</span>
+        </amp-story-page-layer>
+      </amp-story-page>
+
+      <amp-story-page id="logo-top">
+        <amp-story-page-layer template="fill" preset="preset-2021-background">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="top left">
+          <amp-img layout="container" src="img/AMP-Brand-White-Icon.svg" class="top-logo" width="1" height="1">
+          </amp-img>
+          <span class="logo-desc">This icon is anchored to the top left</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" class="lower-title">
+          <span>This is a</span>
+          <h1>full-page</h1>
+          <span>story with background and icon</span>
+        </amp-story-page-layer>
+      </amp-story-page>
+
+      <amp-story-page id="anchors">
+        <amp-story-page-layer template="fill" preset="preset-2021-background">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="right" class="bordered small">
+          <span style="position: absolute; right: 0; top: 45%">Right</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="left" class="bordered small">
+          <span style="position: absolute; left: 0; top: 45%">Left</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="top" class="bordered small">
+          <span style="position: absolute; left: 40%; top: 0">Top</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="bottom" class="bordered small">
+          <span style="position: absolute; left: 40%; bottom: 0">Bottom</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" class="bordered small">
+          <span style="position: absolute; left: 40%; top: 45%">Center</span>
+          <span style="position: absolute; left: 0; top: 65%; right:0; text-align: center">(test with #development=1)</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="top right" class="bordered small">
+          <span style="position: absolute; right: 0; top: 0">Top Right</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="top left" class="bordered small">
+          <span style="position: absolute; left: 0; top: 0">Top Left</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="bottom right" class="bordered small">
+          <span style="position: absolute; right: 0; bottom: 0">Bottom Right</span>
+        </amp-story-page-layer>
+        <amp-story-page-layer preset="preset-2021-foreground" anchor="bottom left" class="bordered small">
+          <span style="position: absolute; left: 0; bottom: 0">Bottom Left</span>
         </amp-story-page-layer>
       </amp-story-page>
     </amp-story>
