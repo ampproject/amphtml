@@ -675,15 +675,6 @@ export class Resource {
   }
 
   /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
-   */
-  getPageLayoutBox() {
-    return this.layoutBox_;
-  }
-
-  /**
    * Returns the first measured layout box.
    * @return {!../layout-rect.LayoutRectDef}
    */
