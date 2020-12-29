@@ -15,7 +15,6 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {useLayoutEffect, useState} from '../../../src/preact';
 import {useStyles} from './base-carousel.jss';
 
 /**
@@ -34,7 +33,7 @@ export function Arrow({
     'disabled': customDisabled,
     'onClick': onCustomClick,
   } = customArrow.props;
-  const [disabled, setDisabled] = useState(customDisabled);
+  const disabled = checkDisabled() || customDisabled;
   const onClick = (e) => {
     if (disabled) {
       return;
@@ -50,12 +49,6 @@ export function Arrow({
   } ${disabled ? classes.arrowDisabled : ''} ${
     outsetArrows ? classes.outsetArrow : classes.insetArrow
   } ${rtl ? classes.rtl : classes.ltr}`;
-
-  useLayoutEffect(() => {
-    // Because scroll position is updated in a useLayoutEffect,
-    // disabled state must be as well to get accurate measurements.
-    setDisabled(checkDisabled());
-  }, [checkDisabled, setDisabled]);
 
   return (
     <div class={classNames}>
