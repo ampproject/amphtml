@@ -322,7 +322,7 @@ function BaseCarouselWithRef(
         advanceCount={advanceCount}
         alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
-        axis={orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y}
+        axis={axis}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}
