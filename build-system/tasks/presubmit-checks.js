@@ -1192,6 +1192,24 @@ const forbiddenTermsSrcInclusive = {
       'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.getLayoutBox': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/base-element.js',
+      'src/custom-element.js',
+      'src/friendly-iframe-embed.js',
+      'src/service/mutator-impl.js',
+      'src/service/resource.js',
+      'src/service/resources-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js',
+      'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+      'extensions/amp-story/1.0/page-advancement.js',
+    ],
+  },
   '\\.getIntersectionElementLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
