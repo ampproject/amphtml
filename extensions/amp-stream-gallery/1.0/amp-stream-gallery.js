@@ -107,12 +107,8 @@ AmpStreamGallery['children'] = {
 
 /** @override */
 AmpStreamGallery['props'] = {
+  'controls': {attr: 'controls', type: 'string', media: true},
   'extraSpace': {attr: 'extra-space', type: 'string', media: true},
-  'insetArrowVisibility': {
-    attr: 'inset-arrow-visibility',
-    type: 'string',
-    media: true,
-  },
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'minItemWidth': {attr: 'min-item-width', type: 'number', media: true},
   'maxItemWidth': {attr: 'max-item-width', type: 'number', media: true},
