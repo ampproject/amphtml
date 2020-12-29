@@ -15,14 +15,17 @@
  */
 
 /** @enum {number} */
-const IframePosition = {
+export const IframePosition = {
   PREVIOUS: -1,
   CURRENT: 0,
   NEXT: 1,
 };
 
 /** @const {number} */
-const MAX_IFRAMES = 2;
+export const MAX_IFRAMES = 3;
+
+/** @const {number} */
+const MAX_IFRAMES_TO_LOAD = 2;
 
 /**
  * Manages the iframes used to host the stories inside the player. It keeps
@@ -87,57 +90,142 @@ export class IframePool {
   }
 
   /**
-   * Finds adjacent iframes given an story, starting in N and going to N+1.
-   * Following a DFS order.
+   * Finds adjacent iframes given an story, starting in N, N+1, N-1, N+2, N-2...
    *
-   * It will only allow up to MAX_IFRAMES to be loaded. Those that can be loaded
-   * will have the `shouldLoad` property as `true`. The rest should only be
-   * positioned.
+   * It will only allow up to MAX_IFRAMES_TO_LOAD to be loaded.
+   * Those that can be loaded will have the `shouldLoad` property as `true`.
+   * The rest should only be positioned.
    *
    * Examples of traversal:
-   * idx
-   * 1 -> [2] [0] [1] [] []
-   * 0 -> [0] [1] [2] [] []
-   * 4 -> [] [] [2] [1] [0]
-   * 0 -> [0] [1]
-   * 1 -> [1] [0]
+   *
+   * x = storyIdx
+   *
+   * 1 -> [2] [x] [1] [] []
+   * 0 -> [x] [1] [2] [] []
+   * 4 -> [] [] [2] [1] [x]
+   * 0 -> [x] [1]
+   * 1 -> [1] [x]
+   *
+   * Flow chart:
+   *
+   *                       +------------------------+
+   *     +---------------> | Visit iframe in cursor +<-----------------+
+   *     |                 +------------------------+                  |
+   *     |                            |                                |
+   *     |                            v                                |
+   *     |                 +-------------------------+        +--------------------+
+   *     |                 |                         |    N   |                    |
+   *     |                 | cursor inside of bounds?|        |move cursor to other|
+   *     |                 |                         +------->+      extreme       |
+   *     |                 +-------------------------+        +--------------------+
+   *     |                            |
+   *     |                            |  Y
+   *     |                            |
+   *     |                            v
+   *     |              +--------------------------------+
+   *     |              |                                |
+   *     |              | should this iframe load a src? |
+   *     |              |   (iframesToLoad > 0 ?)        +--------+
+   *     |              |                                |        |
+   *     |              +--------------------------------+        |
+   *     |                            |                           |
+   *     |                            |  Y                        |
+   *     |                            |                           |
+   *     |                            v                           |
+   *     |               +-------------------------------         |
+   *     |               |                             |          |
+   *     |               | mark iframe to load its src |        N |
+   *     |               |                             |          |
+   *     |               +-----------------------------+          |
+   *     |                            |                           |
+   *     |                            |   Y                       |
+   *     |                            v                           |
+   *     |                +---------------------------+           |
+   *     |                |                           |           |
+   *     |                |   mark its positioning    |           |
+   *     |                | (previous / current next) | <---------+
+   *     |                |                           |
+   *     |                +---------------------------+
+   *     |                            v
+   *     |            +--------------------------------------+     Y      +-------------------------+
+   *     |            |   finished finding adjacent iframes? +------------> exit and return adjacent|
+   *     |            +--------------------------------------+            |       array             |
+   *     |                            |                                   +-------------------------+
+   *     |                            |  N
+   *     |                            v
+   *     |                +---------------------------+
+   *     |                |                           |
+   *     |                | is cursor to the left of  |
+   *     |        Y       | storyIdx or IS storyIdx?  |       N
+   *     |          +-----+                           +------+
+   *     |          |     +---------------------------+      |
+   *     |          |                                        |
+   *     |          v                                        v
+   *     |  +---------------------------+    +----------------------+
+   *     |  |                           |    |                      |
+   *     |  |  move cursor to the right |    |  move cursor to the  |
+   *     |  |      of storyIdx          |    |  left of storyIdx    |
+   *     |  |                           |    |                      |
+   *     |  +---------------------------+    +----------------------+
+   *     |          |                                        |
+   *     |          |                                        |
+   *     |          +----------------------------------------+
+   *     |                               |
+   *     +-------------------------------+
+   *
    * @param {number} storyIdx
    * @param {number} maxIdx
    * @return {!Array<!Object>}
    */
-  findAdjacentDFS(storyIdx, maxIdx) {
+  findAdjacent(storyIdx, maxIdx) {
+    const iframesToPosition = Math.min(MAX_IFRAMES, maxIdx + 1);
+    let iframesToLoad = MAX_IFRAMES_TO_LOAD;
+
+    if (maxIdx < storyIdx) {
+      throw new Error('maxIdx must be greater than or equal than storyIdx.');
+    }
+
+    let cursor = storyIdx;
+    let distance = 0;
     const adjacent = [];
-    let iframesToLoad = MAX_IFRAMES;
+    while (adjacent.length < iframesToPosition) {
+      if (cursor > maxIdx) {
+        // No more stories to the right, move to the left.
+        cursor = storyIdx - distance;
+        continue;
+      }
 
-    const neighborsQueue = [storyIdx, storyIdx + 1, storyIdx - 1];
-    while (adjacent.length < this.iframePool_.length) {
-      const cursorIdx = neighborsQueue.shift();
-
-      if (cursorIdx > maxIdx || cursorIdx < 0) {
+      if (cursor < 0) {
+        // No more stories to the left, move to the right.
+        cursor = storyIdx + distance;
         continue;
       }
 
       adjacent.push({
-        storyIdx: cursorIdx,
+        storyIdx: cursor,
         shouldLoad: iframesToLoad > 0,
         position:
-          cursorIdx === storyIdx
+          cursor === storyIdx
             ? IframePosition.CURRENT
-            : cursorIdx > storyIdx
+            : cursor > storyIdx
             ? IframePosition.NEXT
             : IframePosition.PREVIOUS,
       });
       --iframesToLoad;
 
-      if (cursorIdx > storyIdx && cursorIdx + 1 <= maxIdx) {
-        // Add neighbors to the right of the story to the queue.
-        neighborsQueue.push(cursorIdx + 1);
+      if (cursor > storyIdx) {
+        // Cursor is currently at the right of storyIdx.
+        // Move to the left of storyIdx and increase distance.
+        cursor = storyIdx - distance;
+        distance++;
         continue;
       }
 
-      if (cursorIdx < storyIdx && cursorIdx - 1 >= 0) {
-        // Add neighbors to the left of the story to the queue.
-        neighborsQueue.push(cursorIdx - 1);
+      if (cursor <= storyIdx) {
+        // Cursor is currently at the left of (or is) storyIdx.
+        // Move to the right of storyIdx and increase distance.
+        cursor = cursor === storyIdx ? cursor + 1 : storyIdx + distance;
+        distance++;
         continue;
       }
     }

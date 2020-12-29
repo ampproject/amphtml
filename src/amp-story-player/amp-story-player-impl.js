@@ -17,7 +17,11 @@
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {Deferred} from '../utils/promise';
-import {IframePool} from './amp-story-player-iframe-pool';
+import {
+  IframePool,
+  IframePosition,
+  MAX_IFRAMES,
+} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from './page-scroller';
 import {VisibilityState} from '../visibility-state';
@@ -51,13 +55,6 @@ const LoadStateClass = {
   ERROR: 'i-amphtml-story-player-error',
 };
 
-/** @enum {number} */
-const IframePosition = {
-  PREVIOUS: -1,
-  CURRENT: 0,
-  NEXT: 1,
-};
-
 /** @const @type {!Array<string>} */
 const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
 
@@ -79,9 +76,6 @@ const TOGGLE_THRESHOLD_PX = 50;
  * @const {number}
  */
 const FETCH_STORIES_THRESHOLD = 2;
-
-/** @const {number} */
-const MAX_IFRAMES = 3;
 
 /** @enum {string} */
 const DEPRECATED_BUTTON_TYPES = {
@@ -840,7 +834,7 @@ export class AmpStoryPlayer {
     }
 
     if (storyIdx !== this.currentIdx_) {
-      const loadingQueue = this.iframePool_.findAdjacentDFS(
+      const loadingQueue = this.iframePool_.findAdjacent(
         storyIdx,
         this.stories_.length - 1
       );
