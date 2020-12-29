@@ -44,7 +44,6 @@ function StreamGalleryWithRef(props, ref) {
     children,
     className,
     extraSpace,
-    insetArrowVisibility,
     maxItemWidth = Number.MAX_VALUE,
     minItemWidth = 1,
     maxVisibleCount = Number.MAX_VALUE,
@@ -133,7 +132,6 @@ function StreamGalleryWithRef(props, ref) {
       className={`${className ?? ''} ${classes.gallery} ${
         extraSpace === 'around' ? classes.extraSpace : ''
       }`}
-      controls={insetArrowVisibility}
       outsetArrows={outsetArrows}
       snapAlign={slideAlign}
       ref={carouselRef}
