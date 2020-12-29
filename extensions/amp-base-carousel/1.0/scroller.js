@@ -151,7 +151,7 @@ function ScrollerWithRef(
   const currentIndex = useRef(restingIndex);
 
   const scrollToActiveSlide = useCallback(() => {
-    if (!containerRef.current) {
+    if (!containerRef.current || !containerRef.current.children) {
       return;
     }
     const container = containerRef.current;
@@ -363,6 +363,7 @@ function renderSlides(
             ? classes.enableSnap
             : classes.disableSnap
         } ${_thumbnails ? classes.thumbnails : ''} `}
+        part="slide"
         style={{
           flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
         }}
