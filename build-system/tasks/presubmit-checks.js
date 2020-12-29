@@ -922,7 +922,7 @@ const bannedTermsHelpString =
   'if you are unsure and so that it stands out in code reviews.';
 
 const measurementApiDeprecated =
-  'getLayoutWidth/Box APIs are being deprecated. Please contact the' +
+  'getLayoutSize/Box APIs are being deprecated. Please contact the' +
   ' @ampproject/wg-performance for questions.';
 
 const forbiddenTermsSrcInclusive = {
@@ -1192,14 +1192,6 @@ const forbiddenTermsSrcInclusive = {
       'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
-  '\\.getLayoutWidth': {
-    message: measurementApiDeprecated,
-    allowlist: [
-      'builtins/amp-img.js',
-      'src/service/resources-impl.js',
-      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
-    ],
-  },
   '\\.getIntersectionElementLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
