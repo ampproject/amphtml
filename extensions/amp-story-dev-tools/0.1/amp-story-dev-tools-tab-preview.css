@@ -81,7 +81,7 @@ amp-story-player a {
   margin: 0 5px !important;
   white-space: nowrap !important;
   cursor: pointer !important;
-  outline: none;
+  outline: none !important;
 }
 
 .i-amphtml-story-dev-tools-device-chip:hover, .i-amphtml-story-dev-tools-device-chip:focus {
@@ -102,6 +102,12 @@ amp-story-player a {
   --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-gray-1) !important;
   --i-amphtml-story-dev-tools-device-chip-icon-background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-device-chip-icon-background) !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip[disabled] {
+  cursor: initial !important;
+  --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-device-chip-background) !important;
+  opacity: 0.5 !important;
 }
 
 .i-amphtml-story-dev-tools-device-chip[inactive] svg {
