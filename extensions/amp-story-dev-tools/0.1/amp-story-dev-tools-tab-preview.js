@@ -726,7 +726,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   }
 
   /**
-   * Return the number of spaces currently used by the devices on the screen.
+   * Return the number of spaces currently being used by the devices on the screen.
    * @private
    * @return {number}
    */
