@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {useLayoutEffect, useState} from '../../../src/preact';
 import {useStyles} from './base-carousel.jss';
 
 /**
@@ -25,7 +26,7 @@ export function Arrow({
   advance,
   by,
   customArrow = <DefaultArrow by={by} />,
-  disabled,
+  checkDisabled,
   outsetArrows,
   rtl,
 }) {
@@ -33,9 +34,9 @@ export function Arrow({
     'disabled': customDisabled,
     'onClick': onCustomClick,
   } = customArrow.props;
-  const isDisabled = disabled || customDisabled;
+  const [disabled, setDisabled] = useState(customDisabled);
   const onClick = (e) => {
-    if (isDisabled) {
+    if (disabled) {
       return;
     }
     if (onCustomClick) {
@@ -46,16 +47,22 @@ export function Arrow({
   const classes = useStyles();
   const classNames = `${classes.arrow} ${
     by < 0 ? classes.arrowPrev : classes.arrowNext
-  } ${isDisabled ? classes.arrowDisabled : ''} ${
+  } ${disabled ? classes.arrowDisabled : ''} ${
     outsetArrows ? classes.outsetArrow : classes.insetArrow
   } ${rtl ? classes.rtl : classes.ltr}`;
+
+  useLayoutEffect(() => {
+    // Because scroll position is updated in a useLayoutEffect,
+    // disabled state must be as well to get accurate measurements.
+    setDisabled(checkDisabled());
+  }, [checkDisabled, setDisabled]);
 
   return (
     <div class={classNames}>
       {Preact.cloneElement(customArrow, {
         'onClick': onClick,
-        'disabled': isDisabled,
-        'aria-disabled': isDisabled,
+        'disabled': disabled,
+        'aria-disabled': String(disabled),
       })}
     </div>
   );

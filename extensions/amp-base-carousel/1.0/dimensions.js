@@ -257,7 +257,7 @@ export function scrollContainerToElement(
 
   const {length: containerLength} = getDimension(axis, container);
   const canScroll =
-    containerLength + getScrollPosition(axis, container) <
+    containerLength + getScrollPosition(axis, container) + delta <
     getScrollEnd(axis, container);
   return !!delta && canScroll;
 }

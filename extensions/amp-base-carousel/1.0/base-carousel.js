@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {Alignment, Axis, Orientation} from './dimensions';
+import {
+  Alignment,
+  Axis,
+  Orientation,
+  getDimension,
+  getScrollEnd,
+  getScrollPosition,
+} from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
@@ -115,6 +122,7 @@ function BaseCarouselWithRef(
     ? setCurrentSlideState
     : setGlobalCurrentSlide;
   const currentSlideRef = useRef(currentSlide);
+  const axis = orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y;
 
   useLayoutEffect(() => {
     // noop if !_thumbnails || !carouselContext.
@@ -225,6 +233,23 @@ function BaseCarouselWithRef(
       // Can no longer advance forwards.
       return true;
     }
+    if (mixedLength && dir > 0) {
+      // Measure container to see if we have reached the end.
+      if (!scrollRef.current) {
+        return false;
+      }
+      const container = scrollRef.current.node;
+      if (!container || !container.children) {
+        return false;
+      }
+      const scrollEnd = getScrollEnd(axis, container);
+      const scrollStart = getScrollPosition(axis, container);
+      const {length} = getDimension(axis, container);
+      if (length !== scrollEnd && length + scrollStart >= scrollEnd) {
+        // Can no longer scroll forwards.
+        return true;
+      }
+    }
     return false;
   };
 
@@ -287,8 +312,8 @@ function BaseCarouselWithRef(
         <Arrow
           advance={prev}
           by={-advanceCount}
+          checkDisabled={() => disableForDir(-1)}
           customArrow={arrowPrev}
-          disabled={disableForDir(-1)}
           outsetArrows={outsetArrows}
           rtl={rtl}
         />
@@ -338,8 +363,8 @@ function BaseCarouselWithRef(
         <Arrow
           advance={next}
           by={advanceCount}
+          checkDisabled={() => disableForDir(1)}
           customArrow={arrowNext}
-          disabled={disableForDir(1)}
           outsetArrows={outsetArrows}
           rtl={rtl}
         />
