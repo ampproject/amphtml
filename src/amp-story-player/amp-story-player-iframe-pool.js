@@ -138,14 +138,15 @@ export class IframePool {
    *     |               |                             |          |
    *     |               +-----------------------------+          |
    *     |                            |                           |
-   *     |                            |   Y                       |
+   *     |                            |                           |
    *     |                            v                           |
    *     |                +---------------------------+           |
    *     |                |                           |           |
    *     |                |   mark its positioning    |           |
-   *     |                | (previous / current next) | <---------+
+   *     |                |(previous / current / next)| <---------+
    *     |                |                           |
    *     |                +---------------------------+
+   *     |                            |
    *     |                            v
    *     |            +--------------------------------------+     Y      +-------------------------+
    *     |            |   finished finding adjacent iframes? +------------> exit and return adjacent|
