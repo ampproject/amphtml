@@ -196,7 +196,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
   }
 
   /**
-   * Updates the icon (passed / failed) next to the logs tab selector
+   * Updates the icon (passed / failed) next to the logs tab selector.
    * @param {!Array} errorList
    */
   updateLogsTabIcon(errorList) {
