@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {loadScript} from '../../../src/validator-integration';
 import {urls} from '../../../src/config';
@@ -40,22 +41,14 @@ export function createTabLogsElement(win, storyUrl) {
  */
 function buildStatusIcon(element, statusPassed) {
   const html = htmlFor(element);
-  if (statusPassed) {
-    return html`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-      <path
-        d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L4 11L5.4 9.6L8 12.2L14.6 5.6L16 7L8 15Z"
-        fill="#2DE561"
-      />
-    </svg>`;
-  } else {
-    return html`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-      <path
-        xmlns="http://www.w3.org/2000/svg"
-        d="M9.99 0C4.47 0 0 4.48 0 10C0 15.52 4.47 20 9.99 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 9.99 0ZM11 10C11 10.55 10.55 11 10 11C9.45 11 9 10.55 9 10V6C9 5.45 9.45 5 10 5C10.55 5 11 5.45 11 6V10ZM11 14C11 14.55 10.55 15 10 15C9.45 15 9 14.55 9 14C9 13.45 9.45 13 10 13C10.55 13 11 13.45 11 14Z"
-        fill="#FF5252"
-      />
-    </svg>`;
-  }
+  const iconEl = html`<div
+    class="i-amphtml-story-dev-tools-log-status-icon"
+  ></div>`;
+  iconEl.classList.add(
+    'i-amphtml-story-dev-tools-log-status-icon-' +
+      (statusPassed ? 'passed' : 'failed')
+  );
+  return iconEl;
 }
 
 const buildLogMessageTemplate = (element) => {
@@ -82,22 +75,33 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
 
     /** @private  {string} */
     this.storyUrl_ = '';
+
+    /** @private {!Array} */
+    this.errorList_ = [];
   }
 
   /** @override */
   buildCallback() {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
+    return loadScript(this.element.ownerDocument, `${urls.cdn}/v0/validator.js`)
+      .then(() =>
+        this.validateUrl_(/* global amp: false */ amp.validator, this.storyUrl_)
+      )
+      .then((errorList) => {
+        this.errorList_ = errorList;
+        this.updateLogsTabIcon(errorList);
+      });
   }
 
   /** @override */
   layoutCallback() {
-    return loadScript(
-      this.element.ownerDocument,
-      `${urls.cdn}/v0/validator.js`
-    ).then(() => {
-      this.validateUrl_(/* global amp: false */ amp.validator, this.storyUrl_);
-    });
+    return this.buildLogsList_(this.errorList_);
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return false;
   }
 
   /**
@@ -106,7 +110,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @private
    * @param {!Validator} validator
    * @param {string} url
-   * @return {!Promise}
+   * @return {!Promise<Array>} promise of list of errors
    */
   validateUrl_(validator, url) {
     return Services.xhrFor(this.win)
@@ -118,12 +122,11 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
       .then((html) => {
         const htmlLines = html.split('\n');
         const validationResult = validator.validateString(html);
-        const errorList = validationResult.errors.map((error) => {
+        return validationResult.errors.map((error) => {
           error.htmlLines = htmlLines.slice(error.line - 2, error.line + 3);
           error.message = validator.renderErrorMessage(error);
           return error;
         });
-        return this.buildLogsList_(errorList);
       })
       .catch((error) => {
         user().error(TAG, error);
@@ -190,5 +193,32 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
     title.appendChild(statusIcon);
     title.appendChild(statusText);
     return title;
+  }
+
+  /**
+   * Updates the icon (passed / failed) next to the logs tab selector.
+   * @param {!Array} errorList
+   */
+  updateLogsTabIcon(errorList) {
+    const logsTabSelector = this.win.document.querySelector(
+      '[data-tab="Logs"]'
+    );
+    if (!logsTabSelector) {
+      return;
+    }
+    let statusIcon;
+    if (errorList.length) {
+      statusIcon = createElementWithAttributes(
+        this.element.ownerDocument,
+        'span',
+        {
+          'class': 'i-amphtml-story-dev-tools-log-status-number-failed',
+        }
+      );
+      statusIcon.textContent = errorList.length;
+    } else {
+      statusIcon = buildStatusIcon(this.element, true);
+    }
+    this.mutateElement(() => logsTabSelector.appendChild(statusIcon));
   }
 }
