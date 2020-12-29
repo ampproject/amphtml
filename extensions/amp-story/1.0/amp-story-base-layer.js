@@ -74,7 +74,7 @@ export class AmpStoryBaseLayer extends AMP.BaseElement {
     if (this.isFirstPage_ === null) {
       this.isFirstPage_ = matches(
         this.element,
-        'amp-story-page:first-of-type amp-story-grid-layer'
+        'amp-story-page:first-of-type > *'
       );
     }
     return this.isFirstPage_;

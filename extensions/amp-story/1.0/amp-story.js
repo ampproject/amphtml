@@ -2607,7 +2607,7 @@ export class AmpStory extends AMP.BaseElement {
   updatePausedIcon_() {
     const containsElementsWithPlayback = !!scopedQuerySelector(
       this.element,
-      'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
+      'amp-story-page amp-audio, amp-story-page amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
     );
 
     const storyHasBackgroundAudio = this.element.hasAttribute(
