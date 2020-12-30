@@ -21,7 +21,8 @@
 
 import {Layout} from '../../../src/layout';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {matches} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '../../../src/css';
+import {parseQueryString} from '../../../src/url';
 import {px, setStyles} from '../../../src/style';
 
 /**
@@ -50,7 +51,7 @@ export class AmpStoryBaseLayer extends AMP.BaseElement {
     super(element);
 
     /** @private {?boolean} */
-    this.isFirstPage_ = null;
+    this.isPrerenderActivePage_ = null;
 
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
@@ -67,17 +68,23 @@ export class AmpStoryBaseLayer extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if a child of the first page.
+   * Returns true if the page should be prerendered (for being an active page or first page)
+   * @protected
    * @return {boolean}
    */
-  isFirstPage() {
-    if (this.isFirstPage_ === null) {
-      this.isFirstPage_ = matches(
-        this.element,
-        'amp-story-page:first-of-type > *'
-      );
+  isPrerenderActivePage() {
+    if (this.isPrerenderActivePage_ != null) {
+      return this.isPrerenderActivePage_;
     }
-    return this.isFirstPage_;
+    const hashId = parseQueryString(this.win.location.href)['page'];
+    let selector = 'amp-story-page:first-of-type';
+    if (hashId) {
+      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
+    }
+    const selectorNodes = this.win.document.querySelectorAll(selector);
+    this.isPrerenderActivePage_ =
+      selectorNodes[selectorNodes.length - 1] === this.element.parentElement;
+    return this.isPrerenderActivePage_;
   }
 
   /**

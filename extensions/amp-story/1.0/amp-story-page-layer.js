@@ -62,7 +62,7 @@ export class AmpStoryPageLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
-    return this.isFirstPage();
+    return this.isPrerenderActivePage();
   }
 
   /**
