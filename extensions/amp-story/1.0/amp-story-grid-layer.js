@@ -27,9 +27,8 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid

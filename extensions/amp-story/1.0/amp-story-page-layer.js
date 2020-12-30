@@ -76,7 +76,7 @@ export class AmpStoryPageLayer extends AmpStoryBaseLayer {
     const presetDetails = LAYER_PRESETS[preset];
     user().assert(
       presetDetails,
-      `Preset not found for amp-story-grid-layer: ${preset}`
+      `Preset not found for amp-story-page-layer: ${preset}`
     );
     Object.entries(presetDetails).forEach((keyValue) =>
       this.element.setAttribute(keyValue[0], keyValue[1])

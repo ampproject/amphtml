@@ -406,7 +406,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /**
    * Add classes to adjust the bottom padding on the grid-layer
-   * to prevent overlap with the component.
+   * to prevent overlap with the component if using grid layers.
    *
    * @private
    */

@@ -108,7 +108,8 @@ const LogType = {
 
   IMAGES_PORTRAIT: {
     message: 'Full-bleed images should be in portrait orientation.',
-    selector: 'amp-story-grid-layer[template="fill"] > amp-img > img',
+    selector:
+      'amp-story-grid-layer[template="fill"] > amp-img > img, amp-story-page-layer[template="fill"] > amp-img > img',
     predicate: (el) => el.naturalWidth < el.naturalHeight,
     level: LogLevel.WARN,
   },
@@ -122,7 +123,8 @@ const LogType = {
 
   VIDEOS_PORTRAIT: {
     message: 'Full-bleed videos should be in portrait orientation.',
-    selector: 'amp-story-grid-layer[template="fill"] > amp-video > video',
+    selector:
+      'amp-story-grid-layer[template="fill"] > amp-video > video, amp-story-page-layer[template="fill"] > amp-video > video',
     predicate: (el) => el.videoWidth < el.videoHeight,
     level: LogLevel.WARN,
   },
@@ -142,7 +144,7 @@ const LogType = {
       'Poster images for full-bleed videos should be in portrait ' +
       'orientation.',
     selector:
-      'amp-story-grid-layer[template="fill"] > amp-video > video[poster]',
+      'amp-story-grid-layer[template="fill"] > amp-video > video[poster], amp-story-page-layer[template="fill"] > amp-video > video[poster]',
     predicate: (el) =>
       getPosterFromVideo(el).then(
         (poster) => poster.naturalWidth < poster.naturalHeight

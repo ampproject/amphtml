@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
+import {LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-base-layer';
 import {StoryAnimationPresetDef} from './animation-types';
 import {
   calculateTargetScalingFactor,
@@ -87,12 +87,10 @@ export function setStyleForPreset(el, presetName) {
     const parent = el.parentElement;
     if (
       parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+        LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
       )
     ) {
-      parent.classList.remove(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      );
+      parent.classList.remove(LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]);
     }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
