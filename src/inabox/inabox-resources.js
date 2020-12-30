@@ -93,7 +93,7 @@ export class InaboxResources {
       this.ampdoc_.whenReady().then(() => {
         this.documentReady_ = true;
         this.buildReadyResources_();
-        this.schedulePass(1);
+        this./*OK*/ schedulePass(1);
       });
     } else {
       this.ampdoc_.whenReady().then(() => this./*OK*/ schedulePass(1));
@@ -263,7 +263,7 @@ export class InaboxResources {
         hasNextNodeInDocumentOrder(resource.element, this.ampdoc_.getRootNode())
       ) {
         this.pendingBuildResources_.splice(i, 1);
-        resource.build().then(() => this.schedulePass());
+        resource.build().then(() => this./*OK*/ schedulePass());
         dev().fine(TAG, 'resource upgraded:', resource.debugid);
       }
     }
