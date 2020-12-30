@@ -46,20 +46,21 @@ describes.endtoend(
 
     // Test mixed lengths with snapping.
     describe('snap', () => {
-      const slideWidth = pageWidth * 0.75;
+      const slideOneWidth = pageWidth * 0.75; // First slide has width 75vw
+      const slideTwoWidth = pageWidth * 0.5; // Second slide has width 50vw
 
       it('should have the correct initial slide positions', async () => {
         const slideOne = await getSlide(styles, controller, 0);
         const slideTwo = await getSlide(styles, controller, 1);
 
-        await expect(prop(slideOne, 'offsetWidth')).to.equal(slideWidth);
+        await expect(prop(slideOne, 'offsetWidth')).to.equal(slideOneWidth);
         await expect(controller.getElementRect(slideOne)).to.include({
           x: 0,
         });
 
-        await expect(prop(slideTwo, 'offsetWidth')).to.equal(slideWidth);
+        await expect(prop(slideTwo, 'offsetWidth')).to.equal(slideTwoWidth);
         await expect(controller.getElementRect(slideTwo)).to.include({
-          x: slideWidth,
+          x: slideOneWidth,
         });
       });
 
