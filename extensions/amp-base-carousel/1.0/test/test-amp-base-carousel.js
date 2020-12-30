@@ -291,7 +291,7 @@ describes.realWin(
           'returned to prev slide',
           () => scroller.scrollLeft == 0,
           undefined /* opt_onError */,
-          400 /* opt_timeout */
+          1000 /* opt_timeout */
         );
       });
 
