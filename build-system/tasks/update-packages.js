@@ -96,6 +96,37 @@ function patchIntersectionObserver() {
 }
 
 /**
+ * Patches Resize Observer polyfill by wrapping its body into `install`
+ * function.
+ * This gives us an option to control when and how the polyfill is installed.
+ * The polyfill can only be installed on the root context.
+ */
+function patchResizeObserver() {
+  // Copies intersection-observer into a new file that has an export.
+  const patchedName =
+    'node_modules/resize-observer-polyfill/resize-observer.install.js';
+  let file = fs
+    .readFileSync(
+      'node_modules/resize-observer-polyfill/dist/ResizeObserver.global.js'
+    )
+    .toString();
+
+  // Wrap the contents inside the install function.
+  file = `export function installResizeObserver(global) {\n${file}\n}\n`
+    // For some reason Closure fails on this three lines. Babel is fine.
+    .replace(
+      "typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :",
+      ''
+    )
+    .replace(
+      "typeof define === 'function' && define.amd ? define(factory) :",
+      ''
+    )
+    .replace('}(this, (function () {', '}(global, (function () {');
+  writeIfUpdated(patchedName, file);
+}
+
+/**
  * Deletes the map file for rrule, which breaks closure compiler.
  * TODO(rsimha): Remove this workaround after a fix is merged for
  * https://github.com/google/closure-compiler/issues/3720.
@@ -157,6 +188,7 @@ async function updatePackages() {
   }
   patchWebAnimations();
   patchIntersectionObserver();
+  patchResizeObserver();
   removeRruleSourcemap();
 }
 
