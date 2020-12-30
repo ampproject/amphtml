@@ -212,10 +212,10 @@ export function getScrollEnd(axis, el) {
  */
 export function getOffsetPosition(axis, el) {
   if (axis == Axis.X) {
-    return el.offsetLeft;
+    return el./*OK*/ offsetLeft;
   }
 
-  return el.offetTop;
+  return el./*OK*/ offetTop;
 }
 
 /**
