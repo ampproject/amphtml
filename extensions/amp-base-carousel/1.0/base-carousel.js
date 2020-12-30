@@ -206,8 +206,12 @@ function BaseCarouselWithRef(
           interaction.current = Interaction.GENERIC;
           prev();
         },
-        root: containRef.current,
-        node: contentRef.current,
+        get root() {
+          return containRef.current;
+        },
+        get node() {
+          return contentRef.current;
+        },
       }),
     [next, prev, setRestingIndex]
   );

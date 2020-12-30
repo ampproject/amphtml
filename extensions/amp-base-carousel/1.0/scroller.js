@@ -115,7 +115,9 @@ function ScrollerWithRef(
       advance,
       next: () => advance(advanceCount),
       prev: () => advance(-advanceCount),
-      node: containerRef.current,
+      get node() {
+        return containerRef.current;
+      },
     }),
     [advance, advanceCount]
   );
