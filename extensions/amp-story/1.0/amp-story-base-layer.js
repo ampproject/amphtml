@@ -19,6 +19,27 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {escapeCssSelectorIdent} from '../../../src/css';
+import {parseQueryString} from '../../../src/url';
+import {px, setStyles} from '../../../src/style';
+
+/**
+ * The attribute name for grid layer templates.
+ * @private @const {string}
+ */
+const TEMPLATE_ATTRIBUTE_NAME = 'template';
+
+/**
+ * A mapping of template attribute values to CSS class names.
+ * @const {!Object<string, string>}
+ */
+export const LAYER_TEMPLATE_CLASS_NAMES = {
+  'fill': 'i-amphtml-story-layer-template-fill',
+  'vertical': 'i-amphtml-story-layer-template-vertical',
+  'horizontal': 'i-amphtml-story-layer-template-horizontal',
+  'thirds': 'i-amphtml-story-layer-template-thirds',
+};
 
 /**
  * Base layer template.
@@ -27,6 +48,12 @@ export class AmpStoryBaseLayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {?boolean} */
+    this.isPrerenderActivePage_ = null;
+
+    /** @private {?{horiz: number, vert: number}} */
+    this.aspectRatio_ = null;
   }
 
   /** @override */
@@ -37,5 +64,82 @@ export class AmpStoryBaseLayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.classList.add('i-amphtml-story-layer');
+  }
+
+  /**
+   * Applies internal CSS class names for the template attribute, so that styles
+   * can use the class name instead of compound
+   * amp-story-grid-layer[template="..."] selectors, since the latter increases
+   * CSS specificity and can prevent users from being able to override styles.
+   * @protected
+   */
+  applyTemplateClassName_() {
+    if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
+      const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
+      const templateClassName = LAYER_TEMPLATE_CLASS_NAMES[templateName];
+      this.element.classList.add(templateClassName);
+    }
+  }
+
+  /**
+   * Returns true if the page should be prerendered (for being an active page or first page)
+   * @protected
+   * @return {boolean}
+   */
+  isPrerenderActivePage() {
+    if (this.isPrerenderActivePage_ != null) {
+      return this.isPrerenderActivePage_;
+    }
+    const hashId = parseQueryString(this.win.location.href)['page'];
+    let selector = 'amp-story-page:first-of-type';
+    if (hashId) {
+      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
+    }
+    const selectorNodes = this.win.document.querySelectorAll(selector);
+    this.isPrerenderActivePage_ =
+      selectorNodes[selectorNodes.length - 1] === this.element.parentElement;
+    return this.isPrerenderActivePage_;
+  }
+
+  /** @protected */
+  initializeAspectRatioListeners() {
+    const aspectRatio = this.element.getAttribute('aspect-ratio');
+    if (aspectRatio) {
+      const aspectRatioSplits = aspectRatio.split(':');
+      const horiz = parseInt(aspectRatioSplits[0], 10);
+      const vert = parseInt(aspectRatioSplits[1], 10);
+      if (horiz > 0 && vert > 0) {
+        this.aspectRatio_ = {horiz, vert};
+        const storeService = getStoreService(this.win);
+        storeService.subscribe(
+          StateProperty.PAGE_SIZE,
+          this.updatePageSize_.bind(this),
+          true /* callToInitialize */
+        );
+      }
+    }
+  }
+
+  /**
+   * @param {?{width: number, height: number}} pageSize
+   * @private
+   */
+  updatePageSize_(pageSize) {
+    if (!pageSize) {
+      return;
+    }
+    const {width: vw, height: vh} = pageSize;
+    const {horiz, vert} = this.aspectRatio_;
+    const width = Math.min(vw, (vh * horiz) / vert);
+    const height = Math.min(vh, (vw * vert) / horiz);
+    if (width > 0 && height > 0) {
+      this.getVsync().mutate(() => {
+        this.element.classList.add('i-amphtml-story-layer-template-aspect');
+        setStyles(this.element, {
+          '--i-amphtml-story-layer-width': px(width),
+          '--i-amphtml-story-layer-height': px(height),
+        });
+      });
+    }
   }
 }

@@ -385,8 +385,8 @@ amp-story-grid-layer {
  * Prevents pre-load placeholders from pushing content offscreen. 
  * Prevents preload placeholders from pushing content offscreen. 
  */
-.i-amphtml-story-grid-template-fill amp-img img,
-.i-amphtml-story-grid-template-fill amp-video video {
+.i-amphtml-story-layer-template-fill amp-img img,
+.i-amphtml-story-layer-template-fill amp-video video {
   position: absolute !important;
 }
 
@@ -433,13 +433,13 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-grid-template-with-full-bleed-animation {
+.i-amphtml-story-layer-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
   padding: 0 !important;
 }
 
-.i-amphtml-story-grid-template-fill > * {
+.i-amphtml-story-layer-template-fill > * {
   bottom: 0 !important;
   height: auto !important;
   left: 0 !important;
@@ -449,17 +449,17 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   width: auto !important;
 }
 
-.i-amphtml-story-grid-template-vertical {
+.i-amphtml-story-layer-template-vertical {
   grid-auto-flow: row !important;
   grid-template-columns: 100% !important;
 }
 
-.i-amphtml-story-grid-template-horizontal {
+.i-amphtml-story-layer-template-horizontal {
   grid-auto-flow: column !important;
   grid-template-rows: 100% !important;
 }
 
-.i-amphtml-story-grid-template-thirds {
+.i-amphtml-story-layer-template-thirds {
   height: 100% !important;
   grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
   grid-template-areas: "upper-third"
@@ -467,7 +467,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
                        "lower-third" !important;
 }
 
-.i-amphtml-story-grid-template-aspect {
+.i-amphtml-story-layer-template-aspect {
   margin: auto;
   width: var(--i-amphtml-story-layer-width, 100%);
   height: var(--i-amphtml-story-layer-height, 100%);

@@ -264,7 +264,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-fill"
+        ".i-amphtml-story-layer-template-fill"
       ]
     },
     {
@@ -273,7 +273,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-vertical"
+        ".i-amphtml-story-layer-template-vertical"
       ]
     },
     {
@@ -282,7 +282,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-horizontal"
+        ".i-amphtml-story-layer-template-horizontal"
       ]
     },
     {
@@ -294,7 +294,7 @@
       ],
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-thirds"
+        ".i-amphtml-story-layer-template-thirds"
       ]
     },
     {
@@ -386,7 +386,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-fill"
+        ".i-amphtml-story-layer-template-fill"
       ]
     },
     {
@@ -395,7 +395,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-vertical"
+        ".i-amphtml-story-layer-template-vertical"
       ]
     },
     {
@@ -404,7 +404,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-horizontal"
+        ".i-amphtml-story-layer-template-horizontal"
       ]
     },
     {
@@ -416,7 +416,7 @@
       ],
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-thirds"
+        ".i-amphtml-story-layer-template-thirds"
       ]
     },
     {
