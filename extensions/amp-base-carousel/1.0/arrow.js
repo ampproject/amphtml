@@ -46,7 +46,7 @@ export function Arrow({
   const classes = useStyles();
   const classNames = `${classes.arrow} ${
     by < 0 ? classes.arrowPrev : classes.arrowNext
-  } ${disabled ? classes.arrowDisabled : ''} ${
+  } ${isDisabled ? classes.arrowDisabled : ''} ${
     outsetArrows ? classes.outsetArrow : classes.insetArrow
   } ${rtl ? classes.rtl : classes.ltr}`;
 
