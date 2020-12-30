@@ -177,6 +177,6 @@ export class ResizeObserverStub {
 ResizeObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */
-export function resetSubsForTesting() {
+export function resetStubsForTesting() {
   ResizeObserverStub[UPGRADERS] = [];
 }

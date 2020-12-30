@@ -17,7 +17,7 @@
 import {
   ResizeObserverStub,
   installStub,
-  resetSubsForTesting,
+  resetStubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
 } from '../../../src/polyfillstub/resize-observer-stub';
@@ -127,7 +127,7 @@ describes.fakeWin('upgradePolyfill', {}, (env) => {
   });
 
   afterEach(() => {
-    resetSubsForTesting();
+    resetStubsForTesting();
   });
 
   function nextMicroTask() {
@@ -286,7 +286,7 @@ describes.fakeWin('ResizeObserverStub', {}, (env) => {
       expect(native.callback).to.equal(callback);
     });
 
-    it('should not re-queue if nothing is currently observed', () => {
+    it('should not re-observe if nothing is currently observed', () => {
       const ro = new ResizeObserverStub(callback);
       ro.observe(element1);
       ro.unobserve(element1);
@@ -295,7 +295,7 @@ describes.fakeWin('ResizeObserverStub', {}, (env) => {
       expect(ro.elements_).to.be.null;
     });
 
-    it('should re-queue previously observed elements', () => {
+    it('should re-observe previously observed elements', () => {
       const ro = new ResizeObserverStub(callback);
       ro.observe(element1);
       ro.observe(element2);
