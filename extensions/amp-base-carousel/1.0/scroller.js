@@ -153,7 +153,7 @@ function ScrollerWithRef(
   const currentIndex = useRef(restingIndex);
 
   const scrollToActiveSlide = useCallback(() => {
-    if (!containerRef.current || !containerRef.current.children) {
+    if (!containerRef.current || !containerRef.current.children.length) {
       return;
     }
     const container = containerRef.current;

@@ -25,7 +25,7 @@ export function Arrow({
   advance,
   by,
   customArrow = <DefaultArrow by={by} />,
-  checkDisabled,
+  disabled,
   outsetArrows,
   rtl,
 }) {
@@ -33,9 +33,9 @@ export function Arrow({
     'disabled': customDisabled,
     'onClick': onCustomClick,
   } = customArrow.props;
-  const disabled = checkDisabled() || customDisabled;
+  const isDisabled = disabled || customDisabled;
   const onClick = (e) => {
-    if (disabled) {
+    if (isDisabled) {
       return;
     }
     if (onCustomClick) {
@@ -54,8 +54,8 @@ export function Arrow({
     <div class={classNames}>
       {Preact.cloneElement(customArrow, {
         'onClick': onClick,
-        'disabled': disabled,
-        'aria-disabled': String(disabled),
+        'disabled': isDisabled,
+        'aria-disabled': String(isDisabled),
       })}
     </div>
   );

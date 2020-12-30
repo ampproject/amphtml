@@ -19,8 +19,8 @@ import {
   Axis,
   Orientation,
   getDimension,
+  getOffsetPosition,
   getScrollEnd,
-  getScrollPosition,
 } from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
@@ -243,11 +243,14 @@ function BaseCarouselWithRef(
         return false;
       }
       const container = scrollRef.current.node;
-      if (!container || !container.children) {
+      if (!container || !container.children.length) {
         return false;
       }
       const scrollEnd = getScrollEnd(axis, container);
-      const scrollStart = getScrollPosition(axis, container);
+      const scrollStart = getOffsetPosition(
+        axis,
+        container.children[currentSlide]
+      );
       const {length} = getDimension(axis, container);
       if (length !== scrollEnd && length + scrollStart >= scrollEnd) {
         // Can no longer scroll forwards.
@@ -316,8 +319,8 @@ function BaseCarouselWithRef(
         <Arrow
           advance={prev}
           by={-advanceCount}
-          checkDisabled={() => disableForDir(-1)}
           customArrow={arrowPrev}
+          disabled={disableForDir(-1)}
           outsetArrows={outsetArrows}
           rtl={rtl}
         />
@@ -367,8 +370,8 @@ function BaseCarouselWithRef(
         <Arrow
           advance={next}
           by={advanceCount}
-          checkDisabled={() => disableForDir(1)}
           customArrow={arrowNext}
+          disabled={disableForDir(1)}
           outsetArrows={outsetArrows}
           rtl={rtl}
         />

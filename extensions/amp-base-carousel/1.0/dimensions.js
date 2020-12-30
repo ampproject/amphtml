@@ -205,6 +205,20 @@ export function getScrollEnd(axis, el) {
 }
 
 /**
+ * Gets the offset position for an element along a given axis.
+ * @param {!Axis} axis The axis to get the offset position for.
+ * @param {!Element} el The Element to get the offset position for.
+ * @return {number} The offset position.
+ */
+export function getOffsetPosition(axis, el) {
+  if (axis == Axis.X) {
+    return el.offsetLeft;
+  }
+
+  return el.offetTop;
+}
+
+/**
  * Sets the scroll position for an element along a given axis.
  * @param {!Axis} axis The axis to set the scroll position for.
  * @param {!Element} el The Element to set the scroll position for.
