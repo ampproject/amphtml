@@ -50,7 +50,15 @@ export const _default = () => {
   return (
     <>
       <InlineGallery style={{width}}>
-        <Pagination inset={topInset} style={{height: paginationHeight}} />
+        <Pagination style={{height: paginationHeight}} inset={topInset} />
+        <Thumbnails
+          aspectRatio={aspectRatio}
+          loop={loop}
+          style={{height: thumbnailHeight}}
+        />
+        <br />
+        <Thumbnails />
+        <br />
         <BaseCarousel
           style={{height}}
           autoAdvanceCount={autoAdvanceCount}
@@ -85,13 +93,6 @@ export const _default = () => {
           />
         </BaseCarousel>
         <Pagination inset={bottomInset} />
-        <Thumbnails
-          aspectRatio={aspectRatio}
-          loop={loop}
-          style={{height: thumbnailHeight}}
-        />
-        <br />
-        <Thumbnails />
       </InlineGallery>
       Content below carousel
     </>

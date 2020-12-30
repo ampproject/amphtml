@@ -1199,15 +1199,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
     ],
   },
-  '\\.getPageLayoutBox': {
-    message: measurementApiDeprecated,
-    allowlist: [
-      'src/base-element.js',
-      'src/custom-element.js',
-      'src/service/resource.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js',
-    ],
-  },
   '\\.getIntersectionElementLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
