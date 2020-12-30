@@ -250,7 +250,11 @@ export class InaboxResources {
     this.firstPassDone_.resolve();
   }
 
-  /** */
+  /**
+   * Builds any pending resouces if document is ready, or next element has been
+   * added to DOM.
+   * @private
+   */
   buildReadyResources_() {
     for (let i = this.pendingBuildResources_.length - 1; i >= 0; i--) {
       const resource = this.pendingBuildResources_[i];
