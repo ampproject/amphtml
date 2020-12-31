@@ -33,7 +33,6 @@ tags: {  # <amp-vidazoo-widget>
     name: "data-widget-id"
     mandatory: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-vidazoo-widget/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

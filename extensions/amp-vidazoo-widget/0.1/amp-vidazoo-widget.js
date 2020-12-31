@@ -22,6 +22,7 @@ import {generateSentinel} from '../../../src/3p-frame';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getData} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -48,7 +49,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
     this.widgetId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'http://localhost:8080';
+    this.iframeDomain_ = 'https://static.vidazoo.com';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -120,6 +121,28 @@ class AmpVidazooWidget extends AMP.BaseElement {
     this.bindToWidgetHooks_();
 
     return this.loadPromise(iframe).then(() => this.widgetReadyPromise_);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    this.destroyWidgetFrame_();
+
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+
+    return true;
+  }
+
+  /**
+   * Removes the widget iframe
+   * @private
+   */
+  destroyWidgetFrame_() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
   }
 
   /**
