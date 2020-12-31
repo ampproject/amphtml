@@ -15,15 +15,15 @@
  */
 
 import {Deferred} from './promise';
-import {Services} from '../services';
 import {dev, devAssert} from '../log';
 import {removeNoScriptElements} from './dom-writer';
 
 export class DomTransformStream {
   /**
    * @param {!Window} win
+   * @param {function=} opt_transferThrottleFunc
    */
-  constructor(win) {
+  constructor(win, opt_transferThrottleFunc) {
     const headDefer = new Deferred();
     /**
      * Resolves when head has been written to in memory document.
@@ -64,8 +64,9 @@ export class DomTransformStream {
     /** @private {boolean} */
     this.shouldTransfer_ = false;
 
-    /** @const @private */
-    this.vsync_ = Services.vsyncFor(win);
+    const noThrottleFunc = (cb) => Promise.resolve(cb());
+    /** @const @private {!function}*/
+    this.transferThrottle_ = opt_transferThrottleFunc || noThrottleFunc;
   }
 
   /**
@@ -143,7 +144,7 @@ export class DomTransformStream {
       this.targetBodyPromise_,
       this.headPromise_,
     ]).then((resolvedElements) =>
-      this.vsync_.mutatePromise(() => {
+      this.transferThrottle_(() => {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
         removeNoScriptElements(dev().assertElement(this.detachedBody_));
