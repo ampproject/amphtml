@@ -82,11 +82,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
   },
   {
-    id: 'chunked-amp',
-    name: "Split AMP's loading phase into chunks",
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
-  },
-  {
     id: 'pump-early-frame',
     name:
       'If applicable, let the browser paint the current frame before ' +
