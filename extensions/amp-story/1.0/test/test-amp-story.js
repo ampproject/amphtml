@@ -1656,12 +1656,11 @@ describes.realWin(
       });
 
       describe('amp-story rewriteStyles', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', true);
-        });
+        beforeEach(() => {});
 
         afterEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', false);
+          /* toggleExperiment(win, 'amp-story-responsive-units', false) // launched: true */
+          false;
         });
 
         it('should rewrite vw styles', async () => {
