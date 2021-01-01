@@ -82,13 +82,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
   },
   {
-    id: 'pump-early-frame',
-    name:
-      'If applicable, let the browser paint the current frame before ' +
-      'executing the callback.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
-  },
-  {
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',

@@ -1,6 +1,6 @@
 {
   "allow-doc-opt-in": ["amp-next-page", "analytics-chunks-inabox"],
-  "allow-url-opt-in": ["pump-early-frame"],
+  "allow-url-opt-in": [],
   "amp-accordion-display-locking": 1,
   "canary": 1,
   "a4aProfilingRate": 0.01,
@@ -12,7 +12,6 @@
   "flexAdSlots": 0.05,
   "intersect-resources": 0,
   "ios-fixed-no-transfer": 1,
-  "pump-early-frame": 1,
   "remove-task-timeout": 0,
   "build-in-chunks": 1,
   "visibility-trigger-improvements": 1,

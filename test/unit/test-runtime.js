@@ -33,7 +33,6 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toArray} from '../../src/types';
-import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
 describes.fakeWin(
@@ -202,7 +201,6 @@ describes.fakeWin(
     );
 
     it('should not maybePumpEarlyFrame when body not yet present', () => {
-      toggleExperiment(win, 'pump-early-frame', true);
       // Make document.body be null on first invocation to simulate
       // JS executing before the rest of the doc has been parsed.
       const {body} = win.document;
@@ -223,14 +221,12 @@ describes.fakeWin(
       'should not maybePumpEarlyFrame ' +
         'when a renderDelayingExtension is present',
       () => {
-        toggleExperiment(win, 'pump-early-frame', true);
         win.document.body.appendChild(document.createElement('amp-experiment'));
         extensionRegistrationTest();
       }
     );
 
     it('should maybePumpEarlyFrame and delay extension execution', () => {
-      toggleExperiment(win, 'pump-early-frame', true);
       let progress = '';
       const queueExtensions = win.AMP;
       const highPriority = regularExtension((amp) => {
