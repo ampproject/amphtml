@@ -76,12 +76,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-action-macro',
-    name: 'AMP extension for defining action macros',
-    spec: 'https://github.com/ampproject/amphtml/issues/19494',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
-  },
-  {
     id: 'ios-fixed-no-transfer',
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
