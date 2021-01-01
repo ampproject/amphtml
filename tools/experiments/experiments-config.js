@@ -169,12 +169,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
   },
   {
-    id: 'fix-inconsistent-responsive-height-selection',
-    name: 'Fix inconsistent responsive height selection.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24166',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
-  },
-  {
     id: 'intersect-resources',
     name: 'Use IntersectionObserver for resource scheduling.',
     spec: 'https://github.com/ampproject/amphtml/issues/25428',

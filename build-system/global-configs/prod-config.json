@@ -8,7 +8,6 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "expand-json-targeting": 1,
-  "fix-inconsistent-responsive-height-selection": 0,
   "flexAdSlots": 0.05,
   "intersect-resources": 0,
   "ios-fixed-no-transfer": 0,
