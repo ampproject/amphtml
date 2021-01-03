@@ -17,6 +17,11 @@ import {CSS} from '../../../build/amp-vidazoo-widget-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
+import {
+  assertDoesNotContainDisplay,
+  setStyle,
+  setStyles,
+} from '../../../src/style';
 import {dict} from '../../../src/utils/object';
 import {generateSentinel} from '../../../src/3p-frame';
 import {getContextMetadata} from '../../../src/iframe-attributes';
@@ -24,18 +29,10 @@ import {getData} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
 let REQUEST_ID = 1;
-
-/** @const */
-const VALID_MESSAGE_TYPES = [
-  'vdzw_artemis_hook',
-  'vdzw_amp_response',
-  'vdzw_amp_context',
-];
 
 /** @const */
 const TAG = 'amp-vidazoo-widget';
@@ -49,7 +46,11 @@ class AmpVidazooWidget extends AMP.BaseElement {
     this.widgetId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://static.vidazoo.com';
+    this.iframeDomain_ = 'http://localhost:8080';
+    // this.iframeDomain_ = 'https://static.vidazoo.com';
+
+    /** @private {?HTMLDivElement} */
+    this.wrapper_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -59,6 +60,9 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.widgetReadyResolver_ = null;
+
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
 
     /** @private {Object.<string, Deferred>} */
     this.requests_ = {};
@@ -94,14 +98,13 @@ class AmpVidazooWidget extends AMP.BaseElement {
       element
     );
 
-    const deferred = new Deferred();
-    this.widgetReadyPromise_ = deferred.promise;
-    this.widgetReadyResolver_ = deferred.resolve;
+    this.initializePromise_();
   }
 
   /** @override */
   layoutCallback() {
     const {element} = this;
+
     const urlParams = dict({
       'widgetId': this.widgetId_ || undefined,
     });
@@ -113,10 +116,19 @@ class AmpVidazooWidget extends AMP.BaseElement {
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
-
     this.applyFillContent(iframe, true);
-    element.appendChild(iframe);
     this.iframe_ = iframe;
+
+    this.wrapper_ = element.ownerDocument.createElement('div');
+    this.wrapper_.appendChild(this.iframe_);
+    setStyles(this.wrapper_, {
+      'width': '100%',
+      'height': '100%',
+      'position': 'absolute',
+      'top': '0',
+      'left': '0',
+    });
+    element.appendChild(this.wrapper_);
 
     this.bindToWidgetHooks_();
 
@@ -126,10 +138,8 @@ class AmpVidazooWidget extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.destroyWidgetFrame_();
-
-    const deferred = new Deferred();
-    this.playerReadyPromise_ = deferred.promise;
-    this.playerReadyResolver_ = deferred.resolve;
+    this.destroyIntersectionObserver_();
+    this.initializePromise_();
 
     return true;
   }
@@ -139,9 +149,10 @@ class AmpVidazooWidget extends AMP.BaseElement {
    * @private
    */
   destroyWidgetFrame_() {
-    if (this.iframe_) {
-      removeElement(this.iframe_);
+    if (this.wrapper_) {
+      removeElement(this.wrapper_);
       this.iframe_ = null;
+      this.wrapper_ = null;
     }
   }
 
@@ -157,17 +168,21 @@ class AmpVidazooWidget extends AMP.BaseElement {
       const dataString = getData(e);
       const dataJSON = tryParseJson(dataString);
 
-      // check if event payload is a widget hook
-      if (!dataJSON || VALID_MESSAGE_TYPES.indexOf(dataJSON.type) < 0) {
+      if (!dataJSON || !dataJSON.vdzw_artemis_amp_broadcast) {
         return;
       }
 
-      switch (dataJSON.type) {
-        case 'vdzw_artemis_hook':
-          this.handleHook_(dataJSON);
+      const {data} = dataJSON;
+
+      switch (data.type) {
+        case 'hook':
+          this.handleHook_(data);
           break;
-        case 'vdzw_amp_response':
-          this.handleResponse_(dataJSON);
+        case 'response':
+          this.handleResponse_(data);
+          break;
+        case 'float_layout':
+          this.handleFloatLayoutReceived_(data);
           break;
       }
     });
@@ -189,6 +204,11 @@ class AmpVidazooWidget extends AMP.BaseElement {
       case 'fullScreenModeChange':
         this.handleFullScreenToggle_.apply(this, args);
         break;
+      case 'floatModeChange':
+        this.handleFloatModeToggle_.apply(this, args);
+        break;
+      case 'closeVisibilityChange':
+        this.handleCloseButtonVisibilityToggle_.apply(this, args);
     }
   }
 
@@ -197,18 +217,22 @@ class AmpVidazooWidget extends AMP.BaseElement {
    */
   handleWidgetReady_() {
     const sentinel = generateSentinel(this.win);
-    const {_context} = getContextMetadata(this.win, this.element, sentinel);
-
-    this.iframe_.contentWindow.postMessage(
-      JSON.stringify({type: 'vdzw_amp_context', context: _context}),
-      this.iframeDomain_
+    const {_context: context} = getContextMetadata(
+      this.win,
+      this.element,
+      sentinel
     );
+
+    // sends the AMP context into the iframe
+    this.broadcast_({type: 'amp_context', context});
 
     this.requestFromWidget_('getWidgetOption', {
       option: 'playerHolderBackgroundColor',
     }).then((color = 'transparent') => {
       setStyle(this.element, 'backgroundColor', color);
     });
+
+    this.createIntersectionObserver_();
 
     this.widgetReadyResolver_(this.iframe_);
   }
@@ -229,11 +253,53 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
   /**
    * Called on 'fullScreenModeChange' widget hook.
+   *
    * @param {boolean} isActive is full screen mode activated
-   * @private
    */
   handleFullScreenToggle_(isActive) {
-    this.iframe_.classList.toggle('i-amphtml-fullscreen', isActive);
+    this.wrapper_.classList.toggle('i-amphtml-fullscreen', isActive);
+  }
+
+  /**
+   * Called on 'floatModeChange` widget hook.
+   *
+   * @param {boolean} isFloatActive is float mode active
+   */
+  handleFloatModeToggle_(isFloatActive) {
+    this.iframe_.classList.toggle('i-amphtml-float-active', isFloatActive);
+
+    // clear inline position and layout style
+    if (!isFloatActive) {
+      setStyles(this.iframe_, {
+        'top': '',
+        'right': '',
+        'bottom': '',
+        'left': '',
+        'zIndex': '',
+        'width': '',
+        'height': '',
+        'minWidth': '',
+        'minHeight': '',
+      });
+    }
+  }
+
+  /**
+   * Called on 'closeVisibilityChange' widget hook.
+   *
+   * @param {boolean} isVisible - should the close button be displayed
+   */
+  handleCloseButtonVisibilityToggle_(isVisible) {
+    if (isVisible) {
+    }
+  }
+
+  /**
+   * Receive layout for iframe while in float mode.
+   * @param {*} data
+   */
+  handleFloatLayoutReceived_(data) {
+    setStyles(this.iframe_, assertDoesNotContainDisplay(data.layout));
   }
 
   /**
@@ -248,12 +314,76 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
     this.requests_[id] = deferred;
 
-    this.iframe_.contentWindow.postMessage(
-      JSON.stringify({type: 'vdzw_amp_request', id, request, payload}),
-      this.iframeDomain_
-    );
+    this.broadcast_({
+      type: 'request',
+      id,
+      request,
+      payload,
+    });
 
     return deferred.promise;
+  }
+
+  /**
+   * Broadcast data to the widget inside this.iframe_
+   * @param {*} data
+   */
+  broadcast_(data) {
+    if (!this.iframe_ || !this.iframe_.contentWindow) {
+      return;
+    }
+
+    this.iframe_.contentWindow.postMessage(
+      JSON.stringify({
+        'vdzw_artemis_amp_broadcast': true,
+        data,
+      }),
+      this.iframeDomain_
+    );
+  }
+
+  /**
+   * Create a loading promise
+   */
+  initializePromise_() {
+    const deferred = new Deferred();
+    this.widgetReadyPromise_ = deferred.promise;
+    this.widgetReadyResolver_ = deferred.resolve;
+  }
+
+  /**
+   * Observer this.element for float
+   */
+  createIntersectionObserver_() {
+    this.intersectionObserver_ = new IntersectionObserver(
+      this.onIntersection_.bind(this),
+      {root: null, rootMargin: '0px', threshold: 0}
+    );
+
+    this.intersectionObserver_.observe(this.wrapper_);
+  }
+
+  /**
+   * Destroys intersection observer
+   */
+  destroyIntersectionObserver_() {
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.disconnect();
+      this.intersectionObserver_ = null;
+    }
+  }
+
+  /**
+   * Intersection observer callback.
+   * Broadcasts the intersection state into the widget.
+   * @param {IntersectionObserverEntry[]} entries
+   */
+  onIntersection_(entries) {
+    const {isIntersecting} = entries[0];
+    this.broadcast_({
+      type: 'intersection_change',
+      isIntersecting,
+    });
   }
 }
 
