@@ -41,15 +41,12 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getMowPlayer(attributes, opt_responsive) {
+    function getMowPlayer(attributes) {
       const element = createElementWithAttributes(doc, 'amp-mowplayer', {
-        ...attributes,
         width: 250,
         height: 180,
+        ...attributes,
       });
-      if (opt_responsive) {
-        element.setAttribute('layout', 'responsive');
-      }
       doc.body.appendChild(element);
       element.implementation_.baseURL_ =
         // Use a blank page, since these tests don't require an actual page.
@@ -79,15 +76,12 @@ describes.realWin(
      * @param {string} datasource
      */
     function runTestsForDatasource(datasource) {
-      it('renders', () => {
-        return getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID}, true).then(
-          (mp) => {
-            const iframe = mp.querySelector('iframe');
-            expect(iframe).to.not.be.null;
-            expect(iframe.tagName).to.equal('IFRAME');
-            expect(iframe.src).to.equal(EXAMPLE_VIDEOID_URL);
-          }
-        );
+      it('renders', async () => {
+        const element = await getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID});
+        const iframe = element.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(EXAMPLE_VIDEOID_URL);
       });
 
       it('requires data-mediaid', () =>
