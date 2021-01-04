@@ -56,7 +56,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://static.vidazoo.com/basev/amp/artemis/index.html?widgetId=5fe8ba17de03c70004db1d48'
+        'https://static.vidazoo.com/basev/amp/artemis/0.1/index.html?widgetId=5fe8ba17de03c70004db1d48'
       );
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });

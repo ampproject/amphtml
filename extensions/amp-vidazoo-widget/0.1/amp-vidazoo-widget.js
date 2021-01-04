@@ -124,7 +124,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
     const urlParams = dict({
       'widgetId': this.widgetId_ || undefined,
     });
-    const iframeUrl = this.iframeDomain_ + '/basev/amp/artemis/index.html';
+    const iframeUrl = this.iframeDomain_ + '/basev/amp/artemis/0.1/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
 
     const iframe = element.ownerDocument.createElement('iframe');
