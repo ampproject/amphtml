@@ -62,8 +62,8 @@ describes.realWin(
             source: iframe.contentWindow,
             data: JSON.stringify({event: 'onReady'}),
           });
-        })
-        .then(() => element);
+          return element;
+        });
     }
 
     describe('with data-mediaid', function () {
