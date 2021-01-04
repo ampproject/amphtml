@@ -75,16 +75,6 @@ describes.realWin(
         );
     });
 
-    it('renders player responsive', async () => {
-      const nexxtv = await getNexxtvPlayer({
-        'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761',
-      });
-      const playerIframe = nexxtv.querySelector('iframe');
-      expect(playerIframe).to.not.be.null;
-      expect(playerIframe.className).to.match(/i-amphtml-fill-content/);
-    });
-
     it('removes iframe after unlayoutCallback', async () => {
       const nexxtv = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
