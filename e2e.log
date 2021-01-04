@@ -1,17 +1,16 @@
-[11:56:58] Using gulpfile ~/amphtml/gulpfile.js
-[11:56:58] Starting 'e2e'...
-[11:56:58] Running [36mnpm install[39m to install packages in [36mbuild-system/tasks/e2e[39m...
-[11:57:03] [32mStarted[39m [36mAMP Dev Server[39m [32mat[39m [36mhttp://localhost:8000[39m
-[11:57:03] [32mServing[39m [36munminified[39m [32mJS[39m
-[11:57:03] Running tests...
-●●●●●●●●●●●○○●●●●●●●○●○●○●○●○●○●○●○●○●○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○●○○○●●●●○●●●●●●●●●○●●●●●●●○○●●○○○○○○●○○○●●●●●●●●●●○○●●●●●●●●●○●●○●●●●●●●●●●●●○○○○●○○○○●○○○○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○○○○○○○○○○○○●○○●●●●●●●●●●●●●●●●●●●●●●●●●●○○●●●○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○○○●●●●●
-  1) AMP carousel mixed length slides
+[13:15:36] Using gulpfile ~/amphtml/gulpfile.js
+[13:15:36] Starting 'e2e'...
+[13:15:36] Running [36mnpm install[39m to install packages in [36mbuild-system/tasks/e2e[39m...
+[13:15:39] [32mStarted[39m [36mAMP Dev Server[39m [32mat[39m [36mhttp://localhost:8000[39m
+[13:15:39] [32mServing[39m [36munminified[39m [32mJS[39m
+[13:15:39] Running tests...
+●●●●●●●●●●●○○●●●●●●●○●○●○●○●○●○●○●○●○●○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○●○○○●●●●○●●●●●●●●●○●●●●●●●○○●●○○○○○○●○○○●●●●●●●○○●●●●●●●●●○●●○●●●●●●●●●●●●○○○○●○○○○●○○○○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○○○○○○○○○○○○●○○●●●●●●●●●●●●●●●●●●●●●●●●●●○○●●●○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○○○●●●●●
+  1) amp-ad-exit
        chrome
-          Standalone environment 
+          AMPHTML ads FIE environment 
             
-             no snap
-               should have the correct initial slide positions:
-     StaleElementReferenceError: stale element reference: element is not attached to the page document
+             product1 clicked near the border:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
   (Session info: headless chrome=87.0.4280.88)
       at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
       at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
@@ -20,58 +19,275 @@
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
       at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
 
-  2) AMP carousel mixed length slides
+  2) amp-ad-exit
        chrome
-          Standalone environment 
+          AMPHTML ads FIE environment 
             
-             no snap
-               should have the correct initial slide positions:
-
-      AssertionError: expected 588 to equal 600
-      + expected - actual
-
-      -588
-      +600
-      
-      at condition (build-system/tasks/e2e/expect.js:199:18)
-      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
-      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
-      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
-      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
-      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
-      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
-      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
+             product1 ad opened:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
       at runMicrotasks (<anonymous>)
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
 
-  3) AMP carousel mixed length slides
+  3) amp-ad-exit
        chrome
-          Standalone environment 
+          AMPHTML ads FIE environment 
             
-             snap
-               should have the correct initial slide positions:
-     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-base-carousel/0.1/test-e2e/test-mixed-lengths.js)
-      at listOnTimeout (internal/timers.js:554:17)
-      at processTimers (internal/timers.js:497:7)
+             product2 ad opened:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
 
-  4) AMP carousel mixed length slides
+  4) amp-ad-exit
        chrome
-          Standalone environment 
+          AMPHTML ads FIE environment 
             
-             snap
-               should have the correct initial slide positions:
+             variable target "current" should point to product1 by default:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
 
-      AssertionError: expected { Object (bottom, height, ...) } to have property 'x' of 100, but got 101
-      + expected - actual
-
-      -101
-      +100
-      
-  
-
-  5) AMP carousel mixed length slides
+  5) amp-ad-exit
        chrome
-          Standalone environment 
+          AMPHTML ads FIE environment 
+            
+             should open product2 after setting varible target:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  6) amp-ad-exit
+       chrome
+          AMPHTML ads inabox environment 
+            
+             product1 clicked near the border:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  7) amp-ad-exit
+       chrome
+          AMPHTML ads inabox environment 
+            
+             product1 ad opened:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  8) amp-ad-exit
+       chrome
+          AMPHTML ads inabox environment 
+            
+             product2 ad opened:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  9) amp-ad-exit
+       chrome
+          AMPHTML ads inabox environment 
+            
+             variable target "current" should point to product1 by default:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  10) amp-ad-exit
+       chrome
+          AMPHTML ads inabox environment 
+            
+             should open product2 after setting varible target:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  11) amp-ad-exit
+       chrome
+          AMPHTML ads inabox friendly frame environment 
+            
+             product1 clicked near the border:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  12) amp-ad-exit
+       chrome
+          AMPHTML ads inabox friendly frame environment 
+            
+             product1 ad opened:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  13) amp-ad-exit
+       chrome
+          AMPHTML ads inabox friendly frame environment 
+            
+             product2 ad opened:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  14) amp-ad-exit
+       chrome
+          AMPHTML ads inabox friendly frame environment 
+            
+             variable target "current" should point to product1 by default:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  15) amp-ad-exit
+       chrome
+          AMPHTML ads inabox friendly frame environment 
+            
+             should open product2 after setting varible target:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  16) amp-ad-exit
+       chrome
+          AMPHTML ads inabox safeframe environment 
+            
+             product1 clicked near the border:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  17) amp-ad-exit
+       chrome
+          AMPHTML ads inabox safeframe environment 
+            
+             product1 ad opened:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  18) amp-ad-exit
+       chrome
+          AMPHTML ads inabox safeframe environment 
+            
+             product2 ad opened:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  19) amp-ad-exit
+       chrome
+          AMPHTML ads inabox safeframe environment 
+            
+             variable target "current" should point to product1 by default:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  20) amp-ad-exit
+       chrome
+          AMPHTML ads inabox safeframe environment 
+            
+             should open product2 after setting varible target:
+     JavascriptError: javascript error: cov_1xqb08d7d9 is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  21) AMP carousel mixed length slides
+       chrome
+          Viewer environment 
             
              snap
                should snap on the center point:
@@ -79,89 +295,64 @@
       at listOnTimeout (internal/timers.js:554:17)
       at processTimers (internal/timers.js:497:7)
 
-  6) AMP carousel mixed length slides
+  22) AMP carousel mixed length slides
        chrome
-          Standalone environment 
+          Viewer environment 
             
              snap
                should snap on the center point:
 
-      AssertionError: expected { Object (bottom, height, ...) } to have property 'x' of 200, but got 731
+      AssertionError: expected { Object (bottom, height, ...) } to have property 'x' of 200, but got 197
       + expected - actual
 
-      -731
+      -197
       +200
       
   
 
-  7) AMP carousel mixed length slides
-       chrome
-          Viewer environment 
-            
-             snap
-               should have the correct initial slide positions:
-     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-base-carousel/0.1/test-e2e/test-mixed-lengths.js)
-      at listOnTimeout (internal/timers.js:554:17)
-      at processTimers (internal/timers.js:497:7)
-
-  8) AMP carousel mixed length slides
-       chrome
-          Viewer environment 
-            
-             snap
-               should have the correct initial slide positions:
-
-      AssertionError: expected 588 to equal 600
-      + expected - actual
-
-      -588
-      +600
-      
-      at condition (build-system/tasks/e2e/expect.js:199:18)
-      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
-      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
-      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
-      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
-      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
-      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
-      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:93:5)
-
-  9) AMP carousel arrows when non-looping
+  23) AMP carousel 0.1 slideChange on type="slide" with autoplay
        chrome
           Standalone environment 
             
-             "before each" hook for "should have the arrows in the correct initial state":
-     TimeoutError: Waiting for element to be located .arrow-prev-34d526e
-Wait timed out after 5231ms
-      at /home/rcebulko/amphtml/build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:842:17
+             should fire low trust event for autoplay advance:
+     JavascriptError: javascript error: cov_dakdihqph is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
       at runMicrotasks (<anonymous>)
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
 
-  10) AMP carousel
+  24) AMP carousel 0.1 slideChange on type="slide" with autoplay
        chrome
           Standalone environment 
             
-             should snap when scrolling:
-     TimeoutError: Waiting for element to be located .hide-scrollbar-34d526e
-Wait timed out after 5175ms
-      at /home/rcebulko/amphtml/build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:842:17
+             should fire high trust event on user interaction:
+     JavascriptError: javascript error: cov_dakdihqph is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
       at runMicrotasks (<anonymous>)
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
 
-  11) Vertical AMP carousel
+  25) AMP carousel 0.1 slideChange on type="slide" with autoplay
        chrome
           Standalone environment 
             
-             should reset the window after scroll:
-     TimeoutError: Waiting for element to be located .hide-scrollbar-34d526e
-Wait timed out after 5217ms
-      at /home/rcebulko/amphtml/build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:842:17
+             should fire high trust event on user interaction through amp-bind:
+     JavascriptError: javascript error: cov_dakdihqph is not defined
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
       at runMicrotasks (<anonymous>)
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
 
-  12) amp-fit-text
+  26) amp-fit-text
        chrome
           Standalone environment 
             
@@ -170,7 +361,7 @@ Wait timed out after 5217ms
       at listOnTimeout (internal/timers.js:554:17)
       at processTimers (internal/timers.js:497:7)
 
-  13) amp-fit-text
+  27) amp-fit-text
        chrome
           Standalone environment 
             
@@ -193,7 +384,39 @@ Wait timed out after 5217ms
       at runMicrotasks (<anonymous>)
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
 
-  14) amp-fit-text
+  28) amp-fit-text
+       chrome
+          Viewer environment 
+            
+             should render in correct font-size:
+     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-fit-text/0.1/test-e2e/test-amp-fit-text.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  29) amp-fit-text
+       chrome
+          Viewer environment 
+            
+             should render in correct font-size:
+
+      AssertionError: expected '19px' to equal '20px'
+      + expected - actual
+
+      -19px
+      +20px
+      
+      at condition (build-system/tasks/e2e/expect.js:199:18)
+      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
+      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
+      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
+      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
+      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
+      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
+      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  30) amp-fit-text
        chrome
           Shadow environment 
             
@@ -202,7 +425,7 @@ Wait timed out after 5217ms
       at listOnTimeout (internal/timers.js:554:17)
       at processTimers (internal/timers.js:497:7)
 
-  15) amp-fit-text
+  31) amp-fit-text
        chrome
           Shadow environment 
             
@@ -225,7 +448,7 @@ Wait timed out after 5217ms
       at runMicrotasks (<anonymous>)
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
 
-  16) amp-fit-text
+  32) amp-fit-text
        chrome
           AMPHTML ads inabox friendly frame environment 
             
@@ -234,7 +457,7 @@ Wait timed out after 5217ms
       at listOnTimeout (internal/timers.js:554:17)
       at processTimers (internal/timers.js:497:7)
 
-  17) amp-fit-text
+  33) amp-fit-text
        chrome
           AMPHTML ads inabox friendly frame environment 
             
@@ -257,38 +480,780 @@ Wait timed out after 5217ms
       at runMicrotasks (<anonymous>)
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
 
-  18) amp-fit-text
-       chrome
-          AMPHTML ads inabox safeframe environment 
-            
-             should render in correct font-size:
-     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-fit-text/0.1/test-e2e/test-amp-fit-text.js)
-      at listOnTimeout (internal/timers.js:554:17)
-      at processTimers (internal/timers.js:497:7)
-
-  19) amp-fit-text
-       chrome
-          AMPHTML ads inabox safeframe environment 
-            
-             should render in correct font-size:
-
-      AssertionError: expected '19px' to equal '20px'
-      + expected - actual
-
-      -19px
-      +20px
-      
-      at condition (build-system/tasks/e2e/expect.js:199:18)
-      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
-      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
-      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
-      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
-      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
-      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
-      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:93:5)
-
-Executed 517 of 573 (Skipped 65) 19 FAILED 
-[12:17:31] [32mStopped server at[39m [36mhttp://localhost:8000[39m
-[12:17:31] Finished 'e2e' after 21 min
+Executed 516 of 576 (Skipped 65) 33 FAILED 
+Archive:  test/coverage-e2e/coverage.zip
+  inflating: ./test/coverage-e2e/coverage.json  
+  inflating: ./test/coverage-e2e/lcov-report/base.css  
+  inflating: ./test/coverage-e2e/lcov-report/sort-arrow-sprite.png  
+  inflating: ./test/coverage-e2e/lcov-report/sorter.js  
+  inflating: ./test/coverage-e2e/lcov-report/prettify.css  
+  inflating: ./test/coverage-e2e/lcov-report/prettify.js  
+  inflating: ./test/coverage-e2e/lcov-report/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/3p/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/3p/iframe-messaging-client.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/_a4a-config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/_config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/google/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/google/utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/google/a4a/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/google/a4a/utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/google/a4a/shared/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/google/a4a/shared/content-recommendation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/google/a4a/shared/url-builder.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/inabox/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/inabox/frame-overlay-helper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/inabox/frame-overlay-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/inabox/position-observer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/ads/inabox/util.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-ad-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-autocomplete-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-base-carousel-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-carousel-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-carousel-0.2.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-consent-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-date-picker-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-fit-text-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-form-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-lightbox-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-lightbox-gallery-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-list-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-live-list-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-loader-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-script-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-selector-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-selector-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-sidebar-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-social-share-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-auto-ads-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-auto-ads-ad-badge-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-auto-ads-attribution-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-auto-ads-inabox-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-auto-ads-shared-0.1.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-bookend-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-consent-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-draggable-drawer-header-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-hint-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-info-dialog-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-player-iframe.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-share-menu-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-system-layer-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-tooltip-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-unsupported-browser-layer-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/amp-story-viewport-warning-layer-1.0.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/ampdoc.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/ampshared.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/video-autoplay.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/parsers/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/build/parsers/css-expr-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/builtins/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/builtins/amp-img.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/builtins/amp-layout.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/builtins/amp-pixel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-a4a/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-a4a/0.1/a4a-variable-source.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-a4a/0.1/amp-a4a.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-a4a/0.1/head-validation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-a4a/0.1/secure-frame.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-a4a/0.1/signature-verifier.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-a4a/0.1/within-viewport.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/amp-ad-exit.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/filters/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/filters/click-delay.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/filters/click-location.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/filters/factory.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/filters/filter.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/filters/inactive-element.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-exit/0.1/test-e2e/test-amp-ad-exit.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-network-fake-impl/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-network-fake-impl/0.1/amp-ad-metadata-transformer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad-network-fake-impl/0.1/external-reorder-head-transformer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad/0.1/amp-ad-3p-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad/0.1/amp-ad-custom.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad/0.1/amp-ad-ui.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad/0.1/amp-ad.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad/0.1/concurrent-load.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-ad/0.1/legacy-ad-intersection-observer-host.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/activity-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/amp-analytics.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/analytics-group.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/analytics-root.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/cookie-reader.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/cookie-writer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/crc32.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/default-config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/events.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/iframe-transport-message-queue.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/iframe-transport-vendors.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/iframe-transport.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/instrumentation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/linker-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/linker-reader.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/linker.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/opacity.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/requests.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/resource-timing.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/sandbox-vars-allowlist.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/scroll-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/transport-serializer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/transport.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/variables.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/visibility-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/visibility-model.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-analytics/0.1/test-e2e/test-iframe-transport.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/amp-animation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/install-polyfill.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/web-animation-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/web-animation-types.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/web-animations.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/parsers/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/parsers/css-expr-ast.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/parsers/css-expr.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/parsers/keyframes-extractor.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/runners/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/runners/animation-runner.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/runners/native-web-animation-runner.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/runners/scrolltimeline-worklet-runner.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/runners/utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-animation/0.1/test-e2e/test-amp-animation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-auto-lightbox/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-auto-lightbox/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-auto-lightbox/0.1/test-e2e/test-amp-auto-lightbox.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-autocomplete/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-autocomplete/0.1/amp-autocomplete.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-autocomplete/0.1/autocomplete-binding-def.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-autocomplete/0.1/autocomplete-binding-inline.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-autocomplete/0.1/autocomplete-binding-single.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-autocomplete/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-autocomplete/0.1/test-e2e/test-amp-autocomplete-inline.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-autocomplete/0.1/test-e2e/test-amp-autocomplete.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/action-source.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/amp-base-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/array-util.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/auto-advance.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/carousel-accessibility.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/carousel-events.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/child-layout-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/dimensions.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/responsive-attributes.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/helpers.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-advance.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-arrows-non-looping.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-arrows.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-autoadvance.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-grouping.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-hidden-controls.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-initial-slide.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-mixed-lengths-no-snap.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-mixed-lengths.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-multi-visible-single-advance.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-non-looping.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-responsive.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-rtl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/0.1/test-e2e/test-vertical.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/amp-base-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/arrow.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/base-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/base-carousel.jss.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/carousel-context.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/carousel-props.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/dimensions.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/scroller.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/helpers.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-advance.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-arrows-non-looping.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-arrows.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-autoadvance.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-grouping.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-non-looping.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-responsive.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-rtl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-base-carousel/1.0/test-e2e/test-vertical.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-bind/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-bind/0.1/amp-bind-macro.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-bind/0.1/amp-bind.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-bind/0.1/amp-state.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-bind/0.1/bind-events.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-bind/0.1/bind-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-bind/0.1/bind-validator.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-brightcove/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-brightcove/0.1/amp-brightcove.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/amp-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/base-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/base-slides.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/scrollable-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/slidescroll.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/test-e2e/test-hidden-controls.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.1/test-e2e/test-slidescroll-autoplay.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.2/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.2/amp-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.2/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.2/test-e2e/helpers.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-carousel/0.2/test-e2e/test-responsive-carousel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/amp-consent.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/cmps.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/consent-config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/consent-info.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/consent-policy-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/consent-state-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/consent-ui.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/test-e2e/common.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/test-e2e/test-amp-consent-client-side.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/test-e2e/test-amp-consent-server-side-expire-cache.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/test-e2e/test-amp-consent-server-side.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-consent/0.1/test-e2e/test-cmp-ui-interaction.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/amp-date-picker.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/constants.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/date-picker-common.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/date-range-picker.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/dates-list.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/defaultPhrases.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/react-utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/single-date-picker.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/test-e2e/test-blocked-dates.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/wrappers/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-date-picker/0.1/wrappers/maximum-nights.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-fit-text/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-fit-text/0.1/amp-fit-text.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-fit-text/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-fit-text/0.1/test-e2e/test-amp-fit-text.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-fit-text/1.0/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-fit-text/1.0/test-e2e/test-amp-fit-text.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/amp-form-textarea.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/amp-form.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/form-dirtiness.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/form-events.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/form-proxy.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/form-submit-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/form-validators.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/form-verifiers.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/validation-bubble.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-form/0.1/test-e2e/test-ssr.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-geo/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-geo/0.1/amp-geo-in-group.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-geo/0.1/amp-geo-presets.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-geo/0.1/amp-geo.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-iframe/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-iframe/0.1/amp-iframe.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/lightbox-caption.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/lightbox-controls.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/swipe-to-dismiss.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/service/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/service/lightbox-manager-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/service/lightbox-placeholders.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox-gallery/0.1/test-e2e/test-open-close.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox/0.1/amp-lightbox.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox/0.1/test-e2e/test-amp-lightbox-autocomplete.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-lightbox/0.1/test-e2e/test-amp-lightbox.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/amp-list.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/service/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/service/load-more-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/test-e2e/test-function-src.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/test-e2e/test-load-more-auto.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/test-e2e/test-load-more-manual.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-list/0.1/test-e2e/test-ssr.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-live-list/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-live-list/0.1/amp-live-list.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-live-list/0.1/live-list-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-live-list/0.1/poller.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-loader/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-loader/0.1/amp-loader.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-mustache/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-mustache/0.1/amp-mustache.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-mustache/0.2/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-mustache/0.2/amp-mustache.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-position-observer/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-position-observer/0.1/amp-position-observer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-position-observer/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-position-observer/0.1/test-e2e/test-scrollbound-animation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-position-observer/0.1/test-e2e/test-target-id.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-script/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-script/0.1/amp-script.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-script/0.1/user-activation-tracker.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-script/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-script/0.1/test-e2e/test-amp-script.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/0.1/amp-selector.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/0.1/test-e2e/test-amp-selector-tabs.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/1.0/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/1.0/amp-selector.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/1.0/selector.css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/1.0/selector.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/1.0/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-selector/1.0/test-e2e/test-amp-selector-tabs.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/amp-sidebar.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/autoscroll.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/swipe-to-dismiss.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/toolbar.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/test-e2e/test-amp-sidebar-toolbar.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.1/test-e2e/test-amp-sidebar.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.2/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-sidebar/0.2/test-e2e/test-amp-sidebar.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-social-share/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-social-share/0.1/amp-social-share-config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-social-share/0.1/amp-social-share.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/story-ad-analytics.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/story-ad-button-text-fitter.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/story-ad-config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/story-ad-localization.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/story-ad-page.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/story-ad-ui.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/ar.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/de.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/en-GB.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/en.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/es-419.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/es.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/fr.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/hi.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/id.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/it.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/ja.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/ko.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/nl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/no.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/pt-BR.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/pt-PT.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/ru.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/tr.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/vi.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/zh-CN.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/_locales/zh-TW.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/test-e2e/test-amp-story-auto-ads-fullbleed.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/test-e2e/test-amp-story-auto-ads-utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story-auto-ads/0.1/test-e2e/test-amp-story-auto-ads.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-access.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-affiliate-link.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-base-layer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-consent.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-cta-layer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-draggable-drawer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-embedded-component.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-grid-layer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-hint.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-info-dialog.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-localization-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-media-query-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-page-attachment.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-page.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-render-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-request-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-share-menu.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-share.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-store-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-system-layer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-unsupported-browser-layer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story-viewport-warning-layer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/amp-story.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/animation-presets-utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/animation-presets.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/animation-types.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/animation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/audio.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/development-ui.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/embed-mode.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/events.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/history.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/jsonld.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/live-story-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/loading-spinner.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/logging.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/media-performance-metrics-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/media-pool.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/media-tasks.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/page-advancement.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/pagination-buttons.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/progress-bar.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/semantic-render.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/simple-template.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/sources.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/story-analytics.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/toast.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/variable-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/ar.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/de.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/default.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/en-GB.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/en.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/es-419.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/es.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/fr.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/hi.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/id.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/it.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/ja.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/ko.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/nl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/no.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/pt-BR.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/pt-PT.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/ru.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/tr.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/vi.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/zh-CN.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/_locales/zh-TW.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/amp-story-bookend.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/bookend-component.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/components/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/components/article.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/components/bookend-component-interface.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/components/cta-link.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/components/heading.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/components/landscape.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/components/portrait.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/bookend/components/text-box.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/test-e2e/test-amp-story-bookend.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-story/1.0/test-e2e/test-amp-story-share-menu.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-subscriptions-google/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-subscriptions-google/0.1/test-e2e/test-amp-subscriptions-google.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-twitter/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-twitter/0.1/amp-twitter.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-video/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-video/0.1/amp-video.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-video/0.1/flexible-bitrate.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-video/0.1/test-e2e/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-video/0.1/test-e2e/test-amp-video-analytics.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-video/0.1/test-e2e/test-amp-video.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/findtext.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/focus-handler.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/highlight-handler.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/keyboard-handler.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/touch-handler.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/messaging/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-viewer-integration/0.1/messaging/messaging.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-youtube/0.1/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/extensions/amp-youtube/0.1/amp-youtube.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/3p-frame-messaging.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/3p-frame.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/action-constants.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/ad-cid.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/ad-helper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/amp-events.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/amp-shadow.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/amp.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/analytics.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/animation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/async-input.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/auto-lightbox.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/base-element.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/base-template.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/batched-json.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/chunk.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/clipboard.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/common-signals.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/config.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/consent-state.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/consent.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/cookies.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/css.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/curve.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/custom-element.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/document-fetcher.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/document-ready.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/document-submit.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/dom.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/element-service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/element-stub.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/enums.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/error.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/event-helper-listen.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/event-helper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/experiments.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/exponential-backoff.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/extension-analytics.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/finite-state-machine.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/focus-history.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/font-stylesheet-timeout.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/form-data-wrapper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/form.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/format.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/friendly-iframe-embed.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/full-overlay-frame-helper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/gesture-recognizers.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/gesture.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/get-bounding-client-rect.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/get-html.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/history.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/iframe-attributes.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/iframe-helper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/iframe-video.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/impression.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/ini-load.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/input.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/internal-version.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/json.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/layout-rect.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/layout.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/loading.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/localized-strings.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/log.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/mediasession-helper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/modal.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/mode-object.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/mode.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/module.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/motion.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/multidoc-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/observable.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/pass.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/pixel.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preconnect.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/pull-to-refresh.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/render-delaying-services.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/resolved-promise.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/runtime.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/sanitizer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/services.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/shadow-embed.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/size-list.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/srcset.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/ssr-template-helper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/standalone.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/static-template.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/string.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/style-installer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/style.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/time.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/transition.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/types.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/url-parse-query-string.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/url-rewrite.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/url-try-decode-uri-component.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/url.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/validator-integration.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/video-interface.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/viewport-observer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/visibility-state.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/web-components.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/window-interface.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/amp-story-player/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/amp-story-player/amp-story-player-iframe-pool.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/amp-story-player/amp-story-player-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/amp-story-player/page-scroller.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/component-hooks.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/component-install.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/component-meta.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/component.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/index.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/node.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/prop.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/scan.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/scheduler.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/context/values.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/contextprops/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/contextprops/index.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/experiments/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/experiments/fie-resources-exp.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/experiments/intersect-resources-exp.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/amp-inabox.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/host-services.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/inabox-cid.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/inabox-iframe-messaging-client.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/inabox-mutator.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/inabox-resources.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/inabox-services.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/inabox-story-ad.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/inabox-viewer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/inabox-viewport.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/inabox/utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/abort-controller.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/array-includes.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/custom-elements.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/document-contains.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/domtokenlist.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/fetch.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/intersection-observer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/map-set.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/math-sign.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/object-assign.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/object-values.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/promise.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/set-add.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/string-starts-with.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfills/weakmap-set.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfillstub/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/polyfillstub/intersection-observer-stub.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/base-element.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/compat.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/context.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/index.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/media-query-props.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/slot.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/component/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/component/contain.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/component/index.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/component/renderer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/preact/component/wrapper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/purifier/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/purifier/purifier.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/purifier/sanitation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/action-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/ampdoc-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/batched-xhr-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/cache-cid-api.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/cid-api.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/cid-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/core-services.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/crypto-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/custom-element-registry.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/document-info-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/extension-location.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/extensions-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/fixed-layer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/hidden-observer-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/history-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/ie-intrinsic-bug.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/ie-media-bug.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/jank-meter.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/loader-element.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/loading-indicator.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/localization.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/mutator-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/mutator-interface.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/navigation.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/notification-ui-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/owners-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/owners-interface.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/performance-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/platform-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/resource.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/resources-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/resources-interface.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/standard-actions-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/storage-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/task-queue.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/template-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/timer-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/url-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/url-replacements-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/variable-source.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/video-manager-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/video-session-manager.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewer-cid-api.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewer-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewer-interface.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/vsync-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/xhr-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/position-observer/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/position-observer/position-observer-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/position-observer/position-observer-worker.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/real-time-config/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/real-time-config/callout-vendors.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/real-time-config/real-time-config-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/url-expander/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/url-expander/expander.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/video/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/video/autoplay.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/video/install-autoplay-styles.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewport/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewport/viewport-binding-def.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewport/viewport-binding-ios-embed-wrapper.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewport/viewport-binding-natural.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewport/viewport-impl.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/service/viewport/viewport-interface.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/array.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/base64.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/bytes.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/date.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/detached-dom-stream.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/document-visibility.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/dom-based-weakref.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/dom-fingerprint.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/dom-tranform-stream.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/dom-writer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/function.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/img.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/intersection-observer-3p-host.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/key-codes.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/lru-cache.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/math.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/object.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/priority-queue.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/promise.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/rate-limit.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/signals.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/story.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/stream-response.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/video.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/utils/xhr-utils.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/web-worker/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/src/web-worker/amp-worker.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/caja/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/caja/html-sanitizer.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/css-escape/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/css-escape/css-escape.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/fuzzysearch/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/fuzzysearch/index.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/mustache/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/mustache/mustache.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/set-dom/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/set-dom/set-dom.js.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/webcomponentsjs/index.html  
+  inflating: ./test/coverage-e2e/lcov-report/third_party/webcomponentsjs/ShadowCSS.js.html  
+  inflating: ./test/coverage-e2e/lcov.info  
+[13:40:58] [32mINFO:[39m Generated code coverage report at [36mfile:///home/rcebulko/amphtml/test/coverage-e2e/lcov-report/index.html[39m
+[13:40:58] [32mStopped server at[39m [36mhttp://localhost:8000[39m
+[13:40:58] Finished 'e2e' after 25 min
