@@ -21,9 +21,16 @@ import {
   assertDoesNotContainDisplay,
   setStyle,
   setStyles,
+  toggle,
 } from '../../../src/style';
 import {dict} from '../../../src/utils/object';
 import {generateSentinel} from '../../../src/3p-frame';
+import {
+  getCloseButtonExtendedRadius,
+  getCloseButtonInnerPositionStyle,
+  getCloseButtonOuterPositionStyle,
+  isClickInsideElementRect,
+} from './utils';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getData} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -49,8 +56,17 @@ class AmpVidazooWidget extends AMP.BaseElement {
     this.iframeDomain_ = 'http://localhost:8080';
     // this.iframeDomain_ = 'https://static.vidazoo.com';
 
+    /** @private {?Object} */
+    this.widgetOptions_ = null;
+
     /** @private {?HTMLDivElement} */
     this.wrapper_ = null;
+
+    /** @private {?HTMLDivElement} */
+    this.floater_ = null;
+
+    /** @private {?HTMLAnchorElement} */
+    this.closeButton_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -119,27 +135,27 @@ class AmpVidazooWidget extends AMP.BaseElement {
     this.applyFillContent(iframe, true);
     this.iframe_ = iframe;
 
+    this.floater_ = element.ownerDocument.createElement('div');
+    this.floater_.classList.add('i-amphtml-vidazoo-floater');
+    this.floater_.appendChild(this.iframe_);
+
     this.wrapper_ = element.ownerDocument.createElement('div');
-    this.wrapper_.appendChild(this.iframe_);
-    setStyles(this.wrapper_, {
-      'width': '100%',
-      'height': '100%',
-      'position': 'absolute',
-      'top': '0',
-      'left': '0',
-    });
+    this.wrapper_.classList.add('i-amphtml-vidazoo-wrapper');
+    this.wrapper_.appendChild(this.floater_);
+
     element.appendChild(this.wrapper_);
 
-    this.bindToWidgetHooks_();
+    this.bindToWidgetMessages_();
 
     return this.loadPromise(iframe).then(() => this.widgetReadyPromise_);
   }
 
   /** @override */
   unlayoutCallback() {
-    this.destroyWidgetFrame_();
+    this.destroyWidgetUI_();
     this.destroyIntersectionObserver_();
     this.initializePromise_();
+    this.widgetOptions_ = null;
 
     return true;
   }
@@ -148,19 +164,21 @@ class AmpVidazooWidget extends AMP.BaseElement {
    * Removes the widget iframe
    * @private
    */
-  destroyWidgetFrame_() {
+  destroyWidgetUI_() {
     if (this.wrapper_) {
       removeElement(this.wrapper_);
       this.iframe_ = null;
       this.wrapper_ = null;
+      this.floater_ = null;
+      this.closeButton_ = null;
     }
   }
 
   /**
-   * Subscribe to widget hooks from iframe.
+   * Subscribe to widget messages from iframe.
    * @private
    */
-  bindToWidgetHooks_() {
+  bindToWidgetMessages_() {
     this.win.addEventListener('message', (e) => {
       if (!this.iframe_ || e.source !== this.iframe_.contentWindow) {
         return;
@@ -190,6 +208,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
   /**
    * Handles hook event from widget
+   * @private
    * @param {*} data - The payload from the message event
    */
   handleHook_(data) {
@@ -214,6 +233,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
   /**
    * Setup after widget is ready
+   * @private
    */
   handleWidgetReady_() {
     const sentinel = generateSentinel(this.win);
@@ -226,10 +246,13 @@ class AmpVidazooWidget extends AMP.BaseElement {
     // sends the AMP context into the iframe
     this.broadcast_({type: 'amp_context', context});
 
-    this.requestFromWidget_('getWidgetOption', {
-      option: 'playerHolderBackgroundColor',
-    }).then((color = 'transparent') => {
-      setStyle(this.element, 'backgroundColor', color);
+    this.requestFromWidget_('getWidgetOptions').then((options) => {
+      this.widgetOptions_ = options;
+      setStyle(
+        this.element,
+        'backgroundColor',
+        options.playerHolderBackgroundColor
+      );
     });
 
     this.createIntersectionObserver_();
@@ -239,6 +262,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
   /**
    * Handles request response from widget
+   * @private
    * @param {*} data - The payload from the message event
    */
   handleResponse_(data) {
@@ -253,24 +277,27 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
   /**
    * Called on 'fullScreenModeChange' widget hook.
-   *
+   * @private
    * @param {boolean} isActive is full screen mode activated
    */
   handleFullScreenToggle_(isActive) {
-    this.wrapper_.classList.toggle('i-amphtml-fullscreen', isActive);
+    this.wrapper_.classList.toggle('i-amphtml-vidazoo-fullscreen', isActive);
   }
 
   /**
    * Called on 'floatModeChange` widget hook.
-   *
+   * @private
    * @param {boolean} isFloatActive is float mode active
    */
   handleFloatModeToggle_(isFloatActive) {
-    this.iframe_.classList.toggle('i-amphtml-float-active', isFloatActive);
+    this.floater_.classList.toggle(
+      'i-amphtml-vidazoo-float-active',
+      isFloatActive
+    );
 
     // clear inline position and layout style
     if (!isFloatActive) {
-      setStyles(this.iframe_, {
+      setStyles(this.floater_, {
         'top': '',
         'right': '',
         'bottom': '',
@@ -286,29 +313,38 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
   /**
    * Called on 'closeVisibilityChange' widget hook.
-   *
+   * @private
    * @param {boolean} isVisible - should the close button be displayed
    */
   handleCloseButtonVisibilityToggle_(isVisible) {
-    if (isVisible) {
+    if (this.widgetOptions_.closeButton.disableUI) {
+      return;
     }
+
+    if (!this.closeButton_) {
+      this.createCloseButton_();
+    }
+
+    toggle(this.closeButton_, isVisible);
   }
 
   /**
    * Receive layout for iframe while in float mode.
+   * @private
    * @param {*} data
    */
   handleFloatLayoutReceived_(data) {
-    setStyles(this.iframe_, assertDoesNotContainDisplay(data.layout));
+    setStyles(this.floater_, assertDoesNotContainDisplay(data.layout));
   }
 
   /**
    * Send a request command to the widget
+   * @private
    * @param {string} request
-   * @param {any} payload
+   * @param {?any} payload
    * @return {Promise}
    */
-  requestFromWidget_(request, payload) {
+  requestFromWidget_(request, payload = {}) {
     const id = REQUEST_ID++;
     const deferred = new Deferred();
 
@@ -326,6 +362,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
   /**
    * Broadcast data to the widget inside this.iframe_
+   * @private
    * @param {*} data
    */
   broadcast_(data) {
@@ -343,7 +380,8 @@ class AmpVidazooWidget extends AMP.BaseElement {
   }
 
   /**
-   * Create a loading promise
+   * Create a loading promise.
+   * @private
    */
   initializePromise_() {
     const deferred = new Deferred();
@@ -352,7 +390,66 @@ class AmpVidazooWidget extends AMP.BaseElement {
   }
 
   /**
-   * Observer this.element for float
+   * Creates the UI for the close button.
+   * @private
+   */
+  createCloseButton_() {
+    const closeButtonOptions = this.widgetOptions_.closeButton;
+
+    this.closeButton_ = this.element.ownerDocument.createElement('a');
+    this.closeButton_.classList.add('i-amphtml-vidazoo-close-button');
+    this.closeButton_.innerHTML = '&#215;';
+
+    const position = closeButtonOptions.position.split('-');
+    const extend = getCloseButtonExtendedRadius(
+      closeButtonOptions.extendRadius
+    );
+
+    const style = {
+      ...getCloseButtonOuterPositionStyle(
+        position[0],
+        closeButtonOptions.inset
+      ),
+      ...getCloseButtonInnerPositionStyle(position[1]),
+    };
+
+    setStyles(this.wrapper_, {
+      '--extend-button-top': `${extend[0]}px`,
+      '--extend-button-right': `${extend[1]}px`,
+      '--extend-button-bottom': `${extend[2]}px`,
+      '--extend-button-left': `${extend[3]}px`,
+    });
+
+    setStyles(this.closeButton_, assertDoesNotContainDisplay(style));
+
+    this.floater_.appendChild(this.closeButton_);
+    this.closeButton_.addEventListener(
+      'click',
+      this.handleCloseClick_.bind(this)
+    );
+  }
+
+  /**
+   * Handle close button click.
+   * @param {Event} e
+   */
+  handleCloseClick_(e) {
+    if (
+      !isClickInsideElementRect(e, e.currentTarget) &&
+      this.widgetOptions_.closeButton.extendRadiusClickStrategy === 'block'
+    ) {
+      // click was on button margins, we should block it
+      return;
+    }
+
+    this.broadcast_({
+      type: 'close_click',
+    });
+  }
+
+  /**
+   * Observe this.wrapper_ for intersection.
+   * @private
    */
   createIntersectionObserver_() {
     this.intersectionObserver_ = new IntersectionObserver(
@@ -365,6 +462,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
   /**
    * Destroys intersection observer
+   * @private
    */
   destroyIntersectionObserver_() {
     if (this.intersectionObserver_) {
@@ -376,6 +474,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
   /**
    * Intersection observer callback.
    * Broadcasts the intersection state into the widget.
+   * @private
    * @param {IntersectionObserverEntry[]} entries
    */
   onIntersection_(entries) {

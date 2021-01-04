@@ -1,4 +1,4 @@
-.i-amphtml-fullscreen {
+.i-amphtml-vidazoo-fullscreen {
     position: fixed !important;
     width: 100%;
     height: 100%;
@@ -9,6 +9,66 @@
     z-index: 1;
 }
 
-.i-amphtml-float-active {
+.i-amphtml-vidazoo-float-active {
     position: fixed !important;
+    box-shadow: 0px 0 20px 6px rgba(0, 0, 0, 0.2);
+}
+
+.i-amphtml-vidazoo-wrapper {
+    --extend-button-top: 0;
+    --extend-button-right: 0;
+    --extend-button-bottom: 0;
+    --extend-button-left: 0;
+}
+
+.i-amphtml-vidazoo-wrapper,
+.i-amphtml-vidazoo-floater {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.i-amphtml-vidazoo-close-button {
+    color: #666;
+    background-color: #eee;
+    border: solid 1px #666;
+    border-radius: 100%;
+    font-family: arial, sans-serif;
+    position: absolute;
+    text-decoration: none;
+    z-index: 1000;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 22px;
+    height: 22px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.i-amphtml-vidazoo-close-button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    cursor: pointer;
+    border-radius: 100%;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 0;
+    border-width: var(--extend-button-top) var(--extend-button-right) var(--extend-button-bottom) var(--extend-button-left);
+    transform: translate(0, 0);
+    transform: translate(calc(-1*var(--extend-button-left)), calc(-1*var(--extend-button-top)));
 }
