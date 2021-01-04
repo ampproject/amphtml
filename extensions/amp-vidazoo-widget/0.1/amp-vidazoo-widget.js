@@ -302,11 +302,9 @@ class AmpVidazooWidget extends AMP.BaseElement {
         'right': '',
         'bottom': '',
         'left': '',
-        'zIndex': '',
         'width': '',
         'height': '',
-        'minWidth': '',
-        'minHeight': '',
+        'zIndex': '',
       });
     }
   }
