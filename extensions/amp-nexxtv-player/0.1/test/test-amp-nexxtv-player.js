@@ -34,32 +34,29 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getNexxtv(attributes, opt_responsive) {
-      const nexxtv = createElementWithAttributes(doc, 'amp-nexxtv-player', {
-        ...attributes,
+    async function getNexxtvPlayer(attributes) {
+      const element = createElementWithAttributes(doc, 'amp-nexxtv-player', {
         width: 111,
         height: 222,
+        ...attributes,
         // Use a blank page, since these tests don't require an actual page.
         // hash # at the end so path is not affected by param concat
         'data-origin': `http://localhost:${location.port}/test/fixtures/served/blank.html#`,
       });
-      if (opt_responsive) {
-        nexxtv.setAttribute('layout', 'responsive');
-      }
-      doc.body.appendChild(nexxtv);
-      await nexxtv.build();
-      await nexxtv.layoutCallback();
-      const nexxTimerIframe = nexxtv.querySelector('iframe');
-      nexxtv.implementation_.handleNexxMessage_({
+      doc.body.appendChild(element);
+      await element.build();
+      await element.layoutCallback();
+      const iframe = element.querySelector('iframe');
+      element.implementation_.handleNexxMessage_({
         origin: 'https://embed.nexx.cloud',
-        source: nexxTimerIframe.contentWindow,
+        source: iframe.contentWindow,
         data: JSON.stringify({cmd: 'onload'}),
       });
-      return nexxtv;
+      return element;
     }
 
     it('renders nexxtv video player', async () => {
-      const element = await getNexxtv({
+      const element = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
       });
@@ -79,7 +76,7 @@ describes.realWin(
     });
 
     it('renders player responsive', async () => {
-      const nexxtv = await getNexxtv({
+      const nexxtv = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
       });
@@ -89,7 +86,7 @@ describes.realWin(
     });
 
     it('removes iframe after unlayoutCallback', async () => {
-      const nexxtv = await getNexxtv({
+      const nexxtv = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
       });
@@ -103,7 +100,7 @@ describes.realWin(
     });
 
     it('should forward events from nexxtv-player to the amp element', async () => {
-      const nexxtv = await getNexxtv({
+      const nexxtv = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
       });
