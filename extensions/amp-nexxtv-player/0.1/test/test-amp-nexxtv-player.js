@@ -16,6 +16,7 @@
 
 import '../amp-nexxtv-player';
 import {VideoEvents} from '../../../../src/video-interface';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(
@@ -34,13 +35,14 @@ describes.realWin(
     });
 
     async function getNexxtv(attributes, opt_responsive) {
-      const nexxtv = doc.createElement('amp-nexxtv-player');
-
-      for (const key in attributes) {
-        nexxtv.setAttribute(key, attributes[key]);
-      }
-      nexxtv.setAttribute('width', '111');
-      nexxtv.setAttribute('height', '222');
+      const nexxtv = createElementWithAttributes(doc, 'amp-nexxtv-player', {
+        ...attributes,
+        width: 111,
+        height: 222,
+        // Use a blank page, since these tests don't require an actual page.
+        // hash # at the end so path is not affected by param concat
+        'data-origin': `http://localhost:${location.port}/test/fixtures/served/blank.html#`,
+      });
       if (opt_responsive) {
         nexxtv.setAttribute('layout', 'responsive');
       }
@@ -57,16 +59,23 @@ describes.realWin(
     }
 
     it('renders nexxtv video player', async () => {
-      const nexxtv = await getNexxtv({
+      const element = await getNexxtv({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
       });
-      const playerIframe = nexxtv.querySelector('iframe');
+      const playerIframe = element.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
-      expect(playerIframe.src).to.equal(
-        'https://embed.nexx.cloud/761/video/' +
-          '71QQG852413DU7J?dataMode=static&platform=amp'
-      );
+      expect(playerIframe.src)
+        .to.be.a('string')
+        .and.match(
+          new RegExp(
+            element.getAttribute('data-client') +
+              '/video/' +
+              element.getAttribute('data-mediaid') +
+              '\\?dataMode=static&platform=amp' +
+              '$' // suffix
+          )
+        );
     });
 
     it('renders player responsive', async () => {

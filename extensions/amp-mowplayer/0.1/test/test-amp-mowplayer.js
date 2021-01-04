@@ -40,11 +40,7 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getMowPlayer(
-      attributes,
-      opt_responsive,
-      opt_beforeLayoutCallback
-    ) {
+    function getMowPlayer(attributes, opt_responsive) {
       const mp = doc.createElement('amp-mowplayer');
       for (const key in attributes) {
         mp.setAttribute(key, attributes[key]);
@@ -55,14 +51,13 @@ describes.realWin(
         mp.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(mp);
+      mp.implementation_.baseURL_ =
+        // Use a blank page, since these tests don't require an actual page.
+        // hash # at the end so path is not affected by param concat
+        `http://localhost:${location.port}/test/fixtures/served/blank.html#`;
       return mp
         .build()
-        .then(() => {
-          if (opt_beforeLayoutCallback) {
-            opt_beforeLayoutCallback(mp);
-          }
-          return mp.layoutCallback();
-        })
+        .then(() => mp.layoutCallback())
         .then(() => {
           const mpIframe = mp.querySelector('iframe');
           mp.implementation_.handleMowMessage_({
