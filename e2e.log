@@ -1,0 +1,294 @@
+[11:56:58] Using gulpfile ~/amphtml/gulpfile.js
+[11:56:58] Starting 'e2e'...
+[11:56:58] Running [36mnpm install[39m to install packages in [36mbuild-system/tasks/e2e[39m...
+[11:57:03] [32mStarted[39m [36mAMP Dev Server[39m [32mat[39m [36mhttp://localhost:8000[39m
+[11:57:03] [32mServing[39m [36munminified[39m [32mJS[39m
+[11:57:03] Running tests...
+●●●●●●●●●●●○○●●●●●●●○●○●○●○●○●○●○●○●○●○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○●○○○●●●●○●●●●●●●●●○●●●●●●●○○●●○○○○○○●○○○●●●●●●●●●●○○●●●●●●●●●○●●○●●●●●●●●●●●●○○○○●○○○○●○○○○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○○○○○○○○○○○○●○○●●●●●●●●●●●●●●●●●●●●●●●●●●○○●●●○●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●○○○●●●●●
+  1) AMP carousel mixed length slides
+       chrome
+          Standalone environment 
+            
+             no snap
+               should have the correct initial slide positions:
+     StaleElementReferenceError: stale element reference: element is not attached to the page document
+  (Session info: headless chrome=87.0.4280.88)
+      at Object.throwDecodedError (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/error.js:550:15)
+      at parseHttpResponse (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:565:13)
+      at Executor.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/http.js:491:26)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at Driver.execute (build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:700:17)
+
+  2) AMP carousel mixed length slides
+       chrome
+          Standalone environment 
+            
+             no snap
+               should have the correct initial slide positions:
+
+      AssertionError: expected 588 to equal 600
+      + expected - actual
+
+      -588
+      +600
+      
+      at condition (build-system/tasks/e2e/expect.js:199:18)
+      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
+      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
+      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
+      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
+      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
+      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
+      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  3) AMP carousel mixed length slides
+       chrome
+          Standalone environment 
+            
+             snap
+               should have the correct initial slide positions:
+     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-base-carousel/0.1/test-e2e/test-mixed-lengths.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  4) AMP carousel mixed length slides
+       chrome
+          Standalone environment 
+            
+             snap
+               should have the correct initial slide positions:
+
+      AssertionError: expected { Object (bottom, height, ...) } to have property 'x' of 100, but got 101
+      + expected - actual
+
+      -101
+      +100
+      
+  
+
+  5) AMP carousel mixed length slides
+       chrome
+          Standalone environment 
+            
+             snap
+               should snap on the center point:
+     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-base-carousel/0.1/test-e2e/test-mixed-lengths.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  6) AMP carousel mixed length slides
+       chrome
+          Standalone environment 
+            
+             snap
+               should snap on the center point:
+
+      AssertionError: expected { Object (bottom, height, ...) } to have property 'x' of 200, but got 731
+      + expected - actual
+
+      -731
+      +200
+      
+  
+
+  7) AMP carousel mixed length slides
+       chrome
+          Viewer environment 
+            
+             snap
+               should have the correct initial slide positions:
+     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-base-carousel/0.1/test-e2e/test-mixed-lengths.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  8) AMP carousel mixed length slides
+       chrome
+          Viewer environment 
+            
+             snap
+               should have the correct initial slide positions:
+
+      AssertionError: expected 588 to equal 600
+      + expected - actual
+
+      -588
+      +600
+      
+      at condition (build-system/tasks/e2e/expect.js:199:18)
+      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
+      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
+      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
+      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
+      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
+      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
+      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  9) AMP carousel arrows when non-looping
+       chrome
+          Standalone environment 
+            
+             "before each" hook for "should have the arrows in the correct initial state":
+     TimeoutError: Waiting for element to be located .arrow-prev-34d526e
+Wait timed out after 5231ms
+      at /home/rcebulko/amphtml/build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:842:17
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  10) AMP carousel
+       chrome
+          Standalone environment 
+            
+             should snap when scrolling:
+     TimeoutError: Waiting for element to be located .hide-scrollbar-34d526e
+Wait timed out after 5175ms
+      at /home/rcebulko/amphtml/build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:842:17
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  11) Vertical AMP carousel
+       chrome
+          Standalone environment 
+            
+             should reset the window after scroll:
+     TimeoutError: Waiting for element to be located .hide-scrollbar-34d526e
+Wait timed out after 5217ms
+      at /home/rcebulko/amphtml/build-system/tasks/e2e/node_modules/selenium-webdriver/lib/webdriver.js:842:17
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  12) amp-fit-text
+       chrome
+          Standalone environment 
+            
+             should render in correct font-size:
+     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-fit-text/0.1/test-e2e/test-amp-fit-text.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  13) amp-fit-text
+       chrome
+          Standalone environment 
+            
+             should render in correct font-size:
+
+      AssertionError: expected '19px' to equal '20px'
+      + expected - actual
+
+      -19px
+      +20px
+      
+      at condition (build-system/tasks/e2e/expect.js:199:18)
+      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
+      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
+      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
+      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
+      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
+      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
+      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  14) amp-fit-text
+       chrome
+          Shadow environment 
+            
+             should render in correct font-size:
+     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-fit-text/0.1/test-e2e/test-amp-fit-text.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  15) amp-fit-text
+       chrome
+          Shadow environment 
+            
+             should render in correct font-size:
+
+      AssertionError: expected '19px' to equal '20px'
+      + expected - actual
+
+      -19px
+      +20px
+      
+      at condition (build-system/tasks/e2e/expect.js:199:18)
+      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
+      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
+      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
+      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
+      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
+      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
+      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  16) amp-fit-text
+       chrome
+          AMPHTML ads inabox friendly frame environment 
+            
+             should render in correct font-size:
+     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-fit-text/0.1/test-e2e/test-amp-fit-text.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  17) amp-fit-text
+       chrome
+          AMPHTML ads inabox friendly frame environment 
+            
+             should render in correct font-size:
+
+      AssertionError: expected '19px' to equal '20px'
+      + expected - actual
+
+      -19px
+      +20px
+      
+      at condition (build-system/tasks/e2e/expect.js:199:18)
+      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
+      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
+      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
+      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
+      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
+      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
+      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+  18) amp-fit-text
+       chrome
+          AMPHTML ads inabox safeframe environment 
+            
+             should render in correct font-size:
+     Error: Timeout of 40000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/home/rcebulko/amphtml/extensions/amp-fit-text/0.1/test-e2e/test-amp-fit-text.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  19) amp-fit-text
+       chrome
+          AMPHTML ads inabox safeframe environment 
+            
+             should render in correct font-size:
+
+      AssertionError: expected '19px' to equal '20px'
+      + expected - actual
+
+      -19px
+      +20px
+      
+      at condition (build-system/tasks/e2e/expect.js:199:18)
+      at condition (build-system/tasks/e2e/selenium-webdriver-controller.js:73:12)
+      at _callee$ (build-system/tasks/e2e/selenium-webdriver-controller.js:55:12)
+      at tryCatch (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:61:40)
+      at GeneratorFunctionPrototype.invoke [as _invoke] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:329:22)
+      at GeneratorFunctionPrototype.prototype.<computed> [as next] (build-system/tasks/e2e/node_modules/babel-regenerator-runtime/runtime.js:94:21)
+      at asyncGeneratorStep (build-system/tasks/e2e/selenium-webdriver-controller.js:11:103)
+      at _next (build-system/tasks/e2e/selenium-webdriver-controller.js:13:194)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+Executed 517 of 573 (Skipped 65) 19 FAILED 
+[12:17:31] [32mStopped server at[39m [36mhttp://localhost:8000[39m
+[12:17:31] Finished 'e2e' after 21 min
