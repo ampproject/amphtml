@@ -157,7 +157,7 @@ class AmpBrightcove extends AMP.BaseElement {
       consentStringPromise,
     ]).then((arr) => {
       this.consentState_ = arr[0];
-      this.sharedData_ = arr[1];
+      this.consentSharedData_ = arr[1];
       this.consentString_ = arr[2];
     });
   }

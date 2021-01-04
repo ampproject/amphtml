@@ -79,7 +79,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
       }).then((bc) => {
@@ -101,7 +101,7 @@ describes.realWin(
     });
 
     it('removes iframe after unlayoutCallback', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
       }).then((bc) => {
@@ -115,7 +115,7 @@ describes.realWin(
     });
 
     it('should pass data-param-* attributes to the iframe src', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-param-my-param': 'hello world',
@@ -127,7 +127,7 @@ describes.realWin(
     });
 
     it('should propagate mutated attributes', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
       }).then((bc) => {
@@ -166,7 +166,7 @@ describes.realWin(
     });
 
     it('should give precedence to playlist id', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-playlist-id': 'ref:test-playlist',
@@ -179,7 +179,7 @@ describes.realWin(
     });
 
     it('should allow both playlist and video id to be unset', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
       }).then((bc) => {
         const iframe = bc.querySelector('iframe');
@@ -190,7 +190,7 @@ describes.realWin(
     });
 
     it('should pass referrer', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-referrer': 'COUNTER',
       }).then((bc) => {
@@ -201,7 +201,7 @@ describes.realWin(
     });
 
     it('should force playsinline', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-param-playsinline': 'false',
@@ -213,7 +213,7 @@ describes.realWin(
     });
 
     it('should forward events', () => {
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
       }).then((bc) => {
@@ -299,7 +299,7 @@ describes.realWin(
         .resolves({a: 1, b: 2});
       env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('abc');
 
-      getBrightcove({
+      return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-block-on-consent': '_till_accepted',
