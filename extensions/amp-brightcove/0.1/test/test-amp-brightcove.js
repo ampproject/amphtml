@@ -24,6 +24,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {macroTask} from '../../../../testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.realWin(
@@ -55,6 +56,8 @@ describes.realWin(
 
       await element.signals().whenSignal(CommonSignals.LOAD_START);
 
+      await macroTask();
+
       try {
         fakePostMessage(element, {event: 'ready'});
       } catch (_) {
@@ -75,7 +78,7 @@ describes.realWin(
       });
     }
 
-    it('renders', async () => {
+    it('renders', () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
@@ -97,7 +100,7 @@ describes.realWin(
       );
     });
 
-    it('removes iframe after unlayoutCallback', async () => {
+    it('removes iframe after unlayoutCallback', () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
@@ -111,7 +114,7 @@ describes.realWin(
       });
     });
 
-    it('should pass data-param-* attributes to the iframe src', async () => {
+    it('should pass data-param-* attributes to the iframe src', () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
@@ -123,7 +126,7 @@ describes.realWin(
       });
     });
 
-    it('should propagate mutated attributes', async () => {
+    it('should propagate mutated attributes', () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
@@ -162,7 +165,7 @@ describes.realWin(
       });
     });
 
-    it('should give precedence to playlist id', async () => {
+    it('should give precedence to playlist id', () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
@@ -175,7 +178,7 @@ describes.realWin(
       });
     });
 
-    it('should allow both playlist and video id to be unset', async () => {
+    it('should allow both playlist and video id to be unset', () => {
       getBrightcove({
         'data-account': '1290862519001',
       }).then((bc) => {
@@ -186,7 +189,7 @@ describes.realWin(
       });
     });
 
-    it('should pass referrer', async () => {
+    it('should pass referrer', () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-referrer': 'COUNTER',
@@ -197,7 +200,7 @@ describes.realWin(
       });
     });
 
-    it('should force playsinline', async () => {
+    it('should force playsinline', () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
@@ -209,7 +212,7 @@ describes.realWin(
       });
     });
 
-    it('should forward events', async () => {
+    it('should forward events', () => {
       getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
@@ -287,7 +290,7 @@ describes.realWin(
       });
     });
 
-    it('should propagate consent state to iframe', async () => {
+    it('should propagate consent state to iframe', () => {
       env.sandbox
         .stub(consent, 'getConsentPolicyState')
         .resolves(CONSENT_POLICY_STATE.SUFFICIENT);

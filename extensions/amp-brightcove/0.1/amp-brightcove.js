@@ -147,10 +147,10 @@ class AmpBrightcove extends AMP.BaseElement {
       : Promise.resolve(null);
     const consentStringPromise = consentPolicy
       ? getConsentPolicyInfo(this.element, consentPolicy)
-      : Promise.resolve();
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicy
       ? getConsentPolicySharedData(this.element, consentPolicy)
-      : Promise.resolve();
+      : Promise.resolve(null);
     return Promise.all([
       consentPromise,
       sharedDataPromise,
