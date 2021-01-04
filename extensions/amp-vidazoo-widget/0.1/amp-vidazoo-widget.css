@@ -53,6 +53,7 @@
     align-items: center;
     justify-content: center;
     line-height: 1;
+    box-sizing: border-box;
 }
 
 .i-amphtml-vidazoo-close-button::after {
