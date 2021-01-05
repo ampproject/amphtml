@@ -483,7 +483,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
   });
 
-  describe('children mapping', () => {
+  describe.only('children mapping', () => {
     let element;
     const DATE_STRING = '2018-01-01T08:00:00Z';
     const DATE = Date.parse(DATE_STRING);
@@ -563,6 +563,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
             data-param-test-two="confirm2"
             prefix="pref2"
           ></div>
+          Some text content
           <div cloned id="cloned1"></div>
           <div cloned id="cloned2"></div>
         </amp-preact>
@@ -603,8 +604,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should pass children as prop slot array and parse attributes', () => {
       const {children} = lastProps;
-      expect(children).to.have.lengthOf(2);
-      const {0: child1, 1: child2} = children;
+      expect(children).to.have.lengthOf(3);
+      const {0: child1, 1: child2, 2: textChild} = children;
       expect(child1.type).to.equal(Slot);
       expect(omit(child1.props, 'name')).to.deep.equal({
         boolDefTrue: true,
@@ -617,10 +618,12 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
+      expect(textChild.type).to.equal(Slot);
 
       // Names are random and most importantly not equal to each other.
       expect(child1.props.name).to.match(/i-amphtml-children-\d/);
       expect(child2.props.name).to.match(/i-amphtml-children-\d/);
+      expect(textChild.props.name).to.match(/i-amphtml-children-\d/);
       expect(child1.props.name).to.not.equal(child2.props.name);
       expect(element.querySelector('#child1').slot).to.equal(child1.props.name);
       expect(element.querySelector('#child2').slot).to.equal(child2.props.name);
@@ -629,7 +632,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should rerender on new children', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
       const {children: prevChildren} = lastProps;
-      expect(prevChildren).to.have.lengthOf(2);
+      expect(prevChildren).to.have.lengthOf(3);
       const {0: prevChild1, 1: prevChild2} = prevChildren;
 
       const newChild = createElementWithAttributes(doc, 'div', {
@@ -643,8 +646,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledTwice;
 
       const {children} = lastProps;
-      expect(children).to.have.lengthOf(3);
-      const {0: child1, 1: child2, 2: child3} = children;
+      expect(children).to.have.lengthOf(4);
+      const {0: child1, 1: child2, 3: child3} = children;
 
       // New child.
       expect(child3.type).to.equal(Slot);
@@ -679,7 +682,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should rerender when children are removed', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
       const {children: prevChildren} = lastProps;
-      expect(prevChildren).to.have.lengthOf(2);
+      expect(prevChildren).to.have.lengthOf(3);
       const {1: prevChild2} = prevChildren;
 
       const oldChild = element.querySelector('#child1');
@@ -689,7 +692,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledTwice;
 
       const {children} = lastProps;
-      expect(children).to.have.lengthOf(1);
+      expect(children).to.have.lengthOf(2);
       const {0: child2} = children;
 
       // No changes.
@@ -708,7 +711,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should rerender on reorder', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
       const {children: prevChildren} = lastProps;
-      expect(prevChildren).to.have.lengthOf(2);
+      expect(prevChildren).to.have.lengthOf(3);
       const {0: prevChild1, 1: prevChild2} = prevChildren;
 
       element.insertBefore(
@@ -720,7 +723,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledTwice;
 
       const {children} = lastProps;
-      expect(children).to.have.lengthOf(2);
+      expect(children).to.have.lengthOf(3);
       const {0: child2, 1: child1} = children;
 
       // No changes, except for ordering.
