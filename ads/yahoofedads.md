@@ -45,13 +45,13 @@ Yahoo Native-Display Ads Federation only requires a configured section code to r
 
 ### Required parameters
 
-- `data-site`, `data-region`, `data-lang`: Unique site/region/lang code that represents your site
-- `data-ad-unit`: The AD position with federation config, valid value can be `pencil`, `moments` or `outstream`
-- `data-sa`: The site-attribute used by display AD to render
-- `data-url`: Url the AD is hosted in for tracking purpose
-- `data-space-id`: Use this to provide what space id need to be used on picking up Display AD
+-   `data-site`, `data-region`, `data-lang`: Unique site/region/lang code that represents your site
+-   `data-ad-unit`: The AD position with federation config, valid value can be `pencil`, `moments` or `outstream`
+-   `data-sa`: The site-attribute used by display AD to render
+-   `data-url`: Url the AD is hosted in for tracking purpose
+-   `data-space-id`: Use this to provide what space id need to be used on picking up Display AD
 
 ### Optional override parameters
 
-- `data-ad-position-override`: The position which will be fetched from backend mandatorily, it can be `lrec`, `wfpad`, `reservedMoments`, `nativeMoments` or `nativeRegular`
-- `data-section-id`: Use this ot override what section id need to be used on picking up Native AD
+-   `data-ad-position-override`: The position which will be fetched from backend mandatorily, it can be `lrec`, `wfpad`, `reservedMoments`, `nativeMoments` or `nativeRegular`
+-   `data-section-id`: Use this ot override what section id need to be used on picking up Native AD

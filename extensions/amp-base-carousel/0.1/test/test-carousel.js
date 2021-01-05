@@ -156,8 +156,7 @@ describes.realWin('carousel implementation', {}, (env) => {
       expect(carousel.isAtEnd()).to.be.true;
     });
 
-    // TODO(#30563): fix and unskip.
-    it.skip('should return false when at not at end for RTL', async () => {
+    it('should return false when at not at end for RTL', async () => {
       setStyle(element, 'width', '299.2px');
       element.setAttribute('dir', 'rtl');
 
@@ -208,8 +207,7 @@ describes.realWin('carousel implementation', {}, (env) => {
       expect(carousel.isAtStart()).to.be.false;
     });
 
-    // TODO(#30563): fix and unskip.
-    it.skip('should return true when at start for RTL', async () => {
+    it('should return true when at start for RTL', async () => {
       setStyle(element, 'width', '299.2px');
       element.setAttribute('dir', 'rtl');
 
@@ -235,5 +233,32 @@ describes.realWin('carousel implementation', {}, (env) => {
 
       expect(carousel.isAtStart()).to.be.false;
     });
+  });
+
+  describe('resetScrollReferencePoint_', () => {
+    it(
+      'currentElementOffset_ & currentIndex_ should be set when it is a' +
+        ' programmatic scroll',
+      async () => {
+        const carousel = await createCarousel({
+          slideCount: 12,
+          loop: false,
+        });
+
+        // Fake the scroll that ends short of the correct index.
+        // This is handled by scroll event listener.
+        carousel.touching_ = false;
+        carousel.requestedIndex_ = 1;
+        carousel.currentIndex_ = 0;
+        carousel.restingIndex_ = 0;
+        carousel.currentElementOffset_ = -0.99382;
+
+        carousel.resetScrollReferencePoint_();
+
+        expect(carousel.currentElementOffset_).to.equal(0);
+        expect(carousel.currentIndex_).to.equal(1);
+        expect(carousel.requestedIndex_).to.be.null;
+      }
+    );
   });
 });

@@ -45,21 +45,27 @@ VideoWrapperDef.PlayerComponent;
 /**
  * @typedef {{
  *   component: (!VideoWrapperDef.PlayerComponent|undefined),
+ *   loading: (string|undefined),
+ *   unloadOnPause: (boolean|undefined),
+ *   src: (string|undefined),
  *   sources: (?PreactDef.Renderable|undefined),
  *   autoplay: (boolean|undefined),
  *   controls: (boolean|undefined),
  *   noaudio: (boolean|undefined),
+ *   poster: (string|undefined),
  *   mediasession: (boolean|undefined),
  *   title: (string|undefined),
  *   artist: (string|undefined),
  *   album: (string|undefined),
  *   artwork: (string|undefined),
+ *   onLoad: (function()|undefined),
  * }}
  */
 VideoWrapperDef.Props;
 
 /**
  * @typedef {{
+ *   metadata: ?Object,
  *   displayIcon: boolean,
  *   playing: boolean,
  *   displayOverlay: boolean,

@@ -100,7 +100,7 @@ void AdjustForeignAttributes(std::vector<Attribute>* attrs) {
   for (Attribute& attr : *attrs) {
     if (attr.key.empty() || attr.key.at(0) != 'x') continue;
     if (std::find(keys.begin(), keys.end(), attr.key) != keys.end()) {
-      int j = attr.key.find(":");
+      int j = attr.key.find(':');
       attr.name_space = attr.key.substr(0, j);
       attr.key = attr.key.substr(j + 1);
     }

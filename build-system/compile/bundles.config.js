@@ -300,6 +300,12 @@ exports.extensionBundles = [
     type: TYPES.AD,
   },
   {
+    name: 'amp-ad-network-nws-impl',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.AD,
+  },
+  {
     name: 'amp-ad-network-fake-impl',
     version: '0.1',
     latestVersion: '0.1',
@@ -663,12 +669,8 @@ exports.extensionBundles = [
     version: '1.0',
     latestVersion: '0.1',
     options: {
-      hasCss: false,
-      cssBinaries: [
-        'amp-inline-gallery',
-        'amp-inline-gallery-pagination',
-        'amp-inline-gallery-thumbnails',
-      ],
+      hasCss: true,
+      cssBinaries: ['amp-inline-gallery-pagination'],
     },
     type: TYPES.MISC,
   },
@@ -684,6 +686,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-instagram',
+    version: '1.0',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
@@ -713,6 +721,13 @@ exports.extensionBundles = [
   {
     name: 'amp-lightbox',
     version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-lightbox',
+    version: '1.0',
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -857,7 +872,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-sidebar',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '0.2', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -937,7 +952,18 @@ exports.extensionBundles = [
       cssBinaries: [
         'amp-story-auto-ads-ad-badge',
         'amp-story-auto-ads-attribution',
+        'amp-story-auto-ads-inabox',
+        'amp-story-auto-ads-shared',
       ],
+    },
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-story-dev-tools',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      hasCss: true,
     },
     type: TYPES.MISC,
   },
@@ -964,6 +990,13 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-story-panning-media',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-story-player',
     version: '0.1',
     latestVersion: '0.1',
@@ -975,6 +1008,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-stream-gallery',
+    version: '1.0',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
@@ -1130,12 +1169,6 @@ exports.extensionBundles = [
     ],
   },
   {
-    name: 'amp-google-vrview-image',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
     name: 'amp-viewer-integration',
     version: '0.1',
     latestVersion: '0.1',
@@ -1190,6 +1223,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,
+  },
+  {
+    name: 'amp-youtube',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-youtube',

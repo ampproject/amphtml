@@ -301,7 +301,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
 
     env.sandbox.stub(platform, 'getLAAParams_').returns({
       'gaa_ts': (Date.now() / 1000 - 10).toString(16),
-      'gaa_at': 'laa',
+      'gaa_at': 'la',
       'gaa_sig': 'signature',
       'gaa_n': 123456,
     });
@@ -329,7 +329,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     );
     env.sandbox.stub(platform, 'getLAAParams_').returns({
       'gaa_ts': (Date.now() / 1000 + 10).toString(16),
-      'gaa_at': 'laa',
+      'gaa_at': 'la',
       'gaa_sig': 'signature',
       'gaa_n': 123456,
     });
@@ -359,7 +359,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     ampdoc.win.__AMP_MODE.localDev = false;
     env.sandbox.stub(platform, 'getLAAParams_').returns({
       'gaa_ts': (Date.now() / 1000 + 10).toString(16),
-      'gaa_at': 'laa',
+      'gaa_at': 'la',
       'gaa_sig': 'signature',
       'gaa_n': 123456,
     });
@@ -389,7 +389,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     ampdoc.win.__AMP_MODE.localDev = false;
     env.sandbox.stub(platform, 'getLAAParams_').returns({
       'gaa_ts': (Date.now() / 1000 + 10).toString(16),
-      'gaa_at': 'laa',
+      'gaa_at': 'la',
       'gaa_sig': 'signature',
       'gaa_n': 123456,
     });

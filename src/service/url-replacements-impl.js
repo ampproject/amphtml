@@ -35,7 +35,7 @@ import {
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
 import {
-  installServiceInEmbedScope,
+  installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
 } from '../service';
 
@@ -267,7 +267,7 @@ export class GlobalVariableSource extends VariableSource {
         }
         return clientIds[scope];
       },
-      (scope, opt_userNotificationId, opt_cookieName) => {
+      (scope, opt_userNotificationId, opt_cookieName, opt_disableBackup) => {
         userAssert(
           scope,
           'The first argument to CLIENT_ID, the fallback' +
@@ -287,11 +287,13 @@ export class GlobalVariableSource extends VariableSource {
         }
         return Services.cidForDoc(this.ampdoc)
           .then((cid) => {
+            opt_disableBackup = opt_disableBackup == 'true' ? true : false;
             return cid.get(
               {
                 /** @type {string} */ scope,
                 createCookieIfNotPresent: true,
-                cookieName: opt_cookieName,
+                cookieName: opt_cookieName || undefined,
+                disableBackup: opt_disableBackup,
               },
               consent
             );
@@ -760,7 +762,7 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
@@ -801,7 +803,7 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
@@ -824,7 +826,7 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *     that can be substituted.
    * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
@@ -1147,12 +1149,11 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Window} embedWin
  * @param {!VariableSource} varSource
  */
-export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  installServiceInEmbedScope(
-    embedWin,
+export function installUrlReplacementsForEmbed(ampdoc, varSource) {
+  installServiceInEmbedDoc(
+    ampdoc,
     'url-replace',
     new UrlReplacements(ampdoc, varSource)
   );

@@ -15,18 +15,23 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'amp-selector',
+  title: 'amp-selector-1_0',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-selector', version: '1.0'}],
-    experiments: ['amp-selector-bento'],
+    experiments: ['bento'],
   },
+};
+
+const imgStyle = {
+  display: 'inline-block',
+  margin: '2px',
 };
 
 export const WithAmpImg = () => {
@@ -37,6 +42,7 @@ export const WithAmpImg = () => {
         width="90"
         height="60"
         option="1"
+        style={imgStyle}
       ></amp-img>
       <amp-img
         src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
@@ -44,6 +50,7 @@ export const WithAmpImg = () => {
         height="60"
         disabled
         option="2"
+        style={imgStyle}
       ></amp-img>
       <div class="divider inline-block mx1"></div>
       <amp-img
@@ -51,12 +58,14 @@ export const WithAmpImg = () => {
         width="90"
         height="60"
         option="3"
+        style={imgStyle}
       ></amp-img>
       <amp-img
         src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
         width="90"
         height="60"
         option="4"
+        style={imgStyle}
       ></amp-img>
     </amp-selector>
   );
@@ -84,16 +93,24 @@ WithUl.story = {
 };
 
 export const Actions = () => {
+  const keyboardSelectMode = select(
+    'keyboard select mode',
+    ['none', 'focus', 'select'],
+    'focus'
+  );
   return (
     <>
       <amp-selector
         id="actionsSample"
         layout="container"
         class="sample-selector"
+        keyboard-select-mode={keyboardSelectMode}
         multiple
       >
         <ul>
-          <li option="1">Option 1</li>
+          <li option="1" selected>
+            Option 1
+          </li>
           <li option="2">Option 2</li>
           <li option="3">Option 3</li>
           <li option="4">Option 4</li>

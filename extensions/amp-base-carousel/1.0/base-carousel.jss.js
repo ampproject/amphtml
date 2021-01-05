@@ -43,6 +43,13 @@ const horizontalScroll = {
   },
 };
 
+const verticalScroll = {
+  flexDirection: 'column',
+  scrollSnapTypeY: 'mandatory', // Firefox/IE
+  scrollSnapType: 'y mandatory',
+  overflowX: 'hidden',
+};
+
 /*
  * Styles to hide scrollbars, with three different methods:
  *
@@ -61,8 +68,6 @@ const hideScrollbar = {
   scrollbarWidth: 'none',
 
   boxSizing: '',
-  height: '100%',
-  paddingBottom: '20px',
 
   // Chrome, Safari
   '&::-webkit-scrollbar': {
@@ -72,8 +77,6 @@ const hideScrollbar = {
 };
 
 const slideElement = {
-  flex: '0 0 100%',
-  height: '100%',
   position: 'relative',
   overflow: 'hidden',
   display: 'flex',
@@ -105,7 +108,12 @@ const slideSizing = {
   '& > ::slotted(*)': {
     width: '100%',
   },
+  '&$thumbnails': {
+    padding: '0px 4px',
+  },
 };
+
+const thumbnails = {};
 
 const arrow = {
   zIndex: 1,
@@ -114,12 +122,30 @@ const arrow = {
   justifyContent: 'space-between',
   // Center the button vertically.
   top: '50%',
-  transform: 'translateY(-50%)',
   alignItems: 'center',
   pointerEvents: 'auto',
+  '&$ltr': {
+    transform: 'translateY(-50%)',
+  },
+  '&$rtl': {
+    transform: 'scaleX(-1) translateY(-50%)',
+  },
+  '&$arrowPrev$ltr, &$arrowNext$rtl': {
+    left: 0,
+  },
+  '&$arrowNext$ltr, &$arrowPrev$rtl': {
+    right: 0,
+  },
 };
-const arrowPrev = {left: 0};
-const arrowNext = {right: 0};
+
+const rtl = {};
+
+const ltr = {};
+
+const arrowPrev = {};
+
+const arrowNext = {};
+
 const arrowDisabled = {
   pointerEvents: 'none',
   '&$insetArrow': {
@@ -183,6 +209,11 @@ const defaultArrowButton = {
     backgroundColor: 'rgba(255, 255, 255, 1.0)',
     transitionDuration: '0ms',
   },
+  '&:focus': {
+    border: '1px black solid',
+    borderRadius: '50%',
+    boxShadow: '0 0 0 1pt white',
+  },
 };
 
 const arrowBaseStyle = {
@@ -220,11 +251,15 @@ const JSS = {
   scrollContainer,
   hideScrollbar,
   horizontalScroll,
+  verticalScroll,
   slideElement,
+  thumbnails,
   enableSnap,
   disableSnap,
   slideSizing,
   arrow,
+  ltr,
+  rtl,
   arrowPrev,
   arrowNext,
   arrowDisabled,

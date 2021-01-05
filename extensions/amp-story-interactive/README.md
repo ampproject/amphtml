@@ -1,8 +1,10 @@
 # Interactive components
 
-### Developer preview - August 2020
-
 ## Summary
+
+The interactive components extension provides story creators with a set of interactive experiences they can use to make stories more engaging.
+
+A more complete version of this document can be found in [amp.dev](https://amp.dev/documentation/components/amp-story-interactive/?format=stories).
 
 <table>
   <tr>
@@ -11,19 +13,6 @@
 <td><img src="https://user-images.githubusercontent.com/22420856/90187528-e9bca800-dd87-11ea-8a22-0a99970fab1c.png"></td>
   </tr>
 </table>
-
-This release contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in September. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
-
-This developer preview update covers:
-
-- Details on the new quiz and poll components, as well as quiz and category results
-- Code examples to show proper configuration
-- API to support a backend and integration details
-- Fully functional example Stories demonstrating good usage of these components
-- Additional demos for the variety of styling and customization options
-- Examples for how you can easily integrate these components into WYSIWYG editors and tools
-- Additional explorations and roadmap
-- FAQs (please feel free to reach out with other questions & thoughts)
 
 ## List of interactive components
 
@@ -46,16 +35,14 @@ This developer preview update covers:
 <tr>
 <td>
 <strong>amp-story-interactive-results</strong>
-<br><br>Component that can display 2-4 different states/categories depending on the options selected on the previous pages of a story.<br><br>Requires polls or quizzes in previous pages to feed into the state of the component, and the state will be calculated following the strategy specified: correctness, category-voting, etc.<br><br>Note: we're still finalizing the design for the component, check status of <a href="https://github.com/ampproject/amphtml/pull/29837">#29837</a<</td>
+<br><br>Component that can display 2-4 different states/categories depending on the options selected on the previous pages of a story.<br><br>Requires polls or quizzes in previous pages to feed into the state of the component, and the state will be calculated following the strategy specified: correctness, category-voting, etc.</td>
 <td><img src="https://user-images.githubusercontent.com/22420856/89945317-2b661b00-dbef-11ea-9319-e36bede95460.png"></td>
 </tr>
 </table>
 
 ## Environment setup
 
-Optional: Most things covered here will work out of the box, but be sure to activate the nightly releases for any bug fixes and latest updates to the codebase. In order to run the nightly version of AMP on your machine, go to the [AMP Experiments](https://cdn.ampproject.org/experiments.html) and enable the nightly release.
-
-Also add the following import to your AMP documents:
+Add the following import to your AMP documents:
 
 ```html
 <script
@@ -71,26 +58,26 @@ Single-page components are ones that can be embedded onto a story by themselves,
 
 All of them support the config attributes:
 
-- **id**: Unique element identifier, also used to match the votes in the backend.
-- **endpoint**: Required url of the backend. More info on the backend section.
-- **prompt-text**: Optional string that represents the title or question. All components support it out of the box. If too long (past 3 visible lines) it will be truncated. If not specified, the prompt space will not show up.
-- **prompt-size**: String that determines the font size of the prompt, default is _medium_. Supports _small_, _medium_ and _large_.
-- **option-{1/2/3/4}-text**: Strings that represent the options, indexed from 1. Binary polls require 2 options, polls and quizzes require 2-4 options.
-- **option-{1/2/3/4}-confetti**: Optional emoji that, when the option is selected, will trigger a confetti animation with the given emoji.
+-   **id**: Unique element identifier, also used to match the votes in the backend.
+-   **endpoint**: Required url of the backend. More info on the backend section.
+-   **prompt-text**: Optional string that represents the title or question. All components support it out of the box. If too long (past 3 visible lines) it will be truncated. If not specified, the prompt space will not show up.
+-   **prompt-size**: String that determines the font size of the prompt, default is _medium_. Supports _small_, _medium_ and _large_.
+-   **option-{1/2/3/4}-text**: Strings that represent the options, indexed from 1. Binary polls require 2 options, polls and quizzes require 2-4 options.
+-   **option-{1/2/3/4}-confetti**: Optional emoji that, when the option is selected, will trigger a confetti animation with the given emoji.
 
 All of them support the styling attributes:
 
-- **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
-- **chip-style**: Alternates the visual style of the component, defaults to _flat_. Supports _flat_ and _shadow_ (_transparent_ might also be available in upcoming PR). Only affects quizzes and polls, but not binary-polls.
-- **style**: We have exposed the following CSS properties, available to be overridden through a class declaration:
-  - **--interactive-accent-color**: Default color of the prompt background, and quizzes' option letters, defaults to blue.
-  - **--interactive-prompt-background**: Color or gradient for the prompt background, defaults to \_var(--interactive-accent-color). Note: We recommend setting the accent color to match the prompt background color.
-  - **--interactive-prompt-text-color**: Color of the prompt text, defaults to white. Note: We recommend changing to black/dark if the accent color is bright.
-  - **--interactive-prompt-alignment**: Text alignment of the prompt, defaults to _initial_.
+-   **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
+-   **chip-style**: Alternates the visual style of the component, defaults to _flat_. Supports _flat_ and _shadow_ (_transparent_ might also be available in upcoming PR). Only affects quizzes and polls, but not binary-polls.
+-   **style**: We have exposed the following CSS properties, available to be overridden through a class declaration:
+    -   **--interactive-accent-color**: Default color of the prompt background, and quizzes' option letters, defaults to blue.
+    -   **--interactive-prompt-background**: Color or gradient for the prompt background, defaults to \_var(--interactive-accent-color). Note: We recommend setting the accent color to match the prompt background color.
+    -   **--interactive-prompt-text-color**: Color of the prompt text, defaults to white. Note: We recommend changing to black/dark if the accent color is bright.
+    -   **--interactive-prompt-alignment**: Text alignment of the prompt, defaults to _initial_.
 
 Quizzes support:
 
-- **option-{1/2/3/4}-correct**: Empty attribute that selects the correct option. All other options are assumed to be incorrect.
+-   **option-{1/2/3/4}-correct**: Empty attribute that selects the correct option. All other options are assumed to be incorrect.
 
 ### Components API examples
 
@@ -156,16 +143,16 @@ Currently multi-page results support 2 strategies to decide on what option to sh
 
 All of them support the config attributes:
 
-- **prompt-text**: Optional short text that shows before the category name. Eg: "you are a", "your spirit animal is", etc.
-- **option-{1/2/3/4}-results-category**: Name of the category, also used to link the poll results to this option; required for all options.
-- **option-{1/2/3/4}-image**: The image associated with this option, optional but highly encouraged.
-- **option-{1/2/3/4}-text**: Description of the category, usually explaining what it is.
+-   **prompt-text**: Optional short text that shows before the category name. Eg: "you are a", "your spirit animal is", etc.
+-   **option-{1/2/3/4}-results-category**: Name of the category, also used to link the poll results to this option; required for all options.
+-   **option-{1/2/3/4}-image**: The image associated with this option, optional but highly encouraged.
+-   **option-{1/2/3/4}-text**: Description of the category, usually explaining what it is.
 
 All of them support the styling attributes:
 
-- **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
-- **style**: We have exposed the following CSS properties, available to be overridden here:
-  - **--interactive-accent-color**: Default color of the accents.
+-   **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
+-   **style**: We have exposed the following CSS properties, available to be overridden here:
+    -   **--interactive-accent-color**: Default color of the accents.
 
 ### Percentage results
 
@@ -393,9 +380,9 @@ We have provided Codepens in the Demos section to check the current HTML and CSS
 
 This is a starting point for creating the inputs on a creation tool (and just a guideline / thoughts on good ideas):
 
-- _Styles_: A good starting point for customizing the style is to provide a color picker for accent color (and can additionally provide gradients for the prompt-background), and have dropdowns to select the theme=dark|light) and chip-style=flat|shadow. Dropdowns are better for future-proofing the attributes, as we may add more styles later.
-- _Fields_: Prompt text can be a field that, if left empty, the tool doesn't specify it in the component. Options should be a list of custom fields, where users start with 2 options and can add new options (up to 4 if not a binary-poll). Each option requires a text, but more attributes such as the confetti/correct can be assigned to each option.
-- _Results_: It's useful to guide the users through creating multi-page results. For quizzes, users can add the results component to any page, but it's a good idea to warn users that they need quizzes on previous pages to use it correctly. Users can edit the attributes in a WYSIWYG editor for the multiple states if tools provide a dropdown to change the visible option, allowing users to input one state at a time (thresholds can be specified on a sidebar for example). Poll results can also be edited in a WYSIWYG manner, but it's a good idea to first require users to create the categories in the results component, and provide a dropdown on each poll option to link it to a category of the results page. This prevents errors in matching the names of the categories across components (eg: titlecase vs lowercase, extra spaces, etc) that are hard to debug from a user standpoint.
+-   _Styles_: A good starting point for customizing the style is to provide a color picker for accent color (and can additionally provide gradients for the prompt-background), and have dropdowns to select the theme=dark|light) and chip-style=flat|shadow. Dropdowns are better for future-proofing the attributes, as we may add more styles later.
+-   _Fields_: Prompt text can be a field that, if left empty, the tool doesn't specify it in the component. Options should be a list of custom fields, where users start with 2 options and can add new options (up to 4 if not a binary-poll). Each option requires a text, but more attributes such as the confetti/correct can be assigned to each option.
+-   _Results_: It's useful to guide the users through creating multi-page results. For quizzes, users can add the results component to any page, but it's a good idea to warn users that they need quizzes on previous pages to use it correctly. Users can edit the attributes in a WYSIWYG editor for the multiple states if tools provide a dropdown to change the visible option, allowing users to input one state at a time (thresholds can be specified on a sidebar for example). Poll results can also be edited in a WYSIWYG manner, but it's a good idea to first require users to create the categories in the results component, and provide a dropdown on each poll option to link it to a category of the results page. This prevents errors in matching the names of the categories across components (eg: titlecase vs lowercase, extra spaces, etc) that are hard to debug from a user standpoint.
 
 **What if I want to animate the interactive components?**
 

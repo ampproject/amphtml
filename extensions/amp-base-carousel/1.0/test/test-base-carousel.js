@@ -17,8 +17,11 @@
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
 import {mount} from 'enzyme';
+import {useStyles} from '../base-carousel.jss';
 
 describes.sandboxed('BaseCarousel preact component', {}, () => {
+  const styles = useStyles();
+
   it('should render Arrows and propagates children to Scroller', () => {
     const wrapper = mount(
       <BaseCarousel>
@@ -34,7 +37,7 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
     expect(slides.first().text()).to.equal('slide 1');
     expect(slides.at(1).text()).to.equal('slide 2');
-    expect(slides.last().text()).to.equal('');
+    expect(slides.last().text()).to.equal('slide 3');
   });
 
   it('should render custom Arrows when given', () => {
@@ -68,7 +71,7 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
     // placeholder.
     expect(slides.first().text()).to.equal('slide 1');
     expect(slides.at(1).text()).to.equal('slide 2');
-    expect(slides.last().text()).to.equal('');
+    expect(slides.last().text()).to.equal('slide 3');
   });
 
   it('should render in preparation for looping with loop prop', () => {
@@ -84,7 +87,7 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
     // Given slides [1][2][3] should be rendered as [3][1][2]. But [3] is a
     // placeholder.
-    expect(slides.at(0).text()).to.equal('');
+    expect(slides.at(0).text()).to.equal('slide 3');
     expect(slides.at(1).text()).to.equal('slide 1');
     expect(slides.at(2).text()).to.equal('slide 2');
   });
@@ -98,17 +101,19 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
       </BaseCarousel>
     );
     expect(wrapper.find(`[snap="true"]`)).not.to.be.null;
+    expect(wrapper.find(`.${styles.enableSnap}`)).to.have.lengthOf(3);
   });
 
-  it('should not snap to slides with snap="false"', () => {
+  it('should not snap to slides with snap={false}', () => {
     const wrapper = mount(
-      <BaseCarousel>
+      <BaseCarousel snap={false}>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
       </BaseCarousel>
     );
     expect(wrapper.find(`[snap="false"]`)).not.to.be.null;
+    expect(wrapper.find(`.${styles.disableSnap}`)).to.have.lengthOf(3);
   });
 
   it('should render Arrows with controls=always', () => {
@@ -142,5 +147,20 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
       </BaseCarousel>
     );
     expect(wrapper.find('Arrow')).to.have.lengthOf(0);
+  });
+
+  it('should respect snap-by if snapping', () => {
+    const wrapper = mount(
+      <BaseCarousel snapBy={2} controls="never">
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+        <div>slide 4</div>
+      </BaseCarousel>
+    );
+    const snapEnabledSlides = wrapper.find(`.${styles.enableSnap}`);
+    expect(snapEnabledSlides).to.have.lengthOf(2);
+    expect(snapEnabledSlides.at(0).text()).to.equal('slide 1');
+    expect(snapEnabledSlides.at(1).text()).to.equal('slide 3');
   });
 });

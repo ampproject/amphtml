@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
+import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
 import {cancellation, isBlockedByConsent, reportError} from '../error';
@@ -213,9 +213,6 @@ export class Resource {
      */
     this.pendingChangeSize_ = undefined;
 
-    /** @private {boolean} */
-    this.loadedOnce_ = false;
-
     const deferred = new Deferred();
 
     /** @private @const {!Promise} */
@@ -226,6 +223,10 @@ export class Resource {
 
     /** @const @private {boolean} */
     this.intersect_ = resources.isIntersectionExperimentOn();
+
+    // TODO(#30620): remove isInViewport_ and whenWithinViewport.
+    /** @const @private {boolean} */
+    this.isInViewport_ = false;
 
     /**
      * A client rect that was "premeasured" by an IntersectionObserver.
@@ -458,6 +459,12 @@ export class Resource {
     this.premeasuredRect_ = clientRect;
   }
 
+  /** Removes the premeasured rect, likely forcing a manual measure. */
+  invalidatePremeasurementAndRequestMeasure() {
+    this.premeasuredRect_ = null;
+    this.requestMeasure();
+  }
+
   /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
@@ -531,6 +538,17 @@ export class Resource {
     }
 
     this.element.updateLayoutBox(newBox, sizeChanges);
+  }
+
+  /**
+   * Yields when the resource has been measured.
+   * @return {!Promise}
+   */
+  ensureMeasured() {
+    if (this.hasBeenMeasured()) {
+      return Promise.resolve();
+    }
+    return Services.vsyncFor(this.hostWin).measure(() => this.measure());
   }
 
   /**
@@ -657,31 +675,6 @@ export class Resource {
   }
 
   /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
-   */
-  getPageLayoutBox() {
-    return this.layoutBox_;
-  }
-
-  /**
-   * Returns the resource's layout box relative to the page. It will be
-   * measured if the resource hasn't ever be measured.
-   *
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   */
-  getPageLayoutBoxAsync() {
-    if (this.hasBeenMeasured()) {
-      return tryResolve(() => this.getPageLayoutBox());
-    }
-    return Services.vsyncFor(this.hostWin).measurePromise(() => {
-      this.measure();
-      return this.getPageLayoutBox();
-    });
-  }
-
-  /**
    * Returns the first measured layout box.
    * @return {!../layout-rect.LayoutRectDef}
    */
@@ -752,6 +745,8 @@ export class Resource {
    *    viewport range given.
    */
   whenWithinViewport(viewport) {
+    // TODO(#30620): remove this method once IntersectionObserver{root:doc} is
+    // polyfilled.
     devAssert(viewport !== false);
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
@@ -985,7 +980,6 @@ export class Resource {
       this.loadPromiseResolve_ = null;
     }
     this.layoutPromise_ = null;
-    this.loadedOnce_ = true;
     this.state_ = success
       ? ResourceState.LAYOUT_COMPLETE
       : ResourceState.LAYOUT_FAILED;
@@ -1001,7 +995,7 @@ export class Resource {
   /**
    * Returns true if the resource layout has not completed or failed.
    * @return {boolean}
-   * */
+   */
   isLayoutPending() {
     return (
       this.state_ != ResourceState.LAYOUT_COMPLETE &&
@@ -1021,22 +1015,14 @@ export class Resource {
   }
 
   /**
-   * @return {boolean} true if the resource has been loaded at least once.
-   */
-  hasLoadedOnce() {
-    return this.loadedOnce_;
-  }
-
-  /**
    * Whether the resource is currently visible in the viewport.
    * @return {boolean}
    */
   isInViewport() {
-    const isInViewport = this.element.isInViewport();
-    if (isInViewport) {
+    if (this.isInViewport_) {
       this.resolveDeferredsWhenWithinViewports_();
     }
-    return isInViewport;
+    return this.isInViewport_;
   }
 
   /**
@@ -1044,7 +1030,7 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    this.element.viewportCallback(inViewport);
+    this.isInViewport_ = inViewport;
   }
 
   /**

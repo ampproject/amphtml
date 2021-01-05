@@ -245,10 +245,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
       resource.measure();
     }).to.not.throw();
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 100, 300, 100));
-    // pageLayoutBox == layoutBox
-    expect(resource.getPageLayoutBox()).to.eql(
-      layoutRectLtwh(0, 100, 300, 100)
-    );
   });
 
   it('should allow measure even when not built', () => {
@@ -431,9 +427,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
-    // layoutBox != pageLayoutBox
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
-    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
   it('should calculate fixed for fixed-style parent', () => {
@@ -460,20 +454,16 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
-    // layoutBox != pageLayoutBox
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
-    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
-  describe('getPageLayoutBoxAsync', () => {
+  describe('ensureMeasured', () => {
     it('should return layout box when the resource has NOT been measured', () => {
       env.sandbox.stub(element, 'isUpgraded').returns(true);
       env.sandbox
         .stub(element, 'getBoundingClientRect')
         .returns(layoutRectLtwh(0, 0, 10, 10));
-      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
-        layoutRectLtwh(0, 0, 10, 10)
-      );
+      return resource.ensureMeasured();
     });
 
     it('should return layout box when the resource has been measured', () => {
@@ -482,9 +472,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         .stub(element, 'getBoundingClientRect')
         .returns(layoutRectLtwh(0, 0, 10, 10));
       resource.measure();
-      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
-        layoutRectLtwh(0, 0, 10, 10)
-      );
+      return resource.ensureMeasured();
     });
   });
 
@@ -792,15 +780,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         ))
     );
 
-    it('should call viewportCallback when not built', () => {
-      resource.state_ = ResourceState.NOT_BUILT;
-      resource.setInViewport(true);
-      expect(resource.isInViewport()).to.equal(true);
-      expect(resolveWithinViewportSpy).to.be.calledOnce;
-    });
-
-    it('should call viewportCallback when built', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
+    it('should set inViewport to true', () => {
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
       expect(resolveWithinViewportSpy).to.be.calledOnce;
@@ -891,7 +871,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
   describe('unlayoutCallback', () => {
     it('should NOT call unlayoutCallback on unbuilt element', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('viewportCallback').never();
       elementMock.expects('unlayoutCallback').never();
       resource.unlayout();
       expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
@@ -929,18 +908,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('togglePlaceholder').withArgs(true).never();
       resource.unlayout();
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
-    });
-
-    it('should call viewportCallback when resource not in viewport', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('viewportCallback').withExactArgs(false).once();
-      resource.unlayout();
-    });
-
-    it('should call viewportCallback when resource in viewport', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('viewportCallback').withExactArgs(false).once();
-      resource.unlayout();
     });
 
     it('should delegate unload to unlayoutCallback', () => {
@@ -1079,7 +1046,6 @@ describe('Resource idleRenderOutsideViewport', () => {
       unlayoutCallback: () => true,
       pauseCallback: () => false,
       resumeCallback: () => false,
-      viewportCallback: () => {},
       getLayoutPriority: () => LayoutPriority.CONTENT,
     };
     resources = new ResourcesImpl(new AmpDocSingle(window));

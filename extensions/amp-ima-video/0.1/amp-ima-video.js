@@ -22,6 +22,7 @@ import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
+  dispatchCustomEvent,
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
@@ -179,6 +180,7 @@ class AmpImaVideo extends AMP.BaseElement {
         {initialConsentState},
         {allowFullscreen: true}
       );
+      iframe.title = this.element.title || 'IMA video';
 
       this.applyFillContent(iframe);
 
@@ -203,11 +205,6 @@ class AmpImaVideo extends AMP.BaseElement {
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -285,12 +282,12 @@ class AmpImaVideo extends AMP.BaseElement {
       if (videoEvent == VideoEvents.LOAD) {
         this.playerReadyResolver_(this.iframe_);
       }
-      this.element.dispatchCustomEvent(videoEvent);
+      dispatchCustomEvent(this.element, videoEvent);
       return;
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
-      this.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(this.element, VideoEvents.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {

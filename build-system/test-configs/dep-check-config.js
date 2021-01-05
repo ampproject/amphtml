@@ -154,6 +154,7 @@ exports.rules = [
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
+      'ads/google/a4a/utils.js->src/utils/page-layout-box.js',
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
@@ -165,6 +166,7 @@ exports.rules = [
     mustNotDependOn: 'extensions/**/*.js',
     allowlist: [
       // See todo note in ads/_a4a-config.js
+      'ads/google/a4a/utils.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
     ],
   },
   // Rules for extensions and main src.
@@ -203,8 +205,6 @@ exports.rules = [
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/template-validator.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/callout-vendors.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/real-time-config-manager.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
 
       // AMP access depends on AMP access
@@ -229,17 +229,29 @@ exports.rules = [
       'extensions/amp-inline-gallery/1.0/amp-inline-gallery-pagination.js->extensions/amp-base-carousel/1.0/carousel-props.js',
       'extensions/amp-inline-gallery/1.0/inline-gallery.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-inline-gallery/1.0/pagination.js->extensions/amp-base-carousel/1.0/carousel-context.js',
+      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/1.0/base-carousel.jss.js',
+      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/base-carousel.js',
+      'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/action-source.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/responsive-attributes.js',
+      'extensions/amp-stream-gallery/1.0/amp-stream-gallery.js->extensions/amp-base-carousel/1.0/base-carousel.jss.js',
+      'extensions/amp-stream-gallery/1.0/stream-gallery.js->extensions/amp-base-carousel/1.0/base-carousel.js',
 
       // Facebook components
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
+      // Bento AMP Youtube
+      'extensions/amp-youtube/1.0/amp-youtube.js->extensions/amp-video/1.0/base-element.js',
+      'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-iframe.js',
+      'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-wrapper.js',
+
       // Amp geo in group enum
+      'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
 
@@ -395,6 +407,9 @@ exports.rules = [
       // Experiment moving Fixed Layer to extension
       'extensions/amp-viewer-integration/0.1/amp-viewer-integration.js->' +
         'src/service/fixed-layer.js',
+      // Ads remote config manager
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->src/service/real-time-config/callout-vendors.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->src/service/real-time-config/real-time-config-impl.js',
     ],
   },
   {

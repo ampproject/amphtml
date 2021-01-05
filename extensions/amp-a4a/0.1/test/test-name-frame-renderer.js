@@ -48,12 +48,6 @@ describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
     containerElement = env.win.document.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
-    containerElement.getPageLayoutBox = () => ({
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
-    });
     containerElement.getIntersectionChangeEntry = () => ({});
     env.win.document.body.appendChild(containerElement);
 

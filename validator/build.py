@@ -97,14 +97,6 @@ def CheckPrereqs():
             'instructions at https://github.com/ampproject/amphtml/blob/master/'
             'validator/README.md#installation' % module)
 
-  # Ensure that yarn is installed.
-  try:
-    subprocess.check_output(['npx', 'yarn', '--version'])
-  except (subprocess.CalledProcessError, OSError):
-    Die('Yarn package manager not found. Run '
-        '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
-        'or see https://yarnpkg.com/docs/install.')
-
   # Ensure JVM installed. TODO: Check for version?
   try:
     subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
@@ -130,19 +122,19 @@ def SetupOutDir(out_dir):
 
 
 def InstallNodeDependencies():
-  """Installs the dependencies using yarn."""
+  """Installs the dependencies using npm install."""
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
-      ['npx', 'yarn', 'install'],
-      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
+      ['npm', 'install', '--userconfig', '../.npmrc'],
+      stdout=(open(os.devnull, 'wb') if os.environ.get('CI') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
-  subprocess.check_call(['npx', 'yarn', 'install'],
+  subprocess.check_call(['npm', 'install', '--userconfig', '../../../.npmrc'],
                         cwd='js/nodejs',
                         stdout=(open(os.devnull, 'wb')
-                                if os.environ.get('TRAVIS') else sys.stdout))
+                                if os.environ.get('CI') else sys.stdout))
   logging.info('... done')
 
 
@@ -594,7 +586,7 @@ def Main(parsed_args):
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
-      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
+      level=(logging.ERROR if os.environ.get('CI') else logging.INFO))
   EnsureNodeJsIsInstalled()
   CheckPrereqs()
   InstallNodeDependencies()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getCarousel, getScrollingElement, getSlide} from './helpers';
+import {getCarousel, getScrollingElement, getSlide, getSlides} from './helpers';
 import {useStyles} from '../base-carousel.jss';
 
 const pageWidth = 800;
@@ -28,7 +28,7 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/basic.amp.html',
-    experiments: ['amp-base-carousel-bento'],
+    experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
   },
@@ -135,7 +135,8 @@ describes.endtoend(
       it('should display slides correctly when moving forwards', async function () {
         this.timeout(testTimeout);
         const el = await getScrollingElement(styles, controller);
-        const lastSlide = await getSlide(styles, controller, SLIDE_COUNT - 1);
+        const slides = await getSlides(styles, controller);
+        const lastSlide = slides[SLIDE_COUNT - 1];
 
         // Go to the last slide, wait for scrolling to move.
         const slideWidth = await prop(lastSlide, 'offsetWidth');

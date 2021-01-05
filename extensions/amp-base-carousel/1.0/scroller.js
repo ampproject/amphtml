@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
+import {
+  Axis,
+  findOverlappingIndex,
+  getPercentageOffsetFromAlignment,
+  scrollContainerToElement,
+} from './dimensions';
 import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {
+  useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -43,27 +51,73 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @template T
  */
 function ScrollerWithRef(
-  {children, loop, restingIndex, setRestingIndex, snap},
+  {
+    advanceCount,
+    alignment,
+    autoAdvanceCount,
+    axis,
+    children,
+    loop,
+    mixedLength,
+    restingIndex,
+    setRestingIndex,
+    snap,
+    snapBy = 1,
+    visibleCount,
+    _thumbnails,
+    ...rest
+  },
   ref
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
-  useImperativeHandle(ref, () => ({
-    // Expose "advance" action for navigating between slides by the given quantity of slides.
-    advance: (by) => {
-      const container = containerRef.current;
-      // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
-      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
-      container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
-    },
-  }));
-  const classes = useStyles();
 
   /**
-   * The number of slides we want to place before the
-   * reference or resting index. Only needed if loop=true.
+   * The number of slides we want to place before the reference or resting index.
+   * Normalized to == restingIndex if loop=false.
    */
-  const pivotIndex = Math.floor(children.length / 2);
+  const pivotIndex = loop ? Math.floor(children.length / 2) : restingIndex;
+
+  /**
+   * Whether to early exit from the scroll handler.
+   * This is useful on each render where the container is scrolled to the active
+   * slide at a non-integer pixel position. This is likely to happen
+   * with responsive containers or non-integer `visibleCount`.
+   */
+  const ignoreProgrammaticScrollRef = useRef(false);
+
+  const advance = useCallback(
+    (by) => {
+      const container = containerRef.current;
+      if (!container) {
+        return;
+      }
+      // Smooth scrolling is preferred to `setRestingIndex` whenever possible.
+      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
+      currentIndex.current = mod(currentIndex.current + by, children.length);
+      const didScroll = scrollContainerToElement(
+        axis,
+        alignment,
+        container,
+        container.children[mod(pivotIndex + by, container.children.length)],
+        scrollOffset.current
+      );
+      if (!didScroll) {
+        setRestingIndex(currentIndex.current);
+      }
+    },
+    [alignment, axis, children.length, pivotIndex, setRestingIndex]
+  );
+  useImperativeHandle(
+    ref,
+    () => ({
+      advance,
+      next: () => advance(advanceCount),
+      prev: () => advance(-advanceCount),
+    }),
+    [advance, advanceCount]
+  );
+  const classes = useStyles();
 
   /**
    * The dynamic position that the slide at the resting index
@@ -72,20 +126,23 @@ function ScrollerWithRef(
   const offsetRef = useRef(restingIndex);
 
   /**
-   * The partial scroll position between two slides.
-   * Only needed if snap=false.
+   * The partial scroll position as a percentage of the current visible slide.
+   * Only modified if snap=false.
    */
   const scrollOffset = useRef(0);
 
-  const ignoreProgrammaticScrollRef = useRef(true);
   const slides = renderSlides(
     {
       children,
       loop,
+      mixedLength,
       offsetRef,
       pivotIndex,
       restingIndex,
       snap,
+      snapBy,
+      visibleCount,
+      _thumbnails,
     },
     classes
   );
@@ -97,64 +154,71 @@ function ScrollerWithRef(
       return;
     }
     const container = containerRef.current;
-    ignoreProgrammaticScrollRef.current = true;
-    setStyle(container, 'scrollBehavior', 'auto');
-    let position;
-    if (loop) {
-      if (snap) {
-        position = container./* OK */ offsetWidth * pivotIndex;
-      } else {
-        position = mod(
-          scrollOffset.current +
-            container./* OK */ offsetWidth * offsetRef.current,
-          container./* OK */ scrollWidth
-        );
-      }
-    } else {
-      if (snap) {
-        position = container./* OK */ offsetWidth * restingIndex;
-      } else {
-        position = scrollOffset.current;
-      }
+    if (!container.children.length) {
+      return;
     }
-    container./* OK */ scrollLeft = position;
+    setStyle(container, 'scrollBehavior', 'auto');
+    ignoreProgrammaticScrollRef.current = true;
+    scrollContainerToElement(
+      axis,
+      alignment,
+      container,
+      container.children[pivotIndex],
+      scrollOffset.current
+    );
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [loop, restingIndex, pivotIndex, snap]);
+  }, [axis, alignment, loop, pivotIndex, restingIndex]);
 
   // Trigger render by setting the resting index to the current scroll state.
-  const debouncedResetScrollReferencePoint = useMemo(
-    () =>
-      debounce(
-        window,
-        () => {
-          // Check if the resting index we are centered around is the same as where
-          // we stopped scrolling. If so, we do not need to move anything.
-          if (
-            currentIndex.current === null ||
-            currentIndex.current === restingIndex
-          ) {
-            return;
-          }
-          ignoreProgrammaticScrollRef.current = true;
-          setRestingIndex(currentIndex.current);
-        },
-        RESET_SCROLL_REFERENCE_POINT_WAIT_MS
-      ),
-    [restingIndex, setRestingIndex]
-  );
+  const debouncedResetScrollReferencePoint = useMemo(() => {
+    // Use local window if possible.
+    const win = containerRef.current
+      ? toWin(containerRef.current.ownerDocument.defaultView)
+      : window;
+    return debounce(
+      win,
+      () => {
+        // Check if the resting index we are centered around is the same as where
+        // we stopped scrolling. If so, we do not need to move anything.
+        if (
+          currentIndex.current === null ||
+          currentIndex.current === restingIndex
+        ) {
+          return;
+        }
+        setRestingIndex(currentIndex.current);
+      },
+      RESET_SCROLL_REFERENCE_POINT_WAIT_MS
+    );
+  }, [restingIndex, setRestingIndex]);
 
   // Track current slide without forcing render.
   // This is necessary for smooth scrolling because
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
     const container = containerRef.current;
-    scrollOffset.current =
-      container./* OK */ scrollLeft -
-      offsetRef.current * container./* OK */ offsetWidth;
-    const slideOffset = Math.round(
-      scrollOffset.current / container./* OK */ offsetWidth
+    if (!container) {
+      return;
+    }
+    const overlappingIndex = findOverlappingIndex(
+      axis,
+      alignment,
+      container,
+      container.children,
+      pivotIndex
     );
-    currentIndex.current = mod(slideOffset, children.length);
+    if (!snap) {
+      scrollOffset.current = getPercentageOffsetFromAlignment(
+        axis,
+        alignment,
+        container,
+        container.children[overlappingIndex]
+      );
+    }
+    currentIndex.current = mod(
+      overlappingIndex - offsetRef.current,
+      children.length
+    );
   };
 
   const handleScroll = () => {
@@ -166,14 +230,23 @@ function ScrollerWithRef(
     debouncedResetScrollReferencePoint();
   };
 
+  const incrementCount = Math.max(advanceCount, autoAdvanceCount);
+  const needMoreSlidesToScroll =
+    loop &&
+    incrementCount > 1 &&
+    children.length - pivotIndex - visibleCount < incrementCount;
   return (
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
+      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
+        axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
+      }`}
       tabindex={0}
+      {...rest}
     >
       {slides}
+      {needMoreSlidesToScroll && slides}
     </div>
   );
 }
@@ -235,11 +308,21 @@ export {Scroller};
  * @return {PreactDef.Renderable}
  */
 function renderSlides(
-  {children, restingIndex, offsetRef, pivotIndex, snap, loop},
+  {
+    children,
+    loop,
+    mixedLength,
+    restingIndex,
+    offsetRef,
+    pivotIndex,
+    snap,
+    snapBy,
+    visibleCount,
+    _thumbnails,
+  },
   classes
 ) {
   const {length} = children;
-
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
     return (
@@ -247,8 +330,13 @@ function renderSlides(
         key={key}
         data-slide={index}
         class={`${classes.slideSizing} ${classes.slideElement} ${
-          snap ? classes.enableSnap : classes.disableSnap
-        }`}
+          snap && mod(index, snapBy) === 0
+            ? classes.enableSnap
+            : classes.disableSnap
+        } ${_thumbnails ? classes.thumbnails : ''} `}
+        style={{
+          flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
+        }}
       >
         {child}
       </div>

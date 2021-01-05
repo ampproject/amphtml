@@ -34,9 +34,9 @@ VAST-compliant ad response (for examples, see
 
 The component HTML accepts the following types of HTML nodes as children:
 
-- `source` tags for content video, used in the same way as the standard `video` tag.
-- `track` tags for subtitles, in the same way as the standard `video` tag. If the track is hosted on a different origin than the document, you must add the `data-crossorigin` attribute to the `<amp-ima-video>` tag.
-- a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/reference/js/ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
+-   `source` tags for content video, used in the same way as the standard `video` tag.
+-   `track` tags for subtitles, in the same way as the standard `video` tag. If the track is hosted on a different origin than the document, you must add the `data-crossorigin` attribute to the `<amp-ima-video>` tag.
+-   a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/reference/js/ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
 
 ```html
 <amp-ima-video
@@ -94,6 +94,10 @@ A format string that looks like "Ad (%s of %s)", used to generate the ad disclos
 
 Requires `amp-video-docking` extension. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
 For more details, see [documentation on the docking extension itself](https://amp.dev/documentation/components/amp-video-docking).
+
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"IMA video"`.
 
 ### Common attributes
 

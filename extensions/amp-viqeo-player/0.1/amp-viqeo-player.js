@@ -139,6 +139,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
         allowFullscreen: true,
       }
     );
+    iframe.title = this.element.title || 'Viqeo video';
 
     // required to display the user gesture in the iframe
     iframe.setAttribute('allow', 'autoplay');

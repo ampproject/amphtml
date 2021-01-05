@@ -35,5 +35,5 @@ For configuration details and to generate your tags, please contact [YieldOne](h
 
 Supported parameters:
 
-- `data-pubid`
-- `data-pid`
+-   `data-pubid`
+-   `data-pid`

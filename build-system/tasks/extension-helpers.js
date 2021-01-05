@@ -25,7 +25,7 @@ const {
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
@@ -178,7 +178,7 @@ function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
-  extensionsToBuild = DEFAULT_EXTENSION_SET;
+  extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
       log(red('ERROR:'), 'Missing list of extensions.');
@@ -194,7 +194,11 @@ function getExtensionsToBuild(preBuild = false) {
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
   if (
-    !(preBuild || argv.noextensions || argv.extensions || argv.extensions_from)
+    !preBuild &&
+    !argv.noextensions &&
+    !argv.extensions &&
+    !argv.extensions_from &&
+    !argv.core_runtime_only
   ) {
     const allExtensions = [];
     for (const extension in extensions) {
@@ -213,7 +217,7 @@ function getExtensionsToBuild(preBuild = false) {
  * @param {boolean=} preBuild
  */
 function parseExtensionFlags(preBuild = false) {
-  if (isTravisBuild()) {
+  if (isCiBuild()) {
     return;
   }
 
@@ -221,7 +225,7 @@ function parseExtensionFlags(preBuild = false) {
   const coreRuntimeOnlyMessage =
     green('⤷ Use ') +
     cyan('--core_runtime_only ') +
-    green('to build just the core runtime.');
+    green('to build just the core runtime and skip other JS targets.');
   const noExtensionsMessage =
     green('⤷ Use ') +
     cyan('--noextensions ') +
@@ -241,7 +245,7 @@ function parseExtensionFlags(preBuild = false) {
     cyan('foo.amp.html') +
     green('.');
 
-  if (argv.core_runtime_only) {
+  if (argv.core_runtime_only && !(argv.extensions || argv.extensions_from)) {
     log(green('Building just the core runtime.'));
   } else if (preBuild) {
     log(

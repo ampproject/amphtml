@@ -42,9 +42,10 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {RealTimeConfigManager} from '../real-time-config-manager';
+import {RealTimeConfigManager} from '../../../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {cancellation} from '../../../../src/error';
@@ -89,14 +90,14 @@ if (NO_SIGNING_RTV) {
       );
     });
 
-    it('should contain the correct security features', async () => {
+    it('should contain the correct csp meta content', async () => {
       await a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
       const fie = doc.body.querySelector('iframe[srcdoc]');
       expect(fie.getAttribute('sandbox')).to.equal(
         'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
-          'allow-same-origin allow-top-navigation'
+          'allow-same-origin allow-scripts allow-top-navigation'
       );
       const cspMeta = fie.contentDocument.querySelector(
         'meta[http-equiv=Content-Security-Policy]'
@@ -120,6 +121,20 @@ if (NO_SIGNING_RTV) {
           'https://use.fontawesome.com ' +
           'https://use.typekit.net ' +
           "'unsafe-inline';"
+      );
+    });
+
+    it('should set the correct sandbox features', async () => {
+      env.sandbox
+        .stub(Services.platformFor(env.win), 'isSafari')
+        .returns(false);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      expect(fie.getAttribute('sandbox')).to.equal(
+        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
+          'allow-same-origin allow-top-navigation'
       );
     });
 
@@ -277,9 +292,6 @@ describe('amp-a4a', () => {
     };
     element.getLayoutBox = () => {
       return opt_rect || layoutRectLtwh(0, 0, 200, 50);
-    };
-    element.getPageLayoutBox = () => {
-      return element.getLayoutBox.apply(element, arguments);
     };
     element.getIntersectionChangeEntry = () => {
       return null;
@@ -1388,7 +1400,16 @@ describe('amp-a4a', () => {
       expect(a4a.isVerifiedAmpCreative()).to.be.true;
       expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
       expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
-      expect(maybeExecuteRealTimeConfigStub.calledWith({}, null)).to.be.true;
+      expect(
+        maybeExecuteRealTimeConfigStub.calledWith(
+          a4aElement,
+          {},
+          null,
+          null,
+          null,
+          window.sandbox.match.any
+        )
+      ).to.be.true;
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
       expect(
         getAdUrlSpy.calledWith(
@@ -1473,6 +1494,11 @@ describe('amp-a4a', () => {
         .stub(a4a, 'maybeValidateAmpCreative')
         .returns(Promise.resolve());
       a4a.onLayoutMeasure();
+      a4a.uiHandler = {
+        getScrollPromiseForStickyAd: () => Promise.resolve(null),
+        isStickyAd: () => false,
+        maybeInitStickyAd: () => {},
+      };
       await a4a.layoutCallback();
       expect(
         renderNonAmpCreativeSpy.calledOnce,
@@ -1893,6 +1919,9 @@ describe('amp-a4a', () => {
           applyUnlayoutUI: () => {
             unlayoutUISpy();
           },
+          getScrollPromiseForStickyAd: () => Promise.resolve(null),
+          maybeInitStickyAd: () => {},
+          cleanup: () => {},
         };
         window.sandbox
           .stub(a4a, 'getLayoutBox')
@@ -1962,6 +1991,7 @@ describe('amp-a4a', () => {
     describe('delay request experiment', () => {
       let getAdUrlSpy;
       let a4a;
+
       beforeEach(async () => {
         const fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -1975,48 +2005,54 @@ describe('amp-a4a', () => {
         a4a = new MockA4AImpl(a4aElement);
         getAdUrlSpy = window.sandbox.spy(a4a, 'getAdUrl');
       });
+
       it('should delay request until within renderOutsideViewport', async () => {
         window.sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
         let whenWithinViewportResolve;
         getResourceStub.returns({
           getUpgradeDelayMs: () => 1,
           renderOutsideViewport: () => 3,
-          whenWithinViewport: (viewport) => {
-            expect(viewport).to.equal(3);
+        });
+        const whenWithinViewportStub = window.sandbox
+          .stub(a4a, 'whenWithinViewport')
+          .callsFake(() => {
             return new Promise((resolve) => {
               whenWithinViewportResolve = resolve;
             });
-          },
-        });
+          });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         // Delay to all getAdUrl to potentially execute.
         await Services.timerFor(a4a.win).promise(1);
         expect(getAdUrlSpy).to.not.be.called;
+        expect(whenWithinViewportStub).to.be.calledOnce.calledWith(3);
         whenWithinViewportResolve();
         await a4a.adPromise_;
         return expect(getAdUrlSpy).to.be.calledOnce;
       });
+
       it('should delay request until numeric value', async () => {
         window.sandbox.stub(a4a, 'delayAdRequestEnabled').returns(6);
         let whenWithinViewportResolve;
         getResourceStub.returns({
           getUpgradeDelayMs: () => 1,
           renderOutsideViewport: () => 3,
-          whenWithinViewport: (viewport) => {
-            expect(viewport).to.equal(6);
+        });
+        const whenWithinViewportStub = window.sandbox
+          .stub(a4a, 'whenWithinViewport')
+          .callsFake(() => {
             return new Promise((resolve) => {
               whenWithinViewportResolve = resolve;
             });
-          },
-        });
+          });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         // Delay to all getAdUrl to potentially execute.
         await Services.timerFor(a4a.win).promise(1);
         expect(getAdUrlSpy).to.not.be.called;
+        expect(whenWithinViewportStub).to.be.calledOnce.calledWith(6);
         whenWithinViewportResolve();
         await a4a.adPromise_;
         return expect(getAdUrlSpy).to.be.calledOnce;
@@ -2743,6 +2779,94 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('block-rtc attribute', () => {
+    describes.realWin('block-rtc attribute', {}, (env) => {
+      let geoService, a4a, element, fixture;
+
+      beforeEach(async () => {
+        AMP.RealTimeConfigManager = RealTimeConfigManager;
+        fixture = await createIframePromise();
+        element = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(element);
+        geoService = {
+          isInCountryGroup(country) {
+            switch (country) {
+              case 'usca':
+                return GEO_IN_GROUP.IN;
+              case 'gdpr':
+                return GEO_IN_GROUP.NOT_IN;
+              default:
+                return GEO_IN_GROUP.NOT_DEFINED;
+            }
+          },
+        };
+        return fixture;
+      });
+
+      it('should return false if no attribute found', async () => {
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should return false if empty string', async () => {
+        element.setAttribute('block-rtc', '');
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should return if doc is served from a defined geo group', async () => {
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+        element.setAttribute('block-rtc', 'gdpr,usca');
+        expect(await a4a.getBlockRtc_()).to.true;
+      });
+
+      it('should return false when doc is in an undefined group or not in', async () => {
+        const warnSpy = env.sandbox.stub(user(), 'warn');
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+
+        // Undefined group
+        element.setAttribute('block-rtc', 'tx');
+        expect(await a4a.getBlockRtc_()).to.false;
+        expect(warnSpy.args[0][0]).to.match(/AMP-AD/);
+        expect(warnSpy.args[0][1]).to.match(/Geo group "tx" was not defined./);
+        expect(warnSpy).to.have.been.calledOnce;
+        // Not in
+        element.setAttribute('block-rtc', 'gdpr');
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should throw an error when there is no geoService', async () => {
+        geoService = null;
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+        element.setAttribute('block-rtc', 'usca');
+        await expect(a4a.getBlockRtc_()).to.be.rejectedWith(
+          /requires <amp-geo> to use `block-rtc`/
+        );
+      });
+
+      it('should not execute RealTimeConfig if the attribute is valid', async () => {
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+
+        const maybeExecuteRealTimeConfigStub = window.sandbox.stub();
+        window.sandbox
+          .stub(
+            AMP.RealTimeConfigManager.prototype,
+            'maybeExecuteRealTimeConfig'
+          )
+          .callsFake(maybeExecuteRealTimeConfigStub);
+        element.setAttribute('block-rtc', 'usca');
+        await a4a.tryExecuteRealTimeConfig_();
+        expect(maybeExecuteRealTimeConfigStub).to.not.be.called;
+      });
+    });
+  });
+
   describe('#assignAdUrlToError', () => {
     it('should attach info to error correctly', () => {
       const error = new Error('foo');
@@ -2913,6 +3037,50 @@ describe('amp-a4a', () => {
       const a4a = new MockA4AImpl(element);
       a4a.buildCallback();
       expect(a4a.isSinglePageStoryAd).to.be.true;
+    });
+  });
+
+  describe('pause and resume', () => {
+    let a4a;
+    let pauseStub, resumeStub;
+
+    beforeEach(async () => {
+      const fixture = await createIframePromise();
+      const element = createA4aElement(fixture.doc);
+      a4a = new MockA4AImpl(element);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+
+      // Never resolve
+      window.sandbox
+        ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+        .callsFake(() => {
+          return new Promise(() => {});
+        });
+      const creativeString = buildCreativeString();
+      const metaData = a4a.getAmpAdMetadata(creativeString);
+      await a4a.renderAmpCreative_(metaData);
+
+      pauseStub = window.sandbox./*OK*/ stub(
+        FriendlyIframeEmbed.prototype,
+        'pause'
+      );
+      resumeStub = window.sandbox./*OK*/ stub(
+        FriendlyIframeEmbed.prototype,
+        'resume'
+      );
+    });
+
+    it('should pause the embed', () => {
+      expect(pauseStub).to.not.be.called;
+      expect(resumeStub).to.not.be.called;
+
+      a4a.pauseCallback();
+      expect(pauseStub).to.be.calledOnce;
+
+      a4a.resumeCallback();
+      expect(resumeStub).to.be.calledOnce;
     });
   });
 

@@ -74,6 +74,7 @@ export const consentUiClasses = {
   mask: 'i-amphtml-consent-ui-mask',
   borderEnabled: 'i-amphtml-consent-ui-border-enabled',
   screenReaderDialog: 'i-amphtml-consent-alertdialog',
+  iframeTransform: 'i-amphtml-consent-ui-iframe-transfrom',
 };
 
 export class ConsentUI {
@@ -570,11 +571,12 @@ export class ConsentUI {
   showIframe_() {
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeActive);
-    if (this.modalEnabled_) {
-      classList.add(consentUiClasses.modal);
-    }
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
+    if (this.modalEnabled_) {
+      classList.add(consentUiClasses.modal);
+      tryFocus(dev().assertElement(this.ui_));
+    }
 
     // Remove transition styles added by the fixed layer
     // Transform styles applied by us for the animation.
@@ -636,10 +638,12 @@ export class ConsentUI {
    * If this is the first time viewing the iframe, create
    * an 'invisible' alert dialog with a title and a button.
    * Clicking on the button will transfer focus to the iframe.
+   *
+   * This only applies for bottom pane iframes.
    */
   maybeShowSrAlert_() {
     // If the SR alert has been shown, don't show it again
-    if (this.srAlertShown_) {
+    if (this.srAlertShown_ || this.modalEnabled_) {
       return;
     }
 
@@ -698,6 +702,7 @@ export class ConsentUI {
    * Apply styles for ready event
    */
   applyInitialStyles_() {
+    const {classList} = this.parent_;
     // Apply our initial height and border
     if (this.ui_) {
       setStyles(this.ui_, {
@@ -705,12 +710,11 @@ export class ConsentUI {
       });
     }
     setImportantStyles(this.parent_, {
-      transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
       '--i-amphtml-modal-height': `${this.initialHeight_}`,
     });
+    classList.add(consentUiClasses.iframeTransform);
     // Border is default with modal enabled and option with non-modal
     if (this.borderEnabled_ || this.modalEnabled_) {
-      const {classList} = this.parent_;
       classList.add(consentUiClasses.borderEnabled);
     }
     if (this.modalEnabled_) {
