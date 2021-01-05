@@ -141,7 +141,7 @@ amp-consent.i-amphtml-consent-ui-modal.i-amphtml-consent-ui-border-enabled {
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
-amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-iframe-transfrom {
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-iframe-transform {
   transform: translate3d(0px, calc(100% - var(--i-amphtml-modal-height)), 0px) !important;
 }
 
