@@ -169,11 +169,12 @@ describes.realWin(
 
     describe('imperative api', () => {
       let scroller;
+      let slides;
 
       beforeEach(async () => {
         element.setAttribute('max-visible-count', '1');
         win.document.body.appendChild(element);
-        await getSlidesFromShadow();
+        slides = await getSlidesFromShadow();
 
         scroller = element.shadowRoot.querySelector(
           `[class*=${styles.scrollContainer}]`
@@ -203,21 +204,15 @@ describes.realWin(
 
       it('should execute next and prev actions', async () => {
         element.enqueAction(invocation('next'));
-        await waitFor(() => scroller.scrollLeft > 0, 'advanced to next slide');
-
-        // Make sure internal state index is updated before attempting to call prev(),
-        // Since this is typically updated automatically on debounce, there is a risk that
-        // the test will call prev() on the slide at the 0th index unless we force is here.
-        element.enqueAction(invocation('goToSlide', {index: 1}));
-        await waitFor(() => scroller.scrollLeft > 0, 'to slide 1');
+        await waitFor(
+          () => scroller.scrollLeft === slides[1].offsetLeft,
+          'advanced to next slide'
+        );
 
         element.enqueAction(invocation('prev'));
-        // Wait for a longer timeout than the 200 default in waitFor.
-        await poll(
-          'returned to prev slide',
-          () => scroller.scrollLeft == 0,
-          undefined /* opt_onError */,
-          1000 /* opt_timeout */
+        await waitFor(
+          () => scroller.scrollLeft === slides[0].offsetLeft,
+          'returned to prev slide'
         );
       });
 
