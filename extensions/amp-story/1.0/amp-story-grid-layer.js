@@ -102,7 +102,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    * can use the class name instead of compound
    * amp-story-grid-layer[template="..."] selectors, since the latter increases
    * CSS specificity and can prevent users from being able to override styles.
-   * @protected
+   * @private
    */
   applyTemplateClassName_() {
     if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
