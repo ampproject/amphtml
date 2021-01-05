@@ -28,7 +28,7 @@ const BACKENDS = {
   // Used for testing / as a template
   'webstoriesinteractivity-beta.web.app': {
     learnMoreUrl: 'https://amp.dev/stories',
-    entityName: 'AMP',
+    entityName: 'AMP Disclaimer Testing Site',
   },
 };
 
