@@ -15,6 +15,8 @@
  */
 
 import '../amp-brightcove';
+import * as consent from '../../../../src/consent';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {CommonSignals} from '../../../../src/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
 import {
@@ -22,6 +24,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {macroTask} from '../../../../testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.realWin(
@@ -52,6 +55,9 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
 
       await element.signals().whenSignal(CommonSignals.LOAD_START);
+
+      // Wait for the promise in layoutCallback() to resolve
+      await macroTask();
 
       try {
         fakePostMessage(element, {event: 'ready'});
@@ -269,6 +275,34 @@ describes.realWin(
             fakePostMessage(bc, {event: 'ended', muted: false, playing: false});
             return p;
           });
+      });
+    });
+
+    it('should propagate consent state to iframe', () => {
+      env.sandbox
+        .stub(consent, 'getConsentPolicyState')
+        .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
+      env.sandbox
+        .stub(consent, 'getConsentPolicySharedData')
+        .resolves({a: 1, b: 2});
+      env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('abc');
+
+      return getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+        'data-block-on-consent': '_till_accepted',
+      }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+
+        expect(iframe.src).to.contain(
+          `ampInitialConsentState=${CONSENT_POLICY_STATE.SUFFICIENT}`
+        );
+        expect(iframe.src).to.contain(
+          `ampConsentSharedData=${encodeURIComponent(
+            JSON.stringify({a: 1, b: 2})
+          )}`
+        );
+        expect(iframe.src).to.contain('ampInitialConsentValue=abc');
       });
     });
   }

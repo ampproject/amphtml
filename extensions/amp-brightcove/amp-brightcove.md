@@ -43,11 +43,11 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 </amp-brightcove>
 ```
 
-### Configuration
+### Player Configuration
 
-To support AMP's video interface, which is recommended, make sure you configure players used with the AMP Support plugin. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
+Make sure you configure players used with the AMP Support plugin to support AMP's video interface. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
 
-## Attributes
+## Component Attributes
 
 ### `data-account`
 
@@ -115,6 +115,10 @@ or an element when the user scrolls out of the video component's visual area.
 
 For more details, see
 [documentation on the docking extension itself](https://amp.dev/documentation/components/amp-video-docking).
+
+### `data-block-on-consent`
+
+If [amp-consent](https://amp.dev/documentation/components/amp-consent/) is used, adding `data-block-on-consent="_till_responded"` will delay player load until the consent state is resolved. The consent state is passed to the player's iframe as query parameters for customisation of advertising implementations in the player. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
 
 ### Common attributes
 
