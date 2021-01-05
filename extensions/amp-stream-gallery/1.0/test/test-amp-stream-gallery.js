@@ -21,7 +21,6 @@ import {
   createElementWithAttributes,
   waitForChildPromise,
 } from '../../../../src/dom';
-import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
