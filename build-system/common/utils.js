@@ -101,8 +101,7 @@ function getFilesFromArgv() {
   const toPosix = (str) => str.replace(/\\\\?/g, '/');
   return argv.files
     ? globby.sync(
-        argv.files
-          .split(',')
+        (Array.isArray(argv.files) ? argv.files : argv.files.split(','))
           .map((s) => s.trim())
           .map(toPosix)
       )
