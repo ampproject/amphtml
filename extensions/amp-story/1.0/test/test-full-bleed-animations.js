@@ -145,7 +145,7 @@ describes.realWin(
         await ampStory.layoutCallback();
 
         expect(pageImpl.element.firstElementChild).to.have.class(
-          'i-amphtml-story-layer-template-with-full-bleed-animation'
+          'i-amphtml-story-grid-template-with-full-bleed-animation'
         );
       }
     );
@@ -168,7 +168,7 @@ describes.realWin(
         await ampStory.layoutCallback();
 
         expect(pageImpl.element.firstElementChild).to.not.have.class(
-          'i-amphtml-story-layer-template-with-full-bleed-animation'
+          'i-amphtml-story-grid-template-with-full-bleed-animation'
         );
       }
     );
@@ -189,7 +189,7 @@ describes.realWin(
         await ampStory.layoutCallback();
 
         expect(pageImpl.element.firstElementChild).to.not.have.class(
-          'i-amphtml-story-layer-template-with-full-bleed-animation'
+          'i-amphtml-story-grid-template-with-full-bleed-animation'
         );
       }
     );

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-base-layer';
+import {LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
 import {StoryAnimationPresetDef} from './animation-types';
 import {
   calculateTargetScalingFactor,
@@ -73,7 +73,7 @@ const FULL_BLEED_ANIMATION_NAMES = [
  */
 const ANIMATION_CSS_CLASS_NAMES = {
   [FULL_BLEED_CATEGORY]:
-    'i-amphtml-story-layer-template-with-full-bleed-animation',
+    'i-amphtml-story-grid-template-with-full-bleed-animation',
 };
 
 /**

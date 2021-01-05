@@ -25,23 +25,6 @@ import {parseQueryString} from '../../../src/url';
 import {px, setStyles} from '../../../src/style';
 
 /**
- * The attribute name for grid layer templates.
- * @private @const {string}
- */
-const TEMPLATE_ATTRIBUTE_NAME = 'template';
-
-/**
- * A mapping of template attribute values to CSS class names.
- * @const {!Object<string, string>}
- */
-export const LAYER_TEMPLATE_CLASS_NAMES = {
-  'fill': 'i-amphtml-story-layer-template-fill',
-  'vertical': 'i-amphtml-story-layer-template-vertical',
-  'horizontal': 'i-amphtml-story-layer-template-horizontal',
-  'thirds': 'i-amphtml-story-layer-template-thirds',
-};
-
-/**
  * Base layer template.
  */
 export class AmpStoryBaseLayer extends AMP.BaseElement {
@@ -64,21 +47,6 @@ export class AmpStoryBaseLayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.classList.add('i-amphtml-story-layer');
-  }
-
-  /**
-   * Applies internal CSS class names for the template attribute, so that styles
-   * can use the class name instead of compound
-   * amp-story-grid-layer[template="..."] selectors, since the latter increases
-   * CSS specificity and can prevent users from being able to override styles.
-   * @protected
-   */
-  applyTemplateClassName_() {
-    if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
-      const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = LAYER_TEMPLATE_CLASS_NAMES[templateName];
-      this.element.classList.add(templateClassName);
-    }
   }
 
   /**
