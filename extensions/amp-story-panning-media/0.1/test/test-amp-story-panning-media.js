@@ -64,7 +64,9 @@ describes.realWin(
     });
 
     it('should build', async () => {
-      await createAmpStoryPanningMedia('/examples/img/conservatory-coords.jpg');
+      await createAmpStoryPanningMedia(
+        '/examples/amp-story/img/conservatory-coords.jpg'
+      );
       return expect(() => panningMedia.layoutCallback()).to.not.throw();
     });
 
@@ -78,7 +80,7 @@ describes.realWin(
     it('sets transform of image element from attributes', async () => {
       const positionValues = {x: '50%', y: '50%', zoom: '2'};
       await createAmpStoryPanningMedia(
-        '/examples/img/conservatory-coords.jpg',
+        '/examples/amp-story/img/conservatory-coords.jpg',
         positionValues
       );
       await panningMedia.layoutCallback();

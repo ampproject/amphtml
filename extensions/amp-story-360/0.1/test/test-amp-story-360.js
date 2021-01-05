@@ -83,7 +83,7 @@ describes.realWin(
 
     it('should build', async () => {
       await createAmpStory360(
-        '/examples/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg'
+        '/examples/amp-story/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg'
       );
       expect(() => {
         threesixty.layoutCallback();
@@ -101,7 +101,7 @@ describes.realWin(
 
     it('parses orientation attributes', async () => {
       await createAmpStory360(
-        '/examples/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg'
+        '/examples/amp-story/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg'
       );
       await threesixty.layoutCallback();
       expect(threesixty.canAnimate).to.be.true;
