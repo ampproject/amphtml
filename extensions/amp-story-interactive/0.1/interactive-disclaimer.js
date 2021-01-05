@@ -25,8 +25,9 @@ import {htmlFor} from '../../../src/static-template';
 
 /** @const {!Object<string, !Object>} */
 const BACKENDS = {
+  // Used for testing / as a template
   'webstoriesinteractivity-beta.web.app': {
-    learnMoreUrl: 'https://policies.google.com/terms',
+    learnMoreUrl: 'https://amp.dev/stories',
     entityName: 'AMP',
   },
 };
