@@ -42,6 +42,9 @@ import {userAssert} from '../../../src/log';
 let REQUEST_ID = 1;
 
 /** @const */
+const VERSION = '0.1';
+
+/** @const */
 const TAG = 'amp-vidazoo-widget';
 
 class AmpVidazooWidget extends AMP.BaseElement {
@@ -53,8 +56,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
     this.widgetId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'http://localhost:8080';
-    // this.iframeDomain_ = 'https://static.vidazoo.com';
+    this.iframeDomain_ = 'https://static.vidazoo.com';
 
     /** @private {?Object} */
     this.widgetOptions_ = null;
@@ -124,7 +126,8 @@ class AmpVidazooWidget extends AMP.BaseElement {
     const urlParams = dict({
       'widgetId': this.widgetId_ || undefined,
     });
-    const iframeUrl = this.iframeDomain_ + '/basev/amp/artemis/0.1/index.html';
+    const iframeUrl =
+      this.iframeDomain_ + `/basev/amp/artemis/${VERSION}/index.html`;
     const src = addParamsToUrl(iframeUrl, urlParams);
 
     const iframe = element.ownerDocument.createElement('iframe');
@@ -484,6 +487,6 @@ class AmpVidazooWidget extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', (AMP) => {
+AMP.extension(TAG, VERSION, (AMP) => {
   AMP.registerElement(TAG, AmpVidazooWidget, CSS);
 });
