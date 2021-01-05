@@ -74,7 +74,7 @@ export const consentUiClasses = {
   mask: 'i-amphtml-consent-ui-mask',
   borderEnabled: 'i-amphtml-consent-ui-border-enabled',
   screenReaderDialog: 'i-amphtml-consent-alertdialog',
-  iframeTransform: 'i-amphtml-consent-ui-iframe-transfrom',
+  iframeTransform: 'i-amphtml-consent-ui-iframe-transform',
 };
 
 export class ConsentUI {
