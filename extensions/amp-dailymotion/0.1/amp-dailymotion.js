@@ -171,7 +171,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
     this.iframe_ = createFrameFor(this, this.getIframeSrc_());
 
-    listen(this.win, 'message', this.handleEvents_.bind(this));
+    listen(this.win, 'message', this.handleMessage_.bind(this));
 
     return this.loadPromise(this.iframe_);
   }
@@ -180,7 +180,7 @@ class AmpDailymotion extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleEvents_(event) {
+  handleMessage_(event) {
     if (!originMatches(event, this.iframe_, 'https://www.dailymotion.com')) {
       return;
     }

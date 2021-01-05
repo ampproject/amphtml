@@ -70,7 +70,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
      * @return {undefined}
      * @private
      */
-    this.boundOnMessage_ = (e) => this.onMessage_(e);
+    this.boundHandleMessage_ = (e) => this.handleMessage_(e);
   }
 
   /** @override */
@@ -122,7 +122,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
       createFrameFor(this, src, '', SANDBOX)
     );
 
-    this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
+    this.unlistenFrame_ = listen(this.win, 'message', this.boundHandleMessage_);
     return this.loadPromise(this.iframe_).then(() => {
       this.onReady_();
     });
@@ -172,7 +172,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  onMessage_(event) {
+  handleMessage_(event) {
     if (!this.iframe_) {
       return;
     }

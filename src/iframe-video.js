@@ -17,6 +17,7 @@ import {Services} from './services';
 import {VideoEvents} from './video-interface';
 import {dev} from './log';
 import {dispatchCustomEvent} from './dom';
+import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {isArray, isObject} from './types';
 import {tryParseJson} from './json';
@@ -76,9 +77,8 @@ export function redispatch(element, event, events) {
  */
 export function createFrameFor(video, src, opt_name, opt_sandbox) {
   const {element} = video;
-  const frame = htmlFor(
-    element
-  )`<iframe frameborder=0 allowfullscreen></iframe>`;
+  const html = htmlFor(element);
+  const frame = html`<iframe frameborder="0" allowfullscreen></iframe>`;
 
   if (opt_name) {
     frame.setAttribute('name', opt_name);
@@ -92,12 +92,32 @@ export function createFrameFor(video, src, opt_name, opt_sandbox) {
   // allow the attribute to be set.
   video.propagateAttributes(['referrerpolicy'], frame);
 
+  if (getMode(video.win).test) {
+    src = getTestingBlankDocumentUrl(video.win.parent.location.origin, src);
+  }
+
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
 
   video.applyFillContent(frame);
   element.appendChild(frame);
 
   return frame;
+}
+
+/**
+ * Returns a placeholder local URL for an <iframe> src during testing.
+ *
+ * Unresponsive external URLs cause component tests to fail, so this is required
+ * to keep CI running along in those cases.
+ *
+ * The real src is kept as a hash fragment (after initial "#") to allow test URL
+ * construction. See testing/iframe-video.js for assertion utilities.
+ * @param {string} origin
+ * @param {string=} opt_src
+ * @return {string}
+ */
+export function getTestingBlankDocumentUrl(origin, opt_src = '') {
+  return `${origin}/test/fixtures/served/blank.html#${opt_src}`;
 }
 
 /**

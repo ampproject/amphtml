@@ -15,136 +15,71 @@
  */
 
 import '../amp-mowplayer';
-import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {
+  expectRealIframeSrcEquals,
+  getVideoIframeTestHelpers,
+} from '../../../../testing/iframe-video';
 import {listenOncePromise} from '../../../../src/event-helper';
+
+const TAG = 'amp-mowplayer';
 
 const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';
 const EXAMPLE_VIDEOID_URL = 'https://mowplayer.com/watch/v-myfwarfx4tb';
 
-describes.realWin(
-  'amp-mowplayer',
-  {
-    amp: {
-      extensions: ['amp-mowplayer'],
-    },
-  },
-  function (env) {
-    this.timeout(5000);
-    let win, doc;
-    let timer;
+describes.realWin(TAG, {amp: {extensions: [TAG]}}, (env) => {
+  const {
+    fakePostMessage,
+    buildLayoutElement,
+    listenToForwardedEvent,
+  } = getVideoIframeTestHelpers(env, TAG, {
+    origin: 'https://mowplayer.com',
+    serializeMessage: JSON.stringify,
+    layoutMessage: {event: 'onReady'},
+  });
 
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
-      timer = Services.timerFor(win);
+  it('renders', async () => {
+    const element = await buildLayoutElement({'data-mediaid': EXAMPLE_VIDEOID});
+    const iframe = element.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expectRealIframeSrcEquals(iframe, EXAMPLE_VIDEOID_URL);
+  });
+
+  it('requires data-mediaid', () =>
+    allowConsoleError(() =>
+      buildLayoutElement({}).should.eventually.be.rejectedWith(
+        /The data-mediaid attribute is required for/
+      )
+    ));
+
+  it('should send events from mowplayer to the amp element', async () => {
+    const element = await buildLayoutElement({'data-mediaid': EXAMPLE_VIDEOID});
+
+    await listenToForwardedEvent(element, VideoEvents.MUTED, {
+      event: 'infoDelivery',
+      info: {muted: true},
+    });
+    await listenToForwardedEvent(element, VideoEvents.PLAYING, {
+      event: 'infoDelivery',
+      info: {playerState: 1},
+    });
+    await listenToForwardedEvent(element, VideoEvents.PAUSE, {
+      event: 'infoDelivery',
+      info: {playerState: 2},
+    });
+    await listenToForwardedEvent(element, VideoEvents.UNMUTED, {
+      event: 'infoDelivery',
+      info: {muted: false},
     });
 
-    function getMowPlayer(attributes) {
-      const element = createElementWithAttributes(doc, 'amp-mowplayer', {
-        width: 250,
-        height: 180,
-        ...attributes,
-      });
-      doc.body.appendChild(element);
-      element.implementation_.baseURL_ =
-        // Use a blank page, since these tests don't require an actual page.
-        // hash # at the end so path is not affected by param concat
-        `http://localhost:${location.port}/test/fixtures/served/blank.html#`;
-      return element
-        .build()
-        .then(() => element.layoutCallback())
-        .then(() => {
-          const iframe = element.querySelector('iframe');
-          element.implementation_.handleMowMessage_({
-            origin: 'https://mowplayer.com',
-            source: iframe.contentWindow,
-            data: JSON.stringify({event: 'onReady'}),
-          });
-          return element;
-        });
-    }
-
-    describe('with data-mediaid', function () {
-      runTestsForDatasource(EXAMPLE_VIDEOID);
+    // Make sure pause and end are triggered when video ends.
+    const ended = listenOncePromise(element, VideoEvents.ENDED);
+    const paused = listenOncePromise(element, VideoEvents.PAUSE);
+    fakePostMessage(element, {
+      event: 'infoDelivery',
+      info: {playerState: 0},
     });
-
-    /**
-     * This function runs generic tests for components based on
-     * data-videoid or data-live-channelid.
-     * @param {string} datasource
-     */
-    function runTestsForDatasource(datasource) {
-      it('renders', async () => {
-        const element = await getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID});
-        const iframe = element.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(EXAMPLE_VIDEOID_URL);
-      });
-
-      it('requires data-mediaid', () =>
-        allowConsoleError(() =>
-          getMowPlayer({}).should.eventually.be.rejectedWith(
-            /The data-mediaid attribute is required for/
-          )
-        ));
-
-      it('should send events from mowplayer to the amp element', () => {
-        return getMowPlayer({'data-mediaid': datasource}).then((mp) => {
-          const iframe = mp.querySelector('iframe');
-
-          return Promise.resolve()
-            .then(() => {
-              const p = listenOncePromise(mp, VideoEvents.MUTED);
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: true});
-              return p;
-            })
-            .then(() => {
-              const p = listenOncePromise(mp, VideoEvents.PLAYING);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 1});
-              return p;
-            })
-            .then(() => {
-              const p = listenOncePromise(mp, VideoEvents.PAUSE);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 2});
-              return p;
-            })
-            .then(() => {
-              const p = listenOncePromise(mp, VideoEvents.UNMUTED);
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
-              return p;
-            })
-            .then(() => {
-              // Should not send the unmute event twice if already sent once.
-              const p = listenOncePromise(mp, VideoEvents.UNMUTED).then(() => {
-                assert.fail('Should not have dispatch unmute message twice');
-              });
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
-              const successTimeout = timer.promise(10);
-              return Promise.race([p, successTimeout]);
-            })
-            .then(() => {
-              // Make sure pause and end are triggered when video ends.
-              const pEnded = listenOncePromise(mp, VideoEvents.ENDED);
-              const pPause = listenOncePromise(mp, VideoEvents.PAUSE);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 0});
-              return Promise.all([pEnded, pPause]);
-            });
-        });
-      });
-    }
-
-    function sendFakeInfoDeliveryMessage(mp, iframe, info) {
-      mp.implementation_.handleMowMessage_({
-        origin: 'https://mowplayer.com',
-        source: iframe.contentWindow,
-        data: JSON.stringify({
-          event: 'infoDelivery',
-          info,
-        }),
-      });
-    }
-  }
-);
+    await ended;
+    await paused;
+  });
+});

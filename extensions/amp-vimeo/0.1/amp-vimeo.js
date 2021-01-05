@@ -90,10 +90,10 @@ class AmpVimeo extends AMP.BaseElement {
 
     /**
      * @param {!Event} e
-     * @return {*} TODO(#23582): Specify return type
+     * @return {undefined}
      * @private
      */
-    this.boundOnMessage_ = (e) => this.onMessage_(e);
+    this.boundHandleMessage_ = (e) => this.handleMessage_(e);
 
     /** @private {!UnlistenDef|null} */
     this.unlistenFrame_ = null;
@@ -159,7 +159,7 @@ class AmpVimeo extends AMP.BaseElement {
     const iframe = createFrameFor(this, src);
 
     this.iframe_ = iframe;
-    this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
+    this.unlistenFrame_ = listen(this.win, 'message', this.boundHandleMessage_);
 
     this.sendCommand_('ping');
 
@@ -221,7 +221,7 @@ class AmpVimeo extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  onMessage_(event) {
+  handleMessage_(event) {
     if (
       !originMatches(
         event,

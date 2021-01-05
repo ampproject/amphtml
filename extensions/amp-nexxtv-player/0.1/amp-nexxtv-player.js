@@ -144,7 +144,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(this.win, 'message', (event) => {
-      this.handleNexxMessage_(event);
+      this.handleMessage_(event);
     });
 
     this.element.appendChild(this.iframe_);
@@ -206,7 +206,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleNexxMessage_(event) {
+  handleMessage_(event) {
     const eventData = getData(event);
     if (!eventData || event.source !== this.iframe_.contentWindow) {
       return;

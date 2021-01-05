@@ -115,7 +115,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(this.win, 'message', (e) =>
-      this.handlePlayerMessage_(e)
+      this.handleMessage_(e)
     );
 
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
@@ -149,7 +149,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handlePlayerMessage_(event) {
+  handleMessage_(event) {
     const {element} = this;
 
     if (event.source != this.iframe_.contentWindow) {

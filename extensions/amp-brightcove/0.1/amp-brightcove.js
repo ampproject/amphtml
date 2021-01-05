@@ -41,6 +41,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
@@ -170,7 +171,7 @@ class AmpBrightcove extends AMP.BaseElement {
     return this.getConsents_().then(() => {
       this.iframe_ = createFrameFor(this, this.getIframeSrc_());
       this.unlistenMessage_ = listen(this.win, 'message', (e) =>
-        this.handlePlayerMessage_(e)
+        this.handleMessage_(e)
       );
       return this.loadPromise(this.iframe_).then(
         () => this.playerReadyPromise_
@@ -186,6 +187,7 @@ class AmpBrightcove extends AMP.BaseElement {
    * */
   sendCommand_(command, arg) {
     this.playerReadyPromise_.then(() => {
+      // debugger;
       // We still need to check this.iframe_ as the component may have
       // been unlaid out by now.
       if (this.iframe_ && this.iframe_.contentWindow) {
@@ -196,7 +198,7 @@ class AmpBrightcove extends AMP.BaseElement {
               'args': arg,
             })
           ),
-          'https://players.brightcove.net'
+          getMode(this.win).test ? '*' : 'https://players.brightcove.net'
         );
       }
     });
@@ -206,7 +208,7 @@ class AmpBrightcove extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handlePlayerMessage_(event) {
+  handleMessage_(event) {
     const {element} = this;
 
     if (event.source != this.iframe_.contentWindow) {

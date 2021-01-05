@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
+import {createFrameFor} from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {
   dispatchCustomEvent,
@@ -148,18 +149,14 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    const src = this.getVideoIframeSrc_();
+    const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
-    iframe.setAttribute('frameborder', '0');
-    iframe.src = src;
-    this.applyFillContent(iframe);
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
       this.win,
       'message',
-      this.handleGfycatMessages_.bind(this)
+      this.handleMessage_.bind(this)
     );
 
     this.element.appendChild(iframe);
@@ -197,7 +194,7 @@ class AmpGfycat extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleGfycatMessages_(event) {
+  handleMessage_(event) {
     const eventData = /** @type {?string|undefined} */ (getData(event));
 
     if (

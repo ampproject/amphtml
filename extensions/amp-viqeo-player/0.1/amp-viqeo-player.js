@@ -19,8 +19,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {redispatch} from '../../../src/iframe-video';
-
 import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
@@ -31,6 +29,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {redispatch} from '../../../src/iframe-video';
 
 const TAG = 'amp-viqeo-player';
 
@@ -147,7 +146,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
       this.win,
       'message',
-      this.handleViqeoMessages_.bind(this)
+      this.handleMessage_.bind(this)
     );
 
     return this.mutateElement(() => {
@@ -164,7 +163,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
    * @return {?JsonObject|string|undefined}
    * @private
    * */
-  handleViqeoMessages_(event) {
+  handleMessage_(event) {
     const eventData = getData(event);
     if (
       !eventData ||

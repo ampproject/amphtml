@@ -16,106 +16,67 @@
 
 import '../amp-nexxtv-player';
 import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {
+  expectRealIframeSrcEquals,
+  getVideoIframeTestHelpers,
+} from '../../../../testing/iframe-video';
 
-describes.realWin(
-  'amp-nexxtv-player',
-  {
-    amp: {
-      extensions: ['amp-nexxtv-player'],
-    },
-  },
-  (env) => {
-    let win, doc;
+const TAG = 'amp-nexxtv-player';
 
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
+describes.realWin(TAG, {amp: {extensions: [TAG]}}, (env) => {
+  const {
+    buildLayoutElement,
+    listenToForwardedEvent,
+  } = getVideoIframeTestHelpers(env, TAG, {
+    origin: 'https://embed.nexx.cloud',
+    serializeMessage: JSON.stringify,
+    layoutMessage: {cmd: 'onload'},
+  });
+
+  it('renders', async () => {
+    const element = await buildLayoutElement({
+      'data-mediaid': '71QQG852413DU7J',
+      'data-client': '761',
     });
+    const iframe = element.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expectRealIframeSrcEquals(
+      iframe,
+      'https://embed.nexx.cloud/761/video/' +
+        '71QQG852413DU7J?dataMode=static&platform=amp'
+    );
+  });
 
-    async function getNexxtvPlayer(attributes) {
-      const element = createElementWithAttributes(doc, 'amp-nexxtv-player', {
-        width: 111,
-        height: 222,
-        ...attributes,
-        // Use a blank page, since these tests don't require an actual page.
-        // hash # at the end so path is not affected by param concat
-        'data-origin': `http://localhost:${location.port}/test/fixtures/served/blank.html#`,
-      });
-      doc.body.appendChild(element);
-      await element.build();
-      await element.layoutCallback();
-      const iframe = element.querySelector('iframe');
-      element.implementation_.handleNexxMessage_({
-        origin: 'https://embed.nexx.cloud',
-        source: iframe.contentWindow,
-        data: JSON.stringify({cmd: 'onload'}),
-      });
-      return element;
-    }
-
-    it('renders nexxtv video player', async () => {
-      const element = await getNexxtvPlayer({
-        'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761',
-      });
-      const playerIframe = element.querySelector('iframe');
-      expect(playerIframe).to.not.be.null;
-      expect(playerIframe.src)
-        .to.be.a('string')
-        .and.match(
-          new RegExp(
-            element.getAttribute('data-client') +
-              '/video/' +
-              element.getAttribute('data-mediaid') +
-              '\\?dataMode=static&platform=amp' +
-              '$' // suffix
-          )
-        );
+  it('removes iframe after unlayoutCallback', async () => {
+    const element = await buildLayoutElement({
+      'data-mediaid': '71QQG852413DU7J',
+      'data-client': '761',
     });
+    const playerIframe = element.querySelector('iframe');
+    expect(playerIframe).to.not.be.null;
 
-    it('removes iframe after unlayoutCallback', async () => {
-      const nexxtv = await getNexxtvPlayer({
-        'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761',
-      });
-      const playerIframe = nexxtv.querySelector('iframe');
-      expect(playerIframe).to.not.be.null;
+    const obj = element.implementation_;
+    obj.unlayoutCallback();
+    expect(element.querySelector('iframe')).to.be.null;
+    expect(obj.iframe_).to.be.null;
+  });
 
-      const obj = nexxtv.implementation_;
-      obj.unlayoutCallback();
-      expect(nexxtv.querySelector('iframe')).to.be.null;
-      expect(obj.iframe_).to.be.null;
+  it('should forward events', async () => {
+    const element = await buildLayoutElement({
+      'data-mediaid': '71QQG852413DU7J',
+      'data-client': '761',
     });
-
-    it('should forward events from nexxtv-player to the amp element', async () => {
-      const nexxtv = await getNexxtvPlayer({
-        'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761',
-      });
-      const iframe = nexxtv.querySelector('iframe');
-      await Promise.resolve();
-      const p1 = listenOncePromise(nexxtv, VideoEvents.PLAYING);
-      sendFakeMessage(nexxtv, iframe, {event: 'play'});
-      await p1;
-      const p2 = listenOncePromise(nexxtv, VideoEvents.MUTED);
-      sendFakeMessage(nexxtv, iframe, {event: 'mute'});
-      await p2;
-      const p3 = listenOncePromise(nexxtv, VideoEvents.PAUSE);
-      sendFakeMessage(nexxtv, iframe, {event: 'pause'});
-      await p3;
-      const p4 = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
-      sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
-      return p4;
+    await listenToForwardedEvent(element, VideoEvents.PLAYING, {
+      event: 'play',
     });
-
-    function sendFakeMessage(nexxtv, iframe, command) {
-      nexxtv.implementation_.handleNexxMessage_({
-        origin: 'https://embed.nexx.cloud',
-        source: iframe.contentWindow,
-        data: command,
-      });
-    }
-  }
-);
+    await listenToForwardedEvent(element, VideoEvents.MUTED, {
+      event: 'mute',
+    });
+    await listenToForwardedEvent(element, VideoEvents.PAUSE, {
+      event: 'pause',
+    });
+    await listenToForwardedEvent(element, VideoEvents.UNMUTED, {
+      event: 'unmute',
+    });
+  });
+});

@@ -14,207 +14,118 @@
  * limitations under the License.
  */
 
+import '../amp-viqeo-player';
 import {PlayingStates, VideoEvents} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
-import {listenOncePromise} from '../../../../src/event-helper';
-import AmpViqeoPlayer from '../amp-viqeo-player';
+import {getVideoIframeTestHelpers} from '../../../../testing/iframe-video';
 
-describes.realWin(
-  'amp-viqeo-player',
-  {
-    amp: {
-      extensions: ['amp-viqeo-player'],
+const TAG = 'amp-viqeo-player';
+
+describes.realWin(TAG, {amp: {extensions: [TAG]}}, (env) => {
+  const {
+    buildLayoutElement,
+    listenToForwardedEvent,
+  } = getVideoIframeTestHelpers(env, TAG, {
+    attributes: {
+      width: 16,
+      height: 9,
+      layout: 'responsive',
+      'data-profileid': 184,
+      'data-videoid': '922d04f30b66f1a32eb2',
     },
-    allowExternalResources: true,
-  },
-  function (env) {
-    this.timeout(4000);
-    let win, doc;
+    serializeMessage: (data) => ({source: 'ViqeoPlayer', ...data}),
+  });
 
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
+  describe('test-requires-attributes', () => {
+    it('requires data-videoid', () => {
+      const error = /The data-videoid attribute is required for/;
+      expectAsyncConsoleError(error);
+      return buildLayoutElement({
+        'data-videoid': '',
+      }).should.eventually.be.rejectedWith(error);
     });
 
-    function fakePostMessage(viqeoElement, info) {
-      viqeoElement.implementation_.handleViqeoMessages_({
-        source: viqeoElement.querySelector('iframe').contentWindow,
-        data: {source: 'ViqeoPlayer', ...info},
-      });
-    }
+    it('requires data-profileid', () => {
+      const error = /The data-profileid attribute is required for/;
+      expectAsyncConsoleError(error);
+      return buildLayoutElement({
+        'data-profileid': '',
+      }).should.eventually.be.rejectedWith(error);
+    });
+  });
 
-    it.skip('test-get-data', () => {
-      return getViqeo().then((p) => {
-        const {viqeoElement, entry, viqeo} = p;
-        expect(entry.video.element).to.equal(viqeoElement);
-        expect(entry.video instanceof AmpViqeoPlayer).to.equal(true);
-        expect(entry.video).to.equal(viqeo);
-        expect(viqeo instanceof AmpViqeoPlayer).to.equal(true);
-      });
+  describe('test-playing-actions', () => {
+    it('should propagate autoplay to ad iframe', async () => {
+      const element = await buildLayoutElement({autoplay: ''});
+      const iframe = element.querySelector('iframe');
+      const data = JSON.parse(iframe.name).attributes;
+      expect(data).to.be.ok;
+      expect(data._context).to.be.ok;
+      expect(data._context.autoplay).to.equal(true);
     });
 
-    describe('test-requires-attributes', () => {
-      it('requires data-videoid', () => {
-        const error = /The data-videoid attribute is required for/;
-        expectAsyncConsoleError(error);
-        return getViqeo({viqeoId: null}).should.eventually.be.rejectedWith(
-          error
-        );
-      });
+    it(
+      'should propagate autoplay=false ' +
+        'if element has not autoplay attribute to ad iframe',
+      async () => {
+        const element = await buildLayoutElement();
+        const iframe = element.querySelector('iframe');
+        const data = JSON.parse(iframe.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        return expect(data._context.autoplay).to.equal(false);
+      }
+    );
 
-      it('requires data-profileid', () => {
-        const error = /The data-profileid attribute is required for/;
-        expectAsyncConsoleError(error);
-        return getViqeo({
-          viqeoProfileId: null,
-        }).should.eventually.be.rejectedWith(error);
-      });
+    it('should paused without autoplay', async () => {
+      const element = await buildLayoutElement();
+      const curState = Services.videoManagerForDoc(
+        env.win.document
+      ).getPlayingState(element.implementation_);
+      return expect(curState).to.equal(PlayingStates.PAUSED);
     });
+  });
 
-    describe.skip('test-playing-actions', () => {
-      it('renders responsively', () => {
-        return getViqeo().then((p) => {
-          const iframe = p.viqeoElement.querySelector('iframe');
-          expect(iframe).to.not.be.null;
-          expect(iframe.className).to.match(/i-amphtml-fill-content/);
-        });
-      });
-
-      it('should propagate autoplay to ad iframe', () => {
-        return getViqeo({opt_params: {autoplay: ''}}).then((p) => {
-          const iframe = p.viqeoElement.querySelector('iframe');
-          const data = JSON.parse(iframe.name).attributes;
-          expect(data).to.be.ok;
-          expect(data._context).to.be.ok;
-          expect(data._context.autoplay).to.equal(true);
-        });
-      });
-
-      it(
-        'should propagate autoplay=false ' +
-          'if element has not autoplay attribute to ad iframe',
-        () => {
-          return getViqeo().then((p) => {
-            const iframe = p.viqeoElement.querySelector('iframe');
-            const data = JSON.parse(iframe.name).attributes;
-            expect(data).to.be.ok;
-            expect(data._context).to.be.ok;
-            return expect(data._context.autoplay).to.equal(false);
-          });
-        }
+  describe('createPlaceholderCallback', () => {
+    it('should create a placeholder image', async () => {
+      const element = await buildLayoutElement();
+      const img = element.querySelector('amp-img');
+      expect(img).to.not.be.null;
+      expect(img.getAttribute('src')).to.equal(
+        'https://cdn.viqeo.tv/preview/922d04f30b66f1a32eb2.jpg'
       );
-
-      it('should paused without autoplay', () => {
-        return getViqeo().then((p) => {
-          const curState = p.videoManager.getPlayingState(p.viqeo);
-          return expect(curState).to.equal(PlayingStates.PAUSED);
-        });
-      });
+      expect(img.getAttribute('layout')).to.equal('fill');
+      expect(img.hasAttribute('placeholder')).to.be.true;
+      expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      expect(img.getAttribute('alt')).to.equal('Loading video');
     });
+  });
 
-    describe('createPlaceholderCallback', () => {
-      it('should create a placeholder image', () => {
-        return getViqeo().then((p) => {
-          const img = p.viqeoElement.querySelector('amp-img');
-          expect(img).to.not.be.null;
-          expect(img.getAttribute('src')).to.equal(
-            'https://cdn.viqeo.tv/preview/922d04f30b66f1a32eb2.jpg'
-          );
-          expect(img.getAttribute('layout')).to.equal('fill');
-          expect(img.hasAttribute('placeholder')).to.be.true;
-          expect(img.getAttribute('referrerpolicy')).to.equal('origin');
-          expect(img.getAttribute('alt')).to.equal('Loading video');
-        });
-      });
+  it('should forward events', async () => {
+    const element = await buildLayoutElement();
+    await listenToForwardedEvent(element, VideoEvents.LOAD, {
+      action: 'ready',
     });
-
-    it('should forward events', () => {
-      return getViqeo().then(({viqeoElement}) => {
-        return Promise.resolve()
-          .then(() => {
-            const p = listenOncePromise(viqeoElement, VideoEvents.LOAD);
-            fakePostMessage(viqeoElement, {action: 'ready'});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(viqeoElement, VideoEvents.PLAYING);
-            fakePostMessage(viqeoElement, {action: 'play'});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(viqeoElement, VideoEvents.PAUSE);
-            fakePostMessage(viqeoElement, {action: 'pause'});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(viqeoElement, VideoEvents.MUTED);
-            fakePostMessage(viqeoElement, {action: 'mute'});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(viqeoElement, VideoEvents.UNMUTED);
-            fakePostMessage(viqeoElement, {action: 'unmute'});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(viqeoElement, VideoEvents.ENDED);
-            fakePostMessage(viqeoElement, {action: 'end'});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(viqeoElement, VideoEvents.AD_START);
-            fakePostMessage(viqeoElement, {action: 'startAdvert'});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(viqeoElement, VideoEvents.AD_END);
-            fakePostMessage(viqeoElement, {action: 'endAdvert'});
-            return p;
-          });
-      });
+    await listenToForwardedEvent(element, VideoEvents.PLAYING, {
+      action: 'play',
     });
-
-    function getViqeo(params) {
-      const {id, viqeoProfileId, viqeoId, width, height, opt_params} = {
-        id: 'myVideo',
-        viqeoProfileId: 184,
-        viqeoId: '922d04f30b66f1a32eb2',
-        width: 320,
-        height: 180,
-        opt_params: {},
-        ...params,
-      };
-
-      const viqeoElement = doc.createElement('amp-viqeo-player');
-
-      id && viqeoElement.setAttribute('id', id);
-      viqeoProfileId &&
-        viqeoElement.setAttribute('data-profileid', viqeoProfileId);
-
-      viqeoId && viqeoElement.setAttribute('data-videoid', viqeoId);
-
-      width && viqeoElement.setAttribute('width', width);
-      height && viqeoElement.setAttribute('height', height);
-
-      opt_params &&
-        Object.keys(opt_params).forEach((key) => {
-          viqeoElement.setAttribute(key, opt_params[key]);
-        });
-
-      doc.body.appendChild(viqeoElement);
-      return viqeoElement
-        .build()
-        .then(() => viqeoElement.layoutCallback())
-        .then(() => {
-          const videoManager = Services.videoManagerForDoc(doc);
-          const entry = videoManager.getEntry_(viqeoElement);
-          return Promise.resolve({
-            viqeoElement,
-            videoManager,
-            entry,
-            viqeo: entry.video,
-          });
-        });
-    }
-  }
-);
+    await listenToForwardedEvent(element, VideoEvents.PAUSE, {
+      action: 'pause',
+    });
+    await listenToForwardedEvent(element, VideoEvents.MUTED, {
+      action: 'mute',
+    });
+    await listenToForwardedEvent(element, VideoEvents.UNMUTED, {
+      action: 'unmute',
+    });
+    await listenToForwardedEvent(element, VideoEvents.ENDED, {
+      action: 'end',
+    });
+    await listenToForwardedEvent(element, VideoEvents.AD_START, {
+      action: 'startAdvert',
+    });
+    await listenToForwardedEvent(element, VideoEvents.AD_END, {
+      action: 'endAdvert',
+    });
+  });
+});

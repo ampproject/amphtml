@@ -16,253 +16,180 @@
 
 import '../amp-powr-player';
 import {VideoEvents} from '../../../../src/video-interface';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {
+  expectRealIframeSrcEquals,
+  getRealSrcFromTestingUrl,
+  getVideoIframeTestHelpers,
+} from '../../../../testing/iframe-video';
 import {parseUrlDeprecated} from '../../../../src/url';
 
-describes.realWin(
-  'amp-powr-player',
-  {
-    amp: {
-      extensions: ['amp-powr-player'],
-    },
-  },
-  (env) => {
-    let win, doc;
+const TAG = 'amp-powr-player';
 
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
+describes.realWin(TAG, {amp: {extensions: [TAG]}}, (env) => {
+  const {
+    buildLayoutElement,
+    listenToForwardedEvent,
+  } = getVideoIframeTestHelpers(env, TAG, {
+    origin: 'https://player.powr.com',
+    layoutMessage: {event: 'ready'},
+    serializeMessage: JSON.stringify,
+  });
+
+  it('renders', async () => {
+    const element = await buildLayoutElement({
+      'data-account': '945',
+      'data-player': '1',
+      'data-video': 'amp-test-video',
+    });
+    const iframe = element.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expect(iframe.tagName).to.equal('IFRAME');
+    expectRealIframeSrcEquals(
+      iframe,
+      'https://player.powr.com/iframe.html?account=945&player=1&' +
+        'video=amp-test-video&playsinline=true'
+    );
+  });
+
+  it('requires data-account', () => {
+    const error = /The data-account attribute is required for/;
+    expectAsyncConsoleError(error, 1);
+    return buildLayoutElement({}).should.eventually.be.rejectedWith(error);
+  });
+
+  it('requires data-player', () => {
+    const error = /The data-player attribute is required for/;
+    expectAsyncConsoleError(error, 1);
+    return buildLayoutElement({
+      'data-account': '945',
+    }).should.eventually.be.rejectedWith(error);
+  });
+
+  it('removes iframe after unlayoutCallback', async () => {
+    const element = await buildLayoutElement({
+      'data-account': '945',
+      'data-player': '1',
+      'data-video': 'amp-test-video',
+    });
+    const iframe = element.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    const obj = element.implementation_;
+    obj.unlayoutCallback();
+    expect(element.querySelector('iframe')).to.be.null;
+    expect(obj.iframe_).to.be.null;
+  });
+
+  it('should pass data-param-* attributes to the iframe src', async () => {
+    const element = await buildLayoutElement({
+      'data-account': '945',
+      'data-player': '1',
+      'data-video': 'amp-test-video',
+      'data-param-foo': 'bar',
+    });
+    const iframe = element.querySelector('iframe');
+    const params = parseUrlDeprecated(
+      getRealSrcFromTestingUrl(iframe)
+    ).search.split('&');
+    expect(params).to.contain('foo=bar');
+  });
+
+  it('should propagate mutated attributes', async () => {
+    const element = await buildLayoutElement({
+      'data-account': '945',
+      'data-player': '1',
+      'data-video': 'ZNImchutXk',
+    });
+    const iframe = element.querySelector('iframe');
+
+    expectRealIframeSrcEquals(
+      iframe,
+      'https://player.powr.com/iframe.html?account=945&player=1&' +
+        'video=ZNImchutXk&playsinline=true'
+    );
+
+    element.setAttribute('data-account', '945');
+    element.setAttribute('data-player', '1');
+    element.setAttribute('data-video', 'ZNImchutXk');
+    element.mutatedAttributesCallback({
+      'data-account': '945',
+      'data-player': '1',
+      'data-video': 'ZNImchutXk',
     });
 
-    function getPowrPlayer(attributes, opt_responsive) {
-      const bc = doc.createElement('amp-powr-player');
-      for (const key in attributes) {
-        bc.setAttribute(key, attributes[key]);
-      }
-      bc.setAttribute('width', '111');
-      bc.setAttribute('height', '222');
-      if (opt_responsive) {
-        bc.setAttribute('layout', 'responsive');
-      }
-      doc.body.appendChild(bc);
-      return bc
-        .build()
-        .then(() => {
-          bc.implementation_.playerReadyResolver_(bc.implementation_.iframe_);
-          return bc.layoutCallback();
-        })
-        .then(() => bc);
-    }
+    expectRealIframeSrcEquals(
+      iframe,
+      'https://player.powr.com/iframe.html?account=945&player=1&' +
+        'video=ZNImchutXk&playsinline=true'
+    );
+  });
 
-    function fakePostMessage(bc, info) {
-      bc.implementation_.handlePlayerMessage_({
-        origin: 'https://player.powr.com',
-        source: bc.querySelector('iframe').contentWindow,
-        data: JSON.stringify(info),
-      });
-    }
-
-    it('renders', () => {
-      return getPowrPlayer({
-        'data-account': '945',
-        'data-player': '1',
-        'data-video': 'amp-test-video',
-      }).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://player.powr.com/iframe.html?account=945&player=1&' +
-            'video=amp-test-video&playsinline=true'
-        );
-      });
+  it('should pass referrer', async () => {
+    const element = await buildLayoutElement({
+      'data-account': '945',
+      'data-player': '1',
+      'data-video': 'ZNImchutXk',
+      'data-referrer': 'COUNTER',
     });
+    const iframe = element.querySelector('iframe');
+    expect(iframe.src).to.contain('referrer=1');
+  });
 
-    it('renders responsively', () => {
-      return getPowrPlayer(
-        {
-          'data-account': '945',
-          'data-player': '1',
-          'data-video': 'amp-test-video',
-        },
-        true
-      ).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+  it('should force playsinline', async () => {
+    const element = await buildLayoutElement({
+      'data-account': '945',
+      'data-player': '1',
+      'data-video': 'ZNImchutXk',
+      'data-param-playsinline': 'false',
     });
+    const iframe = element.querySelector('iframe');
+    expect(iframe.src).to.contain('playsinline=true');
+  });
 
-    it('requires data-account', () => {
-      expectAsyncConsoleError(/The data-account attribute is required for/, 1);
-      return getPowrPlayer({}).should.eventually.be.rejectedWith(
-        /The data-account attribute is required for/
-      );
+  it('should forward events', async () => {
+    const element = await buildLayoutElement({
+      'data-account': '945',
+      'data-player': '1',
+      'data-video': 'ZNImchutXk',
     });
-
-    it('requires data-player', () => {
-      expectAsyncConsoleError(/The data-player attribute is required for/, 1);
-      return getPowrPlayer({
-        'data-account': '945',
-      }).should.eventually.be.rejectedWith(
-        /The data-player attribute is required for/
-      );
+    await listenToForwardedEvent(element, VideoEvents.LOAD, {
+      event: 'ready',
+      muted: false,
+      playing: false,
     });
-
-    it('removes iframe after unlayoutCallback', () => {
-      return getPowrPlayer(
-        {
-          'data-account': '945',
-          'data-player': '1',
-          'data-video': 'amp-test-video',
-        },
-        true
-      ).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        const obj = bc.implementation_;
-        obj.unlayoutCallback();
-        expect(bc.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
-      });
+    await listenToForwardedEvent(element, VideoEvents.AD_START, {
+      event: 'ads-ad-started',
+      muted: false,
+      playing: false,
     });
-
-    it('should pass data-param-* attributes to the iframe src', () => {
-      return getPowrPlayer({
-        'data-account': '945',
-        'data-player': '1',
-        'data-video': 'amp-test-video',
-        'data-param-foo': 'bar',
-      }).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-        const params = parseUrlDeprecated(iframe.src).search.split('&');
-        expect(params).to.contain('foo=bar');
-      });
+    await listenToForwardedEvent(element, VideoEvents.AD_END, {
+      event: 'ads-ad-ended',
+      muted: false,
+      playing: false,
     });
-
-    it('should propagate mutated attributes', () => {
-      return getPowrPlayer({
-        'data-account': '945',
-        'data-player': '1',
-        'data-video': 'ZNImchutXk',
-      }).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-
-        expect(iframe.src).to.equal(
-          'https://player.powr.com/iframe.html?account=945&player=1&' +
-            'video=ZNImchutXk&playsinline=true'
-        );
-
-        bc.setAttribute('data-account', '945');
-        bc.setAttribute('data-player', '1');
-        bc.setAttribute('data-video', 'ZNImchutXk');
-        bc.mutatedAttributesCallback({
-          'data-account': '945',
-          'data-player': '1',
-          'data-video': 'ZNImchutXk',
-        });
-
-        expect(iframe.src).to.equal(
-          'https://player.powr.com/iframe.html?account=945&player=1&' +
-            'video=ZNImchutXk&playsinline=true'
-        );
-      });
+    await listenToForwardedEvent(element, VideoEvents.PLAYING, {
+      event: 'playing',
+      muted: false,
+      playing: true,
     });
-
-    it('should pass referrer', () => {
-      return getPowrPlayer({
-        'data-account': '945',
-        'data-player': '1',
-        'data-video': 'ZNImchutXk',
-        'data-referrer': 'COUNTER',
-      }).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-
-        expect(iframe.src).to.contain('referrer=1');
-      });
+    await listenToForwardedEvent(element, VideoEvents.MUTED, {
+      event: 'volumechange',
+      muted: true,
+      playing: true,
     });
-
-    it('should force playsinline', () => {
-      return getPowrPlayer({
-        'data-account': '945',
-        'data-player': '1',
-        'data-video': 'ZNImchutXk',
-        'data-param-playsinline': 'false',
-      }).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-
-        expect(iframe.src).to.contain('playsinline=true');
-      });
+    await listenToForwardedEvent(element, VideoEvents.UNMUTED, {
+      event: 'volumechange',
+      muted: false,
+      playing: true,
     });
-
-    it('should forward events', () => {
-      return getPowrPlayer({
-        'data-account': '945',
-        'data-player': '1',
-        'data-video': 'ZNImchutXk',
-      }).then((bc) => {
-        return Promise.resolve()
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.LOAD);
-            fakePostMessage(bc, {event: 'ready', muted: false, playing: false});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.AD_START);
-            fakePostMessage(bc, {
-              event: 'ads-ad-started',
-              muted: false,
-              playing: false,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.AD_END);
-            fakePostMessage(bc, {
-              event: 'ads-ad-ended',
-              muted: false,
-              playing: false,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PLAYING);
-            fakePostMessage(bc, {
-              event: 'playing',
-              muted: false,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.MUTED);
-            fakePostMessage(bc, {
-              event: 'volumechange',
-              muted: true,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
-            fakePostMessage(bc, {
-              event: 'volumechange',
-              muted: false,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PAUSE);
-            fakePostMessage(bc, {event: 'pause', muted: false, playing: false});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.ENDED);
-            fakePostMessage(bc, {event: 'ended', muted: false, playing: false});
-            return p;
-          });
-      });
+    await listenToForwardedEvent(element, VideoEvents.PAUSE, {
+      event: 'pause',
+      muted: false,
+      playing: false,
     });
-  }
-);
+    await listenToForwardedEvent(element, VideoEvents.ENDED, {
+      event: 'ended',
+      muted: false,
+      playing: false,
+    });
+  });
+});

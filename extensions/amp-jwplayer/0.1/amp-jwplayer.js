@@ -57,7 +57,7 @@ const JWPLAYER_EVENTS = {
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
-class AmpJWPlayer extends AMP.BaseElement {
+class AmpJwplayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -90,7 +90,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.onReadyOnce_ = once((detail) => this.onReady_(detail));
 
     /** @private {function()} */
-    this.onMessage_ = this.onMessage_.bind(this);
+    this.handleMessage_ = this.handleMessage_.bind(this);
 
     /** @private {Object} */
     this.playlistItem_ = null;
@@ -310,7 +310,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     addUnsafeAllowAutoplay(frame);
     disableScrollingOnIframe(frame);
     // Subscribe to messages from player
-    this.unlistenFrame_ = listen(this.win, 'message', this.onMessage_);
+    this.unlistenFrame_ = listen(this.win, 'message', this.handleMessage_);
     // Forward fullscreen changes to player to update ui
     this.unlistenFullscreen_ = listen(frame, 'fullscreenchange', () => {
       const isFullscreen = this.isFullscreen();
@@ -386,7 +386,7 @@ class AmpJWPlayer extends AMP.BaseElement {
    * @param {Event} messageEvent
    * @private
    */
-  onMessage_(messageEvent) {
+  handleMessage_(messageEvent) {
     if (
       !this.iframe_ ||
       !messageEvent ||
@@ -541,5 +541,5 @@ class AmpJWPlayer extends AMP.BaseElement {
 }
 
 AMP.extension('amp-jwplayer', '0.1', (AMP) => {
-  AMP.registerElement('amp-jwplayer', AmpJWPlayer);
+  AMP.registerElement('amp-jwplayer', AmpJwplayer);
 });

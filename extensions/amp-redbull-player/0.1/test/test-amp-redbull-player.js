@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,46 +14,37 @@
  * limitations under the License.
  */
 
-import '../amp-dailymotion';
+import '../amp-redbull-player';
 import {
   expectRealIframeSrcEquals,
   getVideoIframeTestHelpers,
 } from '../../../../testing/iframe-video';
 
-const TAG = 'amp-dailymotion';
+const TAG = 'amp-redbull-player';
 
 describes.realWin(TAG, {amp: {extensions: [TAG]}}, (env) => {
   const {buildLayoutElement} = getVideoIframeTestHelpers(env, TAG, {});
 
-  it('renders', async () => {
-    const element = await buildLayoutElement({'data-videoid': 'x2m8jpp'});
-    const iframe = element.querySelector('iframe');
-    expect(iframe).to.not.be.null;
-    expectRealIframeSrcEquals(
-      iframe,
-      'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
-    );
-  });
-
-  it('passes custom data-* settings', async () => {
+  it('renders the Red Bull player', async () => {
     const element = await buildLayoutElement({
-      'data-videoid': 'x2m8jpp',
-      'data-start': 123,
-      'data-param-origin': 'example&.org',
+      'data-param-videoid':
+        'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT',
     });
     const iframe = element.querySelector('iframe');
     expect(iframe).to.not.be.null;
     expectRealIframeSrcEquals(
       iframe,
-      'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example%26.org'
+      'https://player.redbull.com/amp/amp-iframe.html?videoId=' +
+        encodeURIComponent(
+          'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT'
+        ) +
+        '&skinId=com&ampTagId=rbvideo&locale=global'
     );
   });
 
-  it('requires data-videoid', () => {
-    return allowConsoleError(() => {
-      return buildLayoutElement({}).should.eventually.be.rejectedWith(
-        /The data-videoid attribute is required for/
-      );
-    });
+  it('fails without videoId', () => {
+    return buildLayoutElement({}).should.eventually.be.rejectedWith(
+      /The data-param-videoid attribute is required/
+    );
   });
 });
