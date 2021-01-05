@@ -144,9 +144,7 @@ showing.
 
 ##### loop
 
-Either `true` or `false`, defaults to `true`. When true, the carousel will allow
-the user to move from the first item back to the last item and visa versa. There
-must be at least three times the `visible-count` of slides present for looping to occur.
+Either `true` or `false`, defaults to `false` when omitted. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three times the `visible-count` of slides present for looping to occur.
 
 ##### horizontal
 

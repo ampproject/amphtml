@@ -43,8 +43,8 @@ describes.endtoend(
       const slidesInView = 3;
       const slides = await getSlides(controller);
 
-      // Click `next` more than necessary (3 visible at a time)
-      for (let i = 0; i < slideCount; i++) {
+      // Click `next` to get to the end
+      for (let i = 0; i < slideCount - slidesInView; i++) {
         await controller.click(nextArrow);
         // Need to sleep due to amp-base-carousel buffering clicks
         await sleep(1000);
