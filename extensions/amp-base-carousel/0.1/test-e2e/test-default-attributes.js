@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+const pageWidth = 800;
+const pageHeight = 800;
+
 describes.endtoend(
   'AMP carousel test default attributes',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/default-attributes.amp.html',
+    // TODO (micajuineho): Add viewer-demo support.
     environments: ['single'],
+    initialRect: {width: pageWidth, height: pageHeight},
   },
   async function (env) {
     let controller;
@@ -52,6 +57,21 @@ describes.endtoend(
       scrollContainer = await getScrollContainerByCarouselId('carousel-3');
       loop = await controller.getElementAttribute(scrollContainer, 'loop');
       await expect(loop).to.equal('false');
+    });
+
+    it('should update loop based on media query', async () => {
+      scrollContainer = await getScrollContainerByCarouselId('carousel-4');
+      loop = await controller.getElementAttribute(scrollContainer, 'loop');
+      await expect(loop).to.equal('false');
+
+      await controller.setWindowRect({
+        width: 1200,
+        height: 1200,
+      });
+
+      scrollContainer = await getScrollContainerByCarouselId('carousel-4');
+      loop = await controller.getElementAttribute(scrollContainer, 'loop');
+      await expect(loop).to.equal('true');
     });
   }
 );

@@ -44,8 +44,16 @@
       <amp-img  height="440" width="1000" class="slide" src="../img/lilacgradient.png" layout="responsive">Slide 6</amp-img>
     </amp-base-carousel>
 
-    <!-- Invalid loop=true turned to false -->
+    <!-- Invalid loop=true turned to false (visible-count * 3 < number of slides) -->
     <amp-base-carousel id="carousel-3" loop="true" class="carousel" visible-count="2" height="440" width="1000" layout="responsive">      
+      <amp-img  height="440" width="1000" class="slide" src="../img/redgradient.png" layout="responsive">Slide 1</amp-img>
+      <amp-img  height="440" width="1000" class="slide" src="../img/greengradient.png" layout="responsive">Slide 2</amp-img>
+      <amp-img  height="440" width="1000" class="slide" src="../img/bluegradient.png" layout="responsive">Slide 3</amp-img>
+      <amp-img  height="440" width="1000" class="slide" src="../img/orangegradient.png" layout="responsive">Slide 4</amp-img>
+    </amp-base-carousel>
+    
+    <!-- Responsive loop carousel -->
+    <amp-base-carousel id="carousel-4" loop="(min-width: 1000px) true, false" class="carousel" height="440" width="1000" layout="responsive">      
       <amp-img  height="440" width="1000" class="slide" src="../img/redgradient.png" layout="responsive">Slide 1</amp-img>
       <amp-img  height="440" width="1000" class="slide" src="../img/greengradient.png" layout="responsive">Slide 2</amp-img>
       <amp-img  height="440" width="1000" class="slide" src="../img/bluegradient.png" layout="responsive">Slide 3</amp-img>
