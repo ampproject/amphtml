@@ -92,15 +92,18 @@ export function getWinOrigin(win) {
  * testing by freezing the object.
  * @param {string} url
  * @param {boolean=} opt_nocache
+ *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  */
 export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
+    cache = IS_ESM
+      ? null
+      : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, opt_nocache ? null : cache);
+  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
 }
 
 /**
@@ -111,10 +114,16 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * @param {!HTMLAnchorElement} a
  * @param {string} url
  * @param {LruCache=} opt_cache
+ *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  * @restricted
  */
 export function parseUrlWithA(a, url, opt_cache) {
+  if (IS_ESM) {
+    a.href = '';
+    return /** @type {!Location} */ (new URL(url, a.href));
+  }
+
   if (opt_cache && opt_cache.has(url)) {
     return opt_cache.get(url);
   }
