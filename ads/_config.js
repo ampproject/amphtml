@@ -1220,6 +1220,8 @@ const adConfig = jsonConfiguration({
 
   'triplelift': {},
 
+  'digiteka': {},
+
   'trugaze': {
     clientIdScope: '__tg_amp',
     renderStartImplemented: true,
