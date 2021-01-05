@@ -483,7 +483,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
   });
 
-  describe.only('children mapping', () => {
+  describe('children mapping', () => {
     let element;
     const DATE_STRING = '2018-01-01T08:00:00Z';
     const DATE = Date.parse(DATE_STRING);

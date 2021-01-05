@@ -836,13 +836,11 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
     const children = [];
     props['children'] = children;
 
-    const nodes = element.getRealChildNodes();
+    const nodes = element
+      .getRealChildNodes()
+      .filter((node) => !isEmptyTextNode(node));
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
-      if (isEmptyTextNode(childElement)) {
-        continue;
-      }
-
       const def = matchChild(childElement, childrenDefs);
       if (!def) {
         continue;
