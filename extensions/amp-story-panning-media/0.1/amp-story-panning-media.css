@@ -22,5 +22,5 @@ amp-story-panning-media amp-img {
 }
 
 amp-story-panning-media amp-img img {
-  transition: .3s;
+  transition: transform .3s ease-in-out;
 }

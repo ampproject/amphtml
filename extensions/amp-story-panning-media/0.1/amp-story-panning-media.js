@@ -92,7 +92,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         // Fill image to 100% height of viewport.
         // TODO(#31515): Handle base zoom of aspect ratio wider than image
         setStyles(this.image_, {height: '100%'});
-        return this.updateTransform(this.x_, this.y_, this.z_);
+        return this.updateTransform(this.x_, this.y_, this.zoom_);
       })
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
@@ -102,8 +102,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (this.isOnActivePage_) {
       this.siblings_.forEach((sibling) => {
         sibling.getImpl().then((impl) => {
-          console.log(impl);
-          impl.updateTransform(this.x_, this.y_, this.z_);
+          impl.updateTransform(this.x_, this.y_, this.zoom_);
         });
       });
     }
