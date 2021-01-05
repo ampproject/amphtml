@@ -29,6 +29,7 @@ import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
+import {install as installResizeObserver} from './polyfills/resize-observer';
 import {install as installSetAdd} from './polyfills/set-add';
 import {install as installStringStartsWith} from './polyfills/string-starts-with';
 import {install as installWeakMapSet} from './polyfills/weakmap-set';
@@ -58,6 +59,7 @@ if (self.document) {
   if (!IS_SXG) {
     installCustomElements(self, class {});
     installIntersectionObserver(self);
+    installResizeObserver(self);
     installAbortController(self);
   }
 }

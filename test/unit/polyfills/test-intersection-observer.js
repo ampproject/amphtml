@@ -17,7 +17,7 @@
 import {
   IntersectionObserverStub,
   installStub,
-  resetSubsForTesting,
+  resetStubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
 } from '../../../src/polyfillstub/intersection-observer-stub';
@@ -236,7 +236,7 @@ describes.fakeWin('upgradePolyfill', {}, (env) => {
   });
 
   afterEach(() => {
-    resetSubsForTesting();
+    resetStubsForTesting();
   });
 
   function nextMicroTask() {
@@ -505,7 +505,7 @@ describes.fakeWin('IntersectionObserverStub', {}, (env) => {
       expect(io.takeRecords()).to.equal('native.takeRecords');
     });
 
-    it('should not re-queue if nothing is currently observed', () => {
+    it('should not re-observe if nothing is currently observed', () => {
       const io = new IntersectionObserverStub(callback);
       io.observe(element1);
       io.unobserve(element1);
@@ -514,7 +514,7 @@ describes.fakeWin('IntersectionObserverStub', {}, (env) => {
       expect(io.elements_).to.be.null;
     });
 
-    it('should re-queue previously observed elements', () => {
+    it('should re-observe previously observed elements', () => {
       const io = new IntersectionObserverStub(callback);
       io.observe(element1);
       io.observe(element2);

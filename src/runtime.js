@@ -42,6 +42,7 @@ import {isExperimentOn, toggleExperiment} from './experiments';
 import {registerExtendedTemplate} from './service/template-impl';
 import {reportErrorForWin} from './error';
 import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
+import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
@@ -269,6 +270,7 @@ function adoptShared(global, callback) {
 
   // Some deferred polyfills.
   scheduleInObUpgradeIfNeeded(global);
+  scheduleResObUpgradeIfNeeded(global);
 
   return iniPromise;
 }

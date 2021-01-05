@@ -29,6 +29,7 @@
     "prop-types": "15.7.2",
     "react-dates": "15.5.3",
     "react-jss": "10.3.0",
+    "resize-observer-polyfill": "1.5.1",
     "rrule": "2.6.6",
     "web-activities": "1.13.0",
     "web-animations-js": "2.3.1"

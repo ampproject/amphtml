@@ -1032,6 +1032,7 @@ const forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
       'src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfillstub/resize-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
