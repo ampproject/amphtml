@@ -51,7 +51,8 @@ amp-story-page amp-ad[type="adsense"] > iframe {
 }
 
 /* TODO(ccordry) allow advertisers to opt-in to fullscreen ads. */
-.i-amphtml-story-desktop-fullbleed .i-amphtml-story-layer-template-fill > amp-ad > iframe {
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-grid-template-fill > amp-ad > iframe,
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-layer > amp-ad[layout="fill"] > iframe {
   left: 50% !important;
   right: auto !important;
   margin: auto !important;

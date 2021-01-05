@@ -67,7 +67,7 @@ const TEMPLATE_ATTRIBUTE_NAME = 'template';
  * A mapping of template attribute values to CSS class names.
  * @const {!Object<string, string>}
  */
-export const LAYER_TEMPLATE_CLASS_NAMES = {
+export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
   'fill': 'i-amphtml-story-grid-template-fill',
   'vertical': 'i-amphtml-story-grid-template-vertical',
   'horizontal': 'i-amphtml-story-grid-template-horizontal',
@@ -107,7 +107,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   applyTemplateClassName_() {
     if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
       const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = LAYER_TEMPLATE_CLASS_NAMES[templateName];
+      const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
       this.element.classList.add(templateClassName);
     }
   }
