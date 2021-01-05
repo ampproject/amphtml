@@ -32,12 +32,14 @@ import {
   getEnclosingContainerTypes,
   getIdentityToken,
   getIdentityTokenRequestUrl,
+  getServeNpaPromise,
   googleAdUrl,
   groupAmpAdsByType,
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
@@ -47,6 +49,7 @@ import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installExtensionsService} from '../../../../src/service/extensions-impl';
 import {installXhrService} from '../../../../src/service/xhr-impl';
 import {toggleExperiment} from '../../../../src/experiments';
+import {user} from '../../../../src/log';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
@@ -71,8 +74,6 @@ function noopMethods(
   pageLayoutBox = {
     top: 11.1,
     left: 12.1,
-    right: 0,
-    bottom: 0,
     width: 0,
     height: 0,
   }
@@ -82,7 +83,11 @@ function noopMethods(
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
   sandbox.stub(impl, 'getAmpDoc').returns(ampdoc);
-  sandbox.stub(impl, 'getPageLayoutBox').returns(pageLayoutBox);
+  sandbox.stub(impl.element, 'offsetParent').value(null);
+  sandbox.stub(impl.element, 'offsetTop').value(pageLayoutBox.top);
+  sandbox.stub(impl.element, 'offsetLeft').value(pageLayoutBox.left);
+  sandbox.stub(impl.element, 'offsetWidth').value(pageLayoutBox.width);
+  sandbox.stub(impl.element, 'offsetHeight').value(pageLayoutBox.height);
 }
 
 describe('Google A4A utils', () => {
@@ -1046,6 +1051,71 @@ describe('Google A4A utils', () => {
       const correlator = getCorrelator(win, win.document);
       expect(correlator).to.be.below(2 ** 52);
       expect(correlator).to.be.above(0);
+    });
+  });
+
+  describes.realWin('#getServeNpaPromise', {}, (env) => {
+    let win, doc, element, geoService;
+
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      element = doc.createElement('amp-ad');
+      geoService = {
+        isInCountryGroup(country) {
+          switch (country) {
+            case 'usca':
+              return GEO_IN_GROUP.IN;
+            case 'gdpr':
+              return GEO_IN_GROUP.NOT_IN;
+            default:
+              return GEO_IN_GROUP.NOT_DEFINED;
+          }
+        },
+      };
+    });
+
+    it('should return false if no attribute found', async () => {
+      expect(await getServeNpaPromise(element)).to.false;
+    });
+
+    it('should return true, regardless of geo location if empty string', async () => {
+      element.setAttribute('always-serve-npa', '');
+      expect(await getServeNpaPromise(element)).to.true;
+    });
+
+    it('should return if doc is served from a defined geo group', async () => {
+      env.sandbox
+        .stub(Services, 'geoForDocOrNull')
+        .returns(Promise.resolve(geoService));
+      element.setAttribute('always-serve-npa', 'gdpr,usca');
+      expect(await getServeNpaPromise(element)).to.true;
+    });
+
+    it('should return false when doc is in an undefined group or not in', async () => {
+      const warnSpy = env.sandbox.stub(user(), 'warn');
+      env.sandbox
+        .stub(Services, 'geoForDocOrNull')
+        .returns(Promise.resolve(geoService));
+
+      // Undefined group
+      element.setAttribute('always-serve-npa', 'tx');
+      expect(await getServeNpaPromise(element)).to.false;
+      expect(warnSpy.args[0][0]).to.match(/AMP-AD/);
+      expect(warnSpy.args[0][1]).to.match(/Geo group "tx" was not defined./);
+      expect(warnSpy).to.have.been.calledOnce;
+      // Not in
+      element.setAttribute('always-serve-npa', 'gdpr');
+      expect(await getServeNpaPromise(element)).to.false;
+    });
+
+    it('should return true when geoService is null', async () => {
+      geoService = null;
+      env.sandbox
+        .stub(Services, 'geoForDocOrNull')
+        .returns(Promise.resolve(geoService));
+      element.setAttribute('always-serve-npa', 'gdpr');
+      expect(await getServeNpaPromise(element)).to.true;
     });
   });
 });

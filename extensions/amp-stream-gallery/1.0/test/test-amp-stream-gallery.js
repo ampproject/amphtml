@@ -15,10 +15,13 @@
  */
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-stream-gallery';
+import {ActionInvocation} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {
   createElementWithAttributes,
   waitForChildPromise,
 } from '../../../../src/dom';
+import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -41,7 +44,7 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'amp-stream-gallery-bento', true, true);
+      toggleExperiment(win, 'bento-stream-gallery', true, true);
       element = createElementWithAttributes(
         win.document,
         'amp-stream-gallery',
@@ -61,7 +64,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-stream-gallery-bento', false, true);
+      toggleExperiment(win, 'bento-stream-gallery', false, true);
     });
 
     function newSlide(id) {
@@ -162,6 +165,72 @@ describes.realWin(
       expect(
         renderedSlideWrappers[2].querySelector('slot').assignedElements()
       ).to.deep.equal([userSuppliedChildren[1]]);
+    });
+
+    describe('imperative api', () => {
+      let scroller;
+
+      beforeEach(async () => {
+        element.setAttribute('max-visible-count', '1');
+        win.document.body.appendChild(element);
+        await getSlidesFromShadow();
+
+        scroller = element.shadowRoot.querySelector(
+          `[class*=${styles.scrollContainer}]`
+        );
+      });
+
+      afterEach(() => {
+        win.document.body.removeChild(element);
+        scroller = null;
+      });
+
+      function invocation(method, args = {}) {
+        const source = null;
+        const caller = null;
+        const event = null;
+        const trust = ActionTrust.DEFAULT;
+        return new ActionInvocation(
+          element,
+          method,
+          args,
+          source,
+          caller,
+          event,
+          trust
+        );
+      }
+
+      it('should execute next and prev actions', async () => {
+        element.enqueAction(invocation('next'));
+        await waitFor(() => scroller.scrollLeft > 0, 'advanced to next slide');
+
+        // Make sure internal state index is updated before attempting to call prev(),
+        // Since this is typically updated automatically on debounce, there is a risk that
+        // the test will call prev() on the slide at the 0th index unless we force is here.
+        element.enqueAction(invocation('goToSlide', {index: 1}));
+        await waitFor(() => scroller.scrollLeft > 0, 'to slide 1');
+
+        element.enqueAction(invocation('prev'));
+        // Wait for a longer timeout than the 200 default in waitFor.
+        await poll(
+          'returned to prev slide',
+          () => scroller.scrollLeft == 0,
+          undefined /* opt_onError */,
+          400 /* opt_timeout */
+        );
+      });
+
+      it('should execute goToSlide action', async () => {
+        element.enqueAction(invocation('goToSlide', {index: 1}));
+        await waitFor(() => scroller.scrollLeft > 0, 'go to slide 1');
+
+        element.enqueAction(invocation('goToSlide', {index: 0}));
+        await waitFor(
+          () => scroller.scrollLeft == 0,
+          'returned to first slide'
+        );
+      });
     });
   }
 );

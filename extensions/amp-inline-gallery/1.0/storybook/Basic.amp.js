@@ -29,14 +29,14 @@ export default {
       {name: 'amp-base-carousel', version: '1.0'},
     ],
 
-    experiments: ['amp-inline-gallery-bento', 'amp-base-carousel-bento'],
+    experiments: ['bento'],
   },
 };
 
 export const Default = () => {
   const topInset = boolean('top indicator inset?', false);
-  const bottomInset = boolean('bottom indicator inset?', false);
-  const autoAdvance = boolean('auto advance', true);
+  const bottomInset = boolean('bottom indicator inset?', true);
+  const autoAdvance = boolean('auto advance', false);
   const autoAdvanceCount = text('auto advance count', 1);
   const autoAdvanceInterval = text('auto advance interval', 1000);
   const autoAdvanceLoops = text('auto advance loops', 3);
@@ -50,9 +50,15 @@ export const Default = () => {
   return (
     <amp-inline-gallery style={{maxWidth: '360px'}} layout="container">
       <amp-inline-gallery-pagination
+        layout={topInset ? 'nodisplay' : 'fixed-height'}
+        height={topInset ? undefined : '24'}
         inset={topInset}
+      />
+      <amp-inline-gallery-thumbnails
+        aspectRatio={aspectRatio}
+        loop={loop}
         layout="fixed-height"
-        height="24"
+        height="50"
       />
       <amp-base-carousel
         auto-advance={autoAdvance}
@@ -101,15 +107,9 @@ export const Default = () => {
         ></amp-img>
       </amp-base-carousel>
       <amp-inline-gallery-pagination
+        layout={bottomInset ? 'nodisplay' : 'fixed-height'}
+        height={bottomInset ? undefined : '24'}
         inset={bottomInset}
-        layout="fixed-height"
-        height="24"
-      />
-      <amp-inline-gallery-thumbnails
-        aspectRatio={aspectRatio}
-        loop={loop}
-        layout="fixed-height"
-        height="50"
       />
     </amp-inline-gallery>
   );

@@ -16,7 +16,18 @@
 'use strict';
 
 const log = require('fancy-log');
-const {red, cyan} = require('ansi-colors');
+const {
+  printChangeSummary,
+  startTimer,
+  stopTimer,
+  stopTimedJob,
+  timedExecOrDie: timedExecOrDieBase,
+} = require('./utils');
+const {determineBuildTargets} = require('./build-targets');
+const {isPullRequestBuild} = require('../common/ci');
+const {red, cyan, bold, yellow} = require('ansi-colors');
+const {reportAllExpectedTests} = require('../tasks/report-test-status');
+const {runNpmChecks} = require('./npm-checks');
 
 /**
  * @fileoverview
@@ -24,42 +35,103 @@ const {red, cyan} = require('ansi-colors');
  * Windows. This is run on Github Actions CI stage = Cross-Browser Tests.
  */
 
-const {
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('./utils');
-
 const FILENAME = 'cross-browser-tests.js';
+const FILELOGPREFIX = bold(yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting');
-
+/**
+ * Helper that runs platform-specific integration tests
+ */
+function runIntegrationTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp unit --nobuild --headless --firefox');
       timedExecOrDie(
         'gulp integration --nobuild --compiled --headless --firefox'
       );
       break;
     case 'darwin':
-      timedExecOrDie('gulp unit --nobuild --safari');
       timedExecOrDie('gulp integration --nobuild --compiled --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp unit --nobuild --headless --edge');
       timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
       timedExecOrDie('gulp integration --nobuild --compiled --ie');
       break;
     default:
       log(
         red('ERROR:'),
-        'Cannot run cross-browser tests on',
+        'Cannot run cross-browser integration tests on',
         cyan(process.platform) + '.'
       );
+  }
+}
+
+/**
+ * Helper that runs platform-specific unit tests
+ */
+function runUnitTestsForPlatform() {
+  switch (process.platform) {
+    case 'linux':
+      timedExecOrDie('gulp unit --nobuild --headless --firefox');
+      break;
+    case 'darwin':
+      timedExecOrDie('gulp unit --nobuild --safari');
+      break;
+    case 'win32':
+      timedExecOrDie('gulp unit --nobuild --headless --edge');
+      break;
+    default:
+      log(
+        red('ERROR:'),
+        'Cannot run cross-browser unit tests on',
+        cyan(process.platform) + '.'
+      );
+  }
+}
+
+async function main() {
+  const startTime = startTimer(FILENAME, FILENAME);
+  if (!runNpmChecks(FILENAME)) {
+    stopTimedJob(FILENAME, startTime);
+    return;
+  }
+  if (!isPullRequestBuild()) {
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp dist --fortesting');
+    runIntegrationTestsForPlatform();
+    runUnitTestsForPlatform();
+  } else {
+    printChangeSummary(FILENAME);
+    const buildTargets = determineBuildTargets(FILENAME);
+    if (process.platform == 'linux') {
+      await reportAllExpectedTests(buildTargets); // Only once is sufficient.
+    }
+    if (
+      !buildTargets.has('RUNTIME') &&
+      !buildTargets.has('FLAG_CONFIG') &&
+      !buildTargets.has('UNIT_TEST') &&
+      !buildTargets.has('INTEGRATION_TEST')
+    ) {
+      console.log(
+        `${FILELOGPREFIX} Skipping`,
+        cyan('Cross-Browser Tests'),
+        'because this commit not affect the runtime, flag configs,',
+        'unit tests, or integration tests.'
+      );
+      stopTimer(FILENAME, FILENAME, startTime);
+      return;
+    }
+    timedExecOrDie('gulp update-packages');
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST')
+    ) {
+      timedExecOrDie('gulp dist --fortesting');
+      runIntegrationTestsForPlatform();
+    }
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+      runUnitTestsForPlatform();
+    }
   }
   stopTimer(FILENAME, FILENAME, startTime);
 }

@@ -19,7 +19,6 @@ import {
   createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
-  localizeCtaText,
   maybeCreateAttribution,
   validateCtaMetadata,
 } from './story-ad-ui';
@@ -43,7 +42,7 @@ import {
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
-import {getFrameDoc} from './utils';
+import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';

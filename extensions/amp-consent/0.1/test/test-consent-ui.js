@@ -217,6 +217,30 @@ describes.realWin(
         consentUI.hide();
         expect(consentUI.scrollEnabled_).to.be.true;
       });
+
+      it('should set the iframe transform class on parent', async () => {
+        const config = dict({
+          'promptUISrc': 'https://promptUISrc',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+
+        consentUI.show(false);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+          },
+        });
+        await macroTask();
+        expect(
+          consentUI.parent_.style.getPropertyValue('--i-amphtml-modal-height')
+        ).to.equal('80vh');
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.iframeTransform)
+        ).to.be.true;
+      });
     });
 
     describe('placeholder', () => {
