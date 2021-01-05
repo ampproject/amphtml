@@ -34,6 +34,51 @@ export const _default = () => {
   const side = select('side', sideConfigurations, sideConfigurations[0]);
   const foregroundColor = color('color');
   const backgroundColor = color('background');
+  const backdropColor = color('backdrop color');
+
+  return (
+    <main>
+      <style>
+        {`
+          amp-sidebar {
+              color: ${foregroundColor};
+              background-color: ${backgroundColor};
+          }
+          amp-sidebar::part(backdrop) {
+              background-color: ${backdropColor};
+          }
+          `}
+      </style>
+      <amp-sidebar layout="nodisplay" id="sidebar" side={side}>
+        <div style={{margin: 8}}>
+          <span>
+            Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+            aeque inermis reprehendunt.
+          </span>
+          <ul>
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+          </ul>
+          <button on="tap:sidebar.toggle()">toggle</button>
+          <button on="tap:sidebar.open()">open</button>
+          <button on="tap:sidebar.close()">close</button>
+        </div>
+      </amp-sidebar>
+      <div class="buttons" style={{margin: 8}}>
+        <button on="tap:sidebar.toggle()">toggle</button>
+        <button on="tap:sidebar.open()">open</button>
+        <button on="tap:sidebar.close()">close</button>
+      </div>
+    </main>
+  );
+};
+
+export const styles = () => {
+  const sideConfigurations = ['left', 'right', undefined];
+  const side = select('side', sideConfigurations, sideConfigurations[0]);
+  const foregroundColor = color('color');
+  const backgroundColor = color('background');
   const height = text('height', null);
   const width = text('width', null);
   const padding = text('padding', null);
