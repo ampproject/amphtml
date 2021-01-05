@@ -572,7 +572,7 @@ All AMP template elements must go through AMP security review before they can be
 
 Currently, the following SVG elements are allowed:
 
--   [container elements](https://svgwg.org/svg2-draft/struct.html#TermContainerElement): "clipPath", "defs" (all children above are allowed here), "g", "marker", "mask", "pattern", "svg", "switch", and "symbol".
+-   [container elements](https://svgwg.org/svg2-draft/struct.html#TermContainerElement): "clipPath", "defs", "g", "marker", "mask", "pattern", "svg", "switch", and "symbol".
 -   [structural elements](https://svgwg.org/svg2-draft/struct.html#TermStructuralElement): "defs", "g", "svg", "symbol", and "use".
 -   [graphics elements](https://svgwg.org/svg2-draft/struct.html#TermGraphicsElement): "circle", "ellipse", "foreignObject", "image", "line", "path", "polygon", "polyline", "rect", "text", "textPath", and "tspan".
 -   [text content elements](https://svgwg.org/svg2-draft/text.html#TermTextContentElement): "text", "textPath", and "tspan".
