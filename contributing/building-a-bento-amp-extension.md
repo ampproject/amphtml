@@ -62,8 +62,11 @@ The directory structure is below:
 |   ├── test/                            # Element's unit test suite (req'd)
 |   |   ├── test-amp-my-element.js
 |   |   └── More test JS files (optional)
+|   ├── my-element.js                    # Preact implementation (req'd)
+|   ├── my-element.type.css              # Preact type definitions (req'd)
 |   ├── amp-my-element.js                # Element's implementation (req'd)
 |   ├── amp-my-element.css               # Custom CSS (optional)
+|   ├── my-element.jss.js                # Preact JSS (optional)
 |   └── More JS files (optional)
 ├── validator-amp-my-element.protoascii  # Validator rules (req'd)
 ├── amp-my-element.md                    # Element's main documentation (req'd)
@@ -71,7 +74,7 @@ The directory structure is below:
 └── OWNERS                               # Owners file. Primary contact(s) for the extension. (req'd)
 ```
 
-In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
+In most cases you'll only create the required (req'd) files. If your element does not need custom CSS or JSS, you don't need to create those files.
 
 ## Extend AMP.PreactBaseElement
 
@@ -122,8 +125,8 @@ class AmpMyElement extends AMP.PreactBaseElement {
 AmpMyElement['Component'] = MyElement;            // Component definition.
 
 AmpMyElement['props'] = {  // Map DOM attributes to Preact Component props.
-  'attrName1': {attr: 'attr-name-1'},
-  'attrName2': {attr: 'attr-name-2', type: 'number'},
+  'propName1': {attr: 'attr-name-1'},
+  'propName2': {attr: 'attr-name-2', type: 'number'},
 };
 
 AMP.extension('amp-my-element', '0.1', (AMP) => {
@@ -138,7 +141,7 @@ import * as Preact from '../../../src/preact';
 import {func1, func2} from '../../../src/module';
 // more ES2015-style import statements.
 
-export function MyElement({attrName1, attrName2, ...rest}) {
+export function MyElement({propName1, propName2, ...rest}) {
   // Assign state variables or other behaviors using Preact
   // lifecycle hooks such as useRef, useState, useEffect, etc.
   const [foo, useFoo] = useState(null);
@@ -353,105 +356,6 @@ Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-
 
 ## Performance considerations
 
-### Pre-rendering and placeholders
-
-TO REVIEW
-
-Another enabling feature of instant-web in AMP is support for
-prerendering in a way that does not consume loads of data and does not
-waste too much of the user's device resources. AMP does this by strictly
-controlling resource loading and rendering.
-
-If your extension is lightweight, it might be worth enabling
-pre-rendering of your elements so that users will be able to see it
-appear instantly when they click on an article.
-
-Sometimes fully pre-rendering the element isn't an option because it is
-heavyweight. Your element might want to opt into creating a dynamic
-placeholder for itself (in case a placeholder wasn't provided by the
-developer/publisher who is using your element). This allows elements to
-display content as fast as possible and allow prerendering that
-placeholder. Learn [more about placeholder
-elements](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder).
-
-NOTE: Make sure not to request external resources in the pre-render
-phase. Requests to the publisher's origin itself are OK. If in doubt,
-please flag this in review.
-
-AMP will automatically call your element's
-[createPlaceholderCallback](#createplaceholdercallback) during
-build step if it didn't detect a placeholder was provided. This allows
-you to create your own placeholder. Here's an example of how
-`amp-instagram` element used this callback to create a dynamic
-placeholder of an `amp-img` element to avoid loading the heavyweight
-instagram iframe embed during pre-rendering and instead loads just the
-image directly from instagram media endpoint.
-
-```javascript
-class AmpInstagram extends AMP.BaseElement {
-  // ...
-  /** @override */
-  createPlaceholderCallback() {
-    const placeholder = this.getWin().document.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    const image = this.getWin().document.createElement('amp-img');
-    // This is always the same URL that is actually used inside of the embed.
-    // This lets us avoid loading the image twice and make use of browser cache.
-
-    image.setAttribute(
-      'src',
-      'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) +
-        '/media/?size=l'
-    );
-    image.setAttribute('width', this.element.getAttribute('width'));
-    image.setAttribute('height', this.element.getAttribute('height'));
-    image.setAttribute('layout', 'responsive');
-    setStyles(image, {
-      'object-fit': 'cover',
-    });
-    const wrapper = this.element.ownerDocument.createElement('wrapper');
-    // This makes the non-iframe image appear in the exact same spot
-    // where it will be inside of the iframe.
-    setStyles(wrapper, {
-      'position': 'absolute',
-      'top': '48px',
-      'bottom': '48px',
-      'left': '8px',
-      'right': '8px',
-    });
-    wrapper.appendChild(image);
-    placeholder.appendChild(wrapper);
-    this.applyFillContent(image);
-    return placeholder;
-  }
-  // …
-}
-```
-
-**Important**: One thing to keep in mind is that when you create a
-placeholder, use the amp- provided elements when loading external
-resources. This is most likely going to be `amp-img` like in the
-instagram case above. This still allows AMP resource manager to control
-when these resources get loaded and rendered as oppose to using the
-HTML-native `img` tag which will be out of AMP resource management.
-
-#### Loading indicators
-
-Consider showing a loading indicator if your element is expected to take
-a long time to load (for example, loading a GIF, video or iframe). AMP
-has a built-in mechanism to show a loading indicator simply by
-allowlisting your element to show it. You can do that inside layout.js
-file in the `LOADING_ELEMENTS_` object.
-
-```javascript
-export const LOADING_ELEMENTS_ = {
-  ...
-  'AMP-YOUTUBE': true,
-  'AMP-MY-ELEMENT': true,
-}
-```
-
 ### Loading external resources
 
 If your extension needs to load external resources (like an sdk) then
@@ -472,8 +376,6 @@ iframe with no 3p integration needed, similarly, `amp-youtube` and others.
 
 ## Layouts supported in your element
 
-TO REVIEW
-
 AMP defines different layouts that elements can choose whether or not to
 support Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
@@ -484,21 +386,19 @@ Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
 
 ### What layout should your element support?
 
-TO REVIEW
-
 After understanding each layout type, if it makes sense, support all of
 them. Otherwise choose what makes sense to your element. A popular
 support choice is to support size-defined layouts (Fixed, Fixed Height,
 Responsive and Fill) through using the utility `isLayoutSizeDefined`
 in `layout.js`.
 
-For example, `amp-pixel` only supports fixed layout.
+For example, `amp-inline-gallery-thumbnails` only supports fixed-height layout.
 
 ```javascript
 class AmpPixel extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
+    return layout == Layout.FIXED_HEIGHT;
   }
 }
 ```
@@ -512,6 +412,13 @@ class AmpBaseCarousel extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 }
+```
+
+Please note that for components that support all size-defined layouts, they also need to override the `layoutSizeDefined` property as follows:
+
+```
+/** @override */
+AmpBaseCarousel['layoutSizeDefined'] = true;
 ```
 
 ## Experiments
@@ -577,7 +484,7 @@ Users wanting to experiment with your element can then go to the
 [experiments page](https://cdn.ampproject.org/experiments.html) and
 enable your experiment.
 
-If you are testing on your localhost, use the command `AMP.toggleExperiment(id, true/false)` to enable the experiment.
+If you are testing on your localhost, use the command `AMP.toggleExperiment(id, true/false)` to enable the experiment. One option is to use `AMP.toggleExperiment('bento', true)` to enable all Bento components at once.
 
 File a GitHub issue to cleanup your experiment. Assign it to yourself as a reminder to remove your experiment and code checks. Removal of your experiment happens after the extension has been thoroughly tested and all issues have been addressed.
 
@@ -592,7 +499,7 @@ Create a .md file that serves as the main documentation for your element. This d
 -   Attributes to specify (optional and required)
 -   Validation
 
-For samples of element documentation, see: [amp-accordion](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-accordion.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [amp-stream-gallery](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-stream-gallery.md)
+For samples of element documentation, see: [amp-accordion](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/amp-accordion.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [amp-stream-gallery](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-stream-gallery.md)
 
 Note that for Bento upgrades of existing AMP extensions, a `Migration notes` section is required to detail any differences between the newer Bento and prior versions.
 
@@ -619,6 +526,27 @@ exports.extensionBundles = [
 ...
   {name: 'amp-kaltura-player', version: '0.1', latestVersion: '0.1'},
   {name: 'amp-carousel', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
+...
+];
+```
+
+Note, if you are providing a version upgrade (pre-existing 0.1 to Bento 1.0, for example), it is important to note that the latest version is the 0.1 until the 1.0 version is no longer experimental and fully launched. The following is the most straight-forward way to specify this:
+
+```javascript
+exports.extensionBundles = [
+...
+  {name: 'amp-my-element', version: ['0.1', '1.0'], latestVersion: '0.1', options: {hasCss: true}},
+...
+];
+```
+
+However, note that if one version is `hasCss: true` and the other is `hasCss: false`, they will require two separate entries:
+
+```javascript
+exports.extensionBundles = [
+...
+  {name: 'amp-my-element', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
+  {name: 'amp-my-element', version: '1.0', latestVersion: '0.1'},
 ...
 ];
 ```
@@ -676,7 +604,25 @@ We use Closure Compiler to perform type checking. Please see
 [Annotating JavaScript for the Closure
 Compiler](https://github.com/google/closure-compiler/wiki/Annotating-JavaScript-for-the-Closure-Compiler)
 and existing AMP code for examples of how to add type annotations to
-your code. The following command should be run to ensure no type
+your code.
+
+The following shows the overall structure of your type definition
+file (extensions/amp-my-element/0.1/my-element.type.js). This will allow support of inline prop destructuring in Preact components.
+
+```javascript
+/** @externs */
+
+/**
+ * @typedef {{
+ *   propName1: (string|undefined),
+ *   propName2: (number|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+var MyElementProps;
+```
+
+The following command should be run to ensure no type
 violations are introduced by your extension.
 
 ```shell
@@ -685,24 +631,5 @@ $ gulp check-types
 
 ## Example PRs
 
-TO UPDATE
-
--   Adding new ad-provider
-    -   [Teads](https://github.com/ampproject/amphtml/commit/654ade680d796527345af8ff298a41a7532ee074)
-    -   [EPlanning](https://github.com/ampproject/amphtml/commit/a007543518a07ff77d48297e76bd264cadf36f57)
-    -   [Taboola](https://github.com/ampproject/amphtml/commit/79a58e545939cca0b75e62b2e62147829c59602a)
--   Adding embeds that's not iframe-based (requires JS SDK)
-    -   [amp-facebook](https://github.com/ampproject/amphtml/commit/6679db198d8b9d9c38854d93aa04801e8cf6999f)
--   Adding iframe based embeds
-    -   [amp-soundcloud](https://github.com/ampproject/amphtml/commit/2ac845641c8eea9e67f17a1d471cfb9bab459fd1)
-    -   [amp-vine](https://github.com/ampproject/amphtml/commit/eb98861b25210f89b41abc9ac52b29d9a4ff45a6)
-    -   [amp-brightcove](https://github.com/ampproject/amphtml/commit/9a0f6089600da0c42e1f3787402a1ced0c377c65)
--   Adding non-visual elements
-    -   [amp-font](https://github.com/ampproject/amphtml/commit/ef040b60664a5aad465cb83507d37fae5e361772)
-    -   [amp-install-serviceworker](https://github.com/ampproject/amphtml/commit/e6199cfb5b9d13b0e4bb590b80c09ba3614877e6)
 -   Adding general UI components
-    -   [amp-sidebar](https://github.com/ampproject/amphtml/commit/99634b18310129f4260e4172cb2750ae7b8ffbf0)
-    -   [amp-image-lightbox](https://github.com/ampproject/amphtml/commit/e6006f9ca516ae5d7d79267976d3df39cc1f9636)
-    -   [amp-accordion](https://github.com/ampproject/amphtml/commit/1aae4eee37ec80c6ea9b822fb43ecce73feb7df6)
--   Implementing a video player.
-    -   [amp-jwplayer](https://github.com/ampproject/amphtml/commit/4acdd9f1d70a8a374cb886d3a4778476d13e7daf#diff-f650f38f7840dc8148bacd88733be338)
+    -   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
