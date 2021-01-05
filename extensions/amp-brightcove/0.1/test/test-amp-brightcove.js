@@ -56,6 +56,7 @@ describes.realWin(
 
       await element.signals().whenSignal(CommonSignals.LOAD_START);
 
+      // Wait for the promise in layoutCallback() to resolve
       await macroTask();
 
       try {
@@ -138,19 +139,6 @@ describes.realWin(
             '/index.html?videoId=ref:amp-test-video&playsinline=true'
         );
 
-        const newSrc = new Promise((resolve) => {
-          const cb = () => {
-            resolve(iframe.src);
-            observer.disconnect();
-          };
-
-          const observer = new MutationObserver(cb);
-          observer.observe(iframe, {
-            attributes: true,
-            attributesFilter: ['src'],
-          });
-        });
-
         bc.setAttribute('data-account', '12345');
         bc.setAttribute('data-video-id', 'abcdef');
         bc.mutatedAttributesCallback({
@@ -158,7 +146,7 @@ describes.realWin(
           'data-video-id': 'abcdef',
         });
 
-        return expect(newSrc).to.eventually.equal(
+        return expect(iframe.src).to.eventually.equal(
           'https://players.brightcove.net/' +
             '12345/default_default/index.html?videoId=abcdef&playsinline=true'
         );
