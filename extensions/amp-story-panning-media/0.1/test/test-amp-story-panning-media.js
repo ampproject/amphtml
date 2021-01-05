@@ -15,7 +15,6 @@
  */
 
 import '../amp-story-panning-media';
-
 import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin(
