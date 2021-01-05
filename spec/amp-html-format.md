@@ -578,7 +578,7 @@ Currently, the following SVG elements are allowed:
 -   [text content elements](https://svgwg.org/svg2-draft/text.html#TermTextContentElement): "text", "textPath", and "tspan".
 -   [paint server elements](https://svgwg.org/svg2-draft/painting.html#TermPaintServerElement): "linearGradient", "pattern", and "radialGradient".
 -   [descriptive elements](https://svgwg.org/svg2-draft/struct.html#TermDescriptiveElement): "desc", "metadata", and "title".
--   [filter primative elements](https://drafts.fxtf.org/filter-effects/#filter-primitive): "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", and "feOffset".
+-   [filter primitive elements](https://drafts.fxtf.org/filter-effects/#filter-primitive): "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", and "feOffset".
 -   uncategorized elements: "view", and "filter".
 -   deprecated elements: ["glyph"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/glyph), ["glyphRef"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/glyphRef), ["hkern"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/hkern), ["solidcolor"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/solidcolor), ["tref"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/tref), and ["vkern"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/vkern).
 
