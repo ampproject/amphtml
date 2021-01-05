@@ -26,6 +26,9 @@ import {
   useState,
 } from '../../../src/preact';
 import {useStyles} from './sidebar.jss';
+import {useEffect} from 'preact/hooks';
+
+const NAME = 'Sidebar';
 
 const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
@@ -89,6 +92,7 @@ function SidebarWithRef(
   const classes = useStyles();
   const sidebarRef = useRef();
   const maskRef = useRef();
+  const warningRef = useRef(false);
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
@@ -207,6 +211,32 @@ function SidebarWithRef(
     };
   }, [opened, onAfterCloseRef, side]);
 
+  useEffect(() => {
+    const sidebarElement = sidebarRef.current;
+    if (!sidebarElement || warningRef.current) {
+      return;
+    }
+
+    const root = sidebarElement.getRootNode();
+    const document = sidebarElement.ownerDocument;
+    const warningMessage =
+      `${NAME} is recommended to be a direct child of the` +
+      ` <body> element to preserve a logical DOM order.`;
+
+    //amp mode
+    if (root && root.toString() === '[object ShadowRoot]') {
+      const host = root.host;
+      if (host && host.parentElement != document.body) {
+        displayWarning(warningMessage);
+        warningRef.current = true;
+      }
+      //preact mode
+    } else if (sidebarElement.parentElement != document.body) {
+      displayWarning(warningMessage);
+      warningRef.current = true;
+    }
+  });
+
   return (
     mounted && (
       <>
@@ -238,3 +268,19 @@ function SidebarWithRef(
 const Sidebar = forwardRef(SidebarWithRef);
 Sidebar.displayName = 'Sidebar'; // Make findable for tests.
 export {Sidebar};
+
+/**
+ * @param {?string} message
+ */
+function displayWarning(message) {
+  console /*OK*/
+    .warn(message);
+}
+
+/*
+
+displayWarning(
+        `Could not complete system share.  Navigator unavailable. ${NAME}`
+      );
+
+*/
