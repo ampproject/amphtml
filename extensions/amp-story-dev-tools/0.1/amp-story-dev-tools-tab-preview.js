@@ -198,6 +198,8 @@ const buildAddDeviceDialogTemplate = (element) => {
   `;
 };
 
+const MAX_DEVICE_SPACES = 4;
+
 /**
  * @typedef {{
  *  element: !Element,
@@ -206,9 +208,11 @@ const buildAddDeviceDialogTemplate = (element) => {
  *  width: number,
  *  height: number,
  *  deviceHeight: ?number,
+ *  deviceSpaces: number,
  * }}
  * Contains the data related to the device.
  * Width and height refer to the story viewport, while deviceHeight is the device screen height.
+ * The deviceSpaces refers to the MAX_DEVICE_SPACES, ensuring the devices on screen don't go over the max space set.
  */
 export let DeviceInfo;
 
@@ -220,72 +224,84 @@ const ALL_DEVICES = [
     'width': 411,
     'height': 605,
     'deviceHeight': 731,
+    'deviceSpaces': 1,
   },
   {
     'name': 'Pixel 3',
     'width': 411,
     'height': 686,
     'deviceHeight': 823,
+    'deviceSpaces': 1,
   },
   {
     'name': 'iPhone 8 (Browser)',
     'width': 375,
     'height': 554,
     'deviceHeight': 667,
+    'deviceSpaces': 1,
   },
   {
     'name': 'iPhone 8 (Native)',
     'width': 375,
     'height': 632,
     'deviceHeight': 667,
+    'deviceSpaces': 1,
   },
   {
     'name': 'iPhone 11 (Browser)',
     'width': 414,
     'height': 724,
     'deviceHeight': 896,
+    'deviceSpaces': 1,
   },
   {
     'name': 'iPhone 11 (Native)',
     'width': 414,
     'height': 795,
     'deviceHeight': 896,
+    'deviceSpaces': 1,
   },
   {
     'name': 'iPhone 11 Pro (Browser)',
     'width': 375,
     'height': 635,
     'deviceHeight': 812,
+    'deviceSpaces': 1,
   },
   {
     'name': 'iPhone 11 Pro (Native)',
     'width': 375,
     'height': 713,
     'deviceHeight': 812,
+    'deviceSpaces': 1,
   },
   {
     'name': 'iPad (Browser)',
     'width': 810,
     'height': 1010,
     'deviceHeight': 1080,
+    'deviceSpaces': 2,
   },
   {
     'name': 'OnePlus 5T',
     'width': 455,
     'height': 820,
     'deviceHeight': 910,
+    'deviceSpaces': 1,
   },
   {
     'name': 'OnePlus 7 Pro',
     'width': 412,
     'height': 743,
     'deviceHeight': 892,
+    'deviceSpaces': 1,
   },
   {
     'name': 'Desktop 1080p',
     'width': 1920,
     'height': 1080,
     'deviceHeight': 1080,
+    'deviceSpaces': 2,
   },
 ];
 
@@ -462,6 +478,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       (el) => el.hasAttribute('data-action'),
       this.element
     );
+    if (actionElement.hasAttribute('disabled')) {
+      return;
+    }
     if (actionElement) {
       switch (actionElement.getAttribute('data-action')) {
         case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
@@ -555,9 +574,15 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   onDeviceChipToggled_(chipElement) {
     const deviceName = chipElement.getAttribute('data-device');
     if (this.removeDevice_(deviceName)) {
-      this.mutateElement(() => chipElement.setAttribute('inactive', ''));
+      this.mutateElement(() => {
+        chipElement.setAttribute('inactive', '');
+        this.toggleDeviceChipsWithSpaceAvailable_();
+      });
     } else {
-      this.mutateElement(() => chipElement.removeAttribute('inactive'));
+      this.mutateElement(() => {
+        chipElement.removeAttribute('inactive');
+        this.toggleDeviceChipsWithSpaceAvailable_();
+      });
       this.addDevice_(deviceName);
     }
     this.repositionDevices_();
@@ -645,12 +670,18 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       return obj;
     }, {});
 
+    const currentDeviceSpaces = this.getCurrentSpacesSum_();
+
     // Add a chip for each device on the right category, and mark as inactive if device not selected.
     ALL_DEVICES.forEach((device) => {
       const chip = this.buildDeviceChip_(device.name);
       chip.setAttribute('data-action', PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP);
+      chip.setAttribute('data-spaces', device.deviceSpaces);
       if (!this.devices_.find((d) => d.name == device.name)) {
         chip.setAttribute('inactive', '');
+        if (currentDeviceSpaces + device.deviceSpaces > MAX_DEVICE_SPACES) {
+          chip.setAttribute('disabled', '');
+        }
       }
       if (device.width / device.height > 1) {
         sections['desktop'].appendChild(chip);
@@ -692,5 +723,37 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       removeAfterTimeout(this, this.currentDialog_, 200);
       this.currentDialog_ = null;
     }
+  }
+
+  /**
+   * Return the number of spaces currently being used by the devices on the screen.
+   * @private
+   * @return {number}
+   */
+  getCurrentSpacesSum_() {
+    return this.devices_.reduce(
+      (prev, device) => prev + device.deviceSpaces,
+      0
+    );
+  }
+
+  /**
+   * Disable the chips in the dialog based on whether they have the remaining space available
+   * Must be called in a mutate context.
+   * @private
+   */
+  toggleDeviceChipsWithSpaceAvailable_() {
+    const allChips = this.currentDialog_.querySelectorAll(
+      '.i-amphtml-story-dev-tools-device-chip'
+    );
+    const currentDeviceSpaces = this.getCurrentSpacesSum_();
+    allChips.forEach((chipEl) => {
+      const spaces = parseInt(chipEl.getAttribute('data-spaces'), 10);
+      // Disable the button if there's no space for adding the device and the device is not added already.
+      const isEnabled =
+        (currentDeviceSpaces + spaces <= MAX_DEVICE_SPACES) |
+        !chipEl.hasAttribute('inactive');
+      chipEl.toggleAttribute('disabled', !isEnabled);
+    });
   }
 }
