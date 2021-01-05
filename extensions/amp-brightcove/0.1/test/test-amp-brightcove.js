@@ -146,7 +146,7 @@ describes.realWin(
           'data-video-id': 'abcdef',
         });
 
-        return expect(iframe.src).to.eventually.equal(
+        expect(iframe.src).to.equal(
           'https://players.brightcove.net/' +
             '12345/default_default/index.html?videoId=abcdef&playsinline=true'
         );
