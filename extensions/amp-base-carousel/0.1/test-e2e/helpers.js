@@ -39,9 +39,9 @@ export async function waitForCarouselImg(controller, n) {
   return await waitForImgLoad(controller, el);
 }
 
-export function getSlides(controller, opt_carouselId) {
+export function getSlides(controller, opt_carouselId = '') {
   return controller.findElements(
-    `${TAG_NAME}${opt_carouselId || ''} .${SLOTTED_CLASS}`
+    `${TAG_NAME}${opt_carouselId} .${SLOTTED_CLASS}`
   );
 }
 
@@ -79,10 +79,6 @@ export function getPrevArrow(controller) {
 
 export function getNextArrow(controller) {
   return controller.findElement(NEXT_ARROW_SELECTOR);
-}
-
-export function prop(controller, el, name) {
-  return controller.getElementProperty(el, name);
 }
 
 export function sleep(ms) {

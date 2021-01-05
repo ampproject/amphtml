@@ -16,7 +16,6 @@
 
 import '../amp-carousel';
 import {ActionTrust} from '../../../../src/action-constants';
-import {Alignment} from '../../../amp-base-carousel/0.1/dimensions';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
@@ -166,9 +165,11 @@ describes.realWin(
 
     it('should style snap for container and content correctly', async () => {
       const carousel = await getCarousel({loop: true});
+      const slideWrappers = getSlideWrappers(carousel);
+      expect(slideWrappers.length).to.equal(5);
+
       const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
         .children;
-      expect(slides.length).to.equal(20);
 
       // Ensure that the spacers have the snap property and not the
       // slides.
@@ -176,7 +177,7 @@ describes.realWin(
         const slide = slides[i];
         if (slide.classList.contains('i-amphtml-carousel-spacer')) {
           // type=slides is always center alignment.
-          expect(slide.style.scrollSnapAlign).to.equal(Alignment.CENTER);
+          expect(slide.style.scrollSnapAlign).to.equal('center');
         } else {
           expect(slide.style.scrollSnapAlign).to.equal('');
           expect(slide.children[0].style.scrollSnapAlign).to.equal('');

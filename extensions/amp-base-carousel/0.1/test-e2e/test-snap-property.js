@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getSlides, getSpacers, prop} from './helpers';
+import {getSlides, getSpacers} from './helpers';
 
 describes.endtoend(
   'amp-base-carousel test snap property',
@@ -30,44 +30,30 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should have snap property on spacers', async () => {
-      const slides = await getSlides(controller, '#snap-spacers');
+    it('should set snap property on spacers', async () => {
       const spacers = await getSpacers(controller);
-      for (let i = 0; i < slides.length; i++) {
-        const slide = slides[i];
-        const style = await prop(controller, slide, 'style');
-        const keys = Object.keys(style);
-        for (let j = 0; j < keys.length; j++) {
-          const key = keys[j];
-          await expect(style[key]).to.not.equal('scroll-snap-align');
-        }
-      }
-
       for (let i = 0; i < spacers.length; i++) {
         const spacer = spacers[i];
-        const style = await prop(controller, spacer, 'style');
-        const keys = Object.keys(style);
-        let found = false;
-        for (let j = 0; j < keys.length; j++) {
-          const key = keys[j];
-          found = found || style[key] === 'scroll-snap-align';
-        }
-        await expect(found).to.be.true;
+        const styles = await controller.getElementProperty(spacer, 'style');
+        await expect(styles).to.contain('scroll-snap-align');
       }
     });
 
-    it('should have snap property on slides', async () => {
-      const slides = await getSlides(controller, '#snap-slides');
+    it('should not set snap property on slides when carousel is looped', async () => {
+      const slides = await getSlides(controller, '[loop="true"]');
       for (let i = 0; i < slides.length; i++) {
         const slide = slides[i];
-        const style = await prop(controller, slide, 'style');
-        const keys = Object.keys(style);
-        let found = false;
-        for (let j = 0; j < keys.length; j++) {
-          const key = keys[j];
-          found = found || style[key] === 'scroll-snap-align';
-        }
-        await expect(found).to.be.true;
+        const styles = await controller.getElementProperty(slide, 'style');
+        await expect(styles).to.not.contain('scroll-snap-align');
+      }
+    });
+
+    it('should set snap property on slides when carousel is not looped', async () => {
+      const slides = await getSlides(controller, '[loop="false"]');
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        const styles = await controller.getElementProperty(slide, 'style');
+        await expect(styles).to.contain('scroll-snap-align');
       }
     });
   }

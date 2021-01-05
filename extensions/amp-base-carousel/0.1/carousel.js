@@ -1046,14 +1046,13 @@ export class Carousel {
       const slideIndex = mod(index, slideCount);
       // If an item is at the start of the group, it gets an aligned.
       const shouldSnap = mod(slideIndex, this.snapBy_) === 0;
-      const looping = this.isLooping();
 
       // Only apply `snap` feature on non-looping carousels
       // or only the spacers of the looping carousels.
       // Adding `snap` feature to non-spacers in a looping carousel
       // causes all weird behaviors due to non-homogenous siblings,
       // i.e. <amp-img> with lots of non-fixed sized children, etc.
-      if ((looping && child.classList.contains(SPACER_CLASS)) || !looping) {
+      if (child.classList.contains(SPACER_CLASS) || !this.isLooping()) {
         setStyles(child, {
           'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
           'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
