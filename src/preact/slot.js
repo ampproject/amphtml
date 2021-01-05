@@ -22,13 +22,13 @@ import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';
 
 /**
- * @param {!Element} element
+ * @param {!Node} node
  * @param {string} name
  * @param {!Object|undefined} props
  * @return {!PreactDef.VNode}
  */
-export function createSlot(element, name, props) {
-  element.setAttribute('slot', name);
+export function createSlot(node, name, props) {
+  node.setAttribute && node.setAttribute('slot', name);
   return <Slot {...(props || {})} name={name} />;
 }
 

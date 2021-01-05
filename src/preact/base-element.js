@@ -756,6 +756,16 @@ function matchesAttrPrefix(attributeName, attributePrefix) {
 }
 
 /**
+ * @param {Node} node
+ * @return {boolean}
+ */
+function isEmptyTextNode(node) {
+  return (
+    node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue.trim().length === 0
+  );
+}
+
+/**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
  * @param {{current: ?}} ref
@@ -819,13 +829,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
     devAssert(!childrenDefs, errorMessage);
     // If all children are whitespace text nodes, consider the element as
     // having no children
-    props['children'] = element
-      .getRealChildNodes()
-      .every(
-        (node) =>
-          node.nodeType === /* TEXT_NODE */ 3 &&
-          node.nodeValue.trim().length === 0
-      )
+    props['children'] = element.getRealChildNodes().every(isEmptyTextNode)
       ? null
       : [<Slot />];
   } else if (childrenDefs) {
@@ -835,6 +839,10 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
     const nodes = element.getRealChildNodes();
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
+      if (isEmptyTextNode(childElement)) {
+        continue;
+      }
+
       const def = matchChild(childElement, childrenDefs);
       if (!def) {
         continue;
@@ -842,13 +850,27 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 
       const {single, name, clone, props: slotProps = {}} = def;
       const parsedSlotProps = {};
-      parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
+
+      // TextNodes do not have a getAttribute method. Perhaps this should be
+      // expanded to include comment nodes, or to just exclude any Node without
+      // getAttributes?
+      if (childElement.nodeType !== 3 /* TEXT_NODE */) {
+        parsePropDefs(
+          parsedSlotProps,
+          slotProps,
+          childElement,
+          mediaQueryProps
+        );
+      }
+      const slotNameOr = (fallback) =>
+        (childElement.getAttribute && childElement.getAttribute('slot')) ||
+        fallback;
 
       // TBD: assign keys, reuse slots, etc.
       if (single) {
         props[name] = createSlot(
           childElement,
-          childElement.getAttribute('slot') || `i-amphtml-${name}`,
+          slotNameOr(`i-amphtml-${name}`),
           parsedSlotProps
         );
       } else {
@@ -859,8 +881,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
             ? createShallowVNodeCopy(childElement)
             : createSlot(
                 childElement,
-                childElement.getAttribute('slot') ||
-                  `i-amphtml-${name}-${childIdGenerator()}`,
+                slotNameOr(`i-amphtml-${name}-${childIdGenerator()}`),
                 parsedSlotProps
               )
         );
@@ -959,7 +980,11 @@ function matchChild(element, defs) {
   for (const match in defs) {
     const def = defs[match];
     const selector = typeof def == 'string' ? def : def.selector;
-    if (matches(element, selector)) {
+    if (
+      // TextNode does not have a `.matches` method.
+      (element.nodeType === /* TEXT_NODE */ 3 && selector === '*') ||
+      matches(element, selector)
+    ) {
       return def;
     }
   }
