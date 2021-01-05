@@ -543,6 +543,7 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('digiteka', digiteka);
 register('temedya', temedya);
 register('torimochi', torimochi);
 register('tracdelight', tracdelight);
