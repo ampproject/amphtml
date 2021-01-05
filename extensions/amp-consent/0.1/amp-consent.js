@@ -48,6 +48,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {handleTcfCommand} from './tcf-api-commands';
 import {isEnumValue, isObject} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
@@ -812,18 +813,11 @@ export class AmpConsent extends AMP.BaseElement {
     ) {
       return;
     }
-
-    const payload = data.__tcfapiCall;
-    const cmd = payload.command;
-    // TODO (micajuineho): implement command methods
-    switch (cmd) {
-      case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
-      case TCF_POST_MESSAGE_API_COMMANDS.PING:
-      case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
-      case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
-      default:
-        return;
-    }
+    handleTcfCommand(
+      data.__tcfapiCall,
+      event.source,
+      this.consentPolicyManager_
+    );
   }
 }
 
