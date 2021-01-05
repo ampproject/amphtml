@@ -48,10 +48,11 @@ const Controls = {
  * @enum {string}
  */
 const Interaction = {
-  FOCUS: 'focus',
-  MOUSE: 'mouse',
-  TOUCH: 'touch',
-  NONE: 'none',
+  GENERIC: 0,
+  FOCUS: 1,
+  MOUSE: 2,
+  TOUCH: 3,
+  NONE: 4,
 };
 
 /**
@@ -106,10 +107,20 @@ function BaseCarouselWithRef(
   const [currentSlideState, setCurrentSlideState] = useState(
     Math.min(Math.max(defaultSlide, 0), length)
   );
-  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
-  const currentSlideRef = useRef(currentSlide);
-  const setCurrentSlide =
+  const globalCurrentSlide = carouselContext.currentSlide ?? currentSlideState;
+  const setGlobalCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
+  const currentSlide = _thumbnails ? currentSlideState : globalCurrentSlide;
+  const setCurrentSlide = _thumbnails
+    ? setCurrentSlideState
+    : setGlobalCurrentSlide;
+  const currentSlideRef = useRef(currentSlide);
+
+  useLayoutEffect(() => {
+    // noop if !_thumbnails || !carouselContext.
+    setCurrentSlide(globalCurrentSlide);
+  }, [globalCurrentSlide, setCurrentSlide]);
+
   const {slides, setSlides} = carouselContext;
 
   const scrollRef = useRef(null);
@@ -123,20 +134,19 @@ function BaseCarouselWithRef(
   );
 
   const autoAdvance = useCallback(() => {
-    // Count autoadvance loops as times we have reached the last visible slide.
-    if (currentSlideRef.current >= length - visibleCount) {
-      autoAdvanceTimesRef.current += 1;
-    }
     if (
-      autoAdvanceTimesRef.current == autoAdvanceLoops ||
+      autoAdvanceTimesRef.current + visibleCount / length >= autoAdvanceLoops ||
       interaction.current !== Interaction.NONE
     ) {
       return false;
     }
     if (loop || currentSlideRef.current + visibleCount < length) {
       scrollRef.current.advance(autoAdvanceCount); // Advance forward by specified count
+      // Count autoadvance loops as proportions of the carousel we have advanced through.
+      autoAdvanceTimesRef.current += autoAdvanceCount / length;
     } else {
-      scrollRef.current.advance(-(length - 1)); // Advance in reverse to first slide
+      scrollRef.current.advance(-currentSlideRef.current); // Advance in reverse to first slide
+      autoAdvanceTimesRef.current = Math.ceil(autoAdvanceTimesRef.current);
     }
     return true;
   }, [autoAdvanceCount, autoAdvanceLoops, length, loop, visibleCount]);
@@ -159,10 +169,10 @@ function BaseCarouselWithRef(
 
   const setRestingIndex = useCallback(
     (index) => {
-      index = length > 0 ? Math.min(Math.max(index, 0), length - 1) : -1;
-      if (index < 0) {
+      if (length <= 0 || isNaN(index)) {
         return;
       }
+      index = Math.min(Math.max(index, 0), length - 1);
       setCurrentSlide(index);
       currentSlideRef.current = index;
       if (onSlideChange) {
@@ -176,9 +186,18 @@ function BaseCarouselWithRef(
     ref,
     () =>
       /** @type {!BaseCarouselDef.CarouselApi} */ ({
-        goToSlide: (index) => setRestingIndex(index),
-        next,
-        prev,
+        goToSlide: (index) => {
+          interaction.current = Interaction.GENERIC;
+          setRestingIndex(index);
+        },
+        next: () => {
+          interaction.current = Interaction.GENERIC;
+          next();
+        },
+        prev: () => {
+          interaction.current = Interaction.GENERIC;
+          prev();
+        },
         root: containRef.current,
         node: contentRef.current,
       }),
@@ -193,10 +212,21 @@ function BaseCarouselWithRef(
     }
   }, [_thumbnails, childrenArray, setSlides, slides]);
 
-  const disableForDir = (dir) =>
-    !loop &&
-    (currentSlide + dir < 0 ||
-      (!mixedLength && currentSlide + visibleCount + dir > length));
+  const disableForDir = (dir) => {
+    if (loop) {
+      // Arrows always available when looping.
+      return false;
+    }
+    if (currentSlide + dir < 0) {
+      // Can no longer advance backwards.
+      return true;
+    }
+    if (currentSlide + visibleCount + dir > length) {
+      // Can no longer advance forwards.
+      return true;
+    }
+    return false;
+  };
 
   const interaction = useRef(Interaction.NONE);
   const hideControls = useMemo(() => {

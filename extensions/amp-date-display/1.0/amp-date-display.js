@@ -40,8 +40,9 @@ class AmpDateDisplay extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-date-display-bento'),
-      'expected amp-date-display-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-date-display'),
+      'expected global "bento" or specific "bento-date-display" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }

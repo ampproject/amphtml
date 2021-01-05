@@ -16,7 +16,9 @@
 import '../amp-accordion';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
+import {CanRender} from '../../../../src/contextprops';
 import {htmlFor} from '../../../../src/static-template';
+import {subscribe, unsubscribe} from '../../../../src/context';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -39,10 +41,20 @@ describes.realWin(
       await waitFor(isExpandedOrNot, 'element expanded updated');
     }
 
+    function readContextProp(element, prop) {
+      return new Promise((resolve) => {
+        const handler = (value) => {
+          resolve(value);
+          unsubscribe(element, [prop], handler);
+        };
+        subscribe(element, [prop], handler);
+      });
+    }
+
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'amp-accordion-bento', true, true);
+      toggleExperiment(win, 'bento-accordion', true, true);
       toggleExperiment(win, 'amp-accordion-display-locking', true, true);
       element = html`
         <amp-accordion layout="fixed" width="300" height="200">
@@ -83,6 +95,18 @@ describes.realWin(
         sections[2].firstElementChild.getAttribute('aria-expanded')
       ).to.equal('false');
       expect(sections[2].lastElementChild).to.have.display('none');
+    });
+
+    it('should propagate renderable context', async () => {
+      const sections = element.children;
+      const renderables = await Promise.all([
+        readContextProp(sections[0].lastElementChild, CanRender),
+        readContextProp(sections[1].lastElementChild, CanRender),
+        readContextProp(sections[2].lastElementChild, CanRender),
+      ]);
+      expect(renderables[0]).to.be.true;
+      expect(renderables[1]).to.be.false;
+      expect(renderables[2]).to.be.false;
     });
 
     it('should have amp specific classes for CSS', () => {
@@ -338,6 +362,23 @@ describes.realWin(
       );
       expect(header2.getAttribute('id')).to.equal(
         content2.getAttribute('aria-labelledby')
+      );
+    });
+
+    it('should pick up new children', async () => {
+      const newSection = document.createElement('section');
+      newSection.setAttribute('expanded', '');
+      newSection.appendChild(document.createElement('h2'));
+      newSection.appendChild(document.createElement('div'));
+      element.appendChild(newSection);
+
+      await waitForExpanded(newSection, true);
+
+      expect(newSection.firstElementChild.className).to.include(
+        'i-amphtml-accordion-header'
+      );
+      expect(newSection.lastElementChild.className).to.include(
+        'i-amphtml-accordion-content'
       );
     });
 

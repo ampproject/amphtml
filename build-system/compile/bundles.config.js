@@ -669,12 +669,8 @@ exports.extensionBundles = [
     version: '1.0',
     latestVersion: '0.1',
     options: {
-      hasCss: false,
-      cssBinaries: [
-        'amp-inline-gallery',
-        'amp-inline-gallery-pagination',
-        'amp-inline-gallery-thumbnails',
-      ],
+      hasCss: true,
+      cssBinaries: ['amp-inline-gallery-pagination'],
     },
     type: TYPES.MISC,
   },
@@ -876,7 +872,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-sidebar',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '0.2', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,

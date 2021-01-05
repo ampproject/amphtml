@@ -34,10 +34,10 @@ import {cancellation} from '../error';
 import {
   childElementByTag,
   createElementWithAttributes,
+  dispatchCustomEvent,
   matches,
   parseBooleanAttribute,
 } from '../dom';
-import {createCustomEvent} from '../event-helper';
 import {createRef, hydrate, render} from './index';
 import {dashToCamelCase} from '../string';
 import {devAssert} from '../log';
@@ -46,6 +46,7 @@ import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {isLayoutSizeDefined} from '../layout';
+import {sequentialIdGenerator} from '../utils/id-generator';
 
 /**
  * The following combinations are allowed.
@@ -96,7 +97,10 @@ const TEMPLATES_MUTATION_INIT = {
 };
 
 /** @const {!JsonObject<string, string>} */
-const SHADOW_CONTAINER_ATTRS = dict({'style': 'display: contents'});
+const SHADOW_CONTAINER_ATTRS = dict({
+  'style': 'display: contents; background: inherit;',
+  'part': 'c',
+});
 
 /** @const {!JsonObject<string, string>} */
 const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
@@ -107,6 +111,8 @@ const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
  */
 const SIZE_DEFINED_STYLE = {
   'position': 'absolute',
+  'top': '0',
+  'left': '0',
   'width': '100%',
   'height': '100%',
 };
@@ -122,6 +128,8 @@ const UNSLOTTED_GROUP = 'unslotted';
 
 /** @return {boolean} */
 const MATCH_ANY = () => true;
+
+const childIdGenerator = sequentialIdGenerator();
 
 /**
  * Wraps a Preact Component in a BaseElement class.
@@ -369,9 +377,10 @@ export class PreactBaseElement extends AMP.BaseElement {
    * A callback called immediately after mutations have been observed on a
    * component. This differs from `checkPropsPostMutations` in that it is
    * called in all cases of mutation.
+   * @param {!Array<MutationRecord>} unusedRecords
    * @protected
    */
-  mutationObserverCallback() {}
+  mutationObserverCallback(unusedRecords) {}
 
   /**
    * A callback called immediately after mutations have been observed on a
@@ -406,7 +415,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    */
   checkMutations_(records) {
     const Ctor = this.constructor;
-    this.mutationObserverCallback();
+    this.mutationObserverCallback(records);
     const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
     if (rerender) {
       this.checkPropsPostMutations();
@@ -427,6 +436,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.loadDeferred_) {
       this.loadDeferred_.resolve();
       this.loadDeferred_ = null;
+      dispatchCustomEvent(this.element, 'load', null, {bubbles: false});
     }
   }
 
@@ -438,6 +448,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.loadDeferred_) {
       this.loadDeferred_.reject(opt_reason || new Error('load error'));
       this.loadDeferred_ = null;
+      dispatchCustomEvent(this.element, 'error', null, {bubbles: false});
     }
   }
 
@@ -583,13 +594,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.
     if (!isShadow && !isDetached) {
-      this.mutateElement(() => {
-        this.element.dispatchEvent(
-          createCustomEvent(this.win, AmpEvents.DOM_UPDATE, /* detail */ null, {
-            bubbles: true,
-          })
-        );
-      });
+      this.mutateElement(() =>
+        dispatchCustomEvent(this.element, AmpEvents.DOM_UPDATE, null)
+      );
     }
 
     if (this.renderDeferred_) {
@@ -853,7 +860,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
             : createSlot(
                 childElement,
                 childElement.getAttribute('slot') ||
-                  `i-amphtml-${name}-${list.length}`,
+                  `i-amphtml-${name}-${childIdGenerator()}`,
                 parsedSlotProps
               )
         );

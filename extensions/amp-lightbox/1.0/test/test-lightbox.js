@@ -20,13 +20,21 @@ import {mount} from 'enzyme';
 
 describes.sandboxed('Lightbox preact component v1.0', {}, () => {
   it('Normal lightbox render', () => {
+    const ref = Preact.createRef();
     const wrapper = mount(
-      <Lightbox id="lightbox" openOnLoad={true}>
-        <div>
-          <p>Hello World</p>
-        </div>
+      <Lightbox id="lightbox" ref={ref}>
+        <p>Hello World</p>
       </Lightbox>
     );
-    expect(wrapper.find('p')).to.exist;
+
+    // Nothing is rendered at first.
+    expect(wrapper.children()).to.have.lengthOf(0);
+
+    ref.current.open();
+    wrapper.update();
+
+    // Render provided children
+    expect(wrapper.children()).to.have.lengthOf(1);
+    expect(wrapper.find('p').text()).to.equal('Hello World');
   });
 });

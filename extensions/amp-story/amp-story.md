@@ -47,7 +47,7 @@ As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2
 
 ## AMP story format
 
-An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
+An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md), within the pages are [layers](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-grid-layer.md), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
 <amp-img alt="AMP story tag hierarchy" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
@@ -345,7 +345,7 @@ In most implementations for live blogs, content is either pushed by the server t
 
 This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work.
 
-Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](#data-poll-interval) attribute.
+Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](<#data-poll-interval-(optional)>) attribute.
 
 #### Stop polling
 
@@ -355,8 +355,8 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 -   Specify an `id` on the `<amp-story>` element.
 -   Add the `live-story` attribute to the `<amp-story>` element.
--   [Optional] Add the [`data-poll-interval`](#data-poll-interval) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
--   [Optional] When finishing the live broadcast, add the [`live-story-disabled`](#live-story-disabled) attribute to the `<amp-story>` element to disable the polling.
+-   [Optional] Add the [`data-poll-interval`](<#data-poll-interval-(optional)>) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
+-   [Optional] When finishing the live broadcast, add the [`live-story-disabled`](<#live-story-disabled-(optional)>) attribute to the `<amp-story>` element to disable the polling.
 -   On each `<amp-story-page>`:
     -   Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
 
@@ -370,7 +370,7 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 ### Children (of amp-story)
 
-The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story. The first page specified in the document order is the first page shown in the story.
+The `<amp-story>` component contains one or more [`<amp-story-page>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md) components, containing each of the individual screens of the story. The first page specified in the document order is the first page shown in the story.
 
 #### Optional customization
 
