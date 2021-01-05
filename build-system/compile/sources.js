@@ -40,6 +40,8 @@ const COMMON_GLOBS = [
   'node_modules/dompurify/dist/purify.es.js',
   'node_modules/intersection-observer/package.json',
   'node_modules/intersection-observer/intersection-observer.install.js',
+  'node_modules/resize-observer-polyfill/package.json',
+  'node_modules/resize-observer-polyfill/resize-observer.install.js',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/rrule/dist/es5/rrule.js',

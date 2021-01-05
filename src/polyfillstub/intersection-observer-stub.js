@@ -281,6 +281,6 @@ export class IntersectionObserverStub {
 IntersectionObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */
-export function resetSubsForTesting() {
+export function resetStubsForTesting() {
   IntersectionObserverStub[UPGRADERS] = [];
 }
