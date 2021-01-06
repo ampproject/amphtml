@@ -454,8 +454,8 @@ available:
 // Create and listen to video once consent is given on the parent page:
 integration.getConsentData(function(consent) {
   if (
-  consent.consentPolicyState !== /* SUFFICIENT */ 1 &&
-  consent.consentPolicyState !== /* UNKNOWN_NOT_REQUIRED */ 3
+    consent.consentPolicyState !== /* SUFFICIENT */ 1 &&
+    consent.consentPolicyState !== /* UNKNOWN_NOT_REQUIRED */ 3
   ) {
     integration.postEvent('error');
     return;
