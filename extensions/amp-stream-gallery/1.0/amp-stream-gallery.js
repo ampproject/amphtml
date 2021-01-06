@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
 import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {Services} from '../../../src/services';
 import {StreamGallery} from './stream-gallery';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
@@ -27,13 +31,53 @@ const TAG = 'amp-stream-gallery';
 
 class AmpStreamGallery extends PreactBaseElement {
   /** @override */
+  init() {
+    const {element} = this;
+    this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);
+    this.registerApiAction('next', (api) => api.next(), ActionTrust.LOW);
+    this.registerApiAction(
+      'goToSlide',
+      (api, invocation) => {
+        const {args} = invocation;
+        api.goToSlide(args['index'] || -1);
+      },
+      ActionTrust.LOW
+    );
+
+    return dict({
+      'onSlideChange': (index) => {
+        fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
+      },
+    });
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-stream-gallery-bento'),
-      'expected amp-stream-gallery-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento-stream-gallery'),
+      'expected global "bento" or specific "bento-stream-gallery" experiment to be enabled'
     );
     return isLayoutSizeDefined(layout);
   }
+}
+
+/**
+ * Triggers a 'slideChange' event with one data param:
+ * 'index' - index of the current slide.
+ * @param {!Window} win
+ * @param {!Element} el The element that was selected or deslected.
+ * @param {number} index
+ * @param {!ActionTrust} trust
+ * @private
+ */
+function fireSlideChangeEvent(win, el, index, trust) {
+  const name = 'slideChange';
+  const slideChangeEvent = createCustomEvent(
+    win,
+    `amp-stream-gallery.${name}`,
+    dict({'index': index})
+  );
+  Services.actionServiceForDoc(el).trigger(el, name, slideChangeEvent, trust);
 }
 
 /** @override */
@@ -63,12 +107,8 @@ AmpStreamGallery['children'] = {
 
 /** @override */
 AmpStreamGallery['props'] = {
+  'controls': {attr: 'controls', type: 'string', media: true},
   'extraSpace': {attr: 'extra-space', type: 'string', media: true},
-  'insetArrowVisibility': {
-    attr: 'inset-arrow-visibility',
-    type: 'string',
-    media: true,
-  },
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'minItemWidth': {attr: 'min-item-width', type: 'number', media: true},
   'maxItemWidth': {attr: 'max-item-width', type: 'number', media: true},

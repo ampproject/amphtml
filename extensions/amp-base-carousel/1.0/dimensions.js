@@ -239,7 +239,8 @@ export function scrollContainerToElement(
     ? getStart(axis, container)
     : getCenter(axis, container);
   const delta = Math.round(snapOffset - scrollOffset - offset * length);
-
+  const oldPosition = getScrollPosition(axis, container);
   updateScrollPosition(axis, container, delta);
-  return !!delta;
+  const newPosition = getScrollPosition(axis, container);
+  return oldPosition !== newPosition;
 }

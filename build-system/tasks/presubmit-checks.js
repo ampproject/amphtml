@@ -1032,6 +1032,7 @@ const forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
       'src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfillstub/resize-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -1199,24 +1200,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
     ],
   },
-  '\\.getPageLayoutBox': {
-    message: measurementApiDeprecated,
-    allowlist: [
-      'src/base-element.js',
-      'src/custom-element.js',
-      'src/iframe-attributes.js',
-      'src/ini-load.js',
-      'src/service/mutator-impl.js',
-      'src/service/resource.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/safeframe-host.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils.js',
-      'extensions/amp-auto-ads/0.1/utils.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js',
-      'extensions/amp-video-docking/0.1/math.js',
-      'ads/google/a4a/utils.js',
-    ],
-  },
   '\\.getIntersectionElementLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
@@ -1232,7 +1215,7 @@ const forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19|20) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|2\\d) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };

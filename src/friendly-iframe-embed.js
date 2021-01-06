@@ -35,6 +35,7 @@ import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
+import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
@@ -525,7 +526,7 @@ export class FriendlyIframeEmbed {
       getExperimentBranch(this.ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
         FIE_RESOURCES_EXP.experiment;
     Promise.all([
-      this.whenRenderStarted(),
+      this.whenRenderComplete(),
       whenContentIniLoad(
         fieResourcesOn ? this.ampdoc : this.iframe,
         this.win,
@@ -713,6 +714,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   if (!IS_SXG) {
     installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
+    installResizeObserver(parentWin, childWin);
   }
 }
 
