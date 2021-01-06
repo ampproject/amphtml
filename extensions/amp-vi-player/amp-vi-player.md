@@ -7,7 +7,7 @@ teaser:
 ---
 
 <!--
-Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ limitations under the License.
 
 Displays a [Video Intelligence Player](https://www.vi.ai/).
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
-For configuration information, please check [docs.vi.ai/](https://docs.vi.ai/general/integrations/).
+For configuration information, please check [https://docs.vi.ai/general/integrations/amp-vi-player/](https://docs.vi.ai/general/integrations/amp-vi-player/).
 
 ### Example
 
@@ -47,23 +47,11 @@ For configuration information, please check [docs.vi.ai/](https://docs.vi.ai/gen
 
 ### `data-publisher-id`
 
-Video Intelligence publisher id. This can be found in the Video Intelligence management dashboard.
+Video Intelligence publisher id.
 
 ### `data-channel-id`
 
-Video Intelligence channel id. This can be found in the Video Intelligence management dashboard.
-
-### `data-placement-id` (optional)
-
-Video Intelligence placement id. This can be found in the Video Intelligence management dashboard.
-
-### `data-iab-category` (optional)
-
-The IAB category of the article/page. This can be found in the Video Intelligence management dashboard.
-
-### `data-language` (optional)
-
-The language of the article/page. This can be found in the Video Intelligence management dashboard.
+Video Intelligence channel id.
 
 ### Common attributes
 

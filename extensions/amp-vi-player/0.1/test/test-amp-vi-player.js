@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 import '../amp-vi-player';
+import * as consent from '../../../../src/consent';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 
 describes.realWin(
   'amp-vi-player',
@@ -79,6 +81,31 @@ describes.realWin(
           /The data-channel-id attribute is required for/
         );
       });
+    });
+
+    it('should propagate consent state to iframe', async () => {
+      env.sandbox
+        .stub(consent, 'getConsentPolicyState')
+        .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
+      env.sandbox
+        .stub(consent, 'getConsentPolicySharedData')
+        .resolves({a: 1, b: 2});
+      env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('abc');
+
+      const viPlayer = await getViPlayer({
+        'data-publisher-id': 'test_amp_vi_player',
+        'data-channel-id': 'test_channel',
+      });
+      const iframe = viPlayer.querySelector('iframe');
+      expect(iframe).to.be.ok;
+      const data = JSON.parse(iframe.name);
+      expect(data).to.be.ok;
+      expect(data._context).to.be.ok;
+      expect(data._context.initialConsentState).to.equal(
+        CONSENT_POLICY_STATE.SUFFICIENT
+      );
+      expect(data._context.consentSharedData).to.deep.equal({a: 1, b: 2});
+      expect(data._context.initialConsentValue).to.equal('abc');
     });
   }
 );
