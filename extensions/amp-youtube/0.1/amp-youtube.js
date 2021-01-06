@@ -152,14 +152,6 @@ class AmpYoutube extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
-    // TODO(aghassemi, #3216): amp-youtube has a special case where 404s are not
-    // easily caught hence the following hacky-solution.
-    // Please don't follow this behavior in other extensions, instead
-    // see BaseElement.createPlaceholderCallback.
-    if (!this.getPlaceholder() && this.videoid_) {
-      this.buildImagePlaceholder_();
-    }
-
     installVideoManagerForDoc(this.element);
   }
 
@@ -471,8 +463,12 @@ class AmpYoutube extends AMP.BaseElement {
     );
   }
 
-  /** @private */
-  buildImagePlaceholder_() {
+  /** @override */
+  createPlaceholderCallback() {
+    if (!this.videoid_) {
+      return null;
+    }
+
     const {element: el} = this;
     const imgPlaceholder = htmlFor(el)`<img placeholder referrerpolicy=origin>`;
     const videoid = dev().assertString(this.videoid_);
@@ -501,7 +497,6 @@ class AmpYoutube extends AMP.BaseElement {
       imgPlaceholder.setAttribute('alt', 'Loading video');
     }
     this.applyFillContent(imgPlaceholder);
-    el.appendChild(imgPlaceholder);
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.
@@ -531,6 +526,8 @@ class AmpYoutube extends AMP.BaseElement {
           });
         });
       });
+
+    return imgPlaceholder;
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
