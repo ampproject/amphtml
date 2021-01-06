@@ -331,7 +331,7 @@ export class AmpVideoIntegration {
 
   /**
    * @param {function()} callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise}
    * @private
    */
   safePlayOrPause_(callback) {
@@ -372,7 +372,7 @@ export class AmpVideoIntegration {
   /**
    * @param {!JsonObject} data
    * @param {function()=} opt_callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {number}
    * @private
    */
   postToParent_(data, opt_callback) {
@@ -394,19 +394,28 @@ export class AmpVideoIntegration {
    * @param {function(!JsonObject)} callback
    */
   getIntersection(callback) {
-    this.listenToOnce_();
-    this.getIntersectionForTesting_(callback);
+    this.getFromHostForTesting_('getIntersection', callback);
+  }
+
+  /**
+   * Gets the host document's user consent data.
+   * @param {function(!JsonObject)} callback
+   */
+  getConsentData(callback) {
+    this.getFromHostForTesting_('getConsentData', callback);
   }
 
   /**
    * Returns message id for testing. Private as message id is an implementation
    * detail that others should not rely on.
+   * @param {string} method
    * @param {function(!JsonObject)} callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {number}
    * @private
    */
-  getIntersectionForTesting_(callback) {
-    return this.postToParent_(dict({'method': 'getIntersection'}), callback);
+  getFromHostForTesting_(method, callback) {
+    this.listenToOnce_();
+    return this.postToParent_(dict({'method': method}), callback);
   }
 }
 

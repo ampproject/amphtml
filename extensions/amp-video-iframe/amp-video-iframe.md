@@ -424,6 +424,62 @@ custom variables to log. These are available as `VIDEO_STATE`, keyed by name
 prefixed with `custom_`, i.e. the object `{myVar: 'foo'}` will be available as
 `{'custom_myVar': 'foo}`.
 
+#### <a name="getConsent"></a> `getConsent(callback)`
+
+The iframe document can request user consent data when the host document uses
+[`amp-consent`](hhttps://amp.dev/documentation/components/amp-consent/).
+
+Note: If you only require to block the iframe from loading when consent is not given, it's preferable to [set the `data-block-on-consent` attribute](https://amp.dev/documentation/components/amp-consent/#basic-blocking-behaviors) instead of calling `getConsentData()`
+
+The `callback` passed to the function will be executed with an object that looks
+like this:
+
+```json
+{
+  "consentMetadata": {
+    "consentStringType": 2,
+    "additionalConsent": "additional-consent-string",
+    "gdprApplies": true,
+    "purposeOne": true
+  },
+  "consentString": "accept-string",
+  "consentPolicyState": 1
+}
+```
+
+For example, a video could be blocked from loading until `consentPolicyState` is
+available:
+
+```js
+// Create and listen to video once consent is given on the parent page:
+integration.getConsentData(function(consent) {
+  if (
+  consent.consentPolicyState !== /* SUFFICIENT */ 1 &&
+  consent.consentPolicyState !== /* UNKNOWN_NOT_REQUIRED */ 3
+  ) {
+    integration.postEvent('error');
+    return;
+  }
+
+  // You can use other consent values to map video consent logic as well.
+  console.log(consent);
+
+  // Initialize video and integration once consent is available.
+  var video = document.createElement(video);
+  video.style = "width: 100vw; height: 100vh";
+  video.src = document.body.getAttribute('data-videoid');
+  document.body.appendChild(video);
+
+  integration.method('play', function() {
+    video.play();
+  });
+
+  // etc...
+});
+```
+
+A complete [example using `getConsentData` is available as well.](../../examples/amp-video-iframe/frame-es2015-consent.html)
+
 #### <a name="getIntersection"></a> `getIntersection(callback)`
 
 Gets the intersection ratio (between 0 and 1) for the video element. This is useful for viewability information, e.g.

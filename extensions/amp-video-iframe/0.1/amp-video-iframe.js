@@ -27,6 +27,7 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
+import {collectConsents} from '../../../src/consent';
 import {
   createElementWithAttributes,
   dispatchCustomEvent,
@@ -123,7 +124,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     /**
      * @param {!Event} e
-     * @return {*} TODO(#23582): Specify return type
+     * @return {undefined}
      * @private
      */
     this.boundOnMessage_ = (e) => this.onMessage_(e);
@@ -308,6 +309,10 @@ class AmpVideoIframe extends AMP.BaseElement {
           this.postIntersection_(messageId, intersection);
         });
       }
+      if (methodReceived === 'getConsentData') {
+        this.postConsentData_(messageId);
+        return;
+      }
       userAssert(false, 'Unknown method `%s`.', methodReceived);
       return;
     }
@@ -389,16 +394,37 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 
   /**
+   * @param {number} messageId
+   * @private
+   */
+  postConsentData_(messageId) {
+    collectConsents(this.element, this.getConsentPolicy()).then((consents) => {
+      this.postMessage_(
+        dict({
+          'id': messageId,
+          'args': consents,
+        })
+      );
+    });
+  }
+
+  /**
    * @param {string} method
    * @private
    */
   method_(method) {
-    this.postMessage_(
-      dict({
-        'event': 'method',
-        'method': method,
-      })
-    );
+    const {promise} = this.readyDeferred_ || {};
+    if (!promise) {
+      return;
+    }
+    promise.then(() => {
+      this.postMessage_(
+        dict({
+          'event': 'method',
+          'method': method,
+        })
+      );
+    });
   }
 
   /**
@@ -406,19 +432,10 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    const promise = this.readyDeferred_ && this.readyDeferred_.promise;
-    if (!promise) {
+    if (!this.iframe_ || !this.iframe_.contentWindow) {
       return;
     }
-    promise.then(() => {
-      if (!this.iframe_ || !this.iframe_.contentWindow) {
-        return;
-      }
-      this.iframe_.contentWindow./*OK*/ postMessage(
-        JSON.stringify(message),
-        '*'
-      );
-    });
+    this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
 
   /** @override */
