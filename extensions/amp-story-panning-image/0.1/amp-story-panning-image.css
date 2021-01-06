@@ -1,5 +1,18 @@
-.wrapper {
+amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-page img {
+  transition: transform 1s ease-in-out;
 }
 
-.panner {
+.i-amphtml-story-desktop-panels amp-story-page[active] img {
+  transition: transform 1s ease-in-out;
+}
+
+amp-story-panning-image .wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+ 
+amp-story-panning-image img {
+  height: 100%;
+  -webkit-backface-visibility: hidden;
 }

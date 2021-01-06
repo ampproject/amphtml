@@ -979,22 +979,3 @@ amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
   --i-amphtml-interactive-animation-delay: 350ms !important;
 }
-
-amp-story:not(.i-amphtml-story-desktop-panels).i-amphtml-story-loaded amp-story-page img {
-  transition: transform 1s ease-in-out;
-}
-
-.i-amphtml-story-desktop-panels amp-story-page[active] img {
-  transition: transform 1s ease-in-out;
-}
-
-amp-story-panning-image .wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
- 
-amp-story-panning-image img {
-  height: 100%;
-  -webkit-backface-visibility: hidden;
-}

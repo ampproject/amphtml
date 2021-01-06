@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-story-panning-image-0.1.css';
 import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
@@ -109,5 +110,5 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story-panning-image', '0.1', (AMP) => {
-  AMP.registerElement('amp-story-panning-image', AmpStoryPanningImage);
+  AMP.registerElement('amp-story-panning-image', AmpStoryPanningImage, CSS);
 });
