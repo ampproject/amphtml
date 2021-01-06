@@ -186,7 +186,7 @@ class AmpVideoIframe extends AMP.BaseElement {
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
       'title': title || null,
-      'lang': documentElement ? documentElement.lang : null,
+      'lang': documentElement?.lang || null,
     });
   }
 
