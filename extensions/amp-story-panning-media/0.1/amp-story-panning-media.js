@@ -125,7 +125,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   updateTransform() {
     return this.mutateElement(() => {
       setStyles(this.image, {
-        transform: `scale(${this.activeZoom_}) translate3d(${this.activeX_}, ${this.activeY_}, 1px)`,
+        transform: `scale(${this.activeZoom_}) translate(${this.activeX_}, ${this.activeY_})`,
       });
     });
   }
