@@ -457,7 +457,8 @@ Returns an object containing metadata about the host document:
 {
   "canonicalUrl": "https://example.com/canonical.html",
   "sourceUrl": "https://example.com/amp.html",
-  "title": "My host document's title"
+  "title": "My host document's title",
+  "lang": "en",
 }
 ```
 
