@@ -16,7 +16,6 @@
 
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
-import {_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME} from './requests';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
@@ -246,35 +245,6 @@ export class VisibilityManager {
   getRootLayoutBox() {}
 
   /**
-   * TODO(#29618): Remove after ampim investigation
-   * Returns the root element.
-   * @return {?Element}
-   * @abstract
-   */
-  getRootElementTemp() {}
-
-  /**
-   * TODO(#29618): Remove after ampim investigation
-   * @return {?../../../src/layout-rect.LayoutRectDef}
-   * @abstract
-   */
-  getBoundingClientRectTemp(unusedElement) {}
-
-  /**
-   * TODO(#29618): Remove after ampim investigation
-   * Returns the element's layout rect calculated by AMP
-   * @param {!Element} element
-   * @return {!../../../src/layout-rect.LayoutRectDef}
-   */
-  getElementLayoutBoxTemp(element) {
-    const resource = this.resources_.getResourceForElementOptional(element);
-    const layoutBox = resource
-      ? resource.getLayoutBox()
-      : Services.viewportForDoc(this.ampdoc).getLayoutRect(element);
-    return layoutBox;
-  }
-
-  /**
    * @return {number}
    */
   getRootVisibility() {
@@ -334,19 +304,8 @@ export class VisibilityManager {
    */
   listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
     const calcVisibility = this.getRootVisibility.bind(this);
-    // TODO(#28618) Clean up calcLayoutBoxTemp & calcBoundingClientRectTemp
-    const calcLayoutBoxTemp = this.getRootLayoutBox.bind(this);
-    let calcBoundingClientRectTemp;
-    if (this.getRootElementTemp()) {
-      calcBoundingClientRectTemp = this.getBoundingClientRectTemp.bind(
-        this,
-        this.getRootElementTemp()
-      );
-    }
     return this.createModelAndListen_(
       calcVisibility,
-      calcLayoutBoxTemp,
-      calcBoundingClientRectTemp || null,
       spec,
       readyPromise,
       createReportPromiseFunc,
@@ -373,15 +332,8 @@ export class VisibilityManager {
     callback
   ) {
     const calcVisibility = this.getElementVisibility.bind(this, element);
-    const calculateLayoutBox = this.getElementLayoutBoxTemp.bind(this, element);
-    const calculateBoundingClientRect = this.getBoundingClientRectTemp.bind(
-      this,
-      element
-    );
     return this.createModelAndListen_(
       calcVisibility,
-      calculateLayoutBox,
-      calculateBoundingClientRect,
       spec,
       readyPromise,
       createReportPromiseFunc,
@@ -391,11 +343,8 @@ export class VisibilityManager {
   }
 
   /**
-   * TODO(#29618) Clean up calcLayoutBoxTemp & calcBoundingClientRectTemp
    * Create visibilityModel and listen to visible events.
    * @param {function():number} calcVisibility
-   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcLayoutBoxTemp
-   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcBoundingClientRectTemp
    * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
@@ -405,8 +354,6 @@ export class VisibilityManager {
    */
   createModelAndListen_(
     calcVisibility,
-    calcLayoutBoxTemp,
-    calcBoundingClientRectTemp,
     spec,
     readyPromise,
     createReportPromiseFunc,
@@ -466,8 +413,6 @@ export class VisibilityManager {
         const model = new VisibilityModel(
           newSpec,
           calcVisibility,
-          calcLayoutBoxTemp,
-          calcBoundingClientRectTemp,
           /** @type {?../../../src/service/viewport/viewport-impl.ViewportImpl} */
           (Services.viewportForDoc(this.ampdoc))
         );
@@ -489,8 +434,6 @@ export class VisibilityManager {
     const model = new VisibilityModel(
       spec,
       calcVisibility,
-      calcLayoutBoxTemp,
-      calcBoundingClientRectTemp,
       /** @type {?../../../src/service/viewport/viewport-impl.ViewportImpl} */
       (Services.viewportForDoc(this.ampdoc))
     );
@@ -545,9 +488,6 @@ export class VisibilityManager {
     model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
-
-      // TODO(#29618): Remove after ampim investigation
-      state[_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME] = model.getErrorInfoTemp();
 
       // Additional doc-level state.
       state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
@@ -686,9 +626,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
      */
     this.trackedElements_ = map();
 
-    /** @private {?Element} */
-    this.rootElementTemp_ = null;
-
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
@@ -698,7 +635,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       const rootElement = dev().assertElement(
         root.documentElement || root.body || root
       );
-      this.rootElementTemp_ = rootElement;
       this.unsubscribe(
         this.observe(rootElement, this.setRootVisibility.bind(this))
       );
@@ -774,14 +710,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     return getMinOpacity(rootElement);
   }
 
-  /**
-   * TODO(#29618): Remove after ampim investigation
-   * @override
-   */
-  getRootElementTemp() {
-    return this.rootElementTemp_;
-  }
-
   /** @override */
   getRootLayoutBox() {
     // This code is the same for "in-a-box" and standalone doc.
@@ -843,19 +771,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         trackedElement.intersectionRatio) ||
       0
     );
-  }
-
-  /**
-   * TODO(#29618): Remove after ampim investigation
-   * @override
-   * */
-  getBoundingClientRectTemp(element) {
-    if (!element) {
-      return null;
-    }
-    const id = getElementId(element);
-    const trackedElement = this.trackedElements_[id];
-    return trackedElement && trackedElement.boundingClientRect;
   }
 
   /**
@@ -1010,23 +925,6 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   getRootMinOpacity() {
     const rootElement = dev().assertElement(this.embed.iframe);
     return getMinOpacity(rootElement);
-  }
-
-  /**
-   * TODO(#29618): Remove after ampim investigation
-   * @override
-   * */
-  getRootElementTemp() {
-    // No need to track root element for embed
-    return null;
-  }
-
-  /**
-   * TODO(#29618): Remove after ampim investigation
-   * @override
-   * */
-  getBoundingClientRectTemp() {
-    return null;
   }
 
   /**
