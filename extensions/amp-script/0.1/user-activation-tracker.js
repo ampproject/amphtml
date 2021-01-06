@@ -23,7 +23,7 @@ const ACTIVATION_EVENTS = [
   'input',
   'keypress',
   'submit',
-  'keydown'
+  'keydown',
 ];
 
 /**
