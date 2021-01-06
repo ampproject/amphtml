@@ -685,6 +685,5 @@ class AmpCarousel extends AMP.BaseElement {
 }
 
 AMP.extension('amp-carousel', '0.2', (AMP) => {
-  console.log(`amp-carousel 0.2 ${IS_ESM ? 'module' : 'nomodule'} `);
   AMP.registerElement('amp-carousel', AmpCarousel, CSS);
 });

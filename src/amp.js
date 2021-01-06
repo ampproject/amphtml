@@ -150,7 +150,7 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    if (getMode().esm) {
+    if (IS_ESM) {
       perf.addEnabledExperiment('esm');
     }
     fontStylesheetTimeout(self);
@@ -177,6 +177,9 @@ if (shouldMainBootstrapRun) {
       `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
       self.location.href
     );
+  }
+  if (getMode().test) {
+    self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
   }
   self.document.documentElement.setAttribute(
     'amp-version',

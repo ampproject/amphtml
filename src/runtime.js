@@ -210,16 +210,18 @@ function adoptShared(global, callback) {
   for (let i = 0; i < preregisteredExtensions.length; i++) {
     const fnOrStruct = preregisteredExtensions[i];
     if (IS_ESM) {
-      // If we're in a module, splice out non nomodule extensions.
+      // If we're in a module runtime, trying to execute a nomodule extension
+      // simply remove the nomodule extension so that it is not executed.
       if (!fnOrStruct.e) {
-        console.log('in esm mode');
         preregisteredExtensions.splice(i--, 1);
+        continue;
       }
     } else {
+      // If we're in a nomodule runtime, trying to execute a module extension
+      // simply remove the module extension so that it is not executed.
       if (fnOrStruct.e) {
-      // If we're in an nomodule, splice out the module extensions.
-        console.log('not in esm mode');
         preregisteredExtensions.splice(i--, 1);
+        continue;
       }
     }
     if (maybeLoadCorrectVersion(global, fnOrStruct)) {
