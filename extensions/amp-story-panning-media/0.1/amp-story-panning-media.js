@@ -73,7 +73,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           this.isOnActivePage_ = currPageId === this.getPageId_();
           this.update_();
         });
-        storeService.subscribe(StateProperty.PAGE_SIZE, () => this.update_());
       }),
     ]).then(() => Promise.resolve());
   }
