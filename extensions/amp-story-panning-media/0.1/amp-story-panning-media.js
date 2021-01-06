@@ -68,7 +68,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
-        this.storeService_ = storeService;
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
           this.update_();
@@ -91,7 +90,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         // Fill image to 100% height of viewport.
         // TODO(#31515): Handle base zoom of aspect ratio wider than image
         setStyles(this.image_, {height: '100%'});
-        return this.updateTransform(this.x_, this.y_, this.zoom_);
+        this.update_();
+        return;
       })
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
@@ -111,15 +111,16 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @param {string} x
    * @param {string} y
    * @param {string} zoom
-   * @return {!Promise}
    * @private
    */
   updateTransform(x, y, zoom) {
-    return this.mutateElement(() =>
-      setStyles(this.image_, {
-        transform: `scale(${zoom}) translate(${x}, ${y})`,
-      })
-    );
+    return this.mutateElement(() => {
+      if (this.image_) {
+        setStyles(this.image_, {
+          transform: `scale(${zoom}) translate(${x}, ${y})`,
+        });
+      }
+    });
   }
 
   /**
