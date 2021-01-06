@@ -131,8 +131,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   }
 
   /**
-   * @private
    * @return {string} the page id
+   * @private
    */
   getPageId_() {
     if (this.pageId_ == null) {
