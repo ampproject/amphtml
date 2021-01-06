@@ -123,10 +123,7 @@ export class AmpVideoIntegration {
      * @return {!DocMetadataDef}
      * @private
      */
-    this.getMetadataOnce_ = once(() => {
-      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
-      return {canonicalUrl, sourceUrl};
-    });
+    this.getMetadataOnce_ = once(() => tryParseJson(this.win_.name));
   }
 
   /** @return {!DocMetadataDef} */

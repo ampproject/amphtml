@@ -127,12 +127,18 @@ describes.realWin(
       });
 
       it('sets metadata in iframe name', async () => {
-        const metadata = {
-          canonicalUrl: 'foo.html',
-          sourceUrl: 'bar.html',
-        };
+        const title = 'My test title';
+        const lang = 'es';
+        const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
 
-        env.sandbox.stub(Services, 'documentInfoForDoc').returns(metadata);
+        env.sandbox.stub(env.win.document, 'title', title);
+        env.sandbox.stub(env.win.document.documentElement, 'lang', lang);
+
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+          sourceUrl,
+        });
 
         const videoIframe = createVideoIframe();
 
@@ -140,7 +146,12 @@ describes.realWin(
 
         const {name} = videoIframe.implementation_.iframe_;
 
-        expect(tryParseJson(name)).to.deep.equal(metadata);
+        expect(tryParseJson(name)).to.deep.equal({
+          canonicalUrl,
+          sourceUrl,
+          title,
+          lang,
+        });
       });
 
       it('sets amp=1 fragment in src', async () => {
