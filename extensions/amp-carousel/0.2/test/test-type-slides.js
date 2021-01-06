@@ -168,13 +168,20 @@ describes.realWin(
       const slideWrappers = getSlideWrappers(carousel);
       expect(slideWrappers.length).to.equal(5);
 
-      // Ensure that the content has the snap property not wrapper
-      // or else it will break scrolling animation.
-      for (let i = 0; i < slideWrappers.length; i++) {
-        expect(slideWrappers[i].style.scrollSnapAlign).to.equal('');
-        expect(slideWrappers[i].children[0].style.scrollSnapAlign).to.not.equal(
-          ''
-        );
+      const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
+        .children;
+
+      // Ensure that the spacers have the snap property and not the
+      // slides.
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        if (slide.classList.contains('i-amphtml-carousel-spacer')) {
+          // type=slides is always center alignment.
+          expect(slide.style.scrollSnapAlign).to.equal('center');
+        } else {
+          expect(slide.style.scrollSnapAlign).to.equal('');
+          expect(slide.children[0].style.scrollSnapAlign).to.equal('');
+        }
       }
     });
 
