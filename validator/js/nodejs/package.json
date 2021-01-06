@@ -19,7 +19,7 @@
     "amphtml-validator": "./cli.js"
   },
   "dependencies": {
-    "colors": "1.2.5",
+    "colors": "1.4.0",
     "commander": "2.15.1",
     "promise": "8.0.1"
   },
