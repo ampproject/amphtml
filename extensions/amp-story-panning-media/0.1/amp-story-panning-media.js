@@ -119,7 +119,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   }
 
   /**
-   * @return {Promise}
+   * @return {!Promise}
    * @public
    */
   updateTransform() {
