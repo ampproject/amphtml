@@ -35,8 +35,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} */
     this.element_ = element;
 
-    /** @private {?Element} */
-    this.image_ = null;
+    /** @public {?Element} */
+    this.image = null;
 
     /** @private {?string} */
     this.x_ = null;
@@ -46,6 +46,15 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?string} */
     this.zoom_ = null;
+
+    /** @private {?string} */
+    this.activeX_ = null;
+
+    /** @private {?string} */
+    this.activeY_ = null;
+
+    /** @private {?string} */
+    this.activeZoom_ = null;
 
     /** @private {Array<Element>} */
     this.siblings_ = [];
@@ -61,8 +70,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.zoom_ = this.element_.getAttribute('zoom') || '1';
 
     // Gets components with same children.
-    document.querySelectorAll('amp-story-panning-media').forEach((el) => {
-      this.siblings_.push(el);
+    document.querySelectorAll('amp-story-panning-media').forEach((sibling) => {
+      sibling.getImpl().then((siblingImpl) => {
+        this.siblings_.push(siblingImpl);
+      });
     });
 
     // Initialize all services before proceeding
@@ -78,20 +89,17 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const ampImgEl = dev().assertElement(
-      this.element_.querySelector('amp-img')
-    );
-    return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
+    this.ampImgEl = dev().assertElement(this.element_.querySelector('amp-img'));
+    return whenUpgradedToCustomElement(this.ampImgEl)
+      .then(() => this.ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
       .then(() => {
-        this.image_ = dev().assertElement(this.element.querySelector('img'));
+        this.image = dev().assertElement(this.element.querySelector('img'));
         // Remove layout="fill" classes so image is not clipped.
-        this.image_.classList = '';
+        this.image.classList = '';
         // Fill image to 100% height of viewport.
         // TODO(#31515): Handle base zoom of aspect ratio wider than image
-        setStyles(this.image_, {height: '100%'});
-        this.update_();
-        return;
+        setStyles(this.image, {height: '100%'});
+        return this.updateTransform();
       })
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
@@ -99,27 +107,26 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   update_() {
     if (this.isOnActivePage_) {
-      this.siblings_.forEach((sibling) => {
-        sibling.getImpl().then((impl) => {
-          impl.updateTransform(this.x_, this.y_, this.zoom_);
-        });
+      this.siblings_.forEach((siblingImpl) => {
+        siblingImpl.activeX_ = this.x_;
+        siblingImpl.activeY_ = this.y_;
+        siblingImpl.activeZoom_ = this.zoom_;
+        if (siblingImpl.image) {
+          siblingImpl.updateTransform();
+        }
       });
     }
   }
 
   /**
-   * @param {string} x
-   * @param {string} y
-   * @param {string} zoom
-   * @private
+   * @return {Promise}
+   * @public
    */
-  updateTransform(x, y, zoom) {
+  updateTransform() {
     return this.mutateElement(() => {
-      if (this.image_) {
-        setStyles(this.image_, {
-          transform: `scale(${zoom}) translate(${x}, ${y})`,
-        });
-      }
+      setStyles(this.image, {
+        transform: `scale(${this.activeZoom_}) translate3d(${this.activeX_}, ${this.activeY_}, 1px)`,
+      });
     });
   }
 
