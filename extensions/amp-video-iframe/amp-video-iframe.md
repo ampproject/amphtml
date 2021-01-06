@@ -431,8 +431,11 @@ The iframe document can request user consent data when the host document uses
 
 Note: If you only require to block the iframe from loading when consent is not given, it's preferable to [set the `data-block-on-consent` attribute](https://amp.dev/documentation/components/amp-consent/#basic-blocking-behaviors) instead of calling `getConsentData()`
 
-The `callback` passed to the function will be executed with an object that looks
-like this:
+The `callback` passed to the function will be executed with an object containing the following properties:
+
+-   [**`consentMetadata`**](#on-consent-metadata)
+-   [**`consentString`**](#on-consent-string)
+-   [**`consentPolicyState`**](#on-consent-state)
 
 ```json
 {
